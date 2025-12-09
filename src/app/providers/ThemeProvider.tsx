@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-type Theme = "light" | "dark" | "space";
+export type Theme = "light" | "dark" | "space";
 
 interface ThemeContextType {
     theme: Theme;

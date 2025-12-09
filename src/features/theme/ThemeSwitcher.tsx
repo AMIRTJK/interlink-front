@@ -1,24 +1,35 @@
-import { Button, Dropdown, type MenuProps } from "antd";
-import { BgColorsOutlined } from "@ant-design/icons";
-import { useTheme } from "@app/providers/ThemeProvider";
+import { Tooltip } from "antd";
+import { SunOutlined, MoonOutlined, RocketOutlined } from "@ant-design/icons";
+import { useTheme, type Theme } from "@app/providers/ThemeProvider";
+
+type ThemeOption = {
+    key: Theme;
+    icon: React.ReactNode;
+    label: string;
+};
 
 export const ThemeSwitcher = () => {
-    const { setTheme } = useTheme();
+    const { theme, setTheme } = useTheme();
 
-    const items: MenuProps["items"] = [
-        { key: "light", label: "Light Theme", onClick: () => setTheme("light") },
-        { key: "dark", label: "Dark Theme", onClick: () => setTheme("dark") },
-        { key: "space", label: "Space Theme", onClick: () => setTheme("space") },
+    const themes: ThemeOption[] = [
+        { key: "light", icon: <SunOutlined style={{ color: "#444" }} />, label: "Светлая" },
+        { key: "dark", icon: <MoonOutlined style={{ color: "#444" }} />, label: "Тёмная" },
+        { key: "space", icon: <RocketOutlined style={{ color: "#444" }} />, label: "Космос" },
     ];
 
     return (
-        <Dropdown menu={{ items }} placement="bottomRight" arrow>
-            <Button
-                shape="circle"
-                icon={<BgColorsOutlined />}
-                size="large"
-                className="theme-switcher-btn"
-            />
-        </Dropdown>
+        <div className="theme-switcher">
+            {themes?.map((item) => (
+                <Tooltip key={item.key} title={item.label} placement="bottom">
+                    <button
+                        className={`theme-btn ${theme === item.key ? "active" : ""}`}
+                        onClick={() => setTheme(item.key)}
+                        aria-label={item.label}
+                    >
+                        {item.icon}
+                    </button>
+                </Tooltip>
+            ))}
+        </div>
     );
 };
