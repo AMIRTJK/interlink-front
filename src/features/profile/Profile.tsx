@@ -1,7 +1,7 @@
 import { Avatar, Typography } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export const Profile = () => {
   return (
