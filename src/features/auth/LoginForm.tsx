@@ -8,9 +8,9 @@ const { Title, Text, Link } = Typography;
 export const LoginForm = () => {
   const navigate = useNavigate();
 
-  const onFinish = (values: { username: string; password: string }) => {
+  const onFinish = (values: { phoneNumber: string; password: string }) => {
     console.log("Login values:", values);
-    if (values.username === "km" || values.username === "am") {
+    if (values.phoneNumber === "km" || values.phoneNumber === "am") {
       navigate(ROUTES.PROFILE);
     }
   };
@@ -29,8 +29,8 @@ export const LoginForm = () => {
         size="large"
       >
         <Form.Item
-          name="username"
-          rules={[{ required: true, message: "Введите логин" }]}
+          name="phoneNumber"
+          rules={[{ required: true, message: "Введите номер телефона" }]}
         >
           <Input prefix={<UserOutlined />} placeholder="Номер телефона" className="rounded-lg" />
         </Form.Item>
