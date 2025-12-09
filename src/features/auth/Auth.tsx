@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { LoginForm } from "./LoginForm";
+import { SPACE_VIDEOS } from "@shared/api/authVideo";
 
-const SPACE_VIDEOS = [
-  "https://videos.pexels.com/video-files/3129957/3129957-sd_640_360_25fps.mp4",
-  "https://videos.pexels.com/video-files/4133023/4133023-sd_640_360_30fps.mp4",
-];
+
 
 export const Auth = () => {
   const [videoIndex, setVideoIndex] = useState(0);
@@ -15,7 +13,6 @@ export const Auth = () => {
     }, 60000);
     return () => clearInterval(interval);
   }, []);
-
   return (
     <div className="auth-container">
       <div className="auth-video-bg">
