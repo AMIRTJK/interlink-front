@@ -11,21 +11,21 @@ export const ProfilePage = () => {
                     <Avatar size={80} icon={<UserOutlined />} className="bg-blue-600" />
                     <div>
                         <Title level={2} style={{ margin: 0, color: "var(--color-text-primary)" }}>
-                            User Profile
+                            Профиль
                         </Title>
                         <Text style={{ color: "var(--color-text-primary)", opacity: 0.7 }}>
-                            Manage your account settings
+                            Профиль
                         </Text>
                     </div>
                 </div>
                 <div className="space-y-6">
                     <div className="grid gap-2">
                         <Text strong style={{ color: "var(--color-text-primary)" }}>Full Name</Text>
-                        <div className="input-field">Guest User</div>
+                        <div className="input-field">Профиль</div>
                     </div>
                     <div className="grid gap-2">
                         <Text strong style={{ color: "var(--color-text-primary)" }}>Email</Text>
-                        <div className="input-field">user@example.com</div>
+                        <div className="input-field">Профиль</div>
                     </div>
                 </div>
             </div>
