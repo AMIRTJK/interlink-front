@@ -12,9 +12,9 @@ export const ThemeSwitcher = () => {
     const { theme, setTheme } = useTheme();
 
     const themes: ThemeOption[] = [
-        { key: "light", icon: <SunOutlined style={{ color: "#fff" }} />, label: "Светлая" },
-        { key: "dark", icon: <MoonOutlined style={{ color: "#333" }} />, label: "Тёмная" },
-        { key: "space", icon: <RocketOutlined style={{ color: "#333" }} />, label: "Космос" },
+        { key: "light", icon: <SunOutlined style={{ color: "#444" }} />, label: "Светлая" },
+        { key: "dark", icon: <MoonOutlined style={{ color: "#444" }} />, label: "Тёмная" },
+        { key: "space", icon: <RocketOutlined style={{ color: "#444" }} />, label: "Космос" },
     ];
 
     return (
