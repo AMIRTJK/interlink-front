@@ -9,11 +9,8 @@ export const Profile = () => {
       <div className="card">
         <div className="profile-header">
           <Avatar size={80} icon={<UserOutlined />} className="profile-avatar" />
-          <div>
-            <Title level={2} className="text-white!">Профиль</Title>
-            <Text className="text-white!">Профиль</Text>
-          </div>
         </div>
+        <p className="text-center!">ФИО ПОЛЬЗОВАТЕЛЯ</p>  
         <div className="profile-fields">
           <div className="field-group">
             <Text className="field-label">Full Name</Text>
