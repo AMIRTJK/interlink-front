@@ -5,6 +5,7 @@
   --color-text-primary: #000000;
   --color-bg-secondary: #f3f4f6;
   --color-border: #e5e7eb;
+  --color-profile-title:#0037AF;
 }
 
 .dark {
@@ -36,16 +37,7 @@ body {
   flex-direction: column;
 }
 
-.content-container {
-  max-width: 1280px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 16px;
-  padding-right: 16px;
-  width: 100%;
-  padding-top: 32px;
-  padding-bottom: 32px;
-}
+
 
 .card {
   padding: 24px;
@@ -54,7 +46,6 @@ body {
   border: 1px solid var(--color-border);
   background-color: var(--color-bg-secondary);
   max-width: 672px;
-  margin: 0 auto;
 }
 
 .auth-container {
@@ -220,35 +211,18 @@ body {
   color: #fff;
 }
 
-.header-title {
-  color: var(--color-text-primary);
-}
-
 .profile-avatar {
   background-color: #2563eb;
+  padding: 10px 10px;
+  border-radius: 50%;
 }
 
 .profile-header {
   display: flex;
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 32px;
-}
+  padding: 16px 130px 24px 130px;
+  justify-content: center;
+} 
 
-.profile-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.field-group {
-  gap: 8px;
-}
-
-.field-label {
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
 
 .auth-header {
   text-align: center;
@@ -259,3 +233,5 @@ body {
   display: flex;
   justify-content: flex-end;
 }
+
+

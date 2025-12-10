@@ -1,0 +1,230 @@
+.weekly-calendar {
+  background: var(--color-bg-primary);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.weekly-calendar__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.weekly-calendar__nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.weekly-calendar__date-range {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  min-width: 200px;
+  text-align: center;
+}
+
+.weekly-calendar__view-switcher {
+  display: flex;
+  gap: 8px;
+}
+
+.weekly-calendar__grid {
+  display: flex;
+  gap: 1px;
+  background: var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.weekly-calendar__time-column {
+  width: 80px;
+  background: var(--color-bg-secondary);
+  flex-shrink: 0;
+}
+
+.weekly-calendar__time-header {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.weekly-calendar__time-slot {
+  height: 60px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 4px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.weekly-calendar__days {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+}
+
+.weekly-calendar__day-column {
+  flex: 1;
+  min-width: 140px;
+  background: var(--color-bg-primary);
+  position: relative;
+}
+
+.weekly-calendar__day-column--today {
+  background: rgba(108, 99, 255, 0.03);
+}
+
+.weekly-calendar__day-header {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  background: inherit;
+  z-index: 10;
+}
+
+.weekly-calendar__day-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-transform: capitalize;
+}
+
+.weekly-calendar__day-content {
+  position: relative;
+  min-height: 1440px;
+}
+
+.weekly-calendar__hour-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 60px;
+  border-bottom: 1px solid var(--color-border);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.weekly-calendar__hour-line:hover {
+  background: rgba(108, 99, 255, 0.05);
+}
+
+.weekly-calendar__current-time-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #FF6B6B, #FF8E53);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.weekly-calendar__current-time-line::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FF6B6B;
+}
+
+.weekly-calendar__task-wrapper {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  z-index: 2;
+}
+
+
+.task-card {
+  background: var(--color-bg-secondary);
+  border-radius: 8px;
+  padding: 10px;
+  border-left: 4px solid #6C63FF;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 4px;
+}
+
+.task-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.task-card__header {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.task-card__time-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  background: #6C63FF;
+}
+
+.task-card__title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.task-card__avatars {
+  margin-top: 4px;
+}
+
+
+@media (max-width: 768px) {
+  .weekly-calendar {
+    padding: 12px;
+  }
+  
+  .weekly-calendar__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .weekly-calendar__date-range {
+    font-size: 14px;
+  }
+  
+  .weekly-calendar__view-switcher {
+    justify-content: center;
+  }
+  
+  .weekly-calendar__day-column {
+    min-width: 120px;
+  }
+}

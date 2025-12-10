@@ -8,7 +8,7 @@ export const Header = () => {
       <div className="header-content">
         <div className="flex items-center gap-8">
           <Link to="/" className="nav-link">
-            <Title level={4} className="header-title">Interlink</Title>
+            <Title level={4} className="text-orange-300!">Interlink</Title>
           </Link>
         </div>
         <div className="flex items-center gap-4">

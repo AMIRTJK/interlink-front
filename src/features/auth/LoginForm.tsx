@@ -1,7 +1,7 @@
 import { Button, Form, Input, Typography } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { ROUTES } from "@shared/config/routes";
+import { AppRoutes } from "@shared/config/AppRoutes";
 import '../../app/styles/global.css'
 const { Title, Text, Link } = Typography;
 
@@ -11,7 +11,7 @@ export const LoginForm = () => {
   const onFinish = (values: { phoneNumber: string; password: string }) => {
     console.log("Login values:", values);
     if (values.phoneNumber === "km" || values.phoneNumber === "am") {
-      navigate(ROUTES.PROFILE);
+      navigate(AppRoutes.PROFILE);
     }
   };
 

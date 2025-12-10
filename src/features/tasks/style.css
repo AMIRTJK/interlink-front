@@ -1,0 +1,83 @@
+.task-form {
+  padding: 24px;
+}
+
+.task-form__title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: var(--color-text-primary);
+}
+
+.task-form__container {
+  max-width: 500px;
+}
+
+.task-form__field {
+  margin-bottom: 16px;
+}
+
+.task-form__label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.task-form__row {
+  display: flex;
+  gap: 16px;
+}
+
+.task-form__row > * {
+  flex: 1;
+}
+
+.task-form__submit {
+  margin-top: 24px;
+}
+
+.task-form__submit .ant-btn {
+  height: 44px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.task-form__submit .ant-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.task-form .ant-input,
+.task-form .ant-picker {
+  height: 44px;
+  border-radius: 8px;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.task-form .ant-input:hover,
+.task-form .ant-picker:hover {
+  border-color: #667eea;
+}
+
+.task-form .ant-input:focus,
+.task-form .ant-picker-focused {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.task-form .ant-picker-input > input {
+  color: var(--color-text-primary);
+}
+
+.task-form .ant-picker-suffix {
+  color: var(--color-text-primary);
+  opacity: 0.6;
+}
