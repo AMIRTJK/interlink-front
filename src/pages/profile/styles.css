@@ -10,7 +10,7 @@
   color: var(--color-text-primary);
 }
 
-/* Calendar Page Styles */
+
 .calendar-page-container {
   width: 100%;
   max-width: 1400px;
@@ -31,7 +31,7 @@
   padding: 12px;
 }
 
-/* Analytics Page Styles */
+
 .analytics-container {
   width: 100%;
 }

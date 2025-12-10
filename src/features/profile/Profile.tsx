@@ -3,13 +3,15 @@ import { UserOutlined } from "@ant-design/icons";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { profileRightNav } from "./model";
 import { AppRoutes } from "@shared/config/AppRoutes";
+import { useTheme } from "@app/providers/ThemeProvider";
 import "./style.css";
 
 export const Profile = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme } = useTheme();
 
-  // Get current tab from URL
+
   const getCurrentTab = () => {
     const path = location.pathname;
     if (path.includes(AppRoutes.PROFILE_CALENDAR)) return "calendar";
@@ -25,6 +27,8 @@ export const Profile = () => {
     };
     navigate(`/${AppRoutes.PROFILE}/${routes[e.key]}`);
   };
+
+  const menuTheme = theme === "light" ? "light" : "dark";
 
   return (
     <div className="profile__content">
@@ -48,7 +52,7 @@ export const Profile = () => {
           <Menu
             items={profileRightNav}
             mode="horizontal"
-            theme="dark"
+            theme={menuTheme}
             selectedKeys={[getCurrentTab()]}
             onClick={handleMenuClick}
           />

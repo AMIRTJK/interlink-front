@@ -6,7 +6,6 @@ import type { Task, TaskFormValues } from "@features/tasks";
 import dayjs, { Dayjs } from "dayjs";
 import "./styles.css";
 
-// Sample tasks for demonstration
 const initialTasks: Task[] = [
   {
     id: "1",

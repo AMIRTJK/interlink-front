@@ -106,7 +106,7 @@
 
 .weekly-calendar__day-content {
   position: relative;
-  min-height: 1440px; /* 24 hours * 60px */
+  min-height: 1440px;
 }
 
 .weekly-calendar__hour-line {
@@ -153,7 +153,7 @@
   z-index: 2;
 }
 
-/* Task Card Styles */
+
 .task-card {
   background: var(--color-bg-secondary);
   border-radius: 8px;
@@ -205,7 +205,7 @@
   margin-top: 4px;
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .weekly-calendar {
     padding: 12px;
