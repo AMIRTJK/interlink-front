@@ -5,6 +5,7 @@
   --color-text-primary: #000000;
   --color-bg-secondary: #f3f4f6;
   --color-border: #e5e7eb;
+  --color-profile-title:#0037AF;
 }
 
 .dark {
@@ -36,11 +37,7 @@ body {
   flex-direction: column;
 }
 
-.content-container {
-  padding-top: 16px;
-  padding-left: 24px;
-  padding-right: 19px;
-}
+
 
 .card {
   padding: 24px;
@@ -230,20 +227,6 @@ body {
   justify-content: center;
 } 
 
-.profile-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.field-group {
-  gap: 8px;
-}
-
-.field-label {
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
 
 .auth-header {
   text-align: center;

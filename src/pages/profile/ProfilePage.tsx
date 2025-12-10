@@ -2,7 +2,7 @@ import { Profile } from "@features/profile";
 
 export const ProfilePage = () => {
   return (
-    <div className="content-container">
+    <div className="profile">
       <Profile />
     </div>
   );

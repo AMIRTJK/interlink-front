@@ -1,0 +1,58 @@
+.profile-page {
+  padding: 8px;
+  min-height: 400px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: var(--color-text-primary);
+}
+
+/* Calendar Page Styles */
+.calendar-page-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.calendar-container {
+  max-width: 400px;
+}
+
+.calendar-widget {
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+}
+
+.calendar-widget .ant-picker-calendar-header {
+  padding: 12px;
+}
+
+/* Analytics Page Styles */
+.analytics-container {
+  width: 100%;
+}
+
+.analytics-card {
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  transition: all 0.3s ease;
+}
+
+.analytics-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.analytics-card .ant-statistic-title {
+  color: var(--color-text-primary);
+  opacity: 0.7;
+}
+
+.analytics-card .ant-statistic-content {
+  font-weight: 600;
+}
