@@ -3,14 +3,13 @@ import { UserOutlined } from "@ant-design/icons";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { profileRightNav } from "./model";
 import { AppRoutes } from "@shared/config/AppRoutes";
-import { useTheme } from "@app/providers/ThemeProvider";
 import "./style.css";
+import { useTheme } from "@shared/lib";
 
 export const Profile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { theme } = useTheme();
-
 
   const getCurrentTab = () => {
     const path = location.pathname;
@@ -35,7 +34,11 @@ export const Profile = () => {
       <div className="profile__left-content">
         <div className="card">
           <div className="profile-header">
-            <Avatar size={80} icon={<UserOutlined />} className="profile-avatar" />
+            <Avatar
+              size={80}
+              icon={<UserOutlined />}
+              className="profile-avatar"
+            />
           </div>
           <p className="profile-title">ФИО ПОЛЬЗОВАТЕЛЯ</p>
           <div className="profile__info">
@@ -43,7 +46,9 @@ export const Profile = () => {
             <p className="profile__info-item">Место работы: -</p>
             <p className="profile__info-item">Должность: -</p>
             <p className="profile__info-item">ИНН: -</p>
-            <p className="profile__info-item">Номер телефона: +992 (XXX) XXX-XX-XX</p>
+            <p className="profile__info-item">
+              Номер телефона: +992 (XXX) XXX-XX-XX
+            </p>
           </div>
         </div>
       </div>
