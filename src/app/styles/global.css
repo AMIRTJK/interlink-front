@@ -211,10 +211,6 @@ body {
   color: #fff;
 }
 
-.header-title {
-  color: var(--color-text-primary);
-}
-
 .profile-avatar {
   background-color: #2563eb;
   padding: 10px 10px;
