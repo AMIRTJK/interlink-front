@@ -1,10 +1,10 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
-import { tokenControl } from "../lib/tokenControl";
 import { toast } from "react-toastify";
-import { AppRoutes } from "@shared/config";
+import { AppRoutes, getEnvVar } from "@shared/config";
+import { tokenControl } from "@shared/lib";
 
 export const _axios = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: getEnvVar("VITE_API_URL"),
 });
 
 _axios.interceptors.request.use((config: CustomAxiosRequestConfig) => {
@@ -30,7 +30,7 @@ export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig<unk
 
 _axios.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError<any>) => {
+  async (error: AxiosError<unknown>) => {
     toast.dismiss();
 
     const { status } = error.response || {};
@@ -38,7 +38,7 @@ _axios.interceptors.response.use(
     if (status === 401) {
       toast.error("Пользователь не авторизован");
       tokenControl.remove();
-      window.location.href = AppRoutes.AUTH;
+      window.location.href = AppRoutes.LOGIN;
     }
 
     return Promise.reject(error);
