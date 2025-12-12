@@ -30,17 +30,15 @@
 
 .profile__content {
   display: flex;
-  flex-wrap: wrap;
   gap: 19px;
+  flex-wrap: wrap;
   padding: 16px;
 }
 
 .profile__right-content {
   border: 1px solid var(--color-border);
   border-radius: 16px;
-  min-width: 1422px;
-  max-width: 1473px;
-  padding: 16px;
+  min-width: 1050px;
 }
 
 .profile__header{
