@@ -43,14 +43,7 @@ body {
   flex-direction: column;
 }
 
-.card {
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--color-border);
-  background-color: var(--color-bg-secondary);
-  max-width: 672px;
-}
+
 
 .header {
   position: sticky;
@@ -169,14 +162,3 @@ body {
   color: #fff;
 }
 
-.profile-avatar {
-  background-color: #2563eb;
-  padding: 10px 10px;
-  border-radius: 50%;
-}
-
-.profile-header {
-  display: flex;
-  padding: 16px 130px 24px 130px;
-  justify-content: center;
-}
