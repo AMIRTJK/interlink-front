@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { Button, Form, Input,   } from "antd";
-import { PlusOutlined,} from "@ant-design/icons";
+import { Button, Form, Input, Select,   } from "antd";
 import type { CreateTaskPayload,  } from "./model";
+import { TASK_STATUS_OPTIONS } from "./model";
 import "./style.css";
 import { useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
@@ -37,11 +37,9 @@ export const AddTaskForm = ({ initialValues, onSuccess }: AddTaskFormProps) => {
       assignees: [values?.assignees]
     });
     addTaskMutate(values);
-    
     if (onSuccess) {
       onSuccess(values);
     }
-    
     form.resetFields();
   };
 
@@ -51,12 +49,10 @@ export const AddTaskForm = ({ initialValues, onSuccess }: AddTaskFormProps) => {
       <div className="task-form__container">
         <Form
           form={form}
-          name="addTask"
           onFinish={onFinish}
           layout="vertical"
-          size="large"
         >
-          <Form.Item
+          <Form.Item 
             name="title"
             rules={[{ required: true, message: "Введите название задачи" }]}
           >
@@ -72,6 +68,26 @@ export const AddTaskForm = ({ initialValues, onSuccess }: AddTaskFormProps) => {
               placeholder="Введите описание задачи" 
               style={{resize:"none"}}
             />  
+          </Form.Item>
+          <Form.Item
+            name="assignees"
+            rules={[{ required: false, }]}
+          >
+            <Select 
+              placeholder="Выберите исполнителя" 
+              mode="multiple"
+              style={{width:"100%"}}
+            />
+          </Form.Item>
+          <Form.Item
+            name="status"
+            rules={[{ required: true, message: "Выберите статус задачи" }]}
+          >
+            <Select 
+              placeholder="Выберите статус задачи" 
+              style={{width:"100%"}}
+              options={TASK_STATUS_OPTIONS}
+            />
           </Form.Item>
           <Form.Item className="task-form__submit">
             <Button type="primary" htmlType="submit" block>
