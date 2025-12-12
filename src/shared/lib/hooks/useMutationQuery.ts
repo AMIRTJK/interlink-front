@@ -16,83 +16,78 @@ interface CustomAxiosRequestConfig<T = unknown> extends Omit<
   skipAuth?: boolean;
 }
 
-interface IUseMutationQueryOptions<TRequest = unknown, TResponse = unknown> {
+// Тип ответа API с success/message/data
+export interface IApiResponse<TData = unknown> {
+  success: boolean;
+  message: string;
+  data: TData;
+}
+
+// Опции для useMutationQuery
+interface IUseMutationQueryOptions<TRequest = unknown, TData = unknown> {
   url: string;
   method: "POST" | "PUT" | "DELETE" | "GET";
   messages?: {
     success?: string;
     error?: string;
     invalidate?: string[];
-    onSuccessCb?: (data: TResponse) => void;
+    onSuccessCb?: (data: TData) => void; // возвращаем уже data
     onErrorCb?: () => void;
   };
   queryParams?: Record<string, unknown>;
-  queryOptions?: UseMutationOptions<TResponse, unknown, TRequest, unknown>;
+  queryOptions?: UseMutationOptions<TData, unknown, TRequest, unknown>;
   skipAuth?: boolean;
 }
 
-export const useMutationQuery = <TRequest = unknown, TResponse = unknown>(
-  options: IUseMutationQueryOptions<TRequest, TResponse>
+// Хук useMutationQuery с типизацией
+export const useMutationQuery = <TRequest = unknown, TData = unknown>(
+  options: IUseMutationQueryOptions<TRequest, TData>
 ) => {
   const { url, method, messages, queryOptions, skipAuth = false } = options;
-
   const queryClient = useQueryClient();
 
   const mutationFn = useCallback(
-    async (data: TRequest) => {
-      const response = await _axios<TResponse>({
+    async (data: TRequest): Promise<TData> => {
+      const response = await _axios<IApiResponse<TData>>({
         url,
         method,
         data,
         suppressErrorToast: Boolean(messages?.error),
-        skipAuth: skipAuth,
+        skipAuth,
       } as CustomAxiosRequestConfig<TRequest>);
 
-      if (response.status >= 200 && response.status < 300) {
-        return response.data;
-      } else {
-        const data = response.data as { message?: string };
-        throw new Error(data.message || "Ошибка запроса");
+      const body = response.data;
+
+      if (!body.success) {
+        throw new Error(body.message || "Ошибка запроса");
       }
+
+      return body.data; // возвращаем только data
     },
     [url, method, skipAuth, messages]
   );
 
-  return useMutation({
+  return useMutation<TData, AxiosError, TRequest>({
     mutationFn,
     ...queryOptions,
-    onSuccess: (data, variables, context) => {
-      if (messages?.success) {
-        toast.success(messages.success);
-      }
-      messages?.onSuccessCb?.(data);
 
+    onSuccess: (data, variables, context) => {
+      toast.success("Успешно"); // можно заменить на data.message при необходимости
+      messages?.onSuccessCb?.(data);
       queryOptions?.onSuccess?.(data, variables, context);
 
       if (messages?.invalidate) {
         queryClient.invalidateQueries({ queryKey: messages.invalidate });
-        queryClient.refetchQueries({ queryKey: messages.invalidate });
       }
     },
-    onError: (error: AxiosError, variables, context) => {
-      let errorMessage = "Произошла ошибка";
 
-      const data = error.response?.data as
-        | { message?: string; Message?: string }
-        | undefined;
+    onError: (error, variables, context) => {
+      const data = error.response?.data as IApiResponse<TData> | undefined;
+      const message =
+        data?.message || error.message || messages?.error || "Произошла ошибка";
 
-      if (data?.Message) {
-        errorMessage = data.Message;
-      } else if (data?.message) {
-        errorMessage = data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      if (!messages?.error) {
-        toast.error(errorMessage);
-      }
-
+      toast.error(message);
+      messages?.onErrorCb?.();
       queryOptions?.onError?.(error, variables, context);
     },
   });
