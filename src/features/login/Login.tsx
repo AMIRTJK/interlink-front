@@ -1,16 +1,24 @@
-import { Button, Form, Input, Typography } from "antd";
-import { UserOutlined, LockOutlined } from "@ant-design/icons";
+import { Form, Input, Typography } from "antd";
+import { LockOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import "../../app/styles/global.css";
 import { ApiRoutes } from "@shared/api";
-import { tokenControl, useMutationQuery } from "@shared/lib";
+import {
+  phoneNumberRules,
+  requiredRule,
+  tokenControl,
+  useMutationQuery,
+} from "@shared/lib";
 import { ILoginRequest, ILoginResponse } from "@entities/login";
 const { Link } = Typography;
 import "./Login.css";
 import { AppRoutes } from "@shared/config";
+import { Button, TextField } from "@shared/ui";
 
 export const Login = () => {
   const navigate = useNavigate();
+
+  const [form] = Form.useForm();
 
   // const onFinish = (values: { phoneNumber: string; password: string }) => {
   //   console.log("Login values:", values);
@@ -34,8 +42,8 @@ export const Login = () => {
       },
     }
   );
-  const handleSubmit = (data: { phoneNumber: string; password: string }) => {
-    mutate({ phone: data.phoneNumber, password: data.password });
+  const handleSubmit = (data: { phone: string; password: string }) => {
+    mutate({ phone: `+992${data.phone}`, password: data.password });
   };
 
   return (
@@ -46,52 +54,58 @@ export const Login = () => {
         </h1>
       </div>
       <Form
-        name="login"
-        initialValues={{ remember: true }}
+        form={form}
+        layout="vertical"
+        autoComplete="off"
         onFinish={handleSubmit}
-        size="large"
       >
-        <Form.Item
-          name="phoneNumber"
-          rules={[{ required: true, message: "Введите номер телефона" }]}
-        >
-          <Input
-            prefix={<UserOutlined />}
-            placeholder="Номер телефона"
-            className="rounded-lg"
-          />
-        </Form.Item>
-        <Form.Item
+        <TextField
+          label=""
+          name="phone"
+          rules={[phoneNumberRules]}
+          className="h-14 rounded-[15px]! px-4!"
+          customClass="mb-[8px]!"
+          placeholder="+992"
+        />
+        <TextField
+          type="password"
+          label=""
           name="password"
-          rules={[{ required: true, message: "Введите пароль" }]}
-        >
-          <Input.Password
-            prefix={<LockOutlined />}
-            placeholder="Пароль"
-            className="rounded-lg"
-          />
-        </Form.Item>
-        <Form.Item>
-          <div className="forgot-link">
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className="text-link"
-            >
-              Забыли пароль?
-            </Link>
-          </div>
-        </Form.Item>
-        <Form.Item>
+          rules={[requiredRule]}
+          className="h-14 rounded-[15px]! px-4!"
+          placeholder="Пароль"
+          customClass="big-icon mb-[8px]!"
+        />
+        <div className="flex justify-between mb-2">
+          <Link
+            href="#"
+            onClick={(e) => e.preventDefault()}
+            className="text-white! hover:text-[#e5e5e5]!"
+          >
+            Забыли пароль?
+          </Link>
+          <Link
+            href="#"
+            onClick={(e) => e.preventDefault()}
+            className="text-white! hover:text-[#e5e5e5]!"
+          >
+            Регистрация
+          </Link>
+        </div>
+        <div className="flex flex-col gap-4">
           <Button
+            text="Отправить код"
+            type="primary"
+            className="bg-[#0037AF]! w-full h-14! rounded-[15px]!"
+          />
+          <Button
+            text="Регистрация"
             loading={isPending}
             type="primary"
             htmlType="submit"
-            className="w-full h-10 rounded-lg bg-blue-600 hover:bg-blue-500 border-none"
-          >
-            Войти
-          </Button>
-        </Form.Item>
+            className="bg-[#0037AF]! w-full h-14! rounded-[15px]!"
+          />
+        </div>
       </Form>
     </div>
   );
