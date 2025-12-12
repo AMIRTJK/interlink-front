@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { Button, Form, Input, Select,   } from "antd";
-import type { CreateTaskPayload,  } from "./model";
+import type { CreateTaskPayload, TaskFormValues } from "./model";
 import { TASK_STATUS_OPTIONS } from "./model";
 import "./style.css";
 import { useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 
 interface AddTaskFormProps {
-  initialValues?: Partial<CreateTaskPayload>;
+  initialValues?: Partial<TaskFormValues>;
   onSuccess?: (values: CreateTaskPayload) => void;
 }
 
