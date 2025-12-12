@@ -4,7 +4,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { profileRightNav } from "./model";
 import { AppRoutes } from "@shared/config/AppRoutes";
 import "./style.css";
-import { useTheme } from "@shared/lib";
+import { tokenControl, useTheme } from "@shared/lib";
 
 export const Profile = () => {
   const navigate = useNavigate();
@@ -29,6 +29,8 @@ export const Profile = () => {
 
   const menuTheme = theme === "light" ? "light" : "dark";
 
+  const userId = tokenControl.getUserId();
+  console.log(userId);
   return (
     <div className="profile__content">
       <div className="profile__left-content">
