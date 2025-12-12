@@ -15,14 +15,10 @@
   padding: 16px;
 }
 
-.profile__left-content {
-  padding-left: 24px;
-}
-
 .profile__right-content {
   border: 1px solid var(--color-border);
   border-radius: 16px;
-  min-width: 1472px;
+  min-width: 1422px;
   max-width: 1473px;
   padding: 16px;
 }

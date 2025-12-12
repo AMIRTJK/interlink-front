@@ -1,15 +1,16 @@
 import { Button, Form, Input, Typography } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../../app/styles/global.css";
 import { ApiRoutes } from "@shared/api";
 import { tokenControl, useMutationQuery } from "@shared/lib";
 import { ILoginRequest, ILoginResponse } from "@entities/login";
-const { Title, Text, Link } = Typography;
+const { Link } = Typography;
 import "./Login.css";
+import { AppRoutes } from "@shared/config";
 
 export const Login = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   // const onFinish = (values: { phoneNumber: string; password: string }) => {
   //   console.log("Login values:", values);
@@ -27,12 +28,12 @@ export const Login = () => {
         onSuccessCb: async (data) => {
           const token = data.token;
           tokenControl.set({ token });
-          // navigate(AppRoutes.PROFILE);
+          tokenControl.setUserId(data?.user?.id);
+          navigate(AppRoutes.PROFILE);
         },
       },
     }
   );
-
   const handleSubmit = (data: { phoneNumber: string; password: string }) => {
     mutate({ phone: data.phoneNumber, password: data.password });
   };

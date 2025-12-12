@@ -12,8 +12,8 @@ export const AppRouter = () => {
     <BrowserRouter>
       {/* <Header /> */}
       <Routes>
-        <Route path={AppRoutes.LOGIN} element={<Auth />} />
-        <Route path={AppRoutes.PROFILE} element={<ProfilePage />}>
+        <Route path={`/${AppRoutes.LOGIN}`} element={<Auth />} />
+        <Route path={`/${AppRoutes.PROFILE}`} element={<ProfilePage />}>
           <Route
             index
             element={<Navigate to={AppRoutes.PROFILE_TASKS} replace />}
@@ -25,7 +25,10 @@ export const AppRouter = () => {
             element={<AnalyticsPage />}
           />
         </Route>
-        <Route path="*" element={<Navigate to={AppRoutes.PROFILE} replace />} />
+        <Route
+          path="*"
+          element={<Navigate to={`/${AppRoutes.PROFILE}`} replace />}
+        />
       </Routes>
     </BrowserRouter>
   );

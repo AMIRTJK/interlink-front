@@ -4,7 +4,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { profileRightNav } from "./model";
 import { AppRoutes } from "@shared/config/AppRoutes";
 import "./style.css";
-import { useTheme } from "@shared/lib";
+import { tokenControl, useTheme } from "@shared/lib";
 
 export const Profile = () => {
   const navigate = useNavigate();
@@ -29,6 +29,8 @@ export const Profile = () => {
 
   const menuTheme = theme === "light" ? "light" : "dark";
 
+  const userId = tokenControl.getUserId();
+  console.log(userId);
   return (
     <div className="profile__content">
       <div className="profile__left-content">
@@ -41,15 +43,20 @@ export const Profile = () => {
             />
           </div>
           <p className="profile-title">ФИО ПОЛЬЗОВАТЕЛЯ</p>
+          <div className="flex gap-[72px]">
           <div className="profile__info">
-            <p className="profile__info-item">Email: example@example.com</p>
-            <p className="profile__info-item">Место работы: -</p>
-            <p className="profile__info-item">Должность: -</p>
-            <p className="profile__info-item">ИНН: -</p>
-            <p className="profile__info-item">
-              Номер телефона: +992 (XXX) XXX-XX-XX
-            </p>
+            <p className="profile__info-item">Место работы: </p>
+            <p className="profile__info-item">Должность: </p>
+            <p className="profile__info-item">Номер телефона: </p>
+            <p className="profile__info-item">ИНН:</p>
           </div>
+          <div className="profile__right-info">
+            <p className="profile__info-item"> -</p>
+            <p className="profile__info-item"> -</p>
+            <p className="profile__info-item"> -</p>  
+            <p className="profile__info-item"> -</p>
+          </div>
+        </div>
         </div>
       </div>
       <div className="profile__right-content">
