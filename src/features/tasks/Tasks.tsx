@@ -1,37 +1,34 @@
 import { useState } from "react";
 import { AddTaskForm } from "./AddTaskForm";
-import { PlusOutlined } from "@ant-design/icons";
-import { Button } from "antd";
+import { Modal } from "antd";
+import { TasksTable, ITaskItem } from "@widgets/tasksTable";
 
 export const Tasks = () => {
-  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleAddTask = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleTaskClick = (task: ITaskItem) => {
+    console.log("Task clicked:", task);
+  };
 
   return (
     <div className="profile-page">
-      {!isFormVisible && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "calc(100vh - 200px)",
-          }}
-        >
-          <Button
-            type="primary"
-            shape="circle"
-            icon={<PlusOutlined />}
-            size="large"
-            onClick={() => setIsFormVisible(true)}
-            style={{
-              width: "60px",
-              height: "60px",
-              fontSize: "24px",
-            }}
-          />
-        </div>
-      )}
-      {isFormVisible && <AddTaskForm />}
+      <TasksTable
+        onAddTask={handleAddTask}
+        onTaskClick={handleTaskClick}
+      />
+      <Modal
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={null}
+        title="Добавить задачу"
+        destroyOnClose
+      >
+        <AddTaskForm />
+      </Modal>
     </div>
   );
 };
