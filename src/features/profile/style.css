@@ -31,7 +31,6 @@
 .profile__content {
   display: flex;
   gap: 19px;
-  flex-wrap: wrap;
   padding: 16px;
 }
 
