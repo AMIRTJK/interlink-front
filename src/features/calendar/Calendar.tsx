@@ -131,7 +131,10 @@ export const Calendar = () => {
           width={600}
         >
           <AddTaskForm 
-            initialValues={selectedDateTime || undefined}
+            initialValues={selectedDateTime ? {
+              date: selectedDateTime.date,
+              time: selectedDateTime.time,
+            } : undefined}
             onSuccess={handleTaskCreated}
           />
         </Modal>

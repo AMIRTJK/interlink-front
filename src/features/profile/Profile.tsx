@@ -38,6 +38,8 @@ export const Profile = () => {
     method: "GET",
     url: `${ApiRoutes.FETCH_USER_BY_ID}${userId}`,
   });
+
+  
   return (
     <div className="profile__content">
       <div className="profile__left-content">
