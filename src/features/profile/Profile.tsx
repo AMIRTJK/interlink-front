@@ -7,12 +7,21 @@ import "./style.css";
 import { tokenControl, useGetQuery, useTheme } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { IUser } from "@entities/login";
-
+import { useMemo } from "react";
 export const Profile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { theme } = useTheme();
 
+    const userId = tokenControl.getUserId();
+  const memoUrl = useMemo(
+  () => `${ApiRoutes.FETCH_USER_BY_ID}${userId}`,
+  [userId]
+);
+  const { data: userData } = useGetQuery<unknown, { data: IUser }>({
+  method: "GET",
+  url: memoUrl,
+});
   const getCurrentTab = () => {
     const path = location.pathname;
     if (path.includes(AppRoutes.PROFILE_CALENDAR)) return "calendar";
@@ -31,13 +40,6 @@ export const Profile = () => {
 
   const menuTheme = theme === "light" ? "light" : "dark";
 
-  const userId = tokenControl.getUserId();
-  console.log(userId);
-
-  const { data: userData } = useGetQuery<unknown, { data: IUser }>({
-    method: "GET",
-    url: `${ApiRoutes.FETCH_USER_BY_ID}${userId}`,
-  });
 
   
   return (
