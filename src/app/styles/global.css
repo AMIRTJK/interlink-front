@@ -1,9 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
+/* @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"); */
 @import "tailwindcss";
 
-html {
+/* html {
   font-family: "Inter", sans-serif;
-}
+} */
 
 :root {
   --color-bg-primary: #ffffff;
@@ -11,6 +11,20 @@ html {
   --color-bg-secondary: #f3f4f6;
   --color-border: #e5e7eb;
   --color-profile-title: #0037af;
+}
+
+.ant-input::placeholder,
+.ant-input-password input::placeholder {
+  font-size: 16px !important;
+  color: #808080 !important;
+}
+
+.custom-form-item {
+  margin: 0 !important;
+}
+
+.big-icon .ant-input-password-icon {
+  font-size: 24px !important;
 }
 
 .dark {
@@ -154,10 +168,6 @@ body {
 
 .text-white-70 {
   color: rgba(255, 255, 255, 0.7);
-}
-
-.text-link {
-  color: #69b1ff;
 }
 
 .title-profile {

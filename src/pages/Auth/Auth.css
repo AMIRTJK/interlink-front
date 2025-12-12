@@ -9,6 +9,7 @@
   background-image: url("../../pages/Auth/assets/bg-auth.png");
   background-repeat: no-repeat;
   background-size: cover;
+  padding: 20px 40px;
 }
 
 .auth-video-bg {

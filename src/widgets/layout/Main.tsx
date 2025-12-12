@@ -1,10 +1,10 @@
 import { Outlet } from "react-router-dom";
-import { Header } from "./Header";
+// import { Header } from "./Header";
 
 export const Main = () => {
   return (
     <div className="page-container">
-      <Header />
+      {/* <Header /> */}
       <main className="flex-1">
         <Outlet />
       </main>
