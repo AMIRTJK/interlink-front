@@ -1,6 +1,5 @@
-import { Tasks } from "@features/tasks";
+import { Tasks } from '@features/tasks';
 
 export const TasksPage = () => {
   return <Tasks />;
 };
-
