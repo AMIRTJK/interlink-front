@@ -18,7 +18,7 @@ export const LoginForm = () => {
   //   }
   // };
 
-  const { mutate, isPending } = useMutationQuery<ILoginRequest, ILoginResponse>(
+  const { mutate, isPending, } = useMutationQuery<ILoginRequest, ILoginResponse>(
     {
       url: ApiRoutes.LOGIN,
       method: "POST",
@@ -27,12 +27,12 @@ export const LoginForm = () => {
         onSuccessCb: async (data) => {
           const token = data.token;
           tokenControl.set({ token });
+          tokenControl.setUserId(data?.user?.id);
           navigate(AppRoutes.PROFILE);
         },
       },
     }
   );
-
   const handleSubmit = (data: { phoneNumber: string; password: string }) => {
     mutate({ phone: data.phoneNumber, password: data.password });
   };
