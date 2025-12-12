@@ -1,14 +1,15 @@
 import { Button, Form, Input, Typography } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { AppRoutes } from "@shared/config/AppRoutes";
 import "../../app/styles/global.css";
 import { ApiRoutes } from "@shared/api";
 import { tokenControl, useMutationQuery } from "@shared/lib";
 import { ILoginRequest, ILoginResponse } from "@entities/login";
-const { Title, Text, Link } = Typography;
+const { Link } = Typography;
+import "./Login.css";
+import { AppRoutes } from "@shared/config";
 
-export const LoginForm = () => {
+export const Login = () => {
   const navigate = useNavigate();
 
   // const onFinish = (values: { phoneNumber: string; password: string }) => {
@@ -18,7 +19,7 @@ export const LoginForm = () => {
   //   }
   // };
 
-  const { mutate, isPending, } = useMutationQuery<ILoginRequest, ILoginResponse>(
+  const { mutate, isPending } = useMutationQuery<ILoginRequest, ILoginResponse>(
     {
       url: ApiRoutes.LOGIN,
       method: "POST",
@@ -38,14 +39,12 @@ export const LoginForm = () => {
   };
 
   return (
-    <div className="auth-card">
-      <div className="auth-header">
-        <Title level={2} className="text-white!">
-          Войти
-        </Title>
-        <Text className="text-white-70">Войдите, чтобы продолжить</Text>
+    <div className="login-card">
+      <div className="login-header">
+        <h1 className="font-bold text-white text-[20px] mb-4">
+          Введите данные
+        </h1>
       </div>
-
       <Form
         name="login"
         initialValues={{ remember: true }}
