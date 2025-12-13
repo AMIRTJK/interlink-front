@@ -3,10 +3,9 @@
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   border: 1px solid var(--color-border);
   background-color: #fff;
-  padding:16px;
-  min-width: 389px;
+  padding: 16px;
+  /* min-width: 389px; */
 }
-
 
 .profile-avatar {
   background-color: #2563eb;
@@ -19,13 +18,12 @@
   margin-bottom: 24px;
 }
 
-
-.profile-title{
-    font-size: 20px;
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 24px;
-    color: var(--color-profile-title);
+.profile-title {
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--color-profile-title);
 }
 
 .profile__content {
@@ -34,32 +32,87 @@
   padding: 16px;
 }
 
+.profile__left-content {
+  width: 25%;
+}
+
 .profile__right-content {
   border: 1px solid var(--color-border);
   border-radius: 16px;
-  min-width: 1050px;
+  width: 75%;
 }
 
-.profile__header{
-    display: flex;
-    justify-content: center;
+.profile__header {
+  display: flex;
+  justify-content: center;
 }
 
-.profile__info-item{
+.profile__info-item {
   font-size: 14px;
 }
 
-.profile__info-item-value{
+.profile__info-item-value {
   font-size: 14px;
   font-weight: 500;
 }
 
-.profile__info{
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+.profile__info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .profile__right-body {
-    margin-top: 16px;
+  margin-top: 16px;
+}
+
+.custom-fixed-menu {
+  border-bottom: none !important;
+  background: transparent !important;
+
+  display: flex !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+}
+
+.custom-fixed-menu .ant-menu-item,
+.custom-fixed-menu .ant-menu-item-selected {
+  flex: 1 1 0%;
+
+  padding: 0 10px !important;
+
+  margin: 0 !important;
+
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  text-align: center;
+}
+
+.custom-fixed-menu .ant-menu-item::after,
+.custom-fixed-menu .ant-menu-item-selected::after {
+  content: none !important;
+  display: none !important;
+}
+
+.custom-fixed-menu .ant-menu-item {
+  background-color: transparent !important;
+  color: #0037af !important;
+}
+
+.custom-fixed-menu .ant-menu-item-selected {
+  background-color: #0037af !important;
+  color: white !important;
+  font-weight: 600;
+  border-radius: 8px !important;
+}
+
+.custom-fixed-menu .ant-menu-item:hover {
+  background-color: rgba(0, 55, 175, 0.1) !important;
+  color: #0037af !important;
+}
+
+.custom-fixed-menu .ant-menu-item-selected:hover {
+  background-color: #0037af !important;
+  color: white !important;
 }

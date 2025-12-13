@@ -1,19 +1,20 @@
 .tasks-table {
   display: flex;
   gap: 24px;
-  padding: 24px;
-  min-height: calc(100vh - 200px);
+  /* min-height: calc(100vh - 200px); */
   overflow-x: auto;
 }
 
 .tasks-column {
-  flex: 1;
-  min-width: 300px;
-  max-width: 400px;
+  flex: 1 1 0;
+
   background: var(--color-bg-secondary);
   border-radius: 16px;
   padding: 20px;
   border: 1px solid var(--color-border);
+
+  display: flex;
+  flex-direction: column;
 }
 
 .tasks-column-header {

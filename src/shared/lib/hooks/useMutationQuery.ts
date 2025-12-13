@@ -62,6 +62,12 @@ export const useMutationQuery = <TRequest = unknown, TData = unknown>(
         throw new Error(body.message || "Ошибка запроса");
       }
 
+      const successMessage = messages?.success || body.message || "Успешно";
+
+      if (successMessage) {
+        toast.success(successMessage);
+      }
+
       return body.data; // возвращаем только data
     },
     [url, method, skipAuth, messages]
@@ -72,7 +78,6 @@ export const useMutationQuery = <TRequest = unknown, TData = unknown>(
     ...queryOptions,
 
     onSuccess: (data, variables, context) => {
-      toast.success("Успешно"); // можно заменить на data.message при необходимости
       messages?.onSuccessCb?.(data);
       queryOptions?.onSuccess?.(data, variables, context);
 

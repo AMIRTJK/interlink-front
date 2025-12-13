@@ -31,11 +31,13 @@ export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig<unk
 _axios.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<unknown>) => {
-    toast.dismiss();
+    // toast.dismiss();
 
     const { status } = error.response || {};
 
-    if (status === 401) {
+    const originalRequest = error.config as CustomAxiosRequestConfig;
+
+    if (status === 401 && !originalRequest?.skipAuth) {
       toast.error("Пользователь не авторизован");
       tokenControl.remove();
       window.location.href = AppRoutes.LOGIN;
