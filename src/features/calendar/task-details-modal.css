@@ -10,7 +10,6 @@
 }
 
 .task-details__header-bg {
-  padding: 32px 32px 24px;
   background: linear-gradient(to bottom, #f8f9fa, #ffffff);
   border-bottom: 1px solid #f0f0f0;
 }
@@ -30,15 +29,10 @@
 }
 
 .task-details__title {
-  margin: 0;
   font-size: 24px;
-  font-weight: 700;
-  color: #1f1f1f;
-  line-height: 1.3;
-}
-
-.task-details__content {
-  padding: 24px 32px 32px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 .task-details__meta-row {
