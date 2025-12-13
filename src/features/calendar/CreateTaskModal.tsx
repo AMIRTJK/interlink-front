@@ -27,7 +27,7 @@ export const CreateTaskModal = ({
     >
       <div className="task-details">
         <div className="task-details__header-bg">
-          <h2 className="task-details__title">Добавление</h2>
+          <h2 className="task-details__title">Наименование события</h2>
         </div>
         <div className="task-details__content">
           <AddTaskForm
