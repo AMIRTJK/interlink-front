@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PlusOutlined, CheckOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import { Button, Spin } from "antd";
 import { _axios } from "@shared/api";
 import { ApiRoutes } from "@shared/api/api-routes";
