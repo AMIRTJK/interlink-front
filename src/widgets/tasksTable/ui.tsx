@@ -16,7 +16,13 @@ interface TasksTableProps {
   onTaskClick?: (task: ITaskItem) => void;
 }
 
-const StatusIcon = ({ status }: { status: string }) => {
+const StatusIcon = ({
+  status,
+  className,
+}: {
+  status: string;
+  className?: string;
+}) => {
   const iconSize = 16;
 
   switch (status) {
@@ -26,7 +32,7 @@ const StatusIcon = ({ status }: { status: string }) => {
           src={CompletedIcon}
           alt="Completed"
           style={{ width: iconSize, height: iconSize }}
-          className="status-icon-svg"
+          className={`status-icon-svg ${className}`}
         />
       );
     case TASK_STATUS.IN_PROGRESS:
@@ -35,7 +41,7 @@ const StatusIcon = ({ status }: { status: string }) => {
           src={InProgressIcon}
           alt="In Progress"
           style={{ width: iconSize, height: iconSize }}
-          className="status-icon-svg"
+          className={`status-icon-svg ${className}`}
         />
       );
     case TASK_STATUS.PENDING:
@@ -44,7 +50,7 @@ const StatusIcon = ({ status }: { status: string }) => {
           src={PendingIcon}
           alt="Pending"
           style={{ width: iconSize, height: iconSize }}
-          className="status-icon-svg"
+          className={`status-icon-svg ${className}`}
         />
       );
     default:
@@ -86,11 +92,7 @@ const TaskCard = ({
   return (
     <div className="task-card-task" onClick={() => onClick?.(task)}>
       <div className="task-card-header">
-        <span className={`task-status-indicator ${task.status}`}>
-          {task.status === TASK_STATUS.COMPLETED && (
-            <CheckOutlined style={{ fontSize: 10, color: "white" }} />
-          )}
-        </span>
+        <StatusIcon status={task.status} className="mt-[3px]!" />
         <div className="task-card-content">
           <div className="task-title">{task.title}</div>
           <div className="task-datetime">{formatDate(task.created_at)}</div>
