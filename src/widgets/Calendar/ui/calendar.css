@@ -129,13 +129,13 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, #FF6B6B, #FF8E53);
+  background: linear-gradient(90deg, #ff6b6b, #ff8e53);
   z-index: 5;
   pointer-events: none;
 }
 
 .weekly-calendar__current-time-line::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 50%;
@@ -143,7 +143,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #FF6B6B;
+  background: #ff6b6b;
 }
 
 .weekly-calendar__task-wrapper {
@@ -153,12 +153,11 @@
   z-index: 2;
 }
 
-
 .task-card {
   background: var(--color-bg-secondary);
   border-radius: 8px;
   padding: 10px;
-  border-left: 4px solid #6C63FF;
+  border-left: 4px solid #6c63ff;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -184,7 +183,7 @@
   font-size: 11px;
   font-weight: 600;
   color: white;
-  background: #6C63FF;
+  background: #6c63ff;
 }
 
 .task-card__title {
@@ -205,25 +204,24 @@
   margin-top: 4px;
 }
 
-
 @media (max-width: 768px) {
   .weekly-calendar {
     padding: 12px;
   }
-  
+
   .weekly-calendar__header {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .weekly-calendar__date-range {
     font-size: 14px;
   }
-  
+
   .weekly-calendar__view-switcher {
     justify-content: center;
   }
-  
+
   .weekly-calendar__day-column {
     min-width: 120px;
   }
