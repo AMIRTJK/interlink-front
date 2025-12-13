@@ -34,7 +34,7 @@ export const WeeklyCalendar = ({ tasks, onTaskClick, onTimeSlotClick, currentDat
   const daysToShow = viewMode === 'day' 
     ? [currentDate]
     : viewMode === 'month'
-      ? Array.from({ length: 42 }, (_, i) => startOfWeek.add(i, 'day')) // 6 weeks to cover month
+      ? Array.from({ length: 42 }, (_, i) => startOfWeek.add(i, 'day'))
       : Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, 'day'));
 
   const goToPrev = () => {
@@ -53,6 +53,7 @@ export const WeeklyCalendar = ({ tasks, onTaskClick, onTimeSlotClick, currentDat
       dayjs(task.date).isSame(day, 'day')
     );
   };
+
   const formatDateRange = () => {
     if (viewMode === 'day') return currentDate.format('D MMMM YYYY');
     if (viewMode === 'month') return currentDate.format('MMMM YYYY');
@@ -147,15 +148,24 @@ export const WeeklyCalendar = ({ tasks, onTaskClick, onTimeSlotClick, currentDat
                     style={{ top: `${currentTimePosition * 60}px` }}
                   />
                 )}
-                {getTasksForDay(day).map((task) => {
+                {getTasksForDay(day).map((task, index) => {
                   const taskHour = parseInt(task.time.split(':')[0]);
                   const taskMinute = parseInt(task.time.split(':')[1]);
                   const topPosition = (taskHour + taskMinute / 60) * 60;
+                  
+                  const leftOffset = Math.min(index * 15, 60);
+                  const width = `calc(100% - ${leftOffset}px)`;
+                  
                   return (
                     <div
                       key={task.id}
                       className="weekly-calendar__task-wrapper"
-                      style={{ top: `${topPosition}px` }}
+                      style={{ 
+                        top: `${topPosition}px`,
+                        left: `${leftOffset}px`,
+                        width: width,
+                        zIndex: 10 + index
+                      }}
                     >
                       <TaskCard 
                         task={task} 
