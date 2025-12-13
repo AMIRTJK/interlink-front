@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import "../../app/styles/global.css";
 import { ApiRoutes } from "@shared/api";
 import {
-  phoneNumberRules,
-  requiredRule,
+  // phoneNumberRules,
+  // requiredRule,
   tokenControl,
   useMutationQuery,
 } from "@shared/lib";
@@ -61,7 +61,7 @@ export const Login = () => {
         <TextField
           label=""
           name="phone"
-          rules={[phoneNumberRules]}
+          // rules={[phoneNumberRules]}
           className="h-14 rounded-[15px]! px-4!"
           customClass="mb-[8px]!"
           placeholder="+992"
@@ -70,7 +70,7 @@ export const Login = () => {
           type="password"
           label=""
           name="password"
-          rules={[requiredRule]}
+          // rules={[requiredRule]}
           className="h-14 rounded-[15px]! px-4!"
           placeholder="Пароль"
           customClass="big-icon mb-[8px]!"

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { Button, Form, Input, Select } from "antd";
-import type { CreateTaskPayload, TaskFormValues } from "./model";
+import dayjs from "dayjs";
+import { Button, ColorPicker, DatePicker, Form, Input, Select, TimePicker } from "antd";
+import type { CreateEventPayload, CreateTaskPayload, TaskFormValues, EventResponse } from "./model";
 import { TASK_STATUS_OPTIONS } from "./model";
 import "./style.css";
 import { useMutationQuery } from "@shared/lib";
@@ -8,13 +9,14 @@ import { ApiRoutes } from "@shared/api";
 import { SelectField } from "@shared/ui";
 import { transformAssigneesResponse } from "./lib";
 
-interface AddTaskFormProps {
+interface IProps {
   initialValues?: Partial<TaskFormValues>;
-  onSuccess?: (values: CreateTaskPayload) => void;
+  onSuccess?: (values: CreateTaskPayload | CreateEventPayload | EventResponse) => void;
+  isEvent?: boolean;
 }
 
-export const AddTaskForm = ({ initialValues, onSuccess }: AddTaskFormProps) => {
-  const [form] = Form.useForm<CreateTaskPayload>();
+export const AddTaskForm = ({ initialValues, onSuccess, isEvent }: IProps) => {
+  const [form] = Form.useForm<TaskFormValues>();
 
   useEffect(() => {
     if (initialValues) {
@@ -24,31 +26,73 @@ export const AddTaskForm = ({ initialValues, onSuccess }: AddTaskFormProps) => {
 
   const { mutate: addTaskMutate } = useMutationQuery({
     method: "POST",
-    url: ApiRoutes.ADD_TASK,
+    url: isEvent ? ApiRoutes.ADD_EVENT : ApiRoutes.ADD_TASK,
     messages: {
-      success: "Задача добавлена!",
-      error: "Ошибка при добавлении задачи",
+      success: isEvent ? "Событие добавлено!" : "Задача добавлена!",
+      error: isEvent ? "Ошибка при добавлении события" : "Ошибка при добавлении задачи",
       invalidate: [ApiRoutes.GET_TASKS],
+      onSuccessCb: (data) => {
+        if (isEvent && onSuccess) {
+          onSuccess(data as EventResponse);
+        }
+      },
     },
   });
 
-  const onFinish = (values: CreateTaskPayload) => {
-    console.log("Task values:", {
-      title: values.title,
-      description: values?.description,
-      status: "pending",
-      assignees: [values?.assignees],
-    });
-    addTaskMutate(values);
-    if (onSuccess) {
-      onSuccess(values);
+  const onFinish = (values: TaskFormValues) => {
+    if (isEvent) {
+      const dateStr = values.date?.format("YYYY-MM-DD");
+      const timeStr = values.time?.format("HH:mm");
+      const startDateTime = dayjs(`${dateStr} ${timeStr}`);
+
+      let endDateTime;
+      if (values.endTime) {
+        const endTimeStr = values.endTime.format("HH:mm");
+        endDateTime = dayjs(`${dateStr} ${endTimeStr}`);
+        if (endDateTime.isBefore(startDateTime) || endDateTime.isSame(startDateTime)) {
+             endDateTime = endDateTime.add(1, 'day');
+        }
+      } else {
+        endDateTime = startDateTime.add(1, "hour");
+      }
+
+      const payload: CreateEventPayload = {
+        title: values.title,
+        description: values.description || "",
+        start_at: startDateTime.format("YYYY-MM-DD HH:mm"),
+        end_at: endDateTime.format("YYYY-MM-DD HH:mm"),
+        color: typeof values.color === 'string'
+          ? values.color
+          : (values.color && typeof values.color === 'object' && 'toHexString' in values.color
+              ? (values.color as { toHexString: () => string }).toHexString()
+              : "#3b82f6"),
+        status: "pending",
+        participants: values.assignees || [],
+      };
+      
+      console.log("Event payload:", payload);
+      addTaskMutate(payload);
+    } else {
+      const payload: CreateTaskPayload = {
+        title: values.title,
+        description: values.description || "",
+        status: values.status || "pending",
+        assignees: values.assignees || [],
+      };
+      
+      console.log("Task values:", payload);
+      addTaskMutate(payload);
+      if (onSuccess) {
+        onSuccess(payload);
+      }
     }
-    form.resetFields();
+    
+    if (!isEvent) {
+        form.resetFields();
+    }
   };
 
   return (
-    <div className="task-form">
-      <h2 className="task-form__title">Добавить задачу</h2>
       <div className="task-form__container">
         <Form form={form} onFinish={onFinish} layout="vertical">
           <Form.Item
@@ -66,6 +110,44 @@ export const AddTaskForm = ({ initialValues, onSuccess }: AddTaskFormProps) => {
               style={{ resize: "none" }}
             />
           </Form.Item>
+          {isEvent && (
+            <div style={{ display: "flex", gap: "10px" }}>
+              <Form.Item
+                name="date"
+                label="Дата"
+                style={{ flex: 1 }}
+                rules={[{ required: true, message: "Выберите дату" }]}
+              >
+                <DatePicker format="DD.MM.YYYY" style={{ width: "100%" }} />
+              </Form.Item>
+              <Form.Item
+                name="time"
+                label="Время начала"
+                style={{ flex: 1 }}
+                rules={[{ required: true, message: "Выберите время" }]}
+              >
+                <TimePicker format="HH:mm" style={{ width: "100%" }} />
+              </Form.Item>
+            </div>
+          )}
+          {isEvent && (
+            <div style={{ display: "flex", gap: "10px" }}>
+              <Form.Item
+                name="endTime"
+                label="Время окончания"
+                style={{ flex: 1 }}
+              >
+                <TimePicker format="HH:mm" style={{ width: "100%" }} />
+              </Form.Item>
+               <Form.Item
+                name="color"
+                label="Цвет"
+                initialValue="#3b82f6"
+              >
+                 <ColorPicker />
+              </Form.Item>
+            </div>
+          )}
           <SelectField
             onChange={(values) => {
               // values — массив id выбранных пользователей
@@ -81,25 +163,26 @@ export const AddTaskForm = ({ initialValues, onSuccess }: AddTaskFormProps) => {
             method="GET"
             transformResponse={transformAssigneesResponse}
             searchParamKey="full_name"
-            className="mb-0!"
+            className="mb-5!"
           />
-          <Form.Item
-            name="status"
-            rules={[{ required: true, message: "Выберите статус задачи" }]}
-          >
-            <Select
-              placeholder="Выберите статус задачи"
-              style={{ width: "100%" }}
-              options={TASK_STATUS_OPTIONS}
-            />
-          </Form.Item>
-          <Form.Item className="task-form__submit">
+          {!isEvent && (
+            <Form.Item
+              name="status"
+              rules={[{ required: true, message: "Выберите статус задачи" }]}
+            >
+              <Select
+                placeholder="Выберите статус задачи"
+                style={{ width: "100%" }}
+                options={TASK_STATUS_OPTIONS}
+              />
+            </Form.Item>
+          )}
+        <Form.Item className="task-form__submit">
             <Button type="primary" htmlType="submit" block>
-              Добавить задачу
+              {isEvent ? "Добавить событие" : "Добавить задачу"}
             </Button>
           </Form.Item>
         </Form>
       </div>
-    </div>
   );
 };

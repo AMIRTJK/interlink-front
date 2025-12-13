@@ -1,16 +1,7 @@
-.task-form {
-  padding: 24px;
-}
-
-.task-form__title {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 24px;
-  color: var(--color-text-primary);
-}
 
 .task-form__container {
   max-width: 500px;
+  padding: 20px;
 }
 
 .task-form__field {

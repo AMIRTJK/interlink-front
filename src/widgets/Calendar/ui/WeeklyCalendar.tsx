@@ -4,28 +4,49 @@ import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import type { Task } from "@features/tasks";
-import { TaskCard } from "./TaskCard";
+import { TaskCard } from "@features/calendar";
 import "./calendar.css";
 dayjs.extend(isoWeek);
+import type { ViewMode } from "../model";
+
 interface WeeklyCalendarProps {
   tasks: Task[];
   onTaskClick?: (task: Task) => void;
   onTimeSlotClick?: (date: Dayjs, time: string) => void;
+  currentDate: Dayjs;
+  onDateChange: (date: Dayjs) => void;
 }
-type ViewMode = 'week' | 'month' | 'day';
-export const WeeklyCalendar = ({ tasks, onTaskClick, onTimeSlotClick }: WeeklyCalendarProps) => {
-  const [currentDate, setCurrentDate] = useState(dayjs());
+
+export const WeeklyCalendar = ({ tasks, onTaskClick, onTimeSlotClick, currentDate, onDateChange }: WeeklyCalendarProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('week');
-  const startOfWeek = currentDate.startOf('isoWeek');
-  const endOfWeek = currentDate.endOf('isoWeek');
-  const weekDays = Array.from({ length: 7 }, (_, i) => 
-    startOfWeek.add(i, 'day')
-  );
-  const goToPrevWeek = () => {
-    setCurrentDate(currentDate.subtract(1, 'week'));
+  const startOfWeek = viewMode === 'month' 
+    ? currentDate.startOf('month').startOf('isoWeek')
+    : viewMode === 'day'
+      ? currentDate
+      : currentDate.startOf('isoWeek');
+
+  const endOfWeek = viewMode === 'month'
+    ? currentDate.endOf('month').endOf('isoWeek')
+    : viewMode === 'day'
+      ? currentDate
+      : currentDate.endOf('isoWeek');
+
+  const daysToShow = viewMode === 'day' 
+    ? [currentDate]
+    : viewMode === 'month'
+      ? Array.from({ length: 42 }, (_, i) => startOfWeek.add(i, 'day')) // 6 weeks to cover month
+      : Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, 'day'));
+
+  const goToPrev = () => {
+    if (viewMode === 'day') onDateChange(currentDate.subtract(1, 'day'));
+    else if (viewMode === 'week') onDateChange(currentDate.subtract(1, 'week'));
+    else onDateChange(currentDate.subtract(1, 'month'));
   };
-  const goToNextWeek = () => {
-    setCurrentDate(currentDate.add(1, 'week'));
+
+  const goToNext = () => {
+    if (viewMode === 'day') onDateChange(currentDate.add(1, 'day'));
+    else if (viewMode === 'week') onDateChange(currentDate.add(1, 'week'));
+    else onDateChange(currentDate.add(1, 'month'));
   };
   const getTasksForDay = (day: Dayjs) => {
     return tasks.filter(task => 
@@ -33,6 +54,8 @@ export const WeeklyCalendar = ({ tasks, onTaskClick, onTimeSlotClick }: WeeklyCa
     );
   };
   const formatDateRange = () => {
+    if (viewMode === 'day') return currentDate.format('D MMMM YYYY');
+    if (viewMode === 'month') return currentDate.format('MMMM YYYY');
     return `${startOfWeek.format('D')} - ${endOfWeek.format('D MMMM YYYY')} г.`;
   };
   const isToday = (day: Dayjs) => day.isSame(dayjs(), 'day');
@@ -49,7 +72,7 @@ export const WeeklyCalendar = ({ tasks, onTaskClick, onTimeSlotClick }: WeeklyCa
     }
   };
   const currentTimePosition = getCurrentTimePosition();
-  const showTimeLine = weekDays.some(day => isToday(day));
+  const showTimeLine = daysToShow.some(day => isToday(day));
   return (
     <div className="weekly-calendar">
       <div className="weekly-calendar__header">
@@ -57,7 +80,7 @@ export const WeeklyCalendar = ({ tasks, onTaskClick, onTimeSlotClick }: WeeklyCa
           <Button 
             type="text" 
             icon={<LeftOutlined />} 
-            onClick={goToPrevWeek}
+            onClick={goToPrev}
           />
           <span className="weekly-calendar__date-range">
             {formatDateRange()}
@@ -65,7 +88,7 @@ export const WeeklyCalendar = ({ tasks, onTaskClick, onTimeSlotClick }: WeeklyCa
           <Button 
             type="text" 
             icon={<RightOutlined />} 
-            onClick={goToNextWeek}
+            onClick={goToNext}
           />
         </div>
         <div className="weekly-calendar__view-switcher">
@@ -98,8 +121,8 @@ export const WeeklyCalendar = ({ tasks, onTaskClick, onTimeSlotClick }: WeeklyCa
             </div>
           ))}
         </div>
-        <div className="weekly-calendar__days">
-          {weekDays.map((day) => (
+        <div className={`weekly-calendar__days ${viewMode}`}>
+          {daysToShow.map((day) => (
             <div 
               key={day.format('YYYY-MM-DD')} 
               className={`weekly-calendar__day-column ${isToday(day) ? 'weekly-calendar__day-column--today' : ''}`}
