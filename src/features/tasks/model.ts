@@ -29,6 +29,37 @@ export interface CreateTaskPayload {
   assignees: number[];
 }
 
+export interface Participant {
+  id: number;
+  full_name: string;
+  photo_path: string | null;
+  permission_names?: string[];
+}
+
+export interface EventResponse {
+  id: number;
+  title: string;
+  description: string;
+  start_at: string;
+  end_at: string;
+  color: string;
+  status: string;
+  participants: Participant[];
+  created_at: string;
+  updated_at: string;
+}
+
+// Интерфейс для создания события календаря (API payload)
+export interface CreateEventPayload {
+  title: string;
+  description: string;
+  start_at: string;
+  end_at: string;
+  color: string;
+  status: string;
+  participants: number[];
+}
+
 // Интерфейс задачи для календаря
 export interface Task {
   id: string;
@@ -37,6 +68,7 @@ export interface Task {
   time: string;
   endTime?: string;
   category?: string;
+  color?: string;
   participants?: Array<{
     id: string;
     name: string;
@@ -52,4 +84,6 @@ export interface TaskFormValues {
   time?: Dayjs;
   status?: string;
   assignees?: number[];
+  color?: string;
+  endTime?: Dayjs;
 }

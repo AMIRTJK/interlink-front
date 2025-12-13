@@ -1,4 +1,4 @@
-import { Calendar } from "@features/calendar";
+import { Calendar } from "@widgets/Calendar";
 import "./styles.css";
 
 export const CalendarPage = () => {
