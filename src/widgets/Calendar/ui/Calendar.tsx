@@ -11,10 +11,12 @@ import { toast } from "react-toastify";
 
 import "@features/calendar/task-details-modal.css";
 
+import "./calendar.css";
+
 const mapEventToTask = (event: EventResponse): Task => {
   const startDate = dayjs(event.start_at);
   const endDate = dayjs(event.end_at);
-  
+
   return {
     id: String(event.id),
     title: event.title,
@@ -24,10 +26,10 @@ const mapEventToTask = (event: EventResponse): Task => {
     endTime: endDate.format("HH:mm"),
     category: "work",
     color: event.color,
-    participants: event.participants.map(p => ({
+    participants: event.participants.map((p) => ({
       id: String(p.id),
       name: p.full_name,
-      avatar: p.photo_path || undefined
+      avatar: p.photo_path || undefined,
     })),
   };
 };
@@ -37,7 +39,10 @@ export const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(dayjs());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedDateTime, setSelectedDateTime] = useState<{ date: Dayjs; time: Dayjs } | null>(null);
+  const [selectedDateTime, setSelectedDateTime] = useState<{
+    date: Dayjs;
+    time: Dayjs;
+  } | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const handleTaskClick = (task: Task) => {
@@ -46,9 +51,9 @@ export const Calendar = () => {
   };
 
   const handleTimeSlotClick = (date: Dayjs, time: string) => {
-    const [hours, minutes] = time.split(':');
+    const [hours, minutes] = time.split(":");
     const timeObj = dayjs().hour(parseInt(hours)).minute(parseInt(minutes));
-    
+
     setSelectedDateTime({
       date: date,
       time: timeObj,
@@ -62,26 +67,30 @@ export const Calendar = () => {
   };
 
   const fetchEvents = useCallback(async () => {
-      try {
-        const from = currentDate.startOf('month').subtract(7, 'day').format('YYYY-MM-DD');
-        const to = currentDate.endOf('month').add(7, 'day').format('YYYY-MM-DD');
-        
-        const response = await _axios.get<{ data: EventResponse[] }>(ApiRoutes.GET_EVENTS, {
-          params: { from, to }
-        });
-        const mappedTasks = response.data.data.map(mapEventToTask);
-        setTasks(mappedTasks);
-      } catch (error) {
-        console.error("Failed to fetch events:", error);
-        toast.error("Не удалось загрузить события");
-      }
+    try {
+      const from = currentDate
+        .startOf("month")
+        .subtract(7, "day")
+        .format("YYYY-MM-DD");
+      const to = currentDate.endOf("month").add(7, "day").format("YYYY-MM-DD");
+
+      const response = await _axios.get<{ data: EventResponse[] }>(
+        ApiRoutes.GET_EVENTS,
+        {
+          params: { from, to },
+        }
+      );
+      const mappedTasks = response.data.data.map(mapEventToTask);
+      setTasks(mappedTasks);
+    } catch (error) {
+      console.error("Failed to fetch events:", error);
+      toast.error("Не удалось загрузить события");
+    }
   }, [currentDate]);
 
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
-
-
 
   const handleTaskCreated = () => {
     fetchEvents();
@@ -92,8 +101,8 @@ export const Calendar = () => {
   return (
     <div className="profile-page">
       <div className="calendar-page-container">
-        <WeeklyCalendar 
-          tasks={tasks} 
+        <WeeklyCalendar
+          tasks={tasks}
           currentDate={currentDate}
           onDateChange={setCurrentDate}
           onTaskClick={handleTaskClick}
@@ -114,11 +123,15 @@ export const Calendar = () => {
               <h2 className="task-details__title">Добавить задачу</h2>
             </div>
             <div className="task-details__content">
-              <AddTaskForm 
-                initialValues={selectedDateTime ? {
-                  date: selectedDateTime.date,
-                  time: selectedDateTime.time,
-                } : undefined}
+              <AddTaskForm
+                initialValues={
+                  selectedDateTime
+                    ? {
+                        date: selectedDateTime.date,
+                        time: selectedDateTime.time,
+                      }
+                    : undefined
+                }
                 onSuccess={handleTaskCreated}
                 isEvent={true}
               />

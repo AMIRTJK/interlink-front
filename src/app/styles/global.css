@@ -11,6 +11,8 @@
   --color-bg-secondary: #f3f4f6;
   --color-border: #e5e7eb;
   --color-profile-title: #0037af;
+  --color-bg-main: #e5e9f5;
+  --color-bg-card-task: #f2f5ff;
 }
 
 .ant-input::placeholder,
@@ -55,8 +57,6 @@ body {
   display: flex;
   flex-direction: column;
 }
-
-
 
 .header {
   position: sticky;
@@ -170,4 +170,3 @@ body {
 .title-auth {
   color: #fff;
 }
-
