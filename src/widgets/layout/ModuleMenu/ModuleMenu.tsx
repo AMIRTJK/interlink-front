@@ -1,16 +1,16 @@
 import { Menu } from "antd";
 import type { MenuProps } from "antd";
-import {
-  HomeOutlined,
-  SettingOutlined,
-  FileTextOutlined,
-  MailOutlined,
-  FileDoneOutlined,
-  ExceptionOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import React, { useState } from "react";
+
+import { useState } from "react";
 import "./style.css";
+
+import ProfileIcon from "../../../assets/icons/profile-icon.svg";
+import OrganizationIcon from "../../../assets/icons/organization-icon.svg";
+import MainDocumentsIcon from "../../../assets/icons/main-documents-icon.svg";
+import CorrespondenceIcon from "../../../assets/icons/correspondence-icon.svg";
+import PrimaryDocumentsIcon from "../../../assets/icons/primary documents-icon.svg";
+import ApplicationsIcon from "../../../assets/icons/applications-icon.svg";
+import CrmIcon from "../../../assets/icons/crm-icon.svg";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -18,37 +18,37 @@ const moduleItems: MenuItem[] = [
   {
     key: "personal",
     label: "Личный кабинет",
-    icon: <UserOutlined style={{ fontSize: "40px" }} />,
+    icon: <img src={ProfileIcon} />,
   },
   {
     key: "organization",
     label: "Организация",
-    icon: <SettingOutlined style={{ fontSize: "40px" }} />,
+    icon: <img src={OrganizationIcon} />,
   },
   {
     key: "documents_main",
     label: "Основные документы",
-    icon: <FileTextOutlined style={{ fontSize: "40px" }} />,
+    icon: <img src={MainDocumentsIcon} />,
   },
   {
     key: "correspondence",
     label: "Корреспонденция",
-    icon: <MailOutlined style={{ fontSize: "40px" }} />,
+    icon: <img src={CorrespondenceIcon} />,
   },
   {
     key: "documents_primary",
     label: "Первичные документы",
-    icon: <FileDoneOutlined style={{ fontSize: "40px" }} />,
+    icon: <img src={PrimaryDocumentsIcon} />,
   },
   {
     key: "applications",
     label: "Заявки",
-    icon: <ExceptionOutlined style={{ fontSize: "40px" }} />,
+    icon: <img src={ApplicationsIcon} />,
   },
   {
     key: "crm",
     label: "CRM",
-    icon: <HomeOutlined style={{ fontSize: "40px" }} />,
+    icon: <img src={CrmIcon} />,
   },
 ];
 
@@ -58,7 +58,6 @@ export const ModuleMenu = () => {
   const onClick: MenuProps["onClick"] = (e) => {
     console.log("click ", e);
     setCurrent(e.key);
-    // Здесь должна быть ваша логика navigate, например:
     // navigate(`/module/${e.key}`);
   };
 

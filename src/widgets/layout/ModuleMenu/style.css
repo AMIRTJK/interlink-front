@@ -37,6 +37,10 @@
   font-size: 14px;
 }
 
+.module-grid-menu .ant-menu-item-selected img {
+  filter: brightness(0) invert(1);
+}
+
 /* --- Стили для активной (выделенной) плитки --- */
 .module-grid-menu .ant-menu-item-selected {
   background-color: #0037af !important;
@@ -70,6 +74,10 @@
 .module-grid-menu .ant-menu-item-selected:hover {
   background-color: #0037af !important;
   color: white !important;
+}
+
+.module-grid-menu .ant-menu-item:not(.ant-menu-item-selected):hover img {
+  filter: brightness(0) invert(1);
 }
 
 /* --- Стили для внутреннего содержимого (иконка и текст) --- */
