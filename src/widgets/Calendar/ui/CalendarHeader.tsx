@@ -1,6 +1,6 @@
 import { Button } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import type { ViewMode } from "../../model";
+import type { ViewMode } from "../model";
 
 interface CalendarHeaderProps {
   viewMode: ViewMode;
