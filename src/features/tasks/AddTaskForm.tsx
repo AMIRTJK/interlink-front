@@ -48,7 +48,6 @@ export const AddTaskForm = ({ initialValues, onSuccess }: AddTaskFormProps) => {
 
   return (
     <div className="task-form">
-      <h2 className="task-form__title">Добавить задачу</h2>
       <div className="task-form__container">
         <Form form={form} onFinish={onFinish} layout="vertical">
           <Form.Item
