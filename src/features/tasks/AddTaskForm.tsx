@@ -155,19 +155,15 @@ export const AddTaskForm = ({
           <div style={{ display: "flex", gap: "10px" }}>
             <Form.Item
               name="date"
-              label="Дата"
               style={{ flex: 1 }}
-              rules={[{ required: true, message: "Выберите дату" }]}
             >
-              <DatePicker format="DD.MM.YYYY" style={{ width: "100%" }} />
+              <DatePicker placeholder="Выберите дату" format="DD.MM.YYYY" style={{ width: "100%" }} />
             </Form.Item>
             <Form.Item
               name="time"
-              label="Время начала"
               style={{ flex: 1 }}
-              rules={[{ required: true, message: "Выберите время" }]}
             >
-              <TimePicker format="HH:mm" style={{ width: "100%" }} />
+              <TimePicker placeholder="Выберите время" format="HH:mm" style={{ width: "100%" }} />
             </Form.Item>
           </div>
         )}
@@ -175,12 +171,11 @@ export const AddTaskForm = ({
           <div style={{ display: "flex", gap: "10px" }}>
             <Form.Item
               name="endTime"
-              label="Время окончания"
               style={{ flex: 1 }}
             >
-              <TimePicker format="HH:mm" style={{ width: "100%" }} />
+              <TimePicker placeholder="Время окончания" format="HH:mm" style={{ width: "100%" }} />
             </Form.Item>
-            <Form.Item name="color" label="Цвет" initialValue="#3b82f6">
+            <Form.Item name="color"  initialValue="#3b82f6">
               <ColorPicker />
             </Form.Item>
           </div>
