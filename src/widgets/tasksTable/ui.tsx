@@ -1,26 +1,61 @@
 import { useState, useEffect } from "react";
 import { PlusOutlined, CheckOutlined } from "@ant-design/icons";
-import { Spin } from "antd";
+import { Button, Spin } from "antd";
 import { _axios } from "@shared/api";
 import { ApiRoutes } from "@shared/api/api-routes";
 import { TASK_STATUS, TASK_STATUS_OPTIONS } from "@features/tasks/model";
 import type { ITaskItem, ITasksResponse } from "./model";
 import "./style.css";
 
+import PendingIcon from "../../assets/icons/pending-icon.svg";
+import InProgressIcon from "../../assets/icons/in-progress-icon.svg";
+import CompletedIcon from "../../assets/icons/completed-icon.svg";
+
 interface TasksTableProps {
   onAddTask?: (status: string) => void;
   onTaskClick?: (task: ITaskItem) => void;
 }
 
-const StatusIcon = ({ status }: { status: string }) => {
-  if (status === TASK_STATUS.COMPLETED) {
-    return (
-      <span className={`status-icon ${status}`}>
-        <CheckOutlined style={{ fontSize: 12, color: "white" }} />
-      </span>
-    );
+const StatusIcon = ({
+  status,
+  className,
+}: {
+  status: string;
+  className?: string;
+}) => {
+  const iconSize = 16;
+
+  switch (status) {
+    case TASK_STATUS.COMPLETED:
+      return (
+        <img
+          src={CompletedIcon}
+          alt="Completed"
+          style={{ width: iconSize, height: iconSize }}
+          className={`status-icon-svg ${className}`}
+        />
+      );
+    case TASK_STATUS.IN_PROGRESS:
+      return (
+        <img
+          src={InProgressIcon}
+          alt="In Progress"
+          style={{ width: iconSize, height: iconSize }}
+          className={`status-icon-svg ${className}`}
+        />
+      );
+    case TASK_STATUS.PENDING:
+      return (
+        <img
+          src={PendingIcon}
+          alt="Pending"
+          style={{ width: iconSize, height: iconSize }}
+          className={`status-icon-svg ${className}`}
+        />
+      );
+    default:
+      return <span style={{ width: iconSize, height: iconSize }} />;
   }
-  return <span className={`status-icon ${status}`} />;
 };
 
 const formatDate = (dateString: string | null) => {
@@ -55,13 +90,9 @@ const TaskCard = ({
   onClick?: (task: ITaskItem) => void;
 }) => {
   return (
-    <div className="task-card" onClick={() => onClick?.(task)}>
+    <div className="task-card-task" onClick={() => onClick?.(task)}>
       <div className="task-card-header">
-        <span className={`task-status-indicator ${task.status}`}>
-          {task.status === TASK_STATUS.COMPLETED && (
-            <CheckOutlined style={{ fontSize: 10, color: "white" }} />
-          )}
-        </span>
+        <StatusIcon status={task.status} className="mt-[3px]!" />
         <div className="task-card-content">
           <div className="task-title">{task.title}</div>
           <div className="task-datetime">{formatDate(task.created_at)}</div>
@@ -89,17 +120,18 @@ const TasksColumn = ({
   return (
     <div className="tasks-column">
       <div className="tasks-column-header">
-        <div className="tasks-column-title">
+        <div className="flex items-center gap-1">
           <StatusIcon status={status} />
-          <span>{label}</span>
+          <span className="font-semibold text-[14px]">{label}</span>
         </div>
-        <button
-          className="add-task-btn"
+
+        <Button
           onClick={() => onAddTask?.(status)}
-          type="button"
-        >
-          <PlusOutlined />
-        </button>
+          type="text"
+          shape="circle"
+          style={{ width: 40, height: 40, padding: 0 }}
+          icon={<PlusOutlined className="text-[#0037AF]! text-[20px]!" />}
+        />
       </div>
       <div className="tasks-list">
         {columnTasks.length > 0 ? (
