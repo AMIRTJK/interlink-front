@@ -1,12 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { Modal } from "antd";
 import { WeeklyCalendar } from "./WeeklyCalendar";
+import { TaskDetailsModal } from "@features/calendar";
 import { AddTaskForm } from "@features/tasks";
 import type { Task, EventResponse } from "@features/tasks";
 import dayjs, { Dayjs } from "dayjs";
 
 import { _axios, ApiRoutes } from "@shared/api";
 import { toast } from "react-toastify";
+
+import "@features/calendar/task-details-modal.css";
 
 const mapEventToTask = (event: EventResponse): Task => {
   const startDate = dayjs(event.start_at);
@@ -15,6 +18,7 @@ const mapEventToTask = (event: EventResponse): Task => {
   return {
     id: String(event.id),
     title: event.title,
+    description: event.description,
     date: startDate.format("YYYY-MM-DD"),
     time: startDate.format("HH:mm"),
     endTime: endDate.format("HH:mm"),
@@ -32,10 +36,13 @@ export const Calendar = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [currentDate, setCurrentDate] = useState(dayjs());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedDateTime, setSelectedDateTime] = useState<{ date: Dayjs; time: Dayjs } | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const handleTaskClick = (task: Task) => {
-    console.log("Task clicked:", task);
+    setSelectedTask(task);
+    setIsViewModalOpen(true);
   };
 
   const handleTimeSlotClick = (date: Dayjs, time: string) => {
@@ -76,11 +83,8 @@ export const Calendar = () => {
 
 
 
-  const handleTaskCreated = (response: EventResponse | unknown) => {
-    const event = response as EventResponse;
-    const newTask = mapEventToTask(event);
-
-    setTasks([...tasks, newTask]);
+  const handleTaskCreated = () => {
+    fetchEvents();
     setIsModalOpen(false);
     setSelectedDateTime(null);
   };
@@ -97,21 +101,36 @@ export const Calendar = () => {
         />
 
         <Modal
-          title="Добавить задачу"
+          title={null}
           open={isModalOpen}
           onCancel={handleCancel}
           footer={null}
           width={600}
+          centered
+          className="task-details-modal"
         >
-          <AddTaskForm 
-            initialValues={selectedDateTime ? {
-              date: selectedDateTime.date,
-              time: selectedDateTime.time,
-            } : undefined}
-            onSuccess={handleTaskCreated}
-            isEvent={true}
-          />
+          <div className="task-details">
+            <div className="task-details__header-bg">
+              <h2 className="task-details__title">Добавить задачу</h2>
+            </div>
+            <div className="task-details__content">
+              <AddTaskForm 
+                initialValues={selectedDateTime ? {
+                  date: selectedDateTime.date,
+                  time: selectedDateTime.time,
+                } : undefined}
+                onSuccess={handleTaskCreated}
+                isEvent={true}
+              />
+            </div>
+          </div>
         </Modal>
+
+        <TaskDetailsModal
+          task={selectedTask}
+          isOpen={isViewModalOpen}
+          onClose={() => setIsViewModalOpen(false)}
+        />
       </div>
     </div>
   );

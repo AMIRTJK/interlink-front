@@ -49,7 +49,7 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
       <div className="task-card__title">{task.title}</div>
       {task.participants && task.participants.length > 0 && (
         <Avatar.Group 
-          maxCount={3} 
+          max={{ count: 3 }} 
           size="small"
           className="task-card__avatars"
         >
