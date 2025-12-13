@@ -9,11 +9,6 @@
   right: 24px;
 }
 
-.task-details__header-bg {
-  background: linear-gradient(to bottom, #f8f9fa, #ffffff);
-  border-bottom: 1px solid #f0f0f0;
-}
-
 .task-details__category-badge {
   display: inline-flex;
   align-items: center;

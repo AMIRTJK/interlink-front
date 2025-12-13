@@ -4,15 +4,15 @@ import type { Task } from "@features/tasks";
 import dayjs from "dayjs";
 import "./task-details-modal.css";
 
-interface TaskDetailsModalProps {
+interface IProps {
   task: Task | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const TaskDetailsModal = ({ task, isOpen, onClose }: TaskDetailsModalProps) => {
+export const TaskDetailsModal = ({ task, isOpen, onClose }: IProps) => {
   if (!task) return null;
-
+  
   return (
     <Modal
       open={isOpen}

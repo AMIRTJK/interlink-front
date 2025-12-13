@@ -42,7 +42,8 @@
 
 .weekly-calendar__time-column {
   width: 80px;
-  background: var(--color-bg-secondary);
+  /* background: var(--color-bg-secondary); */
+  background: #fff;
   flex-shrink: 0;
 }
 
@@ -82,7 +83,9 @@
 }
 
 .weekly-calendar__day-column--today {
-  background: rgba(108, 99, 255, 0.03);
+  background: rgba(108, 99, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .weekly-calendar__day-header {
