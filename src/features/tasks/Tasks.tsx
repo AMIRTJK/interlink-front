@@ -5,8 +5,10 @@ import { TasksTable, ITaskItem } from "@widgets/tasksTable";
 
 export const Tasks = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [taskStatus, setTaskStatus] = useState<string>();
 
-  const handleAddTask = () => {
+  const handleAddTask = (status: string) => {
+    setTaskStatus(status);
     setIsModalOpen(true);
   };
 
@@ -16,10 +18,7 @@ export const Tasks = () => {
 
   return (
     <div className="profile-page">
-      <TasksTable
-        onAddTask={handleAddTask}
-        onTaskClick={handleTaskClick}
-      />
+      <TasksTable onAddTask={handleAddTask} onTaskClick={handleTaskClick} />
       <Modal
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
@@ -27,7 +26,7 @@ export const Tasks = () => {
         title="Добавить задачу"
         destroyOnClose
       >
-        <AddTaskForm />
+        <AddTaskForm currentTaskStatus={taskStatus} />
       </Modal>
     </div>
   );

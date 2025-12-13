@@ -89,7 +89,7 @@ export const Profile = () => {
               <p>Номер телефона:</p>
               <p>ИНН:</p>
             </div>
-            <div className="space-y-2 font-medium text-black">
+            <div className="space-y-2 font-medium text-black text-right">
               <p>{userData?.organization_id}</p>
               <p>{userData?.position}</p>
               <p>{userData?.phone}</p>
