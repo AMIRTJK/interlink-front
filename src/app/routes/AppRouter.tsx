@@ -5,12 +5,11 @@ import { ProfilePage } from "@pages/profile/ProfilePage";
 import { TasksPage } from "@pages/profile/TasksPage";
 import { CalendarPage } from "@pages/profile/CalendarPage";
 import { AnalyticsPage } from "@pages/profile/AnalyticsPage";
-// import { Header } from "@widgets/layout/Header";
+import { ToastContainer } from "react-toastify";
 
 export const AppRouter = () => {
   return (
     <BrowserRouter>
-      {/* <Header /> */}
       <Routes>
         <Route path={`/${AppRoutes.LOGIN}`} element={<Auth />} />
         <Route path={`/${AppRoutes.PROFILE}`} element={<ProfilePage />}>
@@ -30,6 +29,18 @@ export const AppRouter = () => {
           element={<Navigate to={`/${AppRoutes.PROFILE}`} replace />}
         />
       </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </BrowserRouter>
   );
 };

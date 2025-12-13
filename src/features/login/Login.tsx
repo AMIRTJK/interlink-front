@@ -1,5 +1,4 @@
-import { Form, Input, Typography } from "antd";
-import { LockOutlined } from "@ant-design/icons";
+import { Form, Typography } from "antd";
 import { useNavigate } from "react-router-dom";
 import "../../app/styles/global.css";
 import { ApiRoutes } from "@shared/api";

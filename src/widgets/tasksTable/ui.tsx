@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { PlusOutlined, CheckOutlined } from '@ant-design/icons';
-import { Spin } from 'antd';
-import { _axios } from '@shared/api';
-import { ApiRoutes } from '@shared/api/api-routes';
-import { TASK_STATUS, TASK_STATUS_OPTIONS } from '@features/tasks/model';
-import type { ITaskItem, ITasksResponse } from './model';
-import './style.css';
+import { useState, useEffect } from "react";
+import { PlusOutlined, CheckOutlined } from "@ant-design/icons";
+import { Spin } from "antd";
+import { _axios } from "@shared/api";
+import { ApiRoutes } from "@shared/api/api-routes";
+import { TASK_STATUS, TASK_STATUS_OPTIONS } from "@features/tasks/model";
+import type { ITaskItem, ITasksResponse } from "./model";
+import "./style.css";
 
 interface TasksTableProps {
   onAddTask?: (status: string) => void;
@@ -16,7 +16,7 @@ const StatusIcon = ({ status }: { status: string }) => {
   if (status === TASK_STATUS.COMPLETED) {
     return (
       <span className={`status-icon ${status}`}>
-        <CheckOutlined style={{ fontSize: 12, color: 'white' }} />
+        <CheckOutlined style={{ fontSize: 12, color: "white" }} />
       </span>
     );
   }
@@ -24,16 +24,26 @@ const StatusIcon = ({ status }: { status: string }) => {
 };
 
 const formatDate = (dateString: string | null) => {
-  if (!dateString) return '';
+  if (!dateString) return "";
   const date = new Date(dateString);
   const day = date.getDate();
   const months = [
-    'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-    'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+    "января",
+    "февраля",
+    "марта",
+    "апреля",
+    "мая",
+    "июня",
+    "июля",
+    "августа",
+    "сентября",
+    "октября",
+    "ноября",
+    "декабря",
   ];
   const month = months[date.getMonth()];
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
   return `${day} ${month}, ${hours}:${minutes}`;
 };
 
@@ -49,14 +59,12 @@ const TaskCard = ({
       <div className="task-card-header">
         <span className={`task-status-indicator ${task.status}`}>
           {task.status === TASK_STATUS.COMPLETED && (
-            <CheckOutlined style={{ fontSize: 10, color: 'white' }} />
+            <CheckOutlined style={{ fontSize: 10, color: "white" }} />
           )}
         </span>
         <div className="task-card-content">
           <div className="task-title">{task.title}</div>
-          <div className="task-datetime">
-            {formatDate(task.created_at)}
-          </div>
+          <div className="task-datetime">{formatDate(task.created_at)}</div>
         </div>
       </div>
     </div>
@@ -76,7 +84,7 @@ const TasksColumn = ({
   onAddTask?: (status: string) => void;
   onTaskClick?: (task: ITaskItem) => void;
 }) => {
-  const columnTasks = tasks.filter(task => task.status === status);
+  const columnTasks = tasks.filter((task) => task.status === status);
 
   return (
     <div className="tasks-column">
@@ -95,7 +103,7 @@ const TasksColumn = ({
       </div>
       <div className="tasks-list">
         {columnTasks.length > 0 ? (
-          columnTasks.map(task => (
+          columnTasks.map((task) => (
             <TaskCard key={task.id} task={task} onClick={onTaskClick} />
           ))
         ) : (
@@ -106,10 +114,7 @@ const TasksColumn = ({
   );
 };
 
-export const TasksTable = ({
-  onAddTask,
-  onTaskClick,
-}: TasksTableProps) => {
+export const TasksTable = ({ onAddTask, onTaskClick }: TasksTableProps) => {
   const [tasks, setTasks] = useState<ITaskItem[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -137,8 +142,8 @@ export const TasksTable = ({
   }
 
   return (
-    <div className="tasks-table">
-      {TASK_STATUS_OPTIONS.map(option => (
+    <div className="flex flex-col lg:flex-row lg:flex-nowrap gap-4 overflow-x-auto p-2">
+      {TASK_STATUS_OPTIONS.map((option) => (
         <TasksColumn
           key={option.value}
           status={option.value}

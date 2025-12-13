@@ -9,6 +9,8 @@ import { ApiRoutes, _axios } from "@shared/api";
 import { IUser } from "@entities/login";
 import { useEffect, useState } from "react";
 
+import userAvatar from "../../assets/images/user-avatar.jpg";
+
 export const Profile = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,9 +25,12 @@ export const Profile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await _axios<{ data: IUser }>(`${ApiRoutes.FETCH_USER_BY_ID}${userId}`, {
-          method: "GET",
-        });
+        const response = await _axios<{ data: IUser }>(
+          `${ApiRoutes.FETCH_USER_BY_ID}${userId}`,
+          {
+            method: "GET",
+          }
+        );
         setUserData(response.data.data);
       } catch (err) {
         console.error("Ошибка при получении данных пользователя:", err);
@@ -55,48 +60,57 @@ export const Profile = () => {
 
   if (loading) {
     return (
-      <div className="profile__content flex justify-center items-center" style={{ height: "100%" }}>
+      <div
+        className="profile__content flex justify-center items-center"
+        style={{ height: "100%" }}
+      >
         <Spin size="large" />
       </div>
     );
   }
 
   return (
-    <div className="profile__content">
-      <div className="profile__left-content">
-        <div className="card">
-          <div className="profile-header">
-            <Avatar size={128} icon={<UserOutlined />} className="profile-avatar" />
+    <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6">
+      <div className="w-full lg:w-[28%]">
+        <div className="bg-white p-6 rounded-xl shadow">
+          <div className="flex flex-col items-center mb-4">
+            <Avatar
+              src={userAvatar}
+              size={128}
+              icon={<UserOutlined />}
+              className="profile-avatar"
+            />
           </div>
-          <p className="profile-title">{`${userData?.first_name} ${userData?.last_name}`}</p>
-          <div className="flex justify-between">
-            <div className="profile__info profile__left-info">
-              <p className="profile__info-item">Место работы:</p>
-              <p className="profile__info-item">Должность:</p>
-              <p className="profile__info-item">Номер телефона:</p>
-              <p className="profile__info-item">ИНН:</p>
+          <p className="text-center text-[#0037AF] text-xl font-semibold mb-6">{`${userData?.first_name} ${userData?.last_name}`}</p>
+          <div className="flex justify-between text-sm">
+            <div className="space-y-2 text-black font-light">
+              <p>Место работы:</p>
+              <p>Должность:</p>
+              <p>Номер телефона:</p>
+              <p>ИНН:</p>
             </div>
-            <div className="profile__info profile__right-info">
-              <p className="profile__info-item profile__info-item-value">{userData?.organization_id}</p>
-              <p className="profile__info-item profile__info-item-value">{userData?.position}</p>
-              <p className="profile__info-item profile__info-item-value">{userData?.phone}</p>
-              <p className="profile__info-item profile__info-item-value">{userData?.inn || "Отсутствует"}</p>
+            <div className="space-y-2 font-medium text-black">
+              <p>{userData?.organization_id}</p>
+              <p>{userData?.position}</p>
+              <p>{userData?.phone}</p>
+              <p>{userData?.inn || "12345678"}</p>
             </div>
           </div>
         </div>
       </div>
-
-      <div className="profile__right-content">
-        <div className="profile__right-nav">
+      <div className="w-full bg-white rounded-[15px] p-4 lg:w-[72%]">
+        <div className="border border-[#E5E9F5] rounded-xl mb-4">
           <Menu
             items={profileRightNav}
             mode="horizontal"
             theme={menuTheme}
             selectedKeys={[getCurrentTab()]}
             onClick={handleMenuClick}
+            className="custom-fixed-menu"
+            disabledOverflow
           />
         </div>
-        <div className="profile__right-body">
+        <div>
           <Outlet />
         </div>
       </div>
