@@ -5,6 +5,10 @@ import { ThemeProvider } from "../shared/lib/theme/ThemeProvider.js";
 import "./styles/global.css";
 import { queryClient } from "@shared/lib/queryClient.js";
 import { App } from "./App.js";
+import dayjs from "dayjs";
+import "dayjs/locale/ru";
+
+dayjs.locale("ru");
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

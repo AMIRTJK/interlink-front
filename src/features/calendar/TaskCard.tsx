@@ -22,7 +22,7 @@ const getCategoryColor = (category?: Task['category']) => {
 };
 
 export const TaskCard = ({ task, onClick }: TaskCardProps) => {
-  const borderColor = getCategoryColor(task.category);
+  const borderColor = task.color || getCategoryColor(task.category);
   
   return (
     <div 
