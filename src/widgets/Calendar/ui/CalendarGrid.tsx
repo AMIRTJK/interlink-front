@@ -1,9 +1,13 @@
+import { Popover, Button } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
+import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import type { Task } from "@features/tasks";
 import { TaskCard } from "@features/calendar";
 import { ViewMode } from "../model";
+import { calculateDayLayout } from "../lib";
 
-interface CalendarGridProps {
+interface IProps {
   daysToShow: Dayjs[];
   viewMode: ViewMode;
   tasks: Task[];
@@ -19,7 +23,9 @@ export const CalendarGrid = ({
   onTaskClick,
   onTimeSlotClick,
   isToday,
-}: CalendarGridProps) => {
+}: IProps) => {
+  const [openClusterId, setOpenClusterId] = useState<string | null>(null);
+
   const getTasksForDay = (day: Dayjs) => {
     return tasks.filter((task) => dayjs(task.date).isSame(day, "day"));
   };
@@ -79,29 +85,81 @@ export const CalendarGrid = ({
                   style={{ top: `${currentTimePosition * 60}px` }}
                 />
               )}
-              {getTasksForDay(day).map((task, index) => {
-                const taskHour = parseInt(task.time.split(":")[0]);
-                const taskMinute = parseInt(task.time.split(":")[1]);
-                const topPosition = (taskHour + taskMinute / 60) * 60;
+              {(() => {
+                const dayTasks = getTasksForDay(day);
+                const items = calculateDayLayout(dayTasks);
 
-                const leftOffset = Math.min(index * 15, 60);
-                const width = `calc(100% - ${leftOffset}px)`;
-
-                return (
-                  <div
-                    key={task.id}
-                    className="weekly-calendar__task-wrapper"
-                    style={{
-                      top: `${topPosition}px`,
-                      left: `${leftOffset}px`,
-                      width: width,
-                      zIndex: 10 + index,
-                    }}
-                  >
-                    <TaskCard task={task} onClick={() => onTaskClick?.(task)} />
-                  </div>
-                );
-              })}
+                return items.map((item, index) => {
+                  if (item.type === 'single') {
+                    return (
+                      <div
+                        key={item.event.id}
+                        className="weekly-calendar__task-wrapper"
+                        style={{
+                          top: `${item.top}px`,
+                          height: `${item.height}px`,
+                          left: `${item.left}%`,
+                          width: `${item.width}%`,
+                        }}
+                      >
+                        <TaskCard task={item.event} onClick={() => onTaskClick?.(item.event)} />
+                      </div>
+                    );
+                  } else {
+                    const mainEvent = item.events[0];
+                    const count = item.events.length;
+                    const clusterId = `${day.format('YYYY-MM-DD')}-cluster-${index}`;
+                    
+                    return (
+                      <Popover
+                        key={clusterId}
+                        placement="right"
+                        title={
+                          <div className="weekly-calendar__popover-title">
+                            <span>События</span>
+                            <Button 
+                              type="text" 
+                              size="small" 
+                              icon={<CloseOutlined />} 
+                              onClick={() => setOpenClusterId(null)}
+                            />
+                          </div>
+                        }
+                        trigger="click"
+                        open={openClusterId === clusterId}
+                        onOpenChange={(visible) => setOpenClusterId(visible ? clusterId : null)}
+                        content={
+                          <div className="weekly-calendar__popover-list">
+                            {item.events.map(event => (
+                              <div key={event.id} onClick={() => onTaskClick?.(event)}>
+                                <TaskCard task={event} />
+                              </div>
+                            ))}
+                          </div>
+                        }
+                      >
+                        <div
+                          className="weekly-calendar__task-wrapper"
+                          style={{
+                            top: `${item.top}px`,
+                            height: `${item.height}px`,
+                            left: `${item.left}%`,
+                            width: `${item.width}%`,
+                            zIndex: 20
+                          }}
+                        >
+                          <div className="weekly-calendar__cluster-wrapper">
+                            <TaskCard task={mainEvent} />
+                            <div className="weekly-calendar__cluster-badge">
+                              +{count}
+                            </div>
+                          </div>
+                        </div>
+                      </Popover>
+                    );
+                  }
+                });
+              })()}
             </div>
           </div>
         ))}
