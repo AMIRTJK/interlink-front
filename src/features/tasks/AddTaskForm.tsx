@@ -39,7 +39,6 @@ export const AddTaskForm = ({
 }: IProps) => {
   const [form] = Form.useForm<TaskFormValues>();
 
-  // Определяем объединенные начальные значения
   const combinedInitialValues: Partial<TaskFormValues> = {
     ...initialValues,
     status:
@@ -60,12 +59,13 @@ export const AddTaskForm = ({
       error: isEvent
         ? "Ошибка при добавлении события"
         : "Ошибка при добавлении задачи",
-      invalidate: [ApiRoutes.GET_TASKS],
       onSuccessCb: (data) => {
         if (isEvent && onSuccess) {
           onSuccess(data as EventResponse);
         }
+        
       },
+      invalidate: [ApiRoutes.GET_TASKS],
     },
   });
 

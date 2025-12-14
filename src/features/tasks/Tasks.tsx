@@ -26,7 +26,10 @@ export const Tasks = () => {
         title="Добавить задачу"
         destroyOnClose
       >
-        <AddTaskForm currentTaskStatus={taskStatus} />
+        <AddTaskForm 
+          currentTaskStatus={taskStatus} 
+          onSuccess={() => setIsModalOpen(false)}
+        />
       </Modal>
     </div>
   );
