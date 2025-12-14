@@ -1,149 +1,156 @@
 .tasks-table {
-  display: flex;
-  gap: 24px;
-  /* min-height: calc(100vh - 200px); */
-  overflow-x: auto;
+	display: flex;
+	gap: 24px;
+	/* min-height: calc(100vh - 200px); */
+	overflow-x: auto;
 }
 
 .tasks-column {
-  flex: 1 1 0;
+	flex: 1 1 0;
 
-  background: var(--color-bg-card-task);
-  border-radius: 16px;
-  padding: 8px;
-  border: 1px solid var(--color-border);
+	background: var(--color-bg-card-task);
+	border-radius: 16px;
+	padding: 8px;
+	border: 1px solid var(--color-border);
 
-  display: flex;
-  flex-direction: column;
+	display: flex;
+	flex-direction: column;
 }
 
 .tasks-column-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  padding-left: 16px;
-  padding-right: 16px;
-  border-bottom: 1px solid var(--color-border);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 20px;
+	padding-bottom: 16px;
+	padding-left: 16px;
+	padding-right: 16px;
+	border-bottom: 1px solid var(--color-border);
 }
 
 .tasks-column-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-text-primary);
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--color-text-primary);
 }
 
 .tasks-column-title .status-icon {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .status-icon.pending {
-  border: 2px solid #8b8b8b;
-  background: transparent;
+	border: 2px solid #8b8b8b;
+	background: transparent;
 }
 
 .status-icon.in_progress {
-  background: linear-gradient(135deg, #ffc107, #ff9800);
+	background: linear-gradient(135deg, #ffc107, #ff9800);
 }
 
 .status-icon.completed {
-  background: linear-gradient(135deg, #4caf50, #45a049);
+	background: linear-gradient(135deg, #4caf50, #45a049);
 }
 
 .add-task-btn:hover {
-  background: var(--color-primary);
-  color: white;
+	background: var(--color-primary);
+	color: white;
 }
 
 .tasks-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
 }
 
 .task-card-task {
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  border: 1px solid var(--color-border);
-  cursor: pointer;
-  transition: all 0.2s ease;
+	background: white;
+	border-radius: 12px;
+	padding: 16px;
+	border: 1px solid var(--color-border);
+	cursor: pointer;
+	transition: all 0.2s ease;
 }
 
 .task-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .task-card-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
 }
 
 .task-status-indicator {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-top: 2px;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	flex-shrink: 0;
+	margin-top: 2px;
 }
 
 .task-status-indicator.pending {
-  border: 2px solid #8b8b8b;
-  background: transparent;
+	border: 2px solid #8b8b8b;
+	background: transparent;
 }
 
 .task-status-indicator.in_progress {
-  background: linear-gradient(135deg, #ffc107, #ff9800);
+	background: linear-gradient(135deg, #ffc107, #ff9800);
 }
 
 .task-status-indicator.completed {
-  background: linear-gradient(135deg, #4caf50, #45a049);
+	background: linear-gradient(135deg, #4caf50, #45a049);
 }
 
 .task-card-content {
-  flex: 1;
+	flex: 1;
 }
 
 .task-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  margin-bottom: 6px;
-  line-height: 1.4;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color-text-primary);
+	margin-bottom: 6px;
+	line-height: 1.4;
+}
+
+.task-desc {
+	font-size: 12px;
+	color: var(--color-text-secondary);
+	margin-bottom: 4px;
+	line-height: 1.4;
 }
 
 .task-datetime {
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  opacity: 0.8;
+	font-size: 12px;
+	color: var(--color-text-secondary);
+	opacity: 0.8;
 }
 
 .empty-column {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--color-text-secondary);
-  opacity: 0.6;
-  font-size: 14px;
+	text-align: center;
+	padding: 40px 20px;
+	color: var(--color-text-secondary);
+	opacity: 0.6;
+	font-size: 14px;
 }
 
 .tasks-table-loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 200px);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: calc(100vh - 200px);
 }
 
 .status-icon-svg {
-  margin-top: 2px;
+	margin-top: 2px;
 }
