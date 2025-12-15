@@ -1,12 +1,10 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 import { TASK_STATUS } from "@features/tasks/model";
-import { ITaskItem } from "./model";
-
+import { ITaskItem, months } from "./model";
 import PendingIcon from "../../assets/icons/pending-icon.svg";
 import InProgressIcon from "../../assets/icons/in-progress-icon.svg";
 import CompletedIcon from "../../assets/icons/completed-icon.svg";
-
 export const StatusIcon = ({
 	status,
 	className,
@@ -15,7 +13,6 @@ export const StatusIcon = ({
 	className?: string;
 }) => {
 	const iconSize = 16;
-
 	switch (status) {
 		case TASK_STATUS.COMPLETED:
 			return (
@@ -54,20 +51,6 @@ export const formatDate = (dateString: string | null) => {
 	if (!dateString) return "";
 	const date = new Date(dateString);
 	const day = date.getDate();
-	const months = [
-		"января",
-		"февраля",
-		"марта",
-		"апреля",
-		"мая",
-		"июня",
-		"июля",
-		"августа",
-		"сентября",
-		"октября",
-		"ноября",
-		"декабря",
-	];
 	const month = months[date.getMonth()];
 	const hours = date.getHours().toString().padStart(2, "0");
 	const minutes = date.getMinutes().toString().padStart(2, "0");
