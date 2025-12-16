@@ -1,35 +1,38 @@
 .weekly-calendar {
   background: var(--color-bg-primary);
   border-radius: 12px;
-  padding: 20px;
 }
 
 .weekly-calendar__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
   flex-wrap: wrap;
   gap: 16px;
+  height: 42px;
+  padding: 0 29px;
 }
 
 .weekly-calendar__nav {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 19px;
 }
 
 .weekly-calendar__date-range {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  min-width: 200px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7a99;
   text-align: center;
+  min-width: 132px;
 }
 
 .weekly-calendar__view-switcher {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  border: 2px solid #f5f6f7;
+  height: 100%;
 }
 
 .weekly-calendar__grid {
@@ -60,11 +63,12 @@
 .weekly-calendar__time-slot {
   height: 60px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   padding-top: 4px;
-  font-size: 11px;
-  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7a99;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -87,6 +91,10 @@
   -webkit-backdrop-filter: blur(10px);
 }
 
+.weekly-calendar__day-column--today .weekly-calendar__day-name {
+  font-weight: 700;
+}
+
 .weekly-calendar__day-header {
   height: 60px;
   display: flex;
@@ -100,9 +108,9 @@
 }
 
 .weekly-calendar__day-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7a99;
   text-transform: capitalize;
 }
 
@@ -155,26 +163,21 @@
   right: 4px;
   z-index: 2;
   transition: z-index 0s;
+  transition: all 0.2s ease;
 }
 
 .weekly-calendar__task-wrapper:hover {
   z-index: 800 !important;
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .task-card {
-  background: var(--color-bg-secondary);
   border-radius: 8px;
   padding: 10px;
-  border-left: 4px solid #6c63ff;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   margin-bottom: 4px;
-}
-
-.task-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .task-card__header {
@@ -195,9 +198,9 @@
 }
 
 .task-card__title {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: #4d5e80;
   margin-bottom: 8px;
   line-height: 1.4;
   overflow: hidden;
@@ -217,17 +220,8 @@
     padding: 12px;
   }
 
-  .weekly-calendar__header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .weekly-calendar__date-range {
     font-size: 14px;
-  }
-
-  .weekly-calendar__view-switcher {
-    justify-content: center;
   }
 
   .weekly-calendar__day-column {
@@ -290,6 +284,6 @@
   font-size: 11px;
   font-weight: bold;
   border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 100;
 }

@@ -1,5 +1,5 @@
 import { Popover, Button } from "antd";
-import { CloseOutlined } from "@ant-design/icons";
+import { CloseOutlined, HistoryOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import type { Task } from "@features/tasks";
@@ -50,7 +50,17 @@ export const CalendarGrid = ({
   return (
     <div className="weekly-calendar__grid">
       <div className="weekly-calendar__time-column">
-        <div className="weekly-calendar__time-header">Сейчас</div>
+        <div className="weekly-calendar__time-header">
+          {" "}
+          <Button
+            type="text"
+            shape="circle"
+            style={{ width: 40, height: 40, padding: 0 }}
+            icon={
+              <HistoryOutlined style={{ fontSize: 20, color: "#C3CAD9" }} />
+            }
+          />
+        </div>
         {Array.from({ length: 24 }, (_, i) => (
           <div key={i} className="weekly-calendar__time-slot">
             {i.toString().padStart(2, "0")}
@@ -89,27 +99,36 @@ export const CalendarGrid = ({
                 const dayTasks = getTasksForDay(day);
                 const items = calculateDayLayout(dayTasks);
 
+                console.log(items);
+
                 return items.map((item, index) => {
-                  if (item.type === 'single') {
+                  if (item.type === "single") {
+                    const color = item.event.color;
                     return (
                       <div
                         key={item.event.id}
                         className="weekly-calendar__task-wrapper"
                         style={{
                           top: `${item.top}px`,
-                          height: `${item.height}px`,
+                          // height: `${item.height}px`,
                           left: `${item.left}%`,
                           width: `${item.width}%`,
+                          border: `2px solid  ${color ? color : "#6c7c96"}`,
+                          borderRadius: "5px",
+                          backgroundColor: `${color}26`,
                         }}
                       >
-                        <TaskCard task={item.event} onClick={() => onTaskClick?.(item.event)} />
+                        <TaskCard
+                          task={item.event}
+                          onClick={() => onTaskClick?.(item.event)}
+                        />
                       </div>
                     );
                   } else {
                     const mainEvent = item.events[0];
                     const count = item.events.length;
-                    const clusterId = `${day.format('YYYY-MM-DD')}-cluster-${index}`;
-                    
+                    const clusterId = `${day.format("YYYY-MM-DD")}-cluster-${index}`;
+
                     return (
                       <Popover
                         key={clusterId}
@@ -117,21 +136,26 @@ export const CalendarGrid = ({
                         title={
                           <div className="weekly-calendar__popover-title">
                             <span>События</span>
-                            <Button 
-                              type="text" 
-                              size="small" 
-                              icon={<CloseOutlined />} 
+                            <Button
+                              type="text"
+                              size="small"
+                              icon={<CloseOutlined />}
                               onClick={() => setOpenClusterId(null)}
                             />
                           </div>
                         }
                         trigger="click"
                         open={openClusterId === clusterId}
-                        onOpenChange={(visible) => setOpenClusterId(visible ? clusterId : null)}
+                        onOpenChange={(visible) =>
+                          setOpenClusterId(visible ? clusterId : null)
+                        }
                         content={
                           <div className="weekly-calendar__popover-list">
-                            {item.events.map(event => (
-                              <div key={event.id} onClick={() => onTaskClick?.(event)}>
+                            {item.events.map((event) => (
+                              <div
+                                key={event.id}
+                                onClick={() => onTaskClick?.(event)}
+                              >
                                 <TaskCard task={event} />
                               </div>
                             ))}
@@ -145,10 +169,17 @@ export const CalendarGrid = ({
                             height: `${item.height}px`,
                             left: `${item.left}%`,
                             width: `${item.width}%`,
-                            zIndex: 20
+                            zIndex: 20,
                           }}
                         >
-                          <div className="weekly-calendar__cluster-wrapper">
+                          <div
+                            className="weekly-calendar__cluster-wrapper"
+                            style={{
+                              border: `2px solid  ${mainEvent.color ? mainEvent.color : "#6c7c96"}`,
+                              borderRadius: "5px",
+                              backgroundColor: `${mainEvent.color}26`,
+                            }}
+                          >
                             <TaskCard task={mainEvent} />
                             <div className="weekly-calendar__cluster-badge">
                               +{count}
