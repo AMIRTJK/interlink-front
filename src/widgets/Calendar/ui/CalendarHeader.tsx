@@ -48,21 +48,21 @@ export const CalendarHeader = ({
       </div>
       <div className="weekly-calendar__view-switcher">
         <ButtonAntd
-          className={`h-full! ${viewMode === "week" ? "text-[#6B7A99]!" : "text-[#ADB8CC]!"}`}
+          className={`h-10! ${viewMode === "week" ? "text-[#6B7A99]!" : "text-[#ADB8CC]!"}`}
           type="text"
           onClick={() => setViewMode("week")}
         >
           Неделя
         </ButtonAntd>
         <ButtonAntd
-          className={`h-full! ${viewMode === "month" ? "text-[#6B7A99]!" : "text-[#ADB8CC]!"}`}
+          className={`h-10! ${viewMode === "month" ? "text-[#6B7A99]!" : "text-[#ADB8CC]!"}`}
           type="text"
           onClick={() => setViewMode("month")}
         >
           Месяц
         </ButtonAntd>
         <ButtonAntd
-          className={`h-full! ${viewMode === "day" ? "text-[#6B7A99]!" : "text-[#ADB8CC]!"}`}
+          className={`h-10! ${viewMode === "day" ? "text-[#6B7A99]!" : "text-[#ADB8CC]!"}`}
           type="text"
           onClick={() => setViewMode("day")}
         >
