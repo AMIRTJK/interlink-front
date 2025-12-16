@@ -71,7 +71,7 @@ export const Profile = () => {
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6">
-      <div className="w-full lg:w-[28%]">
+      <aside className="w-full lg:w-[28%]">
         <div className="bg-white p-6 rounded-xl shadow">
           <div className="flex flex-col items-center mb-4">
             <Avatar
@@ -97,9 +97,9 @@ export const Profile = () => {
             </div>
           </div>
         </div>
-      </div>
-      <div className="w-full bg-white rounded-[15px] p-4 lg:w-[72%]">
-        <div className="border border-[#E5E9F5] rounded-xl mb-4">
+      </aside>
+      <aside className="w-full bg-white rounded-[15px] p-4 lg:w-[72%]">
+        <div className="border border-[#E5E9F5] rounded-xl mb-[45px]">
           <Menu
             items={profileRightNav}
             mode="horizontal"
@@ -113,7 +113,7 @@ export const Profile = () => {
         <div>
           <Outlet />
         </div>
-      </div>
+      </aside>
     </div>
   );
 };

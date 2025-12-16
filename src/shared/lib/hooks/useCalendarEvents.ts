@@ -37,10 +37,7 @@ export const useCalendarEvents = () => {
         .startOf("month")
         .subtract(7, "day")
         .format("YYYY-MM-DD");
-      const to = currentDate
-        .endOf("month")
-        .add(7, "day")
-        .format("YYYY-MM-DD");
+      const to = currentDate.endOf("month").add(7, "day").format("YYYY-MM-DD");
 
       const response = await _axios.get<{ data: EventResponse[] }>(
         ApiRoutes.GET_EVENTS,
@@ -48,6 +45,7 @@ export const useCalendarEvents = () => {
           params: { from, to },
         }
       );
+
       const mappedTasks = response.data.data.map(mapEventToTask);
       setTasks(mappedTasks);
     } catch (error) {

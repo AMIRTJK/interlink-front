@@ -1,14 +1,13 @@
 /* Profile nav */
-.ant-menu-css-var{
-  background:transparent;
+.ant-menu-css-var {
+  background: transparent;
 }
-
 
 .profile-page {
   min-height: 400px;
 }
 
-.ant-menu-item-selected{
+.ant-menu-item-selected {
   transition: all 0.2s ease;
   min-width: 231px;
   text-align: center;
@@ -20,13 +19,6 @@
   font-weight: 600;
   margin-bottom: 24px;
   color: var(--color-text-primary);
-}
-
-
-.calendar-page-container {
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
 }
 
 .calendar-container {
@@ -42,7 +34,6 @@
 .calendar-widget .ant-picker-calendar-header {
   padding: 12px;
 }
-
 
 .analytics-container {
   width: 100%;

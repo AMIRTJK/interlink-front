@@ -8,11 +8,15 @@ import dayjs, { Dayjs } from "dayjs";
 import "@features/calendar/task-details-modal.css";
 
 export const Calendar = () => {
-  const { tasks, currentDate, setCurrentDate, fetchEvents } = useCalendarEvents();
+  const { tasks, currentDate, setCurrentDate, fetchEvents } =
+    useCalendarEvents();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedDateTime, setSelectedDateTime] = useState<{ date: Dayjs; time: Dayjs } | null>(null);
+  const [selectedDateTime, setSelectedDateTime] = useState<{
+    date: Dayjs;
+    time: Dayjs;
+  } | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const handleTaskClick = (task: Task) => {
@@ -21,9 +25,9 @@ export const Calendar = () => {
   };
 
   const handleTimeSlotClick = (date: Dayjs, time: string) => {
-    const [hours, minutes] = time.split(':');
+    const [hours, minutes] = time.split(":");
     const timeObj = dayjs().hour(parseInt(hours)).minute(parseInt(minutes));
-    
+
     setSelectedDateTime({
       date: date,
       time: timeObj,
@@ -44,28 +48,26 @@ export const Calendar = () => {
 
   return (
     <div className="profile-page">
-      <div className="calendar-page-container">
-        <WeeklyCalendar 
-          tasks={tasks} 
-          currentDate={currentDate}
-          onDateChange={setCurrentDate}
-          onTaskClick={handleTaskClick}
-          onTimeSlotClick={handleTimeSlotClick}
-        />
+      <WeeklyCalendar
+        tasks={tasks}
+        currentDate={currentDate}
+        onDateChange={setCurrentDate}
+        onTaskClick={handleTaskClick}
+        onTimeSlotClick={handleTimeSlotClick}
+      />
 
-        <CreateTaskModal
-          isOpen={isModalOpen}
-          onClose={handleCancelCreate}
-          selectedDateTime={selectedDateTime}
-          onSuccess={handleTaskCreated}
-        />
+      <CreateTaskModal
+        isOpen={isModalOpen}
+        onClose={handleCancelCreate}
+        selectedDateTime={selectedDateTime}
+        onSuccess={handleTaskCreated}
+      />
 
-        <TaskDetailsModal
-          task={selectedTask}
-          isOpen={isViewModalOpen}
-          onClose={() => setIsViewModalOpen(false)}
-        />
-      </div>
+      <TaskDetailsModal
+        task={selectedTask}
+        isOpen={isViewModalOpen}
+        onClose={() => setIsViewModalOpen(false)}
+      />
     </div>
   );
 };
