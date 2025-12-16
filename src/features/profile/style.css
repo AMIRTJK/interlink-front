@@ -99,6 +99,7 @@
 .custom-fixed-menu .ant-menu-item {
   background-color: transparent !important;
   color: #0037af !important;
+  transition: all 0.3s ease !important;
 }
 
 .custom-fixed-menu .ant-menu-item-selected {
