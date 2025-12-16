@@ -29,3 +29,36 @@
 .login-header {
   text-align: center;
 }
+
+.ant-input-group-wrapper.h-14 {
+  height: 56px;
+  background-color: white !important;
+  border: 1px solid #d9d9d9;
+  border-radius: 15px !important;
+  overflow: hidden;
+  display: block;
+}
+
+.ant-input-group-wrapper.h-14 .ant-input-wrapper,
+.ant-input-group-wrapper.h-14 .ant-input-group-addon,
+.ant-input-group-wrapper.h-14 .ant-input {
+  height: 100% !important;
+}
+
+.ant-input-group-wrapper.h-14 .ant-input,
+.ant-input-group-wrapper.h-14 .ant-input-group-addon {
+  border: none !important;
+  background-color: transparent !important;
+}
+
+.ant-input-group-wrapper.h-14 .ant-input {
+  padding-top: 0;
+  padding-bottom: 0;
+  background-color: transparent !important;
+}
+
+/* Фокус */
+.ant-input-group-wrapper.h-14:focus-within {
+  border-color: #40a9ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}

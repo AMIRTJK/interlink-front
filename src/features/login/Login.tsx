@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import "../../app/styles/global.css";
 import { ApiRoutes } from "@shared/api";
 import {
-  // phoneNumberRules,
-  // requiredRule,
+  phoneNumberRules,
+  requiredRule,
   tokenControl,
   useMutationQuery,
 } from "@shared/lib";
@@ -13,18 +13,15 @@ const { Link } = Typography;
 import "./Login.css";
 import { AppRoutes } from "@shared/config";
 import { Button, TextField } from "@shared/ui";
+import { selectBefore } from "./lib";
+import { useEffect, useState } from "react";
 
 export const Login = () => {
   const navigate = useNavigate();
 
   const [form] = Form.useForm();
-
-  // const onFinish = (values: { phoneNumber: string; password: string }) => {
-  //   console.log("Login values:", values);
-  //   if (values.phoneNumber === "km" || values.phoneNumber === "am") {
-  //     navigate(AppRoutes.PROFILE);
-  //   }
-  // };
+  const [submittable, setSubmittable] = useState<boolean>(false);
+  const values = Form.useWatch([], form);
 
   const { mutate, isPending } = useMutationQuery<ILoginRequest, ILoginResponse>(
     {
@@ -41,9 +38,21 @@ export const Login = () => {
       },
     }
   );
-  const handleSubmit = (data: { phone: string; password: string }) => {
-    mutate({ phone: `+992${data.phone}`, password: data.password });
+  const handleSubmit = (data: {
+    prefix: string;
+    phone: string;
+    password: string;
+  }) => {
+    const fullPhone = `${data.prefix}${data.phone}`;
+    mutate({ phone: fullPhone, password: data.password });
   };
+
+  useEffect(() => {
+    form
+      .validateFields({ validateOnly: true })
+      .then(() => setSubmittable(true))
+      .catch(() => setSubmittable(false));
+  }, [values, form]);
 
   return (
     <div className="login-card">
@@ -61,16 +70,16 @@ export const Login = () => {
         <TextField
           label=""
           name="phone"
-          // rules={[phoneNumberRules]}
-          className="h-14 rounded-[15px]! px-4!"
+          rules={[phoneNumberRules]}
+          className="h-14 rounded-[15px]! "
           customClass="mb-[8px]!"
-          placeholder="+992"
+          addonBefore={selectBefore}
         />
         <TextField
           type="password"
           label=""
           name="password"
-          // rules={[requiredRule]}
+          rules={[requiredRule]}
           className="h-14 rounded-[15px]! px-4!"
           placeholder="Пароль"
           customClass="big-icon mb-[8px]!"
@@ -98,11 +107,12 @@ export const Login = () => {
             className="bg-[#0037AF]! w-full h-14! rounded-[15px]!"
           />
           <Button
-            text="Регистрация"
+            text="Войти"
             loading={isPending}
             type="primary"
             htmlType="submit"
-            className="bg-[#0037AF]! w-full h-14! rounded-[15px]!"
+            className={`${!submittable ? "text-white! border-none!" : ""} bg-[#0037AF]! w-full h-14! rounded-[15px]!`}
+            disabled={!submittable}
           />
         </div>
       </Form>

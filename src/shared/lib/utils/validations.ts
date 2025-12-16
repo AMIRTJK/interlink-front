@@ -15,8 +15,6 @@ export const requiredRule: { [key: string]: string | boolean } = {
   message: "Поле обязательно",
 };
 
-export const generalRules = [{ required: true, message: "Обязательное поле" }];
-
 export const emailRules = [
   {
     validator(_: unknown, value: string) {
