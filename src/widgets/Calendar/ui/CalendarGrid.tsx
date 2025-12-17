@@ -27,8 +27,12 @@ export const CalendarGrid = ({
   const [openClusterId, setOpenClusterId] = useState<string | null>(null);
 
   const getTasksForDay = (day: Dayjs) => {
-    return tasks.filter((task) => dayjs(task.date).isSame(day, "day"));
+    const targetDate = day.format("YYYY-MM-DD");
+    return tasks.filter((task) => {
+      return task.date === targetDate;
+    });
   };
+  console.log("TASK: ", tasks);
 
   const getCurrentTimePosition = () => {
     const now = dayjs();
@@ -75,7 +79,6 @@ export const CalendarGrid = ({
               isToday(day) ? "weekly-calendar__day-column--today" : ""
             }`}
           >
-            
             <div className="weekly-calendar__day-header">
               <div className="weekly-calendar__day-name">
                 {day.format("dddd DD")}

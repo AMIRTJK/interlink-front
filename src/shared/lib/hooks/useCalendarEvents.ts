@@ -5,16 +5,21 @@ import { toast } from "react-toastify";
 import type { Task, EventResponse } from "@features/tasks";
 
 const mapEventToTask = (event: EventResponse): Task => {
-  const startDate = dayjs(event.start_at);
-  const endDate = dayjs(event.end_at);
+  const datePart = event.start_at.split("T")[0];
+
+  const timePart = event.start_at.split("T")[1].substring(0, 5);
+
+  const endTimePart = event.end_at
+    ? event.end_at.split("T")[1].substring(0, 5)
+    : undefined;
 
   return {
     id: String(event.id),
     title: event.title,
     description: event.description,
-    date: startDate.format("YYYY-MM-DD"),
-    time: startDate.format("HH:mm"),
-    endTime: endDate.format("HH:mm"),
+    date: datePart,
+    time: timePart,
+    endTime: endTimePart,
     category: "work",
     color: event.color,
     participants: event.participants.map((p) => ({
