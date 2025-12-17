@@ -81,3 +81,14 @@ export interface TaskFormValues {
   color?: string;
   endTime?: Dayjs;
 }
+
+ export const colors = [
+    { name: "Желтый", value: "#FFCB33" },
+    { name: "Зеленный", value: "#29CC39" },
+    { name: "Оранжевый", value: "#FF6633" },
+    { name: "Бронзовый", value: "#CC7429" },
+    { name: "Пурпурный", value: "#8833FF" },
+    { name: "Бирюзово-синий", value: "#33BFFF" },
+    { name: "Розовый", value: "#E62E7B" },
+    { name: "Тиффани", value: "#2EE6CA" },
+  ];

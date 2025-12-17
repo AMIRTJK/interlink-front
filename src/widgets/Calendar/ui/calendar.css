@@ -139,7 +139,7 @@
 
 .weekly-calendar__day-content {
   position: relative;
-  min-height: 1440px;
+  /* min-height: 1440px; */
 }
 
 .weekly-calendar__hour-line {
