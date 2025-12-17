@@ -3,7 +3,7 @@ import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api/api-routes";
 import { TASK_STATUS_OPTIONS } from "@features/tasks/model";
 import type { ITaskItem, ITasksResponse } from "./model";
-import { TasksColumn } from "./lib";
+import { TasksColumn } from "./ui/TasksColumn";
 import "./style.css";
 
 interface TasksTableProps {

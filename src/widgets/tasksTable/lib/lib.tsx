@@ -1,7 +1,8 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Button } from "antd";
+import { Button, Pagination } from "antd";
+import { useState } from "react";
 import { TASK_STATUS } from "@features/tasks/model";
-import { ITaskItem, months } from "./model";
+import { ITaskItem, months } from "../model";
 import PendingIcon from "../../assets/icons/pending-icon.svg";
 import InProgressIcon from "../../assets/icons/in-progress-icon.svg";
 import CompletedIcon from "../../assets/icons/completed-icon.svg";
@@ -50,27 +51,25 @@ const getTaskProgressColor = (
   startedAt: string | null,
   plannedAt: string | null
 ): string => {
-  if (!startedAt || !plannedAt) return "#E5E7EB"; // Дефолтный серый (если даты не заданы)
+  if (!startedAt || !plannedAt) return "#E5E7EB";
 
   const start = new Date(startedAt).getTime();
   const end = new Date(plannedAt).getTime();
   const now = new Date().getTime();
 
   // Если время еще не пришло или даты некорректны
-  if (now <= start) return "#E5E7EB"; // Серый
+  if (now <= start) return "#E5E7EB";
 
-  // Если срок уже вышел или наступил
-  if (now >= end) return "#E12B2B"; // Красный
+  if (now >= end) return "#E12B2B";
 
   // Вычисляем середину срока
   const midPoint = start + (end - start) / 2;
 
-  // Если текущее время перевалило за середину
   if (now >= midPoint) {
-    return "#FFAC33"; // Оранжевый
+    return "#FFAC33";
   }
 
-  return "#E5E7EB"; // Серый (до середины срока)
+  return "#E5E7EB";
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -91,7 +90,6 @@ export const TaskCard = ({
   task: ITaskItem;
   onClick?: (task: ITaskItem) => void;
 }) => {
-  console.log(task);
 
   const borderColor = getTaskProgressColor(task.started_at, task.planned_at);
   return (
@@ -127,7 +125,13 @@ export const TasksColumn = ({
   onAddTask?: (status: string) => void;
   onTaskClick?: (task: ITaskItem) => void;
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 3;
+
   const columnTasks = tasks.filter((task) => task.status === status);
+  
+  const startIndex = (currentPage - 1) * pageSize;
+  const currentTasks = columnTasks.slice(startIndex, startIndex + pageSize);
 
   return (
     <div className="tasks-column">
@@ -146,14 +150,26 @@ export const TasksColumn = ({
         />
       </div>
       <div className="tasks-list">
-        {columnTasks.length > 0 ? (
-          columnTasks.map((task) => (
+        {currentTasks.length > 0 ? (
+          currentTasks.map((task) => (
             <TaskCard key={task.id} task={task} onClick={onTaskClick} />
           ))
         ) : (
           <div className="empty-column">Нет задач</div>
         )}
       </div>
+      {columnTasks.length > pageSize && (
+        <div className="flex justify-center p-2">
+          <Pagination
+            simple
+            current={currentPage}
+            onChange={setCurrentPage}
+            total={columnTasks.length}
+            pageSize={pageSize}
+            size="small"
+          />
+        </div>
+      )}
     </div>
   );
 };
