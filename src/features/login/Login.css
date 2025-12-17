@@ -62,3 +62,8 @@
   border-color: #40a9ff;
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
+
+.ant-select-content-value span {
+  color: #abacaf; /* Замените на нужный вам цвет */
+  font-size: 16px;
+}

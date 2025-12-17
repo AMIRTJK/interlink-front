@@ -15,6 +15,8 @@ import { AppRoutes } from "@shared/config";
 import { Button, TextField } from "@shared/ui";
 import { selectBefore } from "./lib";
 import { useEffect, useState } from "react";
+import PasswordIcon from "../../assets/icons/password-icon.svg";
+import { EyeInvisibleOutlined } from "@ant-design/icons";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -83,6 +85,9 @@ export const Login = () => {
           className="h-14 rounded-[15px]! px-4!"
           placeholder="Пароль"
           customClass="big-icon mb-[8px]!"
+          iconRender={(visible) =>
+            visible ? <img src={PasswordIcon} /> : <EyeInvisibleOutlined />
+          }
         />
         <div className="flex justify-between mb-2">
           <Link

@@ -19,6 +19,7 @@ interface IProps {
   onChange?: (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
+  iconRender?: (visible: boolean) => ReactNode;
 }
 
 const { Item } = Form;
@@ -30,6 +31,7 @@ export const TextField = ({
   placeholder,
   customClass,
   type,
+  iconRender,
   ...props
 }: IProps) => {
   const InputComponent = type === "password" ? Input.Password : Input;
@@ -46,6 +48,7 @@ export const TextField = ({
       <InputComponent
         placeholder={placeholder}
         autoComplete="new-password"
+        iconRender={iconRender}
         {...props}
       />
     </Item>
