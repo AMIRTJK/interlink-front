@@ -1,0 +1,143 @@
+import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { Form } from "antd";
+import {
+  type CreateEventPayload,
+  type CreateTaskPayload,
+  type TaskFormValues,
+  type EventResponse,
+  colors,
+} from "../model";
+import { useMutationQuery } from "@shared/lib";
+import { ApiRoutes } from "@shared/api";
+import { RenderFields } from "../lib/renderFields";
+import '../style.css'
+interface IProps {
+  initialValues?: Partial<TaskFormValues>;
+  onSuccess?: (
+    values: CreateTaskPayload | CreateEventPayload | EventResponse
+  ) => void;
+  isEvent?: boolean;
+  currentTaskStatus?: string;
+}
+
+export const AddTaskForm = ({
+  initialValues,
+  onSuccess,
+  isEvent,
+  currentTaskStatus,
+}: IProps) => {
+  const [form] = Form.useForm<TaskFormValues>();
+
+  const combinedInitialValues: Partial<TaskFormValues> = {
+    ...initialValues,
+    status:
+      !isEvent && currentTaskStatus ? currentTaskStatus : initialValues?.status,
+  };
+
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue(initialValues);
+    }
+  }, [initialValues, form]);
+
+  const { mutate: addTaskMutate } = useMutationQuery({
+    method: "POST",
+    url: isEvent ? ApiRoutes.ADD_EVENT : ApiRoutes.ADD_TASK,
+    messages: {
+      success: isEvent ? "Событие добавлено!" : "Задача добавлена!",
+      error: isEvent
+        ? "Ошибка при добавлении события"
+        : "Ошибка при добавлении задачи",
+      onSuccessCb: (data) => {
+        if (isEvent && onSuccess) {
+          onSuccess(data as EventResponse);
+        }
+      },
+      invalidate: [ApiRoutes.GET_TASKS],
+    },
+  });
+
+  const onFinish = (values: TaskFormValues) => {
+    if (isEvent) {
+      const dateStr = values.date?.format("YYYY-MM-DD");
+      const timeStr = values.time?.format("HH:mm");
+      const startDateTime = dayjs(`${dateStr} ${timeStr}`);
+
+      let endDateTime;
+      if (values.endTime) {
+        const endTimeStr = values.endTime.format("HH:mm");
+        endDateTime = dayjs(`${dateStr} ${endTimeStr}`);
+        if (
+          endDateTime.isBefore(startDateTime) ||
+          endDateTime.isSame(startDateTime)
+        ) {
+          endDateTime = endDateTime.add(1, "day");
+        }
+      } else {
+        endDateTime = startDateTime.add(1, "hour");
+      }
+
+      const payload: CreateEventPayload = {
+        title: values.title,
+        description: values.description || "",
+        start_at: startDateTime.format("YYYY-MM-DD HH:mm"),
+        end_at: endDateTime.format("YYYY-MM-DD HH:mm"),
+        color: String(values.color),
+        status: "pending",
+        participants: values.assignees || [],
+      };
+
+      console.log("Event payload:", payload);
+      addTaskMutate(payload);
+    } else {
+      const payload: CreateTaskPayload = {
+        title: values.title,
+        description: values.description || "",
+        status: values.status || "pending",
+        assignees: values.assignees || [],
+      };
+
+      console.log("Task values:", payload);
+      addTaskMutate(payload);
+      if (onSuccess) {
+        onSuccess(payload);
+      }
+    }
+
+    if (!isEvent) {
+      form.resetFields();
+    }
+  };
+
+ 
+
+  const defaultColor = colors[0]?.value;
+
+  const [isSelectOpen, setIsSelectOpen] = useState<boolean>(false);
+
+  const handleChangeStatusSelectOption = (
+    e: React.MouseEvent<HTMLDivElement>
+  ) => {
+    e.stopPropagation();
+    setIsSelectOpen(true);
+  };
+
+  return (
+    <Form
+      form={form}
+      onFinish={onFinish}
+      layout="vertical"
+      initialValues={combinedInitialValues}
+    >
+      <RenderFields
+        isEvent={isEvent}
+        isSelectOpen={isSelectOpen}
+        setIsSelectOpen={setIsSelectOpen}
+        handleChangeStatusSelectOption={handleChangeStatusSelectOption}
+        defaultColor={defaultColor}
+        colors={colors}
+      />
+    </Form>
+  );
+};

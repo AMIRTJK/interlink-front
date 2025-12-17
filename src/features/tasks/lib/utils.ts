@@ -1,4 +1,5 @@
-export const transformAssigneesResponse = (data: any) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const transformAssigneesResponse = (data:any) => {
   const items = Array.isArray(data?.data) ? data.data : [];
 
   return items.map(
