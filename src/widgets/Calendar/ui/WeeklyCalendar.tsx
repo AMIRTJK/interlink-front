@@ -33,6 +33,11 @@ export const WeeklyCalendar = ({
     isToday,
   } = useCalendarView({ currentDate, onDateChange });
 
+  // Функцию возврата к текущей дате
+  const handleGoToToday = () => {
+    onDateChange(dayjs());
+  };
+
   return (
     <div className="weekly-calendar">
       <CalendarHeader
@@ -41,6 +46,7 @@ export const WeeklyCalendar = ({
         onPrev={goToPrev}
         onNext={goToNext}
         dateRange={formatDateRange()}
+        onToday={handleGoToToday} 
       />
       <CalendarGrid
         daysToShow={daysToShow}

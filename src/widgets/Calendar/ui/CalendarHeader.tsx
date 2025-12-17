@@ -11,6 +11,7 @@ interface CalendarHeaderProps {
   onPrev: () => void;
   onNext: () => void;
   dateRange: string;
+  onToday: () => void;
 }
 
 export const CalendarHeader = ({
@@ -19,10 +20,12 @@ export const CalendarHeader = ({
   onPrev,
   onNext,
   dateRange,
+  onToday,
 }: CalendarHeaderProps) => {
   return (
     <div className="weekly-calendar__header">
       <Button
+        onClick={onToday}
         text="Сейчас"
         type="default"
         className="bg-transparent! border-2! border-[#F5F6F7]! px-5! text-[#6B7A99]! text-[12px]! font-medium! h-full rounded-[15px]! shadow-[0_4px_10px_#26334D0D]!"
@@ -48,21 +51,21 @@ export const CalendarHeader = ({
       </div>
       <div className="weekly-calendar__view-switcher">
         <ButtonAntd
-          className={`h-full! ${viewMode === "week" ? "text-[#6B7A99]!" : "text-[#ADB8CC]!"}`}
+          className={`h-10! ${viewMode === "week" ? "text-[#6B7A99]!" : "text-[#ADB8CC]!"}`}
           type="text"
           onClick={() => setViewMode("week")}
         >
           Неделя
         </ButtonAntd>
         <ButtonAntd
-          className={`h-full! ${viewMode === "month" ? "text-[#6B7A99]!" : "text-[#ADB8CC]!"}`}
+          className={`h-10! ${viewMode === "month" ? "text-[#6B7A99]!" : "text-[#ADB8CC]!"}`}
           type="text"
           onClick={() => setViewMode("month")}
         >
           Месяц
         </ButtonAntd>
         <ButtonAntd
-          className={`h-full! ${viewMode === "day" ? "text-[#6B7A99]!" : "text-[#ADB8CC]!"}`}
+          className={`h-10! ${viewMode === "day" ? "text-[#6B7A99]!" : "text-[#ADB8CC]!"}`}
           type="text"
           onClick={() => setViewMode("day")}
         >

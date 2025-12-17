@@ -99,7 +99,7 @@ export const Profile = () => {
         </div>
       </aside>
       <aside className="w-full bg-white rounded-[15px] p-4 lg:w-[72%]">
-        <div className="border border-[#E5E9F5] rounded-xl mb-[45px]">
+        <div className="border border-[#E5E9F5] rounded-xl mb-[45px] pt-0.5 pb-1">
           <Menu
             items={profileRightNav}
             mode="horizontal"

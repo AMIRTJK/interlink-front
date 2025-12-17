@@ -75,6 +75,7 @@ export const CalendarGrid = ({
               isToday(day) ? "weekly-calendar__day-column--today" : ""
             }`}
           >
+            
             <div className="weekly-calendar__day-header">
               <div className="weekly-calendar__day-name">
                 {day.format("dddd DD")}

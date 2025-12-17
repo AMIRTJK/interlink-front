@@ -1,5 +1,5 @@
 import { Form, Input } from "antd";
-import { CSSProperties } from "react";
+import { CSSProperties, ReactNode } from "react";
 
 interface IProps {
   name: string | number | (string | number)[];
@@ -15,7 +15,10 @@ interface IProps {
   maxLength?: number;
   value?: string;
   className?: string;
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  prefix?: ReactNode;
+  onChange?: (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
 }
 
 const { Item } = Form;

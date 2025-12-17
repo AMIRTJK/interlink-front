@@ -1,3 +1,11 @@
+.task-details-modal-view {
+  padding: 20px;
+}
+
+.task-details-modal .ant-modal-container {
+  padding: 27px 0 !important;
+}
+
 .task-details-modal .ant-modal-content {
   border-radius: 16px;
   overflow: hidden;
@@ -20,14 +28,14 @@
   letter-spacing: 0.5px;
   margin-bottom: 16px;
   color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .task-details__title {
   font-size: 20px;
   font-weight: 700;
   margin-bottom: 45px;
-  color:#7D8FB3;
+  color: #7d8fb3;
   /* text-align: center; */
 }
 
@@ -95,7 +103,7 @@
 .task-details__participant:hover {
   border-color: #d9d9d9;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .task-details__participant-name {

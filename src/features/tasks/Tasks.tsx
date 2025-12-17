@@ -1,3 +1,4 @@
+import "./style.css";
 import { useState } from "react";
 import { AddTaskForm } from "./AddTaskForm";
 import { Modal } from "antd";
@@ -23,11 +24,15 @@ export const Tasks = () => {
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         footer={null}
-        title="Добавить задачу"
-        destroyOnClose
+        className="modal-task"
+        title={null}
+        width={376}
+        centered
+        maskClosable={true}
+        closable={false}
       >
-        <AddTaskForm 
-          currentTaskStatus={taskStatus} 
+        <AddTaskForm
+          currentTaskStatus={taskStatus}
           onSuccess={() => setIsModalOpen(false)}
         />
       </Modal>

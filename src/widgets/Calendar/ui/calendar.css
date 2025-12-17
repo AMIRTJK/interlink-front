@@ -10,7 +10,7 @@
   margin-bottom: 32px;
   flex-wrap: wrap;
   gap: 16px;
-  height: 42px;
+  height: 100%;
   padding: 0 29px;
 }
 
@@ -32,6 +32,8 @@
   display: flex;
   align-items: center;
   border: 2px solid #f5f6f7;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
   height: 100%;
 }
 

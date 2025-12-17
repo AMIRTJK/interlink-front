@@ -1,7 +1,7 @@
 import { Modal } from "antd";
 import { AddTaskForm } from "@features/tasks";
 import { Dayjs } from "dayjs";
-import "./task-details-modal.css"; 
+import "./task-details-modal.css";
 interface IProps {
   isOpen: boolean;
   onClose: () => void;
@@ -21,28 +21,25 @@ export const CreateTaskModal = ({
       open={isOpen}
       onCancel={onClose}
       footer={null}
-      width={600}
+      width={376}
       centered
-      className="task-details-modal" 
+      className="task-details-modal"
+      maskClosable={true}
+      closable={false}
     >
       <div className="task-details">
-        <div className="task-details__header-bg">
-          <h2 className="task-details__title">Наименование события</h2>
-        </div>
-        <div className="task-details__content">
-          <AddTaskForm
-            initialValues={
-              selectedDateTime
-                ? {
-                    date: selectedDateTime.date,
-                    time: selectedDateTime.time,
-                  }
-                : undefined
-            }
-            onSuccess={onSuccess}
-            isEvent={true}
-          />
-        </div>
+        <AddTaskForm
+          initialValues={
+            selectedDateTime
+              ? {
+                  date: selectedDateTime.date,
+                  time: selectedDateTime.time,
+                }
+              : undefined
+          }
+          onSuccess={onSuccess}
+          isEvent={true}
+        />
       </div>
     </Modal>
   );
