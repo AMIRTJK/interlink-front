@@ -47,7 +47,7 @@ export const Auth = () => {
       <div className="absolute bottom-0 flex flex-wrap justify-between items-center text-[#FFFFFF73] font-light w-full px-4 sm:px-10 py-5 gap-2 sm:gap-0">
         <p>+992 900 12 36 88</p>
         <p>
-          Разработан <span className="font-semibold">Company</span>
+          Разработан <span className="font-semibold">AM|KM</span>
         </p>
         <p>Поддержка: example@mail.com</p>
       </div>
