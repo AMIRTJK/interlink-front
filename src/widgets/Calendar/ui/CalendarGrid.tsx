@@ -119,7 +119,9 @@ export const CalendarGrid = ({
                           width: `${item.width}%`,
                           border: `2px solid  ${color ? color : "#6c7c96"}`,
                           borderRadius: "5px",
-                          backgroundColor: `${color}26`,
+                          backgroundColor: `${color}e6`,
+                          backdropFilter: "blur(12px)",
+                          WebkitBackdropFilter: "blur(12px)",
                         }}
                       >
                         <TaskCard
@@ -137,32 +139,53 @@ export const CalendarGrid = ({
                       <Popover
                         key={clusterId}
                         placement="right"
-                        title={
-                          <div className="weekly-calendar__popover-title">
-                            <span>События</span>
-                            <Button
-                              type="text"
-                              size="small"
-                              icon={<CloseOutlined />}
-                              onClick={() => setOpenClusterId(null)}
-                            />
-                          </div>
-                        }
+                        title={null} /* Custom header in content */
                         trigger="click"
                         open={openClusterId === clusterId}
                         onOpenChange={(visible) =>
                           setOpenClusterId(visible ? clusterId : null)
                         }
+                        overlayStyle={{ padding: 0 }}
                         content={
-                          <div className="weekly-calendar__popover-list">
-                            {item.events.map((event) => (
-                              <div
-                                key={event.id}
-                                onClick={() => onTaskClick?.(event)}
-                              >
-                                <TaskCard task={event} />
-                              </div>
-                            ))}
+                          <div className="weekly-calendar__popover-content">
+                            <div className="weekly-calendar__popover-header">
+                              <span className="weekly-calendar__popover-title-text">
+                                События ({item.events.length})
+                              </span>
+                              <Button
+                                type="text"
+                                size="small"
+                                icon={<CloseOutlined />}
+                                onClick={() => setOpenClusterId(null)}
+                              />
+                            </div>
+                            <div className="weekly-calendar__popover-timeline">
+                              {item.events.map((event) => (
+                                <div
+                                  key={event.id}
+                                  className="weekly-calendar__popover-item"
+                                  onClick={() => onTaskClick?.(event)}
+                                >
+                                  <div className="weekly-calendar__popover-time">
+                                    {event.time}
+                                  </div>
+                                  <div className="weekly-calendar__popover-card-preview">
+                                    <div
+                                      style={{
+                                        border: `2px solid ${event.color || "#6c7c96"}`,
+                                        borderRadius: "5px",
+                                        backgroundColor: event.color
+                                          ? `${event.color}26`
+                                          : "#6c7c9626",
+                                        padding: "4px",
+                                      }}
+                                    >
+                                      <TaskCard task={event} />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         }
                       >
@@ -173,20 +196,31 @@ export const CalendarGrid = ({
                             height: `${item.height}px`,
                             left: `${item.left}%`,
                             width: `${item.width}%`,
-                            zIndex: 20,
+                            zIndex: 30,
+                            cursor: "pointer",
                           }}
                         >
-                          <div
-                            className="weekly-calendar__cluster-wrapper"
-                            style={{
-                              border: `2px solid  ${mainEvent.color ? mainEvent.color : "#6c7c96"}`,
-                              borderRadius: "5px",
-                              backgroundColor: `${mainEvent.color}26`,
-                            }}
-                          >
-                            <TaskCard task={mainEvent} />
-                            <div className="weekly-calendar__cluster-badge">
-                              +{count}
+                          <div className="weekly-calendar__cluster-wrapper">
+                            {/* Deck Effect Container */}
+                            <div className="weekly-calendar__cluster-deck">
+                              {/* Main Card (First Event) */}
+                              <div
+                                style={{
+                                  height: "100%",
+                                  borderRadius: "8px",
+                                  border: `2px solid ${mainEvent.color || "#6c7c96"}`,
+                                  backgroundColor: mainEvent.color ? `${mainEvent.color}e6` : "#6c7c96e6",
+                                  overflow: "hidden",
+                                  position: "relative",
+                                }}
+                              >
+                                <TaskCard task={mainEvent} />
+                              </div>
+                            </div>
+
+                            {/* "More" Indicator */}
+                            <div className="weekly-calendar__more-indicator">
+                              Еще {count - 1}...
                             </div>
                           </div>
                         </div>

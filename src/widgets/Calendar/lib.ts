@@ -52,15 +52,16 @@ export const calculateDayLayout = (tasks: Task[]): CalendarItem[] => {
   const processCluster = (cluster: PreparedEvent[]) => {
     if (cluster.length === 0) return;
 
-    if (cluster.length === 1) {
-      const event = cluster[0];
-      items.push({
-        type: 'single',
-        event: event.task,
-        top: event.start * PIXELS_PER_MINUTE,
-        height: event.duration * PIXELS_PER_MINUTE,
-        left: 0,
-        width: 100
+    if (cluster.length <= 2) {
+      cluster.forEach(event => {
+        items.push({
+          type: 'single',
+          event: event.task,
+          top: event.start * PIXELS_PER_MINUTE,
+          height: event.duration * PIXELS_PER_MINUTE,
+          left: 0,
+          width: 100
+        });
       });
     } else {
       const minStart = Math.min(...cluster.map(e => e.start));
