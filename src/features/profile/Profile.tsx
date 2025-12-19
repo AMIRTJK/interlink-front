@@ -1,4 +1,4 @@
-import { Avatar, Spin } from "antd";
+import { Avatar } from "antd";
 import { motion } from "framer-motion";
 import { UserOutlined } from "@ant-design/icons";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -9,18 +9,14 @@ import { tokenControl } from "@shared/lib";
 import { ApiRoutes, _axios } from "@shared/api";
 import { IUser } from "@entities/login";
 import { useEffect, useState } from "react";
-
 import userAvatar from "../../assets/images/user-avatar.jpg";
-
+import { If, Loader } from "@shared/ui";
 export const Profile = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-
   const userId = tokenControl.getUserId();
   const [userData, setUserData] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -40,7 +36,6 @@ export const Profile = () => {
 
     fetchUser();
   }, [userId]);
-
   const getCurrentTab = () => {
     const path = location.pathname;
     if (path.includes(AppRoutes.PROFILE_CALENDAR)) return "calendar";
@@ -56,18 +51,11 @@ export const Profile = () => {
     };
     navigate(`/${AppRoutes.PROFILE}/${routes[e.key]}`);
   };
-
   if (loading) {
     return (
-      <div
-        className="profile__content flex justify-center items-center"
-        style={{ height: "100%" }}
-      >
-        <Spin size="large" />
-      </div>
+      <Loader/>
     );
   }
-
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6">
       <aside className="w-full lg:w-[28%]">
@@ -102,22 +90,22 @@ export const Profile = () => {
           {profileRightNav.map((item) => {
             const isActive = getCurrentTab() === item.key;
             return (
-              <button
+              <motion.button
                 key={item.key}
                 className={`profile__tab ${
                   isActive ? "profile__tab--active" : ""
                 }`}
                 onClick={() => handleMenuClick({ key: item.key })}
               >
-                {isActive && (
-                  <motion.div
+                <If is={isActive}>
+                    <motion.div
                     layoutId="active-tab"
                     className="profile__tab-background"
                     transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
                   />
-                )}
+                </If>
                 <span className="profile__tab-text">{item.label}</span>
-              </button>
+              </motion.button>
             );
           })}
         </div>

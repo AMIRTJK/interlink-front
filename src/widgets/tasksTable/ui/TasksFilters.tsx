@@ -4,11 +4,7 @@ import { TASK_STATUS_OPTIONS } from "@features/tasks/model";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
 import { PRIORITY_OPTIONS } from "../model";
-
 dayjs.locale("ru");
-
-
-
 export const TasksFilters = () => {
   const { params, setParams } = useDynamicSearchParams();
 

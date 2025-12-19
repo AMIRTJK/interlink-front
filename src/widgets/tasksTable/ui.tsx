@@ -10,15 +10,13 @@ import { TasksFilters } from "./ui/TasksFilters";
 import "./style.css";
 import { If, Loader } from "@shared/ui";
 
-interface TasksTableProps {
+interface IProps {
   onAddTask?: (status: string) => void;
   onTaskClick?: (task: ITaskItem) => void;
 }
-
-export const TasksTable = ({ onAddTask, onTaskClick }: TasksTableProps) => {
+export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
   const [showFilters, setShowFilters] = useState(false);
   const { params } = useDynamicSearchParams();
-  
   const { data: response, isLoading: loading } = useGetQuery<
     Record<string, string>,
     ITasksResponse
@@ -34,9 +32,7 @@ export const TasksTable = ({ onAddTask, onTaskClick }: TasksTableProps) => {
       staleTime: 60 * 60 * 1000,
     }
   });
-
   const tasks = response?.data || [];
-
   if (loading) {
     return (
       <Loader/>
@@ -56,8 +52,6 @@ export const TasksTable = ({ onAddTask, onTaskClick }: TasksTableProps) => {
         <TasksFilters />
       </If>
       </div>
-
-
       <div className="flex flex-col lg:flex-row lg:flex-nowrap gap-4 overflow-x-auto p-2">
         {TASK_STATUS_OPTIONS.map((option) => (
           <TasksColumn
