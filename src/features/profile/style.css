@@ -66,78 +66,12 @@
   margin-top: 16px;
 }
 
-.profile__tabs {
-  display: flex;
-  gap: 2px;
-  background-color: #E3ECFF;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
+.profile__tabs-wrapper {
+  margin-bottom: 0;
 }
 
-.profile__tab {
+.profile__tabs-wrapper .ui-tab {
   padding: 10px 89px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #64748b;
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  border-radius: 12px 12px 0 0;
-  transition: color 0.3s ease;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.profile__tab:hover:not(.profile__tab--active) {
-  color: #0037af;
-}
-
-.profile__tab--active {
-  color: #0037af !important;
-}
-
-.profile__tab-text {
-  position: relative;
-  z-index: 2;
-}
-
-.profile__tab-background {
-  position: absolute;
-  inset: 0;
-  background-color: #fff;
-  border-radius: 12px 12px 0 0;
-  z-index: 1;
-}
-
-.profile__tab-background::before,
-.profile__tab-background::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  width: 20px;
-  height: 20px;
-  background-color: transparent;
-  pointer-events: none;
-}
-
-.profile__tab-background::before {
-  left: -20px;
-  border-bottom-right-radius: 12px;
-  box-shadow: 6px 0 0 0 #fff;
-}
-
-.profile__tab-background::after {
-  right: -20px;
-  border-bottom-left-radius: 12px;
-  box-shadow: -6px 0 0 0 #fff;
-}
-
-/* Hide scoops for edge tabs based on the background position */
-.profile__tab:first-child .profile__tab-background::before,
-.profile__tab:last-child .profile__tab-background::after {
-  display: none;
 }
 
 .profile__content-card {
