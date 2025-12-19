@@ -8,6 +8,7 @@ import type { ITaskItem, ITasksResponse } from "./model";
 import { TasksColumn } from "./ui/TasksColumn";
 import { TasksFilters } from "./ui/TasksFilters";
 import "./style.css";
+import { If } from "@shared/ui";
 
 interface TasksTableProps {
   onAddTask?: (status: string) => void;
@@ -40,17 +41,19 @@ export const TasksTable = ({ onAddTask, onTaskClick }: TasksTableProps) => {
 
   return (
     <div className="tasks-table-wrapper">
-      <div className="tasks-table-header">
-        <Button 
+      <div className={`${showFilters ? "tasks-table-header" : "tasks-table-header-collapsed"}`}>
+        <Button
+          className={showFilters ? "tasks-table-header-button" : "tasks-table-header-button-collapsed"}
           icon={<FilterOutlined />} 
           onClick={() => setShowFilters(!showFilters)}
-          type={showFilters ? "primary" : "default"}
         >
-          Фильтры
-        </Button>
+          {showFilters ? "Скрыть фильтры" : "Показать фильтры"}
+        </Button> 
+      <If is={showFilters}>
+        <TasksFilters />
+      </If>
       </div>
 
-      {showFilters && <TasksFilters />}
 
       <div className="flex flex-col lg:flex-row lg:flex-nowrap gap-4 overflow-x-auto p-2">
         {TASK_STATUS_OPTIONS.map((option) => (

@@ -143,32 +143,62 @@
   gap: 16px;
   width: 100%;
 }
-
+.tasks-table-header-collapsed{
+  background: #fff;
+}
+.tasks-table-header-button-collapsed{
+  color: #000;
+  border:none;
+  font-size: 16px;
+}
+.tasks-table-header-button-collapsed:hover{
+  background: transparent !important;
+  border: none !important;
+}
 .tasks-table-header {
   display: flex;
-  justify-content: flex-start;
+  flex-direction: column;
+  gap: 5px;
+  flex-wrap: wrap;
   padding: 0 8px;
-}
-
-.tasks-filters-container {
-  background: var(--color-bg-card-task);
-  border: 1px solid var(--color-border);
+  background: #0037AF;
+  padding: 4px 8px;
   border-radius: 12px;
-  padding: 16px;
-  margin: 0 8px;
-  animation: slideDown 0.3s ease-out;
+  /* min-height: 74px; */
+
 }
 
-.filter-item {
+.tasks-table-header-button{
   display: flex;
   align-items: center;
-  gap: 8px;
+ max-width: max-content; 
+ background: transparent;
+ border: none;
+ color: #fff;
+ font-size: 16px;
 }
 
-.filter-label {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  font-weight: 500;
+.tasks-table-header-button:hover{
+  background: transparent !important;
+  border: none !important;
+}
+
+.tasks-filters-container{
+  display: flex;
+  justify-content: center;
+}
+
+.filter-item .ant-picker{
+  padding:13px 8px;
+  min-width: 400px;
+  max-width: 401px;
+}
+
+.filter-item .ant-select-outlined{
+  min-width: 400px;
+  max-width: 401px;
+  padding:13px 8px;
+
 }
 
 @keyframes slideDown {
