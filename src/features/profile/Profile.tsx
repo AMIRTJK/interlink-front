@@ -1,7 +1,6 @@
 import { Avatar } from "antd";
-import { motion } from "framer-motion";
 import { UserOutlined } from "@ant-design/icons";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { profileRightNav } from "./model";
 import { AppRoutes } from "@shared/config/AppRoutes";
 import "./style.css";
@@ -10,13 +9,15 @@ import { ApiRoutes, _axios } from "@shared/api";
 import { IUser } from "@entities/login";
 import { useEffect, useState } from "react";
 import userAvatar from "../../assets/images/user-avatar.jpg";
-import { If, Loader } from "@shared/ui";
+import { Loader, Tabs } from "@shared/ui";
+import { useCurrentTab } from "./lib";
+
 export const Profile = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const userId = tokenControl.getUserId();
   const [userData, setUserData] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const activeTab = useCurrentTab();
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -36,12 +37,7 @@ export const Profile = () => {
 
     fetchUser();
   }, [userId]);
-  const getCurrentTab = () => {
-    const path = location.pathname;
-    if (path.includes(AppRoutes.PROFILE_CALENDAR)) return "calendar";
-    if (path.includes(AppRoutes.PROFILE_ANALYTICS)) return "analytics";
-    return "tasks";
-  };
+ 
 
   const handleMenuClick = (e: { key: string }) => {
     const routes: Record<string, string> = {
@@ -86,29 +82,13 @@ export const Profile = () => {
         </div>
       </aside>
       <aside className="w-full lg:w-[72%]">
-        <div className="profile__tabs">
-          {profileRightNav.map((item) => {
-            const isActive = getCurrentTab() === item.key;
-            return (
-              <motion.button
-                key={item.key}
-                className={`profile__tab ${
-                  isActive ? "profile__tab--active" : ""
-                }`}
-                onClick={() => handleMenuClick({ key: item.key })}
-              >
-                <If is={isActive}>
-                    <motion.div
-                    layoutId="active-tab"
-                    className="profile__tab-background"
-                    transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
-                  />
-                </If>
-                <span className="profile__tab-text">{item.label}</span>
-              </motion.button>
-            );
-          })}
-        </div>
+        <Tabs
+          items={profileRightNav}
+          activeKey={activeTab}
+          onChange={(key) => handleMenuClick({ key })}
+          className="profile__tabs-wrapper"
+        />
+
         <div className="profile__content-card">
           <Outlet />
         </div>

@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+.ui-tabs {
+  display: flex;
+  gap: 2px;
+  background-color: #E3ECFF;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  overflow: hidden;
+}
+
+.ui-tab {
+  padding: 10px 40px; /* Generalized padding, was 89px in profile */
+  font-size: 15px;
+  font-weight: 600;
+  color: #64748b;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 12px 12px 0 0;
+  transition: color 0.3s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1; /* Allow tabs to grow if needed, or keep fixed */
+}
+
+.ui-tab:hover:not(.ui-tab--active) {
+  color: #0037af;
+}
+
+.ui-tab--active {
+  color: #0037af !important;
+}
+
+.ui-tab-text {
+  position: relative;
+  z-index: 2;
+}
+
+.ui-tab-background {
+  position: absolute;
+  inset: 0;
+  background-color: #fff;
+  border-radius: 12px 12px 0 0;
+  z-index: 1;
+}
+
+.ui-tab-background::before,
+.ui-tab-background::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  pointer-events: none;
+}
+
+.ui-tab-background::before {
+  left: -20px;
+  border-bottom-right-radius: 12px;
+  box-shadow: 6px 0 0 0 #fff;
+}
+
+.ui-tab-background::after {
+  right: -20px;
+  border-bottom-left-radius: 12px;
+  box-shadow: -6px 0 0 0 #fff;
+}
+
+/* Hide scoops for edge tabs based on the background position */
+.ui-tab:first-child .ui-tab-background::before,
+.ui-tab:last-child .ui-tab-background::after {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .ui-tab {
+    padding: 10px 20px;
+  }
+}
