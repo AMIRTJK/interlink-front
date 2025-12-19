@@ -190,13 +190,13 @@
 
 .filter-item .ant-picker{
   padding:13px 8px;
-  min-width: 400px;
-  max-width: 401px;
+  min-width: 305px;
+  max-width: 306px;
 }
 
 .filter-item .ant-select-outlined{
-  min-width: 400px;
-  max-width: 401px;
+  min-width: 305px;
+  max-width: 306px;
   padding:13px 8px;
 
 }

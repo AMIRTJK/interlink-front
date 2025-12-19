@@ -66,55 +66,87 @@
   margin-top: 16px;
 }
 
-.custom-fixed-menu {
-  border-bottom: none !important;
-  background: transparent !important;
-
-  display: flex !important;
-  justify-content: space-between !important;
-  gap: 4px;
-  width: 100% !important;
+.profile__tabs {
+  display: flex;
+  gap: 2px;
+  background-color: #E3ECFF;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
 }
 
-.custom-fixed-menu .ant-menu-item,
-.custom-fixed-menu .ant-menu-item-selected {
-  flex: 1 1 0%;
-
-  padding: 0 10px !important;
-
-  margin: 0 !important;
-
-  border: none !important;
-  box-shadow: none !important;
-  border-radius: 8px !important;
-  text-align: center;
+.profile__tab {
+  padding: 10px 89px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #64748b;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 12px 12px 0 0;
+  transition: color 0.3s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.custom-fixed-menu .ant-menu-item::after,
-.custom-fixed-menu .ant-menu-item-selected::after {
-  content: none !important;
-  display: none !important;
+.profile__tab:hover:not(.profile__tab--active) {
+  color: #0037af;
 }
 
-.custom-fixed-menu .ant-menu-item {
-  background-color: transparent !important;
-  color: #0037af !important;
-  transition: all 0.3s ease !important;
-}
-
-.custom-fixed-menu .ant-menu-item-selected {
-  background-color: #0037af !important;
-  color: white !important;
-  font-weight: 400;
-  border-radius: 8px !important;
-}
-
-.custom-fixed-menu .ant-menu-item:hover {
-  background-color: rgba(0, 55, 175, 0.1) !important;
+.profile__tab--active {
   color: #0037af !important;
 }
 
-.custom-fixed-menu .ant-menu-item-selected:hover {
-  background-color: #0037af !important;
-  color: white !important;
+.profile__tab-text {
+  position: relative;
+  z-index: 2;
+}
+
+.profile__tab-background {
+  position: absolute;
+  inset: 0;
+  background-color: #fff;
+  border-radius: 12px 12px 0 0;
+  z-index: 1;
+}
+
+.profile__tab-background::before,
+.profile__tab-background::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  pointer-events: none;
+}
+
+.profile__tab-background::before {
+  left: -20px;
+  border-bottom-right-radius: 12px;
+  box-shadow: 6px 0 0 0 #fff;
+}
+
+.profile__tab-background::after {
+  right: -20px;
+  border-bottom-left-radius: 12px;
+  box-shadow: -6px 0 0 0 #fff;
+}
+
+/* Hide scoops for edge tabs based on the background position */
+.profile__tab:first-child .profile__tab-background::before,
+.profile__tab:last-child .profile__tab-background::after {
+  display: none;
+}
+
+.profile__content-card {
+  background-color: #fff;
+  border-radius: 16px;
+  /* Remove top-left radius if the first tab is active to truly blend, 
+     but since tabs can change, we keep it subtle or use a small overlap */
+  border-top-left-radius: 0; 
+  padding: 32px;
+  min-height: 500px;
+  box-shadow: 0 4px 20px rgba(0, 55, 175, 0.04);
 }
