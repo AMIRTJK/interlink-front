@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Spin, Button } from "antd";
+import { Button } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
 import { useGetQuery, useDynamicSearchParams } from "@shared/lib";
 import { ApiRoutes } from "@shared/api/api-routes";
@@ -8,7 +8,7 @@ import type { ITaskItem, ITasksResponse } from "./model";
 import { TasksColumn } from "./ui/TasksColumn";
 import { TasksFilters } from "./ui/TasksFilters";
 import "./style.css";
-import { If } from "@shared/ui";
+import { If, Loader } from "@shared/ui";
 
 interface TasksTableProps {
   onAddTask?: (status: string) => void;
@@ -27,20 +27,23 @@ export const TasksTable = ({ onAddTask, onTaskClick }: TasksTableProps) => {
     method: "GET",
     params,
     useToken: true,
+    options:{
+      enabled: !!params,
+      keepPreviousData: true,
+      refetchOnMount: true,
+      staleTime: 60 * 60 * 1000,
+    }
   });
 
   const tasks = response?.data || [];
 
   if (loading) {
     return (
-      <div className="tasks-table-loading">
-        <Spin size="large" />
-      </div>
+      <Loader/>
     );
-  }
-
-  return (
-    <div className="tasks-table-wrapper">
+  }else{
+    return (
+      <div className="tasks-table-wrapper">
       <div className={`${showFilters ? "tasks-table-header" : "tasks-table-header-collapsed"}`}>
         <Button
           className={showFilters ? "tasks-table-header-button" : "tasks-table-header-button-collapsed"}
@@ -68,5 +71,6 @@ export const TasksTable = ({ onAddTask, onTaskClick }: TasksTableProps) => {
         ))}
       </div>
     </div>
-  );
+    );
+  }
 };
