@@ -51,3 +51,10 @@ export 	const months = [
 		"ноября",
 		"декабря",
 	];
+
+
+export const PRIORITY_OPTIONS = [
+    { value: "high", label: "Высокий" },
+    { value: "medium", label: "Средний" },
+    { value: "low", label: "Низкий" },
+  ];
