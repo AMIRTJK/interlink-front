@@ -1,27 +1,22 @@
-import { Avatar, Menu, Spin } from "antd";
+import { Avatar } from "antd";
+import { motion } from "framer-motion";
 import { UserOutlined } from "@ant-design/icons";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { profileRightNav } from "./model";
 import { AppRoutes } from "@shared/config/AppRoutes";
 import "./style.css";
-import { tokenControl, useTheme } from "@shared/lib";
+import { tokenControl } from "@shared/lib";
 import { ApiRoutes, _axios } from "@shared/api";
 import { IUser } from "@entities/login";
 import { useEffect, useState } from "react";
-
 import userAvatar from "../../assets/images/user-avatar.jpg";
-
+import { If, Loader } from "@shared/ui";
 export const Profile = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme } = useTheme();
-
-  const menuTheme = theme === "light" ? "light" : "dark";
-
   const userId = tokenControl.getUserId();
   const [userData, setUserData] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -41,7 +36,6 @@ export const Profile = () => {
 
     fetchUser();
   }, [userId]);
-
   const getCurrentTab = () => {
     const path = location.pathname;
     if (path.includes(AppRoutes.PROFILE_CALENDAR)) return "calendar";
@@ -57,18 +51,11 @@ export const Profile = () => {
     };
     navigate(`/${AppRoutes.PROFILE}/${routes[e.key]}`);
   };
-
   if (loading) {
     return (
-      <div
-        className="profile__content flex justify-center items-center"
-        style={{ height: "100%" }}
-      >
-        <Spin size="large" />
-      </div>
+      <Loader/>
     );
   }
-
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6">
       <aside className="w-full lg:w-[28%]">
@@ -98,19 +85,31 @@ export const Profile = () => {
           </div>
         </div>
       </aside>
-      <aside className="w-full bg-white rounded-[15px] p-4 lg:w-[72%]">
-        <div className="border border-[#E5E9F5] rounded-xl mb-[45px] pt-0.5 pb-1">
-          <Menu
-            items={profileRightNav}
-            mode="horizontal"
-            theme={menuTheme}
-            selectedKeys={[getCurrentTab()]}
-            onClick={handleMenuClick}
-            className="custom-fixed-menu"
-            disabledOverflow
-          />
+      <aside className="w-full lg:w-[72%]">
+        <div className="profile__tabs">
+          {profileRightNav.map((item) => {
+            const isActive = getCurrentTab() === item.key;
+            return (
+              <motion.button
+                key={item.key}
+                className={`profile__tab ${
+                  isActive ? "profile__tab--active" : ""
+                }`}
+                onClick={() => handleMenuClick({ key: item.key })}
+              >
+                <If is={isActive}>
+                    <motion.div
+                    layoutId="active-tab"
+                    className="profile__tab-background"
+                    transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
+                  />
+                </If>
+                <span className="profile__tab-text">{item.label}</span>
+              </motion.button>
+            );
+          })}
         </div>
-        <div>
+        <div className="profile__content-card">
           <Outlet />
         </div>
       </aside>
