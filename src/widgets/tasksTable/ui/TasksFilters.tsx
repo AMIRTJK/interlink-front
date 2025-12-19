@@ -28,34 +28,28 @@ export const TasksFilters = () => {
     <div className="tasks-filters-container">
       <Space size="middle" wrap>
         <div className="filter-item">
-          <span className="filter-label">Дата:</span>
           <DatePicker
             placeholder="Выберите дату"
             value={params.date ? dayjs(params.date) : null}
             onChange={handleDateChange}
-            style={{ width: 200 }}
           />
         </div>
 
         <div className="filter-item">
-          <span className="filter-label">Приоритет:</span>
           <Select
             placeholder="Выберите приоритет"
             value={params.priority || undefined}
             onChange={handlePriorityChange}
-            style={{ width: 150 }}
             allowClear
             options={PRIORITY_OPTIONS}
           />
         </div>
 
         <div className="filter-item">
-          <span className="filter-label">Статус:</span>
           <Select
             placeholder="Выберите статус"
             value={params.status || undefined}
             onChange={handleStatusChange}
-            style={{ width: 150 }}
             allowClear
             options={TASK_STATUS_OPTIONS}
           />
