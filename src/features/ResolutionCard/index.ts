@@ -1,1 +1,1 @@
-export * from './ResolutionCard';
+export * from './LetterExecution';

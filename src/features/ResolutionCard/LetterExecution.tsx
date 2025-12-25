@@ -1,7 +1,7 @@
 import React from 'react';
-import './ResolutionCard.css';
 import { IDigitalSignature } from './model';
 import { Image } from 'antd';
+import './LetterExecution.css';
 export interface IProps {
     position: string;
     name: string;
@@ -17,7 +17,7 @@ export interface IProps {
     };
 }
 
-export const ResolutionCard: React.FC<IProps> = ({
+export const LetterExecution: React.FC<IProps> = ({
     position,
     name,
     content,
