@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import userAvatar from "../../assets/images/user-avatar.jpg";
 import { Loader, Tabs } from "@shared/ui";
 import { useCurrentTab } from "./lib";
+import { DetailsOfLetter } from "@features/detailsOfLetter/DetailsOfLetter";
 
 export const Profile = () => {
   const navigate = useNavigate();
@@ -91,6 +92,7 @@ export const Profile = () => {
 
         <div className="profile__content-card">
           <Outlet />
+          <DetailsOfLetter />
         </div>
       </aside>
     </div>
