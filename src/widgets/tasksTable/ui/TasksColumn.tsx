@@ -43,8 +43,8 @@ export const TasksColumn = ({
         />
       </div>
       <div className="tasks-list">
-        {currentTasks.length > 0 ? (
-          currentTasks.map((task) => (
+        {currentTasks?.length > 0 ? (
+          currentTasks?.map((task) => (
             <TaskCard key={task.id} task={task} onClick={onTaskClick} />
           ))
         ) : (

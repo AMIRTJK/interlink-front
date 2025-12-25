@@ -1,0 +1,266 @@
+.letter-execution {
+    max-width: 420px;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #e5e9f5;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    color: #1a202c;
+}
+
+.letter-execution__header {
+    margin-bottom: 20px;
+}
+
+.letter-execution__emblem {
+    max-width: 90px;
+}
+
+.letter-execution__position {
+    color: #4a6fa5;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.letter-execution__name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.letter-execution__content {
+    font-size: 16px;
+    color: #4a5568;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.letter-execution__meta {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 4px;
+}
+
+.letter-execution__meta-item {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.letter-execution__meta-item span {
+    font-weight: 400;
+    color: #4a5568;
+    margin-left: 4px;
+}
+
+/* Digital Signature Box section */
+.letter-execution__signature-box {
+    width: 100%;
+    border: 1.5px solid #2d3748;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 16px 0;
+}
+
+.letter-execution__signature-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #2d3748;
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+}
+
+.letter-execution__flag {
+    width: 28px;
+    height: 18px;
+    background: linear-gradient(
+        to bottom,
+        #cc0000 33.3%,
+        #ffffff 33.3%,
+        #ffffff 66.6%,
+        #006600 66.6%
+    );
+    border: 1px solid #ddd;
+}
+
+.letter-execution__signature-title {
+    font-size: 13px;
+    font-weight: 700;
+    flex: 1;
+}
+
+.letter-execution__signature-emblem {
+    max-width: 18px;
+}
+
+.letter-execution__signature-subtitle {
+    font-size: 10px;
+    text-align: center;
+    background: #1a202c;
+    color: #fff;
+    padding: 2px 4px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.letter-execution__signature-details {
+    font-size: 10px;
+    line-height: 1.3;
+}
+
+.letter-execution__signature-row {
+    color: #2d3748;
+}
+
+/* Footer Section */
+.letter-execution__footer {
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+.letter-execution__footer-name {
+    color: #4a6fa5;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.letter-execution__footer-date {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.date-line {
+    border-bottom: 1px solid #4a6fa5;
+    min-width: 40px;
+    text-align: center;
+    display: inline-block;
+}
+
+.date-line--long {
+    min-width: 140px;
+}
+
+/* Attachments Section */
+.letter-execution__attachments {
+    width: 100%;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.letter-execution__attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.letter-execution__attachment-icon {
+    font-size: 24px;
+    color: #4a6fa5;
+    cursor: pointer;
+}
+
+.letter-execution__attachment-link {
+    background: #f0f5ff;
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid #d6e4ff;
+    color: #1a202c;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.letter-execution__attachment-link:hover {
+    background: #e6f0ff;
+    border-color: #adc6ff;
+}
+
+/* Executors Section */
+.letter-execution__executors {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.letter-execution__executor-card {
+    background: #f8f9fc;
+    border: 1px solid #eef0f7;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.letter-execution__executor-card:hover{
+    background: #eef0f7;
+}
+
+.letter-execution__executor-avatar {
+    flex-shrink: 0;
+}
+
+.letter-execution__executor-avatar .ant-avatar {
+    background-color: #d1d5db;
+}
+
+.letter-execution__executor-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.letter-execution__executor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.letter-execution__executor-label {
+    color: #4c89ff;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.letter-execution__executor-check {
+    color: #bdc3c7; 
+    font-size: 18px;
+}
+
+.letter-execution__executor-name {
+    color: #0066cc;
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.letter-execution__executor-pos {
+    color: #9ca3af;
+    font-size: 14px;
+    margin-top: 2px;
+}

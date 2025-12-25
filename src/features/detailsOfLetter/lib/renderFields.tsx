@@ -3,7 +3,7 @@ import { Form, Input, DatePicker, Button } from "antd";
 
 export const renderFields = () => {
     return (
-        <div className="details__fields-wrapper">
+        <div className="details__fields-wrapper bg-white rounded-2xl p-8">
             <Form.Item name="folder" rules={[{ required: true }]} className="details__letter-field">
                 <SelectField url="api/folders" method="GET" name="folder" placeholder="Выбрать папку *" />
             </Form.Item>
@@ -28,7 +28,6 @@ export const renderFields = () => {
                     ОТПРАВИТЕЛЬ
                 </Button>
             </div>
-
             <Form.Item name="contact" className="details__letter-field">
                 <Input placeholder="Контакт" />
             </Form.Item>
