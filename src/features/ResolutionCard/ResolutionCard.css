@@ -1,0 +1,133 @@
+.resolution-card {
+    max-width: 420px;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #e5e9f5;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    color: #1a202c;
+}
+
+.resolution-card__emblem {
+    max-width: 90px;
+    margin-bottom: 16px;
+}
+
+.resolution-card__position {
+    color: #4a6fa5;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.resolution-card__name {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    text-align: center;
+}
+
+.resolution-card__content {
+    font-size: 15px;
+    color: #4a5568;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.resolution-card__deadline,
+.resolution-card__status {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.resolution-card__deadline span,
+.resolution-card__status span {
+    font-weight: 400;
+    color: #4a6fa5;
+}
+
+/* .resolution-card__signature-box {
+    width: 100%;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    padding: 8px;
+    margin: 16px 0;
+    font-size: 10px;
+} */
+
+.resolution-card__signature-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #2d3748;
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+}
+
+.resolution-card__flag {
+    aspect-ratio: 3 / 2;
+    width: 28px;
+    background: linear-gradient(
+        to bottom,
+        #cc0000 33%,
+        #fff 33%,
+        #fff 66%,
+        #006600 66%
+    );
+    border: 1px solid #ddd;
+}
+
+.resolution-card__signature-title {
+    font-weight: 700;
+    flex: 1;
+}
+
+.resolution-card__signature-emblem {
+    max-width: 16px;
+}
+
+.resolution-card__signature-subtitle {
+    text-align: center;
+    background: #1a202c;
+    color: #fff;
+    padding: 2px 4px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.resolution-card__signature-row {
+    line-height: 1.2;
+}
+
+.resolution-card__footer-name {
+    color: #4a6fa5;
+    font-size: 17px;
+    font-weight: 700;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.resolution-card__footer-date {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+    align-items: center;
+}
+
+.date-line {
+    border-bottom: 1px solid #4a6fa5;
+    min-width: 40px;
+    text-align: center;
+}
+
+.date-line--long {
+    min-width: 120px;
+}
