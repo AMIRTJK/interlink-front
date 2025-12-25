@@ -14,14 +14,22 @@ interface IProps {
   onTimeSlotClick?: (date: Dayjs, time: string) => void;
   currentDate: Dayjs;
   onDateChange: (date: Dayjs) => void;
+  search?: string;
+  onSearch?: (value: string) => void;
 }
 
+/**
+ * Компонент WeeklyCalendar является оберткой над заголовком и сеткой календаря.
+ * Он объединяет логику навигации по датам (через useCalendarView) и отображение данных.
+ */
 export const WeeklyCalendar = ({
   tasks,
   onTaskClick,
   onTimeSlotClick,
   currentDate,
   onDateChange,
+  search,
+  onSearch,
 }: IProps) => {
   const {
     viewMode,
@@ -47,6 +55,8 @@ export const WeeklyCalendar = ({
         onNext={goToNext}
         dateRange={formatDateRange()}
         onToday={handleGoToToday} 
+        search={search}
+        onSearch={onSearch}
       />
       <CalendarGrid
         daysToShow={daysToShow}
