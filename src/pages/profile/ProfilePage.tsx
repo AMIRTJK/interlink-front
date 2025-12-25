@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+import { DetailsOfLetter } from "@features/detailsOfLetter/DetailsOfLetter";
 import { Profile } from "@features/profile";
 import { LetterExecution } from "@features/ResolutionCard";
 import { ResolutionOfLetter } from "@features/ResolutionOfLetter";
@@ -18,13 +20,9 @@ export const ProfilePage = () => {
             </div>
             
             <div className="flex flex-col gap-8 p-6 items-center">
-                <div className="w-full">
-                    <ResolutionOfLetter />
-                </div>
-
-                <div className="w-full flex flex-col items-center">
-                    <LetterExecution />
-                </div>
+                <ResolutionOfLetter />
+                <DetailsOfLetter mode="create" />
+                <LetterExecution />
             </div>
         </div>
     );
