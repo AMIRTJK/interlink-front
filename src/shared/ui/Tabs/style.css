@@ -43,13 +43,14 @@
   background-color: #fff;
   border-radius: 12px 12px 0 0;
   z-index: 1;
+  will-change: transform;
 }
 
 .ui-tab-background::before,
 .ui-tab-background::after {
   content: "";
   position: absolute;
-  bottom: 0;
+  bottom: 0px;
   width: 20px;
   height: 20px;
   background-color: transparent;
@@ -67,6 +68,7 @@
   border-bottom-left-radius: 12px;
   box-shadow: -6px 0 0 0 #fff;
 }
+
 .ui-tab:first-child .ui-tab-background::before,
 .ui-tab:last-child .ui-tab-background::after {
   display: none;

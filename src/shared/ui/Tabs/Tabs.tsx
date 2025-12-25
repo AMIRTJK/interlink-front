@@ -23,7 +23,7 @@ export const Tabs = ({
               <motion.div
                 layoutId={layoutId}
                 className="ui-tab-background"
-                transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
+                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
               />
             </If>
             <span className="ui-tab-text">{item.label}</span>
