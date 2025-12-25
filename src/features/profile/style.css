@@ -77,9 +77,8 @@
 .profile__content-card {
   background-color: #fff;
   border-radius: 16px;
-  /* Remove top-left radius if the first tab is active to truly blend, 
-     but since tabs can change, we keep it subtle or use a small overlap */
   border-top-left-radius: 0; 
+  border-top-right-radius: 0; 
   padding: 32px;
   min-height: 500px;
   box-shadow: 0 4px 20px rgba(0, 55, 175, 0.04);

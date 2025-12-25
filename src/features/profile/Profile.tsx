@@ -3,7 +3,6 @@ import { UserOutlined } from "@ant-design/icons";
 import { Outlet, useNavigate } from "react-router-dom";
 import { profileRightNav } from "./model";
 import { AppRoutes } from "@shared/config/AppRoutes";
-import "./style.css";
 import { tokenControl } from "@shared/lib";
 import { ApiRoutes, _axios } from "@shared/api";
 import { IUser } from "@entities/login";
@@ -11,8 +10,7 @@ import { useEffect, useState } from "react";
 import userAvatar from "../../assets/images/user-avatar.jpg";
 import { Loader, Tabs } from "@shared/ui";
 import { useCurrentTab } from "./lib";
-import { DetailsOfLetter } from "@features/detailsOfLetter/DetailsOfLetter";
-
+import "./style.css";
 export const Profile = () => {
   const navigate = useNavigate();
   const userId = tokenControl.getUserId();
@@ -92,7 +90,6 @@ export const Profile = () => {
 
         <div className="profile__content-card">
           <Outlet />
-          <DetailsOfLetter />
         </div>
       </aside>
     </div>
