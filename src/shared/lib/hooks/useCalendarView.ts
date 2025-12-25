@@ -15,36 +15,36 @@ export const useCalendarView = ({ currentDate, onDateChange }: UseCalendarViewPr
 
   const startOfWeek = viewMode === 'month' 
     ? currentDate.startOf('month').startOf('isoWeek')
-    : viewMode === 'day'
-      ? currentDate
+    : viewMode === 'year'
+      ? currentDate.startOf('year')
       : currentDate.startOf('isoWeek');
 
   const endOfWeek = viewMode === 'month'
     ? currentDate.endOf('month').endOf('isoWeek')
-    : viewMode === 'day'
-      ? currentDate
+    : viewMode === 'year'
+      ? currentDate.endOf('year')
       : currentDate.endOf('isoWeek');
 
-  const daysToShow = viewMode === 'day' 
-    ? [currentDate]
+  const daysToShow = viewMode === 'year' 
+    ? Array.from({ length: 12 }, (_, i) => currentDate.startOf('year').add(i, 'month'))
     : viewMode === 'month'
       ? Array.from({ length: 42 }, (_, i) => startOfWeek.add(i, 'day'))
       : Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, 'day'));
 
   const goToPrev = () => {
-    if (viewMode === 'day') onDateChange(currentDate.subtract(1, 'day'));
+    if (viewMode === 'year') onDateChange(currentDate.subtract(1, 'year'));
     else if (viewMode === 'week') onDateChange(currentDate.subtract(1, 'week'));
     else onDateChange(currentDate.subtract(1, 'month'));
   };
 
   const goToNext = () => {
-    if (viewMode === 'day') onDateChange(currentDate.add(1, 'day'));
+    if (viewMode === 'year') onDateChange(currentDate.add(1, 'year'));
     else if (viewMode === 'week') onDateChange(currentDate.add(1, 'week'));
     else onDateChange(currentDate.add(1, 'month'));
   };
 
   const formatDateRange = () => {
-    if (viewMode === 'day') return currentDate.format('D MMMM YYYY');
+    if (viewMode === 'year') return currentDate.format('YYYY');
     if (viewMode === 'month') return currentDate.format('MMMM YYYY');
     return `${startOfWeek.format('D')} - ${endOfWeek.format('D MMMM YYYY')} г.`;
   };
