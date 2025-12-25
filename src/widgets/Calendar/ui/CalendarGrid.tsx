@@ -1,5 +1,5 @@
-import { Popover, Button } from "antd";
-import { CloseOutlined, HistoryOutlined } from "@ant-design/icons";
+import { Popover, Button, Empty } from "antd";
+import { CloseOutlined, HistoryOutlined, InboxOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import type { Task } from "@features/tasks";
@@ -16,6 +16,11 @@ interface IProps {
   isToday: (date: Dayjs) => boolean;
 }
 
+/**
+ * Компонент CalendarGrid отвечает за отрисовку основной сетки календаря.
+ * Он распределяет задачи (tasks) по временным слотам и дням, управляет 
+ * отображением текущего времени и кластеризацией перекрывающихся событий.
+ */
 export const CalendarGrid = ({
   daysToShow,
   viewMode,
@@ -72,166 +77,167 @@ export const CalendarGrid = ({
         ))}
       </div>
       <div className={`weekly-calendar__days ${viewMode}`}>
-        {daysToShow.map((day) => (
-          <div
-            key={day.format("YYYY-MM-DD")}
-            className={`weekly-calendar__day-column ${
-              isToday(day) ? "weekly-calendar__day-column--today" : ""
-            }`}
-          >
-            <div className="weekly-calendar__day-header">
-              <div className="weekly-calendar__day-name">
-                {day.format("dddd DD")}
+        {tasks.length === 0 ? (
+          <div className="weekly-calendar__empty">
+            <Empty
+              image={
+                <InboxOutlined style={{ fontSize: 64, color: "#ADB8CC" }} />
+              }
+              imageStyle={{ height: 64 }}
+              description={
+                <span className="weekly-calendar__empty-text">
+                  Событий не найдено
+                </span>
+              }
+            />
+          </div>
+        ) : (
+          daysToShow.map((day) => (
+            <div
+              key={day.format("YYYY-MM-DD")}
+              className={`weekly-calendar__day-column ${
+                isToday(day) ? "weekly-calendar__day-column--today" : ""
+              }`}
+            >
+              <div className="weekly-calendar__day-header">
+                <div className="weekly-calendar__day-header-content">
+                  <span className="weekly-calendar__day-name">
+                    {day.format("ddd")}
+                  </span>
+                  <span className="weekly-calendar__day-number">
+                    {day.format("DD")}
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className="weekly-calendar__day-content">
-              {Array.from({ length: 24 }, (_, i) => (
-                <div
-                  key={i}
-                  className="weekly-calendar__hour-line"
-                  style={{ top: `${i * 60}px` }}
-                  onClick={() => handleTimeSlotClick(day, i)}
-                />
-              ))}
-              {showTimeLine && isToday(day) && (
-                <div
-                  className="weekly-calendar__current-time-line"
-                  style={{ top: `${currentTimePosition * 60}px` }}
-                />
-              )}
-              {(() => {
-                const dayTasks = getTasksForDay(day);
-                const items = calculateDayLayout(dayTasks);
+              <div className="weekly-calendar__day-content">
+                {Array.from({ length: 24 }, (_, i) => (
+                  <div
+                    key={i}
+                    className="weekly-calendar__hour-line"
+                    style={{ top: `${i * 72}px` }}
+                    onClick={() => handleTimeSlotClick(day, i)}
+                  />
+                ))}
+                {showTimeLine && isToday(day) && (
+                  <div
+                    className="weekly-calendar__current-time-line"
+                    style={{ top: `${currentTimePosition * 72}px` }}
+                  />
+                )}
+                {(() => {
+                  const dayTasks = getTasksForDay(day);
+                  const items = calculateDayLayout(dayTasks);
 
-                console.log(items);
+                  console.log(items);
 
-                return items.map((item, index) => {
-                  if (item.type === "single") {
-                    const color = item.event.color;
-                    return (
-                      <div
-                        key={item.event.id}
-                        className="weekly-calendar__task-wrapper"
-                        style={{
-                          top: `${item.top}px`,
-                          // height: `${item.height}px`,
-                          left: `${item.left}%`,
-                          width: `${item.width}%`,
-                          border: `2px solid  ${color ? color : "#6c7c96"}`,
-                          borderRadius: "5px",
-                          backgroundColor: `${color}e6`,
-                          backdropFilter: "blur(12px)",
-                          WebkitBackdropFilter: "blur(12px)",
-                        }}
-                      >
-                        <TaskCard
-                          task={item.event}
-                          onClick={() => onTaskClick?.(item.event)}
-                        />
-                      </div>
-                    );
-                  } else {
-                    const mainEvent = item.events[0];
-                    const count = item.events.length;
-                    const clusterId = `${day.format("YYYY-MM-DD")}-cluster-${index}`;
-
-                    return (
-                      <Popover
-                        key={clusterId}
-                        placement="right"
-                        title={null} /* Custom header in content */
-                        trigger="click"
-                        open={openClusterId === clusterId}
-                        onOpenChange={(visible) =>
-                          setOpenClusterId(visible ? clusterId : null)
-                        }
-                        overlayStyle={{ padding: 0 }}
-                        content={
-                          <div className="weekly-calendar__popover-content">
-                            <div className="weekly-calendar__popover-header">
-                              <span className="weekly-calendar__popover-title-text">
-                                События ({item.events.length})
-                              </span>
-                              <Button
-                                type="text"
-                                size="small"
-                                icon={<CloseOutlined />}
-                                onClick={() => setOpenClusterId(null)}
-                              />
-                            </div>
-                            <div className="weekly-calendar__popover-timeline">
-                              {item.events.map((event) => (
-                                <div
-                                  key={event.id}
-                                  className="weekly-calendar__popover-item"
-                                  onClick={() => onTaskClick?.(event)}
-                                >
-                                  <div className="weekly-calendar__popover-time">
-                                    {event.time}
-                                  </div>
-                                  <div className="weekly-calendar__popover-card-preview">
-                                    <div
-                                      style={{
-                                        border: `2px solid ${event.color || "#6c7c96"}`,
-                                        borderRadius: "5px",
-                                        backgroundColor: event.color
-                                          ? `${event.color}26`
-                                          : "#6c7c9626",
-                                        padding: "4px",
-                                      }}
-                                    >
-                                      <TaskCard task={event} />
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        }
-                      >
+                  return items.map((item, index) => {
+                    if (item.type === "single") {
+                      return (
                         <div
+                          key={item.event.id}
                           className="weekly-calendar__task-wrapper"
                           style={{
                             top: `${item.top}px`,
                             height: `${item.height}px`,
                             left: `${item.left}%`,
                             width: `${item.width}%`,
-                            zIndex: 30,
-                            cursor: "pointer",
                           }}
                         >
-                          <div className="weekly-calendar__cluster-wrapper">
-                            {/* Deck Effect Container */}
-                            <div className="weekly-calendar__cluster-deck">
-                              {/* Main Card (First Event) */}
-                              <div
-                                style={{
-                                  height: "100%",
-                                  borderRadius: "8px",
-                                  border: `2px solid ${mainEvent.color || "#6c7c96"}`,
-                                  backgroundColor: mainEvent.color ? `${mainEvent.color}e6` : "#6c7c96e6",
-                                  overflow: "hidden",
-                                  position: "relative",
-                                }}
-                              >
-                                <TaskCard task={mainEvent} />
+                          <TaskCard
+                            task={item.event}
+                            onClick={() => onTaskClick?.(item.event)}
+                          />
+                        </div>
+                      );
+                    } else {
+                      const mainEvent = item.events[0];
+                      const count = item.events.length;
+                      const clusterId = `${day.format("YYYY-MM-DD")}-cluster-${index}`;
+
+                      return (
+                        <Popover
+                          key={clusterId}
+                          placement="right"
+                          title={null} /* Custom header in content */
+                          trigger="click"
+                          open={openClusterId === clusterId}
+                          onOpenChange={(visible) =>
+                            setOpenClusterId(visible ? clusterId : null)
+                          }
+                          overlayStyle={{ padding: 0 }}
+                          content={
+                            <div className="weekly-calendar__popover-content">
+                              <div className="weekly-calendar__popover-header">
+                                <span className="weekly-calendar__popover-title-text">
+                                  События ({item.events.length})
+                                </span>
+                                <Button
+                                  type="text"
+                                  size="small"
+                                  icon={<CloseOutlined />}
+                                  onClick={() => setOpenClusterId(null)}
+                                />
+                              </div>
+                              <div className="weekly-calendar__popover-timeline">
+                                {item.events.map((event) => (
+                                  <div
+                                    key={event.id}
+                                    className="weekly-calendar__popover-item"
+                                    onClick={() => onTaskClick?.(event)}
+                                  >
+                                    <div className="weekly-calendar__popover-time">
+                                      {event.time}
+                                    </div>
+                                    <div className="weekly-calendar__popover-card-preview">
+                                      <TaskCard task={event} />
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             </div>
+                          }
+                        >
+                          <div
+                            className="weekly-calendar__task-wrapper"
+                            style={{
+                              top: `${item.top}px`,
+                              height: `${item.height}px`,
+                              left: `${item.left}%`,
+                              width: `${item.width}%`,
+                              zIndex: 30,
+                              cursor: "pointer",
+                            }}
+                          >
+                            <div className="weekly-calendar__cluster-wrapper">
+                              {/* Deck Effect Container */}
+                              <div className="weekly-calendar__cluster-deck">
+                                {/* Main Card (First Event) */}
+                                <div
+                                  style={{
+                                    height: "100%",
+                                    overflow: "hidden",
+                                    position: "relative",
+                                  }}
+                                >
+                                  <TaskCard task={mainEvent} />
+                                </div>
+                              </div>
 
-                            {/* "More" Indicator */}
-                            <div className="weekly-calendar__more-indicator">
-                              Еще {count - 1}...
+                              {/* "More" Indicator */}
+                              <div className="weekly-calendar__more-indicator">
+                                Еще {count - 1}...
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </Popover>
-                    );
-                  }
-                });
-              })()}
+                        </Popover>
+                      );
+                    }
+                  });
+                })()}
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

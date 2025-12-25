@@ -7,8 +7,13 @@ import dayjs, { Dayjs } from "dayjs";
 
 import "@features/calendar/task-details-modal.css";
 
+/**
+ * Компонент Calendar является корневым для функционала календаря.
+ * Он управляет состоянием событий, модальными окнами создания/просмотра задач
+ * и обеспечивает интеграцию между API и UI календаря.
+ */
 export const Calendar = () => {
-  const { tasks, currentDate, setCurrentDate, fetchEvents } =
+  const { tasks, currentDate, setCurrentDate, fetchEvents, search, setSearch } =
     useCalendarEvents();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,6 +59,8 @@ export const Calendar = () => {
         onDateChange={setCurrentDate}
         onTaskClick={handleTaskClick}
         onTimeSlotClick={handleTimeSlotClick}
+        search={search}
+        onSearch={setSearch}
       />
 
       <CreateTaskModal
