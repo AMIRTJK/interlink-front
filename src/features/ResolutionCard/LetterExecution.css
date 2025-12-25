@@ -10,7 +10,6 @@
     align-items: center;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     color: #1a202c;
-    font-family: 'Inter', sans-serif;
 }
 
 .letter-execution__header {
@@ -65,7 +64,7 @@
     margin-left: 4px;
 }
 
-/* Digital Signature Box */
+/* Digital Signature Box section */
 .letter-execution__signature-box {
     width: 100%;
     border: 1.5px solid #2d3748;
@@ -225,7 +224,6 @@
     flex-shrink: 0;
 }
 
-/* Override Ant Avatar style for initials background if needed */
 .letter-execution__executor-avatar .ant-avatar {
     background-color: #d1d5db;
 }
@@ -250,7 +248,7 @@
 }
 
 .letter-execution__executor-check {
-    color: #bdc3c7; /* Gray like the image maybe? Or checkmark color */
+    color: #bdc3c7; 
     font-size: 18px;
 }
 
