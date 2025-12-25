@@ -53,7 +53,7 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
       </If>
       </div>
       <div className="flex flex-col lg:flex-row lg:flex-nowrap gap-4 overflow-x-auto p-2">
-        {TASK_STATUS_OPTIONS.map((option) => (
+        {TASK_STATUS_OPTIONS?.map((option) => (
           <TasksColumn
             key={option.value}
             status={option.value}
