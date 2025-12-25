@@ -1,7 +1,7 @@
 import { Profile } from "@features/profile";
 import { ModuleMenu } from "@widgets/layout";
 import { Header } from "@widgets/layout/Header";
-import { LetterExecution } from "@features/ResolutionCard";
+// import { LetterExecution } from "@features/ResolutionCard";
 // import { DetailsOfLetter } from "@features/detailsOfLetter/DetailsOfLetter";
 // import { ResolutionOfLetter } from "@features/ResolutionOfLetter";
 export const ProfilePage = () => {
