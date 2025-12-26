@@ -83,3 +83,7 @@
   min-height: 500px;
   box-shadow: 0 4px 20px rgba(0, 55, 175, 0.04);
 }
+/* hidden no animation switcher */
+.hidden-no-animations-switcher{
+  display:none;
+}
