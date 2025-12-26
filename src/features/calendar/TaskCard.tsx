@@ -1,4 +1,4 @@
-import { VideoCameraFilled } from "@ant-design/icons";
+// import { VideoCameraFilled } from "@ant-design/icons";
 import type { Task } from "@features/tasks";
 import { Avatar } from "antd";
 
@@ -15,14 +15,14 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
       className="task-card"
       style={{ 
         borderLeft: `4px solid ${color}`,
-        backgroundColor: `${color}1A`, // 10% opacity for background
+        backgroundColor: `${color}1A`, 
       }}
       onClick={onClick}
     >
       <div className="task-card__content">
         <div className="task-card__time" style={{ color: color }}>
           {task.time}
-          <VideoCameraFilled style={{ marginLeft: "6px", fontSize: "14px" }} />
+          {/* <VideoCameraFilled style={{ marginLeft: "6px", fontSize: "14px" }} /> */}
         </div>
         <div className="task-card__title" style={{ color: color }}>
           {task.title}
@@ -30,7 +30,7 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
         {task.participants && task.participants.length > 0 && (
           <div className="task-card__avatars">
             <Avatar.Group max={{ count: 3, style: { color: color, backgroundColor: `${color}1A`, fontSize: '10px' } }}>
-              {task.participants.map((participant) => (
+              {task.participants?.map((participant) => (
                 <Avatar 
                   key={participant.id} 
                   src={participant.avatar} 
