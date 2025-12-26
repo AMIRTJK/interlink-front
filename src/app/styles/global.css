@@ -178,7 +178,7 @@ body.no-animations * {
   scroll-behavior: auto !important;
 }
 
-/* Global no animations */
+/* Global no animations hover */
 body.no-animations *:hover {
   transform: none !important;
   box-shadow: none !important;
