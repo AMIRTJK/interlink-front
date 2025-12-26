@@ -1,4 +1,5 @@
 import { createContext, useEffect, useState, type ReactNode } from "react";
+import { ConfigProvider } from "antd";
 import { Theme, ThemeContextType } from "./theme.types";
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -9,6 +10,10 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     return (saved as Theme) || "light";
   });
 
+  const [isAnimEnabled, setIsAnimEnabled] = useState(() => {
+    return localStorage.getItem("anim-enabled") !== "false";
+  });
+
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark", "space");
@@ -16,9 +21,20 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("app-theme", theme);
   }, [theme]);
 
+  useEffect(() => {
+    localStorage.setItem("anim-enabled", String(isAnimEnabled));
+    if (!isAnimEnabled) {
+      document.body.classList.add("no-animations");
+    } else {
+      document.body.classList.remove("no-animations");
+    }
+  }, [isAnimEnabled]);
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-      {children}
+    <ThemeContext.Provider value={{ theme, setTheme, isAnimEnabled, setIsAnimEnabled }}>
+      <ConfigProvider theme={{ token: { motion: isAnimEnabled } }}>
+        {children}
+      </ConfigProvider>
     </ThemeContext.Provider>
   );
 };

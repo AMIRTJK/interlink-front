@@ -170,3 +170,9 @@ body {
 .title-auth {
   color: #fff;
 }
+
+/* No Animations Mode */
+body.no-animations * {
+  transition: none !important;
+  animation: none !important;
+}

@@ -78,3 +78,8 @@
     padding: 10px 20px;
   }
 }
+/* No Animations Mode */
+body.no-animations .ui-tab:hover:not(.ui-tab--active) {
+  color: #64748b;
+  transition: none !important;
+}

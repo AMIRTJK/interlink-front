@@ -3,7 +3,7 @@ import { UserOutlined, SettingOutlined } from "@ant-design/icons";
 import { Outlet, useNavigate } from "react-router-dom";
 import { profileRightNav } from "./model";
 import { AppRoutes } from "@shared/config/AppRoutes";
-import { tokenControl } from "@shared/lib";
+import { tokenControl, useTheme } from "@shared/lib";
 import { ApiRoutes, _axios } from "@shared/api";
 import { IUser } from "@entities/login";
 import { useEffect, useState } from "react";
@@ -18,6 +18,7 @@ export const Profile = () => {
   const [userData, setUserData] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
   const activeTab = useCurrentTab();
+  const { isAnimEnabled, setIsAnimEnabled } = useTheme();
   
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSnowEnabled, setIsSnowEnabled] = useState(() => {
@@ -65,7 +66,7 @@ export const Profile = () => {
     <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6">
       <SnowOverlay enabled={isSnowEnabled} />
       <Modal
-        title="Тестовые функции"
+        title="Настройки"
         open={isSettingsOpen}
         onCancel={() => setIsSettingsOpen(false)}
         footer={null}
@@ -76,6 +77,13 @@ export const Profile = () => {
           <Switch 
             checked={isSnowEnabled} 
             onChange={setIsSnowEnabled} 
+          />
+        </div>
+        <div className="flex items-center justify-between py-2">
+          <span>Анимации ⚡</span>
+          <Switch 
+            checked={isAnimEnabled} 
+            onChange={setIsAnimEnabled} 
           />
         </div>
       </Modal>
