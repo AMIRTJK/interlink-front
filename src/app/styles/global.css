@@ -175,4 +175,12 @@ body {
 body.no-animations * {
   transition: none !important;
   animation: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* Global no animations */
+body.no-animations *:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
