@@ -82,6 +82,13 @@ export const Profile = () => {
 
       <aside className="w-full lg:w-[28%]">
         <div className="bg-white p-6 rounded-xl shadow">
+          <div className="flex justify-end">
+            <SettingOutlined 
+              className="text-gray-500! hover:text-blue-600! transition-colors! cursor-pointer!"
+              style={{ fontSize: "20px" }}
+              onClick={() => setIsSettingsOpen(true)}
+            />
+          </div>
           <div className="flex flex-col items-center mb-4 relative">
              <div className="relative">
               <Avatar
@@ -90,12 +97,6 @@ export const Profile = () => {
                 icon={<UserOutlined />}
                 className="profile-avatar"
               />
-              <div 
-                className="profile-settings-btn"
-                onClick={() => setIsSettingsOpen(true)}
-              >
-                <SettingOutlined className="profile-settings-icon" />
-              </div>
             </div>
           </div>
           <p className="text-center text-[#0037AF] text-xl font-semibold mb-6">{`${userData?.first_name} ${userData?.last_name}`}</p>
