@@ -82,7 +82,7 @@ export const Profile = () => {
         {/* Класс для скрывания no-animations функционал:
           "hidden-no-animations-switcher"
         */}
-        <div className="flex items-center justify-between py-2 hidden-no-animations-switcher">
+        <div className="flex items-center justify-between py-2">
           {/* Это пока думаю лучше скрыть Амир) что думаете? просто скрыто доработаем потом включим в подходящий момент, когда это нам нужно будет.*/}
           <span>Анимации ⚡</span>
           <Switch 
