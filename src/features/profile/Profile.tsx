@@ -3,7 +3,7 @@ import { UserOutlined, SettingOutlined } from "@ant-design/icons";
 import { Outlet, useNavigate } from "react-router-dom";
 import { profileRightNav } from "./model";
 import { AppRoutes } from "@shared/config/AppRoutes";
-import { tokenControl } from "@shared/lib";
+import { tokenControl, useTheme } from "@shared/lib";
 import { ApiRoutes, _axios } from "@shared/api";
 import { IUser } from "@entities/login";
 import { useEffect, useState } from "react";
@@ -18,6 +18,7 @@ export const Profile = () => {
   const [userData, setUserData] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
   const activeTab = useCurrentTab();
+  const { isAnimEnabled, setIsAnimEnabled } = useTheme();
   
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSnowEnabled, setIsSnowEnabled] = useState(() => {
@@ -65,7 +66,7 @@ export const Profile = () => {
     <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6">
       <SnowOverlay enabled={isSnowEnabled} />
       <Modal
-        title="Тестовые функции"
+        title="Настройки"
         open={isSettingsOpen}
         onCancel={() => setIsSettingsOpen(false)}
         footer={null}
@@ -78,10 +79,28 @@ export const Profile = () => {
             onChange={setIsSnowEnabled} 
           />
         </div>
+        {/* Класс для скрывания no-animations функционал:
+          "hidden-no-animations-switcher"
+        */}
+        <div className="flex items-center justify-between py-2">
+          {/* Это пока думаю лучше скрыть Амир) что думаете? просто скрыто доработаем потом включим в подходящий момент, когда это нам нужно будет.*/}
+          <span>Анимации ⚡</span>
+          <Switch 
+            checked={isAnimEnabled} 
+            onChange={setIsAnimEnabled} 
+          />
+        </div>
       </Modal>
 
       <aside className="w-full lg:w-[28%]">
         <div className="bg-white p-6 rounded-xl shadow">
+          <div className="flex justify-end">
+            <SettingOutlined 
+              className="text-gray-500! hover:text-blue-600! transition-colors! cursor-pointer!"
+              style={{ fontSize: "20px" }}
+              onClick={() => setIsSettingsOpen(true)}
+            />
+          </div>
           <div className="flex flex-col items-center mb-4 relative">
              <div className="relative">
               <Avatar
@@ -90,12 +109,6 @@ export const Profile = () => {
                 icon={<UserOutlined />}
                 className="profile-avatar"
               />
-              <div 
-                className="profile-settings-btn"
-                onClick={() => setIsSettingsOpen(true)}
-              >
-                <SettingOutlined className="profile-settings-icon" />
-              </div>
             </div>
           </div>
           <p className="text-center text-[#0037AF] text-xl font-semibold mb-6">{`${userData?.first_name} ${userData?.last_name}`}</p>

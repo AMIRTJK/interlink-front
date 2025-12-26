@@ -93,3 +93,14 @@
 .module-grid-menu .ant-menu-item .anticon {
   flex-shrink: 0 !important;
 }
+
+/* No Animations Mode - Disable Hover Effects */
+body.no-animations .module-grid-menu .ant-menu-item:not(.ant-menu-item-selected):hover {
+  background-color: white !important;
+  color: #333 !important;
+  border: none !important;
+}
+/* No Animations Mode */
+body.no-animations .module-grid-menu .ant-menu-item:not(.ant-menu-item-selected):hover img {
+  filter: none !important;
+}

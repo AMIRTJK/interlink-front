@@ -402,3 +402,10 @@
   margin-top: 8px;
   display: block;
 }
+
+/* No Animations - TaskCard */
+body.no-animations .task-card:hover {
+  transform: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
