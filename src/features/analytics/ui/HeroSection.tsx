@@ -35,7 +35,7 @@ export const HeroSection = ({ data }: HeroSectionProps) => {
       
       <Card className="shadow-sm hover:shadow-md transition-shadow">
         <Statistic
-          title="В огне (Просрочено)"
+          title="Просрочено"
           value={data.overdueCount}
           prefix={<FireOutlined className="text-red-500" />}
           valueStyle={{ fontWeight: "bold", color: data.overdueCount > 0 ? "#cf1322" : "inherit" }}

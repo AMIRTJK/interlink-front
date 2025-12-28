@@ -1,12 +1,12 @@
 export interface IAnalyticsHero {
   totalTasks: number;
-  completionRate: number; // 0-100
+  completionRate: number; 
   overdueCount: number;
-  averageTime: string; // e.g. "2ч 30м"
+  averageTime: string; 
 }
 
 export interface IAnalyticsActivity {
-  date: string; // YYYY-MM-DD
+  date: string; 
   count: number;
 }
 
@@ -17,5 +17,5 @@ export interface IAnalyticsData {
 
 export interface IAnalyticsRequest {
   userId: string;
-  date: string; // ISO string or YYYY-MM-DD
+  date: string; 
 }

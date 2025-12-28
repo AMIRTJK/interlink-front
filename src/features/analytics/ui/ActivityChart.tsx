@@ -8,7 +8,7 @@ interface ActivityChartProps {
 
 export const ActivityChart = ({ data }: ActivityChartProps) => {
   return (
-    <Card title="График продуктивности" className="shadow-sm w-full">
+    <Card title="График продуктивности" className="hidden shadow-sm w-full">
       <div style={{ height: 350, width: "100%" }}>
         <ResponsiveContainer>
           <AreaChart
