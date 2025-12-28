@@ -1,43 +1,46 @@
-import { Card, Statistic, Row, Col } from "antd";
-import { RiseOutlined, CheckCircleOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { useEffect } from "react";
+import {  Alert } from "antd";
+import { useAnalytics } from "@shared/lib/hooks/useAnalytics";
+import { tokenControl } from "@shared/lib";
+import { HeroSection } from "./ui/HeroSection";
+import { ActivityChart } from "./ui/ActivityChart";
+import { If, Loader } from "@shared/ui";
 
 export const Analytics = () => {
+  const userId = tokenControl.getUserId();
+  const { mutate, data, isLoading, isError } = useAnalytics();
+
+  useEffect(() => {
+    if (userId) {
+      mutate({ 
+        userId: userId, 
+        date: new Date().toISOString() 
+      });
+    }
+  }, [mutate, userId]);
+
   return (
-    <div className="profile-page">
-      <div className="analytics-container">
-        <h2 className="page-title">Аналитика</h2>
-        <Row gutter={[16, 16]}>
-          <Col span={8}>
-            <Card className="analytics-card">
-              <Statistic
-                title="Всего задач"
-                value={24}
-                prefix={<RiseOutlined />}
-                valueStyle={{ color: "#667eea" }}
-              />
-            </Card>
-          </Col>
-          <Col span={8}>
-            <Card className="analytics-card">
-              <Statistic
-                title="Выполнено"
-                value={18}
-                prefix={<CheckCircleOutlined />}
-                valueStyle={{ color: "#52c41a" }}
-              />
-            </Card>
-          </Col>
-          <Col span={8}>
-            <Card className="analytics-card">
-              <Statistic
-                title="В ожидании"
-                value={6}
-                prefix={<ClockCircleOutlined />}
-                valueStyle={{ color: "#faad14" }}
-              />
-            </Card>
-          </Col>
-        </Row>
+    <div className="profile-page p-6">
+      <div className="analytics-container max-w-7xl mx-auto">
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">Аналитика</h2>
+        <If is={isLoading}>
+          <Loader/>
+        </If>
+       <If is={isError}>
+          <Alert
+            message="Ошибка загрузки"
+            description="Не удалось загрузить данные аналитики."
+            type="error"
+            showIcon
+            className="mb-6"
+          />
+       </If>
+        {data && (
+          <div className="space-y-6">
+            <HeroSection data={data.hero} />
+            <ActivityChart data={data.activity} />
+          </div>
+        )}
       </div>
     </div>
   );
