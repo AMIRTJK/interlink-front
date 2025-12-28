@@ -36,13 +36,12 @@ export const useCalendarEvents = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState("");
 
+  const from = currentDate.startOf("month").format("YYYY-MM-DD");
+  const to = currentDate.endOf("month").format("YYYY-MM-DD");
+
   const fetchEvents = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Диапазон: от первого числа этого месяца до конца текущего выбранного месяца
-      const from = currentDate.startOf("month").format("YYYY-MM-DD");
-      const to = currentDate.endOf("month").format("YYYY-MM-DD");
-
       const response = await _axios.get<{ data: EventResponse[] }>(
         ApiRoutes.GET_EVENTS,
         { 
@@ -62,7 +61,7 @@ export const useCalendarEvents = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentDate, search]);
+  }, [from, to, search]);
 
   useEffect(() => {
     fetchEvents();
