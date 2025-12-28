@@ -48,7 +48,7 @@ export const TextField = ({
       <InputComponent
         placeholder={placeholder}
         autoComplete="new-password"
-        iconRender={iconRender}
+        {...(type === "password" ? { iconRender } : {})}
         {...props}
       />
     </Item>

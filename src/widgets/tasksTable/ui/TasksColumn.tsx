@@ -11,13 +11,28 @@ export const TasksColumn = ({
   tasks,
   onAddTask,
   onTaskClick,
+  onTaskDrop,
 }: {
   status: string;
   label: string;
   tasks: ITaskItem[];
   onAddTask?: (status: string) => void;
   onTaskClick?: (task: ITaskItem) => void;
+  onTaskDrop?: (taskId: string, status: string) => void;
 }) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData("taskId");
+    if (taskId) {
+      onTaskDrop?.(taskId, status);
+    }
+  };
+
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 3;
 
@@ -27,7 +42,11 @@ export const TasksColumn = ({
   const currentTasks = columnTasks.slice(startIndex, startIndex + pageSize);
 
   return (
-    <div className="tasks-column">
+    <div 
+      className="tasks-column"
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
       <div className="tasks-column-header">
         <div className="flex items-center gap-1">
           <StatusIcon status={status} />

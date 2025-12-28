@@ -25,7 +25,7 @@ export interface IApiResponse<TData = unknown> {
 
 // Опции для useMutationQuery
 interface IUseMutationQueryOptions<TRequest = unknown, TData = unknown> {
-  url: string;
+  url: string | ((data: TRequest) => string);
   method: "POST" | "PUT" | "DELETE" | "GET";
   messages?: {
     success?: string;
@@ -48,8 +48,10 @@ export const useMutationQuery = <TRequest = unknown, TData = unknown>(
 
   const mutationFn = useCallback(
     async (data: TRequest): Promise<TData> => {
+      const requestUrl = typeof url === "function" ? url(data) : url;
+
       const response = await _axios<IApiResponse<TData>>({
-        url,
+        url: requestUrl,
         method,
         data,
         suppressErrorToast: Boolean(messages?.error),

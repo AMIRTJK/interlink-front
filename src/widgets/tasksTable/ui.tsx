@@ -3,7 +3,8 @@ import { Button } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
 import { useGetQuery, useDynamicSearchParams } from "@shared/lib";
 import { ApiRoutes } from "@shared/api/api-routes";
-import { TASK_STATUS_OPTIONS } from "@features/tasks/model";
+import { TASK_STATUS_OPTIONS } from "@features/tasks";
+import { useMutationQuery } from "@shared/lib";
 import type { ITaskItem, ITasksResponse } from "./model";
 import { TasksColumn } from "./ui/TasksColumn";
 import { TasksFilters } from "./ui/TasksFilters";
@@ -14,8 +15,11 @@ interface IProps {
   onAddTask?: (status: string) => void;
   onTaskClick?: (task: ITaskItem) => void;
 }
+
 export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
   const [showFilters, setShowFilters] = useState(false);
+  const [localTasks, setLocalTasks] = useState<ITaskItem[]>([]);
+  const [lastSyncedData, setLastSyncedData] = useState<ITaskItem[] | undefined>(undefined);
   const { params } = useDynamicSearchParams();
   const { data: response, isLoading: loading } = useGetQuery<
     Record<string, string>,
@@ -29,10 +33,45 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
       enabled: !!params,
       keepPreviousData: true,
       refetchOnMount: true,
-      staleTime: 60 * 60 * 1000,
     }
   });
-  const tasks = response?.data || [];
+
+  const { mutateAsync: updateTaskStatus } = useMutationQuery<{ id: string; status: string }, unknown>({
+    url: (data) => `${ApiRoutes.UPDATE_TASK_STATUS}/${data.id}`,
+    method: "PUT",
+    messages: {
+      error: "Ошибка обновления статуса",
+    },
+  });
+  
+  if (response?.data && response.data !== lastSyncedData) {
+    setLocalTasks(response.data);
+    setLastSyncedData(response.data);
+  }
+
+  const handleTaskDrop = async (taskId: string, newStatus: string) => {
+    const taskIndex = localTasks.findIndex((t) => t.id.toString() === taskId);
+    if (taskIndex === -1) return;
+    
+    const updatedTasks = [...localTasks];
+    const oldStatus = updatedTasks[taskIndex].status;
+    
+    if (oldStatus === newStatus) return;
+
+    updatedTasks[taskIndex] = { ...updatedTasks[taskIndex], status: newStatus };
+    setLocalTasks(updatedTasks);
+
+    try {
+      await updateTaskStatus({ id: taskId, status: newStatus });
+    } catch (error) {
+       console.log(error);
+       const revertedTasks = [...localTasks]; 
+       revertedTasks[taskIndex] = { ...revertedTasks[taskIndex], status: oldStatus };
+       setLocalTasks(revertedTasks);
+    }
+  };
+
+  const tasks = localTasks || [];
   if (loading) {
     return (
       <Loader/>
@@ -61,6 +100,7 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
             tasks={tasks}
             onAddTask={onAddTask}
             onTaskClick={onTaskClick}
+            onTaskDrop={handleTaskDrop}
           />
         ))}
       </div>
