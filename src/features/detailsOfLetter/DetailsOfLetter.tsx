@@ -5,9 +5,9 @@ import { useEffect } from "react";
 import { IDetailsOfLetterProps } from "./model";
 import "./DetailsOfLetter.css";
 
-export const DetailsOfLetter: React.FC<IDetailsOfLetterProps> = ({ 
-    mode = 'create', 
-    initialData 
+export const DetailsOfLetter: React.FC<IDetailsOfLetterProps> = ({
+    mode = 'create',
+    initialData
 }) => {
     const [form] = useForm();
 
@@ -16,17 +16,17 @@ export const DetailsOfLetter: React.FC<IDetailsOfLetterProps> = ({
             form.setFieldsValue(initialData);
         }
     }, [initialData, form]);
-    
+
     return (
         <div className="details__container">
-            <Form 
-                form={form} 
-                layout="vertical" 
+            <Form
+                form={form}
+                layout="vertical"
                 className="details__form"
                 colon={false}
-                disabled={mode === 'view'}
+                disabled={mode === 'show'}
             >
-               {renderFields()}
+                {renderFields()}
             </Form>
         </div>
     );

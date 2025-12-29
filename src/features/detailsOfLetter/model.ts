@@ -11,6 +11,6 @@ export interface IDetailsOfLetterData {
 }
 
 export interface IDetailsOfLetterProps {
-    mode?: 'create' | 'view';
+    mode?: 'create' | 'show';
     initialData?: IDetailsOfLetterData;
 }
