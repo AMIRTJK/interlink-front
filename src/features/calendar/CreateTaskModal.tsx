@@ -5,15 +5,21 @@ import "./task-details-modal.css";
 interface IProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedDateTime: { date: Dayjs; time: Dayjs } | null;
+  selectedDateTime?: { date: Dayjs; time: Dayjs } | null;
+  initialValues?: any; // Should be ITaskFormValues, but avoiding import cycle if possible. Or I'll import.
   onSuccess: () => void;
+  mode?: 'create' | 'edit';
+  eventId?: string;
 }
 
 export const CreateTaskModal = ({
   isOpen,
   onClose,
   selectedDateTime,
+  initialValues,
   onSuccess,
+  mode = 'create',
+  eventId,
 }: IProps) => {
   return (
     <Modal
@@ -30,15 +36,17 @@ export const CreateTaskModal = ({
       <div className="task-details">
         <AddTaskForm
           initialValues={
-            selectedDateTime
+            initialValues || (selectedDateTime
               ? {
                   date: selectedDateTime.date,
                   time: selectedDateTime.time,
                 }
-              : undefined
+              : undefined)
           }
           onSuccess={onSuccess}
           isEvent={true}
+          mode={mode}
+          eventId={eventId}
         />
       </div>
     </Modal>
