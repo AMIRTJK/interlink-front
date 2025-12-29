@@ -26,7 +26,7 @@ export interface IApiResponse<TData = unknown> {
 // Опции для useMutationQuery
 interface IUseMutationQueryOptions<TRequest = unknown, TData = unknown> {
   url: string | ((data: TRequest) => string);
-  method: "POST" | "PUT" | "DELETE" | "GET";
+  method: "POST" | "PUT" | "DELETE" | "GET" | "PATCH";
   messages?: {
     success?: string;
     error?: string;

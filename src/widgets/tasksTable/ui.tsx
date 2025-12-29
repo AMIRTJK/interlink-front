@@ -37,8 +37,8 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
   });
 
   const { mutateAsync: updateTaskStatus } = useMutationQuery<{ id: string; status: string }, unknown>({
-    url: (data) => `${ApiRoutes.UPDATE_TASK_STATUS}/${data.id}`,
-    method: "PUT",
+    url: (data) => `${ApiRoutes.UPDATE_TASK_STATUS}/${data.id}/status`,
+    method: "PATCH",
     messages: {
       error: "Ошибка обновления статуса",
     },
