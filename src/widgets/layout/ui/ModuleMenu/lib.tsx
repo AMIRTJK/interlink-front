@@ -14,59 +14,59 @@ export type MenuItem = Required<MenuProps>["items"][number];
 export const getModuleItems = (
   variant: "horizontal" | "compact"
 ): MenuItem[] => [
-  {
-    key: `/${AppRoutes.PROFILE}`,
-    label: "Личный кабинет",
-    icon: variant === "horizontal" ? <img src={ProfileIcon} alt="" /> : null,
-  },
-  {
-    key: "/modules/temp-organization",
-    label: "Организация",
-    icon:
-      variant === "horizontal" ? <img src={OrganizationIcon} alt="" /> : null,
-  },
-  {
-    key: "/modules/temp-docs_main",
-    label: "Основные документы",
-    icon:
-      variant === "horizontal" ? <img src={MainDocumentsIcon} alt="" /> : null,
-  },
-  {
-    key: `/${AppRoutes.MODULES}/${AppRoutes.CORRESPONDENCE}`,
-    label: "Корреспонденция",
-    icon:
-      variant === "horizontal" ? <img src={CorrespondenceIcon} alt="" /> : null,
-    children:
-      variant === "compact"
-        ? [
+    {
+      key: AppRoutes.PROFILE,
+      label: "Личный кабинет",
+      icon: variant === "horizontal" ? <img src={ProfileIcon} alt="" /> : null,
+    },
+    {
+      key: "/modules/temp-organization",
+      label: "Организация",
+      icon:
+        variant === "horizontal" ? <img src={OrganizationIcon} alt="" /> : null,
+    },
+    {
+      key: "/modules/temp-docs_main",
+      label: "Основные документы",
+      icon:
+        variant === "horizontal" ? <img src={MainDocumentsIcon} alt="" /> : null,
+    },
+    {
+      key: AppRoutes.CORRESPONDENCE,
+      label: "Корреспонденция",
+      icon:
+        variant === "horizontal" ? <img src={CorrespondenceIcon} alt="" /> : null,
+      children:
+        variant === "compact"
+          ? [
             {
-              key: `/${AppRoutes.MODULES}/${AppRoutes.CORRESPONDENCE}/${AppRoutes.CORRESPONDENCE_INCOMING}`,
+              key: AppRoutes.CORRESPONDENCE_INCOMING,
               label: "Входящие",
             },
             {
-              key: `/${AppRoutes.MODULES}/${AppRoutes.CORRESPONDENCE}/${AppRoutes.CORRESPONDENCE_OUTGOING}`,
+              key: AppRoutes.CORRESPONDENCE_OUTGOING,
               label: "Исходящие",
             },
           ]
-        : undefined,
-  },
-  {
-    key: "/modules/temp-docs_primary",
-    label: "Первичные документы",
-    icon:
-      variant === "horizontal" ? (
-        <img src={PrimaryDocumentsIcon} alt="" />
-      ) : null,
-  },
-  {
-    key: "/modules/temp-apps",
-    label: "Заявки",
-    icon:
-      variant === "horizontal" ? <img src={ApplicationsIcon} alt="" /> : null,
-  },
-  {
-    key: "/modules/temp-crm",
-    label: "CRM",
-    icon: variant === "horizontal" ? <img src={CrmIcon} alt="" /> : null,
-  },
-];
+          : undefined,
+    },
+    {
+      key: "/modules/temp-docs_primary",
+      label: "Первичные документы",
+      icon:
+        variant === "horizontal" ? (
+          <img src={PrimaryDocumentsIcon} alt="" />
+        ) : null,
+    },
+    {
+      key: "/modules/temp-apps",
+      label: "Заявки",
+      icon:
+        variant === "horizontal" ? <img src={ApplicationsIcon} alt="" /> : null,
+    },
+    {
+      key: "/modules/temp-crm",
+      label: "CRM",
+      icon: variant === "horizontal" ? <img src={CrmIcon} alt="" /> : null,
+    },
+  ];

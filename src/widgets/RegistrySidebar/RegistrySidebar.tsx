@@ -29,13 +29,13 @@ export const RegistrySidebar = () => {
       icon: <img src={incomingIcon} />,
       label: "Входящие письма",
       count: 32,
-      path: `/${AppRoutes.MODULES}/${AppRoutes.CORRESPONDENCE}/${AppRoutes.CORRESPONDENCE_INCOMING}`,
+      path: AppRoutes.CORRESPONDENCE_INCOMING,
     },
     {
       key: "2",
       icon: <img src={outgoingIcon} />,
       label: "Исходящие письма",
-      path: `/${AppRoutes.MODULES}/${AppRoutes.CORRESPONDENCE}/${AppRoutes.CORRESPONDENCE_OUTGOING}`,
+      path: AppRoutes.CORRESPONDENCE_OUTGOING,
     },
     {
       key: "3",
@@ -100,7 +100,7 @@ export const RegistrySidebar = () => {
         {/* ВЕРХ: Лого и кнопка (Фиксированная высота) */}
         <div className="flex items-center justify-between py-6 shrink-0">
           {!collapsed && (
-            <div className="cursor-pointer" onClick={() => navigate("/")}>
+            <div className="cursor-pointer" onClick={() => navigate(AppRoutes.PROFILE)}>
               <img src={Logo} alt="logo" />
             </div>
           )}

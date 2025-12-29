@@ -30,7 +30,7 @@ export const ModuleMenu = ({ variant }: IProps) => {
 
   const activeKey =
     activeItem?.key ||
-    (pathname.includes("modules") ? "" : `/${AppRoutes.PROFILE_TASKS}`);
+    (pathname.includes("modules") ? "" : AppRoutes.PROFILE_TASKS);
   const subItems = activeItem?.children;
 
   const handleNavigate = (path: string) => {
@@ -48,19 +48,18 @@ export const ModuleMenu = ({ variant }: IProps) => {
         items={
           variant === "compact"
             ? items.map((item) => {
-                if (item && "children" in item) {
-                  const { children: _, ...rest } = item as SubMenuItem;
-                  return rest;
-                }
-                return item;
-              })
+              if (item && "children" in item) {
+                const { children: _, ...rest } = item as SubMenuItem;
+                return rest;
+              }
+              return item;
+            })
             : items
         }
         theme="light"
         disabledOverflow
-        className={`flex-wrap p-2 border-b-0! ${
-          variant === "compact" ? "compact-style" : "full-style"
-        }`}
+        className={`flex-wrap p-2 border-b-0! ${variant === "compact" ? "compact-style" : "full-style"
+          }`}
       />
 
       {/* Вторая синяя полоса для подмодулей */}

@@ -59,7 +59,7 @@ export const Profile = () => {
     const subPath = routes[e.key];
     if (subPath) {
       // Склеиваем префикс и хвост
-      navigate(`/${AppRoutes.PROFILE}/${subPath}`);
+      navigate(subPath);
     }
   };
 

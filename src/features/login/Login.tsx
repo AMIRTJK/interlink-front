@@ -35,7 +35,7 @@ export const Login = () => {
           const token = data.token;
           tokenControl.set({ token });
           tokenControl.setUserId(data?.user?.id);
-          navigate(AppRoutes.PROFILE);
+          navigate(AppRoutes.PROFILE_TASKS, { replace: true });
         },
       },
     }

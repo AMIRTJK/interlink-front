@@ -21,7 +21,7 @@ export const Header = () => {
 
   return (
     <header className="bg-white p-4 flex justify-between items-center rounded-[15px] h-[61px]">
-      <Link to="/" className="mt-2">
+      <Link to={AppRoutes.PROFILE} className="mt-2">
         <Image src={Logo} preview={false} />
       </Link>
       <div className="flex items-center gap-2">
