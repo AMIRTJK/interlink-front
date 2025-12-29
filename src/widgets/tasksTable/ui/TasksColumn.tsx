@@ -12,6 +12,7 @@ export const TasksColumn = ({
   onAddTask,
   onTaskClick,
   onTaskDrop,
+  onDelete,
 }: {
   status: string;
   label: string;
@@ -19,6 +20,7 @@ export const TasksColumn = ({
   onAddTask?: (status: string) => void;
   onTaskClick?: (task: ITaskItem) => void;
   onTaskDrop?: (taskId: string, status: string) => void;
+  onDelete?: (taskId: string | number) => void;
 }) => {
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -64,7 +66,7 @@ export const TasksColumn = ({
       <div className="tasks-list">
         {currentTasks?.length > 0 ? (
           currentTasks?.map((task) => (
-            <TaskCard key={task.id} task={task} onClick={onTaskClick} />
+            <TaskCard key={task.id} task={task} onClick={onTaskClick} onDelete={onDelete} />
           ))
         ) : (
           <div className="empty-column">Нет задач</div>

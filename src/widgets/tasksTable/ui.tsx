@@ -49,6 +49,28 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
     setLastSyncedData(response.data);
   }
 
+  const { mutateAsync: deleteTask } = useMutationQuery<string, unknown>({
+    url: (taskId) => `${ApiRoutes.DELETE_TASK_BY_ID}${taskId}`,
+    method: "DELETE",
+    messages: {
+      success: "Задача удалена",
+      error: "Ошибка удаления задачи",
+    },
+  });
+
+  const handleDeleteTask = async (taskId: string | number) => {
+    const idStr = taskId.toString();
+    const originalTasks = [...localTasks];
+    setLocalTasks(localTasks.filter((t) => t.id.toString() !== idStr));
+
+    try {
+      await deleteTask(idStr);
+    } catch (error) {
+      console.error(error);
+      setLocalTasks(originalTasks);
+    }
+  };
+
   const handleTaskDrop = async (taskId: string, newStatus: string) => {
     const taskIndex = localTasks.findIndex((t) => t.id.toString() === taskId);
     if (taskIndex === -1) return;
@@ -101,6 +123,7 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
             onAddTask={onAddTask}
             onTaskClick={onTaskClick}
             onTaskDrop={handleTaskDrop}
+            onDelete={handleDeleteTask}
           />
         ))}
       </div>

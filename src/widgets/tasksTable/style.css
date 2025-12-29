@@ -243,3 +243,20 @@ body:not(.no-animations) .task-card-task.dragging {
 .status-icon-svg {
   margin-top: 2px;
 }
+
+.task-card-delete-btn {
+  color: #9ca3af; 
+}
+
+/* No-animations */
+body:not(.no-animations) .task-card-delete-btn {
+  transition: color 0.2s ease;
+}
+
+body:not(.no-animations) .task-card-delete-btn:hover {
+  color: #ef4444; 
+}
+
+body.no-animations .task-card-delete-btn:hover {
+  color: #9ca3af !important;
+}
