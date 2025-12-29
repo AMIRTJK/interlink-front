@@ -1,7 +1,7 @@
 import { Profile } from "@features/profile";
-import { LetterExecution } from "@features/ResolutionCard";
-import { DetailsOfLetter } from "@features/detailsOfLetter/DetailsOfLetter";
-import { ResolutionOfLetter } from "@features/ResolutionOfLetter";
+// import { LetterExecution } from "@features/ResolutionCard";
+// import { DetailsOfLetter } from "@features/detailsOfLetter/DetailsOfLetter";
+// import { ResolutionOfLetter } from "@features/ResolutionOfLetter";
 export const ProfilePage = () => {
   return (
     <div>
