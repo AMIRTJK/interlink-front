@@ -75,6 +75,27 @@
   border-radius: 12px;
   padding: 16px;
   cursor: pointer;
+  position: relative;
+}
+
+body:not(.no-animations) .task-card-task {
+  transition: all 0.2s ease-in-out;
+}
+
+body:not(.no-animations) .task-card-task:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+  cursor: grab;
+}
+
+body:not(.no-animations) .task-card-task:active {
+  cursor: grabbing;
+}
+
+body:not(.no-animations) .task-card-task.dragging {
+  filter: blur(4px);
+  opacity: 0.6;
 }
 
 .task-card-header {

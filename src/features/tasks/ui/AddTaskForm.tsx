@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { Form } from "antd";
 import {
-  type CreateEventPayload,
-  type CreateTaskPayload,
-  type TaskFormValues,
-  type EventResponse,
+  type ICreateEventPayload,
+  type ICreateTaskPayload,
+  type ITaskFormValues,
+  type IEventResponse,
   colors,
 } from "../model";
 import { useMutationQuery } from "@shared/lib";
@@ -13,9 +13,9 @@ import { ApiRoutes } from "@shared/api";
 import { RenderFields } from "../lib/renderFields";
 import '../style.css'
 interface IProps {
-  initialValues?: Partial<TaskFormValues>;
+  initialValues?: Partial<ITaskFormValues>;
   onSuccess?: (
-    values: CreateTaskPayload | CreateEventPayload | EventResponse
+    values: ICreateTaskPayload | ICreateEventPayload | IEventResponse
   ) => void;
   isEvent?: boolean;
   currentTaskStatus?: string;
@@ -27,9 +27,9 @@ export const AddTaskForm = ({
   isEvent,
   currentTaskStatus,
 }: IProps) => {
-  const [form] = Form.useForm<TaskFormValues>();
+  const [form] = Form.useForm<ITaskFormValues>();
 
-  const combinedInitialValues: Partial<TaskFormValues> = {
+  const combinedInitialValues: Partial<ITaskFormValues> = {
     ...initialValues,
     status:
       !isEvent && currentTaskStatus ? currentTaskStatus : initialValues?.status,
@@ -51,14 +51,14 @@ export const AddTaskForm = ({
         : "Ошибка при добавлении задачи",
       onSuccessCb: (data) => {
         if (isEvent && onSuccess) {
-          onSuccess(data as EventResponse);
+          onSuccess(data as IEventResponse);
         }
       },
       invalidate: [ApiRoutes.GET_TASKS],
     },
   });
 
-  const onFinish = (values: TaskFormValues) => {
+  const onFinish = (values: ITaskFormValues) => {
     if (isEvent) {
       const dateStr = values.date?.format("YYYY-MM-DD");
       const timeStr = values.time?.format("HH:mm");
@@ -78,7 +78,7 @@ export const AddTaskForm = ({
         endDateTime = startDateTime.add(1, "hour");
       }
 
-      const payload: CreateEventPayload = {
+      const payload: ICreateEventPayload = {
         title: values.title,
         description: values.description || "",
         start_at: startDateTime.format("YYYY-MM-DD HH:mm"),
@@ -91,7 +91,7 @@ export const AddTaskForm = ({
       console.log("Event payload:", payload);
       addTaskMutate(payload);
     } else {
-      const payload: CreateTaskPayload = {
+      const payload: ICreateTaskPayload = {
         title: values.title,
         description: values.description || "",
         status: values.status || "pending",

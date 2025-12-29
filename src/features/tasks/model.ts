@@ -18,21 +18,21 @@ export const TASK_STATUS_OPTIONS = [
   { value: TASK_STATUS.COMPLETED, label: TASK_STATUS_LABELS[TASK_STATUS.COMPLETED] },
 ];
 
-export interface CreateTaskPayload {
+export interface ICreateTaskPayload {
   title: string;
   description: string;
   status: string;
   assignees: number[];
 }
 
-export interface Participant {
+export interface IParticipant {
   id: number;
   full_name: string;
   photo_path: string | null;
   permission_names?: string[];
 }
 
-export interface EventResponse {
+export interface IEventResponse {
   id: number;
   title: string;
   description: string;
@@ -40,12 +40,12 @@ export interface EventResponse {
   end_at: string;
   color: string;
   status: string;
-  participants: Participant[];
+  participants: IParticipant[];
   created_at: string;
   updated_at: string;
 }
 
-export interface CreateEventPayload {
+export interface ICreateEventPayload {
   title: string;
   description: string;
   start_at: string;
@@ -55,7 +55,7 @@ export interface CreateEventPayload {
   participants: number[];
 }
 
-export interface Task {
+export interface ITask {
   id: string;
   title: string;
   description?: string;
@@ -71,7 +71,7 @@ export interface Task {
   }>;
 }
 
-export interface TaskFormValues {
+export interface ITaskFormValues {
   title: string;
   description?: string;
   date?: Dayjs;

@@ -49,14 +49,16 @@ export const SelectField = ({
   transformResponse,
   mode,
   className = `${customClass}`,
+  searchParamKey,
   ...props
 }: ISelectFieldProps) => {
   const [items, setItems] = useState<unknown[]>([]);
   const [isFetched, setIsFetched] = useState(false);
+
   const [searchTerm, setSearchTerm] = useState("");
-  const searchParamKey = props.searchParamKey || "name";
+  const usedSearchParamKey = searchParamKey || "name";
   const params = props.showSearch
-    ? { [searchParamKey]: searchTerm }
+    ? { [usedSearchParamKey]: searchTerm }
     : undefined;
 
   const { data, refetch, isFetching } = useGetQuery<unknown>({
@@ -152,7 +154,7 @@ export const SelectField = ({
       <Select
         mode={mode}
         loading={isFetching}
-        onDropdownVisibleChange={loadItems} // Вызываем загрузку данных при открытии выпадающего списка
+        onOpenChange={loadItems} // Вызываем загрузку данных при открытии выпадающего списка
         onSearch={url ? handleSearch : undefined}
         filterOption={filterOption}
         onChange={onChange ? onChange : handleChange}
