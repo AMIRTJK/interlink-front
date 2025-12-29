@@ -19,14 +19,14 @@ export const Profile = () => {
   const [loading, setLoading] = useState(true);
   const activeTab = useCurrentTab();
   const { isAnimEnabled, setIsAnimEnabled } = useTheme();
-  
+
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSnowEnabled, setIsSnowEnabled] = useState(() => {
-    return localStorage.getItem('snow-enabled') === 'true';
+    return localStorage.getItem("snow-enabled") === "true";
   });
 
   useEffect(() => {
-    localStorage.setItem('snow-enabled', String(isSnowEnabled));
+    localStorage.setItem("snow-enabled", String(isSnowEnabled));
   }, [isSnowEnabled]);
 
   useEffect(() => {
@@ -55,7 +55,12 @@ export const Profile = () => {
       calendar: AppRoutes.PROFILE_CALENDAR,
       analytics: AppRoutes.PROFILE_ANALYTICS,
     };
-    navigate(`/${AppRoutes.PROFILE}/${routes[e.key]}`);
+
+    const subPath = routes[e.key];
+    if (subPath) {
+      // Склеиваем префикс и хвост
+      navigate(`/${AppRoutes.PROFILE}/${subPath}`);
+    }
   };
 
   if (loading) {
@@ -74,10 +79,7 @@ export const Profile = () => {
       >
         <div className="flex items-center justify-between py-2">
           <span>Включить снег ❄️</span>
-          <Switch 
-            checked={isSnowEnabled} 
-            onChange={setIsSnowEnabled} 
-          />
+          <Switch checked={isSnowEnabled} onChange={setIsSnowEnabled} />
         </div>
         {/* Класс для скрывания no-animations функционал:
           "hidden-no-animations-switcher"
@@ -85,24 +87,21 @@ export const Profile = () => {
         <div className="flex items-center justify-between py-2 hidden-no-animations-switcher">
           {/* Это пока думаю лучше скрыть   */}
           <span>Анимации ⚡</span>
-          <Switch 
-            checked={isAnimEnabled} 
-            onChange={setIsAnimEnabled} 
-          />
+          <Switch checked={isAnimEnabled} onChange={setIsAnimEnabled} />
         </div>
       </Modal>
 
       <aside className="w-full lg:w-[28%]">
         <div className="bg-white p-6 rounded-xl shadow">
           <div className="flex justify-end">
-            <SettingOutlined 
+            <SettingOutlined
               className="text-gray-500! hover:text-blue-600! transition-colors! cursor-pointer!"
               style={{ fontSize: "20px" }}
               onClick={() => setIsSettingsOpen(true)}
             />
           </div>
           <div className="flex flex-col items-center mb-4 relative">
-             <div className="relative">
+            <div className="relative">
               <Avatar
                 src={userAvatar}
                 size={128}

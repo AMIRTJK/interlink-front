@@ -5,6 +5,13 @@
   font-family: "Inter", sans-serif;
 } */
 
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
 :root {
   --color-bg-primary: #ffffff;
   --color-text-primary: #000000;

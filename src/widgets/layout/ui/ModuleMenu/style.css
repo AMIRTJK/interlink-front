@@ -1,0 +1,340 @@
+/* --- Контейнер Menu --- */
+.full-style.ant-menu {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 12px;
+}
+
+/* --- Общие стили для плиток (активные и неактивные) --- */
+.full-style .ant-menu-item,
+.full-style .ant-menu-item-selected {
+  /* Фиксированные размеры */
+  width: 188px !important;
+  height: 110px !important;
+
+  /* Flexbox для вертикального space-between */
+  display: flex !important;
+  flex-direction: column;
+  justify-content: space-between !important;
+  align-items: center !important;
+
+  /* Внутренние отступы и сброс внешних */
+  padding: 16px 8px !important;
+  margin: 0 !important;
+
+  /* Сброс границ и скругление углов */
+  border: none !important;
+  border-radius: 15px !important;
+
+  /* Визуальные стили невыделенной плитки */
+  transition: all 0.3s ease !important;
+
+  background-color: white !important;
+  color: #333 !important;
+  font-size: 14px;
+  min-width: 0 !important;
+}
+
+.full-style .ant-menu-item-selected img {
+  filter: brightness(0) invert(1);
+}
+
+/* --- Стили для активной (выделенной) плитки --- */
+.full-style .ant-menu-item-selected {
+  background-color: #0037af !important;
+  color: white !important;
+  font-weight: 400;
+}
+
+/* --- Удаление индикатора выделения у активной плитки и при наведении --- */
+.full-style .ant-menu-item-selected::after,
+.full-style .ant-menu-item::after {
+  display: none !important;
+}
+
+/* --- Эффект HOVER: Полное удаление границы и установка фона --- */
+
+/* При наведении на ЛЮБОЙ элемент: сброс всех границ */
+.full-style .ant-menu-item:hover,
+.full-style .ant-menu-item-selected:hover {
+  border: none !important;
+  border-bottom: none !important;
+}
+
+/* При наведении на НЕАКТИВНЫЙ элемент (легкий фон) */
+.full-style .ant-menu-item:not(.ant-menu-item-selected):hover {
+  background-color: #0037af !important;
+  color: white !important;
+  border-color: #0037af;
+}
+
+/* При наведении на АКТИВНЫЙ элемент (сохраняем синий фон) */
+.full-style .ant-menu-item-selected:hover {
+  background-color: #0037af !important;
+  color: white !important;
+}
+
+.full-style .ant-menu-item:not(.ant-menu-item-selected):hover img {
+  filter: brightness(0) invert(1);
+}
+
+/* --- Стили для внутреннего содержимого (иконка и текст) --- */
+.full-style .ant-menu-item .ant-menu-title-content {
+  flex-grow: 0 !important;
+  margin: 0 !important;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.full-style .ant-menu-item .anticon {
+  flex-shrink: 0 !important;
+}
+
+/* No Animations Mode - Disable Hover Effects */
+body.no-animations
+  .full-style
+  .ant-menu-item:not(.ant-menu-item-selected):hover {
+  background-color: white !important;
+  color: #333 !important;
+  border: none !important;
+}
+/* No Animations Mode */
+body.no-animations
+  .full-style
+  .ant-menu-item:not(.ant-menu-item-selected):hover
+  img {
+  filter: none !important;
+}
+
+/* ========================================== */
+/* 1. FULL-STYLE (Ваш оригинальный код)       */
+/* ========================================== */
+.full-style.ant-menu {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 12px;
+}
+
+.full-style .ant-menu-item,
+.full-style .ant-menu-item-selected {
+  width: 188px !important;
+  height: 110px !important;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 16px 8px !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 15px !important;
+  transition: all 0.3s ease !important;
+  background-color: white !important;
+  color: #333 !important;
+  font-size: 14px;
+  min-width: 0 !important;
+}
+
+.full-style .ant-menu-item-selected {
+  background-color: #0037af !important;
+  color: white !important;
+}
+
+.full-style .ant-menu-item-selected img {
+  filter: brightness(0) invert(1);
+}
+
+.full-style .ant-menu-item:not(.ant-menu-item-selected):hover {
+  background-color: #0037af !important;
+  color: white !important;
+}
+
+.full-style .ant-menu-item:not(.ant-menu-item-selected):hover img {
+  filter: brightness(0) invert(1);
+}
+
+.full-style .ant-menu-item-selected::after,
+.full-style .ant-menu-item::after {
+  display: none !important;
+}
+
+/* COMPACT-STYLE */
+
+.compact-mode {
+  position: relative;
+  background: #ffffff;
+  border-radius: 15px;
+  margin-bottom: 24px;
+}
+
+.compact-style.ant-menu-horizontal {
+  background: transparent !important;
+  border-bottom: none !important;
+  margin-bottom: -1px;
+  position: relative;
+  z-index: 2;
+  display: flex !important;
+  align-items: center !important; /* Центрируем вкладки по вертикали */
+  height: 40px !important;
+  gap: 0 !important;
+  padding: 0 8px !important;
+}
+
+/* --- Базовый стиль элемента --- */
+.compact-style .ant-menu-item {
+  position: relative !important;
+  height: 28px !important; /* Чуть меньше высоты контейнера */
+  line-height: 28px !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 20px !important;
+  transition: all 0.2s ease !important;
+  border-radius: 8px !important; /* Скругление для HOVER состояния */
+  color: #595959 !important;
+  overflow: visible !important;
+  margin: 0 4px !important;
+}
+
+.compact-style .ant-menu-item::before {
+  left: -10px;
+  border-bottom-right-radius: 12px;
+  box-shadow: 6px 6px 0 6px transparent;
+  clip-path: inset(0 0 0 -10px);
+}
+
+.compact-style .ant-menu-item .ant-menu-title-content::after {
+  right: -10px;
+  bottom: 0;
+  border-bottom-left-radius: 12px;
+  box-shadow: -6px 6px 0 6px transparent;
+  clip-path: inset(0 -10px 0 0);
+}
+
+.compact-style .ant-menu-item::before,
+.compact-style .ant-menu-item .ant-menu-title-content::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 12px;
+  height: 12px;
+  background: transparent;
+  pointer-events: none;
+
+  /* Добавляем переход для тени и прозрачности */
+  transition: all 0.2s ease !important;
+  opacity: 0;
+}
+
+.compact-style .ant-menu-item::after {
+  display: none !important;
+}
+
+/* --- СОСТОЯНИЕ HOVER (как в Chrome) --- */
+.compact-style .ant-menu-item:not(.ant-menu-item-selected):hover {
+  background-color: rgba(
+    0,
+    0,
+    0,
+    0.06
+  ) !important; /* Легкое затемнение капсулы */
+  color: #333 !important;
+}
+
+/* --- СОСТОЯНИЕ SELECTED (Перетекание) --- */
+.compact-style .ant-menu-item-selected {
+  background-color: #0037af !important;
+  color: white !important;
+  border-radius: 15px 15px 0 0 !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  align-self: flex-end;
+  z-index: 5 !important;
+  margin: 0 !important;
+}
+
+.compact-style .ant-menu-item-selected::before {
+  opacity: 1;
+  box-shadow: 6px 6px 0 6px #0037af;
+}
+
+.compact-style .ant-menu-item-selected .ant-menu-title-content::after {
+  opacity: 1;
+  box-shadow: -6px 6px 0 6px #0037af;
+}
+
+/* Ушки только для выбранного элемента */
+.compact-style .ant-menu-item-selected::before,
+.compact-style .ant-menu-item-selected .ant-menu-title-content::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 12px;
+  height: 12px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.compact-style .ant-menu-item-selected::before {
+  left: -10px;
+  border-bottom-right-radius: 12px;
+  box-shadow: 6px 6px 0 6px #0037af;
+  clip-path: inset(0 0 0 -10px);
+}
+
+.compact-style .ant-menu-item-selected .ant-menu-title-content::after {
+  right: -10px;
+  bottom: 0;
+  border-bottom-left-radius: 12px;
+  box-shadow: -6px 6px 0 6px #0037af;
+  clip-path: inset(0 -10px 0 0);
+}
+
+/* Фикс для отрисовки ушек за пределами li */
+.compact-style .ant-menu-item-selected {
+  overflow: visible !important;
+}
+
+.compact-style .ant-menu-item .ant-menu-title-content {
+  overflow: visible !important;
+  display: block !important;
+}
+
+/* --- Синяя полоса снизу --- */
+.sub-menu-bar {
+  background-color: #0037af;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  padding: 10px 32px;
+  gap: 24px;
+  position: relative;
+  z-index: 1;
+  color: white;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+}
+
+/* Стили для элементов подменю */
+.sub-menu-item {
+  cursor: pointer;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  font-weight: 400;
+  position: relative;
+}
+
+.sub-menu-item:hover {
+  opacity: 1;
+}
+
+/* СОСТОЯНИЕ ACTIVE для подменю */
+.sub-menu-item.active {
+  opacity: 1;
+}

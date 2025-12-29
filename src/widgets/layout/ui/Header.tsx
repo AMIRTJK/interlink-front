@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar, Button, Image } from "antd";
-import Logo from "../../assets/images/logo.svg";
+import Logo from "../../../assets/images/logo.svg";
 import { BellOutlined } from "@ant-design/icons";
-import LogoutIcon from "../../assets/images/logout.svg";
-import UserAvatar from "../../assets/images/user-avatar.jpg";
+import LogoutIcon from "../../../assets/images/logout.svg";
+import UserAvatar from "../../../assets/images/user-avatar.jpg";
 import { tokenControl } from "@shared/lib";
 import { AppRoutes } from "@shared/config";
 import { toast } from "react-toastify";
