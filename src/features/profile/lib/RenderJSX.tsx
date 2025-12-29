@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 import { IUser } from "@entities/login";
 // import userAvatar from "../../assets/images/user-avatar.jpg";
 import userAvatar from '../../../assets/images/user-avatar.jpg'
-import { Tabs, SnowOverlay, Loader } from "@shared/ui";
+import { Tabs, Loader } from "@shared/ui";
 import { profileRightNav } from "../model";
 
 interface IProps {
@@ -38,7 +38,6 @@ export const RenderJSX = ({
 
     return (
         <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6">
-            <SnowOverlay enabled={isSnowEnabled} />
             <Modal
                 title="Настройки"
                 open={isSettingsOpen}
@@ -53,7 +52,7 @@ export const RenderJSX = ({
                 {/* Класс для скрывания no-animations функционал:
           "hidden-no-animations-switcher"
         */}
-                <div className="flex items-center justify-between py-2 hidden-no-animations-switcher">
+                <div className="flex items-center justify-between py-2 ">
                     {/* Это пока думаю лучше скрыть   */}
                     <span>Анимации ⚡</span>
                     <Switch checked={isAnimEnabled} onChange={setIsAnimEnabled} />

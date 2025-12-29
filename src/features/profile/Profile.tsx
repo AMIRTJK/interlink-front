@@ -16,16 +16,9 @@ export const Profile = () => {
   const [userData, setUserData] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
   const activeTab = useCurrentTab();
-  const { isAnimEnabled, setIsAnimEnabled } = useTheme();
+  const { isAnimEnabled, setIsAnimEnabled, isSnowEnabled, setIsSnowEnabled } = useTheme();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isSnowEnabled, setIsSnowEnabled] = useState(() => {
-    return localStorage.getItem("snow-enabled") === "true";
-  });
-
-  useEffect(() => {
-    localStorage.setItem("snow-enabled", String(isSnowEnabled));
-  }, [isSnowEnabled]);
 
   useEffect(() => {
     const fetchUser = async () => {
