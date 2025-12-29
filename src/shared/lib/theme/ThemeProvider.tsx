@@ -10,8 +10,13 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     return (saved as Theme) || "light";
   });
 
+
   const [isAnimEnabled, setIsAnimEnabled] = useState(() => {
     return localStorage.getItem("anim-enabled") !== "false";
+  });
+
+  const [isSnowEnabled, setIsSnowEnabled] = useState(() => {
+    return localStorage.getItem("snow-enabled") === "true";
   });
 
   useEffect(() => {
@@ -30,8 +35,19 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isAnimEnabled]);
 
+  useEffect(() => {
+    localStorage.setItem("snow-enabled", String(isSnowEnabled));
+  }, [isSnowEnabled]);
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, isAnimEnabled, setIsAnimEnabled }}>
+    <ThemeContext.Provider value={{
+      theme,
+      setTheme,
+      isAnimEnabled,
+      setIsAnimEnabled,
+      isSnowEnabled,
+      setIsSnowEnabled
+    }}>
       <ConfigProvider theme={{ token: { motion: isAnimEnabled } }}>
         {children}
       </ConfigProvider>

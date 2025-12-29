@@ -5,4 +5,6 @@ export interface ThemeContextType {
   setTheme: (theme: Theme) => void;
   isAnimEnabled: boolean;
   setIsAnimEnabled: (enabled: boolean) => void;
+  isSnowEnabled: boolean;
+  setIsSnowEnabled: (enabled: boolean) => void;
 }
