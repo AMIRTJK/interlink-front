@@ -1,8 +1,9 @@
-import { Modal, Avatar } from "antd";
+import { Modal, Avatar, Button } from "antd";
 import {
   ClockCircleOutlined,
   UserOutlined,
   CalendarOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import type { Task } from "@features/tasks";
 import dayjs from "dayjs";
@@ -12,21 +13,33 @@ interface IProps {
   task: Task | null;
   isOpen: boolean;
   onClose: () => void;
+  onEdit?: (task: Task) => void;
 }
 
-export const TaskDetailsModal = ({ task, isOpen, onClose }: IProps) => {
+export const TaskDetailsModal = ({ task, isOpen, onClose, onEdit }: IProps) => {
   if (!task) return null;
 
   return (
     <Modal
       open={isOpen}
       onCancel={onClose}
-      footer={null}
       width={600}
       title={null}
       closable={true}
       className="task-details-modal-view"
       centered
+      footer={
+        <div className="flex justify-end p-4 border-t border-gray-100">
+          <Button 
+            onClick={() => onEdit?.(task)} 
+            icon={<EditOutlined />}
+            type="primary"
+            ghost
+          >
+            Редактировать
+          </Button>
+        </div>
+      }
     >
       <div className="task-details">
         <div className="task-details__header-bg">

@@ -9,6 +9,7 @@ export const ApiRoutes = {
   UPDATE_TASK_STATUS: "/api/v1/tasks",
   GET_ANALYTICS: "/api/v1/analytics",
   DELETE_TASK_BY_ID: "/api/v1/tasks/",
+  UPDATE_EVENT: "/api/v1/events",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];

@@ -19,6 +19,8 @@ interface IProps {
   ) => void;
   isEvent?: boolean;
   currentTaskStatus?: string;
+  mode?: 'create' | 'edit';
+  eventId?: string;
 }
 
 export const AddTaskForm = ({
@@ -26,6 +28,8 @@ export const AddTaskForm = ({
   onSuccess,
   isEvent,
   currentTaskStatus,
+  mode = 'create',
+  eventId,
 }: IProps) => {
   const [form] = Form.useForm<ITaskFormValues>();
 
@@ -42,19 +46,25 @@ export const AddTaskForm = ({
   }, [initialValues, form]);
 
   const { mutate: addTaskMutate } = useMutationQuery({
-    method: "POST",
-    url: isEvent ? ApiRoutes.ADD_EVENT : ApiRoutes.ADD_TASK,
+    method: mode === 'edit' ? 'PUT' : 'POST',
+    url: isEvent 
+      ? (mode === 'edit' && eventId 
+          ? `${ApiRoutes.UPDATE_EVENT}/${eventId}` 
+          : ApiRoutes.ADD_EVENT)
+      : ApiRoutes.ADD_TASK,
     messages: {
-      success: isEvent ? "Событие добавлено!" : "Задача добавлена!",
+      success: isEvent 
+        ? (mode === 'edit' ? "Событие обновлено!" : "Событие добавлено!") 
+        : "Задача добавлена!",
       error: isEvent
-        ? "Ошибка при добавлении события"
+        ? (mode === 'edit' ? "Ошибка при обновлении события" : "Ошибка при добавлении события")
         : "Ошибка при добавлении задачи",
       onSuccessCb: (data) => {
         if (isEvent && onSuccess) {
           onSuccess(data as IEventResponse);
         }
       },
-      invalidate: [ApiRoutes.GET_TASKS],
+      invalidate: [ApiRoutes.GET_TASKS, ApiRoutes.GET_EVENTS],
     },
   });
 
@@ -105,7 +115,7 @@ export const AddTaskForm = ({
       }
     }
 
-    if (!isEvent) {
+    if (!isEvent && mode !== 'edit') {
       form.resetFields();
     }
   };
