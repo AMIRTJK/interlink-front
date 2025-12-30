@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppRoutes } from "@shared/config/AppRoutes";
 import { tokenControl } from "@shared/lib";
 import { ToastContainer } from "react-toastify";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy,  } from "react";
 import { Loader } from "@shared/ui/Loader";
 import { MainLayout, ProfileLayout } from "@widgets/layout";
 import { RegistryTable } from "@widgets/RegistryTable";
@@ -74,6 +74,8 @@ const mockData: Record<string, unknown>[] = [
 ];
 
 export const AppRouter = () => {
+
+
   return (
     <BrowserRouter>
       <Suspense fallback={<Loader />}>
@@ -132,11 +134,11 @@ export const AppRouter = () => {
                   <Route
                     index
                     element={
-                      <RegistryTable
-                        type="outgoing"
-                        createButtonText="Добавить письмо"
-                        data={mockData}
-                      />
+                          <RegistryTable
+                          type="outgoing"
+                          createButtonText="Добавить письмо"
+                          data={mockData}
+                        />
                     }
                   />
                   <Route
