@@ -39,7 +39,8 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const canCreate = userRoles.includes("correspondence.create");
   const canView = userRoles.includes("correspondence.register");
   return (
-    <div className="bg-white flex flex-col gap-2 w-full h-full">
+    <div className="bg-white flex flex-col gap-2 w-full h-full rounded-2xl overflow-hidden">
+      {" "}
       <nav>
         <StatusTabs activeTab={currentTab} onTabChange={setCurrentTab} />
       </nav>
