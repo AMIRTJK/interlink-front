@@ -75,7 +75,6 @@ const mockData: Record<string, unknown>[] = [
 
 export const AppRouter = () => {
 
-
   return (
     <BrowserRouter>
       <Suspense fallback={<Loader />}>
