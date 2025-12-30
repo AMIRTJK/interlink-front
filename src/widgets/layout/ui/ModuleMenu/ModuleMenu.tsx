@@ -3,8 +3,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { AppRoutes } from "@shared/config/AppRoutes";
 import { getModuleItems, MenuItem } from "./lib";
 import { tokenControl, useGetQuery } from "@shared/lib";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import "./style.css";
+import { ApiRoutes } from "@shared/api";
+
+/* ===================== TYPES ===================== */
 interface IProps {
   variant: "horizontal" | "compact";
 }
@@ -17,13 +20,98 @@ type SubMenuItem = {
   icon?: React.ReactNode;
 };
 
+interface IPermission {
+  group: string;
+  name: string;
+  label: string;
+}
+
+interface IUserResponse {
+  data: {
+    position: string;
+    // добавь другие поля если нужно
+  };
+}
+
+/* ===================== COMPONENT ===================== */
 export const ModuleMenu = ({ variant }: IProps) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  
-  // Мемоизируем items
+
+  // 1. Мемоизируем элементы меню
   const items = useMemo(() => getModuleItems(variant), [variant]);
 
+  // 2. Получаем права и данные пользователя через наш "умный" хук
+  const { firstQueryData, secondQueryData } = useGetQuery<
+    unknown,
+    { data: IPermission[] }, // Тип первого ответа
+    { data: IPermission[] }, // Тип select
+    unknown,
+    IUserResponse            // Тип второго ответа
+  >({
+    method: "GET",
+    url: ApiRoutes.FETCH_PERMISSIONS,
+    useToken: true,
+    options: {
+      enabled: tokenControl.get() !== null,
+    },
+    secondQuery: {
+      url: `${ApiRoutes.FETCH_USER_BY_ID}${tokenControl.getUserId()}`,
+      method: "GET",
+      shouldWaitFirst: true, // Включаем последовательную загрузку
+    },
+  });
+
+  // 3. Извлекаем имена ролей (прав)
+  const userRoleNames = useMemo(() => {
+    return firstQueryData?.data?.map((p) => p.name) || [];
+  }, [firstQueryData]);
+
+  // 4. Извлекаем должность
+  const userPosition = useMemo(() => {
+    return secondQueryData?.data?.position;
+  }, [secondQueryData]);
+
+  // 5. Фильтруем элементы меню (ИСПРАВЛЕНЫ ЗАВИСИМОСТИ)
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      // Если у элемента нет требований по ролям, показываем его
+      if (!item || !("requiredRole" in item)) {
+        return true;
+      }
+
+      const menuItem = item as SubMenuItem;
+      
+      // Если список ролей пуст, показываем всем
+      if (!menuItem.requiredRole || menuItem.requiredRole.length === 0) {
+        return true;
+      }
+
+      // Админу разрешено всё
+      if (userPosition === "Super Administrator") {
+        return true;
+      }
+
+      // Проверка наличия хотя бы одной нужной роли
+      return menuItem.requiredRole.some((role) => userRoleNames.includes(role));
+    });
+  }, [items, userRoleNames, userPosition]);
+
+  // 6. Подготавливаем элементы для Ant Design Menu
+  const menuItems = useMemo(() => {
+    if (variant === "compact") {
+      return filteredItems.map((item) => {
+        if (item && "children" in item) {
+          const { children: _, ...rest } = item as SubMenuItem;
+          return rest;
+        }
+        return item;
+      });
+    }
+    return filteredItems;
+  }, [variant, filteredItems]);
+
+  // 7. Логика активных ключей
   const activeItem = items.find((item) => {
     if (!item || !("key" in item)) return false;
     const itemKey = String(item.key);
@@ -42,91 +130,6 @@ export const ModuleMenu = ({ variant }: IProps) => {
     }
   };
 
-  // Получаем права пользователя
-  const { data: userRoles } = useGetQuery({
-    method: "GET",
-    url: "/api/v1/admin/permissions",
-    useToken: true,
-    options: {
-      enabled: tokenControl.get() !== null,
-    },
-  });
-
-  // Получаем ВСЕ роли пользователя
-  const userRolesArray = useMemo(() => {
-    return (
-      (
-        userRoles as
-          | { data: { group: string; name: string; permissions: string[] }[] }
-          | undefined
-      )?.data || [] 
-    );
-  }, [userRoles]);
-
-  // Добавляем все роли в localStorage
-  useEffect(() => {
-    if (userRolesArray.length > 0) {
-      const rolesString = userRolesArray.map((item) => item.name).join(", ");
-      tokenControl.setUserRole(rolesString);
-    }
-  }, [userRolesArray]);
-
-  // Получаем список имен всех ролей пользователя
-  const userRoleNames = useMemo(
-    () => userRolesArray.map((item) => item.name),
-    [userRolesArray]
-  );
-
-  // Получаем должность пользователя
-  const userPosition = useMemo(() => {
-    const position = tokenControl.getUserPosition();
-    console.log("Должность пользователя:", position);
-    return position;
-  }, []);
-
-  // Фильтруем элементы меню на основе ролей пользователя
-  const filteredItems = useMemo(() => {
-    console.log("Все элементы меню:", items);
-    console.log("Роли пользователя для фильтрации:", userRoleNames);
-    
-    const filtered = items.filter((item) => {
-      if (!item || !("requiredRole" in item)) {
-        console.log(`Элемент без requiredRole - показываем:`, item);
-        return true;
-      }
-      
-      const menuItem = item as SubMenuItem;
-      // Если нет requiredRole, показываем элемент всем
-      if (!menuItem.requiredRole || menuItem.requiredRole.length === 0) {
-        return true;
-      }
-      
-      // Проверяем должность - если Super Administrator, показываем все
-      if (userPosition === "Super Administrator") {
-        return true;
-      }
-      // Проверяем, есть ли хотя бы одна роль из requiredRole у пользователя
-      const hasRole = menuItem.requiredRole.some(role => userRoleNames.includes(role));
-      return hasRole;
-    });
-    
-    console.log("Отфильтрованные элементы:", filtered);
-    return filtered;
-  }, [items, userRoleNames, userPosition]);
-
-  const menuItems = useMemo(() => {
-    if (variant === "compact") {
-      return filteredItems.map((item) => {
-        if (item && "children" in item) {
-          const { children: _, ...rest } = item as SubMenuItem;
-          return rest;
-        }
-        return item;
-      });
-    }
-    return filteredItems;
-  }, [variant, filteredItems]);
-  console.log(tokenControl.getUserPosition())
   return (
     <div className={`menu-container ${variant}-mode`}>
       <Menu
@@ -140,10 +143,11 @@ export const ModuleMenu = ({ variant }: IProps) => {
           variant === "compact" ? "compact-style" : "full-style"
         }`}
       />
-      {/* Вторая синяя полоса для подмодулей */}
-      {variant === "compact" && (
+
+      {/* Саб-меню для компактного режима */}
+      {variant === "compact" && subItems && (
         <div className="sub-menu-bar">
-          {subItems?.map((sub) => {
+          {subItems.map((sub) => {
             if (!sub || !("key" in sub)) return null;
             const isActive =
               pathname === sub.key || pathname.startsWith(sub.key + "/");
