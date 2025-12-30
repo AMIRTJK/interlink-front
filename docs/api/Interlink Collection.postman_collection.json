@@ -1289,9 +1289,48 @@
 		},
 		{
 			"name": "Get Crspndnce",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
-				"header": []
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "// Query params:\r\n\r\n// search (string) — поиск по subject, reg_number, ФИО автора/исполнителя, названию департамента\r\n\r\n// status (string) — фильтр по статусу (например: draft|in_progress|done)\r\n\r\n// date_from (date YYYY-MM-DD) — с даты создания\r\n\r\n// date_to (date YYYY-MM-DD) — по дату создания\r\n\r\n// creator_id (int) — фильтр по автору\r\n\r\n// assignee_user_id (int) — фильтр по назначенному сотруднику\r\n\r\n// assignee_department_id (int) — фильтр по назначенному департаменту\r\n\r\n// sort (enum) — id|created_at|updated_at|reg_number|subject|status\r\n\r\n// dir (enum) — asc|desc\r\n\r\n// per_page (int 1..200) — размер страницы\r\n\r\n// page (int) — номер страницы\r\n\r\n// with (string csv) — какие связи грузить:\r\n// creator,assignments,assignments.assigneeUser,assignments.assigneeDepartment"
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/correspondences",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"correspondences"
+					]
+				}
 			},
 			"response": []
 		},
@@ -1482,10 +1521,452 @@
 			"response": []
 		},
 		{
-			"name": "New Request",
+			"name": "Get Departments",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
-				"header": []
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n"
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/admin/departments",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"admin",
+						"departments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Only 1 Department",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n"
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/admin/departments/3",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"admin",
+						"departments",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Department",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Юридический департамент\",\r\n  \"code\": \"legal_dep\"\r\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/admin/departments/3",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"admin",
+						"departments",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Department",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/admin/departments/3",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"admin",
+						"departments",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Assigning departments to user",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"department_ids\": [3,4]\r\n}\r\n// можно назначить одного юзера в нескольких департаментах ",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/admin/users/{user_id}/departments",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"admin",
+						"users",
+						"{user_id}",
+						"departments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Correspomdences attachments",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/User/Desktop/Снимок экрана 2025-08-18 135843.png"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/correspondences/1/attachments",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"correspondences",
+						"1",
+						"attachments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Correspondence Upload MULTIPLE files (bulk)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/User/Desktop/Снимок экрана 2025-08-18 135843.png"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/correspondences/1/attachments/bulk?files[]",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"correspondences",
+						"1",
+						"attachments",
+						"bulk"
+					],
+					"query": [
+						{
+							"key": "files[]",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Correspondence Delete file",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/correspondence-attachments/1",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"correspondence-attachments",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Correspondence show full informations",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/correspondences/1",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"correspondences",
+						"1"
+					]
+				}
 			},
 			"response": []
 		}

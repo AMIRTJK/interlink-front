@@ -1,7 +1,7 @@
 import { CorrespondenseStatus } from "@entities/correspondence";
 
-export const getCorrespondenseOutgoingStatusLabel = (status: number) => {
-  const statusMap: Record<number, { label: string; color: string }> = {
+export const getCorrespondenseOutgoingStatusLabel = (status: string) => {
+  const statusMap: Record<string, { label: string; color: string }> = {
     [CorrespondenseStatus.DRAFT]: { label: "Черновик", color: "#FFAC33" },
     [CorrespondenseStatus.REGISTERED]: {
       label: "Зарегистрировано",

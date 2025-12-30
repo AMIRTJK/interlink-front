@@ -46,7 +46,6 @@ export const FilterDate: FC<IProps> = ({ config }) => {
         onChange={handleChange}
         format="YYYY-MM-DD"
       />
-      ;
     </Form.Item>
   );
 };

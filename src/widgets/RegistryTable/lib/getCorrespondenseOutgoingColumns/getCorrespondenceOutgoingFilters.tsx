@@ -4,12 +4,12 @@ export const getCorrespondenceOutgoingFilters = (): IFilterItem[] => {
   return [
     {
       type: FilterType.INPUT,
-      name: "outboundNumber",
+      name: "outgoingNumber",
       placeholder: "Исходящий номер",
     },
     {
       type: FilterType.INPUT,
-      name: "inboundNumber",
+      name: "incomingNumber",
       placeholder: "Входящий номер",
     },
     {
