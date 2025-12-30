@@ -3,8 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { AppRoutes } from "@shared/config/AppRoutes";
 import { getModuleItems, MenuItem } from "./lib";
 import { tokenControl, useGetQuery } from "@shared/lib";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
+import { ApiRoutes } from "@shared/api";
 import "./style.css";
+
 interface IProps {
   variant: "horizontal" | "compact";
 }
@@ -17,10 +19,25 @@ type SubMenuItem = {
   icon?: React.ReactNode;
 };
 
+
+interface IPermissionsResponse {
+  data: {
+    name: string;
+    group: string;
+    label: string;
+  }[];
+}
+
+interface IUserProfileResponse {
+  data: {
+    position: string;
+  };
+}
+
 export const ModuleMenu = ({ variant }: IProps) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  
+
   // Мемоизируем items
   const items = useMemo(() => getModuleItems(variant), [variant]);
 
@@ -43,12 +60,23 @@ export const ModuleMenu = ({ variant }: IProps) => {
   };
 
   // Получаем права пользователя
-  const { data: userRoles } = useGetQuery({
+  const { firstQueryData, secondQueryData } = useGetQuery<
+    unknown,
+    IPermissionsResponse, // Ответ первого запроса
+    IPermissionsResponse, // Результат Select
+    unknown,
+    IUserProfileResponse  // Ответ второго запроса
+  >({
     method: "GET",
-    url: "/api/v1/admin/permissions",
+    url: `${ApiRoutes.FETCH_PERMISSIONS}`,
     useToken: true,
     options: {
       enabled: tokenControl.get() !== null,
+    },
+    secondQuery: {
+      url: `${ApiRoutes.FETCH_USER_BY_ID}${tokenControl.getUserId()}`,
+      method: "GET",
+      shouldWaitFirst: true,
     },
   });
 
@@ -56,62 +84,46 @@ export const ModuleMenu = ({ variant }: IProps) => {
   const userRolesArray = useMemo(() => {
     return (
       (
-        userRoles as
+        firstQueryData as
           | { data: { group: string; name: string; permissions: string[] }[] }
           | undefined
-      )?.data || [] 
+      )?.data || []
     );
-  }, [userRoles]);
-
-  // Добавляем все роли в localStorage
-  useEffect(() => {
-    if (userRolesArray.length > 0) {
-      const rolesString = userRolesArray.map((item) => item.name).join(", ");
-      tokenControl.setUserRole(rolesString);
-    }
-  }, [userRolesArray]);
+  }, [firstQueryData]);
 
   // Получаем список имен всех ролей пользователя
   const userRoleNames = useMemo(
     () => userRolesArray.map((item) => item.name),
     [userRolesArray]
   );
-
   // Получаем должность пользователя
   const userPosition = useMemo(() => {
-    const position = tokenControl.getUserPosition();
-    console.log("Должность пользователя:", position);
-    return position;
-  }, []);
-
+    return secondQueryData?.data.position;
+  }, [secondQueryData]);
   // Фильтруем элементы меню на основе ролей пользователя
   const filteredItems = useMemo(() => {
-    console.log("Все элементы меню:", items);
-    console.log("Роли пользователя для фильтрации:", userRoleNames);
-    
     const filtered = items.filter((item) => {
       if (!item || !("requiredRole" in item)) {
-        console.log(`Элемент без requiredRole - показываем:`, item);
         return true;
       }
-      
       const menuItem = item as SubMenuItem;
       // Если нет requiredRole, показываем элемент всем
       if (!menuItem.requiredRole || menuItem.requiredRole.length === 0) {
         return true;
       }
-      
       // Проверяем должность - если Super Administrator, показываем все
       if (userPosition === "Super Administrator") {
         return true;
       }
+
       // Проверяем, есть ли хотя бы одна роль из requiredRole у пользователя
-      const hasRole = menuItem.requiredRole.some(role => userRoleNames.includes(role));
+      const hasRole = menuItem.requiredRole.some((role) =>
+        userRoleNames.includes(role)
+      );
       return hasRole;
     });
-    
-    console.log("Отфильтрованные элементы:", filtered);
     return filtered;
+    // Добавлены все зависимости, которые используются внутри filter
   }, [items, userRoleNames, userPosition]);
 
   const menuItems = useMemo(() => {
@@ -126,7 +138,7 @@ export const ModuleMenu = ({ variant }: IProps) => {
     }
     return filteredItems;
   }, [variant, filteredItems]);
-  console.log(tokenControl.getUserPosition())
+
   return (
     <div className={`menu-container ${variant}-mode`}>
       <Menu

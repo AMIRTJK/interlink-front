@@ -134,12 +134,12 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     return cleanParams;
   }, [queryParams, transformedFilters, page, perPage, direction]);
 
-  const { data, isLoading } = url
+  const { data, isPending } = url
     ? useGetQuery({
         url,
         params,
       })
-    : { data: undefined, isLoading: false };
+    : { data: undefined, isPending: false };
 
   const columnsWithNumbers = useMemo(() => {
     // Добавляем колонку ID только если idColumnHidden !== true
@@ -219,7 +219,7 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
       <Table
         scroll={"scroll" in props ? props.scroll : { y: "calc(100vh - 450px)" }}
         className={props.className}
-        loading={isLoading}
+        loading={isPending}
         dataSource={tableData}
         columns={columnsWithNumbers}
         rowKey={"id"}

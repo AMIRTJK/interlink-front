@@ -51,9 +51,10 @@ export const RegistryTable = <T extends Record<string, unknown>>({
           type="default"
           text={createButtonText}
           withIcon={true}
-          disabled={!canCreate}
+          loading={isLoading}
+          disabled={isLoading}
           icon={AddIcon}
-          className="h-9! px-[34px]! text-[#0037AF]! border-[#0037AF]! rounded-lg! transition-all! hover:opacity-75!"
+          className={`${' h-9! px-[34px]! text-[#0037AF]! border-[#0037AF]! rounded-lg! transition-all! hover:opacity-75!'}`}
         />
       </div>
       {/* <div className="px-2">
