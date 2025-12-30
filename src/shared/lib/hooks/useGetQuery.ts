@@ -75,11 +75,11 @@ interface ISecondQueryOptions<
   TSecondResponse = any,
 > {
   url: string;
-  method?: "GET" | "POST";
+  method?: "GET";
   params?: TSecondRequest;
   paramsFromFirst?: (data: TFirstResult) => TSecondRequest;
   /** Если true, второй запрос будет ждать успеха первого */
-  shouldWaitFirst?: boolean; 
+  shouldWaitFirst?: boolean;
   options?: Partial<UseQueryOptions<TSecondResponse, any, TSecondResponse>>;
 }
 
@@ -88,10 +88,10 @@ interface IUseGetQueryOptions<
   TResponse = any,
   TSelect = any,
   TSecondRequest = any,
-  TSecondResponse = any
+  TSecondResponse = any,
 > {
   url: string;
-  method?: "GET" | "POST";
+  method?: "GET";
   params?: TRequest;
   useToken?: boolean;
   options?: Partial<UseQueryOptions<TResponse, any, TSelect>>;
@@ -104,11 +104,24 @@ export const useGetQuery = <
   TResponse = any,
   TSelect = any,
   TSecondRequest = any,
-  TSecondResponse = any
+  TSecondResponse = any,
 >(
-  options: IUseGetQueryOptions<TRequest, TResponse, TSelect, TSecondRequest, TSecondResponse>
+  options: IUseGetQueryOptions<
+    TRequest,
+    TResponse,
+    TSelect,
+    TSecondRequest,
+    TSecondResponse
+  >
 ) => {
-  const { url, params, method = "POST", useToken = false, options: queryOptions, secondQuery } = options;
+  const {
+    url,
+    params,
+    method = "GET",
+    useToken = false,
+    options: queryOptions,
+    secondQuery,
+  } = options;
 
   /* ---------- ПЕРВЫЙ ЗАПРОС ---------- */
   const firstQuery = useQuery({
@@ -121,7 +134,7 @@ export const useGetQuery = <
       }
       const response = await _axios<TResponse>(url, {
         method,
-        [method === "POST" ? "data" : "params"]: params ?? {},
+        [method === "GET" ? "data" : "params"]: params ?? {},
         headers,
       });
       return response.data;
@@ -133,16 +146,22 @@ export const useGetQuery = <
   const secondOptions = secondQuery?.options || {};
   const { enabled: manualEnabled, ...restSecondOptions } = secondOptions;
 
-  const isDependent = Boolean(secondQuery?.shouldWaitFirst || secondQuery?.paramsFromFirst);
+  const isDependent = Boolean(
+    secondQuery?.shouldWaitFirst || secondQuery?.paramsFromFirst
+  );
 
-  const computedEnabled = isDependent 
-    ? firstQuery.isSuccess 
-    : true;
+  const computedEnabled = isDependent ? firstQuery.isSuccess : true;
 
-  const finalEnabled = manualEnabled !== undefined ? manualEnabled : computedEnabled;
+  const finalEnabled =
+    manualEnabled !== undefined ? manualEnabled : computedEnabled;
 
   const secondQueryResult = useQuery({
-    queryKey: [secondQuery?.url, secondQuery?.params, firstQuery.data, firstQuery.isSuccess],
+    queryKey: [
+      secondQuery?.url,
+      secondQuery?.params,
+      firstQuery.data,
+      firstQuery.isSuccess,
+    ],
     queryFn: async () => {
       if (!secondQuery) throw new Error("No config");
       const headers: Record<string, string> = {};
@@ -151,13 +170,14 @@ export const useGetQuery = <
         if (token) headers.Authorization = `Bearer ${token}`;
       }
 
-      const finalParams = (secondQuery.paramsFromFirst && firstQuery.data)
-        ? secondQuery.paramsFromFirst(firstQuery.data)
-        : secondQuery.params;
+      const finalParams =
+        secondQuery.paramsFromFirst && firstQuery.data
+          ? secondQuery.paramsFromFirst(firstQuery.data)
+          : secondQuery.params;
 
       const response = await _axios<TSecondResponse>(secondQuery.url, {
-        method: secondQuery.method ?? "POST",
-        [secondQuery.method === "POST" ? "data" : "params"]: finalParams ?? {},
+        method: secondQuery.method ?? "GET",
+        [secondQuery.method === "GET" ? "data" : "params"]: finalParams ?? {},
         headers,
       });
       return response.data;
@@ -172,15 +192,17 @@ export const useGetQuery = <
     data: firstQuery.data,
     refetch: firstQuery.refetch,
     isFetching: firstQuery.isFetching,
-    
+
     // 2. Новые поля для цепочек запросов (ModuleMenu)
     firstQueryData: firstQuery.data,
     secondQueryData: secondQueryResult.data,
-    
+
     // 3. Общие статусы
-    isPending: firstQuery.isLoading || (Boolean(secondQuery) && finalEnabled && secondQueryResult.isLoading),
+    isPending:
+      firstQuery.isLoading ||
+      (Boolean(secondQuery) && finalEnabled && secondQueryResult.isLoading),
     isError: firstQuery.isError || secondQueryResult.isError,
-    
+
     // 4. Полные объекты для продвинутого использования
     firstQuery,
     secondQuery: secondQueryResult,
