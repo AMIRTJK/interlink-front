@@ -23,7 +23,7 @@ interface ISelectFieldProps {
     data: unknown,
     extraParams?: unknown
   ) => { value: string; label: string }[];
-  method?: "GET" | "POST";
+  method?: "GET";
   extraTransformParams?: unknown;
   searchParamKey?: string;
   onChange?: (
@@ -42,7 +42,7 @@ export const SelectField = ({
   rules,
   options,
   url,
-  method = "POST",
+  method = "GET",
   customClass,
   onChange,
   isFetchAllowed,
