@@ -30,7 +30,7 @@ export const useDynamicSearchParams: useDynamicSearchParamsType = (
 
   const setParamsHandle: SetParamsHandle = (key, value) => {
     if (typeof key !== "string") {
-      const params = Object.entries(key).reduce<Record<string, unknown>>(
+      const params = Object.entries(key).reduce<Record<string, any>>(
         (prev, [key, value]) => {
           if (value) {
             prev[key] = value;
@@ -41,7 +41,7 @@ export const useDynamicSearchParams: useDynamicSearchParamsType = (
         {}
       );
 
-      setParams(params as unknown as Record<string, string>);
+      setParams(params);
       return;
     }
 

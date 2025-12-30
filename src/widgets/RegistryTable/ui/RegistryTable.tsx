@@ -1,15 +1,67 @@
-interface RegistryTableProps {
-  data?: unknown;
+import { StatusTabs } from "@features/StatusTabs";
+import { Button, UniversalTable } from "@shared/ui";
+import { useState } from "react";
+import AddIcon from "../../../assets/icons/add-icon.svg";
+import { FilterRegistry } from "@features/FilterRegistry";
+import { useLocation, useNavigate } from "react-router";
+import { getRegistryColumns, getRegistryFilters } from "../lib";
+
+interface RegistryTableProps<T extends Record<string, unknown>> {
+  data?: T[];
   isLoading?: boolean;
-  type?: string;
+  type: string;
+  createButtonText: string;
 }
 
-export const RegistryTable = ({ data, isLoading }: RegistryTableProps) => {
+export const RegistryTable = <T extends Record<string, unknown>>({
+  data,
+  isLoading,
+  createButtonText,
+  type,
+}: RegistryTableProps<T>) => {
   console.log(data, isLoading);
+  const [currentTab, setCurrentTab] = useState("inbox");
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleCreate = () => {
+    navigate(`${location.pathname}/create`);
+  };
+
+  const columns = getRegistryColumns(type);
+  const filters = getRegistryFilters(type);
 
   return (
-    <div className="bg-white w-full h-full">
-      <p className="p-6">Реестр</p>
+    <div className="bg-white flex flex-col gap-2 w-full h-full">
+      <nav>
+        <StatusTabs activeTab={currentTab} onTabChange={setCurrentTab} />
+      </nav>
+      {/* Panel Control */}
+      <div className="px-2">
+        <Button
+          onClick={handleCreate}
+          type="default"
+          text={createButtonText}
+          withIcon={true}
+          icon={AddIcon}
+          className="h-9! px-[34px]! text-[#0037AF]! border-[#0037AF]! rounded-lg! transition-all! hover:opacity-75!"
+        />
+      </div>
+      <div className="px-2">
+        <FilterRegistry />
+      </div>
+      <div className="px-2">
+        <UniversalTable
+          dataSource={data}
+          filters={filters}
+          columns={columns}
+          style="flex justify-between"
+          className="[&_.ant-table-cell]:rounded-none! [&_.ant-pagination]:px-4!"
+          direction={1}
+          autoFilter={false}
+        />
+      </div>
     </div>
   );
 };

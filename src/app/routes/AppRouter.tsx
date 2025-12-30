@@ -9,19 +9,68 @@ import { RegistryTable } from "@widgets/RegistryTable";
 import PrivateRoute from "./PrivateRoute";
 
 // Lazy-loaded страницы
-const Auth = lazy(() => import("@pages/Auth/Auth").then(m => ({ default: m.Auth })));
-const ProfilePage = lazy(() => import("@pages/modules/profile/ProfilePage").then(m => ({ default: m.ProfilePage })));
-const TasksPage = lazy(() => import("@pages/modules/profile/TasksPage").then(m => ({ default: m.TasksPage })));
-const CalendarPage = lazy(() => import("@pages/modules/profile/CalendarPage").then(m => ({ default: m.CalendarPage })));
-const AnalyticsPage = lazy(() => import("@pages/modules/profile/AnalyticsPage").then(m => ({ default: m.AnalyticsPage })));
-const CorrespondencePage = lazy(() => import("@pages/modules/correspondence/CorrespondencePage").then(m => ({ default: m.CorrespondencePage })));
-const PlaceholderPage = lazy(() => import("@pages/modules/placeholderpage/PlaceholderPage").then(m => ({ default: m.PlaceholderPage })));
-const NotFoundPage = lazy(() => import("@shared/ui/NotFoundPage/NotFoundPage").then(m => ({ default: m.NotFoundPage })));
+const Auth = lazy(() =>
+  import("@pages/Auth/Auth").then((m) => ({ default: m.Auth }))
+);
+const ProfilePage = lazy(() =>
+  import("@pages/modules/profile/ProfilePage").then((m) => ({
+    default: m.ProfilePage,
+  }))
+);
+const TasksPage = lazy(() =>
+  import("@pages/modules/profile/TasksPage").then((m) => ({
+    default: m.TasksPage,
+  }))
+);
+const CalendarPage = lazy(() =>
+  import("@pages/modules/profile/CalendarPage").then((m) => ({
+    default: m.CalendarPage,
+  }))
+);
+const AnalyticsPage = lazy(() =>
+  import("@pages/modules/profile/AnalyticsPage").then((m) => ({
+    default: m.AnalyticsPage,
+  }))
+);
+const CorrespondencePage = lazy(() =>
+  import("@pages/modules/correspondence/CorrespondencePage").then((m) => ({
+    default: m.CorrespondencePage,
+  }))
+);
+const CreateCorrespondencePage = lazy(() =>
+  import("@pages/modules/correspondence/CreateCorrespondencePage").then(
+    (m) => ({ default: m.CreateCorrespondencePage })
+  )
+);
+const PlaceholderPage = lazy(() =>
+  import("@pages/modules/placeholderpage/PlaceholderPage").then((m) => ({
+    default: m.PlaceholderPage,
+  }))
+);
+const NotFoundPage = lazy(() =>
+  import("@shared/ui/NotFoundPage/NotFoundPage").then((m) => ({
+    default: m.NotFoundPage,
+  }))
+);
 
 // Mock data для таблиц
-const mockData: unknown[] = [
-  { id: "1", number: "ИСХ-101", title: "Договор на поставку оборудования", date: "25.12.2025", status: "completed", sender: 'ООО "Вектор"' },
-  { id: "2", number: "ВХ-202", title: "Запрос коммерческого предложения", date: "26.12.2025", status: "pending", sender: "ИП Иванов" },
+const mockData: Record<string, unknown>[] = [
+  {
+    id: "1",
+    number: "ИСХ-101",
+    title: "Договор на поставку оборудования",
+    date: "25.12.2025",
+    status: "completed",
+    sender: 'ООО "Вектор"',
+  },
+  {
+    id: "2",
+    number: "ВХ-202",
+    title: "Запрос коммерческого предложения",
+    date: "26.12.2025",
+    status: "pending",
+    sender: "ИП Иванов",
+  },
 ];
 
 export const AppRouter = () => {
@@ -33,9 +82,11 @@ export const AppRouter = () => {
           <Route
             path="/"
             element={
-              tokenControl.get()
-                ? <Navigate to={AppRoutes.PROFILE_TASKS} replace />
-                : <Navigate to={AppRoutes.LOGIN} replace />
+              tokenControl.get() ? (
+                <Navigate to={AppRoutes.PROFILE_TASKS} replace />
+              ) : (
+                <Navigate to={AppRoutes.LOGIN} replace />
+              )
             }
           />
 
@@ -60,12 +111,39 @@ export const AppRouter = () => {
             {/* Модули */}
             <Route path="/modules" element={<MainLayout />}>
               <Route path="correspondence" element={<CorrespondencePage />}>
-                <Route
-                  index
-                  element={<Navigate to="incoming" replace />}
-                />
-                <Route path="incoming" element={<RegistryTable type="incoming" data={mockData} />} />
-                <Route path="outgoing" element={<RegistryTable type="outgoing" data={mockData} />} />
+                <Route index element={<Navigate to="incoming" replace />} />
+                <Route path="incoming">
+                  <Route
+                    index
+                    element={
+                      <RegistryTable
+                        type="incoming"
+                        createButtonText="Добавить письмо"
+                        data={mockData}
+                      />
+                    }
+                  />
+                  <Route
+                    path="create"
+                    element={<CreateCorrespondencePage type="incoming" />}
+                  />
+                </Route>
+                <Route path="outgoing">
+                  <Route
+                    index
+                    element={
+                      <RegistryTable
+                        type="outgoing"
+                        createButtonText="Добавить письмо"
+                        data={mockData}
+                      />
+                    }
+                  />
+                  <Route
+                    path="create"
+                    element={<CreateCorrespondencePage type="outgoing" />}
+                  />
+                </Route>
               </Route>
               <Route path="*" element={<PlaceholderPage />} />
             </Route>
