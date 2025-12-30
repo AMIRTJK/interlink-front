@@ -2,10 +2,10 @@ import { StatusTabs } from "@features/StatusTabs";
 import { Button, UniversalTable } from "@shared/ui";
 import { useState } from "react";
 import AddIcon from "../../../assets/icons/add-icon.svg";
-import { FilterRegistry } from "@features/FilterRegistry";
+// import { FilterRegistry } from "@features/FilterRegistry";
 import { useLocation, useNavigate } from "react-router";
 import { getRegistryColumns, getRegistryFilters } from "../lib";
-import { tokenControl } from "@shared/lib";
+import { tokenControl, useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 
 interface RegistryTableProps<T extends Record<string, unknown>> {
@@ -34,10 +34,18 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   };
   const columns = getRegistryColumns(type);
   const filters = getRegistryFilters(type);
-  // При необходимости можно рефактор сделать
-  const userRoles = tokenControl.getUserRole()?.split(", ") ?? [];
-  const canCreate = userRoles.includes("correspondence.create");
-  const canView = userRoles.includes("correspondence.register");
+
+  const {firstQueryData,isPending}=useGetQuery({
+    url:ApiRoutes.FETCH_PERMISSIONS,
+    method:"GET",
+    useToken:true,
+    options:{
+      enabled:tokenControl.get()!==null
+    }
+  })
+
+  const canCreate=firstQueryData?.data?.find((item:{name:string})=>item.name===`correspondence.create`)
+  const canView=firstQueryData?.data?.find((item:{name:string})=>item.name===`correspondence.view`)
   return (
     <div className="bg-white flex flex-col gap-2 w-full h-full rounded-2xl overflow-hidden">
       {" "}
@@ -45,14 +53,14 @@ export const RegistryTable = <T extends Record<string, unknown>>({
         <StatusTabs activeTab={currentTab} onTabChange={setCurrentTab} />
       </nav>
       {/* Panel Control */}
-      <div className={`px-2 ${canCreate ? "block" : "hidden"}`}>
+      <div className={`px-2 ${canCreate ? "block!" : "hidden!"}`}>
         <Button
           onClick={handleCreate}
           type="default"
           text={createButtonText}
           withIcon={true}
-          loading={isLoading}
-          disabled={isLoading}
+          loading={isLoading||isPending}
+          disabled={isLoading||isPending}
           icon={AddIcon}
           className={`${' h-9! px-[34px]! text-[#0037AF]! border-[#0037AF]! rounded-lg! transition-all! hover:opacity-75!'}`}
         />
@@ -60,7 +68,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
       {/* <div className="px-2">
         <FilterRegistry />
       </div> */}
-      <div className={`${canView ? "block px-2" : "hidden"}`}>
+      <div className={`${canView ? "block! px-2!" : "hidden!"}`}>
         <UniversalTable
           url={ApiRoutes.GET_CORRESPONDENCES}
           filters={filters}
