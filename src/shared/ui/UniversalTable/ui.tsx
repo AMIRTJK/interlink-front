@@ -200,7 +200,7 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     []
   ).map(formatDatesInObject);
 
-  console.log(tableData, "===========");
+  // console.log(tableData, "===========");
 
   return (
     <div>
