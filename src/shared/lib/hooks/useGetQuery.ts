@@ -46,17 +46,7 @@ export const useGetQuery = <
 >(
   options: IUseGetQueryOptions<TRequest, TResponse, TSelect, TSecondRequest, TSecondResponse>
 ) => {
-<<<<<<< HEAD
   const { url, params, method = "POST", useToken = false, options: queryOptions, secondQuery } = options;
-=======
-  const {
-    url,
-    params,
-    method = "GET",
-    useToken = false,
-    options: queryOptions,
-  } = options;
->>>>>>> cf671ca737f82b09f0dcb9f980680620c2e36cf1
 
   /* ---------- ПЕРВЫЙ ЗАПРОС ---------- */
   const firstQuery = useQuery({
