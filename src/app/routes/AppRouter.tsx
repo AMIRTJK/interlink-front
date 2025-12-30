@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppRoutes } from "@shared/config/AppRoutes";
 import { tokenControl } from "@shared/lib";
 import { ToastContainer } from "react-toastify";
-import { Suspense, lazy,  } from "react";
+import { Suspense, lazy } from "react";
 import { Loader } from "@shared/ui/Loader";
 import { MainLayout, ProfileLayout } from "@widgets/layout";
 import { RegistryTable } from "@widgets/RegistryTable";
@@ -53,28 +53,15 @@ const NotFoundPage = lazy(() =>
   }))
 );
 
-// Mock data для таблиц
-const mockData: Record<string, unknown>[] = [
-  {
-    id: "1",
-    number: "ИСХ-101",
-    title: "Договор на поставку оборудования",
-    date: "25.12.2025",
-    status: "completed",
-    sender: 'ООО "Вектор"',
-  },
-  {
-    id: "2",
-    number: "ВХ-202",
-    title: "Запрос коммерческого предложения",
-    date: "26.12.2025",
-    status: "pending",
-    sender: "ИП Иванов",
-  },
-];
+const incomingParams = {
+  kind: "incoming",
+};
+
+const outgoingParams = {
+  kind: "outgoing",
+};
 
 export const AppRouter = () => {
-
   return (
     <BrowserRouter>
       <Suspense fallback={<Loader />}>
@@ -120,7 +107,7 @@ export const AppRouter = () => {
                       <RegistryTable
                         type="incoming"
                         createButtonText="Добавить письмо"
-                        data={mockData}
+                        extraParams={incomingParams}
                       />
                     }
                   />
@@ -133,11 +120,11 @@ export const AppRouter = () => {
                   <Route
                     index
                     element={
-                          <RegistryTable
-                          type="outgoing"
-                          createButtonText="Добавить письмо"
-                          data={mockData}
-                        />
+                      <RegistryTable
+                        type="outgoing"
+                        createButtonText="Добавить письмо"
+                        extraParams={outgoingParams}
+                      />
                     }
                   />
                   <Route

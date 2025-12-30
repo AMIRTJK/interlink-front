@@ -1,6 +1,6 @@
 export enum CorrespondenseStatus {
-  DRAFT = 0,
-  REGISTERED = 1,
-  IN_PROGRESS = 2,
-  COMPLETED = 3,
+  DRAFT = "draft",
+  REGISTERED = "registered",
+  IN_PROGRESS = "in_progress",
+  COMPLETED = "completed",
 }

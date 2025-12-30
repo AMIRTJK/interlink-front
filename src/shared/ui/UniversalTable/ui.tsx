@@ -1,3 +1,4 @@
+import "./style.css";
 import { Form, Table, TableColumnsType } from "antd";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import {
@@ -33,6 +34,8 @@ interface IProps<RecordType, ResponseType> {
   actionButton?: ReactNode;
   className?: string;
   autoFilter?: boolean;
+  scroll?: { x?: number | string | true; y?: number | string };
+  showSizeChanger?: boolean;
 }
 
 export function UniversalTable<RecordType = any, ResponseType = any>(
@@ -58,17 +61,19 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
   const [form] = Form.useForm();
 
   const getItemsFromResponse =
-    props.getItemsFromResponse ?? ((response: any) => response?.items ?? []);
+    props.getItemsFromResponse ??
+    ((response: any) => response?.data?.data ?? []);
 
   const [activeFilters, setActiveFilters] = useState<Record<string, any>>({});
 
+  const page = searchParams.page;
+  const perPage = searchParams.per_page;
   const currentFilterSource = autoFilter ? searchParams : activeFilters;
+
   const filterValues = useFilterValues(
     currentFilterSource ?? {},
     filters ?? []
   ) as Record<string, any>;
-
-  const { pageNumber, pageSize } = searchParams;
 
   const transformedFilters = useMemo(() => {
     return Object.keys(filterValues).reduce(
@@ -95,23 +100,39 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
   }, [filterValues, filters]);
 
   const params = useMemo(() => {
-    return {
+    const rawParams: Record<string, any> = {
+      ...transformedFilters,
       ...queryParams,
-      ids: null,
-      filters: {
-        ...(queryParams?.filters ?? {}),
-        ...transformedFilters,
-      },
-      orderBy: {
-        orderColumn: 1,
-        direction: direction,
-      },
-      pageInfo: {
-        pageNumber: Number(pageNumber) || 1,
-        pageSize: Number(pageSize) || DEFAULT_PAGE_SIZE,
-      },
+      sort: queryParams?.sort || "id",
+      dir: direction === 1 ? "desc" : "asc",
+      page: Number(page) || 1,
+      per_page: Number(perPage) || DEFAULT_PAGE_SIZE,
     };
-  }, [queryParams, transformedFilters, pageNumber, pageSize, direction]);
+
+    const cleanParams: Record<string, any> = {};
+
+    Object.entries(rawParams).forEach(([key, value]) => {
+      // Игнорируем пустые значения, чтобы не слать их в API
+      if (value === undefined || value === null) return;
+      // Приведение типов для числовых полей (согласно вашему API)
+      const numericFields = [
+        "creator_id",
+        "assignee_user_id",
+        "assignee_department_id",
+        "page",
+        "per_page",
+      ];
+      if (numericFields.includes(key)) {
+        const num = Number(value);
+        if (!isNaN(num)) cleanParams[key] = num;
+        return;
+      }
+
+      cleanParams[key] = value;
+    });
+
+    return cleanParams;
+  }, [queryParams, transformedFilters, page, perPage, direction]);
 
   const { data, isLoading } = url
     ? useGetQuery({
@@ -144,7 +165,7 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     } else {
       setActiveFilters(transformed);
     }
-    setParams("pageNumber", 1);
+    setParams("page", 1);
   };
 
   const handleReset = () => {
@@ -154,20 +175,24 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     } else {
       setActiveFilters({});
     }
-    setParams("pageNumber", 1);
+    setParams("page", 1);
   };
 
   useEffect(() => {
-    if (!pageSize) setParams("pageSize", DEFAULT_PAGE_SIZE);
-    if (!pageNumber) setParams("pageNumber", 1);
+    if (!perPage) setParams("per_page", DEFAULT_PAGE_SIZE);
+    if (!page) setParams("page", 1);
   }, []);
 
+  const filtersSnapshot = useMemo(
+    () => JSON.stringify(transformedFilters),
+    [transformedFilters]
+  );
+
   useEffect(() => {
-    if (autoFilter) {
-      setParams("pageNumber", 1);
+    if (autoFilter && page !== undefined && Number(page) !== 1) {
+      setParams("page", 1);
     }
-    return;
-  }, [transformedFilters]);
+  }, [filtersSnapshot, autoFilter]);
 
   const tableData = (
     dataSource ??
@@ -175,10 +200,12 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     []
   ).map(formatDatesInObject);
 
+  console.log(tableData, "===========");
+
   return (
-    <div className="">
+    <div>
       <If is={Boolean(filters)}>
-        <div className={`flex items-center pb-5 px-5 pt-2  ${props.style}`}>
+        <div className={`w-full! mb-2 ${props.style}`}>
           {title && <h2 className="mr-auto text-lg font-semibold">{title}</h2>}
           <FiltersContainer
             filters={filters ?? []}
@@ -190,7 +217,7 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
         </div>
       </If>
       <Table
-        scroll={{ y: "calc(100vh - 450px)" }}
+        scroll={"scroll" in props ? props.scroll : { y: "calc(100vh - 450px)" }}
         className={props.className}
         loading={isLoading}
         dataSource={tableData}
@@ -198,22 +225,20 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
         rowKey={"id"}
         rowClassName={props.rowClassName}
         rowSelection={rowSelection}
+        pagination={{
+          total: (data as any)?.data?.total || 0,
+          current: Number(page) || 1,
+          pageSize: Number(perPage) || DEFAULT_PAGE_SIZE,
+          pageSizeOptions: [10, 20, 50, 100],
+          showSizeChanger: props.showSizeChanger ?? true,
+          onChange(page, pageSize) {
+            setParams("page", page);
+            setParams("per_page", pageSize);
+          },
+        }}
         onRow={(record) => ({
           onClick: () => handleRowClick?.(record),
         })}
-        pagination={{
-          // Тестово указал, тут должно прийди из сервиса
-          total: 10,
-          defaultPageSize: DEFAULT_PAGE_SIZE,
-          current: Number(pageNumber) || 1,
-          pageSize: Number(pageSize) || DEFAULT_PAGE_SIZE,
-          pageSizeOptions: [10, 20, 30],
-          showSizeChanger: true,
-          onChange(page, pageSize) {
-            setParams("pageNumber", page);
-            setParams("pageSize", pageSize);
-          },
-        }}
       />
     </div>
   );

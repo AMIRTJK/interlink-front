@@ -29,7 +29,7 @@ export const useGetQuery = <
   const {
     url,
     params,
-    method = "POST",
+    method = "GET",
     useToken = false,
     options: queryOptions,
   } = options;

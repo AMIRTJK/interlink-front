@@ -4,13 +4,13 @@ export const getCorrespondenceIncomingFilters = (): IFilterItem[] => {
   return [
     {
       type: FilterType.INPUT,
-      name: "outboundNumber",
-      placeholder: "Исходящий номер",
+      name: "incomingNumber",
+      placeholder: "Входящий номер",
     },
     {
       type: FilterType.INPUT,
-      name: "inboundNumber",
-      placeholder: "Входящий номер",
+      name: "outgoingNumber",
+      placeholder: "Исходящий номер",
     },
     {
       type: FilterType.DATE,
@@ -22,8 +22,8 @@ export const getCorrespondenceIncomingFilters = (): IFilterItem[] => {
       name: "sender",
       placeholder: "Отправитель",
       options: [
-        { label: "Организация 1", value: 1 },
-        { label: "Организация 2", value: 2 },
+        { label: "Коммерческая организация", value: 1 },
+        { label: "Бюджетная организация", value: 2 },
       ],
     },
     {
@@ -31,7 +31,9 @@ export const getCorrespondenceIncomingFilters = (): IFilterItem[] => {
       name: "status",
       placeholder: "Статус",
       options: [
-        { label: "В работе", value: "processing" },
+        { label: "Черновик", value: "draft" },
+        { label: "Зарегистрировано", value: "registered" },
+        { label: "В процессе", value: "in_progress" },
         { label: "Завершено", value: "completed" },
       ],
     },
