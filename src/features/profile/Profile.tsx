@@ -29,7 +29,7 @@ export const Profile = () => {
           }
         );
         setUserData(response.data.data);
-        tokenControl.setUserPosition(response?.data.data.position);
+        tokenControl.setUserPosition(response?.data?.data?.position);
       } catch (err) {
         console.error("Ошибка при получении данных пользователя:", err);
       } finally {
