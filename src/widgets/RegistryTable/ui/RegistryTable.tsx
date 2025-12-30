@@ -35,6 +35,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 // При необходимости можно рефактор сделать
  const userRoles = tokenControl.getUserRole()?.split(', ') ?? [];
   const canCreate = userRoles.includes('correspondence.create');
+  const canView= userRoles.includes('correspondence.register');
   return (
     <div className="bg-white flex flex-col gap-2 w-full h-full">
       <nav>
@@ -54,7 +55,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
       <div className="px-2">
         <FilterRegistry />
       </div>
-      <div className="px-2">
+      <div className={`${canView ? 'block px-2' : 'hidden'}`}>
         <UniversalTable
           dataSource={data}
           filters={filters}

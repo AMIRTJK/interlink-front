@@ -13,6 +13,7 @@ export const TasksColumn = ({
   onTaskClick,
   onTaskDrop,
   onDelete,
+  canCreateTasks,
 }: {
   status: string;
   label: string;
@@ -21,6 +22,7 @@ export const TasksColumn = ({
   onTaskClick?: (task: ITaskItem) => void;
   onTaskDrop?: (taskId: string, status: string) => void;
   onDelete?: (taskId: string | number) => void;
+  canCreateTasks: boolean;
 }) => {
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -59,6 +61,7 @@ export const TasksColumn = ({
           onClick={() => onAddTask?.(status)}
           type="text"
           shape="circle"
+          className={`${!canCreateTasks ? "" : "hidden"}`}
           style={{ width: 40, height: 40, padding: 0 }}
           icon={<PlusOutlined className="text-[#0037AF]! text-[20px]!" />}
         />
@@ -66,7 +69,7 @@ export const TasksColumn = ({
       <div className="tasks-list">
         {currentTasks?.length > 0 ? (
           currentTasks?.map((task) => (
-            <TaskCard key={task.id} task={task} onClick={onTaskClick} onDelete={onDelete} />
+            <TaskCard key={task?.id} task={task} onClick={onTaskClick} onDelete={onDelete} />
           ))
         ) : (
           <div className="empty-column">Нет задач</div>
