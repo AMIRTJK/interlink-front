@@ -1,11 +1,12 @@
 import { StatusTabs } from "@features/StatusTabs";
 import { Button, UniversalTable } from "@shared/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AddIcon from "../../../assets/icons/add-icon.svg";
 import { FilterRegistry } from "@features/FilterRegistry";
 import { useLocation, useNavigate } from "react-router";
 import { getRegistryColumns, getRegistryFilters } from "../lib";
-import { tokenControl, useGetQuery } from "@shared/lib";
+import { tokenControl } from "@shared/lib";
+
 
 interface RegistryTableProps<T extends Record<string, unknown>> {
   data?: T[];
@@ -29,34 +30,18 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const handleCreate = () => {
     navigate(`${location.pathname}/create`);
   };
-
   const columns = getRegistryColumns(type);
   const filters = getRegistryFilters(type);
-
 // При необходимости можно рефактор сделать
-    const {data:userRoles}=useGetQuery({
-    method:"GET",
-    url:"/api/v1/admin/permissions",
-    options:{
-      enabled:tokenControl.get()!==null
-    }
-  })
-
-  // Берем userRole.
-const userRole: { group: string; name: string; permissions: string[] } | null =
-  (userRoles as { data: { group: string; name: string; permissions: string[] }[] } | undefined)?.data
-    .find(item => item.name === "correspondence.create") || null;
-    useEffect(()=>{
-      tokenControl.setUserRole(userRole?.name || "");
-    },[userRole])
-
+ const userRoles = tokenControl.getUserRole()?.split(', ') ?? [];
+  const canCreate = userRoles.includes('correspondence.create');
   return (
     <div className="bg-white flex flex-col gap-2 w-full h-full">
       <nav>
         <StatusTabs activeTab={currentTab} onTabChange={setCurrentTab} />
       </nav>
       {/* Panel Control */}
-      <div className={` ${userRole ? 'block px-2' : 'hidden'}`}>
+      <div className={`px-2 ${canCreate ? 'block' : 'hidden'}`}>
         <Button
           onClick={handleCreate}
           type="default"

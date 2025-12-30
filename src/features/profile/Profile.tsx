@@ -1,6 +1,5 @@
 
-import { Outlet, useNavigate } from "react-router-dom";
-import { profileRightNav } from "./model";
+import { useNavigate } from "react-router-dom";
 import { AppRoutes } from "@shared/config/AppRoutes";
 import { tokenControl, useTheme } from "@shared/lib";
 import { ApiRoutes, _axios } from "@shared/api";
@@ -30,6 +29,7 @@ export const Profile = () => {
           }
         );
         setUserData(response.data.data);
+        tokenControl.setUserPosition(response?.data.data.position);
       } catch (err) {
         console.error("Ошибка при получении данных пользователя:", err);
       } finally {

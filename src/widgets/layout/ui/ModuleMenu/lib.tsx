@@ -1,6 +1,5 @@
 import { AppRoutes } from "@shared/config";
 import type { MenuProps } from "antd";
-
 import ProfileIcon from "../../../../assets/icons/profile-icon.svg";
 import OrganizationIcon from "../../../../assets/icons/organization-icon.svg";
 import MainDocumentsIcon from "../../../../assets/icons/main-documents-icon.svg";
@@ -9,7 +8,10 @@ import PrimaryDocumentsIcon from "../../../../assets/icons/primary documents-ico
 import ApplicationsIcon from "../../../../assets/icons/applications-icon.svg";
 import CrmIcon from "../../../../assets/icons/crm-icon.svg";
 
-export type MenuItem = Required<MenuProps>["items"][number];
+// Расширяем базовый тип MenuItem из Ant Design
+export type MenuItem = Required<MenuProps>["items"][number] & {
+  requiredRole?: string[];
+};
 
 export const getModuleItems = (
   variant: "horizontal" | "compact"
@@ -34,25 +36,26 @@ export const getModuleItems = (
     {
       key: AppRoutes.CORRESPONDENCE,
       label: "Корреспонденция",
+      requiredRole: ["correspondence.view",], 
       icon:
         variant === "horizontal" ? <img src={CorrespondenceIcon} alt="" /> : null,
-      children:
-        variant === "compact"
-          ? [
-            {
-              key: AppRoutes.CORRESPONDENCE_INCOMING,
-              label: "Входящие",
-            },
-            {
-              key: AppRoutes.CORRESPONDENCE_OUTGOING,
-              label: "Исходящие",
-            },
-          ]
-          : undefined,
+      ...(variant === "compact" && {
+        children: [
+          {
+            key: AppRoutes.CORRESPONDENCE_INCOMING,
+            label: "Входящие",
+          },
+          {
+            key: AppRoutes.CORRESPONDENCE_OUTGOING,
+            label: "Исходящие",
+          },
+        ]
+      }),
     },
     {
       key: "/modules/temp-docs_primary",
       label: "Первичные документы",
+      requiredRole: ["primary_documents.view",], 
       icon:
         variant === "horizontal" ? (
           <img src={PrimaryDocumentsIcon} alt="" />
@@ -61,12 +64,14 @@ export const getModuleItems = (
     {
       key: "/modules/temp-apps",
       label: "Заявки",
+      requiredRole: ["apps.view",], 
       icon:
         variant === "horizontal" ? <img src={ApplicationsIcon} alt="" /> : null,
     },
     {
       key: "/modules/temp-crm",
       label: "CRM",
+      requiredRole: ["crm.view",], 
       icon: variant === "horizontal" ? <img src={CrmIcon} alt="" /> : null,
     },
   ];

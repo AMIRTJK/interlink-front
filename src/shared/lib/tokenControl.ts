@@ -1,6 +1,7 @@
 const TOKEN_KEY = "interlink/token";
 const USER_ID='interlink/userId';
 const USER_ROLE='interlink/userRole';
+const USER_POSITION='interlink/userPosition';
 interface IToken {
   token: string;
   userId?:number;
@@ -41,5 +42,17 @@ export const tokenControl = {
 
   removeUserRole:()=>{
     localStorage.removeItem(USER_ROLE);
+  },
+
+  setUserPosition:(position:string)=>{
+    localStorage.setItem(USER_POSITION, position);
+  },
+
+  getUserPosition:()=>{
+    return localStorage.getItem(USER_POSITION);
+  },
+
+  removeUserPosition:()=>{
+    localStorage.removeItem(USER_POSITION);
   },
 };
