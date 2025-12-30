@@ -72,7 +72,7 @@ export const ModuleMenu = ({ variant }: IProps) => {
     return secondQueryData?.data?.position;
   }, [secondQueryData]);
 
-  // 5. Фильтруем элементы меню (ИСПРАВЛЕНЫ ЗАВИСИМОСТИ)
+  // 5. Фильтруем элементы меню 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
       // Если у элемента нет требований по ролям, показываем его
