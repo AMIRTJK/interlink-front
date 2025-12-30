@@ -75,7 +75,7 @@ export const FilterRegistry = () => {
             {/* Кнопка настроек в стиле скриншота */}
             <Button
               type="default"
-              className="flex! items-center! justify-center! h-9! w-9! p-0! flex-shrink-0! border-white/50! bg-transparent! hover:bg-white/10!"
+              className="flex! items-center! justify-center! h-9! w-9! p-0! shrink-0! border-white/50! bg-transparent! hover:bg-white/10!"
               icon={FilterSettingsIcon}
               withIcon
             />

@@ -7,7 +7,7 @@ export const CorrespondencePage = () => {
       <aside className="h-[800px]">
         <RegistrySidebar />
       </aside>
-      <main className="w-full h-[800px] rounded-2xl overflow-auto">
+      <main className="w-full h-[800px] rounded-2xl overflow-hidden">
         <Outlet />
       </main>
     </div>
