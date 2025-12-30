@@ -1,3 +1,64 @@
+// V1-с одним запросом
+
+// import {
+//   useQuery,
+//   UseQueryOptions,
+//   UseQueryResult,
+// } from "@tanstack/react-query";
+// import { useCallback } from "react";
+// import { _axios } from "@shared/api";
+// import { tokenControl } from "../tokenControl";
+
+// interface IUseGetQueryOptions<
+//   TRequest = unknown,
+//   TResponse = unknown,
+//   TSelect = unknown,
+// > {
+//   url: string;
+//   method?: "GET" | "POST";
+//   params?: TRequest;
+//   useToken?: boolean;
+//   options?: Partial<UseQueryOptions<TResponse, unknown, TSelect>>;
+// }
+
+// export const useGetQuery = <
+//   TRequest = unknown,
+//   TResponse = unknown,
+//   TSelect = TResponse,
+// >(
+//   options: IUseGetQueryOptions<TRequest, TResponse, TSelect>
+// ) => {
+//   const {
+//     url,
+//     params,
+//     method = "POST",
+//     useToken = false,
+//     options: queryOptions,
+//   } = options;
+
+//   const queryFn = useCallback(async () => {
+//     const headers: Record<string, string> = {};
+//     if (useToken) {
+//       const token = tokenControl.get();
+//       if (token) {
+//         headers.Authorization = `Bearer ${token}`;
+//       }
+//     }
+//     const response = await _axios<TResponse>(url, {
+//       method,
+//       [method === "POST" ? "data" : "params"]: params ?? {},
+//     });
+
+//     return response.data;
+//   }, [method, url, params, useToken]);
+
+//   return useQuery({
+//     queryFn,
+//     queryKey: [url, params, useToken],
+//     ...queryOptions,
+//   }) as UseQueryResult<TSelect, unknown>;
+// };
+
 // V2-с двумя запросами
 import {
   useQuery,
@@ -14,7 +75,7 @@ interface ISecondQueryOptions<
   TSecondResponse = any,
 > {
   url: string;
-  method?: "GET";
+  method?: "GET" | "POST";
   params?: TSecondRequest;
   paramsFromFirst?: (data: TFirstResult) => TSecondRequest;
   /** Если true, второй запрос будет ждать успеха первого */
@@ -30,7 +91,7 @@ interface IUseGetQueryOptions<
   TSecondResponse = any,
 > {
   url: string;
-  method?: "GET";
+  method?: "GET" | "POST";
   params?: TRequest;
   useToken?: boolean;
   options?: Partial<UseQueryOptions<TResponse, any, TSelect>>;
@@ -73,7 +134,7 @@ export const useGetQuery = <
       }
       const response = await _axios<TResponse>(url, {
         method,
-        [method === "GET" ? "data" : "params"]: params ?? {},
+        [method === "POST" ? "data" : "params"]: params ?? {},
         headers,
       });
       return response.data;
@@ -115,8 +176,8 @@ export const useGetQuery = <
           : secondQuery.params;
 
       const response = await _axios<TSecondResponse>(secondQuery.url, {
-        method: secondQuery.method ?? "GET",
-        [secondQuery.method === "GET" ? "data" : "params"]: finalParams ?? {},
+        method: secondQuery.method ?? "POST",
+        [secondQuery.method === "POST" ? "data" : "params"]: finalParams ?? {},
         headers,
       });
       return response.data;
