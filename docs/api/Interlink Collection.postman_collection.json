@@ -1099,6 +1099,395 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Create Document (draft)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"kind\": \"incoming\",\r\n  \"channel\": \"paper\",\r\n  \"doc_date\": \"2025-12-27\",\r\n  \"subject\": \"Входящее письмо тест\",\r\n  \"body\": \"Тестовое содержание письма\",\r\n  \"sender_name\": \"ООО Ромашка\",\r\n  \"sender_contact\": \"+992900000000\",\r\n  \"priority\": \"high\",\r\n  \"due_at\": \"2026-01-10 18:00\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/correspondences",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"correspondences"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register Document",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"registered_at\": \"2025-12-27 10:00\"\r\n}\r\n///v1/correspondences/{id}/register"
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/correspondences/1/register",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"correspondences",
+						"1",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Resolutions  (можно много)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"text\": \"Замминистра: Направить в юридический отдел. Контроль.\",\r\n  \"due_at\": \"2026-01-03 18:00\"\r\n}\r\n\r\n// Должно вернуться:\r\n\r\n// id резолюции\r\n\r\n// author_id = текущий юзер\r\n\r\n// text\r\n\r\n// due_at"
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/correspondences/1/resolutions",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"correspondences",
+						"1",
+						"resolutions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Assign tasks (Crspndnce) (многим)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "// {\r\n//   \"resolution_id\": 1,\r\n//   \"due_at\": \"2026-01-03 18:00\",\r\n//   \"assignee_users\": [1],\r\n//   \"note\": \"Срочно\"\r\n// }\r\n\r\n{\r\n  \"resolution_id\": 1,\r\n  \"assignee_departments\": [3],\r\n  \"note\": \"Подготовить юридическое заключение\"\r\n}\r\n"
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/correspondences/1/assignments",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"correspondences",
+						"1",
+						"assignments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Crspndnce",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Changing the status of an assignment (as a department employee)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "// Смена статуса поручения (как сотрудник отдела)\r\n// {\r\n//   \"status\": \"in_progress\"\r\n// }\r\n// {\r\n//   \"status\": \"done\"\r\n// }\r\n// done_at заполнится\r\n\r\n// если это последнее поручение → документ станет completed"
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/correspondence-assignments/{ASSIGNMENT_ID}/status",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"correspondence-assignments",
+						"{ASSIGNMENT_ID}",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Comments",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"text\": \"Проверка: документ взят в работу, готовим проект ответа.\"\r\n}\r\n"
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/correspondences/1/comments",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"correspondences",
+						"1",
+						"comments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Comments",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/correspondences/1/comments",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"correspondences",
+						"1",
+						"comments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Department",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"name\": \"Юридический отдел 2\", \"code\": \"legal2\" }\r\n"
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/v1/admin/departments",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"admin",
+						"departments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
 		}
 	],
 	"variable": [

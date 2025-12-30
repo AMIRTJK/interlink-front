@@ -5,3 +5,5 @@ export * from "./form-fields";
 export * from "./If";
 export * from "./Tabs/Tabs";
 export * from "./SnowOverlay";
+export * from "./UniversalTable";
+export * from "./FiltersContainer";
