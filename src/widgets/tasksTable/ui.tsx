@@ -21,7 +21,7 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
   const [localTasks, setLocalTasks] = useState<ITaskItem[]>([]);
   const [lastSyncedData, setLastSyncedData] = useState<ITaskItem[] | undefined>(undefined);
   const { params } = useDynamicSearchParams();
-  const { data: response, isLoading: loading } = useGetQuery<
+  const { data: response, isPending: loading } = useGetQuery<
     Record<string, string>,
     ITasksResponse
   >({
@@ -92,10 +92,6 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
        setLocalTasks(revertedTasks);
     }
   };
-
-  const userRoles = tokenControl.getUserRole()?.split(', ') ?? [];
-  const canCreateTasks = userRoles.includes('tasks.create');
-
   const tasks = localTasks || [];
   if (loading) {
     return (
@@ -108,6 +104,8 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
         <Button
           className={showFilters ? "tasks-table-header-button" : "tasks-table-header-button-collapsed"}
           icon={<FilterOutlined />} 
+          disabled={loading}
+          loading={loading}
           onClick={() => setShowFilters(!showFilters)}
         >
           {showFilters ? "Скрыть фильтры" : "Показать фильтры"}
@@ -127,7 +125,6 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
             onTaskClick={onTaskClick}
             onTaskDrop={handleTaskDrop}
             onDelete={handleDeleteTask}
-            canCreateTasks={canCreateTasks}
           />
         ))}
       </div>

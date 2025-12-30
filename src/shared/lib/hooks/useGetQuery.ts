@@ -1,3 +1,65 @@
+// V1-с одним запросом
+
+// import {
+//   useQuery,
+//   UseQueryOptions,
+//   UseQueryResult,
+// } from "@tanstack/react-query";
+// import { useCallback } from "react";
+// import { _axios } from "@shared/api";
+// import { tokenControl } from "../tokenControl";
+
+// interface IUseGetQueryOptions<
+//   TRequest = unknown,
+//   TResponse = unknown,
+//   TSelect = unknown,
+// > {
+//   url: string;
+//   method?: "GET" | "POST";
+//   params?: TRequest;
+//   useToken?: boolean;
+//   options?: Partial<UseQueryOptions<TResponse, unknown, TSelect>>;
+// }
+
+// export const useGetQuery = <
+//   TRequest = unknown,
+//   TResponse = unknown,
+//   TSelect = TResponse,
+// >(
+//   options: IUseGetQueryOptions<TRequest, TResponse, TSelect>
+// ) => {
+//   const {
+//     url,
+//     params,
+//     method = "POST",
+//     useToken = false,
+//     options: queryOptions,
+//   } = options;
+
+//   const queryFn = useCallback(async () => {
+//     const headers: Record<string, string> = {};
+//     if (useToken) {
+//       const token = tokenControl.get();
+//       if (token) {
+//         headers.Authorization = `Bearer ${token}`;
+//       }
+//     }
+//     const response = await _axios<TResponse>(url, {
+//       method,
+//       [method === "POST" ? "data" : "params"]: params ?? {},
+//     });
+
+//     return response.data;
+//   }, [method, url, params, useToken]);
+
+//   return useQuery({
+//     queryFn,
+//     queryKey: [url, params, useToken],
+//     ...queryOptions,
+//   }) as UseQueryResult<TSelect, unknown>;
+// };
+
+// V2-с двумя запросами
 import {
   useQuery,
   UseQueryOptions,
@@ -8,41 +70,41 @@ import { tokenControl } from "../tokenControl";
 
 /* ===================== TYPES ===================== */
 interface ISecondQueryOptions<
-  TFirstResult = unknown,
-  TSecondRequest = unknown,
-  TSecondResponse = unknown
+  TFirstResult = any,
+  TSecondRequest = any,
+  TSecondResponse = any,
 > {
   url: string;
   method?: "GET" | "POST";
   params?: TSecondRequest;
   paramsFromFirst?: (data: TFirstResult) => TSecondRequest;
-  /** НОВОЕ: Если true, второй запрос будет ждать успеха первого, даже если данные не передаются */
+  /** Если true, второй запрос будет ждать успеха первого */
   shouldWaitFirst?: boolean; 
-  options?: Partial<UseQueryOptions<TSecondResponse, unknown, TSecondResponse>>;
+  options?: Partial<UseQueryOptions<TSecondResponse, any, TSecondResponse>>;
 }
 
 interface IUseGetQueryOptions<
-  TRequest = unknown,
-  TResponse = unknown,
-  TSelect = unknown,
-  TSecondRequest = unknown,
-  TSecondResponse = unknown
+  TRequest = any,
+  TResponse = any,
+  TSelect = any,
+  TSecondRequest = any,
+  TSecondResponse = any
 > {
   url: string;
   method?: "GET" | "POST";
   params?: TRequest;
   useToken?: boolean;
-  options?: Partial<UseQueryOptions<TResponse, unknown, TSelect>>;
+  options?: Partial<UseQueryOptions<TResponse, any, TSelect>>;
   secondQuery?: ISecondQueryOptions<TSelect, TSecondRequest, TSecondResponse>;
 }
 
 /* ===================== HOOK ===================== */
 export const useGetQuery = <
-  TRequest = unknown,
-  TResponse = unknown,
-  TSelect = TResponse,
-  TSecondRequest = unknown,
-  TSecondResponse = unknown
+  TRequest = any,
+  TResponse = any,
+  TSelect = any,
+  TSecondRequest = any,
+  TSecondResponse = any
 >(
   options: IUseGetQueryOptions<TRequest, TResponse, TSelect, TSecondRequest, TSecondResponse>
 ) => {
@@ -65,23 +127,18 @@ export const useGetQuery = <
       return response.data;
     },
     ...queryOptions,
-  }) as UseQueryResult<TSelect, unknown>;
+  }) as UseQueryResult<TSelect, any>;
 
   /* ---------- ЛОГИКА ВТОРОГО ЗАПРОСА ---------- */
   const secondOptions = secondQuery?.options || {};
   const { enabled: manualEnabled, ...restSecondOptions } = secondOptions;
 
-  // Автоматическое определение зависимости:
-  // Ждем первый запрос, если:
-  // 1. Указан флаг shouldWaitFirst: true
-  // 2. ИЛИ передана функция paramsFromFirst
   const isDependent = Boolean(secondQuery?.shouldWaitFirst || secondQuery?.paramsFromFirst);
 
   const computedEnabled = isDependent 
-    ? firstQuery.isSuccess // ждем успешного завершения
+    ? firstQuery.isSuccess 
     : true;
 
-  // Финальный enabled учитывает ручной ввод пользователя
   const finalEnabled = manualEnabled !== undefined ? manualEnabled : computedEnabled;
 
   const secondQueryResult = useQuery({
@@ -109,12 +166,22 @@ export const useGetQuery = <
     enabled: Boolean(secondQuery) && !!finalEnabled,
   });
 
+  /* ---------- ВОЗВРАЩАЕМ ДАННЫЕ ---------- */
   return {
+    // 1. Обратная совместимость для обычных вызовов (SelectField, Table и др.)
+    data: firstQuery.data,
+    refetch: firstQuery.refetch,
+    isFetching: firstQuery.isFetching,
+    
+    // 2. Новые поля для цепочек запросов (ModuleMenu)
     firstQueryData: firstQuery.data,
     secondQueryData: secondQueryResult.data,
-    // isLoading объединяет оба запроса (если второй должен быть запущен)
-    isLoading: firstQuery.isLoading || (Boolean(secondQuery) && finalEnabled && secondQueryResult.isLoading),
+    
+    // 3. Общие статусы
+    isPending: firstQuery.isLoading || (Boolean(secondQuery) && finalEnabled && secondQueryResult.isLoading),
     isError: firstQuery.isError || secondQueryResult.isError,
+    
+    // 4. Полные объекты для продвинутого использования
     firstQuery,
     secondQuery: secondQueryResult,
   };
