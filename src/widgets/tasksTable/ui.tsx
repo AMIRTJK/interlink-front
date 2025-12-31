@@ -19,9 +19,9 @@ interface IProps {
 export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
   const [showFilters, setShowFilters] = useState(false);
   const [localTasks, setLocalTasks] = useState<ITaskItem[]>([]);
-  const [lastSyncedData, setLastSyncedData] = useState<ITaskItem[] | undefined>(undefined);
   const { params } = useDynamicSearchParams();
-  const { data: response, isPending: loading } = useGetQuery<
+
+  const { isLoading: loading } = useGetQuery<
     Record<string, string>,
     ITasksResponse
   >({
@@ -29,25 +29,30 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
     method: "GET",
     params,
     useToken: true,
-    options:{
+    preload: true,
+    preloadConditional: ["tasks.create"],
+    options: {
       enabled: !!params,
       keepPreviousData: true,
       refetchOnMount: true,
-    }
+      onSuccess: (data) => {
+        if (data?.data) {
+          setLocalTasks(data.data);
+        }
+      },
+    },
   });
 
-  const { mutateAsync: updateTaskStatus } = useMutationQuery<{ id: string; status: string }, unknown>({
+  const { mutateAsync: updateTaskStatus } = useMutationQuery<
+    { id: string; status: string },
+    unknown
+  >({
     url: (data) => `${ApiRoutes.UPDATE_TASK_STATUS}/${data.id}/status`,
     method: "PATCH",
     messages: {
       error: "Ошибка обновления статуса",
     },
   });
-  
-  if (response?.data && response.data !== lastSyncedData) {
-    setLocalTasks(response.data);
-    setLastSyncedData(response.data);
-  }
 
   const { mutateAsync: deleteTask } = useMutationQuery<string, unknown>({
     url: (taskId) => `${ApiRoutes.DELETE_TASK_BY_ID}${taskId}`,
@@ -92,14 +97,15 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
        setLocalTasks(revertedTasks);
     }
   };
+
   const tasks = localTasks || [];
+
   if (loading) {
-    return (
-      <Loader/>
-    );
-  }else{
-    return (
-      <div className="tasks-table-wrapper">
+    return <Loader />;
+  }
+
+  return (
+    <div className="tasks-table-wrapper">
       <div className={`${showFilters ? "tasks-table-header" : "tasks-table-header-collapsed"}`}>
         <Button
           className={showFilters ? "tasks-table-header-button" : "tasks-table-header-button-collapsed"}
@@ -110,9 +116,9 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
         >
           {showFilters ? "Скрыть фильтры" : "Показать фильтры"}
         </Button> 
-      <If is={showFilters}>
-        <TasksFilters />
-      </If>
+        <If is={showFilters}>
+          <TasksFilters />
+        </If>
       </div>
       <div className="flex flex-col lg:flex-row lg:flex-nowrap gap-4 overflow-x-auto p-2">
         {TASK_STATUS_OPTIONS?.map((option) => (
@@ -129,6 +135,5 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
         ))}
       </div>
     </div>
-    );
-  }
+  );
 };

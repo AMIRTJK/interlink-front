@@ -1,119 +1,14 @@
-// V1-с одним запросом
-
-
-// import { _axios } from "@shared/api";
-// import {
-//   useMutation,
-//   UseMutationOptions,
-//   useQueryClient,
-// } from "@tanstack/react-query";
-// import { AxiosError, AxiosRequestConfig } from "axios";
-// import { useCallback } from "react";
-// import { toast } from "react-toastify";
-
-// interface CustomAxiosRequestConfig<T = unknown> extends Omit<
-//   AxiosRequestConfig<T>,
-//   "headers"
-// > {
-//   suppressErrorToast?: boolean;
-//   skipAuth?: boolean;
-// }
-
-// // Тип ответа API с success/message/data
-// export interface IApiResponse<TData = unknown> {
-//   success: boolean;
-//   message: string;
-//   data: TData;
-// }
-
-// // Опции для useMutationQuery
-// interface IUseMutationQueryOptions<TRequest = unknown, TData = unknown> {
-//   url: string | ((data: TRequest) => string);
-//   method: "POST" | "PUT" | "DELETE" | "GET" | "PATCH";
-//   messages?: {
-//     success?: string;
-//     error?: string;
-//     invalidate?: string[];
-//     onSuccessCb?: (data: TData) => void; // возвращаем уже data
-//     onErrorCb?: () => void;
-//   };
-//   queryParams?: Record<string, unknown>;
-//   queryOptions?: UseMutationOptions<TData, unknown, TRequest, unknown>;
-//   skipAuth?: boolean;
-// }
-
-// // Хук useMutationQuery с типизацией
-// export const useMutationQuery = <TRequest = unknown, TData = unknown>(
-//   options: IUseMutationQueryOptions<TRequest, TData>
-// ) => {
-//   const { url, method, messages, queryOptions, skipAuth = false } = options;
-//   const queryClient = useQueryClient();
-
-//   const mutationFn = useCallback(
-//     async (data: TRequest): Promise<TData> => {
-//       const requestUrl = typeof url === "function" ? url(data) : url;
-
-//       const response = await _axios<IApiResponse<TData>>({
-//         url: requestUrl,
-//         method,
-//         data,
-//         suppressErrorToast: Boolean(messages?.error),
-//         skipAuth,
-//       } as CustomAxiosRequestConfig<TRequest>);
-
-//       const body = response.data;
-
-//       if (!body.success) {
-//         throw new Error(body.message || "Ошибка запроса");
-//       }
-
-//       const successMessage = messages?.success || body.message || "Успешно";
-
-//       if (successMessage) {
-//         toast.success(successMessage);
-//       }
-
-//       return body.data; // возвращаем только data
-//     },
-//     [url, method, skipAuth, messages]
-//   );
-
-//   return useMutation<TData, AxiosError, TRequest>({
-//     mutationFn,
-//     ...queryOptions,
-
-//     onSuccess: (data, variables, context) => {
-//       messages?.onSuccessCb?.(data);
-//       queryOptions?.onSuccess?.(data, variables, context);
-
-//       if (messages?.invalidate) {
-//         queryClient.invalidateQueries({ queryKey: messages.invalidate });
-//       }
-//     },
-
-//     onError: (error, variables, context) => {
-//       const data = error.response?.data as IApiResponse<TData> | undefined;
-//       const message =
-//         data?.message || error.message || messages?.error || "Произошла ошибка";
-
-//       toast.error(message);
-//       messages?.onErrorCb?.();
-//       queryOptions?.onError?.(error, variables, context);
-//     },
-//   });
-// };
-
-
-// V2-с двумя запросами
-import { _axios } from "@shared/api";
+import { _axios, ApiRoutes } from "@shared/api";
 import {
   useMutation,
   UseMutationOptions,
   useQueryClient,
+  useQuery,
 } from "@tanstack/react-query";
 import { AxiosError, AxiosRequestConfig } from "axios";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { toast } from "react-toastify";
+import { tokenControl } from "../tokenControl";
 
 /* ===================== TYPES ===================== */
 
@@ -150,6 +45,8 @@ interface IUseMutationQueryOptions<TRequest, TData, TSecondData> {
   queryOptions?: UseMutationOptions<any, AxiosError, TRequest, unknown>;
   secondQuery?: ISecondMutationQuery<TData, TSecondData>;
   skipAuth?: boolean;
+  preload?: boolean; // грузим permissions
+  preloadConditional?: string[]; // permissions для разрешения мутации
 }
 
 /* ===================== HOOK ===================== */
@@ -160,11 +57,58 @@ export const useMutationQuery = <
 >(
   options: IUseMutationQueryOptions<TRequest, TData, TSecondData>
 ) => {
-  const { url, method, messages, queryOptions, secondQuery, skipAuth = false } = options;
+  const { 
+    url, 
+    method, 
+    messages, 
+    queryOptions, 
+    secondQuery, 
+    skipAuth = false,
+    preload,
+    preloadConditional
+  } = options;
+  
   const queryClient = useQueryClient();
 
+  /* ---------- PERMISSIONS CHECK ---------- */
+  const permissionsQuery = useQuery({
+    queryKey: [ApiRoutes.FETCH_PERMISSIONS],
+    queryFn: async () => {
+      const headers: Record<string, string> = {};
+      const token = tokenControl.get();
+      if (token) headers.Authorization = `Bearer ${token}`;
+      
+      const response = await _axios(ApiRoutes.FETCH_PERMISSIONS, {
+        method: "GET",
+        headers,
+      });
+      return response.data.data;
+    },
+    enabled: !!preload && tokenControl.get() !== null,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Учитываем загрузку прав в состоянии isAllowed, чтобы кнопка была disabled (а не loading)
+  const isAllowedResult = useMemo(() => {
+    if (!preload) return true;
+    if (permissionsQuery.isLoading) return false; 
+    if (!permissionsQuery.isSuccess || !permissionsQuery.data) return false;
+    if (!preloadConditional || !preloadConditional.length) return true;
+
+    const currentPermissions = (permissionsQuery.data as { name: string }[]).map(p => p.name);
+    return preloadConditional.every(perm => currentPermissions.includes(perm));
+  }, [preload, permissionsQuery.isLoading, permissionsQuery.isSuccess, permissionsQuery.data, preloadConditional]);
+
+  /* ---------- MUTATION FUNCTION ---------- */
   const mutationFn = useCallback(
     async (requestData: TRequest): Promise<TSecondData | TData> => {
+      // Защита: если права нужны, но их нет ИЛИ они еще грузятся - блокируем выполнение
+      if (preload && !isAllowedResult) {
+        const errorMsg = "У вас недостаточно прав для выполнения этой операции";
+        toast.error(errorMsg);
+        throw new Error(errorMsg);
+      }
+
       // 1. ПЕРВЫЙ ЗАПРОС (Основная мутация)
       const firstUrl = typeof url === "function" ? url(requestData) : url;
       
@@ -174,7 +118,7 @@ export const useMutationQuery = <
         data: requestData,
         suppressErrorToast: Boolean(messages?.error),
         skipAuth,
-      } as CustomAxiosRequestConfig); // Приведение типа для кастомных полей
+      } as CustomAxiosRequestConfig);
 
       const firstBody = firstResponse.data;
 
@@ -200,7 +144,7 @@ export const useMutationQuery = <
           method: secondMethod,
           [secondMethod === "POST" ? "data" : "params"]: secondParams,
           skipAuth,
-        } as CustomAxiosRequestConfig); // ИСПРАВЛЕНО: добавлено приведение типа здесь
+        } as CustomAxiosRequestConfig);
 
         const secondBody = secondResponse.data;
 
@@ -213,15 +157,14 @@ export const useMutationQuery = <
 
       return firstData;
     },
-    [url, method, skipAuth, messages, secondQuery]
+    [url, method, skipAuth, messages, secondQuery, preload, isAllowedResult]
   );
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn,
     ...queryOptions,
 
     onSuccess: (finalData, variables, context) => {
-      // Уведомление об успехе (не показываем для GET)
       const successMessage = messages?.success || "Операция успешно выполнена";
       if (successMessage && method !== "GET") {
         toast.success(successMessage);
@@ -230,7 +173,6 @@ export const useMutationQuery = <
       messages?.onSuccessCb?.(finalData);
       queryOptions?.onSuccess?.(finalData, variables, context);
 
-      // Инвалидация кэша по ключам
       if (messages?.invalidate) {
         messages.invalidate.forEach((key) => {
           queryClient.invalidateQueries({ queryKey: [key] });
@@ -239,12 +181,19 @@ export const useMutationQuery = <
     },
 
     onError: (error: AxiosError, variables, context) => {
-      const errorData = error.response?.data as IApiResponse<any> | undefined;
-      const message = errorData?.message || error.message || messages?.error || "Произошла ошибка";
-
-      toast.error(message);
+      if (error.message !== "У вас недостаточно прав для выполнения этой операции") {
+        const errorData = error.response?.data as IApiResponse<any> | undefined;
+        const message = errorData?.message || error.message || messages?.error || "Произошла ошибка";
+        toast.error(message);
+      }
+      
       messages?.onErrorCb?.();
       queryOptions?.onError?.(error, variables, context);
     },
   });
+
+  return {
+    ...mutation,
+    isAllowed: isAllowedResult, 
+  };
 };
