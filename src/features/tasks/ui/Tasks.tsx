@@ -6,14 +6,22 @@ import '../style.css'
 export const Tasks = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taskStatus, setTaskStatus] = useState<string>();
+  const [editingTask, setEditingTask] = useState<ITaskItem | null>(null);
 
   const handleAddTask = (status: string) => {
+    setEditingTask(null);
     setTaskStatus(status);
     setIsModalOpen(true);
   };
 
   const handleTaskClick = (task: ITaskItem) => {
-    console.log("Task clicked:", task);
+    setEditingTask(task);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingTask(null);
   };
 
   return (
@@ -21,7 +29,7 @@ export const Tasks = () => {
       <TasksTable onAddTask={handleAddTask} onTaskClick={handleTaskClick} />
       <Modal
         open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
+        onCancel={handleCloseModal}
         footer={null}
         className="modal-task"
         title={null}
@@ -32,7 +40,19 @@ export const Tasks = () => {
       >
         <AddTaskForm
           currentTaskStatus={taskStatus}
-          onSuccess={() => setIsModalOpen(false)}
+          onSuccess={handleCloseModal}
+          mode={editingTask ? "edit" : "create"}
+          taskId={editingTask?.id}
+          initialValues={
+            editingTask
+              ? {
+                  title: editingTask.title,
+                  description: editingTask.description,
+                  status: editingTask.status,
+                  assignees: editingTask.assignees.map((a) => a.id),
+                }
+              : undefined
+          }
         />
       </Modal>
     </div>

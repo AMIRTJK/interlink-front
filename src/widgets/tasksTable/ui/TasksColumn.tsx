@@ -84,7 +84,7 @@ export const TasksColumn = ({
       <div className="tasks-list">
         {currentTasks?.length > 0 ? (
           currentTasks?.map((task) => (
-            <TaskCard key={task?.id} task={task} onClick={onTaskClick} onDelete={onDelete} />
+            <TaskCard key={task?.id} task={task} onClick={onTaskClick} onEdit={onTaskClick} onDelete={onDelete} />
           ))
         ) : (
           <div className="empty-column">Нет задач</div>
