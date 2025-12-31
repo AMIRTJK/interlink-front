@@ -41,6 +41,7 @@ export const FiltersContainer: FC<IProps> = ({
       case FilterType.SELECT:
         return <FilterSelect key={filter.name} config={filter} />;
       case FilterType.DATE:
+      case FilterType.DATE_RANGE: // Оба типа обрабатываем одним компонентом
         return <FilterDate key={filter.name} config={filter} />;
       default:
         return null;
@@ -74,7 +75,11 @@ export const FiltersContainer: FC<IProps> = ({
             },
           }}
         >
-          <Form form={form} className="flex items-center gap-2">
+          <Form
+            form={form}
+            className="flex items-center gap-2"
+            onValuesChange={(_, allValues) => onSearch(allValues)}
+          >
             <div
               className="grid gap-2 flex-grow"
               style={{

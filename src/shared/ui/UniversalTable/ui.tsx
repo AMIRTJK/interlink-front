@@ -3,6 +3,7 @@ import { Form, Table, TableColumnsType } from "antd";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import {
   FiltersContainer,
+  FilterType,
   IFilterItem,
   useFilterValues,
 } from "../FiltersContainer";
@@ -78,33 +79,16 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
   ) as Record<string, any>;
 
   const transformedFilters = useMemo(() => {
-    return Object.keys(filterValues).reduce(
-      (acc, key) => {
-        const filterConfig = filters?.find((f) => f.name === key);
-        let value = filterValues[key];
-
-        if (filterConfig) {
-          if (typeof filterConfig.transform === "function") {
-            value = filterConfig.transform(value, filterConfig.options);
-          } else if (filterConfig.options && typeof value === "string") {
-            const option = filterConfig.options.find((o) => o.label === value);
-            if (option) {
-              value = option.value;
-            }
-          }
-        }
-
-        acc[key] = value;
-        return acc;
-      },
-      {} as Record<string, any>
-    );
+    return transformFilterValues(filterValues, filters ?? []);
   }, [filterValues, filters]);
 
   const params = useMemo(() => {
+    const baseParams = { ...queryParams };
+    const currentFilters = autoFilter ? searchParams : transformedFilters;
+
     const rawParams: Record<string, any> = {
-      ...transformedFilters,
-      ...queryParams,
+      ...baseParams,
+      ...currentFilters,
       sort: queryParams?.sort || "id",
       dir: direction === 1 ? "desc" : "asc",
       page: Number(page) || 1,
@@ -114,8 +98,17 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     const cleanParams: Record<string, any> = {};
 
     Object.entries(rawParams).forEach(([key, value]) => {
+      const filterConfig = filters?.find((f) => f.name === key);
+      if (
+        filterConfig &&
+        filterConfig.type === FilterType.DATE &&
+        filterConfig.rangeNames
+      ) {
+        return; // Пропускаем 'date_range', так как у нас есть 'date_from' и 'date_to'
+      }
+
       // Игнорируем пустые значения, чтобы не слать их в API
-      if (value === undefined || value === null) return;
+      if (value === undefined || value === null || value === "") return;
       // Приведение типов для числовых полей (согласно вашему API)
       const numericFields = [
         "creator_id",
@@ -134,7 +127,16 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     });
 
     return cleanParams;
-  }, [queryParams, transformedFilters, page, perPage, direction]);
+  }, [
+    queryParams,
+    searchParams,
+    transformedFilters,
+    autoFilter,
+    page,
+    perPage,
+    direction,
+    filters,
+  ]);
 
   const { data, isPending } = url
     ? useGetQuery({
@@ -173,7 +175,15 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
   const handleReset = () => {
     form.resetFields();
     if (autoFilter) {
-      filters?.forEach((f) => setParams(f.name, undefined));
+      filters?.forEach((f) => {
+        if (f.type === FilterType.DATE && f.rangeNames) {
+          // Если это диапазон, сбрасываем оба спец-ключа
+          setParams(f.rangeNames[0], undefined);
+          setParams(f.rangeNames[1], undefined);
+        }
+        // Сбрасываем основной ключ
+        setParams(f.name, undefined);
+      });
     } else {
       setActiveFilters({});
     }

@@ -54,7 +54,6 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const inboxCount = Number(tokenControl.getOutgoingLetterCount()) || 0;
   return (
     <div className="bg-white flex flex-col gap-2 w-full h-full rounded-2xl overflow-hidden">
-      {" "}
       <nav>
         <StatusTabs
           counts={{ inbox: inboxCount }}
@@ -86,7 +85,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
           className="[&_.ant-table-cell]:rounded-none! [&_.ant-pagination]:px-4!"
           direction={1}
           autoFilter={true}
-          queryParams={{ ...extraParams }}
+          queryParams={{ ...extraParams, tab: currentTab }}
           scroll={{}}
           showSizeChanger={false}
           customPagination={true}

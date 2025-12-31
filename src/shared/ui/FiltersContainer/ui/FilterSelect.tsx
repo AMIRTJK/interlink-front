@@ -9,39 +9,41 @@ interface IProps {
 
 export const FilterSelect: FC<IProps> = ({ config }) => {
   const { params, setParams } = useDynamicSearchParams();
-
   const [value, setValue] = useState<string | undefined>(undefined);
+  const { placeholder, name, options = [] } = config;
 
-  const { placeholder, name, options = [], transform } = config;
-
-  const debouncedChange = useDebouncedCallback((value: unknown) => {
-    setParams(name, value);
+  const debouncedChange = useDebouncedCallback((val: unknown) => {
+    setParams(name, val);
   }, 400);
 
   const handleChange = (selectedValue: string) => {
-    if (!selectedValue) {
-      setValue(undefined);
-      debouncedChange("");
-      return;
-    }
     setValue(selectedValue);
-    debouncedChange(selectedValue);
+    // Если пользователь стер значение, отправляем пустую строку или undefined
+    debouncedChange(selectedValue || undefined);
   };
 
+  // Синхронизация с URL (например, при сбросе фильтров)
   useEffect(() => {
-    if (params[name] !== value) {
-      setValue(params[name]);
-    }
-  }, []);
+    setValue(params[name]);
+  }, [params[name]]);
 
   return (
     <Form.Item name={name} noStyle>
       <Select
+        showSearch // Включает возможность печатать в поле
+        allowClear
         placeholder={placeholder}
         options={options}
-        value={transform?.(value) || value}
+        value={value}
         onChange={handleChange}
-        allowClear
+        // Настройка поиска: ищем по тексту (label), игнорируя регистр
+        optionFilterProp="label"
+        filterOption={(input, option) =>
+          (option?.label ?? "")
+            .toString()
+            .toLowerCase()
+            .includes(input.toLowerCase())
+        }
       />
     </Form.Item>
   );
