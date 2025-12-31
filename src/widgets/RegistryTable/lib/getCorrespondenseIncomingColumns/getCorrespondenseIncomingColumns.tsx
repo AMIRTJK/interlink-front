@@ -15,15 +15,15 @@ export const getCorrespondenseIncomingColumns = (): TableColumnsType => {
     },
     {
       title: "Отправитель",
-      dataIndex: "3",
+      dataIndex: "sender_name",
     },
     {
       title: "Дата",
-      dataIndex: "4",
+      dataIndex: "created_at",
     },
     {
       title: "Тема",
-      dataIndex: "5",
+      dataIndex: "subject",
     },
     {
       title: "Исполнитель",
