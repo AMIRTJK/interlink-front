@@ -16,6 +16,8 @@ import collapseIcon from "../../assets/icons/collapse-icon.svg";
 
 import Logo from "../../assets/images/logo.svg";
 import { AppRoutes } from "@shared/config";
+import { tokenControl, useGetQuery } from "@shared/lib";
+import { ApiRoutes } from "@shared/api";
 
 const { Sider } = Layout;
 
@@ -23,13 +25,16 @@ export const RegistrySidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
-
+  const [outgoingCount, setOutgoingCount] = useState<number>(() => {
+  return Number(tokenControl.getOutgoingLetterCount()) || 0;
+});
+console.log(setOutgoingCount)
   const mainItems = [
     {
       key: AppRoutes.CORRESPONDENCE_INCOMING,
       icon: <img src={incomingIcon} />,
       label: "Входящие письма",
-      count: 32,
+      count: outgoingCount,
       path: AppRoutes.CORRESPONDENCE_INCOMING,
     },
     {
@@ -86,6 +91,18 @@ export const RegistrySidebar = () => {
     }
   };
 
+  const {isPending}=useGetQuery({
+      method:"GET",
+      url:ApiRoutes.GET_CORRESPONDENCES,
+      options:{
+        onSuccess:(data)=>{
+          tokenControl.setOutgoingLetterCount(data.data.data.length)
+        },
+      enabled:true
+      }
+  },)
+
+
   return (
     <Sider
       theme="light"
@@ -108,6 +125,8 @@ export const RegistrySidebar = () => {
           )}
           <Button
             type="text"
+            disabled={isPending}
+            loading={isPending}
             onClick={() => setCollapsed(!collapsed)}
             className={collapsed ? "mx-auto" : "ml-auto"}
             icon={<img src={collapseIcon} />}

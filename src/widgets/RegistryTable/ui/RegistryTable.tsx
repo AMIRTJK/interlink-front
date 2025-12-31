@@ -46,11 +46,13 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 
   const canCreate=firstQueryData?.data?.find((item:{name:string})=>item.name===`correspondence.create`)
   const canView=firstQueryData?.data?.find((item:{name:string})=>item.name===`correspondence.view`)
+
+  const inboxCount=Number(tokenControl.getOutgoingLetterCount()) || 0
   return (
     <div className="bg-white flex flex-col gap-2 w-full h-full rounded-2xl overflow-hidden">
       {" "}
       <nav>
-        <StatusTabs activeTab={currentTab} onTabChange={setCurrentTab} />
+        <StatusTabs counts={{inbox:inboxCount}} activeTab={currentTab} onTabChange={setCurrentTab} />
       </nav>
       {/* Panel Control */}
       <div className={`px-2 ${canCreate ? "block!" : "hidden!"}`}>

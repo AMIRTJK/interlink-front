@@ -1,5 +1,5 @@
 import { RegistrySidebar } from "@widgets/RegistrySidebar";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 export const CorrespondencePage = () => {
   return (
