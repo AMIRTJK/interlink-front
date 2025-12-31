@@ -91,16 +91,16 @@ console.log(setOutgoingCount)
     }
   };
 
-  const {isPending}=useGetQuery({
-      method:"GET",
-      url:ApiRoutes.GET_CORRESPONDENCES,
-      options:{
-        onSuccess:(data)=>{
-          tokenControl.setOutgoingLetterCount(data.data.data.length)
-        },
-      enabled:true
-      }
-  },)
+  const { isPending } = useGetQuery({
+    method: "GET",
+    url: ApiRoutes.GET_CORRESPONDENCES,
+    options: {
+      onSuccess: (data: { data: { total: number } }) => {
+        tokenControl.setOutgoingLetterCount(data.data.total);
+      },
+      enabled: true,
+    },
+  });
 
 
   return (

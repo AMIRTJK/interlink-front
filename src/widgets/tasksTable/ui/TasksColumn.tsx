@@ -1,11 +1,11 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { Button, Pagination } from "antd";
-import {  useState } from "react";
+import { useState } from "react";
 import { ITaskItem } from "../model";
 import { StatusIcon } from "./StatusIcon";
 import { TaskCard } from "./TaskCard";
-import { tokenControl, useGetQuery } from "@shared/lib";
-import { ApiRoutes } from "@shared/api";
+import { useGetQuery } from "@shared/lib";
+import "../style.css";
 
 export const TasksColumn = ({
   status,
@@ -45,21 +45,11 @@ export const TasksColumn = ({
   const startIndex = (currentPage - 1) * pageSize;
   const currentTasks = columnTasks.slice(startIndex, startIndex + pageSize);
 
-   const { firstQueryData,} = useGetQuery({
-     method: "GET",
-     url: `${ApiRoutes.FETCH_PERMISSIONS}`,
-     useToken: true,
-     options: {
-       enabled: tokenControl.get() !== null,
-     },
-    //  secondQuery: {
-    //    url: `${ApiRoutes.FETCH_USER_BY_ID}${tokenControl.getUserId()}`,
-    //    method: "GET",
-    //    shouldWaitFirst: true,
-    //  },
-   });
+  const { data: canCreateTask } = useGetQuery({
+    preload: true,
+    preloadConditional: ["tasks.create"],
+  });
 
-   const canCreateTask = firstQueryData?.data.find((item: {name: string})=>item.name === "tasks.create")
   return (
     <div 
       className="tasks-column"

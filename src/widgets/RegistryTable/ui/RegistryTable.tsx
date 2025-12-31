@@ -2,11 +2,11 @@ import { StatusTabs } from "@features/StatusTabs";
 import { Button, UniversalTable } from "@shared/ui";
 import { useState } from "react";
 import AddIcon from "../../../assets/icons/add-icon.svg";
-// import { FilterRegistry } from "@features/FilterRegistry";
 import { useLocation, useNavigate } from "react-router";
 import { getRegistryColumns, getRegistryFilters } from "../lib";
 import { tokenControl, useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+// import { FilterRegistry } from "@features/FilterRegistry";
 
 interface RegistryTableProps<T extends Record<string, unknown>> {
   data?: T[];
@@ -35,23 +35,11 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const columns = getRegistryColumns(type);
   const filters = getRegistryFilters(type);
 
-  const { firstQueryData, isPending } = useGetQuery({
-    url: ApiRoutes.FETCH_PERMISSIONS,
-    method: "GET",
-    useToken: true,
-    options: {
-      enabled: tokenControl.get() !== null,
-    },
+  const { data: isAllowed, isPending } = useGetQuery({
+    preload: true,
+    preloadConditional: ["correspondence.create", "correspondence.view"],
   });
-
-  const canCreate = firstQueryData?.data?.find(
-    (item: { name: string }) => item.name === `correspondence.create`
-  );
-  const canView = firstQueryData?.data?.find(
-    (item: { name: string }) => item.name === `correspondence.view`
-  );
-
-  const inboxCount = Number(tokenControl.getOutgoingLetterCount()) || 0;
+  const inboxCount=Number(tokenControl.getOutgoingLetterCount()) || 0
   return (
     <div className="bg-white flex flex-col gap-2 w-full h-full rounded-2xl overflow-hidden">
       <nav>
@@ -62,7 +50,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
         />
       </nav>
       {/* Panel Control */}
-      <div className={`px-2 ${canCreate ? "block!" : "hidden!"}`}>
+      <div className={`px-2 ${isAllowed ? "block!" : "hidden!"}`}>
         <Button
           onClick={handleCreate}
           type="default"
@@ -77,7 +65,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
       {/* <div className="px-2">
         <FilterRegistry />
       </div> */}
-      <div className={`${canView ? "block! px-2!" : "hidden!"}`}>
+      <div className={`${isAllowed ? "block! px-2!" : "hidden!"}`}>
         <UniversalTable
           url={ApiRoutes.GET_CORRESPONDENCES}
           filters={filters}

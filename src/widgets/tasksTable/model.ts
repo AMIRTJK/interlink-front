@@ -2,13 +2,7 @@ import { TASK_STATUS, TASK_STATUS_OPTIONS } from '@features/tasks/model';
 
 export interface IAssignee {
   id: number;
-  last_name: string;
-  first_name: string;
-  middle_name: string | null;
-  phone: string;
-  position: string;
-  photo_path: string | null;
-  full_name: string;
+  [key:string]:string|number
 }
 
 export interface ITaskItem {

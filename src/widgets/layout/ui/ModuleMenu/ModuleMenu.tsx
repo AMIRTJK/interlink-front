@@ -10,30 +10,13 @@ import "./style.css";
 interface IProps {
   variant: "horizontal" | "compact";
 }
-
-type SubMenuItem = {
+type TSubMenuItem = {
   key: string;
   label: React.ReactNode;
   children?: MenuItem[];
   requiredRole?: string[];
   icon?: React.ReactNode;
 };
-
-
-interface IPermissionsResponse {
-  data: {
-    name: string;
-    group: string;
-    label: string;
-  }[];
-}
-
-interface IUserProfileResponse {
-  data: {
-    position: string;
-  };
-}
-
 export const ModuleMenu = ({ variant }: IProps) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -45,7 +28,7 @@ export const ModuleMenu = ({ variant }: IProps) => {
     if (!item || !("key" in item)) return false;
     const itemKey = String(item.key);
     return pathname === itemKey || pathname.startsWith(itemKey + "/");
-  }) as SubMenuItem | undefined;
+  }) as TSubMenuItem | undefined;
 
   const activeKey =
     activeItem?.key ||
@@ -60,53 +43,42 @@ export const ModuleMenu = ({ variant }: IProps) => {
   };
 
   // Получаем права пользователя
-  const { firstQueryData, secondQueryData } = useGetQuery<
-    unknown,
-    IPermissionsResponse, // Ответ первого запроса
-    IPermissionsResponse, // Результат Select
-    unknown,
-    IUserProfileResponse  // Ответ второго запроса
-  >({
+  const { data, preloadData } = useGetQuery({
     method: "GET",
-    url: `${ApiRoutes.FETCH_PERMISSIONS}`,
+    url: `${ApiRoutes.FETCH_USER_BY_ID}${tokenControl.getUserId()}`,
     useToken: true,
-    options: {
-      enabled: tokenControl.get() !== null,
-    },
-    secondQuery: {
-      url: `${ApiRoutes.FETCH_USER_BY_ID}${tokenControl.getUserId()}`,
-      method: "GET",
-      shouldWaitFirst: true,
-    },
+    preload: true,
   });
 
-  // Получаем ВСЕ роли пользователя
+  // Получаем ВСЕ роли пользователя (безопасное получение из профиля, если есть)
   const userRolesArray = useMemo(() => {
-    return (
-      (
-        firstQueryData as
-          | { data: { group: string; name: string; permissions: string[] }[] }
-          | undefined
-      )?.data || []
-    );
-  }, [firstQueryData]);
+    const roles = (
+      data as
+        | { data: { group: string; name: string; permissions: string[] }[] }
+        | undefined
+    )?.data;
+    return Array.isArray(roles) ? roles : [];
+  }, [data]);
 
-  // Получаем список имен всех ролей пользователя
-  const userRoleNames = useMemo(
-    () => userRolesArray.map((item) => item.name),
-    [userRolesArray]
-  );
+  // Получаем список имен всех ролей пользователя (включая preloadData)
+  const userRoleNames = useMemo(() => {
+    const namesFromRoles = userRolesArray.map((item) => item.name);
+    const namesFromPreload =
+      preloadData?.map((item: { name: string }) => item.name) || [];
+    return [...new Set([...namesFromRoles, ...namesFromPreload])];
+  }, [userRolesArray, preloadData]);
+
   // Получаем должность пользователя
   const userPosition = useMemo(() => {
-    return secondQueryData?.data.position;
-  }, [secondQueryData]);
+    return (data as { data: { position: string } } | undefined)?.data?.position;
+  }, [data]);
   // Фильтруем элементы меню на основе ролей пользователя
   const filteredItems = useMemo(() => {
     const filtered = items.filter((item) => {
       if (!item || !("requiredRole" in item)) {
         return true;
       }
-      const menuItem = item as SubMenuItem;
+      const menuItem = item as TSubMenuItem;
       // Если нет requiredRole, показываем элемент всем
       if (!menuItem.requiredRole || menuItem.requiredRole.length === 0) {
         return true;
@@ -117,20 +89,20 @@ export const ModuleMenu = ({ variant }: IProps) => {
       }
 
       // Проверяем, есть ли хотя бы одна роль из requiredRole у пользователя
-      const hasRole = menuItem.requiredRole.some((role) =>
-        userRoleNames.includes(role)
+      const hasRole = menuItem.requiredRole.some(
+        (role) => userRoleNames.includes(role) || preloadData?.some((p: { name: string }) => p.name === role)
       );
       return hasRole;
     });
     return filtered;
     // Добавлены все зависимости, которые используются внутри filter
-  }, [items, userRoleNames, userPosition]);
+  }, [items, userRoleNames, userPosition, preloadData]);
 
   const menuItems = useMemo(() => {
     if (variant === "compact") {
       return filteredItems.map((item) => {
         if (item && "children" in item) {
-          const { children: _, ...rest } = item as SubMenuItem;
+          const { children: _, ...rest } = item as TSubMenuItem;
           return rest;
         }
         return item;

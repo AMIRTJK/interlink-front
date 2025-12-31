@@ -1,118 +1,30 @@
-// V1-с одним запросом
-
-// import {
-//   useQuery,
-//   UseQueryOptions,
-//   UseQueryResult,
-// } from "@tanstack/react-query";
-// import { useCallback } from "react";
-// import { _axios } from "@shared/api";
-// import { tokenControl } from "../tokenControl";
-
-// interface IUseGetQueryOptions<
-//   TRequest = unknown,
-//   TResponse = unknown,
-//   TSelect = unknown,
-// > {
-//   url: string;
-//   method?: "GET" | "POST";
-//   params?: TRequest;
-//   useToken?: boolean;
-//   options?: Partial<UseQueryOptions<TResponse, unknown, TSelect>>;
-// }
-
-// export const useGetQuery = <
-//   TRequest = unknown,
-//   TResponse = unknown,
-//   TSelect = TResponse,
-// >(
-//   options: IUseGetQueryOptions<TRequest, TResponse, TSelect>
-// ) => {
-//   const {
-//     url,
-//     params,
-//     method = "POST",
-//     useToken = false,
-//     options: queryOptions,
-//   } = options;
-
-//   const queryFn = useCallback(async () => {
-//     const headers: Record<string, string> = {};
-//     if (useToken) {
-//       const token = tokenControl.get();
-//       if (token) {
-//         headers.Authorization = `Bearer ${token}`;
-//       }
-//     }
-//     const response = await _axios<TResponse>(url, {
-//       method,
-//       [method === "POST" ? "data" : "params"]: params ?? {},
-//     });
-
-//     return response.data;
-//   }, [method, url, params, useToken]);
-
-//   return useQuery({
-//     queryFn,
-//     queryKey: [url, params, useToken],
-//     ...queryOptions,
-//   }) as UseQueryResult<TSelect, unknown>;
-// };
-
-// V2-с двумя запросами
 import {
   useQuery,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
-import { _axios } from "@shared/api";
+import { _axios, ApiRoutes } from "@shared/api";
 import { tokenControl } from "../tokenControl";
+import { useMemo } from "react";
 
 /* ===================== TYPES ===================== */
-interface ISecondQueryOptions<
-  TFirstResult = any,
-  TSecondRequest = any,
-  TSecondResponse = any,
-> {
-  url: string;
-  method?: "GET" | "POST";
-  params?: TSecondRequest;
-  paramsFromFirst?: (data: TFirstResult) => TSecondRequest;
-  /** Если true, второй запрос будет ждать успеха первого */
-  shouldWaitFirst?: boolean;
-  options?: Partial<UseQueryOptions<TSecondResponse, any, TSecondResponse>>;
-}
-
-interface IUseGetQueryOptions<
-  TRequest = any,
-  TResponse = any,
-  TSelect = any,
-  TSecondRequest = any,
-  TSecondResponse = any,
-> {
-  url: string;
+interface IUseGetQueryOptions<TRequest = any, TResponse = any, TSelect = any> {
+  url?: string; // Опциональный URL
   method?: "GET" | "POST";
   params?: TRequest;
   useToken?: boolean;
   options?: Partial<UseQueryOptions<TResponse, any, TSelect>>;
-  secondQuery?: ISecondQueryOptions<TSelect, TSecondRequest, TSecondResponse>;
+  preload?: boolean; // грузим permissions
+  preloadConditional?: string[]; // permissions для запуска mainQuery ИЛИ для возврата data: true
 }
 
 /* ===================== HOOK ===================== */
 export const useGetQuery = <
   TRequest = any,
   TResponse = any,
-  TSelect = any,
-  TSecondRequest = any,
-  TSecondResponse = any,
+  TSelect = TResponse,
 >(
-  options: IUseGetQueryOptions<
-    TRequest,
-    TResponse,
-    TSelect,
-    TSecondRequest,
-    TSecondResponse
-  >
+  options: IUseGetQueryOptions<TRequest, TResponse, TSelect>
 ) => {
   const {
     url,
@@ -120,91 +32,90 @@ export const useGetQuery = <
     method = "GET",
     useToken = false,
     options: queryOptions,
-    secondQuery,
+    preload,
+    preloadConditional,
   } = options;
 
-  /* ---------- ПЕРВЫЙ ЗАПРОС ---------- */
-  const firstQuery = useQuery({
-    queryKey: [url, params, useToken],
+  /* ---------- PRELOAD QUERY ---------- */
+  const preloadQuery = useQuery({
+    queryKey: [ApiRoutes.FETCH_PERMISSIONS],
     queryFn: async () => {
       const headers: Record<string, string> = {};
       if (useToken) {
         const token = tokenControl.get();
         if (token) headers.Authorization = `Bearer ${token}`;
       }
-      const response = await _axios<TResponse>(url, {
-        method,
-        [method === "POST" ? "data" : "params"]: params ?? {},
+      const response = await _axios(ApiRoutes.FETCH_PERMISSIONS, {
+        method: "GET",
         headers,
       });
-      return response.data;
+      return response.data.data; 
     },
-    ...queryOptions,
-  }) as UseQueryResult<TSelect, any>;
-
-  /* ---------- ЛОГИКА ВТОРОГО ЗАПРОСА ---------- */
-  const secondOptions = secondQuery?.options || {};
-  const { enabled: manualEnabled, ...restSecondOptions } = secondOptions;
-
-  const isDependent = Boolean(
-    secondQuery?.shouldWaitFirst || secondQuery?.paramsFromFirst
-  );
-
-  const computedEnabled = isDependent ? firstQuery.isSuccess : true;
-
-  const finalEnabled =
-    manualEnabled !== undefined ? manualEnabled : computedEnabled;
-
-  const secondQueryResult = useQuery({
-    queryKey: [
-      secondQuery?.url,
-      secondQuery?.params,
-      firstQuery.data,
-      firstQuery.isSuccess,
-    ],
-    queryFn: async () => {
-      if (!secondQuery) throw new Error("No config");
-      const headers: Record<string, string> = {};
-      if (useToken) {
-        const token = tokenControl.get();
-        if (token) headers.Authorization = `Bearer ${token}`;
-      }
-
-      const finalParams =
-        secondQuery.paramsFromFirst && firstQuery.data
-          ? secondQuery.paramsFromFirst(firstQuery.data)
-          : secondQuery.params;
-
-      const response = await _axios<TSecondResponse>(secondQuery.url, {
-        method: secondQuery.method ?? "POST",
-        [secondQuery.method === "POST" ? "data" : "params"]: finalParams ?? {},
-        headers,
-      });
-      return response.data;
-    },
-    ...restSecondOptions,
-    enabled: Boolean(secondQuery) && !!finalEnabled,
+    enabled: preload ? tokenControl.get() !== null : false,
+    staleTime: 1000 * 60 * 5, 
   });
 
-  /* ---------- ВОЗВРАЩАЕМ ДАННЫЕ ---------- */
+  /* ---------- MAIN QUERY ENABLED ---------- */
+  const mainEnabled = useMemo(() => {
+    // Режим с URL: проверяем условия для запуска запроса
+    if (url) {
+      if (!preload) return true;
+      if (!preloadQuery.isSuccess || !preloadQuery.data) return false;
+      if (!preloadConditional || !preloadConditional.length) return true;
+      const current = (preloadQuery.data as { name: string }[]).map((p) => p.name);
+      return preloadConditional.every((perm) => current.includes(perm));
+    }
+    
+    // Режим "проверка прав": URL нет, но есть условия
+    if (!url && preload && preloadConditional && preloadConditional.length) {
+      if (!preloadQuery.isSuccess || !preloadQuery.data) return false;
+      const current = (preloadQuery.data as { name: string }[]).map((p) => p.name);
+      return preloadConditional.every((perm) => current.includes(perm));
+    }
+
+    return false; // По умолчанию отключен, если нет URL или условий
+  }, [url, preload, preloadQuery.isSuccess, preloadQuery.data, preloadConditional]);
+
+  /* ---------- MAIN QUERY ---------- */
+  const mainQuery = useQuery({
+    // Если нет URL, ключ базируется на условиях, чтобы разные проверки не конфликтовали
+    queryKey: url ? [url, params, useToken] : ["__permission_check__", preloadConditional],
+    queryFn: async () => {
+      if (url) {
+        const headers: Record<string, string> = {};
+        if (useToken) {
+          const token = tokenControl.get();
+          if (token) headers.Authorization = `Bearer ${token}`;
+        }
+        const response = await _axios<TResponse>(url, {
+          method,
+          [method === "POST" ? "data" : "params"]: params ?? {},
+          headers,
+        });
+        return response.data;
+      }
+      // Если URL нет, возвращаем true как сигнал выполнения условий
+      return true as any;
+    },
+    ...queryOptions,
+    enabled: mainEnabled && queryOptions?.enabled !== false,
+  }) as UseQueryResult<TSelect, any>;
+
+  // В React Query v4 isLoading = true для отключенных запросов.
+  const isMainLoading = mainQuery.isLoading && (mainEnabled && queryOptions?.enabled !== false);
+  const isPreloadLoading = preload && preloadQuery.isLoading && tokenControl.get() !== null;
+  const loadingState = isMainLoading || isPreloadLoading;
+
+  /* ---------- RETURN ---------- */
   return {
-    // 1. Обратная совместимость для обычных вызовов (SelectField, Table и др.)
-    data: firstQuery.data,
-    refetch: firstQuery.refetch,
-    isFetching: firstQuery.isFetching,
-
-    // 2. Новые поля для цепочек запросов (ModuleMenu)
-    firstQueryData: firstQuery.data,
-    secondQueryData: secondQueryResult.data,
-
-    // 3. Общие статусы
-    isPending:
-      firstQuery.isLoading ||
-      (Boolean(secondQuery) && finalEnabled && secondQueryResult.isLoading),
-    isError: firstQuery.isError || secondQueryResult.isError,
-
-    // 4. Полные объекты для продвинутого использования
-    firstQuery,
-    secondQuery: secondQueryResult,
+    data: mainQuery.data, // Для "проверки прав" тут будет true
+    refetch: mainQuery.refetch,
+    isFetching: mainQuery.isFetching,
+    preloadData: preloadQuery.data,
+    isLoading: loadingState,
+    isPending: loadingState, // Для обратной совместимости
+    isError: mainQuery.isError || (preload ? preloadQuery.isError : false),
+    mainQuery,
+    preloadQuery,
   };
 };

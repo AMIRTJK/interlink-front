@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { AddTaskForm } from "./AddTaskForm";
 import { Modal } from "antd";
-import { TasksTable, ITaskItem } from "@widgets/tasksTable";
+import { TasksTable } from "@widgets/tasksTable";
 import '../style.css'
+import { IAssignee, ITaskItem } from "@widgets/tasksTable/model";
 export const Tasks = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taskStatus, setTaskStatus] = useState<string>();
@@ -49,7 +50,7 @@ export const Tasks = () => {
                   title: editingTask.title,
                   description: editingTask.description,
                   status: editingTask.status,
-                  assignees: editingTask.assignees.map((a) => a.id),
+                  assignees: editingTask.assignees.map((a:IAssignee) => a.id),
                 }
               : undefined
           }
