@@ -21,6 +21,7 @@ interface IProps {
   currentTaskStatus?: string;
   mode?: 'create' | 'edit';
   eventId?: string;
+  taskId?: string | number;
 }
 
 export const AddTaskForm = ({
@@ -30,6 +31,7 @@ export const AddTaskForm = ({
   currentTaskStatus,
   mode = 'create',
   eventId,
+  taskId,
 }: IProps) => {
   const [form] = Form.useForm<ITaskFormValues>();
 
@@ -51,14 +53,16 @@ export const AddTaskForm = ({
       ? (mode === 'edit' && eventId 
           ? `${ApiRoutes.UPDATE_EVENT}/${eventId}` 
           : ApiRoutes.ADD_EVENT)
-      : ApiRoutes.ADD_TASK,
+      : (mode === 'edit' && taskId
+          ? `${ApiRoutes.UPDATE_TASK_STATUS}/${taskId}`
+          : ApiRoutes.ADD_TASK),
     messages: {
       success: isEvent 
         ? (mode === 'edit' ? "Событие обновлено!" : "Событие добавлено!") 
-        : "Задача добавлена!",
+        : (mode === 'edit' ? "Задача обновлена!" : "Задача добавлена!"),
       error: isEvent
         ? (mode === 'edit' ? "Ошибка при обновлении события" : "Ошибка при добавлении события")
-        : "Ошибка при добавлении задачи",
+        : (mode === 'edit' ? "Ошибка при обновлении задачи" : "Ошибка при добавлении задачи"),
       onSuccessCb: (data) => {
         if (isEvent && onSuccess) {
           onSuccess(data as IEventResponse);
@@ -120,8 +124,6 @@ export const AddTaskForm = ({
     }
   };
 
- 
-
   const defaultColor = colors[0]?.value;
 
   const [isSelectOpen, setIsSelectOpen] = useState<boolean>(false);
@@ -142,6 +144,7 @@ export const AddTaskForm = ({
     >
       <RenderFields
         isEvent={isEvent}
+        isEdit={mode === 'edit'}
         isSelectOpen={isSelectOpen}
         setIsSelectOpen={setIsSelectOpen}
         handleChangeStatusSelectOption={handleChangeStatusSelectOption}

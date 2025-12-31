@@ -92,3 +92,14 @@ export interface ITaskFormValues {
     { name: "Розовый", value: "#E62E7B" },
     { name: "Тиффани", value: "#2EE6CA" },
   ];
+
+
+  export interface IRenderFields {
+  isEvent?: boolean;
+  isEdit?: boolean;
+  isSelectOpen: boolean;
+  setIsSelectOpen: (open: boolean) => void;
+  handleChangeStatusSelectOption: (e: React.MouseEvent<HTMLDivElement>) => void;
+  defaultColor?: string;
+  colors: { name: string; value: string }[];
+}

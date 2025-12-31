@@ -2,7 +2,7 @@ import { ITaskItem } from "../model";
 import { getTaskProgressColor, formatDate } from "../lib/utils";
 import { StatusIcon } from "./StatusIcon";
 
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { PopConfirm } from "@shared/ui";
 import { Button } from "antd";
 import { useState } from "react";
@@ -10,10 +10,12 @@ import { useState } from "react";
 export const TaskCard = ({
   task,
   onClick,
+  onEdit,
   onDelete,
 }: {
   task: ITaskItem;
   onClick?: (task: ITaskItem) => void;
+  onEdit?: (task: ITaskItem) => void;
   onDelete?: (taskId: string | number) => void;
 }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -45,7 +47,13 @@ export const TaskCard = ({
         <div className="task-card-content w-full">
           <div className="flex justify-between items-start">
             <div className="task-title pr-6">{task.title}</div>
-            <div onClick={(e) => e.stopPropagation()}>
+            <div className="flex flex-col items-center gap-1" onClick={(e) => e.stopPropagation()}>
+              <Button
+                type="text"
+                size="small"
+                onClick={() => onEdit?.(task)}
+                icon={<EditOutlined className="text-[#0037AF]! hover:text-[#0099AF]!" />}
+              />
               <PopConfirm
                 title="Удалить задачу?"
                 onConfirm={() => onDelete?.(task.id)}

@@ -2,29 +2,20 @@ import { Button, DatePicker, Form, Select, TimePicker } from "antd";
 import { If, SelectField, TextField } from "@shared/ui";
 import { requiredRule } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { TASK_STATUS_OPTIONS } from "../model";
+import { IRenderFields, TASK_STATUS_OPTIONS } from "../model";
 import { transformAssigneesResponse } from "./utils";
-// import ArrowBottomSuffix from "../../assets/icons/arrow-bottom-suffix.svg";
 import ArrowBottomSuffix from '../../../assets/icons/arrow-bottom-suffix.svg'
 import DescriptionIcon from '../../../assets/icons/description-icon.svg'
 
-interface RenderFieldsProps {
-  isEvent?: boolean;
-  isSelectOpen: boolean;
-  setIsSelectOpen: (open: boolean) => void;
-  handleChangeStatusSelectOption: (e: React.MouseEvent<HTMLDivElement>) => void;
-  defaultColor?: string;
-  colors: { name: string; value: string }[];
-}
-
 export const RenderFields = ({
   isEvent,
+  isEdit,
   isSelectOpen,
   setIsSelectOpen,
   handleChangeStatusSelectOption,
   defaultColor,
   colors,
-}: RenderFieldsProps) => {
+}: IRenderFields) => {
   return (
     <>
       <div className="flex items-center w-full px-6 gap-2 mb-6">
@@ -160,7 +151,7 @@ export const RenderFields = ({
           className="bg-[#0037af]!"
           block
         >
-          {isEvent ? "Добавить событие" : "Добавить задачу"}
+          {isEvent ? "Добавить событие" : isEdit ? "Редактировать задачу" : "Добавить задачу"}
         </Button>
       </div>
     </>
