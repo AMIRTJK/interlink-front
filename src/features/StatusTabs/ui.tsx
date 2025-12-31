@@ -1,36 +1,35 @@
-import React from "react";
 import { Tabs, Badge } from "antd";
 import "./style.css";
 
-interface TabItem {
+interface ITabItem {
   id: string;
   label: string;
-  count?: number;
 }
 
-interface StatusTabsProps {
+interface IStatusTabs {
   activeTab: string;
   onTabChange: (id: string) => void;
+  counts?: Record<string, number>;
 }
 
-const TABS: TabItem[] = [
-  { id: "inbox", label: "Входящие", count: 32 },
+const TABS: ITabItem[] = [
+  { id: "inbox", label: "Входящие" },
   { id: "registration", label: "На регистрации" },
-  { id: "review", label: "На визировании", count: 4 },
+  { id: "review", label: "На визировании" },
   { id: "execution", label: "На исполнение" },
   { id: "approval", label: "На согласовании" },
   { id: "signing", label: "На подпись" },
 ];
 
-export const StatusTabs = ({ activeTab, onTabChange }: StatusTabsProps) => {
+export const StatusTabs = ({ activeTab, onTabChange, counts }: IStatusTabs) => {
   const items = TABS.map((tab) => ({
     key: tab.id,
     label: (
       <span className="status-tab-label">
         {tab.label}
-        {tab.count !== undefined && (
+        {counts?.[tab.id] !== undefined && (
           <Badge
-            count={tab.count}
+            count={counts[tab.id]}
             className="status-tab-badge"
             overflowCount={999}
           />

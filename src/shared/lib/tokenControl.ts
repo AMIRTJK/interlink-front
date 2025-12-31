@@ -1,11 +1,13 @@
 const TOKEN_KEY = "interlink/token";
 const USER_ID='interlink/userId';
+const OUTGOING_LETTER_COUNT='interlink/outgoingLetterCount';
 interface IToken {
   token: string;
   userId?:number;
 }
 
 export const tokenControl = {
+// Token
   set: ({ token }: IToken) => {
     localStorage.setItem(TOKEN_KEY, token);
   },
@@ -17,7 +19,7 @@ export const tokenControl = {
   remove: () => {
     localStorage.removeItem(TOKEN_KEY);
   },
-
+// User id
   setUserId:(userId:number)=>{
     localStorage.setItem(USER_ID, userId.toString());
   },
@@ -29,4 +31,18 @@ export const tokenControl = {
   removeUserId:()=>{
     localStorage.removeItem(USER_ID);
   },
+  
+// Outgoing letter count
+  setOutgoingLetterCount:(count:number)=>{
+    localStorage.setItem(OUTGOING_LETTER_COUNT, count.toString());
+  },
+
+  getOutgoingLetterCount:()=>{
+    return localStorage.getItem(OUTGOING_LETTER_COUNT);
+  },
+
+  removeOutgoingLetterCount:()=>{
+    localStorage.removeItem(OUTGOING_LETTER_COUNT);
+  },
+
 };
