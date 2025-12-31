@@ -1,4 +1,5 @@
-import { IFilterItem } from "../FiltersContainer";
+import { FilterType, IFilterItem } from "../FiltersContainer";
+import dayjs from "dayjs";
 
 export const transformFilterValues = (
   rawValues: Record<string, any>,
@@ -13,7 +14,22 @@ export const transformFilterValues = (
         return acc;
       }
 
-      const { transform, options } = filter;
+      const { transform, options, type, rangeNames } = filter;
+
+      if (
+        (type === FilterType.DATE || type === FilterType.DATE_RANGE) &&
+        rangeNames &&
+        Array.isArray(rawValue)
+      ) {
+        acc[rangeNames[0]] = rawValue[0]
+          ? dayjs(rawValue[0]).format("YYYY-MM-DD")
+          : undefined;
+        acc[rangeNames[1]] = rawValue[1]
+          ? dayjs(rawValue[1]).format("YYYY-MM-DD")
+          : undefined;
+        acc[key] = undefined;
+        return acc;
+      }
 
       switch (true) {
         case typeof transform === "function":

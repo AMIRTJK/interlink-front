@@ -14,6 +14,10 @@ export const FilterInput: FC<IProps> = ({ config }) => {
 
   const { placeholder, name, inputProps } = config;
 
+  const currentPlaceholder = Array.isArray(placeholder)
+    ? placeholder[0]
+    : placeholder;
+
   const debouncedChange = useDebouncedCallback((value: unknown) => {
     setParams(name, value);
   }, 400);
@@ -33,7 +37,7 @@ export const FilterInput: FC<IProps> = ({ config }) => {
     <Form.Item name={name} noStyle>
       <Input
         {...inputProps}
-        placeholder={placeholder}
+        placeholder={currentPlaceholder}
         onChange={handleChange}
         value={value}
       />

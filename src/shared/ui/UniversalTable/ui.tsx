@@ -3,6 +3,7 @@ import { Form, Table, TableColumnsType } from "antd";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import {
   FiltersContainer,
+  FilterType,
   IFilterItem,
   useFilterValues,
 } from "../FiltersContainer";
@@ -36,6 +37,7 @@ interface IProps<RecordType, ResponseType> {
   autoFilter?: boolean;
   scroll?: { x?: number | string | true; y?: number | string };
   showSizeChanger?: boolean;
+  customPagination?: boolean;
 }
 
 export function UniversalTable<RecordType = any, ResponseType = any>(
@@ -54,6 +56,7 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     direction = 0,
     actionButton,
     autoFilter = true,
+    customPagination,
   } = props;
 
   const { params: searchParams, setParams } = useDynamicSearchParams();
@@ -76,33 +79,16 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
   ) as Record<string, any>;
 
   const transformedFilters = useMemo(() => {
-    return Object.keys(filterValues).reduce(
-      (acc, key) => {
-        const filterConfig = filters?.find((f) => f.name === key);
-        let value = filterValues[key];
-
-        if (filterConfig) {
-          if (typeof filterConfig.transform === "function") {
-            value = filterConfig.transform(value, filterConfig.options);
-          } else if (filterConfig.options && typeof value === "string") {
-            const option = filterConfig.options.find((o) => o.label === value);
-            if (option) {
-              value = option.value;
-            }
-          }
-        }
-
-        acc[key] = value;
-        return acc;
-      },
-      {} as Record<string, any>
-    );
+    return transformFilterValues(filterValues, filters ?? []);
   }, [filterValues, filters]);
 
   const params = useMemo(() => {
+    const baseParams = { ...queryParams };
+    const currentFilters = autoFilter ? searchParams : transformedFilters;
+
     const rawParams: Record<string, any> = {
-      ...transformedFilters,
-      ...queryParams,
+      ...baseParams,
+      ...currentFilters,
       sort: queryParams?.sort || "id",
       dir: direction === 1 ? "desc" : "asc",
       page: Number(page) || 1,
@@ -112,8 +98,17 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     const cleanParams: Record<string, any> = {};
 
     Object.entries(rawParams).forEach(([key, value]) => {
+      const filterConfig = filters?.find((f) => f.name === key);
+      if (
+        filterConfig &&
+        filterConfig.type === FilterType.DATE &&
+        filterConfig.rangeNames
+      ) {
+        return; // Пропускаем 'date_range', так как у нас есть 'date_from' и 'date_to'
+      }
+
       // Игнорируем пустые значения, чтобы не слать их в API
-      if (value === undefined || value === null) return;
+      if (value === undefined || value === null || value === "") return;
       // Приведение типов для числовых полей (согласно вашему API)
       const numericFields = [
         "creator_id",
@@ -132,7 +127,16 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     });
 
     return cleanParams;
-  }, [queryParams, transformedFilters, page, perPage, direction]);
+  }, [
+    queryParams,
+    searchParams,
+    transformedFilters,
+    autoFilter,
+    page,
+    perPage,
+    direction,
+    filters,
+  ]);
 
   const { data, isPending } = url
     ? useGetQuery({
@@ -171,7 +175,15 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
   const handleReset = () => {
     form.resetFields();
     if (autoFilter) {
-      filters?.forEach((f) => setParams(f.name, undefined));
+      filters?.forEach((f) => {
+        if (f.type === FilterType.DATE && f.rangeNames) {
+          // Если это диапазон, сбрасываем оба спец-ключа
+          setParams(f.rangeNames[0], undefined);
+          setParams(f.rangeNames[1], undefined);
+        }
+        // Сбрасываем основной ключ
+        setParams(f.name, undefined);
+      });
     } else {
       setActiveFilters({});
     }
@@ -203,7 +215,14 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
   // console.log(tableData, "===========");
 
   return (
-    <div>
+    <div
+      className={
+        customPagination
+          ? "custom-pagination h-full flex flex-col"
+          : "h-full flex flex-col"
+      }
+    >
+      {" "}
       <If is={Boolean(filters)}>
         <div className={`w-full! mb-2 ${props.style}`}>
           {title && <h2 className="mr-auto text-lg font-semibold">{title}</h2>}
@@ -234,6 +253,61 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
           onChange(page, pageSize) {
             setParams("page", page);
             setParams("per_page", pageSize);
+          },
+          // ... внутри UniversalTable в пропсе pagination компонента Table
+
+          itemRender: (current, type, originalElement) => {
+            if (!customPagination) return originalElement;
+
+            const btnClassName =
+              "flex items-center h-9 gap-2 px-4 py-1 border border-[#C9D4EB] rounded-lg text-[#0037AF] transition-all";
+            const isDisabled = (originalElement as any).props.disabled;
+            const activeStyles = isDisabled
+              ? "opacity-50 cursor-not-allowed bg-gray-50 text-gray-400"
+              : "hover:opacity-80 cursor-pointer active:scale-95";
+
+            if (type === "prev") {
+              return (
+                <div className={`${btnClassName} ${activeStyles}`}>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                  </svg>
+                  <span className="text-sm font-medium">Назад</span>
+                </div>
+              );
+            }
+
+            if (type === "next") {
+              return (
+                <div className={`${btnClassName} ${activeStyles}`}>
+                  <span className="text-sm font-medium">Дальше</span>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </div>
+              );
+            }
+            return originalElement;
           },
         }}
         onRow={(record) => ({

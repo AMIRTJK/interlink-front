@@ -14,16 +14,20 @@ export const getCorrespondenceIncomingFilters = (): IFilterItem[] => {
     },
     {
       type: FilterType.DATE,
-      name: "date",
-      placeholder: "Дата",
+      name: "date_range",
+      placeholder: ["С даты", "По дату"],
+      rangeNames: ["date_from", "date_to"],
     },
     {
       type: FilterType.SELECT,
-      name: "sender",
+      name: "sender_name",
       placeholder: "Отправитель",
       options: [
-        { label: "Коммерческая организация", value: 1 },
-        { label: "Бюджетная организация", value: 2 },
+        // Временные данные для теста
+        { label: "ООО Ромашка 4", value: "ООО Ромашка 4" },
+        { label: "ООО Ромашка 3", value: "ООО Ромашка 3" },
+        { label: "ООО Ромашка 2", value: "ООО Ромашка 2" },
+        { label: "ООО Ромашка", value: "ООО Ромашка" },
       ],
     },
     {
