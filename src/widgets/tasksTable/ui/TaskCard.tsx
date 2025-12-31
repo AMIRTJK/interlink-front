@@ -44,9 +44,12 @@ export const TaskCard = ({
     >
       <div className="task-card-header relative">
         <StatusIcon status={task.status} className="mt-[3px]!" />
-        <div className="task-card-content w-full">
-          <div className="flex justify-between items-start">
-            <div className="task-title pr-6">{task.title}</div>
+        <div className="task-card-content flex justify-between items-start">
+            <div className="task__text-content">
+              <p className="task-title pr-6">{task.title}</p>
+              <p className="task-desc">{task.description}</p>
+              <p className="task-datetime">{formatDate(task.created_at)}</p>
+            </div>
             <div className="flex flex-col items-center gap-1" onClick={(e) => e.stopPropagation()}>
               <Button
                 type="text"
@@ -65,10 +68,8 @@ export const TaskCard = ({
                   icon={<DeleteOutlined className="task-card-delete-btn" />}
                 />
               </PopConfirm>
-            </div>
           </div>
-          <div className="task-desc">{task.description}</div>
-          <div className="task-datetime">{formatDate(task.created_at)}</div>
+          
         </div>
       </div>
     </div>
