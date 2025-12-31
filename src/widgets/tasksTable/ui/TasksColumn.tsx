@@ -5,7 +5,7 @@ import { ITaskItem } from "../model";
 import { StatusIcon } from "./StatusIcon";
 import { TaskCard } from "./TaskCard";
 import { useGetQuery } from "@shared/lib";
-import "./style.css";
+import "../style.css";
 
 export const TasksColumn = ({
   status,
