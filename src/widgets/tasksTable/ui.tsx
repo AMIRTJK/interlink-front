@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Button } from "antd";
-import { FilterOutlined } from "@ant-design/icons";
 import { useGetQuery, useDynamicSearchParams, } from "@shared/lib";
 import { ApiRoutes } from "@shared/api/api-routes";
 import { TASK_STATUS_OPTIONS } from "@features/tasks";
@@ -9,7 +7,7 @@ import type { ITaskItem, ITasksResponse } from "./model";
 import { TasksColumn } from "./ui/TasksColumn";
 import { TasksFilters } from "./ui/TasksFilters";
 import "./style.css";
-import { If, Loader } from "@shared/ui";
+import { Loader } from "@shared/ui";
 
 interface IProps {
   onAddTask?: (status: string) => void;
@@ -17,20 +15,23 @@ interface IProps {
 }
 
 export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
-  const [showFilters, setShowFilters] = useState(false);
   const [localTasks, setLocalTasks] = useState<ITaskItem[]>([]);
   const { params } = useDynamicSearchParams();
 
   const { isLoading: loading } = useGetQuery<
-    Record<string, string>,
+    any,
     ITasksResponse
   >({
     url: ApiRoutes.GET_TASKS,
     method: "GET",
-    params,
+    params:{
+      per_page:String(1),
+      ...params
+    },
     useToken: true,
     preload: true,
     preloadConditional: ["tasks.create"],
+    
     options: {
       enabled: !!params,
       keepPreviousData: true,
@@ -106,20 +107,7 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
 
   return (
     <div className="tasks-table-wrapper">
-      <div className={`${showFilters ? "tasks-table-header" : "tasks-table-header-collapsed"}`}>
-        <Button
-          className={showFilters ? "tasks-table-header-button" : "tasks-table-header-button-collapsed"}
-          icon={<FilterOutlined />} 
-          disabled={loading}
-          loading={loading}
-          onClick={() => setShowFilters(!showFilters)}
-        >
-          {showFilters ? "Скрыть фильтры" : "Показать фильтры"}
-        </Button> 
-        <If is={showFilters}>
-          <TasksFilters />
-        </If>
-      </div>
+      <TasksFilters />
       <div className="flex flex-col lg:flex-row lg:flex-nowrap gap-4 overflow-x-auto p-2">
         {TASK_STATUS_OPTIONS?.map((option) => (
           <TasksColumn

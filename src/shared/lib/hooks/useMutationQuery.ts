@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { tokenControl } from "../tokenControl";
 
 /* ===================== TYPES ===================== */
+type TBaseRequest = Record<string, string | number | boolean | undefined | any>;
 
 /** Расширяем стандартный конфиг Axios нашими полями */
 interface CustomAxiosRequestConfig<T = any> extends Omit<AxiosRequestConfig<T>, "headers"> {
@@ -31,7 +32,7 @@ interface ISecondMutationQuery<TFirstData, TSecondData> {
   paramsFromFirst?: (data: TFirstData) => any;
 }
 
-interface IUseMutationQueryOptions<TRequest, TData, TSecondData> {
+interface IUseMutationQueryOptions<TRequest = TBaseRequest, TData = any, TSecondData = any> {
   url: string | ((data: TRequest) => string);
   method: "POST" | "PUT" | "DELETE" | "GET" | "PATCH";
   messages?: {
@@ -51,7 +52,7 @@ interface IUseMutationQueryOptions<TRequest, TData, TSecondData> {
 
 /* ===================== HOOK ===================== */
 export const useMutationQuery = <
-  TRequest = any,
+  TRequest = TBaseRequest,
   TData = any,
   TSecondData = any
 >(
