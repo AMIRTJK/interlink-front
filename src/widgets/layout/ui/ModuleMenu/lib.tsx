@@ -8,7 +8,6 @@ import PrimaryDocumentsIcon from "../../../../assets/icons/primary documents-ico
 import ApplicationsIcon from "../../../../assets/icons/applications-icon.svg";
 import CrmIcon from "../../../../assets/icons/crm-icon.svg";
 
-// Расширяем базовый тип MenuItem из Ant Design
 export type MenuItem = Required<MenuProps>["items"][number] & {
   requiredRole?: string[];
 };
