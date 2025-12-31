@@ -35,24 +35,32 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const columns = getRegistryColumns(type);
   const filters = getRegistryFilters(type);
 
-  const {firstQueryData,isPending}=useGetQuery({
-    url:ApiRoutes.FETCH_PERMISSIONS,
-    method:"GET",
-    useToken:true,
-    options:{
-      enabled:tokenControl.get()!==null
-    }
-  })
+  const { firstQueryData, isPending } = useGetQuery({
+    url: ApiRoutes.FETCH_PERMISSIONS,
+    method: "GET",
+    useToken: true,
+    options: {
+      enabled: tokenControl.get() !== null,
+    },
+  });
 
-  const canCreate=firstQueryData?.data?.find((item:{name:string})=>item.name===`correspondence.create`)
-  const canView=firstQueryData?.data?.find((item:{name:string})=>item.name===`correspondence.view`)
+  const canCreate = firstQueryData?.data?.find(
+    (item: { name: string }) => item.name === `correspondence.create`
+  );
+  const canView = firstQueryData?.data?.find(
+    (item: { name: string }) => item.name === `correspondence.view`
+  );
 
-  const inboxCount=Number(tokenControl.getOutgoingLetterCount()) || 0
+  const inboxCount = Number(tokenControl.getOutgoingLetterCount()) || 0;
   return (
     <div className="bg-white flex flex-col gap-2 w-full h-full rounded-2xl overflow-hidden">
       {" "}
       <nav>
-        <StatusTabs counts={{inbox:inboxCount}} activeTab={currentTab} onTabChange={setCurrentTab} />
+        <StatusTabs
+          counts={{ inbox: inboxCount }}
+          activeTab={currentTab}
+          onTabChange={setCurrentTab}
+        />
       </nav>
       {/* Panel Control */}
       <div className={`px-2 ${canCreate ? "block!" : "hidden!"}`}>
@@ -61,10 +69,10 @@ export const RegistryTable = <T extends Record<string, unknown>>({
           type="default"
           text={createButtonText}
           withIcon={true}
-          loading={isLoading||isPending}
-          disabled={isLoading||isPending}
+          loading={isLoading || isPending}
+          disabled={isLoading || isPending}
           icon={AddIcon}
-          className={`${' h-9! px-[34px]! text-[#0037AF]! border-[#0037AF]! rounded-lg! transition-all! hover:opacity-75!'}`}
+          className={`${" h-9! px-8.5!  text-[#0037AF]! border-[#0037AF]! rounded-lg! transition-all! hover:opacity-75!"}`}
         />
       </div>
       {/* <div className="px-2">
@@ -81,6 +89,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
           queryParams={{ ...extraParams }}
           scroll={{}}
           showSizeChanger={false}
+          customPagination={true}
         />
       </div>
     </div>

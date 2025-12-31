@@ -1,6 +1,27 @@
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { Button, Flex, TableColumnsType, Tag, Typography } from "antd";
+import "./style.css";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  InboxOutlined,
+  PushpinOutlined,
+  FolderOpenOutlined,
+  MoreOutlined,
+} from "@ant-design/icons";
+import {
+  Button,
+  Dropdown,
+  Flex,
+  MenuProps,
+  TableColumnsType,
+  Tag,
+  Typography,
+} from "antd";
 import { getCorrespondenseIncomingStatusLabel } from "./getCorrespondenseIncomingStatusLabel";
+
+import archiveIcon from "../../../../assets/icons/archive-icon.svg";
+import pinnedIcon from "../../../../assets/icons/pinned-icon.svg";
+import folderIcon from "../../../../assets/icons/folder-icon.svg";
+import trashIcon from "../../../../assets/icons/trash-icon.svg";
 
 export const getCorrespondenseIncomingColumns = (): TableColumnsType => {
   return [
@@ -50,28 +71,61 @@ export const getCorrespondenseIncomingColumns = (): TableColumnsType => {
       },
     },
     {
-      title: "Действие",
-      width: 100,
-      render: (correspondenseData) => (
-        <Flex justify="end">
-          <Button
-            type="text"
-            // onClick={(event) => {
-            //   event.stopPropagation();
-            //   handleEdit(correspondenseData);
-            // }}
-            icon={<EditOutlined />}
-          />
-          <Button
-            type="text"
-            // onClick={(event) => {
-            //   event.stopPropagation();
-            //   handleDelete(correspondenseData);
-            // }}
-            icon={<DeleteOutlined />}
-          />
-        </Flex>
-      ),
+      title: "",
+      width: 40,
+      fixed: "right",
+      render: (record) => {
+        const items: MenuProps["items"] = [
+          {
+            key: "archive",
+            label: "В архив",
+            icon: <img src={archiveIcon} className="w-5 h-5" />,
+            onClick: () => console.log("Archive", record),
+          },
+          {
+            key: "pin",
+            label: "Закрепить",
+            icon: <img src={pinnedIcon} className="w-5 h-5" />,
+            onClick: () => console.log("Pin", record),
+          },
+          {
+            key: "folder",
+            label: "В папку",
+            icon: <img src={folderIcon} className="w-5 h-5" />,
+            onClick: () => console.log("To folder", record),
+          },
+          {
+            type: "divider",
+          },
+          {
+            key: "delete",
+            label: "Удалить",
+            danger: true,
+            icon: <img src={trashIcon} className="w-5 h-5" />,
+            onClick: () => console.log("Delete", record),
+          },
+        ];
+
+        return (
+          <div onClick={(e) => e.stopPropagation()}>
+            <Dropdown
+              menu={{ items }}
+              trigger={["click"]}
+              placement="bottomRight"
+              overlayClassName="custom-registry-dropdown"
+            >
+              <Button
+                type="text"
+                icon={
+                  <MoreOutlined
+                    style={{ fontSize: "20px", color: "#8C8C8C" }}
+                  />
+                }
+              />
+            </Dropdown>
+          </div>
+        );
+      },
     },
   ];
 };

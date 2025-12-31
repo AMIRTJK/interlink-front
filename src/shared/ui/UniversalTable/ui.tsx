@@ -36,6 +36,7 @@ interface IProps<RecordType, ResponseType> {
   autoFilter?: boolean;
   scroll?: { x?: number | string | true; y?: number | string };
   showSizeChanger?: boolean;
+  customPagination?: boolean;
 }
 
 export function UniversalTable<RecordType = any, ResponseType = any>(
@@ -54,6 +55,7 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     direction = 0,
     actionButton,
     autoFilter = true,
+    customPagination,
   } = props;
 
   const { params: searchParams, setParams } = useDynamicSearchParams();
@@ -203,7 +205,14 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
   // console.log(tableData, "===========");
 
   return (
-    <div>
+    <div
+      className={
+        customPagination
+          ? "custom-pagination h-full flex flex-col"
+          : "h-full flex flex-col"
+      }
+    >
+      {" "}
       <If is={Boolean(filters)}>
         <div className={`w-full! mb-2 ${props.style}`}>
           {title && <h2 className="mr-auto text-lg font-semibold">{title}</h2>}
@@ -234,6 +243,61 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
           onChange(page, pageSize) {
             setParams("page", page);
             setParams("per_page", pageSize);
+          },
+          // ... внутри UniversalTable в пропсе pagination компонента Table
+
+          itemRender: (current, type, originalElement) => {
+            if (!customPagination) return originalElement;
+
+            const btnClassName =
+              "flex items-center h-9 gap-2 px-4 py-1 border border-[#C9D4EB] rounded-lg text-[#0037AF] transition-all";
+            const isDisabled = (originalElement as any).props.disabled;
+            const activeStyles = isDisabled
+              ? "opacity-50 cursor-not-allowed bg-gray-50 text-gray-400"
+              : "hover:opacity-80 cursor-pointer active:scale-95";
+
+            if (type === "prev") {
+              return (
+                <div className={`${btnClassName} ${activeStyles}`}>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                  </svg>
+                  <span className="text-sm font-medium">Назад</span>
+                </div>
+              );
+            }
+
+            if (type === "next") {
+              return (
+                <div className={`${btnClassName} ${activeStyles}`}>
+                  <span className="text-sm font-medium">Дальше</span>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </div>
+              );
+            }
+            return originalElement;
           },
         }}
         onRow={(record) => ({
