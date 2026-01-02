@@ -95,8 +95,8 @@ console.log(setOutgoingCount)
     method: "GET",
     url: ApiRoutes.GET_CORRESPONDENCES,
     options: {
-      onSuccess: (data: { data: { total: number } }) => {
-        tokenControl.setOutgoingLetterCount(data.data.total);
+      onSuccess: (data:{data:{items:{[key:string]:string|number|boolean}[]}}) => {
+        tokenControl.setOutgoingLetterCount(data?.data?.items?.length || 0);
       },
       enabled: true,
     },
