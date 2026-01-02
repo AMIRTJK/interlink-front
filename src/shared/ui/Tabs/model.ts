@@ -1,6 +1,8 @@
+import { ReactNode } from "react";
+
 export interface ITabItem {
   key: string;
-  label: string;
+  label: ReactNode;
 }
 
 export interface ITabsProps {

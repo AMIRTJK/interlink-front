@@ -2,11 +2,11 @@ import { Card } from "antd";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { IAnalyticsActivity } from "../model/types";
 
-interface ActivityChartProps {
+interface IProps {
   data: IAnalyticsActivity[];
 }
 
-export const ActivityChart = ({ data }: ActivityChartProps) => {
+export const ActivityChart = ({ data }: IProps) => {
   return (
     <Card title="График продуктивности" className="hidden shadow-sm w-full">
       <div style={{ height: 350, width: "100%" }}>

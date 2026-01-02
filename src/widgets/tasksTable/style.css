@@ -126,6 +126,9 @@ body:not(.no-animations) .task-card-task.dragging {
 }
 
 .task-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   flex: 1;
 }
 

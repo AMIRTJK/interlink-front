@@ -8,7 +8,9 @@ import { tokenControl } from "../tokenControl";
 import { useMemo } from "react";
 
 /* ===================== TYPES ===================== */
-interface IUseGetQueryOptions<TRequest = any, TResponse = any, TSelect = any> {
+type TBaseRequest = Record<string, string | number | boolean | undefined | any>;
+
+interface IUseGetQueryOptions<TRequest = TBaseRequest, TResponse = any, TSelect = any> {
   url?: string; // Опциональный URL
   method?: "GET" | "POST";
   params?: TRequest;
@@ -20,7 +22,7 @@ interface IUseGetQueryOptions<TRequest = any, TResponse = any, TSelect = any> {
 
 /* ===================== HOOK ===================== */
 export const useGetQuery = <
-  TRequest = any,
+  TRequest = TBaseRequest,
   TResponse = any,
   TSelect = TResponse,
 >(
@@ -49,10 +51,10 @@ export const useGetQuery = <
         method: "GET",
         headers,
       });
-      return response.data.data; 
+      return response.data.data; // массив permissions
     },
     enabled: preload ? tokenControl.get() !== null : false,
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 5, // кэшируем на 5 минут
   });
 
   /* ---------- MAIN QUERY ENABLED ---------- */
