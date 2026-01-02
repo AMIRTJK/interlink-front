@@ -1,4 +1,5 @@
-import { Tabs, Badge } from "antd";
+import { Badge } from "antd";
+import { Tabs } from "@shared/ui";
 import "./style.css";
 
 interface ITabItem {
@@ -20,6 +21,7 @@ const TABS: ITabItem[] = [
   { id: "approval", label: "На согласовании" },
   { id: "signing", label: "На подпись" },
 ];
+
 
 export const StatusTabs = ({ activeTab, onTabChange, counts }: IStatusTabs) => {
   const items = TABS.map((tab) => ({
@@ -45,7 +47,6 @@ export const StatusTabs = ({ activeTab, onTabChange, counts }: IStatusTabs) => {
         onChange={onTabChange}
         items={items}
         className="custom-chrome-tabs"
-        animated={false}
       />
     </div>
   );
