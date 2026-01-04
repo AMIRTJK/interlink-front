@@ -1,8 +1,11 @@
 import { SelectField } from "@shared/ui";
 import { Form, Input, DatePicker, Button } from "antd";
 
-
-export const renderFields = ()=> (
+interface IProps{
+  createLetterIsPending?: boolean;
+  isAllowed?: boolean;
+}
+export const renderFields = ({createLetterIsPending, isAllowed}: IProps)=> (
   <div className="details__fields-wrapper bg-white rounded-2xl p-8">
     <Form.Item name="folder" className="details__letter-field">
       <SelectField url="api/folders" method="GET" name="folder" placeholder="Выбрать папку" />
@@ -38,7 +41,7 @@ export const renderFields = ()=> (
       <Input placeholder="Тема" />
     </Form.Item>
 
-    <Button htmlType="submit">
+    <Button loading={createLetterIsPending} disabled={createLetterIsPending || !isAllowed } htmlType="submit">
       Создать
     </Button>
   </div>

@@ -14,7 +14,7 @@ export const ApiRoutes = {
 
   // Corresspondence
   GET_CORRESPONDENCES: "/api/v1/correspondences",
-  CREATE_LETTER: "/api/v1/correspondences/create",
+  CREATE_CORRESPONDENCES: "/api/v1/correspondences",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];

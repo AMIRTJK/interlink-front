@@ -5,8 +5,10 @@ import "./DetailsOfLetter.css";
 
 export const DetailsOfLetter: React.FC<IDetailsOfLetterProps> = ({
   // mode = "create",
+  createLetterIsPending,
   initialData,
   form,               
+  isAllowed
 }) => {
   useEffect(() => {
     if (initialData) {
@@ -17,7 +19,7 @@ export const DetailsOfLetter: React.FC<IDetailsOfLetterProps> = ({
   return (
     <div className="details__container">
       <div className="details__form">
-        {renderFields()}
+        {renderFields({createLetterIsPending, isAllowed})}
       </div>
     </div>
   );

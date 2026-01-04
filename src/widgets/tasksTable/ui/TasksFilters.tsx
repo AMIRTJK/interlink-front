@@ -58,8 +58,8 @@ export const TasksFilters = () => {
             },
           }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <div className="filter-item">
+          <div className="flex flex-col md:flex-row gap-[10px]">
+            <div className="filter-item w-full md:flex-1">
               <DatePicker
                 className="w-full"
                 placeholder="Выберите дату"
@@ -68,7 +68,7 @@ export const TasksFilters = () => {
               />
             </div>
 
-            <div className="filter-item">
+            <div className="filter-item w-full md:flex-1">
               <Select
                 className="w-full"
                 placeholder="Выберите приоритет"
@@ -79,7 +79,7 @@ export const TasksFilters = () => {
               />
             </div>
 
-            <div className="filter-item">
+            <div className="filter-item w-full md:flex-1">
               <Select
                 className="w-full"
                 placeholder="Выберите статус"
