@@ -24,13 +24,22 @@ export const TasksColumn = ({
   onTaskDrop?: (taskId: string, status: string) => void;
   onDelete?: (taskId: string | number) => void;
 }) => {
+  const [isDragOver, setIsDragOver] = useState(false);
+
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
+    setIsDragOver(true);
   };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setIsDragOver(false);
+  }
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    setIsDragOver(false);
     const taskId = e.dataTransfer.getData("taskId");
     if (taskId) {
       onTaskDrop?.(taskId, status);
@@ -52,8 +61,9 @@ export const TasksColumn = ({
 
   return (
     <div 
-      className="tasks-column"
+      className={`tasks-column ${isDragOver ? "drag-over" : ""}`}
       onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
       <div className="tasks-column-header">
