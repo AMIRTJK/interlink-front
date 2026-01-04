@@ -13,6 +13,8 @@ export interface IDetailsOfLetterData {
 
 export interface IDetailsOfLetterProps {
     mode?: 'create' | 'show';
+    createLetterIsPending: boolean;
     initialData?: IDetailsOfLetterData;
     form?: FormInstance<unknown>;
+    isAllowed?: boolean | undefined;
 }
