@@ -1,3 +1,4 @@
+import { FormInstance } from "antd";
 import { Dayjs } from "dayjs";
 
 export interface IDetailsOfLetterData {
@@ -13,4 +14,5 @@ export interface IDetailsOfLetterData {
 export interface IDetailsOfLetterProps {
     mode?: 'create' | 'show';
     initialData?: IDetailsOfLetterData;
+    form?: FormInstance<unknown>;
 }
