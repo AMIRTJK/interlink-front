@@ -1,18 +1,24 @@
 import { TableColumnsType } from "antd";
-import { getCorrespondenseIncomingColumns } from "./getCorrespondenseIncomingColumns";
-import { getCorrespondenseOutgoingColumns } from "./getCorrespondenseOutgoingColumns";
+import { useCorrespondenseIncomingColumns } from "./getCorrespondenseIncomingColumns";
+import { useCorrespondenseOutgoingColumns } from "./getCorrespondenseOutgoingColumns";
 
 export type RegistryType = "correspondence" | "crm" | "primary-documents";
 
-// Маппинг: ключ — это тип, значение — функция возвращающая колонки
-const columnsStrategy: Record<string, () => TableColumnsType<any>> = {
-  incoming: getCorrespondenseIncomingColumns,
-  outgoing: getCorrespondenseOutgoingColumns,
+export const useRegistryColumns = (type: string): TableColumnsType<any> => {
+  const incomingColumns = useCorrespondenseIncomingColumns();
+  const outgoingColumns = useCorrespondenseOutgoingColumns();
+
+  switch (type) {
+    case "incoming":
+      return incomingColumns;
+    case "outgoing":
+      return outgoingColumns;
+    default:
+      return [];
+  }
 };
 
-export const getRegistryColumns = (type: string): TableColumnsType<any> => {
-  const strategy = columnsStrategy[type];
-
-  // Возвращаем пустой массив или дефолтные колонки, если тип не найден
-  return strategy ? strategy() : [];
-};
+/**
+ * @deprecated Use useRegistryColumns instead
+ */
+export const getRegistryColumns = useRegistryColumns;

@@ -1,14 +1,8 @@
 import "./style.css";
 import {
-  // EditOutlined,
-  // DeleteOutlined,
-  // InboxOutlined,
-  // PushpinOutlined,
-  // FolderOpenOutlined,
   MoreOutlined,
 } from "@ant-design/icons";
 import {
-  // Flex,
   Button,
   Dropdown,
   MenuProps,
@@ -22,8 +16,54 @@ import archiveIcon from "../../../../assets/icons/archive-icon.svg";
 import pinnedIcon from "../../../../assets/icons/pinned-icon.svg";
 import folderIcon from "../../../../assets/icons/folder-icon.svg";
 import trashIcon from "../../../../assets/icons/trash-icon.svg";
+import { ApiRoutes } from "@shared/api";
+import { useMutationQuery } from "@shared/lib";
 
-export const getCorrespondenseIncomingColumns = (): TableColumnsType => {
+export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
+  // Archive mutation
+  const { mutate: archiveCorrespondence } = useMutationQuery<{ id: number; is_archived: boolean }>({
+    url: (data) => ApiRoutes.ARCHIVE_CORRESPONDENCE.replace(':id', String(data.id)),
+    method: "PATCH",
+    messages: {
+      success: "Письмо успешно архивировано",
+      error: "Ошибка архивирования письма",
+      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+    },
+  });
+
+  // Pin mutation
+  const { mutate: pinCorrespondence } = useMutationQuery<{ id: number; is_pinned: boolean }>({
+    url: (data) => ApiRoutes.PIN_CORRESPONDENCE.replace(':id', String(data.id)),
+    method: "PATCH",
+    messages: {
+      success: "Письмо успешно закреплено",
+      error: "Ошибка закрепления письма",
+      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+    },
+  });
+
+  // Folder mutation
+  const { mutate: moveToFolder } = useMutationQuery<{ id: number; folder_id: number }>({
+    url: (data) => ApiRoutes.FOLDER_CORRESPONDENCE.replace(':id', String(data.id)),
+    method: "PATCH",
+    messages: {
+      success: "Письмо перемещено в папку",
+      error: "Ошибка перемещения письма",
+      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+    },
+  });
+
+  // Delete mutation
+  const { mutate: deleteCorrespondence } = useMutationQuery<{ id: number }>({
+    url: (data) => ApiRoutes.DELETE_CORRESPONDENCE.replace(':id', String(data.id)),
+    method: "DELETE",
+    messages: {
+      success: "Письмо успешно удалено",
+      error: "Ошибка удаления письма",
+      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+    },
+  });
+
   return [
     {
       title: "Вх. номер",
@@ -80,19 +120,26 @@ export const getCorrespondenseIncomingColumns = (): TableColumnsType => {
             key: "archive",
             label: "В архив",
             icon: <img src={archiveIcon} className="w-5 h-5" />,
-            onClick: () => console.log("Archive", record),
+            onClick: () => {
+              archiveCorrespondence({ id: record.id, is_archived: true });
+            },
           },
           {
             key: "pin",
             label: "Закрепить",
             icon: <img src={pinnedIcon} className="w-5 h-5" />,
-            onClick: () => console.log("Pin", record),
+            onClick: () => {
+              pinCorrespondence({ id: record.id, is_pinned: true });
+            },
           },
           {
             key: "folder",
             label: "В папку",
             icon: <img src={folderIcon} className="w-5 h-5" />,
-            onClick: () => console.log("To folder", record),
+            onClick: () => {
+              //cоздать модалку для выбора папки и отправки запроса с folder_id
+              console.log("Move to folder", record);
+            },
           },
           {
             type: "divider",
@@ -102,7 +149,9 @@ export const getCorrespondenseIncomingColumns = (): TableColumnsType => {
             label: "Удалить",
             danger: true,
             icon: <img src={trashIcon} className="w-5 h-5" />,
-            onClick: () => console.log("Delete", record),
+            onClick: () => {
+              deleteCorrespondence({ id: record.id });
+            },
           },
         ];
 
@@ -129,3 +178,5 @@ export const getCorrespondenseIncomingColumns = (): TableColumnsType => {
     },
   ];
 };
+
+

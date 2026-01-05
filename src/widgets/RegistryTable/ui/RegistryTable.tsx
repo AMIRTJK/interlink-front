@@ -3,7 +3,7 @@ import { Button, UniversalTable } from "@shared/ui";
 import { useState } from "react";
 import AddIcon from "../../../assets/icons/add-icon.svg";
 import { useLocation, useNavigate } from "react-router";
-import { getRegistryColumns, getRegistryFilters } from "../lib";
+import { useRegistryColumns, getRegistryFilters } from "../lib";
 import { tokenControl, useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 // import { FilterRegistry } from "@features/FilterRegistry";
@@ -32,7 +32,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const handleCreate = () => {
     navigate(`${location.pathname}/create`);
   };
-  const columns = getRegistryColumns(type);
+  const columns = useRegistryColumns(type);
   const filters = getRegistryFilters(type);
 
   const { data: isAllowed, isPending } = useGetQuery({

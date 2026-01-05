@@ -16,6 +16,9 @@ export const ApiRoutes = {
   GET_CORRESPONDENCES: "/api/v1/correspondences",
   CREATE_CORRESPONDENCES: "/api/v1/correspondences",
   ARCHIVE_CORRESPONDENCE: "/api/v1/correspondences/:id/archive",
+  PIN_CORRESPONDENCE: "/api/v1/correspondences/:id/pin",
+  FOLDER_CORRESPONDENCE: "/api/v1/correspondences/:id/folder",
+  DELETE_CORRESPONDENCE: "/api/v1/correspondences/:id",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];
