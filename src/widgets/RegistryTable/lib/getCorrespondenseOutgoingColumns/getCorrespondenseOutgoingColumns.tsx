@@ -1,13 +1,7 @@
 import {
-  // EditOutlined,
-  // DeleteOutlined,
-  // FolderOpenOutlined,
-  // PushpinOutlined,
-  // InboxOutlined,
   MoreOutlined,
 } from "@ant-design/icons";
 import {
-  // Flex,
   Button,
   Dropdown,
   MenuProps,
@@ -21,8 +15,54 @@ import archiveIcon from "../../../../assets/icons/archive-icon.svg";
 import pinnedIcon from "../../../../assets/icons/pinned-icon.svg";
 import folderIcon from "../../../../assets/icons/folder-icon.svg";
 import trashIcon from "../../../../assets/icons/trash-icon.svg";
+import { ApiRoutes } from "@shared/api";
+import { useMutationQuery } from "@shared/lib";
 
-export const getCorrespondenseOutgoingColumns = (): TableColumnsType => {
+export const useCorrespondenseOutgoingColumns = (): TableColumnsType => {
+  // Archive mutation
+  const { mutate: archiveCorrespondence } = useMutationQuery<{ id: number; is_archived: boolean }>({
+    url: (data) => ApiRoutes.ARCHIVE_CORRESPONDENCE.replace(':id', String(data.id)),
+    method: "PATCH",
+    messages: {
+      success: "Письмо успешно архивировано",
+      error: "Ошибка архивирования письма",
+      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+    },
+  });
+
+  // Pin mutation
+  const { mutate: pinCorrespondence } = useMutationQuery<{ id: number; is_pinned: boolean }>({
+    url: (data) => ApiRoutes.PIN_CORRESPONDENCE.replace(':id', String(data.id)),
+    method: "PATCH",
+    messages: {
+      success: "Письмо успешно закреплено",
+      error: "Ошибка закрепления письма",
+      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+    },
+  });
+
+  // Move to folder mutation
+  const { mutate: _moveToFolder } = useMutationQuery<{ id: number; folder_id: number }>({
+    url: (data) => ApiRoutes.FOLDER_CORRESPONDENCE.replace(':id', String(data.id)),
+    method: "PATCH",
+    messages: {
+      success: "Письмо перемещено в папку",
+      error: "Ошибка перемещения письма",
+      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+    },
+  });
+
+  // Delete mutation
+  const { mutate: deleteCorrespondence } = useMutationQuery<{ id: number }>({
+    url: (data) => ApiRoutes.DELETE_CORRESPONDENCE.replace(':id', String(data.id)),
+    method: "DELETE",
+    messages: {
+      success: "Письмо успешно удалено",
+      error: "Ошибка удаления письма",
+      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+    },
+  });
+
   return [
     {
       title: "Вх. номер",
@@ -79,19 +119,27 @@ export const getCorrespondenseOutgoingColumns = (): TableColumnsType => {
             key: "archive",
             label: "В архив",
             icon: <img src={archiveIcon} className="w-5 h-5" />,
-            onClick: () => console.log("Archive", record),
+            onClick: () => {
+              archiveCorrespondence({ id: record.id, is_archived: true });
+            },
           },
           {
             key: "pin",
             label: "Закрепить",
             icon: <img src={pinnedIcon} className="w-5 h-5" />,
-            onClick: () => console.log("Pin", record),
+            onClick: () => {
+              pinCorrespondence({ id: record.id, is_pinned: true });
+            },
           },
           {
             key: "folder",
             label: "В папку",
             icon: <img src={folderIcon} className="w-5 h-5" />,
-            onClick: () => console.log("To folder", record),
+            onClick: () => {
+              // TODO: Open modal to select folder, then call mutation with folder_id
+              console.log("Move to folder", record);
+              // moveToFolder({ id: record.id, folder_id: selectedFolderId });
+            },
           },
           {
             type: "divider",
@@ -101,7 +149,9 @@ export const getCorrespondenseOutgoingColumns = (): TableColumnsType => {
             label: "Удалить",
             danger: true,
             icon: <img src={trashIcon} className="w-5 h-5" />,
-            onClick: () => console.log("Delete", record),
+            onClick: () => {
+              deleteCorrespondence({ id: record.id });
+            },
           },
         ];
 
@@ -128,3 +178,6 @@ export const getCorrespondenseOutgoingColumns = (): TableColumnsType => {
     },
   ];
 };
+
+// Backward compatibility export
+
