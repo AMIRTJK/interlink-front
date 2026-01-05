@@ -66,7 +66,8 @@ export const useMutationQuery = <
     secondQuery, 
     skipAuth = false,
     preload,
-    preloadConditional
+    preloadConditional,
+    queryParams
   } = options;
   
   const queryClient = useQueryClient();
@@ -113,13 +114,17 @@ export const useMutationQuery = <
       // 1. ПЕРВЫЙ ЗАПРОС (Основная мутация)
       const firstUrl = typeof url === "function" ? url(requestData) : url;
       
-      const firstResponse = await _axios<IApiResponse<TData>>({
-        url: firstUrl,
-        method,
-        data: requestData,
-        suppressErrorToast: Boolean(messages?.error),
-        skipAuth,
-      } as CustomAxiosRequestConfig);
+        const { id: _id, ...restData } = requestData || {} as any;
+        const requestBody = method === "DELETE" ? (Object.keys(restData).length > 0 ? restData : undefined) : restData;
+
+        const firstResponse = await _axios<IApiResponse<TData>>({
+          url: firstUrl,
+          method,
+          data: requestBody, 
+          params: queryParams,
+          suppressErrorToast: Boolean(messages?.error),
+          skipAuth,
+        } as CustomAxiosRequestConfig);
 
       const firstBody = firstResponse.data;
 
@@ -158,7 +163,7 @@ export const useMutationQuery = <
 
       return firstData;
     },
-    [url, method, skipAuth, messages, secondQuery, preload, isAllowedResult]
+    [url, method, skipAuth, messages, secondQuery, preload, isAllowedResult, queryParams]
   );
 
   const mutation = useMutation({
