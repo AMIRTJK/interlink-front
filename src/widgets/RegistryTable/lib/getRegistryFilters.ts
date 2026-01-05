@@ -7,6 +7,9 @@ export const getRegistryFilters = (type: string): IFilterItem[] => {
     // Маппинг ключей на соответствующие функции
     incoming: getCorrespondenceIncomingFilters,
     outgoing: getCorrespondenceOutgoingFilters,
+    archived: getCorrespondenceIncomingFilters,
+    pinned: getCorrespondenceIncomingFilters,
+    trashed: getCorrespondenceIncomingFilters,
 
     // Если есть общий тип для всей корреспонденции (как фоллбек)
     correspondence: getCorrespondenceIncomingFilters,

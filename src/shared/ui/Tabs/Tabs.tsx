@@ -3,12 +3,12 @@ import { useTheme } from "@shared/lib";
 import { If } from "../If";
 import "./style.css";
 import { ITabsProps } from "./model";
-export const Tabs = ({ 
-  items, 
-  activeKey, 
-  onChange, 
-  className = "", 
-  layoutId = "active-tab" 
+export const Tabs = ({
+  items,
+  activeKey,
+  onChange,
+  className = "",
+  layoutId = "active-tab",
 }: ITabsProps) => {
   const { isAnimEnabled } = useTheme();
   return (
@@ -25,7 +25,11 @@ export const Tabs = ({
               <motion.div
                 layoutId={isAnimEnabled ? layoutId : undefined}
                 className="ui-tab-background"
-                transition={isAnimEnabled ? { type: "spring", bounce: 0, duration: 0.4 } : { duration: 0 }}
+                transition={
+                  isAnimEnabled
+                    ? { type: "spring", bounce: 0, duration: 0.4 }
+                    : { duration: 0 }
+                }
               />
             </If>
             <span className="ui-tab-text">{item.label}</span>

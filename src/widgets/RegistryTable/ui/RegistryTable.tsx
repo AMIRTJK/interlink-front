@@ -1,18 +1,18 @@
-import { StatusTabs } from "@features/StatusTabs";
-import { Button, UniversalTable } from "@shared/ui";
-import { useState } from "react";
+import { Button, If, UniversalTable } from "@shared/ui";
+import { useMemo, useState } from "react";
 import AddIcon from "../../../assets/icons/add-icon.svg";
 import { useLocation, useNavigate } from "react-router";
 import { useRegistryColumns, getRegistryFilters } from "../lib";
 import { tokenControl, useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { StatusTabs } from "@features/StatusTabs";
 // import { FilterRegistry } from "@features/FilterRegistry";
 
 interface RegistryTableProps<T extends Record<string, unknown>> {
   data?: T[];
   isLoading?: boolean;
   type: string;
-  createButtonText: string;
+  createButtonText?: string;
   extraParams?: Record<string, any>;
 }
 
@@ -23,8 +23,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   type,
   extraParams,
 }: RegistryTableProps<T>) => {
-  console.log(data, isLoading);
-  const [currentTab, setCurrentTab] = useState("inbox");
+  const [currentTab, setCurrentTab] = useState(extraParams?.tab || "draft");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,18 +38,31 @@ export const RegistryTable = <T extends Record<string, unknown>>({
     preload: true,
     preloadConditional: ["correspondence.create", "correspondence.view"],
   });
-  const inboxCount=Number(tokenControl.getIncomingLetterCount()) || 0
+
+  const { data: countersData } = useGetQuery({
+    url: ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+    params: extraParams?.kind ? { kind: extraParams.kind } : {},
+  });
+
+  const tabCounts = useMemo(() => countersData?.data || {}, [countersData]);
+
+  const showTabs = !!extraParams?.kind;
+
   return (
     <div className="bg-white flex flex-col gap-2 w-full h-full rounded-2xl overflow-hidden">
       <nav>
-        <StatusTabs
-          counts={{ inbox: inboxCount }}
-          activeTab={currentTab}
-          onTabChange={setCurrentTab}
-        />
+        <If is={showTabs}>
+          <StatusTabs
+            counts={tabCounts}
+            activeTab={currentTab}
+            onTabChange={setCurrentTab}
+          />
+        </If>
       </nav>
       {/* Panel Control */}
-      <div className={`px-2 ${isAllowed ? "block!" : "hidden!"}`}>
+      <div
+        className={`px-2 ${isAllowed && createButtonText ? "block!" : "hidden!"}`}
+      >
         <Button
           onClick={handleCreate}
           type="default"
@@ -73,7 +85,10 @@ export const RegistryTable = <T extends Record<string, unknown>>({
           className="[&_.ant-table-cell]:rounded-none! [&_.ant-pagination]:px-4!"
           direction={1}
           autoFilter={true}
-          queryParams={{ ...extraParams, tab: currentTab }}
+          queryParams={{
+            ...extraParams,
+            ...(showTabs ? { status: currentTab } : {}),
+          }}
           scroll={{}}
           showSizeChanger={false}
           customPagination={true}
