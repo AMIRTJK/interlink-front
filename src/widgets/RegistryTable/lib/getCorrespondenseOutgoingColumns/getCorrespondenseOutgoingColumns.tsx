@@ -1,15 +1,15 @@
 import {
-  EditOutlined,
-  DeleteOutlined,
+  // EditOutlined,
+  // DeleteOutlined,
+  // FolderOpenOutlined,
+  // PushpinOutlined,
+  // InboxOutlined,
   MoreOutlined,
-  FolderOpenOutlined,
-  PushpinOutlined,
-  InboxOutlined,
 } from "@ant-design/icons";
 import {
+  // Flex,
   Button,
   Dropdown,
-  Flex,
   MenuProps,
   TableColumnsType,
   Tag,
