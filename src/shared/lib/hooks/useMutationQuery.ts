@@ -114,17 +114,14 @@ export const useMutationQuery = <
       // 1. ПЕРВЫЙ ЗАПРОС (Основная мутация)
       const firstUrl = typeof url === "function" ? url(requestData) : url;
       
-        const { id: _id, ...restData } = requestData || {} as any;
-        const requestBody = method === "DELETE" ? (Object.keys(restData).length > 0 ? restData : undefined) : restData;
-
-        const firstResponse = await _axios<IApiResponse<TData>>({
-          url: firstUrl,
-          method,
-          data: requestBody, 
-          params: queryParams,
-          suppressErrorToast: Boolean(messages?.error),
-          skipAuth,
-        } as CustomAxiosRequestConfig);
+      const firstResponse = await _axios<IApiResponse<TData>>({
+        url: firstUrl,
+        method,
+        data: requestData,
+        params: queryParams,
+        suppressErrorToast: Boolean(messages?.error),
+        skipAuth,
+      } as CustomAxiosRequestConfig);
 
       const firstBody = firstResponse.data;
 
