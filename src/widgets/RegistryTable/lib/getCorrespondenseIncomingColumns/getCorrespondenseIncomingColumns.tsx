@@ -1,7 +1,5 @@
 import "./style.css";
-import {
-  MoreOutlined,
-} from "@ant-design/icons";
+import { MoreOutlined } from "@ant-design/icons";
 import {
   Button,
   Dropdown,
@@ -21,11 +19,19 @@ import { useMutationQuery } from "@shared/lib";
 
 export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
   // Archive mutation
-  const { mutate: archiveCorrespondence } = useMutationQuery<{ id: number; is_archived: boolean }>({
-    url: (data) => ApiRoutes.ARCHIVE_CORRESPONDENCE.replace(':id', String(data.id)),
+  const { mutate: archiveCorrespondence } = useMutationQuery<{
+    id: number;
+    is_archived: boolean;
+  }>({
+    url: (data) =>
+      ApiRoutes.ARCHIVE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "PATCH",
-    preload:true,
-    preloadConditional:['correspondence.create','correspondence.update','correspondence.delete'],
+    preload: true,
+    preloadConditional: [
+      "correspondence.create",
+      "correspondence.update",
+      "correspondence.delete",
+    ],
     messages: {
       success: "Письмо успешно архивировано",
       error: "Ошибка архивирования письма",
@@ -34,8 +40,11 @@ export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
   });
 
   // Pin mutation
-  const { mutate: pinCorrespondence } = useMutationQuery<{ id: number; is_pinned: boolean }>({
-    url: (data) => ApiRoutes.PIN_CORRESPONDENCE.replace(':id', String(data.id)),
+  const { mutate: pinCorrespondence } = useMutationQuery<{
+    id: number;
+    is_pinned: boolean;
+  }>({
+    url: (data) => ApiRoutes.PIN_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "PATCH",
     messages: {
       success: "Письмо успешно закреплено",
@@ -45,11 +54,15 @@ export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
   });
 
   // Folder mutation
-  const { mutate: moveToFolder } = useMutationQuery<{ id: number; folder_id: number }>({
-    url: (data) => ApiRoutes.FOLDER_CORRESPONDENCE.replace(':id', String(data.id)),
+  const { mutate: moveToFolder } = useMutationQuery<{
+    folder_id: number;
+    id: number;
+  }>({
+    url: (data) =>
+      ApiRoutes.FOLDER_CORRESPONDENCE.replace(":folder_id", String(data.id)),
     method: "PATCH",
-    preload:true,
-    preloadConditional:['folder.create','folder.update','folder.delete'],
+    preload: true,
+    preloadConditional: ["correspondence.update"],
     messages: {
       success: "Письмо перемещено в папку",
       error: "Ошибка перемещения письма",
@@ -59,7 +72,8 @@ export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
 
   // Delete mutation
   const { mutate: deleteCorrespondence } = useMutationQuery<{ id: number }>({
-    url: (data) => ApiRoutes.DELETE_CORRESPONDENCE.replace(':id', String(data.id)),
+    url: (data) =>
+      ApiRoutes.DELETE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "DELETE",
     messages: {
       success: "Письмо успешно удалено",
@@ -143,6 +157,10 @@ export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
             onClick: () => {
               //cоздать модалку для выбора папки и отправки запроса с folder_id
               console.log("Move to folder", record);
+              moveToFolder({
+                id: record.id,
+                folder_id: record.id,
+              });
             },
           },
           {
@@ -182,5 +200,3 @@ export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
     },
   ];
 };
-
-
