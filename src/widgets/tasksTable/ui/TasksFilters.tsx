@@ -34,7 +34,10 @@ export const TasksFilters = () => {
   return (
     <div className="bg-[#0037AF] rounded-xl p-3 transition-all">
       {/* Header */}
-      <div className="flex justify-between items-center mb-3">
+      <div
+        className="flex justify-between items-center"
+        style={{ marginBottom: collapsed ? "0px" : "12px" }}
+      >
         <div className="flex items-center gap-2 text-white">
           <FilterOutlined />
           <span className="text-sm font-medium">Фильтр</span>

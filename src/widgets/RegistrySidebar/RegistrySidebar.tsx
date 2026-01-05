@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Layout, Menu, Button, ConfigProvider } from "antd";
 
 import { useLocation, useNavigate } from "react-router-dom";
@@ -15,7 +15,7 @@ import collapseIcon from "../../assets/icons/collapse-icon.svg";
 
 import Logo from "../../assets/images/logo.svg";
 import { AppRoutes } from "@shared/config";
-import { tokenControl, useGetQuery } from "@shared/lib";
+import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import "./style.css";
 
@@ -25,34 +25,42 @@ export const RegistrySidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const [incomingCount, setIncomingCount] = useState<number>(() => {
-  return Number(tokenControl.getIncomingLetterCount()) || 0;
-});
+
+  const { data: countersData, isPending } = useGetQuery({
+    url: ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+    params: {},
+  });
+
+  const counts = useMemo(() => countersData?.data || {}, [countersData]);
+
   const mainItems = [
     {
       key: AppRoutes.CORRESPONDENCE_INCOMING,
       icon: <img src={incomingIcon} />,
       label: "Входящие письма",
-      count: incomingCount,
+      count: counts.incoming_total,
       path: AppRoutes.CORRESPONDENCE_INCOMING,
     },
     {
       key: AppRoutes.CORRESPONDENCE_OUTGOING,
       icon: <img src={outgoingIcon} />,
       label: "Исходящие письма",
+      count: counts.outgoing_total,
       path: AppRoutes.CORRESPONDENCE_OUTGOING,
     },
     {
       key: AppRoutes.CORRESPONDENCE_ARCHIVE,
       icon: <img src={archiveIcon} />,
       label: "Архив",
-      path: `#`,
+      count: counts.archived_total,
+      path: AppRoutes.CORRESPONDENCE_ARCHIVE,
     },
     {
       key: AppRoutes.CORRESPONDENCE_PINNED,
       icon: <img src={pinnedIcon} />,
       label: "Закреплённые",
-      path: `#`,
+      count: counts.pinned_total,
+      path: AppRoutes.CORRESPONDENCE_PINNED,
     },
     {
       key: AppRoutes.CORRESPONDENCE_FOLDERS,
@@ -61,10 +69,11 @@ export const RegistrySidebar = () => {
       path: `#`,
     },
     {
-      key: AppRoutes.CORRESPONDENCE_TRASH,
+      key: AppRoutes.CORRESPONDENCE_TRASHED,
       icon: <img src={garbageIcon} />,
       label: "Корзина",
-      path: `#`,
+      count: counts.trash_total,
+      path: AppRoutes.CORRESPONDENCE_TRASHED,
     },
   ];
 
@@ -90,20 +99,6 @@ export const RegistrySidebar = () => {
     }
   };
 
-  const { isPending } = useGetQuery({
-    method: "GET",
-    url: ApiRoutes.GET_CORRESPONDENCES,
-    options: {
-      onSuccess: (data: { data: { items: { [key: string]: string | number | boolean }[] } }) => {
-        const count = data?.data?.items?.length || 0;
-        tokenControl.setIncomingLetterCount(count);
-        setIncomingCount(count);
-      },
-      enabled: true,
-    },
-  });
-
-
   return (
     <Sider
       theme="light"
@@ -126,8 +121,6 @@ export const RegistrySidebar = () => {
           )}
           <Button
             type="text"
-            disabled={isPending}
-            loading={isPending}
             onClick={() => setCollapsed(!collapsed)}
             className={collapsed ? "mx-auto" : "ml-auto"}
             icon={<img src={collapseIcon} />}

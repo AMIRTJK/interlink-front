@@ -55,10 +55,24 @@ const NotFoundPage = lazy(() =>
 
 const incomingParams = {
   kind: "incoming",
+  tab: "draft",
 };
 
 const outgoingParams = {
   kind: "outgoing",
+  tab: "draft",
+};
+
+const archivedParams = {
+  archived: 1,
+};
+
+const pinnedParams = {
+  pinned: 1,
+};
+
+const trashedParams = {
+  trashed: 1,
 };
 
 export const AppRouter = () => {
@@ -130,6 +144,36 @@ export const AppRouter = () => {
                   <Route
                     path="create"
                     element={<CreateCorrespondencePage type="outgoing" />}
+                  />
+                </Route>
+                <Route path="archive">
+                  <Route
+                    index
+                    element={
+                      <RegistryTable
+                        type="archived"
+                        extraParams={archivedParams}
+                      />
+                    }
+                  />
+                </Route>
+                <Route path="pinned">
+                  <Route
+                    index
+                    element={
+                      <RegistryTable type="pinned" extraParams={pinnedParams} />
+                    }
+                  />
+                </Route>
+                <Route path="trashed">
+                  <Route
+                    index
+                    element={
+                      <RegistryTable
+                        type="trashed"
+                        extraParams={trashedParams}
+                      />
+                    }
                   />
                 </Route>
               </Route>

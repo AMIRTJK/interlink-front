@@ -13,5 +13,5 @@ export const AppRoutes = {
   CORRESPONDENCE_ARCHIVE: "/modules/correspondence/archive",
   CORRESPONDENCE_PINNED: "/modules/correspondence/pinned",
   CORRESPONDENCE_FOLDERS: "/modules/correspondence/folders",
-  CORRESPONDENCE_TRASH: "/modules/correspondence/trash",
+  CORRESPONDENCE_TRASHED: "/modules/correspondence/trashed",
 } as const;
