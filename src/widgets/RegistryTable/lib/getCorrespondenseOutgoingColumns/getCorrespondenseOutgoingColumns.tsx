@@ -120,7 +120,7 @@ export const useCorrespondenseOutgoingColumns = (): TableColumnsType => {
             label: "В архив",
             icon: <img src={archiveIcon} className="w-5 h-5" />,
             onClick: () => {
-              archiveCorrespondence({ id: record.id, is_archived: true });
+              archiveCorrespondence({ das: record.id, is_archived: true });
             },
           },
           {

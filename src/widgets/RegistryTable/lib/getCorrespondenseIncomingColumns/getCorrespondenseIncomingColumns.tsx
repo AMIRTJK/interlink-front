@@ -24,6 +24,8 @@ export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
   const { mutate: archiveCorrespondence } = useMutationQuery<{ id: number; is_archived: boolean }>({
     url: (data) => ApiRoutes.ARCHIVE_CORRESPONDENCE.replace(':id', String(data.id)),
     method: "PATCH",
+    preload:true,
+    preloadConditional:['correspondence.create','correspondence.update','correspondence.delete'],
     messages: {
       success: "Письмо успешно архивировано",
       error: "Ошибка архивирования письма",
@@ -46,6 +48,8 @@ export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
   const { mutate: moveToFolder } = useMutationQuery<{ id: number; folder_id: number }>({
     url: (data) => ApiRoutes.FOLDER_CORRESPONDENCE.replace(':id', String(data.id)),
     method: "PATCH",
+    preload:true,
+    preloadConditional:['folder.create','folder.update','folder.delete'],
     messages: {
       success: "Письмо перемещено в папку",
       error: "Ошибка перемещения письма",
