@@ -65,7 +65,9 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
 
   const getItemsFromResponse =
     props.getItemsFromResponse ??
-    ((response: any) => response?.data?.data ?? []);
+    ((response: any) => response?.data?.items ?? []);
+    // ((response: any) => response?.data?.data ?? []);
+
 
   const [activeFilters, setActiveFilters] = useState<Record<string, any>>({});
 
@@ -245,7 +247,8 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
         rowClassName={props.rowClassName}
         rowSelection={rowSelection}
         pagination={{
-          total: (data as any)?.data?.total || 0,
+          total: (data as any)?.data?.meta?.total || 0,
+          // total: (data as any)?.data?.total || 0,
           current: Number(page) || 1,
           pageSize: Number(perPage) || DEFAULT_PAGE_SIZE,
           pageSizeOptions: [10, 20, 50, 100],

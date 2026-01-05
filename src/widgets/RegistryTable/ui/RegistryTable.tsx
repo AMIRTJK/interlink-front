@@ -39,7 +39,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
     preload: true,
     preloadConditional: ["correspondence.create", "correspondence.view"],
   });
-  const inboxCount=Number(tokenControl.getOutgoingLetterCount()) || 0
+  const inboxCount=Number(tokenControl.getIncomingLetterCount()) || 0
   return (
     <div className="bg-white flex flex-col gap-2 w-full h-full rounded-2xl overflow-hidden">
       <nav>

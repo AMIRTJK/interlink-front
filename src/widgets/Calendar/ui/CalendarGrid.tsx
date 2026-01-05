@@ -38,7 +38,6 @@ export const CalendarGrid = ({
     });
   };
   console.log("TASK: ", tasks);
-
   const getCurrentTimePosition = () => {
     const now = dayjs();
     const hours = now.hour();
@@ -127,9 +126,6 @@ export const CalendarGrid = ({
                 {(() => {
                   const dayTasks = getTasksForDay(day);
                   const items = calculateDayLayout(dayTasks);
-
-                  console.log(items);
-
                   return items.map((item, index) => {
                     if (item.type === "single") {
                       return (

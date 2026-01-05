@@ -1,16 +1,16 @@
 import "./style.css";
 import {
-  EditOutlined,
-  DeleteOutlined,
-  InboxOutlined,
-  PushpinOutlined,
-  FolderOpenOutlined,
+  // EditOutlined,
+  // DeleteOutlined,
+  // InboxOutlined,
+  // PushpinOutlined,
+  // FolderOpenOutlined,
   MoreOutlined,
 } from "@ant-design/icons";
 import {
+  // Flex,
   Button,
   Dropdown,
-  Flex,
   MenuProps,
   TableColumnsType,
   Tag,

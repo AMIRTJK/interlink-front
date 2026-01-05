@@ -1,4 +1,3 @@
-import "./style.css";
 import { useState } from "react";
 import { Layout, Menu, Button, ConfigProvider } from "antd";
 
@@ -18,6 +17,7 @@ import Logo from "../../assets/images/logo.svg";
 import { AppRoutes } from "@shared/config";
 import { tokenControl, useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import "./style.css";
 
 const { Sider } = Layout;
 
@@ -25,16 +25,15 @@ export const RegistrySidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const [outgoingCount, setOutgoingCount] = useState<number>(() => {
-  return Number(tokenControl.getOutgoingLetterCount()) || 0;
+  const [incomingCount, setIncomingCount] = useState<number>(() => {
+  return Number(tokenControl.getIncomingLetterCount()) || 0;
 });
-console.log(setOutgoingCount)
   const mainItems = [
     {
       key: AppRoutes.CORRESPONDENCE_INCOMING,
       icon: <img src={incomingIcon} />,
       label: "Входящие письма",
-      count: outgoingCount,
+      count: incomingCount,
       path: AppRoutes.CORRESPONDENCE_INCOMING,
     },
     {
@@ -95,8 +94,10 @@ console.log(setOutgoingCount)
     method: "GET",
     url: ApiRoutes.GET_CORRESPONDENCES,
     options: {
-      onSuccess: (data:{data:{items:{[key:string]:string|number|boolean}[]}}) => {
-        tokenControl.setOutgoingLetterCount(data?.data?.items?.length || 0);
+      onSuccess: (data: { data: { items: { [key: string]: string | number | boolean }[] } }) => {
+        const count = data?.data?.items?.length || 0;
+        tokenControl.setIncomingLetterCount(count);
+        setIncomingCount(count);
       },
       enabled: true,
     },
@@ -156,7 +157,7 @@ console.log(setOutgoingCount)
                 label: (
                   <div className="flex justify-between items-center w-full">
                     <span>{item.label}</span>
-                    {item.count && !collapsed && (
+                    {!!item.count && !collapsed && (
                       <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
                         {item.count}
                       </span>
