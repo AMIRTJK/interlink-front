@@ -66,7 +66,8 @@ export const useMutationQuery = <
     secondQuery, 
     skipAuth = false,
     preload,
-    preloadConditional
+    preloadConditional,
+    queryParams
   } = options;
   
   const queryClient = useQueryClient();
@@ -117,6 +118,7 @@ export const useMutationQuery = <
         url: firstUrl,
         method,
         data: requestData,
+        params: queryParams,
         suppressErrorToast: Boolean(messages?.error),
         skipAuth,
       } as CustomAxiosRequestConfig);
@@ -158,7 +160,7 @@ export const useMutationQuery = <
 
       return firstData;
     },
-    [url, method, skipAuth, messages, secondQuery, preload, isAllowedResult]
+    [url, method, skipAuth, messages, secondQuery, preload, isAllowedResult, queryParams]
   );
 
   const mutation = useMutation({
