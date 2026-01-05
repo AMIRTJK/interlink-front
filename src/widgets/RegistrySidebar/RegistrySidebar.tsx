@@ -25,16 +25,16 @@ export const RegistrySidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const [outgoingCount, setOutgoingCount] = useState<number>(() => {
-  return Number(tokenControl.getOutgoingLetterCount()) || 0;
+  const [incomingCount, setIncomingCount] = useState<number>(() => {
+  return Number(tokenControl.getIncomingLetterCount()) || 0;
 });
-console.log(setOutgoingCount)
+// console.log(setOutgoingCount)
   const mainItems = [
     {
       key: AppRoutes.CORRESPONDENCE_INCOMING,
       icon: <img src={incomingIcon} />,
       label: "Входящие письма",
-      count: outgoingCount,
+      count: incomingCount || (()=>setIncomingCount(Number(tokenControl.getIncomingLetterCount()) || 0))(),
       path: AppRoutes.CORRESPONDENCE_INCOMING,
     },
     {

@@ -33,11 +33,11 @@ export const tokenControl = {
   },
   
 // Outgoing letter count
-  setOutgoingLetterCount:(count:number)=>{
+  setIncomingLetterCount:(count:number)=>{
     localStorage.setItem(OUTGOING_LETTER_COUNT, count.toString());
   },
 
-  getOutgoingLetterCount:()=>{
+  getIncomingLetterCount:()=>{
     return localStorage.getItem(OUTGOING_LETTER_COUNT);
   },
 
