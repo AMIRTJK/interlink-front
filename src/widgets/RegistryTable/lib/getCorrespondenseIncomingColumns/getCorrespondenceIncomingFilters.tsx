@@ -36,9 +36,13 @@ export const getCorrespondenceIncomingFilters = (): IFilterItem[] => {
       placeholder: "Статус",
       options: [
         { label: "Черновик", value: "draft" },
-        { label: "Зарегистрировано", value: "registered" },
-        { label: "В процессе", value: "in_progress" },
-        { label: "Завершено", value: "completed" },
+        { label: "Регистрация", value: "to_register" },
+        { label: "Визирование", value: "to_visa" },
+        { label: "Исполнение", value: "to_execute" },
+        { label: "Согласование", value: "to_approve" },
+        { label: "Подпись", value: "to_sign" },
+        { label: "Завершено", value: "done" },
+        { label: "Отменено", value: "cancelled" },
       ],
     },
   ] as IFilterItem[];

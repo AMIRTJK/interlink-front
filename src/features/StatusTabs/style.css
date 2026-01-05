@@ -1,89 +1,3 @@
-/* Фоновый контейнер */
-.status-tabs-wrapper {
-  background-color: #e3ecff;
-  width: 100%;
-  overflow: hidden;
-}
-
-.custom-chrome-tabs .ant-tabs-nav-list {
-  padding: 0 !important;
-  width: 100%;
-}
-
-.custom-chrome-tabs .ant-tabs-nav {
-  margin: 0 !important;
-}
-
-.custom-chrome-tabs .ant-tabs-ink-bar {
-  display: none !important;
-}
-
-/* Настраиваем вкладки */
-.custom-chrome-tabs .ant-tabs-tab {
-  padding: 9px 28px !important;
-  margin: 0 !important;
-  transition: none !important;
-  border: none !important;
-  background: transparent !important;
-}
-
-.custom-chrome-tabs .ant-tabs-tab-btn,
-.custom-chrome-tabs .ant-tabs-tab-remove {
-  transition: none !important;
-}
-
-.custom-chrome-tabs .ant-tabs-tab:first-child {
-  margin-left: 0 !important;
-}
-
-/* Активное состояние */
-.custom-chrome-tabs .ant-tabs-tab-active {
-  background-color: #ffffff !important;
-  border-radius: 18px 18px 0 0 !important;
-  position: relative;
-  z-index: 2;
-}
-
-/* Эффект Chrome: псевдоэлементы */
-.custom-chrome-tabs .ant-tabs-tab-active::before,
-.custom-chrome-tabs .ant-tabs-tab-active::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  width: 20px;
-  height: 20px;
-  background: transparent;
-  pointer-events: none;
-  transition: none !important;
-}
-
-.custom-chrome-tabs .ant-tabs-tab-active::before {
-  left: -20px;
-  border-bottom-right-radius: 18px;
-  box-shadow: 10px 0 0 0 #ffffff;
-}
-
-.custom-chrome-tabs .ant-tabs-tab-active::after {
-  right: -20px;
-  border-bottom-left-radius: 18px;
-  box-shadow: -10px 0 0 0 #ffffff;
-}
-
-/* Исправляем края */
-.custom-chrome-tabs .ant-tabs-tab:first-child.ant-tabs-tab-active {
-  border-radius: 0 18px 0 0 !important;
-}
-.custom-chrome-tabs .ant-tabs-tab:first-child.ant-tabs-tab-active::before {
-  display: none !important;
-}
-
-.custom-chrome-tabs .ant-tabs-tab:last-child.ant-tabs-tab-active {
-  border-radius: 18px 0 0 0 !important;
-}
-.custom-chrome-tabs .ant-tabs-tab:last-child.ant-tabs-tab-active::after {
-  display: none !important;
-}
-
 /* Лейблы и бейджи */
 .status-tab-label {
   display: flex;
@@ -92,13 +6,12 @@
   font-weight: 400; /* Обычный вес для неактивных */
   font-size: 14px;
   transition: none !important;
-  color: #222222;
+  color: inherit;
 }
 
-/* Жирный шрифт для активной вкладки */
-.custom-chrome-tabs .ant-tabs-tab-active .status-tab-label {
-  color: #0037af !important;
-  font-weight: 600 !important;
+/* Явно прописываем цвет текста для НЕАКТИВНОЙ вкладки */
+.status-tab:not(.status-tab--active) .status-tab-label {
+  color: #222222;
 }
 
 .status-tab-badge .ant-scroll-number {
@@ -126,4 +39,95 @@
 
 .status-tab-badge .ant-scroll-number-only {
   margin-top: 2.5px !important;
+}
+
+.status-tab--active .status-tab-label {
+  color: #0037af !important;
+  font-weight: 600 !important;
+}
+
+.status-tabs {
+  display: flex;
+  gap: 2px;
+  background-color: #e3ecff;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  height: 36px;
+}
+
+.status-tab {
+  padding: 10px 40px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #64748b;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 12px 12px 0 0;
+  transition: color 0.3s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.status-tab:hover:not(.status-tab--active) {
+  color: #0037af;
+}
+
+.status-tab--active {
+  color: #0037af !important;
+}
+
+.status-tab-text {
+  position: relative;
+  z-index: 2;
+}
+
+.status-tab-background {
+  position: absolute;
+  inset: 0;
+  background-color: #fff;
+  border-radius: 12px 12px 0 0;
+  z-index: 1;
+  will-change: transform;
+}
+
+.status-tab-background::before,
+.status-tab-background::after {
+  content: "";
+  position: absolute;
+  bottom: 0px;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  pointer-events: none;
+}
+
+.status-tab-background::before {
+  left: -20px;
+  border-bottom-right-radius: 12px;
+  box-shadow: 6px 0 0 0 #fff;
+}
+
+.status-tab-background::after {
+  right: -20px;
+  border-bottom-left-radius: 12px;
+  box-shadow: -6px 0 0 0 #fff;
+}
+
+.status-tab:first-child .status-tab-background::before,
+.status-tab:last-child .status-tab-background::after {
+  display: none;
+}
+@media (max-width: 1024px) {
+  .status-tab {
+    padding: 10px 20px;
+  }
+}
+/* No Animations Mode */
+body.no-animations .status-tab:hover:not(.status-tab--active) {
+  color: #64748b;
+  transition: none !important;
 }

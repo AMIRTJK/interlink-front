@@ -1,4 +1,3 @@
-import { StatusTabs } from "@features/StatusTabs";
 import { Button, UniversalTable } from "@shared/ui";
 import { useState } from "react";
 import AddIcon from "../../../assets/icons/add-icon.svg";
@@ -6,6 +5,7 @@ import { useLocation, useNavigate } from "react-router";
 import { useRegistryColumns, getRegistryFilters } from "../lib";
 import { tokenControl, useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { StatusTabs } from "@features/StatusTabs";
 // import { FilterRegistry } from "@features/FilterRegistry";
 
 interface RegistryTableProps<T extends Record<string, unknown>> {
@@ -24,7 +24,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   extraParams,
 }: RegistryTableProps<T>) => {
   console.log(data, isLoading);
-  const [currentTab, setCurrentTab] = useState("inbox");
+  const [currentTab, setCurrentTab] = useState("draft");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,7 +39,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
     preload: true,
     preloadConditional: ["correspondence.create", "correspondence.view"],
   });
-  const inboxCount=Number(tokenControl.getIncomingLetterCount()) || 0
+  const inboxCount = Number(tokenControl.getIncomingLetterCount()) || 0;
   return (
     <div className="bg-white flex flex-col gap-2 w-full h-full rounded-2xl overflow-hidden">
       <nav>

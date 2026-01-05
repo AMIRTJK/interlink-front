@@ -1,14 +1,14 @@
 .ui-tabs {
   display: flex;
   gap: 2px;
-  background-color: #E3ECFF;
+  background-color: #e3ecff;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
   overflow: hidden;
 }
 
 .ui-tab {
-  padding: 10px 40px; 
+  padding: 10px 40px;
   font-size: 15px;
   font-weight: 600;
   color: #64748b;
@@ -21,7 +21,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1; 
+  flex: 1;
 }
 
 .ui-tab:hover:not(.ui-tab--active) {
