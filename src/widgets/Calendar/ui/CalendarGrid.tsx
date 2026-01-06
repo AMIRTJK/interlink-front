@@ -60,7 +60,6 @@ export const CalendarGrid = ({
     return day.isBefore(dayjs(), 'day');
   };
 
-  // Check if day is weekend (Sat or Sun)
   const isWeekend = (day: Dayjs) => {
     return day.day() === 0 || day.day() === 6;
   };
@@ -156,7 +155,7 @@ export const CalendarGrid = ({
                         <Popover
                           key={clusterId}
                           placement="right"
-                          title={null} /* Custom header in content */
+                          title={null} 
                           trigger="click"
                           open={openClusterId === clusterId}
                           onOpenChange={(visible) =>
@@ -207,9 +206,7 @@ export const CalendarGrid = ({
                             }}
                           >
                             <div className="weekly-calendar__cluster-wrapper">
-                              {/* Deck Effect Container */}
                               <div className="weekly-calendar__cluster-deck">
-                                {/* Main Card (First Event) */}
                                 <div
                                   style={{
                                     height: "100%",
@@ -221,7 +218,6 @@ export const CalendarGrid = ({
                                 </div>
                               </div>
 
-                              {/* "More" Indicator */}
                               <div className="weekly-calendar__more-indicator">
                                 Еще {count - 1}...
                               </div>
