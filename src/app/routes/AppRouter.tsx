@@ -4,19 +4,23 @@ import { tokenControl } from "@shared/lib";
 import { ToastContainer } from "react-toastify";
 import { Suspense, lazy } from "react";
 import { Loader } from "@shared/ui/Loader";
-import { MainLayout, ProfileLayout } from "@widgets/layout";
-import { RegistryTable } from "@widgets/RegistryTable";
 import PrivateRoute from "./PrivateRoute";
 
 // Lazy-loaded страницы
 const Auth = lazy(() =>
   import("@pages/Auth/Auth").then((m) => ({ default: m.Auth }))
 );
+
+const ProfileLayout=lazy(()=>import("@widgets/layout").then((m)=>({default:m.ProfileLayout})))
+
+const MainLayout=lazy(()=>import("@widgets/layout").then((m)=>({default:m.MainLayout})))
+
 const ProfilePage = lazy(() =>
   import("@pages/modules/profile/ProfilePage").then((m) => ({
     default: m.ProfilePage,
   }))
 );
+
 const TasksPage = lazy(() =>
   import("@pages/modules/profile/TasksPage").then((m) => ({
     default: m.TasksPage,
@@ -27,26 +31,37 @@ const CalendarPage = lazy(() =>
     default: m.CalendarPage,
   }))
 );
+
 const AnalyticsPage = lazy(() =>
   import("@pages/modules/profile/AnalyticsPage").then((m) => ({
     default: m.AnalyticsPage,
   }))
 );
+
+const RegistryTable = lazy(() =>
+  import("@widgets/RegistryTable").then((m) => ({
+    default: m.RegistryTable,
+  }))
+);
+
 const CorrespondencePage = lazy(() =>
   import("@pages/modules/correspondence/CorrespondencePage").then((m) => ({
     default: m.CorrespondencePage,
   }))
 );
+
 const CreateCorrespondencePage = lazy(() =>
   import("@pages/modules/correspondence/CreateCorrespondencePage").then(
     (m) => ({ default: m.CreateCorrespondencePage })
   )
 );
+
 const PlaceholderPage = lazy(() =>
   import("@pages/modules/placeholderpage/PlaceholderPage").then((m) => ({
     default: m.PlaceholderPage,
   }))
 );
+
 const NotFoundPage = lazy(() =>
   import("@shared/ui/NotFoundPage/NotFoundPage").then((m) => ({
     default: m.NotFoundPage,

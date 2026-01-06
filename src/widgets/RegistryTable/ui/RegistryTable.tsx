@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import AddIcon from "../../../assets/icons/add-icon.svg";
 import { useLocation, useNavigate } from "react-router";
 import { useRegistryColumns, getRegistryFilters } from "../lib";
-import { tokenControl, useGetQuery } from "@shared/lib";
+import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { StatusTabs } from "@features/StatusTabs";
 // import { FilterRegistry } from "@features/FilterRegistry";

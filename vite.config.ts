@@ -4,7 +4,11 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+  ],
+
   resolve: {
     alias: {
       "@app": path.resolve(__dirname, "src/app"),
@@ -13,6 +17,20 @@ export default defineConfig({
       "@features": path.resolve(__dirname, "src/features"),
       "@entities": path.resolve(__dirname, "src/entities"),
       "@shared": path.resolve(__dirname, "src/shared"),
+    },
+  },
+
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // ядро react
+          react: ["react", "react-dom", "react-router-dom"],
+
+          // весь Ant Design отдельно
+          antd: ["antd"],
+        },
+      },
     },
   },
 });
