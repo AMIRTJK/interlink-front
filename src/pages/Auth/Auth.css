@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: url("../../pages/Auth/assets/bg-auth-optimized.jpg");
+  background-image: url("bg-auth.jpg");
   background-repeat: no-repeat;
   background-size: cover;
   padding: 20px 40px;

@@ -36,6 +36,7 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
                   src={participant.avatar} 
                   size={20}
                   style={{ border: `1px solid ${color}33` }}
+                  alt={participant.name}
                 >
                   {participant.name.charAt(0)}
                 </Avatar>

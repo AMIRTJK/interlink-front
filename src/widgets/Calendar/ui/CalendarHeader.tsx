@@ -72,8 +72,9 @@ export const CalendarHeader = ({
             className="border-2! border-[#F5F6F7]! "
             type="default"
             shape="circle"
+            aria-label="Предыдущий период"
             style={{ width: 40, height: 40, padding: 0 }}
-            icon={<img className="h-7 w-7" src={LeftArrow}></img>}
+            icon={<img className="h-7 w-7" src={LeftArrow} alt="Назад"></img>}
           />
           <p className="weekly-calendar__date-range">{dateRange}</p>
           <ButtonAntd
@@ -81,8 +82,9 @@ export const CalendarHeader = ({
             className="border-2! border-[#F5F6F7]! "
             type="default"
             shape="circle"
+            aria-label="Следующий период"
             style={{ width: 40, height: 40, padding: 0 }}
-            icon={<img className="h-7 w-7" src={RightArrow}></img>}
+            icon={<img className="h-7 w-7" src={RightArrow} alt="Вперед"></img>}
           />
         </div>
         {viewMode === 'month' && onMonthPagePrev && onMonthPageNext && (
@@ -93,8 +95,9 @@ export const CalendarHeader = ({
               className="border-2! border-[#F5F6F7]!"
               type="default"
               shape="circle"
+              aria-label="Предыдущая страница дней"
               style={{ width: 40, height: 40, padding: 0 }}
-              icon={<img className="h-7 w-7" src={LeftArrow}></img>}
+              icon={<img className="h-7 w-7" src={LeftArrow} alt="Назад"></img>}
             />
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '100px' }}>
               <span style={{ fontSize: '11px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase' }}>
@@ -102,7 +105,7 @@ export const CalendarHeader = ({
               </span>
               <p className="weekly-calendar__date-range" style={{ minWidth: '50px', margin: 0 }}>
                 {monthPageOffset !== undefined && totalMonthPages !== undefined
-                  ? `${monthPageOffset + 1} / ${totalMonthPages}`
+                   ? `${monthPageOffset + 1} / ${totalMonthPages}`
                   : ''}
               </p>
             </div>
@@ -112,8 +115,9 @@ export const CalendarHeader = ({
               className="border-2! border-[#F5F6F7]!"
               type="default"
               shape="circle"
+              aria-label="Следующая страница дней"
               style={{ width: 40, height: 40, padding: 0 }}
-              icon={<img className="h-7 w-7" src={RightArrow}></img>}
+              icon={<img className="h-7 w-7" src={RightArrow} alt="Вперед"></img>}
             />
           </div>
         )}

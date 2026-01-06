@@ -1,5 +1,5 @@
 import { Button as ButtonAntd } from "antd";
-import { ReactNode } from "react";
+
 
 interface ButtonProps {
   type: "primary" | "default" | "dashed" | "link" | "text";
@@ -7,6 +7,8 @@ interface ButtonProps {
   htmlType?: "button" | "submit" | "reset";
   withIcon?: boolean;
   icon?: React.ReactNode | string;
+  iconAlt?: string;
+  ariaLabel?: string;
   style?: { [key: string]: string };
   onClick?: () => void;
   loading?: boolean;
@@ -16,13 +18,12 @@ interface ButtonProps {
   block?: boolean;
 }
 
-const If = ({ is, children }: { is: boolean; children: ReactNode }) =>
-  is ? <>{children}</> : null;
-
 export const Button = ({
   text,
   withIcon,
   icon,
+  iconAlt = "иконка",
+  ariaLabel,
   antdIcon,
   block,
   ...props
@@ -33,7 +34,9 @@ export const Button = ({
       return (
         <img
           src={icon}
-          alt="button-icon"
+          alt={iconAlt}
+          width="24"
+          height="24"
           style={{ width: "24px", height: "24px" }}
           className="block mx-auto"
         />
@@ -45,7 +48,12 @@ export const Button = ({
   const finalIcon = renderIcon() || antdIcon;
 
   return (
-    <ButtonAntd {...props} block={block} icon={finalIcon}>
+    <ButtonAntd 
+      {...props} 
+      block={block} 
+      icon={finalIcon}
+      aria-label={ariaLabel || text}
+    >
       {text ? <span className="ml-2">{text}</span> : null}
     </ButtonAntd>
   );

@@ -73,6 +73,7 @@ export const CalendarGrid = ({
           <Button
             type="text"
             shape="circle"
+            aria-label="История"
             style={{ width: 40, height: 40, padding: 0 }}
             icon={
               <HistoryOutlined style={{ fontSize: 20, color: "#C3CAD9" }} />
