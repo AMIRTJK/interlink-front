@@ -26,7 +26,9 @@
   align-items: center;
 }
 
-.weekly-calendar__nav { gap: 19px; }
+.weekly-calendar__nav {
+  gap: 19px;
+}
 
 .weekly-calendar__date-range {
   font-size: 12px;
@@ -70,7 +72,7 @@
   gap: 1px;
   background: var(--color-border);
   border-radius: 8px;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 .weekly-calendar__time-column {
@@ -86,11 +88,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid #eef2f6; /* Более мягкая граница */
+  border-bottom: 1px solid #eef2f6;
 }
 
 .weekly-calendar__time-header {
-  height: 80px; /* Совпадает с высотой заголовка дня */
+  height: 80px;
   border-bottom: 1px solid #eef2f6;
 }
 
@@ -107,10 +109,11 @@
 
 .weekly-calendar__days {
   flex: 1;
+  width: 0;
+  min-width: 0;
   overflow-x: auto;
 }
 
-/* Consolidated Scrollbar Styles */
 .weekly-calendar__days::-webkit-scrollbar,
 .weekly-calendar__popover-list::-webkit-scrollbar,
 .weekly-calendar__popover-timeline::-webkit-scrollbar {
@@ -139,24 +142,66 @@
 
 .weekly-calendar__day-column {
   flex: 1;
-  min-width: 140px;
+  min-width: 100px;
   background: var(--color-bg-primary);
   position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.weekly-calendar__day-column:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .weekly-calendar__day-column--today {
-  background: rgba(108, 99, 255, 0.1);
+  background: linear-gradient(180deg, rgba(108, 99, 255, 0.12) 0%, rgba(108, 99, 255, 0.05) 100%);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px rgba(108, 99, 255, 0.15);
 }
-.weekly-calendar__day-column--today .weekly-calendar__day-name { font-weight: 700; }
+.weekly-calendar__day-column--today .weekly-calendar__day-name {
+  font-weight: 700;
+  color: #6C63FF;
+}
+
+.weekly-calendar__day-column--today .weekly-calendar__day-number {
+  color: #6C63FF;
+  font-weight: 600;
+}
+
+.weekly-calendar__day-column--weekend {
+  background: rgba(241, 245, 249, 0.4);
+}
+
+.weekly-calendar__day-column--weekend .weekly-calendar__day-name,
+.weekly-calendar__day-column--weekend .weekly-calendar__day-number {
+  color: #475569;
+}
+
+.weekly-calendar__day-column--past {
+  background: rgba(248, 250, 252, 0.5);
+}
+
+.weekly-calendar__day-column--past .weekly-calendar__day-name,
+.weekly-calendar__day-column--past .weekly-calendar__day-number {
+  color: #CBD5E1;
+  opacity: 0.6;
+}
+
+.weekly-calendar__day-column--past .weekly-calendar__hour-line {
+  cursor: not-allowed;
+}
+
+.weekly-calendar__day-column--past .weekly-calendar__hour-line:hover {
+  background: transparent;
+}
 
 .weekly-calendar__day-header {
   position: sticky;
   top: 0;
   background: inherit;
   z-index: 1000;
-  height: 80px; /* Увеличено для двух строк */
+  height: 80px; 
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -193,10 +238,13 @@
   height: 72px;
   border-bottom: 1px solid var(--color-border);
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
 
-.weekly-calendar__hour-line:hover { background: rgba(108, 99, 255, 0.05); }
+.weekly-calendar__hour-line:hover {
+  background: rgba(108, 99, 255, 0.05);
+  transform: scaleY(1.02);
+}
 
 .weekly-calendar__current-time-line {
   position: absolute;
@@ -224,7 +272,9 @@
   left: 2px;
   right: 2px;
   z-index: 2;
-  transition: z-index 0s, all 0.2s ease;
+  transition:
+    z-index 0s,
+    all 0.2s ease;
 }
 
 .weekly-calendar__task-wrapper:hover {
@@ -272,16 +322,27 @@
   font-weight: 700;
   line-height: 1.3;
 }
-.task-card__avatars { margin-top: 4px; }
+.task-card__avatars {
+  margin-top: 4px;
+}
 
 @media (max-width: 768px) {
-  .weekly-calendar { padding: 12px; }
-  .weekly-calendar__date-range { font-size: 14px; }
-  .weekly-calendar__day-column { min-width: 120px; }
+  .weekly-calendar {
+    padding: 12px;
+  }
+  .weekly-calendar__date-range {
+    font-size: 14px;
+  }
+  .weekly-calendar__day-column {
+    min-width: 120px;
+  }
 }
 
 /* Cluster & Popover */
-.weekly-calendar__cluster-wrapper { position: relative; height: 100%; }
+.weekly-calendar__cluster-wrapper {
+  position: relative;
+  height: 100%;
+}
 
 .weekly-calendar__cluster-deck {
   position: relative;
@@ -306,10 +367,20 @@
   transition: all 0.2s ease;
 }
 
-.weekly-calendar__cluster-deck::before { transform: translate(3px, 3px); opacity: 0.7; }
-.weekly-calendar__cluster-deck::after { transform: translate(6px, 6px); opacity: 0.4; }
-.weekly-calendar__cluster-wrapper:hover .weekly-calendar__cluster-deck::before { transform: translate(4px, 4px); }
-.weekly-calendar__cluster-wrapper:hover .weekly-calendar__cluster-deck::after { transform: translate(8px, 8px); }
+.weekly-calendar__cluster-deck::before {
+  transform: translate(3px, 3px);
+  opacity: 0.7;
+}
+.weekly-calendar__cluster-deck::after {
+  transform: translate(6px, 6px);
+  opacity: 0.4;
+}
+.weekly-calendar__cluster-wrapper:hover .weekly-calendar__cluster-deck::before {
+  transform: translate(4px, 4px);
+}
+.weekly-calendar__cluster-wrapper:hover .weekly-calendar__cluster-deck::after {
+  transform: translate(8px, 8px);
+}
 
 .weekly-calendar__more-indicator {
   position: absolute;
@@ -329,7 +400,9 @@
   /* pointer-events: none; */
 }
 
-.weekly-calendar__popover-content { padding: 8px 4px; }
+.weekly-calendar__popover-content {
+  padding: 8px 4px;
+}
 
 .weekly-calendar__popover-header {
   display: flex;
@@ -366,8 +439,12 @@
   cursor: pointer;
   position: relative;
 }
-.weekly-calendar__popover-item:last-child { border-bottom: none; }
-.weekly-calendar__popover-item:hover { background: #f8fafc; }
+.weekly-calendar__popover-item:last-child {
+  border-bottom: none;
+}
+.weekly-calendar__popover-item:hover {
+  background: #f8fafc;
+}
 
 .weekly-calendar__popover-time {
   font-size: 12px;
@@ -380,7 +457,10 @@
   padding-right: 12px;
   margin-right: 4px;
 }
-.weekly-calendar__popover-card-preview { flex: 1; padding-left: 0; }
+.weekly-calendar__popover-card-preview {
+  flex: 1;
+  padding-left: 0;
+}
 
 /* Пустое состояние */
 .weekly-calendar__empty {

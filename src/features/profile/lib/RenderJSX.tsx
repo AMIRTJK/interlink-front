@@ -44,6 +44,8 @@ export const RenderJSX = ({
                 onCancel={() => setIsSettingsOpen(false)}
                 footer={null}
                 width={300}
+                closable={true}
+                maskClosable={true}
             >
                 <div className="flex items-center justify-between py-2">
                     <span>Включить снег ❄️</span>

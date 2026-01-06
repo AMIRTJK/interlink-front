@@ -13,8 +13,8 @@
 }
 
 .task-details-modal .ant-modal-close {
-  top: 24px;
-  right: 24px;
+  top: 5px;
+  right: 10px;
 }
 
 .task-details__category-badge {

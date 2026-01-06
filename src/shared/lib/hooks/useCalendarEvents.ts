@@ -36,8 +36,9 @@ export const useCalendarEvents = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState("");
 
-  const from = currentDate.startOf("month").format("YYYY-MM-DD");
-  const to = currentDate.endOf("month").format("YYYY-MM-DD");
+  const gridStart = currentDate.startOf("month").startOf("isoWeek");
+  const from = gridStart.format("YYYY-MM-DD");
+  const to = gridStart.add(42, "day").format("YYYY-MM-DD");
 
   const fetchEvents = useCallback(async () => {
     setIsLoading(true);

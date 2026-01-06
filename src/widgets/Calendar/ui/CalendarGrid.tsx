@@ -1,5 +1,5 @@
-import { Popover, Button, Empty } from "antd";
-import { CloseOutlined, HistoryOutlined, InboxOutlined } from "@ant-design/icons";
+import { Popover, Button } from "antd";
+import { CloseOutlined, HistoryOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import type { Task } from "@features/tasks";
@@ -38,6 +38,7 @@ export const CalendarGrid = ({
     });
   };
   console.log("TASK: ", tasks);
+  
   const getCurrentTimePosition = () => {
     const now = dayjs();
     const hours = now.hour();
@@ -46,10 +47,22 @@ export const CalendarGrid = ({
   };
 
   const handleTimeSlotClick = (day: Dayjs, hour: number) => {
+    if (isPast(day)) {
+      return;
+    }
+    
     if (onTimeSlotClick) {
       const time = `${hour.toString().padStart(2, "0")}:00`;
       onTimeSlotClick(day, time);
     }
+  };
+  const isPast = (day: Dayjs) => {
+    return day.isBefore(dayjs(), 'day');
+  };
+
+  // Check if day is weekend (Sat or Sun)
+  const isWeekend = (day: Dayjs) => {
+    return day.day() === 0 || day.day() === 6;
   };
 
   const currentTimePosition = getCurrentTimePosition();
@@ -76,26 +89,15 @@ export const CalendarGrid = ({
         ))}
       </div>
       <div className={`weekly-calendar__days ${viewMode}`}>
-        {tasks.length === 0 ? (
-          <div className="weekly-calendar__empty">
-            <Empty
-              image={
-                <InboxOutlined style={{ fontSize: 64, color: "#ADB8CC" }} />
-              }
-              imageStyle={{ height: 64 }}
-              description={
-                <span className="weekly-calendar__empty-text">
-                  Событий не найдено
-                </span>
-              }
-            />
-          </div>
-        ) : (
-          daysToShow.map((day) => (
+          {daysToShow.map((day) => (
             <div
               key={day.format("YYYY-MM-DD")}
               className={`weekly-calendar__day-column ${
                 isToday(day) ? "weekly-calendar__day-column--today" : ""
+              } ${
+                isPast(day) ? "weekly-calendar__day-column--past" : ""
+              } ${
+                isWeekend(day) ? "weekly-calendar__day-column--weekend" : ""
               }`}
             >
               <div className="weekly-calendar__day-header">
@@ -232,8 +234,7 @@ export const CalendarGrid = ({
                 })()}
               </div>
             </div>
-          ))
-        )}
+          ))}
       </div>
     </div>
   );

@@ -16,6 +16,13 @@ interface CalendarHeaderProps {
   onToday: () => void;
   search?: string;
   onSearch?: (value: string) => void;
+  // Month pagination
+  onMonthPagePrev?: () => void;
+  onMonthPageNext?: () => void;
+  canGoMonthPagePrev?: boolean;
+  canGoMonthPageNext?: boolean;
+  monthPageOffset?: number;
+  totalMonthPages?: number;
 }
 
 /**
@@ -33,6 +40,12 @@ export const CalendarHeader = ({
   onToday,
   search = "",
   onSearch,
+  onMonthPagePrev,
+  onMonthPageNext,
+  canGoMonthPagePrev,
+  canGoMonthPageNext,
+  monthPageOffset,
+  totalMonthPages,
 }: CalendarHeaderProps) => {
   const [localSearch, setLocalSearch] = useState(search);
 
@@ -72,6 +85,38 @@ export const CalendarHeader = ({
             icon={<img className="h-7 w-7" src={RightArrow}></img>}
           />
         </div>
+        {viewMode === 'month' && onMonthPagePrev && onMonthPageNext && (
+          <div className="weekly-calendar__nav" style={{ marginLeft: '16px' }}>
+            <ButtonAntd
+              onClick={onMonthPagePrev}
+              disabled={!canGoMonthPagePrev}
+              className="border-2! border-[#F5F6F7]!"
+              type="default"
+              shape="circle"
+              style={{ width: 40, height: 40, padding: 0 }}
+              icon={<img className="h-7 w-7" src={LeftArrow}></img>}
+            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '100px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase' }}>
+                Дни:
+              </span>
+              <p className="weekly-calendar__date-range" style={{ minWidth: '50px', margin: 0 }}>
+                {monthPageOffset !== undefined && totalMonthPages !== undefined
+                  ? `${monthPageOffset + 1} / ${totalMonthPages}`
+                  : ''}
+              </p>
+            </div>
+            <ButtonAntd
+              onClick={onMonthPageNext}
+              disabled={!canGoMonthPageNext}
+              className="border-2! border-[#F5F6F7]!"
+              type="default"
+              shape="circle"
+              style={{ width: 40, height: 40, padding: 0 }}
+              icon={<img className="h-7 w-7" src={RightArrow}></img>}
+            />
+          </div>
+        )}
       </div>
 
       <div className="weekly-calendar__header-right">
