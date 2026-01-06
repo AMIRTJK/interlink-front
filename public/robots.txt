@@ -1,6 +1,20 @@
+# Роботы для проекта Интерлинк (ЭДО)
 User-agent: *
-Allow: /
-Disallow: /private/
-Disallow: /admin/
 
-Sitemap: https://yourdomain.com/sitemap.xml
+# Разрешаем индексацию только входной страницы
+Allow: /
+Allow: /auth/login
+
+# Запрещаем индексацию всех приватных модулей и личных данных
+Disallow: /profile/
+Disallow: /modules/
+Disallow: /api/
+Disallow: /config/
+
+# Запрещаем индексацию технических файлов
+Disallow: /*?
+Disallow: /static/
+Disallow: /assets/
+
+# Указываем на карту сайта (замените на реальный домен при деплое)
+Sitemap: https://interlink.tj/sitemap.xml
