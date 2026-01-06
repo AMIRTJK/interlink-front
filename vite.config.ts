@@ -1,12 +1,18 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
+import compression from "vite-plugin-compression";
+
 import path from "path";
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    compression({
+      algorithm: "gzip",
+      ext: ".gz",
+    }),
   ],
 
   resolve: {
@@ -21,16 +27,22 @@ export default defineConfig({
   },
 
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // ядро react
-          react: ["react", "react-dom", "react-router-dom"],
-
-          // весь Ant Design отдельно
-          antd: ["antd"],
-        },
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+      format: {
+        comments: false,
       },
     },
+    rollupOptions: {
+      output: {
+        // Убираем агрессивный manualChunks, оставляем стандартное разбиение Vite
+        manualChunks: undefined,
+      },
+    },
+    chunkSizeWarningLimit: 2000,
   },
 });

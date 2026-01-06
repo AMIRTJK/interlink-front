@@ -269,7 +269,7 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
 
             if (type === "prev") {
               return (
-                <div className={`${btnClassName} ${activeStyles}`}>
+                <div className={`${btnClassName} ${activeStyles}`} role="button" aria-label="Предыдущая страница">
                   <svg
                     width="16"
                     height="16"
@@ -279,6 +279,8 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    role="img"
+                    aria-label="Стрелка влево"
                   >
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
@@ -290,7 +292,7 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
 
             if (type === "next") {
               return (
-                <div className={`${btnClassName} ${activeStyles}`}>
+                <div className={`${btnClassName} ${activeStyles}`} role="button" aria-label="Следующая страница">
                   <span className="text-sm font-medium">Дальше</span>
                   <svg
                     width="16"
@@ -301,6 +303,8 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    role="img"
+                    aria-label="Стрелка вправо"
                   >
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                     <polyline points="12 5 19 12 12 19"></polyline>

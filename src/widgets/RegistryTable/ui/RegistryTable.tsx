@@ -65,12 +65,14 @@ export const RegistryTable = <T extends Record<string, unknown>>({
       >
         <Button
           onClick={handleCreate}
+          ariaLabel="Добавить новое письмо"
           type="default"
           text={createButtonText}
           withIcon={true}
           loading={isLoading || isPending}
           disabled={isLoading || isPending}
           icon={AddIcon}
+          iconAlt="Иконка плюс"
           className={`${" h-9! px-8.5!  text-[#0037AF]! border-[#0037AF]! rounded-lg! transition-all! hover:opacity-75!"}`}
         />
       </div>
