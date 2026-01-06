@@ -92,7 +92,6 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
     try {
       await updateTaskStatus({ id: taskId, status: newStatus });
     } catch (error) {
-       console.log(error);
        const revertedTasks = [...localTasks]; 
        revertedTasks[taskIndex] = { ...revertedTasks[taskIndex], status: oldStatus };
        setLocalTasks(revertedTasks);

@@ -37,8 +37,6 @@ export const CalendarGrid = ({
       return task.date === targetDate;
     });
   };
-  console.log("TASK: ", tasks);
-  
   const getCurrentTimePosition = () => {
     const now = dayjs();
     const hours = now.hour();

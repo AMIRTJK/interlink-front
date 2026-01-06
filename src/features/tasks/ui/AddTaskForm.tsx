@@ -102,7 +102,6 @@ export const AddTaskForm = ({
         participants: values.assignees || [],
       };
 
-      console.log("Event payload:", payload);
       addTaskMutate(payload);
     } else {
       const payload: ICreateTaskPayload = {
@@ -111,8 +110,6 @@ export const AddTaskForm = ({
         status: values.status || "pending",
         assignees: values.assignees || [],
       };
-
-      console.log("Task values:", payload);
       addTaskMutate(payload);
       if (onSuccess) {
         onSuccess(payload);

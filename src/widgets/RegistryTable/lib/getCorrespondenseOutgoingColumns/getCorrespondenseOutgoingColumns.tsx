@@ -136,9 +136,7 @@ export const useCorrespondenseOutgoingColumns = (): TableColumnsType => {
             label: "В папку",
             icon: <img src={folderIcon} className="w-5 h-5" />,
             onClick: () => {
-              // TODO: Open modal to select folder, then call mutation with folder_id
               console.log("Move to folder", record);
-              // moveToFolder({ id: record.id, folder_id: selectedFolderId });
             },
           },
           {
