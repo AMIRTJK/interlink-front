@@ -214,8 +214,6 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     []
   ).map(formatDatesInObject);
 
-  // console.log(tableData, "===========");
-
   return (
     <div
       className={

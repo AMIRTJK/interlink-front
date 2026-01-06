@@ -37,7 +37,7 @@ export const Tasks = () => {
         width={376}
         centered
         maskClosable={true}
-        closable={false}
+        closable={true}
       >
         <AddTaskForm
           currentTaskStatus={taskStatus}

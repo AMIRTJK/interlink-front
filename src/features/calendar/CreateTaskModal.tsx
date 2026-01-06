@@ -31,7 +31,7 @@ export const CreateTaskModal = ({
       centered
       className="task-details-modal"
       maskClosable={true}
-      closable={false}
+      closable={true}
     >
       <div className="task-details">
         <AddTaskForm

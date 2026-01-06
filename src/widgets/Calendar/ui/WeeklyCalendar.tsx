@@ -39,6 +39,12 @@ export const WeeklyCalendar = ({
     goToNext,
     formatDateRange,
     isToday,
+    goToMonthPagePrev,
+    goToMonthPageNext,
+    canGoMonthPagePrev,
+    canGoMonthPageNext,
+    monthPageOffset,
+    totalMonthPages,
   } = useCalendarView({ currentDate, onDateChange });
 
   // Функцию возврата к текущей дате
@@ -53,10 +59,16 @@ export const WeeklyCalendar = ({
         setViewMode={setViewMode}
         onPrev={goToPrev}
         onNext={goToNext}
-        dateRange={formatDateRange()}
+        dateRange={formatDateRange()} 
         onToday={handleGoToToday} 
         search={search}
         onSearch={onSearch}
+        onMonthPagePrev={goToMonthPagePrev}
+        onMonthPageNext={goToMonthPageNext}
+        canGoMonthPagePrev={canGoMonthPagePrev}
+        canGoMonthPageNext={canGoMonthPageNext}
+        monthPageOffset={monthPageOffset}
+        totalMonthPages={totalMonthPages}
       />
       <CalendarGrid
         daysToShow={daysToShow}

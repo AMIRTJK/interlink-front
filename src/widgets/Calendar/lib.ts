@@ -20,7 +20,6 @@ export interface ClusterLayout {
 
 export type CalendarItem = EventLayout | ClusterLayout;
 
-const MINUTES_IN_DAY = 24 * 60;
 const PIXELS_PER_MINUTE = 1.2;
 
 const getMinutes = (timeStr: string): number => {
@@ -33,8 +32,8 @@ export const calculateDayLayout = (tasks: Task[]): CalendarItem[] => {
 
   const preparedEvents = tasks.map(task => {
     const start = getMinutes(task.time);
-    const end = start + 60; // Фиксированная длительность 1 час
-    if (end > MINUTES_IN_DAY) { /* handle day overflow if needed */ }
+    const end = start + 60; 
+    
     return {
       task,
       start,
@@ -53,12 +52,12 @@ export const calculateDayLayout = (tasks: Task[]): CalendarItem[] => {
     if (cluster.length === 0) return;
 
     if (cluster.length <= 2) {
-      cluster.forEach(event => {
+      cluster?.forEach(event => {
         items.push({
           type: 'single',
           event: event.task,
-          top: event.start * PIXELS_PER_MINUTE,
-          height: event.duration * PIXELS_PER_MINUTE,
+          top: event?.start * PIXELS_PER_MINUTE,
+          height: event?.duration * PIXELS_PER_MINUTE,
           left: 0,
           width: 100
         });
