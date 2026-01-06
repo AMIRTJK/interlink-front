@@ -1,10 +1,11 @@
-import { Card } from "antd";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { IAnalyticsActivity } from "../model/types";
-
+import { lazy } from "react";
 interface IProps {
   data: IAnalyticsActivity[];
 }
+
+const Card=lazy(() => import("antd/es/card").then((m) => ({ default: m.default })));
 
 export const ActivityChart = ({ data }: IProps) => {
   return (
