@@ -9,7 +9,7 @@ export const useRegistryColumns = (type: string): TableColumnsType<any> => {
   const outgoingColumns = useCorrespondenseOutgoingColumns();
   const archivedColumns = useCorrespondenseIncomingColumns();
   const pinnedColumns = useCorrespondenseIncomingColumns();
-  const trashedColumns = useCorrespondenseIncomingColumns();
+  const trashedColumns = useCorrespondenseIncomingColumns(type);
 
   switch (type) {
     case "incoming":
