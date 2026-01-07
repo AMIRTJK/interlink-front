@@ -48,6 +48,24 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 
   const showTabs = !!extraParams?.kind;
 
+  const expandedRowRender = (record: any) => {
+    return (
+      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 m-2">
+        <h4 className="font-bold mb-2">Детали записи #{record.id}</h4>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <span className="text-gray-500">Отправитель:</span>{" "}
+            {record.sender_name}
+          </div>
+          <div>
+            <span className="text-gray-500">Тема:</span> {record.subject}
+          </div>
+          {/* Можно добавить компонент с историей или табами */}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-white flex flex-col gap-2 w-full h-full rounded-2xl overflow-hidden">
       <nav>
@@ -94,6 +112,9 @@ export const RegistryTable = <T extends Record<string, unknown>>({
           scroll={{}}
           showSizeChanger={false}
           customPagination={true}
+          expandable={{
+            expandedRowRender: expandedRowRender,
+          }}
         />
       </div>
     </div>
