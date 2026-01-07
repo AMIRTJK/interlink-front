@@ -1,5 +1,5 @@
 import "./style.css";
-import { Form, Table, TableColumnsType } from "antd";
+import { Form, Table, TableColumnsType, TableProps } from "antd";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import {
   FiltersContainer,
@@ -38,6 +38,7 @@ interface IProps<RecordType, ResponseType> {
   scroll?: { x?: number | string | true; y?: number | string };
   showSizeChanger?: boolean;
   customPagination?: boolean;
+  expandable?: TableProps<RecordType>["expandable"];
 }
 
 export function UniversalTable<RecordType = any, ResponseType = any>(
@@ -57,6 +58,7 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     actionButton,
     autoFilter = true,
     customPagination,
+    expandable,
   } = props;
 
   const { params: searchParams, setParams } = useDynamicSearchParams();
@@ -66,8 +68,7 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
   const getItemsFromResponse =
     props.getItemsFromResponse ??
     ((response: any) => response?.data?.items ?? []);
-    // ((response: any) => response?.data?.data ?? []);
-
+  // ((response: any) => response?.data?.data ?? []);
 
   const [activeFilters, setActiveFilters] = useState<Record<string, any>>({});
 
@@ -242,6 +243,7 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
         dataSource={tableData}
         columns={columnsWithNumbers}
         rowKey={"id"}
+        expandable={expandable}
         rowClassName={props.rowClassName}
         rowSelection={rowSelection}
         pagination={{
@@ -269,7 +271,11 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
 
             if (type === "prev") {
               return (
-                <div className={`${btnClassName} ${activeStyles}`} role="button" aria-label="Предыдущая страница">
+                <div
+                  className={`${btnClassName} ${activeStyles}`}
+                  role="button"
+                  aria-label="Предыдущая страница"
+                >
                   <svg
                     width="16"
                     height="16"
@@ -292,7 +298,11 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
 
             if (type === "next") {
               return (
-                <div className={`${btnClassName} ${activeStyles}`} role="button" aria-label="Следующая страница">
+                <div
+                  className={`${btnClassName} ${activeStyles}`}
+                  role="button"
+                  aria-label="Следующая страница"
+                >
                   <span className="text-sm font-medium">Дальше</span>
                   <svg
                     width="16"
