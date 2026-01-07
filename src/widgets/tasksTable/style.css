@@ -223,13 +223,13 @@ body:not(.no-animations) .task-card-task.dragging {
 
 .filter-item .ant-picker{
   padding:13px 8px;
-  min-width: 305px;
-  max-width: 306px;
+  min-width: 345px;
+  max-width: 346px;
 }
 
 .filter-item .ant-select-outlined{
-  min-width: 305px;
-  max-width: 306px;
+  min-width: 345px;
+  max-width: 346px;
   padding:13px 8px;
 
 }

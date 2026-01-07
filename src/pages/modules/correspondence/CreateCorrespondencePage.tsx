@@ -6,6 +6,8 @@ import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 import { useNavigate } from "react-router";
 import { Button, Form } from "antd";
+import { useState } from "react";
+import { If } from "@shared/ui";
 
 export const CreateCorrespondencePage = ({
   type,
@@ -33,6 +35,7 @@ export const CreateCorrespondencePage = ({
     createLetterMutate(values);
   };
 
+  const [isLetterExecutionVisible, setIsLetterExecutionVisible] = useState(false);
   return (
     <div className="p-6 bg-white rounded-lg">
       <Button
@@ -46,8 +49,10 @@ export const CreateCorrespondencePage = ({
       <Form form={form} onFinish={onSubmit} layout="vertical">
         <div className="flex flex-col gap-8 p-6 items-center">
           <DetailsOfLetter isAllowed={isAllowed} createLetterIsPending={createLetterIsPending} mode="create" form={form} /> 
-          <LetterExecution />
-          <ResolutionOfLetter />
+          <ResolutionOfLetter setIsLetterExecutionVisible={setIsLetterExecutionVisible} />
+          <If is={isLetterExecutionVisible}>
+            <LetterExecution />
+          </If>
         </div>
       </Form>
     </div>
