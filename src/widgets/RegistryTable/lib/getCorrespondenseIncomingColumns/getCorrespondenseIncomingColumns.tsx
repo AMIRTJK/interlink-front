@@ -1,5 +1,5 @@
 import "./style.css";
-import { MoreOutlined } from "@ant-design/icons";
+import { MoreOutlined, RollbackOutlined } from "@ant-design/icons";
 import {
   Button,
   Dropdown,
@@ -17,7 +17,9 @@ import trashIcon from "../../../../assets/icons/trash-icon.svg";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 
-export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
+export const useCorrespondenseIncomingColumns = (
+  type?: string
+): TableColumnsType => {
   // Archive mutation
   const { mutate: archiveCorrespondence } = useMutationQuery<{
     id: number;
@@ -33,8 +35,15 @@ export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
       "correspondence.delete",
     ],
     messages: {
-      success: "Письмо успешно архивировано",
-      error: "Ошибка архивирования письма",
+      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+    },
+  });
+
+  const { mutate: restoreCorrespondence } = useMutationQuery<{ id: number }>({
+    url: (data) =>
+      ApiRoutes.RESTORE_CORRESPONDENCE.replace(":id", String(data.id)), // Проверьте наличие роута в ApiRoutes
+    method: "POST",
+    messages: {
       invalidate: [ApiRoutes.GET_CORRESPONDENCES],
     },
   });
@@ -47,8 +56,6 @@ export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
     url: (data) => ApiRoutes.PIN_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "PATCH",
     messages: {
-      success: "Письмо успешно закреплено",
-      error: "Ошибка закрепления письма",
       invalidate: [ApiRoutes.GET_CORRESPONDENCES],
     },
   });
@@ -64,8 +71,6 @@ export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
     preload: true,
     preloadConditional: ["correspondence.update"],
     messages: {
-      success: "Письмо перемещено в папку",
-      error: "Ошибка перемещения письма",
       invalidate: [ApiRoutes.GET_CORRESPONDENCES],
     },
   });
@@ -76,8 +81,6 @@ export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
       ApiRoutes.DELETE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "DELETE",
     messages: {
-      success: "Письмо успешно удалено",
-      error: "Ошибка удаления письма",
       invalidate: [ApiRoutes.GET_CORRESPONDENCES],
     },
   });
@@ -133,6 +136,8 @@ export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
       width: 40,
       fixed: "right",
       render: (record) => {
+        const isTrashed = type === "trashed";
+
         const items: MenuProps["items"] = [
           {
             key: "archive",
@@ -166,15 +171,20 @@ export const useCorrespondenseIncomingColumns = (): TableColumnsType => {
           {
             type: "divider",
           },
-          {
-            key: "delete",
-            label: "Удалить",
-            danger: true,
-            icon: <img src={trashIcon} className="w-5 h-5" />,
-            onClick: () => {
-              deleteCorrespondence({ id: record.id });
-            },
-          },
+          isTrashed
+            ? {
+                key: "restore",
+                label: "Восстановить",
+                icon: <RollbackOutlined className="text-[#0037AF]!" />,
+                onClick: () => restoreCorrespondence({ id: record.id }),
+              }
+            : {
+                key: "delete",
+                label: "Удалить",
+                danger: true,
+                icon: <img src={trashIcon} className="w-5 h-5" />,
+                onClick: () => deleteCorrespondence({ id: record.id }),
+              },
         ];
 
         return (
