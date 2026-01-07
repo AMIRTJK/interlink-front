@@ -1,6 +1,4 @@
-import {
-  MoreOutlined,
-} from "@ant-design/icons";
+import { MoreOutlined } from "@ant-design/icons";
 import {
   Button,
   Dropdown,
@@ -20,46 +18,70 @@ import { useMutationQuery } from "@shared/lib";
 
 export const useCorrespondenseOutgoingColumns = (): TableColumnsType => {
   // Archive mutation
-  const { mutate: archiveCorrespondence } = useMutationQuery<{ id: number; is_archived: boolean }>({
-    url: (data) => ApiRoutes.ARCHIVE_CORRESPONDENCE.replace(':id', String(data.id)),
+  const { mutate: archiveCorrespondence } = useMutationQuery<{
+    id: number;
+    is_archived: boolean;
+  }>({
+    url: (data) =>
+      ApiRoutes.ARCHIVE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "PATCH",
     messages: {
       success: "Письмо успешно архивировано",
       error: "Ошибка архивирования письма",
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: [
+        ApiRoutes.GET_CORRESPONDENCES,
+        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+      ],
     },
   });
 
   // Pin mutation
-  const { mutate: pinCorrespondence } = useMutationQuery<{ id: number; is_pinned: boolean }>({
-    url: (data) => ApiRoutes.PIN_CORRESPONDENCE.replace(':id', String(data.id)),
+  const { mutate: pinCorrespondence } = useMutationQuery<{
+    id: number;
+    is_pinned: boolean;
+  }>({
+    url: (data) => ApiRoutes.PIN_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "PATCH",
     messages: {
       success: "Письмо успешно закреплено",
       error: "Ошибка закрепления письма",
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: [
+        ApiRoutes.GET_CORRESPONDENCES,
+        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+      ],
     },
   });
 
   // Move to folder mutation
-  const { mutate: _moveToFolder } = useMutationQuery<{ id: number; folder_id: number }>({
-    url: (data) => ApiRoutes.FOLDER_CORRESPONDENCE.replace(':id', String(data.id)),
+  const { mutate: _moveToFolder } = useMutationQuery<{
+    id: number;
+    folder_id: number;
+  }>({
+    url: (data) =>
+      ApiRoutes.FOLDER_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "PATCH",
     messages: {
       success: "Письмо перемещено в папку",
       error: "Ошибка перемещения письма",
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: [
+        ApiRoutes.GET_CORRESPONDENCES,
+        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+      ],
     },
   });
 
   // Delete mutation
   const { mutate: deleteCorrespondence } = useMutationQuery<{ id: number }>({
-    url: (data) => ApiRoutes.DELETE_CORRESPONDENCE.replace(':id', String(data.id)),
+    url: (data) =>
+      ApiRoutes.DELETE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "DELETE",
     messages: {
       success: "Письмо успешно удалено",
       error: "Ошибка удаления письма",
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: [
+        ApiRoutes.GET_CORRESPONDENCES,
+        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+      ],
     },
   });
 
@@ -176,6 +198,3 @@ export const useCorrespondenseOutgoingColumns = (): TableColumnsType => {
     },
   ];
 };
-
-// Backward compatibility export
-

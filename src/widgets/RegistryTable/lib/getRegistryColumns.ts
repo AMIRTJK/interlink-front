@@ -7,8 +7,8 @@ export type RegistryType = "correspondence" | "crm" | "primary-documents";
 export const useRegistryColumns = (type: string): TableColumnsType<any> => {
   const incomingColumns = useCorrespondenseIncomingColumns();
   const outgoingColumns = useCorrespondenseOutgoingColumns();
-  const archivedColumns = useCorrespondenseIncomingColumns();
-  const pinnedColumns = useCorrespondenseIncomingColumns();
+  const archivedColumns = useCorrespondenseIncomingColumns(type);
+  const pinnedColumns = useCorrespondenseIncomingColumns(type);
   const trashedColumns = useCorrespondenseIncomingColumns(type);
 
   switch (type) {

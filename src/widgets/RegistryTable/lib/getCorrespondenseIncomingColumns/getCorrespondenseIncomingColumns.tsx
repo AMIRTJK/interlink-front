@@ -35,7 +35,10 @@ export const useCorrespondenseIncomingColumns = (
       "correspondence.delete",
     ],
     messages: {
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: [
+        ApiRoutes.GET_CORRESPONDENCES,
+        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+      ],
     },
   });
 
@@ -44,7 +47,10 @@ export const useCorrespondenseIncomingColumns = (
       ApiRoutes.RESTORE_CORRESPONDENCE.replace(":id", String(data.id)), // Проверьте наличие роута в ApiRoutes
     method: "POST",
     messages: {
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: [
+        ApiRoutes.GET_CORRESPONDENCES,
+        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+      ],
     },
   });
 
@@ -56,7 +62,10 @@ export const useCorrespondenseIncomingColumns = (
     url: (data) => ApiRoutes.PIN_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "PATCH",
     messages: {
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: [
+        ApiRoutes.GET_CORRESPONDENCES,
+        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+      ],
     },
   });
 
@@ -71,7 +80,10 @@ export const useCorrespondenseIncomingColumns = (
     preload: true,
     preloadConditional: ["correspondence.update"],
     messages: {
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: [
+        ApiRoutes.GET_CORRESPONDENCES,
+        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+      ],
     },
   });
 
@@ -81,7 +93,10 @@ export const useCorrespondenseIncomingColumns = (
       ApiRoutes.DELETE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "DELETE",
     messages: {
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: [
+        ApiRoutes.GET_CORRESPONDENCES,
+        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+      ],
     },
   });
 
@@ -137,24 +152,30 @@ export const useCorrespondenseIncomingColumns = (
       fixed: "right",
       render: (record) => {
         const isTrashed = type === "trashed";
+        const isArchived = type === "archived";
+        const isPinned = type === "pinned";
 
         const items: MenuProps["items"] = [
-          {
-            key: "archive",
-            label: "В архив",
-            icon: <img src={archiveIcon} className="w-5 h-5" />,
-            onClick: () => {
-              archiveCorrespondence({ id: record.id, is_archived: true });
-            },
-          },
-          {
-            key: "pin",
-            label: "Закрепить",
-            icon: <img src={pinnedIcon} className="w-5 h-5" />,
-            onClick: () => {
-              pinCorrespondence({ id: record.id, is_pinned: true });
-            },
-          },
+          isArchived
+            ? null
+            : {
+                key: "archive",
+                label: "В архив",
+                icon: <img src={archiveIcon} className="w-5 h-5" />,
+                onClick: () => {
+                  archiveCorrespondence({ id: record.id, is_archived: true });
+                },
+              },
+          isPinned
+            ? null
+            : {
+                key: "pin",
+                label: "Закрепить",
+                icon: <img src={pinnedIcon} className="w-5 h-5" />,
+                onClick: () => {
+                  pinCorrespondence({ id: record.id, is_pinned: true });
+                },
+              },
           {
             key: "folder",
             label: "В папку",
