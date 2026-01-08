@@ -118,16 +118,23 @@
   overflow-y: auto;
 }
 
+.docView__right-title {
+  font-weight: 600;
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+
 .docView__right-files {
   display: flex;
   gap: 12px;
   margin-bottom: 12px;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 /* Карточки из макета */
 .file-card {
-  border: 1px solid #adc6ff;
+  border: 1px solid #0037af;
   border-radius: 8px;
   background: #f0f5ff;
   display: flex;
@@ -135,7 +142,6 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  padding: 24px 57px 23px 57px;
   transition: all 0.2s;
 }
 
@@ -157,7 +163,7 @@
 }
 
 .file-name {
-  font-size: 10px;
+  font-size: 14px;
   color: #262626;
 }
 

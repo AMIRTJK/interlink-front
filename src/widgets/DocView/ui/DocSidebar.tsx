@@ -33,7 +33,6 @@ const ICON_MAP: Record<string, string> = {
   return (
     <div className="docView__right">
       <h4 className="docView__right-title">Вложения</h4>
-
       <div className="docView__right-files">
         {files?.map((file) => (
           <div

@@ -24,6 +24,8 @@ export const DocView: React.FC<IDocView> = ({
     { id: 1, name: "Договор.pdf", url: "/files/contract.pdf", type: "pdf" },
     { id: 2, name: "Смета.xls", url: "/files/budget.xls", type: "xls" },
     { id: 3, name: "Инструкция.doc", url: "/files/manual.doc", type: "doc" },
+    { id: 3, name: "Инструкция.doc", url: "/files/manual.doc", type: "doc" },
+    { id: 3, name: "Инструкция.doc", url: "/files/manual.doc", type: "doc" },
   ];
 
   const [isSetExecutor,setIsSetExecutor] = useState<boolean>(false)
