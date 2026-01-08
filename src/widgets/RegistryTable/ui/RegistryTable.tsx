@@ -1,4 +1,4 @@
-import { Button, DocView, If, UniversalTable } from "@shared/ui";
+import { Button, If, UniversalTable } from "@shared/ui";
 import { useMemo, useState } from "react";
 import AddIcon from "../../../assets/icons/add-icon.svg";
 import { useLocation, useNavigate } from "react-router";
@@ -7,6 +7,7 @@ import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { StatusTabs } from "@features/StatusTabs";
 import { Modal } from "antd";
+import { DocView } from "@widgets/DocView";
 // import { FilterRegistry } from "@features/FilterRegistry";
 
 interface RegistryTableProps<T extends Record<string, unknown>> {
