@@ -7,4 +7,9 @@ export interface ThemeContextType {
   setIsAnimEnabled: (enabled: boolean) => void;
   isSnowEnabled: boolean;
   setIsSnowEnabled: (enabled: boolean) => void;
+  isRainEnabled: boolean;
+  setIsRainEnabled: (enabled: boolean) => void;
+  isAutumnEnabled: boolean;
+  setIsAutumnEnabled: (enabled: boolean) => void;
 }
+

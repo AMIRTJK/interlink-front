@@ -15,7 +15,16 @@ export const Profile = () => {
   const [userData, setUserData] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
   const activeTab = useCurrentTab();
-  const { isAnimEnabled, setIsAnimEnabled, isSnowEnabled, setIsSnowEnabled } = useTheme();
+  const {
+    isAnimEnabled,
+    setIsAnimEnabled,
+    isSnowEnabled,
+    setIsSnowEnabled,
+    isRainEnabled,
+    setIsRainEnabled,
+    isAutumnEnabled,
+    setIsAutumnEnabled,
+  } = useTheme();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -59,9 +68,13 @@ export const Profile = () => {
     <RenderJSX
       loading={loading}
       isSnowEnabled={isSnowEnabled}
+      setIsSnowEnabled={setIsSnowEnabled}
+      isRainEnabled={isRainEnabled}
+      setIsRainEnabled={setIsRainEnabled}
+      isAutumnEnabled={isAutumnEnabled}
+      setIsAutumnEnabled={setIsAutumnEnabled}
       isSettingsOpen={isSettingsOpen}
       setIsSettingsOpen={setIsSettingsOpen}
-      setIsSnowEnabled={setIsSnowEnabled}
       isAnimEnabled={isAnimEnabled}
       setIsAnimEnabled={setIsAnimEnabled}
       userData={userData}
@@ -69,4 +82,5 @@ export const Profile = () => {
       onMenuClick={handleMenuClick}
     />
   );
+
 };

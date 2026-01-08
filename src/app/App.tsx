@@ -1,13 +1,17 @@
 import { AppRouter } from "./routes/AppRouter";
-import { SnowOverlay } from "@shared/ui";
+import { SnowOverlay, RainOverlay, AutumnOverlay } from "@shared/ui";
+
 import { useTheme } from "@shared/lib";
 
 export const App = () => {
-  const { isSnowEnabled } = useTheme();
+  const { isSnowEnabled, isRainEnabled, isAutumnEnabled } = useTheme();
   return (
     <>
       <SnowOverlay enabled={isSnowEnabled} />
+      <RainOverlay enabled={isRainEnabled} />
+      <AutumnOverlay enabled={isAutumnEnabled} />
       <AppRouter />
     </>
   );
 };
+

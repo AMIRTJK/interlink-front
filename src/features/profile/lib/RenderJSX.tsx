@@ -10,9 +10,13 @@ import { profileRightNav } from "../model";
 interface IProps {
   loading: boolean;
   isSnowEnabled: boolean;
+  setIsSnowEnabled: (v: boolean) => void;
+  isRainEnabled: boolean;
+  setIsRainEnabled: (v: boolean) => void;
+  isAutumnEnabled: boolean;
+  setIsAutumnEnabled: (v: boolean) => void;
   isSettingsOpen: boolean;
   setIsSettingsOpen: (v: boolean) => void;
-  setIsSnowEnabled: (v: boolean) => void;
   isAnimEnabled: boolean;
   setIsAnimEnabled: (v: boolean) => void;
   userData: IUser | null;
@@ -23,9 +27,13 @@ interface IProps {
 export const RenderJSX = ({
   loading,
   isSnowEnabled,
+  setIsSnowEnabled,
+  isRainEnabled,
+  setIsRainEnabled,
+  isAutumnEnabled,
+  setIsAutumnEnabled,
   isSettingsOpen,
   setIsSettingsOpen,
-  setIsSnowEnabled,
   isAnimEnabled,
   setIsAnimEnabled,
   userData,
@@ -51,6 +59,14 @@ export const RenderJSX = ({
           <span>Включить снег ❄️</span>
           <Switch checked={isSnowEnabled} onChange={setIsSnowEnabled} />
         </div>
+        <div className="flex items-center justify-between py-2">
+          <span>Включить дождь 🌧️</span>
+          <Switch checked={isRainEnabled} onChange={setIsRainEnabled} />
+        </div>
+        <div className="flex items-center justify-between py-2">
+          <span>Листопад 🍂</span>
+          <Switch checked={isAutumnEnabled} onChange={setIsAutumnEnabled} />
+        </div>
         {/* Класс для скрывания no-animations функционал:
           "hidden-no-animations-switcher"
         */}
@@ -60,6 +76,7 @@ export const RenderJSX = ({
           <Switch checked={isAnimEnabled} onChange={setIsAnimEnabled} />
         </div>
       </Modal>
+
 
       <aside className="w-full lg:w-[28%]">
         <div className="bg-white p-6 rounded-xl shadow">
