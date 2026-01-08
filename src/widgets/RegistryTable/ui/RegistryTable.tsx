@@ -1,3 +1,4 @@
+import "./style.css";
 import { Button, If, UniversalTable } from "@shared/ui";
 import { useMemo, useState } from "react";
 import AddIcon from "../../../assets/icons/add-icon.svg";
@@ -9,6 +10,7 @@ import { StatusTabs } from "@features/StatusTabs";
 import { Modal } from "antd";
 import { DocView } from "@widgets/DocView";
 // import { FilterRegistry } from "@features/FilterRegistry";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface RegistryTableProps<T extends Record<string, unknown>> {
   data?: T[];
@@ -49,15 +51,21 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const tabCounts = useMemo(() => countersData?.data || {}, [countersData]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBookOpen, setIsBookOpen] = useState(false);
 
   const handleShowDoc = () => {
     setIsModalOpen(true);
+    setTimeout(() => {
+      setIsBookOpen(true);
+    }, 500);
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    setIsBookOpen(false);
+    setTimeout(() => {
+      setIsModalOpen(false);
+    }, 1500);
   };
-
   const showTabs = !!extraParams?.kind;
 
   const expandedRowRender = (record: any) => {
@@ -137,14 +145,55 @@ export const RegistryTable = <T extends Record<string, unknown>>({
         open={isModalOpen}
         onCancel={handleCloseModal}
         footer={null}
-        className="modal-task"
-        title={null}
-        width={1000}
+        width={600}
         centered
-        maskClosable={true}
-        closable={true}
+        closable={false}
+        transitionName=""
+        maskTransitionName="ant-fade"
+        destroyOnClose={true}
+        styles={{
+          body: { padding: 0 },
+          mask: {
+            backdropFilter: "blur(4px)",
+            WebkitBackdropFilter: "blur(4px)",
+          },
+        }}
+        className="modal-doc"
+        modalRender={(modal) => (
+          <AnimatePresence mode="wait">
+            {isModalOpen && (
+              <motion.div
+                key="modal-motion"
+                initial={{ opacity: 0, scale: 0.9, y: 40 }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  y: 0,
+                  x: isBookOpen ? 300 : 0,
+                }}
+                exit={{
+                  opacity: 0,
+                  scale: 0.9,
+                  y: 40,
+                  transition: { duration: 0.5 },
+                }}
+                transition={{
+                  duration: 0.6,
+                  ease: [0.16, 1, 0.3, 1],
+                  x: { duration: 1.2, ease: [0.645, 0.045, 0.355, 1] },
+                }}
+                style={{ pointerEvents: "auto" }}
+              >
+                {modal}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       >
-        <DocView docName="Документ" />
+        <div className={`card ${isBookOpen ? "is-open" : ""}`}>
+          <div className="cover"></div>
+          <div className="content"></div>
+        </div>
       </Modal>
     </>
   );
