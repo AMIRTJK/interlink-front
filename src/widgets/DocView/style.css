@@ -140,7 +140,7 @@
 }
 
 .file-card.active {
-  border: 2px solid #1d39c4;
+  /* border: 2px solid #1d39c4; */
   background: #e6f7ff;
 }
 

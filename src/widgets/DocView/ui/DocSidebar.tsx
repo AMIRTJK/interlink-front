@@ -71,7 +71,7 @@ export const DocSidebar: React.FC<ISidebar> = ({
         </Button>
         <Button className="action-btn">Ознакомлен</Button>
         <Button type="primary" className="action-btn">
-          Создать визу
+           Визировать
         </Button>
       </div>
     </div>
