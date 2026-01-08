@@ -7,4 +7,3 @@ export * from "./Tabs/ui";
 export * from "./SnowOverlay";
 export * from "./UniversalTable";
 export * from "./FiltersContainer";
-export * from './DocView'
