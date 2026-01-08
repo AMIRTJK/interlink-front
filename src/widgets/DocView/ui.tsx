@@ -89,9 +89,9 @@ export const DocView: React.FC<IDocView> = ({
             activeFileId={activeFile?.id}
             onFileSelect={setActiveFile}
           />
-              <If is={isSetExecutor}>
-        <LetterExecution/>
-      </If>
+          <If is={isSetExecutor}>
+            <LetterExecution/>
+          </If>
         </div>
         
       </div>
