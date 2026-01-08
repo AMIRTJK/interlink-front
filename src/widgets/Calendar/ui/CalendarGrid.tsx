@@ -3,7 +3,7 @@ import { CloseOutlined, HistoryOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import type { Task } from "@features/tasks";
-import { TaskCard } from "@features/calendar";
+import { TaskCard } from "@features/Calendar";
 import { ViewMode } from "../model";
 import { calculateDayLayout } from "../lib";
 

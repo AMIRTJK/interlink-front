@@ -1,7 +1,7 @@
 // import { useEffect, useState } from "react";
 // import { SPACE_VIDEOS } from "@shared/api/authVideo";
 
-import { Login } from "@features/login";
+import { Login } from "@features/Login";
 import "./Auth.css";
 
 export const Auth = () => {

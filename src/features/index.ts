@@ -1,5 +1,5 @@
-export * from "./login";
-export * from "./profile";
+export * from "./Login";
+export * from "./Profile";
 export * from "./theme";
 export * from "./tasks";
 export * from "./StatusTabs";

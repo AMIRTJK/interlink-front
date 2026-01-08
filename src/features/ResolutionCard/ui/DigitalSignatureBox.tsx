@@ -1,6 +1,6 @@
 import React from 'react';
 import { IDigitalSignature } from '../model';
-import { Image } from 'antd';
+// import { Image } from 'antd';
 
 export const DigitalSignatureBox: React.FC<IDigitalSignature> = ({
     certId = "ОТСУТСТВУЕТ",
@@ -13,13 +13,13 @@ export const DigitalSignatureBox: React.FC<IDigitalSignature> = ({
             <div className="letter-execution__signature-header">
                 <div className="letter-execution__flag"></div>
                 <div className="letter-execution__signature-title">Имзои электронии рақамӣ</div>
-                <Image 
+                {/* <Image 
                 width={50}
                 height={50}
                     src="https://tse2.mm.bing.net/th/id/OIP.kAEwO6AL1baonTM-XiqMvwHaGL?rs=1&pid=ImgDetMain&o=7&rm=3" 
                     alt="Small Emblem" 
                     className="letter-execution__signature-emblem"
-                />
+                /> */}
             </div>
             <div className="letter-execution__signature-subtitle">
                 Маълумоти имзои электронии рақамӣ

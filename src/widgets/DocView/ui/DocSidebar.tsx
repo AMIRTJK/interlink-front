@@ -8,29 +8,33 @@ import wordIcon from "../../../assets/icons/word.svg";
 // Импорт иконок действий
 import downLoadAll from "../../../assets/icons/download.svg";
 import downLoadLetter from "../../../assets/icons/letter-download.svg";
-interface ISidebar {
+interface IProps {
   files: IDocFile[];
   activeFileId?: number;
   onFileSelect: (file: IDocFile) => void;
+  setIsSetExecutor:React.Dispatch<React.SetStateAction<boolean>>
 }
 
-// Карта иконок
+
+export const DocSidebar: React.FC<IProps> = ({
+  files,
+  activeFileId,
+  onFileSelect,
+  setIsSetExecutor
+}) => {
+  // Карта иконок
 const ICON_MAP: Record<string, string> = {
   pdf: pdfIcon,
   xls: excelIcon,
   doc: wordIcon,
 };
 
-export const DocSidebar: React.FC<ISidebar> = ({
-  files,
-  activeFileId,
-  onFileSelect,
-}) => {
+
   return (
     <div className="docView__right">
       <h4 className="docView__right-title">Вложения</h4>
       <div className="docView__right-files">
-        {files.map((file) => (
+        {files?.map((file) => (
           <div
             key={file.id}
             className={`file-card ${activeFileId === file.id ? "active" : ""}`}
@@ -69,8 +73,8 @@ export const DocSidebar: React.FC<ISidebar> = ({
           Отказать
         </Button>
         <Button className="action-btn">Ознакомлен</Button>
-        <Button type="primary" className="action-btn">
-          Создать визу
+        <Button onClick={()=>setIsSetExecutor(true)} type="primary" className="action-btn">
+           Визировать
         </Button>
       </div>
     </div>
