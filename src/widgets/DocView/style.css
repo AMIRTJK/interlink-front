@@ -9,17 +9,12 @@
   width: 100%;
   transform: perspective(5000px) rotateZ(0);
   transform-style: preserve-3d;
-  box-shadow:
-    10px 0 20px rgba(0, 0, 0, 0.2),
-    inset 300px 0 50px rgba(0, 0, 0, 0.2);
   transition: all 1s ease-in-out;
-  border-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
 .card.is-open {
-  box-shadow:
-    10px 0 20px rgba(0, 0, 0, 0.2),
-    inset 10px 0 50px rgba(0, 0, 0, 0.2);
 }
 
 .cover {
@@ -33,11 +28,11 @@
   transform-origin: left;
   transform-style: preserve-3d;
   transition: all 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
-  border-radius: 10px;
   z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
+  left: 1px;
 }
 
 .cover p {
@@ -62,7 +57,6 @@
   inset: 0;
   background-image: url("../../assets/images/cover.png");
   background-size: cover;
-  border-radius: 10px;
 
   /* Важно: заставляем картинку исчезнуть, когда она поворачивается спиной */
   backface-visibility: hidden;
@@ -77,21 +71,19 @@
   position: absolute;
   inset: 0;
   background-color: white; /* Цвет внутренней стороны обложки */
-  border-radius: 10px;
+  /* border-radius: 10px; */
   /* Разворачиваем этот слой изначально "спиной" к пользователю */
   transform: rotateY(180deg);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   z-index: 1;
   /* Добавим легкую тень для реализма внутренней страницы */
-  box-shadow: inset 20px 0 30px rgba(0, 0, 0, 0.05);
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
 }
 
 .card.is-open .cover {
   transform: rotateY(-170deg);
-  box-shadow:
-    10px 0 20px rgba(0, 0, 0, 0.2),
-    inset 10px 0 50px rgba(0, 0, 0, 0.1);
 }
 
 .content {
@@ -111,7 +103,6 @@
 .docView__document-preview {
   flex: 1;
   background: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin: 20px;
   display: flex;
   justify-content: center;
