@@ -7,6 +7,8 @@ import { DocSidebar } from "./ui/DocSidebar";
 import { IDocFile, IDocView } from "./model";
 import { Modal } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
+import { If } from "@shared/ui";
+import { LetterExecution } from "@features/ResolutionCard";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
@@ -24,6 +26,7 @@ export const DocView: React.FC<IDocView> = ({
     { id: 3, name: "Инструкция.doc", url: "/files/manual.doc", type: "doc" },
   ];
 
+  const [isSetExecutor,setIsSetExecutor] = useState<boolean>(false)
   return (
     <Modal
       open={open}
@@ -79,13 +82,20 @@ export const DocView: React.FC<IDocView> = ({
           <DocPreview fileUrl={mockFiles[0].url} docName={mockFiles[0].name} />
         </div>
         <div className="content">
+          
           <DocSidebar
+            setIsSetExecutor={setIsSetExecutor}
             files={mockFiles}
             activeFileId={activeFile?.id}
             onFileSelect={setActiveFile}
           />
+              <If is={isSetExecutor}>
+        <LetterExecution/>
+      </If>
         </div>
+        
       </div>
+  
     </Modal>
   );
 };
