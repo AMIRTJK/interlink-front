@@ -1,85 +1,169 @@
-.docView__content {
-    display: flex;
-    /* height: 100vh; */
-    background-color: #fff;
+.modal-doc .ant-modal-container {
+  padding: 0;
 }
 
-/* Левая часть */
-.docView__left {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background-color: #f0f5ff;
-    padding: 20px;
-    overflow: hidden;
+.card {
+  background-color: #fff;
+  position: relative;
+  height: 800px;
+  width: 100%;
+  transform: perspective(5000px) rotateZ(0);
+  transform-style: preserve-3d;
+  box-shadow:
+    10px 0 20px rgba(0, 0, 0, 0.2),
+    inset 300px 0 50px rgba(0, 0, 0, 0.2);
+  transition: all 1s ease-in-out;
+  border-radius: 10px;
+}
+
+.card.is-open {
+  box-shadow:
+    10px 0 20px rgba(0, 0, 0, 0.2),
+    inset 10px 0 50px rgba(0, 0, 0, 0.2);
+}
+
+.cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  background-size: cover;
+  transform-origin: left;
+  transform-style: preserve-3d;
+  transition: all 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  border-radius: 10px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cover p {
+  position: relative;
+  z-index: 5; /* Выше чем ::after */
+
+  /* Разворачиваем текст изначально "спиной", 
+     чтобы при открытии книги он стал лицом */
+  transform: rotateY(180deg);
+
+  /* Скрываем его, когда книга закрыта (чтобы не просвечивал сквозь обложку) */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  font-size: 24px;
+  color: #333;
+}
+
+.cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("../../assets/images/cover.png");
+  background-size: cover;
+  border-radius: 10px;
+
+  /* Важно: заставляем картинку исчезнуть, когда она поворачивается спиной */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  /* Картинка должна быть над белым фоном .cover */
+  z-index: 1;
+}
+
+.cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: white; /* Цвет внутренней стороны обложки */
+  border-radius: 10px;
+  /* Разворачиваем этот слой изначально "спиной" к пользователю */
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  z-index: 1;
+  /* Добавим легкую тень для реализма внутренней страницы */
+  box-shadow: inset 20px 0 30px rgba(0, 0, 0, 0.05);
+}
+
+.card.is-open .cover {
+  transform: rotateY(-170deg);
+  box-shadow:
+    10px 0 20px rgba(0, 0, 0, 0.2),
+    inset 10px 0 50px rgba(0, 0, 0, 0.1);
+}
+
+.content {
+  padding: 20px;
+  height: 100%;
+  width: 100%;
+}
+
+.modal-doc {
+  pointer-events: none;
+}
+.modal-doc .ant-modal-content {
+  pointer-events: auto;
+  background: transparent !important;
 }
 
 .docView__document-preview {
-    flex: 1;
-    background: white;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    margin: 20px;
-    display: flex;
-    justify-content: center;
-    overflow-y: auto;
-}
-
-/* Правая часть */
-.docView__right {
-    width: 450px;
-    display: flex;
-    flex-direction: column;
-    padding: 24px;
-    border-left: 1px solid #e8e8e8;
+  flex: 1;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
 }
 
 .docView__right-files {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
 }
 
 /* Карточки из макета */
 .file-card {
-    border: 1px solid #adc6ff;
-    border-radius: 8px;
-    background: #f0f5ff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    padding: 24px 57px 23px 57px;
-    transition: all 0.2s;
+  border: 1px solid #adc6ff;
+  border-radius: 8px;
+  background: #f0f5ff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 24px 57px 23px 57px;
+  transition: all 0.2s;
 }
 
 .file-card.active {
-    border: 2px solid #1d39c4;
-    background: #e6f7ff;
+  border: 2px solid #1d39c4;
+  background: #e6f7ff;
 }
 
 .file-icon {
-    width: 40px;
-    height: 40px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    margin-bottom: 6px;
+  width: 40px;
+  height: 40px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-bottom: 6px;
 }
 
-
 .file-name {
-    font-size: 10px;
-    color: #262626;
+  font-size: 10px;
+  color: #262626;
 }
 
 .docView__right-actions {
-    margin-top: auto; 
-    display: flex;
-    gap: 12px;
+  margin-top: auto;
+  display: flex;
+  gap: 12px;
 }
 
 .action-btn {
-    flex: 1;
-    height: 40px;
+  flex: 1;
+  height: 40px;
 }

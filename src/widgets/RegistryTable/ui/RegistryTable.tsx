@@ -7,10 +7,7 @@ import { useRegistryColumns, getRegistryFilters } from "../lib";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { StatusTabs } from "@features/StatusTabs";
-import { Modal } from "antd";
 import { DocView } from "@widgets/DocView";
-// import { FilterRegistry } from "@features/FilterRegistry";
-import { AnimatePresence, motion } from "framer-motion";
 
 interface RegistryTableProps<T extends Record<string, unknown>> {
   data?: T[];
@@ -66,6 +63,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
       setIsModalOpen(false);
     }, 1500);
   };
+
   const showTabs = !!extraParams?.kind;
 
   const expandedRowRender = (record: any) => {
@@ -100,7 +98,6 @@ export const RegistryTable = <T extends Record<string, unknown>>({
             />
           </If>
         </nav>
-        {/* Panel Control */}
         <div
           className={`px-2 ${isAllowed && createButtonText ? "block!" : "hidden!"}`}
         >
@@ -117,9 +114,6 @@ export const RegistryTable = <T extends Record<string, unknown>>({
             className={`${" h-9! px-8.5!  text-[#0037AF]! border-[#0037AF]! rounded-lg! transition-all! hover:opacity-75!"}`}
           />
         </div>
-        {/* <div className="px-2">
-        <FilterRegistry />
-      </div> */}
         <div className={`${isAllowed ? "block! px-2!" : "hidden!"}`}>
           <UniversalTable
             url={ApiRoutes.GET_CORRESPONDENCES}
@@ -141,60 +135,11 @@ export const RegistryTable = <T extends Record<string, unknown>>({
           />
         </div>
       </div>
-      <Modal
+      <DocView
         open={isModalOpen}
-        onCancel={handleCloseModal}
-        footer={null}
-        width={600}
-        centered
-        closable={false}
-        transitionName=""
-        maskTransitionName="ant-fade"
-        destroyOnClose={true}
-        styles={{
-          body: { padding: 0 },
-          mask: {
-            backdropFilter: "blur(4px)",
-            WebkitBackdropFilter: "blur(4px)",
-          },
-        }}
-        className="modal-doc"
-        modalRender={(modal) => (
-          <AnimatePresence mode="wait">
-            {isModalOpen && (
-              <motion.div
-                key="modal-motion"
-                initial={{ opacity: 0, scale: 0.9, y: 40 }}
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                  y: 0,
-                  x: isBookOpen ? 300 : 0,
-                }}
-                exit={{
-                  opacity: 0,
-                  scale: 0.9,
-                  y: 40,
-                  transition: { duration: 0.5 },
-                }}
-                transition={{
-                  duration: 0.6,
-                  ease: [0.16, 1, 0.3, 1],
-                  x: { duration: 1.2, ease: [0.645, 0.045, 0.355, 1] },
-                }}
-                style={{ pointerEvents: "auto" }}
-              >
-                {modal}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        )}
-      >
-        <div className={`card ${isBookOpen ? "is-open" : ""}`}>
-          <div className="cover"></div>
-          <div className="content"></div>
-        </div>
-      </Modal>
+        bookOpen={isBookOpen}
+        onClose={handleCloseModal}
+      />
     </>
   );
 };
