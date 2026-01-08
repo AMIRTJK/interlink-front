@@ -5,9 +5,17 @@ import "./style.css";
 import { DocPreview } from "./ui/DocPreview";
 import { DocSidebar } from "./ui/DocSidebar";
 import { IDocFile, IDocView } from "./model";
+import { Modal } from "antd";
+import { AnimatePresence, motion } from "framer-motion";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
-export const DocView: React.FC<IDocView> = ({ files = [] }) => {
+
+export const DocView: React.FC<IDocView> = ({
+  files = [],
+  open,
+  bookOpen,
+  onClose,
+}) => {
   const [activeFile, setActiveFile] = useState(files[0] || null);
 
   const mockFiles: IDocFile[] = [
@@ -15,17 +23,69 @@ export const DocView: React.FC<IDocView> = ({ files = [] }) => {
     { id: 2, name: "Смета.xls", url: "/files/budget.xls", type: "xls" },
     { id: 3, name: "Инструкция.doc", url: "/files/manual.doc", type: "doc" },
   ];
-  return (
-    <div className="docView__content">
-      {/* Левая часть */}
-      <DocPreview fileUrl={mockFiles[0].url} docName={mockFiles[0].name} />
 
-      {/* Правая часть */}
-      <DocSidebar
-        files={mockFiles}
-        activeFileId={activeFile?.id}
-        onFileSelect={setActiveFile}
-      />
-    </div>
+  return (
+    <Modal
+      open={open}
+      onCancel={onClose}
+      footer={null}
+      width={600}
+      centered
+      closable={false}
+      transitionName=""
+      maskTransitionName="ant-fade"
+      destroyOnClose={true}
+      styles={{
+        body: { padding: 0 },
+        mask: {
+          backdropFilter: "blur(4px)",
+          WebkitBackdropFilter: "blur(4px)",
+        },
+      }}
+      className="modal-doc"
+      modalRender={(modal) => (
+        <AnimatePresence mode="wait">
+          {open && (
+            <motion.div
+              key="modal-motion"
+              initial={{ opacity: 0, scale: 0.9, y: 40 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                x: bookOpen ? 300 : 0,
+              }}
+              exit={{
+                opacity: 0,
+                scale: 0.9,
+                y: 40,
+                transition: { duration: 0.5 },
+              }}
+              transition={{
+                duration: 0.6,
+                ease: [0.16, 1, 0.3, 1],
+                x: { duration: 1.2, ease: [0.645, 0.045, 0.355, 1] },
+              }}
+              style={{ pointerEvents: "auto" }}
+            >
+              {modal}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
+    >
+      <div className={`card ${bookOpen ? "is-open" : ""}`}>
+        <div className="cover">
+          <DocPreview fileUrl={mockFiles[0].url} docName={mockFiles[0].name} />
+        </div>
+        <div className="content">
+          <DocSidebar
+            files={mockFiles}
+            activeFileId={activeFile?.id}
+            onFileSelect={setActiveFile}
+          />
+        </div>
+      </div>
+    </Modal>
   );
 };
