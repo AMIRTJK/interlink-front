@@ -31,7 +31,7 @@ export const DocSidebar: React.FC<ISidebar> = ({
       <h4 className="docView__right-title">Вложения</h4>
 
       <div className="docView__right-files">
-        {files.map((file) => (
+        {files?.map((file) => (
           <div
             key={file.id}
             className={`file-card ${activeFileId === file.id ? "active" : ""}`}
