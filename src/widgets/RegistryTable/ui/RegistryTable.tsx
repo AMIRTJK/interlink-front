@@ -1,4 +1,4 @@
-import { Button, If, UniversalTable } from "@shared/ui";
+import { Button, DocView, If, UniversalTable } from "@shared/ui";
 import { useMemo, useState } from "react";
 import AddIcon from "../../../assets/icons/add-icon.svg";
 import { useLocation, useNavigate } from "react-router";
@@ -6,6 +6,7 @@ import { useRegistryColumns, getRegistryFilters } from "../lib";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { StatusTabs } from "@features/StatusTabs";
+import { Modal } from "antd";
 // import { FilterRegistry } from "@features/FilterRegistry";
 
 interface RegistryTableProps<T extends Record<string, unknown>> {
@@ -46,6 +47,16 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 
   const tabCounts = useMemo(() => countersData?.data || {}, [countersData]);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleShowDoc = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   const showTabs = !!extraParams?.kind;
 
   const expandedRowRender = (record: any) => {
@@ -60,63 +71,80 @@ export const RegistryTable = <T extends Record<string, unknown>>({
           <div>
             <span className="text-gray-500">Тема:</span> {record.subject}
           </div>
-          {/* Можно добавить компонент с историей или табами */}
+          <div>
+            <Button type="default" text="Визировать" onClick={handleShowDoc} />
+          </div>
         </div>
       </div>
     );
   };
 
   return (
-    <div className="bg-white flex flex-col gap-2 w-full h-full rounded-2xl overflow-hidden">
-      <nav>
-        <If is={showTabs}>
-          <StatusTabs
-            counts={tabCounts}
-            activeTab={currentTab}
-            onTabChange={setCurrentTab}
+    <>
+      <div className="bg-white flex flex-col gap-2 w-full h-full rounded-2xl overflow-hidden">
+        <nav>
+          <If is={showTabs}>
+            <StatusTabs
+              counts={tabCounts}
+              activeTab={currentTab}
+              onTabChange={setCurrentTab}
+            />
+          </If>
+        </nav>
+        {/* Panel Control */}
+        <div
+          className={`px-2 ${isAllowed && createButtonText ? "block!" : "hidden!"}`}
+        >
+          <Button
+            onClick={handleCreate}
+            ariaLabel="Добавить новое письмо"
+            type="default"
+            text={createButtonText}
+            withIcon={true}
+            loading={isLoading || isPending}
+            disabled={isLoading || isPending}
+            icon={AddIcon}
+            iconAlt="Иконка плюс"
+            className={`${" h-9! px-8.5!  text-[#0037AF]! border-[#0037AF]! rounded-lg! transition-all! hover:opacity-75!"}`}
           />
-        </If>
-      </nav>
-      {/* Panel Control */}
-      <div
-        className={`px-2 ${isAllowed && createButtonText ? "block!" : "hidden!"}`}
-      >
-        <Button
-          onClick={handleCreate}
-          ariaLabel="Добавить новое письмо"
-          type="default"
-          text={createButtonText}
-          withIcon={true}
-          loading={isLoading || isPending}
-          disabled={isLoading || isPending}
-          icon={AddIcon}
-          iconAlt="Иконка плюс"
-          className={`${" h-9! px-8.5!  text-[#0037AF]! border-[#0037AF]! rounded-lg! transition-all! hover:opacity-75!"}`}
-        />
-      </div>
-      {/* <div className="px-2">
+        </div>
+        {/* <div className="px-2">
         <FilterRegistry />
       </div> */}
-      <div className={`${isAllowed ? "block! px-2!" : "hidden!"}`}>
-        <UniversalTable
-          url={ApiRoutes.GET_CORRESPONDENCES}
-          filters={filters}
-          columns={columns}
-          className="[&_.ant-table-cell]:rounded-none! [&_.ant-pagination]:px-4!"
-          direction={1}
-          autoFilter={true}
-          queryParams={{
-            ...extraParams,
-            ...(showTabs ? { status: currentTab } : {}),
-          }}
-          scroll={{}}
-          showSizeChanger={false}
-          customPagination={true}
-          expandable={{
-            expandedRowRender: expandedRowRender,
-          }}
-        />
+        <div className={`${isAllowed ? "block! px-2!" : "hidden!"}`}>
+          <UniversalTable
+            url={ApiRoutes.GET_CORRESPONDENCES}
+            filters={filters}
+            columns={columns}
+            className="[&_.ant-table-cell]:rounded-none! [&_.ant-pagination]:px-4!"
+            direction={1}
+            autoFilter={true}
+            queryParams={{
+              ...extraParams,
+              ...(showTabs ? { status: currentTab } : {}),
+            }}
+            scroll={{}}
+            showSizeChanger={false}
+            customPagination={true}
+            expandable={{
+              expandedRowRender: expandedRowRender,
+            }}
+          />
+        </div>
       </div>
-    </div>
+      <Modal
+        open={isModalOpen}
+        onCancel={handleCloseModal}
+        footer={null}
+        className="modal-task"
+        title={null}
+        width={1000}
+        centered
+        maskClosable={true}
+        closable={true}
+      >
+        <DocView docName="Документ" />
+      </Modal>
+    </>
   );
 };
