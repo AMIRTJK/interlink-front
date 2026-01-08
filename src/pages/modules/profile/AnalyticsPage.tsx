@@ -3,7 +3,7 @@ import { Loader } from "@shared/ui";
 import "./styles.css";
 
 const Analytics = lazy(() =>
-  import("@features/analytics").then((m) => ({ default: m.Analytics }))
+  import("@features/Analytics").then((m) => ({ default: m.Analytics }))
 );
 
 export const AnalyticsPage = () => {

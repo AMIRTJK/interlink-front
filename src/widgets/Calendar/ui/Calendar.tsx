@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { WeeklyCalendar } from "./WeeklyCalendar";
-import { TaskDetailsModal, CreateTaskModal } from "@features/calendar";
+import { TaskDetailsModal, CreateTaskModal } from "@features/Calendar";
 import { useCalendarEvents } from "@shared/lib/hooks/useCalendarEvents";
 import type { Task } from "@features/tasks";
 import dayjs, { Dayjs } from "dayjs";

@@ -1,5 +1,5 @@
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import { DetailsOfLetter } from "@features/detailsOfLetter/DetailsOfLetter";
+import { DetailsOfLetter } from "@features/DetailsOfLetter/DetailsOfLetter";
 import { LetterExecution } from "@features/ResolutionCard";
 import { ResolutionOfLetter } from "@features/ResolutionOfLetter";
 import { ApiRoutes } from "@shared/api";
