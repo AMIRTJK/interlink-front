@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 import { IUser } from "@entities/login";
 // import userAvatar from "../../assets/images/user-avatar.jpg";
 import userAvatar from '../../../assets/images/user-avatar.jpg'
-import { Tabs, Loader } from "@shared/ui";
+import { Tabs, Loader, DocView } from "@shared/ui";
 import { profileRightNav } from "../model";
 
 interface IProps {
@@ -108,6 +108,7 @@ export const RenderJSX = ({
                 <div className="profile__content-card">
                     <Outlet />
                 </div>
+                <DocView docName="Документ" />
             </aside>
         </div>
     );

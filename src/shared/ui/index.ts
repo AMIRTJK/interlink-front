@@ -3,7 +3,8 @@ export * from "./PopConfirm";
 export * from "./Loader";
 export * from "./form-fields";
 export * from "./If";
-export * from "./Tabs/Tabs";
+export * from "./Tabs/ui";
 export * from "./SnowOverlay";
 export * from "./UniversalTable";
 export * from "./FiltersContainer";
+export * from './DocView'
