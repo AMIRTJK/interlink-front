@@ -139,8 +139,12 @@
   transition: all 0.2s;
 }
 
+.file-card:hover {
+  border: 1px solid #1d39c4;
+}
+
 .file-card.active {
-  /* border: 2px solid #1d39c4; */
+  border: 1px solid #1d39c4;
   background: #e6f7ff;
 }
 
