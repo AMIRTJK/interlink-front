@@ -117,10 +117,10 @@
 
 .docView__right-files {
   display: flex;
-  gap: 12px;
+  gap: 8px;
+  width: 100%;
   margin-bottom: 12px;
   flex-wrap: wrap;
-  width: 100%;
 }
 
 /* Карточки из макета */
@@ -130,10 +130,14 @@
   background: #f0f5ff;
   display: flex;
   flex-direction: column;
+  flex: 1;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
+  padding: 23.12px 0;
+  flex: 0 0 calc(33.33% - 6px);
+  min-width: 80px;
 }
 
 .file-card:hover {
