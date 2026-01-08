@@ -28,7 +28,7 @@ export const DocView: React.FC<IDocView> = ({
     { id: 3, name: "Инструкция.doc", url: "/files/manual.doc", type: "doc" },
   ];
 
-  const [isSetExecutor,setIsSetExecutor] = useState<boolean>(false)
+  const [isSetExecutor, setIsSetExecutor] = useState<boolean>(false);
   return (
     <Modal
       open={open}
@@ -36,7 +36,7 @@ export const DocView: React.FC<IDocView> = ({
       footer={null}
       width={600}
       centered
-      closable={false}
+      closable={true}
       transitionName=""
       maskTransitionName="ant-fade"
       destroyOnClose={true}
@@ -84,7 +84,6 @@ export const DocView: React.FC<IDocView> = ({
           <DocPreview fileUrl={mockFiles[0].url} docName={mockFiles[0].name} />
         </div>
         <div className="content">
-          
           <DocSidebar
             setIsSetExecutor={setIsSetExecutor}
             files={mockFiles}
@@ -92,12 +91,10 @@ export const DocView: React.FC<IDocView> = ({
             onFileSelect={setActiveFile}
           />
           <If is={isSetExecutor}>
-            <LetterExecution/>
+            <LetterExecution />
           </If>
         </div>
-        
       </div>
-  
     </Modal>
   );
 };
