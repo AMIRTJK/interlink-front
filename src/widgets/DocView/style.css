@@ -15,6 +15,7 @@
 }
 
 .card.is-open {
+  border-radius: 0;
 }
 
 .cover {
