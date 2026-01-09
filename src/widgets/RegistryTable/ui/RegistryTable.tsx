@@ -53,16 +53,26 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const [expandedRowKeys, setExpandedRowKeys] = useState<readonly React.Key[]>(
     []
   );
+  const [isClosable, setIsClosable] = useState(false);
 
   const handleShowDoc = () => {
     setIsModalOpen(true);
+    setIsClosable(false);
+
     setTimeout(() => {
       setIsBookOpen(true);
+      setTimeout(() => {
+        setIsClosable(true);
+      }, 400);
     }, 500);
   };
 
   const handleCloseModal = () => {
     setIsBookOpen(false);
+    setTimeout(() => {
+      setIsClosable(false);
+    }, 800); 
+
     setTimeout(() => {
       setIsModalOpen(false);
     }, 1500);
@@ -203,6 +213,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
         open={isModalOpen}
         bookOpen={isBookOpen}
         onClose={handleCloseModal}
+        closable={isClosable}
       />
     </>
   );

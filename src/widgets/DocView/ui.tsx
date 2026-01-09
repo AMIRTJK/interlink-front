@@ -17,6 +17,7 @@ export const DocView: React.FC<IDocView> = ({
   open,
   bookOpen,
   onClose,
+  closable = false,
 }) => {
   const [activeFile, setActiveFile] = useState(files[0] || null);
 
@@ -36,7 +37,7 @@ export const DocView: React.FC<IDocView> = ({
       footer={null}
       width={600}
       centered
-      closable={true}
+      closable={closable}
       transitionName=""
       maskTransitionName="ant-fade"
       destroyOnClose={true}

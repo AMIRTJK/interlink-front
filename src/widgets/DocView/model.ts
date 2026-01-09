@@ -12,4 +12,5 @@ export interface IDocView {
   onClose: () => void;
   open: boolean;
   bookOpen: boolean;
+  closable?: boolean;
 }
