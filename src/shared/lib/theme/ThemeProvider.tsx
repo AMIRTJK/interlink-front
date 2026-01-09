@@ -19,6 +19,15 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     return localStorage.getItem("snow-enabled") === "true";
   });
 
+  const [isRainEnabled, setIsRainEnabled] = useState(() => {
+    return localStorage.getItem("rain-enabled") === "true";
+  });
+
+  const [isAutumnEnabled, setIsAutumnEnabled] = useState(() => {
+    return localStorage.getItem("autumn-enabled") === "true";
+  });
+
+
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark", "space");
@@ -39,6 +48,15 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("snow-enabled", String(isSnowEnabled));
   }, [isSnowEnabled]);
 
+  useEffect(() => {
+    localStorage.setItem("rain-enabled", String(isRainEnabled));
+  }, [isRainEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem("autumn-enabled", String(isAutumnEnabled));
+  }, [isAutumnEnabled]);
+
+
   return (
     <ThemeContext.Provider value={{
       theme,
@@ -46,7 +64,11 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       isAnimEnabled,
       setIsAnimEnabled,
       isSnowEnabled,
-      setIsSnowEnabled
+      setIsSnowEnabled,
+      isRainEnabled,
+      setIsRainEnabled,
+      isAutumnEnabled,
+      setIsAutumnEnabled
     }}>
       <ConfigProvider theme={{ token: { motion: isAnimEnabled } }}>
         {children}

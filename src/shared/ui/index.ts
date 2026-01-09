@@ -5,5 +5,7 @@ export * from "./form-fields";
 export * from "./If";
 export * from "./Tabs/ui";
 export * from "./SnowOverlay";
+export * from "./RainOverlay/ui";
+export * from "./AutumnOverlay/ui";
 export * from "./UniversalTable";
 export * from "./FiltersContainer";

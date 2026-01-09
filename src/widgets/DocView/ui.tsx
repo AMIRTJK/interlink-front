@@ -85,7 +85,6 @@ export const DocView: React.FC<IDocView> = ({
         </div>
         <div className="content">
           <DocSidebar
-            setIsSetExecutor={setIsSetExecutor}
             files={mockFiles}
             activeFileId={activeFile?.id}
             onFileSelect={setActiveFile}

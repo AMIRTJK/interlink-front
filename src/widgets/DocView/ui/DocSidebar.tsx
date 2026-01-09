@@ -12,7 +12,6 @@ interface IProps {
   files: IDocFile[];
   activeFileId?: number;
   onFileSelect: (file: IDocFile) => void;
-  setIsSetExecutor:React.Dispatch<React.SetStateAction<boolean>>
 }
 
 
@@ -20,7 +19,6 @@ export const DocSidebar: React.FC<IProps> = ({
   files,
   activeFileId,
   onFileSelect,
-  setIsSetExecutor
 }) => {
   // Карта иконок
 const ICON_MAP: Record<string, string> = {
@@ -73,8 +71,8 @@ const ICON_MAP: Record<string, string> = {
           Отказать
         </Button>
         <Button className="action-btn">Ознакомлен</Button>
-        <Button onClick={()=>setIsSetExecutor(true)} type="primary" className="action-btn">
-           Визировать
+        <Button type="primary" className="action-btn">
+           Создать визу
         </Button>
       </div>
     </div>
