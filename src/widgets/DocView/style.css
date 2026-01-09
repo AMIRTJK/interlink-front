@@ -16,6 +16,8 @@
 
 .card.is-open {
   border-radius: 0;
+  border-bottom-right-radius: 10px;
+  border-top-right-radius: 10px;
 }
 
 .cover {
@@ -33,7 +35,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  left: 1px;
+  left: 0;
 }
 
 .cover p {
@@ -88,6 +90,8 @@
 }
 
 .content {
+  position: relative;
+  z-index: 1;
   padding: 20px;
   height: 100%;
   width: 100%;
@@ -99,6 +103,7 @@
 .modal-doc .ant-modal-content {
   pointer-events: auto;
   background: transparent !important;
+  overflow: visible !important;
 }
 
 .docView__document-preview {
