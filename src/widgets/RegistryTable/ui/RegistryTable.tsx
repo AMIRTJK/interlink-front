@@ -50,6 +50,9 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBookOpen, setIsBookOpen] = useState(false);
+  const [expandedRowKeys, setExpandedRowKeys] = useState<readonly React.Key[]>(
+    []
+  );
 
   const handleShowDoc = () => {
     setIsModalOpen(true);
@@ -70,66 +73,69 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const expandedRowRender = (record: any) => {
     return (
       <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 m-2">
-  <div className="flex justify-between items-start gap-6">
-    {/* Левая часть — данные */}
-    <div className="flex-1">
-      <h4 className="font-bold mb-2">Детали записи #{record.id}</h4>
+        <div className="flex justify-between items-start gap-6">
+          {/* Левая часть — данные */}
+          <div className="flex-1">
+            <h4 className="font-bold mb-2">Детали записи #{record.id}</h4>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <span className="text-gray-500 mb-0.5 block">Отправитель:</span>
-          <p>{record.sender_name}</p>
-        </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <span className="text-gray-500 mb-0.5 block">Отправитель:</span>
+                <p>{record.sender_name}</p>
+              </div>
 
-        <div>
-          <span className="text-gray-500 mb-0.5 block">Тема:</span>
-          <p>{record.subject}</p>
-        </div>
+              <div>
+                <span className="text-gray-500 mb-0.5 block">Тема:</span>
+                <p>{record.subject}</p>
+              </div>
 
-        <div>
-          <span className="text-gray-500 mb-0.5 block">Дата:</span>
-          <p>{record.created_at}</p>
-        </div>
+              <div>
+                <span className="text-gray-500 mb-0.5 block">Дата:</span>
+                <p>{record.created_at}</p>
+              </div>
 
-        <div>
-          <span className="text-gray-500 mb-0.5 block">Входящий номер:</span>
-          <p>{record.incomingNumber}</p>
-        </div>
+              <div>
+                <span className="text-gray-500 mb-0.5 block">
+                  Входящий номер:
+                </span>
+                <p>{record.incomingNumber}</p>
+              </div>
 
-        <div>
-          <span className="text-gray-500 mb-0.5 block">Исходящий номер:</span>
-          <p>{record.outgoingNumber}</p>
-        </div>
-        <div>
-          <span className="text-gray-500 mb-0.5 block">Статус:</span>
-          <p>{record.status}</p>
+              <div>
+                <span className="text-gray-500 mb-0.5 block">
+                  Исходящий номер:
+                </span>
+                <p>{record.outgoingNumber}</p>
+              </div>
+              <div>
+                <span className="text-gray-500 mb-0.5 block">Статус:</span>
+                <p>{record.status}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Правая часть — кнопки */}
+          <div className="flex flex-col gap-2">
+            <Button
+              type="default"
+              text="Исполнение"
+              withIcon
+              icon={executionIcon}
+              iconAlt="execution"
+              onClick={handleShowDoc}
+              className="bg-[#0037AF]! text-white!"
+            />
+            <Button
+              type="default"
+              text="Документ"
+              withIcon
+              icon={wordIcon}
+              iconAlt="word"
+              onClick={handleShowDoc}
+            />
+          </div>
         </div>
       </div>
-    </div>
-
-    {/* Правая часть — кнопки */}
-    <div className="flex flex-col gap-2">
-      <Button
-        type="default"
-        text="Исполнение"
-        withIcon
-        icon={executionIcon}
-        iconAlt="execution"
-        onClick={handleShowDoc}
-        className="bg-[#0037AF]! text-white!"
-      />
-       <Button
-        type="default"
-        text="Документ"
-        withIcon
-        icon={wordIcon}
-        iconAlt="word"
-        onClick={handleShowDoc}
-      />
-    </div>
-  </div>
-</div>
-
     );
   };
 
@@ -166,7 +172,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
             url={ApiRoutes.GET_CORRESPONDENCES}
             filters={filters}
             columns={columns}
-            className="[&_.ant-table-cell]:rounded-none! [&_.ant-pagination]:px-4!"
+            className="[&_.ant-table-cell]:rounded-none! [&_.ant-pagination]:px-4! [&_.ant-table-row]:cursor-pointer"
             direction={1}
             autoFilter={true}
             queryParams={{
@@ -178,6 +184,17 @@ export const RegistryTable = <T extends Record<string, unknown>>({
             customPagination={true}
             expandable={{
               expandedRowRender: expandedRowRender,
+              expandRowByClick: true,
+              expandedRowKeys: expandedRowKeys,
+              onExpand: (expanded, record) => {
+                const key = record.id;
+                setExpandedRowKeys(
+                  expanded
+                    ? [...expandedRowKeys, key]
+                    : expandedRowKeys.filter((k) => k !== key)
+                );
+              },
+              showExpandColumn: false,
             }}
           />
         </div>
