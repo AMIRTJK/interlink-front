@@ -9,6 +9,7 @@ import { ApiRoutes } from "@shared/api";
 import { StatusTabs } from "@features/StatusTabs";
 import { DocView } from "@widgets/DocView";
 import wordIcon from "../../../assets/icons/word2.svg";
+import executionIcon from "../../../assets/icons/execution.svg";
 interface RegistryTableProps<T extends Record<string, unknown>> {
   data?: T[];
   isLoading?: boolean;
@@ -69,20 +70,66 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const expandedRowRender = (record: any) => {
     return (
       <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 m-2">
-        <h4 className="font-bold mb-2">Детали записи #{record.id}</h4>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <span className="text-gray-500">Отправитель:</span>{" "}
-            {record.sender_name}
-          </div>
-          <div>
-            <span className="text-gray-500">Тема:</span> {record.subject}
-          </div>
-          <div>
-            <Button type="default" text="Документ" withIcon icon={wordIcon} iconAlt="word" onClick={handleShowDoc} />
-          </div>
+  <div className="flex justify-between items-start gap-6">
+    {/* Левая часть — данные */}
+    <div className="flex-1">
+      <h4 className="font-bold mb-2">Детали записи #{record.id}</h4>
+
+      <div className="grid grid-cols-3 gap-4">
+        <div>
+          <span className="text-gray-500 mb-0.5 block">Отправитель:</span>
+          <p>{record.sender_name}</p>
+        </div>
+
+        <div>
+          <span className="text-gray-500 mb-0.5 block">Тема:</span>
+          <p>{record.subject}</p>
+        </div>
+
+        <div>
+          <span className="text-gray-500 mb-0.5 block">Дата:</span>
+          <p>{record.created_at}</p>
+        </div>
+
+        <div>
+          <span className="text-gray-500 mb-0.5 block">Входящий номер:</span>
+          <p>{record.incomingNumber}</p>
+        </div>
+
+        <div>
+          <span className="text-gray-500 mb-0.5 block">Исходящий номер:</span>
+          <p>{record.outgoingNumber}</p>
+        </div>
+        <div>
+          <span className="text-gray-500 mb-0.5 block">Статус:</span>
+          <p>{record.status}</p>
         </div>
       </div>
+    </div>
+
+    {/* Правая часть — кнопки */}
+    <div className="flex flex-col gap-2">
+      <Button
+        type="default"
+        text="Исполнение"
+        withIcon
+        icon={executionIcon}
+        iconAlt="execution"
+        onClick={handleShowDoc}
+        className="bg-[#0037AF]! text-white!"
+      />
+       <Button
+        type="default"
+        text="Документ"
+        withIcon
+        icon={wordIcon}
+        iconAlt="word"
+        onClick={handleShowDoc}
+      />
+    </div>
+  </div>
+</div>
+
     );
   };
 
