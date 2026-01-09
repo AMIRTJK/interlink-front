@@ -24,6 +24,8 @@ export const Profile = () => {
     setIsRainEnabled,
     isAutumnEnabled,
     setIsAutumnEnabled,
+    isSakuraEnabled,
+    setIsSakuraEnabled,
   } = useTheme();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -71,6 +73,8 @@ export const Profile = () => {
       setIsRainEnabled={setIsRainEnabled}
       isAutumnEnabled={isAutumnEnabled}
       setIsAutumnEnabled={setIsAutumnEnabled}
+      isSakuraEnabled={isSakuraEnabled}
+      setIsSakuraEnabled={setIsSakuraEnabled}
       isSettingsOpen={isSettingsOpen}
       setIsSettingsOpen={setIsSettingsOpen}
       isAnimEnabled={isAnimEnabled}
