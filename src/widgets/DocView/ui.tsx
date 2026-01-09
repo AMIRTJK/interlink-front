@@ -19,8 +19,6 @@ export const DocView: React.FC<IDocView> = ({
   onClose,
   closable = false,
 }) => {
-  const [activeFile, setActiveFile] = useState(files[0] || null);
-
   const mockFiles: IDocFile[] = [
     { id: 1, name: "Договор.pdf", url: "/files/contract.pdf", type: "pdf" },
     { id: 2, name: "Смета.xls", url: "/files/budget.xls", type: "xls" },
@@ -28,6 +26,8 @@ export const DocView: React.FC<IDocView> = ({
     { id: 3, name: "Инструкция.doc", url: "/files/manual.doc", type: "doc" },
     { id: 3, name: "Инструкция.doc", url: "/files/manual.doc", type: "doc" },
   ];
+
+  const [activeFile, setActiveFile] = useState(mockFiles[0]);
 
   const [isSetExecutor, setIsSetExecutor] = useState<boolean>(false);
   return (
