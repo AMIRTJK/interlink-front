@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 
 export const SakuraOverlay: React.FC<WeatherOverlayProps> = ({
   enabled,
-  count = 120,
+  count = 70,
 }) => {
   const petals = useMemo(() => {
     return Array.from({ length: count }).map((_, index) => ({
