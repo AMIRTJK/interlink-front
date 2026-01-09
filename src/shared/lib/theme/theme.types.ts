@@ -11,5 +11,7 @@ export interface ThemeContextType {
   setIsRainEnabled: (enabled: boolean) => void;
   isAutumnEnabled: boolean;
   setIsAutumnEnabled: (enabled: boolean) => void;
+  isSakuraEnabled: boolean;
+  setIsSakuraEnabled: (enabled: boolean) => void;
 }
 
