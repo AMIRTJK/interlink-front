@@ -8,7 +8,7 @@ import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { StatusTabs } from "@features/StatusTabs";
 import { DocView } from "@widgets/DocView";
-
+import wordIcon from "../../../assets/icons/word2.svg";
 interface RegistryTableProps<T extends Record<string, unknown>> {
   data?: T[];
   isLoading?: boolean;
@@ -79,7 +79,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
             <span className="text-gray-500">Тема:</span> {record.subject}
           </div>
           <div>
-            <Button type="default" text="Визировать" onClick={handleShowDoc} />
+            <Button type="default" text="Документ" withIcon icon={wordIcon} iconAlt="word" onClick={handleShowDoc} />
           </div>
         </div>
       </div>
