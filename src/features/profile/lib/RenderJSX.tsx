@@ -14,6 +14,8 @@ interface IProps {
   setIsRainEnabled: (v: boolean) => void;
   isAutumnEnabled: boolean;
   setIsAutumnEnabled: (v: boolean) => void;
+  isSakuraEnabled: boolean;
+  setIsSakuraEnabled: (v: boolean) => void;
   isAnimEnabled: boolean;
   setIsAnimEnabled: (v: boolean) => void;
   isSettingsOpen: boolean;
@@ -31,6 +33,8 @@ export const RenderJSX = ({
   setIsRainEnabled,
   isAutumnEnabled,
   setIsAutumnEnabled,
+  isSakuraEnabled,
+  setIsSakuraEnabled,
   isAnimEnabled,
   setIsAnimEnabled,
   isSettingsOpen,
@@ -53,7 +57,7 @@ export const RenderJSX = ({
         closable
         maskClosable
       >
-        <div className="space-y-2 hidden">
+        <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span>Включить снег ❄️</span>
             <Switch checked={isSnowEnabled} onChange={setIsSnowEnabled} />
@@ -65,6 +69,10 @@ export const RenderJSX = ({
           <div className="flex justify-between items-center">
             <span>Листопад 🍂</span>
             <Switch checked={isAutumnEnabled} onChange={setIsAutumnEnabled} />
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Сакура 🌸</span>
+            <Switch checked={isSakuraEnabled} onChange={setIsSakuraEnabled} />
           </div>
           <div className="flex justify-between items-center">
             <span>Анимации ⚡</span>

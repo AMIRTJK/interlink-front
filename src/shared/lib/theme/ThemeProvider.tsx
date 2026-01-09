@@ -27,6 +27,10 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     return localStorage.getItem("autumn-enabled") === "true";
   });
 
+  const [isSakuraEnabled, setIsSakuraEnabled] = useState(() => {
+    return localStorage.getItem("sakura-enabled") === "true";
+  });
+
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -56,6 +60,10 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("autumn-enabled", String(isAutumnEnabled));
   }, [isAutumnEnabled]);
 
+  useEffect(() => {
+    localStorage.setItem("sakura-enabled", String(isSakuraEnabled));
+  }, [isSakuraEnabled]);
+
 
   return (
     <ThemeContext.Provider value={{
@@ -68,7 +76,9 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       isRainEnabled,
       setIsRainEnabled,
       isAutumnEnabled,
-      setIsAutumnEnabled
+      setIsAutumnEnabled,
+      isSakuraEnabled,
+      setIsSakuraEnabled
     }}>
       <ConfigProvider theme={{ token: { motion: isAnimEnabled } }}>
         {children}
