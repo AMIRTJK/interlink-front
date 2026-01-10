@@ -47,7 +47,7 @@ export const CreateCorrespondencePage = ({
         Создание {type === "incoming" ? "входящего" : "исходящего"} письма
       </h1>
       <Form form={form} onFinish={onSubmit} layout="vertical">
-        <div className="flex flex-col gap-8 p-6 items-center">
+        <div className="flex flex-col gap-8 p-6">
           <DetailsOfLetter isAllowed={isAllowed} createLetterIsPending={createLetterIsPending} mode="create" form={form} /> 
           <ResolutionOfLetter setIsLetterExecutionVisible={setIsLetterExecutionVisible} />
           <If is={isLetterExecutionVisible}>

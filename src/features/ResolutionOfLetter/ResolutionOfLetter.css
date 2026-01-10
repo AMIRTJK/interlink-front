@@ -66,22 +66,28 @@
     border-radius: 10px !important;
     background: transparent;
     padding: 19px 85px;
+    margin-bottom: 32px;
 }
 
 /* Блок загрузки */
 
 .resolution__upload-title {
     font-weight: 600;
-    margin-bottom: 16px;
+    margin-bottom: 17px;
     color: #1a1a1a;
+    font-size: 14px;
 }
 
 .resolution__dragger.ant-upload-drag {
     width: 300px !important;
     background: #fff !important;
     border: none !important;
+    border-radius: 12px !important;
 }
-
+.ant-upload-drag-container{
+    background: #fff !important;
+    text-align: left;
+}
 .resolution__dragger .ant-upload-btn {
     padding: 0 !important;
 }
@@ -93,6 +99,7 @@
     padding: 20px;
     border: 2px dashed #f0f0f0;
     border-radius: 12px;
+    background-color: #fff;
 }
 
 .resolution__dragger-icon {

@@ -1,6 +1,7 @@
 import { Avatar, Button, Form, Input, DatePicker, Select, Upload } from "antd";
 import { CalendarOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
 import userAvatar from '../../../assets/images/user-avatar.jpg';
+import calendarIcon from '../../../assets/icons/calenDar.svg'
 import '../ResolutionOfLetter.css'
 interface IProps {
     resolutionerName: string;
@@ -8,6 +9,7 @@ interface IProps {
 }
 
 export const RenderField: React.FC<IProps> = ({ resolutionerName, setIsLetterExecutionVisible }) => {
+    console.log(setIsLetterExecutionVisible)
     return (
         <div className="resolution">
             <h3 className="resolution__title">Резолюция</h3>
@@ -32,7 +34,7 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName, setIsLetterExe
                             <DatePicker 
                                 placeholder="Срок" 
                                 className="resolution__datepicker" 
-                                suffixIcon={<CalendarOutlined className="resolution__icon"/>}
+                                suffixIcon={<img src={calendarIcon} className="resolution__icon" alt="f"/>}
                             />
                         </Form.Item>
 
@@ -50,8 +52,8 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName, setIsLetterExe
                         </Button>
 
                         <div className="resolution__upload-section">
-                            <p className="resolution__upload-title">Загрузить файлы</p>
                             <Upload.Dragger className="resolution__dragger">
+                                    <p className="resolution__upload-title">Загрузить файлы</p>
                                 <div className="resolution__dragger-content">
                                     <div className="resolution__dragger-icon">
                                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
