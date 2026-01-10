@@ -1,21 +1,74 @@
-import { Button } from "antd";
-
+import { Avatar, Button, Form, Input, DatePicker, Select, Upload } from "antd";
+import { CalendarOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
+import userAvatar from '../../../assets/images/user-avatar.jpg';
+import '../ResolutionOfLetter.css'
 interface IProps {
     resolutionerName: string;
     setIsLetterExecutionVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const RenderField:React.FC<IProps> = ({ resolutionerName, setIsLetterExecutionVisible }) => {
+export const RenderField: React.FC<IProps> = ({ resolutionerName, setIsLetterExecutionVisible }) => {
     return (
-        <div className="bg-white p-8 rounded-2xl min-w-[1360px] max-w-[1361px]">
-            <h3 className="mb-2">{resolutionerName || "Резолюционер"}</h3>
-            <div className="flex gap-2">
-                <Button onClick={() => setIsLetterExecutionVisible(true)}>
-                    Исполнения
-                </Button>
-                <Button>
-                    Подготовить ответ
-                </Button>
+        <div className="resolution">
+            <h3 className="resolution__title">Резолюция</h3>
+            
+            <div className="resolution__content">
+                <div className="resolution__author">
+                    <Avatar src={userAvatar} size={44} />
+                    <div className="resolution__author-info">
+                        <p className="resolution__author-name">{resolutionerName}</p>
+                        <p className="resolution__author-date">{new Date().toLocaleDateString()}</p>
+                    </div>
+                </div>
+
+                <div className="resolution__form-container">
+                    <Form layout="vertical" className="resolution__form">
+                        
+                        <Form.Item className="resolution__form-item">
+                            <Input placeholder="Виза" className="resolution__input" />
+                        </Form.Item>
+
+                        <Form.Item className="resolution__form-item">
+                            <DatePicker 
+                                placeholder="Срок" 
+                                className="resolution__datepicker" 
+                                suffixIcon={<CalendarOutlined className="resolution__icon"/>}
+                            />
+                        </Form.Item>
+
+                        <Form.Item className="resolution__form-item">
+                            <Select 
+                                placeholder="Статус" 
+                                className="resolution__select py-[16px]! px-[13px]!"
+                                suffixIcon={<DownOutlined className="resolution__icon"/>}
+                                options={[{ value: 'test', label: 'test' }]}
+                            />
+                        </Form.Item>
+
+                        <Button className="resolution__button-executor">
+                            Выбрать исполнителя
+                        </Button>
+
+                        <div className="resolution__upload-section">
+                            <p className="resolution__upload-title">Загрузить файлы</p>
+                            <Upload.Dragger className="resolution__dragger">
+                                <div className="resolution__dragger-content">
+                                    <div className="resolution__dragger-icon">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                                        </svg>
+                                    </div>
+                                    <p className="resolution__dragger-text">
+                                        Просмотрите и выберите файлы, которые хотите загрузить с вашего компьютера.
+                                    </p>
+                                    <div className="resolution__dragger-plus">
+                                        <PlusOutlined style={{ color: 'white', fontSize: '16px' }} />
+                                    </div>
+                                </div>
+                            </Upload.Dragger>
+                        </div>
+                    </Form>
+                </div>
             </div>
         </div>
     );
