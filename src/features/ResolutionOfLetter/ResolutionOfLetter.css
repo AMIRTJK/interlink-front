@@ -1,17 +1,15 @@
 /* Основной контейнер */
-.resolution {
-    background-color: #ffffff;
+.resolution-of-letter__container{
+    max-width: max-content;
     padding: 0 80px;
-    border-radius: 16px;
-    max-width: 1440px;
 }
-
-.resolution__title {
+/* .resolution__title {
     font-size: 20px;
     font-weight: 700;
     margin-bottom: 24px;
     color: #000;
-}
+    max-width: max-content;
+} */
 
 /* Блок автора */
 .resolution__author {
@@ -19,11 +17,13 @@
     align-items: center;
     gap: 12px;
     margin-bottom: 24px;
+    max-width: max-content;
 }
 
 .resolution__author-name {
     font-weight: 500;
     font-size: 14px;
+    max-width: max-content;
 }
 
 .resolution__author-date {
@@ -71,6 +71,10 @@
 
 /* Блок загрузки */
 
+.resolution__upload-section .ant-upload-drag-container{
+    padding: 16px;
+}
+
 .resolution__upload-title {
     font-weight: 600;
     margin-bottom: 17px;
@@ -78,18 +82,13 @@
     font-size: 14px;
 }
 
-.resolution__dragger.ant-upload-drag {
-    width: 300px !important;
-    background: #fff !important;
-    border: none !important;
-    border-radius: 12px !important;
-}
-.ant-upload-drag-container{
+.resolution__upload-section .ant-upload-drag-container{
     background: #fff !important;
     text-align: left;
 }
-.resolution__dragger .ant-upload-btn {
-    padding: 0 !important;
+
+.resolution__upload-section .ant-upload-btn{
+background: #fff !important;
 }
 
 .resolution__dragger-content {
@@ -97,9 +96,8 @@
     flex-direction: column;
     align-items: center;
     padding: 20px;
-    border: 2px dashed #f0f0f0;
     border-radius: 12px;
-    background-color: #fff;
+    background-color: #fff !important;
 }
 
 .resolution__dragger-icon {
@@ -110,21 +108,19 @@
 .resolution__dragger-text {
     color: #bfbfbf;
     font-size: 12px;
-    text-align: center;
-    line-height: 1.4;
     margin-bottom: 16px;
 }
 
 .resolution__dragger-plus {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
     background-color: #003eb3;
     min-width: 32px;
     min-height: 32px;
     max-width: 33px;
     max-height: 33px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
     transition: background 0.3s;
 }
 
