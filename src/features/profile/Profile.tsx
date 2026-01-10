@@ -65,7 +65,7 @@ export const Profile = () => {
   };
 
   return (
-    <RenderJSX
+    <><RenderJSX
       loading={loading}
       isSnowEnabled={isSnowEnabled}
       setIsSnowEnabled={setIsSnowEnabled}
@@ -81,8 +81,7 @@ export const Profile = () => {
       setIsAnimEnabled={setIsAnimEnabled}
       userData={userData}
       activeTab={activeTab}
-      onMenuClick={handleMenuClick}
-    />
+      onMenuClick={handleMenuClick} /></>
   );
 
 };
