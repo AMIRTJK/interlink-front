@@ -1,5 +1,5 @@
 import { Avatar, Button, Form, Input, DatePicker, Select, Upload } from "antd";
-import { CalendarOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
+import { DownOutlined, PlusOutlined } from '@ant-design/icons';
 import userAvatar from '../../../assets/images/user-avatar.jpg';
 import calendarIcon from '../../../assets/icons/calenDar.svg'
 import '../ResolutionOfLetter.css'
@@ -11,9 +11,7 @@ interface IProps {
 export const RenderField: React.FC<IProps> = ({ resolutionerName, setIsLetterExecutionVisible }) => {
     console.log(setIsLetterExecutionVisible)
     return (
-        <div className="resolution">
-            <h3 className="resolution__title">Резолюция</h3>
-            
+        <>
             <div className="resolution__content">
                 <div className="resolution__author">
                     <Avatar src={userAvatar} size={44} />
@@ -22,7 +20,6 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName, setIsLetterExe
                         <p className="resolution__author-date">{new Date().toLocaleDateString()}</p>
                     </div>
                 </div>
-
                 <div className="resolution__form-container">
                     <Form layout="vertical" className="resolution__form">
                         
@@ -71,7 +68,7 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName, setIsLetterExe
                         </div>
                     </Form>
                 </div>
-            </div>
         </div>
+        </>
     );
 };
