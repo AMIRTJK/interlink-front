@@ -49,7 +49,6 @@
     padding: 16px 56px 12px 16px !important;
     height: auto !important;
     border-radius: 10px !important;
-    border: 1px solid #f0f0f0 !important;
     font-size: 16px !important;
 }
 
@@ -89,6 +88,7 @@
 
 .resolution__upload-section .ant-upload-btn{
 background: #fff !important;
+border: none !important;
 }
 
 .resolution__dragger-content {
@@ -97,6 +97,7 @@ background: #fff !important;
     align-items: center;
     padding: 20px;
     border-radius: 12px;
+    border: 1px dashed #f0f0f0;
     background-color: #fff !important;
 }
 
