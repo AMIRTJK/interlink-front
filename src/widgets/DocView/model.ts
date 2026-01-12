@@ -13,4 +13,5 @@ export interface IDocView {
   open: boolean;
   bookOpen: boolean;
   closable?: boolean;
+  isAnimationFinished?: boolean;
 }

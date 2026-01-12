@@ -54,24 +54,28 @@ export const RegistryTable = <T extends Record<string, unknown>>({
     []
   );
   const [isClosable, setIsClosable] = useState(false);
+  const [isAnimationFinished, setIsAnimationFinished] = useState(false);
 
   const handleShowDoc = () => {
     setIsModalOpen(true);
     setIsClosable(false);
+    setIsAnimationFinished(false);
 
     setTimeout(() => {
       setIsBookOpen(true);
       setTimeout(() => {
+        setIsAnimationFinished(true);
         setIsClosable(true);
       }, 400);
     }, 500);
   };
 
   const handleCloseModal = () => {
+    setIsAnimationFinished(false);
     setIsBookOpen(false);
     setTimeout(() => {
       setIsClosable(false);
-    }, 800); 
+    }, 800);
 
     setTimeout(() => {
       setIsModalOpen(false);
@@ -214,6 +218,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
         bookOpen={isBookOpen}
         onClose={handleCloseModal}
         closable={isClosable}
+        isAnimationFinished={isAnimationFinished}
       />
     </>
   );

@@ -18,6 +18,7 @@ export const DocView: React.FC<IDocView> = ({
   bookOpen,
   onClose,
   closable = false,
+  isAnimationFinished,
 }) => {
   const mockFiles: IDocFile[] = [
     { id: 1, name: "Договор.pdf", url: "/files/contract.pdf", type: "pdf" },
@@ -80,9 +81,20 @@ export const DocView: React.FC<IDocView> = ({
         </AnimatePresence>
       )}
     >
-      <div className={`card ${bookOpen ? "is-open" : ""}`}>
+      <div
+        className={`card ${bookOpen ? "is-open" : ""} ${isAnimationFinished ? "no-perspective" : ""}`}
+      >
         <div className="cover">
-          <DocPreview fileUrl={mockFiles[0].url} docName={mockFiles[0].name} />
+          <div className="face front"></div>
+          <div className="face back">
+            <h1 className="text-2xl">123</h1>
+            <div style={{ height: "100%", overflow: "auto" }}>
+              <DocPreview
+                fileUrl={mockFiles[0].url}
+                docName={mockFiles[0].name}
+              />
+            </div>
+          </div>
         </div>
         <div className="content">
           <DocSidebar
