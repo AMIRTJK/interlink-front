@@ -58,19 +58,19 @@ export const RenderJSX = ({
         maskClosable
       >
         <div className="space-y-2">
-          <div className="flex justify-between items-center">
+          <div className="hidden! sm:flex justify-between items-center">
             <span>Включить снег ❄️</span>
             <Switch checked={isSnowEnabled} onChange={setIsSnowEnabled} />
           </div>
-          <div className="flex justify-between items-center">
+          <div className="hidden! sm:flex justify-between items-center">
             <span>Включить дождь 🌧️</span>
             <Switch checked={isRainEnabled} onChange={setIsRainEnabled} />
           </div>
-          <div className="flex justify-between items-center">
+          <div className="hidden! sm:flex justify-between items-center">
             <span>Листопад 🍂</span>
             <Switch checked={isAutumnEnabled} onChange={setIsAutumnEnabled} />
           </div>
-          <div className="flex justify-between items-center">
+          <div className="hidden! sm:flex justify-between items-center">
             <span>Сакура 🌸</span>
             <Switch checked={isSakuraEnabled} onChange={setIsSakuraEnabled} />
           </div>
