@@ -1,3 +1,8 @@
+
+.ant-modal-title{
+    border-bottom: 1px solid #D9DADD;
+    padding-bottom: 18px;
+}
 /* Основной контейнер */
 .resolution-of-letter__container{
     max-width: max-content;
@@ -10,7 +15,8 @@
     align-items: center;
     gap: 12px;
     margin-bottom: 24px;
-    max-width: max-content;
+    padding-bottom: 20px;
+
 }
 
 .resolution__author-name {
