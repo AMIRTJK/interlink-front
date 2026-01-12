@@ -1,15 +1,13 @@
+
+.ant-modal-title{
+    border-bottom: 1px solid #D9DADD;
+    padding-bottom: 18px;
+}
 /* Основной контейнер */
 .resolution-of-letter__container{
     max-width: max-content;
     padding: 0 80px;
 }
-/* .resolution__title {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 24px;
-    color: #000;
-    max-width: max-content;
-} */
 
 /* Блок автора */
 .resolution__author {
@@ -17,7 +15,8 @@
     align-items: center;
     gap: 12px;
     margin-bottom: 24px;
-    max-width: max-content;
+    padding-bottom: 20px;
+
 }
 
 .resolution__author-name {
@@ -74,6 +73,10 @@
     padding: 16px;
 }
 
+.resolution__dragger .ant-upload-drag {
+    border: none !important;
+}
+
 .resolution__upload-title {
     font-weight: 600;
     margin-bottom: 17px;
@@ -97,8 +100,13 @@ border: none !important;
     align-items: center;
     padding: 20px;
     border-radius: 12px;
-    border: 1px dashed #f0f0f0;
+    border: 1px dashed #f0f0f0 !important;
     background-color: #fff !important;
+    transition: border 0.2s;
+}
+
+.resolution__dragger-content:hover{
+    border: 1px dashed #1d4ed8 !important;
 }
 
 .resolution__dragger-icon {
