@@ -5,9 +5,13 @@ import calendarIcon from '../../../assets/icons/calenDar.svg'
 import '../ResolutionOfLetter.css'
 interface IProps {
     resolutionerName: string;
+    mutate: (values: {[key:string]:string|number}) => void;
+    isPending: boolean;
+    isAllowed: boolean;
 }
 
-export const RenderField: React.FC<IProps> = ({ resolutionerName }) => {
+export const RenderField: React.FC<IProps> = ({ resolutionerName, mutate, isPending, isAllowed }) => {
+    const [form] = Form.useForm();
     return (
         <>
             <div className="resolution__content">
@@ -19,7 +23,7 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName }) => {
                     </div>
                 </div>
                 <div className="resolution__form-container">
-                    <Form layout="vertical" className="resolution__form">
+                    <Form form={form} onFinish={mutate} layout="vertical" className="resolution__form">
                         
                         <Form.Item className="resolution__form-item">
                             <Input placeholder="Виза" className="resolution__input" />
@@ -64,6 +68,9 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName }) => {
                                 </div>
                             </Upload.Dragger>
                         </div>
+                        <Button type="primary" htmlType="submit" className="resolution__button">
+                            Визировать
+                        </Button>
                     </Form>
                 </div>
         </div>

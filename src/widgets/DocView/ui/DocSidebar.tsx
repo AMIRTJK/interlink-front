@@ -10,8 +10,7 @@ import downLoadAll from "../../../assets/icons/download.svg";
 import downLoadLetter from "../../../assets/icons/letter-download.svg";
 import { ResolutionOfLetter } from "@features/ResolutionOfLetter";
 import { If } from "@shared/ui";
-// import { useMutationQuery } from "@shared/lib";
-// import { ApiRoutes } from "@shared/api";
+
 interface IProps {
   files: IDocFile[];
   activeFileId?: number;
@@ -30,15 +29,7 @@ export const DocSidebar: React.FC<IProps> = ({
     doc: wordIcon,
   };
   const [isLetterExecutionVisible, setIsLetterExecutionVisible] = useState(false);
-// const {mutate: createLetterMutate, isPending: createLetterIsPending, isAllowed }=useMutationQuery({
-//   url: `ApiRoutes.CREATE_RESOLUTION`,
-//   method: "POST",
-//   preload: true,
-//   preloadConditional: ["correspondence.create"],
-//   messages:{
-//     invalidate:[ApiRoutes.GET_CORRESPONDENCES]
-//   }
-// })
+
 
   return (
     <div className="docView__right">
