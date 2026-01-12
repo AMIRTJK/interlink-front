@@ -1,8 +1,11 @@
-import { Avatar, Button, Form, Input, DatePicker, Select, Upload } from "antd";
+import { Avatar, Button, Form, Input, DatePicker, Select, Upload, Tag } from "antd";
 import { DownOutlined, PlusOutlined } from '@ant-design/icons';
 import userAvatar from '../../../assets/images/user-avatar.jpg';
 import calendarIcon from '../../../assets/icons/calenDar.svg'
+import { SelectExecutorsModal, IDepartment, IUser } from "../ui/SelectExecutorsModal";
+import { useState } from "react";
 import '../ResolutionOfLetter.css'
+
 interface IProps {
     resolutionerName: string;
     mutate: (values: {[key:string]:string|number}) => void;
@@ -10,10 +13,44 @@ interface IProps {
     isAllowed: boolean;
 }
 
-export const RenderField: React.FC<IProps> = ({ resolutionerName, mutate, isPending, isAllowed }) => {
+export const RenderField: React.FC<IProps> = ({ resolutionerName, mutate }) => {
     const [form] = Form.useForm();
+    const [executorModalOpen, setExecutorModalOpen] = useState(false);
+    const [selectedDepts, setSelectedDepts] = useState<IDepartment[]>([]);
+    const [selectedUsers, setSelectedUsers] = useState<IUser[]>([]);
+
+    const handleExecutorsSelected = (departments: IDepartment[], users: IUser[]) => {
+        setSelectedDepts(departments);
+        setSelectedUsers(users);
+        
+        // Update form values for submission
+        form.setFieldsValue({
+            assignee_departments: departments.map(d => d.id),
+            assignee_users: users.map(u => u.id)
+        });
+    };
+
+    const handleRemoveDept = (id: number) => {
+        const newDepts = selectedDepts.filter(d => d.id !== id);
+        setSelectedDepts(newDepts);
+        form.setFieldValue('assignee_departments', newDepts.map(d => d.id));
+    };
+
+    const handleRemoveUser = (id: number) => {
+        const newUsers = selectedUsers.filter(u => u.id !== id);
+        setSelectedUsers(newUsers);
+        form.setFieldValue('assignee_users', newUsers.map(u => u.id));
+    };
+
     return (
         <>
+            <SelectExecutorsModal 
+                open={executorModalOpen} 
+                onCancel={() => setExecutorModalOpen(false)}
+                onOk={handleExecutorsSelected}
+                initialSelectedDepartments={selectedDepts}
+                initialSelectedUsers={selectedUsers}
+            />
             <div className="resolution__content">
                 <div className="resolution__author">
                     <Avatar src={userAvatar} size={44} />
@@ -24,12 +61,19 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName, mutate, isPend
                 </div>
                 <div className="resolution__form-container">
                     <Form form={form} onFinish={mutate} layout="vertical" className="resolution__form">
-                        
-                        <Form.Item className="resolution__form-item">
+                        {/* Hidden fields for executors */}
+                        <Form.Item name="assignee_departments" hidden>
+                            <Input />
+                        </Form.Item>
+                        <Form.Item name="assignee_users" hidden>
+                            <Input />
+                        </Form.Item>
+
+                        <Form.Item className="resolution__form-item" name="visa">
                             <Input placeholder="Виза" className="resolution__input" />
                         </Form.Item>
 
-                        <Form.Item className="resolution__form-item">
+                        <Form.Item className="resolution__form-item" name="deadline">
                             <DatePicker 
                                 placeholder="Срок" 
                                 className="resolution__datepicker" 
@@ -37,7 +81,7 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName, mutate, isPend
                             />
                         </Form.Item>
 
-                        <Form.Item className="resolution__form-item">
+                        <Form.Item className="resolution__form-item" name="status">
                             <Select 
                                 placeholder="Статус" 
                                 className="resolution__select py-[16px]! px-[13px]!"
@@ -46,9 +90,39 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName, mutate, isPend
                             />
                         </Form.Item>
 
-                        <Button className="resolution__button-executor">
-                            Выбрать исполнителя
-                        </Button>
+                        <div style={{ marginBottom: 32 }}>
+                            <Button className="resolution__button-executor" onClick={() => setExecutorModalOpen(true)}>
+                                Выбрать исполнителя
+                            </Button>
+                            
+                            {/* Display chosen executors */}
+                            {(selectedDepts.length > 0 || selectedUsers.length > 0) && (
+                                <div className="resolution__selected-tags-container">
+                                    {selectedDepts.map(dept => (
+                                        <Tag 
+                                            key={dept.id} 
+                                            closable 
+                                            onClose={() => handleRemoveDept(dept.id)}
+                                            className="resolution__selected-tag"
+                                            color="blue"
+                                        >
+                                            <span>{dept.name}</span>
+                                        </Tag>
+                                    ))}
+                                    {selectedUsers.map(user => (
+                                        <Tag 
+                                            key={user.id} 
+                                            closable 
+                                            onClose={() => handleRemoveUser(user.id)}
+                                            className="resolution__selected-tag"
+                                            color="cyan"
+                                        >
+                                            <span>{user.full_name}</span>
+                                        </Tag>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
                         <div className="resolution__upload-section">
                             <Upload.Dragger className="resolution__dragger">

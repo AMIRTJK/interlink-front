@@ -135,3 +135,23 @@ border: none !important;
 .resolution__dragger-plus:hover {
     background-color: #002c80;
 }
+
+/* Теги выбранных исполнителей */
+.resolution__selected-tags-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+    width: 100%;
+}
+
+.resolution__selected-tag {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-right: 0 !important;
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 6px;
+}

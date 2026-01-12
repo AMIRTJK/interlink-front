@@ -20,7 +20,11 @@ export const ApiRoutes = {
   FOLDER_CORRESPONDENCE: "/api/v1/correspondences/:id/folder",
   DELETE_CORRESPONDENCE: "/api/v1/correspondences/:id",
   GET_COUNTERS_CORRESPONDENCE: "/api/v1/correspondences/counters",
+  CREATE_RESOLUTION: "/api/v1/correspondences/:id/resolutions",
   RESTORE_CORRESPONDENCE: "/api/v1/correspondences/:id/restore",
+  GET_DEPARTMENTS: "/api/v1/admin/departments",
+  GET_ROLES: "/api/v1/admin/roles",
+  GET_USERS: "/api/v1/admin/users",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];
