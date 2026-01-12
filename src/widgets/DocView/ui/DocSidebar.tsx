@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "antd";
 import { IDocFile } from "../model";
 // Импорт иконок файлов
@@ -8,12 +8,13 @@ import wordIcon from "../../../assets/icons/word.svg";
 // Импорт иконок действий
 import downLoadAll from "../../../assets/icons/download.svg";
 import downLoadLetter from "../../../assets/icons/letter-download.svg";
+import { ResolutionOfLetter } from "@features/ResolutionOfLetter";
+import { If } from "@shared/ui";
 interface IProps {
   files: IDocFile[];
   activeFileId?: number;
   onFileSelect: (file: IDocFile) => void;
 }
-
 
 export const DocSidebar: React.FC<IProps> = ({
   files,
@@ -21,11 +22,12 @@ export const DocSidebar: React.FC<IProps> = ({
   onFileSelect,
 }) => {
   // Карта иконок
-const ICON_MAP: Record<string, string> = {
-  pdf: pdfIcon,
-  xls: excelIcon,
-  doc: wordIcon,
-};
+  const ICON_MAP: Record<string, string> = {
+    pdf: pdfIcon,
+    xls: excelIcon,
+    doc: wordIcon,
+  };
+  const [isLetterExecutionVisible, setIsLetterExecutionVisible] = useState(false);
 
 
   return (
@@ -71,10 +73,13 @@ const ICON_MAP: Record<string, string> = {
           Отказать
         </Button>
         <Button className="action-btn">Ознакомлен</Button>
-        <Button type="primary" className="action-btn">
+        <Button type="primary" className="action-btn" onClick={() => setIsLetterExecutionVisible(true)}>
            Создать визу
         </Button>
       </div>
+     <If is={isLetterExecutionVisible}>
+       <ResolutionOfLetter isLetterExecutionVisible={isLetterExecutionVisible} setIsLetterExecutionVisible={setIsLetterExecutionVisible} />
+     </If>
     </div>
   );
 };

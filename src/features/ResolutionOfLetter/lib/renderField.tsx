@@ -5,11 +5,9 @@ import calendarIcon from '../../../assets/icons/calenDar.svg'
 import '../ResolutionOfLetter.css'
 interface IProps {
     resolutionerName: string;
-    setIsLetterExecutionVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const RenderField: React.FC<IProps> = ({ resolutionerName, setIsLetterExecutionVisible }) => {
-    console.log(setIsLetterExecutionVisible)
+export const RenderField: React.FC<IProps> = ({ resolutionerName }) => {
     return (
         <>
             <div className="resolution__content">

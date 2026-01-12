@@ -1,13 +1,10 @@
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { DetailsOfLetter } from "@features/DetailsOfLetter/DetailsOfLetter";
 import { LetterExecution } from "@features/ResolutionCard";
-import { ResolutionOfLetter } from "@features/ResolutionOfLetter";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 import { useNavigate } from "react-router";
 import { Button, Form } from "antd";
-import { useState } from "react";
-import { If } from "@shared/ui";
 
 export const CreateCorrespondencePage = ({
   type,
@@ -35,7 +32,6 @@ export const CreateCorrespondencePage = ({
     createLetterMutate(values);
   };
 
-  const [isLetterExecutionVisible, setIsLetterExecutionVisible] = useState(false);
   return (
     <div className="p-6 bg-white rounded-lg">
       <Button
@@ -49,10 +45,7 @@ export const CreateCorrespondencePage = ({
       <Form form={form} onFinish={onSubmit} layout="vertical">
         <div className="flex flex-col gap-8 p-6">
           <DetailsOfLetter isAllowed={isAllowed} createLetterIsPending={createLetterIsPending} mode="create" form={form} /> 
-          <ResolutionOfLetter setIsLetterExecutionVisible={setIsLetterExecutionVisible} />
-          <If is={isLetterExecutionVisible}>
             <LetterExecution />
-          </If>
         </div>
       </Form>
     </div>
