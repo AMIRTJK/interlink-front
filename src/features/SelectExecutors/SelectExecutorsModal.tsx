@@ -3,7 +3,7 @@ import { Modal, Button, Form, Input, Row, Col } from "antd";
 import { UserOutlined, ApartmentOutlined, FilterOutlined } from "@ant-design/icons";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { IDepartment, IUser, ISelectExecutorsModalProps } from "./model";
+import { IDepartment, IUser, ISelectExecutorsModalProps } from "./model/types";
 import { UsersList, DepartmentsList } from "./lib";
 import { Tabs, SelectField } from "@shared/ui";
 import "./SelectExecutorsModal.css";
@@ -30,7 +30,6 @@ export const SelectExecutorsModal: React.FC<ISelectExecutorsModalProps> = ({
 
   const [form] = Form.useForm();
 
-  // 1. Отделы (основной список)
   const { data: deptsResponse, isLoading: loadingDepartments } = useGetQuery<{ search?: string; page?: number }, any>({
     url: ApiRoutes.GET_DEPARTMENTS,
     params: { 
@@ -40,7 +39,6 @@ export const SelectExecutorsModal: React.FC<ISelectExecutorsModalProps> = ({
     options: { enabled: open, keepPreviousData: true },
   });
 
-  // 2. Пользователи (основной список)
   const { data: usersResponse, isLoading: loadingUsers } = useGetQuery<{ search?: string; department_id?: number; role_id?: number; page?: number; with_departments?: number; with_roles?: number }, any>({
     url: ApiRoutes.GET_USERS,
     params: {
@@ -77,7 +75,6 @@ export const SelectExecutorsModal: React.FC<ISelectExecutorsModalProps> = ({
   const deptsMeta = getMeta(deptsResponse);
   const usersMeta = getMeta(usersResponse);
 
-  // Синхронизация при открытии
   React.useEffect(() => {
     if (open) {
       setSelectedDepartments(initialSelectedDepartments);
@@ -228,4 +225,3 @@ export const SelectExecutorsModal: React.FC<ISelectExecutorsModalProps> = ({
     </Modal>
   );
 };
-

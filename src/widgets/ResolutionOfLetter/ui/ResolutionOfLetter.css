@@ -1,0 +1,361 @@
+
+.ant-modal-title{
+    border-bottom: 1px solid #D9DADD;
+    padding-bottom: 18px;
+}
+
+.resolution-of-letter__container{
+    max-width: 1200px;
+    padding: 0 40px;
+}
+
+.resolution__content {
+    display: flex;
+    gap: 40px;
+}
+
+.resolution__left-content{
+    display: flex;
+    flex-direction: column;
+    margin-right: 16px;
+}
+
+.resolution__author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    padding-top: 24px;
+}
+
+.resolution__author-name {
+    font-weight: 500;
+    font-size: 14px;
+    max-width: max-content;
+}
+
+.resolution__author-date {
+    color: #8c8c8c;
+    font-size: 12px;
+}
+
+.resolution__form-container {
+    max-width: 300px;
+}
+
+.resolution__form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.resolution__input,
+.resolution__datepicker,
+.resolution__select .ant-select-outlined {
+    min-width: 300px !important;
+    max-width: 300px !important;
+    padding: 16px !important;
+    border-radius: 8px !important;
+}
+
+.resolution__icon {
+    color: #1d4ed8 !important;
+    font-size: 12px;
+}
+
+.resolution__button-executor {
+    border: 1px solid #1d4ed8 !important;
+    color: #1d4ed8 !important;
+    border-radius: 10px !important;
+    background: transparent;
+    padding: 19px 85px;
+    margin-bottom: 32px;
+}
+
+.resolution__upload-section .ant-upload-drag-container{
+    margin: 0 !important;
+}
+
+.resolution__dragger .ant-upload-drag {
+    border: none !important;
+}
+
+.resolution__upload-title {
+    font-weight: 600;
+    margin-bottom: 17px;
+    color: #1a1a1a;
+    font-size: 14px;
+}
+
+.resolution__upload-section .ant-upload-drag-container{
+    background: #fff !important;
+    text-align: left;
+}
+
+.resolution__dragger-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px dashed #d0cfcfe7 !important;
+    transition: border 0.2s;
+}
+
+.resolution__dragger-content:hover{
+    border: 1px dashed #1d4ed8 !important;
+}
+
+.resolution__dragger-icon {
+    color: #1d4ed8;
+    margin-bottom: 8px;
+}
+
+.resolution__dragger-text {
+    color: #bfbfbf;
+    font-size: 12px;
+    margin-bottom: 16px;
+    max-width: 220px;
+    line-height: 120%;
+    font-weight: 300;
+}
+
+.resolution__dragger-plus {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background-color: #003eb3;
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 33px;
+    max-height: 33px;
+    transition: background 0.2s;
+}
+
+.resolution__dragger-plus:hover {
+    background-color: #002d80a7;
+}
+
+.resolution__preview-container {
+    max-width: 300px;
+}
+
+.resolution__card {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.resolution__card-signed-banner {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #e6f7e9;
+    color: #43a047;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.resolution__card-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.resolution__card-label {
+    color: #ABACAF;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.resolution__card-value {
+    color: #1a1a1a;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.resolution__card-executors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.resolution__card-pill {
+    padding: 2px 10px 2px 2px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #4a5568;
+    border: 1px solid #edf2f7;
+    position: relative;
+}
+
+.resolution__card-pill-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.2s;
+    margin-left: 2px;
+}
+
+.resolution__card-pill-close:hover {
+    color: #ff4d4f;
+}
+
+.resolution__card-pill-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.resolution__card-divider {
+    height: 1px;
+    background-color: #f0f0f0;
+    margin: 4px 0;
+}
+
+.resolution__signature-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid #BCC5DF;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.resolution__signature-row {
+    display: flex;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.resolution__signature-label {
+    color: #666;
+}
+
+.resolution__signature-value--blue {
+    color: #2b6cb0;
+    font-weight: 600;
+}
+
+.resolution__signature-value--green {
+    color: #48bb78;
+    font-weight: 600;
+}
+
+.resolution__signature-btn {
+    margin-top: 8px;
+    border-radius: 8px !important;
+    height: 36px !important;
+    color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+    font-weight: 500;
+}
+
+.resolution__files-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 100px;
+}
+
+.resolution__file-card {
+    background: #ffffff;
+    border: 1px solid #eef2f6;
+    border-radius: 12px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: calc(50% - 4px);
+    flex-shrink: 0;
+}
+
+.resolution__file-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.resolution__file-name {
+    font-size: 12px;
+    color: #4a5568;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+}
+
+.resolution__file-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.resolution__file-download {
+    color: #a0aec0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.resolution__file-remove {
+    color: #a0aec0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.resolution__file-remove:hover {
+    color: #ff4d4f;
+}
+
+.resolution__action-btn {
+    background-color: #003eb3;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 19px 115px;
+}
+
+.resolution__right-content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    flex: 1;
+    width: 100%;
+}
+
+.resolution__right-content-action-icon{
+    margin: 0 auto;
+}
+
+.resolution__right-title {
+    font-weight: 700;
+    margin-bottom: 2px;
+    color: #ADB9DE;
+    font-size: 14px;
+}
+
+.resolution__right-text {
+    font-weight: 500;
+    color: #ADB9DE;
+    font-size: 12px;
+    margin-bottom: 14px;
+}
+
+.resolution__button-executor-right{
+    padding: 0;
+}

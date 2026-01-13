@@ -2,9 +2,9 @@ import { Avatar, Modal, Switch } from "antd";
 import { UserOutlined, SettingOutlined } from "@ant-design/icons";
 import { Outlet } from "react-router-dom";
 import { IUser } from "@entities/login";
-import userAvatar from "../../../assets/images/user-avatar.jpg";
 import { Tabs, Loader } from "@shared/ui";
 import { profileRightNav } from "../model";
+import userAvatar from '../../../assets/images/user-avatar.jpg'
 
 interface IProps {
   loading: boolean;

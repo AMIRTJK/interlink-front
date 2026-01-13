@@ -20,7 +20,7 @@ export interface IUser {
     id: number;
     full_name: string;
     position?: string;
-    department?: IDepartment; // Legacy or specific single dept
+    department?: IDepartment;
     departments?: IDepartment[];
     roles?: IRole[];
     organization?: IOrganization;

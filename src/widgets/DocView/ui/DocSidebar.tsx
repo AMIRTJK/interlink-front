@@ -8,7 +8,7 @@ import wordIcon from "../../../assets/icons/word.svg";
 // Импорт иконок действий
 import downLoadAll from "../../../assets/icons/download.svg";
 import downLoadLetter from "../../../assets/icons/letter-download.svg";
-import { ResolutionOfLetter } from "@features/ResolutionOfLetter";
+import { ResolutionOfLetter } from "@widgets/ResolutionOfLetter";
 import { If } from "@shared/ui";
 
 interface IProps {

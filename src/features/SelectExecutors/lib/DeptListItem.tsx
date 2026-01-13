@@ -1,5 +1,5 @@
 import { ApartmentOutlined, CheckCircleFilled } from '@ant-design/icons';
-import { IDepartment } from '../model';
+import { IDepartment } from '../model/types';
 
 interface DeptListItemProps {
     dept: IDepartment;
@@ -7,7 +7,6 @@ interface DeptListItemProps {
     onToggle: (dept: IDepartment) => void;
 }
 
-// Компонент строки департамента (список)
 export const DeptListItem: React.FC<DeptListItemProps> = ({ dept, isSelected, onToggle }) => {
     return (
         <div 
