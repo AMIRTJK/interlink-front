@@ -2,7 +2,6 @@ import { Modal } from "antd";
 import { useResolutionOfLetter } from "./lib/useResolutionOfLetter";
 import { RenderField } from "./lib/renderField";
 import './ui/ResolutionOfLetter.css';
-import { userInfo } from "os";
 
 interface IProps {
     isLetterExecutionVisible: boolean;
@@ -39,7 +38,7 @@ export const ResolutionOfLetter: React.FC<IProps> = ({ setIsLetterExecutionVisib
                 footer={null}
             >
                 <RenderField 
-                    resolutionerName={userInfo?.name}
+                    resolutionerName={'km'}
                     form={form}
                     executorModalOpen={executorModalOpen}
                     setExecutorModalOpen={setExecutorModalOpen}
@@ -47,7 +46,7 @@ export const ResolutionOfLetter: React.FC<IProps> = ({ setIsLetterExecutionVisib
                     selectedUsers={selectedUsers}
                     uploadedFiles={uploadedFiles}
                     visaValue={visaValue}
-                    isTotalPending={isTotalPending}
+                    isTotalPending={isTotalPending ?? false}
                     isAllowed={isAllowed ?? false}
                     hasSelection={hasSelection}
                     handleExecutorsSelected={handleExecutorsSelected}
