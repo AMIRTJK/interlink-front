@@ -103,6 +103,7 @@ export const BookModal: React.FC<BookModalProps> = ({
   const [pageNum, setPageNum] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [scale, setScale] = useState(1.0);
+  const [zoomInput, setZoomInput] = useState("100");
   const [htmlContent, setHtmlContent] = useState<string>("");
 
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -321,6 +322,10 @@ export const BookModal: React.FC<BookModalProps> = ({
     }
   };
 
+  useEffect(() => {
+    setZoomInput(String(Math.round(scale * 100)));
+  }, [scale]);
+
   const adjustZoom = (delta: number) => {
     let newPercent = Math.round(scale * 10) * 10;
     newPercent += delta * 100;
@@ -329,12 +334,35 @@ export const BookModal: React.FC<BookModalProps> = ({
     setScale(newPercent / 100);
   };
 
-  const handleManualZoom = (val: string) => {
-    let percent = parseInt(val);
-    if (isNaN(percent)) percent = 100;
+  // Просто обновляем текст при вводе (разрешаем пустую строку и любые цифры)
+  const handleZoomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setZoomInput(e.target.value);
+  };
+
+  // Валидируем и применяем масштаб только при завершении ввода
+  const commitZoom = () => {
+    let percent = parseInt(zoomInput);
+
+    if (isNaN(percent)) {
+      // Если ввели чушь, возвращаем текущий реальный масштаб
+      setZoomInput(String(Math.round(scale * 100)));
+      return;
+    }
+
+    // Ограничиваем диапазон
     if (percent < 20) percent = 20;
     if (percent > 300) percent = 300;
+
     setScale(percent / 100);
+    setZoomInput(String(percent)); // Форматируем инпут красиво
+  };
+
+  // Обработка нажатия Enter
+  const handleZoomInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      commitZoom();
+      (e.target as HTMLInputElement).blur(); // Убираем фокус
+    }
   };
 
   const downloadCurrentFile = () => {
@@ -412,7 +440,6 @@ export const BookModal: React.FC<BookModalProps> = ({
   };
 
   const isPdf = currentFile.type === "pdf";
-  const zoomPercent = Math.round(scale * 100);
 
   return (
     <>
@@ -541,10 +568,12 @@ export const BookModal: React.FC<BookModalProps> = ({
                       <input
                         type="number"
                         className="zoom-input"
-                        value={zoomPercent}
+                        value={zoomInput} // Используем локальный стейт
                         min="20"
                         max="300"
-                        onChange={(e) => handleManualZoom(e.target.value)}
+                        onChange={handleZoomInputChange} // Просто ввод
+                        onBlur={commitZoom} // Применение при потере фокуса (клик вне поля)
+                        onKeyDown={handleZoomInputKeyDown} // Применение по Enter
                       />
                       <span className="zoom-percent-sign">%</span>
                     </div>
