@@ -8,9 +8,23 @@
     box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
 }
 
+.resolution__content {
+    display: flex;
+    gap: 24px;
+}
+
+.resolution__left {
+    flex: 1;
+    min-width: 0;
+}
+
+.resolution__right {
+    flex: 1;
+    min-width: 0;
+}
+
 .select-executors-modal .ant-modal-header {
     background: transparent !important;
-    border-bottom: 1px solid #303030 !important;
     padding-bottom: 16px !important;
     margin-bottom: 24px !important;
 }

@@ -104,7 +104,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
               </div>
 
               <div>
-                <span className="text-gray-500 mb-0.5 block">Дата:</span>
+f                <span className="text-gray-500 mb-0.5 block">Дата:</span>
                 <p>{record.created_at}</p>
               </div>
 
