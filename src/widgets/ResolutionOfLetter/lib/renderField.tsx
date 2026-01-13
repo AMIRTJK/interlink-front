@@ -1,12 +1,11 @@
 import { Button, FormInstance } from "antd";
 import { PlusOutlined } from '@ant-design/icons';
 import { SelectExecutorsModal, IDepartment, IUser } from "@features/SelectExecutors";
-import usersIcon from '@shared/assets/icons/users.svg'
 import { If } from "@shared/ui";
 import { ResolutionAuthor } from "../ui/ResolutionAuthor";
 import { ResolutionForm } from "../ui/ResolutionForm";
 import { ResolutionPreviewCard } from "../ui/ResolutionPreviewCard";
-
+import usersIcon from '../../../assets/icons/users.svg'
 interface IRenderFieldProps {
     resolutionerName: string;
     form: FormInstance;

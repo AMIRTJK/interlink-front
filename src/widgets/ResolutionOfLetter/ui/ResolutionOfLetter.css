@@ -5,8 +5,13 @@
 }
 
 .resolution-of-letter__container{
-    max-width: max-content;
-    padding: 0 80px;
+    max-width: 1200px;
+    padding: 0 40px;
+}
+
+.resolution__content {
+    display: flex;
+    gap: 40px;
 }
 
 .resolution__left-content{
@@ -222,6 +227,9 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    border: 1px solid #BCC5DF;
+    padding: 10px;
+    border-radius: 10px;
 }
 
 .resolution__signature-row {
@@ -326,6 +334,8 @@
     align-items: center;
     justify-content: center;
     margin: 0 auto;
+    flex: 1;
+    width: 100%;
 }
 
 .resolution__right-content-action-icon{

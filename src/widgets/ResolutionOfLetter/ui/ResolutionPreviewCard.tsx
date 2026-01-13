@@ -1,9 +1,8 @@
 import { Avatar, Button, Upload } from "antd";
-import userAvatar from '@shared/assets/images/user-avatar.jpg';
 import { IDepartment, IUser } from "@features/SelectExecutors";
 import { PlusOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
 import { ResolutionFileList } from "./ResolutionFileList";
-
+import userAvatar from '../../../assets/images/user-avatar.jpg';
 interface IProps {
     resolutionerName: string;
     selectedDepts: IDepartment[];
