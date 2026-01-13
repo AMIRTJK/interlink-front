@@ -93,43 +93,43 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 
   const expandedRowRender = (record: any) => {
     return (
-      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 m-2">
+      <div className="p-4 bg-[#F2F5FF]">
         <div className="flex justify-between items-start gap-6">
           {/* Левая часть — данные */}
           <div className="flex-1">
-            <h4 className="font-bold mb-2">Детали записи #{record.id}</h4>
-
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <span className="text-gray-500 mb-0.5 block">Отправитель:</span>
+                <span className="text-[#6D8AC9] mb-0.5 block">
+                  Отправитель:
+                </span>
                 <p>{record.sender_name}</p>
               </div>
 
               <div>
-                <span className="text-gray-500 mb-0.5 block">Тема:</span>
+                <span className="text-[#6D8AC9] mb-0.5 block">Тема:</span>
                 <p>{record.subject}</p>
               </div>
 
               <div>
-                f <span className="text-gray-500 mb-0.5 block">Дата:</span>
+                f <span className="text-[#6D8AC9] mb-0.5 block">Дата:</span>
                 <p>{record.created_at}</p>
               </div>
 
               <div>
-                <span className="text-gray-500 mb-0.5 block">
+                <span className="text-[#6D8AC9] mb-0.5 block">
                   Входящий номер:
                 </span>
                 <p>{record.incomingNumber}</p>
               </div>
 
               <div>
-                <span className="text-gray-500 mb-0.5 block">
+                <span className="text-[#6D8AC9] mb-0.5 block">
                   Исходящий номер:
                 </span>
                 <p>{record.outgoingNumber}</p>
               </div>
               <div>
-                <span className="text-gray-500 mb-0.5 block">Статус:</span>
+                <span className="text-[#6D8AC9] mb-0.5 block">Статус:</span>
                 <p>{record.status}</p>
               </div>
             </div>
@@ -139,13 +139,14 @@ export const RegistryTable = <T extends Record<string, unknown>>({
           <div className="flex flex-col gap-2">
             <Button
               type="default"
-              text="Исполнение"
+              text="На исполнение"
               withIcon
               icon={executionIcon}
               iconAlt="execution"
               className="bg-[#0037AF]! text-white!"
             />
             <Button
+              className="border-[#0037AF]! text-[#0037AF]! font-medium!"
               type="default"
               text="Документ"
               withIcon
@@ -192,7 +193,12 @@ export const RegistryTable = <T extends Record<string, unknown>>({
             url={ApiRoutes.GET_CORRESPONDENCES}
             filters={filters}
             columns={columns}
-            className="[&_.ant-table-cell]:rounded-none! [&_.ant-pagination]:px-4! [&_.ant-table-row]:cursor-pointer"
+            className="[&_.ant-table-cell]:rounded-none! [&_.ant-pagination]:px-4! [&_.ant-table-row]:cursor-pointer [&_.ant-table-expanded-row.ant-table-expanded-row-level-1>td]:bg-[#F2F5FF]!"
+            rowClassName={(record: any) =>
+              expandedRowKeys.includes(record.id)
+                ? "[&>td]:bg-[#E9F0FF]! hover:[&>td]:bg-[#E9F0FF]!"
+                : ""
+            }
             direction={1}
             autoFilter={true}
             queryParams={{
