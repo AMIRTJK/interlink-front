@@ -7,9 +7,10 @@ import { useRegistryColumns, getRegistryFilters } from "../lib";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { StatusTabs } from "@features/StatusTabs";
-import { DocView } from "@widgets/DocView";
+// import { DocView } from "@widgets/DocView";
 import wordIcon from "../../../assets/icons/word2.svg";
 import executionIcon from "../../../assets/icons/execution.svg";
+import { BookModal } from "@widgets/BookModal";
 interface RegistryTableProps<T extends Record<string, unknown>> {
   data?: T[];
   isLoading?: boolean;
@@ -48,39 +49,45 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 
   const tabCounts = useMemo(() => countersData?.data || {}, [countersData]);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isBookOpen, setIsBookOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isBookOpen, setIsBookOpen] = useState(false);
   const [expandedRowKeys, setExpandedRowKeys] = useState<readonly React.Key[]>(
     []
   );
-  const [isClosable, setIsClosable] = useState(false);
-  const [isAnimationFinished, setIsAnimationFinished] = useState(false);
+  // const [isClosable, setIsClosable] = useState(false);
+  // const [isAnimationFinished, setIsAnimationFinished] = useState(false);
 
-  const handleShowDoc = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => {
     setIsModalOpen(true);
-    setIsClosable(false);
-    setIsAnimationFinished(false);
-
-    setTimeout(() => {
-      setIsBookOpen(true);
-      setTimeout(() => {
-        setIsAnimationFinished(true);
-        setIsClosable(true);
-      }, 400);
-    }, 500);
   };
 
-  const handleCloseModal = () => {
-    setIsAnimationFinished(false);
-    setIsBookOpen(false);
-    setTimeout(() => {
-      setIsClosable(false);
-    }, 800);
+  // const handleShowDoc = () => {
+  //   setIsModalOpen(true);
+  //   setIsClosable(false);
+  //   setIsAnimationFinished(false);
 
-    setTimeout(() => {
-      setIsModalOpen(false);
-    }, 1500);
-  };
+  //   setTimeout(() => {
+  //     setIsBookOpen(true);
+  //     setTimeout(() => {
+  //       setIsAnimationFinished(true);
+  //       setIsClosable(true);
+  //     }, 400);
+  //   }, 500);
+  // };
+
+  // const handleCloseModal = () => {
+  //   setIsAnimationFinished(false);
+  //   setIsBookOpen(false);
+  //   setTimeout(() => {
+  //     setIsClosable(false);
+  //   }, 800);
+
+  //   setTimeout(() => {
+  //     setIsModalOpen(false);
+  //   }, 1500);
+  // };
 
   const showTabs = !!extraParams?.kind;
 
@@ -104,7 +111,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
               </div>
 
               <div>
-f                <span className="text-gray-500 mb-0.5 block">Дата:</span>
+                f <span className="text-gray-500 mb-0.5 block">Дата:</span>
                 <p>{record.created_at}</p>
               </div>
 
@@ -136,7 +143,6 @@ f                <span className="text-gray-500 mb-0.5 block">Дата:</span>
               withIcon
               icon={executionIcon}
               iconAlt="execution"
-              onClick={handleShowDoc}
               className="bg-[#0037AF]! text-white!"
             />
             <Button
@@ -145,7 +151,7 @@ f                <span className="text-gray-500 mb-0.5 block">Дата:</span>
               withIcon
               icon={wordIcon}
               iconAlt="word"
-              onClick={handleShowDoc}
+              onClick={handleOpenModal}
             />
           </div>
         </div>
@@ -213,13 +219,14 @@ f                <span className="text-gray-500 mb-0.5 block">Дата:</span>
           />
         </div>
       </div>
-      <DocView
+      <BookModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      {/* <DocView
         open={isModalOpen}
         bookOpen={isBookOpen}
         onClose={handleCloseModal}
         closable={isClosable}
         isAnimationFinished={isAnimationFinished}
-      />
+      /> */}
     </>
   );
 };
