@@ -45,6 +45,11 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName, mutate }) => {
         form.setFieldValue('assignee_users', newUsers.map(u => u.id));
     };
 
+    const handleRemoveFile = (uid: string) => {
+        const newFiles = uploadedFiles.filter(f => f.uid !== uid);
+        setUploadedFiles(newFiles);
+    };
+
     return (
         <>
             <SelectExecutorsModal 
@@ -109,6 +114,7 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName, mutate }) => {
                                         multiple
                                         onChange={(info) => setUploadedFiles(info.fileList)}
                                         beforeUpload={() => false}
+                                        showUploadList={false}
                                     >
                                         <p className="resolution__upload-title">Загрузить файлы</p>
                                         <div className="resolution__dragger-content">
@@ -201,6 +207,7 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName, mutate }) => {
                                     multiple
                                     onChange={(info) => setUploadedFiles(info.fileList)}
                                     beforeUpload={() => false}
+                                    showUploadList={false}
                                 >
                                     <p className="resolution__upload-title">Загрузить файлы</p>
                                     <div className="resolution__dragger-content">
@@ -227,8 +234,13 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName, mutate }) => {
                                                 <FileTextOutlined style={{ color: '#003eb3', fontSize: '20px' }} />
                                                 <span className="resolution__file-name">{file.name}</span>
                                             </div>
-                                            <div className="resolution__file-download">
-                                                <DownloadOutlined />
+                                            <div className="resolution__file-actions">
+                                                <div className="resolution__file-download">
+                                                    <DownloadOutlined />
+                                                </div>
+                                                <div className="resolution__file-remove" onClick={() => handleRemoveFile(file.uid)}>
+                                                    <PlusOutlined style={{ transform: 'rotate(45deg)', fontSize: '14px' }} />
+                                                </div>
                                             </div>
                                         </div>
                                     ))}

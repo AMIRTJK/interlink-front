@@ -57,10 +57,6 @@
     padding: 16px !important;
     border-radius: 8px !important;
 }
-
-.resolution__select .ant-select-selector {
-    background: red !important;
-}
 .resolution__icon {
     color: #1d4ed8 !important;
     font-size: 12px;
@@ -198,7 +194,6 @@
 }
 
 .resolution__card-pill {
-    background: red;
     padding: 2px 10px 2px 2px;
     border-radius: 20px;
     display: flex;
@@ -274,20 +269,24 @@
 }
 
 /* Файлы */
-.resolution__files-grid {
-    /* display: grid; */
-    /* grid-template-columns: 1fr 1fr; */
-    gap: 12px;
+.resolution__files-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 100px;
+
 }
 
 .resolution__file-card {
     background: #ffffff;
     border: 1px solid #eef2f6;
     border-radius: 12px;
-    padding: 12px;
+    padding: 8px 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    width: calc(50% - 4px);
+    flex-shrink: 0;
 }
 
 .resolution__file-info {
@@ -306,6 +305,12 @@
     max-width: 80px;
 }
 
+.resolution__file-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .resolution__file-download {
     color: #a0aec0;
     cursor: pointer;
@@ -313,14 +318,24 @@
     align-items: center;
 }
 
+.resolution__file-remove {
+    color: #a0aec0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.resolution__file-remove:hover {
+    color: #ff4d4f;
+}
+
 /* Основная кнопка */
 .resolution__action-btn {
-    height: 48px !important;
-    border-radius: 10px !important;
-    background-color: #003eb3 !important;
+    background-color: #003eb3;
     font-weight: 600;
     font-size: 14px;
-    margin-top: 10px;
+    padding: 19px 115px;
 }
 
 /* RIGHT */
