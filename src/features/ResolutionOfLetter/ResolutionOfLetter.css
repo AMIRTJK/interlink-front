@@ -257,7 +257,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 100px;
+    margin-bottom: 24px;
 }
 
 .resolution__file-card {

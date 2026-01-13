@@ -8,7 +8,6 @@ import { If } from "@shared/ui";
 import { useMutationQuery } from "@shared/lib/hooks/useMutationQuery";
 import { ApiRoutes } from "@shared/api";
 import { ResolutionAuthor } from "../ui/ResolutionAuthor";
-import { ResolutionFileList } from "../ui/ResolutionFileList";
 import { ResolutionForm } from "../ui/ResolutionForm";
 import { ResolutionPreviewCard } from "../ui/ResolutionPreviewCard";
 
@@ -111,6 +110,8 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName, mutate: origin
                             onFinish={onFinish}
                             onSelectExecutors={() => setExecutorModalOpen(true)}
                             onUploadChange={handleUploadChange}
+                            files={uploadedFiles}
+                            onRemoveFile={handleRemoveFile}
                             isPending={isSubmitting || originalIsPending}
                         />
                     </If>
@@ -124,15 +125,12 @@ export const RenderField: React.FC<IProps> = ({ resolutionerName, mutate: origin
                             onRemoveDept={handleRemoveDept}
                             onRemoveUser={handleRemoveUser}
                             onUploadChange={handleUploadChange}
+                            files={uploadedFiles}
+                            onRemoveFile={handleRemoveFile}
                             onSubmit={() => form.submit()}
                             isPending={isSubmitting || originalIsPending}
                         />
                     </If>
-
-                    <ResolutionFileList 
-                        files={uploadedFiles}
-                        onRemove={handleRemoveFile}
-                    />
                 </div>
 
                 <If is={!hasSelection}>

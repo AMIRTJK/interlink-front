@@ -1,16 +1,19 @@
-import { Avatar, Button, Upload,} from "antd";
+import { Avatar, Button, Upload, UploadFile } from "antd";
 import userAvatar from '../../../assets/images/user-avatar.jpg';
 import { IDepartment, IUser } from "../ui/SelectExecutorsModal";
 import { PlusOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
+import { ResolutionFileList } from "./ResolutionFileList";
 
 interface IProps {
     resolutionerName: string;
     selectedDepts: IDepartment[];
     selectedUsers: IUser[];
     visaValue: string;
+    files: UploadFile[];
     onRemoveDept: (id: number) => void;
     onRemoveUser: (id: number) => void;
     onUploadChange: (info: any) => void;
+    onRemoveFile: (uid: string) => void;
     onSubmit: () => void;
     isPending?: boolean;
 }
@@ -20,9 +23,11 @@ export const ResolutionPreviewCard: React.FC<IProps> = ({
     selectedDepts,
     selectedUsers,
     visaValue,
+    files,
     onRemoveDept,
     onRemoveUser,
     onUploadChange,
+    onRemoveFile,
     onSubmit,
     isPending
 }) => {
@@ -112,6 +117,8 @@ export const ResolutionPreviewCard: React.FC<IProps> = ({
                     </div>
                 </Upload.Dragger>
             </div>
+
+            <ResolutionFileList files={files} onRemove={onRemoveFile} />
 
             <Button type="primary" className="resolution__action-btn" onClick={onSubmit} loading={isPending}>
                 Визировать

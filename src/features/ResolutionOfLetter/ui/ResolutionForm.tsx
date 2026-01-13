@@ -1,12 +1,15 @@
-import { Button, Form, Input, DatePicker, Select, Upload,FormInstance } from "antd";
+import { Button, Form, Input, DatePicker, Select, Upload, FormInstance, UploadFile } from "antd";
 import { DownOutlined, PlusOutlined } from '@ant-design/icons';
 import calendarIcon from '../../../assets/icons/calenDar.svg';
+import { ResolutionFileList } from "./ResolutionFileList";
 
 interface IProps {
     form: FormInstance;
     onFinish: (values: any) => void;
     onSelectExecutors: () => void;
     onUploadChange: (info: any) => void;
+    files: UploadFile[];
+    onRemoveFile: (uid: string) => void;
     isPending?: boolean;
 }
 
@@ -15,6 +18,8 @@ export const ResolutionForm: React.FC<IProps> = ({
     onFinish, 
     onSelectExecutors, 
     onUploadChange,
+    files,
+    onRemoveFile,
     isPending 
 }) => {
     return (
@@ -78,6 +83,9 @@ export const ResolutionForm: React.FC<IProps> = ({
                         </div>
                     </Upload.Dragger>
                 </div>
+
+                <ResolutionFileList files={files} onRemove={onRemoveFile} />
+
                 <Button type="primary" htmlType="submit" className="resolution__button" loading={isPending}>
                     Визировать
                 </Button>
