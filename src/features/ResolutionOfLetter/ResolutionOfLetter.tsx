@@ -1,10 +1,9 @@
-import { JSX } from "react";
-import { RenderField } from "./lib";
+import { ResolutionContent } from "./lib";
 import { Modal } from "antd";
 import { useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import './ResolutionOfLetter.css'
-export const ResolutionOfLetter:React.FC<{isLetterExecutionVisible: boolean, setIsLetterExecutionVisible: React.Dispatch<React.SetStateAction<boolean>>}> = ({setIsLetterExecutionVisible}):JSX.Element => {
+export const ResolutionOfLetter:React.FC<{isLetterExecutionVisible: boolean, setIsLetterExecutionVisible: React.Dispatch<React.SetStateAction<boolean>>}> = ({setIsLetterExecutionVisible}) => {
     const {mutate: chooseResolutionMutate, isPending: chooseResolutionIsPending, isAllowed }=useMutationQuery({
   url: `ApiRoutes.CREATE_RESOLUTION`,
   method: "POST",
@@ -24,7 +23,7 @@ export const ResolutionOfLetter:React.FC<{isLetterExecutionVisible: boolean, set
             onCancel={() => setIsLetterExecutionVisible(false)}
             footer={null}
             >
-                <RenderField resolutionerName="Резолюционер" mutate={chooseResolutionMutate} isPending={chooseResolutionIsPending} isAllowed={isAllowed} />
+                <ResolutionContent resolutionerName="Резолюционер" mutate={chooseResolutionMutate} isPending={chooseResolutionIsPending} isAllowed={isAllowed} />
             </Modal>
 
         </div>

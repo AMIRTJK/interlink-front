@@ -1,4 +1,4 @@
-import { Button, Form, Input, DatePicker, Select, Upload, FormInstance, UploadFile } from "antd";
+import { Button, Form, Input, DatePicker, Select, Upload, FormInstance } from "antd";
 import { DownOutlined, PlusOutlined } from '@ant-design/icons';
 import calendarIcon from '../../../assets/icons/calenDar.svg';
 import { ResolutionFileList } from "./ResolutionFileList";
@@ -8,9 +8,10 @@ interface IProps {
     onFinish: (values: any) => void;
     onSelectExecutors: () => void;
     onUploadChange: (info: any) => void;
-    files: UploadFile[];
-    onRemoveFile: (uid: string) => void;
+    files: any[];
+    onRemoveFile: (id: number) => void;
     isPending?: boolean;
+    isAllowed?: boolean;
 }
 
 export const ResolutionForm: React.FC<IProps> = ({ 
@@ -20,7 +21,8 @@ export const ResolutionForm: React.FC<IProps> = ({
     onUploadChange,
     files,
     onRemoveFile,
-    isPending 
+    isPending,
+    isAllowed
 }) => {
     return (
         <div className="resolution__form-container">
@@ -66,6 +68,7 @@ export const ResolutionForm: React.FC<IProps> = ({
                         onChange={onUploadChange}
                         beforeUpload={() => false}
                         showUploadList={false}
+                        disabled={!isAllowed}
                     >
                         <p className="resolution__upload-title">Загрузить файлы</p>
                         <div className="resolution__dragger-content">
@@ -84,7 +87,7 @@ export const ResolutionForm: React.FC<IProps> = ({
                     </Upload.Dragger>
                 </div>
 
-                <ResolutionFileList files={files} onRemove={onRemoveFile} />
+                <ResolutionFileList files={files} onRemove={onRemoveFile} isAllowed={isAllowed} />
 
                 <Button type="primary" htmlType="submit" className="resolution__button" loading={isPending}>
                     Визировать

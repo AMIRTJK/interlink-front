@@ -1,1 +1,1 @@
-export * from './renderField';
+export * from './ResolutionContent';

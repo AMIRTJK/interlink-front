@@ -1,4 +1,4 @@
-import { Avatar, Button, Upload, UploadFile } from "antd";
+import { Avatar, Button, Upload } from "antd";
 import userAvatar from '../../../assets/images/user-avatar.jpg';
 import { IDepartment, IUser } from "../ui/SelectExecutorsModal";
 import { PlusOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
@@ -9,13 +9,14 @@ interface IProps {
     selectedDepts: IDepartment[];
     selectedUsers: IUser[];
     visaValue: string;
-    files: UploadFile[];
+    files: any[];
     onRemoveDept: (id: number) => void;
     onRemoveUser: (id: number) => void;
     onUploadChange: (info: any) => void;
-    onRemoveFile: (uid: string) => void;
+    onRemoveFile: (id: number) => void;
     onSubmit: () => void;
     isPending?: boolean;
+    isAllowed?: boolean;
 }
 
 export const ResolutionPreviewCard: React.FC<IProps> = ({
@@ -29,7 +30,8 @@ export const ResolutionPreviewCard: React.FC<IProps> = ({
     onUploadChange,
     onRemoveFile,
     onSubmit,
-    isPending
+    isPending,
+    isAllowed
 }) => {
     return (
         <div className="resolution__preview-container">
@@ -100,6 +102,7 @@ export const ResolutionPreviewCard: React.FC<IProps> = ({
                     onChange={onUploadChange}
                     beforeUpload={() => false}
                     showUploadList={false}
+                    disabled={!isAllowed}
                 >
                     <p className="resolution__upload-title">Загрузить файлы</p>
                     <div className="resolution__dragger-content">
@@ -118,7 +121,7 @@ export const ResolutionPreviewCard: React.FC<IProps> = ({
                 </Upload.Dragger>
             </div>
 
-            <ResolutionFileList files={files} onRemove={onRemoveFile} />
+            <ResolutionFileList files={files} onRemove={onRemoveFile} isAllowed={isAllowed} />
 
             <Button type="primary" className="resolution__action-btn" onClick={onSubmit} loading={isPending}>
                 Визировать

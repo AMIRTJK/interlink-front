@@ -14,6 +14,7 @@ export const ApiRoutes = {
 
   // Corresspondence
   GET_CORRESPONDENCES: "/api/v1/correspondences",
+  GET_CORRESPONDENCE_BY_ID: "/api/v1/correspondences/:id",
   CREATE_CORRESPONDENCES: "/api/v1/correspondences",
   ARCHIVE_CORRESPONDENCE: "/api/v1/correspondences/:id/archive",
   PIN_CORRESPONDENCE: "/api/v1/correspondences/:id/pin",
@@ -25,6 +26,9 @@ export const ApiRoutes = {
   GET_DEPARTMENTS: "/api/v1/admin/departments",
   GET_ROLES: "/api/v1/admin/roles",
   GET_USERS: "/api/v1/admin/users",
+  CREATE_ATTACHMENT: "/api/v1/correspondences/:id/attachments",
+  CREATE_ATTACHMENTS_BULK: "/api/v1/correspondences/:id/attachments/bulk",
+  DELETE_ATTACHMENT: "/api/v1/correspondence-attachments/:id",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];
