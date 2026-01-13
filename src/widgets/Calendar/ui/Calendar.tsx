@@ -68,10 +68,12 @@ export const Calendar = () => {
         description: editEvent.description,
         date: dayjs(editEvent.date),
         time: dayjs(`${editEvent.date} ${editEvent.time}`),
-        endTime: editEvent.endTime ? dayjs(`${editEvent.date} ${editEvent.endTime}`) : undefined,
+        endTime: editEvent.endTime
+          ? dayjs(`${editEvent.date} ${editEvent.endTime}`)
+          : undefined,
         color: editEvent.color,
         assignees: editEvent.participants?.map((p) => Number(p.id)) || [],
-        status: "pending" // Default or fetched if available. Task type misses it currently.
+        status: "pending", // Default or fetched if available. Task type misses it currently.
       };
     }
     return undefined;
@@ -95,7 +97,7 @@ export const Calendar = () => {
         selectedDateTime={selectedDateTime}
         initialValues={getInitialValues()}
         onSuccess={handleTaskCreated}
-        mode={editEvent ? 'edit' : 'create'}
+        mode={editEvent ? "edit" : "create"}
         eventId={editEvent?.id.toString()}
       />
 
