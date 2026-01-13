@@ -20,9 +20,7 @@ export const mapStateToResolution = (
         id: 0,
         full_name: 'Неизвестный пользователь',
         position: 'Сотрудник',
-        last_name: '', first_name: '', middle_name: '', phone: '', 
-        photo_path: undefined, phone_verified_at: undefined, meta: undefined, 
-        created_at: '', updated_at: '', roles: [], permissions: []
+        photo_path: undefined
     } as IUser;
 
     const safeAuthor = currentUser ?? authorStub;

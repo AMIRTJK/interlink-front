@@ -1,5 +1,5 @@
 import { ApartmentOutlined, CheckCircleFilled } from '@ant-design/icons';
-import { IDepartment } from '../model/types';
+import { IDepartment } from '../model';
 
 interface DeptListItemProps {
     dept: IDepartment;

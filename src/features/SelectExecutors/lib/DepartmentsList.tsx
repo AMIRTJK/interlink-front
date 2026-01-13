@@ -1,6 +1,6 @@
 import React from 'react';
 import { Empty, Spin } from "antd";
-import { IDepartment } from "../model/types";
+import { IDepartment } from "../model";
 import { DeptListItem } from "./DeptListItem";
 
 interface DepartmentsListProps {

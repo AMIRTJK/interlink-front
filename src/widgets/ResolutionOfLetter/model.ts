@@ -1,4 +1,4 @@
-import { IUser } from "@entities/login";
+import { IUser } from "@features/SelectExecutors";
 
 // Статусы исполнения резолюции
 export type ResolutionStatus = 'PREPARING' | 'DONE' | 'PENDING' | 'REJECTED';

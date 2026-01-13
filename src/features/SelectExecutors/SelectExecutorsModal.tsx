@@ -3,7 +3,7 @@ import { Modal, Button, Form, Input, Row, Col } from "antd";
 import { UserOutlined, ApartmentOutlined, FilterOutlined } from "@ant-design/icons";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { IDepartment, IUser, ISelectExecutorsModalProps } from "./model/types";
+import { IDepartment, IUser, ISelectExecutorsModalProps } from "./model";
 import { UsersList, DepartmentsList } from "./lib";
 import { Tabs, SelectField } from "@shared/ui";
 import "./SelectExecutorsModal.css";

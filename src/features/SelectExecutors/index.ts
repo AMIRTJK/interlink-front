@@ -1,2 +1,2 @@
 export { SelectExecutorsModal } from "./SelectExecutorsModal";
-export * from "./model/types";
+export * from "./model";
