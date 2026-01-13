@@ -3,13 +3,11 @@
     border-bottom: 1px solid #D9DADD;
     padding-bottom: 18px;
 }
-/* Основной контейнер */
+
 .resolution-of-letter__container{
     max-width: max-content;
     padding: 0 80px;
 }
-
-/* LEFT */
 
 .resolution__left-content{
     display: flex;
@@ -17,7 +15,6 @@
     margin-right: 16px;
 }
 
-/* Блок автора */
 .resolution__author {
     display: flex;
     align-items: center;
@@ -25,7 +22,6 @@
     margin-bottom: 24px;
     padding-bottom: 20px;
     padding-top: 24px;
-
 }
 
 .resolution__author-name {
@@ -39,7 +35,6 @@
     font-size: 12px;
 }
 
-/* Форма */
 .resolution__form-container {
     max-width: 300px;
 }
@@ -49,6 +44,7 @@
     flex-direction: column;
     gap: 16px;
 }
+
 .resolution__input,
 .resolution__datepicker,
 .resolution__select .ant-select-outlined {
@@ -57,10 +53,12 @@
     padding: 16px !important;
     border-radius: 8px !important;
 }
+
 .resolution__icon {
     color: #1d4ed8 !important;
     font-size: 12px;
 }
+
 .resolution__button-executor {
     border: 1px solid #1d4ed8 !important;
     color: #1d4ed8 !important;
@@ -69,8 +67,6 @@
     padding: 19px 85px;
     margin-bottom: 32px;
 }
-
-/* Блок загрузки */
 
 .resolution__upload-section .ant-upload-drag-container{
     margin: 0 !important;
@@ -91,6 +87,7 @@
     background: #fff !important;
     text-align: left;
 }
+
 .resolution__dragger-content {
     display: flex;
     flex-direction: column;
@@ -136,9 +133,6 @@
     background-color: #002d80a7;
 }
 
-/* Теги выбранных исполнителей */
-/* КАРТОЧКА ПРЕДПРОСМОТРА  */
-
 .resolution__preview-container {
     max-width: 300px;
 }
@@ -147,7 +141,6 @@
     display: flex;
     flex-direction: column;
     gap: 18px;
-    
 }
 
 .resolution__card-signed-banner {
@@ -160,14 +153,12 @@
     border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
-    
 }
 
 .resolution__card-section {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    
 }
 
 .resolution__card-label {
@@ -175,22 +166,18 @@
     font-size: 12px;
     font-weight: 700;
     margin-bottom: 8px;
-    
 }
 
 .resolution__card-value {
     color: #1a1a1a;
     font-size: 12px;
     font-weight: 600;
-    
 }
 
-/* Исполнители в карточке */
 .resolution__card-executors {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    
 }
 
 .resolution__card-pill {
@@ -225,14 +212,12 @@
     border-radius: 50%;
 }
 
-/* Разделитель */
 .resolution__card-divider {
     height: 1px;
     background-color: #f0f0f0;
     margin: 4px 0;
 }
 
-/* Подпись */
 .resolution__signature-details {
     display: flex;
     flex-direction: column;
@@ -268,13 +253,11 @@
     font-weight: 500;
 }
 
-/* Файлы */
 .resolution__files-list {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 100px;
-
 }
 
 .resolution__file-card {
@@ -330,15 +313,12 @@
     color: #ff4d4f;
 }
 
-/* Основная кнопка */
 .resolution__action-btn {
     background-color: #003eb3;
     font-weight: 600;
     font-size: 14px;
     padding: 19px 115px;
 }
-
-/* RIGHT */
 
 .resolution__right-content{
     display: flex;
@@ -347,9 +327,11 @@
     justify-content: center;
     margin: 0 auto;
 }
+
 .resolution__right-content-action-icon{
     margin: 0 auto;
 }
+
 .resolution__right-title {
     font-weight: 700;
     margin-bottom: 2px;
@@ -366,6 +348,4 @@
 
 .resolution__button-executor-right{
     padding: 0;
-    /* font-weight: 500; */
 }
-
