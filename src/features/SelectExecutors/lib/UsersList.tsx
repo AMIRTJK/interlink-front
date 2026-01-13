@@ -1,6 +1,6 @@
 import React from 'react';
 import { Empty, Spin } from "antd";
-import { IUser } from "../model/types";
+import { IUser } from "../model";
 import { UserItem } from "./UserItem";
 
 interface UsersListProps {

@@ -1,6 +1,6 @@
 import { Tooltip } from 'antd';
 import { CheckCircleFilled } from '@ant-design/icons';
-import { IUser } from '../model/types';
+import { IUser } from '../model';
 
 interface UserItemProps {
     user: IUser;
