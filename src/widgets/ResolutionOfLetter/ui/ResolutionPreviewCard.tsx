@@ -1,6 +1,6 @@
 import { Avatar, Button, Upload } from "antd";
-import userAvatar from '../../../assets/images/user-avatar.jpg';
-import { IDepartment, IUser } from "../ui/SelectExecutorsModal";
+import userAvatar from '@shared/assets/images/user-avatar.jpg';
+import { IDepartment, IUser } from "@features/SelectExecutors";
 import { PlusOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
 import { ResolutionFileList } from "./ResolutionFileList";
 
@@ -16,7 +16,7 @@ interface IProps {
     onRemoveFile: (id: number) => void;
     onSubmit: () => void;
     isPending?: boolean;
-    isAllowed?: boolean;
+    isAllowed: boolean;
 }
 
 export const ResolutionPreviewCard: React.FC<IProps> = ({

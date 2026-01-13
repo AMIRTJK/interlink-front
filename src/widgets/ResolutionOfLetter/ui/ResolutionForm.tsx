@@ -1,6 +1,6 @@
 import { Button, Form, Input, DatePicker, Select, Upload, FormInstance } from "antd";
 import { DownOutlined, PlusOutlined } from '@ant-design/icons';
-import calendarIcon from '../../../assets/icons/calenDar.svg';
+import calendarIcon from '@shared/assets/icons/calenDar.svg';
 import { ResolutionFileList } from "./ResolutionFileList";
 
 interface IProps {
@@ -11,7 +11,7 @@ interface IProps {
     files: any[];
     onRemoveFile: (id: number) => void;
     isPending?: boolean;
-    isAllowed?: boolean;
+    isAllowed: boolean;
 }
 
 export const ResolutionForm: React.FC<IProps> = ({ 

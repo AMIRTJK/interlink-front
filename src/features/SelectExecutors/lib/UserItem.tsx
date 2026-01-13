@@ -1,6 +1,6 @@
 import { Tooltip } from 'antd';
 import { CheckCircleFilled } from '@ant-design/icons';
-import { IUser } from '../model';
+import { IUser } from '../model/types';
 
 interface UserItemProps {
     user: IUser;
@@ -8,7 +8,6 @@ interface UserItemProps {
     onToggle: (user: IUser) => void;
 }
 
-// Компонент карточки сотрудника (отображение в сетке)
 export const UserItem: React.FC<UserItemProps> = ({ user, isSelected, onToggle }) => {
     return (
         <Tooltip title={user.position || "Сотрудник"}>
@@ -30,7 +29,6 @@ export const UserItem: React.FC<UserItemProps> = ({ user, isSelected, onToggle }
                         </div>
                     )}
                 </div>
-                {/* Информация */}
             <h4 className="user__name text-center" title={user.full_name}>{user.full_name}</h4>
             <span className="user__position text-center">
                 {user.roles?.[0]?.name || user.position || "Сотрудник"}

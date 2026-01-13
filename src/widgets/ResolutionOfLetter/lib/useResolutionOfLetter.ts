@@ -1,25 +1,10 @@
 import { useState, useRef } from "react";
-import { Button, Form } from "antd";
-import { PlusOutlined } from '@ant-design/icons';
-import { SelectExecutorsModal, IDepartment, IUser } from "../ui/SelectExecutorsModal";
-import usersIcon from '../../../assets/icons/users.svg'
-import '../ResolutionOfLetter.css'
-import { If } from "@shared/ui";
-import { useMutationQuery } from "@shared/lib/hooks/useMutationQuery";
-import { useGetQuery } from "@shared/lib/hooks/useGetQuery";
+import { Form } from "antd";
+import { useMutationQuery, useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { ResolutionAuthor } from "../ui/ResolutionAuthor";
-import { ResolutionForm } from "../ui/ResolutionForm";
-import { ResolutionPreviewCard } from "../ui/ResolutionPreviewCard";
+import { IDepartment, IUser } from "@features/SelectExecutors";
 
-interface IProps {
-    resolutionerName: string;
-    mutate: (values: { [key: string]: string | number }) => void;
-    isPending: boolean;
-    isAllowed: boolean;
-}
-
-export const ResolutionContent: React.FC<IProps> = ({ resolutionerName, mutate: originalMutate, isPending: originalIsPending, isAllowed }) => {
+export const useResolutionOfLetter = () => {
     const [form] = Form.useForm();
     const [executorModalOpen, setExecutorModalOpen] = useState(false);
     const [selectedDepts, setSelectedDepts] = useState<IDepartment[]>([]);
@@ -34,12 +19,22 @@ export const ResolutionContent: React.FC<IProps> = ({ resolutionerName, mutate: 
     const { isLoading: isCorrespondenceLoading } = useGetQuery({
         url: ApiRoutes.GET_CORRESPONDENCE_BY_ID.replace(':id', correspondenceId),
         options: {
-            onSuccess: (response) => {
+            onSuccess: (response: any) => {
                 const attachments = response?.data?.attachments || response?.attachments;
                 if (attachments) {
                     setUploadedFiles(attachments);
                 }
             }
+        }
+    });
+
+    const { mutate: chooseResolutionMutate, isPending: chooseResolutionIsPending, isAllowed } = useMutationQuery({
+        url: ApiRoutes.CREATE_RESOLUTION,
+        method: "POST",
+        preload: true,
+        preloadConditional: ["correspondence.create"],
+        messages: {
+            invalidate: [ApiRoutes.GET_CORRESPONDENCES]
         }
     });
 
@@ -53,8 +48,8 @@ export const ResolutionContent: React.FC<IProps> = ({ resolutionerName, mutate: 
             error: 'Ошибка при создании резолюции'
         },
         queryOptions: {
-            onSuccess: (data) => {
-                originalMutate(data);
+            onSuccess: (data: any) => {
+                chooseResolutionMutate(data);
             }
         }
     });
@@ -137,65 +132,24 @@ export const ResolutionContent: React.FC<IProps> = ({ resolutionerName, mutate: 
     };
 
     const hasSelection = selectedDepts.length > 0 || selectedUsers.length > 0;
-    const isTotalPending = isSubmitting || originalIsPending || isUploading || isCorrespondenceLoading;
+    const isTotalPending = isSubmitting || chooseResolutionIsPending || isUploading || isCorrespondenceLoading;
 
-    return (
-        <>
-            <SelectExecutorsModal 
-                open={executorModalOpen} 
-                onCancel={() => setExecutorModalOpen(false)}
-                onOk={handleExecutorsSelected}
-                initialSelectedDepartments={selectedDepts}
-                initialSelectedUsers={selectedUsers}
-            />
-            <div className="resolution__content">
-                <div className="resolution__left-content">
-                    <ResolutionAuthor name={resolutionerName} />
-
-                    <If is={!hasSelection}>
-                        <ResolutionForm 
-                            form={form}
-                            onFinish={onFinish}
-                            onSelectExecutors={() => setExecutorModalOpen(true)}
-                            onUploadChange={handleUploadChange}
-                            files={uploadedFiles}
-                            onRemoveFile={handleRemoveFile}
-                            isPending={isTotalPending}
-                            isAllowed={isAllowed}
-                        />
-                    </If>
-
-                    <If is={hasSelection}>
-                        <ResolutionPreviewCard 
-                            resolutionerName={resolutionerName}
-                            selectedDepts={selectedDepts}
-                            selectedUsers={selectedUsers}
-                            visaValue={visaValue}
-                            onRemoveDept={handleRemoveDept}
-                            onRemoveUser={handleRemoveUser}
-                            onUploadChange={handleUploadChange}
-                            files={uploadedFiles}
-                            onRemoveFile={handleRemoveFile}
-                            onSubmit={() => form.submit()}
-                            isPending={isTotalPending}
-                            isAllowed={isAllowed}
-                        />
-                    </If>
-                </div>
-
-                <If is={!hasSelection}>
-                    <div className="resolution__right-content">
-                        <div className="resolution__right-content-action">
-                            <img className="resolution__right-content-action-icon" src={usersIcon} alt="users"/>
-                            <h3 className="resolution__right-title">Исполнители не назначены</h3>
-                            <p className="resolution__right-text">Выберите исполнителей слева</p>
-                            <Button icon={<PlusOutlined />} type="link" className="resolution__button-executor-right" onClick={() => setExecutorModalOpen(true)}>
-                                Выбрать исполнителя
-                            </Button>
-                        </div>
-                    </div>
-                </If>
-            </div>
-        </>
-    );
+    return {
+        form,
+        executorModalOpen,
+        setExecutorModalOpen,
+        selectedDepts,
+        selectedUsers,
+        uploadedFiles,
+        visaValue,
+        isTotalPending,
+        isAllowed,
+        hasSelection,
+        handleExecutorsSelected,
+        handleRemoveDept,
+        handleRemoveUser,
+        handleRemoveFile,
+        handleUploadChange,
+        onFinish
+    };
 };

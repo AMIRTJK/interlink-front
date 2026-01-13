@@ -1,5 +1,5 @@
 import { Avatar } from "antd";
-import userAvatar from '../../../assets/images/user-avatar.jpg';
+import userAvatar from '@shared/assets/images/user-avatar.jpg';
 
 interface IProps {
     name: string;

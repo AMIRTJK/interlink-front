@@ -3,7 +3,7 @@ import { FileTextOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/ic
 interface IProps {
     files: any[];
     onRemove: (id: number) => void;
-    isAllowed?: boolean;
+    isAllowed: boolean;
 }
 
 export const ResolutionFileList: React.FC<IProps> = ({ files, onRemove, isAllowed }) => {
