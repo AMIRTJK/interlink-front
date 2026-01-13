@@ -432,7 +432,6 @@
 .resolution-execution__section {
     margin-bottom: 16px;
     background: #fff;
-    padding: 8px;
     border-radius: 8px;
 }
 
@@ -446,8 +445,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    padding-left: 10px;
-    padding-right: 10px;
+    
 }
 
 .resolution-execution__executor-item {
