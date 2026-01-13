@@ -45,4 +45,17 @@ export const tokenControl = {
     localStorage.removeItem(OUTGOING_LETTER_COUNT);
   },
 
+// User data
+  setUserData: (user: any) => {
+    localStorage.setItem('interlink/userData', JSON.stringify(user));
+  },
+
+  getUserData: () => {
+    const data = localStorage.getItem('interlink/userData');
+    return data ? JSON.parse(data) : null;
+  },
+
+  removeUserData: () => {
+    localStorage.removeItem('interlink/userData');
+  }
 };

@@ -82,7 +82,15 @@ export const RenderField: React.FC<IRenderFieldProps> = ({
                             onUploadChange={handleUploadChange}
                             files={uploadedFiles}
                             onRemoveFile={handleRemoveFile}
-                            onSubmit={() => form.submit()}
+                            onSubmit={() => {
+                                form.validateFields()
+                                    .then(values => {
+                                        onFinish(values);
+                                    })
+                                    .catch(info => {
+                                        console.error('Validate Failed:', info);
+                                    });
+                            }}
                             isPending={isTotalPending}
                             isAllowed={isAllowed}
                         />

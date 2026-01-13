@@ -40,6 +40,7 @@ export const Profile = () => {
           }
         );
         setUserData(response.data.data);
+        tokenControl.setUserData(response.data.data);
       } catch (err) {
         console.error("Ошибка при получении данных пользователя:", err);
       } finally {

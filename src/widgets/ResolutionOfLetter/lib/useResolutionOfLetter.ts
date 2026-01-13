@@ -43,10 +43,6 @@ export const useResolutionOfLetter = () => {
     const { mutate: submitResolution, isPending: isSubmitting } = useMutationQuery({
         url: ApiRoutes.CREATE_RESOLUTION.replace(':id', correspondenceId),
         method: 'POST',
-        messages: {
-            success: 'Резолюция успешно создана',
-            error: 'Ошибка при создании резолюции'
-        },
         queryOptions: {
             onSuccess: (data: any) => {
                 chooseResolutionMutate(data);
@@ -57,10 +53,6 @@ export const useResolutionOfLetter = () => {
     const { mutate: uploadFilesBulk, isPending: isUploading } = useMutationQuery({
         url: ApiRoutes.CREATE_ATTACHMENTS_BULK.replace(':id', correspondenceId),
         method: 'POST',
-        messages: {
-            success: 'Файлы успешно загружены',
-            error: 'Ошибка при загрузке файлов'
-        },
         queryOptions: {
             onSuccess: (newAttachments: any[]) => {
                 setUploadedFiles(prev => [...prev, ...newAttachments]);
@@ -71,10 +63,6 @@ export const useResolutionOfLetter = () => {
     const { mutate: deleteAttachment } = useMutationQuery({
         url: (id) => ApiRoutes.DELETE_ATTACHMENT.replace(':id', String(id)),
         method: 'DELETE',
-        messages: {
-            success: 'Файл удален',
-            error: 'Ошибка при удалении файла'
-        }
     });
 
     const handleExecutorsSelected = (departments: IDepartment[], users: IUser[]) => {
@@ -127,8 +115,14 @@ export const useResolutionOfLetter = () => {
         }, 300);
     };
 
+
+    // Состояние для открытия режима просмотра (Execution View)
+    const [executionModalOpen, setExecutionModalOpen] = useState(false);
+
     const onFinish = (values: any) => {
+        // Запрос отправляется, но мы показываем результат сразу 
         submitResolution(values);
+        setExecutionModalOpen(true);
     };
 
     const hasSelection = selectedDepts.length > 0 || selectedUsers.length > 0;
@@ -138,6 +132,8 @@ export const useResolutionOfLetter = () => {
         form,
         executorModalOpen,
         setExecutorModalOpen,
+        executionModalOpen,      // <-- Новое состояние
+        setExecutionModalOpen,   // <-- Сеттер
         selectedDepts,
         selectedUsers,
         uploadedFiles,
