@@ -3,6 +3,7 @@ import { Modal } from "antd";
 import { useResolutionOfLetter } from "./lib/useResolutionOfLetter";
 import { RenderField } from "./lib/renderField";
 import { tokenControl } from "@shared/lib";
+import { Breadcrumbs } from "@shared/ui";
 import { ResolutionExecution } from "./ui/ResolutionExecution";
 import { mapStateToResolution } from "./lib/mappers";
 import './ui/ResolutionOfLetter.css';
@@ -58,7 +59,14 @@ export const ResolutionOfLetter: React.FC<IProps> = ({ setIsLetterExecutionVisib
         <div className="resolution-of-letter__container">
             {/* Форма создания резолюции */}
             <Modal
-                title={<div className="flex items-center gap-4"><span>Резолюция</span> <span className="text-gray-400 font-normal text-sm">Область визирующего</span></div>}
+                title={
+                    <Breadcrumbs 
+                        items={[
+                            { label: 'Документ', onClick: () => setIsLetterExecutionVisible(false) },
+                            { label: 'Резолюция', isActive: true }
+                        ]} 
+                    />
+                }
                 open={!executionModalOpen} // Скрываем, когда открыт режим просмотра
                 width={1200}
                 onCancel={() => setIsLetterExecutionVisible(false)}
