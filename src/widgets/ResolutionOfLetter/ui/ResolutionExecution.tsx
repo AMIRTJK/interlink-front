@@ -7,18 +7,19 @@ import { ResolutionExecutionLayout } from "./ResolutionExecutionLayout";
 interface IProps {
     open: boolean;
     onCancel: () => void;
+    onBack: () => void;
     resolution: IResolution;
 }
 
 // Главный компонент режима просмотра резолюции
-export const ResolutionExecution: React.FC<IProps> = ({ open, onCancel, resolution }) => {
+export const ResolutionExecution: React.FC<IProps> = ({ open, onCancel, onBack, resolution }) => {
     return (
         <Modal
             title={
                 <Breadcrumbs 
                     items={[
                         { label: 'Документ', onClick: onCancel },
-                        { label: 'Область визирующего', isActive: true },
+                        { label: 'Область визирующего', onClick: onBack },
                         { label: 'Резолюция', isActive: true }
                     ]} 
                 />

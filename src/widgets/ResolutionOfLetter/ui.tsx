@@ -96,9 +96,12 @@ export const ResolutionOfLetter: React.FC<IProps> = ({ setIsLetterExecutionVisib
             <ResolutionExecution 
                 open={executionModalOpen} 
                 resolution={previewResolution}
+                onBack={() => {
+                    setExecutionModalOpen(false);
+                }}
                 onCancel={() => {
                     setExecutionModalOpen(false);
-                    setIsLetterExecutionVisible(false); // Закрыть всё при закрытии
+                    setIsLetterExecutionVisible(false);
                 }}
             />
         </div>
