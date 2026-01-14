@@ -3,6 +3,7 @@ import { Modal } from "antd";
 import { useResolutionOfLetter } from "./lib/useResolutionOfLetter";
 import { RenderField } from "./lib/renderField";
 import { tokenControl } from "@shared/lib";
+import { Breadcrumbs } from "@shared/ui";
 import { ResolutionExecution } from "./ui/ResolutionExecution";
 import { mapStateToResolution } from "./lib/mappers";
 import './ui/ResolutionOfLetter.css';
@@ -40,8 +41,6 @@ export const ResolutionOfLetter: React.FC<IProps> = ({ setIsLetterExecutionVisib
         isAllowed,
         hasSelection,
         handleExecutorsSelected,
-        handleRemoveDept,
-        handleRemoveUser,
         handleRemoveFile,
         handleUploadChange,
         onFinish
@@ -60,27 +59,33 @@ export const ResolutionOfLetter: React.FC<IProps> = ({ setIsLetterExecutionVisib
         <div className="resolution-of-letter__container">
             {/* Форма создания резолюции */}
             <Modal
-                title="Резолюция"
+                title={
+                    <Breadcrumbs 
+                        items={[
+                            { label: 'Документ', onClick: () => setIsLetterExecutionVisible(false) },
+                            { label: 'Резолюция', isActive: true }
+                        ]} 
+                    />
+                }
                 open={!executionModalOpen} // Скрываем, когда открыт режим просмотра
                 width={1200}
                 onCancel={() => setIsLetterExecutionVisible(false)}
                 footer={null}
+                className="resolution-execution-modal"
             >
                 <RenderField 
                     resolutionerName={currentUserName}
+                    previewResolution={previewResolution}
                     form={form}
                     executorModalOpen={executorModalOpen}
                     setExecutorModalOpen={setExecutorModalOpen}
                     selectedDepts={selectedDepts}
                     selectedUsers={selectedUsers}
                     uploadedFiles={uploadedFiles}
-                    visaValue={visaValue}
                     isTotalPending={isTotalPending ?? false}
                     isAllowed={isAllowed ?? false}
                     hasSelection={hasSelection}
                     handleExecutorsSelected={handleExecutorsSelected}
-                    handleRemoveDept={handleRemoveDept}
-                    handleRemoveUser={handleRemoveUser}
                     handleRemoveFile={handleRemoveFile}
                     handleUploadChange={handleUploadChange}
                     onFinish={onFinish}
@@ -91,9 +96,12 @@ export const ResolutionOfLetter: React.FC<IProps> = ({ setIsLetterExecutionVisib
             <ResolutionExecution 
                 open={executionModalOpen} 
                 resolution={previewResolution}
+                onBack={() => {
+                    setExecutionModalOpen(false);
+                }}
                 onCancel={() => {
                     setExecutionModalOpen(false);
-                    setIsLetterExecutionVisible(false); // Закрыть всё при закрытии
+                    setIsLetterExecutionVisible(false);
                 }}
             />
         </div>

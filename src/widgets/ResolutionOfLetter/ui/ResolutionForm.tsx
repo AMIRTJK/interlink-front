@@ -61,7 +61,7 @@ export const ResolutionForm: React.FC<IProps> = ({
                     </Button>
                 </div>
 
-                <div className="resolution__upload-section">
+                <div className="resolution__upload-section bg-[white]!">
                     <Upload.Dragger 
                         className="resolution__dragger"
                         multiple

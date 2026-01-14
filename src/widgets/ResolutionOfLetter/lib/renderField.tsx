@@ -1,26 +1,27 @@
+import React from "react";
 import { Button, FormInstance } from "antd";
 import { PlusOutlined } from '@ant-design/icons';
 import { SelectExecutorsModal, IDepartment, IUser } from "@features/SelectExecutors";
 import { If } from "@shared/ui";
 import { ResolutionAuthor } from "../ui/ResolutionAuthor";
 import { ResolutionForm } from "../ui/ResolutionForm";
-import { ResolutionPreviewCard } from "../ui/ResolutionPreviewCard";
+import { ResolutionExecutionLayout } from "../ui/ResolutionExecutionLayout";
+import { IResolution } from "../model";
 import usersIcon from '../../../assets/icons/users.svg'
+
 interface IRenderFieldProps {
     resolutionerName: string;
+    previewResolution: IResolution;
     form: FormInstance;
     executorModalOpen: boolean;
     setExecutorModalOpen: (open: boolean) => void;
     selectedDepts: IDepartment[];
     selectedUsers: IUser[];
     uploadedFiles: any[];
-    visaValue: any;
     isTotalPending: boolean;
     isAllowed: boolean;
     hasSelection: boolean;
     handleExecutorsSelected: (departments: IDepartment[], users: IUser[]) => void;
-    handleRemoveDept: (id: number) => void;
-    handleRemoveUser: (id: number) => void;
     handleRemoveFile: (id: number) => void;
     handleUploadChange: (info: any) => void;
     onFinish: (values: any) => void;
@@ -28,19 +29,17 @@ interface IRenderFieldProps {
 
 export const RenderField: React.FC<IRenderFieldProps> = ({
     resolutionerName,
+    previewResolution,
     form,
     executorModalOpen,
     setExecutorModalOpen,
     selectedDepts,
     selectedUsers,
     uploadedFiles,
-    visaValue,
     isTotalPending,
     isAllowed,
     hasSelection,
     handleExecutorsSelected,
-    handleRemoveDept,
-    handleRemoveUser,
     handleRemoveFile,
     handleUploadChange,
     onFinish
@@ -54,11 +53,11 @@ export const RenderField: React.FC<IRenderFieldProps> = ({
                 initialSelectedDepartments={selectedDepts}
                 initialSelectedUsers={selectedUsers}
             />
-            <div className="resolution__content">
-                <div className="resolution__left-content">
-                    <ResolutionAuthor name={resolutionerName} />
-
-                    <If is={!hasSelection}>
+            
+            <If is={!hasSelection}>
+                <div className="resolution__content">
+                    <div className="resolution__left-content">
+                        <ResolutionAuthor name={resolutionerName} />
                         <ResolutionForm 
                             form={form}
                             onFinish={onFinish}
@@ -69,35 +68,7 @@ export const RenderField: React.FC<IRenderFieldProps> = ({
                             isPending={isTotalPending}
                             isAllowed={isAllowed}
                         />
-                    </If>
-
-                    <If is={hasSelection}>
-                        <ResolutionPreviewCard 
-                            resolutionerName={resolutionerName}
-                            selectedDepts={selectedDepts}
-                            selectedUsers={selectedUsers}
-                            visaValue={visaValue}
-                            onRemoveDept={handleRemoveDept}
-                            onRemoveUser={handleRemoveUser}
-                            onUploadChange={handleUploadChange}
-                            files={uploadedFiles}
-                            onRemoveFile={handleRemoveFile}
-                            onSubmit={() => {
-                                form.validateFields()
-                                    .then(values => {
-                                        onFinish(values);
-                                    })
-                                    .catch(info => {
-                                        console.error('Validate Failed:', info);
-                                    });
-                            }}
-                            isPending={isTotalPending}
-                            isAllowed={isAllowed}
-                        />
-                    </If>
-                </div>
-
-                <If is={!hasSelection}>
+                    </div>
                     <div className="resolution__right-content">
                         <div className="resolution__right-content-action">
                             <img className="resolution__right-content-action-icon" src={usersIcon} alt="users"/>
@@ -108,8 +79,26 @@ export const RenderField: React.FC<IRenderFieldProps> = ({
                             </Button>
                         </div>
                     </div>
-                </If>
-            </div>
+                </div>
+            </If>
+
+            <If is={hasSelection}>
+                <ResolutionExecutionLayout 
+                    resolution={previewResolution}
+                    actionButton={
+                        <Button 
+                            type="primary" 
+                            className="resolution-execution__main-btn" 
+                            onClick={() => {
+                                form.validateFields().then(onFinish);
+                            }}
+                            loading={isTotalPending}
+                        >
+                            Визировать
+                        </Button>
+                    }
+                />
+            </If>
         </>
     );
 };

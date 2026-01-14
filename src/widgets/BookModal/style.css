@@ -212,7 +212,7 @@
 }
 .content .modal-header-half {
   position: relative;
-  justify-content: flex-end;
+  justify-content: space-between;
   border-top-right-radius: 10px;
   margin-right: 24px;
 }

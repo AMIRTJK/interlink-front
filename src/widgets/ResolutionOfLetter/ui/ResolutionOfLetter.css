@@ -12,6 +12,13 @@
 .resolution__content {
     display: flex;
     gap: 40px;
+    width: 100%;
+}
+
+.resolution__right-content-selection {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 40px;
 }
 
 .resolution__left-content{
@@ -425,13 +432,15 @@
 .resolution-execution__details-card {
     border-radius: 16px;
     border: 1px solid #c6f6d5;
-    padding: 10px;
+    /* padding: 10px; */
     /* padding: 20px; */
 }
 
 .resolution-execution__section {
     margin-bottom: 16px;
     background: #fff;
+    padding: 10px;
+    margin: 0 10px 10px 10px;
     border-radius: 8px;
 }
 
@@ -462,8 +471,9 @@
 
 .resolution-execution__signature-info {
     border-radius: 12px;
-  padding: 10px;
     background: #e6f7e9;
+    margin: 0 10px 10px 10px;
+    padding: 10px;
 }
 
 .resolution-execution__signer-name {

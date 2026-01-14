@@ -10,7 +10,7 @@ import downloadAllFilesIcon from "../../assets/icons/download-all-files-icon.svg
 import pdfIcon from "../../assets/icons/pdf-icon.svg";
 import xlsIcon from "../../assets/icons/xls-icon.svg";
 import docIcon from "../../assets/icons/doc-icon.svg";
-import { If } from "@shared/ui";
+import { If, Breadcrumbs } from "@shared/ui";
 import { ResolutionOfLetter } from "@widgets/ResolutionOfLetter";
 
 // Подключение воркера
@@ -601,6 +601,10 @@ export const BookModal: React.FC<BookModalProps> = ({
           {/* ПРАВАЯ ЧАСТЬ */}
           <div className="content">
             <div className="modal-header-half">
+               <Breadcrumbs 
+                items={[{ label: 'Документ', isActive: true }]} 
+                style={{ marginLeft: '24px' }}
+              />
               <button className="close-btn" onClick={onClose}>
                 <svg
                   width="14"
