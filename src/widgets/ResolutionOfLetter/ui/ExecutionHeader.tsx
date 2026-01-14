@@ -13,9 +13,10 @@ import { IResolution } from "../model";
 
 interface IProps {
     resolution: IResolution;
+    actionButton?: React.ReactNode;
 }
 
-export const ExecutionHeader: React.FC<IProps> = ({ resolution }) => {
+export const ExecutionHeader: React.FC<IProps> = ({ resolution, actionButton }) => {
     return (
         <div className="resolution-execution__header">
             <div className="resolution-execution__header-info">
@@ -51,9 +52,13 @@ export const ExecutionHeader: React.FC<IProps> = ({ resolution }) => {
             </div>
 
             {/* Главная кнопка действия (самое видное место) */}
-            <Button type="primary" size="large" className="resolution-execution__main-btn">
-                Подготовить ответ
-            </Button>
+            {actionButton ? (
+                actionButton
+            ) : (
+                <Button type="primary" size="large" className="resolution-execution__main-btn">
+                    Подготовить ответ
+                </Button>
+            )}
         </div>
     );
 };

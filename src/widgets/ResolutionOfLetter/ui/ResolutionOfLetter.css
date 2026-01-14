@@ -12,6 +12,13 @@
 .resolution__content {
     display: flex;
     gap: 40px;
+    width: 100%;
+}
+
+.resolution__right-content-selection {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 40px;
 }
 
 .resolution__left-content{

@@ -40,8 +40,6 @@ export const ResolutionOfLetter: React.FC<IProps> = ({ setIsLetterExecutionVisib
         isAllowed,
         hasSelection,
         handleExecutorsSelected,
-        handleRemoveDept,
-        handleRemoveUser,
         handleRemoveFile,
         handleUploadChange,
         onFinish
@@ -60,27 +58,26 @@ export const ResolutionOfLetter: React.FC<IProps> = ({ setIsLetterExecutionVisib
         <div className="resolution-of-letter__container">
             {/* Форма создания резолюции */}
             <Modal
-                title="Резолюция"
+                title={<div className="flex items-center gap-4"><span>Резолюция</span> <span className="text-gray-400 font-normal text-sm">Область визирующего</span></div>}
                 open={!executionModalOpen} // Скрываем, когда открыт режим просмотра
                 width={1200}
                 onCancel={() => setIsLetterExecutionVisible(false)}
                 footer={null}
+                className="resolution-execution-modal"
             >
                 <RenderField 
                     resolutionerName={currentUserName}
+                    previewResolution={previewResolution}
                     form={form}
                     executorModalOpen={executorModalOpen}
                     setExecutorModalOpen={setExecutorModalOpen}
                     selectedDepts={selectedDepts}
                     selectedUsers={selectedUsers}
                     uploadedFiles={uploadedFiles}
-                    visaValue={visaValue}
                     isTotalPending={isTotalPending ?? false}
                     isAllowed={isAllowed ?? false}
                     hasSelection={hasSelection}
                     handleExecutorsSelected={handleExecutorsSelected}
-                    handleRemoveDept={handleRemoveDept}
-                    handleRemoveUser={handleRemoveUser}
                     handleRemoveFile={handleRemoveFile}
                     handleUploadChange={handleUploadChange}
                     onFinish={onFinish}

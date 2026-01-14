@@ -19,7 +19,7 @@ interface IProps {
 export const ResolutionInfoSidebar: React.FC<IProps> = ({ resolution }) => {
     return (
         <div className="resolution-execution__sidebar">
-            {/* Карточка автора резолюции (тот, кто всё затеял) */}
+            {/* Карточка автора резолюции */}
             <div className="resolution-execution__author-card">
                 <div className="resolution-execution__author-header">
                     <Avatar src={userAvatar} size={48} />
@@ -44,14 +44,9 @@ export const ResolutionInfoSidebar: React.FC<IProps> = ({ resolution }) => {
                     <p className="resolution-execution__text">{resolution.description}</p>
                 </div>
 
-                {/* Текстовый список исполнителей (дублирует визуальный список справа, но компактнее) */}
                 <div className="resolution-execution__section">
                     <span className="resolution__card-label">Исполнители</span>
                     <div className="resolution-execution__executors-list">
-                        <div className="resolution-execution__executor-item">
-                            <Avatar src={userAvatar} size={20} />
-                            <span>{resolution.mainExecutor.full_name}</span>
-                        </div>
                         {resolution.executors.map(ex => (
                             <div key={ex.id} className="resolution-execution__executor-item">
                                 <Avatar src={userAvatar} size={20} />
@@ -61,7 +56,7 @@ export const ResolutionInfoSidebar: React.FC<IProps> = ({ resolution }) => {
                     </div>
                 </div>
 
-                {/* Техническая инфа о подписи (дата, статус сертификата) */}
+                {/* Техническая инфа о подписи */}
                 <div className="resolution-execution__signature-info">
                     <span className="resolution__card-label">Электронная подпись</span>
                     <span className="resolution-execution__signer-name">{resolution.author.full_name}</span>
@@ -80,7 +75,7 @@ export const ResolutionInfoSidebar: React.FC<IProps> = ({ resolution }) => {
                 </div>
             </div>
 
-            {/* Список прикрепленных файлов (доки, сканы и т.д.) */}
+            {/* Список прикрепленных файлов */}
             <div className="resolution-execution__files">
                 {/* Используем уже готовый компонент списка файлов в режиме только чтение */}
                 <ResolutionFileList 

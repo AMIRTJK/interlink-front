@@ -49,16 +49,7 @@ export const mapStateToResolution = (
             statusText: 'Подготовка заключения',
             isMain: index === 0
         })),
-        conclusions: [
-            // Добавляем пример заключения, чтобы мы видели, как выглядит карточка.
-            // В проде при создании их нет, но для демо оставим.
-            {
-                id: 999,
-                author: safeAuthor, // Автор заключения - текущий юзер
-                date: new Date().toLocaleDateString() + ', ' + new Date().toLocaleTimeString().slice(0, 5),
-                status: 'DONE'
-            }
-        ],
+        conclusions: [],
         files: uploadedFiles,
         status: 'Подготовка заключения'
     };

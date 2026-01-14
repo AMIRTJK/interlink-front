@@ -9,7 +9,7 @@ export interface IExecutor {
     user: IUser;
     role: string; // Номер исполнителя или роль
     status: ResolutionStatus;
-    statusText: string; // Текст статуса (например, "Подготовка заключения")
+    statusText: string; // Текст статуса
     isMain?: boolean; // Главный исполнитель или нет
 }
 
