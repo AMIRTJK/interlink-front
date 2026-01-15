@@ -30,7 +30,9 @@ export interface IUser {
 export interface ISelectExecutorsModalProps {
     open: boolean;
     onCancel: () => void;
-    onOk: (departments: IDepartment[], users: IUser[]) => void;
+    onOk: (departments: IDepartment[], users: IUser[], mainUserId?: number, mainDeptId?: number) => void;
     initialSelectedDepartments?: IDepartment[];
     initialSelectedUsers?: IUser[];
+    initialMainUserId?: number;
+    initialMainDeptId?: number;
 }

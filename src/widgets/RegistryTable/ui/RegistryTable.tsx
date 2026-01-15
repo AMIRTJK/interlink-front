@@ -16,17 +16,18 @@ interface RegistryTableProps<T extends Record<string, unknown>> {
   isLoading?: boolean;
   type: string;
   createButtonText?: string;
-  extraParams?: Record<string, any>;
+  extraParams?: Record<string, unknown>;
 }
 
 export const RegistryTable = <T extends Record<string, unknown>>({
-  data,
   isLoading,
   createButtonText,
   type,
   extraParams,
 }: RegistryTableProps<T>) => {
-  const [currentTab, setCurrentTab] = useState(extraParams?.tab || "draft");
+  const tabFromParams = extraParams?.tab;
+  const initialTab = typeof tabFromParams === 'string' ? tabFromParams : "draft";
+  const [currentTab, setCurrentTab] = useState(initialTab);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -47,15 +48,11 @@ export const RegistryTable = <T extends Record<string, unknown>>({
     params: extraParams?.kind ? { kind: extraParams.kind } : {},
   });
 
-  const tabCounts = useMemo(() => countersData?.data || {}, [countersData]);
+  const tabCounts = useMemo(() => (countersData as Record<string, any>)?.data || {}, [countersData]);
 
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [isBookOpen, setIsBookOpen] = useState(false);
   const [expandedRowKeys, setExpandedRowKeys] = useState<readonly React.Key[]>(
     []
   );
-  // const [isClosable, setIsClosable] = useState(false);
-  // const [isAnimationFinished, setIsAnimationFinished] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -63,79 +60,51 @@ export const RegistryTable = <T extends Record<string, unknown>>({
     setIsModalOpen(true);
   };
 
-  // const handleShowDoc = () => {
-  //   setIsModalOpen(true);
-  //   setIsClosable(false);
-  //   setIsAnimationFinished(false);
-
-  //   setTimeout(() => {
-  //     setIsBookOpen(true);
-  //     setTimeout(() => {
-  //       setIsAnimationFinished(true);
-  //       setIsClosable(true);
-  //     }, 400);
-  //   }, 500);
-  // };
-
-  // const handleCloseModal = () => {
-  //   setIsAnimationFinished(false);
-  //   setIsBookOpen(false);
-  //   setTimeout(() => {
-  //     setIsClosable(false);
-  //   }, 800);
-
-  //   setTimeout(() => {
-  //     setIsModalOpen(false);
-  //   }, 1500);
-  // };
-
   const showTabs = !!extraParams?.kind;
 
-  const expandedRowRender = (record: any) => {
+  const expandedRowRender = (record: T) => {
     return (
       <div className="p-4 bg-[#F2F5FF]">
         <div className="flex justify-between items-start gap-6">
-          {/* Левая часть — данные */}
           <div className="flex-1">
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <span className="text-[#6D8AC9] mb-0.5 block">
                   Отправитель:
                 </span>
-                <p>{record.sender_name}</p>
+                <p>{record.sender_name as string}</p>
               </div>
 
               <div>
                 <span className="text-[#6D8AC9] mb-0.5 block">Тема:</span>
-                <p>{record.subject}</p>
+                <p>{record.subject as string}</p>
               </div>
 
               <div>
-                f <span className="text-[#6D8AC9] mb-0.5 block">Дата:</span>
-                <p>{record.created_at}</p>
+                <span className="text-[#6D8AC9] mb-0.5 block">Дата:</span>
+                <p>{record.created_at as string}</p>
               </div>
 
               <div>
                 <span className="text-[#6D8AC9] mb-0.5 block">
                   Входящий номер:
                 </span>
-                <p>{record.incomingNumber}</p>
+                <p>{record.incomingNumber as string}</p>
               </div>
 
               <div>
                 <span className="text-[#6D8AC9] mb-0.5 block">
                   Исходящий номер:
                 </span>
-                <p>{record.outgoingNumber}</p>
+                <p>{record.outgoingNumber as string}</p>
               </div>
               <div>
                 <span className="text-[#6D8AC9] mb-0.5 block">Статус:</span>
-                <p>{record.status}</p>
+                <p>{record.status as string}</p>
               </div>
             </div>
           </div>
 
-          {/* Правая часть — кнопки */}
           <div className="flex flex-col gap-2">
             <Button
               type="default"
@@ -144,6 +113,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
               icon={executionIcon}
               iconAlt="execution"
               className="bg-[#0037AF]! text-white!"
+              onClick={() => navigate(`/modules/correspondence/${record.id}/execution`)}
             />
             <Button
               className="border-[#0037AF]! text-[#0037AF]! font-medium!"
@@ -194,15 +164,15 @@ export const RegistryTable = <T extends Record<string, unknown>>({
             filters={filters}
             columns={columns}
             className="[&_.ant-table-cell]:rounded-none! [&_.ant-pagination]:px-4! [&_.ant-table-row]:cursor-pointer [&_.ant-table-expanded-row.ant-table-expanded-row-level-1>td]:bg-[#F2F5FF]!"
-            rowClassName={(record: any) =>
-              expandedRowKeys.includes(record.id)
+            rowClassName={(record: T) =>
+              expandedRowKeys.includes(record.id as number)
                 ? "[&>td]:bg-[#E9F0FF]! hover:[&>td]:bg-[#E9F0FF]!"
                 : ""
             }
             direction={1}
             autoFilter={true}
             queryParams={{
-              ...extraParams,
+              ...extraParams as Record<string, unknown>,
               ...(showTabs ? { status: currentTab } : {}),
             }}
             scroll={{}}
@@ -213,7 +183,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
               expandRowByClick: true,
               expandedRowKeys: expandedRowKeys,
               onExpand: (expanded, record) => {
-                const key = record.id;
+                const key = record.id as number;
                 setExpandedRowKeys(
                   expanded
                     ? [...expandedRowKeys, key]
@@ -226,13 +196,6 @@ export const RegistryTable = <T extends Record<string, unknown>>({
         </div>
       </div>
       <BookModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-      {/* <DocView
-        open={isModalOpen}
-        bookOpen={isBookOpen}
-        onClose={handleCloseModal}
-        closable={isClosable}
-        isAnimationFinished={isAnimationFinished}
-      /> */}
     </>
   );
 };

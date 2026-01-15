@@ -1,83 +1,74 @@
 import React from "react";
 import { Avatar } from "antd";
-import { SafetyCertificateOutlined } from "@ant-design/icons";
+import { SafetyCertificateOutlined, CrownFilled } from "@ant-design/icons";
 import userAvatar from '../../../assets/images/user-avatar.jpg'
 import { IResolution } from "../model";
 import { ResolutionFileList } from "./ResolutionFileList";
-
-/**
- * Боковая панель с детальной информацией (слева).
- * Содержит данные об авторе (кто выдал резолюцию), 
- * текст основания, список прикрепленных исполнителей и файлов.
- * Также отображает статус электронной подписи.
- */
-
+// Свойства боковой панели информации
 interface IProps {
-    resolution: IResolution;
+    resolution: IResolution; // Объект резолюции
 }
-
+// Боковая панель с деталями резолюции (ЭЦП, Основание, Исполнители)
 export const ResolutionInfoSidebar: React.FC<IProps> = ({ resolution }) => {
     return (
         <div className="resolution-execution__sidebar">
-            {/* Карточка автора резолюции */}
-            <div className="resolution-execution__author-card">
-                <div className="resolution-execution__author-header">
-                    <Avatar src={userAvatar} size={48} />
-                    <div className="resolution-execution__author-info">
-                        <span className="resolution-execution__author-name">{resolution.author.full_name}</span>
-                        <span className="resolution-execution__author-role">{resolution.author.position}</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Основной блок с деталями: текст, исполнители, подпись */}
             <div className="resolution-execution__details-card">
-                {/* Баннер "Подписано ЭЦП" - для важности */}
+                
+                {/* Шапка: Статус электронной подписи */}
                 <div className="resolution__card-signed-banner">
-                    <SafetyCertificateOutlined />
+                    <SafetyCertificateOutlined className="text-xl" />
                     <span>Подписано электронной подписью</span>
                 </div>
 
-                {/* Основание / Суть задачи */}
+                {/* Техническая информация об ЭЦП */}
+                <div className="resolution-execution__signature-info">
+                    <span className="resolution__card-label">Электронная подпись</span>
+                    <span className="resolution-execution__signer-name">{resolution.author.full_name}</span>
+                    
+                    {/* Сведения о времени и валидности */}
+                    <div className="resolution-execution__signature-row">
+                        <span>Дата и время:</span>
+                        <span className="text-blue-700 font-bold">23.07.2025 • 14:32</span>
+                    </div>
+                    
+                    <div className="resolution-execution__signature-row">
+                        <span>Сертификат:</span>
+                        <span className="text-green-600 font-bold">Действителен</span>
+                    </div>
+
+                    {/* Ссылка на детали сертификата */}
+                    <a href="#" className="resolution-execution__link">Подробнее о подписи</a>
+                </div>
+
+                {/* Текст основания резолюции */}
                 <div className="resolution-execution__section">
                     <span className="resolution__card-label">Основание</span>
                     <p className="resolution-execution__text">{resolution.description}</p>
                 </div>
 
+                {/* Список исполнителей в виде интерактивных «пилюль» */}
                 <div className="resolution-execution__section">
                     <span className="resolution__card-label">Исполнители</span>
                     <div className="resolution-execution__executors-list">
-                        {resolution.executors.map(ex => (
-                            <div key={ex.id} className="resolution-execution__executor-item">
-                                <Avatar src={userAvatar} size={20} />
-                                <span>{ex.user.full_name}</span>
-                            </div>
-                        ))}
+                        {resolution.executors.map(ex => {
+                            const isMain = ex.isMain;
+                            return (
+                                <div 
+                                    key={ex.id} 
+                                    className={`resolution-execution__executor-item ${isMain ? 'resolution-execution__executor-item--main' : ''}`}
+                                >
+                                    <Avatar src={userAvatar} size={24} />
+                                    <span>{ex.user.full_name}</span>
+                                    {isMain && <CrownFilled className="text-black opacity-80" />}
+                                </div>
+                            );
+                        })}
                     </div>
-                </div>
-
-                {/* Техническая инфа о подписи */}
-                <div className="resolution-execution__signature-info">
-                    <span className="resolution__card-label">Электронная подпись</span>
-                    <span className="resolution-execution__signer-name">{resolution.author.full_name}</span>
-                    
-                    <div className="resolution-execution__signature-row">
-                        <span>Дата и время:</span>
-                        <span className="text-blue-600 font-medium">23.07.2025, 14:32</span>
-                    </div>
-                    
-                    <div className="resolution-execution__signature-row">
-                        <span>Сертификат:</span>
-                        <span className="text-green-500 font-medium">Действителен</span>
-                    </div>
-
-                    <a href="#" className="resolution-execution__link">Подробнее о подписи</a>
                 </div>
             </div>
 
-            {/* Список прикрепленных файлов */}
-            <div className="resolution-execution__files">
-                {/* Используем уже готовый компонент списка файлов в режиме только чтение */}
+            {/* Блок прикрепленных файлов (только для чтения) */}
+            <div className="resolution-execution__files mt-4">
                 <ResolutionFileList 
                     files={resolution.files} 
                     onRemove={() => {}} 

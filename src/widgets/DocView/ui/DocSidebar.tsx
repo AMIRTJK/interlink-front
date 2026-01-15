@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "antd";
+import { useNavigate, useParams } from "react-router-dom";
 import { IDocFile } from "../model";
 // Импорт иконок файлов
 import pdfIcon from "../../../assets/icons/Pdf.svg";
@@ -22,13 +23,15 @@ export const DocSidebar: React.FC<IProps> = ({
   activeFileId,
   onFileSelect,
 }) => {
+  const navigate = useNavigate();
+  const { id } = useParams();
   // Карта иконок
   const ICON_MAP: Record<string, string> = {
     pdf: pdfIcon,
     xls: excelIcon,
     doc: wordIcon,
   };
-  const [isLetterExecutionVisible, setIsLetterExecutionVisible] = useState(false);
+  const [isLetterExecutionVisible, setIsLetterExecutionVisible] = React.useState(false);
 
 
   return (
@@ -73,7 +76,12 @@ export const DocSidebar: React.FC<IProps> = ({
         <Button danger className="action-btn">
           Отказать
         </Button>
-        <Button className="action-btn">Ознакомлен</Button>
+        <Button
+          className="action-btn"
+          onClick={() => navigate(`/modules/correspondence/${id}/execution`)}
+        >
+          Исполнение
+        </Button>
         <Button type="primary" className="action-btn" onClick={() => setIsLetterExecutionVisible(true)}>
            Создать визу
         </Button>

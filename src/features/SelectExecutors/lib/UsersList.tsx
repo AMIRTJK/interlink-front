@@ -7,12 +7,23 @@ interface UsersListProps {
     loading: boolean;
     users: IUser[];
     selectedUsers: IUser[];
+    mainUserId?: number;
     onToggle: (user: IUser) => void;
+    onSetMain: (id: number) => void;
     pagination?: { current_page: number; last_page: number };
     onPageChange?: (page: number) => void;
 }
 
-export const UsersList: React.FC<UsersListProps> = ({ loading, users, selectedUsers, onToggle, pagination, onPageChange }) => {
+export const UsersList: React.FC<UsersListProps> = ({ 
+    loading, 
+    users, 
+    selectedUsers, 
+    mainUserId,
+    onToggle, 
+    onSetMain,
+    pagination, 
+    onPageChange 
+}) => {
     if (loading) return <div className="text-center py-10"><Spin /></div>;
     
     if (users.length === 0) {
@@ -27,7 +38,9 @@ export const UsersList: React.FC<UsersListProps> = ({ loading, users, selectedUs
                         key={user.id} 
                         user={user}
                         isSelected={!!selectedUsers.find(u => u.id === user.id)}
+                        isMain={mainUserId === user.id}
                         onToggle={onToggle}
+                        onSetMain={onSetMain}
                     />
                 ))}
             </div>
