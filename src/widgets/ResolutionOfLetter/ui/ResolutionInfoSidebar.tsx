@@ -4,12 +4,10 @@ import { SafetyCertificateOutlined, CrownFilled } from "@ant-design/icons";
 import userAvatar from '../../../assets/images/user-avatar.jpg'
 import { IResolution } from "../model";
 import { ResolutionFileList } from "./ResolutionFileList";
-
 // Свойства боковой панели информации
 interface IProps {
     resolution: IResolution; // Объект резолюции
 }
-
 // Боковая панель с деталями резолюции (ЭЦП, Основание, Исполнители)
 export const ResolutionInfoSidebar: React.FC<IProps> = ({ resolution }) => {
     return (
