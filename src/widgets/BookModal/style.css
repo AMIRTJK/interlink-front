@@ -254,6 +254,7 @@
   align-items: center;
   justify-content: center;
   transition: 0.2s;
+  margin-left: auto;
 }
 .close-btn:hover {
   background: #dbeafe;
