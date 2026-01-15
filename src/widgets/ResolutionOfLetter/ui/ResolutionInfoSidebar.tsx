@@ -1,6 +1,6 @@
 import React from "react";
 import { Avatar } from "antd";
-import { SafetyCertificateOutlined, SafetyCertificateFilled, CrownFilled } from "@ant-design/icons";
+import { SafetyCertificateOutlined, CrownFilled } from "@ant-design/icons";
 import userAvatar from '../../../assets/images/user-avatar.jpg'
 import { IResolution } from "../model";
 import { ResolutionFileList } from "./ResolutionFileList";
