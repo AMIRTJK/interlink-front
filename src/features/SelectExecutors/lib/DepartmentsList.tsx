@@ -7,12 +7,23 @@ interface DepartmentsListProps {
     loading: boolean;
     departments: IDepartment[];
     selectedDepartments: IDepartment[];
+    mainDeptId?: number;
     onToggle: (dept: IDepartment) => void;
+    onSetMain: (id: number) => void;
     pagination?: { current_page: number; last_page: number };
     onPageChange?: (page: number) => void;
 }
 
-export const DepartmentsList: React.FC<DepartmentsListProps> = ({ loading, departments, selectedDepartments, onToggle, pagination, onPageChange }) => {
+export const DepartmentsList: React.FC<DepartmentsListProps> = ({ 
+    loading, 
+    departments, 
+    selectedDepartments, 
+    mainDeptId,
+    onToggle, 
+    onSetMain,
+    pagination, 
+    onPageChange 
+}) => {
     if (loading) return <div className="text-center py-10"><Spin /></div>;
 
     if (departments.length === 0) {
@@ -27,7 +38,9 @@ export const DepartmentsList: React.FC<DepartmentsListProps> = ({ loading, depar
                     key={dept.id} 
                     dept={dept}
                     isSelected={!!selectedDepartments.find(d => d.id === dept.id)}
+                    isMain={mainDeptId === dept.id}
                     onToggle={onToggle}
+                    onSetMain={onSetMain}
                 />
             ))}
           </div>

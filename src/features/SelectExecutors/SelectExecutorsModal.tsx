@@ -13,11 +13,15 @@ export const SelectExecutorsModal: React.FC<ISelectExecutorsModalProps> = ({
   onCancel,
   onOk,
   initialSelectedDepartments = [],
-  initialSelectedUsers = []
+  initialSelectedUsers = [],
+  initialMainUserId,
+  initialMainDeptId
 }) => {
   const [activeTab, setActiveTab] = useState<string>("users");
   const [selectedDepartments, setSelectedDepartments] = useState<IDepartment[]>(initialSelectedDepartments);
   const [selectedUsers, setSelectedUsers] = useState<IUser[]>(initialSelectedUsers);
+  const [mainUserId, setMainUserId] = useState<number | undefined>(initialMainUserId);
+  const [mainDeptId, setMainDeptId] = useState<number | undefined>(initialMainDeptId);
   
   const [queryParams, setQueryParams] = useState({
     search: "",
@@ -79,8 +83,20 @@ export const SelectExecutorsModal: React.FC<ISelectExecutorsModalProps> = ({
     if (open) {
       setSelectedDepartments(initialSelectedDepartments);
       setSelectedUsers(initialSelectedUsers);
+      setMainUserId(initialMainUserId);
+      setMainDeptId(initialMainDeptId);
     }
-  }, [open, initialSelectedDepartments, initialSelectedUsers]);
+  }, [open, initialSelectedDepartments, initialSelectedUsers, initialMainUserId, initialMainDeptId]);
+
+  const handleSetMainUser = (id: number) => {
+    setMainUserId(prev => prev === id ? undefined : id);
+    setMainDeptId(undefined); // Только один главный
+  };
+
+  const handleSetMainDept = (id: number) => {
+    setMainDeptId(prev => prev === id ? undefined : id);
+    setMainUserId(undefined); // Только один главный
+  };
 
   const handleSearch = () => {
     const values = form.getFieldsValue();
@@ -97,24 +113,36 @@ export const SelectExecutorsModal: React.FC<ISelectExecutorsModalProps> = ({
     setQueryParams({ search: "", department_id: undefined, role_id: undefined });
     setUsersPage(1);
     setDepartmentsPage(1);
+    setMainUserId(undefined);
+    setMainDeptId(undefined);
     form.resetFields();
     onCancel();
   }
 
   const handleDepartmentToggle = (dept: IDepartment) => {
-    setSelectedDepartments(prev => 
-        prev.find(d => d.id === dept.id) ? prev.filter(d => d.id !== dept.id) : [...prev, dept]
-    );
+    setSelectedDepartments(prev => {
+        const isExist = prev.find(d => d.id === dept.id);
+        if (isExist) {
+            if (mainDeptId === dept.id) setMainDeptId(undefined);
+            return prev.filter(d => d.id !== dept.id);
+        }
+        return [...prev, dept];
+    });
   };
 
   const handleUserToggle = (user: IUser) => {
-    setSelectedUsers(prev => 
-        prev.find(u => u.id === user.id) ? prev.filter(u => u.id !== user.id) : [...prev, user]
-    );
+    setSelectedUsers(prev => {
+        const isExist = prev.find(u => u.id === user.id);
+        if (isExist) {
+            if (mainUserId === user.id) setMainUserId(undefined);
+            return prev.filter(u => u.id !== user.id);
+        }
+        return [...prev, user];
+    });
   };
 
   const handleOk = () => {
-    onOk(selectedDepartments, selectedUsers);
+    onOk(selectedDepartments, selectedUsers, mainUserId, mainDeptId);
     handleClose();
   };
 
@@ -207,7 +235,9 @@ export const SelectExecutorsModal: React.FC<ISelectExecutorsModalProps> = ({
                   loading={loadingUsers || false}
                   users={users}
                   selectedUsers={selectedUsers}
+                  mainUserId={mainUserId}
                   onToggle={handleUserToggle}
+                  onSetMain={handleSetMainUser}
                   pagination={usersMeta}
                   onPageChange={setUsersPage}
               />
@@ -216,7 +246,9 @@ export const SelectExecutorsModal: React.FC<ISelectExecutorsModalProps> = ({
                   loading={loadingDepartments || false}
                   departments={departments}
                   selectedDepartments={selectedDepartments}
+                  mainDeptId={mainDeptId}
                   onToggle={handleDepartmentToggle}
+                  onSetMain={handleSetMainDept}
                   pagination={deptsMeta}
                   onPageChange={setDepartmentsPage}
               />

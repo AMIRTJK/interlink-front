@@ -68,6 +68,12 @@ const NotFoundPage = lazy(() =>
   }))
 );
 
+const ResolutionExecution = lazy(() =>
+  import("@widgets/ResolutionOfLetter").then((m) => ({
+    default: m.ResolutionExecution,
+  }))
+);
+
 const incomingParams = {
   kind: "incoming",
   tab: "draft",
@@ -191,6 +197,7 @@ export const AppRouter = () => {
                     }
                   />
                 </Route>
+                <Route path=":id/execution" element={<ResolutionExecution />} />
               </Route>
               <Route path="*" element={<PlaceholderPage />} />
             </Route>

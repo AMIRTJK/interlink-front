@@ -5,10 +5,13 @@ import { IUser } from '../model';
 interface UserItemProps {
     user: IUser;
     isSelected: boolean;
+    isMain: boolean;
     onToggle: (user: IUser) => void;
+    onSetMain: (id: number) => void;
 }
 
-export const UserItem: React.FC<UserItemProps> = ({ user, isSelected, onToggle }) => {
+import { Checkbox } from 'antd';
+export const UserItem: React.FC<UserItemProps> = ({ user, isSelected, isMain, onToggle, onSetMain }) => {
     return (
         <Tooltip title={user.position || "Сотрудник"}>
             <div 
@@ -36,6 +39,16 @@ export const UserItem: React.FC<UserItemProps> = ({ user, isSelected, onToggle }
             <span className="user__department text-center text-xs text-gray-400 mt-1">
                 {user.departments?.[0]?.name || user.department?.name || user.organization?.name || ""}
             </span>
+            {isSelected && (
+                <div 
+                    className="user__main-checker mt-2 pt-2 border-t w-full flex justify-center"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <Checkbox checked={isMain} onChange={() => onSetMain(user.id)}>
+                        Главный
+                    </Checkbox>
+                </div>
+            )}
             </div>
         </Tooltip>
     );
