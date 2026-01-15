@@ -601,10 +601,10 @@ export const BookModal: React.FC<BookModalProps> = ({
           {/* ПРАВАЯ ЧАСТЬ */}
           <div className="content">
             <div className="modal-header-half">
-               <Breadcrumbs 
+              {/* <Breadcrumbs 
                 items={[{ label: 'Документ', isActive: true }]} 
                 style={{ marginLeft: '24px' }}
-              />
+              /> */}
               <button className="close-btn" onClick={onClose}>
                 <svg
                   width="14"
