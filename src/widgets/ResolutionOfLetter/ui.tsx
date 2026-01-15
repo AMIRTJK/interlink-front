@@ -1,109 +1,85 @@
-import React from "react";
 import { Modal } from "antd";
 import { useResolutionOfLetter } from "./lib/useResolutionOfLetter";
 import { RenderField } from "./lib/renderField";
 import { tokenControl } from "@shared/lib";
-import { Breadcrumbs } from "@shared/ui";
-import { ResolutionExecution } from "./ui/ResolutionExecution";
-import { mapStateToResolution } from "./lib/mappers";
 import './ui/ResolutionOfLetter.css';
 
-/**
- * Корневой компонент виджета "Резолюция".
- * Отвечает за:
- * 1. Форму создания новой резолюции (выбор людей, файлов).
- * 2. Режим предпросмотра (Execution View) перед отправкой.
- * 3. Связь с API и управление состоянием через хук useResolutionOfLetter.
- */
-
+// Свойства главного компонента виджета
 interface IProps {
-    isLetterExecutionVisible: boolean;
-    setIsLetterExecutionVisible: (visible: boolean) => void;
+    isLetterExecutionVisible: boolean; // Видимость модалки создания
+    setIsLetterExecutionVisible: (visible: boolean) => void; // Функция переключения видимости
 }
 
-export const ResolutionOfLetter: React.FC<IProps> = ({ setIsLetterExecutionVisible }) => {
-    // Вытаскиваем инфу о текущем юзере из локального хранилища.
-    // Если его нет (ну вдруг), показываем дефолтное имя, чтоб не крэшилось.
+// Главный входной компонент для работы с резолюциями
+export const ResolutionOfLetter: React.FC<IProps> = ({ isLetterExecutionVisible, setIsLetterExecutionVisible }) => {
+    
+    // Получаем данные текущего пользователя для отображения автора
     const currentUser = tokenControl.getUserData();
     const currentUserName = currentUser?.full_name || 'Сотрудник';
 
+    // Вся логика вынесена в отдельный хук для чистоты
     const {
         form,
         executorModalOpen,
         setExecutorModalOpen,
-        executionModalOpen,
-        setExecutionModalOpen,
         selectedDepts,
         selectedUsers,
+        mainUserId,
+        mainDeptId,
         uploadedFiles,
-        visaValue,
         isTotalPending,
         isAllowed,
         hasSelection,
         handleExecutorsSelected,
+        handleRemoveUser,
+        handleRemoveDept,
+        handleSetMainUser,
+        handleSetMainDept,
         handleRemoveFile,
         handleUploadChange,
         onFinish
     } = useResolutionOfLetter();
 
-    // Собираем объект резолюции на лету, используя данные из формы.
-    // Это нужно, чтобы в превьюхе сразу показать то, что юзер понавыбирал.
-    const previewResolution = mapStateToResolution(
-        currentUser,
-        selectedUsers,
-        visaValue,
-        uploadedFiles
-    );
-
     return (
         <div className="resolution-of-letter__container">
-            {/* Форма создания резолюции */}
+            
+            {/* Модальное окно создания/просмотра формы резолюции */}
             <Modal
-                title={
-                    <Breadcrumbs 
-                        items={[
-                            { label: 'Документ', onClick: () => setIsLetterExecutionVisible(false) },
-                            { label: 'Резолюция', isActive: true }
-                        ]} 
-                    />
-                }
-                open={!executionModalOpen} // Скрываем, когда открыт режим просмотра
+                open={isLetterExecutionVisible}
                 width={1200}
                 onCancel={() => setIsLetterExecutionVisible(false)}
                 footer={null}
                 className="resolution-execution-modal"
+                centered
             >
+                {/* Отрисовка полей и логика переключения между формой и предпросмотром */}
                 <RenderField 
                     resolutionerName={currentUserName}
-                    previewResolution={previewResolution}
                     form={form}
                     executorModalOpen={executorModalOpen}
                     setExecutorModalOpen={setExecutorModalOpen}
                     selectedDepts={selectedDepts}
                     selectedUsers={selectedUsers}
+                    mainUserId={mainUserId}
+                    mainDeptId={mainDeptId}
                     uploadedFiles={uploadedFiles}
                     isTotalPending={isTotalPending ?? false}
                     isAllowed={isAllowed ?? false}
                     hasSelection={hasSelection}
                     handleExecutorsSelected={handleExecutorsSelected}
+                    handleRemoveUser={handleRemoveUser}
+                    handleRemoveDept={handleRemoveDept}
+                    handleSetMainUser={handleSetMainUser}
+                    handleSetMainDept={handleSetMainDept}
                     handleRemoveFile={handleRemoveFile}
                     handleUploadChange={handleUploadChange}
-                    onFinish={onFinish}
+                    onFinish={(values) => {
+                        onFinish(values);
+                        // Закрываем окно после успешной отправки формы
+                        setIsLetterExecutionVisible(false);
+                    }}
                 />
             </Modal>
-
-            {/* Режим просмотра (исполнения) резолюции */}
-            <ResolutionExecution 
-                open={executionModalOpen} 
-                resolution={previewResolution}
-                onBack={() => {
-                    setExecutionModalOpen(false);
-                }}
-                onCancel={() => {
-                    setExecutionModalOpen(false);
-                    setIsLetterExecutionVisible(false);
-                }}
-            />
         </div>
     );
 };

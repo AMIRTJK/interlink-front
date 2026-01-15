@@ -1,19 +1,33 @@
-import { Button, Form, Input, DatePicker, Select, Upload, FormInstance } from "antd";
-import { DownOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Form, Input, DatePicker, Select, Upload, FormInstance, Avatar } from "antd";
+import type { UploadChangeParam } from "antd/es/upload";
+import { DownOutlined, PlusOutlined, UserOutlined, TeamOutlined, CrownFilled, CloseOutlined } from '@ant-design/icons';
 import { ResolutionFileList } from "./ResolutionFileList";
+import { IDepartment, IUser } from "@features/SelectExecutors";
+import { IAttachment } from "../model";
+import userAvatar from '../../../assets/images/user-avatar.jpg'
 import calendarIcon from '../../../assets/icons/calenDar.svg'
 
+// Свойства формы создания резолюции
 interface IProps {
-    form: FormInstance;
-    onFinish: (values: any) => void;
-    onSelectExecutors: () => void;
-    onUploadChange: (info: any) => void;
-    files: any[];
-    onRemoveFile: (id: number) => void;
-    isPending?: boolean;
-    isAllowed: boolean;
+    form: FormInstance; // Экземпляр формы
+    onFinish: (values: Record<string, unknown>) => void; // Колбэк при отправке
+    onSelectExecutors: () => void; // Открытие выбора исполнителей
+    onUploadChange: (info: UploadChangeParam) => void; // Загрузка файлов
+    files: IAttachment[]; // Список файлов
+    onRemoveFile: (id: number) => void; // Удаление файла
+    isPending?: boolean; // Статус загрузки
+    isAllowed: boolean; // Права на создание
+    selectedDepts: IDepartment[]; // Выбранные отделы
+    selectedUsers: IUser[]; // Выбранные пользователи
+    mainUserId?: number; // ID главного пользователя
+    mainDeptId?: number; // ID главного отдела
+    onRemoveUser: (id: number) => void; // Удалить пользователя
+    onRemoveDept: (id: number) => void; // Удалить отдел
+    onSetMainUser: (id: number) => void; // Назначить пользователя главным
+    onSetMainDept: (id: number) => void; // Назначить отдел главным
 }
 
+// Компонент формы для создания новой резолюции (визы)
 export const ResolutionForm: React.FC<IProps> = ({ 
     form, 
     onFinish, 
@@ -22,11 +36,21 @@ export const ResolutionForm: React.FC<IProps> = ({
     files,
     onRemoveFile,
     isPending,
-    isAllowed
+    isAllowed,
+    selectedDepts,
+    selectedUsers,
+    mainUserId,
+    mainDeptId,
+    onRemoveUser,
+    onRemoveDept,
+    onSetMainUser,
+    onSetMainDept
 }) => {
     return (
         <div className="resolution__form-container">
             <Form form={form} onFinish={onFinish} layout="vertical" className="resolution__form">
+                
+                {/* Скрытые поля для передачи ID в API */}
                 <Form.Item name="assignee_departments" hidden>
                     <Input />
                 </Form.Item>
@@ -34,10 +58,12 @@ export const ResolutionForm: React.FC<IProps> = ({
                     <Input />
                 </Form.Item>
 
+                {/* Поле ввода текста визы */}
                 <Form.Item className="resolution__form-item" name="visa">
                     <Input placeholder="Виза" className="resolution__input" />
                 </Form.Item>
 
+                {/* Выбор срока (дедлайна) */}
                 <Form.Item className="resolution__form-item" name="deadline">
                     <DatePicker 
                         placeholder="Срок" 
@@ -46,6 +72,7 @@ export const ResolutionForm: React.FC<IProps> = ({
                     />
                 </Form.Item>
 
+                {/* Выбор статуса резолюции */}
                 <Form.Item className="resolution__form-item" name="status">
                     <Select 
                         placeholder="Статус" 
@@ -55,12 +82,82 @@ export const ResolutionForm: React.FC<IProps> = ({
                     />
                 </Form.Item>
 
+                {/* Блок управления исполнителями */}
                 <div className="resolution__button-executor-container">
                     <Button className="resolution__button-executor" onClick={onSelectExecutors}>
                         Выбрать исполнителя
                     </Button>
+                    
+                    {/* Список визуальных капсул (pills) выбранных исполнителей */}
+                    <div className="flex flex-col gap-2 mb-6">
+                        
+                        {/* Выбранные пользователи */}
+                        {selectedUsers.map(user => {
+                            const isMain = mainUserId === user.id;
+                            return (
+                                <div 
+                                    key={user.id} 
+                                    className={`resolution__form-pill ${isMain ? 'resolution__form-pill--main' : ''}`}
+                                >
+                                    <div className="resolution__form-pill-info flex-1">
+                                        <Avatar src={userAvatar} icon={<UserOutlined />} size="small" />
+                                        <span className="resolution__form-pill-name">{user.full_name}</span>
+                                    </div>
+                                    <div className="resolution__form-pill-actions">
+                                        {/* Кнопка выбора главного */}
+                                        <Button 
+                                            type="text" 
+                                            className="resolution__form-pill-btn"
+                                            icon={<CrownFilled style={{ fontSize: '12px', color: isMain ? '#1a1a1a' : '#94a3b8' }} />} 
+                                            onClick={() => onSetMainUser(user.id)}
+                                        />
+                                        
+                                        {/* Кнопка удаления */}
+                                        <Button 
+                                            type="text" 
+                                            className="resolution__form-pill-btn danger"
+                                            icon={<CloseOutlined style={{ fontSize: '12px' }} />} 
+                                            onClick={() => onRemoveUser(user.id)}
+                                        />
+                                    </div>
+                                </div>
+                            );
+                        })}
+
+                        {/* Выбранные отделы */}
+                        {selectedDepts.map(dept => {
+                            const isMain = mainDeptId === dept.id;
+                            return (
+                                <div 
+                                    key={dept.id} 
+                                    className={`resolution__form-pill ${isMain ? 'resolution__form-pill--main' : ''}`}
+                                >
+                                    <div className="resolution__form-pill-info flex-1">
+                                        <Avatar icon={<TeamOutlined />} size="small" className={isMain ? 'bg-white/30' : 'bg-blue-100'} />
+                                        <span className="resolution__form-pill-name">{dept.name}</span>
+                                    </div>
+                                    <div className="resolution__form-pill-actions">
+                                        <Button 
+                                            type="text" 
+                                            className="resolution__form-pill-btn"
+                                            icon={<CrownFilled style={{ fontSize: '12px', color: isMain ? '#1a1a1a' : '#94a3b8' }} />} 
+                                            onClick={() => onSetMainDept(dept.id)}
+                                        />
+                                        
+                                        <Button 
+                                            type="text" 
+                                            className="resolution__form-pill-btn danger"
+                                            icon={<CloseOutlined style={{ fontSize: '12px' }} />} 
+                                            onClick={() => onRemoveDept(dept.id)}
+                                        />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
 
+                {/* Зона загрузки файлов */}
                 <div className="resolution__upload-section bg-[white]!">
                     <Upload.Dragger 
                         className="resolution__dragger"
@@ -78,7 +175,7 @@ export const ResolutionForm: React.FC<IProps> = ({
                                 </svg>
                             </div>
                             <p className="resolution__dragger-text">
-                                Просмотрите и выберите файлы, которые хотите загрузить с вашего компьютера.
+                                Перетащите файлы сюда или нажмите для выбора
                             </p>
                             <div className="resolution__dragger-plus">
                                 <PlusOutlined style={{ color: 'white', fontSize: '16px' }} />
@@ -87,8 +184,10 @@ export const ResolutionForm: React.FC<IProps> = ({
                     </Upload.Dragger>
                 </div>
 
+                {/* Список уже загруженных файлов */}
                 <ResolutionFileList files={files} onRemove={onRemoveFile} isAllowed={isAllowed} />
 
+                {/* Кнопка подтверждения */}
                 <Button type="primary" htmlType="submit" className="resolution__button" loading={isPending}>
                     Визировать
                 </Button>

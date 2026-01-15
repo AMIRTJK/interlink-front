@@ -1,37 +1,54 @@
-import React from "react";
-import { Modal } from "antd";
-import { Breadcrumbs } from "@shared/ui";
+import { useParams } from "react-router-dom";
 import { IResolution } from "../model";
 import { ResolutionExecutionLayout } from "./ResolutionExecutionLayout";
 
+// Свойства страницы исполнения
 interface IProps {
-    open: boolean;
-    onCancel: () => void;
-    onBack: () => void;
-    resolution: IResolution;
+    resolution?: IResolution; // Опциональный объект резолюции
 }
 
-// Главный компонент режима просмотра резолюции
-export const ResolutionExecution: React.FC<IProps> = ({ open, onCancel, onBack, resolution }) => {
-    return (
-        <Modal
-            title={
-                <Breadcrumbs 
-                    items={[
-                        { label: 'Документ', onClick: onCancel },
-                        { label: 'Область визирующего', onClick: onBack },
-                        { label: 'Резолюция', isActive: true }
-                    ]} 
-                />
+// Страница просмотра хода исполнения резолюции
+export const ResolutionExecution: React.FC<IProps> = ({ resolution: propResolution }) => {
+    // Получаем ID из URL для запроса данных (в будущем)
+    const { id } = useParams<{ id: string }>();
+
+    // Тестовые данные для отладки интерфейса
+    const mockResolution: IResolution = {
+        id: Number(id) || 1,
+        author: { id: 1, full_name: "Иванов Иван Иванович", position: "Директор" },
+        createDate: "15.01.2026",
+        description: "Для ознакомления и исполнения в установленные сроки.",
+        status: "В процессе",
+        mainExecutor: { id: 2, full_name: "Петров Петр Петрович", position: "Начальник отдела" },
+        approvers: [],
+        files: [],
+        conclusions: [],
+        executors: [
+            {
+                id: 1,
+                user: { id: 2, full_name: "Петров Петр Петрович", position: "Начальник отдела" },
+                role: "Исполнитель 1",
+                status: "PENDING",
+                statusText: "В ожидании",
+                isMain: true // Флаг главного исполнителя (подсвечивается оранжевым)
+            },
+            {
+                id: 2,
+                user: { id: 3, full_name: "Сидоров Сидор", position: "Специалист" },
+                role: "Исполнитель 2",
+                status: "PREPARING",
+                statusText: "Подготовка"
             }
-            open={open}
-            onCancel={onCancel}
-            width={1400}
-            footer={null}
-            className="resolution-execution-modal"
-            centered
-        >
+        ]
+    };
+
+    // Приоритет отдаем пропсам, иначе используем моки
+    const resolution = propResolution || mockResolution;
+
+    return (
+        <div className="resolution-execution-page p-6 max-w-[1200px] mx-auto">
+            {/* Рендерим лейаут страницы исполнения */}
             <ResolutionExecutionLayout resolution={resolution} />
-        </Modal>
+        </div>
     );
 };
