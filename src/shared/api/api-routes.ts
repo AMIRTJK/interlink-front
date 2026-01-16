@@ -49,6 +49,9 @@ export const ApiRoutes = {
   GET_ROLE: "/api/v1/roles/:id",
   UPDATE_ROLE: "/api/v1/roles/:id",
   DELETE_ROLE: "/api/v1/roles/:id",
+
+  // Permissions
+  CREATE_PERMISSION: "api/v1/admin/permissions",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];
