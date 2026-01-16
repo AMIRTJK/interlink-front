@@ -24,11 +24,31 @@ export const ApiRoutes = {
   CREATE_RESOLUTION: "/api/v1/correspondences/:id/resolutions",
   RESTORE_CORRESPONDENCE: "/api/v1/correspondences/:id/restore",
   GET_DEPARTMENTS: "/api/v1/admin/departments",
-  GET_ROLES: "/api/v1/admin/roles",
-  GET_USERS: "/api/v1/admin/users",
   CREATE_ATTACHMENT: "/api/v1/correspondences/:id/attachments",
   CREATE_ATTACHMENTS_BULK: "/api/v1/correspondences/:id/attachments/bulk",
   DELETE_ATTACHMENT: "/api/v1/correspondence-attachments/:id",
+
+  // ==================== HR MODULE ====================
+  // Organizations
+  CREATE_ORGANIZATION: "/api/v1/organizations",
+  GET_ORGANIZATIONS: "/api/v1/organizations",
+  GET_ORGANIZATION: "/api/v1/organizations/:id",
+  UPDATE_ORGANIZATION: "/api/v1/organizations/:id",
+  DELETE_ORGANIZATION: "/api/v1/organizations/:id",
+  
+  // Users
+  CREATE_USER: "/api/v1/users",
+  GET_USERS: "/api/v1/users",
+  UPDATE_USER: "/api/v1/users/:id",
+  DELETE_USER: "/api/v1/users/:id",
+  SET_USER_ROLES: "/api/v1/users/:id/roles",
+  
+  // Roles
+  CREATE_ROLE: "/api/v1/roles",
+  GET_ROLES: "/api/v1/roles",
+  GET_ROLE: "/api/v1/roles/:id",
+  UPDATE_ROLE: "/api/v1/roles/:id",
+  DELETE_ROLE: "/api/v1/roles/:id",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];
