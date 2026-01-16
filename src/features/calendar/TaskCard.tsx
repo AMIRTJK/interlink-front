@@ -15,16 +15,16 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
       className="task-card"
       style={{ 
         borderLeft: `4px solid ${color}`,
-        backgroundColor: `${color}1A`, 
+        backgroundColor: `${color}3A`, 
       }}
       onClick={onClick}
     >
       <div className="task-card__content">
-        <div className="task-card__time" style={{ color: color }}>
+        <div className="task-card__time" style={{ color: '#000' }}>
           {task.time}
           {/* <VideoCameraFilled style={{ marginLeft: "6px", fontSize: "14px" }} /> */}
         </div>
-        <div className="task-card__title" style={{ color: color }}>
+        <div className="task-card__title" style={{ color: '#000' }}>
           {task.title}
         </div>
         {task.participants && task.participants.length > 0 && (

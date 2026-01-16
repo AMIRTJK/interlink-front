@@ -46,7 +46,7 @@ export const ResolutionExecution: React.FC<IProps> = ({ resolution: propResoluti
     const resolution = propResolution || mockResolution;
 
     return (
-        <div className="resolution-execution-page p-6 max-w-[1200px] mx-auto">
+        <div className="resolution-execution-page">
             {/* Рендерим лейаут страницы исполнения */}
             <ResolutionExecutionLayout resolution={resolution} />
         </div>

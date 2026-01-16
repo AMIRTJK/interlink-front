@@ -188,22 +188,33 @@ export const useResolutionOfLetter = () => {
     const handleUploadChange = (info: UploadChangeParam) => {
         const { fileList } = info;
         
+        // Если файл удален, ничего не делаем здесь (есть handleRemoveFile)
+        if (info.file.status === 'removed') return;
+
         if (uploadTimeout.current) {
             clearTimeout(uploadTimeout.current);
         }
 
+        // Используем небольшой таймаут, чтобы собрать файлы в один запрос, 
+        // если пользователь закинул сразу несколько.
         uploadTimeout.current = setTimeout(() => {
-            const newFiles = fileList
-                .filter(file => file.status === 'done' || file.originFileObj)
-                .map(file => ({
-                    id: Number(file.uid) || Math.random(),
-                    name: file.name,
-                    url: (file.response as Record<string, unknown>)?.url || '',
-                    size: file.size,
-                    type: file.type
-                } as IAttachment));
+            const formData = new FormData();
+            let hasNewFiles = false;
 
-            setUploadedFiles(prev => [...prev, ...newFiles]);
+            // Собираем все файлы, у которых есть сырые данные (originFileObj)
+            // и которые мы еще не отправляли
+            fileList.forEach(f => {
+                if (f.originFileObj) {
+                    formData.append('files[]', f.originFileObj);
+                    hasNewFiles = true;
+                    // Помечаем файл как обрабатываемый, чтобы не слать повторно
+                    delete f.originFileObj; 
+                }
+            });
+
+            if (hasNewFiles) {
+                uploadFilesBulk(formData as any);
+            }
         }, 300);
     };
 
