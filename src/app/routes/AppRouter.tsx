@@ -74,6 +74,8 @@ const ResolutionExecution = lazy(() =>
   }))
 );
 
+const HrPage=lazy(()=>import("@pages/modules/hr/Hr").then((m)=>({default:m.HrPage})))
+
 const incomingParams = {
   kind: "incoming",
   tab: "draft",
@@ -133,6 +135,7 @@ export const AppRouter = () => {
 
             {/* Модули */}
             <Route path="/modules" element={<MainLayout />}>
+            <Route path="hr" element={<HrPage />}/>
               <Route path="correspondence" element={<CorrespondencePage />}>
                 <Route index element={<Navigate to="incoming" replace />} />
                 <Route path="incoming">
