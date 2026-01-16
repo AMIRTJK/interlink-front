@@ -12,7 +12,7 @@ export const CreatePermissionAndRole = () => {
   return (
     <Card title="Конструктор Ролей и Прав" style={{ maxWidth: 500 }}>
       <Form layout="vertical" onFinish={(v) => mutate(v)}>
-        <Form.Item name="name" label="Имя роли (Slug)" rules={[{ required: true }]}><Input placeholder="manager" /></Form.Item>
+        <Form.Item name="name" label="Имя роли" rules={[{ required: true }]}><Input placeholder="manager" /></Form.Item>
         <Form.Item name="permissions" label="Список разрешений" rules={[{ required: true }]}>
           <Select mode="tags" style={{ width: '100%' }} placeholder="Введите права (напр. users.view)">
             <Select.Option value="users.view">users.view</Select.Option>
