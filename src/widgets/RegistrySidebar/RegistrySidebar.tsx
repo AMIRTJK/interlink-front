@@ -48,40 +48,40 @@ export const RegistrySidebar = () => {
   const { mutate: createFolder } = useMutationQuery({
     url: ApiRoutes.CREATE_FOLDER,
     method: "POST",
-    onSuccess: () => {
-      message.success("Папка создана");
-      setIsModalOpen(false);
-      form.resetFields();
-      refetchFolders();
-    },
-    onError: () => {
-      message.error("Не удалось создать папку");
+    messages: {
+      success: "Папка создана",
+      error: "Не удалось создать папку",
+      onSuccessCb: () => {
+        setIsModalOpen(false);
+        form.resetFields();
+        refetchFolders();
+      },
     }
   });
 
   const { mutate: updateFolder } = useMutationQuery<{ id: number; name: string }>({
     url: (data) => ApiRoutes.UPDATE_FOLDER.replace(":id", String(data.id)),
     method: "PUT",
-    onSuccess: () => {
-      message.success("Папка обновлена");
-      setIsModalOpen(false);
-      form.resetFields();
-      refetchFolders();
-    },
-    onError: () => {
-      message.error("Не удалось обновить папку");
+    messages: {
+      success: "Папка обновлена",
+      error: "Не удалось обновить папку",
+      onSuccessCb: () => {
+        setIsModalOpen(false);
+        form.resetFields();
+        refetchFolders();
+      },
     }
   });
 
   const { mutate: deleteFolder } = useMutationQuery<{ id: number }>({
     url: (data) => ApiRoutes.DELETE_FOLDER.replace(":id", String(data.id)),
     method: "DELETE",
-    onSuccess: () => {
-      message.success("Папка удалена");
-      refetchFolders();
-    },
-    onError: () => {
-      message.error("Не удалось удалить папку");
+    messages: {
+      success: "Папка удалена",
+      error: "Не удалось удалить папку",
+      onSuccessCb: () => {
+        refetchFolders();
+      },
     }
   });
 
