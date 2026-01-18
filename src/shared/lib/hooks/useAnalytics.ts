@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { _axios } from "@shared/api/http";
 import { ApiRoutes } from "@shared/api/api-routes";
-// TODO: Fix import path after moving hook to shared
 import { IAnalyticsData, IAnalyticsRequest } from "@features/Analytics/model/types";
 
 // Мок-данные для демонстрации, пока нет API
