@@ -10,13 +10,13 @@ import downloadAllFilesIcon from "../../assets/icons/download-all-files-icon.svg
 import pdfIcon from "../../assets/icons/pdf-icon.svg";
 import xlsIcon from "../../assets/icons/xls-icon.svg";
 import docIcon from "../../assets/icons/doc-icon.svg";
-import { If, Breadcrumbs } from "@shared/ui";
+import { If } from "@shared/ui";
 import { ResolutionOfLetter } from "@widgets/ResolutionOfLetter";
 
 // Подключение воркера
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url
+  import.meta.url,
 ).toString();
 
 type FileType = "pdf" | "doc" | "xls";
@@ -90,6 +90,7 @@ export const BookModal: React.FC<BookModalProps> = ({
 }) => {
   const [isLetterExecutionVisible, setIsLetterExecutionVisible] =
     useState(false);
+
   const [activeClass, setActiveClass] = useState(false);
   const [cardOpen, setCardOpen] = useState(false);
   const [noPerspective, setNoPerspective] = useState(false);
