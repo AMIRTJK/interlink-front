@@ -1,6 +1,7 @@
-import { PlusOutlined, MoreOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, MoreOutlined, EditOutlined } from "@ant-design/icons";
 import { Button, Dropdown, MenuProps } from "antd";
 import folderIcon from "../../../assets/icons/folder-icon.svg";
+import trashIcon from "../../../assets/icons/trash-icon.svg";
 
 interface BuildMenuTreeParams {
   // navigate: (path: string) => void;
@@ -56,7 +57,7 @@ export const buildMenuTree = ({
         {
           key: "edit",
           label: "Редактировать",
-          icon: <EditOutlined />,
+          icon: <EditOutlined className="text-[#0037AF]!" />,
           onClick: (e) => {
             e.domEvent.stopPropagation();
             handleEditClick(folder.id, folder.name);
@@ -65,7 +66,8 @@ export const buildMenuTree = ({
         {
           key: "delete",
           label: "Удалить",
-          icon: <DeleteOutlined className="text-red-500" />,
+          danger: true,
+          icon: <img src={trashIcon} className="w-5 h-5" />,
           onClick: (e) => {
             e.domEvent.stopPropagation();
             deleteFolder({ id: folder.id });
@@ -81,16 +83,23 @@ export const buildMenuTree = ({
       path: def ? def.path : `/modules/correspondence/folders?folderId=${folder.id}`,
       children,
       label: (
-        <div className="flex justify-between items-center w-full group overflow-hidden pr-2">
-          <span className="truncate">{folder.name}</span>
-          <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center w-full group overflow-hidden pr-10 relative">
+          <span className="truncate flex-1">{folder.name}</span>
+          <div className="flex items-center shrink-0 ml-2">
             {(def ? def.count : undefined) !== undefined && !collapsed && (
               <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
                 {def.count}
               </span>
             )}
-            {!collapsed && menuActions.length > 0 && (
-              <Dropdown menu={{ items: menuActions }} trigger={["click"]} placement="bottomRight">
+          </div>
+          {!collapsed && menuActions.length > 0 && (
+            <div className="absolute right-1 flex items-center justify-center w-8 z-20">
+              <Dropdown 
+                menu={{ items: menuActions }} 
+                trigger={["click"]} 
+                placement="bottomRight"
+                overlayClassName="custom-registry-dropdown"
+              >
                 <Button
                   type="text"
                   size="small"
@@ -99,8 +108,8 @@ export const buildMenuTree = ({
                   className="opacity-0 group-hover:opacity-100"
                 />
               </Dropdown>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )
     };
@@ -122,9 +131,9 @@ export const buildMenuTree = ({
         folderName: name,
         icon: def.icon,
         label: (
-          <div className="flex justify-between items-center w-full overflow-hidden pr-2">
-            <span>{name}</span>
-            <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center w-full overflow-hidden pr-10 relative">
+            <span className="truncate flex-1">{name}</span>
+            <div className="flex items-center shrink-0 ml-2">
               {def.count !== undefined && def.count > 0 && !collapsed && (
                 <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
                   {def.count}
