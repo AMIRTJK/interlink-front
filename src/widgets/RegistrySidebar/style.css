@@ -1,3 +1,21 @@
-/* .registry-sidebar-style .ant-menu-item {
-  padding: 24px 16px;
-} */
+/* Резервируем одинаковое место справа для ВСЕХ элементов (со стрелкой и без) */
+.registry-sidebar-style .ant-menu-title-content {
+    padding-inline-end: 48px !important;
+}
+
+/* Позиционируем стрелку внутри этого пространства */
+.registry-sidebar-style .ant-menu-submenu-arrow {
+    inset-inline-end: 12px !important;
+    opacity: 0.7;
+}
+
+/* Настраиваем общие отступы пунктов */
+.registry-sidebar-style .ant-menu-item,
+.registry-sidebar-style .ant-menu-submenu-title {
+    padding-inline: 16px 0px !important;
+}
+
+/* Убираем лишние анимации, которые могут мешать нашему выравниванию */
+.registry-sidebar-style .ant-menu-sub {
+    will-change: height;
+}

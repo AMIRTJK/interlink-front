@@ -181,6 +181,16 @@ export const RegistrySidebar = () => {
     }
   }, [finalMenuItems, footerItems, navigate, handleAddClick]);
 
+  const menuTheme = useMemo(() => ({
+    components: {
+      Menu: {
+        itemHeight: collapsed ? 30 : 56,
+        itemMarginInline: 0,
+        itemMarginBlock: collapsed ? 24 : 4,
+      },
+    },
+  }), [collapsed]);
+
   return (
     <App>
       <Sider
@@ -213,17 +223,7 @@ export const RegistrySidebar = () => {
           </div>
 
           <div className="flex-1 overflow-y-auto overflow-x-hidden">
-            <ConfigProvider
-              theme={{
-                components: {
-                  Menu: {
-                    itemHeight: collapsed ? 30 : 56,
-                    itemMarginInline: 0,
-                    itemMarginBlock: collapsed ? 24 : 4,
-                  },
-                },
-              }}
-            >
+            <ConfigProvider theme={menuTheme}>
               <Menu
                 mode="inline"
                 selectedKeys={[pathname]}
@@ -235,17 +235,7 @@ export const RegistrySidebar = () => {
           </div>
 
           <div className="shrink-0 pb-4 border-none pt-6">
-            <ConfigProvider
-              theme={{
-                components: {
-                  Menu: {
-                    itemHeight: collapsed ? 30 : 56,
-                    itemMarginInline: 0,
-                    itemMarginBlock: collapsed ? 24 : 4,
-                  },
-                },
-              }}
-            >
+            <ConfigProvider theme={menuTheme}>
               <Menu
                 mode="inline"
                 selectable={false}
