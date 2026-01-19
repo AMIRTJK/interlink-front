@@ -83,17 +83,21 @@ export const buildMenuTree = ({
       path: def ? def.path : `/modules/correspondence/folders?folderId=${folder.id}`,
       children,
       label: (
-        <div className="flex items-center w-full group overflow-hidden pr-10 relative">
-          <span className="truncate flex-1">{folder.name}</span>
-          <div className="flex items-center shrink-0 ml-2">
+        <div className="flex items-center w-full group overflow-hidden h-full gap-0">
+          <span className="truncate flex-1 pr-1">{folder.name}</span>
+          
+          {/* Ячейка для счётчика (всегда 40px, вторая с конца) */}
+          <div className="w-10 shrink-0 flex items-center justify-center">
             {(def ? def.count : undefined) !== undefined && !collapsed && (
               <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
                 {def.count}
               </span>
             )}
           </div>
-          {!collapsed && menuActions.length > 0 && (
-            <div className="absolute right-1 flex items-center justify-center w-8 z-20">
+
+          {/* Ячейка для действий/стрелки (всегда 40px, в самом конце) */}
+          <div className="w-10 shrink-0 flex items-center justify-center relative">
+            {!collapsed && menuActions.length > 0 && (
               <Dropdown 
                 menu={{ items: menuActions }} 
                 trigger={["click"]} 
@@ -105,11 +109,11 @@ export const buildMenuTree = ({
                   size="small"
                   icon={<MoreOutlined />}
                   onClick={(e) => e.stopPropagation()}
-                  className="opacity-0 group-hover:opacity-100"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
                 />
               </Dropdown>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )
     };
@@ -131,15 +135,17 @@ export const buildMenuTree = ({
         folderName: name,
         icon: def.icon,
         label: (
-          <div className="flex items-center w-full overflow-hidden pr-10 relative">
-            <span className="truncate flex-1">{name}</span>
-            <div className="flex items-center shrink-0 ml-2">
+          <div className="flex items-center w-full overflow-hidden h-full gap-0">
+            <span className="truncate flex-1 pr-1">{name}</span>
+            <div className="w-10 shrink-0 flex items-center justify-center">
               {def.count !== undefined && def.count > 0 && !collapsed && (
                 <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
                   {def.count}
                 </span>
               )}
             </div>
+            {/* Пустая ячейка для выравнивания с папками, где есть кнопки/стрелки */}
+            <div className="w-10 shrink-0" />
           </div>
         ),
         path: def.path,
