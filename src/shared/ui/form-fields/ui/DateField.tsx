@@ -1,5 +1,6 @@
 import { DatePicker, Form } from "antd";
-import { CSSProperties } from "react";
+import { CSSProperties, ReactNode } from "react";
+import dayjs from "dayjs";
 
 interface IProps {
   name: string;
@@ -9,6 +10,7 @@ interface IProps {
   style?: CSSProperties;
   customClass?: string;
   className?: string;
+  suffixIcon?: ReactNode;
 }
 
 const { Item } = Form;
@@ -18,15 +20,18 @@ export const DateField = ({
   label,
   rules,
   placeholder = "Дата",
-  style = { width: "100%", padding: "10px", maxHeight: "40px" },
   customClass,
   className,
+  suffixIcon = false,
   ...props
 }: IProps) => {
   return (
     <Item
       label={label}
       name={name}
+      getValueProps={(i) => ({
+        value: i && dayjs(i).isValid() ? dayjs(i) : undefined,
+      })}
       labelCol={{ span: 24 }}
       wrapperCol={{ span: 24 }}
       rules={rules}
@@ -34,13 +39,11 @@ export const DateField = ({
     >
       <DatePicker
         format="DD.MM.YYYY"
-        style={style}
         placeholder={placeholder}
-        suffixIcon={null}
+        suffixIcon={suffixIcon}
         className={className}
         {...props}
       />
-
     </Item>
   );
 };

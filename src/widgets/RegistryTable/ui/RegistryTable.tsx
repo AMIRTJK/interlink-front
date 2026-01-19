@@ -11,6 +11,8 @@ import { StatusTabs } from "@features/StatusTabs";
 import wordIcon from "../../../assets/icons/word2.svg";
 import executionIcon from "../../../assets/icons/execution.svg";
 import { BookModal } from "@widgets/BookModal";
+import { AppRoutes } from "@shared/config";
+import { CorrespondenseStatus } from "@entities/correspondence";
 interface RegistryTableProps<T extends Record<string, unknown>> {
   data?: T[];
   isLoading?: boolean;
@@ -26,7 +28,8 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   extraParams,
 }: RegistryTableProps<T>) => {
   const tabFromParams = extraParams?.tab;
-  const initialTab = typeof tabFromParams === 'string' ? tabFromParams : "draft";
+  const initialTab =
+    typeof tabFromParams === "string" ? tabFromParams : "draft";
   const [currentTab, setCurrentTab] = useState(initialTab);
 
   const navigate = useNavigate();
@@ -48,10 +51,13 @@ export const RegistryTable = <T extends Record<string, unknown>>({
     params: extraParams?.kind ? { kind: extraParams.kind } : {},
   });
 
-  const tabCounts = useMemo(() => (countersData as Record<string, any>)?.data || {}, [countersData]);
+  const tabCounts = useMemo(
+    () => (countersData as Record<string, any>)?.data || {},
+    [countersData],
+  );
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<readonly React.Key[]>(
-    []
+    [],
   );
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,9 +66,27 @@ export const RegistryTable = <T extends Record<string, unknown>>({
     setIsModalOpen(true);
   };
 
+  const handleNavigateToExecution = (record: T) => {
+    navigate(
+      AppRoutes.CORRESPONDENCE_INCOMING_SHOW.replace(":id", String(record.id)),
+      {
+        state: { openExecution: true },
+      },
+    );
+  };
+
+  const handleNavigateToLetter = (record: T) => {
+    navigate(
+      AppRoutes.CORRESPONDENCE_INCOMING_SHOW.replace(":id", String(record.id)),
+    );
+  };
+
   const showTabs = !!extraParams?.kind;
 
   const expandedRowRender = (record: T) => {
+    const isExecuteButtonActive =
+      CorrespondenseStatus.TO_EXECUTE === record.status;
+
     return (
       <div className="p-4 bg-[#F2F5FF]">
         <div className="flex justify-between items-start gap-6">
@@ -108,12 +132,21 @@ export const RegistryTable = <T extends Record<string, unknown>>({
           <div className="flex flex-col gap-2">
             <Button
               type="default"
-              text="На исполнение"
+              text="Перейти к записи"
+              withIcon
+              iconAlt="execution"
+              className="bg-[#0037AF]! text-white!"
+              onClick={() => handleNavigateToLetter(record)}
+            />
+            <Button
+              // disabled={!isExecuteButtonActive}
+              type="default"
+              text="Перейти к исполнению"
               withIcon
               icon={executionIcon}
               iconAlt="execution"
-              className="bg-[#0037AF]! text-white!"
-              onClick={() => navigate(`/modules/correspondence/${record.id}/execution`)}
+              className={`bg-[#0037AF]! text-white! ${!isExecuteButtonActive ? "opacity-50" : ""}`}
+              onClick={() => handleNavigateToExecution(record)}
             />
             <Button
               className="border-[#0037AF]! text-[#0037AF]! font-medium!"
@@ -172,7 +205,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
             direction={1}
             autoFilter={true}
             queryParams={{
-              ...extraParams as Record<string, unknown>,
+              ...(extraParams as Record<string, unknown>),
               ...(showTabs ? { status: currentTab } : {}),
             }}
             scroll={{}}
@@ -187,7 +220,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
                 setExpandedRowKeys(
                   expanded
                     ? [...expandedRowKeys, key]
-                    : expandedRowKeys.filter((k) => k !== key)
+                    : expandedRowKeys.filter((k) => k !== key),
                 );
               },
               showExpandColumn: false,

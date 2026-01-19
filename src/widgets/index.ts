@@ -5,3 +5,4 @@ export * from "./RegistryTable";
 export * from "./RegistrySidebar";
 export * from "./DocView";
 export * from "./BookModal";
+export * from "./CorrespondenceForm";

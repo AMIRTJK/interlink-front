@@ -21,17 +21,18 @@ interface ISelectFieldProps {
   url?: string; // Динамический URL для различных эндпоинтов
   transformResponse?: (
     data: unknown,
-    extraParams?: unknown
+    extraParams?: unknown,
   ) => { value: string; label: string }[];
   method?: "GET";
   extraTransformParams?: unknown;
   searchParamKey?: string;
   onChange?: (
     value: number,
-    option?: ReactElement | ReactElement[] | undefined
+    option?: ReactElement | ReactElement[] | undefined,
   ) => void;
   mode?: "multiple" | "tags";
   autoComplete?: string;
+  suffixIcon?: React.ReactNode;
 }
 
 const { Option } = Select;
@@ -50,6 +51,7 @@ export const SelectField = ({
   mode,
   className = `${customClass}`,
   searchParamKey,
+  suffixIcon,
   ...props
 }: ISelectFieldProps) => {
   const [items, setItems] = useState<unknown[]>([]);
@@ -160,6 +162,7 @@ export const SelectField = ({
         onChange={onChange ? onChange : handleChange}
         {...props}
         data-autocomplete="new-password"
+        suffixIcon={suffixIcon}
       >
         {renderOptions}
       </Select>

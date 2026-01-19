@@ -8,73 +8,79 @@ import PrivateRoute from "./PrivateRoute";
 
 // Lazy-loaded страницы
 const Auth = lazy(() =>
-  import("@pages/Auth/Auth").then((m) => ({ default: m.Auth }))
+  import("@pages/Auth/Auth").then((m) => ({ default: m.Auth })),
 );
 
-const ProfileLayout=lazy(()=>import("@widgets/layout").then((m)=>({default:m.ProfileLayout})))
+const ProfileLayout = lazy(() =>
+  import("@widgets/layout").then((m) => ({ default: m.ProfileLayout })),
+);
 
-const MainLayout=lazy(()=>import("@widgets/layout").then((m)=>({default:m.MainLayout})))
+const MainLayout = lazy(() =>
+  import("@widgets/layout").then((m) => ({ default: m.MainLayout })),
+);
 
 const ProfilePage = lazy(() =>
   import("@pages/modules/profile/ProfilePage").then((m) => ({
     default: m.ProfilePage,
-  }))
+  })),
 );
 
 const TasksPage = lazy(() =>
   import("@pages/modules/profile/TasksPage").then((m) => ({
     default: m.TasksPage,
-  }))
+  })),
 );
 const CalendarPage = lazy(() =>
   import("@pages/modules/profile/CalendarPage").then((m) => ({
     default: m.CalendarPage,
-  }))
+  })),
 );
 
 const AnalyticsPage = lazy(() =>
   import("@pages/modules/profile/AnalyticsPage").then((m) => ({
     default: m.AnalyticsPage,
-  }))
+  })),
 );
 
 const RegistryTable = lazy(() =>
   import("@widgets/RegistryTable").then((m) => ({
     default: m.RegistryTable,
-  }))
+  })),
 );
 
 const CorrespondencePage = lazy(() =>
   import("@pages/modules/correspondence/CorrespondencePage").then((m) => ({
     default: m.CorrespondencePage,
-  }))
+  })),
 );
 
 const CreateCorrespondencePage = lazy(() =>
   import("@pages/modules/correspondence/CreateCorrespondencePage").then(
-    (m) => ({ default: m.CreateCorrespondencePage })
-  )
+    (m) => ({ default: m.CreateCorrespondencePage }),
+  ),
+);
+
+const ShowCorrespondencePage = lazy(() =>
+  import("@pages/modules/correspondence/ShowCorrespondencePage").then((m) => ({
+    default: m.ShowCorrespondencePage,
+  })),
 );
 
 const PlaceholderPage = lazy(() =>
   import("@pages/modules/placeholderpage/PlaceholderPage").then((m) => ({
     default: m.PlaceholderPage,
-  }))
+  })),
 );
 
 const NotFoundPage = lazy(() =>
   import("@shared/ui/NotFoundPage/NotFoundPage").then((m) => ({
     default: m.NotFoundPage,
-  }))
+  })),
 );
 
-const ResolutionExecution = lazy(() =>
-  import("@widgets/ResolutionOfLetter").then((m) => ({
-    default: m.ResolutionExecution,
-  }))
+const HrPage = lazy(() =>
+  import("@pages/modules/hr/Hr").then((m) => ({ default: m.HrPage })),
 );
-
-const HrPage=lazy(()=>import("@pages/modules/hr/Hr").then((m)=>({default:m.HrPage})))
 
 const incomingParams = {
   kind: "incoming",
@@ -135,7 +141,7 @@ export const AppRouter = () => {
 
             {/* Модули */}
             <Route path="/modules" element={<MainLayout />}>
-            <Route path="hr" element={<HrPage />}/>
+              <Route path="hr" element={<HrPage />} />
               <Route path="correspondence" element={<CorrespondencePage />}>
                 <Route index element={<Navigate to="incoming" replace />} />
                 <Route path="incoming">
@@ -153,6 +159,10 @@ export const AppRouter = () => {
                     path="create"
                     element={<CreateCorrespondencePage type="incoming" />}
                   />
+                  <Route
+                    path=":id"
+                    element={<ShowCorrespondencePage type="incoming" />}
+                  />
                 </Route>
                 <Route path="outgoing">
                   <Route
@@ -168,6 +178,10 @@ export const AppRouter = () => {
                   <Route
                     path="create"
                     element={<CreateCorrespondencePage type="outgoing" />}
+                  />
+                  <Route
+                    path=":id"
+                    element={<ShowCorrespondencePage type="outgoing" />}
                   />
                 </Route>
                 <Route path="archive">
@@ -200,7 +214,6 @@ export const AppRouter = () => {
                     }
                   />
                 </Route>
-                <Route path=":id/execution" element={<ResolutionExecution />} />
               </Route>
               <Route path="*" element={<PlaceholderPage />} />
             </Route>
