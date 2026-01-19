@@ -1,25 +1,26 @@
-import { PlusOutlined, MoreOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, MoreOutlined, EditOutlined } from "@ant-design/icons";
 import { Button, Dropdown, MenuProps } from "antd";
 import folderIcon from "../../../assets/icons/folder-icon.svg";
+import trashIcon from "../../../assets/icons/trash-icon.svg";
 
 interface BuildMenuTreeParams {
+  // navigate: (path: string) => void;
+  // counts: any;
   folders: any[];
-  counts: any;
   collapsed: boolean;
   definitions: Record<string, any>;
   handleEditClick: (folderId: number, currentName: string) => void;
   deleteFolder: (data: { id: number }) => void;
-  navigate: (path: string) => void;
 }
 
 export const buildMenuTree = ({
   folders,
-  counts,
   collapsed,
   definitions,
   handleEditClick,
   deleteFolder,
-  navigate,
+  // counts,
+  // navigate,
 }: BuildMenuTreeParams) => {
   const buildFullItem = (folder: any, visited = new Set<number>()): any => {
     if (folder.id && visited.has(folder.id)) return null;
@@ -56,7 +57,7 @@ export const buildMenuTree = ({
         {
           key: "edit",
           label: "Редактировать",
-          icon: <EditOutlined />,
+          icon: <EditOutlined className="text-[#0037AF]!" />,
           onClick: (e) => {
             e.domEvent.stopPropagation();
             handleEditClick(folder.id, folder.name);
@@ -65,7 +66,8 @@ export const buildMenuTree = ({
         {
           key: "delete",
           label: "Удалить",
-          icon: <DeleteOutlined className="text-red-500" />,
+          danger: true,
+          icon: <img src={trashIcon} className="w-5 h-5" />,
           onClick: (e) => {
             e.domEvent.stopPropagation();
             deleteFolder({ id: folder.id });
@@ -81,22 +83,33 @@ export const buildMenuTree = ({
       path: def ? def.path : `/modules/correspondence/folders?folderId=${folder.id}`,
       children,
       label: (
-        <div className="flex justify-between items-center w-full group overflow-hidden pr-2">
-          <span className="truncate">{folder.name}</span>
-          <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center w-full group overflow-hidden h-full gap-0">
+          <span className="truncate flex-1 pr-1">{folder.name}</span>
+          
+          {/* Ячейка для счётчика (всегда 40px, вторая с конца) */}
+          <div className="w-10 shrink-0 flex items-center justify-center">
             {(def ? def.count : undefined) !== undefined && !collapsed && (
               <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
                 {def.count}
               </span>
             )}
+          </div>
+
+          {/* Ячейка для действий/стрелки (всегда 40px, в самом конце) */}
+          <div className="w-10 shrink-0 flex items-center justify-center relative">
             {!collapsed && menuActions.length > 0 && (
-              <Dropdown menu={{ items: menuActions }} trigger={["click"]} placement="bottomRight">
+              <Dropdown 
+                menu={{ items: menuActions }} 
+                trigger={["click"]} 
+                placement="bottomRight"
+                overlayClassName="custom-registry-dropdown"
+              >
                 <Button
                   type="text"
                   size="small"
                   icon={<MoreOutlined />}
                   onClick={(e) => e.stopPropagation()}
-                  className="opacity-0 group-hover:opacity-100"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
                 />
               </Dropdown>
             )}
@@ -122,15 +135,17 @@ export const buildMenuTree = ({
         folderName: name,
         icon: def.icon,
         label: (
-          <div className="flex justify-between items-center w-full overflow-hidden pr-2">
-            <span>{name}</span>
-            <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center w-full overflow-hidden h-full gap-0">
+            <span className="truncate flex-1 pr-1">{name}</span>
+            <div className="w-10 shrink-0 flex items-center justify-center">
               {def.count !== undefined && def.count > 0 && !collapsed && (
                 <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
                   {def.count}
                 </span>
               )}
             </div>
+            {/* Пустая ячейка для выравнивания с папками, где есть кнопки/стрелки */}
+            <div className="w-10 shrink-0" />
           </div>
         ),
         path: def.path,
