@@ -1,12 +1,15 @@
-/* Резервируем одинаковое место справа для ВСЕХ элементов (со стрелкой и без) */
+/* Позволяем содержимому занимать всю ширину, отступами управляем внутри */
 .registry-sidebar-style .ant-menu-title-content {
-    padding-inline-end: 48px !important;
+    padding-inline-end: 0px !important;
+    position: relative;
+    display: block !important;
 }
 
-/* Позиционируем стрелку внутри этого пространства */
+/* Позиционируем стрелку поверх всего */
 .registry-sidebar-style .ant-menu-submenu-arrow {
     inset-inline-end: 12px !important;
     opacity: 0.7;
+    z-index: 10;
 }
 
 /* Настраиваем общие отступы пунктов */
@@ -16,6 +19,47 @@
 }
 
 /* Убираем лишние анимации, которые могут мешать нашему выравниванию */
-.registry-sidebar-style .ant-menu-sub {
-    will-change: height;
+/* Стили для Dropdown в стиле UniversalTable (Glassmorphism) */
+.custom-registry-dropdown {
+    background-color: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden;
+}
+
+.custom-registry-dropdown .ant-dropdown-menu {
+    background: transparent !important;
+    padding: 6px !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.custom-registry-dropdown .ant-dropdown-menu-item {
+    padding: 10px 14px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    background: transparent !important;
+}
+
+.custom-registry-dropdown .ant-dropdown-menu-item:hover {
+    background-color: rgba(0, 55, 175, 0.05) !important;
+}
+
+.custom-registry-dropdown .ant-dropdown-menu-title-content {
+    font-size: 14px;
+    font-weight: 500;
+    color: #252525;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.custom-registry-dropdown .ant-dropdown-menu-item-divider {
+    margin: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.04);
 }

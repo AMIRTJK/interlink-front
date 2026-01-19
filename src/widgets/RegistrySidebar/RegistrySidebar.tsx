@@ -132,14 +132,14 @@ export const RegistrySidebar = () => {
   }), [counts]);
 
   const finalMenuItems = useMemo(() => buildMenuTree({
+    // counts,
+    // navigate,
     folders,
-    counts,
     collapsed,
     definitions,
     handleEditClick,
     deleteFolder,
-    navigate,
-  }), [folders, counts, collapsed, definitions, handleEditClick, deleteFolder, navigate]);
+  }), [folders, collapsed, definitions, handleEditClick, deleteFolder]);
 
   const footerItems = useMemo(() => [
     {
