@@ -128,7 +128,7 @@ export const buildMenuTree = ({
         label: (
           <div className="flex justify-between items-center w-full">
             <span>{name}</span>
-            {def.count !== undefined && !collapsed && (
+            {def.count !== undefined && def.count > 0 && !collapsed && (
               <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
                 {def.count}
               </span>
