@@ -80,14 +80,10 @@ export const buildMenuTree = ({
       icon: def ? def.icon : <img src={folderIcon} />,
       path: def ? def.path : `/modules/correspondence/folders?folderId=${folder.id}`,
       children,
-      onTitleClick: (children && children.length > 0) ? () => {
-        const path = def ? def.path : `/modules/correspondence/folders?folderId=${folder.id}`;
-        if (path && !path.startsWith('#')) navigate(path);
-      } : undefined,
       label: (
-        <div className="flex justify-between items-center w-full group">
+        <div className="flex justify-between items-center w-full group overflow-hidden pr-2">
           <span className="truncate">{folder.name}</span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {(def ? def.count : undefined) !== undefined && !collapsed && (
               <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
                 {def.count}
@@ -126,13 +122,15 @@ export const buildMenuTree = ({
         folderName: name,
         icon: def.icon,
         label: (
-          <div className="flex justify-between items-center w-full">
+          <div className="flex justify-between items-center w-full overflow-hidden pr-2">
             <span>{name}</span>
-            {def.count !== undefined && def.count > 0 && !collapsed && (
-              <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
-                {def.count}
-              </span>
-            )}
+            <div className="flex items-center gap-2 shrink-0">
+              {def.count !== undefined && def.count > 0 && !collapsed && (
+                <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
+                  {def.count}
+                </span>
+              )}
+            </div>
           </div>
         ),
         path: def.path,
