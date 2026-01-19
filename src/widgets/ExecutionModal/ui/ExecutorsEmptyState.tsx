@@ -1,10 +1,10 @@
 interface ExecutorsEmptyStateProps {
-  onAssign?: () => void;
+  onAssignExecutors?: () => void;
   className?: string;
 }
 
 export const ExecutorsEmptyState = ({
-  onAssign,
+  onAssignExecutors,
   className,
 }: ExecutorsEmptyStateProps) => {
   return (
@@ -37,8 +37,8 @@ export const ExecutorsEmptyState = ({
       </p>
 
       <button
-        onClick={onAssign}
-        className="flex cursor-pointer items-center gap-2 text-[#0037AF] font-semibold hover:text-blue-700 hover:bg-blue-50 px-6 py-3 rounded-lg transition-colors"
+        onClick={onAssignExecutors}
+        className="flex cursor-pointer items-center gap-2 text-[#0037AF] font-semibold hover:text-blue-700 hover:bg-blue-50 px-6 py-3 rounded-lg transition-colors active:transform active:scale-[0.98]"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
