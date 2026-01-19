@@ -2,28 +2,19 @@ import { useMemo, useState, useCallback } from "react";
 import { Layout, Menu, Button, ConfigProvider, App, Form } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
-
-import incomingIcon from "../../assets/icons/incoming-icon.svg";
-import outgoingIcon from "../../assets/icons/outgoing-icon.svg";
-import archiveIcon from "../../assets/icons/archive-icon.svg";
-import pinnedIcon from "../../assets/icons/pinned-icon.svg";
-import garbageIcon from "../../assets/icons/garbage-icon.svg";
-import helpIcon from "../../assets/icons/help-icon.svg";
-import settingsIcon from "../../assets/icons/settings-icon.svg";
-import collapseIcon from "../../assets/icons/collapse-icon.svg";
 import Logo from "../../assets/images/logo.svg";
-
 import { AppRoutes } from "@shared/config";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { FolderModal } from "./ui/FolderModal";
 import { buildMenuTree } from "./lib/buildMenuTree";
+import { sideBarIcons } from "./lib/sidebarIcons";
 import "./style.css";
 
 const { Sider } = Layout;
 
 export const RegistrySidebar = () => {
-  const { message } = App.useApp();
+
   const [collapsed, setCollapsed] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [parentId, setParentId] = useState<number | null>(null);
@@ -37,20 +28,15 @@ export const RegistrySidebar = () => {
     url: ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
     params: {},
   });
-
   const counts = useMemo(() => countersData?.data || {}, [countersData]);
-
   const { data: foldersData, refetch: refetchFolders } = useGetQuery({
     url: ApiRoutes.GET_FOLDERS,
     params: {},
   });
-
   const { mutate: createFolder } = useMutationQuery({
     url: ApiRoutes.CREATE_FOLDER,
     method: "POST",
     messages: {
-      success: "Папка создана",
-      error: "Не удалось создать папку",
       onSuccessCb: () => {
         setIsModalOpen(false);
         form.resetFields();
@@ -63,8 +49,6 @@ export const RegistrySidebar = () => {
     url: (data) => ApiRoutes.UPDATE_FOLDER.replace(":id", String(data.id)),
     method: "PUT",
     messages: {
-      success: "Папка обновлена",
-      error: "Не удалось обновить папку",
       onSuccessCb: () => {
         setIsModalOpen(false);
         form.resetFields();
@@ -77,8 +61,6 @@ export const RegistrySidebar = () => {
     url: (data) => ApiRoutes.DELETE_FOLDER.replace(":id", String(data.id)),
     method: "DELETE",
     messages: {
-      success: "Папка удалена",
-      error: "Не удалось удалить папку",
       onSuccessCb: () => {
         refetchFolders();
       },
@@ -119,31 +101,31 @@ export const RegistrySidebar = () => {
   const definitions = useMemo(() => ({
     "Входящие письма": {
       key: AppRoutes.CORRESPONDENCE_INCOMING,
-      icon: <img src={incomingIcon} />,
+      icon: <img src={sideBarIcons.incomingIcon} />,
       count: counts.incoming_total,
       path: AppRoutes.CORRESPONDENCE_INCOMING,
     },
     "Исходящие письма": {
       key: AppRoutes.CORRESPONDENCE_OUTGOING,
-      icon: <img src={outgoingIcon} />,
+      icon: <img src={sideBarIcons.outgoingIcon} />,
       count: counts.outgoing_total,
       path: AppRoutes.CORRESPONDENCE_OUTGOING,
     },
     "Архив": {
       key: AppRoutes.CORRESPONDENCE_ARCHIVE,
-      icon: <img src={archiveIcon} />,
+      icon: <img src={sideBarIcons.archiveIcon} />,
       count: counts.archived_total,
       path: AppRoutes.CORRESPONDENCE_ARCHIVE,
     },
     "Закреплённые": {
       key: AppRoutes.CORRESPONDENCE_PINNED,
-      icon: <img src={pinnedIcon} />,
+      icon: <img src={sideBarIcons.pinnedIcon} />,
       count: counts.pinned_total,
       path: AppRoutes.CORRESPONDENCE_PINNED,
     },
     "Корзина": {
       key: AppRoutes.CORRESPONDENCE_TRASHED,
-      icon: <img src={garbageIcon} />,
+      icon: <img src={sideBarIcons.garbageIcon} />,
       count: counts.trash_total,
       path: AppRoutes.CORRESPONDENCE_TRASHED,
     },
@@ -162,13 +144,13 @@ export const RegistrySidebar = () => {
   const footerItems = useMemo(() => [
     {
       key: "help",
-      icon: <img src={helpIcon} alt="" />,
+      icon: <img src={sideBarIcons.helpIcon} alt="" />,
       label: "Помощь",
       path: "#",
     },
     {
       key: "settings",
-      icon: <img src={settingsIcon} alt="" />,
+      icon: <img src={sideBarIcons.settingsIcon} alt="" />,
       label: "Настройки",
       path: "#",
     },
@@ -225,7 +207,7 @@ export const RegistrySidebar = () => {
                 type="text"
                 onClick={() => setCollapsed(!collapsed)}
                 className={collapsed ? "mx-auto" : "ml-auto"}
-                icon={<img src={collapseIcon} />}
+                icon={<img src={sideBarIcons.collapseIcon} />}
               />
             </div>
           </div>
