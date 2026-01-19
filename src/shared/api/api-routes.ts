@@ -28,7 +28,6 @@ export const ApiRoutes = {
   GET_COUNTERS_CORRESPONDENCE: "/api/v1/correspondences/counters",
   CREATE_RESOLUTION: "/api/v1/correspondences/:id/resolutions",
   RESTORE_CORRESPONDENCE: "/api/v1/correspondences/:id/restore",
-  GET_DEPARTMENTS: "/api/v1/admin/departments",
   UPLOAD_CORRESPONDENCE_ATTACHMENTS: "/api/v1/correspondences/:id/attachments",
   UPLOAD_CORRESPONDENCE_ATTACHMENTS_BULK:
     "/api/v1/correspondences/:id/attachments/bulk",
@@ -36,28 +35,35 @@ export const ApiRoutes = {
 
   // ==================== HR MODULE ====================
   // Organizations
-  CREATE_ORGANIZATION: "/api/v1/organizations",
+  CREATE_ORGANIZATION: "/api/v1/admin/organizations",
   GET_ORGANIZATIONS: "/api/v1/admin/organizations",
-  GET_ORGANIZATION: "/api/v1/organizations/:id",
-  UPDATE_ORGANIZATION: "/api/v1/organizations/:id",
-  DELETE_ORGANIZATION: "/api/v1/organizations/:id",
+  GET_ORGANIZATION: "/api/v1/admin/organizations/:id",
+  UPDATE_ORGANIZATION: "/api/v1/admin/organizations/:id",
+  DELETE_ORGANIZATION: "/api/v1/admin/organizations/:id",
 
   // Users
-  CREATE_USER: "/api/v1/users",
+  CREATE_USER: "/api/v1/admin/users",
   GET_USERS: "/api/v1/admin/users",
-  UPDATE_USER: "/api/v1/users/:id",
-  DELETE_USER: "/api/v1/users/:id",
-  SET_USER_ROLES: "/api/v1/users/:id/roles",
+  UPDATE_USER: "/api/v1/admin/users/:id",
+  DELETE_USER: "/api/v1/admin/users/:id",
+  SET_USER_ROLES: "/api/v1/admin/users/:id/roles",
 
   // Roles
-  CREATE_ROLE: "/api/v1/roles",
-  GET_ROLES: "/api/v1/roles",
-  GET_ROLE: "/api/v1/roles/:id",
-  UPDATE_ROLE: "/api/v1/roles/:id",
-  DELETE_ROLE: "/api/v1/roles/:id",
+  CREATE_ROLE: "/api/v1/admin/roles",
+  GET_ROLES: "/api/v1/admin/roles",
+  GET_ROLE: "/api/v1/admin/roles/:id",
+  UPDATE_ROLE: "/api/v1/admin/roles/:id",
+  DELETE_ROLE: "/api/v1/admin/roles/:id",
 
   // Permissions
-  CREATE_PERMISSION: "api/v1/admin/permissions",
+  CREATE_PERMISSION: "/api/v1/admin/permissions",
+
+  // Departments
+  CREATE_DEPARTMENT: "/api/v1/admin/departments",
+  GET_DEPARTMENTS: "/api/v1/admin/departments",
+  GET_DEPARTMENT: "/api/v1/admin/departments/:id",
+  UPDATE_DEPARTMENT: "/api/v1/admin/departments/:id",
+  DELETE_DEPARTMENT: "/api/v1/admin/departments/:id",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];

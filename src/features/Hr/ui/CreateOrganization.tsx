@@ -1,21 +1,23 @@
 import { CreateOrganizationDTO } from '@entities/hr';
+import { ApiRoutes } from '@shared/api';
 import { useMutationQuery } from '@shared/lib';
 import { Form, Input, Button, Card } from 'antd';
 
 export const CreateOrganization = () => {
   const [form] = Form.useForm();
   const { mutate, isPending, isAllowed } = useMutationQuery<CreateOrganizationDTO>({
-    url: "/organizations",
+    url: ApiRoutes.CREATE_ORGANIZATION,
     method: "POST",
     messages: { success: "Организация создана", invalidate: ["FETCH_ORGS"] },
     preload: true,
-    preloadConditional: ["orgs.create"]
+    preloadConditional: ["organizations.create"]
   });
 
   const onFinish = (values: any) => {
+    const { meta_type, meta_note, ...rest } = values;
     const payload: CreateOrganizationDTO = {
-      ...values,
-      meta: { type: values.meta_type, note: values.meta_note }
+      ...rest,
+      meta: { type: meta_type, note: meta_note }
     };
     mutate(payload, { onSuccess: () => form.resetFields() });
   };
@@ -29,6 +31,7 @@ export const CreateOrganization = () => {
         <Form.Item name="inn" label="ИНН"><Input /></Form.Item>
         <Form.Item name="phone" label="Телефон"><Input /></Form.Item>
         <Form.Item name="email" label="Email"><Input /></Form.Item>
+        <Form.Item name="website" label="Website"><Input /></Form.Item>
         <Form.Item name="address" label="Адрес"><Input /></Form.Item>
         <Form.Item name="meta_type" label="Тип (meta)" initialValue="client"><Input /></Form.Item>
         <Form.Item name="meta_note" label="Заметка (meta)"><Input /></Form.Item>

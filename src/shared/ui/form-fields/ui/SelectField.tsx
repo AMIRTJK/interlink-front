@@ -1,7 +1,7 @@
 import { useGetQuery } from "@shared/lib";
 import { Form, Select } from "antd";
 import { DefaultOptionType } from "antd/es/select";
-import { CSSProperties, ReactElement, useEffect, useState } from "react";
+import { CSSProperties, ReactElement, useEffect, useState, useMemo, useCallback } from "react";
 
 // внутри компонента SelectField
 
@@ -33,6 +33,8 @@ interface ISelectFieldProps {
   mode?: "multiple" | "tags";
   autoComplete?: string;
   suffixIcon?: React.ReactNode;
+  disabled?: boolean;
+  params?: Record<string, string | number | boolean | undefined>;
 }
 
 const { Option } = Select;
@@ -52,6 +54,7 @@ export const SelectField = ({
   className = `${customClass}`,
   searchParamKey,
   suffixIcon,
+  params: extraParams,
   ...props
 }: ISelectFieldProps) => {
   const [items, setItems] = useState<unknown[]>([]);
@@ -59,25 +62,27 @@ export const SelectField = ({
 
   const [searchTerm, setSearchTerm] = useState("");
   const usedSearchParamKey = searchParamKey || "name";
-  const params = props.showSearch
-    ? { [usedSearchParamKey]: searchTerm }
-    : undefined;
+  
+  const queryParams = useMemo(() => ({
+    ...(props.showSearch ? { [usedSearchParamKey]: searchTerm } : {}),
+    ...extraParams
+  }), [props.showSearch, usedSearchParamKey, searchTerm, extraParams]);
 
   const { data, refetch, isFetching } = useGetQuery<unknown>({
     url: url!,
     method: method,
-    params,
+    params: queryParams,
     options: {
       enabled: false,
     },
   });
 
   // Функция загрузки данных
-  const loadItems = (open: boolean) => {
+  const loadItems = useCallback((open: boolean) => {
     if (open && !isFetched && url) {
       setIsFetched(true);
     }
-  };
+  }, [isFetched, url]);
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -135,13 +140,15 @@ export const SelectField = ({
 
   useEffect(() => {
     if (isFetchAllowed) loadItems(true);
-  }, [isFetchAllowed]);
+  }, [isFetchAllowed, loadItems]);
 
   useEffect(() => {
     if (isFetched && url) {
       refetch();
     }
-  }, [searchTerm, isFetched, url]);
+    // Сбрасываем items при смене URL или параметров, чтобы не видеть старые данные
+    if (url) setItems([]);
+  }, [searchTerm, isFetched, url, queryParams, refetch]);
 
   return (
     <Form.Item
@@ -160,6 +167,7 @@ export const SelectField = ({
         onSearch={url ? handleSearch : undefined}
         filterOption={filterOption}
         onChange={onChange ? onChange : handleChange}
+        disabled={props.disabled}
         {...props}
         data-autocomplete="new-password"
         suffixIcon={suffixIcon}

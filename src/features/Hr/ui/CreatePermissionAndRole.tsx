@@ -87,8 +87,9 @@ interface PermissionItem {
 
 export const CreatePermissionAndRole = () => {
   const { mutate, isPending } = useMutationQuery<CreatePermissionAndRoleDTO>({
-    url: `${ApiRoutes.CREATE_PERMISSION}`,
+    url: ApiRoutes.CREATE_ROLE,
     method: "POST",
+    messages: { success: "Роль успешно создана", invalidate: ["FETCH_ROLES"] }
   });
 
   const transformPermissions = (response: unknown) => {
@@ -113,6 +114,7 @@ export const CreatePermissionAndRole = () => {
           isFetchAllowed={true}
           transformResponse={transformPermissions}
           placeholder="Выберите права"
+          mode="multiple"
         />
         <Button type="primary" htmlType="submit" loading={isPending} block>Создать связку</Button>
       </Form>
