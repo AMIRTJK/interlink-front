@@ -1,17 +1,20 @@
 import { CreateDepartmentDTO } from '@entities/hr';
+import { ApiRoutes } from '@shared/api';
 import { useMutationQuery } from '@shared/lib';
 import { Form, Input, Button, Card } from 'antd';
 
 export const CreateDepartment = () => {
   const [form] = Form.useForm();
 
-  const { mutate, isPending } = useMutationQuery<CreateDepartmentDTO>({
-    url: "/departments", 
+  const { mutate, isPending, isAllowed } = useMutationQuery<CreateDepartmentDTO>({
+    url: ApiRoutes.CREATE_DEPARTMENT, 
     method: "POST",
     messages: { 
       success: "Департамент успешно создан",
       invalidate: ["FETCH_DEPARTMENTS"] 
-    }
+    },
+    preload: true,
+    preloadConditional: ["departments.create"]
   });
 
   return (
@@ -20,6 +23,7 @@ export const CreateDepartment = () => {
         form={form}
         layout="vertical" 
         onFinish={(v) => mutate(v, { onSuccess: () => form.resetFields() })}
+        disabled={!isAllowed}
       >
         <Form.Item 
           name="name" 

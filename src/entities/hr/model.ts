@@ -24,6 +24,7 @@ export interface CreateUserDTO {
   password?: string;
   position: string;
   organization_id: number;
+  department_id: number;
   roles: string[];
 }
 
