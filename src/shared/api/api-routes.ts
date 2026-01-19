@@ -20,6 +20,10 @@ export const ApiRoutes = {
   PIN_CORRESPONDENCE: "/api/v1/correspondences/:id/pin",
   CORRESPONDENCE_FOLDERS: "/api/v1/correspondence-folders",
   FOLDER_CORRESPONDENCE: "/api/v1/correspondences/:id/folder",
+  GET_FOLDERS: "/api/v1/correspondence-folders",
+  CREATE_FOLDER: "/api/v1/correspondence-folders",
+  UPDATE_FOLDER: "/api/v1/correspondence-folders/:id",
+  DELETE_FOLDER: "/api/v1/correspondence-folders/:id",
   DELETE_CORRESPONDENCE: "/api/v1/correspondences/:id",
   GET_COUNTERS_CORRESPONDENCE: "/api/v1/correspondences/counters",
   CREATE_RESOLUTION: "/api/v1/correspondences/:id/resolutions",
@@ -51,6 +55,9 @@ export const ApiRoutes = {
   GET_ROLE: "/api/v1/roles/:id",
   UPDATE_ROLE: "/api/v1/roles/:id",
   DELETE_ROLE: "/api/v1/roles/:id",
+
+  // Permissions
+  CREATE_PERMISSION: "api/v1/admin/permissions",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];
