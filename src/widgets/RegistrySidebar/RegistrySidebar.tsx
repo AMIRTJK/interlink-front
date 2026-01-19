@@ -37,8 +37,6 @@ export const RegistrySidebar = () => {
     url: ApiRoutes.CREATE_FOLDER,
     method: "POST",
     messages: {
-      success: "Папка создана",
-      error: "Не удалось создать папку",
       onSuccessCb: () => {
         setIsModalOpen(false);
         form.resetFields();
@@ -51,8 +49,6 @@ export const RegistrySidebar = () => {
     url: (data) => ApiRoutes.UPDATE_FOLDER.replace(":id", String(data.id)),
     method: "PUT",
     messages: {
-      success: "Папка обновлена",
-      error: "Не удалось обновить папку",
       onSuccessCb: () => {
         setIsModalOpen(false);
         form.resetFields();

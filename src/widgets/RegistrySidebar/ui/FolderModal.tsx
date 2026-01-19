@@ -1,6 +1,6 @@
 import { Modal, Form, Input, FormInstance } from "antd";
 
-interface FolderModalProps {
+interface IProps {
   isOpen: boolean;
   isEditing: boolean;
   parentId: number | null;
@@ -16,7 +16,7 @@ export const FolderModal = ({
   form,
   onCancel,
   onFinish,
-}: FolderModalProps) => {
+}: IProps) => {
   const getTitle = () => {
     if (isEditing) return "Редактировать папку";
     if (parentId) return "Создать подпапку";
@@ -29,7 +29,7 @@ export const FolderModal = ({
       open={isOpen}
       onOk={() => form.submit()}
       onCancel={onCancel}
-      okText={isEditing ? "Сохранить" : "Создать"}
+      okText={isEditing ? "Редактировать" : "Создать"}
       cancelText="Отмена"
     >
       <Form form={form} onFinish={onFinish} layout="vertical">
