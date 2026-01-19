@@ -1,11 +1,13 @@
-/* Позволяем содержимому занимать всю ширину, отступами управляем внутри */
+/* Позволяем заголовку занимать свободное место, сохраняя привязку к иконке слева */
 .registry-sidebar-style .ant-menu-title-content {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-start;
     padding-inline-end: 0px !important;
-    position: relative;
-    display: block !important;
 }
 
-/* Позиционируем стрелку поверх всего */
+/* Фиксируем стрелку в крайней ячейке */
 .registry-sidebar-style .ant-menu-submenu-arrow {
     inset-inline-end: 12px !important;
     opacity: 0.7;
