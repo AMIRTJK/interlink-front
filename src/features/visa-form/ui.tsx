@@ -13,12 +13,14 @@ interface VisaFormProps {
   correspondenceId?: number;
   className?: string; // Самый важный проп для встраивания
   onSuccess?: () => void; // Если нужно закрыть модалку после успеха
+  onAssignExecutors?: () => void;
 }
 
 export const VisaForm: React.FC<VisaFormProps> = ({
   correspondenceId,
   className,
   onSuccess,
+  onAssignExecutors,
 }) => {
   const [fileList, setFileList] = useState<IAttachment[]>(mockFiles);
   const [isFormValid, setIsFormValid] = useState(false);
@@ -179,6 +181,7 @@ export const VisaForm: React.FC<VisaFormProps> = ({
           </Col>
           <Col span={24}>
             <button
+              onClick={onAssignExecutors}
               type="button"
               className="w-full cursor-pointer bg-white border border-[#0037af] text-[#0037AF] rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-blue-50 transition-all group active:transform active:scale-[0.98]"
             >
