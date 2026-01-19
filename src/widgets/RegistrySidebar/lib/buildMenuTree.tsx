@@ -3,23 +3,23 @@ import { Button, Dropdown, MenuProps } from "antd";
 import folderIcon from "../../../assets/icons/folder-icon.svg";
 
 interface BuildMenuTreeParams {
+  // navigate: (path: string) => void;
+  // counts: any;
   folders: any[];
-  counts: any;
   collapsed: boolean;
   definitions: Record<string, any>;
   handleEditClick: (folderId: number, currentName: string) => void;
   deleteFolder: (data: { id: number }) => void;
-  navigate: (path: string) => void;
 }
 
 export const buildMenuTree = ({
   folders,
-  counts,
   collapsed,
   definitions,
   handleEditClick,
   deleteFolder,
-  navigate,
+  // counts,
+  // navigate,
 }: BuildMenuTreeParams) => {
   const buildFullItem = (folder: any, visited = new Set<number>()): any => {
     if (folder.id && visited.has(folder.id)) return null;
