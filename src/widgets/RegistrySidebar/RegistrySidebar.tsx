@@ -1,14 +1,16 @@
-import { useMemo, useState, useCallback } from "react";
-import { Layout, Menu, Button, ConfigProvider, App, Form } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Layout, Menu, Form, Button, ConfigProvider, App } from "antd";
+import { useGetQuery, useMutationQuery } from "@shared/lib";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { _axios, ApiRoutes } from "@shared/api";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Logo from "../../assets/images/logo.svg";
 import { AppRoutes } from "@shared/config";
-import { useGetQuery, useMutationQuery } from "@shared/lib";
-import { ApiRoutes } from "@shared/api";
 import { FolderModal } from "./ui/FolderModal";
 import { buildMenuTree } from "./lib/buildMenuTree";
 import { sideBarIcons } from "./lib/sidebarIcons";
+import { useMemo, useState, useCallback } from "react";
+import { toast } from "react-toastify";
 import "./style.css";
 
 const { Sider } = Layout;
@@ -145,6 +147,42 @@ export const RegistrySidebar = () => {
     [counts],
   );
 
+  const queryClient = useQueryClient();
+  const { mutate: moveItem } = useMutation({
+    mutationFn: async (data: { id: number; folder_id: number | null; type: "folder" | "correspondence" }) => {
+      // Пользователь обновил роут на /api/v1/correspondences/:DOC_ID/move
+      const url = ApiRoutes.MOVE_FOLDER.replace(":DOC_ID", String(data.id));
+
+      const response = await _axios({
+        url,
+        method: "PATCH",
+        data: { folder_id: data.folder_id },
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Ошибка перемещения");
+      }
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success("Перемещено");
+      refetchFolders();
+      queryClient.invalidateQueries({ queryKey: [ApiRoutes.GET_CORRESPONDENCES] });
+      window.dispatchEvent(new CustomEvent("correspondence-moved"));
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Ошибка при перемещении");
+    },
+  });
+
+  const handleDrop = useCallback(
+    (targetFolderId: number | null, draggedType: "folder" | "correspondence", draggedId: number) => {
+      if (draggedType === "folder" && targetFolderId === draggedId) return;
+      moveItem({ id: draggedId, folder_id: targetFolderId, type: draggedType });
+    },
+    [moveItem],
+  );
+
   const finalMenuItems = useMemo(
     () =>
       buildMenuTree({
@@ -157,8 +195,9 @@ export const RegistrySidebar = () => {
         deleteFolder,
         handleAddClick,
         onNavigate: (path: string) => navigate(path),
+        onDrop: handleDrop,
       }),
-    [folders, collapsed, definitions, handleEditClick, deleteFolder, navigate, handleAddClick],
+    [folders, collapsed, definitions, handleEditClick, deleteFolder, navigate, handleAddClick, handleDrop],
   );
 
   const footerItems = useMemo(
@@ -206,6 +245,16 @@ export const RegistrySidebar = () => {
     },
     [finalMenuItems, footerItems, navigate, handleAddClick],
   );
+
+  const [searchParams] = useSearchParams();
+  const folderIdParam = searchParams.get("folderId");
+  
+  const activeKey = useMemo(() => {
+    if (folderIdParam) {
+      return `folder-${folderIdParam}`;
+    }
+    return pathname;
+  }, [pathname, folderIdParam]);
 
   const menuTheme = useMemo(
     () => ({
@@ -263,7 +312,7 @@ export const RegistrySidebar = () => {
             <ConfigProvider theme={menuTheme}>
               <Menu
                 mode="inline"
-                selectedKeys={[pathname]}
+                selectedKeys={[activeKey]}
                 onClick={handleMenuClick}
                 className={`registry-sidebar-style border-none! ${collapsed ? "collapsed-style" : ""}`}
                 items={finalMenuItems}

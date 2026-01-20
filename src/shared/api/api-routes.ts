@@ -23,6 +23,7 @@ export const ApiRoutes = {
   GET_FOLDERS: "/api/v1/correspondence-folders",
   CREATE_FOLDER: "/api/v1/correspondence-folders",
   UPDATE_FOLDER: "/api/v1/correspondence-folders/:id",
+  MOVE_FOLDER: "/api/v1/correspondences/:DOC_ID/move",
   DELETE_FOLDER: "/api/v1/correspondence-folders/:id",
   DELETE_CORRESPONDENCE: "/api/v1/correspondences/:id",
   GET_COUNTERS_CORRESPONDENCE: "/api/v1/correspondences/counters",
