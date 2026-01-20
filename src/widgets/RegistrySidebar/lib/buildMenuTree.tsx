@@ -11,6 +11,7 @@ interface BuildMenuTreeParams {
   definitions: Record<string, any>;
   handleEditClick: (folderId: number, currentName: string) => void;
   deleteFolder: (data: { id: number }) => void;
+  onNavigate: (path: string) => void;
 }
 
 export const buildMenuTree = ({
@@ -19,6 +20,7 @@ export const buildMenuTree = ({
   definitions,
   handleEditClick,
   deleteFolder,
+  onNavigate,
   // counts,
   // navigate,
 }: BuildMenuTreeParams) => {
@@ -84,7 +86,18 @@ export const buildMenuTree = ({
       children,
       label: (
         <div className="flex items-center w-full group overflow-hidden h-full gap-0">
-          <span className="truncate flex-1 pr-1">{folder.name}</span>
+          <div 
+            className="flex items-center flex-1 overflow-hidden cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              const path = def ? def.path : `/modules/correspondence/folders?folderId=${folder.id}`;
+              if (path) {
+                onNavigate(path);
+              }
+            }}
+          >
+            <span className="truncate flex-1 pr-1">{folder.name}</span>
+          </div>
           
           {/* Ячейка для счётчика (всегда 40px, вторая с конца) */}
           <div className="w-10 shrink-0 flex items-center justify-center">
@@ -136,7 +149,17 @@ export const buildMenuTree = ({
         icon: def.icon,
         label: (
           <div className="flex items-center w-full overflow-hidden h-full gap-0">
-            <span className="truncate flex-1 pr-1">{name}</span>
+            <div 
+              className="flex items-center flex-1 overflow-hidden cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (def.path) {
+                  onNavigate(def.path);
+                }
+              }}
+            >
+              <span className="truncate flex-1 pr-1">{name}</span>
+            </div>
             <div className="w-10 shrink-0 flex items-center justify-center">
               {def.count !== undefined && def.count > 0 && !collapsed && (
                 <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
