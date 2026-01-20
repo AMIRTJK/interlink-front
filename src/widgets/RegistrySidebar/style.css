@@ -14,11 +14,20 @@
   z-index: 10;
 }
 
-/* Настраиваем общие отступы пунктов */
-.registry-sidebar-style .ant-menu-item,
+/* Глобальный сброс фона для всех вложенных меню и элементов */
+.registry-sidebar-style .ant-menu-sub,
+.registry-sidebar-style .ant-menu-submenu,
+.registry-sidebar-style .ant-menu-item {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Убираем фон по умолчанию для submenu title */
 .registry-sidebar-style .ant-menu-submenu-title {
   padding-inline: 16px 0px !important;
   padding: 0 16px !important;
+  margin-bottom: 2px !important;
+  background: transparent !important;
 }
 
 .collapsed-style .ant-menu-item,
@@ -26,63 +35,206 @@
   padding: 0 !important;
 }
 
-/* Увеличиваем отступ ТОЛЬКО для элементов внутри submenu (не для самих Входящих/Исходящих) */
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-item {
-  padding-left: 40px !important;
+/* Стили для ПЕРВОГО уровня вложенности */
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item,
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
+  padding-left: 16px !important;
   position: relative;
   border-radius: 8px;
   margin-bottom: 2px;
   transition: all 0.2s ease;
+  background: transparent !important;
 }
 
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-item {
-  padding-left: 56px !important;
-}
-
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-submenu .ant-menu-item {
-  padding-left: 72px !important;
-}
-
-/* Вертикальная линия для вложенных элементов */
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-item::before {
+/* Линия 1-го уровня: Синий */
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item::before,
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
   content: '';
   position: absolute;
-  left: 24px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(to bottom, rgba(0, 55, 175, 0.1), rgba(0, 55, 175, 0.05));
+  left: 8px;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background-color: #3b82f6; /* Blue-500 */
   border-radius: 2px;
+  opacity: 0.6;
 }
 
-/* Легкий фон для вложенных элементов при наведении */
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-item:hover {
-  background-color: rgba(0, 55, 175, 0.03) !important;
+/* Ховер 1-го уровня */
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item:hover,
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
+  background-color: rgba(59, 130, 246, 0.05) !important;
 }
 
-/* Отступ для submenu title внутри submenu (вложенные папки внутри созданных папок) */
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu-title {
-  padding-left: 40px !important;
-  position: relative;
-  border-radius: 8px;
-  margin-bottom: 2px;
-  transition: all 0.2s ease;
+/* Активный 1-й уровень */
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item-selected,
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  padding-left: 16px !important;
+}
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item-selected::before,
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
+  opacity: 1;
+  width: 4px;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
 }
 
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-submenu-title {
-  padding-left: 56px !important;
+/* ВТОРОЙ уровень вложенности */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
+  padding-left: 32px !important;
+  background: transparent !important;
 }
 
-/* Вертикальная линия для вложенных submenu */
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu-title::before {
-  content: '';
-  position: absolute;
+/* Линия 2-го уровня: Фиолетовый */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
   left: 24px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(to bottom, rgba(0, 55, 175, 0.1), rgba(0, 55, 175, 0.05));
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background-color: #8b5cf6; /* Violet-500 */
   border-radius: 2px;
+  opacity: 0.6;
+}
+
+/* Ховер 2-го уровня */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
+  background-color: rgba(139, 92, 246, 0.05) !important;
+}
+
+/* Активный 2-й уровень */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  background-color: rgba(139, 92, 246, 0.1) !important;
+  padding-left: 32px !important;
+}
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
+  opacity: 1;
+  width: 4px;
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
+}
+
+/* ТРЕТИЙ уровень вложенности */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
+  padding-left: 48px !important;
+  background: transparent !important;
+}
+
+/* Линия 3-го уровня: Розовый */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
+  left: 40px;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background-color: #ec4899; /* Pink-500 */
+  border-radius: 2px;
+  opacity: 0.6;
+}
+
+/* Ховер 3-го уровня */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
+  background-color: rgba(236, 72, 153, 0.05) !important;
+}
+
+/* Активный 3-й уровень */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  background-color: rgba(236, 72, 153, 0.1) !important;
+  padding-left: 48px !important;
+}
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
+  opacity: 1;
+  width: 4px;
+  box-shadow: 0 0 8px rgba(236, 72, 153, 0.5);
+}
+
+/* ЧЕТВЕРТЫЙ уровень вложенности */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
+  padding-left: 64px !important;
+  background: transparent !important;
+}
+
+/* Линия 4-го уровня: Оранжевый */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
+  left: 56px;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background-color: #f97316; /* Orange-500 */
+  border-radius: 2px;
+  opacity: 0.6;
+}
+
+/* Ховер 4-го уровня */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
+  background-color: rgba(249, 115, 22, 0.05) !important;
+}
+
+/* Активный 4-й уровень */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  background-color: rgba(249, 115, 22, 0.1) !important;
+  padding-left: 64px !important;
+}
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
+  opacity: 1;
+  width: 4px;
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.5);
+}
+
+/* ПЯТЫЙ уровень вложенности */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
+  padding-left: 80px !important;
+  background: transparent !important;
+}
+
+/* Линия 5-го уровня: Бирюзовый/Зеленый */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
+  left: 72px;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background-color: #14b8a6; /* Teal-500 */
+  border-radius: 2px;
+  opacity: 0.6;
+}
+
+/* Ховер 5-го уровня */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
+  background-color: rgba(20, 184, 166, 0.05) !important;
+}
+
+/* Активный 5-й уровень */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  background-color: rgba(20, 184, 166, 0.1) !important;
+  padding-left: 80px !important;
+}
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
+  opacity: 1;
+  width: 4px;
+  box-shadow: 0 0 8px rgba(20, 184, 166, 0.5);
+}
+
+/* Специальное правило, чтобы скрыть линию у кнопки "Создать новую папку", у которой нет детей и id,
+   но она попадает под селекторы. Можно использовать nth-child(1) если она всегда первая или атрибут. */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-item[data-menu-id*="create-placeholder"]::before {
+  display: none !important;
 }
 
 /* Убираем лишние анимации, которые могут мешать нашему выравниванию */
