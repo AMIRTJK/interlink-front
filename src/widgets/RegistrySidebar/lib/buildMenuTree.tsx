@@ -13,6 +13,7 @@ interface BuildMenuTreeParams {
   deleteFolder: (data: { id: number }) => void;
   handleAddClick: (parentId: number | null) => void;
   onNavigate: (path: string) => void;
+  onDrop: (targetFolderId: number | null, draggedType: "folder" | "correspondence", draggedId: number) => void;
 }
 
 export const buildMenuTree = ({
@@ -23,6 +24,7 @@ export const buildMenuTree = ({
   deleteFolder,
   handleAddClick,
   onNavigate,
+  onDrop,
   // counts,
   // navigate,
 }: BuildMenuTreeParams) => {
@@ -129,14 +131,57 @@ export const buildMenuTree = ({
       );
     }
 
+    const handleSidebarDrop = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.classList.remove("folder-drag-over");
+      
+      const folderIdStr = e.dataTransfer.getData("folderId");
+      const correspondenceIdStr = e.dataTransfer.getData("correspondenceId");
+
+      if (folderIdStr) {
+        onDrop(folder.id, "folder", Number(folderIdStr));
+      } else if (correspondenceIdStr) {
+        onDrop(folder.id, "correspondence", Number(correspondenceIdStr));
+      }
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = "move";
+      e.currentTarget.classList.add("folder-drag-over");
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.classList.remove("folder-drag-over");
+    };
+
+    const handleDragStart = (e: React.DragEvent) => {
+      e.dataTransfer.setData("folderId", folder.id.toString());
+      e.dataTransfer.effectAllowed = "move";
+    };
+
     return {
       key: folderKey,
       folderName: folder.name,
       icon: def ? def.icon : <img src={folderIcon} />,
       path: folderPath,
       children,
+      onTitleClick: () => {
+        // Ant Design Menu workaround if needed
+      },
       label: (
-        <div className="flex items-center w-full group overflow-hidden h-full gap-0">
+        <div 
+          className="flex items-center w-full group overflow-hidden h-full gap-0"
+          draggable={!def} // Системные папки нельзя таскать
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleSidebarDrop}
+        >
           <div 
             className="flex items-center flex-1 overflow-hidden cursor-pointer"
             onClick={(e) => {

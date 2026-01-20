@@ -39,6 +39,7 @@ interface IProps<RecordType, ResponseType> {
   showSizeChanger?: boolean;
   customPagination?: boolean;
   expandable?: TableProps<RecordType>["expandable"];
+  onRow?: (record: RecordType) => React.HTMLAttributes<any>;
 }
 
 export function UniversalTable<RecordType = any, ResponseType = any>(
@@ -59,6 +60,7 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     autoFilter = true,
     customPagination,
     expandable,
+    onRow,
   } = props;
 
   const { params: searchParams, setParams } = useDynamicSearchParams();
@@ -141,12 +143,18 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     filters,
   ]);
 
-  const { data, isPending } = url
+  const { data, isPending, refetch } = url
     ? useGetQuery({
         url,
         params,
       })
-    : { data: undefined, isPending: false };
+    : { data: undefined, isPending: false, refetch: () => {} };
+
+  useEffect(() => {
+    const handleMove = () => refetch();
+    window.addEventListener('correspondence-moved', handleMove);
+    return () => window.removeEventListener('correspondence-moved', handleMove);
+  }, [refetch]);
 
   const columnsWithNumbers = useMemo(() => {
     // Добавляем колонку ID только если idColumnHidden !== true
@@ -325,9 +333,19 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
             return originalElement;
           },
         }}
-        onRow={(record) => ({
-          onClick: () => handleRowClick?.(record),
-        })}
+        onRow={(record) => {
+          const rowProps = onRow ? onRow(record) : {};
+          return {
+            ...rowProps,
+            onTitleClick: () => {
+              // Ant Design Menu workaround if needed
+            },
+            onClick: (e) => {
+              rowProps.onClick?.(e);
+              handleRowClick?.(record);
+            },
+          };
+        }}
       />
     </div>
   );

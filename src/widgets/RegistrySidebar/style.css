@@ -307,3 +307,67 @@
   margin: 4px 8px;
   background-color: rgba(0, 0, 0, 0.04);
 }
+/* === Drag & Drop Styles (Prettier Version) === */
+
+/* Строка в таблице, которую тащим (Source) */
+.ant-table-row.dragging {
+  /* Эффект "поднятой" карточки */
+  background: linear-gradient(135deg, rgba(230, 247, 255, 0.95), rgba(255, 255, 255, 0.9)) !important;
+  box-shadow: 0 12px 32px rgba(24, 144, 255, 0.3), 
+              0 4px 8px rgba(0, 0, 0, 0.05) !important;
+  transform: scale(1.02) translateY(-2px);
+  z-index: 9999;
+  position: relative;
+  
+  /* Акцентная граница */
+  outline: 2px solid #1890ff !important;
+  outline-offset: -2px;
+  
+  /* Курсор */
+  cursor: grabbing !important;
+  
+  /* Плавность */
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ant-table-row.dragging td {
+  border-bottom: 2px solid #1890ff !important;
+  border-top: 2px solid #1890ff !important;
+}
+.ant-table-row.dragging td:first-child {
+  border-left: 2px solid #1890ff !important;
+  border-radius: 8px 0 0 8px;
+}
+.ant-table-row.dragging td:last-child {
+  border-right: 2px solid #1890ff !important;
+  border-radius: 0 8px 8px 0;
+}
+
+
+/* Папка в сайдбаре, над которой держим элемент (Target) */
+.folder-drag-over {
+  /* Мягкий градиент и свечение */
+  background: linear-gradient(90deg, rgba(24, 144, 255, 0.15), rgba(24, 144, 255, 0.02)) !important;
+  border-radius: 8px;
+  position: relative;
+  overflow: visible !important; /* Чтобы тень не обрезалась */
+}
+
+/* Эффект свечения через псевдо-элемент */
+.folder-drag-over::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  border: 2px solid #1890ff;
+  box-shadow: 0 0 15px rgba(24, 144, 255, 0.4);
+  pointer-events: none;
+  z-index: 10;
+  animation: pulse-border 1.5s infinite;
+}
+
+@keyframes pulse-border {
+  0% { box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(24, 144, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(24, 144, 255, 0); }
+}

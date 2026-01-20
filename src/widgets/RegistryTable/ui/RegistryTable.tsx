@@ -211,6 +211,17 @@ export const RegistryTable = <T extends Record<string, unknown>>({
             scroll={{}}
             showSizeChanger={false}
             customPagination={true}
+            onRow={(record) => ({
+              draggable: true,
+              onDragStart: (e) => {
+                e.dataTransfer.setData("correspondenceId", String(record.id));
+                e.dataTransfer.effectAllowed = "move";
+                (e.currentTarget as HTMLElement).classList.add("dragging");
+              },
+              onDragEnd: (e) => {
+                (e.currentTarget as HTMLElement).classList.remove("dragging");
+              }
+            })}
             expandable={{
               expandedRowRender: expandedRowRender,
               expandRowByClick: true,
