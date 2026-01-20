@@ -8,7 +8,7 @@ export const CreateOrganization = () => {
   const { mutate, isPending, isAllowed } = useMutationQuery<CreateOrganizationDTO>({
     url: ApiRoutes.CREATE_ORGANIZATION,
     method: "POST",
-    messages: { success: "Организация создана", invalidate: ["FETCH_ORGS"] },
+    messages: { success: "Организация создана", invalidate: [ApiRoutes.GET_ORGANIZATIONS] },
     preload: true,
     preloadConditional: ["organizations.create"]
   });

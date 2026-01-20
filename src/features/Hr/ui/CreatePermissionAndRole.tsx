@@ -14,7 +14,7 @@ export const CreatePermissionAndRole = () => {
   const { mutate, isPending } = useMutationQuery<CreatePermissionAndRoleDTO>({
     url: ApiRoutes.CREATE_ROLE,
     method: "POST",
-    messages: { success: "Роль успешно создана", invalidate: ["FETCH_ROLES"] }
+    messages: { success: "Роль успешно создана", invalidate: [ApiRoutes.GET_ROLES] }
   });
 
   const transformPermissions = (response: unknown) => {

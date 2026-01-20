@@ -11,7 +11,7 @@ export const CreateDepartment = () => {
     method: "POST",
     messages: { 
       success: "Департамент успешно создан",
-      invalidate: ["FETCH_DEPARTMENTS"] 
+      invalidate: [ApiRoutes.GET_DEPARTMENTS] 
     },
     preload: true,
     preloadConditional: ["departments.create"]
