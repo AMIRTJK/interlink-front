@@ -26,7 +26,7 @@ export const buildMenuTree = ({
   // counts,
   // navigate,
 }: BuildMenuTreeParams) => {
-  const buildFullItem = (folder: any, visited = new Set<number>()): any => {
+  const buildFullItem = (folder: any, visited = new Set<number>(), depth = 0): any => {
     if (folder.id && visited.has(folder.id)) return null;
     if (folder.id) visited.add(folder.id);
 
@@ -72,7 +72,7 @@ export const buildMenuTree = ({
     const nestedFolders = folders
       .filter((f: any) => f.parent_id === folder.id)
       .sort((a: any, b: any) => a.sort - b.sort)
-      .map((f: any) => buildFullItem(f, new Set(visited)))
+      .map((f: any) => buildFullItem(f, new Set(visited), depth + 1))
       .filter(Boolean);
 
     let children: any[] | undefined = nestedFolders.length > 0 ? nestedFolders : undefined;
@@ -100,8 +100,12 @@ export const buildMenuTree = ({
             e.domEvent.stopPropagation();
             handleEditClick(folder.id, folder.name);
           },
-        },
-        {
+        }
+      );
+      
+      // Показываем "Создать папку" только если глубина меньше 5
+      if (depth < 5) {
+        menuActions.push({
           key: "create-sub",
           label: "Создать папку",
           icon: <PlusOutlined className="text-[#0037AF]!" />,
@@ -109,8 +113,10 @@ export const buildMenuTree = ({
             e.domEvent.stopPropagation();
             handleAddClick(folder.id);
           },
-        },
-        {
+        });
+      }
+
+      menuActions.push({
           key: "delete",
           label: "Удалить",
           danger: true,
