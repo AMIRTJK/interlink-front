@@ -155,8 +155,9 @@ export const RegistrySidebar = () => {
         definitions,
         handleEditClick,
         deleteFolder,
+        onNavigate: (path: string) => navigate(path),
       }),
-    [folders, collapsed, definitions, handleEditClick, deleteFolder],
+    [folders, collapsed, definitions, handleEditClick, deleteFolder, navigate],
   );
 
   const footerItems = useMemo(
