@@ -34,6 +34,40 @@ export const buildMenuTree = ({
     const isIncomingOrOutgoing = folder.name === "Входящие письма" || folder.name === "Исходящие письма";
     const folderKey = def ? def.key : `folder-${folder.id}`;
 
+    // Функция для определения родительской системной папки (Входящие/Исходящие)
+    const getParentSystemFolder = (folderId: number): string | null => {
+      const findParent = (id: number): any => {
+        const currentFolder = folders.find((f: any) => f.id === id);
+        if (!currentFolder) return null;
+        
+        // Если это системная папка
+        if (currentFolder.name === "Входящие письма") return "incoming";
+        if (currentFolder.name === "Исходящие письма") return "outgoing";
+        
+        // Если есть родитель, ищем дальше
+        if (currentFolder.parent_id) {
+          return findParent(currentFolder.parent_id);
+        }
+        
+        return null;
+      };
+      
+      return findParent(folderId);
+    };
+
+    // Формируем path для пользовательских папок
+    let folderPath = def ? def.path : `/modules/correspondence/folders?folderId=${folder.id}`;
+    
+    // Если это пользовательская папка (не системная), определяем родителя
+    if (!def && folder.id) {
+      const parentType = getParentSystemFolder(folder.id);
+      if (parentType === "incoming") {
+        folderPath = `/modules/correspondence/incoming?folderId=${folder.id}`;
+      } else if (parentType === "outgoing") {
+        folderPath = `/modules/correspondence/outgoing?folderId=${folder.id}`;
+      }
+    }
+
     // Рендерим детей
     const nestedFolders = folders
       .filter((f: any) => f.parent_id === folder.id)
@@ -93,7 +127,7 @@ export const buildMenuTree = ({
       key: folderKey,
       folderName: folder.name,
       icon: def ? def.icon : <img src={folderIcon} />,
-      path: def ? def.path : `/modules/correspondence/folders?folderId=${folder.id}`,
+      path: folderPath,
       children,
       label: (
         <div className="flex items-center w-full group overflow-hidden h-full gap-0">
@@ -101,9 +135,8 @@ export const buildMenuTree = ({
             className="flex items-center flex-1 overflow-hidden cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
-              const path = def ? def.path : `/modules/correspondence/folders?folderId=${folder.id}`;
-              if (path) {
-                onNavigate(path);
+              if (folderPath) {
+                onNavigate(folderPath);
               }
             }}
           >

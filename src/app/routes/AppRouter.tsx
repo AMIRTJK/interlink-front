@@ -78,6 +78,12 @@ const NotFoundPage = lazy(() =>
   })),
 );
 
+const CorrespondenceTableWrapper = lazy(() =>
+  import("@widgets/RegistryTable").then((m) => ({
+    default: m.CorrespondenceTableWrapper,
+  })),
+);
+
 const HrPage = lazy(() =>
   import("@pages/modules/hr/Hr").then((m) => ({ default: m.HrPage })),
 );
@@ -148,10 +154,10 @@ export const AppRouter = () => {
                   <Route
                     index
                     element={
-                      <RegistryTable
+                      <CorrespondenceTableWrapper
                         type="incoming"
                         createButtonText="Добавить письмо"
-                        extraParams={incomingParams}
+                        baseParams={incomingParams}
                       />
                     }
                   />
@@ -168,10 +174,10 @@ export const AppRouter = () => {
                   <Route
                     index
                     element={
-                      <RegistryTable
+                      <CorrespondenceTableWrapper
                         type="outgoing"
                         createButtonText="Добавить письмо"
-                        extraParams={outgoingParams}
+                        baseParams={outgoingParams}
                       />
                     }
                   />
