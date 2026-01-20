@@ -26,28 +26,23 @@
   padding: 0 !important;
 }
 
-/* Увеличиваем отступ ТОЛЬКО для элементов внутри submenu (не для самих Входящих/Исходящих) */
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-item {
-  padding-left: 40px !important;
+/* Стили для ПЕРВОГО уровня вложенности (папки 6, 7, 9 внутри "Входящих") */
+/* Используем прямой дочерний селектор > чтобы затронуть только первый уровень */
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item,
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
+  padding-left: 16px !important;
   position: relative;
   border-radius: 8px;
   margin-bottom: 2px;
   transition: all 0.2s ease;
 }
 
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-item {
-  padding-left: 56px !important;
-}
-
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-submenu .ant-menu-item {
-  padding-left: 72px !important;
-}
-
-/* Вертикальная линия для вложенных элементов */
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-item::before {
+/* Вертикальная линия для первого уровня */
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item::before,
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
   content: '';
   position: absolute;
-  left: 24px;
+  left: 8px;
   top: 0;
   bottom: 0;
   width: 2px;
@@ -55,34 +50,43 @@
   border-radius: 2px;
 }
 
-/* Легкий фон для вложенных элементов при наведении */
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-item:hover {
+/* Легкий фон при наведении для первого уровня */
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item:hover,
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
   background-color: rgba(0, 55, 175, 0.03) !important;
 }
 
-/* Отступ для submenu title внутри submenu (вложенные папки внутри созданных папок) */
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu-title {
-  padding-left: 40px !important;
-  position: relative;
-  border-radius: 8px;
-  margin-bottom: 2px;
-  transition: all 0.2s ease;
+/* ВТОРОЙ уровень вложенности (папки внутри папок 6, 7, 9) */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
+  padding-left: 32px !important;
 }
 
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-submenu-title {
-  padding-left: 56px !important;
-}
-
-/* Вертикальная линия для вложенных submenu */
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu-title::before {
-  content: '';
-  position: absolute;
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
   left: 24px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(to bottom, rgba(0, 55, 175, 0.1), rgba(0, 55, 175, 0.05));
-  border-radius: 2px;
+}
+
+/* ТРЕТИЙ уровень вложенности */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
+  padding-left: 48px !important;
+}
+
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
+  left: 40px;
+}
+
+/* ЧЕТВЕРТЫЙ уровень вложенности */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
+  padding-left: 64px !important;
+}
+
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
+  left: 56px;
 }
 
 /* Убираем лишние анимации, которые могут мешать нашему выравниванию */
