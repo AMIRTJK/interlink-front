@@ -10,7 +10,18 @@
       "name": "login",
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
         "body": {
           "mode": "raw",
           "raw": "{\r\n  \"phone\": \"+992900000001\",\r\n  \"password\": \"password123\"\r\n}\r\n",
@@ -89,7 +100,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"name\": \"manager\",\r\n  \"permissions\": [\r\n    \"users.view\",\r\n    \"ui.menu.analytics\",\r\n    \"ui.button.export_users\"\r\n  ]\r\n}",
+          "raw": "{\r\n  \"name\": \"manager_test\",\r\n  \"permissions\": [\r\n    \"users.view\",\r\n    \"users.create\",\r\n    \"users.update\",\r\n    \"users.delete\",\r\n    \"organizations.view\"\r\n  ]\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -139,7 +150,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"name\": \"ui.menu.reports\"\r\n}"
+          "raw": "{\r\n  \"name\": \"ui.menu.reports1\"\r\n}"
         },
         "url": {
           "raw": "{{baseURL}}/api/v1/admin/permissions",
@@ -184,7 +195,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"last_name\": \"Иванов\",\r\n  \"first_name\": \"Иван\",\r\n  \"phone\": \"+992900000010\",\r\n  \"password\": \"secret123\",\r\n  \"position\": \"Сотрудник\",\r\n  \"organization_id\": 1,\r\n  \"roles\": [\"manager\"]\r\n}\r\n\r\n"
+          "raw": "{\r\n  \"last_name\": \"Иванов\",\r\n  \"first_name\": \"Иван\",\r\n  \"phone\": \"+992900000015\",\r\n  \"password\": \"secret123\",\r\n  \"position\": \"Сотрудник\",\r\n  \"organization_id\": 1,\r\n  \"roles\": [\"manager_test\"]\r\n}\r\n\r\n"
         },
         "url": {
           "raw": "http://localhost:8000/api/v1/admin/users",
@@ -219,7 +230,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{baseURL}}/api/v1/admin/roles/2",
+          "raw": "{{baseURL}}/api/v1/admin/roles/5",
           "host": [
             "{{baseURL}}"
           ],
@@ -228,7 +239,7 @@
             "v1",
             "admin",
             "roles",
-            "2"
+            "5"
           ]
         }
       },
@@ -288,8 +299,48 @@
     {
       "name": "Delete Role",
       "request": {
-        "method": "GET",
-        "header": []
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "KAh7xgxZMiJ3Miv0V0iHZp5QAXRegSjx6bFPRiph3133bb77",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/admin/roles/2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "v1",
+            "admin",
+            "roles",
+            "2"
+          ]
+        }
       },
       "response": []
     },
@@ -351,7 +402,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"user_id\": 2,\r\n  \"roles\": [\"manager\"]\r\n}\r\n",
+          "raw": "{\r\n  \"user_id\": 2,\r\n  \"roles\": [\"org_admin\"]\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -522,9 +573,50 @@
     },
     {
       "name": "GET 1 Organizations",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
       "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "KAh7xgxZMiJ3Miv0V0iHZp5QAXRegSjx6bFPRiph3133bb77",
+              "type": "string"
+            }
+          ]
+        },
         "method": "GET",
-        "header": []
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/admin/organizations/2",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "admin",
+            "organizations",
+            "2"
+          ]
+        }
       },
       "response": []
     },
@@ -556,7 +648,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"name\": \"ООО Тестовая организация (обновлено)\",\r\n  \"short_name\": \"ООО Тест+\",\r\n  \"code\": \"test_org\", \r\n  \"inn\": \"1234567890\",\r\n  \"phone\": \"+992900000100\",\r\n  \"email\": \"office@test-org.tj\",\r\n  \"website\": \"https://test-org.tj\",\r\n  \"address\": \"г. Душанбе, ул. Обновлённая 2\",\r\n  \"meta\": {\r\n    \"type\": \"client\",\r\n    \"note\": \"обновлено\"\r\n  }\r\n}\r\n",
+          "raw": "{\r\n  \"name\": \"ООО Тестовая организация (обновлено)\",\r\n  \"short_name\": \"ООО Тест+\",\r\n  \"code\": \"test_org\", \r\n  \"inn\": \"123456789\",\r\n  \"phone\": \"+992900000100\",\r\n  \"email\": \"office@test-org.tj\",\r\n  \"website\": \"https://test-org.tj\",\r\n  \"address\": \"г. Душанбе, ул. Обновлённая 2\",\r\n  \"meta\": {\r\n    \"type\": \"client\",\r\n    \"note\": \"обновлено\"\r\n  }\r\n}\r\n",
           "options": {
             "raw": {
               "language": "json"
@@ -680,7 +772,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "KAh7xgxZMiJ3Miv0V0iHZp5QAXRegSjx6bFPRiph3133bb77",
+              "value": "VWbQkk8BNWzLtjzRUjOSnJss97sfDQyiJuZK0Kx01528abd5",
               "type": "string"
             }
           ]
@@ -968,7 +1060,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+              "value": "XUuE2yz8rYpHjkz4YDI2FJ5EnDXOG36ulPqxfH0A07bf9f5c",
               "type": "string"
             }
           ]
@@ -988,7 +1080,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"title\": \"Мероприятие Postman 3\",\r\n  \"description\": \"Проверка API\",\r\n  \"start_at\": \"2025-01-20 14:00\",\r\n  \"end_at\": \"2025-01-20 15:00\",\r\n  \"color\": \"#3b82f6\",\r\n  \"status\": \"pending\",\r\n  \"participants\": [3,4] //user_id \r\n}\r\n",
+          "raw": "{\r\n  \"title\": \"Мероприятие Postman 3\",\r\n  \"description\": \"Проверка API\",\r\n  \"start_at\": \"2025-01-20 14:00\",\r\n  \"end_at\": \"2025-01-20 15:00\",\r\n  \"color\": \"#3b82f6\",\r\n  \"status\": \"pending\",\r\n  \"participants\": [1,4] //user_id \r\n}\r\n",
           "options": {
             "raw": {
               "language": "json"
@@ -1108,7 +1200,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+              "value": "XUuE2yz8rYpHjkz4YDI2FJ5EnDXOG36ulPqxfH0A07bf9f5c",
               "type": "string"
             }
           ]
@@ -1128,7 +1220,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"kind\": \"incoming\",\r\n  \"channel\": \"paper\",\r\n  \"doc_date\": \"2025-12-27\",\r\n  \"subject\": \"Входящее письмо тест\",\r\n  \"body\": \"Тестовое содержание письма\",\r\n  \"sender_name\": \"ООО Ромашка\",\r\n  \"sender_contact\": \"+992900000000\",\r\n  \"priority\": \"high\",\r\n  \"due_at\": \"2026-01-10 18:00\"\r\n}\r\n",
+          "raw": "{\r\n  \"kind\": \"incoming\",\r\n  \"channel\": \"paper\",\r\n  \"doc_date\": \"2025-12-27\",\r\n  \"subject\": \"Входящее письмо тест\",\r\n  \"body\": \"Тестовое содержание письма\",\r\n  \"sender_name\": \"ООО Ромашка 4\",\r\n  \"sender_contact\": \"+992900000000\",\r\n  \"priority\": \"high\",\r\n  \"due_at\": \"2026-01-10 18:00\"\r\n}\r\n",
           "options": {
             "raw": {
               "language": "json"
@@ -1177,10 +1269,10 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"text\": \"Замминистра: Направить в юридический отдел. Контроль.\",\r\n  \"due_at\": \"2026-01-03 18:00\"\r\n}\r\n\r\n// Должно вернуться:\r\n\r\n// id резолюции\r\n\r\n// author_id = текущий юзер\r\n\r\n// text\r\n\r\n// due_at"
+          "raw": "{\r\n  \"text\": \"Замминистра: Направить в юридический отдел. Контроль.\",\r\n  \"due_at\": null,\r\n   \"status\": \"pending\"\r\n}\r\n\r\n// Должно вернуться:\r\n\r\n// id резолюции\r\n\r\n// author_id = текущий юзер\r\n\r\n// text\r\n\r\n// due_at"
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondences/1/resolutions",
+          "raw": "{{baseURL}}/api/v1/correspondences/4/resolutions",
           "host": [
             "{{baseURL}}"
           ],
@@ -1188,7 +1280,7 @@
             "api",
             "v1",
             "correspondences",
-            "1",
+            "4",
             "resolutions"
           ]
         }
@@ -1223,10 +1315,10 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "// {\r\n\r\n//   \"due_at\": \"2026-01-03 18:00\",\r\n//   \"assignee_users\": [1],\r\n//   \"note\": \"Срочно\"\r\n// }\r\n\r\n{\r\n  \r\n  \"assignee_departments\": [3],\r\n  \"note\": \"Подготовить юридическое заключение\"\r\n}\r\n"
+          "raw": "{\r\n  \"resolution_id\": 3,\r\n  \"assignee_departments\": [3],\r\n  \"note\": \"Подготовить юридическое заключение\",\r\n  \"due_at\": null\r\n}\r\n\r\n"
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondences/1/assignments",
+          "raw": "{{baseURL}}/api/v1/correspondences/4/assignments",
           "host": [
             "{{baseURL}}"
           ],
@@ -1234,7 +1326,7 @@
             "api",
             "v1",
             "correspondences",
-            "1",
+            "4",
             "assignments"
           ]
         }
@@ -1316,10 +1408,10 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "// Смена статуса поручения (как сотрудник отдела)\r\n// {\r\n//   \"status\": \"in_progress\"\r\n// }\r\n// {\r\n//   \"status\": \"done\"\r\n// }\r\n// done_at заполнится\r\n\r\n// если это последнее поручение → документ станет completed"
+          "raw": "// PATCH {{baseURL}}/api/v1/correspondence-assignments/{ASSIGNMENT_ID}/status\r\n//\r\n// Body:\r\n// { \"status\": \"pending\" }\r\n// { \"status\": \"in_progress\" }\r\n{ \"status\": \"done\" }\r\n// { \"status\": \"cancelled\" }\r\n//\r\n// Rules:\r\n// - allowed statuses: pending|in_progress|done|cancelled\r\n// - if status=done => done_at авто = now()\r\n// - if status != done => done_at = null\r\n// - if this was the last active assignment for the correspondence =>\r\n//     correspondence.status becomes \"done\" (if not cancelled)\r\n"
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondence-assignments/{ASSIGNMENT_ID}/status",
+          "raw": "{{baseURL}}/api/v1/correspondence-assignments/5/status",
           "host": [
             "{{baseURL}}"
           ],
@@ -1327,7 +1419,7 @@
             "api",
             "v1",
             "correspondence-assignments",
-            "{ASSIGNMENT_ID}",
+            "5",
             "status"
           ]
         }
@@ -2056,7 +2148,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{ \"name\": \"Важное\", \"sort\": 1 }\r\n"
+          "raw": "{ \"name\": \"Важное\", \"sort\": 1 }\r\n// Создание вложенной папки —  просто добавляем parent_id\r\n// {\r\n//   \"name\": \"Договоры\",\r\n//   \"parent_id\": 5,\r\n//   \"sort\": 10\r\n// }\r\n// Если parent_id не передан или null → папка корневая"
         },
         "url": {
           "raw": "{{baseURL}}/api/v1/correspondence-folders",
@@ -2100,7 +2192,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{ \"name\": \"Важное (обновлено)\", \"sort\": 2 }\r\n"
+          "raw": "{ \"name\": \"Важное (обновлено)\", \"sort\": 2 }\r\n// { Здесь тоже самое \r\n//   \"name\": \"Важное (обновлено)\",\r\n//   \"sort\": 2,\r\n//   \"parent_id\": 5\r\n// }\r\n"
         },
         "url": {
           "raw": "{{baseURL}}/api/v1/correspondence-folders/{{FOLDER_ID}}",
@@ -2194,10 +2286,10 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{ \"name\": \"Важное\", \"sort\": 1 }\r\n"
+          "raw": "\r\n"
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondences?folder_id={{FOLDER_ID}}",
+          "raw": "{{baseURL}}/api/v1/correspondences?folder_id=1",
           "host": [
             "{{baseURL}}"
           ],
@@ -2209,7 +2301,7 @@
           "query": [
             {
               "key": "folder_id",
-              "value": "{{FOLDER_ID}}"
+              "value": "1"
             }
           ]
         }
@@ -2508,32 +2600,176 @@
     {
       "name": "Set Leader to Crspndce",
       "request": {
-        "method": "GET",
-        "header": []
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"leader_id\": 1 }\r\n"
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/correspondences/4/set-leader",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "correspondences",
+            "4",
+            "set-leader"
+          ]
+        }
       },
       "response": []
     },
     {
       "name": "Проверить резолюции через list",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
       "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "XUuE2yz8rYpHjkz4YDI2FJ5EnDXOG36ulPqxfH0A07bf9f5c",
+              "type": "string"
+            }
+          ]
+        },
         "method": "GET",
-        "header": []
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/correspondences/4/resolutions",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "correspondences",
+            "4",
+            "resolutions"
+          ]
+        }
       },
       "response": []
     },
     {
       "name": "Проверить резолюции внутри карточки",
       "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "XUuE2yz8rYpHjkz4YDI2FJ5EnDXOG36ulPqxfH0A07bf9f5c",
+              "type": "string"
+            }
+          ]
+        },
         "method": "GET",
-        "header": []
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/api/v1/correspondences/4?view=full",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "correspondences",
+            "4"
+          ],
+          "query": [
+            {
+              "key": "view",
+              "value": "full"
+            }
+          ]
+        }
       },
       "response": []
     },
     {
       "name": "Назначить конкретного человека(assignments)",
       "request": {
-        "method": "GET",
-        "header": []
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "XUuE2yz8rYpHjkz4YDI2FJ5EnDXOG36ulPqxfH0A07bf9f5c",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"resolution_id\": 3,\r\n  \"assignee_users\": [2],\r\n  \"note\": \"Срочно дать заключение\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/correspondences/4/assignments",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "correspondences",
+            "4",
+            "assignments"
+          ]
+        }
       },
       "response": []
     }

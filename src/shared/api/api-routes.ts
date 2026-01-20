@@ -32,6 +32,7 @@ export const ApiRoutes = {
   UPLOAD_CORRESPONDENCE_ATTACHMENTS_BULK:
     "/api/v1/correspondences/:id/attachments/bulk",
   DELETE_CORRESPONDENCE_ATTACHMENT: "/api/v1/correspondence-attachments/:id",
+  ASSIGNMENTS_CORRESPONDENCE: "/api/v1/correspondences/:id/assignments",
 
   // ==================== HR MODULE ====================
   // Organizations
