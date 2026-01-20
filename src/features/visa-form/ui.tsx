@@ -1,26 +1,48 @@
-import React, { useState } from "react";
-import { Col, Form, message, Row, Upload, type UploadProps } from "antd";
-import { Button, DateField, SelectField, TextField } from "@shared/ui";
-import { useMutationQuery } from "@shared/lib";
+import React, { useEffect, useMemo, useState } from "react";
+import { Avatar, Col, Form, message, Row } from "antd";
+import { Button, DateField, If, SelectField, TextField } from "@shared/ui";
+import { tokenControl, useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 
 import dateIcon from "../../assets/icons/date-icon.svg";
 import arrowBottomIcon from "../../assets/icons/arrow-bottom-icon.svg";
 import fileListIcon from "../../assets/icons/file-list-icon.svg";
 import { IAttachment, mockFiles } from "./lib";
+import {
+  CorrespondenceResponse,
+  CreateAssignmentRequest,
+} from "@entities/correspondence";
+import { ApartmentOutlined, StarFilled } from "@ant-design/icons";
 
 interface VisaFormProps {
-  correspondenceId?: number;
+  correspondenceData?: CorrespondenceResponse;
   className?: string; // Самый важный проп для встраивания
   onSuccess?: () => void; // Если нужно закрыть модалку после успеха
   onAssignExecutors?: () => void;
+  selectedUserIds?: number[];
+  selectedDeptIds?: number[];
+  selectedMainExecutorIds?: number[];
+}
+
+interface IApiUser {
+  id: number;
+  full_name: string;
+  photo_path: string | null;
+}
+
+interface IApiDepartment {
+  id: number;
+  name: string;
 }
 
 export const VisaForm: React.FC<VisaFormProps> = ({
-  correspondenceId,
+  correspondenceData,
   className,
   onSuccess,
   onAssignExecutors,
+  selectedUserIds = [],
+  selectedDeptIds = [],
+  selectedMainExecutorIds = [],
 }) => {
   const [fileList, setFileList] = useState<IAttachment[]>(mockFiles);
   const [isFormValid, setIsFormValid] = useState(false);
@@ -31,59 +53,87 @@ export const VisaForm: React.FC<VisaFormProps> = ({
     { label: "Назоратӣ", value: "Назоратӣ" },
   ];
 
-  const { mutate: uploadFilesBulk, isPending: isUploading } = useMutationQuery<
-    FormData,
-    IAttachment[]
-  >({
-    url: ApiRoutes.UPLOAD_CORRESPONDENCE_ATTACHMENTS_BULK.replace(
-      ":id",
-      String(correspondenceId || ""),
-    ),
-    method: "POST",
+  const { data: usersData } = useGetQuery({
+    url: ApiRoutes.GET_USERS,
+    useToken: true,
   });
 
-  const { mutate: deleteFile, isPending: isDeleting } = useMutationQuery<
-    number,
-    unknown
-  >({
-    url: (id) => `/api/v1/correspondence-attachments/${id}`,
-    method: "DELETE",
-    messages: {
-      success: "Файл удален",
-      error: "Не удалось удалить файл",
-    },
+  const { data: deptsData } = useGetQuery({
+    url: ApiRoutes.GET_DEPARTMENTS,
+    useToken: true,
   });
+
+  const selectedUsersList = useMemo(() => {
+    const allUsers = (usersData?.data?.data as IApiUser[]) || [];
+    const filtered = allUsers.filter((u) => selectedUserIds.includes(u.id));
+
+    return filtered.sort((a, b) => {
+      const isAMain = selectedMainExecutorIds.includes(a.id);
+      const isBMain = selectedMainExecutorIds.includes(b.id);
+      if (isAMain && !isBMain) return -1;
+      if (!isAMain && isBMain) return 1;
+      return 0;
+    });
+  }, [usersData, selectedUserIds, selectedMainExecutorIds]);
+
+  const selectedDeptsList = useMemo(() => {
+    const allDepts = (deptsData?.data?.data as IApiDepartment[]) || [];
+    return allDepts.filter((d) => selectedDeptIds.includes(d.id));
+  }, [deptsData, selectedDeptIds]);
+
+  // const { mutate: uploadFilesBulk, isPending: isUploading } = useMutationQuery<
+  //   FormData,
+  //   IAttachment[]
+  // >({
+  //   url: ApiRoutes.UPLOAD_CORRESPONDENCE_ATTACHMENTS_BULK.replace(
+  //     ":id",
+  //     String(correspondenceId || "")
+  //   ),
+  //   method: "POST",
+  // });
+
+  // const { mutate: deleteFile, isPending: isDeleting } = useMutationQuery<
+  //   number,
+  //   unknown
+  // >({
+  //   url: (id) => `/api/v1/correspondence-attachments/${id}`,
+  //   method: "DELETE",
+  //   messages: {
+  //     success: "Файл удален",
+  //     error: "Не удалось удалить файл",
+  //   },
+  // });
 
   // --- Handlers ---
-  const handleUpload: UploadProps["customRequest"] = (options) => {
-    const { file, onSuccess: onUploadSuccess, onError } = options;
-    const formData = new FormData();
-    formData.append("files[]", file as Blob);
+  // const handleUpload: UploadProps["customRequest"] = (options) => {
+  //   const { file, onSuccess: onUploadSuccess, onError } = options;
+  //   const formData = new FormData();
+  //   formData.append("files[]", file as Blob);
 
-    uploadFilesBulk(formData, {
-      onSuccess: (data) => {
-        if (Array.isArray(data)) {
-          setFileList((prev) => [...prev, ...data]);
-          message.success(`${(file as File).name} успешно загружен`);
-          if (onUploadSuccess) onUploadSuccess(data);
-        } else {
-          setFileList((prev) => [...prev, data as IAttachment]);
-          if (onUploadSuccess) onUploadSuccess(data);
-        }
-      },
-      onError: (err) => {
-        if (onError) onError(err);
-      },
-    });
-  };
+  //   uploadFilesBulk(formData, {
+  //     onSuccess: (data) => {
+  //       if (Array.isArray(data)) {
+  //         setFileList((prev) => [...prev, ...data]);
+  //         message.success(`${(file as File).name} успешно загружен`);
+  //         if (onUploadSuccess) onUploadSuccess(data);
+  //       } else {
+  //         setFileList((prev) => [...prev, data as IAttachment]);
+  //         if (onUploadSuccess) onUploadSuccess(data);
+  //       }
+  //     },
+  //     onError: (err) => {
+  //       if (onError) onError(err);
+  //     },
+  //   });
+  // };
 
-  const handleRemoveFile = (attachmentId: number) => {
-    deleteFile(attachmentId, {
-      onSuccess: () => {
-        setFileList((prev) => prev.filter((item) => item.id !== attachmentId));
-      },
-    });
-  };
+  // const handleRemoveFile = (attachmentId: number) => {
+  //   deleteFile(attachmentId, {
+  //     onSuccess: () => {
+  //       setFileList((prev) => prev.filter((item) => item.id !== attachmentId));
+  //     },
+  //   });
+  // };
 
   const handleDownloadFile = (file: IAttachment) => {
     const link = document.createElement("a");
@@ -98,20 +148,78 @@ export const VisaForm: React.FC<VisaFormProps> = ({
   //   return filename.split(".").pop()?.toUpperCase() || "FILE";
   // };
 
+  const hasSelection =
+    selectedUsersList.length > 0 || selectedDeptsList.length > 0;
+
   const handleFormChange = (
     _: unknown,
-    allValues: { due_at: unknown; note: string; status: string },
+    allValues: { due_at: unknown; note: string; status: string }
   ) => {
     const { due_at, note, status } = allValues;
-    const isValid = !!due_at && !!note && !!status;
+    const isValid = !!due_at && !!note && !!status && hasSelection;
     setIsFormValid(isValid);
   };
 
+  useEffect(() => {
+    const values = form.getFieldsValue(["due_at", "note", "status"]);
+    const isValid =
+      !!values.due_at && !!values.note && !!values.status && hasSelection;
+    setIsFormValid(isValid);
+  }, [hasSelection, form]);
+
+  const { mutate, isPending, isAllowed } =
+    useMutationQuery<CreateAssignmentRequest>({
+      url: ApiRoutes.ASSIGNMENTS_CORRESPONDENCE,
+      method: "POST",
+      messages: {
+        invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      },
+      preload: true,
+      preloadConditional: ["correspondence.assign"],
+    });
+
   const handleSubmit = () => {
     form.validateFields().then((values) => {
-      console.log("Submit values:", values, fileList);
-      message.success("Виза создана!");
-      if (onSuccess) onSuccess();
+      const userIdStr = tokenControl.getUserId();
+      const currentUserId = userIdStr ? Number(userIdStr) : null;
+
+      if (!currentUserId) {
+        message.error("Ошибка авторизации: не найден ID пользователя");
+        return;
+      }
+
+      const assignmentsList = correspondenceData?.assignments || [];
+
+      const myAssignment = assignmentsList.find(
+        (item) => item.assignee_user_id === currentUserId
+      );
+
+      let resolutionId = myAssignment?.resolution_id;
+
+      console.log(resolutionId);
+
+      const formattedDueAt = values.due_at;
+
+      const payload: any = {
+        resolution_id: resolutionId,
+        note: values.note,
+        due_at: formattedDueAt,
+      };
+
+      if (selectedUserIds.length > 0) {
+        payload.assignee_users = selectedUserIds;
+      }
+
+      if (selectedDeptIds.length > 0) {
+        payload.assignee_departments = selectedDeptIds;
+      }
+
+      mutate(payload, {
+        onSuccess: () => {
+          if (onSuccess) onSuccess();
+          form.resetFields();
+        },
+      });
     });
   };
 
@@ -199,11 +307,75 @@ export const VisaForm: React.FC<VisaFormProps> = ({
                   d="M12 4.5v15m7.5-7.5h-15"
                 />
               </svg>
-              Назначить исполнителей
+              {hasSelection
+                ? "Изменить исполнителей"
+                : "Назначить исполнителей"}
             </button>
           </Col>
+
+          <If is={hasSelection}>
+            <div className="w-full px-4">
+              <p className="text-[13px] font-bold text-[#b4bce0] mb-2.5 ml-1">
+                Выбранные исполнители
+              </p>
+
+              {/* Используем Grid для ровного распределения (макс 2 в строку) */}
+              <div className="grid grid-cols-2 gap-2 w-full">
+                {/* 1. Сначала рендерим Пользователей (отсортированных: Главные -> Остальные) */}
+                {selectedUsersList.map((user) => {
+                  const isMain = selectedMainExecutorIds.includes(user.id);
+                  return (
+                    <div
+                      key={`user-${user.id}`}
+                      className="flex items-center gap-2 bg-white border border-gray-100 rounded-full pl-1 pr-3 py-1 shadow-sm select-none min-w-0"
+                    >
+                      <div className="relative shrink-0">
+                        <Avatar
+                          src={user.photo_path}
+                          size={24}
+                          className={`
+                          flex items-center justify-center text-[10px]
+                          ${isMain ? "ring-2 ring-[#B4833E]" : "bg-gray-200"}
+                        `}
+                        >
+                          {!user.photo_path && user.full_name?.[0]}
+                        </Avatar>
+                        {/* Звездочка для главного исполнителя */}
+                        {isMain && (
+                          <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-[1px] leading-none z-10">
+                            <StarFilled
+                              style={{ fontSize: "10px", color: "#B4833E" }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-[12px] text-gray-700 font-medium truncate">
+                        {user.full_name}
+                      </span>
+                    </div>
+                  );
+                })}
+
+                {/* 2. Затем рендерим Департаменты */}
+                {selectedDeptsList.map((dept) => (
+                  <div
+                    key={`dept-${dept.id}`}
+                    className="flex items-center gap-2 bg-white border border-indigo-100 rounded-full pl-1 pr-3 py-1 shadow-sm select-none min-w-0"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
+                      <ApartmentOutlined style={{ fontSize: "14px" }} />
+                    </div>
+                    <span className="text-[12px] text-gray-700 font-medium truncate">
+                      {dept.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </If>
+
           <Col span={24}>
-            <Upload
+            {/* <Upload
               customRequest={handleUpload}
               showUploadList={false}
               multiple={true}
@@ -230,14 +402,14 @@ export const VisaForm: React.FC<VisaFormProps> = ({
                   {isUploading ? "Загрузка..." : "Прикрепить файл (макс 20МБ)"}
                 </span>
               </div>
-            </Upload>
+            </Upload> */}
 
             {fileList.length > 0 && (
               <div className="grid grid-cols-1 gap-3 mt-4 pb-2">
                 {fileList.map((file) => (
                   <div
                     key={file.id}
-                    className={`bg-white p-3 rounded-2xl border border-[#BCC5DF]/40 flex items-center justify-between gap-3 hover:border-[#0037AF]/40 transition-colors group relative ${isDeleting ? "opacity-50 pointer-events-none" : ""}`}
+                    className="bg-white p-3 rounded-2xl border border-[#BCC5DF]/40 flex items-center justify-between gap-3 hover:border-[#0037AF]/40 transition-colors group relative"
                   >
                     <div
                       className="flex items-center gap-3 overflow-hidden flex-1 cursor-pointer"
@@ -273,11 +445,11 @@ export const VisaForm: React.FC<VisaFormProps> = ({
                       </svg>
                     </button>
 
-                    <button
+                    {/* <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleRemoveFile(file.id);
+                        // handleRemoveFile(file.id);
                       }}
                       className="absolute -top-1.5 -right-1.5 bg-white rounded-full p-0.5 text-gray-400 hover:text-red-500 shadow border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity z-10 scale-90"
                     >
@@ -289,7 +461,7 @@ export const VisaForm: React.FC<VisaFormProps> = ({
                       >
                         <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
                       </svg>
-                    </button>
+                    </button> */}
                   </div>
                 ))}
               </div>

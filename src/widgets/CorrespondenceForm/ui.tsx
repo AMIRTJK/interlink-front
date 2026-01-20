@@ -7,6 +7,7 @@ import executionIcon from "../../assets/icons/execution.svg";
 import { ApiRoutes } from "@shared/api";
 import { transformResponse } from "./lib";
 import { useLocation } from "react-router";
+import { CorrespondenceResponse } from "@entities/correspondence";
 
 // Тип документа
 export type CorrespondenceType = "incoming" | "outgoing";
@@ -27,7 +28,7 @@ export interface CorrespondenceFormData {
 
 interface CorrespondenceFormProps {
   type: CorrespondenceType;
-  initialValues?: CorrespondenceFormData;
+  initialValues?: CorrespondenceResponse;
   onFinish: (values: CorrespondenceFormData) => void;
   isLoading?: boolean;
   title: string;
@@ -245,7 +246,7 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
       <ExecutionModal
         isOpen={executionModalState.isOpen}
         onClose={executionModalState.close}
-        correspondenceId={initialValues?.id}
+        correspondenceData={initialValues}
       />
     </div>
   );

@@ -6,29 +6,37 @@ import { VisaForm } from "@features/visa-form";
 import { HeaderExecutionModal } from "./HeaderExecutionModal";
 import { If } from "@shared/ui";
 import { ExecutorStructure } from "@features/executor-structure";
+import { CorrespondenceResponse } from "@entities/correspondence";
 
 interface ExecutionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  correspondenceId?: number;
+  correspondenceData?: CorrespondenceResponse;
 }
 
 export const ExecutionModal: React.FC<ExecutionModalProps> = ({
   isOpen,
   onClose,
-  correspondenceId,
+  correspondenceData,
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showExecutorStructure, setShowExecutorStructure] = useState(false);
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+  const [selectedDeptIds, setSelectedDeptIds] = useState<number[]>([]);
+  const [selectedMainIds, setSelectedMainIds] = useState<number[]>([]);
 
   const toggleFullScreen = () => {
     setIsFullScreen((prev) => !prev);
   };
 
-  const handleSaveExecutors = (selected: number[], mains: number[]) => {
-    console.log("Selected Users:", selected);
-    console.log("Main Executors:", mains);
-    // Тут логика сохранения или передачи данных обратно в форму
+  const handleSaveExecutors = (
+    userIds: number[],
+    deptIds: number[],
+    mainExecutorIds: number[]
+  ) => {
+    setSelectedUserIds(userIds);
+    setSelectedDeptIds(deptIds);
+    setSelectedMainIds(mainExecutorIds);
     setShowExecutorStructure(false);
   };
 
@@ -53,7 +61,10 @@ export const ExecutionModal: React.FC<ExecutionModalProps> = ({
         />
         <div className="flex flex-col md:flex-row flex-1 overflow-y-auto md:overflow-hidden bg-[#F5F7FB]  md:bg-white">
           <VisaForm
-            correspondenceId={correspondenceId}
+            selectedUserIds={selectedUserIds}
+            selectedDeptIds={selectedDeptIds}
+            selectedMainExecutorIds={selectedMainIds}
+            correspondenceData={correspondenceData}
             className="w-full md:w-96 md:rounded-2xl bg-[#F2F5FF] p-4 border-b md:border-b-0 md:border-r border-gray-100 shrink-0"
             onAssignExecutors={() => setShowExecutorStructure(true)}
           />
@@ -63,6 +74,9 @@ export const ExecutionModal: React.FC<ExecutionModalProps> = ({
                 onCancel={() => setShowExecutorStructure(false)}
                 onSave={handleSaveExecutors}
                 className="w-full h-full animate-fade-in"
+                initialSelectedUserIds={selectedUserIds}
+                initialSelectedDeptIds={selectedDeptIds}
+                initialMainExecutorIds={selectedMainIds}
               />
             </If>
             <If is={!showExecutorStructure}>

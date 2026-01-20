@@ -23,6 +23,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
 
   const { isLoading, data: correspondenceData } = useGetQuery({
     url: ApiRoutes.GET_CORRESPONDENCE_BY_ID.replace(":id", String(id || "")),
+    params: { view: "full" },
   });
 
   const handleFinish = (values: CorrespondenceFormData) => {
