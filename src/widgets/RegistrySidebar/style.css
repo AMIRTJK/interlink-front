@@ -18,13 +18,71 @@
 .registry-sidebar-style .ant-menu-item,
 .registry-sidebar-style .ant-menu-submenu-title {
   padding-inline: 16px 0px !important;
-  padding-left: 0 !important;
   padding: 0 16px !important;
 }
 
 .collapsed-style .ant-menu-item,
 .collapsed-style .ant-menu-submenu-title {
   padding: 0 !important;
+}
+
+/* Увеличиваем отступ ТОЛЬКО для элементов внутри submenu (не для самих Входящих/Исходящих) */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-item {
+  padding-left: 40px !important;
+  position: relative;
+  border-radius: 8px;
+  margin-bottom: 2px;
+  transition: all 0.2s ease;
+}
+
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-item {
+  padding-left: 56px !important;
+}
+
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-submenu .ant-menu-item {
+  padding-left: 72px !important;
+}
+
+/* Вертикальная линия для вложенных элементов */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-item::before {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(0, 55, 175, 0.1), rgba(0, 55, 175, 0.05));
+  border-radius: 2px;
+}
+
+/* Легкий фон для вложенных элементов при наведении */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-item:hover {
+  background-color: rgba(0, 55, 175, 0.03) !important;
+}
+
+/* Отступ для submenu title внутри submenu (вложенные папки внутри созданных папок) */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu-title {
+  padding-left: 40px !important;
+  position: relative;
+  border-radius: 8px;
+  margin-bottom: 2px;
+  transition: all 0.2s ease;
+}
+
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-submenu-title {
+  padding-left: 56px !important;
+}
+
+/* Вертикальная линия для вложенных submenu */
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu-title::before {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(0, 55, 175, 0.1), rgba(0, 55, 175, 0.05));
+  border-radius: 2px;
 }
 
 /* Убираем лишние анимации, которые могут мешать нашему выравниванию */
