@@ -63,3 +63,14 @@ export const PERMISSION_TRANSLATIONS: Record<string, string> = {
   'system.logs.view': 'Просмотр системных логов',
   'profile.edit_own': 'Редактирование профиля'
 };
+// SUPPLEMENTARY_PERMISSIONS
+export const SUPPLEMENTARY_PERMISSIONS = [
+  { value: 'analytics.view', label: PERMISSION_TRANSLATIONS['analytics.view'] },
+  { value: 'analytics.export', label: PERMISSION_TRANSLATIONS['analytics.export'] },
+  { value: 'approvals.view', label: PERMISSION_TRANSLATIONS['approvals.view'] },
+  { value: 'approvals.create', label: PERMISSION_TRANSLATIONS['approvals.create'] },
+  { value: 'approvals.sign', label: PERMISSION_TRANSLATIONS['approvals.sign'] },
+  { value: 'approvals.reject', label: PERMISSION_TRANSLATIONS['approvals.reject'] },
+  { value: 'system.logs.view', label: PERMISSION_TRANSLATIONS['system.logs.view'] },
+  { value: 'profile.edit_own', label: PERMISSION_TRANSLATIONS['profile.edit_own'] },
+];

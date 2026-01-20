@@ -3,20 +3,9 @@ import { ApiRoutes } from '@shared/api';
 import { useMutationQuery } from '@shared/lib';
 import { SelectField } from '@shared/ui';
 import { Form, Input, Button, Card } from 'antd';
-import { PERMISSION_TRANSLATIONS } from '../model';
+import { PERMISSION_TRANSLATIONS, SUPPLEMENTARY_PERMISSIONS } from '../model';
 
-const SUPPLEMENTARY_PERMISSIONS = [
-  { value: 'analytics.view', label: PERMISSION_TRANSLATIONS['analytics.view'] },
-  { value: 'analytics.export', label: PERMISSION_TRANSLATIONS['analytics.export'] },
-  { value: 'approvals.view', label: PERMISSION_TRANSLATIONS['approvals.view'] },
-  { value: 'approvals.create', label: PERMISSION_TRANSLATIONS['approvals.create'] },
-  { value: 'approvals.sign', label: PERMISSION_TRANSLATIONS['approvals.sign'] },
-  { value: 'approvals.reject', label: PERMISSION_TRANSLATIONS['approvals.reject'] },
-  { value: 'system.logs.view', label: PERMISSION_TRANSLATIONS['system.logs.view'] },
-  { value: 'profile.edit_own', label: PERMISSION_TRANSLATIONS['profile.edit_own'] },
-];
-
-interface PermissionItem {
+interface IProps {
   name: string;
   label?: string;
 }
@@ -29,7 +18,7 @@ export const CreatePermissionAndRole = () => {
   });
 
   const transformPermissions = (response: unknown) => {
-    const data = (response as { data: PermissionItem[] })?.data || [];
+    const data = (response as { data: IProps[] })?.data || [];
     const serverItems = data.map((p) => ({
       value: p.name,
       label: PERMISSION_TRANSLATIONS[p.name] || p.label || p.name // Перевод или фоллбэк
