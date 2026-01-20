@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback } from "react";
 import { Layout, Menu, Button, ConfigProvider, App, Form } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Logo from "../../assets/images/logo.svg";
 import { AppRoutes } from "@shared/config";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
@@ -207,6 +207,16 @@ export const RegistrySidebar = () => {
     [finalMenuItems, footerItems, navigate, handleAddClick],
   );
 
+  const [searchParams] = useSearchParams();
+  const folderIdParam = searchParams.get("folderId");
+  
+  const activeKey = useMemo(() => {
+    if (folderIdParam) {
+      return `folder-${folderIdParam}`;
+    }
+    return pathname;
+  }, [pathname, folderIdParam]);
+
   const menuTheme = useMemo(
     () => ({
       components: {
@@ -263,7 +273,7 @@ export const RegistrySidebar = () => {
             <ConfigProvider theme={menuTheme}>
               <Menu
                 mode="inline"
-                selectedKeys={[pathname]}
+                selectedKeys={[activeKey]}
                 onClick={handleMenuClick}
                 className={`registry-sidebar-style border-none! ${collapsed ? "collapsed-style" : ""}`}
                 items={finalMenuItems}

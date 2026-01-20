@@ -43,7 +43,7 @@
   border-radius: 8px;
   margin-bottom: 2px;
   transition: all 0.2s ease;
-  background: transparent !important;
+  background-color: transparent !important;
 }
 
 /* Линия 1-го уровня: Синий */
@@ -57,33 +57,38 @@
   width: 3px;
   background-color: #3b82f6; /* Blue-500 */
   border-radius: 2px;
-  opacity: 0.6;
+  opacity: 0.4;
+  transition: all 0.2s ease;
 }
 
 /* Ховер 1-го уровня */
 .registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item:hover,
 .registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
-  background-color: rgba(59, 130, 246, 0.05) !important;
+  background-color: rgba(59, 130, 246, 0.08) !important;
+}
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item:hover::before,
+.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover::before {
+  opacity: 0.8;
 }
 
 /* Активный 1-й уровень */
 .registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item-selected,
 .registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
-  background-color: rgba(59, 130, 246, 0.1) !important;
+  background-color: rgba(59, 130, 246, 0.12) !important;
   padding-left: 16px !important;
 }
 .registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item-selected::before,
 .registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
   opacity: 1;
   width: 4px;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
 }
 
 /* ВТОРОЙ уровень вложенности */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
   padding-left: 32px !important;
-  background: transparent !important;
+  background-color: transparent !important;
 }
 
 /* Линия 2-го уровня: Фиолетовый */
@@ -95,33 +100,38 @@
   width: 3px;
   background-color: #8b5cf6; /* Violet-500 */
   border-radius: 2px;
-  opacity: 0.6;
+  opacity: 0.4;
+  transition: all 0.2s ease;
 }
 
 /* Ховер 2-го уровня */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
-  background-color: rgba(139, 92, 246, 0.05) !important;
+  background-color: rgba(139, 92, 246, 0.08) !important;
+}
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover::before {
+  opacity: 0.8;
 }
 
 /* Активный 2-й уровень */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
-  background-color: rgba(139, 92, 246, 0.1) !important;
+  background-color: rgba(139, 92, 246, 0.12) !important;
   padding-left: 32px !important;
 }
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected::before,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
   opacity: 1;
   width: 4px;
-  box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
 }
 
 /* ТРЕТИЙ уровень вложенности */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
   padding-left: 48px !important;
-  background: transparent !important;
+  background-color: transparent !important;
 }
 
 /* Линия 3-го уровня: Розовый */
@@ -133,33 +143,38 @@
   width: 3px;
   background-color: #ec4899; /* Pink-500 */
   border-radius: 2px;
-  opacity: 0.6;
+  opacity: 0.4;
+  transition: all 0.2s ease;
 }
 
 /* Ховер 3-го уровня */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
-  background-color: rgba(236, 72, 153, 0.05) !important;
+  background-color: rgba(236, 72, 153, 0.08) !important;
+}
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover::before {
+  opacity: 0.8;
 }
 
 /* Активный 3-й уровень */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
-  background-color: rgba(236, 72, 153, 0.1) !important;
+  background-color: rgba(236, 72, 153, 0.12) !important;
   padding-left: 48px !important;
 }
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected::before,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
   opacity: 1;
   width: 4px;
-  box-shadow: 0 0 8px rgba(236, 72, 153, 0.5);
+  box-shadow: 0 0 8px rgba(236, 72, 153, 0.4);
 }
 
 /* ЧЕТВЕРТЫЙ уровень вложенности */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
   padding-left: 64px !important;
-  background: transparent !important;
+  background-color: transparent !important;
 }
 
 /* Линия 4-го уровня: Оранжевый */
@@ -171,33 +186,38 @@
   width: 3px;
   background-color: #f97316; /* Orange-500 */
   border-radius: 2px;
-  opacity: 0.6;
+  opacity: 0.4;
+  transition: all 0.2s ease;
 }
 
 /* Ховер 4-го уровня */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
-  background-color: rgba(249, 115, 22, 0.05) !important;
+  background-color: rgba(249, 115, 22, 0.08) !important;
+}
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover::before {
+  opacity: 0.8;
 }
 
 /* Активный 4-й уровень */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
-  background-color: rgba(249, 115, 22, 0.1) !important;
+  background-color: rgba(249, 115, 22, 0.12) !important;
   padding-left: 64px !important;
 }
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected::before,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
   opacity: 1;
   width: 4px;
-  box-shadow: 0 0 8px rgba(249, 115, 22, 0.5);
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.4);
 }
 
 /* ПЯТЫЙ уровень вложенности */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
   padding-left: 80px !important;
-  background: transparent !important;
+  background-color: transparent !important;
 }
 
 /* Линия 5-го уровня: Бирюзовый/Зеленый */
@@ -209,26 +229,31 @@
   width: 3px;
   background-color: #14b8a6; /* Teal-500 */
   border-radius: 2px;
-  opacity: 0.6;
+  opacity: 0.4;
+  transition: all 0.2s ease;
 }
 
 /* Ховер 5-го уровня */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
-  background-color: rgba(20, 184, 166, 0.05) !important;
+  background-color: rgba(20, 184, 166, 0.08) !important;
+}
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover::before,
+.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover::before {
+  opacity: 0.8;
 }
 
 /* Активный 5-й уровень */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
-  background-color: rgba(20, 184, 166, 0.1) !important;
+  background-color: rgba(20, 184, 166, 0.12) !important;
   padding-left: 80px !important;
 }
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected::before,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
   opacity: 1;
   width: 4px;
-  box-shadow: 0 0 8px rgba(20, 184, 166, 0.5);
+  box-shadow: 0 0 8px rgba(20, 184, 166, 0.4);
 }
 
 /* Специальное правило, чтобы скрыть линию у кнопки "Создать новую папку", у которой нет детей и id,
