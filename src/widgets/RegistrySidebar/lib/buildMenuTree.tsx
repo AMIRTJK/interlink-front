@@ -13,6 +13,7 @@ interface BuildMenuTreeParams {
   deleteFolder: (data: { id: number }) => void;
   handleAddClick: (parentId: number | null) => void;
   onNavigate: (path: string) => void;
+  onDrop: (targetFolderId: number | null, draggedType: "folder" | "correspondence", draggedId: number) => void;
 }
 
 export const buildMenuTree = ({
@@ -23,10 +24,11 @@ export const buildMenuTree = ({
   deleteFolder,
   handleAddClick,
   onNavigate,
+  onDrop,
   // counts,
   // navigate,
 }: BuildMenuTreeParams) => {
-  const buildFullItem = (folder: any, visited = new Set<number>()): any => {
+  const buildFullItem = (folder: any, visited = new Set<number>(), depth = 0): any => {
     if (folder.id && visited.has(folder.id)) return null;
     if (folder.id) visited.add(folder.id);
 
@@ -72,7 +74,7 @@ export const buildMenuTree = ({
     const nestedFolders = folders
       .filter((f: any) => f.parent_id === folder.id)
       .sort((a: any, b: any) => a.sort - b.sort)
-      .map((f: any) => buildFullItem(f, new Set(visited)))
+      .map((f: any) => buildFullItem(f, new Set(visited), depth + 1))
       .filter(Boolean);
 
     let children: any[] | undefined = nestedFolders.length > 0 ? nestedFolders : undefined;
@@ -100,8 +102,12 @@ export const buildMenuTree = ({
             e.domEvent.stopPropagation();
             handleEditClick(folder.id, folder.name);
           },
-        },
-        {
+        }
+      );
+      
+      // Показываем "Создать папку" только если глубина меньше 5
+      if (depth < 5) {
+        menuActions.push({
           key: "create-sub",
           label: "Создать папку",
           icon: <PlusOutlined className="text-[#0037AF]!" />,
@@ -109,8 +115,10 @@ export const buildMenuTree = ({
             e.domEvent.stopPropagation();
             handleAddClick(folder.id);
           },
-        },
-        {
+        });
+      }
+
+      menuActions.push({
           key: "delete",
           label: "Удалить",
           danger: true,
@@ -123,14 +131,57 @@ export const buildMenuTree = ({
       );
     }
 
+    const handleSidebarDrop = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.classList.remove("folder-drag-over");
+      
+      const folderIdStr = e.dataTransfer.getData("folderId");
+      const correspondenceIdStr = e.dataTransfer.getData("correspondenceId");
+
+      if (folderIdStr) {
+        onDrop(folder.id, "folder", Number(folderIdStr));
+      } else if (correspondenceIdStr) {
+        onDrop(folder.id, "correspondence", Number(correspondenceIdStr));
+      }
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = "move";
+      e.currentTarget.classList.add("folder-drag-over");
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.classList.remove("folder-drag-over");
+    };
+
+    const handleDragStart = (e: React.DragEvent) => {
+      e.dataTransfer.setData("folderId", folder.id.toString());
+      e.dataTransfer.effectAllowed = "move";
+    };
+
     return {
       key: folderKey,
       folderName: folder.name,
       icon: def ? def.icon : <img src={folderIcon} />,
       path: folderPath,
       children,
+      onTitleClick: () => {
+        // Ant Design Menu workaround if needed
+      },
       label: (
-        <div className="flex items-center w-full group overflow-hidden h-full gap-0">
+        <div 
+          className="flex items-center w-full group overflow-hidden h-full gap-0"
+          draggable={!def} // Системные папки нельзя таскать
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleSidebarDrop}
+        >
           <div 
             className="flex items-center flex-1 overflow-hidden cursor-pointer"
             onClick={(e) => {
