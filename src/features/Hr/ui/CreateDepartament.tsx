@@ -10,7 +10,6 @@ export const CreateDepartment = () => {
     url: ApiRoutes.CREATE_DEPARTMENT, 
     method: "POST",
     messages: { 
-      success: "Департамент успешно создан",
       invalidate: [ApiRoutes.GET_DEPARTMENTS] 
     },
     preload: true,
