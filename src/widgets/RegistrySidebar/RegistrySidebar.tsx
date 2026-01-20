@@ -247,7 +247,7 @@ export const RegistrySidebar = () => {
                   type="text"
                   icon={<PlusOutlined />}
                   onClick={() => handleAddClick(null)}
-                  className="h-6! w-6! hidden!"
+                  className="h-6! w-6! hidden! addFolderRootSideBar"
                 />
               )}
               <Button
