@@ -11,6 +11,7 @@ interface BuildMenuTreeParams {
   definitions: Record<string, any>;
   handleEditClick: (folderId: number, currentName: string) => void;
   deleteFolder: (data: { id: number }) => void;
+  handleAddClick: (parentId: number | null) => void;
   onNavigate: (path: string) => void;
 }
 
@@ -20,6 +21,7 @@ export const buildMenuTree = ({
   definitions,
   handleEditClick,
   deleteFolder,
+  handleAddClick,
   onNavigate,
   // counts,
   // navigate,
@@ -63,6 +65,15 @@ export const buildMenuTree = ({
           onClick: (e) => {
             e.domEvent.stopPropagation();
             handleEditClick(folder.id, folder.name);
+          },
+        },
+        {
+          key: "create-sub",
+          label: "Создать папку",
+          icon: <PlusOutlined className="text-[#0037AF]!" />,
+          onClick: (e) => {
+            e.domEvent.stopPropagation();
+            handleAddClick(folder.id);
           },
         },
         {
