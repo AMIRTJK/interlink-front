@@ -8,7 +8,6 @@ interface RegistrySidebarProps {
 export const RegistrySidebar = ({ isDetailView }: RegistrySidebarProps) => {
   return (
     <div className="flex h-full items-stretch">
-      {/* Ваш основной сайдбар (ModuleSidebar) должен быть здесь */}
       <div className="shrink-0">
         <ModuleSidebar />
       </div>
