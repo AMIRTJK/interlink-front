@@ -278,7 +278,7 @@ export const RegistrySidebar = () => {
         trigger={null}
         width="100%"
         collapsedWidth="80px"
-        className="h-full! border-none! rounded-2xl p-6 w-[23%]!"
+        className="h-full! border-none! rounded-2xl p-3 w-[260px]! max-w-[260px]!"
       >
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between py-6 shrink-0">

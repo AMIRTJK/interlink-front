@@ -81,12 +81,12 @@
 /* LEVEL 1: Blue (#3b82f6) */
 .registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item,
 .registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
-  padding-left: 16px !important;
+  padding-left: 12px !important;
 }
 /* Color */
 .registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item::before,
 .registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
-  background-color: #3b82f6; left: 8px;
+  background-color: #3b82f6; left: 6px;
 }
 /* Hover Bg */
 .registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item:hover,
@@ -107,11 +107,11 @@
 /* LEVEL 2: Violet (#8b5cf6) */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
-  padding-left: 32px !important;
+  padding-left: 24px !important;
 }
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
-  background-color: #8b5cf6; left: 24px;
+  background-color: #8b5cf6; left: 18px;
 }
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
@@ -130,11 +130,11 @@
 /* LEVEL 3: Pink (#ec4899) */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
-  padding-left: 48px !important;
+  padding-left: 36px !important;
 }
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
-  background-color: #ec4899; left: 40px;
+  background-color: #ec4899; left: 30px;
 }
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
@@ -153,11 +153,11 @@
 /* LEVEL 4: Orange (#f97316) */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
-  padding-left: 64px !important;
+  padding-left: 48px !important;
 }
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
-  background-color: #f97316; left: 56px;
+  background-color: #f97316; left: 42px;
 }
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
@@ -176,11 +176,11 @@
 /* LEVEL 5: Teal (#14b8a6) */
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
-  padding-left: 80px !important;
+  padding-left: 60px !important;
 }
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
-  background-color: #14b8a6; left: 72px;
+  background-color: #14b8a6; left: 54px;
 }
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
 .registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
