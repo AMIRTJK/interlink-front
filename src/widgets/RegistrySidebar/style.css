@@ -9,7 +9,7 @@
 }
 
 .registry-sidebar-style .ant-menu-submenu-arrow {
-  inset-inline-end: 12px !important;
+  inset-inline-end: 8px !important;
   opacity: 0.7;
   z-index: 10;
 }
@@ -21,6 +21,14 @@
 .registry-sidebar-style .ant-menu-submenu-title {
   background: transparent !important;
   background-color: transparent !important;
+}
+
+.registry-sidebar-style div.ant-menu-submenu-title {
+  padding: 0 !important;
+}
+
+.registry-sidebar-style li.ant-menu-item{
+  padding:0 !important
 }
 
 /* Item Spacing & Shape */
