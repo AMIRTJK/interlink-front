@@ -31,7 +31,7 @@ export const CorrespondenceControlPanel: React.FC<
   const navigate = useNavigate();
 
   return (
-    <div className="bg-white border-b border-gray-200 pb-6 flex items-center justify-between sticky top-0 z-10 mb-6">
+    <div className="bg-white border-b border-gray-200 p-6 flex items-center justify-between sticky top-0 z-10 mb-6">
       <div className="flex items-center gap-4">
         <Button
           type="text"
