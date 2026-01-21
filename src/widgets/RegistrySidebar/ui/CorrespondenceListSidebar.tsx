@@ -59,14 +59,14 @@ export const CorrespondenceListSidebar = () => {
 
   if (isLoading) {
     return (
-      <aside className="w-[300px] h-full bg-white rounded-2xl p-4 flex items-center justify-center border-l border-gray-200 ml-2">
+      <aside className="w-75 h-full bg-white rounded-2xl p-4 flex items-center justify-center border-l border-gray-200 ml-2">
         <Loader />
       </aside>
     );
   }
 
   return (
-    <aside className="w-[300px] min-w-[300px] h-full bg-[#F5F6F8] rounded-2xl overflow-hidden flex flex-col ml-2 border border-gray-200">
+    <aside className="w-75 min-w-75 h-full bg-[#F5F6F8] rounded-2xl overflow-hidden flex flex-col ml-2 border border-gray-200">
       <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
         {list.length > 0 ? (
           list.map((item: any) => {
