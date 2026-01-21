@@ -4,18 +4,35 @@ import { matchPath, Outlet, useLocation } from "react-router-dom";
 export const CorrespondencePage = () => {
   const location = useLocation();
 
-  const isCreatePage = matchPath(
+  const path = location.pathname;
+
+  const isIncomingCreate = matchPath(
     { path: "/modules/correspondence/incoming/create" },
-    location.pathname,
+    path,
   );
-
-  const isShowPage = matchPath(
+  const isIncomingShow = matchPath(
     { path: "/modules/correspondence/incoming/:id" },
-    location.pathname,
+    path,
   );
+  const isIncomingDetail =
+    !!isIncomingCreate ||
+    (!!isIncomingShow && isIncomingShow.params.id !== "create");
 
-  const isDetailView =
-    !!isCreatePage || (!!isShowPage && isShowPage.params.id !== "create");
+  const isOutgoingCreate = matchPath(
+    { path: "/modules/correspondence/outgoing/create" },
+    path,
+  );
+  const isOutgoingShow = matchPath(
+    { path: "/modules/correspondence/outgoing/:id" },
+    path,
+  );
+  const isOutgoingDetail =
+    !!isOutgoingCreate ||
+    (!!isOutgoingShow && isOutgoingShow.params.id !== "create");
+
+  const isDetailView = isIncomingDetail || isOutgoingDetail;
+
+  const currentType = isOutgoingDetail ? "outgoing" : "incoming";
 
   return (
     <div className="flex w-full gap-3 h-full">
