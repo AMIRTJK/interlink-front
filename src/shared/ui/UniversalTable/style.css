@@ -42,6 +42,8 @@
   border-radius: 8px;
 }
 
+
+
 .custom-pagination .ant-pagination-item-active:hover {
   background-color: #f0f5ff !important;
   opacity: 1;

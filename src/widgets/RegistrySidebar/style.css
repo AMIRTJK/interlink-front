@@ -27,8 +27,8 @@
   padding: 0 !important;
 }
 
-.registry-sidebar-style li.ant-menu-item{
-  padding:0 !important
+.registry-sidebar-style li.ant-menu-item {
+  padding: 0 !important;
 }
 
 /* Item Spacing & Shape */
@@ -55,7 +55,7 @@
 /* Base Line Style (Invisible by default, colored by level) */
 .registry-sidebar-style .ant-menu-item::before,
 .registry-sidebar-style .ant-menu-submenu-title::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 4px;
   bottom: 4px;
@@ -73,136 +73,510 @@
 
 /* Selected Effect (Common) */
 .registry-sidebar-style .ant-menu-item-selected::before,
-.registry-sidebar-style .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
+.registry-sidebar-style
+  .ant-menu-submenu-selected
+  > .ant-menu-submenu-title::before {
   opacity: 1;
   width: 4px;
 }
 
 /* Hide line for "Create Placeholder" button */
-.registry-sidebar-style .ant-menu-item[data-menu-id*="create-placeholder"]::before {
+.registry-sidebar-style
+  .ant-menu-item[data-menu-id*="create-placeholder"]::before {
   display: none !important;
 }
-
 
 /* --- LEVEL SPECIFIC STYLES (Colors & Indentation) --- */
 
 /* LEVEL 1: Blue (#3b82f6) */
 .registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item,
-.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
+.registry-sidebar-style
+  .ant-menu-submenu
+  > .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title {
   padding-left: 12px !important;
 }
 /* Color */
-.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item::before,
-.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
-  background-color: #3b82f6; left: 6px;
+.registry-sidebar-style
+  .ant-menu-submenu
+  > .ant-menu-sub
+  > .ant-menu-item::before,
+.registry-sidebar-style
+  .ant-menu-submenu
+  > .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title::before {
+  background-color: #3b82f6;
+  left: 6px;
 }
 /* Hover Bg */
-.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item:hover,
-.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
+.registry-sidebar-style
+  .ant-menu-submenu
+  > .ant-menu-sub
+  > .ant-menu-item:hover,
+.registry-sidebar-style
+  .ant-menu-submenu
+  > .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title:hover {
   background-color: rgba(59, 130, 246, 0.08) !important;
 }
 /* Selected Bg & Shadow */
-.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item-selected,
-.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
+.registry-sidebar-style
+  .ant-menu-submenu
+  > .ant-menu-sub
+  > .ant-menu-item-selected,
+.registry-sidebar-style
+  .ant-menu-submenu
+  > .ant-menu-sub
+  > .ant-menu-submenu-selected
+  > .ant-menu-submenu-title {
   background-color: rgba(59, 130, 246, 0.12) !important;
 }
-.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item-selected::before,
-.registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
+.registry-sidebar-style
+  .ant-menu-submenu
+  > .ant-menu-sub
+  > .ant-menu-item-selected::before,
+.registry-sidebar-style
+  .ant-menu-submenu
+  > .ant-menu-sub
+  > .ant-menu-submenu-selected
+  > .ant-menu-submenu-title::before {
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
 }
 
-
 /* LEVEL 2: Violet (#8b5cf6) */
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title {
   padding-left: 24px !important;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
-  background-color: #8b5cf6; left: 18px;
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item::before,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title::before {
+  background-color: #8b5cf6;
+  left: 18px;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item:hover,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title:hover {
   background-color: rgba(139, 92, 246, 0.08) !important;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item-selected,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu-selected
+  > .ant-menu-submenu-title {
   background-color: rgba(139, 92, 246, 0.12) !important;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected::before,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item-selected::before,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu-selected
+  > .ant-menu-submenu-title::before {
   box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
 }
 
-
 /* LEVEL 3: Pink (#ec4899) */
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title {
   padding-left: 36px !important;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
-  background-color: #ec4899; left: 30px;
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item::before,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title::before {
+  background-color: #ec4899;
+  left: 30px;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item:hover,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title:hover {
   background-color: rgba(236, 72, 153, 0.08) !important;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item-selected,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu-selected
+  > .ant-menu-submenu-title {
   background-color: rgba(236, 72, 153, 0.12) !important;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected::before,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item-selected::before,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu-selected
+  > .ant-menu-submenu-title::before {
   box-shadow: 0 0 8px rgba(236, 72, 153, 0.4);
 }
 
-
 /* LEVEL 4: Orange (#f97316) */
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title {
   padding-left: 48px !important;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
-  background-color: #f97316; left: 42px;
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item::before,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title::before {
+  background-color: #f97316;
+  left: 42px;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item:hover,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title:hover {
   background-color: rgba(249, 115, 22, 0.08) !important;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item-selected,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu-selected
+  > .ant-menu-submenu-title {
   background-color: rgba(249, 115, 22, 0.12) !important;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected::before,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item-selected::before,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu-selected
+  > .ant-menu-submenu-title::before {
   box-shadow: 0 0 8px rgba(249, 115, 22, 0.4);
 }
 
-
 /* LEVEL 5: Teal (#14b8a6) */
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title {
   padding-left: 60px !important;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item::before,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title::before {
-  background-color: #14b8a6; left: 54px;
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item::before,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title::before {
+  background-color: #14b8a6;
+  left: 54px;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item:hover,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu > .ant-menu-submenu-title:hover {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item:hover,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title:hover {
   background-color: rgba(20, 184, 166, 0.08) !important;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item-selected,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu-selected
+  > .ant-menu-submenu-title {
   background-color: rgba(20, 184, 166, 0.12) !important;
 }
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-item-selected::before,
-.registry-sidebar-style .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub .ant-menu-submenu .ant-menu-sub > .ant-menu-submenu-selected > .ant-menu-submenu-title::before {
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-item-selected::before,
+.registry-sidebar-style
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  .ant-menu-submenu
+  .ant-menu-sub
+  > .ant-menu-submenu-selected
+  > .ant-menu-submenu-title::before {
   box-shadow: 0 0 8px rgba(20, 184, 166, 0.4);
 }
-
 
 /* --- Dropdown Styles --- */
 .custom-registry-dropdown {
@@ -211,7 +585,7 @@
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
   overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 .custom-registry-dropdown .ant-dropdown-menu {
   background: transparent !important;
@@ -225,7 +599,6 @@
 .custom-registry-dropdown .ant-dropdown-menu-item:hover {
   background-color: rgba(0, 0, 0, 0.04) !important;
 }
-
 
 /* === Drag & Drop Styles (Blue Text Highlight) === */
 
@@ -255,7 +628,7 @@
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
-  
+
   /* Только цвет текста */
   color: #1890ff !important;
   font-weight: 600 !important;
@@ -270,5 +643,27 @@
 
 /* Убираем лишние псевдо-элементы */
 .folder-drag-over::after {
+  display: none !important;
+}
+
+.registry-sidebar-style.collapsed-style li.ant-menu-item,
+.registry-sidebar-style.collapsed-style div.ant-menu-submenu-title {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+.registry-sidebar-style.collapsed-style .ant-menu-item .ant-menu-item-icon,
+.registry-sidebar-style.collapsed-style
+  .ant-menu-submenu-title
+  .ant-menu-item-icon {
+  min-width: auto;
+  margin: 0 !important;
+  margin-inline-end: 0 !important;
+}
+
+.registry-sidebar-style.collapsed-style .ant-menu-title-content {
   display: none !important;
 }
