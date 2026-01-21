@@ -149,7 +149,11 @@ export const RegistrySidebar = () => {
 
   const queryClient = useQueryClient();
   const { mutate: moveItem } = useMutation({
-    mutationFn: async (data: { id: number; folder_id: number | null; type: "folder" | "correspondence" }) => {
+    mutationFn: async (data: {
+      id: number;
+      folder_id: number | null;
+      type: "folder" | "correspondence";
+    }) => {
       // Пользователь обновил роут на /api/v1/correspondences/:DOC_ID/move
       const url = ApiRoutes.MOVE_FOLDER.replace(":DOC_ID", String(data.id));
 
@@ -167,7 +171,9 @@ export const RegistrySidebar = () => {
     onSuccess: () => {
       toast.success("Перемещено");
       refetchFolders();
-      queryClient.invalidateQueries({ queryKey: [ApiRoutes.GET_CORRESPONDENCES] });
+      queryClient.invalidateQueries({
+        queryKey: [ApiRoutes.GET_CORRESPONDENCES],
+      });
       window.dispatchEvent(new CustomEvent("correspondence-moved"));
     },
     onError: (error: any) => {
@@ -176,7 +182,11 @@ export const RegistrySidebar = () => {
   });
 
   const handleDrop = useCallback(
-    (targetFolderId: number | null, draggedType: "folder" | "correspondence", draggedId: number) => {
+    (
+      targetFolderId: number | null,
+      draggedType: "folder" | "correspondence",
+      draggedId: number,
+    ) => {
       if (draggedType === "folder" && targetFolderId === draggedId) return;
       moveItem({ id: draggedId, folder_id: targetFolderId, type: draggedType });
     },
@@ -197,7 +207,16 @@ export const RegistrySidebar = () => {
         onNavigate: (path: string) => navigate(path),
         onDrop: handleDrop,
       }),
-    [folders, collapsed, definitions, handleEditClick, deleteFolder, navigate, handleAddClick, handleDrop],
+    [
+      folders,
+      collapsed,
+      definitions,
+      handleEditClick,
+      deleteFolder,
+      navigate,
+      handleAddClick,
+      handleDrop,
+    ],
   );
 
   const footerItems = useMemo(
@@ -248,11 +267,19 @@ export const RegistrySidebar = () => {
 
   const [searchParams] = useSearchParams();
   const folderIdParam = searchParams.get("folderId");
-  
+
   const activeKey = useMemo(() => {
     if (folderIdParam) {
       return `folder-${folderIdParam}`;
     }
+
+    if (pathname.startsWith(AppRoutes.CORRESPONDENCE_INCOMING)) {
+      return AppRoutes.CORRESPONDENCE_INCOMING;
+    }
+    if (pathname.startsWith(AppRoutes.CORRESPONDENCE_OUTGOING)) {
+      return AppRoutes.CORRESPONDENCE_OUTGOING;
+    }
+
     return pathname;
   }, [pathname, folderIdParam]);
 
@@ -263,6 +290,8 @@ export const RegistrySidebar = () => {
           itemHeight: collapsed ? 30 : 56,
           itemMarginInline: 0,
           itemMarginBlock: collapsed ? 24 : 4,
+          itemPaddingInline: collapsed ? 0 : 16,
+          iconMarginInlineEnd: collapsed ? 0 : 10,
         },
       },
     }),
@@ -278,10 +307,16 @@ export const RegistrySidebar = () => {
         trigger={null}
         width="100%"
         collapsedWidth="80px"
-        className="h-full! border-none! rounded-2xl p-3 w-[260px]! max-w-[260px]!"
+        className={`h-full! border-none! rounded-2xl p-3 ${
+          collapsed ? "w-[80px]! max-w-[80px]!" : "w-[260px]! max-w-[260px]!"
+        }`}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between py-6 shrink-0">
+          <div
+            className={`flex items-center shrink-0 py-6 ${
+              collapsed ? "justify-center" : "justify-between"
+            }`}
+          >
             {!collapsed && (
               <div
                 className="cursor-pointer"
