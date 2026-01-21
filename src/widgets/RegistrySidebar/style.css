@@ -219,30 +219,48 @@
 }
 
 
-/* === Drag & Drop Styles (Elegant Bottom Border) === */
+/* === Drag & Drop Styles (Blue Text Highlight) === */
 
 /* Source Row */
 .ant-table-row.dragging {
-  background-color: #f0f5ff !important;
+  background-color: transparent !important;
   opacity: 1 !important;
   cursor: grabbing !important;
-  transform: none !important;
-  outline: none !important;
   box-shadow: none !important;
+  outline: none !important;
 }
-.ant-table-row.dragging td {
-  border-bottom: 2px solid #1890ff !important;
+
+/* Красим весь текст в синий */
+.ant-table-row.dragging td,
+.ant-table-row.dragging td a,
+.ant-table-row.dragging td span,
+.ant-table-row.dragging td div,
+.ant-table-row.dragging .ant-typography {
+  color: #1890ff !important;
+  border-bottom: none !important;
   border-top: none !important;
-  border-left: none !important;
-  border-right: none !important;
 }
 
 /* Target Folder */
 .folder-drag-over {
-  border-bottom: 2px solid hsl(209, 100%, 55%) !important;
-  transition: all 0.1s ease;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  
+  /* Только цвет текста */
+  color: #1890ff !important;
+  font-weight: 600 !important;
+  transition: color 0.1s ease;
 }
-/* No pseudo-elements */
+
+/* Красим иконки и текст папки */
+.folder-drag-over .ant-menu-title-content,
+.folder-drag-over .anticon {
+  color: #1890ff !important;
+}
+
+/* Убираем лишние псевдо-элементы */
 .folder-drag-over::after {
   display: none !important;
 }
