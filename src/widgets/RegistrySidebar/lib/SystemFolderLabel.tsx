@@ -1,5 +1,5 @@
 import React from "react";
-import { FolderDefinition } from "../types";
+import { FolderDefinition } from "./types";
 
 interface SystemFolderLabelProps {
   name: string;

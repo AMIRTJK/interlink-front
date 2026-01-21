@@ -1,5 +1,4 @@
 import { MenuProps } from "antd";
-import type { ItemType } from "antd/es/menu/interface";
 
 export interface Folder {
   id: number;
@@ -15,12 +14,8 @@ export interface FolderDefinition {
   count?: number;
 }
 
-// Use Ant Design's ItemType directly for better compatibility
-export type MenuItem = ItemType & {
-  folderName?: string;
-  path?: string;
-  parent_id?: number | null;
-};
+// Используем any для MenuItem по просьбе пользователя для успешного билда
+export type MenuItem = any;
 
 export interface BuildMenuTreeParams {
   folders: Folder[];

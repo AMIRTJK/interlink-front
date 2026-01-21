@@ -9,15 +9,15 @@ export const sortMenuItems = (items: MenuItem[]): MenuItem[] => {
   const bottomNames = FOLDER_ORDER.BOTTOM as readonly string[];
 
   const topItems = items
-    .filter((i) => topNames.includes(i.folderName))
-    .sort((a, b) => topNames.indexOf(a.folderName) - topNames.indexOf(b.folderName));
+    .filter((i: any) => i.folderName && topNames.includes(i.folderName))
+    .sort((a: any, b: any) => topNames.indexOf(a.folderName) - topNames.indexOf(b.folderName));
 
   const bottomItems = items
-    .filter((i) => bottomNames.includes(i.folderName))
-    .sort((a, b) => bottomNames.indexOf(a.folderName) - bottomNames.indexOf(b.folderName));
+    .filter((i: any) => i.folderName && bottomNames.includes(i.folderName))
+    .sort((a: any, b: any) => bottomNames.indexOf(a.folderName) - bottomNames.indexOf(b.folderName));
 
   const midItems = items.filter(
-    (i) => !topNames.includes(i.folderName) && !bottomNames.includes(i.folderName)
+    (i: any) => !i.folderName || (!topNames.includes(i.folderName) && !bottomNames.includes(i.folderName))
   );
 
   return [...topItems, ...midItems, ...bottomItems];
