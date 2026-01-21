@@ -2,7 +2,7 @@ import "./style.css";
 import { Button, If, UniversalTable } from "@shared/ui";
 import { useMemo, useState } from "react";
 import AddIcon from "../../../assets/icons/add-icon.svg";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useRegistryColumns, getRegistryFilters } from "../lib";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
@@ -34,6 +34,14 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [searchParams] = useSearchParams();
+  const folderId = searchParams.get("folderId");
+
+  const isIncoming = location.pathname === AppRoutes.CORRESPONDENCE_INCOMING;
+  const isOutgoing = location.pathname === AppRoutes.CORRESPONDENCE_OUTGOING;
+
+  const showCreateButton = (isIncoming || isOutgoing) && !folderId;
 
   const handleCreate = () => {
     navigate(`${location.pathname}/create`);
@@ -176,7 +184,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
           </If>
         </nav>
         <div
-          className={`px-2 ${isAllowed && createButtonText ? "block!" : "hidden!"}`}
+          className={`px-2 ${isAllowed && createButtonText && showCreateButton ? "block!" : "hidden!"}`}
         >
           <Button
             onClick={handleCreate}
