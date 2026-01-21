@@ -18,17 +18,15 @@ export const FolderLabel: React.FC<FolderLabelProps> = ({
 }) => {
   return (
     <div
-      className="flex items-center w-full group overflow-hidden h-full gap-0"
+      className="flex items-center"
       draggable={isDraggable}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
-      style={{ paddingRight: "40px" }} // Space for expand arrow
     >
-      {/* Folder name with ellipsis */}
       <div
-        className="flex items-center flex-1 overflow-hidden cursor-pointer min-w-0"
+        className="flex items-center flex-1 cursor-pointer min-w-[125px] max-w-[101px]"
         onClick={(e) => {
           e.stopPropagation();
           if (folderPath) {
@@ -36,18 +34,16 @@ export const FolderLabel: React.FC<FolderLabelProps> = ({
           }
         }}
       >
-        <span className="truncate">{folder.name}</span>
+        <span>{folder.name}</span>
       </div>
 
-      {/* Counter badge - fixed width for vertical alignment */}
       <div
-        className="shrink-0 flex items-center justify-end"
+        className="flex items-center justify-end"
         style={{ width: "40px" }}
       >
         <FolderCounter definition={definition} collapsed={collapsed} />
       </div>
 
-      {/* Three-dot menu - fixed width, left of expand arrow */}
       <div
         className="shrink-0 flex items-center justify-center"
         style={{ width: "32px" }}
