@@ -19,7 +19,6 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
 }) => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
-  const navigate = useNavigate();
 
   const { isLoading, data: correspondenceData } = useGetQuery({
     url: ApiRoutes.GET_CORRESPONDENCE_BY_ID.replace(":id", String(id || "")),
@@ -40,21 +39,9 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
   const shouldOpenExecution = (location.state as { openExecution?: boolean })
     ?.openExecution;
 
-  const handleBack = () => navigate(-1);
 
   return (
     <div className="h-full flex flex-col gap-4">
-      <div className="flex items-center gap-2 px-1">
-        <Button
-          type="text"
-          icon={<ArrowLeftOutlined />}
-          onClick={handleBack}
-          className="text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-        >
-          Назад
-        </Button>
-      </div>
-
       <div className="flex-1 h-full overflow-hidden">
         <CorrespondenceForm
           type={type}

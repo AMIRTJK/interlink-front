@@ -41,17 +41,6 @@ export const CreateCorrespondencePage = ({
 
   return (
     <div className="h-full flex flex-col gap-4">
-      <div className="flex items-center gap-2 px-1">
-        <Button
-          type="text"
-          icon={<ArrowLeftOutlined />}
-          onClick={handleBack}
-          className="text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-        >
-          Назад
-        </Button>
-      </div>
-
       <div className="flex-1 h-full overflow-hidden">
         <CorrespondenceForm
           type={type}

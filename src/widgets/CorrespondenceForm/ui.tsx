@@ -1,5 +1,13 @@
 import React, { useEffect } from "react";
-import { Form, Input, Button as AntButton, Tag, Col, Row } from "antd";
+import {
+  Form,
+  Input,
+  Button as AntButton,
+  Tag,
+  Col,
+  Row,
+  notification,
+} from "antd";
 import { Button, DateField, If, SelectField } from "@shared/ui";
 import { useModalState } from "@shared/lib";
 import { ExecutionModal } from "@widgets/ExecutionModal";
@@ -7,7 +15,10 @@ import executionIcon from "../../assets/icons/execution.svg";
 import { ApiRoutes } from "@shared/api";
 import { transformResponse } from "./lib";
 import { useLocation } from "react-router";
-import { CorrespondenceResponse } from "@entities/correspondence";
+import {
+  CorrespondenceControlPanel,
+  CorrespondenceResponse,
+} from "@entities/correspondence";
 
 // Тип документа
 export type CorrespondenceType = "incoming" | "outgoing";
@@ -69,8 +80,24 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialExecutionOpen, location.state]);
 
+  const handleReject = () => {
+    notification.info({ message: "Функционал отклонения в разработке" });
+  };
+
+  const handleComplete = () => {
+    notification.success({ message: "Документ помечен как завершенный" });
+  };
+
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm h-full flex flex-col">
+      <CorrespondenceControlPanel
+        isSaving={isLoading}
+        isAllowed={isAllowed}
+        onSave={form.submit}
+        onResolution={executionModalState.open}
+        onReject={handleReject}
+        onComplete={handleComplete}
+      />
       <div className="mb-6 border-b border-gray-100 pb-4 flex justify-between items-center">
         <h1 className="text-xl font-bold text-gray-900">{title}</h1>
         {initialValues?.status && (
