@@ -13,7 +13,7 @@ interface MenuActionParams {
 }
 
 /**
- * Creates the context menu actions for a custom folder
+ * Сборка экшенов меню папки
  */
 export const createFolderMenuActions = ({
   folderId,
@@ -25,7 +25,7 @@ export const createFolderMenuActions = ({
 }: MenuActionParams): MenuProps["items"] => {
   const menuActions: MenuProps["items"] = [];
 
-  // Edit action
+// Редактирование
   menuActions.push({
     key: "edit",
     label: "Редактировать",
@@ -49,7 +49,7 @@ export const createFolderMenuActions = ({
     });
   }
 
-  // Delete action
+// Удаление
   menuActions.push({
     key: "delete",
     label: "Удалить",

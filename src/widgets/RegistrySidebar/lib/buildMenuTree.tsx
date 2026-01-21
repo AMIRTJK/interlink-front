@@ -11,6 +11,9 @@ import { SystemFolderLabel } from "./SystemFolderLabel";
 
 export type { BuildMenuTreeParams, MenuItem, Folder, FolderDefinition };
 
+/**
+ * Сборка дерева меню
+ */
 export const buildMenuTree = ({
   folders,
   collapsed,
@@ -69,7 +72,7 @@ export const buildMenuTree = ({
           deleteFolder,
         });
 
-    // Create drag handlers
+    // Обработчики Drag and Drop
     const isDraggable = !isSystemFolder;
     const handleDragStart = (e: React.DragEvent) => dragHandlers.handleDragStart(e, folder.id);
     const handleDrop = (e: React.DragEvent) => dragHandlers.handleDrop(e, folder.id, onDrop);
@@ -101,7 +104,7 @@ export const buildMenuTree = ({
     };
   };
 
-  // Build root-level items
+  // Сборка корневых элементов
   const rootFolders = getRootFolders(folders);
   const rootItems = rootFolders.map((f) => buildFullItem(f)).filter(Boolean) as MenuItem[];
 
@@ -119,6 +122,6 @@ export const buildMenuTree = ({
     }
   });
 
-  // Sort items according to predefined order
+  // Сортировка по порядку
   return sortMenuItems(rootItems);
 };

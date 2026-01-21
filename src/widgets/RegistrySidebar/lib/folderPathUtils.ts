@@ -2,8 +2,7 @@ import { ROUTES, SYSTEM_FOLDERS } from "./constants";
 import { Folder } from "./types";
 
 /**
- * Determines the parent system folder type (incoming/outgoing) for a given folder
- * by traversing up the folder tree
+ * Поиск родительской системной папки вверх по дереву
  */
 export const getParentSystemFolder = (
   folderId: number,
@@ -29,19 +28,19 @@ export const getParentSystemFolder = (
 };
 
 /**
- * Builds the navigation path for a folder based on its type and parent
+ * Путь навигации для папки
  */
 export const buildFolderPath = (
   folder: Folder,
   folders: Folder[],
   definition?: { path: string }
 ): string => {
-  // If it's a system folder with a defined path, use that
+  // Путь для системной папки
   if (definition?.path) {
     return definition.path;
   }
 
-  // For custom folders, determine the path based on parent system folder
+  // Путь для пользовательской папки
   if (folder.id) {
     const parentType = getParentSystemFolder(folder.id, folders);
     

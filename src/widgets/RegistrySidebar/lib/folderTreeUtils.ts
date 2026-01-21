@@ -2,7 +2,7 @@ import { Folder, MenuItem } from "./types";
 import { FOLDER_ORDER } from "./constants";
 
 /**
- * Sorts menu items according to predefined folder order
+ * Сортировка меню по порядку
  */
 export const sortMenuItems = (items: MenuItem[]): MenuItem[] => {
   const topNames = FOLDER_ORDER.TOP as readonly string[];
@@ -24,7 +24,7 @@ export const sortMenuItems = (items: MenuItem[]): MenuItem[] => {
 };
 
 /**
- * Filters and sorts child folders for a given parent folder
+ * Фильтр и сортировка дочерних папок
  */
 export const getChildFolders = (parentId: number, folders: Folder[]): Folder[] => {
   return folders
@@ -33,7 +33,7 @@ export const getChildFolders = (parentId: number, folders: Folder[]): Folder[] =
 };
 
 /**
- * Gets all root-level folders (folders with no parent)
+ * Список корневых папок
  */
 export const getRootFolders = (folders: Folder[]): Folder[] => {
   return folders
