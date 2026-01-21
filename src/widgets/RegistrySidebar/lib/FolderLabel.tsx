@@ -24,7 +24,7 @@ export const FolderLabel: React.FC<FolderLabelProps> = ({
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
-      style={{ paddingRight: '40px' }} // Space for expand arrow
+      style={{ paddingRight: "40px" }} // Space for expand arrow
     >
       {/* Folder name with ellipsis */}
       <div
@@ -40,12 +40,18 @@ export const FolderLabel: React.FC<FolderLabelProps> = ({
       </div>
 
       {/* Counter badge - fixed width for vertical alignment */}
-      <div className="shrink-0 flex items-center justify-end" style={{ width: '40px' }}>
+      <div
+        className="shrink-0 flex items-center justify-end"
+        style={{ width: "40px" }}
+      >
         <FolderCounter definition={definition} collapsed={collapsed} />
       </div>
 
       {/* Three-dot menu - fixed width, left of expand arrow */}
-      <div className="shrink-0 flex items-center justify-center" style={{ width: '32px' }}>
+      <div
+        className="shrink-0 flex items-center justify-center"
+        style={{ width: "32px" }}
+      >
         <FolderActions menuActions={menuActions} collapsed={collapsed} />
       </div>
     </div>

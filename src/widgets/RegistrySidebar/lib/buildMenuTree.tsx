@@ -1,9 +1,18 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { MenuProps } from "antd";
 import folderIcon from "../../../assets/icons/folder-icon.svg";
-import { Folder, FolderDefinition, MenuItem, BuildMenuTreeParams } from "./types";
+import {
+  Folder,
+  FolderDefinition,
+  MenuItem,
+  BuildMenuTreeParams,
+} from "./types";
 import { buildFolderPath, isIncomingOrOutgoingFolder } from "./folderPathUtils";
-import { getChildFolders, getRootFolders, sortMenuItems } from "./folderTreeUtils";
+import {
+  getChildFolders,
+  getRootFolders,
+  sortMenuItems,
+} from "./folderTreeUtils";
 import { createDragHandlers } from "./dragHandlers";
 import { createFolderMenuActions } from "./menuActionBuilder";
 import { FolderLabel } from "./FolderLabel";
@@ -29,7 +38,11 @@ export const buildMenuTree = ({
   /**
    * Recursively builds a menu item for a folder and its children
    */
-  const buildFullItem = (folder: Folder, visited = new Set<number>(), depth = 0): MenuItem | null => {
+  const buildFullItem = (
+    folder: Folder,
+    visited = new Set<number>(),
+    depth = 0,
+  ): MenuItem | null => {
     // Prevent circular references
     if (folder.id && visited.has(folder.id)) return null;
     if (folder.id) visited.add(folder.id);
@@ -45,7 +58,8 @@ export const buildMenuTree = ({
       .map((f) => buildFullItem(f, new Set(visited), depth + 1))
       .filter(Boolean) as MenuItem[];
 
-    let children: MenuItem[] | undefined = nestedFolders.length > 0 ? nestedFolders : undefined;
+    let children: MenuItem[] | undefined =
+      nestedFolders.length > 0 ? nestedFolders : undefined;
 
     // Add "Create new folder" placeholder for Incoming/Outgoing folders
     if (isIncomingOrOutgoingFolder(folder.name)) {
@@ -53,11 +67,17 @@ export const buildMenuTree = ({
         key: `create-placeholder-${folder.id || folder.name}`,
         folderName: "Создать новую папку",
         icon: <PlusOutlined />,
-        label: <span className="text-[#0037AF] font-medium">Создать новую папку</span>,
+        label: (
+          <span className="text-[#0037AF] font-medium">
+            Создать новую папку
+          </span>
+        ),
         path: "",
         parent_id: folder.id || null,
       };
-      children = children ? [createPlaceholder, ...children] : [createPlaceholder];
+      children = children
+        ? [createPlaceholder, ...children]
+        : [createPlaceholder];
     }
 
     // Create context menu actions for custom folders
@@ -74,8 +94,10 @@ export const buildMenuTree = ({
 
     // Обработчики Drag and Drop
     const isDraggable = !isSystemFolder;
-    const handleDragStart = (e: React.DragEvent) => dragHandlers.handleDragStart(e, folder.id);
-    const handleDrop = (e: React.DragEvent) => dragHandlers.handleDrop(e, folder.id, onDrop);
+    const handleDragStart = (e: React.DragEvent) =>
+      dragHandlers.handleDragStart(e, folder.id);
+    const handleDrop = (e: React.DragEvent) =>
+      dragHandlers.handleDrop(e, folder.id, onDrop);
 
     return {
       key: folderKey,
@@ -106,17 +128,30 @@ export const buildMenuTree = ({
 
   // Сборка корневых элементов
   const rootFolders = getRootFolders(folders);
-  const rootItems = rootFolders.map((f) => buildFullItem(f)).filter(Boolean) as MenuItem[];
+  const rootItems = rootFolders
+    .map((f) => buildFullItem(f))
+    .filter(Boolean) as MenuItem[];
 
   // Add missing system folders (if they don't exist in DB)
   Object.keys(definitions).forEach((name) => {
-    if (!rootItems.find((i) => i.folderName === name || i.key === definitions[name].key)) {
+    if (
+      !rootItems.find(
+        (i) => i.folderName === name || i.key === definitions[name].key,
+      )
+    ) {
       const def = definitions[name];
       rootItems.push({
         key: def.key,
         folderName: name,
         icon: def.icon,
-        label: <SystemFolderLabel name={name} definition={def} collapsed={collapsed} onNavigate={onNavigate} />,
+        label: (
+          <SystemFolderLabel
+            name={name}
+            definition={def}
+            collapsed={collapsed}
+            onNavigate={onNavigate}
+          />
+        ),
         path: def.path,
       });
     }

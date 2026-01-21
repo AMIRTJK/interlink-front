@@ -27,15 +27,17 @@ export const SystemFolderLabel: React.FC<SystemFolderLabelProps> = ({
       >
         <span className="truncate flex-1 pr-1">{name}</span>
       </div>
-      
+
       <div className="w-10 shrink-0 flex items-center justify-center">
-        {definition.count !== undefined && definition.count > 0 && !collapsed && (
-          <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
-            {definition.count}
-          </span>
-        )}
+        {definition.count !== undefined &&
+          definition.count > 0 &&
+          !collapsed && (
+            <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
+              {definition.count}
+            </span>
+          )}
       </div>
-      
+
       {/* Empty cell for alignment with folders that have buttons/arrows */}
       <div className="w-10 shrink-0" />
     </div>
