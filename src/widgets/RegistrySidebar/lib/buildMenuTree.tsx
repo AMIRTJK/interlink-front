@@ -191,7 +191,7 @@ export const buildMenuTree = ({
               }
             }}
           >
-            <span className="truncate flex-1 pr-1">{folder.name}</span>
+            <span className="mr-5">{folder.name}</span>
           </div>
           
           {/* Ячейка для счётчика (всегда 40px, вторая с конца) */}
