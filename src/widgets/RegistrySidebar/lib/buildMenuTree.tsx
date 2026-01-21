@@ -191,11 +191,11 @@ export const buildMenuTree = ({
               }
             }}
           >
-            <span className="mr-5">{folder.name}</span>
+            <span>{folder.name}</span>
           </div>
           
           {/* Ячейка для счётчика (всегда 40px, вторая с конца) */}
-          <div className="w-10 shrink-0 flex items-center justify-center">
+          <div className="w-9 shrink-0 flex items-center justify-center">
             {(def ? def.count : undefined) !== undefined && !collapsed && (
               <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
                 {def.count}
