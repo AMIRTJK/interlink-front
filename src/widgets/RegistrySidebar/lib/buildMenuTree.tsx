@@ -106,13 +106,15 @@ export const buildMenuTree = ({
       path: folderPath,
       children,
       onTitleClick: () => {
-        // Ant Design Menu workaround if needed
+        if (folderPath) {
+          onNavigate(folderPath);
+        }
       },
       label: (
         <FolderLabel
           folder={folder}
           folderPath={folderPath}
-          collapsed={collapsed}
+          collapsed={depth === 0 ? collapsed : false}
           definition={definition}
           menuActions={menuActions}
           onNavigate={onNavigate}
