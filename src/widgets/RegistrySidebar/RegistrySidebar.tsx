@@ -9,7 +9,7 @@ export const RegistrySidebar = ({ isDetailView }: RegistrySidebarProps) => {
   return (
     <div className="flex h-full items-stretch">
       <div className="shrink-0">
-        <ModuleSidebar />
+        <ModuleSidebar isDetailView={isDetailView} />
       </div>
 
       <If is={isDetailView}>

@@ -7,7 +7,7 @@ import { _axios, ApiRoutes } from "@shared/api";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Logo from "../../../assets/images/logo.svg";
 import { AppRoutes } from "@shared/config";
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
 
 import { Loader } from "@shared/ui";
@@ -17,7 +17,11 @@ import { FolderModal } from "./FolderModal";
 
 const { Sider } = Layout;
 
-export const ModuleSidebar = () => {
+interface RegistrySidebarProps {
+  isDetailView?: boolean;
+}
+
+export const ModuleSidebar = ({ isDetailView }: RegistrySidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [parentId, setParentId] = useState<number | null>(null);
@@ -26,6 +30,12 @@ export const ModuleSidebar = () => {
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (typeof isDetailView !== "undefined") {
+      setCollapsed(!!isDetailView);
+    }
+  }, [isDetailView]);
 
   const { data: countersData } = useGetQuery({
     url: ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
