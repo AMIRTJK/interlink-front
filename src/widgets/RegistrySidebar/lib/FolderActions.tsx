@@ -25,7 +25,6 @@ export const FolderActions: React.FC<FolderActionsProps> = ({ menuActions, colla
         size="small"
         icon={<MoreOutlined />}
         onClick={(e) => e.stopPropagation()}
-        className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8"
       />
     </Dropdown>
   );

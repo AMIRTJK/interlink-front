@@ -25,6 +25,7 @@ export const FolderLabel: React.FC<FolderLabelProps> = ({
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
+      
       <div
         className="flex items-center flex-1 cursor-pointer min-w-[125px] max-w-[101px]"
         onClick={(e) => {
@@ -34,7 +35,8 @@ export const FolderLabel: React.FC<FolderLabelProps> = ({
           }
         }}
       >
-        <span>{folder.name}</span>
+        <span className="mr-auto!">{folder.name}</span>
+        <FolderActions menuActions={menuActions} collapsed={collapsed} />
       </div>
 
       <div
@@ -43,13 +45,7 @@ export const FolderLabel: React.FC<FolderLabelProps> = ({
       >
         <FolderCounter definition={definition} collapsed={collapsed} />
       </div>
-
-      <div
-        className="shrink-0 flex items-center justify-center"
-        style={{ width: "32px" }}
-      >
-        <FolderActions menuActions={menuActions} collapsed={collapsed} />
-      </div>
+      
     </div>
   );
 };
