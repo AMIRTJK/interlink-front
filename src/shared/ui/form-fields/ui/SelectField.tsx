@@ -21,6 +21,7 @@ interface ISelectFieldProps {
   style?: CSSProperties;
   options?: DefaultOptionType[];
   className?: string;
+  selectClass?: string;
   allowClear?: boolean;
   showSearch?: boolean;
   isFetchAllowed?: boolean;
@@ -63,6 +64,7 @@ export const SelectField = ({
   searchParamKey,
   suffixIcon,
   params: extraParams,
+  selectClass,
   ...props
 }: ISelectFieldProps) => {
   const [items, setItems] = useState<unknown[]>([]);
@@ -175,6 +177,7 @@ export const SelectField = ({
       style={props.style}
     >
       <Select
+        className={selectClass}
         mode={mode}
         loading={isFetching}
         onOpenChange={loadItems} // Вызываем загрузку данных при открытии выпадающего списка

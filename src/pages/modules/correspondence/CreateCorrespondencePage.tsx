@@ -49,6 +49,7 @@ export const CreateCorrespondencePage = ({
           isLoading={createLetterIsPending}
           isReadOnly={false}
           isAllowed={isAllowed}
+          variant="create"
         />
         {/* <h1 className="text-xl font-bold mb-4">
         Создание {type === "incoming" ? "входящего" : "исходящего"} письма

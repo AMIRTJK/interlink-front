@@ -39,7 +39,6 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
   const shouldOpenExecution = (location.state as { openExecution?: boolean })
     ?.openExecution;
 
-
   return (
     <div className="h-full flex flex-col gap-4">
       <div className="flex-1 h-full overflow-hidden">
@@ -52,6 +51,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
           isLoading={isLoading}
           isAllowed={true}
           initialExecutionOpen={shouldOpenExecution}
+          variant="view"
         />
       </div>
     </div>

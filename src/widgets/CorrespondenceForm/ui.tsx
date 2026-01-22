@@ -29,8 +29,9 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 
-// Тип документа
 export type CorrespondenceType = "incoming" | "outgoing";
+
+export type CorrespondenceFormVariant = "create" | "view";
 
 export interface CorrespondenceFormData {
   id?: number;
@@ -47,13 +48,13 @@ export interface CorrespondenceFormData {
 }
 
 interface CorrespondenceFormProps {
+  variant: CorrespondenceFormVariant;
   type: CorrespondenceType;
   initialValues?: CorrespondenceResponse;
   onFinish: (values: CorrespondenceFormData) => void;
   isLoading?: boolean;
   title: string;
   isReadOnly?: boolean;
-  showSaveButton?: boolean;
   isAllowed?: boolean;
   initialExecutionOpen?: boolean;
 }
@@ -139,7 +140,7 @@ const CustomStepper: React.FC<CustomStepperProps> = ({ items, current }) => {
         const isActive = index === current;
 
         // Цвета (можно вынести в переменные или tailwind config)
-        const greenColor = "#22C55E"; // text-green-500
+        const greenColor = "#229A2E"; // text-green-500
         const grayColor = "#D1D5DB"; // text-gray-300
         const darkGrayText = "#9CA3AF"; // text-gray-400
 
@@ -175,7 +176,7 @@ const CustomStepper: React.FC<CustomStepperProps> = ({ items, current }) => {
               <div
                 className="text-center text-xs sm:text-sm font-medium transition-colors duration-300 max-w-[120px]"
                 style={{
-                  color: isActive || isCompleted ? "#16a34a" : "#374151", // Green-600 or Gray-700
+                  color: isActive || isCompleted ? "#229A2E" : "#374151",
                 }}
               >
                 {item.title}
@@ -204,9 +205,9 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
   onFinish,
   isLoading,
   title,
-  showSaveButton = true,
   isAllowed,
   initialExecutionOpen = false,
+  variant,
 }) => {
   const [form] = Form.useForm();
   const executionModalState = useModalState();
@@ -228,10 +229,21 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialExecutionOpen, location.state]);
 
-  // === ИСПРАВЛЕНИЕ: приводим status к string для switch ===
+  const currentStatus =
+    (initialValues?.status as string) || CorrespondenseStatus.DRAFT;
+
   const currentStep = useMemo(() => {
-    // Используем "as string", чтобы TS не ругался на несовпадение типов Enum и литералов
     const status = initialValues?.status as string;
+
+    const isEditable = currentStatus === CorrespondenseStatus.DRAFT;
+
+    const canSave = isEditable;
+
+    const canSendToResolution =
+      currentStatus === CorrespondenseStatus.TO_REGISTER;
+    const canReject = currentStatus === CorrespondenseStatus.TO_REGISTER;
+
+    const canComplete = currentStatus === CorrespondenseStatus.TO_SIGN;
 
     switch (status) {
       case CorrespondenseStatus.DRAFT:
@@ -252,7 +264,7 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
       default:
         return 0;
     }
-  }, [initialValues?.status]);
+  }, [currentStatus]);
 
   const stepStatus =
     (initialValues?.status as string) === CorrespondenseStatus.CANCELLED
@@ -269,10 +281,12 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
 
   const labelStyle = "text-[#6D8AC9]! text-sm! mb-1! block! font-normal!";
   const inputStyle =
-    "h-10! bg-[#F2F5FF]! border-none! rounded-lg! hover:bg-[#E9F0FF]! focus:bg-white! focus:ring-2! focus:ring-blue-100! transition-all!";
+    variant === "view"
+      ? "view-input w-full!" // Цвета заданы в style.css
+      : "create-input w-full!";
 
   return (
-    <div className="bg-white rounded-2xl p-0 shadow-sm h-full flex flex-col overflow-hidden">
+    <div className="bg-white rounded-2xl p-0 shadow-sm flex flex-col overflow-hidden">
       {/* ПАНЕЛЬ УПРАВЛЕНИЯ */}
       <CorrespondenceControlPanel
         isSaving={isLoading}
@@ -284,7 +298,7 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
       />
 
       {/* ТЕЛО ФОРМЫ */}
-      <div className="flex-1 overflow-y-auto px-6 pb-8 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto px-6 pb-1 custom-scrollbar">
         {/* ЗАГОЛОВОК */}
         <h1 className="correspondence-title">{title}</h1>
 
@@ -320,7 +334,7 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
                     method="GET"
                     transformResponse={(data) => transformResponse(data)}
                     searchParamKey="search"
-                    className={inputStyle}
+                    selectClass={inputStyle}
                   />
                 </If>
                 <If is={isOutgoing}>
@@ -338,7 +352,7 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
                   className={`w-full ${inputStyle}`}
                   name="doc_date"
                   label={<span className={labelStyle}>Дата регистрации</span>}
-                  placeholder="27.12.2025"
+                  placeholder="Выберите дату"
                 />
               </Col>
 
@@ -365,10 +379,7 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
                   label={<span className={labelStyle}>Почта</span>}
                   name="email"
                 >
-                  <Input
-                    placeholder="example@mail.com"
-                    className={inputStyle}
-                  />
+                  <Input placeholder="Введите почту" className={inputStyle} />
                 </Form.Item>
               </Col>
 
@@ -377,7 +388,10 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
                   label={<span className={labelStyle}>Входящий номер</span>}
                   name="incomingNumber"
                 >
-                  <Input placeholder="ALIF BANK OJSC" className={inputStyle} />
+                  <Input
+                    placeholder="Введите входящий номер"
+                    className={inputStyle}
+                  />
                 </Form.Item>
               </Col>
 
@@ -386,7 +400,10 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
                   label={<span className={labelStyle}>Контакт</span>}
                   name="sender_contact"
                 >
-                  <Input placeholder="JSC BANK" className={inputStyle} />
+                  <Input
+                    placeholder="Введите номер телефона"
+                    className={inputStyle}
+                  />
                 </Form.Item>
               </Col>
 
@@ -399,7 +416,9 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
                   method="GET"
                   transformResponse={(data) => transformResponse(data)}
                   searchParamKey="name"
-                  className={inputStyle}
+                  showSearch
+                  allowClear
+                  selectClass={inputStyle}
                 />
               </Col>
 
@@ -408,77 +427,82 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
                   label={<span className={labelStyle}>Исходящий номер</span>}
                   name="outgoingNumber"
                 >
-                  <Input placeholder="И-45321" className={inputStyle} />
+                  <Input
+                    placeholder="Введите исходящий номер"
+                    className={inputStyle}
+                  />
                 </Form.Item>
               </Col>
             </Row>
           </div>
 
           {/* РЕЗОЛЮЦИЯ */}
-          <div>
-            <h2 className="text-lg font-semibold mb-5 text-gray-800 border-b border-gray-100 pb-2">
-              Резолюция
-            </h2>
-            <div className="flex flex-wrap gap-6 items-stretch">
-              <div className="border border-gray-200 rounded-xl p-4 flex items-center gap-4 flex-1 min-w-[300px] bg-white">
-                <Avatar
-                  size={48}
-                  icon={<UserOutlined />}
-                  className="bg-blue-100! text-blue-600!"
-                />
-                <div>
-                  <div className="font-bold text-base text-gray-900">
-                    Шарипов Амир
+          <If is={variant === "view"}>
+            <div>
+              <h2 className="text-lg font-semibold mb-5 text-gray-800 border-b border-gray-100 pb-2">
+                Резолюция
+              </h2>
+              <div className="flex flex-wrap gap-6 items-stretch">
+                <div className="border border-gray-200 rounded-xl p-4 flex items-center gap-4 flex-1 min-w-[300px] bg-white">
+                  <Avatar
+                    size={48}
+                    icon={<UserOutlined />}
+                    className="bg-blue-100! text-blue-600!"
+                  />
+                  <div>
+                    <div className="font-bold text-base text-gray-900">
+                      Шарипов Амир
+                    </div>
+                    <div className="text-xs text-gray-500 mt-0.5">
+                      Старший специалист / Исполнитель №1
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500 mt-0.5">
-                    Старший специалист / Исполнитель №1
+                </div>
+
+                <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center justify-center gap-3 flex-1 min-w-[300px] cursor-pointer hover:bg-[#F1F5F9] transition-colors py-4 px-6 group">
+                  <div className="text-[#0037AF] group-hover:scale-110 transition-transform">
+                    <FilePdfOutlined style={{ fontSize: "28px" }} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[#0037AF] font-medium text-sm">
+                      Название.pdf
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      Нажмите для просмотра
+                    </span>
                   </div>
                 </div>
-              </div>
 
-              <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center justify-center gap-3 flex-1 min-w-[300px] cursor-pointer hover:bg-[#F1F5F9] transition-colors py-4 px-6 group">
-                <div className="text-[#0037AF] group-hover:scale-110 transition-transform">
-                  <FilePdfOutlined style={{ fontSize: "28px" }} />
+                <div className="flex flex-col gap-3 min-w-55 justify-center">
+                  <AntButton
+                    type="primary"
+                    icon={<ReloadOutlined />}
+                    onClick={executionModalState.open}
+                    className="bg-[#0037AF]! hover:bg-[#002D93]! h-10! rounded-lg! font-medium! text-sm! shadow-sm! border-none! w-full!"
+                  >
+                    На исполнение
+                  </AntButton>
+                  <AntButton className="border-[#0037AF]! text-[#0037AF]! h-10! rounded-lg! font-medium! text-sm! hover:bg-blue-50! w-full!">
+                    Подготовить ответ
+                  </AntButton>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-[#0037AF] font-medium text-sm">
-                    Название.pdf
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    Нажмите для просмотра
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-3 min-w-55 justify-center">
-                <AntButton
-                  type="primary"
-                  icon={<ReloadOutlined />}
-                  onClick={executionModalState.open}
-                  className="bg-[#0037AF]! hover:bg-[#002D93]! h-10! rounded-lg! font-medium! text-sm! shadow-sm! border-none! w-full!"
-                >
-                  На исполнение
-                </AntButton>
-                <AntButton className="border-[#0037AF]! text-[#0037AF]! h-10! rounded-lg! font-medium! text-sm! hover:bg-blue-50! w-full!">
-                  Подготовить ответ
-                </AntButton>
               </div>
             </div>
-          </div>
 
-          {/* ИСТОРИЯ */}
-          <div>
-            <h2 className="text-lg font-semibold mb-5 text-gray-800 border-b border-gray-100 pb-2">
-              История документа
-            </h2>
-            <Table
-              columns={HISTORY_COLUMNS}
-              dataSource={HISTORY_DATA}
-              pagination={false}
-              rowClassName={() => "text-xs"}
-              className="border! border-gray-100! rounded-lg! overflow-hidden! [&_.ant-table-thead_th]:bg-[#F9FAFB]! [&_.ant-table-thead_th]:text-[#6D8AC9]! [&_.ant-table-thead_th]:font-normal!"
-            />
-          </div>
+            {/* ИСТОРИЯ */}
+            <div className="pb-5">
+              <h2 className="text-lg font-semibold mb-5 text-gray-800 border-b border-gray-100 pb-2">
+                История документа
+              </h2>
+              <Table
+                columns={HISTORY_COLUMNS}
+                dataSource={HISTORY_DATA}
+                pagination={false}
+                rowClassName={() => "text-xs"}
+                className="border! border-gray-100! rounded-lg! overflow-hidden! [&_.ant-table-thead_th]:bg-[#F9FAFB]! [&_.ant-table-thead_th]:text-[#6D8AC9]! [&_.ant-table-thead_th]:font-normal!"
+              />
+            </div>
+          </If>
         </Form>
       </div>
 
