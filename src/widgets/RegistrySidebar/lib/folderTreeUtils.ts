@@ -1,4 +1,4 @@
-import { Folder, MenuItem } from "./types";
+import { IFolder, MenuItem } from "./types";
 import { FOLDER_ORDER } from "./constants";
 
 /**
@@ -26,7 +26,7 @@ export const sortMenuItems = (items: MenuItem[]): MenuItem[] => {
 /**
  * Фильтр и сортировка дочерних папок
  */
-export const getChildFolders = (parentId: number, folders: Folder[]): Folder[] => {
+export const getChildFolders = (parentId: number, folders: IFolder[]): IFolder[] => {
   return folders
     .filter((f) => f.parent_id === parentId)
     .sort((a, b) => a.sort - b.sort);
@@ -35,7 +35,7 @@ export const getChildFolders = (parentId: number, folders: Folder[]): Folder[] =
 /**
  * Список корневых папок
  */
-export const getRootFolders = (folders: Folder[]): Folder[] => {
+export const getRootFolders = (folders: IFolder[]): IFolder[] => {
   return folders
     .filter((f) => f.parent_id === null || f.parent_id === undefined)
     .sort((a, b) => a.sort - b.sort);
