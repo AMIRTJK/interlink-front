@@ -1,11 +1,11 @@
 import { If } from "@shared/ui";
 import { CorrespondenceListSidebar, ModuleSidebar } from "./ui";
 
-interface RegistrySidebarProps {
+interface IProps {
   isDetailView?: boolean;
 }
 
-export const RegistrySidebar = ({ isDetailView }: RegistrySidebarProps) => {
+export const RegistrySidebar = ({ isDetailView }: IProps) => {
   return (
     <div className="flex h-full items-stretch">
       <div className="shrink-0">
