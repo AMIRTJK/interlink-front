@@ -122,7 +122,7 @@ export const RenderFields = ({
           showSearch
           allowClear
           mode="multiple"
-          url={ApiRoutes.GET_ASSIGNEES}
+          url={ApiRoutes.GET_USERS}
           method="GET"
           transformResponse={transformAssigneesResponse}
           searchParamKey="full_name"
