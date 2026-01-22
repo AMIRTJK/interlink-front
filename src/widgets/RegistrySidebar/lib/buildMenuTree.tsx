@@ -2,10 +2,10 @@ import { PlusOutlined } from "@ant-design/icons";
 import { MenuProps } from "antd";
 import folderIcon from "../../../assets/icons/folder-icon.svg";
 import {
-  Folder,
-  FolderDefinition,
+  IFolder,
+  IFolderDefinition,
   MenuItem,
-  BuildMenuTreeParams,
+  IBuildMenuTreeParams,
 } from "./types";
 import { buildFolderPath, isIncomingOrOutgoingFolder } from "./folderPathUtils";
 import {
@@ -18,7 +18,7 @@ import { createFolderMenuActions } from "./menuActionBuilder";
 import { FolderLabel } from "./FolderLabel";
 import { SystemFolderLabel } from "./SystemFolderLabel";
 
-export type { BuildMenuTreeParams, MenuItem, Folder, FolderDefinition };
+export type { IBuildMenuTreeParams, MenuItem, IFolder, IFolderDefinition };
 
 /**
  * Сборка дерева меню
@@ -32,18 +32,13 @@ export const buildMenuTree = ({
   handleAddClick,
   onNavigate,
   onDrop,
-}: BuildMenuTreeParams): MenuItem[] => {
+}: IBuildMenuTreeParams): MenuItem[] => {
   const dragHandlers = createDragHandlers();
-
-  /**
-   * Recursively builds a menu item for a folder and its children
-   */
   const buildFullItem = (
-    folder: Folder,
+    folder: IFolder,
     visited = new Set<number>(),
     depth = 0,
   ): MenuItem | null => {
-    // Prevent circular references
     if (folder.id && visited.has(folder.id)) return null;
     if (folder.id) visited.add(folder.id);
 
@@ -52,7 +47,6 @@ export const buildMenuTree = ({
     const folderKey = definition ? definition.key : `folder-${folder.id}`;
     const folderPath = buildFolderPath(folder, folders, definition);
 
-    // Build children recursively
     const childFolders = getChildFolders(folder.id, folders);
     const nestedFolders = childFolders
       .map((f) => buildFullItem(f, new Set(visited), depth + 1))
@@ -60,8 +54,6 @@ export const buildMenuTree = ({
 
     let children: MenuItem[] | undefined =
       nestedFolders.length > 0 ? nestedFolders : undefined;
-
-    // Add "Create new folder" placeholder for Incoming/Outgoing folders
     if (isIncomingOrOutgoingFolder(folder.name)) {
       const createPlaceholder: MenuItem = {
         key: `create-placeholder-${folder.id || folder.name}`,
@@ -80,7 +72,6 @@ export const buildMenuTree = ({
         : [createPlaceholder];
     }
 
-    // Create context menu actions for custom folders
     const menuActions: MenuProps["items"] = isSystemFolder
       ? []
       : createFolderMenuActions({
@@ -92,7 +83,6 @@ export const buildMenuTree = ({
           deleteFolder,
         });
 
-    // Обработчики Drag and Drop
     const isDraggable = !isSystemFolder;
     const handleDragStart = (e: React.DragEvent) =>
       dragHandlers.handleDragStart(e, folder.id);
@@ -128,13 +118,11 @@ export const buildMenuTree = ({
     };
   };
 
-  // Сборка корневых элементов
   const rootFolders = getRootFolders(folders);
   const rootItems = rootFolders
     .map((f) => buildFullItem(f))
     .filter(Boolean) as MenuItem[];
 
-  // Add missing system folders (if they don't exist in DB)
   Object.keys(definitions).forEach((name) => {
     if (
       !rootItems.find(
@@ -159,6 +147,5 @@ export const buildMenuTree = ({
     }
   });
 
-  // Сортировка по порядку
   return sortMenuItems(rootItems);
 };

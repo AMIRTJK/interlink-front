@@ -1,14 +1,14 @@
 import React from "react";
-import { FolderDefinition } from "./types";
+import { IFolderDefinition } from "./types";
 
-interface SystemFolderLabelProps {
+interface IProps {
   name: string;
-  definition: FolderDefinition;
+  definition: IFolderDefinition;
   collapsed: boolean;
   onNavigate: (path: string) => void;
 }
 
-export const SystemFolderLabel: React.FC<SystemFolderLabelProps> = ({
+export const SystemFolderLabel: React.FC<IProps> = ({
   name,
   definition,
   collapsed,

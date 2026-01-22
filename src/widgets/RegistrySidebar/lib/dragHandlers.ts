@@ -1,6 +1,6 @@
 import { CSS_CLASSES } from "./constants";
 
-export interface DragHandlers {
+export interface IProps {
   handleDragStart: (e: React.DragEvent, folderId: number) => void;
   handleDragOver: (e: React.DragEvent) => void;
   handleDragLeave: (e: React.DragEvent) => void;
@@ -11,10 +11,7 @@ export interface DragHandlers {
   ) => void;
 }
 
-/**
- * Creates drag and drop event handlers for folder items
- */
-export const createDragHandlers = (): DragHandlers => {
+export const createDragHandlers = (): IProps => {
   return {
     handleDragStart: (e: React.DragEvent, folderId: number) => {
       e.dataTransfer.setData("folderId", folderId.toString());

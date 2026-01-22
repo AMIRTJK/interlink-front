@@ -36,7 +36,6 @@ export const createFolderMenuActions = ({
     },
   });
 
-  // Create subfolder action (only if depth < MAX_FOLDER_DEPTH)
   if (depth < MAX_FOLDER_DEPTH) {
     menuActions.push({
       key: "create-sub",

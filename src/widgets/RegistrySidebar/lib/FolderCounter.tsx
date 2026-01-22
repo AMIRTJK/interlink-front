@@ -1,12 +1,12 @@
 import React from "react";
-import { FolderDefinition } from "./types";
+import { IFolderDefinition } from "./types";
 
-interface FolderCounterProps {
-  definition?: FolderDefinition;
+interface IProps {
+  definition?: IFolderDefinition;
   collapsed: boolean;
 }
 
-export const FolderCounter: React.FC<FolderCounterProps> = ({ definition, collapsed }) => {
+export const FolderCounter: React.FC<IProps> = ({ definition, collapsed }) => {
   const count = definition?.count;
 
   if (count === undefined || collapsed) {
