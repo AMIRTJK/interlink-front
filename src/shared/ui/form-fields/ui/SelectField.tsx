@@ -1,13 +1,21 @@
 import { useGetQuery } from "@shared/lib";
 import { Form, Select } from "antd";
 import { DefaultOptionType } from "antd/es/select";
-import { CSSProperties, ReactElement, useEffect, useState, useMemo, useCallback } from "react";
+import {
+  CSSProperties,
+  ReactElement,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  ReactNode,
+} from "react";
 
 // внутри компонента SelectField
 
 interface ISelectFieldProps {
   name: string;
-  label?: string | boolean;
+  label?: ReactNode;
   rules?: object[];
   placeholder?: string;
   style?: CSSProperties;
@@ -62,11 +70,14 @@ export const SelectField = ({
 
   const [searchTerm, setSearchTerm] = useState("");
   const usedSearchParamKey = searchParamKey || "name";
-  
-  const queryParams = useMemo(() => ({
-    ...(props.showSearch ? { [usedSearchParamKey]: searchTerm } : {}),
-    ...extraParams
-  }), [props.showSearch, usedSearchParamKey, searchTerm, extraParams]);
+
+  const queryParams = useMemo(
+    () => ({
+      ...(props.showSearch ? { [usedSearchParamKey]: searchTerm } : {}),
+      ...extraParams,
+    }),
+    [props.showSearch, usedSearchParamKey, searchTerm, extraParams],
+  );
 
   const { data, refetch, isFetching } = useGetQuery<unknown>({
     url: url!,
@@ -78,11 +89,14 @@ export const SelectField = ({
   });
 
   // Функция загрузки данных
-  const loadItems = useCallback((open: boolean) => {
-    if (open && !isFetched && url) {
-      setIsFetched(true);
-    }
-  }, [isFetched, url]);
+  const loadItems = useCallback(
+    (open: boolean) => {
+      if (open && !isFetched && url) {
+        setIsFetched(true);
+      }
+    },
+    [isFetched, url],
+  );
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);

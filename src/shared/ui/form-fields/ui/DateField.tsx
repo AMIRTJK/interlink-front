@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 
 interface IProps {
   name: string;
-  label?: string | boolean;
+  label?: ReactNode;
   rules?: object[];
   placeholder?: string;
   style?: CSSProperties;
