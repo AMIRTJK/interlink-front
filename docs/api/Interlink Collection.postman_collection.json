@@ -1220,7 +1220,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"kind\": \"incoming\",\r\n  \"channel\": \"paper\",\r\n  \"doc_date\": \"2025-12-27\",\r\n  \"subject\": \"Входящее письмо тест\",\r\n  \"body\": \"Тестовое содержание письма\",\r\n  \"sender_name\": \"ООО Ромашка 4\",\r\n  \"sender_contact\": \"+992900000000\",\r\n  \"priority\": \"high\",\r\n  \"due_at\": \"2026-01-10 18:00\"\r\n}\r\n",
+          "raw": "{\r\n  \"kind\": \"incoming\",\r\n  \"channel\": \"paper\",\r\n  \"doc_date\": \"2025-12-27\",\r\n  \"subject\": \"Входящее письмо тест 7\",\r\n  \"body\": \"Тестовое содержание письма\",\r\n  \"sender_name\": \"ООО Ромашка 4\",\r\n  \"sender_contact\": \"+992900000000\",\r\n  \"priority\": \"high\",\r\n  \"due_at\": \"2026-01-10 18:00\"\r\n}\r\n",
           "options": {
             "raw": {
               "language": "json"
@@ -1269,10 +1269,10 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"text\": \"Замминистра: Направить в юридический отдел. Контроль.\",\r\n  \"due_at\": null,\r\n   \"status\": \"pending\"\r\n}\r\n\r\n// Должно вернуться:\r\n\r\n// id резолюции\r\n\r\n// author_id = текущий юзер\r\n\r\n// text\r\n\r\n// due_at"
+          "raw": "{\r\n  \"text\": \"Замминистра: Направить в юридический отдел. Контроль. 3\",\r\n  \"due_at\": null,\r\n   \"status\": \"pending\"\r\n}\r\n\r\n// Должно вернуться:\r\n\r\n// id резолюции\r\n\r\n// author_id = текущий юзер\r\n\r\n// text\r\n\r\n// due_at"
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondences/4/resolutions",
+          "raw": "{{baseURL}}/api/v1/correspondences/8/resolutions",
           "host": [
             "{{baseURL}}"
           ],
@@ -1280,7 +1280,7 @@
             "api",
             "v1",
             "correspondences",
-            "4",
+            "8",
             "resolutions"
           ]
         }
@@ -1318,7 +1318,7 @@
           "raw": "{\r\n  \"resolution_id\": 3,\r\n  \"assignee_departments\": [3],\r\n  \"note\": \"Подготовить юридическое заключение\",\r\n  \"due_at\": null\r\n}\r\n\r\n"
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondences/4/assignments",
+          "raw": "{{baseURL}}/api/v1/correspondences/6/assignments",
           "host": [
             "{{baseURL}}"
           ],
@@ -1326,7 +1326,7 @@
             "api",
             "v1",
             "correspondences",
-            "4",
+            "6",
             "assignments"
           ]
         }
@@ -1367,14 +1367,15 @@
           "raw": "// GET {{baseURL}}/api/v1/correspondences\r\n//\r\n// Query params:\r\n//\r\n// search (string) — поиск по:\r\n// subject, reg_number, sender_name,\r\n// ФИО автора (creator),\r\n// ФИО назначенного исполнителя (assignments.assigneeUser),\r\n// названию назначенного департамента (assignments.assigneeDepartment.name)\r\n//\r\n// kind (enum) — incoming|outgoing|internal\r\n//\r\n// status (string OR array) — фильтр по статусу:\r\n//   draft|to_register|to_visa|to_execute|to_approve|to_sign|done|cancelled\r\n//   Примеры:\r\n//     status=to_register\r\n//     status[]=to_register&status[]=to_visa\r\n//\r\n// priority (enum) — low|normal|high\r\n//\r\n// channel (string)\r\n//\r\n// date_from (date YYYY-MM-DD) — с даты создания (created_at)\r\n// date_to   (date YYYY-MM-DD) — по дату создания (created_at)\r\n//\r\n// doc_date_from (date YYYY-MM-DD) — с даты документа (doc_date)\r\n// doc_date_to   (date YYYY-MM-DD) — по дату документа (doc_date)\r\n//\r\n// due_from (date YYYY-MM-DD) — с даты срока (due_at)\r\n// due_to   (date YYYY-MM-DD) — по дату срока (due_at)\r\n//\r\n// creator_id (int) — фильтр по автору\r\n// assignee_user_id (int) — фильтр по назначенному сотруднику (через assignments)\r\n// assignee_department_id (int) — фильтр по назначенному департаменту (через assignments)\r\n//\r\n// sort (enum) — id|created_at|updated_at|reg_number|subject|status|priority|due_at|doc_date\r\n// dir  (enum) — asc|desc\r\n//\r\n// per_page (int 1..200) — размер страницы\r\n// page (int) — номер страницы\r\n//\r\n// NOTE:\r\n// - Параметр with не используется, связи загружаются сервером и форматируются через Resource.\r\n"
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondences",
+          "raw": "{{baseURL}}/api/v1/correspondences/8",
           "host": [
             "{{baseURL}}"
           ],
           "path": [
             "api",
             "v1",
-            "correspondences"
+            "correspondences",
+            "8"
           ]
         }
       },
@@ -1411,7 +1412,7 @@
           "raw": "// PATCH {{baseURL}}/api/v1/correspondence-assignments/{ASSIGNMENT_ID}/status\r\n//\r\n// Body:\r\n// { \"status\": \"pending\" }\r\n// { \"status\": \"in_progress\" }\r\n{ \"status\": \"done\" }\r\n// { \"status\": \"cancelled\" }\r\n//\r\n// Rules:\r\n// - allowed statuses: pending|in_progress|done|cancelled\r\n// - if status=done => done_at авто = now()\r\n// - if status != done => done_at = null\r\n// - if this was the last active assignment for the correspondence =>\r\n//     correspondence.status becomes \"done\" (if not cancelled)\r\n"
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondence-assignments/5/status",
+          "raw": "{{baseURL}}/api/v1/correspondence-assignments/9/status",
           "host": [
             "{{baseURL}}"
           ],
@@ -1419,7 +1420,7 @@
             "api",
             "v1",
             "correspondence-assignments",
-            "5",
+            "9",
             "status"
           ]
         }
@@ -1809,6 +1810,9 @@
     },
     {
       "name": "Correspomdences attachments",
+      "protocolProfileBehavior": {
+        "disabledSystemHeaders": {}
+      },
       "request": {
         "auth": {
           "type": "bearer",
@@ -1829,8 +1833,15 @@
           },
           {
             "key": "Content-Type",
-            "value": "application/json",
-            "type": "text"
+            "value": "multipart/form-data boundary=...",
+            "type": "text",
+            "disabled": true
+          },
+          {
+            "key": "",
+            "value": "",
+            "type": "text",
+            "disabled": true
           }
         ],
         "body": {
@@ -1840,12 +1851,19 @@
               "key": "file",
               "type": "file",
               "uuid": "cac840bc-5fca-4270-9a09-0faae571d8a3",
-              "src": "/C:/Users/User/Desktop/Снимок экрана 2025-08-18 135843.png"
+              "src": "/C:/Users/User/Desktop/Снимок экрана 2025-08-18 135843.png",
+              "disabled": true
+            },
+            {
+              "key": "file",
+              "type": "file",
+              "uuid": "28076ef1-55e5-4142-af66-1b4688ecaadc",
+              "src": "/C:/Users/User/Desktop/GGJejMy9Ble22ijPdKn2Ai542sauHdYdntwz-RpduqqxzV77ZIZCPBtmuhfL3W8reNYaWp_bH7_lsG9vhXvYFEof.jpg"
             }
           ]
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondences/1/attachments",
+          "raw": "{{baseURL}}/api/v1/correspondences/8/attachments",
           "host": [
             "{{baseURL}}"
           ],
@@ -1853,7 +1871,7 @@
             "api",
             "v1",
             "correspondences",
-            "1",
+            "8",
             "attachments"
           ]
         }
@@ -2005,7 +2023,7 @@
           "raw": ""
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondences/1",
+          "raw": "{{baseURL}}/api/v1/correspondences/8",
           "host": [
             "{{baseURL}}"
           ],
@@ -2013,7 +2031,7 @@
             "api",
             "v1",
             "correspondences",
-            "1"
+            "8"
           ]
         }
       },
@@ -2628,7 +2646,7 @@
           "raw": "{ \"leader_id\": 1 }\r\n"
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondences/4/set-leader",
+          "raw": "{{baseURL}}/api/v1/correspondences/8/set-leader",
           "host": [
             "{{baseURL}}"
           ],
@@ -2636,7 +2654,7 @@
             "api",
             "v1",
             "correspondences",
-            "4",
+            "8",
             "set-leader"
           ]
         }
@@ -2671,7 +2689,7 @@
           }
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondences/4/resolutions",
+          "raw": "{{baseURL}}/api/v1/correspondences/8/resolutions",
           "host": [
             "{{baseURL}}"
           ],
@@ -2679,7 +2697,7 @@
             "api",
             "v1",
             "correspondences",
-            "4",
+            "8",
             "resolutions"
           ]
         }
@@ -2702,7 +2720,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondences/4?view=full",
+          "raw": "{{baseURL}}/api/v1/correspondences/8?view=full",
           "host": [
             "{{baseURL}}"
           ],
@@ -2710,7 +2728,7 @@
             "api",
             "v1",
             "correspondences",
-            "4"
+            "8"
           ],
           "query": [
             {
@@ -2750,7 +2768,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"resolution_id\": 3,\r\n  \"assignee_users\": [2],\r\n  \"note\": \"Срочно дать заключение\"\r\n}\r\n",
+          "raw": "{\r\n  \"resolution_id\": 9,\r\n  \"assignee_users\": [2],\r\n  \"note\": \"Срочно дать заключение 2\"\r\n}\r\n",
           "options": {
             "raw": {
               "language": "json"
@@ -2758,7 +2776,7 @@
           }
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondences/4/assignments",
+          "raw": "{{baseURL}}/api/v1/correspondences/8/assignments",
           "host": [
             "{{baseURL}}"
           ],
@@ -2766,8 +2784,197 @@
             "api",
             "v1",
             "correspondences",
-            "4",
+            "8",
             "assignments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Запросить payload",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "XUuE2yz8rYpHjkz4YDI2FJ5EnDXOG36ulPqxfH0A07bf9f5c",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"action\": \"visa\", \"method\": \"cms\" }\r\n"
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/correspondences/8/signature/payload",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "correspondences",
+            "8",
+            "signature",
+            "payload"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Кнопка подписать",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "XUuE2yz8rYpHjkz4YDI2FJ5EnDXOG36ulPqxfH0A07bf9f5c",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "\r\n{\r\n  \"signature_id\": 3,\r\n  \"nonce\": \"9nkjhvJblg0YJl0Q7H3055XiLHj4ru95B9QxPxY5\",\r\n  \"method\": \"simple\"\r\n}\r\n"
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/correspondences/8/signature/confirm",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "correspondences",
+            "8",
+            "signature",
+            "confirm"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Редактировать резолюцию",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "XUuE2yz8rYpHjkz4YDI2FJ5EnDXOG36ulPqxfH0A07bf9f5c",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"text\": \"…\", \"due_at\": \"2026-01-25 18:00\" }\r\n//Статус меняется автоматический ",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/correspondence-resolutions/5",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "correspondence-resolutions",
+            "5"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Закрыть резолюцию лидером",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "XUuE2yz8rYpHjkz4YDI2FJ5EnDXOG36ulPqxfH0A07bf9f5c",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"status\": \"approved\" }\r\n\r\n// { \"status\": \"returned\" }\r\n// { \"status\": \"done\" }\r\n"
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/correspondence-resolutions/{id}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "correspondence-resolutions",
+            "{id}"
           ]
         }
       },
