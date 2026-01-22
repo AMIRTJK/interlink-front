@@ -1,5 +1,5 @@
 import { ROUTES, SYSTEM_FOLDERS } from "./constants";
-import { IFolder } from "./types";
+import { IFolder } from "../model";
 
 /**
  * Поиск родительской системной папки вверх по дереву

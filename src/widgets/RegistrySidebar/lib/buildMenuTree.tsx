@@ -6,7 +6,7 @@ import {
   IFolderDefinition,
   MenuItem,
   IBuildMenuTreeParams,
-} from "./types";
+} from "../model";
 import { buildFolderPath, isIncomingOrOutgoingFolder } from "./folderPathUtils";
 import {
   getChildFolders,

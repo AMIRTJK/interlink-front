@@ -1,5 +1,5 @@
 import React from "react";
-import { IFolderDefinition } from "./types";
+import { IFolderDefinition } from "../model";
 
 interface IProps {
   definition?: IFolderDefinition;

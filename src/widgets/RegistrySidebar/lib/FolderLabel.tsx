@@ -1,5 +1,5 @@
 import React from "react";
-import { IFolderLabelProps } from "./types";
+import { IFolderLabelProps } from "../model";
 import { FolderCounter } from "./FolderCounter";
 import { FolderActions } from "./FolderActions";
 // Поправить троеточие)
