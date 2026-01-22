@@ -3,12 +3,12 @@ import { Button, Dropdown, MenuProps } from "antd";
 import { MoreOutlined } from "@ant-design/icons";
 import { CSS_CLASSES } from "./constants";
 
-interface FolderActionsProps {
+interface IProps {
   menuActions: MenuProps["items"];
   collapsed: boolean;
 }
 
-export const FolderActions: React.FC<FolderActionsProps> = ({ menuActions, collapsed }) => {
+export const FolderActions: React.FC<IProps> = ({ menuActions, collapsed }) => {
   if (collapsed || !menuActions || menuActions.length === 0) {
     return null;
   }
@@ -25,7 +25,6 @@ export const FolderActions: React.FC<FolderActionsProps> = ({ menuActions, colla
         size="small"
         icon={<MoreOutlined />}
         onClick={(e) => e.stopPropagation()}
-        className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8"
       />
     </Dropdown>
   );

@@ -1,26 +1,26 @@
 import { MenuProps } from "antd";
 
-export interface Folder {
+export interface IFolder {
   id: number;
   name: string;
   parent_id: number | null;
   sort: number;
 }
 
-export interface FolderDefinition {
+export interface IFolderDefinition {
   key: string;
   path: string;
   icon: React.ReactNode;
   count?: number;
 }
 
-// Используем any для MenuItem по просьбе пользователя для успешного билда
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type MenuItem = any;
 
-export interface BuildMenuTreeParams {
-  folders: Folder[];
+export interface IBuildMenuTreeParams {
+  folders: IFolder[];
   collapsed: boolean;
-  definitions: Record<string, FolderDefinition>;
+  definitions: Record<string, IFolderDefinition>;
   handleEditClick: (folderId: number, currentName: string) => void;
   deleteFolder: (data: { id: number }) => void;
   handleAddClick: (parentId: number | null) => void;
@@ -28,11 +28,11 @@ export interface BuildMenuTreeParams {
   onDrop: (targetFolderId: number | null, draggedType: "folder" | "correspondence", draggedId: number) => void;
 }
 
-export interface FolderLabelProps {
-  folder: Folder;
+export interface IFolderLabelProps {
+  folder: IFolder;
   folderPath: string;
   collapsed: boolean;
-  definition?: FolderDefinition;
+  definition?: IFolderDefinition;
   menuActions: MenuProps["items"];
   onNavigate: (path: string) => void;
   onDragStart: (e: React.DragEvent) => void;
