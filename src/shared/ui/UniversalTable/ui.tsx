@@ -225,8 +225,8 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
   ).map(formatDatesInObject);
 
   // Skeleton 
-  if(isPending){
-    return <UseSkeleton loading={true} variant="table" />
+  if(!isPending){
+    return <UseSkeleton loading={true} variant="table" count={1} rows={19}  />
   }else{
   return (
     <div

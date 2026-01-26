@@ -8,6 +8,7 @@ export const UseSkeleton: React.FC<ISkeletonProps> = ({
   children,
   active = true,
   count = 1,
+  rows,
   ...rest
 }) => {
   if (!loading) return <>{children}</>;
@@ -26,7 +27,7 @@ export const UseSkeleton: React.FC<ISkeletonProps> = ({
         return (
           <Space direction="vertical" style={{ width: '100%' }} size="middle">
             <Skeleton.Button active={active} block style={{ height: 150 }} />
-            <Skeleton active={active} paragraph={{ rows: 2 }} title={false} />
+            <Skeleton active={active} paragraph={{ rows: rows || 2 }} title={false} />
           </Space>
         );
       case 'table':
@@ -35,17 +36,24 @@ export const UseSkeleton: React.FC<ISkeletonProps> = ({
             <Skeleton.Input 
               active={active} 
               block 
-              style={{ height: 30, marginBottom: 12 }} 
+              style={{ height: 32, marginBottom: 12 }} 
             />
             <Skeleton 
               active={active} 
-              paragraph={{ rows: 8, width: '100%' }} 
+              paragraph={{ rows: rows || 5, width: '100%' }} 
               title={false} 
             />
           </div>
         );
       default:
-        return <Skeleton active={active} {...rest} />;
+        return (
+          <Skeleton 
+            active={active} 
+            title={false} 
+            paragraph={{ rows: rows || 3 }} 
+            {...rest} 
+          />
+        );
     }
   };
 
@@ -54,8 +62,9 @@ export const UseSkeleton: React.FC<ISkeletonProps> = ({
       {Array.from({ length: count }).map((_, index) => (
         <React.Fragment key={index}>
           {renderSkeleton()}
+          {/* Отступ между блоками, если count > 1 */}
           {count > 1 && index < count - 1 && (
-            <div style={{ marginBottom: 16 }} />
+            <div style={{ marginBottom: 24 }} />
           )}
         </React.Fragment>
       ))}
