@@ -125,13 +125,13 @@ export const ModuleSidebar = ({ isDetailView }: RegistrySidebarProps) => {
 
   const definitions = useMemo(
     () => ({
-      "Входящие письма": {
+      "Внешняя корреспонденция": {
         key: AppRoutes.CORRESPONDENCE_INCOMING,
         icon: <img src={sideBarIcons.incomingIcon} />,
         count: counts.incoming_total,
         path: AppRoutes.CORRESPONDENCE_INCOMING,
       },
-      "Исходящие письма": {
+      "Внутренняя корреспонденция": {
         key: AppRoutes.CORRESPONDENCE_OUTGOING,
         icon: <img src={sideBarIcons.outgoingIcon} />,
         count: counts.outgoing_total,
