@@ -60,13 +60,13 @@ export const Profile = () => {
 
     const subPath = routes[e.key];
     if (subPath) {
-      // Склеиваем префикс и хвост
       navigate(subPath);
     }
   };
 
   return (
-    <><RenderJSX
+    <>
+    <RenderJSX
       loading={loading}
       isSnowEnabled={isSnowEnabled}
       setIsSnowEnabled={setIsSnowEnabled}
@@ -82,7 +82,8 @@ export const Profile = () => {
       setIsAnimEnabled={setIsAnimEnabled}
       userData={userData}
       activeTab={activeTab}
-      onMenuClick={handleMenuClick} /></>
+      onMenuClick={handleMenuClick} />
+    </>
   );
 
 };
