@@ -7,6 +7,7 @@ import { HeaderExecutionModal } from "./HeaderExecutionModal";
 import { If } from "@shared/ui";
 import { ExecutorStructure } from "@features/executor-structure";
 import { CorrespondenceResponse } from "@entities/correspondence";
+import { Spin } from "antd";
 
 interface ExecutionModalProps {
   isOpen: boolean;
@@ -32,7 +33,7 @@ export const ExecutionModal: React.FC<ExecutionModalProps> = ({
   const handleSaveExecutors = (
     userIds: number[],
     deptIds: number[],
-    mainExecutorIds: number[]
+    mainExecutorIds: number[],
   ) => {
     setSelectedUserIds(userIds);
     setSelectedDeptIds(deptIds);

@@ -1,6 +1,6 @@
 import "./style.css";
 import { Button, If, UniversalTable } from "@shared/ui";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AddIcon from "../../../assets/icons/add-icon.svg";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useRegistryColumns, getRegistryFilters } from "../lib";
@@ -12,7 +12,10 @@ import wordIcon from "../../../assets/icons/word2.svg";
 import executionIcon from "../../../assets/icons/execution.svg";
 import { BookModal } from "@widgets/BookModal";
 import { AppRoutes } from "@shared/config";
-import { CorrespondenseStatus } from "@entities/correspondence";
+import {
+  CorrespondenceResponse,
+  CorrespondenseStatus,
+} from "@entities/correspondence";
 interface RegistryTableProps<T extends Record<string, unknown>> {
   data?: T[];
   isLoading?: boolean;
@@ -31,6 +34,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const initialTab =
     typeof tabFromParams === "string" ? tabFromParams : "draft";
   const [currentTab, setCurrentTab] = useState(initialTab);
+  const [correspondenceId, setCorrespondenceId] = useState<string | number>();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -74,16 +78,39 @@ export const RegistryTable = <T extends Record<string, unknown>>({
     setIsModalOpen(true);
   };
 
-  const handleNavigateToExecution = (record: T) => {
+  const handleGetIdCorrespondence = (record: CorrespondenceResponse) => {
+    setCorrespondenceId(record.id);
+  };
+
+  useEffect(() => {
+    if (location.state && (location.state as any).openBookModal) {
+      setIsModalOpen(true);
+      if ((location.state as any).savedCorrespondenceId) {
+        setCorrespondenceId((location.state as any).savedCorrespondenceId);
+      }
+
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  const handleNavigateToExecution = (fromModal = false) => {
     navigate(
-      AppRoutes.CORRESPONDENCE_INCOMING_SHOW.replace(":id", String(record.id)),
+      AppRoutes.CORRESPONDENCE_INCOMING_SHOW.replace(
+        ":id",
+        String(correspondenceId),
+      ),
       {
-        state: { openExecution: true },
+        state: {
+          openExecution: true,
+          returnToBookModal: fromModal,
+          previousPath: location.pathname + location.search,
+          savedCorrespondenceId: correspondenceId,
+        },
       },
     );
   };
 
-  const handleNavigateToLetter = (record: T) => {
+  const handleNavigateToLetter = (record: CorrespondenceResponse) => {
     navigate(
       AppRoutes.CORRESPONDENCE_INCOMING_SHOW.replace(":id", String(record.id)),
     );
@@ -91,7 +118,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 
   const showTabs = !!extraParams?.kind;
 
-  const expandedRowRender = (record: T) => {
+  const expandedRowRender = (record: CorrespondenceResponse) => {
     const isExecuteButtonActive =
       CorrespondenseStatus.TO_EXECUTE === record.status;
 
@@ -121,14 +148,14 @@ export const RegistryTable = <T extends Record<string, unknown>>({
                 <span className="text-[#6D8AC9] mb-0.5 block">
                   Входящий номер:
                 </span>
-                <p>{record.incomingNumber as string}</p>
+                <p>{null}</p>
               </div>
 
               <div>
                 <span className="text-[#6D8AC9] mb-0.5 block">
                   Исходящий номер:
                 </span>
-                <p>{record.outgoingNumber as string}</p>
+                <p>{null}</p>
               </div>
               <div>
                 <span className="text-[#6D8AC9] mb-0.5 block">Статус:</span>
@@ -154,7 +181,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
               icon={executionIcon}
               iconAlt="execution"
               className={`bg-[#0037AF]! text-white! ${!isExecuteButtonActive ? "opacity-50" : ""}`}
-              onClick={() => handleNavigateToExecution(record)}
+              onClick={() => handleNavigateToExecution(false)}
             />
             <Button
               className="border-[#0037AF]! text-[#0037AF]! font-medium!"
@@ -205,7 +232,8 @@ export const RegistryTable = <T extends Record<string, unknown>>({
             filters={filters}
             columns={columns}
             className="[&_.ant-table-cell]:rounded-none! [&_.ant-pagination]:px-4! [&_.ant-table-row]:cursor-pointer [&_.ant-table-expanded-row.ant-table-expanded-row-level-1>td]:bg-[#F2F5FF]!"
-            rowClassName={(record: T) =>
+            handleRowClick={handleGetIdCorrespondence}
+            rowClassName={(record: CorrespondenceResponse) =>
               expandedRowKeys.includes(record.id as number)
                 ? "[&>td]:bg-[#E9F0FF]! hover:[&>td]:bg-[#E9F0FF]!"
                 : ""
@@ -228,7 +256,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
               },
               onDragEnd: (e) => {
                 (e.currentTarget as HTMLElement).classList.remove("dragging");
-              }
+              },
             })}
             expandable={{
               expandedRowRender: expandedRowRender,
@@ -247,7 +275,11 @@ export const RegistryTable = <T extends Record<string, unknown>>({
           />
         </div>
       </div>
-      <BookModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <BookModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        toNavigate={() => handleNavigateToExecution(true)}
+      />
     </>
   );
 };

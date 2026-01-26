@@ -1,7 +1,17 @@
+import { Button } from "@shared/ui";
+import { useLocation, useNavigate } from "react-router";
+import arrowBack from "../../../assets/icons/arrow-left-navigate.svg";
+
 interface IProps {
   toggleFullScreen: () => void;
   onClose: () => void;
   isFullScreen: boolean;
+}
+
+interface LocationState {
+  returnToBookModal?: boolean;
+  previousPath?: string;
+  savedCorrespondenceId?: string | number;
 }
 
 export const HeaderExecutionModal = ({
@@ -9,10 +19,39 @@ export const HeaderExecutionModal = ({
   onClose,
   isFullScreen,
 }: IProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNavigateBack = () => {
+    const state = location.state as LocationState | null;
+
+    if (state?.returnToBookModal && state?.previousPath) {
+      navigate(state.previousPath, {
+        state: {
+          openBookModal: true,
+          savedCorrespondenceId: state.savedCorrespondenceId,
+        },
+      });
+    } else {
+      navigate(-1);
+    }
+  };
+
   return (
     <div className="flex items-center justify-between md:pb-2 md:mb-4  border-b border-gray-100 bg-white z-20 shrink-0">
-      <h2 className="text-lg md:text-xl font-bold text-gray-900">Резолюция</h2>
-
+      <div className="flex items-start gap-4">
+        <Button
+          type="text"
+          text="Назад"
+          onClick={handleNavigateBack}
+          withIcon={true}
+          icon={arrowBack}
+          className="font-medium! text-[#0037AF]!"
+        />
+        <h2 className="text-lg md:text-xl font-bold text-gray-900">
+          Резолюция
+        </h2>
+      </div>
       <div className="flex items-center gap-2">
         <button
           onClick={toggleFullScreen}

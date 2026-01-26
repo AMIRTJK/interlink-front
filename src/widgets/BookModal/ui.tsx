@@ -12,6 +12,9 @@ import xlsIcon from "../../assets/icons/xls-icon.svg";
 import docIcon from "../../assets/icons/doc-icon.svg";
 import { If } from "@shared/ui";
 import { ResolutionOfLetter } from "@widgets/ResolutionOfLetter";
+import { useModalState } from "@shared/lib";
+import { ExecutionModal } from "@widgets/ExecutionModal";
+import { T } from "react-router/dist/development/instrumentation-BlrVzjbg";
 
 // Подключение воркера
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
@@ -56,6 +59,7 @@ interface BookModalProps {
   coverTitle?: React.ReactNode;
   coverSubtitle?: React.ReactNode;
   coverLogoSrc?: string;
+  toNavigate: () => void;
 }
 
 interface DragInfo {
@@ -69,6 +73,7 @@ interface DragInfo {
 export const BookModal: React.FC<BookModalProps> = ({
   isOpen,
   onClose,
+  toNavigate,
   footerPhone = "тел: 1310 - 1334",
   coverTitle = (
     <>
@@ -88,9 +93,6 @@ export const BookModal: React.FC<BookModalProps> = ({
   ),
   coverLogoSrc = "https://upload.wikimedia.org/wikipedia/commons/9/9f/Emblem_of_Tajikistan.svg",
 }) => {
-  const [isLetterExecutionVisible, setIsLetterExecutionVisible] =
-    useState(false);
-
   const [activeClass, setActiveClass] = useState(false);
   const [cardOpen, setCardOpen] = useState(false);
   const [noPerspective, setNoPerspective] = useState(false);
@@ -117,6 +119,8 @@ export const BookModal: React.FC<BookModalProps> = ({
     scrollLeft: 0,
     scrollTop: 0,
   });
+
+  const executionModalState = useModalState();
 
   // Блокировка скролла body
   useEffect(() => {
@@ -674,10 +678,7 @@ export const BookModal: React.FC<BookModalProps> = ({
                   Отказать
                 </button>
                 <button className="btn btn-outline-blue">Ознакомлен</button>
-                <button
-                  onClick={() => setIsLetterExecutionVisible(true)}
-                  className="btn btn-solid-blue"
-                >
+                <button onClick={toNavigate} className="btn btn-solid-blue">
                   Создать визу
                 </button>
               </div>
@@ -685,12 +686,6 @@ export const BookModal: React.FC<BookModalProps> = ({
           </div>
         </div>
       </div>
-      <If is={isLetterExecutionVisible}>
-        <ResolutionOfLetter
-          isLetterExecutionVisible={isLetterExecutionVisible}
-          setIsLetterExecutionVisible={setIsLetterExecutionVisible}
-        />
-      </If>
     </>
   );
 };
