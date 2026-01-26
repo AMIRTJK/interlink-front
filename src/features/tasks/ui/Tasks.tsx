@@ -2,8 +2,8 @@ import { useState } from "react";
 import { AddTaskForm } from "./AddTaskForm";
 import { Modal } from "antd";
 import { TasksTable } from "@widgets/tasksTable";
-import '../style.css'
 import { IAssignee, ITaskItem } from "@widgets/tasksTable/model";
+import '../style.css'
 export const Tasks = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taskStatus, setTaskStatus] = useState<string>();
