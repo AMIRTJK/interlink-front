@@ -1,7 +1,7 @@
-export type SkeletonVariant = 'text' | 'avatar' | 'button' | 'input' | 'image' | 'card';
+export type SkeletonVariant = 'text' | 'avatar' | 'button' | 'input' | 'image' | 'card' | 'table';
 
 export interface ISkeletonProps {
-  loading: boolean;
+  loading: boolean | undefined;
   variant?: SkeletonVariant;
   children?: React.ReactNode;
   active?: boolean;

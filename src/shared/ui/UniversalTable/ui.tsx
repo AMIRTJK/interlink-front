@@ -15,6 +15,7 @@ import {
   useGetQuery,
 } from "@shared/lib";
 import { transformFilterValues } from "./lib";
+import { UseSkeleton } from "../Skeleton/ui";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -223,6 +224,10 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
     []
   ).map(formatDatesInObject);
 
+  // Skeleton 
+  if(isPending){
+    return <UseSkeleton loading={true} variant="table" />
+  }else{
   return (
     <div
       className={
@@ -349,4 +354,5 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
       />
     </div>
   );
+}
 }
