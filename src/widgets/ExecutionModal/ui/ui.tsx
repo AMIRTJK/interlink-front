@@ -68,6 +68,7 @@ export const ExecutionModal: React.FC<ExecutionModalProps> = ({
             correspondenceData={correspondenceData}
             className="w-full md:w-96 md:rounded-2xl bg-[#F2F5FF] p-4 border-b md:border-b-0 md:border-r border-gray-100 shrink-0"
             onAssignExecutors={() => setShowExecutorStructure(true)}
+            onClose={onClose}
           />
           <div className="flex-1 pl-4 bg-white relative flex flex-col items-center justify-center text-center min-h-[300px]">
             <If is={showExecutorStructure}>

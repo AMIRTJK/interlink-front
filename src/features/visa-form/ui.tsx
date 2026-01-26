@@ -22,6 +22,7 @@ interface VisaFormProps {
   selectedUserIds?: number[];
   selectedDeptIds?: number[];
   selectedMainExecutorIds?: number[];
+  onClose: () => void;
 }
 
 interface IApiUser {
@@ -43,6 +44,7 @@ export const VisaForm: React.FC<VisaFormProps> = ({
   selectedUserIds = [],
   selectedDeptIds = [],
   selectedMainExecutorIds = [],
+  onClose,
 }) => {
   const [fileList, setFileList] = useState<IAttachment[]>(mockFiles);
   const [isFormValid, setIsFormValid] = useState(false);
@@ -153,7 +155,7 @@ export const VisaForm: React.FC<VisaFormProps> = ({
 
   const handleFormChange = (
     _: unknown,
-    allValues: { due_at: unknown; note: string; status: string }
+    allValues: { due_at: unknown; note: string; status: string },
   ) => {
     const { due_at, note, status } = allValues;
     const isValid = !!due_at && !!note && !!status && hasSelection;
@@ -191,7 +193,7 @@ export const VisaForm: React.FC<VisaFormProps> = ({
       const assignmentsList = correspondenceData?.assignments || [];
 
       const myAssignment = assignmentsList.find(
-        (item) => item.assignee_user_id === currentUserId
+        (item) => item.assignee_user_id === currentUserId,
       );
 
       let resolutionId = myAssignment?.resolution_id;
@@ -221,6 +223,7 @@ export const VisaForm: React.FC<VisaFormProps> = ({
         },
       });
     });
+    onClose();
   };
 
   const FileIconBlue = () => <img src={fileListIcon} className="h-8 w-8" />;
