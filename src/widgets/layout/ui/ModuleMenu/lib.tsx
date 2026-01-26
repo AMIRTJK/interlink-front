@@ -13,64 +13,64 @@ export type MenuItem = Required<MenuProps>["items"][number] & {
 };
 
 export const getModuleItems = (
-  variant: "horizontal" | "compact"
+  variant: "horizontal" | "compact",
 ): MenuItem[] => [
-    {
-      key: AppRoutes.PROFILE,
-      label: "Личный кабинет",
-      icon: variant === "horizontal" ? <img src={ProfileIcon} alt="" /> : null,
-    },
-    {
-      key: "/modules/temp-organization",
-      label: "Организация",
-      icon:
-        variant === "horizontal" ? <img src={OrganizationIcon} alt="" /> : null,
-    },
-    {
-      key: "/modules/temp-docs_main",
-      label: "Основные документы",
-      icon:
-        variant === "horizontal" ? <img src={MainDocumentsIcon} alt="" /> : null,
-    },
-    {
-      key: AppRoutes.CORRESPONDENCE,
-      label: "Корреспонденция",
-      requiredRole: ["correspondence.view",], 
-      icon:
-        variant === "horizontal" ? <img src={CorrespondenceIcon} alt="" /> : null,
-      ...(variant === "compact" && {
-        children: [
-          {
-            key: AppRoutes.CORRESPONDENCE_INCOMING,
-            label: "Входящие",
-          },
-          {
-            key: AppRoutes.CORRESPONDENCE_OUTGOING,
-            label: "Исходящие",
-          },
-        ]
-      }),
-    },
-    {
-      key: "/modules/temp-docs_primary",
-      label: "Первичные документы",
-      requiredRole: ["primary_documents.view",], 
-      icon:
-        variant === "horizontal" ? (
-          <img src={PrimaryDocumentsIcon} alt="" />
-        ) : null,
-    },
-    {
-      key: "/modules/temp-apps",
-      label: "Заявки",
-      requiredRole: ["apps.view",], 
-      icon:
-        variant === "horizontal" ? <img src={ApplicationsIcon} alt="" /> : null,
-    },
-    {
-      key: "/modules/temp-crm",
-      label: "CRM",
-      requiredRole: ["crm.view",], 
-      icon: variant === "horizontal" ? <img src={CrmIcon} alt="" /> : null,
-    },
-  ];
+  {
+    key: AppRoutes.PROFILE,
+    label: "Личный кабинет",
+    icon: variant === "horizontal" ? <img src={ProfileIcon} alt="" /> : null,
+  },
+  {
+    key: "/modules/temp-organization",
+    label: "Организация",
+    icon:
+      variant === "horizontal" ? <img src={OrganizationIcon} alt="" /> : null,
+  },
+  {
+    key: "/modules/temp-docs_main",
+    label: "Основные документы",
+    icon:
+      variant === "horizontal" ? <img src={MainDocumentsIcon} alt="" /> : null,
+  },
+  {
+    key: AppRoutes.CORRESPONDENCE,
+    label: "Корреспонденция",
+    requiredRole: ["correspondence.view"],
+    icon:
+      variant === "horizontal" ? <img src={CorrespondenceIcon} alt="" /> : null,
+    ...(variant === "compact" && {
+      children: [
+        {
+          key: AppRoutes.CORRESPONDENCE_INCOMING,
+          label: "Внешняя корреспонденция",
+        },
+        {
+          key: AppRoutes.CORRESPONDENCE_OUTGOING,
+          label: "Внутренняя корреспонденция",
+        },
+      ],
+    }),
+  },
+  {
+    key: "/modules/temp-docs_primary",
+    label: "Первичные документы",
+    requiredRole: ["primary_documents.view"],
+    icon:
+      variant === "horizontal" ? (
+        <img src={PrimaryDocumentsIcon} alt="" />
+      ) : null,
+  },
+  {
+    key: "/modules/temp-apps",
+    label: "Заявки",
+    requiredRole: ["apps.view"],
+    icon:
+      variant === "horizontal" ? <img src={ApplicationsIcon} alt="" /> : null,
+  },
+  {
+    key: "/modules/temp-crm",
+    label: "CRM",
+    requiredRole: ["crm.view"],
+    icon: variant === "horizontal" ? <img src={CrmIcon} alt="" /> : null,
+  },
+];

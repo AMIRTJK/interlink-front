@@ -33,7 +33,7 @@ export interface CorrespondenceResponse {
   recipient_name: string | null;
   recipient_contact: string | null;
 
-  status: "draft" | "pending" | "done";
+  status: CorrespondenseStatus;
   priority: "low" | "medium" | "high";
 
   due_at: string | null;

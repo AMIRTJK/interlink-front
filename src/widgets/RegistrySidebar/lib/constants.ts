@@ -1,6 +1,6 @@
 export const SYSTEM_FOLDERS = {
-  INCOMING: "Входящие письма",
-  OUTGOING: "Исходящие письма",
+  INCOMING: "Внешняя корреспонденция",
+  OUTGOING: "Внутренняя корреспонденция",
   ARCHIVE: "Архив",
   PINNED: "Закреплённые",
   TRASH: "Корзина",
