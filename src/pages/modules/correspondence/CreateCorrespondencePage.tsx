@@ -30,7 +30,7 @@ export const CreateCorrespondencePage = ({
     },
   });
 
-  const handleBack = () => navigate(-1);
+  // const handleBack = () => navigate(-1);
 
   const title =
     type === "incoming" ? "Новое входящее письмо" : "Новое исходящее письмо";
