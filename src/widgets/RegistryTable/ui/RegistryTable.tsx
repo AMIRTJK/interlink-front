@@ -111,11 +111,12 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   };
 
   const handleNavigateToLetter = (record: CorrespondenceResponse) => {
-    navigate(
-      AppRoutes.CORRESPONDENCE_INCOMING_SHOW.replace(":id", String(record.id)),
-    );
-  };
+    const route = type.includes("outgoing")
+      ? AppRoutes.CORRESPONDENCE_OUTGOING_SHOW
+      : AppRoutes.CORRESPONDENCE_INCOMING_SHOW;
 
+    navigate(route.replace(":id", String(record.id)));
+  };
   const showTabs = !!extraParams?.kind;
 
   const expandedRowRender = (record: CorrespondenceResponse) => {

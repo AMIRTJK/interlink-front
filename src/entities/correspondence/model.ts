@@ -13,8 +13,7 @@ export interface CorrespondenceResponse {
   id: number;
   organization_id: number;
   creator_id: number;
-
-  kind: "incoming" | "outgoing" | "internal";
+  kind: "incoming" | "outgoing";
   channel: "paper" | "email" | "system";
 
   reg_prefix: string | null;

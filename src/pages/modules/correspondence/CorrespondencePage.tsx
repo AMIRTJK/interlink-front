@@ -1,3 +1,4 @@
+import { If } from "@shared/ui";
 import { RegistrySidebar } from "@widgets/RegistrySidebar";
 import { matchPath, Outlet, useLocation } from "react-router-dom";
 
@@ -32,13 +33,22 @@ export const CorrespondencePage = () => {
 
   const isDetailView = isIncomingDetail || isOutgoingDetail;
 
-  // const currentType = isOutgoingDetail ? "outgoing" : "incoming";
+  const hiddenPatterns = [
+    "/modules/correspondence/outgoing/create",
+    "/modules/correspondence/outgoing/:id",
+  ];
+
+  const shouldHideUI = hiddenPatterns.some((pattern) =>
+    matchPath({ path: pattern, end: true }, location.pathname),
+  );
 
   return (
     <div className="flex w-full gap-3 h-full">
-      <aside>
-        <RegistrySidebar isDetailView={isDetailView} />
-      </aside>
+      <If is={!shouldHideUI}>
+        <aside>
+          <RegistrySidebar isDetailView={isDetailView} />
+        </aside>
+      </If>
       <main className="w-full min-w-0">
         <Outlet />
       </main>

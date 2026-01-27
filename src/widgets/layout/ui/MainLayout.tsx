@@ -1,17 +1,35 @@
-import { Outlet } from "react-router-dom";
+import { matchPath, Outlet, useLocation } from "react-router-dom";
 import { ModuleMenu } from "./ModuleMenu";
 import { Header } from "./Header";
+import { If } from "@shared/ui";
 
-export const MainLayout = () => (
-  <div className="p-6 bg-[#F2F5FF] min-h-screen flex flex-col">
-    <div className="mb-6">
-      <Header />
+export const MainLayout = () => {
+  const location = useLocation();
+
+  const hiddenPatterns = [
+    "/modules/correspondence/outgoing/create",
+    "/modules/correspondence/outgoing/:id",
+  ];
+
+  const shouldHideUI = hiddenPatterns.some((pattern) =>
+    matchPath({ path: pattern, end: true }, location.pathname),
+  );
+
+  return (
+    <div className="p-6 bg-[#F2F5FF] min-h-screen flex flex-col">
+      <If is={!shouldHideUI}>
+        <div className="mb-6">
+          <Header />
+        </div>
+      </If>
+      <If is={!shouldHideUI}>
+        <div>
+          <ModuleMenu variant="compact" />
+        </div>
+      </If>
+      <div>
+        <Outlet />
+      </div>
     </div>
-    <div>
-      <ModuleMenu variant="compact" />
-    </div>
-    <div>
-      <Outlet />
-    </div>
-  </div>
-);
+  );
+};

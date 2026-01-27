@@ -1,26 +1,17 @@
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
-import { useLocation, useNavigate } from "react-router";
 import {
   CorrespondenceForm,
   CorrespondenceFormData,
 } from "@widgets/CorrespondenceForm";
-import { useEffect } from "react";
-import { AppRoutes } from "@shared/config";
+import { InternalCorrespondece } from "@widgets/InternalCorrespondece/ui";
+import { matchPath, useLocation } from "react-router";
 
 export const CreateCorrespondencePage = ({
   type,
 }: {
   type: "incoming" | "outgoing";
 }) => {
-  const navigate = useNavigate();
-  const pathname=useLocation().pathname;
-  useEffect(()=>{
-    if(pathname===AppRoutes.CORRESPONDENCE_OUTGOING_CREATE){
-      navigate(AppRoutes.CORRESPONDENCE_INTERNAL);
-    }
-  },[pathname])
-
   const {
     mutate: createLetterMutate,
     isPending: createLetterIsPending,
@@ -45,6 +36,25 @@ export const CreateCorrespondencePage = ({
     createLetterMutate(values);
   };
 
+  const location = useLocation();
+
+  const hiddenPatterns = [
+    "/modules/correspondence/outgoing/create",
+    "/modules/correspondence/outgoing/:id",
+  ];
+
+  const shouldHideUI = hiddenPatterns.some((pattern) =>
+    matchPath({ path: pattern, end: true }, location.pathname),
+  );
+
+  if (shouldHideUI) {
+    return (
+      <div>
+        <InternalCorrespondece />
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col gap-4">
       <div className="flex-1 h-full overflow-hidden">
@@ -57,20 +67,6 @@ export const CreateCorrespondencePage = ({
           isAllowed={isAllowed}
           variant="create"
         />
-        {/* <h1 className="text-xl font-bold mb-4">
-        Создание {type === "incoming" ? "входящего" : "исходящего"} письма
-      </h1>
-      <Form form={form} onFinish={onSubmit} layout="vertical">
-        <div className="flex flex-col gap-8 p-6">
-          <DetailsOfLetter
-            isAllowed={isAllowed}
-            createLetterIsPending={createLetterIsPending}
-            mode="create"
-            form={form}
-          />
-          <LetterExecution />
-        </div>
-      </Form> */}
       </div>
     </div>
   );
