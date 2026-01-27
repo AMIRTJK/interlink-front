@@ -1,5 +1,10 @@
 import React from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  matchPath,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import {
   CorrespondenceForm,
   CorrespondenceFormData,
@@ -38,6 +43,19 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
 
   const shouldOpenExecution = (location.state as { openExecution?: boolean })
     ?.openExecution;
+
+  const hiddenPatterns = [
+    "/modules/correspondence/outgoing/create",
+    "/modules/correspondence/outgoing/:id",
+  ];
+
+  const shouldHideUI = hiddenPatterns.some((pattern) =>
+    matchPath({ path: pattern, end: true }, location.pathname),
+  );
+
+  if (shouldHideUI) {
+    return <div>OUTGOING</div>;
+  }
 
   return (
     <div className="h-full flex flex-col gap-4">
