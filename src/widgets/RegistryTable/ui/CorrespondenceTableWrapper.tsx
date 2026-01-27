@@ -27,10 +27,12 @@ export const CorrespondenceTableWrapper = ({
   }, [baseParams, folderId]);
 
   return (
-    <RegistryTable
-      type={type}
-      createButtonText={createButtonText}
-      extraParams={extraParams}
-    />
+    <>
+      <RegistryTable
+        type={type}
+        createButtonText={createButtonText}
+        extraParams={extraParams}
+      />
+    </>
   );
 };

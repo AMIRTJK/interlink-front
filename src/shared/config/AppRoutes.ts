@@ -15,4 +15,5 @@ export const AppRoutes = {
   CORRESPONDENCE_FOLDERS: "/modules/correspondence/folders",
   CORRESPONDENCE_TRASHED: "/modules/correspondence/trashed",
   CORRESPONDENCE_INCOMING_SHOW: "/modules/correspondence/incoming/:id",
+  CORRESPONDENCE_INTERNAL: "/modules/correspondence/internal",
 } as const;

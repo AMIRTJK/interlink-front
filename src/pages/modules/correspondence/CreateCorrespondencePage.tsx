@@ -1,12 +1,12 @@
-import { ArrowLeftOutlined } from "@ant-design/icons";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
-import { useNavigate } from "react-router";
-import { Button } from "antd";
+import { useLocation, useNavigate } from "react-router";
 import {
   CorrespondenceForm,
   CorrespondenceFormData,
 } from "@widgets/CorrespondenceForm";
+import { useEffect } from "react";
+import { AppRoutes } from "@shared/config";
 
 export const CreateCorrespondencePage = ({
   type,
@@ -14,6 +14,12 @@ export const CreateCorrespondencePage = ({
   type: "incoming" | "outgoing";
 }) => {
   const navigate = useNavigate();
+  const pathname=useLocation().pathname;
+  useEffect(()=>{
+    if(pathname===AppRoutes.CORRESPONDENCE_OUTGOING_CREATE){
+      navigate(AppRoutes.CORRESPONDENCE_INTERNAL);
+    }
+  },[pathname])
 
   const {
     mutate: createLetterMutate,
@@ -30,7 +36,7 @@ export const CreateCorrespondencePage = ({
     },
   });
 
-  const handleBack = () => navigate(-1);
+  // const handleBack = () => navigate(-1);
 
   const title =
     type === "incoming" ? "Новое входящее письмо" : "Новое исходящее письмо";

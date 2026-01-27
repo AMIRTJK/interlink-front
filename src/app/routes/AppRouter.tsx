@@ -88,6 +88,11 @@ const HrPage = lazy(() =>
   import("@pages/modules/hr/Hr").then((m) => ({ default: m.HrPage })),
 );
 
+
+const InternalСorrespondencePage = lazy(() =>
+  import("@pages/modules/correspondence/InternalСorrespondencePage").then((m) => ({ default: m.InternalСorrespondencePage })),
+);
+
 const incomingParams = {
   kind: "incoming",
   tab: "draft",
@@ -149,6 +154,7 @@ export const AppRouter = () => {
             <Route path="/modules" element={<MainLayout />}>
               <Route path="hr" element={<HrPage />} />
               <Route path="correspondence" element={<CorrespondencePage />}>
+              <Route path="internal" element={<InternalСorrespondencePage />} />
                 <Route index element={<Navigate to="incoming" replace />} />
                 <Route path="incoming">
                   <Route
