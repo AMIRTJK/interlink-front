@@ -21,7 +21,7 @@ export const DrawerQRCodeSection: React.FC = () => {
           type="primary" 
           block
           size="large"
-          className="bg-[#F87171] hover:!bg-[#ef4444] border-none rounded-xl font-medium shadow-red-200 shadow-md h-11"
+          className="bg-[#F87171] hover:bg-[#ef4444]! border-none rounded-xl font-medium shadow-red-200 shadow-md h-11"
         >
           Вставить в документ
         </Button>
