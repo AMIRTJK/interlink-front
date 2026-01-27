@@ -321,7 +321,7 @@ export const ModuleSidebar = ({ isDetailView }: RegistrySidebarProps) => {
         collapsible
         collapsed={collapsed}
         trigger={null}
-        width="100%"
+        width="325px"
         collapsedWidth="80px"
         className={`h-full! border-none! rounded-2xl p-3 ${
           collapsed ? "w-[80px]! max-w-[80px]!" : "w-[260px]! max-w-[260px]!"
