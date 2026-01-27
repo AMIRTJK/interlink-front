@@ -1,0 +1,35 @@
+/* Анимация появления (уже у вас есть, убедитесь в наличии) */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.drawer__content--animate {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Стили меню, синхронизированные с дизайном Drawer */
+.ant-dropdown-menu {
+  background-color: #ffffff !important;
+  border-radius: 16px !important; /* Увеличили для соответствия rounded-2xl */
+  padding: 8px !important;
+  border: 1px solid #fee2e2 !important; /* Легкая красная граница как при ховере */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05) !important;
+}
+
+.ant-dropdown-menu-item {
+  border-radius: 10px !important;
+  padding: 10px 14px !important;
+  margin-bottom: 4px !important;
+  transition: all 0.2s ease !important;
+}
+
+.ant-dropdown-menu-item-active, .ant-dropdown-menu-item:hover {
+  background-color: #fef2f2 !important; /* Цвет фона при наведении */
+  color: #F87171 !important; /* Красный акцентный цвет */
+}
+
+/* Убираем стандартные тени Ant, чтобы не двоилось */
+.ant-dropdown {
+  box-shadow: none !important;
+}

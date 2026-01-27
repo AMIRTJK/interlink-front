@@ -8,7 +8,7 @@ import { IActionsModal, TTab, TABS_LIST, actionsList } from './model';
 import { DrawerQRCodeSection } from './ui/QRCodeSection';
 import { DrawerActionRow } from './ui/DrawerActionRow';
 import { SmartTabs } from '@shared/ui/SmartTabs/ui';
-import './styly.css'
+import './style.css'
 export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) => {
   const [activeTab, setActiveTab] = useState<TTab>('actions');
 

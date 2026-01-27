@@ -1,4 +1,6 @@
 import { FileTextOutlined, SearchOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import { ApiRoutes } from '@shared/api';
+import { SmartDropDown } from '@shared/ui/SmartDropDown';
 import React from 'react';
 
 export interface IActionsModal {
@@ -12,6 +14,7 @@ export interface IActionItem {
   placeholder: string; 
   icon: React.ReactNode;
   onClick?: () => void;
+  render?: () => React.ReactNode; 
 }
 
 export type TTab = 'actions' | 'metadata' | 'comments' | 'chat';
@@ -26,12 +29,25 @@ export const TABS_LIST: { key: TTab; label: string }[] = [
 
 // Мок-данные
 export const actionsList: IActionItem[] = [
-    {
-      id: 'blank',
-      label: 'Бланк организации',
-      placeholder: 'Выберите бланк',
-      icon: <FileTextOutlined />,
-    },
+   {
+  id: 'blank',
+  label: 'Бланк организации',
+  placeholder: 'Выберите бланк',
+  icon: <FileTextOutlined />,
+  render: () => (
+    <SmartDropDown 
+      url={`${ApiRoutes.GET_FOLDERS}`} 
+      placeholder="Выберите бланк"
+      icon={<FileTextOutlined />}
+      onSelect={(val) => console.log('Выбран ID:', val)}
+      transformResponse={(data: any) => {
+        // Если структура сложная, правим тут
+        const list = data?.items || [];
+        return list.map((i: any) => ({ value: i.id, label: i.name }));
+      }}
+    />
+  ),
+},
     {
       id: 'attach',
       label: 'Прикрепить письмо',

@@ -1,7 +1,3 @@
-/* style.css */
-
-/* .drawer-root — это наш Block по BEM, который мы повесим на сам компонент Drawer */
-
 .drawer-root .ant-drawer-content {
   background-color: #F8F9FB !important; /* Общий серый фон */
 }
