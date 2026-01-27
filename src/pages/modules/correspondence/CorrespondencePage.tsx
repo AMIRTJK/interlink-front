@@ -32,7 +32,7 @@ export const CorrespondencePage = () => {
 
   const isDetailView = isIncomingDetail || isOutgoingDetail;
 
-  const currentType = isOutgoingDetail ? "outgoing" : "incoming";
+  // const currentType = isOutgoingDetail ? "outgoing" : "incoming";
 
   return (
     <div className="flex w-full gap-3 h-full">
