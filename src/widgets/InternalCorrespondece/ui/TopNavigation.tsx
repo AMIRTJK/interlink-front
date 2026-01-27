@@ -122,7 +122,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   return (
     <>
       <nav
-        className="h-16 px-8 flex items-center justify-between backdrop-blur-xl border-b z-30 transition-all duration-300 sticky top-0"
+        className="h-16 px-14 flex items-center justify-between backdrop-blur-xl border-b z-30 transition-all duration-300 sticky top-0"
         style={{
           backgroundColor: isDarkMode
             ? "rgba(17, 24, 39, 0.7)"
