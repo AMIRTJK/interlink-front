@@ -17,11 +17,10 @@ export interface IActionItem {
   render?: () => React.ReactNode; 
 }
 
-export type TTab = 'actions' | 'metadata' | 'comments' | 'chat';
+export type TTab = 'actions' | 'comments' | 'chat';
 
 export const TABS_LIST: { key: TTab; label: string }[] = [
   { key: 'actions', label: 'Действия' },
-  { key: 'metadata', label: 'Метаданные' },
   { key: 'comments', label: 'Комментарии' },
   { key: 'chat', label: 'Чат' },
 ];
