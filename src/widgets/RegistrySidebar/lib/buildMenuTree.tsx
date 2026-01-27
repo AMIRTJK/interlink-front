@@ -16,7 +16,7 @@ import {
 import { createDragHandlers } from "./dragHandlers";
 import { createFolderMenuActions } from "./menuActionBuilder";
 import { FolderLabel } from "./FolderLabel";
-import { SystemFolderLabel } from "./SystemFolderLabel";
+// import { SystemFolderLabel } from "./SystemFolderLabel";
 
 export type { IBuildMenuTreeParams, MenuItem, IFolder, IFolderDefinition };
 
@@ -123,29 +123,29 @@ export const buildMenuTree = ({
     .map((f) => buildFullItem(f))
     .filter(Boolean) as MenuItem[];
 
-  Object.keys(definitions).forEach((name) => {
-    if (
-      !rootItems.find(
-        (i) => i.folderName === name || i.key === definitions[name].key,
-      )
-    ) {
-      const def = definitions[name];
-      rootItems.push({
-        key: def.key,
-        folderName: name,
-        icon: def.icon,
-        label: (
-          <SystemFolderLabel
-            name={name}
-            definition={def}
-            collapsed={collapsed}
-            onNavigate={onNavigate}
-          />
-        ),
-        path: def.path,
-      });
-    }
-  });
+  // Object.keys(definitions).forEach((name) => {
+  //   if (
+  //     !rootItems.find(
+  //       (i) => i.folderName === name || i.key === definitions[name].key,
+  //     )
+  //   ) {
+  //     const def = definitions[name];
+  //     rootItems.push({
+  //       key: def.key,
+  //       folderName: name,
+  //       icon: def.icon,
+  //       label: (
+  //         <SystemFolderLabel
+  //           name={name}
+  //           definition={def}
+  //           collapsed={collapsed}
+  //           onNavigate={onNavigate}
+  //         />
+  //       ),
+  //       path: def.path,
+  //     });
+  //   }
+  // });
 
   return sortMenuItems(rootItems);
 };
