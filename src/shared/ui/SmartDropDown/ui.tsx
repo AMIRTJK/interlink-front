@@ -63,7 +63,6 @@ export const SmartDropDown: React.FC<ISmartDropDownProps> = ({
       trigger={['click']}
       open={isOpen}
       onOpenChange={setIsOpen}
-      // Применяем анимацию появления к самому выпадающему меню
       overlayClassName="drawer__content--animate"
     >
       <div className="

@@ -1,10 +1,10 @@
 .drawer-root .ant-drawer-content {
-  background-color: #F8F9FB !important; /* Общий серый фон */
+  background-color: #F8F9FB !important;
 }
 
 .drawer-root .ant-drawer-header {
-  background: transparent !important;   /* Прозрачный хедер, чтобы было видно серый фон */
-  border-bottom: none !important;       /* Убираем линию */
+  background: transparent !important;   
+  border-bottom: none !important;      
   padding: 24px 24px 0 24px !important;
 }
 
@@ -20,7 +20,6 @@
   scrollbar-color: #cbd5e1 transparent;
 }
 
-/* Скрываем скролл для контейнера табов */
 .drawer__tabs::-webkit-scrollbar {
   display: none;
 }
@@ -29,7 +28,6 @@
   scrollbar-width: none;
 }
 
-/* Анимация появления */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
