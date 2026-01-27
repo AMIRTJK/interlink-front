@@ -18,7 +18,7 @@ export const FolderLabel: React.FC<IFolderLabelProps> = ({
 }) => {
   return (
     <div
-      className="flex items-center"
+      className="flex items-center gap-16"
       draggable={isDraggable}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
@@ -35,7 +35,7 @@ export const FolderLabel: React.FC<IFolderLabelProps> = ({
           }
         }}
       >
-        <span className="mr-auto!">{folder.name}</span>
+        <span className="mr-[170px]!">{folder.name}</span>
         <FolderActions menuActions={menuActions} collapsed={collapsed} />
       </div>
 
