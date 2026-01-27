@@ -4,6 +4,7 @@ import {
   CorrespondenceForm,
   CorrespondenceFormData,
 } from "@widgets/CorrespondenceForm";
+import { InternalCorrespondece } from "@widgets/InternalCorrespondece/ui";
 import { matchPath, useLocation } from "react-router";
 
 export const CreateCorrespondencePage = ({
@@ -47,7 +48,11 @@ export const CreateCorrespondencePage = ({
   );
 
   if (shouldHideUI) {
-    return <div>OUTGOING</div>;
+    return (
+      <div>
+        <InternalCorrespondece />
+      </div>
+    );
   }
 
   return (
