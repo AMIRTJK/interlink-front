@@ -20,7 +20,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
       open={open}
       width={410} // Ширина как на макете
       closeIcon={<CloseOutlined style={{ fontSize: '18px', color: '#1F2937' }} />}
-      // Важно: rootClassName позволяет стилизовать обертку, которая не прижата к краю
       rootClassName="drawer-floating-root" 
       maskStyle={{ 
         backgroundColor: 'rgba(0, 0, 0, 0.2)', 
@@ -36,7 +35,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
           />
         </div>
 
-        <div className="drawer__content flex-1 overflow-y-auto no-scrollbar">
+        <div className="drawer__content flex-1">
           {activeTab === 'actions' ? (
             <div className="drawer__content--animate pb-6 flex flex-col gap-1">
               {actionsList.map((item) => (
@@ -48,8 +47,8 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
               <DrawerQRCodeSection />
             </div>
           ) : (
-            <div className="flex items-center justify-center h-40 text-gray-400 border-2 border-dashed border-gray-100 rounded-3xl animate-pulse">
-                Контент: {activeTab}
+            <div className="flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-100 rounded-3xl animate-pulse">
+                Контент: {activeTab}+
             </div>
           )}
         </div>

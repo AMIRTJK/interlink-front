@@ -10,8 +10,8 @@ export const DrawerActionRow: React.FC<IActionItem & { render?: () => React.Reac
   render 
 }) => {
   return (
-    <div className="mb-5">
-      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 pl-1">
+    <div className="mb-4">
+      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1">
         {label}
       </div>
       {render ? (

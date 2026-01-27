@@ -3,7 +3,7 @@ import { Button, QRCode } from 'antd';
 
 export const DrawerQRCodeSection: React.FC = () => {
   return (
-    <div className="mt-8">
+    <div>
       <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 pl-1">
         QR КОД
       </div>
