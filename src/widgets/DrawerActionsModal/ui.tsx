@@ -24,7 +24,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
       maskStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.15)', backdropFilter: 'blur(2px)' }}
     >
       <div className="drawer__container h-full flex flex-col">
-        
         <SmartTabs 
           items={TABS_LIST}            
           activeKey={activeTab}          
