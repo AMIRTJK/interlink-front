@@ -1,3 +1,6 @@
+/**
+ * Типы данных и списки табов для компонента DrawerActionsModal.
+ */
 import { FileTextOutlined, SearchOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
 import { ApiRoutes } from '@shared/api';
 import { SmartDropDown } from '@shared/ui/SmartDropDown';

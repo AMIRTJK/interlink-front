@@ -1,3 +1,6 @@
+/**
+ * Универсальный компонент переключателя вкладок (табов).
+ */
 import React from 'react';
 
 export interface ITabOption {
