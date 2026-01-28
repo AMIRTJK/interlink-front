@@ -1,7 +1,3 @@
-/**
- * Основной компонент инспектора (Drawer).
- * Управляет логикой выбора писем, подписывающих и согласующих.
- */
 import React, { useState } from 'react';
 import { Drawer, Modal } from 'antd';
 import { 

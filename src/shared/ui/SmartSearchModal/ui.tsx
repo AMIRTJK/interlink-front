@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { Input, Button, Spin, Empty } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Input, Button, Empty } from 'antd';
+import { ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons';
 import { ISmartSearchModalProps, ISelectionState, ISearchItem } from './model';
 import { SearchPreviewPanel } from './ui/SearchPreviewPanel';
 import { SearchListItem } from './ui/SearchListItem';
 import { useGetQuery } from '@shared/lib/hooks';
+import { Loader } from '@shared/ui';
 
 export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
-  // title,
   placeholder = "Поиск по теме или отправителю...",
   items = [],
   querySettings,
@@ -26,7 +26,10 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
     url: querySettings?.url,
     params: {
         ...querySettings?.params,
-        search: searchText ,
+        ...(mode === 'attach' 
+            ? { subject: searchText, sender_name: searchText } 
+            : { first_name: searchText }
+        ),
         page: 1,
         per_page: 50 
     },
@@ -68,15 +71,18 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
     });
 
     setState(prev => {
-        const isSelected = prev.selectedIds.includes(item.id);
         let newSelectedIds = prev.selectedIds;
 
         if (multiple) {
+            const isSelected = prev.selectedIds.includes(item.id);
+            if (!isSelected && prev.selectedIds.length >= 3) {
+                return prev;
+            }
             newSelectedIds = isSelected
                 ? prev.selectedIds.filter(id => id !== item.id)
                 : [...prev.selectedIds, item.id];
         } else {
-             newSelectedIds = isSelected ? [] : [item.id];
+             newSelectedIds = prev.selectedIds.includes(item.id) ? [] : [item.id];
         }
         
         return {
@@ -100,7 +106,6 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
     <div className="smart-search-content flex flex-col h-full bg-gray-50/30 rounded-3xl p-8">
       <div className="mb-6">
         <Input
-          // prefix={<SearchOutlined className="text-gray-400 mr-2" />}
           placeholder={placeholder}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
@@ -108,51 +113,80 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
         />
       </div>
 
-      <div className="flex min-h-0 relative">
-        {isLoading ? (
-            <div className="w-full h-full flex items-center justify-center">
-                <Spin size="large" />
+      <div className="flex-1 flex min-h-0 relative gap-4 overflow-hidden">
+        {isExpanded && (
+        <div className="flex-1 animate-in fade-in slide-in-from-left-4 duration-500 relative flex flex-col">
+            <Button 
+                icon={<ArrowLeftOutlined />}
+                type='link'
+                onClick={handleClosePreview} 
+                className="flex text-xl! ml-auto! mb-2! pr-3!"
+            />
+            <div className="flex-1 min-h-0">
+                <SearchPreviewPanel item={state.activePreviewItem} />
             </div>
-        ) : displayItems.length === 0 ? (
-            <div className="w-full h-full flex items-center justify-center">
-                <Empty description="Нет данных" />
-            </div>
-        ) : (
-            <>
-                {isExpanded && (
-                <div className="flex-1 animate-in fade-in slide-in-from-left-4 duration-500 relative">
-                    <Button 
-                    type='link'
-                        onClick={handleClosePreview} 
-                        className="flex ml-auto! px-[2px]!"
-                    >
-                         Назад
-                    </Button>
-                    <SearchPreviewPanel item={state.activePreviewItem} />
-                </div>
-                )}
-                
-                <div className={`
-                    flex flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar transition-all duration-500 ease-in-out
-                    ${isExpanded ? 'w-[440px]' : 'w-full'}
-                `}>
-                    {displayItems.map((item: ISearchItem) => (
-                        <SearchListItem 
-                        key={item.id}
-                        item={item}
-                        isActive={state.activePreviewItem?.id === item.id}
-                        isSelected={state.selectedIds.includes(item.id)}
-                        onClick={handleItemClick}
-                        />
-                    ))}
-                </div>
-            </>
+        </div>
         )}
+        
+        <div className={`
+            flex flex-col relative transition-all duration-500 ease-in-out
+            ${isExpanded ? 'w-[440px]' : 'w-full'}
+        `}>
+            {isLoading && (
+                <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] flex items-center justify-center rounded-[24px] overflow-hidden">
+                    <Loader />
+                </div>
+            )}
+
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar flex flex-col gap-3">
+                {displayItems.length === 0 && !isLoading ? (
+                    <div className="h-full flex items-center justify-center">
+                        <Empty description="Нет данных" />
+                    </div>
+                ) : (
+                    displayItems.map((item: ISearchItem) => (
+                        <SearchListItem 
+                            key={item.id}
+                            item={item}
+                            isActive={state.activePreviewItem?.id === item.id}
+                            isSelected={state.selectedIds.includes(item.id)}
+                            onClick={handleItemClick}
+                        />
+                    ))
+                )}
+            </div>
+        </div>
       </div>
-      <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center bg-transparent">
-        <div className="text-gray-400 text-sm font-medium">
+      <div className="mt-8 pt-6 border-t border-gray-100 flex items-center gap-6 bg-transparent">
+        <div className="text-gray-400 text-sm font-medium whitespace-nowrap">
           Выбрано: <span className="text-[#8C52FF] ml-1">{state.selectedIds.length}</span>
         </div>
+
+        {state.selectedIds.length > 0 && (
+            <div className="flex-1 flex gap-2 overflow-x-auto no-scrollbar py-1">
+                {state.selectedIds.map(id => {
+                    const item = selectedItemsMap[id];
+                    if (!item) return null;
+                    const isActive = state.activePreviewItem?.id === id;
+                    return (
+                        <button
+                            key={id}
+                            onClick={() => setState(prev => ({ ...prev, activePreviewItem: item }))}
+                            className={`
+                                px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border
+                                ${isActive 
+                                    ? 'bg-[#8C52FF] text-white border-[#8C52FF] shadow-sm' 
+                                    : 'bg-white text-gray-500 border-gray-100 hover:border-purple-200'
+                                }
+                            `}
+                        >
+                            {item.title}
+                        </button>
+                    );
+                })}
+            </div>
+        )}
+
         <Button
           type="primary"
           size="large"
