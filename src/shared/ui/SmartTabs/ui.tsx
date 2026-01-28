@@ -13,7 +13,7 @@ interface IProps {
 
 export const SmartTabs: React.FC<IProps> = ({ items, activeKey, onChange }) => {
   return (
-    <div className="w-full overflow-x-auto no-scrollbar py-2 mb-4">
+    <div className="w-full overflow-x-auto no-scrollbar py-2">
       <div className="flex items-center gap-2">
         
         {items.map((tab) => {

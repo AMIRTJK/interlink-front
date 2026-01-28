@@ -6,12 +6,12 @@ import {
   PaperClipOutlined, 
   UserOutlined, 
   TeamOutlined,
-  MailOutlined
+  MailOutlined,
+  RightOutlined
 } from '@ant-design/icons';
 
 import { IActionsModal, TTab, TABS_LIST, actionsList } from './model';
 import { DrawerQRCodeSection } from './ui/QRCodeSection';
-import { DrawerActionRow } from './ui/DrawerActionRow';
 import { SmartTabs } from '@shared/ui/SmartTabs/ui';
 
 import './style.css';
@@ -66,39 +66,9 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
     if (type === 'approvers') setSelectedApprovers(prev => prev.filter(i => i.id !== id));
   };
 
-  const renderSelectedItems = (items: ISearchItem[], type: TModalType) => {
-    if (!items.length) return null;
-    return (
-      <div className="flex flex-col gap-2 mb-4 px-1">
-        {items.map(item => (
-            <div key={item.id} className="group relative flex items-center justify-between bg-white p-3 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
-                <div className="flex items-center gap-3 overflow-hidden">
-                    <div className={`
-                        flex items-center justify-center w-10 h-10 rounded-full shrink-0
-                        ${type === 'attach' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}
-                    `}>
-                        {type === 'attach' && <PaperClipOutlined />}
-                        {type === 'signer' && <UserOutlined />}
-                        {type === 'approvers' && <TeamOutlined />}
-                    </div>
-                    <div className="flex flex-col truncate">
-                        <span className="text-sm font-bold text-gray-800 truncate">{item.title}</span>
-                        {item.subtitle && <span className="text-xs text-gray-400 truncate">{item.subtitle}</span>}
-                    </div>
-                </div>
-                <button
-                    onClick={() => handleRemoveItem(item.id, type)}
-                    className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 transition-all"
-                >
-                    <CloseOutlined />
-                </button>
-            </div>
-        ))}
-      </div>
-    );
-  };
 
-  const getModalConfig = (): ISmartSearchModalProps & { mode: 'attach' | 'select' } => {
+
+  const getModalConfig = (): Omit<ISmartSearchModalProps, 'onConfirm'> & { mode: 'attach' | 'select' } => {
     switch (activeModalType) {
         case 'attach':
             return {
@@ -150,10 +120,19 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
   return (
     <>
         <Drawer
-        title="Инспектор"
+        title={
+          <div className="flex items-center justify-between w-full">
+            <span className="text-lg font-semibold text-gray-800">Инспектор</span>
+            <CloseOutlined 
+              onClick={onClose}
+              style={{ fontSize: '18px', color: '#1F2937', cursor: 'pointer' }} 
+            />
+          </div>
+        }
         placement="right"
         onClose={onClose}
         open={open}
+        closable={false}
         styles={{
             wrapper: { width: 410 },
             mask: {
@@ -161,7 +140,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                 backdropFilter: 'blur(4px)'
             }
         }}
-        closeIcon={<CloseOutlined style={{ fontSize: '18px', color: '#1F2937' }} />}
         rootClassName="drawer-floating-root"
         >
         <div className="drawer__container h-full flex flex-col">
@@ -169,7 +147,10 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
             <SmartTabs
                 items={TABS_LIST}
                 activeKey={activeTab}
-                onChange={setActiveTab as (key: string) => void}
+                onChange={(key) => {
+                  console.log('Tab changed to:', key);
+                  setActiveTab(key as TTab);
+                }}
             />
             </div>
 
@@ -179,83 +160,126 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                        <div>
                           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Прикрепить письмо</h4>
 
-                          {selectedItems.length > 0 ? (
-                            <div className="mb-3">
-                              <Dropdown
-                                trigger={['click']}
-                                dropdownRender={() => (
-                                  <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-2 mt-2">
-                                    {selectedItems.map(item => (
-                                      <div key={item.id} className="group relative flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-all">
-                                        <div className="flex-1 min-w-0">
-                                          <div className="text-sm font-medium text-gray-800 truncate">{item.title}</div>
-                                          {item.subtitle && <div className="text-xs text-gray-400 truncate">{item.subtitle}</div>}
-                                        </div>
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleRemoveItem(item.id, 'attach');
-                                          }}
-                                          className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all"
-                                        >
-                                          <CloseOutlined className="text-xs" />
-                                        </button>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              >
-                                <div className="group flex items-center justify-between bg-white p-4 rounded-2xl cursor-pointer hover:shadow-lg hover:shadow-gray-100 transition-all duration-300 border border-transparent hover:border-purple-100">
-                                  <div className="flex items-center gap-3 text-gray-700">
-                                    <span className="text-lg text-gray-400 group-hover:text-purple-500 transition-colors">
-                                      <PaperClipOutlined />
-                                    </span>
-                                    <span className="font-medium text-sm text-gray-700">
-                                      Выбрано писем: {selectedItems.length}
-                                    </span>
-                                  </div>
-                                  <RightOutlined className="text-gray-300 text-[10px] transition-all duration-300 group-hover:translate-x-1" />
-                                </div>
-                              </Dropdown>
+                          {/* Selector button */}
+                          <div 
+                            onClick={() => handleOpenModal('attach')}
+                            className="group flex items-center justify-between bg-white p-4 rounded-2xl cursor-pointer hover:shadow-lg hover:shadow-gray-100 transition-all duration-300 border border-transparent hover:border-purple-100"
+                          >
+                            <div className="flex items-center gap-3 text-gray-700">
+                              <span className="text-lg text-gray-400 group-hover:text-purple-500 transition-colors">
+                                <PaperClipOutlined />
+                              </span>
+                              <span className="font-medium text-sm text-gray-700">
+                                {selectedItems.length > 0 ? `Выбрано писем: ${selectedItems.length}` : 'Выбрать письмо'}
+                              </span>
                             </div>
-                          ) : (
-                            <DrawerActionRow
-                              icon={<PaperClipOutlined />}
-                              label="Выбрать письмо"
-                              onClick={() => handleOpenModal('attach')}
-                            />
+                            <RightOutlined className="text-gray-300 text-[10px] transition-all duration-300 group-hover:translate-x-1" />
+                          </div>
+
+                          {/* Selected items cards below */}
+                          {selectedItems.length > 0 && (
+                            <div className="flex flex-col gap-2">
+                              {selectedItems.map(item => (
+                                <div key={item.id} className="group relative flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium text-gray-800 truncate">{item.title}</div>
+                                    {item.subtitle && <div className="text-xs text-gray-400 truncate">{item.subtitle}</div>}
+                                  </div>
+                                  <button
+                                    onClick={() => handleRemoveItem(item.id, 'attach')}
+                                    className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all"
+                                  >
+                                    <CloseOutlined className="text-xs" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
                           )}
                        </div>
 
                        <div className="mt-6">
                           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Подписывающий</h4>
 
-                          {selectedSigner && renderSelectedItems([selectedSigner], 'signer')}
+                          {/* Selector button */}
+                          <div 
+                            onClick={() => handleOpenModal('signer')}
+                            className="group flex items-center justify-between bg-white p-4 rounded-2xl cursor-pointer hover:shadow-lg hover:shadow-gray-100 transition-all duration-300 border border-transparent hover:border-purple-100"
+                          >
+                            <div className="flex items-center gap-3 text-gray-700">
+                              <span className="text-lg text-gray-400 group-hover:text-purple-500 transition-colors">
+                                <UserOutlined />
+                              </span>
+                              <span className="font-medium text-sm text-gray-700">
+                                {selectedSigner ? selectedSigner.title : 'Выбрать подписывающего'}
+                              </span>
+                            </div>
+                            <RightOutlined className="text-gray-300 text-[10px] transition-all duration-300 group-hover:translate-x-1" />
+                          </div>
 
-                          {!selectedSigner && (
-                            <DrawerActionRow
-                                icon={<UserOutlined />}
-                                label="Выбрать подписывающего"
-                                onClick={() => handleOpenModal('signer')}
-                            />
+                          {/* Selected item card below */}
+                          {selectedSigner && (
+                            <div className="group relative flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-medium text-gray-800 truncate">{selectedSigner.title}</div>
+                                {selectedSigner.subtitle && <div className="text-xs text-gray-400 truncate">{selectedSigner.subtitle}</div>}
+                              </div>
+                              <button
+                                onClick={() => handleRemoveItem(selectedSigner.id, 'signer')}
+                                className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all"
+                              >
+                                <CloseOutlined className="text-xs" />
+                              </button>
+                            </div>
                           )}
                        </div>
 
                        <div className="mt-6">
                           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Согласующие</h4>
 
-                          {renderSelectedItems(selectedApprovers, 'approvers')}
-
-                          <DrawerActionRow
-                            icon={<TeamOutlined />}
-                            label="Выбрано:"
+                          {/* Selector button */}
+                          <div 
                             onClick={() => handleOpenModal('approvers')}
-                          />
+                            className="group flex items-center justify-between bg-white p-4 rounded-2xl cursor-pointer hover:shadow-lg hover:shadow-gray-100 transition-all duration-300 border border-transparent hover:border-purple-100"
+                          >
+                            <div className="flex items-center gap-3 text-gray-700">
+                              <span className="text-lg text-gray-400 group-hover:text-purple-500 transition-colors">
+                                <TeamOutlined />
+                              </span>
+                              <span className="font-medium text-sm text-gray-700">
+                                {selectedApprovers.length > 0 ? `Выбрано: ${selectedApprovers.length}` : 'Выбрать согласующих'}
+                              </span>
+                            </div>
+                            <RightOutlined className="text-gray-300 text-[10px] transition-all duration-300 group-hover:translate-x-1" />
+                          </div>
+
+                          {/* Selected items cards below */}
+                           {selectedApprovers.length > 0 && (
+                            <div className="flex flex-col gap-2">
+                              {selectedApprovers.map(item => (
+                                <div key={item.id} className="group relative flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium text-gray-800 truncate">{item.title}</div>
+                                    {item.subtitle && <div className="text-xs text-gray-400 truncate">{item.subtitle}</div>}
+                                  </div>
+                                  <button
+                                    onClick={() => handleRemoveItem(item.id, 'approvers')}
+                                    className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all"
+                                  >
+                                    <CloseOutlined className="text-xs" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                       </div>
+
+                       {/* Section 4: QR Code */}
+                       <div>
+                          <DrawerQRCodeSection />
                        </div>
 
                     </div>
                 )}
-                {activeTab === 'qr' && <DrawerQRCodeSection />}
             </div>
         </div>
         </Drawer>
