@@ -1,7 +1,7 @@
 .drawer-floating-root .ant-drawer-content-wrapper {
   height: calc(100% - 40px) !important;
-  top: 25px !important;
-  right: 25px !important;
+  top: 75px !important;
+  right: 35px !important;
   border-radius: 20px !important;
   overflow: hidden; 
 }

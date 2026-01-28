@@ -10,21 +10,20 @@ import {
   RightOutlined
 } from '@ant-design/icons';
 
-import { IActionsModal, TTab, TABS_LIST, actionsList } from './model';
+import { IActionsModal, TTab, TABS_LIST,  } from './model';
 import { DrawerQRCodeSection } from './ui/QRCodeSection';
 import { SmartTabs } from '@shared/ui/SmartTabs/ui';
 
 import './style.css';
 import { ISearchItem, SmartSearchUI, ISmartSearchModalProps } from '@shared/ui/SmartSearchModal';
 import { ApiRoutes } from '@shared/api';
-import { useModalState } from '@shared/lib/hooks'; // Added useModalState
+import { useModalState } from '@shared/lib/hooks'; 
 
 type TModalType = 'attach' | 'signer' | 'approvers';
 
 export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) => {
   const [activeTab, setActiveTab] = useState<TTab>('actions');
 
-  // Refactored to use useModalState + local type state
   const { isOpen: isModalOpen, open: openModal, close: closeModal } = useModalState();
   const [activeModalType, setActiveModalType] = useState<TModalType | null>(null);
 
@@ -40,7 +39,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
 
   const handleCloseModal = () => {
     closeModal();
-    // Do not nullify type immediately to avoid flicker during close animation
   };
 
   const handleConfirm = (ids: string[], items: ISearchItem[]) => {
@@ -134,7 +132,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
         open={open}
         closable={false}
         styles={{
-            wrapper: { width: 410 },
+            wrapper: { width: 440,minHeight: '330px',maxHeight: '770px' },
             mask: {
                 backgroundColor: 'rgba(0, 0, 0, 0.2)',
                 backdropFilter: 'blur(4px)'
