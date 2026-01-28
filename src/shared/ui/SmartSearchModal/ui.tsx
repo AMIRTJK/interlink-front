@@ -98,18 +98,13 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
 
   return (
     <div className="smart-search-content flex flex-col h-full bg-white rounded-3xl p-6">
-      <div className="mb-6 flex gap-4">
-        {isExpanded && (
-            <Button onClick={handleClosePreview} className="h-14 w-14 rounded-2xl border-none bg-gray-50 hover:bg-gray-100 flex items-center justify-center">
-                 <span className="text-xl">←</span>
-            </Button>
-        )}
+      <div className="mb-6">
         <Input
           prefix={<SearchOutlined className="text-gray-400 mr-2" />}
           placeholder={placeholder}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          className="h-14 rounded-2xl bg-gray-50 border-none hover:bg-gray-100 focus:bg-white transition-all text-base shadow-sm flex-1"
+          className="h-14 rounded-2xl bg-gray-50 border-none hover:bg-gray-100 focus:bg-white transition-all text-base shadow-sm w-full"
         />
       </div>
 
@@ -156,7 +151,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
           size="large"
           disabled={state.selectedIds.length === 0}
           onClick={handleConfirmClick}
-          className="rounded-2xl px-12 h-12 bg-purple-400 hover:bg-purple-500! border-none shadow-lg shadow-purple-100 font-bold transition-all"
+          className="rounded-2xl px-12 h-12 bg-[#8C52FF] hover:bg-[#7a3eff]! border-none shadow-lg shadow-purple-100 font-bold transition-all"
         >
           Готово
         </Button>

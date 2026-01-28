@@ -159,7 +159,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
 
             <div className="flex-1 overflow-y-auto custom-scrollbar">
                 {activeTab === 'actions' && (
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-2">
                        {[
                          {
                            id: 'attach' as const,
