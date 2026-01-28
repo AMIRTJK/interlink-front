@@ -108,7 +108,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
         />
       </div>
 
-      <div className="flex gap-8 flex-1 min-h-0 relative">
+      <div className="flex min-h-0 relative">
         {isLoading ? (
             <div className="w-full h-full flex items-center justify-center">
                 <Spin size="large" />
@@ -122,10 +122,11 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
                 {isExpanded && (
                 <div className="flex-1 animate-in fade-in slide-in-from-left-4 duration-500 relative">
                     <Button 
+                    type='link'
                         onClick={handleClosePreview} 
-                        className="absolute left-0 top-0 z-10 h-10 w-10 rounded-xl border-none bg-white shadow-sm hover:shadow-md flex items-center justify-center -translate-x-1/2"
+                        className="flex ml-auto! px-[2px]!"
                     >
-                         <span className="text-lg">←</span>
+                         Назад
                     </Button>
                     <SearchPreviewPanel item={state.activePreviewItem} />
                 </div>

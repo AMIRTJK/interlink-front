@@ -20,7 +20,6 @@ export const SearchPreviewPanel: React.FC<IProps> = ({ item }) => {
     <div className="flex flex-col h-full overflow-hidden">
       {item && (
         <div className="flex items-center gap-2 mb-3 px-1">
-          <PaperClipOutlined className="text-gray-400 rotate-45" />
           <span className="text-sm font-semibold text-gray-700 truncate">{item.title}</span>
         </div>
       )}
