@@ -184,7 +184,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                          }
                        ].map(section => (
                          <div key={section.id}>
-                           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">{section.title}</h4>
+                           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{section.title}</h4>
                            
                            <ActionSelector 
                              icon={section.icon}
