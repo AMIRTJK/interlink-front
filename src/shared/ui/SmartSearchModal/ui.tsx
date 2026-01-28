@@ -97,18 +97,18 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
   };
 
   return (
-    <div className="smart-search-content flex flex-col h-full bg-white rounded-3xl p-6">
+    <div className="smart-search-content flex flex-col h-full bg-gray-50/30 rounded-3xl p-8">
       <div className="mb-6">
         <Input
           prefix={<SearchOutlined className="text-gray-400 mr-2" />}
           placeholder={placeholder}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          className="h-14 rounded-2xl bg-gray-50 border-none hover:bg-gray-100 focus:bg-white transition-all text-base shadow-sm w-full"
+          className="h-14 rounded-2xl bg-white border-none hover:bg-gray-50 focus:bg-white transition-all text-base shadow-sm w-full px-5"
         />
       </div>
 
-      <div className="flex gap-6 flex-1 min-h-0 relative">
+      <div className="flex gap-8 flex-1 min-h-0 relative">
         {isLoading ? (
             <div className="w-full h-full flex items-center justify-center">
                 <Spin size="large" />
@@ -120,13 +120,19 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
         ) : (
             <>
                 {isExpanded && (
-                <div className="flex-1 animate-in fade-in slide-in-from-left-4 duration-500">
+                <div className="flex-1 animate-in fade-in slide-in-from-left-4 duration-500 relative">
+                    <Button 
+                        onClick={handleClosePreview} 
+                        className="absolute left-0 top-0 z-10 h-10 w-10 rounded-xl border-none bg-white shadow-sm hover:shadow-md flex items-center justify-center -translate-x-1/2"
+                    >
+                         <span className="text-lg">←</span>
+                    </Button>
                     <SearchPreviewPanel item={state.activePreviewItem} />
                 </div>
                 )}
                 
                 <div className={`
-                    flex flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar transition-all duration-300
+                    flex flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar transition-all duration-500 ease-in-out
                     ${isExpanded ? 'w-[440px]' : 'w-full'}
                 `}>
                     {displayItems.map((item: ISearchItem) => (
@@ -142,16 +148,16 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
             </>
         )}
       </div>
-      <div className="mt-6 pt-5 border-t border-gray-100 flex justify-between items-center bg-white">
+      <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center bg-transparent">
         <div className="text-gray-400 text-sm font-medium">
-          Выбрано: <span className="text-purple-500 ml-1">{state.selectedIds.length}</span>
+          Выбрано: <span className="text-[#8C52FF] ml-1">{state.selectedIds.length}</span>
         </div>
         <Button
           type="primary"
           size="large"
           disabled={state.selectedIds.length === 0}
           onClick={handleConfirmClick}
-          className="rounded-2xl px-12 h-12 bg-[#8C52FF] hover:bg-[#7a3eff]! border-none shadow-lg shadow-purple-100 font-bold transition-all"
+          className="rounded-[20px] px-14 h-14 bg-[#8C52FF] hover:bg-[#7a3eff]! border-none shadow-xl shadow-purple-200/50 font-bold transition-all text-base"
         >
           Готово
         </Button>
