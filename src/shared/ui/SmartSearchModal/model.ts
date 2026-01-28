@@ -1,4 +1,3 @@
-// import { ReactNode } from 'react';
 export interface ISearchItem {
   id: string;
   title: string;
@@ -14,7 +13,6 @@ export interface ISmartSearchModalProps {
   title?: string;
   placeholder?: string;
   
-  // Data Source
   items?: ISearchItem[];
   querySettings?: {
     url: string;
@@ -22,11 +20,9 @@ export interface ISmartSearchModalProps {
     queryKey?: any[]; 
   };
   transformResponse?: (data: any) => ISearchItem[];
-  
-  // Behavior
-  mode?: 'attach' | 'select'; // attach = list -> split, select = list only
+  mode?: 'attach' | 'select'; 
   onSelect?: (item: ISearchItem) => void;
-  onConfirm: (selectedIds: string[], items: ISearchItem[]) => void; // Pass full items back
+  onConfirm: (selectedIds: string[], items: ISearchItem[]) => void; 
   multiple?: boolean;
 }
 

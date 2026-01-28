@@ -20,19 +20,15 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
     selectedIds: [],
     activePreviewItem: null,
   });
-  
   const [selectedItemsMap, setSelectedItemsMap] = useState<Record<string, ISearchItem>>({});
-
   const [searchText, setSearchText] = useState('');
-
-  // Data Fetching
   const { data: fetchedData, isLoading } = useGetQuery<any, any>({
     url: querySettings?.url,
     params: {
         ...querySettings?.params,
         search: searchText ,
         page: 1,
-        per_page: 50 // ensure enough items
+        per_page: 50 
     },
     options: {
         enabled: !!querySettings?.url
@@ -41,10 +37,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
 
   const displayItems = useMemo(() => {
     if (!querySettings?.url) return items;
-    
     let rawItems: any[] = [];
-    
-    // Try to find array in response
     if (Array.isArray(fetchedData)) {
         rawItems = fetchedData;
     } else if (fetchedData) {
@@ -57,22 +50,13 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
     if (transformResponse) {
         return transformResponse(rawItems);
     }
-    
     return rawItems;
   }, [querySettings?.url, fetchedData, items, transformResponse]);
-
   const isExpanded = mode === 'attach' && !!state.activePreviewItem;
-
   const handleItemClick = (item: ISearchItem) => {
-    // Logic: Click always toggles selection. 
-    // IF mode is attach, it ALSO opens the preview (sets activePreviewItem).
-    
-    // 1. Toggle Selection
     setSelectedItemsMap(prev => {
         const newMap = { ...prev };
         if (!multiple) {
-             // If multiple is false, we clear others? Or just replace?
-             // Usually single select replaces.
             return newMap[item.id] ? {} : { [item.id]: item };
         }
         if (newMap[item.id]) {
@@ -97,7 +81,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
         
         return {
             ...prev,
-            activePreviewItem: mode === 'attach' ? item : null, // Set preview for attach
+            activePreviewItem: mode === 'attach' ? item : null, 
             selectedIds: newSelectedIds
         };
     });
@@ -163,7 +147,6 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
             </>
         )}
       </div>
-
       <div className="mt-6 pt-5 border-t border-gray-100 flex justify-between items-center bg-white">
         <div className="text-gray-400 text-sm font-medium">
           Выбрано: <span className="text-purple-500 ml-1">{state.selectedIds.length}</span>

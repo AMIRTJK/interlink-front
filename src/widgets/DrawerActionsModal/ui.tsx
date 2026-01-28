@@ -157,8 +157,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                     <div className="flex flex-col">
                        <div>
                           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Прикрепить письмо</h4>
-
-                          {/* Selector button */}
                           <div 
                             onClick={() => handleOpenModal('attach')}
                             className="group flex items-center justify-between bg-white p-4 rounded-2xl cursor-pointer hover:shadow-lg hover:shadow-gray-100 transition-all duration-300 border border-transparent hover:border-purple-100"
@@ -174,7 +172,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                             <RightOutlined className="text-gray-300 text-[10px] transition-all duration-300 group-hover:translate-x-1" />
                           </div>
 
-                          {/* Selected items cards below */}
                           {selectedItems.length > 0 && (
                             <div className="flex flex-col gap-2">
                               {selectedItems.map(item => (
@@ -197,8 +194,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
 
                        <div className="mt-6">
                           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Подписывающий</h4>
-
-                          {/* Selector button */}
                           <div 
                             onClick={() => handleOpenModal('signer')}
                             className="group flex items-center justify-between bg-white p-4 rounded-2xl cursor-pointer hover:shadow-lg hover:shadow-gray-100 transition-all duration-300 border border-transparent hover:border-purple-100"
@@ -213,8 +208,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                             </div>
                             <RightOutlined className="text-gray-300 text-[10px] transition-all duration-300 group-hover:translate-x-1" />
                           </div>
-
-                          {/* Selected item card below */}
                           {selectedSigner && (
                             <div className="group relative flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
                               <div className="flex-1 min-w-0">
@@ -233,8 +226,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
 
                        <div className="mt-6">
                           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Согласующие</h4>
-
-                          {/* Selector button */}
                           <div 
                             onClick={() => handleOpenModal('approvers')}
                             className="group flex items-center justify-between bg-white p-4 rounded-2xl cursor-pointer hover:shadow-lg hover:shadow-gray-100 transition-all duration-300 border border-transparent hover:border-purple-100"
@@ -249,8 +240,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                             </div>
                             <RightOutlined className="text-gray-300 text-[10px] transition-all duration-300 group-hover:translate-x-1" />
                           </div>
-
-                          {/* Selected items cards below */}
                            {selectedApprovers.length > 0 && (
                             <div className="flex flex-col gap-2">
                               {selectedApprovers.map(item => (
@@ -270,8 +259,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                             </div>
                           )}
                        </div>
-
-                       {/* Section 4: QR Code */}
                        <div>
                           <DrawerQRCodeSection />
                        </div>
@@ -281,7 +268,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
             </div>
         </div>
         </Drawer>
-
         <Modal
             open={isModalOpen} 
             onCancel={handleCloseModal}

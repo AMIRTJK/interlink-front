@@ -1,4 +1,3 @@
-// Update imports to include CheckCircleOutlined
 import React from 'react';
 import { CheckCircleOutlined } from '@ant-design/icons';
 import { ISearchItem } from '../model';
