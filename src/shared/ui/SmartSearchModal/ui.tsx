@@ -100,11 +100,11 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
     <div className="smart-search-content flex flex-col h-full bg-gray-50/30 rounded-3xl p-8">
       <div className="mb-6">
         <Input
-          prefix={<SearchOutlined className="text-gray-400 mr-2" />}
+          // prefix={<SearchOutlined className="text-gray-400 mr-2" />}
           placeholder={placeholder}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          className="h-14 rounded-2xl bg-white border-none hover:bg-gray-50 focus:bg-white transition-all text-base shadow-sm w-full px-5"
+          className="h-14 rounded-2xl bg-white border-none! hover:bg-gray-50 focus:bg-white transition-all text-base shadow-sm w-full px-5"
         />
       </div>
 
