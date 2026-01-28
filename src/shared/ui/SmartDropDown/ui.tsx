@@ -63,7 +63,7 @@ export const SmartDropDown: React.FC<ISmartDropDownProps> = ({
       trigger={['click']}
       open={isOpen}
       onOpenChange={setIsOpen}
-      overlayClassName="drawer__content--animate"
+      rootClassName="drawer__content--animate"
     >
       <div className="
         drawer__content--animate

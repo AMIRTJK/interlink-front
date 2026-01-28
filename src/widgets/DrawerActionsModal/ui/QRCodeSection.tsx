@@ -1,3 +1,6 @@
+/**
+ * Секция отображения и вставки QR-кода в инспекторе.
+ */
 import React from 'react';
 import { Button, QRCode } from 'antd';
 

@@ -12,3 +12,4 @@ export * from "./FiltersContainer";
 export * from "./SakuraOverlay/ui";
 export * from "./Breadcrumbs";
 export * from './ActionToolbar'
+export * from './SmartSearchModal'
