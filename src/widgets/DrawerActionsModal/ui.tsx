@@ -176,21 +176,57 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
             <div className="flex-1 overflow-y-auto custom-scrollbar">
                 {activeTab === 'actions' && (
                     <div className="flex flex-col">
-
-                       {/* Section 1: Attachment */}
                        <div>
                           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Прикрепить письмо</h4>
 
-                          {renderSelectedItems(selectedItems, 'attach')}
-
-                          <DrawerActionRow
-                            icon={<PaperClipOutlined />}
-                            label="Выбрал письма:"
-                            onClick={() => handleOpenModal('attach')}
-                          />
+                          {selectedItems.length > 0 ? (
+                            <div className="mb-3">
+                              <Dropdown
+                                trigger={['click']}
+                                dropdownRender={() => (
+                                  <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-2 mt-2">
+                                    {selectedItems.map(item => (
+                                      <div key={item.id} className="group relative flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-all">
+                                        <div className="flex-1 min-w-0">
+                                          <div className="text-sm font-medium text-gray-800 truncate">{item.title}</div>
+                                          {item.subtitle && <div className="text-xs text-gray-400 truncate">{item.subtitle}</div>}
+                                        </div>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleRemoveItem(item.id, 'attach');
+                                          }}
+                                          className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all"
+                                        >
+                                          <CloseOutlined className="text-xs" />
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              >
+                                <div className="group flex items-center justify-between bg-white p-4 rounded-2xl cursor-pointer hover:shadow-lg hover:shadow-gray-100 transition-all duration-300 border border-transparent hover:border-purple-100">
+                                  <div className="flex items-center gap-3 text-gray-700">
+                                    <span className="text-lg text-gray-400 group-hover:text-purple-500 transition-colors">
+                                      <PaperClipOutlined />
+                                    </span>
+                                    <span className="font-medium text-sm text-gray-700">
+                                      Выбрано писем: {selectedItems.length}
+                                    </span>
+                                  </div>
+                                  <RightOutlined className="text-gray-300 text-[10px] transition-all duration-300 group-hover:translate-x-1" />
+                                </div>
+                              </Dropdown>
+                            </div>
+                          ) : (
+                            <DrawerActionRow
+                              icon={<PaperClipOutlined />}
+                              label="Выбрать письмо"
+                              onClick={() => handleOpenModal('attach')}
+                            />
+                          )}
                        </div>
 
-                       {/* Section 2: Signer */}
                        <div className="mt-6">
                           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Подписывающий</h4>
 
@@ -205,7 +241,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                           )}
                        </div>
 
-                       {/* Section 3: Approvers */}
                        <div className="mt-6">
                           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Согласующие</h4>
 
@@ -213,7 +248,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
 
                           <DrawerActionRow
                             icon={<TeamOutlined />}
-                            label="Выбрал: 1"
+                            label="Выбрано:"
                             onClick={() => handleOpenModal('approvers')}
                           />
                        </div>
@@ -226,15 +261,11 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
         </Drawer>
 
         <Modal
-            open={isModalOpen} // Updated
+            open={isModalOpen} 
             onCancel={handleCloseModal}
             footer={null}
             title={
                 <div className="flex items-center gap-3 text-xl font-bold text-gray-800 py-3 px-1">
-                    {/* Wait, user mock shows 'Mail' icon or 'Search' icon?
-                        Image 1 Title: "Поиск писем" with Envelope icon (MailOutlined).
-                        Image last Title: "Выбор согласующих" with Team icon.
-                    */}
                     {activeModalType === 'attach' && <div className="text-2xl text-gray-700"><MailOutlined /></div>}
                     {activeModalType === 'signer' && <div className="text-2xl text-gray-700"><UserOutlined /></div>}
                     {activeModalType === 'approvers' && <div className="text-2xl text-gray-700"><TeamOutlined /></div>}
