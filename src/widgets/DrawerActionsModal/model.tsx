@@ -40,7 +40,6 @@ export const actionsList: IActionItem[] = [
       icon={<FileTextOutlined />}
       onSelect={(val) => console.log('Выбран ID:', val)}
       transformResponse={(data: any) => {
-        // Если структура сложная, правим тут
         const list = data?.items || [];
         return list.map((i: any) => ({ value: i.id, label: i.name }));
       }}
