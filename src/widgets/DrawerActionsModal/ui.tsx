@@ -147,7 +147,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                 items={TABS_LIST}
                 activeKey={activeTab}
                 onChange={(key) => {
-                  console.log('Tab changed to:', key);
                   setActiveTab(key as TTab);
                 }}
             />

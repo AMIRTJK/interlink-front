@@ -103,28 +103,26 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
   };
 
   return (
-    <div className="smart-search-content flex flex-col h-full bg-gray-50/30 rounded-3xl p-8">
-      <div className="mb-6">
+    <div className="smart-search-content flex flex-col h-full bg-gray-50/30 rounded-3xl">
+      <div className='mb-5'>
         <Input
           placeholder={placeholder}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          className="h-14 rounded-2xl bg-white border-none! hover:bg-gray-50 focus:bg-white transition-all text-base shadow-sm w-full px-5"
+          className="min-h-14 max-h-14 rounded-2xl bg-white border-none! hover:bg-gray-50 focus:bg-white transition-all text-base shadow-sm w-full px-5"
         />
       </div>
 
-      <div className="flex-1 flex min-h-0 relative gap-4 overflow-hidden">
+      <div className="flex min-h-0 gap-3 mb-6">
         {isExpanded && (
-        <div className="flex-1 animate-in fade-in slide-in-from-left-4 duration-500 relative flex flex-col">
+        <div className="flex-1 animate-in fade-in slide-in-from-left-4 duration-500  flex flex-col">
             <Button 
                 icon={<ArrowLeftOutlined />}
                 type='link'
                 onClick={handleClosePreview} 
-                className="flex text-xl! ml-auto! mb-2! pr-3!"
+                className="flex text-xl! ml-auto! pr-3!"
             />
-            <div className="flex-1 min-h-0">
-                <SearchPreviewPanel item={state.activePreviewItem} />
-            </div>
+            <SearchPreviewPanel item={state.activePreviewItem} />
         </div>
         )}
         
@@ -138,7 +136,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
                 </div>
             )}
 
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar flex flex-col gap-3">
+            <div className="flex-1 overflow-y-auto flex flex-col gap-3">
                 {displayItems.length === 0 && !isLoading ? (
                     <div className="h-full flex items-center justify-center">
                         <Empty description="Нет данных" />
@@ -157,7 +155,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
             </div>
         </div>
       </div>
-      <div className="mt-8 pt-6 border-t border-gray-100 flex items-center gap-6 bg-transparent">
+      <div className="flex items-center gap-3">
         <div className="text-gray-400 text-sm font-medium whitespace-nowrap">
           Выбрано: <span className="text-[#8C52FF] ml-1">{state.selectedIds.length}</span>
         </div>
@@ -188,13 +186,12 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
         )}
 
         <Button
-          type="primary"
           size="large"
           disabled={state.selectedIds.length === 0}
           onClick={handleConfirmClick}
-          className="rounded-[20px] px-14 h-14 bg-[#8C52FF] hover:bg-[#7a3eff]! border-none shadow-xl shadow-purple-200/50 font-bold transition-all text-base"
+          className=" bg-[#8C52FF]! text-white! border-none! hover:bg-[#7a3eff]!"
         >
-          Готово
+          Готово111
         </Button>
       </div>
     </div>

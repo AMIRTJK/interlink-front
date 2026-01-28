@@ -16,7 +16,7 @@ export const SearchListItem: React.FC<IProps> = ({ item, isSelected, isActive, o
       className={`
         p-5 rounded-[24px] cursor-pointer transition-all border relative
         ${isSelected 
-            ? 'border-purple-200 bg-purple-50/50' 
+            ? 'border-[#8C52FF] bg-[rgba(167,139,250,0.12)]' 
             : isActive 
                 ? 'border-gray-200 bg-gray-50'
                 : 'border-gray-50 bg-white hover:bg-gray-50 hover:border-purple-200'
