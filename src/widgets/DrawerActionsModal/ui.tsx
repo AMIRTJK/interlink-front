@@ -193,7 +193,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                            />
 
                            {section.items.length > 0 && (
-                             <div className="flex flex-col gap-2 mt-3">
+                             <div className="flex flex-col gap-2">
                                {section.items.map(item => (
                                  <SelectedCard 
                                    key={item.id}
