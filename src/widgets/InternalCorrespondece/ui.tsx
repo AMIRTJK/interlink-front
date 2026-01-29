@@ -5,6 +5,7 @@ import { TopNavigation } from "./ui/TopNavigation";
 import { useState } from "react";
 import { DocumentHeaderForm } from "./ui/DocumentHeaderForm";
 import { Form } from "antd";
+import { DocumentEditor } from "./ui/DocumentEditor";
 
 export const InternalCorrespondece = () => {
   // Извлекаем правильные имена из хука: open и close
@@ -13,9 +14,9 @@ export const InternalCorrespondece = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Определяем классы для фона всей страницы
-  const bgClass = isDarkMode
-    ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100"
-    : "bg-gradient-to-br from-white via-gray-50 to-white text-gray-900";
+  // const bgClass = isDarkMode
+  //   ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100"
+  //   : "bg-gradient-to-br from-white via-gray-50 to-white text-gray-900";
 
   const [form] = Form.useForm();
 
@@ -40,8 +41,9 @@ export const InternalCorrespondece = () => {
         isDarkMode={isDarkMode}
         toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
       />
-      <main className="flex-1 overflow-auto relative">
+      <main className="max-w-4xl flex flex-col gap-4 mx-auto px-8 py-12">
         <DocumentHeaderForm isDarkMode={isDarkMode} form={form} />
+        <DocumentEditor isDarkMode={isDarkMode} />
       </main>
       <DrawerActionsModal open={isOpen} onClose={close} />
       <ActionToolbar

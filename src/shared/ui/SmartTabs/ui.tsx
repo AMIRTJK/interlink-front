@@ -1,7 +1,7 @@
 /**
  * Универсальный компонент переключателя вкладок (табов).
  */
-import React from 'react';
+import React from "react";
 
 export interface ITabOption {
   key: string;
@@ -9,19 +9,18 @@ export interface ITabOption {
 }
 
 interface IProps {
-  items: ITabOption[];  
-  activeKey: string;         
-  onChange: (key: string) => void; 
+  items: ITabOption[];
+  activeKey: string;
+  onChange: (key: string) => void;
 }
 
 export const SmartTabs: React.FC<IProps> = ({ items, activeKey, onChange }) => {
   return (
-    <div className="w-full overflow-x-auto no-scrollbar py-1 px-6">
-      <div className="flex items-center gap-2">
-        
+    <div className="w-full overflow-x-auto no-scrollbar py-1 px-1">
+      <div className="flex justify-between items-center gap-2">
         {items.map((tab) => {
           const isActive = activeKey === tab.key;
-          
+
           return (
             <button
               key={tab.key}
@@ -32,9 +31,10 @@ export const SmartTabs: React.FC<IProps> = ({ items, activeKey, onChange }) => {
                 transition-all duration-300 ease-out whitespace-nowrap
                 border border-transparent select-none
                 
-                ${isActive 
-                  ? 'bg-[#F87171] text-white shadow-[0_4px_12px_rgba(248,113,113,0.35)] scale-105' 
-                  : 'bg-transparent text-gray-500 hover:bg-white hover:text-gray-800'
+                ${
+                  isActive
+                    ? "bg-[#F87171] text-white shadow-[0_4px_12px_rgba(248,113,113,0.35)] scale-105"
+                    : "bg-transparent text-gray-500 hover:bg-white hover:text-gray-800"
                 }
               `}
             >
@@ -42,7 +42,6 @@ export const SmartTabs: React.FC<IProps> = ({ items, activeKey, onChange }) => {
             </button>
           );
         })}
-        
       </div>
     </div>
   );
