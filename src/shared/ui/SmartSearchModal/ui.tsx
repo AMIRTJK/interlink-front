@@ -6,6 +6,7 @@ import { SearchPreviewPanel } from './ui/SearchPreviewPanel';
 import { SearchListItem } from './ui/SearchListItem';
 import { useGetQuery } from '@shared/lib/hooks';
 import { Loader, If } from '@shared/ui';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
   placeholder = "Поиск по теме или отправителю...",
@@ -44,10 +45,11 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
     if (Array.isArray(fetchedData)) {
         rawItems = fetchedData;
     } else if (fetchedData) {
-        if (Array.isArray(fetchedData.items)) rawItems = fetchedData.items;
-        else if (Array.isArray(fetchedData.data)) rawItems = fetchedData.data;
-        else if (fetchedData.data && Array.isArray(fetchedData.data.items)) rawItems = fetchedData.data.items;
-        else if (fetchedData.data && Array.isArray(fetchedData.data.data)) rawItems = fetchedData.data.data; // Handle pagination wrapper
+        const data = fetchedData as any;
+        if (Array.isArray(data.items)) rawItems = data.items;
+        else if (Array.isArray(data.data)) rawItems = data.data;
+        else if (data.data && Array.isArray(data.data.items)) rawItems = data.data.items;
+        else if (data.data && Array.isArray(data.data.data)) rawItems = data.data.data;
     }
     
     if (transformResponse) {
@@ -55,7 +57,9 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
     }
     return rawItems;
   }, [querySettings?.url, fetchedData, items, transformResponse]);
+
   const isExpanded = mode === 'attach' && !!state.activePreviewItem;
+
   const handleItemClick = (item: ISearchItem) => {
     setSelectedItemsMap(prev => {
         const newMap = { ...prev };
@@ -113,30 +117,45 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
         />
       </div>
 
-      <div className="flex min-h-0 gap-3 mb-6">
-        <If is={isExpanded}>
-        <div className="flex-1 animate-in fade-in slide-in-from-left-4 duration-500  flex flex-col">
-            <Button 
-                icon={<CloseOutlined />}
-                type='link'
-                onClick={handleClosePreview} 
-                className="flex text-xl! ml-auto! pr-3!"
-            />
-            <SearchPreviewPanel item={state.activePreviewItem} />
-        </div>
-        </If>
+      <div className="flex min-h-0 gap-3 mb-6 overflow-hidden">
+        <AnimatePresence mode="popLayout">
+          {isExpanded && (
+            <motion.div 
+              key="preview-panel"
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -20, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="flex-1 flex flex-col min-w-0"
+            >
+                <div className="flex items-center justify-end mb-1">
+                  <Button 
+                      icon={<CloseOutlined />}
+                      type='text'
+                      onClick={handleClosePreview} 
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                  />
+                </div>
+                <SearchPreviewPanel item={state.activePreviewItem} />
+            </motion.div>
+          )}
+        </AnimatePresence>
         
-        <div className={`
-            flex flex-col relative transition-all duration-500 ease-in-out
-            ${isExpanded ? 'w-[440px]' : 'w-full'}
-        `}>
+        <motion.div 
+            layout
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className={`
+                flex flex-col relative
+                ${isExpanded ? 'w-[440px]' : 'w-full'}
+            `}
+        >
             <If is={isLoading}>
                 <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] flex items-center justify-center rounded-[24px] overflow-hidden">
                     <Loader />
                 </div>
             </If>
 
-            <div className="flex-1 overflow-y-auto flex flex-col gap-3">
+            <div className="flex-1 overflow-y-auto flex flex-col gap-3 custom-scrollbar pr-1">
                 {displayItems.length === 0 && !isLoading ? (
                     <div className="h-full flex items-center justify-center">
                         <Empty description="Нет данных" />
@@ -153,7 +172,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
                     ))
                 )}
             </div>
-        </div>
+        </motion.div>
       </div>
       <div className="flex items-center gap-3">
         <div className="text-gray-400 text-sm font-medium whitespace-nowrap">
@@ -167,19 +186,20 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
                     if (!item) return null;
                     const isActive = state.activePreviewItem?.id === id;
                     return (
-                        <Button
+                        <button
                             key={id}
+                            type="button"
                             onClick={() => setState(prev => ({ ...prev, activePreviewItem: item }))}
                             className={`
-                                px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border
+                                px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border outline-none
                                 ${isActive 
                                     ? 'bg-[#8C52FF] text-white border-[#8C52FF] shadow-sm' 
                                     : 'bg-white text-gray-500 border-gray-100 hover:border-purple-200'
                                 }
                             `}
                         >
-                            {item.title}
-                        </Button>
+                            {item.title || 'Без названия'}
+                        </button>
                     );
                 })}
             </div>

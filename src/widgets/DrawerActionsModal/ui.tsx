@@ -154,11 +154,11 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 500, opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed right-5 top-[140px] z-1001 w-[440px] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden"
-              style={{minHeight: '720px', maxHeight: '721px' }}
+              className="fixed right-5 top-[140px] z-1001 w-[440px] bg-white rounded-3xl shadow-2xl flex flex-col "
+              style={{minHeight: '720px', maxHeight: '821px' }}
             >
               {/* Header */}
-              <div className="px-6 py-4 flex items-center justify-between border-b border-gray-50 bg-white">
+              <div className="px-6 py-4 flex items-center justify-between border-b border-gray-50 bg-white rounded-t-3xl!">
                 <span className="text-lg font-semibold text-gray-800">Инспектор</span>
                 <CloseOutlined 
                   onClick={onClose}
@@ -299,6 +299,22 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
           key={activeModalType}
           zIndex={1100}
           className="smart-search-modal"
+          transitionName=""
+          maskTransitionName="ant-fade"
+          modalRender={(modal) => (
+            <AnimatePresence mode="wait">
+              {isModalOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                >
+                  {modal}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
           styles={{
               header: { borderBottom: '1px solid #f0f0f0', padding: '16px 24px', marginBottom: 0 },
               body: { padding: 0, borderRadius: '0 0 24px 24px', overflow: 'hidden' }

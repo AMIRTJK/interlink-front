@@ -9,8 +9,8 @@
   flex: 1 !important;
   display: flex !important;
   flex-direction: column !important;
-  overflow: hidden !important;
-  max-height: 720px!important;
+  /* overflow: hidden !important; */
+  min-height: 782px!important;
 }
 
 .drawer-content-scroll {
