@@ -297,6 +297,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
           width={modalConfig.mode === 'attach' ? 1000 : 500}
           centered
           key={activeModalType}
+          zIndex={1100}
           className="smart-search-modal"
           styles={{
               header: { borderBottom: '1px solid #f0f0f0', padding: '16px 24px', marginBottom: 0 },
