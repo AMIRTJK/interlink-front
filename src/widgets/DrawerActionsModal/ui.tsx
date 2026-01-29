@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Drawer, Modal } from 'antd';
+import { Modal } from 'antd';
 import { 
   CloseOutlined, 
   UserOutlined, 
   TeamOutlined,
   MailOutlined,
+  PushpinOutlined,
 } from '@ant-design/icons';
 
 import { IActionsModal, TTab, TABS_LIST } from './model';
@@ -13,6 +14,8 @@ import { SelectedCard } from './ui/SelectedCard';
 import { ActionSelector } from './ui/ActionSelector';
 import { SmartTabs } from '@shared/ui/SmartTabs/ui';
 import { CommentCard, If } from '@shared/ui';
+import { ChatView } from '../../features/chat';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import './style.css';
 import { ISearchItem, SmartSearchUI, ISmartSearchModalProps } from '@shared/ui/SmartSearchModal';
@@ -23,6 +26,8 @@ type TModalType = 'attach' | 'signer' | 'approvers';
 
 export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) => {
   const [activeTab, setActiveTab] = useState<TTab>('actions');
+  const [isFloating, setIsFloating] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
 
   const { isOpen: isModalOpen, open: openModal, close: closeModal } = useModalState();
   const [activeModalType, setActiveModalType] = useState<TModalType | null>(null);
@@ -73,7 +78,14 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                 title: 'Прикрепить письмо',
                 mode: 'attach' as const,
                 querySettings: { url: ApiRoutes.GET_CORRESPONDENCES },
-                transformResponse: (items: any[]) => items.map(item => ({
+                transformResponse: (items: Array<{
+                    id: string;
+                    subject?: string;
+                    sender_name?: string;
+                    doc_date?: string;
+                    created_at?: string;
+                    kind?: string;
+                }>) => items.map(item => ({
                     id: item.id,
                     title: item.subject || 'Без темы',
                     subtitle: item.sender_name || 'Неизвестный отправитель',
@@ -87,7 +99,13 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                 title: 'Выбрать подписывающего',
                 mode: 'select' as const,
                 querySettings: { url: ApiRoutes.GET_USERS },
-                transformResponse: (items: any[]) => items.map(item => ({
+                transformResponse: (items: Array<{
+                    id: string;
+                    full_name?: string;
+                    last_name?: string;
+                    first_name?: string;
+                    position?: string;
+                }>) => items.map(item => ({
                     id: item.id,
                     title: item.full_name || `${item.last_name} ${item.first_name}`,
                     subtitle: item.position || 'Сотрудник',
@@ -100,7 +118,13 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                 title: 'Выбрать согласующих',
                 mode: 'select' as const,
                 querySettings: { url: ApiRoutes.GET_USERS },
-                transformResponse: (items: any[]) => items.map(item => ({
+                transformResponse: (items: Array<{
+                    id: string;
+                    full_name?: string;
+                    last_name?: string;
+                    first_name?: string;
+                    position?: string;
+                }>) => items.map(item => ({
                     id: item.id,
                     title: item.full_name || `${item.last_name} ${item.first_name}`,
                     subtitle: item.position || 'Сотрудник',
@@ -115,165 +139,224 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
 
   const modalConfig = getModalConfig();
 
+  const resetPosition = () => {
+    setIsFloating(false);
+    setPosition({ x: 0, y: 0 });
+  };
+
   return (
     <>
-        <Drawer
-        title={
-          <div className="flex items-center justify-between w-full">
-            <span className="text-lg font-semibold text-gray-800">Инспектор</span>
-            <CloseOutlined 
-              onClick={onClose}
-              style={{ fontSize: '18px', color: '#1F2937', cursor: 'pointer' }} 
-            />
-          </div>
-        }
-        placement="right"
-        onClose={onClose}
-        open={open}
-        closable={false}
-        styles={{
-            wrapper: { width: 440,minHeight: '330px',maxHeight: '770px' },
-            mask: {
-                backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                backdropFilter: 'blur(4px)'
-            }
-        }}
-        rootClassName="drawer-floating-root"
-        >
-        <div className="drawer__container h-full flex flex-col">
-            <div className="mb-4">
-            <SmartTabs
-                items={TABS_LIST}
-                activeKey={activeTab}
-                onChange={(key) => {
-                  setActiveTab(key as TTab);
-                }}
-            />
+      <AnimatePresence>
+        {open && (
+          <>
+            <If is={!isFloating}>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={onClose}
+                className="fixed inset-0 z-1000 bg-black/20 backdrop-blur-xs"
+              />
+            </If>
+
+          <motion.div
+            drag={isFloating}
+            dragMomentum={false}
+            dragListener={isFloating}
+            onDragEnd={(_, info) => {
+              if (isFloating) {
+                setPosition(prev => ({
+                  x: prev.x + info.delta.x,
+                  y: prev.y + info.delta.y
+                }));
+              }
+            }}
+            initial={isFloating ? { x: position.x, y: position.y, opacity: 0 } : { x: 500, opacity: 0 }}
+            animate={isFloating ? { x: position.x, y: position.y, opacity: 1 } : { x: 0, opacity: 1 }}
+            exit={isFloating ? { opacity: 0, scale: 0.95 } : { x: 500, opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className={`
+              fixed z-1001 drawer-floating-container
+              ${isFloating ? 'shadow-2xl border border-gray-100' : 'drawer-floating-container--pinned'}
+            `}
+            style={{
+              width: 440,
+              ...(isFloating ? {
+                height: 600,
+                top: '15%',
+                left: '35%',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              } : {}),
+              borderRadius: '20px',
+            }}
+          >
+            {/* Header */}
+            <div className="drawer-header">
+              <div className="flex items-center gap-3">
+                <span className="text-lg font-semibold text-gray-800">Инспектор</span>
+                <PushpinOutlined 
+                  onClick={isFloating ? resetPosition : () => setIsFloating(true)}
+                  style={{ 
+                    fontSize: '18px', 
+                    color: isFloating ? '#8C52FF' : '#9CA3AF', 
+                    cursor: 'pointer',
+                    transform: isFloating ? 'rotate(-45deg)' : 'none',
+                    transition: 'all 0.3s'
+                  }} 
+                  title={isFloating ? "Закрепить" : "Открепить"}
+                />
+              </div>
+              <CloseOutlined 
+                onClick={onClose}
+                style={{ fontSize: '18px', color: '#1F2937', cursor: 'pointer' }} 
+              />
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
-                <If is={activeTab === 'actions'}>
-                    <div className="flex flex-col gap-2">
-                       {[
-                         {
-                           id: 'attach' as const,
-                           title: 'Прикрепить письмо',
-                           icon: <MailOutlined />,
-                           label: selectedItems.length > 0 ? `Выбрано писем: ${selectedItems.length}` : 'Выбрать письмо',
-                           items: selectedItems
-                         },
-                         {
-                           id: 'signer' as const,
-                           title: 'Подписывающий',
-                           icon: <UserOutlined />,
-                           label: selectedSigner ? selectedSigner.title : 'Выбрать подписывающего',
-                           items: selectedSigner ? [selectedSigner] : []
-                         },
-                         {
-                           id: 'approvers' as const,
-                           title: 'Согласующие',
-                           icon: <TeamOutlined />,
-                           label: selectedApprovers.length > 0 ? `Выбрано: ${selectedApprovers.length}` : 'Выбрать согласующих',
-                           items: selectedApprovers
-                         }
-                       ].map(section => (
-                         <div key={section.id}>
-                           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{section.title}</h4>
-                           
-                           <ActionSelector 
-                             icon={section.icon}
-                             label={section.label}
-                             onClick={() => handleOpenModal(section.id)}
-                           />
+            {/* Content */}
+            <div className="drawer-body">
+              <div className="mb-4">
+                <SmartTabs
+                    items={TABS_LIST}
+                    activeKey={activeTab}
+                    onChange={(key) => {
+                      setActiveTab(key as TTab);
+                    }}
+                />
+              </div>
 
-                           <If is={section.items.length > 0}>
-                             <div className="flex flex-col gap-2">
-                               {section.items.map(item => (
-                                 <SelectedCard 
-                                   key={item.id}
-                                   title={item.title}
-                                   subtitle={item.subtitle}
-                                   onRemove={() => handleRemoveItem(item.id, section.id)}
-                                 />
-                               ))}
-                             </div>
-                           </If>
-                         </div>
-                       ))}
-
-                       <div>
-                          <DrawerQRCodeSection />
-                       </div>
-                    </div>
-                </If>
-
-                <If is={activeTab === 'comments'}>
-                    <div className="flex flex-col gap-3">
-                        {/* Пример использования useGetQuery для получения комментариев */}
-                        {/* 
-                          const { data: comments } = useGetQuery({ 
-                            url: `${ApiRoutes.GET_CORRESPONDENCES}/:id/comments`, 
-                            useToken: true 
-                          });
-                        */}
-                        {[
+              <div className="drawer-content-scroll custom-scrollbar">
+                    <If is={activeTab === 'actions'}>
+                        <div className="flex flex-col gap-2">
+                          {[
                             {
-                                id: 1,
-                                author: 'Иванов И.И.',
-                                date: '15.04.2024 14:30',
-                                content: 'Необходимо уточнить пункт 2',
-                                color: '#8C52FF'
+                              id: 'attach' as const,
+                              title: 'Прикрепить письмо',
+                              icon: <MailOutlined />,
+                              label: selectedItems.length > 0 ? `Выбрано писем: ${selectedItems.length}` : 'Выбрать письмо',
+                              items: selectedItems
                             },
                             {
-                                id: 2,
-                                author: 'Петрова М.А.',
-                                date: '15.04.2024 15:15',
-                                content: 'Согласовано с моей стороны',
-                                color: '#8C52FF'
+                              id: 'signer' as const,
+                              title: 'Подписывающий',
+                              icon: <UserOutlined />,
+                              label: selectedSigner ? selectedSigner.title : 'Выбрать подписывающего',
+                              items: selectedSigner ? [selectedSigner] : []
+                            },
+                            {
+                              id: 'approvers' as const,
+                              title: 'Согласующие',
+                              icon: <TeamOutlined />,
+                              label: selectedApprovers.length > 0 ? `Выбрано: ${selectedApprovers.length}` : 'Выбрать согласующих',
+                              items: selectedApprovers
                             }
-                        ].map(comment => (
-                            <CommentCard 
-                                key={comment.id}
-                                author={comment.author}
-                                date={comment.date}
-                                content={comment.content}
-                                indicatorColor={comment.color}
-                            />
-                        ))}
-                    </div>
-                </If>
-            </div>
-        </div>
-        </Drawer>
-        <Modal
-            open={isModalOpen} 
-            onCancel={handleCloseModal}
-            footer={null}
-            title={
-                <div className="flex items-center gap-3 text-xl font-bold text-gray-800 py-3 px-1">
-                    {activeModalType === 'attach' && <div className="text-2xl text-gray-700"><MailOutlined /></div>}
-                    {activeModalType === 'signer' && <div className="text-2xl text-gray-700"><UserOutlined /></div>}
-                    {activeModalType === 'approvers' && <div className="text-2xl text-gray-700"><TeamOutlined /></div>}
-                    <span>{modalConfig.title}</span>
+                          ].map(section => (
+                            <div key={section.id}>
+                              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{section.title}</h4>
+                              
+                              <ActionSelector 
+                                icon={section.icon}
+                                label={section.label}
+                                onClick={() => handleOpenModal(section.id)}
+                              />
+
+                              <If is={section.items.length > 0}>
+                                <div className="flex flex-col gap-2">
+                                  {section.items.map(item => (
+                                    <SelectedCard 
+                                      key={item.id}
+                                      title={item.title}
+                                      subtitle={item.subtitle}
+                                      onRemove={() => handleRemoveItem(item.id, section.id)}
+                                    />
+                                  ))}
+                                </div>
+                              </If>
+                            </div>
+                          ))}
+
+                          <div>
+                              <DrawerQRCodeSection />
+                          </div>
+                        </div>
+                    </If>
+
+                    <If is={activeTab === 'comments'}>
+                        <div className="flex flex-col gap-3">
+                            {/* Пример использования useGetQuery для получения комментариев */}
+                            {/* 
+                              const { data: comments } = useGetQuery({ 
+                                url: `${ApiRoutes.GET_CORRESPONDENCES}/:id/comments`, 
+                                useToken: true 
+                              });
+                            */}
+                            {[
+                                {
+                                    id: 1,
+                                    author: 'Иванов И.И.',
+                                    date: '15.04.2024 14:30',
+                                    content: 'Необходимо уточнить пункт 2',
+                                    color: '#8C52FF'
+                                },
+                                {
+                                    id: 2,
+                                    author: 'Петрова М.А.',
+                                    date: '15.04.2024 15:15',
+                                    content: 'Согласовано с моей стороны',
+                                    color: '#8C52FF'
+                                }
+                            ].map(comment => (
+                                <CommentCard 
+                                    key={comment.id}
+                                    author={comment.author}
+                                    date={comment.date}
+                                    content={comment.content}
+                                    indicatorColor={comment.color}
+                                />
+                            ))}
+                        </div>
+                    </If>
+
+                    <If is={activeTab === 'chat'}>
+                        <div className="h-full">
+                            <ChatView />
+                        </div>
+                    </If>
                 </div>
-            }
-            width={modalConfig.mode === 'attach' ? 1000 : 500}
-            centered
-            key={activeModalType}
-            className="smart-search-modal"
-            styles={{
-                header: { borderBottom: '1px solid #f0f0f0', padding: '16px 24px', marginBottom: 0 },
-                body: { padding: 0, borderRadius: '0 0 24px 24px', overflow: 'hidden' }
-            }}
-            closeIcon={<CloseOutlined style={{ fontSize: '18px' }} />}
-        >
-            <div className="h-[600px]">
-                <SmartSearchUI 
-                    {...modalConfig} 
-                    onConfirm={handleConfirm}
-                />
-            </div>
-        </Modal>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <Modal
+          open={isModalOpen} 
+          onCancel={handleCloseModal}
+          footer={null}
+          title={
+              <div className="flex items-center gap-3 text-xl font-bold text-gray-800 py-3 px-1">
+                  {activeModalType === 'attach' && <div className="text-2xl text-gray-700"><MailOutlined /></div>}
+                  {activeModalType === 'signer' && <div className="text-2xl text-gray-700"><UserOutlined /></div>}
+                  {activeModalType === 'approvers' && <div className="text-2xl text-gray-700"><TeamOutlined /></div>}
+                  <span>{modalConfig.title}</span>
+              </div>
+          }
+          width={modalConfig.mode === 'attach' ? 1000 : 500}
+          centered
+          key={activeModalType}
+          className="smart-search-modal"
+          styles={{
+              header: { borderBottom: '1px solid #f0f0f0', padding: '16px 24px', marginBottom: 0 },
+              body: { padding: 0, borderRadius: '0 0 24px 24px', overflow: 'hidden' }
+          }}
+          closeIcon={<CloseOutlined style={{ fontSize: '18px' }} />}
+      >
+          <div className="h-[600px]">
+              <SmartSearchUI 
+                  {...modalConfig} 
+                  onConfirm={handleConfirm}
+              />
+          </div>
+      </Modal>
     </>
   );
 };

@@ -6,3 +6,4 @@ export * from "./StatusTabs";
 export * from "./FilterRegistry";
 export * from "./CreateApproval";
 export * from "./visa-form";
+export * from "./chat";
