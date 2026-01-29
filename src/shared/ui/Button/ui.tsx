@@ -1,6 +1,5 @@
 import { Button as ButtonAntd } from "antd";
 
-
 interface ButtonProps {
   type: "primary" | "default" | "dashed" | "link" | "text";
   text?: string;
@@ -48,13 +47,13 @@ export const Button = ({
   const finalIcon = renderIcon() || antdIcon;
 
   return (
-    <ButtonAntd 
-      {...props} 
-      block={block} 
+    <ButtonAntd
+      {...props}
+      block={block}
       icon={finalIcon}
       aria-label={ariaLabel || text}
     >
-      {text ? <span className="ml-2">{text}</span> : null}
+      {text ? <span>{text}</span> : null}
     </ButtonAntd>
   );
 };

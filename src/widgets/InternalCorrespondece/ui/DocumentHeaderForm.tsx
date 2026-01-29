@@ -49,10 +49,11 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
   const textSecondary = isDarkMode ? "text-gray-400" : "text-gray-500";
 
   return (
-    <div className="max-w-4xl mx-auto px-8 py-10 font-sans">
+    <div className="">
       <Form
         form={form}
         layout="vertical"
+        className="flex flex-col gap-3"
         initialValues={{
           date: dayjs(),
           number: "",
@@ -60,7 +61,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
         }}
       >
         {/* 1. ЗАГОЛОВОК (БОЛЬШОЙ) */}
-        <Form.Item name="subject" className="mb-4">
+        <Form.Item name="subject" className="mb-4" noStyle>
           <Input
             placeholder="Заголовок документа..."
             variant="borderless"
@@ -79,26 +80,26 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           {/* --- Блок: Получатель --- */}
           <div className="flex items-center gap-2">
             <Button
-              antdIcon={<UserOutlined style={{ fontSize: "18px" }} />}
+              antdIcon={<UserOutlined style={{ fontSize: "14px" }} />}
               type="text"
               text="Получатель"
               onClick={handleRecipientClick}
-              className={`text-sm! ${textSecondary} text-[#4a5565]! px-0! hover:bg-transparent! hover:text-gray-600! dark:hover:text-gray-300! transition-colors!`}
+              className={`text-sm! ${textSecondary} text-[#4a5565]! px-0! hover:bg-transparent! hover:text-gray-400! dark:hover:text-gray-300! transition-colors!`}
             />
           </div>
 
           {/* --- Блок: Дата --- */}
           <div className="flex items-center gap-2">
-            <ClockCircleOutlined style={{ fontSize: "18px" }} />
+            <ClockCircleOutlined style={{ fontSize: "14px" }} />
             <Form.Item name="date" noStyle rules={[{ required: true }]}>
               <DatePicker
                 format="DD.MM.YYYY"
                 variant="borderless"
                 allowClear={false}
                 suffixIcon={null}
-                className={`!p-0 !text-sm ${textSecondary} hover:bg-transparent w-[90px]`}
+                className={`p-0! text-sm! max-w-17.5! ${textSecondary} text-[#4a5565]! px-0! hover:bg-transparent! hover:text-gray-400! dark:hover:text-gray-300! transition-colors!`}
                 style={{ color: "inherit" }}
-                inputReadOnly // Чтобы не открывалась клавиатура на мобильных, только пикер
+                inputReadOnly
               />
             </Form.Item>
           </div>
@@ -133,13 +134,13 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
         </div>
 
         {/* 3. КОПИЯ */}
-        <div className="flex items-center gap-4 mt-3">
+        <div className="flex items-center gap-4">
           <Button
             type="text"
+            text=" Копия (необязательно)"
             onClick={handleCCClick}
-            className={`text-sm ${textSecondary}`}
+            className={`text-sm! ${textSecondary} text-[#4a5565]! px-0! hover:bg-transparent! hover:text-gray-400! dark:hover:text-gray-300! transition-colors!`}
           />
-          Копия (необязательно)
         </div>
       </Form>
     </div>
