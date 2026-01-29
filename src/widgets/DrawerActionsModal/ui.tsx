@@ -12,6 +12,7 @@ import { DrawerQRCodeSection } from './ui/QRCodeSection';
 import { SelectedCard } from './ui/SelectedCard';
 import { ActionSelector } from './ui/ActionSelector';
 import { SmartTabs } from '@shared/ui/SmartTabs/ui';
+import { CommentCard, If } from '@shared/ui';
 
 import './style.css';
 import { ISearchItem, SmartSearchUI, ISmartSearchModalProps } from '@shared/ui/SmartSearchModal';
@@ -151,7 +152,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
             </div>
 
             <div className="flex-1 overflow-y-auto custom-scrollbar">
-                {activeTab === 'actions' && (
+                <If is={activeTab === 'actions'}>
                     <div className="flex flex-col gap-2">
                        {[
                          {
@@ -185,7 +186,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                              onClick={() => handleOpenModal(section.id)}
                            />
 
-                           {section.items.length > 0 && (
+                           <If is={section.items.length > 0}>
                              <div className="flex flex-col gap-2">
                                {section.items.map(item => (
                                  <SelectedCard 
@@ -196,7 +197,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                                  />
                                ))}
                              </div>
-                           )}
+                           </If>
                          </div>
                        ))}
 
@@ -204,7 +205,43 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                           <DrawerQRCodeSection />
                        </div>
                     </div>
-                )}
+                </If>
+
+                <If is={activeTab === 'comments'}>
+                    <div className="flex flex-col gap-3">
+                        {/* Пример использования useGetQuery для получения комментариев */}
+                        {/* 
+                          const { data: comments } = useGetQuery({ 
+                            url: `${ApiRoutes.GET_CORRESPONDENCES}/:id/comments`, 
+                            useToken: true 
+                          });
+                        */}
+                        {[
+                            {
+                                id: 1,
+                                author: 'Иванов И.И.',
+                                date: '15.04.2024 14:30',
+                                content: 'Необходимо уточнить пункт 2',
+                                color: '#8C52FF'
+                            },
+                            {
+                                id: 2,
+                                author: 'Петрова М.А.',
+                                date: '15.04.2024 15:15',
+                                content: 'Согласовано с моей стороны',
+                                color: '#8C52FF'
+                            }
+                        ].map(comment => (
+                            <CommentCard 
+                                key={comment.id}
+                                author={comment.author}
+                                date={comment.date}
+                                content={comment.content}
+                                indicatorColor={comment.color}
+                            />
+                        ))}
+                    </div>
+                </If>
             </div>
         </div>
         </Drawer>
