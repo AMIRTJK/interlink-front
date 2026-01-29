@@ -5,7 +5,7 @@ import { ISmartSearchModalProps, ISelectionState, ISearchItem } from './model';
 import { SearchPreviewPanel } from './ui/SearchPreviewPanel';
 import { SearchListItem } from './ui/SearchListItem';
 import { useGetQuery } from '@shared/lib/hooks';
-import { Loader } from '@shared/ui';
+import { Loader, If } from '@shared/ui';
 
 export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
   placeholder = "Поиск по теме или отправителю...",
@@ -114,7 +114,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
       </div>
 
       <div className="flex min-h-0 gap-3 mb-6">
-        {isExpanded && (
+        <If is={isExpanded}>
         <div className="flex-1 animate-in fade-in slide-in-from-left-4 duration-500  flex flex-col">
             <Button 
                 icon={<ArrowLeftOutlined />}
@@ -124,17 +124,17 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
             />
             <SearchPreviewPanel item={state.activePreviewItem} />
         </div>
-        )}
+        </If>
         
         <div className={`
             flex flex-col relative transition-all duration-500 ease-in-out
             ${isExpanded ? 'w-[440px]' : 'w-full'}
         `}>
-            {isLoading && (
+            <If is={isLoading}>
                 <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] flex items-center justify-center rounded-[24px] overflow-hidden">
                     <Loader />
                 </div>
-            )}
+            </If>
 
             <div className="flex-1 overflow-y-auto flex flex-col gap-3">
                 {displayItems.length === 0 && !isLoading ? (
@@ -160,14 +160,14 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
           Выбрано: <span className="text-[#8C52FF] ml-1">{state.selectedIds.length}</span>
         </div>
 
-        {state.selectedIds.length > 0 && (
+        <If is={mode === 'attach' && state.selectedIds.length > 0}>
             <div className="flex-1 flex gap-2 overflow-x-auto no-scrollbar py-1">
                 {state.selectedIds.map(id => {
                     const item = selectedItemsMap[id];
                     if (!item) return null;
                     const isActive = state.activePreviewItem?.id === id;
                     return (
-                        <button
+                        <Button
                             key={id}
                             onClick={() => setState(prev => ({ ...prev, activePreviewItem: item }))}
                             className={`
@@ -179,11 +179,15 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
                             `}
                         >
                             {item.title}
-                        </button>
+                        </Button>
                     );
                 })}
             </div>
-        )}
+        </If>
+
+        <If is={!(mode === 'attach' && state.selectedIds.length > 0)}>
+            <div className="flex-1" />
+        </If>
 
         <Button
           size="large"
