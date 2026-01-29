@@ -188,145 +188,146 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 500, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-5 top-[70px] z-1001 w-[440px] bg-white rounded-3xl shadow-2xl flex flex-col "
-              style={{ minHeight: "720px", maxHeight: "821px" }}
+              className="fixed right-0 h-full top-0 z-1001 w-[440px] bg-white shadow-2xl flex flex-col "
             >
               {/* Header */}
-              <div className="px-6 py-4 flex items-center justify-between border-b border-gray-50 bg-white rounded-t-3xl!">
-                <span className="text-lg font-semibold text-gray-800">
-                  Инспектор
-                </span>
-                <CloseOutlined
-                  onClick={onClose}
-                  style={{
-                    fontSize: "18px",
-                    color: "#1F2937",
-                    cursor: "pointer",
-                  }}
-                />
-              </div>
-
-              {/* Content */}
-              <div className="drawer-body">
-                <div className="mb-4">
-                  <SmartTabs
-                    items={TABS_LIST}
-                    activeKey={activeTab}
-                    onChange={(key) => {
-                      setActiveTab(key as TTab);
+              <div className=" flex  flex-col border-b border-gray-50 bg-white overflow-auto">
+                <div className="flex justify-between px-6 py-4">
+                  <span className="text-lg font-semibold text-gray-800">
+                    Инспектор
+                  </span>
+                  <CloseOutlined
+                    onClick={onClose}
+                    style={{
+                      fontSize: "18px",
+                      color: "#1F2937",
+                      cursor: "pointer",
                     }}
                   />
                 </div>
 
-                <div className="drawer-content-scroll custom-scrollbar">
-                  <If is={activeTab === "actions"}>
-                    <div className="flex flex-col gap-2">
-                      {[
-                        {
-                          id: "attach" as const,
-                          title: "Прикрепить письмо",
-                          icon: <MailOutlined />,
-                          label:
-                            selectedItems.length > 0
-                              ? `Выбрано писем: ${selectedItems.length}`
-                              : "Выбрать письмо",
-                          items: selectedItems,
-                        },
-                        {
-                          id: "signer" as const,
-                          title: "Подписывающий",
-                          icon: <UserOutlined />,
-                          label: selectedSigner
-                            ? selectedSigner.title
-                            : "Выбрать подписывающего",
-                          items: selectedSigner ? [selectedSigner] : [],
-                        },
-                        {
-                          id: "approvers" as const,
-                          title: "Согласующие",
-                          icon: <TeamOutlined />,
-                          label:
-                            selectedApprovers.length > 0
-                              ? `Выбрано: ${selectedApprovers.length}`
-                              : "Выбрать согласующих",
-                          items: selectedApprovers,
-                        },
-                      ].map((section) => (
-                        <div key={section.id}>
-                          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                            {section.title}
-                          </h4>
+                {/* Content */}
+                <div className="drawer-body">
+                  <div className="mb-4">
+                    <SmartTabs
+                      items={TABS_LIST}
+                      activeKey={activeTab}
+                      onChange={(key) => {
+                        setActiveTab(key as TTab);
+                      }}
+                    />
+                  </div>
 
-                          <ActionSelector
-                            icon={section.icon}
-                            label={section.label}
-                            onClick={() => handleOpenModal(section.id)}
-                          />
+                  <div className="drawer-content-scroll custom-scrollbar">
+                    <If is={activeTab === "actions"}>
+                      <div className="flex flex-col gap-2">
+                        {[
+                          {
+                            id: "attach" as const,
+                            title: "Прикрепить письмо",
+                            icon: <MailOutlined />,
+                            label:
+                              selectedItems.length > 0
+                                ? `Выбрано писем: ${selectedItems.length}`
+                                : "Выбрать письмо",
+                            items: selectedItems,
+                          },
+                          {
+                            id: "signer" as const,
+                            title: "Подписывающий",
+                            icon: <UserOutlined />,
+                            label: selectedSigner
+                              ? selectedSigner.title
+                              : "Выбрать подписывающего",
+                            items: selectedSigner ? [selectedSigner] : [],
+                          },
+                          {
+                            id: "approvers" as const,
+                            title: "Согласующие",
+                            icon: <TeamOutlined />,
+                            label:
+                              selectedApprovers.length > 0
+                                ? `Выбрано: ${selectedApprovers.length}`
+                                : "Выбрать согласующих",
+                            items: selectedApprovers,
+                          },
+                        ].map((section) => (
+                          <div key={section.id}>
+                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                              {section.title}
+                            </h4>
 
-                          <If is={section.items.length > 0}>
-                            <div className="flex flex-col gap-2">
-                              {section.items.map((item) => (
-                                <SelectedCard
-                                  key={item.id}
-                                  title={item.title}
-                                  subtitle={item.subtitle}
-                                  onRemove={() =>
-                                    handleRemoveItem(item.id, section.id)
-                                  }
-                                />
-                              ))}
-                            </div>
-                          </If>
+                            <ActionSelector
+                              icon={section.icon}
+                              label={section.label}
+                              onClick={() => handleOpenModal(section.id)}
+                            />
+
+                            <If is={section.items.length > 0}>
+                              <div className="flex flex-col gap-2">
+                                {section.items.map((item) => (
+                                  <SelectedCard
+                                    key={item.id}
+                                    title={item.title}
+                                    subtitle={item.subtitle}
+                                    onRemove={() =>
+                                      handleRemoveItem(item.id, section.id)
+                                    }
+                                  />
+                                ))}
+                              </div>
+                            </If>
+                          </div>
+                        ))}
+
+                        <div>
+                          <DrawerQRCodeSection />
                         </div>
-                      ))}
-
-                      <div>
-                        <DrawerQRCodeSection />
                       </div>
-                    </div>
-                  </If>
+                    </If>
 
-                  <If is={activeTab === "comments"}>
-                    <div className="flex flex-col gap-3">
-                      {/* Пример использования useGetQuery для получения комментариев */}
-                      {/* 
+                    <If is={activeTab === "comments"}>
+                      <div className="flex flex-col gap-3">
+                        {/* Пример использования useGetQuery для получения комментариев */}
+                        {/* 
                               const { data: comments } = useGetQuery({ 
                                 url: `${ApiRoutes.GET_CORRESPONDENCES}/:id/comments`, 
                                 useToken: true 
                               });
                             */}
-                      {[
-                        {
-                          id: 1,
-                          author: "Иванов И.И.",
-                          date: "15.04.2024 14:30",
-                          content: "Необходимо уточнить пункт 2",
-                          color: "#8C52FF",
-                        },
-                        {
-                          id: 2,
-                          author: "Петрова М.А.",
-                          date: "15.04.2024 15:15",
-                          content: "Согласовано с моей стороны",
-                          color: "#8C52FF",
-                        },
-                      ].map((comment) => (
-                        <CommentCard
-                          key={comment.id}
-                          author={comment.author}
-                          date={comment.date}
-                          content={comment.content}
-                          indicatorColor={comment.color}
-                        />
-                      ))}
-                    </div>
-                  </If>
+                        {[
+                          {
+                            id: 1,
+                            author: "Иванов И.И.",
+                            date: "15.04.2024 14:30",
+                            content: "Необходимо уточнить пункт 2",
+                            color: "#8C52FF",
+                          },
+                          {
+                            id: 2,
+                            author: "Петрова М.А.",
+                            date: "15.04.2024 15:15",
+                            content: "Согласовано с моей стороны",
+                            color: "#8C52FF",
+                          },
+                        ].map((comment) => (
+                          <CommentCard
+                            key={comment.id}
+                            author={comment.author}
+                            date={comment.date}
+                            content={comment.content}
+                            indicatorColor={comment.color}
+                          />
+                        ))}
+                      </div>
+                    </If>
 
-                  <If is={activeTab === "chat"}>
-                    <div className="h-full">
-                      <ChatView />
-                    </div>
-                  </If>
+                    <If is={activeTab === "chat"}>
+                      <div className="h-full">
+                        <ChatView />
+                      </div>
+                    </If>
+                  </div>
                 </div>
               </div>
             </motion.div>
