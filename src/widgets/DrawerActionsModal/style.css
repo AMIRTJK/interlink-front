@@ -8,8 +8,7 @@
 .drawer-floating-container--pinned {
   top: 145px !important;
   right: 35px !important;
-
-
+  background: #fff !important;
 }
 
 .drawer-header {
