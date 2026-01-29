@@ -18,7 +18,6 @@
   background: #F9FAFB;
 }
 
-/* Custom scrollbar for chat history */
 .chat-view__history::-webkit-scrollbar {
   width: 5px;
 }
