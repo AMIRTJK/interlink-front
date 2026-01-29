@@ -79,7 +79,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                     title: item.subject || 'Без темы',
                     subtitle: item.sender_name || 'Неизвестный отправитель',
                     date: item.doc_date || item.created_at,
-                    tag: 'Входящее'
+                    tag: item.kind === 'incoming' ? 'Входящее' : 'Исходящее'
                 })),
                 multiple: true
             };
@@ -92,7 +92,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                     id: item.id,
                     title: item.full_name || `${item.last_name} ${item.first_name}`,
                     subtitle: item.position || 'Сотрудник',
-                    tag: 'Сотрудник'
+                    tag: item.position || 'Сотрудник'
                 })),
                 multiple: false
             };
@@ -105,7 +105,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                     id: item.id,
                     title: item.full_name || `${item.last_name} ${item.first_name}`,
                     subtitle: item.position || 'Сотрудник',
-                    tag: 'Сотрудник'
+                    tag: item.position || 'Сотрудник'
                 })),
                 multiple: true
             };
