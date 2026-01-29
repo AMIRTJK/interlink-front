@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Input, Button, Empty } from 'antd';
-import { ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons';
+import { CloseOutlined,} from '@ant-design/icons';
 import { ISmartSearchModalProps, ISelectionState, ISearchItem } from './model';
 import { SearchPreviewPanel } from './ui/SearchPreviewPanel';
 import { SearchListItem } from './ui/SearchListItem';
@@ -117,7 +117,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
         <If is={isExpanded}>
         <div className="flex-1 animate-in fade-in slide-in-from-left-4 duration-500  flex flex-col">
             <Button 
-                icon={<ArrowLeftOutlined />}
+                icon={<CloseOutlined />}
                 type='link'
                 onClick={handleClosePreview} 
                 className="flex text-xl! ml-auto! pr-3!"

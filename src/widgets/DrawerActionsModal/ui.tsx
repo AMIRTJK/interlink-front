@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { Drawer, Modal } from 'antd';
 import { 
   CloseOutlined, 
-  PaperClipOutlined, 
   UserOutlined, 
   TeamOutlined,
   MailOutlined,
-  RightOutlined
 } from '@ant-design/icons';
 
 import { IActionsModal, TTab, TABS_LIST } from './model';
@@ -159,7 +157,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
                          {
                            id: 'attach' as const,
                            title: 'Прикрепить письмо',
-                           icon: <PaperClipOutlined />,
+                           icon: <MailOutlined />,
                            label: selectedItems.length > 0 ? `Выбрано писем: ${selectedItems.length}` : 'Выбрать письмо',
                            items: selectedItems
                          },
