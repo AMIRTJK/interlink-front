@@ -191,7 +191,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
           onClick={handleConfirmClick}
           className=" bg-[#8C52FF]! text-white! border-none! hover:bg-[#7a3eff]!"
         >
-          Готово111
+          Готово
         </Button>
       </div>
     </div>
