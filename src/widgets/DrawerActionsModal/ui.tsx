@@ -5,7 +5,6 @@ import {
   UserOutlined, 
   TeamOutlined,
   MailOutlined,
-  PushpinOutlined,
 } from '@ant-design/icons';
 
 import { IActionsModal, TTab, TABS_LIST } from './model';
@@ -26,8 +25,6 @@ type TModalType = 'attach' | 'signer' | 'approvers';
 
 export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) => {
   const [activeTab, setActiveTab] = useState<TTab>('actions');
-  const [isFloating, setIsFloating] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
 
   const { isOpen: isModalOpen, open: openModal, close: closeModal } = useModalState();
   const [activeModalType, setActiveModalType] = useState<TModalType | null>(null);
@@ -139,78 +136,35 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({ open, onClose }) =
 
   const modalConfig = getModalConfig();
 
-  const resetPosition = () => {
-    setIsFloating(false);
-    setPosition({ x: 0, y: 0 });
-  };
-
   return (
     <>
       <AnimatePresence>
         {open && (
           <>
-            <If is={!isFloating}>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={onClose}
-                className="fixed inset-0 z-1000 bg-black/20 backdrop-blur-xs"
-              />
-            </If>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
+              className="fixed inset-0 z-1000 bg-black/20 backdrop-blur-xs"
+            />
 
-          <motion.div
-            drag={isFloating}
-            dragMomentum={false}
-            dragListener={isFloating}
-            onDragEnd={(_, info) => {
-              if (isFloating) {
-                setPosition(prev => ({
-                  x: prev.x + info.delta.x,
-                  y: prev.y + info.delta.y
-                }));
-              }
-            }}
-            initial={isFloating ? { x: position.x, y: position.y, opacity: 0 } : { x: 500, opacity: 0 }}
-            animate={isFloating ? { x: position.x, y: position.y, opacity: 1 } : { x: 0, opacity: 1 }}
-            exit={isFloating ? { opacity: 0, scale: 0.95 } : { x: 500, opacity: 0 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className={`
-              fixed z-1001 drawer-floating-container
-              ${isFloating ? 'shadow-2xl border border-gray-100' : 'drawer-floating-container--pinned'}
-            `}
-            style={{
-              width: 440,
-              ...(isFloating ? {
-                height: 600,
-                top: '15%',
-                left: '35%',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              } : {}),
-              borderRadius: '20px',
-            }}
-          >
-            {/* Header */}
-            <div className="drawer-header">
-              <div className="flex items-center gap-3">
+            <motion.div
+              initial={{ x: 500, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 500, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed right-5 top-[140px] z-1001 w-[440px] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+              style={{minHeight: '720px', maxHeight: '721px' }}
+            >
+              {/* Header */}
+              <div className="px-6 py-4 flex items-center justify-between border-b border-gray-50 bg-white">
                 <span className="text-lg font-semibold text-gray-800">Инспектор</span>
-                <PushpinOutlined 
-                  onClick={isFloating ? resetPosition : () => setIsFloating(true)}
-                  style={{ 
-                    fontSize: '18px', 
-                    color: isFloating ? '#8C52FF' : '#9CA3AF', 
-                    cursor: 'pointer',
-                    transform: isFloating ? 'rotate(-45deg)' : 'none',
-                    transition: 'all 0.3s'
-                  }} 
-                  title={isFloating ? "Закрепить" : "Открепить"}
+                <CloseOutlined 
+                  onClick={onClose}
+                  style={{ fontSize: '18px', color: '#1F2937', cursor: 'pointer' }} 
                 />
               </div>
-              <CloseOutlined 
-                onClick={onClose}
-                style={{ fontSize: '18px', color: '#1F2937', cursor: 'pointer' }} 
-              />
-            </div>
 
             {/* Content */}
             <div className="drawer-body">
