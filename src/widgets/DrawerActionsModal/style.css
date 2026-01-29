@@ -1,29 +1,25 @@
-.drawer-floating-root .ant-drawer-content-wrapper {
-  height: calc(100% - 40px) !important;
-  top: 75px !important;
-  right: 35px !important;
-  border-radius: 20px !important;
-  overflow: hidden; 
+.drawer-header {
+  padding: 16px 24px !important;
+  display: flex !important;
+  justify-content: space-between !important;
 }
 
-.drawer-floating-root .ant-drawer-content {
-  border-radius: 20px !important;
-  overflow: hidden;
+.drawer-body {
+  padding: 24px !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  /* overflow: hidden !important; */
+  min-height: 782px!important;
 }
 
-.drawer-floating-root .ant-drawer-wrapper-body {
-  border-radius: 20px !important;
-  overflow: hidden;
+.drawer-content-scroll {
+  flex: 1 !important;
+  /* overflow-y: auto !important; */
 }
 
-.drawer-floating-root .ant-drawer-header {
-  border-radius: 20px 20px 0 0 !important;
-}
-
-.drawer-floating-root .ant-drawer-body {
-  border-radius: 0 0 20px 20px !important;
-  overflow-y: hidden; 
-  overflow-x: hidden; 
+.drawer-footer-modal-fix {
+  padding: 0 !important;
 }
 
 @keyframes fadeInSlide {
