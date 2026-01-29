@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import { pdfjs } from "react-pdf";
-
-import "./style.css";
 import { DocPreview } from "./ui/DocPreview";
 import { DocSidebar } from "./ui/DocSidebar";
 import { IDocFile, IDocView } from "./model";
 import { Modal } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
+import { If } from "@shared/ui";
+import { LetterExecution } from "@features/ResolutionCard";
+import "./style.css";
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 export const DocView: React.FC<IDocView> = ({
-  files = [],
+  // files = [],
   open,
   bookOpen,
   onClose,
