@@ -6,6 +6,7 @@
 
 .drawer-body {
   padding: 0 24px !important;
+  margin-bottom: 24px;
   flex: 1 !important;
   display: flex !important;
   flex-direction: column !important;
