@@ -9,6 +9,7 @@ import React from 'react';
 export interface IActionsModal {
   open: boolean;
   onClose: () => void;
+  docId?: string;
 }
 
 export interface IActionItem {

@@ -5,9 +5,11 @@ import { TopNavigation } from "./ui/TopNavigation";
 import { useState } from "react";
 import { DocumentHeaderForm } from "./ui/DocumentHeaderForm";
 import { Form } from "antd";
+import { useParams } from "react-router";
 import { DocumentEditor } from "./ui/DocumentEditor";
 
 export const InternalCorrespondece = () => {
+  const { id } = useParams<{ id: string }>();
   // Извлекаем правильные имена из хука: open и close
   const { open, close, isOpen } = useModalState();
 
@@ -45,7 +47,7 @@ export const InternalCorrespondece = () => {
         <DocumentHeaderForm isDarkMode={isDarkMode} form={form} />
         <DocumentEditor isDarkMode={isDarkMode} />
       </main>
-      <DrawerActionsModal open={isOpen} onClose={close} />
+      <DrawerActionsModal open={isOpen} onClose={close} docId={id} />
       <ActionToolbar
         setIsInspectorOpen={open}
         setShowPreview={() => console.log("Просмотр")}
