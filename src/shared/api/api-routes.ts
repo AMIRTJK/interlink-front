@@ -66,6 +66,14 @@ export const ApiRoutes = {
   GET_DEPARTMENT: "/api/v1/admin/departments/:id",
   UPDATE_DEPARTMENT: "/api/v1/admin/departments/:id",
   DELETE_DEPARTMENT: "/api/v1/admin/departments/:id",
+
+  // ==================== INTERNAL CORRESPONDENCE ====================
+  INTERNAL_INVITE_APPROVER:
+    "/api/v1/internal-correspondences/:id/approvals/invite",
+  INTERNAL_UPDATE_APPROVAL_STATUS:
+    "/api/v1/internal-correspondences/approvals/:approval_id/status",
+  INTERNAL_INVITE_SIGNER: "/api/v1/internal-correspondences/:id/signers/invite",
+  INTERNAL_GET_WORKFLOW: "/api/v1/internal-correspondences/:id/workflow",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];

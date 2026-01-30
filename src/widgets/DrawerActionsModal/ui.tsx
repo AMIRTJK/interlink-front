@@ -27,9 +27,12 @@ import { useModalState } from "@shared/lib/hooks";
 
 type TModalType = "attach" | "signer" | "approvers";
 
+import { useGetQuery, useMutationQuery } from "@shared/lib/hooks";
+
 export const DrawerActionsModal: React.FC<IActionsModal> = ({
   open,
   onClose,
+  docId,
 }) => {
   const [activeTab, setActiveTab] = useState<TTab>("actions");
 
@@ -47,6 +50,54 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
     null,
   );
   const [selectedApprovers, setSelectedApprovers] = useState<ISearchItem[]>([]);
+
+  // Получение текущего workflow (согласующие, подписанты)
+  const { data: workflowData, refetch: refetchWorkflow } = useGetQuery({
+    url: docId
+      ? ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", docId)
+      : "",
+    useToken: true,
+    options: {
+      enabled: !!docId && open, // Загружаем только когда открыто и есть ID
+    },
+  });
+
+  // Синхронизация данных с сервера в стейт (при открытии/успешной загрузке)
+  React.useEffect(() => {
+    if (workflowData) {
+      if (workflowData.signers && workflowData.signers.length > 0) {
+        const s = workflowData.signers[0];
+        setSelectedSigner({
+          id: s.user_id || s.id,
+          title: s.full_name || s.user?.full_name || "Подписант",
+          subtitle: s.position,
+        });
+      }
+      if (workflowData.approvers) {
+        setSelectedApprovers(
+          workflowData.approvers.map((a: any) => ({
+            id: a.user_id || a.id,
+            title: a.full_name || a.user?.full_name || "Согласующий",
+            subtitle: a.status || "Pending",
+          })),
+        );
+      }
+    }
+  }, [workflowData]);
+
+  // 2. Мутации для приглашения
+  const { mutate: inviteSigner } = useMutationQuery({
+    url: docId ? ApiRoutes.INTERNAL_INVITE_SIGNER.replace(":id", docId) : "",
+    method: "POST",
+  });
+
+  const { mutate: inviteApprover } = useMutationQuery({
+    url: docId
+      ? ApiRoutes.INTERNAL_INVITE_APPROVER.replace(":id", docId)
+      : "",
+    method: "POST",
+  });
+
 
   const handleOpenModal = (type: TModalType) => {
     setActiveModalType(type);
@@ -76,6 +127,46 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
       });
     }
     closeModal();
+  };
+
+  const handleSave = () => {
+    console.log("handleSave called. docId:", docId);
+    console.log("Selected Signer:", selectedSigner);
+    console.log("Selected Approvers:", selectedApprovers);
+
+    if (docId) {
+      // 1. Invite Signer
+      if (selectedSigner) {
+        inviteSigner(
+          { user_id: selectedSigner.id },
+          {
+            onSuccess: () => {
+              console.log("Signer invited");
+            },
+          },
+        );
+      }
+
+      // 2. Invite Approvers
+      selectedApprovers.forEach((item) => {
+        inviteApprover(
+          { user_id: item.id },
+          {
+            onSuccess: () => {
+              console.log("Approver invited", item.id);
+            },
+          },
+        );
+      });
+
+      // Refetch workflow after delay (to allow backend to process)
+      setTimeout(() => {
+        refetchWorkflow();
+      }, 500);
+    } else {
+      alert("Ошибка: ID документа не найден. Сначала сохраните черновик.");
+    }
+    onClose();
   };
 
   const handleRemoveItem = (id: string, type: TModalType) => {
@@ -282,6 +373,14 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
 
                         <div>
                           <DrawerQRCodeSection />
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                          <button
+                            onClick={handleSave}
+                            className="w-full py-3 px-4 bg-[#FF6B6B] hover:bg-[#ff5252] text-white font-medium rounded-xl transition-colors duration-200 flex items-center justify-center gap-2"
+                          >
+                            <span>Сохранить участников</span>
+                          </button>
                         </div>
                       </div>
                     </If>
