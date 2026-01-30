@@ -135,7 +135,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
     console.log("Selected Approvers:", selectedApprovers);
 
     if (docId) {
-      // 1. Invite Signer
       if (selectedSigner) {
         inviteSigner(
           { user_id: selectedSigner.id },
@@ -147,7 +146,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
         );
       }
 
-      // 2. Invite Approvers
       selectedApprovers.forEach((item) => {
         inviteApprover(
           { user_id: item.id },
@@ -159,7 +157,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
         );
       });
 
-      // Refetch workflow after delay (to allow backend to process)
       setTimeout(() => {
         refetchWorkflow();
       }, 500);
@@ -279,7 +276,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 500, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-5 top-5 bottom-5 rounded-2xl! z-1001 w-[440px] bg-white shadow-2xl flex flex-col overflow-hidden"
+              className="fixed right-5 top-25 bottom-5 rounded-2xl! max-h-[720px]! z-1001 w-[440px] bg-white shadow-2xl flex flex-col overflow-hidden"
             >
               {/* Header */}
               <div className=" flex flex-col border-gray-50 bg-white">
