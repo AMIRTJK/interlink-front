@@ -38,7 +38,7 @@ export const InternalCorrespondece = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#f9fafb]">
+    <div className="relative min-h-screen bg-[#f9fafb] overflow-hidden!">
       <TopNavigation
         isDarkMode={isDarkMode}
         toggleDarkMode={() => setIsDarkMode(!isDarkMode)}

@@ -6,12 +6,13 @@
 
 .drawer-body {
   padding: 0 24px !important;
+  margin-bottom: 24px;
   flex: 1 !important;
   display: flex !important;
   flex-direction: column !important;
-  min-height: 851px !important;
-  max-height: 852px!important;
-  border-radius: 20px!important;
+  /* min-height: 751px !important; */
+  /* max-height: 752px!important; */
+  /* border-radius: 20px!important; */
   /* overflow: hidden !important; */
 }
 

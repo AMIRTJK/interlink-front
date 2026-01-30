@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal } from "antd";
+import { Button, Modal } from "antd";
 import {
   CloseOutlined,
   UserOutlined,
@@ -135,7 +135,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
     console.log("Selected Approvers:", selectedApprovers);
 
     if (docId) {
-      // 1. Invite Signer
       if (selectedSigner) {
         inviteSigner(
           { user_id: selectedSigner.id },
@@ -147,7 +146,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
         );
       }
 
-      // 2. Invite Approvers
       selectedApprovers.forEach((item) => {
         inviteApprover(
           { user_id: item.id },
@@ -159,7 +157,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
         );
       });
 
-      // Refetch workflow after delay (to allow backend to process)
       setTimeout(() => {
         refetchWorkflow();
       }, 500);
@@ -279,7 +276,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 500, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-5 top-5 bottom-5 rounded-2xl! z-1001 w-[440px] bg-white shadow-2xl flex flex-col overflow-hidden"
+              className="fixed right-5 top-5 bottom-5 rounded-2xl! min-h-[920px]! overflow-y-auto z-1001 w-[440px] bg-white shadow-2xl flex flex-col overflow-hidden"
             >
               {/* Header */}
               <div className=" flex flex-col border-gray-50 bg-white">
@@ -375,12 +372,13 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                           <DrawerQRCodeSection />
                         </div>
                         <div>
-                          <button
+                          <Button
                             onClick={handleSave}
-                            className="w-full py-3 px-4 bg-[#FF6B6B] hover:bg-[#ff5252] text-white font-medium rounded-xl transition-colors duration-200 flex items-center justify-center gap-2"
+                            type="primary"
+                            className=" w-full! p-5! font-bold! bg-[#FF6B6B]! hover:bg-[#ff5252]! text-white font-medium rounded-xl! transition-colors duration-200 flex items-center justify-center gap-2"
                           >
-                            <span>Сохранить участников</span>
-                          </button>
+                           Сохранить участников
+                          </Button>
                         </div>
                       </div>
                     </If>
