@@ -279,10 +279,10 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 500, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-0 h-full top-0 z-1001 w-[440px] bg-white shadow-2xl flex flex-col "
+              className="fixed right-5 top-5 bottom-5 rounded-2xl! z-1001 w-[440px] bg-white shadow-2xl flex flex-col overflow-hidden"
             >
               {/* Header */}
-              <div className=" flex  flex-col border-b border-gray-50 bg-white overflow-auto">
+              <div className=" flex flex-col border-gray-50 bg-white">
                 <div className="flex justify-between px-6 py-4">
                   <span className="text-lg font-semibold text-gray-800">
                     Инспектор
@@ -299,7 +299,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
 
                 {/* Content */}
                 <div className="drawer-body">
-                  <div className="mb-4">
+                  <div>
                     <SmartTabs
                       items={TABS_LIST}
                       activeKey={activeTab}
@@ -374,7 +374,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                         <div>
                           <DrawerQRCodeSection />
                         </div>
-                        <div className="mt-4 pt-4 border-t border-gray-100">
+                        <div>
                           <button
                             onClick={handleSave}
                             className="w-full py-3 px-4 bg-[#FF6B6B] hover:bg-[#ff5252] text-white font-medium rounded-xl transition-colors duration-200 flex items-center justify-center gap-2"
