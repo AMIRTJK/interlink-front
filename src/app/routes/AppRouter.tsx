@@ -155,7 +155,6 @@ export const AppRouter = () => {
             <Route path="/modules" element={<MainLayout />}>
               <Route path="hr" element={<HrPage />} />
               <Route path="correspondence" element={<CorrespondencePage />}>
-                {/* <Route path="internal" element={<InternalСorrespondencePage />} /> */}
                 <Route index element={<Navigate to="incoming" replace />} />
                 <Route path="incoming">
                   <Route

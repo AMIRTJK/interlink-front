@@ -2,7 +2,6 @@ import React from "react";
 import {
   matchPath,
   useLocation,
-  useNavigate,
   useParams,
 } from "react-router-dom";
 import {
@@ -10,10 +9,10 @@ import {
   CorrespondenceFormData,
   CorrespondenceType,
 } from "@widgets/CorrespondenceForm";
-import { Button, Spin } from "antd";
+import {  Spin } from "antd";
 import { ApiRoutes } from "@shared/api";
 import { useGetQuery } from "@shared/lib";
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import { InternalCorrespondece } from "@widgets/InternalCorrespondece";
 
 interface ShowCorrespondencePageProps {
   type?: CorrespondenceType;
@@ -54,7 +53,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
   );
 
   if (shouldHideUI) {
-    return <div>OUTGOING</div>;
+    return <InternalCorrespondece mode="show" />;
   }
 
   return (
