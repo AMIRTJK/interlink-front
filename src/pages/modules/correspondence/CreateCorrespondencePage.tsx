@@ -51,7 +51,7 @@ export const CreateCorrespondencePage = ({
     return (
       <div>
         {/* show||create */}
-        <InternalCorrespondece mode="create" />
+        <InternalCorrespondece mode="show" />
       </div>
     );
   }
