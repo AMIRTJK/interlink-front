@@ -22,11 +22,14 @@ const licenseKey =
 
 interface DocumentEditorProps {
   isDarkMode: boolean;
+  mode: string;
 }
 
-export const DocumentEditor = ({ isDarkMode }: DocumentEditorProps) => {
+export const DocumentEditor = ({ isDarkMode, mode }: DocumentEditorProps) => {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [isEditorHovered, setIsEditorHovered] = useState(false);
+
+  const isReadyModeEditor = mode === "show";
 
   const toolbarBg = isDarkMode
     ? "rgba(31, 41, 55, 0.9)"
@@ -70,6 +73,7 @@ export const DocumentEditor = ({ isDarkMode }: DocumentEditorProps) => {
       >
         <CKEditor
           editor={DecoupledEditor}
+          disabled={isReadyModeEditor}
           onReady={(editor) => {
             const toolbarElement = editor.ui.view.toolbar.element;
 
