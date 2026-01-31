@@ -1,12 +1,4 @@
 import React, { useState } from "react";
-import { Button, Modal } from "antd";
-import {
-  CloseOutlined,
-  UserOutlined,
-  TeamOutlined,
-  MailOutlined,
-} from "@ant-design/icons";
-
 import { IActionsModal, TTab, TABS_LIST } from "./model";
 import { DrawerQRCodeSection } from "./ui/QRCodeSection";
 import { SelectedCard } from "./ui/SelectedCard";
@@ -15,7 +7,7 @@ import { SmartTabs } from "@shared/ui/SmartTabs/ui";
 import { CommentCard, If } from "@shared/ui";
 import { ChatView } from "../../features/chat";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { Icons, Ui } from "./lib";
 import "./style.css";
 import {
   ISearchItem,
@@ -33,6 +25,8 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
   open,
   onClose,
   docId,
+  mode = "create",
+  onReply,
 }) => {
   const [activeTab, setActiveTab] = useState<TTab>("actions");
 
@@ -284,7 +278,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                   <span className="text-lg font-semibold text-gray-800">
                     Инспектор
                   </span>
-                  <CloseOutlined
+                  <Icons.CloseOutlined
                     onClick={onClose}
                     style={{
                       fontSize: "18px",
@@ -294,7 +288,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                   />
                 </div>
 
-                {/* Content */}
                 <div className="drawer-body">
                   <div>
                     <SmartTabs
@@ -308,79 +301,100 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
 
                   <div className="drawer-content-scroll custom-scrollbar">
                     <If is={activeTab === "actions"}>
-                      <div className="flex flex-col gap-2">
-                        {[
-                          {
-                            id: "attach" as const,
-                            title: "Прикрепить письмо",
-                            icon: <MailOutlined />,
-                            label:
-                              selectedItems.length > 0
-                                ? `Выбрано писем: ${selectedItems.length}`
-                                : "Выбрать письмо",
-                            items: selectedItems,
-                          },
-                          {
-                            id: "signer" as const,
-                            title: "Подписывающий",
-                            icon: <UserOutlined />,
-                            label: selectedSigner
-                              ? selectedSigner.title
-                              : "Выбрать подписывающего",
-                            items: selectedSigner ? [selectedSigner] : [],
-                          },
-                          {
-                            id: "approvers" as const,
-                            title: "Согласующие",
-                            icon: <TeamOutlined />,
-                            label:
-                              selectedApprovers.length > 0
-                                ? `Выбрано: ${selectedApprovers.length}`
-                                : "Выбрать согласующих",
-                            items: selectedApprovers,
-                          },
-                        ].map((section) => (
-                          <div key={section.id}>
-                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                              {section.title}
-                            </h4>
-
-                            <ActionSelector
-                              icon={section.icon}
-                              label={section.label}
-                              onClick={() => handleOpenModal(section.id)}
-                            />
-
-                            <If is={section.items.length > 0}>
-                              <div className="flex flex-col gap-2">
-                                {section.items.map((item) => (
-                                  <SelectedCard
-                                    key={item.id}
-                                    title={item.title}
-                                    subtitle={item.subtitle}
-                                    onRemove={() =>
-                                      handleRemoveItem(item.id, section.id)
-                                    }
-                                  />
-                                ))}
-                              </div>
-                            </If>
-                          </div>
-                        ))}
-
-                        <div>
-                          <DrawerQRCodeSection />
-                        </div>
-                        <div>
-                          <Button
-                            onClick={handleSave}
-                            type="primary"
-                            className=" w-full! p-5! font-bold! bg-[#FF6B6B]! hover:bg-[#ff5252]! text-white font-medium rounded-xl! transition-colors duration-200 flex items-center justify-center gap-2"
+                      {mode === "show" ? (
+                        <div className="flex flex-col gap-3 mt-5">
+                          <Ui.Button
+                            onClick={onReply}
+                            size="large"
+                            className="w-full! h-14! px-4! py-3! bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm!"
+                            icon={<Icons.MailOutlined style={{ fontSize: '18px', color: '#6B7280' }} />}
                           >
-                           Сохранить участников
-                          </Button>
+                            <span className="font-medium">Ответить</span>
+                          </Ui.Button>
+                          <Ui.Button
+                            onClick={() => console.log("Переслать")}
+                            size="large"
+                            className="w-full! h-14! px-4! py-3! bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm!"
+                            icon={<Icons.SendOutlined style={{ fontSize: '18px', color: '#6B7280', transform: 'rotate(0deg)' }} />}
+                          >
+                            <span className="text-base font-medium">Переслать</span>
+                          </Ui.Button>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="flex flex-col gap-2">
+                          {[
+                            {
+                              id: "attach" as const,
+                              title: "Прикрепить письмо",
+                              icon: <Icons.MailOutlined />,
+                              label:
+                                selectedItems.length > 0
+                                  ? `Выбрано писем: ${selectedItems.length}`
+                                  : "Выбрать письмо",
+                              items: selectedItems,
+                            },
+                            {
+                              id: "signer" as const,
+                              title: "Подписывающий",
+                              icon: <Icons.UserOutlined />,
+                              label: selectedSigner
+                                ? selectedSigner.title
+                                : "Выбрать подписывающего",
+                              items: selectedSigner ? [selectedSigner] : [],
+                            },
+                            {
+                              id: "approvers" as const,
+                              title: "Согласующие",
+                              icon: <Icons.TeamOutlined />,
+                              label:
+                                selectedApprovers.length > 0
+                                  ? `Выбрано: ${selectedApprovers.length}`
+                                  : "Выбрать согласующих",
+                              items: selectedApprovers,
+                            },
+                          ].map((section) => (
+                            <div key={section.id}>
+                              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                {section.title}
+                              </h4>
+
+                              <ActionSelector
+                                icon={section.icon}
+                                label={section.label}
+                                onClick={() => handleOpenModal(section.id)}
+                              />
+
+                              <If is={section.items.length > 0}>
+                                <div className="flex flex-col gap-2">
+                                  {section.items.map((item) => (
+                                    <SelectedCard
+                                      key={item.id}
+                                      title={item.title}
+                                      subtitle={item.subtitle}
+                                      onRemove={() =>
+                                        handleRemoveItem(item.id, section.id)
+                                      }
+                                    />
+                                  ))}
+                                </div>
+                              </If>
+                            </div>
+                          ))}
+
+                          <div>
+                            <DrawerQRCodeSection />
+                          </div>
+                          <div>
+                            <Ui.Button
+                              onClick={handleSave}
+                              type="primary"
+                              className=" w-full! p-5! font-bold! bg-[#FF6B6B]! hover:bg-[#ff5252]! text-white rounded-xl! transition-colors duration-200 flex items-center justify-center gap-2"
+                            >
+                             Сохранить участников
+                            </Ui.Button>
+                          </div>
+                        </div>
+                      )}
                     </If>
 
                     <If is={activeTab === "comments"}>
@@ -432,7 +446,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
         )}
       </AnimatePresence>
 
-      <Modal
+      <Ui.Modal
         open={isModalOpen}
         onCancel={handleCloseModal}
         footer={null}
@@ -440,17 +454,17 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
           <div className="flex items-center gap-3 text-xl font-bold text-gray-800 py-3 px-1">
             {activeModalType === "attach" && (
               <div className="text-2xl text-gray-700">
-                <MailOutlined />
+                <Icons.MailOutlined />
               </div>
             )}
             {activeModalType === "signer" && (
               <div className="text-2xl text-gray-700">
-                <UserOutlined />
+                <Icons.UserOutlined />
               </div>
             )}
             {activeModalType === "approvers" && (
               <div className="text-2xl text-gray-700">
-                <TeamOutlined />
+                <Icons.TeamOutlined />
               </div>
             )}
             <span>{modalConfig.title}</span>
@@ -489,12 +503,12 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
             overflow: "hidden",
           },
         }}
-        closeIcon={<CloseOutlined style={{ fontSize: "18px" }} />}
+        closeIcon={<Icons.CloseOutlined style={{ fontSize: "18px" }} />}
       >
         <div className="h-[600px]">
           <SmartSearchUI {...modalConfig} onConfirm={handleConfirm} />
         </div>
-      </Modal>
+      </Ui.Modal>
     </>
   );
 };
