@@ -7,6 +7,8 @@ export interface IActionsModal {
   open: boolean;
   onClose: () => void;
   docId?: string;
+  mode?: "create" | "show";
+  onReply?: () => void;
 }
 
 export interface IActionItem {

@@ -8,12 +8,17 @@ import { Form } from "antd";
 import { useParams } from "react-router";
 import { DocumentEditor } from "./ui/DocumentEditor";
 
-export const InternalCorrespondece = () => {
+interface IProps {
+  mode: "create" | "show";
+  initValues?: any;
+}
+
+export const InternalCorrespondece: React.FC<IProps> = ({ mode: initialMode, initValues }) => {
   const { id } = useParams<{ id: string }>();
-  // Извлекаем правильные имена из хука: open и close
   const { open, close, isOpen } = useModalState();
 
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [currentMode, setCurrentMode] = useState<"create" | "show">(initialMode);
 
   // Определяем классы для фона всей страницы
   // const bgClass = isDarkMode
@@ -21,6 +26,11 @@ export const InternalCorrespondece = () => {
   //   : "bg-gradient-to-br from-white via-gray-50 to-white text-gray-900";
 
   const [form] = Form.useForm();
+
+  const handleReply = () => {
+    setCurrentMode("create");
+    close();
+  };
 
   // 3. Создаем функцию отправки
   const onSendClick = async () => {
@@ -47,12 +57,19 @@ export const InternalCorrespondece = () => {
         <DocumentHeaderForm isDarkMode={isDarkMode} form={form} />
         <DocumentEditor isDarkMode={isDarkMode} />
       </main>
-      <DrawerActionsModal open={isOpen} onClose={close} docId={id} />
+      <DrawerActionsModal 
+        open={isOpen} 
+        onClose={close} 
+        docId={id} 
+        mode={currentMode}
+        onReply={handleReply}
+      />
       <ActionToolbar
         setIsInspectorOpen={open}
         setShowPreview={() => console.log("Просмотр")}
         handleSend={() => console.log("Отправить")}
         onSave={onSendClick}
+        mode={currentMode}
       />
     </div>
   );

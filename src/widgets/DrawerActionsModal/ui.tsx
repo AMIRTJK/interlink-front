@@ -5,6 +5,7 @@ import {
   UserOutlined,
   TeamOutlined,
   MailOutlined,
+  SendOutlined,
 } from "@ant-design/icons";
 
 import { IActionsModal, TTab, TABS_LIST } from "./model";
@@ -33,6 +34,8 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
   open,
   onClose,
   docId,
+  mode = "create",
+  onReply,
 }) => {
   const [activeTab, setActiveTab] = useState<TTab>("actions");
 
@@ -294,7 +297,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                   />
                 </div>
 
-                {/* Content */}
                 <div className="drawer-body">
                   <div>
                     <SmartTabs
@@ -308,79 +310,100 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
 
                   <div className="drawer-content-scroll custom-scrollbar">
                     <If is={activeTab === "actions"}>
-                      <div className="flex flex-col gap-2">
-                        {[
-                          {
-                            id: "attach" as const,
-                            title: "Прикрепить письмо",
-                            icon: <MailOutlined />,
-                            label:
-                              selectedItems.length > 0
-                                ? `Выбрано писем: ${selectedItems.length}`
-                                : "Выбрать письмо",
-                            items: selectedItems,
-                          },
-                          {
-                            id: "signer" as const,
-                            title: "Подписывающий",
-                            icon: <UserOutlined />,
-                            label: selectedSigner
-                              ? selectedSigner.title
-                              : "Выбрать подписывающего",
-                            items: selectedSigner ? [selectedSigner] : [],
-                          },
-                          {
-                            id: "approvers" as const,
-                            title: "Согласующие",
-                            icon: <TeamOutlined />,
-                            label:
-                              selectedApprovers.length > 0
-                                ? `Выбрано: ${selectedApprovers.length}`
-                                : "Выбрать согласующих",
-                            items: selectedApprovers,
-                          },
-                        ].map((section) => (
-                          <div key={section.id}>
-                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                              {section.title}
-                            </h4>
-
-                            <ActionSelector
-                              icon={section.icon}
-                              label={section.label}
-                              onClick={() => handleOpenModal(section.id)}
-                            />
-
-                            <If is={section.items.length > 0}>
-                              <div className="flex flex-col gap-2">
-                                {section.items.map((item) => (
-                                  <SelectedCard
-                                    key={item.id}
-                                    title={item.title}
-                                    subtitle={item.subtitle}
-                                    onRemove={() =>
-                                      handleRemoveItem(item.id, section.id)
-                                    }
-                                  />
-                                ))}
-                              </div>
-                            </If>
-                          </div>
-                        ))}
-
-                        <div>
-                          <DrawerQRCodeSection />
-                        </div>
-                        <div>
+                      {mode === "show" ? (
+                        <div className="flex flex-col gap-3 mt-5">
                           <Button
-                            onClick={handleSave}
-                            type="primary"
-                            className=" w-full! p-5! font-bold! bg-[#FF6B6B]! hover:bg-[#ff5252]! text-white font-medium rounded-xl! transition-colors duration-200 flex items-center justify-center gap-2"
+                            onClick={onReply}
+                            size="large"
+                            className="w-full! h-14! px-4! py-3! bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm!"
+                            icon={<MailOutlined style={{ fontSize: '18px', color: '#6B7280' }} />}
                           >
-                           Сохранить участников
+                            <span className="font-medium">Ответить</span>
+                          </Button>
+                          <Button
+                            onClick={() => console.log("Переслать")}
+                            size="large"
+                            className="w-full! h-14! px-4! py-3! bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm!"
+                            icon={<SendOutlined style={{ fontSize: '18px', color: '#6B7280', transform: 'rotate(0deg)' }} />}
+                          >
+                            <span className="text-base font-medium">Переслать</span>
                           </Button>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="flex flex-col gap-2">
+                          {[
+                            {
+                              id: "attach" as const,
+                              title: "Прикрепить письмо",
+                              icon: <MailOutlined />,
+                              label:
+                                selectedItems.length > 0
+                                  ? `Выбрано писем: ${selectedItems.length}`
+                                  : "Выбрать письмо",
+                              items: selectedItems,
+                            },
+                            {
+                              id: "signer" as const,
+                              title: "Подписывающий",
+                              icon: <UserOutlined />,
+                              label: selectedSigner
+                                ? selectedSigner.title
+                                : "Выбрать подписывающего",
+                              items: selectedSigner ? [selectedSigner] : [],
+                            },
+                            {
+                              id: "approvers" as const,
+                              title: "Согласующие",
+                              icon: <TeamOutlined />,
+                              label:
+                                selectedApprovers.length > 0
+                                  ? `Выбрано: ${selectedApprovers.length}`
+                                  : "Выбрать согласующих",
+                              items: selectedApprovers,
+                            },
+                          ].map((section) => (
+                            <div key={section.id}>
+                              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                {section.title}
+                              </h4>
+
+                              <ActionSelector
+                                icon={section.icon}
+                                label={section.label}
+                                onClick={() => handleOpenModal(section.id)}
+                              />
+
+                              <If is={section.items.length > 0}>
+                                <div className="flex flex-col gap-2">
+                                  {section.items.map((item) => (
+                                    <SelectedCard
+                                      key={item.id}
+                                      title={item.title}
+                                      subtitle={item.subtitle}
+                                      onRemove={() =>
+                                        handleRemoveItem(item.id, section.id)
+                                      }
+                                    />
+                                  ))}
+                                </div>
+                              </If>
+                            </div>
+                          ))}
+
+                          <div>
+                            <DrawerQRCodeSection />
+                          </div>
+                          <div>
+                            <Button
+                              onClick={handleSave}
+                              type="primary"
+                              className=" w-full! p-5! font-bold! bg-[#FF6B6B]! hover:bg-[#ff5252]! text-white rounded-xl! transition-colors duration-200 flex items-center justify-center gap-2"
+                            >
+                             Сохранить участников
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </If>
 
                     <If is={activeTab === "comments"}>

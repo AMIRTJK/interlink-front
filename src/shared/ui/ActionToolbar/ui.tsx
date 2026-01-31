@@ -14,13 +14,15 @@ interface IProps {
   setShowPreview: (val: boolean) => void;
   setIsInspectorOpen: (val: boolean) => void;
   handleSend: () => void;
+  mode?: "create" | "show";
 }
 
 export const ActionToolbar: React.FC<IProps> = ({
   onSave,
   setShowPreview,
   setIsInspectorOpen,
-  handleSend
+  handleSend,
+  mode = "create"
 }) => {
   return (
     <motion.div 
@@ -47,24 +49,26 @@ export const ActionToolbar: React.FC<IProps> = ({
           label="Инспектор" 
           onClick={() => setIsInspectorOpen(true)} 
         />
-        <Button 
-          type="primary"
-          size="large"
-          onClick={handleSend}
-          icon={<SendOutlined style={{ transform: 'rotate(-30deg)' }} />}
-          className="ml-2 rounded-full border-none flex items-center font-semibold shadow-lg shadow-purple-200/50 transition-all duration-300 hover:brightness-110 hover:shadow-purple-300 active:scale-95"
-          style={{
-            background: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
-            height: '42px',
-            paddingLeft: '24px',
-            paddingRight: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          Отправить
-        </Button>
+        {mode !== "show" && (
+          <Button 
+            type="primary"
+            size="large"
+            onClick={handleSend}
+            icon={<SendOutlined style={{ transform: 'rotate(-30deg)' }} />}
+            className="ml-2 rounded-full border-none flex items-center font-semibold shadow-lg shadow-purple-200/50 transition-all duration-300 hover:brightness-110 hover:shadow-purple-300 active:scale-95"
+            style={{
+              background: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
+              height: '42px',
+              paddingLeft: '24px',
+              paddingRight: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            Отправить
+          </Button>
+        )}
       </div>
     </motion.div>
   );
