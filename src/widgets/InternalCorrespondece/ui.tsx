@@ -10,15 +10,14 @@ import { DocumentEditor } from "./ui/DocumentEditor";
 
 interface IProps {
   mode: "create" | "show";
-  initValues?: any;
 }
 
-export const InternalCorrespondece: React.FC<IProps> = ({ mode: initialMode, initValues }) => {
+export const InternalCorrespondece: React.FC<IProps> = ({ mode }) => {
   const { id } = useParams<{ id: string }>();
   const { open, close, isOpen } = useModalState();
 
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [currentMode, setCurrentMode] = useState<"create" | "show">(initialMode);
+  const [currentMode, setCurrentMode] = useState<"create" | "show">(mode);
 
   // Определяем классы для фона всей страницы
   // const bgClass = isDarkMode
@@ -48,19 +47,21 @@ export const InternalCorrespondece: React.FC<IProps> = ({ mode: initialMode, ini
   };
 
   return (
-    <div className={`relative min-h-screen bg-[#f9fafb] ${isOpen ? "max-h-[768px] overflow-hidden" : ""}`}>
+    <div
+      className={`relative min-h-screen bg-[#f9fafb] ${isOpen ? "max-h-[768px] overflow-hidden" : ""}`}
+    >
       <TopNavigation
         isDarkMode={isDarkMode}
         toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
       />
       <main className="max-w-4xl flex flex-col gap-4 mx-auto px-8 py-12">
         <DocumentHeaderForm isDarkMode={isDarkMode} form={form} />
-        <DocumentEditor isDarkMode={isDarkMode} />
+        <DocumentEditor isDarkMode={isDarkMode} mode={currentMode} />
       </main>
-      <DrawerActionsModal 
-        open={isOpen} 
-        onClose={close} 
-        docId={id} 
+      <DrawerActionsModal
+        open={isOpen}
+        onClose={close}
+        docId={id}
         mode={currentMode}
         onReply={handleReply}
       />
