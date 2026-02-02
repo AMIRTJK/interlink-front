@@ -14,6 +14,8 @@ export const ApiRoutes = {
 
   // Corresspondence
   GET_CORRESPONDENCES: "/api/v1/correspondences",
+  // Внутренняя корреспонденция (для папок Отправленные/Полученные)
+  GET_INTERNAL_CORRESPONDENCES: "/api/v1/internal-correspondences",
   GET_CORRESPONDENCE_BY_ID: "/api/v1/correspondences/:id",
   CREATE_CORRESPONDENCES: "/api/v1/correspondences",
   ARCHIVE_CORRESPONDENCE: "/api/v1/correspondences/:id/archive",
@@ -68,10 +70,26 @@ export const ApiRoutes = {
   DELETE_DEPARTMENT: "/api/v1/admin/departments/:id",
 
   // ==================== INTERNAL CORRESPONDENCE ====================
-  INTERNAL_INVITE_APPROVER:
-    "/api/v1/internal-correspondences/:id/approvals/invite",
-  INTERNAL_UPDATE_APPROVAL_STATUS:
-    "/api/v1/internal-correspondences/approvals/:approval_id/status",
+  GET_INTERNAL_COUNTERS: "/api/v1/internal-correspondences/counters",
+  GET_INTERNAL_INCOMING: "/api/v1/internal-correspondences/inbox",
+  GET_INTERNAL_OUTGOING: "/api/v1/internal-correspondences/sent",
+  GET_INTERNAL_DRAFTS: "/api/v1/internal-correspondences/drafts",
+  GET_INTERNAL_TRASH: "/api/v1/internal-correspondences/trash",
+  CREATE_INTERNAL: "/api/v1/internal-correspondences",
+  UPDATE_INTERNAL: "/api/v1/internal-correspondences/:id",
+  SEND_INTERNAL: "/api/v1/internal-correspondences/:id/send",
+  READ_INTERNAL: "/api/v1/internal-correspondences/:id/read",
+  DELETE_INTERNAL: "/api/v1/internal-correspondences/:id",
+  RESTORE_INTERNAL: "/api/v1/internal-correspondences/:id/restore",
+
+  // Recipients
+  GET_INTERNAL_RECIPIENTS_USERS: "/api/v1/internal-correspondences/recipients/users",
+  GET_INTERNAL_RECIPIENTS_DEPARTMENTS: "/api/v1/internal-correspondences/recipients/departments",
+  GET_INTERNAL_RECIPIENTS_RECENT: "/api/v1/internal-correspondences/recipients/recent",
+
+  // Workflow
+  INTERNAL_INVITE_APPROVER: "/api/v1/internal-correspondences/:id/approvals/invite",
+  INTERNAL_UPDATE_APPROVAL_STATUS: "/api/v1/internal-correspondences/approvals/:approval_id/status",
   INTERNAL_INVITE_SIGNER: "/api/v1/internal-correspondences/:id/signers/invite",
   INTERNAL_GET_WORKFLOW: "/api/v1/internal-correspondences/:id/workflow",
 } as const;

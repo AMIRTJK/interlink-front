@@ -113,6 +113,9 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
         return; // Пропускаем 'date_range', так как у нас есть 'date_from' и 'date_to'
       }
 
+      // Игнорируем параметры, которые нужны только для UI (чтобы они не улетали в API)
+      if (key === "defaultFolder") return;
+
       // Игнорируем пустые значения, чтобы не слать их в API
       if (value === undefined || value === null || value === "") return;
       // Приведение типов для числовых полей (согласно вашему API)
