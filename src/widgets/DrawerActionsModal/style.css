@@ -10,6 +10,7 @@
   flex: 1 !important;
   display: flex !important;
   flex-direction: column !important;
+  gap: 24px;
   /* min-height: 751px !important; */
   /* max-height: 752px!important; */
   /* border-radius: 20px!important; */
