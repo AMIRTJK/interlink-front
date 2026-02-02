@@ -1,9 +1,35 @@
+/* 1. Контейнер, в котором лежит "лист" */
+.custom-editor {
+  /* Разрешаем скролл внутри контейнера, так как лист будет длинным */
+  overflow-y: auto !important;
+  /* Центрируем лист бумаги внутри области */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Лист начинается сверху */
+  scrollbar-width: thin;
+}
+
 /* --- Стили самого редактора (Лист бумаги) --- */
 .custom-editor .ck-content {
-  border: none !important;
-  box-shadow: none !important;
+  /* Физические размеры А4 */
+  width: 21cm !important;
+  min-height: 29.7cm !important; /* Минимум одна страница */
+
+  /* Отступы внутри листа, соответствующие настройкам Pagination в JS */
+
+  /* Визуал бумаги */
+  background-color: #ffffff !important; /* Бумага всегда белая, даже в темной теме */
+  color: #000000 !important; /* Текст на бумаге всегда черный */
+  /* Убираем стандартные рамки фокуса */
   outline: none !important;
-  height: 100%;
+
+  margin: 10mm;
+}
+
+.custom-editor .ck-focused {
+  border: none !important;
+  background-color: none !important;
+  box-shadow: none !important;
 }
 
 .ck.ck-balloon-panel.ck-balloon-panel_position_border-side_left.ck-balloon-panel_visible.ck-evaluation-badge-balloon {

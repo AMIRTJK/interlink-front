@@ -11,9 +11,15 @@ import {
   Link,
   BlockQuote,
   PageBreak,
+  CloudServices,
 } from "ckeditor5";
 
-import { FormatPainter, Pagination } from "ckeditor5-premium-features";
+import {
+  FormatPainter,
+  Pagination,
+  ExportPdf,
+  ExportWord,
+} from "ckeditor5-premium-features";
 
 import "ckeditor5/ckeditor5.css";
 import "ckeditor5-premium-features/ckeditor5-premium-features.css";
@@ -64,8 +70,9 @@ export const DocumentEditor = ({ isDarkMode, mode }: DocumentEditorProps) => {
         ></div>
       </If>
       <div
-        className="custom-editor rounded-3xl h-280.75 overflow-hidden p-4 shadow-xl border transition-all duration-300"
+        className="custom-editor rounded-3xl overflow-auto shadow-xl border transition-all duration-300"
         style={{
+          height: "30cm",
           backgroundColor: isDarkMode
             ? "rgba(31, 41, 55, 0.4)"
             : "rgba(255, 255, 255, 0.8)",
@@ -99,6 +106,9 @@ export const DocumentEditor = ({ isDarkMode, mode }: DocumentEditorProps) => {
               BlockQuote,
               PageBreak,
               Pagination,
+              CloudServices,
+              ExportPdf,
+              ExportWord,
             ],
             toolbar: {
               items: [
@@ -113,11 +123,39 @@ export const DocumentEditor = ({ isDarkMode, mode }: DocumentEditorProps) => {
                 "blockQuote", // Заглушка для "Скрепки" (последний элемент)
                 "pageBreak", // Кнопка для ручного разрыва страницы
                 "|",
+                "exportPdf",
+                "exportWord",
+                "|",
                 "previousPage", // Кнопки навигации по страницам (от Pagination)
                 "nextPage",
                 "pageNavigation",
               ],
               shouldNotGroupWhenFull: true,
+            },
+            exportPdf: {
+              fileName: "my-sample-file.pdf",
+              converterOptions: {
+                format: "A4",
+                margin_top: "20mm",
+                margin_bottom: "20mm",
+                margin_right: "12mm",
+                margin_left: "12mm",
+                page_orientation: "portrait",
+              },
+            },
+            exportWord: {
+              fileName: "my-sample-file.docx",
+              converterOptions: {
+                document: {
+                  size: "A4",
+                  margins: {
+                    top: "20mm",
+                    bottom: "20mm",
+                    right: "12mm",
+                    left: "12mm",
+                  },
+                },
+              },
             },
             pagination: {
               pageWidth: "21cm",
@@ -126,14 +164,16 @@ export const DocumentEditor = ({ isDarkMode, mode }: DocumentEditorProps) => {
               pageMargins: {
                 top: "20mm",
                 bottom: "20mm",
-                left: "12mm",
-                right: "12mm",
+                left: "20mm",
+                right: "20mm",
               },
             },
             fontSize: {
               options: [10, 12, 14, "default", 18, 20, 24],
             },
+
             initialData: "<p>Hello from CKEditor 5 in React!</p>",
+            placeholder: "Type the content here!",
           }}
         />
       </div>
