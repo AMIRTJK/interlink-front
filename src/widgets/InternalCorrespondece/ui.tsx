@@ -4,7 +4,7 @@ import { DrawerActionsModal } from "@widgets/DrawerActionsModal";
 import { TopNavigation } from "./ui/TopNavigation";
 import { useState } from "react";
 import { DocumentHeaderForm } from "./ui/DocumentHeaderForm";
-import { Form } from "antd";
+import { Form, Modal } from "antd";
 import { useParams } from "react-router";
 import { DocumentEditor } from "./ui/DocumentEditor";
 
@@ -15,6 +15,7 @@ interface IProps {
 export const InternalCorrespondece: React.FC<IProps> = ({ mode }) => {
   const { id } = useParams<{ id: string }>();
   const { open, close, isOpen } = useModalState();
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [currentMode, setCurrentMode] = useState<"create" | "show">(mode);
@@ -67,11 +68,25 @@ export const InternalCorrespondece: React.FC<IProps> = ({ mode }) => {
       />
       <ActionToolbar
         setIsInspectorOpen={open}
-        setShowPreview={() => console.log("Просмотр")}
+        setShowPreview={() => setIsPreviewOpen(true)}
         handleSend={() => console.log("Отправить")}
         onSave={onSendClick}
         mode={currentMode}
       />
+      <Modal
+        title="Предварительный просмотр"
+        open={isPreviewOpen}
+        onCancel={() => setIsPreviewOpen(false)}
+        footer={null}
+        width={1000}
+        centered
+        destroyOnClose
+        bodyStyle={{ height: "80vh", padding: 0, overflow: "hidden" }}
+      >
+        <div className="p-4 bg-gray-100 rounded-lg max-h-[80vh] overflow-y-auto">
+          <DocumentEditor isDarkMode={isDarkMode} mode="show" />
+        </div>
+      </Modal>
     </div>
   );
 };
