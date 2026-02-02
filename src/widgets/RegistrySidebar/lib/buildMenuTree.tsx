@@ -73,24 +73,25 @@ export const buildMenuTree = ({
       if (folder.name === SYSTEM_FOLDERS.OUTGOING) {
         const defaultChildren: MenuItem[] = [
           {
-            key: "default-sent",
-            folderName: "Отправленные",
-            icon: <SendOutlined />,
-            label: <span className="font-medium">Отправленные</span>,
-            path: `/modules/correspondence/outgoing?defaultFolder="sent"`,
-          },
-          {
             key: "default-received",
             folderName: "Полученные",
             icon: <MailOutlined />,
             label: <span className="font-medium">Полученные</span>,
-            path: `/modules/correspondence/incoming?defaultFolder="received"`,
+            path: `/modules/correspondence/incoming?defaultFolder=received`,
+          },
+          {
+            key: "default-sent",
+            folderName: "Отправленные",
+            icon: <SendOutlined />,
+            label: <span className="font-medium">Отправленные</span>,
+            path: `/modules/correspondence/outgoing?defaultFolder=sent`,
           },
         ];
 
+        // Кнопку "Создать папку" теперь ставим ПОСЛЕ дефолтных папок, как просил пользователь
         children = children
-          ? [createPlaceholder, ...defaultChildren, ...children]
-          : [createPlaceholder, ...defaultChildren];
+          ? [...defaultChildren, createPlaceholder, ...children]
+          : [...defaultChildren, createPlaceholder];
       } else {
         children = children
           ? [createPlaceholder, ...children]

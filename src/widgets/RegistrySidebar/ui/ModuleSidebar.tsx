@@ -285,6 +285,13 @@ export const ModuleSidebar = ({ isDetailView }: RegistrySidebarProps) => {
   const folderIdParam = searchParams.get("folderId");
 
   const activeKey = useMemo(() => {
+    // Проверяем, не находимся ли мы в наших дефолтных папках
+    const defaultFolder = searchParams.get("defaultFolder");
+    if (defaultFolder) {
+      // Подсвечиваем "Полученные" или "Отправленные" в сайдбаре
+      return `default-${defaultFolder.replace(/"/g, "")}`;
+    }
+
     if (folderIdParam) {
       return `folder-${folderIdParam}`;
     }

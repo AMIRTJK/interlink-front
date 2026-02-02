@@ -18,21 +18,17 @@ export const CorrespondenceTableWrapper = ({
   const folderId = searchParams.get("folderId");
 
   const { params, url } = useMemo(() => {
-    const currentParams = { ...baseParams };
-    let currentUrl: string = ApiRoutes.GET_CORRESPONDENCES;
+    let currentParams = { ...baseParams };
+    const currentUrl = ApiRoutes.GET_CORRESPONDENCES;
 
     // Если в URL есть defaultFolder (папки "Полученные"/"Отправленные"), 
-    // меняем эндпоинт на специфичные пути согласно новому списку АПИ
+    // добавляем фильтрацию по внутреннему каналу через параметр channel
     const defaultFolder = searchParams.get("defaultFolder");
     if (defaultFolder) {
-      // Убираем кавычки из значения, если они есть (на случай "?defaultFolder="sent"")
-      const folderValue = defaultFolder.replace(/"/g, "");
-
-      if (folderValue === "received") {
-        currentUrl = ApiRoutes.GET_INTERNAL_INCOMING;
-      } else if (folderValue === "sent") {
-        currentUrl = ApiRoutes.GET_INTERNAL_OUTGOING;
-      }
+      currentParams = {
+        ...currentParams,
+        channel: "internal",
+      };
     }
 
     if (folderId) {
