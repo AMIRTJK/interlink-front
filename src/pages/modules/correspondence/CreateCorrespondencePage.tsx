@@ -48,12 +48,8 @@ export const CreateCorrespondencePage = ({
   );
 
   if (shouldHideUI) {
-    return (
-      <div>
-        {/* show||create */}
-        <InternalCorrespondece mode="create" />
-      </div>
-    );
+    // show||create
+    return <InternalCorrespondece mode="create" />;
   }
 
   return (
