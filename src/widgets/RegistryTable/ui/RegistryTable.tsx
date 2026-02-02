@@ -22,6 +22,7 @@ interface RegistryTableProps<T extends Record<string, unknown>> {
   type: string;
   createButtonText?: string;
   extraParams?: Record<string, unknown>;
+  url?: string; // URL для загрузки данных (по умолчанию GET_CORRESPONDENCES)
 }
 
 export const RegistryTable = <T extends Record<string, unknown>>({
@@ -29,6 +30,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   createButtonText,
   type,
   extraParams,
+  url = ApiRoutes.GET_CORRESPONDENCES, // Если URL не передан, используем стандартный
 }: RegistryTableProps<T>) => {
   const tabFromParams = extraParams?.tab;
   const initialTab =
@@ -230,7 +232,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
         </div>
         <div className={`${isAllowed ? "block! px-2!" : "hidden!"}`}>
           <UniversalTable
-            url={ApiRoutes.GET_CORRESPONDENCES}
+            url={url}
             filters={filters}
             columns={columns}
             className="[&_.ant-table-cell]:rounded-none! [&_.ant-pagination]:px-4! [&_.ant-table-row]:cursor-pointer [&_.ant-table-expanded-row.ant-table-expanded-row-level-1>td]:bg-[#F2F5FF]!"
