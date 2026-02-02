@@ -33,7 +33,7 @@ export const SmartTabs: React.FC<IProps> = ({ items, activeKey, onChange }) => {
                 
                 ${
                   isActive
-                    ? "bg-[#F87171] text-white shadow-[0_4px_12px_rgba(248,113,113,0.35)] scale-105"
+                    ? "bg-[#F87171] text-white scale-105"
                     : "bg-transparent text-gray-500 hover:bg-white hover:text-gray-800"
                 }
               `}
