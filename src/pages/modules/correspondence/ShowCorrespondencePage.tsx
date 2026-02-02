@@ -53,6 +53,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
   );
 
   if (shouldHideUI) {
+    // show||create
     return <InternalCorrespondece mode="show" />;
   }
 
