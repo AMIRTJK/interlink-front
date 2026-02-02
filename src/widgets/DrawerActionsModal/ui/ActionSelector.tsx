@@ -15,7 +15,14 @@ export const ActionSelector: React.FC<IActionSelectorProps> = ({ icon, label, on
   return (
     <div 
       onClick={onClick}
-      className="group flex items-center justify-between bg-white p-4 rounded-2xl cursor-pointer hover:shadow-lg hover:shadow-gray-100 transition-all duration-300 border border-transparent hover:border-purple-100"
+      className="group flex items-center justify-between
+p-4 rounded-2xl cursor-pointer
+border border-[#a78bfa]
+transition-all duration-300
+
+hover:border-[#8b5cf6]
+hover:bg-[#f5f3ff]
+hover:shadow-lg hover:shadow-purple-100"
     >
       <div className="flex items-center gap-3 text-gray-700">
         <span className="text-lg text-gray-400 group-hover:text-purple-500 transition-colors">
