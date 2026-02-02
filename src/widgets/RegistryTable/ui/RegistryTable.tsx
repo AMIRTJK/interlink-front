@@ -44,8 +44,9 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 
   const isIncoming = location.pathname === AppRoutes.CORRESPONDENCE_INCOMING;
   const isOutgoing = location.pathname === AppRoutes.CORRESPONDENCE_OUTGOING;
+  const isDefaultFolder = !!searchParams.get("defaultFolder");
 
-  const showCreateButton = (isIncoming || isOutgoing) && !folderId;
+  const showCreateButton = (isIncoming || isOutgoing) && !folderId && !isDefaultFolder;
 
   const handleCreate = () => {
     navigate(`${location.pathname}/create`);

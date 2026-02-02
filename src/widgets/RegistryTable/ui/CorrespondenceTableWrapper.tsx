@@ -17,14 +17,26 @@ export const CorrespondenceTableWrapper = ({
   const folderId = searchParams.get("folderId");
 
   const extraParams = useMemo(() => {
+    let params = { ...baseParams };
+
+    // Если в URL есть defaultFolder (папки "Полученные"/"Отправленные"), 
+    // добавляем фильтрацию по внутреннему каналу
+    const defaultFolder = searchParams.get("defaultFolder");
+    if (defaultFolder) {
+      params = {
+        ...params,
+        channel: "internal",
+      };
+    }
+
     if (folderId) {
       return {
-        ...baseParams,
+        ...params,
         folder_id: parseInt(folderId, 10),
       };
     }
-    return baseParams;
-  }, [baseParams, folderId]);
+    return params;
+  }, [baseParams, folderId, searchParams]);
 
   return (
     <>

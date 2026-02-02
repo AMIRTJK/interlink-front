@@ -1,4 +1,4 @@
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, MailOutlined, SendOutlined } from "@ant-design/icons";
 import { MenuProps } from "antd";
 import folderIcon from "../../../assets/icons/folder-icon.svg";
 import {
@@ -17,6 +17,7 @@ import { createDragHandlers } from "./dragHandlers";
 import { createFolderMenuActions } from "./menuActionBuilder";
 import { FolderLabel } from "./FolderLabel";
 import { SystemFolderLabel } from "./SystemFolderLabel";
+import { SYSTEM_FOLDERS } from "./constants";
 
 export type { IBuildMenuTreeParams, MenuItem, IFolder, IFolderDefinition };
 
@@ -67,9 +68,34 @@ export const buildMenuTree = ({
         path: "",
         parent_id: folder.id || null,
       };
-      children = children
-        ? [createPlaceholder, ...children]
-        : [createPlaceholder];
+
+      // Добавляем дефолтные папки ("Полученные", "Отправленные") только во "Внутреннюю корреспонденцию"
+      if (folder.name === SYSTEM_FOLDERS.OUTGOING) {
+        const defaultChildren: MenuItem[] = [
+          {
+            key: "default-sent",
+            folderName: "Отправленные",
+            icon: <SendOutlined />,
+            label: <span className="font-medium">Отправленные</span>,
+            path: `/modules/correspondence/outgoing?defaultFolder="sent"`,
+          },
+          {
+            key: "default-received",
+            folderName: "Полученные",
+            icon: <MailOutlined />,
+            label: <span className="font-medium">Полученные</span>,
+            path: `/modules/correspondence/incoming?defaultFolder="received"`,
+          },
+        ];
+
+        children = children
+          ? [createPlaceholder, ...defaultChildren, ...children]
+          : [createPlaceholder, ...defaultChildren];
+      } else {
+        children = children
+          ? [createPlaceholder, ...children]
+          : [createPlaceholder];
+      }
     }
 
     const menuActions: MenuProps["items"] = isSystemFolder
