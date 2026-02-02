@@ -10,13 +10,15 @@ import {
   Alignment,
   Link,
   BlockQuote,
+  PageBreak,
 } from "ckeditor5";
 
-import { FormatPainter } from "ckeditor5-premium-features";
+import { FormatPainter, Pagination } from "ckeditor5-premium-features";
 
 import "ckeditor5/ckeditor5.css";
 import "ckeditor5-premium-features/ckeditor5-premium-features.css";
 import { useRef, useState } from "react";
+import { If } from "@shared/ui";
 const licenseKey =
   "eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3NzA5NDA3OTksImp0aSI6IjYxNmUzMTYzLTAwNDItNDYzYS05MWZmLWViNDA4MjIxMzZmNiIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiLCJzaCJdLCJ3aGl0ZUxhYmVsIjp0cnVlLCJsaWNlbnNlVHlwZSI6InRyaWFsIiwiZmVhdHVyZXMiOlsiKiJdLCJ2YyI6Ijc4NTQzYmQ2In0.5fu9jpzMqZ6Y0vptqRSnt55NplhFPsSYrP2HfYpxdz3OYmKpYo0EBUn5Mgv-LaTCScJoOXiDs3t-VB9xNMarfA";
 
@@ -45,20 +47,22 @@ export const DocumentEditor = ({ isDarkMode, mode }: DocumentEditorProps) => {
       onMouseEnter={() => setIsEditorHovered(true)}
       onMouseLeave={() => setIsEditorHovered(false)}
     >
-      <div
-        ref={toolbarRef}
-        className={`custom-toolbar-container ${isDarkMode ? "dark" : ""} ${
-          isEditorHovered ? "visible" : ""
-        }`}
-        style={{
-          backgroundColor: toolbarBg,
-          borderColor: toolbarBorder,
-          backdropFilter: "blur(12px)",
-          opacity: isEditorHovered ? 1 : 0,
-          transform: `translate(-50%, ${isEditorHovered ? "0px" : "10px"})`,
-          pointerEvents: isEditorHovered ? "auto" : "none",
-        }}
-      ></div>
+      <If is={!isReadyModeEditor}>
+        <div
+          ref={toolbarRef}
+          className={`custom-toolbar-container ${isDarkMode ? "dark" : ""} ${
+            isEditorHovered ? "visible" : ""
+          }`}
+          style={{
+            backgroundColor: toolbarBg,
+            borderColor: toolbarBorder,
+            backdropFilter: "blur(12px)",
+            opacity: isEditorHovered ? 1 : 0,
+            transform: `translate(-50%, ${isEditorHovered ? "0px" : "10px"})`,
+            pointerEvents: isEditorHovered ? "auto" : "none",
+          }}
+        ></div>
+      </If>
       <div
         className="custom-editor rounded-3xl h-280.75 overflow-hidden p-4 shadow-xl border transition-all duration-300"
         style={{
@@ -93,6 +97,8 @@ export const DocumentEditor = ({ isDarkMode, mode }: DocumentEditorProps) => {
               Alignment,
               Link,
               BlockQuote,
+              PageBreak,
+              Pagination,
             ],
             toolbar: {
               items: [
@@ -105,8 +111,24 @@ export const DocumentEditor = ({ isDarkMode, mode }: DocumentEditorProps) => {
                 "link", // Ссылка (Цепочка)
                 "|",
                 "blockQuote", // Заглушка для "Скрепки" (последний элемент)
+                "pageBreak", // Кнопка для ручного разрыва страницы
+                "|",
+                "previousPage", // Кнопки навигации по страницам (от Pagination)
+                "nextPage",
+                "pageNavigation",
               ],
               shouldNotGroupWhenFull: true,
+            },
+            pagination: {
+              pageWidth: "21cm",
+              pageHeight: "29.7cm",
+
+              pageMargins: {
+                top: "20mm",
+                bottom: "20mm",
+                left: "12mm",
+                right: "12mm",
+              },
             },
             fontSize: {
               options: [10, 12, 14, "default", 18, 20, 24],
