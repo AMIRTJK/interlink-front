@@ -176,7 +176,8 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
         return {
           title: "Прикрепить письмо",
           mode: "attach" as const,
-          querySettings: { url: ApiRoutes.GET_CORRESPONDENCES },
+          // Используем внутренние входящие письма согласно спецификации
+          querySettings: { url: ApiRoutes.GET_INTERNAL_INCOMING as string },
           transformResponse: (
             items: Array<{
               id: string;
@@ -200,7 +201,8 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
         return {
           title: "Выбрать подписывающего",
           mode: "select" as const,
-          querySettings: { url: ApiRoutes.GET_USERS },
+          // Используем специфичный поиск сотрудников для внутренних писем
+          querySettings: { url: ApiRoutes.GET_INTERNAL_RECIPIENTS_USERS as string },
           transformResponse: (
             items: Array<{
               id: string;
@@ -222,7 +224,8 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
         return {
           title: "Выбрать согласующих",
           mode: "select" as const,
-          querySettings: { url: ApiRoutes.GET_USERS },
+          // Используем специфичный поиск сотрудников для внутренних писем
+          querySettings: { url: ApiRoutes.GET_INTERNAL_RECIPIENTS_USERS as string },
           transformResponse: (
             items: Array<{
               id: string;
