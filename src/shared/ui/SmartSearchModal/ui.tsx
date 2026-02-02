@@ -29,7 +29,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
         ...querySettings?.params,
         ...(mode === 'attach' 
             ? { subject: searchText, sender_name: searchText } 
-            : { last_name: searchText, first_name: searchText, middle_name: searchText }
+            : { search: searchText } // Для поиска людей теперь используем один ключ search
         ),
         page: 1,
         per_page: 50 
@@ -111,6 +111,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
       <div className='mb-5'>
         <Input
           placeholder={placeholder}
+          allowClear
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           className="min-h-14 max-h-14 rounded-2xl bg-white border-none! hover:bg-gray-50 focus:bg-white transition-all text-base shadow-sm w-full px-5"
