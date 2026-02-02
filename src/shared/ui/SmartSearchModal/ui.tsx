@@ -29,7 +29,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
         ...querySettings?.params,
         ...(mode === 'attach' 
             ? { subject: searchText, sender_name: searchText } 
-            : { first_name: searchText }
+            : { last_name: searchText, first_name: searchText, middle_name: searchText }
         ),
         page: 1,
         per_page: 50 
