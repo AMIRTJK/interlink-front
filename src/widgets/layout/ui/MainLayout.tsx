@@ -1,19 +1,11 @@
-import { matchPath, Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { ModuleMenu } from "./ModuleMenu";
 import { Header } from "./Header";
 import { If } from "@shared/ui";
+import { useCorrespondenceRoute } from "@shared/lib";
 
 export const MainLayout = () => {
-  const location = useLocation();
-
-  const hiddenPatterns = [
-    "/modules/correspondence/outgoing/create",
-    "/modules/correspondence/outgoing/:id",
-  ];
-
-  const shouldHideUI = hiddenPatterns.some((pattern) =>
-    matchPath({ path: pattern, end: true }, location.pathname),
-  );
+  const { shouldHideUI } = useCorrespondenceRoute();
 
   return (
     <div
