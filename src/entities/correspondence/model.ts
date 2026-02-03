@@ -9,6 +9,12 @@ export enum CorrespondenseStatus {
   CANCELLED = "cancelled",
 }
 
+export enum InternalCorrespondenceStatus {
+  TO_APPROVE = "to_approve",
+  TO_SIGN = "to_sign",
+  SENT = "sent",
+}
+
 export interface CorrespondenceResponse {
   id: number;
   organization_id: number;

@@ -15,7 +15,9 @@ import { AppRoutes } from "@shared/config";
 import {
   CorrespondenceResponse,
   CorrespondenseStatus,
+  InternalCorrespondenceStatus,
 } from "@entities/correspondence";
+import { INTERNAL_OUTGOING_TABS } from "../lib/lib";
 interface RegistryTableProps<T extends Record<string, unknown>> {
   data?: T[];
   isLoading?: boolean;
@@ -33,8 +35,15 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   url = ApiRoutes.GET_CORRESPONDENCES, // Если URL не передан, используем стандартный
 }: RegistryTableProps<T>) => {
   const tabFromParams = extraParams?.tab;
+
+  const defaultTab =
+    type === "internal-outgoing"
+      ? InternalCorrespondenceStatus.TO_APPROVE
+      : "draft";
+
   const initialTab =
-    typeof tabFromParams === "string" ? tabFromParams : "draft";
+    typeof tabFromParams === "string" ? tabFromParams : defaultTab;
+
   const [currentTab, setCurrentTab] = useState(initialTab);
   const [correspondenceId, setCorrespondenceId] = useState<string | number>();
 
@@ -46,7 +55,18 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 
   const isIncoming = location.pathname === AppRoutes.CORRESPONDENCE_INCOMING;
   const isOutgoing = location.pathname === AppRoutes.CORRESPONDENCE_OUTGOING;
+
   const isDefaultFolder = !!searchParams.get("defaultFolder");
+
+  const customTabs = useMemo(() => {
+    if (type === "internal-incoming") {
+      return []; // Пустой массив скроет табы
+    }
+    if (type === "internal-outgoing") {
+      return INTERNAL_OUTGOING_TABS;
+    }
+    return undefined; // undefined заставит StatusTabs использовать дефолтные
+  }, [type]);
 
   // Динамически определяем URL в зависимости от типа и текущей вкладки
   const currentUrl = useMemo(() => {
@@ -58,12 +78,17 @@ export const RegistryTable = <T extends Record<string, unknown>>({
       }
       // Здесь можно добавить другие маппинги для внутренней корреспонденции (trash и т.д.)
     }
-    
+
     // По умолчанию или для внешней корреспонденции используем базовый URL
     return url;
   }, [type, currentTab, url]);
 
-  const showCreateButton = (type.includes("incoming") || type.includes("outgoing")) && !folderId && !isDefaultFolder && !type.includes("drafts") && !type.includes("archive");
+  const showCreateButton =
+    (type.includes("incoming") || type.includes("outgoing")) &&
+    !folderId &&
+    !isDefaultFolder &&
+    !type.includes("drafts") &&
+    !type.includes("archive");
 
   const handleCreate = () => {
     navigate(`${location.pathname}/create`);
@@ -135,7 +160,10 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 
     navigate(route.replace(":id", String(record.id)));
   };
-  const showTabs = !!extraParams?.kind;
+
+  const showTabs = Array.isArray(customTabs)
+    ? customTabs.length > 0
+    : !!extraParams?.kind;
 
   const expandedRowRender = (record: CorrespondenceResponse) => {
     const isExecuteButtonActive =
@@ -226,6 +254,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
               counts={tabCounts}
               activeTab={currentTab}
               onTabChange={setCurrentTab}
+              items={customTabs}
             />
           </If>
         </nav>

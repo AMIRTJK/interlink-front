@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { AppRoutes } from "@shared/config/AppRoutes";
 import { getModuleItems, MenuItem } from "./lib";
 import { tokenControl, useGetQuery } from "@shared/lib";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ApiRoutes } from "@shared/api";
 import "./style.css";
 
@@ -17,12 +17,45 @@ type TSubMenuItem = {
   requiredRole?: string[];
   icon?: React.ReactNode;
 };
+
+const SHARED_ROUTES = ["archive", "pinned", "trashed"];
+const STORAGE_KEY = "correspondence_active_tab";
+
 export const ModuleMenu = ({ variant }: IProps) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
   // Мемоизируем items
   const items = useMemo(() => getModuleItems(variant), [variant]);
+
+  const hasChildren = (item: MenuItem): item is TSubMenuItem => {
+    return item !== null && typeof item === "object" && "children" in item;
+  };
+
+  useEffect(() => {
+    const isSharedRoute = SHARED_ROUTES.some((route) =>
+      pathname.includes(route),
+    );
+
+    if (!isSharedRoute && pathname.includes("/correspondence")) {
+      // Находим основной пункт "Корреспонденция"
+      const correspondenceMenu = items.find(
+        (item) => item?.key === AppRoutes.CORRESPONDENCE,
+      );
+
+      // Безопасно проверяем наличие детей через Type Guard
+      if (correspondenceMenu && hasChildren(correspondenceMenu)) {
+        const activeTab = correspondenceMenu.children?.find((sub) => {
+          // Проверяем sub на null и наличие ключа (так как подпункты тоже Union)
+          return sub && "key" in sub && pathname.startsWith(String(sub.key));
+        });
+
+        if (activeTab && "key" in activeTab) {
+          sessionStorage.setItem(STORAGE_KEY, String(activeTab.key));
+        }
+      }
+    }
+  }, [pathname, items]);
 
   const activeItem = items.find((item) => {
     if (!item || !("key" in item)) return false;
@@ -90,7 +123,9 @@ export const ModuleMenu = ({ variant }: IProps) => {
 
       // Проверяем, есть ли хотя бы одна роль из requiredRole у пользователя
       const hasRole = menuItem.requiredRole.some(
-        (role) => userRoleNames.includes(role) || preloadData?.some((p: { name: string }) => p.name === role)
+        (role) =>
+          userRoleNames.includes(role) ||
+          preloadData?.some((p: { name: string }) => p.name === role),
       );
       return hasRole;
     });
@@ -129,8 +164,25 @@ export const ModuleMenu = ({ variant }: IProps) => {
         <div className="sub-menu-bar">
           {subItems?.map((sub) => {
             if (!sub || !("key" in sub)) return null;
-            const isActive =
-              pathname === sub.key || pathname.startsWith(sub.key + "/");
+
+            const subKey = String(sub.key);
+
+            const isDirectMatch =
+              pathname === subKey || pathname.startsWith(subKey + "/");
+
+            const isRestoredMatch = (() => {
+              const isSharedRoute = SHARED_ROUTES.some((route) =>
+                pathname.includes(route),
+              );
+              if (isSharedRoute) {
+                const lastActiveKey = sessionStorage.getItem(STORAGE_KEY);
+                return lastActiveKey === subKey;
+              }
+              return false;
+            })();
+
+            const isActive = isDirectMatch || isRestoredMatch;
+
             return (
               <div
                 key={sub.key}
