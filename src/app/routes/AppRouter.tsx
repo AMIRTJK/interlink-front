@@ -97,12 +97,10 @@ const HrPage = lazy(() =>
 
 const incomingParams = {
   kind: "incoming",
-  tab: "draft",
 };
 
 const outgoingParams = {
   kind: "outgoing",
-  tab: "draft",
 };
 
 const archivedParams = {
@@ -168,7 +166,9 @@ export const AppRouter = () => {
                         <CorrespondenceTableWrapper
                           type="incoming"
                           createButtonText="Добавить письмо"
-                          baseParams={incomingParams}
+                          baseParams={{
+                            ...incomingParams,
+                          }}
                         />
                       }
                     />
@@ -188,7 +188,9 @@ export const AppRouter = () => {
                         <CorrespondenceTableWrapper
                           type="outgoing"
                           createButtonText="Добавить письмо"
-                          baseParams={outgoingParams}
+                          baseParams={{
+                            ...outgoingParams,
+                          }}
                         />
                       }
                     />
@@ -210,13 +212,7 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        <CorrespondenceTableWrapper
-                          type="internal-incoming"
-                          baseParams={{
-                            ...incomingParams,
-                            channel: "internal",
-                          }}
-                        />
+                        <CorrespondenceTableWrapper type="internal-incoming" />
                       }
                     />
                     <Route
@@ -239,10 +235,6 @@ export const AppRouter = () => {
                         <CorrespondenceTableWrapper
                           type="internal-outgoing"
                           createButtonText="Добавить письмо"
-                          baseParams={{
-                            ...outgoingParams,
-                            channel: "internal",
-                          }}
                         />
                       }
                     />
@@ -266,7 +258,6 @@ export const AppRouter = () => {
                         <CorrespondenceTableWrapper
                           type="internal-drafts"
                           createButtonText="Добавить письмо"
-                          baseParams={{ channel: "internal", status: "draft" }}
                         />
                       }
                     />

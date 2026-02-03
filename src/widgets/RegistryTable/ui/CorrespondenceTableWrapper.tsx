@@ -6,22 +6,23 @@ import { ApiRoutes } from "@shared/api";
 interface IncomingTableWrapperProps {
   type: string;
   createButtonText?: string;
-  baseParams: Record<string, unknown>;
+  baseParams?: Record<string, unknown>;
 }
 
-export const CorrespondenceTableWrapper = ({ 
-  type, 
-  createButtonText, 
-  baseParams 
+export const CorrespondenceTableWrapper = ({
+  type,
+  createButtonText,
+  baseParams,
 }: IncomingTableWrapperProps) => {
   const [searchParams] = useSearchParams();
   const folderId = searchParams.get("folderId");
 
   const { params, url } = useMemo(() => {
     let currentParams = { ...baseParams };
+
     const currentUrl = ApiRoutes.GET_CORRESPONDENCES;
 
-    // Если в URL есть defaultFolder (папки "Полученные"/"Отправленные"), 
+    // Если в URL есть defaultFolder (папки "Полученные"/"Отправленные"),
     // добавляем фильтрацию по внутреннему каналу через параметр channel
     const defaultFolder = searchParams.get("defaultFolder");
     if (defaultFolder) {
@@ -31,16 +32,24 @@ export const CorrespondenceTableWrapper = ({
       };
     }
 
+    // EXTERNAL-INCOMING
+    if (type === "incoming" || type === "outgoing") {
+      return {
+        params: currentParams,
+        url: currentUrl,
+      };
+    }
+
     if (type === "internal-incoming") {
       return {
-        params: { ...currentParams, exclude_status: 'draft' },
+        params: { ...currentParams },
         url: ApiRoutes.GET_INTERNAL_INCOMING,
       };
     }
-    
+
     if (type === "internal-outgoing") {
       return {
-        params: { ...currentParams, exclude_status: 'draft' },
+        params: { ...currentParams },
         url: ApiRoutes.GET_INTERNAL_OUTGOING,
       };
     }
@@ -61,7 +70,7 @@ export const CorrespondenceTableWrapper = ({
         url: currentUrl,
       };
     }
-    
+
     return {
       params: currentParams,
       url: currentUrl,
