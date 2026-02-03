@@ -19,12 +19,12 @@ export const AppRoutes = {
 
   CORRESPONDENCE_INCOMING_CREATE: "/modules/correspondence/external/create",
   CORRESPONDENCE_OUTGOING_CREATE: "/modules/correspondence/internal/create",
-  
+
   CORRESPONDENCE_ARCHIVE: "/modules/correspondence/archive",
   CORRESPONDENCE_PINNED: "/modules/correspondence/pinned",
   CORRESPONDENCE_FOLDERS: "/modules/correspondence/folders",
   CORRESPONDENCE_TRASHED: "/modules/correspondence/trashed",
-  CORRESPONDENCE_INCOMING_SHOW: "/modules/correspondence/external/:id",
+  CORRESPONDENCE_INCOMING_SHOW: "/modules/correspondence/external/incoming/:id",
   CORRESPONDENCE_OUTGOING_SHOW: "/modules/correspondence/internal/:id",
   // CORRESPONDENCE_INTERNAL: "/modules/correspondence/internal",
 } as const;
