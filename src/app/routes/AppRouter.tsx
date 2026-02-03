@@ -269,7 +269,30 @@ export const AppRouter = () => {
                         <RegistryTable
                           type="internal-incoming"
                           url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
-                          extraParams={{ archived: 1 }}
+                          extraParams={archivedParams}
+                        />
+                      }
+                    />
+                  </Route>
+                  <Route path="pinned">
+                    <Route
+                      index
+                      element={
+                        <RegistryTable
+                          type="internal-incoming"
+                          url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
+                          extraParams={pinnedParams}
+                        />
+                      }
+                    />
+                  </Route>
+                  <Route path="trashed">
+                    <Route
+                      index
+                      element={
+                        <RegistryTable
+                          type="internal-incoming"
+                          url={ApiRoutes.GET_INTERNAL_TRASH}
                         />
                       }
                     />
