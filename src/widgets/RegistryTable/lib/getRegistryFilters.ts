@@ -12,6 +12,7 @@ export const getRegistryFilters = (type: string): IFilterItem[] => {
     trashed: getCorrespondenceIncomingFilters,
     "internal-incoming": getCorrespondenceIncomingFilters,
     "internal-outgoing": getCorrespondenceOutgoingFilters,
+    "internal-drafts": getCorrespondenceOutgoingFilters,
 
     // Если есть общий тип для всей корреспонденции (как фоллбек)
     correspondence: getCorrespondenceIncomingFilters,

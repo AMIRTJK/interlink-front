@@ -33,15 +33,22 @@ export const CorrespondenceTableWrapper = ({
 
     if (type === "internal-incoming") {
       return {
-        params: currentParams,
+        params: { ...currentParams, exclude_status: 'draft' },
         url: ApiRoutes.GET_INTERNAL_INCOMING,
       };
     }
     
     if (type === "internal-outgoing") {
       return {
-        params: currentParams,
+        params: { ...currentParams, exclude_status: 'draft' },
         url: ApiRoutes.GET_INTERNAL_OUTGOING,
+      };
+    }
+
+    if (type === "internal-drafts") {
+      return {
+        params: currentParams,
+        url: ApiRoutes.GET_INTERNAL_DRAFTS,
       };
     }
 

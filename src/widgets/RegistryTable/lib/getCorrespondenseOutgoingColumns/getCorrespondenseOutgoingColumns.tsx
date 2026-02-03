@@ -16,7 +16,9 @@ import trashIcon from "../../../../assets/icons/trash-icon.svg";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 
-export const useCorrespondenseOutgoingColumns = (): TableColumnsType => {
+export const useCorrespondenseOutgoingColumns = (type?: string): TableColumnsType => {
+  const isInternal = type?.includes("internal");
+
   // Archive mutation
   const { mutate: archiveCorrespondence } = useMutationQuery<{
     id: number;
@@ -31,6 +33,9 @@ export const useCorrespondenseOutgoingColumns = (): TableColumnsType => {
       invalidate: [
         ApiRoutes.GET_CORRESPONDENCES,
         ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+        ApiRoutes.GET_INTERNAL_INCOMING,
+        ApiRoutes.GET_INTERNAL_OUTGOING,
+        ApiRoutes.GET_INTERNAL_COUNTERS,
       ],
     },
   });
@@ -48,6 +53,9 @@ export const useCorrespondenseOutgoingColumns = (): TableColumnsType => {
       invalidate: [
         ApiRoutes.GET_CORRESPONDENCES,
         ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+        ApiRoutes.GET_INTERNAL_INCOMING,
+        ApiRoutes.GET_INTERNAL_OUTGOING,
+        ApiRoutes.GET_INTERNAL_COUNTERS,
       ],
     },
   });
@@ -66,6 +74,9 @@ export const useCorrespondenseOutgoingColumns = (): TableColumnsType => {
       invalidate: [
         ApiRoutes.GET_CORRESPONDENCES,
         ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+        ApiRoutes.GET_INTERNAL_INCOMING,
+        ApiRoutes.GET_INTERNAL_OUTGOING,
+        ApiRoutes.GET_INTERNAL_COUNTERS,
       ],
     },
   });
@@ -73,7 +84,9 @@ export const useCorrespondenseOutgoingColumns = (): TableColumnsType => {
   // Delete mutation
   const { mutate: deleteCorrespondence } = useMutationQuery<{ id: number }>({
     url: (data) =>
-      ApiRoutes.DELETE_CORRESPONDENCE.replace(":id", String(data.id)),
+      isInternal
+        ? ApiRoutes.DELETE_INTERNAL.replace(":id", String(data.id))
+        : ApiRoutes.DELETE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "DELETE",
     messages: {
       success: "Письмо успешно удалено",
@@ -81,6 +94,9 @@ export const useCorrespondenseOutgoingColumns = (): TableColumnsType => {
       invalidate: [
         ApiRoutes.GET_CORRESPONDENCES,
         ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+        ApiRoutes.GET_INTERNAL_INCOMING,
+        ApiRoutes.GET_INTERNAL_OUTGOING,
+        ApiRoutes.GET_INTERNAL_COUNTERS,
       ],
     },
   });

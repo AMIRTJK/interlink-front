@@ -6,7 +6,7 @@ export type RegistryType = "correspondence" | "crm" | "primary-documents";
 
 export const useRegistryColumns = (type: string): TableColumnsType<any> => {
   const incomingColumns = useCorrespondenseIncomingColumns();
-  const outgoingColumns = useCorrespondenseOutgoingColumns();
+  const outgoingColumns = useCorrespondenseOutgoingColumns(type);
   const archivedColumns = useCorrespondenseIncomingColumns(type);
   const pinnedColumns = useCorrespondenseIncomingColumns(type);
   const trashedColumns = useCorrespondenseIncomingColumns(type);
@@ -25,6 +25,7 @@ export const useRegistryColumns = (type: string): TableColumnsType<any> => {
     case "internal-incoming":
       return incomingColumns;
     case "internal-outgoing":
+    case "internal-drafts":
       return outgoingColumns;
     default:
       return [];

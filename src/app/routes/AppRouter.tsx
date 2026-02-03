@@ -245,6 +245,18 @@ export const AppRouter = () => {
                       element={<ShowCorrespondencePage type="internal-outgoing" />}
                     />
                   </Route>
+                  <Route path="drafts">
+                    <Route
+                      index
+                      element={
+                        <CorrespondenceTableWrapper
+                          type="internal-drafts"
+                          createButtonText="Добавить письмо"
+                          baseParams={{ channel: 'internal', status: 'draft' }}
+                        />
+                      }
+                    />
+                  </Route>
                 </Route>
                 <Route path="archive">
                   <Route
