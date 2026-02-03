@@ -11,6 +11,7 @@ export const AppRoutes = {
   CORRESPONDENCE_INTERNAL_INCOMING: "/modules/correspondence/internal/incoming",
   CORRESPONDENCE_INTERNAL_OUTGOING: "/modules/correspondence/internal/outgoing",
   CORRESPONDENCE_INTERNAL_DRAFTS: "/modules/correspondence/internal/drafts",
+  CORRESPONDENCE_INTERNAL_ARCHIVE: "/modules/correspondence/internal/archive",
 
   // Legacy/Root mapping (for sidebar matching)
   CORRESPONDENCE_INCOMING: "/modules/correspondence/external", // Keeps compatibility with "Incoming" folder logic if needed
