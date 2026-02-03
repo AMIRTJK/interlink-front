@@ -76,20 +76,25 @@ export const ApiRoutes = {
   GET_INTERNAL_DRAFTS: "/api/v1/internal-correspondences/drafts",
   GET_INTERNAL_TRASH: "/api/v1/internal-correspondences/trash",
   CREATE_INTERNAL: "/api/v1/internal-correspondences",
-  UPDATE_INTERNAL: "/api/v1/internal-correspondences/:id",
+  GET_INTERNAL_BY_ID: "/api/v1/internal-correspondences/:id",
   SEND_INTERNAL: "/api/v1/internal-correspondences/:id/send",
   READ_INTERNAL: "/api/v1/internal-correspondences/:id/read",
   DELETE_INTERNAL: "/api/v1/internal-correspondences/:id",
   RESTORE_INTERNAL: "/api/v1/internal-correspondences/:id/restore",
 
   // Recipients
-  GET_INTERNAL_RECIPIENTS_USERS: "/api/v1/internal-correspondences/recipients/users",
-  GET_INTERNAL_RECIPIENTS_DEPARTMENTS: "/api/v1/internal-correspondences/recipients/departments",
-  GET_INTERNAL_RECIPIENTS_RECENT: "/api/v1/internal-correspondences/recipients/recent",
+  GET_INTERNAL_RECIPIENTS_USERS:
+    "/api/v1/internal-correspondences/recipients/users",
+  GET_INTERNAL_RECIPIENTS_DEPARTMENTS:
+    "/api/v1/internal-correspondences/recipients/departments",
+  GET_INTERNAL_RECIPIENTS_RECENT:
+    "/api/v1/internal-correspondences/recipients/recent",
 
   // Workflow
-  INTERNAL_INVITE_APPROVER: "/api/v1/internal-correspondences/:id/approvals/invite",
-  INTERNAL_UPDATE_APPROVAL_STATUS: "/api/v1/internal-correspondences/approvals/:approval_id/status",
+  INTERNAL_INVITE_APPROVER:
+    "/api/v1/internal-correspondences/:id/approvals/invite",
+  INTERNAL_UPDATE_APPROVAL_STATUS:
+    "/api/v1/internal-correspondences/approvals/:approval_id/status",
   INTERNAL_INVITE_SIGNER: "/api/v1/internal-correspondences/:id/signers/invite",
   INTERNAL_GET_WORKFLOW: "/api/v1/internal-correspondences/:id/workflow",
 } as const;

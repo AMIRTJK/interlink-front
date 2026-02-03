@@ -1,15 +1,11 @@
 import React from "react";
-import {
-  matchPath,
-  useLocation,
-  useParams,
-} from "react-router-dom";
+import { matchPath, useLocation, useParams } from "react-router-dom";
 import {
   CorrespondenceForm,
   CorrespondenceFormData,
   CorrespondenceType,
 } from "@widgets/CorrespondenceForm";
-import {  Spin } from "antd";
+import { Spin } from "antd";
 import { ApiRoutes } from "@shared/api";
 import { useGetQuery } from "@shared/lib";
 import { InternalCorrespondece } from "@widgets/InternalCorrespondece";
@@ -24,10 +20,27 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
 
+  const hiddenPatterns = [
+    "/modules/correspondence/outgoing/create",
+    "/modules/correspondence/outgoing/:id",
+  ];
+
+  const shouldHideUI = hiddenPatterns.some((pattern) =>
+    matchPath({ path: pattern, end: true }, location.pathname),
+  );
+
+  const currentApi = shouldHideUI
+    ? ApiRoutes.GET_INTERNAL_BY_ID
+    : ApiRoutes.GET_CORRESPONDENCE_BY_ID;
+
+  const currentParam = shouldHideUI ? {} : { view: "full" };
+
   const { isLoading, data: correspondenceData } = useGetQuery({
-    url: ApiRoutes.GET_CORRESPONDENCE_BY_ID.replace(":id", String(id || "")),
-    params: { view: "full" },
+    url: currentApi.replace(":id", String(id || "")),
+    params: currentParam,
   });
+
+  console.log(correspondenceData);
 
   const handleFinish = (values: CorrespondenceFormData) => {
     console.log("Updating:", values);
@@ -38,19 +51,10 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
   const title =
     type === "incoming" ? `Входящее письмо #${id}` : `Исходящее письмо #${id}`;
 
-  const { data } = correspondenceData;
+  const data = correspondenceData?.data;
 
   const shouldOpenExecution = (location.state as { openExecution?: boolean })
     ?.openExecution;
-
-  const hiddenPatterns = [
-    "/modules/correspondence/outgoing/create",
-    "/modules/correspondence/outgoing/:id",
-  ];
-
-  const shouldHideUI = hiddenPatterns.some((pattern) =>
-    matchPath({ path: pattern, end: true }, location.pathname),
-  );
 
   if (shouldHideUI) {
     // show||create
