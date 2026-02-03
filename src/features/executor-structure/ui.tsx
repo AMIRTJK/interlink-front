@@ -274,7 +274,7 @@ interface ExecutorStructureProps {
   onSave: (
     selectedUserIds: number[],
     selectedDeptIds: number[],
-    mainExecutorIds: number[]
+    mainExecutorIds: number[],
   ) => void;
   className?: string;
   initialSelectedUserIds?: number[];
@@ -294,13 +294,13 @@ export const ExecutorStructure: React.FC<ExecutorStructureProps> = ({
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>(
-    initialSelectedUserIds
+    initialSelectedUserIds,
   );
   const [selectedDeptIds, setSelectedDeptIds] = useState<number[]>(
-    initialSelectedDeptIds
+    initialSelectedDeptIds,
   );
   const [mainExecutorIds, setMainExecutorIds] = useState<number[]>(
-    initialMainExecutorIds
+    initialMainExecutorIds,
   );
 
   const [isSearchFocused, setIsSearchFocused] = useState(false);

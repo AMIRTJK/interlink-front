@@ -5,28 +5,35 @@ import { useCorrespondenseOutgoingColumns } from "./getCorrespondenseOutgoingCol
 export type RegistryType = "correspondence" | "crm" | "primary-documents";
 
 export const useRegistryColumns = (type: string): TableColumnsType<any> => {
-  const incomingColumns = useCorrespondenseIncomingColumns();
+  // EXTERNAL
+  const mainExternalColumns = useCorrespondenseIncomingColumns(type);
+  const incomingColumns = useCorrespondenseIncomingColumns(type);
   const outgoingColumns = useCorrespondenseOutgoingColumns(type);
-  const archivedColumns = useCorrespondenseIncomingColumns(type);
-  const pinnedColumns = useCorrespondenseIncomingColumns(type);
-  const trashedColumns = useCorrespondenseIncomingColumns(type);
 
   switch (type) {
     case "incoming":
       return incomingColumns;
     case "outgoing":
       return outgoingColumns;
-    case "archived":
-      return archivedColumns;
-    case "pinned":
-      return pinnedColumns;
-    case "trashed":
-      return trashedColumns;
+
+    // Внутренние
     case "internal-incoming":
       return incomingColumns;
     case "internal-outgoing":
+      return outgoingColumns;
     case "internal-drafts":
       return outgoingColumns;
+
+    // Служебные
+    case "archived":
+    case "pinned":
+    case "trashed":
+    case "internal-archived":
+    case "internal-pinned":
+      return mainExternalColumns;
+    case "internal-trashed":
+      return outgoingColumns;
+
     default:
       return [];
   }

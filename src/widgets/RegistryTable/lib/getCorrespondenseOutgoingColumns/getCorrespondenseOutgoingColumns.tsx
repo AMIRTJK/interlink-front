@@ -1,4 +1,4 @@
-import { MoreOutlined } from "@ant-design/icons";
+import { MoreOutlined, RollbackOutlined } from "@ant-design/icons";
 import {
   Button,
   Dropdown,
@@ -16,7 +16,9 @@ import trashIcon from "../../../../assets/icons/trash-icon.svg";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 
-export const useCorrespondenseOutgoingColumns = (type?: string): TableColumnsType => {
+export const useCorrespondenseOutgoingColumns = (
+  type?: string,
+): TableColumnsType => {
   const isInternal = type?.includes("internal");
 
   // Archive mutation
@@ -36,6 +38,24 @@ export const useCorrespondenseOutgoingColumns = (type?: string): TableColumnsTyp
         ApiRoutes.GET_INTERNAL_INCOMING,
         ApiRoutes.GET_INTERNAL_OUTGOING,
         ApiRoutes.GET_INTERNAL_COUNTERS,
+      ],
+    },
+  });
+
+  const { mutate: restoreCorrespondence } = useMutationQuery<{ id: number }>({
+    url: (data) =>
+      isInternal
+        ? ApiRoutes.RESTORE_INTERNAL.replace(":id", String(data.id))
+        : ApiRoutes.RESTORE_CORRESPONDENCE.replace(":id", String(data.id)),
+    method: "POST",
+    messages: {
+      invalidate: [
+        ApiRoutes.GET_CORRESPONDENCES,
+        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+        ApiRoutes.GET_INTERNAL_INCOMING,
+        ApiRoutes.GET_INTERNAL_OUTGOING,
+        ApiRoutes.GET_INTERNAL_COUNTERS,
+        ApiRoutes.GET_INTERNAL_TRASH,
       ],
     },
   });
@@ -61,7 +81,7 @@ export const useCorrespondenseOutgoingColumns = (type?: string): TableColumnsTyp
   });
 
   // Move to folder mutation
-  const { mutate: _moveToFolder } = useMutationQuery<{
+  const { mutate: moveToFolder } = useMutationQuery<{
     id: number;
     folder_id: number;
   }>({
@@ -77,6 +97,7 @@ export const useCorrespondenseOutgoingColumns = (type?: string): TableColumnsTyp
         ApiRoutes.GET_INTERNAL_INCOMING,
         ApiRoutes.GET_INTERNAL_OUTGOING,
         ApiRoutes.GET_INTERNAL_COUNTERS,
+        ApiRoutes.GET_INTERNAL_TRASH,
       ],
     },
   });
@@ -103,8 +124,8 @@ export const useCorrespondenseOutgoingColumns = (type?: string): TableColumnsTyp
 
   return [
     {
-      title: "Вх. номер",
-      dataIndex: "1",
+      title: isInternal ? "Рег. номер" : "Вх. номер",
+      dataIndex: "reg_number",
     },
 
     {
@@ -117,15 +138,25 @@ export const useCorrespondenseOutgoingColumns = (type?: string): TableColumnsTyp
     },
     {
       title: "Дата",
-      dataIndex: "4",
+      dataIndex: "created_at",
     },
     {
       title: "Тема",
-      dataIndex: "5",
+      dataIndex: "subject",
     },
     {
-      title: "Исполнитель",
-      dataIndex: "6",
+      title: isInternal ? "Получатель" : "Исполнитель",
+      // Условный dataIndex: для внутренней берем из вложенного массива, для внешней - обычное поле
+      dataIndex: isInternal ? "recipient_name" : "6",
+      render: (value, record: any) => {
+        if (isInternal) {
+          // Безопасное получение данных для внутренней
+          const internalRecipient = record.recipients?.[0]?.user?.full_name;
+          return internalRecipient;
+        }
+        // Для внешней
+        return value || record.recipient_name;
+      },
     },
     {
       title: "Статус",
@@ -152,43 +183,61 @@ export const useCorrespondenseOutgoingColumns = (type?: string): TableColumnsTyp
       width: 40,
       fixed: "right",
       render: (record) => {
+        const isTrashed = type === "trashed" || type === "internal-trashed";
+        const isArchived = type === "archived" || type === "internal-archived";
+        const isPinned = type === "pinned" || type === "internal-pinned";
+
         const items: MenuProps["items"] = [
-          {
-            key: "archive",
-            label: "В архив",
-            icon: <img src={archiveIcon} className="w-5 h-5" />,
-            onClick: () => {
-              archiveCorrespondence({ id: record.id, is_archived: true });
-            },
-          },
-          {
-            key: "pin",
-            label: "Закрепить",
-            icon: <img src={pinnedIcon} className="w-5 h-5" />,
-            onClick: () => {
-              pinCorrespondence({ id: record.id, is_pinned: true });
-            },
-          },
+          isArchived
+            ? null
+            : {
+                key: "archive",
+                label: "В архив",
+                icon: <img src={archiveIcon} className="w-5 h-5" />,
+                onClick: () => {
+                  archiveCorrespondence({ id: record.id, is_archived: true });
+                },
+              },
+          isPinned
+            ? null
+            : {
+                key: "pin",
+                label: "Закрепить",
+                icon: <img src={pinnedIcon} className="w-5 h-5" />,
+                onClick: () => {
+                  pinCorrespondence({ id: record.id, is_pinned: true });
+                },
+              },
           {
             key: "folder",
             label: "В папку",
             icon: <img src={folderIcon} className="w-5 h-5" />,
             onClick: () => {
+              //cоздать модалку для выбора папки и отправки запроса с folder_id
               console.log("Move to folder", record);
+              moveToFolder({
+                id: record.id,
+                folder_id: record.id,
+              });
             },
           },
           {
             type: "divider",
           },
-          {
-            key: "delete",
-            label: "Удалить",
-            danger: true,
-            icon: <img src={trashIcon} className="w-5 h-5" />,
-            onClick: () => {
-              deleteCorrespondence({ id: record.id });
-            },
-          },
+          isTrashed
+            ? {
+                key: "restore",
+                label: "Восстановить",
+                icon: <RollbackOutlined className="text-[#0037AF]!" />,
+                onClick: () => restoreCorrespondence({ id: record.id }),
+              }
+            : {
+                key: "delete",
+                label: "Удалить",
+                danger: true,
+                icon: <img src={trashIcon} className="w-5 h-5" />,
+                onClick: () => deleteCorrespondence({ id: record.id }),
+              },
         ];
 
         return (

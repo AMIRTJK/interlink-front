@@ -14,6 +14,8 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { motion, AnimatePresence } from "framer-motion";
+import { useGetQuery } from "@shared/lib";
+import { ApiRoutes } from "@shared/api";
 
 // --- Types & Mocks ---
 interface NavRegistry {
@@ -32,56 +34,6 @@ const softMaterialPresets = [
   { name: "Rose", primary: "#FB7185", accent: "#FECDD3" },
   { name: "Sky", primary: "#38BDF8", accent: "#BAE6FD" },
 ];
-
-const navRegistries: Record<string, NavRegistry> = {
-  inbox: {
-    label: "Входящие",
-    items: [
-      {
-        id: "1",
-        title: "О согласовании бюджета",
-        date: "16.04.2024",
-        from: "Иванов И.И.",
-        status: "Новое",
-      },
-      {
-        id: "2",
-        title: "Запрос документов",
-        date: "15.04.2024",
-        from: "Петрова М.А.",
-        status: "Прочитано",
-      },
-    ],
-  },
-  sent: {
-    label: "Отправленные",
-    items: [
-      {
-        id: "1",
-        title: "Отчет за квартал",
-        date: "15.04.2024",
-        status: "Доставлено",
-      },
-    ],
-  },
-  drafts: {
-    label: "Черновики",
-    items: [
-      {
-        id: "1",
-        title: "Об утверждении структуры",
-        date: "16.04.2024",
-        status: "Редактируется",
-      },
-    ],
-  },
-  history: {
-    label: "История",
-    items: [
-      { id: "1", title: "Приказ №125", date: "10.04.2024", status: "Архив" },
-    ],
-  },
-};
 
 // --- Helper Component ---
 // Antd иконки ведут себя как текст, поэтому используем text-[16px] для размера
@@ -118,6 +70,67 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
 
   const textPrimary = isDarkMode ? "text-gray-100" : "text-gray-900";
   const textSecondary = isDarkMode ? "text-gray-400" : "text-gray-600";
+
+  const { data: draftsDataResponse } = useGetQuery({
+    url: ApiRoutes.GET_INTERNAL_DRAFTS,
+    useToken: true,
+  });
+
+  const draftsData = (draftsDataResponse?.data?.data || []).map(
+    (item: any) => ({
+      id: String(item.id),
+      // 1. Тема
+      title: item.subject || "Без темы",
+      date: item.created_at
+        ? new Date(item.created_at).toLocaleDateString()
+        : "",
+      from: item.recipients?.[0]?.user?.full_name,
+      status: "Черновик",
+    }),
+  );
+
+  const navRegistries: Record<string, NavRegistry> = {
+    inbox: {
+      label: "Входящие",
+      items: [
+        {
+          id: "1",
+          title: "О согласовании бюджета",
+          date: "16.04.2024",
+          from: "Иванов И.И.",
+          status: "Новое",
+        },
+        {
+          id: "2",
+          title: "Запрос документов",
+          date: "15.04.2024",
+          from: "Петрова М.А.",
+          status: "Прочитано",
+        },
+      ],
+    },
+    sent: {
+      label: "Отправленные",
+      items: [
+        {
+          id: "1",
+          title: "Отчет за квартал",
+          date: "15.04.2024",
+          status: "Доставлено",
+        },
+      ],
+    },
+    drafts: {
+      label: "Черновики",
+      items: draftsData,
+    },
+    history: {
+      label: "История",
+      items: [
+        { id: "1", title: "Приказ №125", date: "10.04.2024", status: "Архив" },
+      ],
+    },
+  };
 
   return (
     <>

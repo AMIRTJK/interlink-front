@@ -267,7 +267,7 @@ export const AppRouter = () => {
                       index
                       element={
                         <RegistryTable
-                          type="internal-incoming"
+                          type="internal-archived"
                           url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
                           extraParams={archivedParams}
                         />
@@ -279,7 +279,7 @@ export const AppRouter = () => {
                       index
                       element={
                         <RegistryTable
-                          type="internal-incoming"
+                          type="internal-pinned"
                           url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
                           extraParams={pinnedParams}
                         />
@@ -291,7 +291,7 @@ export const AppRouter = () => {
                       index
                       element={
                         <RegistryTable
-                          type="internal-incoming"
+                          type="internal-trashed"
                           url={ApiRoutes.GET_INTERNAL_TRASH}
                         />
                       }
