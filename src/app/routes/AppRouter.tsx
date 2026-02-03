@@ -157,7 +157,7 @@ export const AppRouter = () => {
               <Route path="hr" element={<HrPage />} />
               <Route path="correspondence" element={<CorrespondencePage />}>
                 <Route index element={<Navigate to="external" replace />} />
-                
+
                 {/* External Correspondence (Legacy API) */}
                 <Route path="external">
                   <Route index element={<Navigate to="incoming" replace />} />
@@ -206,24 +206,30 @@ export const AppRouter = () => {
                 {/* Internal Correspondence (Internal API) */}
                 <Route path="internal">
                   <Route index element={<Navigate to="incoming" replace />} />
-                   <Route path="incoming">
+                  <Route path="incoming">
                     <Route
                       index
                       element={
                         <CorrespondenceTableWrapper
                           type="internal-incoming"
-                          createButtonText="Добавить письмо"
-                          baseParams={{ ...incomingParams, channel: 'internal' }}
+                          baseParams={{
+                            ...incomingParams,
+                            channel: "internal",
+                          }}
                         />
                       }
                     />
                     <Route
                       path="create"
-                      element={<CreateCorrespondencePage type="internal-incoming" />}
+                      element={
+                        <CreateCorrespondencePage type="internal-incoming" />
+                      }
                     />
                     <Route
                       path=":id"
-                      element={<ShowCorrespondencePage type="internal-incoming" />}
+                      element={
+                        <ShowCorrespondencePage type="internal-incoming" />
+                      }
                     />
                   </Route>
                   <Route path="outgoing">
@@ -233,17 +239,24 @@ export const AppRouter = () => {
                         <CorrespondenceTableWrapper
                           type="internal-outgoing"
                           createButtonText="Добавить письмо"
-                          baseParams={{ ...outgoingParams, channel: 'internal' }}
+                          baseParams={{
+                            ...outgoingParams,
+                            channel: "internal",
+                          }}
                         />
                       }
                     />
                     <Route
                       path="create"
-                      element={<CreateCorrespondencePage type="internal-outgoing" />}
+                      element={
+                        <CreateCorrespondencePage type="internal-outgoing" />
+                      }
                     />
                     <Route
                       path=":id"
-                      element={<ShowCorrespondencePage type="internal-outgoing" />}
+                      element={
+                        <ShowCorrespondencePage type="internal-outgoing" />
+                      }
                     />
                   </Route>
                   <Route path="drafts">
@@ -253,17 +266,17 @@ export const AppRouter = () => {
                         <CorrespondenceTableWrapper
                           type="internal-drafts"
                           createButtonText="Добавить письмо"
-                          baseParams={{ channel: 'internal', status: 'draft' }}
+                          baseParams={{ channel: "internal", status: "draft" }}
                         />
                       }
                     />
                   </Route>
                   <Route path="archive">
-                     <Route
+                    <Route
                       index
                       element={
                         <RegistryTable
-                          type="internal-incoming" 
+                          type="internal-incoming"
                           url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
                           extraParams={{ archived: 1 }}
                         />

@@ -15,9 +15,10 @@ interface IStatusTabs {
   onTabChange: (id: string) => void;
   counts?: Record<string, number>;
   layoutId?: string;
+  items?: ITabItem[];
 }
 
-const TABS: ITabItem[] = [
+const DEFAULT_TABS: ITabItem[] = [
   { id: CorrespondenseStatus.DRAFT, label: "Черновик" },
   { id: CorrespondenseStatus.TO_REGISTER, label: "Регистрация" },
   { id: CorrespondenseStatus.TO_VISA, label: "Визирование" },
@@ -33,12 +34,15 @@ export const StatusTabs = ({
   onTabChange,
   counts,
   layoutId = "active-tab",
+  items,
 }: IStatusTabs) => {
   const { isAnimEnabled } = useTheme();
 
+  const tabsRender = items || DEFAULT_TABS;
+
   return (
     <div className="status-tabs">
-      {TABS.map((tab) => {
+      {tabsRender.map((tab) => {
         const isActive = activeTab === tab.id;
 
         return (
