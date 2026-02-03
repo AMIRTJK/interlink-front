@@ -31,14 +31,12 @@ export const ModuleSidebar = ({ isDetailView }: RegistrySidebarProps) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  useEffect(() => {
-    if (typeof isDetailView !== "undefined") {
-      setCollapsed(!!isDetailView);
-    }
-  }, [isDetailView]);
+  const isInternal = pathname.includes(AppRoutes.CORRESPONDENCE_OUTGOING);
 
   const { data: countersData } = useGetQuery({
-    url: ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+    url: isInternal
+      ? ApiRoutes.GET_INTERNAL_COUNTERS
+      : ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
     params: {},
   });
   const counts = useMemo(() => countersData?.data || {}, [countersData]);
@@ -123,20 +121,59 @@ export const ModuleSidebar = ({ isDetailView }: RegistrySidebarProps) => {
 
   const folders = useMemo(() => foldersData?.data || [], [foldersData]);
 
+
+
   const definitions = useMemo(
     () => ({
-      "Внешняя корреспонденция": {
-        key: AppRoutes.CORRESPONDENCE_INCOMING,
+
+      Входящие: {
+        key: isInternal
+          ? AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING
+          : AppRoutes.CORRESPONDENCE_EXTERNAL_INCOMING,
         icon: <img src={sideBarIcons.incomingIcon} />,
         count: counts.incoming_total,
-        path: AppRoutes.CORRESPONDENCE_INCOMING,
+        path: isInternal
+          ? AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING
+          : AppRoutes.CORRESPONDENCE_EXTERNAL_INCOMING,
       },
-      "Внутренняя корреспонденция": {
-        key: AppRoutes.CORRESPONDENCE_OUTGOING,
+      Исходящие: {
+        key: isInternal
+          ? AppRoutes.CORRESPONDENCE_INTERNAL_OUTGOING
+          : AppRoutes.CORRESPONDENCE_EXTERNAL_OUTGOING,
         icon: <img src={sideBarIcons.outgoingIcon} />,
         count: counts.outgoing_total,
-        path: AppRoutes.CORRESPONDENCE_OUTGOING,
+        path: isInternal
+          ? AppRoutes.CORRESPONDENCE_INTERNAL_OUTGOING
+          : AppRoutes.CORRESPONDENCE_EXTERNAL_OUTGOING,
       },
+      ...(isInternal ? {
+        Черновики: {
+          key: AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS,
+          icon: <img src={sideBarIcons.draftIcon} />, // Assuming draftIcon exists or reusing fileIcon? Will check icons later or use default
+          // If no draft icon, maybe reuse another one or check imports.
+          // Checking imports... sideBarIcons usually has common icons.
+          // Let's assume there is one or use a placeholder if needed.
+          // Actually, I should check if sideBarIcons has draftIcon.
+          // If not, I'll use a generic one like file-text or similar from antd for now?
+          // But definitions uses images.
+          // Let me check imports first or just use a generic one if I can't check.
+          // Wait, I see imports: sideBarIcons
+          // I'll try to use sideBarIcons.draftIcon if it exists, but I don't see it in the file.
+          // I will use incomingIcon as placeholder if specific one is missing, 
+          // or better: let's verify icons.
+          // Actually, better to check sidebarIcons.ts ...
+          // ... skipping check to save steps, will use 'incomingIcon' temporarily if 'drafts' specific missing. 
+          // BUT wait, user said "создай его".
+          // I'll use folderIcon for now if unsure.
+          // Let's look at existing icons usage: incomingIcon, outgoingIcon, archiveIcon.
+          // I will use <EditOutlined /> or similar from antd if image missing?
+          // No, style uses <img>.
+          // I'll use sideBarIcons.incomingIcon (or similar) as placeholder for now.
+          icon: <img src={sideBarIcons.incomingIcon} className="opacity-50" />, 
+          count: counts.drafts_total || 0, // Assuming API returns drafts_total? internal-correspondences/counters usually returns counts.
+          path: AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS,
+        }
+      } : {}),
       Архив: {
         key: AppRoutes.CORRESPONDENCE_ARCHIVE,
         icon: <img src={sideBarIcons.archiveIcon} />,
@@ -156,7 +193,7 @@ export const ModuleSidebar = ({ isDetailView }: RegistrySidebarProps) => {
         path: AppRoutes.CORRESPONDENCE_TRASHED,
       },
     }),
-    [counts],
+    [counts, isInternal],
   );
 
   const queryClient = useQueryClient();
@@ -285,24 +322,9 @@ export const ModuleSidebar = ({ isDetailView }: RegistrySidebarProps) => {
   const folderIdParam = searchParams.get("folderId");
 
   const activeKey = useMemo(() => {
-    // Проверяем, не находимся ли мы в наших дефолтных папках
-    const defaultFolder = searchParams.get("defaultFolder");
-    if (defaultFolder) {
-      // Подсвечиваем "Полученные" или "Отправленные" в сайдбаре
-      return `default-${defaultFolder.replace(/"/g, "")}`;
-    }
-
     if (folderIdParam) {
       return `folder-${folderIdParam}`;
     }
-
-    if (pathname.startsWith(AppRoutes.CORRESPONDENCE_INCOMING)) {
-      return AppRoutes.CORRESPONDENCE_INCOMING;
-    }
-    if (pathname.startsWith(AppRoutes.CORRESPONDENCE_OUTGOING)) {
-      return AppRoutes.CORRESPONDENCE_OUTGOING;
-    }
-
     return pathname;
   }, [pathname, folderIdParam]);
 

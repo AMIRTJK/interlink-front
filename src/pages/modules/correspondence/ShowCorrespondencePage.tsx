@@ -11,7 +11,7 @@ import { useGetQuery } from "@shared/lib";
 import { InternalCorrespondece } from "@widgets/InternalCorrespondece";
 
 interface ShowCorrespondencePageProps {
-  type?: CorrespondenceType;
+  type?: string;
 }
 
 export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
@@ -49,7 +49,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
   if (isLoading) return <Spin />;
 
   const title =
-    type === "incoming" ? `Входящее письмо #${id}` : `Исходящее письмо #${id}`;
+    type.includes("incoming") ? `Входящее письмо #${id}` : `Исходящее письмо #${id}`;
 
   const data = correspondenceData?.data;
 
@@ -71,7 +71,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
     <div className="h-full flex flex-col gap-4">
       <div className="flex-1 h-full overflow-hidden">
         <CorrespondenceForm
-          type={type}
+          type={type.includes("incoming") ? "incoming" : "outgoing"}
           title={title}
           initialValues={data}
           onFinish={handleFinish}

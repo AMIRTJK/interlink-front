@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { ApiRoutes } from "@shared/api";
 
 interface IncomingTableWrapperProps {
-  type: "incoming" | "outgoing";
+  type: string;
   createButtonText?: string;
   baseParams: Record<string, unknown>;
 }
@@ -31,6 +31,27 @@ export const CorrespondenceTableWrapper = ({
       };
     }
 
+    if (type === "internal-incoming") {
+      return {
+        params: { ...currentParams, exclude_status: 'draft' },
+        url: ApiRoutes.GET_INTERNAL_INCOMING,
+      };
+    }
+    
+    if (type === "internal-outgoing") {
+      return {
+        params: { ...currentParams, exclude_status: 'draft' },
+        url: ApiRoutes.GET_INTERNAL_OUTGOING,
+      };
+    }
+
+    if (type === "internal-drafts") {
+      return {
+        params: currentParams,
+        url: ApiRoutes.GET_INTERNAL_DRAFTS,
+      };
+    }
+
     if (folderId) {
       return {
         params: {
@@ -45,7 +66,7 @@ export const CorrespondenceTableWrapper = ({
       params: currentParams,
       url: currentUrl,
     };
-  }, [baseParams, folderId, searchParams]);
+  }, [baseParams, folderId, searchParams, type]);
 
   return (
     <>

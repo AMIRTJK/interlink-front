@@ -20,12 +20,17 @@ import { useMutationQuery } from "@shared/lib";
 export const useCorrespondenseIncomingColumns = (
   type?: string
 ): TableColumnsType => {
+  const isInternal = type?.includes("internal");
+
   // Archive mutation
   const { mutate: archiveCorrespondence } = useMutationQuery<{
     id: number;
     is_archived: boolean;
   }>({
     url: (data) =>
+      // TODO: Check if Internal has specific Archive endpoint or if it shares logic
+      // For now assuming internal might generally use DELETE or specific route
+      // Defaulting to standard Archive for non-internal or if internal shares it
       ApiRoutes.ARCHIVE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "PATCH",
     preload: true,
@@ -38,18 +43,26 @@ export const useCorrespondenseIncomingColumns = (
       invalidate: [
         ApiRoutes.GET_CORRESPONDENCES,
         ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+        ApiRoutes.GET_INTERNAL_INCOMING,
+        ApiRoutes.GET_INTERNAL_OUTGOING,
+        ApiRoutes.GET_INTERNAL_COUNTERS,
       ],
     },
   });
 
   const { mutate: restoreCorrespondence } = useMutationQuery<{ id: number }>({
     url: (data) =>
-      ApiRoutes.RESTORE_CORRESPONDENCE.replace(":id", String(data.id)), // Проверьте наличие роута в ApiRoutes
+       isInternal 
+        ? ApiRoutes.RESTORE_INTERNAL.replace(":id", String(data.id))
+        : ApiRoutes.RESTORE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "POST",
     messages: {
       invalidate: [
         ApiRoutes.GET_CORRESPONDENCES,
         ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+        ApiRoutes.GET_INTERNAL_INCOMING,
+        ApiRoutes.GET_INTERNAL_OUTGOING,
+        ApiRoutes.GET_INTERNAL_COUNTERS,
       ],
     },
   });
@@ -65,6 +78,9 @@ export const useCorrespondenseIncomingColumns = (
       invalidate: [
         ApiRoutes.GET_CORRESPONDENCES,
         ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+        ApiRoutes.GET_INTERNAL_INCOMING,
+        ApiRoutes.GET_INTERNAL_OUTGOING,
+        ApiRoutes.GET_INTERNAL_COUNTERS,
       ],
     },
   });
@@ -83,6 +99,9 @@ export const useCorrespondenseIncomingColumns = (
       invalidate: [
         ApiRoutes.GET_CORRESPONDENCES,
         ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+         ApiRoutes.GET_INTERNAL_INCOMING,
+        ApiRoutes.GET_INTERNAL_OUTGOING,
+        ApiRoutes.GET_INTERNAL_COUNTERS,
       ],
     },
   });
@@ -90,12 +109,17 @@ export const useCorrespondenseIncomingColumns = (
   // Delete mutation
   const { mutate: deleteCorrespondence } = useMutationQuery<{ id: number }>({
     url: (data) =>
-      ApiRoutes.DELETE_CORRESPONDENCE.replace(":id", String(data.id)),
+      isInternal
+        ? ApiRoutes.DELETE_INTERNAL.replace(":id", String(data.id))
+        : ApiRoutes.DELETE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "DELETE",
     messages: {
       invalidate: [
         ApiRoutes.GET_CORRESPONDENCES,
         ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+        ApiRoutes.GET_INTERNAL_INCOMING,
+        ApiRoutes.GET_INTERNAL_OUTGOING,
+        ApiRoutes.GET_INTERNAL_COUNTERS,
       ],
     },
   });

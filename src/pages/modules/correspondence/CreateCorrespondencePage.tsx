@@ -10,7 +10,7 @@ import { matchPath, useLocation } from "react-router";
 export const CreateCorrespondencePage = ({
   type,
 }: {
-  type: "incoming" | "outgoing";
+  type: string;
 }) => {
   const {
     mutate: createLetterMutate,
@@ -30,7 +30,7 @@ export const CreateCorrespondencePage = ({
   // const handleBack = () => navigate(-1);
 
   const title =
-    type === "incoming" ? "Новое входящее письмо" : "Новое исходящее письмо";
+    type.includes("incoming") ? "Новое входящее письмо" : "Новое исходящее письмо";
 
   const handleFinish = (values: CorrespondenceFormData) => {
     createLetterMutate(values);
@@ -56,7 +56,7 @@ export const CreateCorrespondencePage = ({
     <div className="h-full flex flex-col gap-4">
       <div className="flex-1 h-full overflow-hidden">
         <CorrespondenceForm
-          type={type}
+          type={type.includes("incoming") ? "incoming" : "outgoing"}
           title={title}
           onFinish={handleFinish}
           isLoading={createLetterIsPending}
