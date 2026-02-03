@@ -123,17 +123,6 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
       .map((u) => u.full_name)
       .join(", ");
 
-    // ДОБАВЛЯЕМ ЭТОТ ЭФФЕКТ
-    // При изменении входных пропсов (загрузка данных) обновляем локальный стейт
-    useEffect(() => {
-      if (initialRecipients.length > 0) {
-        setSelectedRecipients(initialRecipients);
-      }
-      if (initialCC.length > 0) {
-        setSelectedCC(initialCC);
-      }
-    }, [initialRecipients, initialCC]);
-
     return (
       <div className="flex flex-wrap items-center gap-2">
         {visibleUsers.map((user) => (
