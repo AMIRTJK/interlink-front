@@ -62,6 +62,13 @@ export interface CorrespondenceResponse {
   resolutions: Resolution[];
 }
 
+export interface CreateInternalRequest {
+  subject: string;
+  body: string;
+  recipients: {
+    to: number[];
+  };
+}
 export interface User {
   id: number;
   first_name: string;

@@ -58,7 +58,13 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
 
   if (shouldHideUI) {
     // show||create
-    return <InternalCorrespondece mode="show" />;
+    return (
+      <InternalCorrespondece
+        mode="show"
+        initialData={correspondenceData?.data}
+        isLoading={isLoading}
+      />
+    );
   }
 
   return (

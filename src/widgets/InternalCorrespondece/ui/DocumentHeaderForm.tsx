@@ -20,6 +20,8 @@ dayjs.locale("ru");
 interface DocumentHeaderFormProps {
   isDarkMode: boolean;
   form: FormInstance;
+  initialRecipients?: Recipient[];
+  initialCC?: Recipient[];
 }
 
 export interface Recipient {
@@ -34,6 +36,8 @@ type SelectionMode = "recipients" | "copy" | null;
 export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
   isDarkMode,
   form,
+  initialRecipients = [],
+  initialCC = [],
 }) => {
   const [selectedRecipients, setSelectedRecipients] = useState<Recipient[]>([]);
   const [selectedCC, setSelectedCC] = useState<Recipient[]>([]);
@@ -118,6 +122,17 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
       .slice(MAX_VISIBLE)
       .map((u) => u.full_name)
       .join(", ");
+
+    // ДОБАВЛЯЕМ ЭТОТ ЭФФЕКТ
+    // При изменении входных пропсов (загрузка данных) обновляем локальный стейт
+    useEffect(() => {
+      if (initialRecipients.length > 0) {
+        setSelectedRecipients(initialRecipients);
+      }
+      if (initialCC.length > 0) {
+        setSelectedCC(initialCC);
+      }
+    }, [initialRecipients, initialCC]);
 
     return (
       <div className="flex flex-wrap items-center gap-2">

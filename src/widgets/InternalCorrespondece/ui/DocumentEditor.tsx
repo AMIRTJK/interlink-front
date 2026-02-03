@@ -31,9 +31,16 @@ const licenseKey =
 interface DocumentEditorProps {
   isDarkMode: boolean;
   mode: string;
+  onChange?: (data: string) => void;
+  initialContent?: string; // Новый проп
 }
 
-export const DocumentEditor = ({ isDarkMode, mode }: DocumentEditorProps) => {
+export const DocumentEditor = ({
+  isDarkMode,
+  mode,
+  onChange,
+  initialContent = "",
+}: DocumentEditorProps) => {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [isEditorHovered, setIsEditorHovered] = useState(false);
 
@@ -85,11 +92,18 @@ export const DocumentEditor = ({ isDarkMode, mode }: DocumentEditorProps) => {
         <CKEditor
           editor={DecoupledEditor}
           disabled={isReadyModeEditor}
+          data={initialContent}
           onReady={(editor) => {
             const toolbarElement = editor.ui.view.toolbar.element;
 
             if (toolbarRef.current && toolbarElement) {
               toolbarRef.current.appendChild(toolbarElement);
+            }
+          }}
+          onChange={(event, editor) => {
+            const data = editor.getData();
+            if (onChange) {
+              onChange(data);
             }
           }}
           config={{
@@ -171,8 +185,6 @@ export const DocumentEditor = ({ isDarkMode, mode }: DocumentEditorProps) => {
             fontSize: {
               options: [10, 12, 14, "default", 18, 20, 24],
             },
-
-            initialData: "<p>Hello from CKEditor 5 in React!</p>",
             placeholder: "Type the content here!",
           }}
         />
