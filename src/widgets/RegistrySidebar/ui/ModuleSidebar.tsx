@@ -175,10 +175,10 @@ export const ModuleSidebar = ({ isDetailView }: RegistrySidebarProps) => {
         }
       } : {}),
       Архив: {
-        key: AppRoutes.CORRESPONDENCE_ARCHIVE,
+        key: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_ARCHIVE : AppRoutes.CORRESPONDENCE_ARCHIVE,
         icon: <img src={sideBarIcons.archiveIcon} />,
         count: counts.archived_total,
-        path: AppRoutes.CORRESPONDENCE_ARCHIVE,
+        path: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_ARCHIVE : AppRoutes.CORRESPONDENCE_ARCHIVE,
       },
       Закреплённые: {
         key: AppRoutes.CORRESPONDENCE_PINNED,

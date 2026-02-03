@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppRoutes } from "@shared/config/AppRoutes";
+import { ApiRoutes } from "@shared/api";
 import { tokenControl } from "@shared/lib";
 import { ToastContainer } from "react-toastify";
 import { Suspense, lazy } from "react";
@@ -253,6 +254,18 @@ export const AppRouter = () => {
                           type="internal-drafts"
                           createButtonText="Добавить письмо"
                           baseParams={{ channel: 'internal', status: 'draft' }}
+                        />
+                      }
+                    />
+                  </Route>
+                  <Route path="archive">
+                     <Route
+                      index
+                      element={
+                        <RegistryTable
+                          type="internal-incoming" 
+                          url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
+                          extraParams={{ archived: 1 }}
                         />
                       }
                     />
