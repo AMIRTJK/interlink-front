@@ -123,19 +123,30 @@ export const ModuleSidebar = ({ isDetailView }: RegistrySidebarProps) => {
 
   const folders = useMemo(() => foldersData?.data || [], [foldersData]);
 
+  const isInternal = pathname.includes(AppRoutes.CORRESPONDENCE_OUTGOING);
+
   const definitions = useMemo(
     () => ({
-      "Внешняя корреспонденция": {
-        key: AppRoutes.CORRESPONDENCE_INCOMING,
+
+      Входящие: {
+        key: isInternal
+          ? AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING
+          : AppRoutes.CORRESPONDENCE_EXTERNAL_INCOMING,
         icon: <img src={sideBarIcons.incomingIcon} />,
         count: counts.incoming_total,
-        path: AppRoutes.CORRESPONDENCE_INCOMING,
+        path: isInternal
+          ? AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING
+          : AppRoutes.CORRESPONDENCE_EXTERNAL_INCOMING,
       },
-      "Внутренняя корреспонденция": {
-        key: AppRoutes.CORRESPONDENCE_OUTGOING,
+      Исходящие: {
+        key: isInternal
+          ? AppRoutes.CORRESPONDENCE_INTERNAL_OUTGOING
+          : AppRoutes.CORRESPONDENCE_EXTERNAL_OUTGOING,
         icon: <img src={sideBarIcons.outgoingIcon} />,
         count: counts.outgoing_total,
-        path: AppRoutes.CORRESPONDENCE_OUTGOING,
+        path: isInternal
+          ? AppRoutes.CORRESPONDENCE_INTERNAL_OUTGOING
+          : AppRoutes.CORRESPONDENCE_EXTERNAL_OUTGOING,
       },
       Архив: {
         key: AppRoutes.CORRESPONDENCE_ARCHIVE,
@@ -156,7 +167,7 @@ export const ModuleSidebar = ({ isDetailView }: RegistrySidebarProps) => {
         path: AppRoutes.CORRESPONDENCE_TRASHED,
       },
     }),
-    [counts],
+    [counts, isInternal],
   );
 
   const queryClient = useQueryClient();
@@ -285,24 +296,9 @@ export const ModuleSidebar = ({ isDetailView }: RegistrySidebarProps) => {
   const folderIdParam = searchParams.get("folderId");
 
   const activeKey = useMemo(() => {
-    // Проверяем, не находимся ли мы в наших дефолтных папках
-    const defaultFolder = searchParams.get("defaultFolder");
-    if (defaultFolder) {
-      // Подсвечиваем "Полученные" или "Отправленные" в сайдбаре
-      return `default-${defaultFolder.replace(/"/g, "")}`;
-    }
-
     if (folderIdParam) {
       return `folder-${folderIdParam}`;
     }
-
-    if (pathname.startsWith(AppRoutes.CORRESPONDENCE_INCOMING)) {
-      return AppRoutes.CORRESPONDENCE_INCOMING;
-    }
-    if (pathname.startsWith(AppRoutes.CORRESPONDENCE_OUTGOING)) {
-      return AppRoutes.CORRESPONDENCE_OUTGOING;
-    }
-
     return pathname;
   }, [pathname, folderIdParam]);
 

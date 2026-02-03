@@ -22,6 +22,10 @@ export const useRegistryColumns = (type: string): TableColumnsType<any> => {
       return pinnedColumns;
     case "trashed":
       return trashedColumns;
+    case "internal-incoming":
+      return incomingColumns;
+    case "internal-outgoing":
+      return outgoingColumns;
     default:
       return [];
   }

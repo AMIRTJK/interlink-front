@@ -1,4 +1,4 @@
-import { PlusOutlined, MailOutlined, SendOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import { MenuProps } from "antd";
 import folderIcon from "../../../assets/icons/folder-icon.svg";
 import {
@@ -17,7 +17,6 @@ import { createDragHandlers } from "./dragHandlers";
 import { createFolderMenuActions } from "./menuActionBuilder";
 import { FolderLabel } from "./FolderLabel";
 import { SystemFolderLabel } from "./SystemFolderLabel";
-import { SYSTEM_FOLDERS } from "./constants";
 
 export type { IBuildMenuTreeParams, MenuItem, IFolder, IFolderDefinition };
 
@@ -41,6 +40,7 @@ export const buildMenuTree = ({
     depth = 0,
   ): MenuItem | null => {
     if (folder.id && visited.has(folder.id)) return null;
+    if (folder.name === "Полученные" || folder.name === "Отправленные") return null;
     if (folder.id) visited.add(folder.id);
 
     const definition = definitions[folder.name];
@@ -70,33 +70,9 @@ export const buildMenuTree = ({
       };
 
       // Добавляем дефолтные папки ("Полученные", "Отправленные") только во "Внутреннюю корреспонденцию"
-      if (folder.name === SYSTEM_FOLDERS.OUTGOING) {
-        const defaultChildren: MenuItem[] = [
-          {
-            key: "default-received",
-            folderName: "Полученные",
-            icon: <MailOutlined />,
-            label: <span className="font-medium">Полученные</span>,
-            path: `/modules/correspondence/incoming?defaultFolder=received`,
-          },
-          {
-            key: "default-sent",
-            folderName: "Отправленные",
-            icon: <SendOutlined />,
-            label: <span className="font-medium">Отправленные</span>,
-            path: `/modules/correspondence/outgoing?defaultFolder=sent`,
-          },
-        ];
-
-        // Кнопку "Создать папку" теперь ставим ПОСЛЕ дефолтных папок, как просил пользователь
-        children = children
-          ? [...defaultChildren, createPlaceholder, ...children]
-          : [...defaultChildren, createPlaceholder];
-      } else {
-        children = children
-          ? [createPlaceholder, ...children]
-          : [createPlaceholder];
-      }
+      children = children
+        ? [createPlaceholder, ...children]
+        : [createPlaceholder];
     }
 
     const menuActions: MenuProps["items"] = isSystemFolder

@@ -155,47 +155,96 @@ export const AppRouter = () => {
             <Route path="/modules" element={<MainLayout />}>
               <Route path="hr" element={<HrPage />} />
               <Route path="correspondence" element={<CorrespondencePage />}>
-                <Route index element={<Navigate to="incoming" replace />} />
-                <Route path="incoming">
-                  <Route
-                    index
-                    element={
-                      <CorrespondenceTableWrapper
-                        type="incoming"
-                        createButtonText="Добавить письмо"
-                        baseParams={incomingParams}
-                      />
-                    }
-                  />
-                  <Route
-                    path="create"
-                    element={<CreateCorrespondencePage type="incoming" />}
-                  />
-                  <Route
-                    path=":id"
-                    element={<ShowCorrespondencePage type="incoming" />}
-                  />
+                <Route index element={<Navigate to="external" replace />} />
+                
+                {/* External Correspondence (Legacy API) */}
+                <Route path="external">
+                  <Route index element={<Navigate to="incoming" replace />} />
+                  <Route path="incoming">
+                    <Route
+                      index
+                      element={
+                        <CorrespondenceTableWrapper
+                          type="incoming"
+                          createButtonText="Добавить письмо"
+                          baseParams={incomingParams}
+                        />
+                      }
+                    />
+                    <Route
+                      path="create"
+                      element={<CreateCorrespondencePage type="incoming" />}
+                    />
+                    <Route
+                      path=":id"
+                      element={<ShowCorrespondencePage type="incoming" />}
+                    />
+                  </Route>
+                  <Route path="outgoing">
+                    <Route
+                      index
+                      element={
+                        <CorrespondenceTableWrapper
+                          type="outgoing"
+                          createButtonText="Добавить письмо"
+                          baseParams={outgoingParams}
+                        />
+                      }
+                    />
+                    <Route
+                      path="create"
+                      element={<CreateCorrespondencePage type="outgoing" />}
+                    />
+                    <Route
+                      path=":id"
+                      element={<ShowCorrespondencePage type="outgoing" />}
+                    />
+                  </Route>
                 </Route>
-                <Route index element={<Navigate to="outgoing" replace />} />
-                <Route path="outgoing">
-                  <Route
-                    index
-                    element={
-                      <CorrespondenceTableWrapper
-                        type="outgoing"
-                        createButtonText="Добавить письмо"
-                        baseParams={outgoingParams}
-                      />
-                    }
-                  />
-                  <Route
-                    path="create"
-                    element={<CreateCorrespondencePage type="outgoing" />}
-                  />
-                  <Route
-                    path=":id"
-                    element={<ShowCorrespondencePage type="outgoing" />}
-                  />
+
+                {/* Internal Correspondence (Internal API) */}
+                <Route path="internal">
+                  <Route index element={<Navigate to="incoming" replace />} />
+                   <Route path="incoming">
+                    <Route
+                      index
+                      element={
+                        <CorrespondenceTableWrapper
+                          type="internal-incoming"
+                          createButtonText="Добавить письмо"
+                          baseParams={{ ...incomingParams, channel: 'internal' }}
+                        />
+                      }
+                    />
+                    <Route
+                      path="create"
+                      element={<CreateCorrespondencePage type="internal-incoming" />}
+                    />
+                    <Route
+                      path=":id"
+                      element={<ShowCorrespondencePage type="internal-incoming" />}
+                    />
+                  </Route>
+                  <Route path="outgoing">
+                    <Route
+                      index
+                      element={
+                        <CorrespondenceTableWrapper
+                          type="internal-outgoing"
+                          createButtonText="Добавить письмо"
+                          baseParams={{ ...outgoingParams, channel: 'internal' }}
+                        />
+                      }
+                    />
+                    <Route
+                      path="create"
+                      element={<CreateCorrespondencePage type="internal-outgoing" />}
+                    />
+                    <Route
+                      path=":id"
+                      element={<ShowCorrespondencePage type="internal-outgoing" />}
+                    />
+                  </Route>
                 </Route>
                 <Route path="archive">
                   <Route
