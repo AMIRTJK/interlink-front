@@ -232,7 +232,8 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
             </span>
             <Form.Item name="number" noStyle>
               <Input
-                placeholder="Введите номер"
+                disabled
+                placeholder="Номер письма"
                 variant="borderless"
                 className={`
                   px-0! py-0! h-auto! w-32! text-sm! ${textSecondary}
