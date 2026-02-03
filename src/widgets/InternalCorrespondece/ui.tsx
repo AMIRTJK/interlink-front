@@ -1,19 +1,22 @@
-import dayjs from "dayjs";
+import dayjsLib from "dayjs";
 import { useModalState, useMutationQuery } from "@shared/lib";
 import { ActionToolbar } from "@shared/ui";
 import { DrawerActionsModal } from "@widgets/DrawerActionsModal";
 import { TopNavigation } from "./ui/TopNavigation";
 import { useEffect, useState } from "react";
-import { DocumentHeaderForm } from "./ui/DocumentHeaderForm";
+import { DocumentHeaderForm, Recipient } from "./ui/DocumentHeaderForm";
 import { Form, Modal } from "antd";
 import { useParams } from "react-router";
 import { DocumentEditor } from "./ui/DocumentEditor";
-import { CreateInternalRequest } from "@entities/correspondence";
+import {
+  CreateInternalRequest,
+  InternalCorrespondenceResponse,
+} from "@entities/correspondence";
 import { ApiRoutes } from "@shared/api";
 
 interface IProps {
   mode: "create" | "show";
-  initialData?: any;
+  initialData?: InternalCorrespondenceResponse;
   isLoading?: boolean;
 }
 
@@ -97,33 +100,55 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   // ЭФФЕКТ: Заполнение данных при просмотре
   useEffect(() => {
     if (mode === "show" && initialData) {
-      // Защита от ошибки dayjs
-      let dateValue = dayjs();
-      if (initialData.created_at) {
-        dateValue = dayjs(initialData.created_at);
+      // 1. Обработка Даты
+      let dateValue = dayjsLib();
+      // Предпочитаем doc_date, если нет - created_at
+      const dateString = initialData.doc_date || initialData.created_at;
+      if (dateString) {
+        dateValue = dayjsLib(dateString);
       }
 
+      // 2. Обработка Получателей (НОВАЯ ЛОГИКА)
+      const rawRecipients = initialData.recipients || [];
+
+      // Фильтруем "Кому" (type: 'to') и мапим в формат для UI
+      const toRecipients: Recipient[] = rawRecipients
+        .filter((r) => r.type === "to")
+        .map((r) => ({
+          id: r.user.id, // Берем ID юзера, а не записи
+          full_name: r.user.full_name,
+          photo_path: r.user.photo_path || "", // fallback для null
+          position: r.user.position || "",
+        }));
+
+      // Фильтруем "Копия" (type: 'copy') - если такие будут
+      const ccRecipients: Recipient[] = rawRecipients
+        .filter((r) => r.type === "copy")
+        .map((r) => ({
+          id: r.user.id,
+          full_name: r.user.full_name,
+          photo_path: r.user.photo_path || "",
+          position: r.user.position || "",
+        }));
+
+      // 3. Устанавливаем значения в форму
       form.setFieldsValue({
         subject: initialData.subject,
-        number: initialData.number,
+        number: initialData.reg_number, // reg_number из JSON
         date: dateValue,
+        // Для формы нужны только ID
+        recipients: toRecipients.map((r) => r.id),
+        copy: ccRecipients.map((r) => r.id),
       });
 
-      // 2. Устанавливаем получателей (предполагаем, что с бэка приходит массив объектов)
-      // Если с бэка приходит просто [id], то логика будет другой (нужен fetch юзеров),
-      // но обычно в view mode приходит полный объект recipients
-      if (initialData.recipients?.to) {
-        setInitialRecipients(initialData.recipients.to);
-      }
-      // Если есть копия
-      if (initialData.recipients?.copy) {
-        setInitialCC(initialData.recipients.copy);
-      }
+      // 4. Обновляем стейт для визуального отображения (чипсы)
+      setInitialRecipients(toRecipients);
+      setInitialCC(ccRecipients);
 
-      // 3. Устанавливаем контент редактора
+      // 5. Контент редактора
       if (initialData.body) {
         setInitialEditorContent(initialData.body);
-        setEditorBody(initialData.body); // Синхронизируем текущий стейт тоже
+        setEditorBody(initialData.body);
       }
     }
   }, [mode, initialData, form]);

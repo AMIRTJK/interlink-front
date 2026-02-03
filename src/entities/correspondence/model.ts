@@ -62,13 +62,6 @@ export interface CorrespondenceResponse {
   resolutions: Resolution[];
 }
 
-export interface CreateInternalRequest {
-  subject: string;
-  body: string;
-  recipients: {
-    to: number[];
-  };
-}
 export interface User {
   id: number;
   first_name: string;
@@ -144,4 +137,38 @@ export interface CreateAssignmentRequest {
 
   note: string;
   due_at: string | null;
+}
+
+export interface CreateInternalRequest {
+  subject: string;
+  body: string;
+  recipients: {
+    to: number[];
+  };
+}
+
+export interface UserShort {
+  id: number;
+  full_name: string;
+  photo_path?: string | null;
+  position?: string; // В JSON нет, но для UI может пригодиться
+}
+
+// Интерфейс одной записи в массиве recipients
+export interface RecipientEntry {
+  id: number; // ID связи
+  user_id: number;
+  type: "to" | "copy" | string; // Тип получателя
+  user: UserShort; // Вложенный объект пользователя
+}
+
+// Главный интерфейс ответа от API
+export interface InternalCorrespondenceResponse {
+  id: number;
+  subject: string | null;
+  body: string | null;
+  doc_date: string | null;
+  created_at: string;
+  reg_number: string | null;
+  recipients: RecipientEntry[]; // <--- Массив, а не объект
 }
