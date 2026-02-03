@@ -5,7 +5,6 @@ import {
   CorrespondenceFormData,
 } from "@widgets/CorrespondenceForm";
 import { InternalCorrespondece } from "@widgets/InternalCorrespondece/ui";
-import { matchPath, useLocation } from "react-router";
 
 export const CreateCorrespondencePage = ({
   type,
@@ -36,21 +35,14 @@ export const CreateCorrespondencePage = ({
     createLetterMutate(values);
   };
 
-  const location = useLocation();
+  const isInternal = type.includes("internal");
 
-  const hiddenPatterns = [
-    "/modules/correspondence/outgoing/create",
-    "/modules/correspondence/outgoing/:id",
-  ];
-
-  const shouldHideUI = hiddenPatterns.some((pattern) =>
-    matchPath({ path: pattern, end: true }, location.pathname),
-  );
-
-  if (shouldHideUI) {
+  if (isInternal) {
     // show||create
     return <InternalCorrespondece mode="create" />;
   }
+
+
 
   return (
     <div className="h-full flex flex-col gap-4">

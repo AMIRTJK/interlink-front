@@ -63,7 +63,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
     return url;
   }, [type, currentTab, url]);
 
-  const showCreateButton = (isIncoming || isOutgoing) && !folderId && !isDefaultFolder;
+  const showCreateButton = (type.includes("incoming") || type.includes("outgoing")) && !folderId && !isDefaultFolder && !type.includes("drafts") && !type.includes("archive");
 
   const handleCreate = () => {
     navigate(`${location.pathname}/create`);
