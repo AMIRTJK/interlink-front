@@ -48,6 +48,21 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const isOutgoing = location.pathname === AppRoutes.CORRESPONDENCE_OUTGOING;
   const isDefaultFolder = !!searchParams.get("defaultFolder");
 
+  // Динамически определяем URL в зависимости от типа и текущей вкладки
+  const currentUrl = useMemo(() => {
+    // Если это внутренняя корреспонденция (тип outgoing)
+    if (type === "outgoing") {
+      // Для вкладки "Черновики" используем специфичный эндпоинт
+      if (currentTab === CorrespondenseStatus.DRAFT) {
+        return ApiRoutes.GET_INTERNAL_DRAFTS;
+      }
+      // Здесь можно добавить другие маппинги для внутренней корреспонденции (trash и т.д.)
+    }
+    
+    // По умолчанию или для внешней корреспонденции используем базовый URL
+    return url;
+  }, [type, currentTab, url]);
+
   const showCreateButton = (isIncoming || isOutgoing) && !folderId && !isDefaultFolder;
 
   const handleCreate = () => {
@@ -232,7 +247,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
         </div>
         <div className={`${isAllowed ? "block! px-2!" : "hidden!"}`}>
           <UniversalTable
-            url={url}
+            url={currentUrl}
             filters={filters}
             columns={columns}
             className="[&_.ant-table-cell]:rounded-none! [&_.ant-pagination]:px-4! [&_.ant-table-row]:cursor-pointer [&_.ant-table-expanded-row.ant-table-expanded-row-level-1>td]:bg-[#F2F5FF]!"
