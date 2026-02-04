@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import {
   CorrespondenceForm,
   CorrespondenceFormData,
@@ -17,6 +17,9 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
   type = "external-incoming",
 }) => {
   const { id } = useParams<{ id: string }>();
+
+  const location = useLocation();
+
   const { shouldHideUI } = useCorrespondenceRoute();
 
   const currentApi = shouldHideUI
