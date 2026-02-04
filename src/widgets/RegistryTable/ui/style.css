@@ -1,0 +1,10 @@
+/* В вашем глобальном или локальном CSS файле */
+.custom-registry-table .ant-table-thead > tr > th {
+  background: #f8fafc; /* Светлый фон для шапки */
+  font-weight: 600;
+  color: #475569;
+}
+
+.custom-registry-table .ant-table-row:hover {
+  cursor: pointer;
+}

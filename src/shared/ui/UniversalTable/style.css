@@ -1,0 +1,54 @@
+.ant-table-cell {
+  padding: 8px !important;
+}
+
+/* Стили для распределения элементов пагинации по краям */
+.custom-pagination .ant-pagination {
+  display: flex !important;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between; /* Это раздвинет Назад и Дальше по краям */
+}
+
+/* Центрируем блок с цифрами */
+.custom-pagination .ant-pagination-prev {
+  margin-right: auto !important;
+}
+
+.custom-pagination .ant-pagination-next {
+  margin-left: auto !important;
+}
+
+/* Стили для самих цифр (опционально, для соответствия дизайну) */
+.custom-pagination .ant-pagination-item {
+  border: none !important;
+  background: transparent !important;
+  height: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.custom-pagination .ant-pagination-item:hover {
+  opacity: 0.8;
+  background-color: #f5f5f5 !important; /* Легкий фон при наведении */
+  border-radius: 8px;
+}
+
+.custom-pagination .ant-pagination-item-active {
+  background-color: #f0f5ff !important; /* Светло-голубой фон для активной цифры */
+  border-radius: 8px;
+}
+
+
+
+.custom-pagination .ant-pagination-item-active:hover {
+  background-color: #f0f5ff !important;
+  opacity: 1;
+}
+
+.custom-pagination .ant-pagination-item-active a {
+  color: #0037af !important;
+}

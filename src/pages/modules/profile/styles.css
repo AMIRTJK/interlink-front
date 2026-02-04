@@ -1,0 +1,61 @@
+/* Profile nav */
+.ant-menu-css-var {
+  background: transparent;
+}
+
+.profile-page {
+  min-height: 400px;
+}
+
+.ant-menu-item-selected {
+  transition: all 0.2s ease;
+  min-width: 231px;
+  text-align: center;
+  border-radius: 8px !important;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: var(--color-text-primary);
+}
+
+.calendar-container {
+  max-width: 400px;
+}
+
+.calendar-widget {
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+}
+
+.calendar-widget .ant-picker-calendar-header {
+  padding: 12px;
+}
+
+.analytics-container {
+  width: 100%;
+}
+
+.analytics-card {
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  transition: all 0.3s ease;
+}
+
+.analytics-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.analytics-card .ant-statistic-title {
+  color: var(--color-text-primary);
+  opacity: 0.7;
+}
+
+.analytics-card .ant-statistic-content {
+  font-weight: 600;
+}

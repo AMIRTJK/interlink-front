@@ -1,0 +1,113 @@
+.task-details-modal-view {
+  padding: 20px;
+}
+
+.task-details-modal .ant-modal-container {
+  padding: 27px 0 !important;
+}
+
+.task-details-modal .ant-modal-content {
+  border-radius: 16px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.task-details-modal .ant-modal-close {
+  top: 5px;
+  right: 10px;
+}
+
+.task-details__category-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.task-details__title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 45px;
+  color: #7d8fb3;
+  /* text-align: center; */
+}
+
+.task-details__meta-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+  color: #595959;
+}
+
+.task-details__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.task-details__meta-icon {
+  color: #8c8c8c;
+  font-size: 18px;
+}
+
+.task-details__section {
+  margin-bottom: 28px;
+}
+
+.task-details__label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #8c8c8c;
+  margin: 0 0 12px 0;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.task-details__description {
+  color: #262626;
+  line-height: 1.6;
+  font-size: 15px;
+  white-space: pre-wrap;
+  background: #fafafa;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+.task-details__participants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.task-details__participant {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  padding: 6px 16px 6px 6px;
+  border-radius: 24px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.2s;
+}
+
+.task-details__participant:hover {
+  border-color: #d9d9d9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.task-details__participant-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #262626;
+}

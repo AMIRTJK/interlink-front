@@ -1,0 +1,55 @@
+import { Tooltip } from 'antd';
+import { CheckCircleFilled } from '@ant-design/icons';
+import { IUser } from '../model';
+
+interface UserItemProps {
+    user: IUser;
+    isSelected: boolean;
+    isMain: boolean;
+    onToggle: (user: IUser) => void;
+    onSetMain: (id: number) => void;
+}
+
+import { Checkbox } from 'antd';
+export const UserItem: React.FC<UserItemProps> = ({ user, isSelected, isMain, onToggle, onSetMain }) => {
+    return (
+        <Tooltip title={user.position || "Сотрудник"}>
+            <div 
+                className={`user__card ${isSelected ? 'user__card--selected' : ''}`}
+                onClick={() => onToggle(user)}
+            >
+                <div className="user__avatar-wrapper">
+                    <div className="user__avatar flex items-center justify-center bg-gray-200 rounded-full h-10 w-10 text-gray-500 font-bold overflow-hidden">
+                        {user.photo_path ? (
+                            <img src={user.photo_path} alt={user.full_name} className="h-full w-full object-cover" />
+                        ) : (
+                            (user.full_name && user.full_name.charAt(0).toUpperCase()) || "U"
+                        )}
+                    </div>
+                    {isSelected && (
+                        <div className="user__check absolute top-0 right-0 p-1">
+                            <CheckCircleFilled className="text-green-500 text-lg bg-white rounded-full" />
+                        </div>
+                    )}
+                </div>
+            <h4 className="user__name text-center" title={user.full_name}>{user.full_name}</h4>
+            <span className="user__position text-center">
+                {user.roles?.[0]?.name || user.position || "Сотрудник"}
+            </span>
+            <span className="user__department text-center text-xs text-gray-400 mt-1">
+                {user.departments?.[0]?.name || user.department?.name || user.organization?.name || ""}
+            </span>
+            {isSelected && (
+                <div 
+                    className="user__main-checker mt-2 pt-2 border-t w-full flex justify-center"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <Checkbox checked={isMain} onChange={() => onSetMain(user.id)}>
+                        Главный
+                    </Checkbox>
+                </div>
+            )}
+            </div>
+        </Tooltip>
+    );
+};

@@ -1,0 +1,69 @@
+.login-card {
+  position: relative;
+  width: 100%;
+  padding: 16px;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  z-index: 0;
+  overflow: hidden; /* важно для скругления */
+}
+
+.login-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #999999, #ffffff);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.login-header {
+  text-align: center;
+}
+
+.ant-input-group-wrapper.h-14 {
+  height: 56px;
+  background-color: white !important;
+  border: 1px solid #d9d9d9;
+  border-radius: 15px !important;
+  overflow: hidden;
+  display: block;
+}
+
+.ant-input-group-wrapper.h-14 .ant-input-wrapper,
+.ant-input-group-wrapper.h-14 .ant-input-group-addon,
+.ant-input-group-wrapper.h-14 .ant-input {
+  height: 100% !important;
+}
+
+.ant-input-group-wrapper.h-14 .ant-input,
+.ant-input-group-wrapper.h-14 .ant-input-group-addon {
+  border: none !important;
+  background-color: transparent !important;
+}
+
+.ant-input-group-wrapper.h-14 .ant-input {
+  padding-top: 0;
+  padding-bottom: 0;
+  background-color: transparent !important;
+}
+
+/* Фокус */
+.ant-input-group-wrapper.h-14:focus-within {
+  border-color: #40a9ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.ant-select-content-value span {
+  color: #abacaf; /* Замените на нужный вам цвет */
+  font-size: 16px;
+}

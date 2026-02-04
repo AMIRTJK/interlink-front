@@ -1,0 +1,222 @@
+import dayjsLib from "dayjs";
+import { useModalState, useMutationQuery } from "@shared/lib";
+import { ActionToolbar } from "@shared/ui";
+import { DrawerActionsModal } from "@widgets/DrawerActionsModal";
+import { TopNavigation } from "./ui/TopNavigation";
+import { useEffect, useState } from "react";
+import { DocumentHeaderForm, Recipient } from "./ui/DocumentHeaderForm";
+import { Form, Modal } from "antd";
+import { useNavigate, useParams } from "react-router";
+import { DocumentEditor } from "./ui/DocumentEditor";
+import {
+  CreateInternalRequest,
+  InternalCorrespondenceResponse,
+} from "@entities/correspondence";
+import { ApiRoutes } from "@shared/api";
+
+interface IProps {
+  mode: "create" | "show";
+  initialData?: InternalCorrespondenceResponse;
+  isLoading?: boolean;
+}
+
+export const InternalCorrespondece: React.FC<IProps> = ({
+  mode,
+  initialData,
+  isLoading,
+}) => {
+  const { id } = useParams<{ id: string }>();
+
+  const navigate = useNavigate();
+  const { open, close, isOpen } = useModalState();
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const effectiveMode = "create";
+  const [currentMode, setCurrentMode] = useState<"create" | "show">(mode);
+
+  const [initialRecipients, setInitialRecipients] = useState<any[]>([]);
+  const [initialCC, setInitialCC] = useState<any[]>([]);
+  // Состояние для начального контента редактора
+  const [initialEditorContent, setInitialEditorContent] = useState<string>("");
+
+  // Определяем классы для фона всей страницы
+  // const bgClass = isDarkMode
+  //   ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100"
+  //   : "bg-gradient-to-br from-white via-gray-50 to-white text-gray-900";
+
+  const [form] = Form.useForm();
+
+  const [editorBody, setEditorBody] = useState<string>("");
+
+  const handleReply = () => {
+    setCurrentMode("create");
+    close();
+  };
+
+  const { mutate: createDraft, isPending: isCreating } =
+    useMutationQuery<CreateInternalRequest>({
+      url: ApiRoutes.CREATE_INTERNAL,
+      method: "POST",
+      messages: {
+        invalidate: [ApiRoutes.GET_INTERNAL_DRAFTS],
+      },
+      queryOptions: {
+        onSuccess: (data: any) => {
+          console.log("Server response:", data);
+
+          const newId = data?.id;
+
+          if (newId) {
+            navigate(`/modules/correspondence/internal/outgoing/${newId}`);
+          } else {
+            console.warn("ID не найден в ответе:", data);
+          }
+        },
+      },
+    });
+
+  const { mutate: updateDraft, isPending: isUpdating } =
+    useMutationQuery<CreateInternalRequest>({
+      url: ApiRoutes.PUT_INTERNAL.replace(":id", String(id || "")),
+      method: "PUT",
+      messages: {
+        invalidate: [ApiRoutes.GET_INTERNAL_BY_ID],
+      },
+    });
+
+  const onSaveClick = async () => {
+    try {
+      // Валидируем форму
+      const values = await form.validateFields();
+
+      const requestPayload = {
+        subject: values.subject,
+        body: editorBody,
+        recipients: {
+          to: values.recipients,
+          // copy: values.copy, // Если нужно
+        },
+      };
+
+      if (id) {
+        // Если ID есть - обновляем
+        console.log("Обновление черновика:", id, requestPayload);
+        updateDraft(requestPayload);
+      } else {
+        // Если ID нет - создаем
+        console.log("Создание черновика:", requestPayload);
+        createDraft(requestPayload, {});
+      }
+    } catch (errorInfo) {
+      console.log("Ошибка валидации:", errorInfo);
+    }
+  };
+
+  // ЭФФЕКТ: Заполнение данных при просмотре
+  useEffect(() => {
+    if (initialData) {
+      // 1. Дата
+      let dateValue = dayjsLib();
+      const dateString = initialData.doc_date || initialData.created_at;
+      if (dateString) {
+        dateValue = dayjsLib(dateString);
+      }
+
+      // 2. Получатели
+      const rawRecipients = initialData.recipients || [];
+
+      const toRecipients: Recipient[] = rawRecipients
+        .filter((r) => r.type === "to")
+        .map((r) => ({
+          id: r.user.id,
+          full_name: r.user.full_name,
+          photo_path: r.user.photo_path || "",
+          position: r.user.position || "",
+        }));
+
+      const ccRecipients: Recipient[] = rawRecipients
+        .filter((r) => r.type === "copy")
+        .map((r) => ({
+          id: r.user.id,
+          full_name: r.user.full_name,
+          photo_path: r.user.photo_path || "",
+          position: r.user.position || "",
+        }));
+
+      // 3. Сеттим в форму
+      form.setFieldsValue({
+        subject: initialData.subject,
+        number: initialData.reg_number,
+        date: dateValue,
+        recipients: toRecipients.map((r) => r.id),
+        copy: ccRecipients.map((r) => r.id),
+      });
+
+      // 4. Стейты для UI
+      setInitialRecipients(toRecipients);
+      setInitialCC(ccRecipients);
+
+      // 5. Редактор
+      if (initialData.body) {
+        setInitialEditorContent(initialData.body);
+        setEditorBody(initialData.body);
+      }
+    }
+  }, [initialData, form]);
+
+  return (
+    <div
+      className={`relative min-h-screen bg-[#f9fafb] ${isOpen ? "max-h-[768px] overflow-hidden" : ""}`}
+    >
+      <TopNavigation
+        isDarkMode={isDarkMode}
+        toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+      />
+      <main className="max-w-4xl flex flex-col gap-4 mx-auto px-8 py-12">
+        <DocumentHeaderForm
+          isDarkMode={isDarkMode}
+          form={form}
+          initialRecipients={initialRecipients}
+          initialCC={initialCC}
+        />
+        <DocumentEditor
+          isDarkMode={isDarkMode}
+          mode={effectiveMode}
+          onChange={setEditorBody}
+          initialContent={initialEditorContent}
+        />
+      </main>
+      <DrawerActionsModal
+        open={isOpen}
+        onClose={close}
+        docId={id}
+        mode={effectiveMode}
+        onReply={handleReply}
+      />
+      <ActionToolbar
+        setIsInspectorOpen={open}
+        setShowPreview={() => setIsPreviewOpen(true)}
+        handleSend={() => console.log("Отправить")}
+        onSave={onSaveClick}
+        mode={effectiveMode}
+        onSaveLoading={isCreating || isUpdating}
+      />
+      <Modal
+        title="Предварительный просмотр"
+        open={isPreviewOpen}
+        onCancel={() => setIsPreviewOpen(false)}
+        footer={null}
+        width={1000}
+        centered
+        destroyOnClose
+        bodyStyle={{ height: "80vh", padding: 0, overflow: "hidden" }}
+      >
+        <div className="p-4 bg-gray-100 rounded-lg max-h-[80vh] overflow-y-auto">
+          <DocumentEditor isDarkMode={isDarkMode} mode="show" />
+        </div>
+      </Modal>
+    </div>
+  );
+};
