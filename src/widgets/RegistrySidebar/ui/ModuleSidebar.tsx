@@ -17,7 +17,8 @@ import { FolderModal } from "./FolderModal";
 
 const { Sider } = Layout;
 
-export const ModuleSidebar = ({ collapsed }: { collapsed: boolean }) => {
+export const ModuleSidebar = () => {
+  const [collapsed, setCollapsed] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [parentId, setParentId] = useState<number | null>(null);
   const [editingFolderId, setEditingFolderId] = useState<number | null>(null);
@@ -308,6 +309,12 @@ export const ModuleSidebar = ({ collapsed }: { collapsed: boolean }) => {
                   className="h-6! w-6! hidden! addFolderRootSideBar"
                 />
               )}
+              <Button
+                type="text"
+                onClick={() => setCollapsed(!collapsed)}
+                className={collapsed ? "mx-auto h-7! w-7!" : "ml-auto"}
+                icon={<img src={sideBarIcons.collapseIcon} />}
+              />
             </div>
           </div>
 
