@@ -1,23 +1,23 @@
+import React, { useMemo, useState, useCallback } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { AppRoutes } from "@shared/config";
 import "./style.css";
 import { PlusOutlined } from "@ant-design/icons";
-import { Layout, Menu, Form, Button, ConfigProvider, App } from "antd";
+import { Layout, Button, App, Form } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { _axios, ApiRoutes } from "@shared/api";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Logo from "../../../assets/images/logo.svg";
-import { AppRoutes } from "@shared/config";
-import { useMemo, useState, useCallback } from "react";
 import { toast } from "react-toastify";
 
 import { sideBarIcons } from "../lib/sidebarIcons";
 import { buildMenuTree } from "../lib/buildMenuTree";
+import { SidebarItem } from "./SidebarItem";
 import { FolderModal } from "./FolderModal";
 
 const { Sider } = Layout;
 
-export const ModuleSidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
+export const ModuleSidebar = ({ collapsed }: { collapsed: boolean }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [parentId, setParentId] = useState<number | null>(null);
   const [editingFolderId, setEditingFolderId] = useState<number | null>(null);
@@ -260,51 +260,7 @@ export const ModuleSidebar = () => {
     ],
   );
 
-  const footerItems = useMemo(
-    () => [
-      {
-        key: "help",
-        icon: <img src={sideBarIcons.helpIcon} alt="" />,
-        label: "Помощь",
-        path: "#",
-      },
-      {
-        key: "settings",
-        icon: <img src={sideBarIcons.settingsIcon} alt="" />,
-        label: "Настройки",
-        path: "#",
-      },
-    ],
-    [],
-  );
 
-  const handleMenuClick = useCallback(
-    ({ key }: { key: string }) => {
-      const findInTree = (items: any[], searchKey: string): any => {
-        for (const item of items) {
-          if (item.key === searchKey) return item;
-          if (item.children) {
-            const found = findInTree(item.children, searchKey);
-            if (found) return found;
-          }
-        }
-        return null;
-      };
-
-      const item = findInTree([...finalMenuItems, ...footerItems], key);
-
-      if (key.startsWith("create-placeholder-")) {
-        const parentFolderId = item?.parent_id || null;
-        handleAddClick(parentFolderId);
-        return;
-      }
-
-      if (item?.path && !item.path.startsWith("#")) {
-        navigate(item.path);
-      }
-    },
-    [finalMenuItems, footerItems, navigate, handleAddClick],
-  );
 
   const [searchParams] = useSearchParams();
   const folderIdParam = searchParams.get("folderId");
@@ -315,21 +271,6 @@ export const ModuleSidebar = () => {
     }
     return pathname;
   }, [pathname, folderIdParam]);
-
-  const menuTheme = useMemo(
-    () => ({
-      components: {
-        Menu: {
-          itemHeight: collapsed ? 30 : 56,
-          itemMarginInline: 0,
-          itemMarginBlock: collapsed ? 24 : 4,
-          itemPaddingInline: collapsed ? 0 : 16,
-          iconMarginInlineEnd: collapsed ? 0 : 10,
-        },
-      },
-    }),
-    [collapsed],
-  );
 
   return (
     <App>
@@ -367,49 +308,35 @@ export const ModuleSidebar = () => {
                   className="h-6! w-6! hidden! addFolderRootSideBar"
                 />
               )}
-              <Button
-                type="text"
-                onClick={() => setCollapsed(!collapsed)}
-                className={collapsed ? "mx-auto h-7! w-7!" : "ml-auto"}
-                icon={<img src={sideBarIcons.collapseIcon} />}
-              />
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto overflow-x-hidden">
-            <ConfigProvider theme={menuTheme}>
-              <Menu
-                mode="inline"
-                selectedKeys={[activeKey]}
-                onClick={handleMenuClick}
-                className={`registry-sidebar-style border-none! ${collapsed ? "collapsed-style" : ""}`}
-                items={finalMenuItems}
-              />
-            </ConfigProvider>
-          </div>
-
-          <div className="shrink-0 pb-4 border-none pt-6">
-            <ConfigProvider theme={menuTheme}>
-              <Menu
-                mode="inline"
-                selectable={false}
-                onClick={handleMenuClick}
-                className={`registry-sidebar-style border-none! ${collapsed ? "collapsed-style" : ""}`}
-                items={footerItems}
-              />
-            </ConfigProvider>
-          </div>
+        <div className="flex-1 overflow-y-auto px-4 py-2 custom-scrollbar">
+          {finalMenuItems.map((item) => (
+            <SidebarItem
+              key={item.key}
+              item={item}
+              isActive={[activeKey].includes(item.key as string)}
+            />
+          ))}
         </div>
 
-        <FolderModal
-          isOpen={isModalOpen}
-          isEditing={!!editingFolderId}
-          parentId={parentId}
-          form={form}
-          onCancel={() => setIsModalOpen(false)}
-          onFinish={onFinish}
-        />
-      </Sider>
-    </App>
+        {!collapsed && (
+          <div className="px-5 pb-5 text-xs text-gray-400 text-center">
+            AM | KM
+          </div>
+        )}
+      </div>
+
+      <FolderModal
+        isOpen={isModalOpen}
+        isEditing={!!editingFolderId}
+        parentId={parentId}
+        form={form}
+        onCancel={() => setIsModalOpen(false)}
+        onFinish={onFinish}
+      />
+    </Sider>
+  </App>
   );
 };

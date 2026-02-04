@@ -1,5 +1,14 @@
 /* === Registry Sidebar Overrides (Refactored) === */
 
+/* === Scrollbar Hider === */
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.custom-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* --- General Adjustments --- */
 .registry-sidebar-style .ant-menu-title-content {
   flex: 1 !important;
