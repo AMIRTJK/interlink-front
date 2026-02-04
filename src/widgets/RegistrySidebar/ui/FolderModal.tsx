@@ -35,10 +35,15 @@ export const FolderModal = ({
       <Form form={form} onFinish={onFinish} layout="vertical">
         <Form.Item
           name="name"
-          label="Название папки"
           rules={[{ required: true, message: "Введите название" }]}
         >
-          <Input placeholder="Введите название..." />
+          <Input placeholder="Введите название папки" />
+        </Form.Item>
+        <Form.Item
+          name="prefix"
+          rules={[{ required: false, }]}
+        >
+          <Input placeholder="Введите префикс папки" />
         </Form.Item>
       </Form>
     </Modal>
