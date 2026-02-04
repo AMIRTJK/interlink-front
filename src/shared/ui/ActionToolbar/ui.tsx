@@ -16,6 +16,7 @@ interface IProps {
   handleSend: () => void;
   mode?: "create" | "show";
   onSaveLoading: boolean;
+  isActionsEnabled: boolean;
 }
 
 export const ActionToolbar: React.FC<IProps> = ({
@@ -25,6 +26,7 @@ export const ActionToolbar: React.FC<IProps> = ({
   handleSend,
   onSaveLoading,
   mode = "create",
+  isActionsEnabled,
 }) => {
   return (
     <motion.div
@@ -49,11 +51,13 @@ export const ActionToolbar: React.FC<IProps> = ({
           icon={<MessageOutlined style={{ fontSize: "18px" }} />}
           label="Инспектор"
           onClick={() => setIsInspectorOpen(true)}
+          disabled={!isActionsEnabled}
         />
         {mode !== "show" && (
           <Button
             type="primary"
             size="large"
+            disabled={!isActionsEnabled}
             onClick={handleSend}
             icon={<SendOutlined style={{ transform: "rotate(-30deg)" }} />}
             className="ml-2 rounded-full border-none flex items-center font-semibold shadow-lg shadow-purple-200/50 transition-all duration-300 hover:brightness-110 hover:shadow-purple-300 active:scale-95"
