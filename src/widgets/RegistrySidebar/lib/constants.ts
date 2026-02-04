@@ -15,8 +15,8 @@ export const FOLDER_ORDER = {
 
 export const ROUTES = {
   CORRESPONDENCE_BASE: "/modules/correspondence",
-  INCOMING: "/modules/correspondence/incoming",
-  OUTGOING: "/modules/correspondence/outgoing",
+  INCOMING: "/modules/correspondence/external-incoming",
+  OUTGOING: "/modules/correspondence/external-outgoing",
   FOLDERS: "/modules/correspondence/folders",
 } as const;
 

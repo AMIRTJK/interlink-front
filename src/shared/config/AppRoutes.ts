@@ -12,6 +12,8 @@ export const AppRoutes = {
   CORRESPONDENCE_INTERNAL_OUTGOING: "/modules/correspondence/internal/outgoing",
   CORRESPONDENCE_INTERNAL_DRAFTS: "/modules/correspondence/internal/drafts",
   CORRESPONDENCE_INTERNAL_ARCHIVE: "/modules/correspondence/internal/archive",
+  CORRESPONDENCE_INTERNAL_PINNED: "/modules/correspondence/internal/pinned",
+  CORRESPONDENCE_INTERNAL_TRASHED: "/modules/correspondence/internal/trashed",
 
   // Legacy/Root mapping (for sidebar matching)
   CORRESPONDENCE_INCOMING: "/modules/correspondence/external", // Keeps compatibility with "Incoming" folder logic if needed
@@ -19,12 +21,14 @@ export const AppRoutes = {
 
   CORRESPONDENCE_INCOMING_CREATE: "/modules/correspondence/external/create",
   CORRESPONDENCE_OUTGOING_CREATE: "/modules/correspondence/internal/create",
-  
+
   CORRESPONDENCE_ARCHIVE: "/modules/correspondence/archive",
   CORRESPONDENCE_PINNED: "/modules/correspondence/pinned",
   CORRESPONDENCE_FOLDERS: "/modules/correspondence/folders",
   CORRESPONDENCE_TRASHED: "/modules/correspondence/trashed",
-  CORRESPONDENCE_INCOMING_SHOW: "/modules/correspondence/external/:id",
-  CORRESPONDENCE_OUTGOING_SHOW: "/modules/correspondence/internal/:id",
+  CORRESPONDENCE_INCOMING_SHOW: "/modules/correspondence/external/incoming/:id",
+  CORRESPONDENCE_OUTGOING_SHOW: "/modules/correspondence/external/outgoing/:id",
+  INTERNAL_INCOMING_SHOW: "/modules/correspondence/internal/incoming/:id",
+  INTERNAL_OUTGOING_SHOW: "/modules/correspondence/internal/outgoing/:id",
   // CORRESPONDENCE_INTERNAL: "/modules/correspondence/internal",
 } as const;

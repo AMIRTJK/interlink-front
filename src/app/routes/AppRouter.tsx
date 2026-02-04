@@ -97,12 +97,10 @@ const HrPage = lazy(() =>
 
 const incomingParams = {
   kind: "incoming",
-  tab: "draft",
 };
 
 const outgoingParams = {
   kind: "outgoing",
-  tab: "draft",
 };
 
 const archivedParams = {
@@ -166,19 +164,25 @@ export const AppRouter = () => {
                       index
                       element={
                         <CorrespondenceTableWrapper
-                          type="incoming"
+                          type="external-incoming"
                           createButtonText="Добавить письмо"
-                          baseParams={incomingParams}
+                          baseParams={{
+                            ...incomingParams,
+                          }}
                         />
                       }
                     />
                     <Route
                       path="create"
-                      element={<CreateCorrespondencePage type="incoming" />}
+                      element={
+                        <CreateCorrespondencePage type="external-incoming" />
+                      }
                     />
                     <Route
                       path=":id"
-                      element={<ShowCorrespondencePage type="incoming" />}
+                      element={
+                        <ShowCorrespondencePage type="external-incoming" />
+                      }
                     />
                   </Route>
                   <Route path="outgoing">
@@ -186,19 +190,25 @@ export const AppRouter = () => {
                       index
                       element={
                         <CorrespondenceTableWrapper
-                          type="outgoing"
+                          type="external-outgoing"
                           createButtonText="Добавить письмо"
-                          baseParams={outgoingParams}
+                          baseParams={{
+                            ...outgoingParams,
+                          }}
                         />
                       }
                     />
                     <Route
                       path="create"
-                      element={<CreateCorrespondencePage type="outgoing" />}
+                      element={
+                        <CreateCorrespondencePage type="external-outgoing" />
+                      }
                     />
                     <Route
                       path=":id"
-                      element={<ShowCorrespondencePage type="outgoing" />}
+                      element={
+                        <ShowCorrespondencePage type="external-outgoing" />
+                      }
                     />
                   </Route>
                 </Route>
@@ -210,13 +220,7 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        <CorrespondenceTableWrapper
-                          type="internal-incoming"
-                          baseParams={{
-                            ...incomingParams,
-                            channel: "internal",
-                          }}
-                        />
+                        <CorrespondenceTableWrapper type="internal-incoming" />
                       }
                     />
                     <Route
@@ -239,10 +243,6 @@ export const AppRouter = () => {
                         <CorrespondenceTableWrapper
                           type="internal-outgoing"
                           createButtonText="Добавить письмо"
-                          baseParams={{
-                            ...outgoingParams,
-                            channel: "internal",
-                          }}
                         />
                       }
                     />
@@ -266,7 +266,6 @@ export const AppRouter = () => {
                         <CorrespondenceTableWrapper
                           type="internal-drafts"
                           createButtonText="Добавить письмо"
-                          baseParams={{ channel: "internal", status: "draft" }}
                         />
                       }
                     />
@@ -276,9 +275,32 @@ export const AppRouter = () => {
                       index
                       element={
                         <RegistryTable
-                          type="internal-incoming"
+                          type="internal-archived"
                           url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
-                          extraParams={{ archived: 1 }}
+                          extraParams={archivedParams}
+                        />
+                      }
+                    />
+                  </Route>
+                  <Route path="pinned">
+                    <Route
+                      index
+                      element={
+                        <RegistryTable
+                          type="internal-pinned"
+                          url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
+                          extraParams={pinnedParams}
+                        />
+                      }
+                    />
+                  </Route>
+                  <Route path="trashed">
+                    <Route
+                      index
+                      element={
+                        <RegistryTable
+                          type="internal-trashed"
+                          url={ApiRoutes.GET_INTERNAL_TRASH}
                         />
                       }
                     />

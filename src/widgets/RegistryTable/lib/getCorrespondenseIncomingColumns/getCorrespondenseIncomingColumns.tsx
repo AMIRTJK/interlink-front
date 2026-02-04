@@ -18,7 +18,7 @@ import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 
 export const useCorrespondenseIncomingColumns = (
-  type?: string
+  type?: string,
 ): TableColumnsType => {
   const isInternal = type?.includes("internal");
 
@@ -52,7 +52,7 @@ export const useCorrespondenseIncomingColumns = (
 
   const { mutate: restoreCorrespondence } = useMutationQuery<{ id: number }>({
     url: (data) =>
-       isInternal 
+      isInternal
         ? ApiRoutes.RESTORE_INTERNAL.replace(":id", String(data.id))
         : ApiRoutes.RESTORE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "POST",
@@ -63,6 +63,7 @@ export const useCorrespondenseIncomingColumns = (
         ApiRoutes.GET_INTERNAL_INCOMING,
         ApiRoutes.GET_INTERNAL_OUTGOING,
         ApiRoutes.GET_INTERNAL_COUNTERS,
+        ApiRoutes.GET_INTERNAL_TRASH,
       ],
     },
   });
@@ -99,7 +100,7 @@ export const useCorrespondenseIncomingColumns = (
       invalidate: [
         ApiRoutes.GET_CORRESPONDENCES,
         ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
-         ApiRoutes.GET_INTERNAL_INCOMING,
+        ApiRoutes.GET_INTERNAL_INCOMING,
         ApiRoutes.GET_INTERNAL_OUTGOING,
         ApiRoutes.GET_INTERNAL_COUNTERS,
       ],
@@ -126,10 +127,9 @@ export const useCorrespondenseIncomingColumns = (
 
   return [
     {
-      title: "Вх. номер",
-      dataIndex: "1",
+      title: isInternal ? "Рег. номер" : "Вх. номер",
+      dataIndex: "reg_number",
     },
-
     {
       title: "Исх. номер",
       dataIndex: "2",
@@ -147,8 +147,20 @@ export const useCorrespondenseIncomingColumns = (
       dataIndex: "subject",
     },
     {
-      title: "Исполнитель",
-      dataIndex: "6",
+      title: isInternal ? "Получатель" : "Исполнитель",
+      // Условный dataIndex: для внутренней берем из вложенного массива, для внешней - обычное поле
+      dataIndex: isInternal
+        ? ["recipients", 0, "user", 0, "full_name"]
+        : "recipient_name",
+      render: (value, record: any) => {
+        if (isInternal) {
+          // Безопасное получение данных для внутренней
+          const internalRecipient = record.recipients?.[0]?.user?.full_name;
+          return internalRecipient;
+        }
+        // Для внешней
+        return value || record.recipient_name;
+      },
     },
     {
       title: "Статус",
@@ -175,9 +187,9 @@ export const useCorrespondenseIncomingColumns = (
       width: 40,
       fixed: "right",
       render: (record) => {
-        const isTrashed = type === "trashed";
-        const isArchived = type === "archived";
-        const isPinned = type === "pinned";
+        const isTrashed = type === "trashed" || type === "internal-trashed";
+        const isArchived = type === "archived" || type === "internal-archived";
+        const isPinned = type === "pinned" || type === "internal-pinned";
 
         const items: MenuProps["items"] = [
           isArchived

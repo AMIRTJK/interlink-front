@@ -53,9 +53,6 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const [searchParams] = useSearchParams();
   const folderId = searchParams.get("folderId");
 
-  const isIncoming = location.pathname === AppRoutes.CORRESPONDENCE_INCOMING;
-  const isOutgoing = location.pathname === AppRoutes.CORRESPONDENCE_OUTGOING;
-
   const isDefaultFolder = !!searchParams.get("defaultFolder");
 
   const customTabs = useMemo(() => {
@@ -63,25 +60,15 @@ export const RegistryTable = <T extends Record<string, unknown>>({
       return []; // Пустой массив скроет табы
     }
     if (type === "internal-outgoing") {
+      return [];
+    }
+    if (type === "internal-drafts") {
       return INTERNAL_OUTGOING_TABS;
     }
     return undefined; // undefined заставит StatusTabs использовать дефолтные
   }, [type]);
 
-  // Динамически определяем URL в зависимости от типа и текущей вкладки
-  const currentUrl = useMemo(() => {
-    // Если это внутренняя корреспонденция (тип outgoing)
-    if (type === "outgoing") {
-      // Для вкладки "Черновики" используем специфичный эндпоинт
-      if (currentTab === CorrespondenseStatus.DRAFT) {
-        return ApiRoutes.GET_INTERNAL_DRAFTS;
-      }
-      // Здесь можно добавить другие маппинги для внутренней корреспонденции (trash и т.д.)
-    }
-
-    // По умолчанию или для внешней корреспонденции используем базовый URL
-    return url;
-  }, [type, currentTab, url]);
+  const currentUrl = url;
 
   const showCreateButton =
     (type.includes("incoming") || type.includes("outgoing")) &&
@@ -154,9 +141,15 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   };
 
   const handleNavigateToLetter = (record: CorrespondenceResponse) => {
-    const route = type.includes("outgoing")
-      ? AppRoutes.CORRESPONDENCE_OUTGOING_SHOW
-      : AppRoutes.CORRESPONDENCE_INCOMING_SHOW;
+    console.log(type);
+
+    const route = type.includes("external-incoming")
+      ? AppRoutes.CORRESPONDENCE_INCOMING_SHOW
+      : type.includes("internal-incoming")
+        ? AppRoutes.INTERNAL_INCOMING_SHOW
+        : type.includes("internal-outgoing") || type.includes("internal-drafts")
+          ? AppRoutes.INTERNAL_OUTGOING_SHOW
+          : "";
 
     navigate(route.replace(":id", String(record.id)));
   };

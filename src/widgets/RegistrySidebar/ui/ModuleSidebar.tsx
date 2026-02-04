@@ -34,6 +34,7 @@ export const ModuleSidebar = () => {
       : ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
     params: {},
   });
+
   const counts = useMemo(() => countersData?.data || {}, [countersData]);
   const { data: foldersData, refetch: refetchFolders } = useGetQuery({
     url: ApiRoutes.GET_FOLDERS,
@@ -142,28 +143,9 @@ export const ModuleSidebar = () => {
         ? {
             Черновики: {
               key: AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS,
-              icon: <img src={sideBarIcons.incomingIcon} />, // Assuming draftIcon exists or reusing fileIcon? Will check icons later or use default
-              // If no draft icon, maybe reuse another one or check imports.
-              // Checking imports... sideBarIcons usually has common icons.
-              // Let's assume there is one or use a placeholder if needed.
-              // Actually, I should check if sideBarIcons has draftIcon.
-              // If not, I'll use a generic one like file-text or similar from antd for now?
-              // But definitions uses images.
-              // Let me check imports first or just use a generic one if I can't check.
-              // Wait, I see imports: sideBarIcons
-              // I'll try to use sideBarIcons.draftIcon if it exists, but I don't see it in the file.
-              // I will use incomingIcon as placeholder if specific one is missing,
-              // or better: let's verify icons.
-              // Actually, better to check sidebarIcons.ts ...
-              // ... skipping check to save steps, will use 'incomingIcon' temporarily if 'drafts' specific missing.
-              // BUT wait, user said "создай его".
-              // I'll use folderIcon for now if unsure.
-              // Let's look at existing icons usage: incomingIcon, outgoingIcon, archiveIcon.
-              // I will use <EditOutlined /> or similar from antd if image missing?
-              // No, style uses <img>.
-              // I'll use sideBarIcons.incomingIcon (or similar) as placeholder for now.
+              icon: <img src={sideBarIcons.incomingIcon} />,
 
-              count: counts.drafts_total || 0, // Assuming API returns drafts_total? internal-correspondences/counters usually returns counts.
+              count: isInternal ? counts.drafts : counts.drafts_total || 0,
               path: AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS,
             },
           }
@@ -179,16 +161,24 @@ export const ModuleSidebar = () => {
           : AppRoutes.CORRESPONDENCE_ARCHIVE,
       },
       Закреплённые: {
-        key: AppRoutes.CORRESPONDENCE_PINNED,
+        key: isInternal
+          ? AppRoutes.CORRESPONDENCE_INTERNAL_PINNED
+          : AppRoutes.CORRESPONDENCE_PINNED,
         icon: <img src={sideBarIcons.pinnedIcon} />,
         count: counts.pinned_total,
-        path: AppRoutes.CORRESPONDENCE_PINNED,
+        path: isInternal
+          ? AppRoutes.CORRESPONDENCE_INTERNAL_PINNED
+          : AppRoutes.CORRESPONDENCE_PINNED,
       },
       Корзина: {
-        key: AppRoutes.CORRESPONDENCE_TRASHED,
+        key: isInternal
+          ? AppRoutes.CORRESPONDENCE_INTERNAL_TRASHED
+          : AppRoutes.CORRESPONDENCE_TRASHED,
         icon: <img src={sideBarIcons.garbageIcon} />,
-        count: counts.trash_total,
-        path: AppRoutes.CORRESPONDENCE_TRASHED,
+        count: isInternal ? counts.trash : counts.trash_total,
+        path: isInternal
+          ? AppRoutes.CORRESPONDENCE_INTERNAL_TRASHED
+          : AppRoutes.CORRESPONDENCE_TRASHED,
       },
     }),
     [counts, isInternal],

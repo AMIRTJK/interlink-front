@@ -6,11 +6,7 @@ import {
 } from "@widgets/CorrespondenceForm";
 import { InternalCorrespondece } from "@widgets/InternalCorrespondece/ui";
 
-export const CreateCorrespondencePage = ({
-  type,
-}: {
-  type: string;
-}) => {
+export const CreateCorrespondencePage = ({ type }: { type: string }) => {
   const {
     mutate: createLetterMutate,
     isPending: createLetterIsPending,
@@ -28,8 +24,9 @@ export const CreateCorrespondencePage = ({
 
   // const handleBack = () => navigate(-1);
 
-  const title =
-    type.includes("incoming") ? "Новое входящее письмо" : "Новое исходящее письмо";
+  const title = type.includes("incoming")
+    ? "Новое входящее письмо"
+    : "Новое исходящее письмо";
 
   const handleFinish = (values: CorrespondenceFormData) => {
     createLetterMutate(values);
@@ -42,13 +39,11 @@ export const CreateCorrespondencePage = ({
     return <InternalCorrespondece mode="create" />;
   }
 
-
-
   return (
     <div className="h-full flex flex-col gap-4">
       <div className="flex-1 h-full overflow-hidden">
         <CorrespondenceForm
-          type={type.includes("incoming") ? "incoming" : "outgoing"}
+          type={type}
           title={title}
           onFinish={handleFinish}
           isLoading={createLetterIsPending}

@@ -5,14 +5,17 @@ import { getCorrespondenceOutgoingFilters } from "./getCorrespondenseOutgoingCol
 export const getRegistryFilters = (type: string): IFilterItem[] => {
   const filtersMap: Record<string, () => IFilterItem[]> = {
     // Маппинг ключей на соответствующие функции
-    incoming: getCorrespondenceIncomingFilters,
-    outgoing: getCorrespondenceOutgoingFilters,
+    "external-incoming": getCorrespondenceIncomingFilters,
+    "external-outgoing": getCorrespondenceOutgoingFilters,
     archived: getCorrespondenceIncomingFilters,
     pinned: getCorrespondenceIncomingFilters,
     trashed: getCorrespondenceIncomingFilters,
     "internal-incoming": getCorrespondenceIncomingFilters,
     "internal-outgoing": getCorrespondenceOutgoingFilters,
     "internal-drafts": getCorrespondenceOutgoingFilters,
+    "internal-archived": getCorrespondenceIncomingFilters,
+    "internal-pinned": getCorrespondenceIncomingFilters,
+    "internal-trashed": getCorrespondenceIncomingFilters,
 
     // Если есть общий тип для всей корреспонденции (как фоллбек)
     correspondence: getCorrespondenceIncomingFilters,
