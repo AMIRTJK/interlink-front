@@ -43,7 +43,7 @@ export const CreateUser = () => {
 
   const onFinish = (values: Omit<CreateUserDTO, "organization_id" | "department_id"> & { organization_id: string, department_id: string }) => {
     const payload: CreateUserDTO = {
-      ...values,
+      ...values, phone: `+992${values.phone}`,
       organization_id: Number(values.organization_id),
       department_id: Number(values.department_id)
     };
