@@ -68,6 +68,7 @@ export const buildMenuTree = ({
         ),
         path: "",
         parent_id: folder.id,
+        onTitleClick: () => handleAddClick(folder.id),
       };
 
       // Добавляем дефолтные папки ("Полученные", "Отправленные") только во "Внутреннюю корреспонденцию"

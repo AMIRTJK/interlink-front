@@ -18,7 +18,7 @@ export const FolderLabel: React.FC<IFolderLabelProps> = ({
 }) => {
   return (
     <div
-      className="flex items-center justify-between w-full group overflow-hidden pr-6"
+      className="flex items-center justify-between w-full group overflow-hidden pr-2"
       draggable={isDraggable}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
