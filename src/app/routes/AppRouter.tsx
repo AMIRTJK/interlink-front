@@ -164,7 +164,7 @@ export const AppRouter = () => {
                       index
                       element={
                         <CorrespondenceTableWrapper
-                          type="incoming"
+                          type="external-incoming"
                           createButtonText="Добавить письмо"
                           baseParams={{
                             ...incomingParams,
@@ -174,11 +174,15 @@ export const AppRouter = () => {
                     />
                     <Route
                       path="create"
-                      element={<CreateCorrespondencePage type="incoming" />}
+                      element={
+                        <CreateCorrespondencePage type="external-incoming" />
+                      }
                     />
                     <Route
                       path=":id"
-                      element={<ShowCorrespondencePage type="incoming" />}
+                      element={
+                        <ShowCorrespondencePage type="external-incoming" />
+                      }
                     />
                   </Route>
                   <Route path="outgoing">
@@ -186,7 +190,7 @@ export const AppRouter = () => {
                       index
                       element={
                         <CorrespondenceTableWrapper
-                          type="outgoing"
+                          type="external-outgoing"
                           createButtonText="Добавить письмо"
                           baseParams={{
                             ...outgoingParams,
@@ -196,11 +200,15 @@ export const AppRouter = () => {
                     />
                     <Route
                       path="create"
-                      element={<CreateCorrespondencePage type="outgoing" />}
+                      element={
+                        <CreateCorrespondencePage type="external-outgoing" />
+                      }
                     />
                     <Route
                       path=":id"
-                      element={<ShowCorrespondencePage type="outgoing" />}
+                      element={
+                        <ShowCorrespondencePage type="external-outgoing" />
+                      }
                     />
                   </Route>
                 </Route>

@@ -14,6 +14,7 @@ import { Button, If } from "@shared/ui"; // Импортируем твой If
 import { RecipientSelectorModal } from "./RecipientSelectorModal";
 import { SelectedRecipientsModal } from "./SelectedRecipientsModal";
 import { ApiRoutes } from "@shared/api";
+import { requiredRule } from "@shared/lib";
 
 dayjs.locale("ru");
 
@@ -182,14 +183,14 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           copy: [],
         }}
       >
-        <Form.Item name="recipients" hidden>
+        <Form.Item name="recipients" rules={[requiredRule]} hidden>
           <Input />
         </Form.Item>
         <Form.Item name="copy" hidden>
           <Input />
         </Form.Item>
 
-        <Form.Item name="subject" className="mb-4" noStyle>
+        <Form.Item name="subject" className="mb-4" rules={[requiredRule]}>
           <Input
             placeholder="Заголовок документа..."
             variant="borderless"
@@ -215,7 +216,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
 
           <div className="flex items-center gap-2">
             <ClockCircleOutlined style={{ fontSize: "14px" }} />
-            <Form.Item name="date" noStyle rules={[{ required: true }]}>
+            <Form.Item name="date" noStyle>
               <DatePicker
                 format="DD.MM.YYYY"
                 variant="borderless"
@@ -224,6 +225,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
                 className={`p-0! text-sm! max-w-[90px] ${textSecondary} text-[#4a5565]! px-0! hover:bg-transparent! hover:text-gray-400! dark:hover:text-gray-300! transition-colors!`}
                 style={{ color: "inherit" }}
                 inputReadOnly
+                disabled
               />
             </Form.Item>
           </div>

@@ -35,7 +35,7 @@ export const useCorrespondenceRoute = (): CorrespondenceRouteState => {
           return true;
         }
 
-        if (type === "incoming" && !isCreate) {
+        if (type === "external-incoming" && !isCreate) {
           return true;
         }
       }

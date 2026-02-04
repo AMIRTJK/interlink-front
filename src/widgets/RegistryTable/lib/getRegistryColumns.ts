@@ -11,9 +11,9 @@ export const useRegistryColumns = (type: string): TableColumnsType<any> => {
   const outgoingColumns = useCorrespondenseOutgoingColumns(type);
 
   switch (type) {
-    case "incoming":
+    case "external-incoming":
       return incomingColumns;
-    case "outgoing":
+    case "external-outgoing":
       return outgoingColumns;
 
     // Внутренние

@@ -33,7 +33,7 @@ export const CorrespondenceTableWrapper = ({
     }
 
     // EXTERNAL-INCOMING
-    if (type === "incoming" || type === "outgoing") {
+    if (type === "external-incoming" || type === "external-outgoing") {
       return {
         params: currentParams,
         url: currentUrl,

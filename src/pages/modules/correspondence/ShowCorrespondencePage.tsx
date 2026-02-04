@@ -1,13 +1,12 @@
 import React from "react";
-import { matchPath, useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   CorrespondenceForm,
   CorrespondenceFormData,
-  CorrespondenceType,
 } from "@widgets/CorrespondenceForm";
 import { Spin } from "antd";
 import { ApiRoutes } from "@shared/api";
-import { useGetQuery } from "@shared/lib";
+import { useCorrespondenceRoute, useGetQuery } from "@shared/lib";
 import { InternalCorrespondece } from "@widgets/InternalCorrespondece";
 
 interface ShowCorrespondencePageProps {
@@ -15,19 +14,10 @@ interface ShowCorrespondencePageProps {
 }
 
 export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
-  type = "incoming",
+  type = "external-incoming",
 }) => {
   const { id } = useParams<{ id: string }>();
-  const location = useLocation();
-
-  const hiddenPatterns = [
-    "/modules/correspondence/outgoing/create",
-    "/modules/correspondence/outgoing/:id",
-  ];
-
-  const shouldHideUI = hiddenPatterns.some((pattern) =>
-    matchPath({ path: pattern, end: true }, location.pathname),
-  );
+  const { shouldHideUI } = useCorrespondenceRoute();
 
   const currentApi = shouldHideUI
     ? ApiRoutes.GET_INTERNAL_BY_ID
@@ -48,8 +38,9 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
 
   if (isLoading) return <Spin />;
 
-  const title =
-    type.includes("incoming") ? `Входящее письмо #${id}` : `Исходящее письмо #${id}`;
+  const title = type.includes("incoming")
+    ? `Входящее письмо #${id}`
+    : `Исходящее письмо #${id}`;
 
   const data = correspondenceData?.data;
 
@@ -71,7 +62,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
     <div className="h-full flex flex-col gap-4">
       <div className="flex-1 h-full overflow-hidden">
         <CorrespondenceForm
-          type={type.includes("incoming") ? "incoming" : "outgoing"}
+          type={type}
           title={title}
           initialValues={data}
           onFinish={handleFinish}

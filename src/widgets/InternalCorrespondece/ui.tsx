@@ -6,7 +6,7 @@ import { TopNavigation } from "./ui/TopNavigation";
 import { useEffect, useState } from "react";
 import { DocumentHeaderForm, Recipient } from "./ui/DocumentHeaderForm";
 import { Form, Modal } from "antd";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { DocumentEditor } from "./ui/DocumentEditor";
 import {
   CreateInternalRequest,
@@ -26,10 +26,14 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   isLoading,
 }) => {
   const { id } = useParams<{ id: string }>();
+
+  const navigate = useNavigate();
   const { open, close, isOpen } = useModalState();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const effectiveMode = "create";
   const [currentMode, setCurrentMode] = useState<"create" | "show">(mode);
 
   const [initialRecipients, setInitialRecipients] = useState<any[]>([]);
@@ -51,77 +55,87 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     close();
   };
 
-  const {
-    mutate: sendForm,
-    isPending,
-    isAllowed,
-  } = useMutationQuery<CreateInternalRequest>({
-    url: ApiRoutes.CREATE_INTERNAL,
-    method: "POST",
-    messages: {
-      invalidate: [ApiRoutes.GET_INTERNAL_DRAFTS],
-    },
-    preload: true,
-    preloadConditional: ["internal_correspondence.create"],
-  });
+  const { mutate: createDraft, isPending: isCreating } =
+    useMutationQuery<CreateInternalRequest>({
+      url: ApiRoutes.CREATE_INTERNAL,
+      method: "POST",
+      messages: {
+        invalidate: [ApiRoutes.GET_INTERNAL_DRAFTS],
+      },
+      queryOptions: {
+        onSuccess: (data: any) => {
+          console.log("Server response:", data);
 
-  // 3. Создаем функцию отправки
-  const onSendClick = async () => {
+          const newId = data?.id;
+
+          if (newId) {
+            navigate(`/modules/correspondence/internal/outgoing/${newId}`);
+          } else {
+            console.warn("ID не найден в ответе:", data);
+          }
+        },
+      },
+    });
+
+  const { mutate: updateDraft, isPending: isUpdating } =
+    useMutationQuery<CreateInternalRequest>({
+      url: ApiRoutes.PUT_INTERNAL.replace(":id", String(id || "")),
+      method: "PUT",
+      messages: {
+        invalidate: [ApiRoutes.GET_INTERNAL_BY_ID],
+      },
+    });
+
+  const onSaveClick = async () => {
     try {
-      // Валидируем форму (тема, получатели, дата)
+      // Валидируем форму
       const values = await form.validateFields();
 
-      // Проверка на пустой редактор (опционально)
-      if (!editorBody || editorBody.trim() === "") {
-        alert("Тело документа не может быть пустым!");
-        return;
-      }
-
-      // 3. Формируем структуру запроса, которую вы описали
       const requestPayload = {
-        subject: values.subject, // Из инпута формы
-        body: editorBody, // HTML из CKEditor (<p>Текст</p>)
+        subject: values.subject,
+        body: editorBody,
         recipients: {
-          to: values.recipients, // Массив ID [2, 3...]
-          // copy: values.copy (пока игнорируем, как вы и просили)
+          to: values.recipients,
+          // copy: values.copy, // Если нужно
         },
       };
 
-      console.log("Отправляем на бэк:", requestPayload);
-
-      // Отправляем запрос
-      sendForm(requestPayload);
+      if (id) {
+        // Если ID есть - обновляем
+        console.log("Обновление черновика:", id, requestPayload);
+        updateDraft(requestPayload);
+      } else {
+        // Если ID нет - создаем
+        console.log("Создание черновика:", requestPayload);
+        createDraft(requestPayload, {});
+      }
     } catch (errorInfo) {
       console.log("Ошибка валидации:", errorInfo);
-      alert("Заполните обязательные поля!");
     }
   };
 
   // ЭФФЕКТ: Заполнение данных при просмотре
   useEffect(() => {
-    if (mode === "show" && initialData) {
-      // 1. Обработка Даты
+    if (initialData) {
+      // 1. Дата
       let dateValue = dayjsLib();
-      // Предпочитаем doc_date, если нет - created_at
       const dateString = initialData.doc_date || initialData.created_at;
       if (dateString) {
         dateValue = dayjsLib(dateString);
       }
 
-      // 2. Обработка Получателей (НОВАЯ ЛОГИКА)
+      // 2. Получатели
       const rawRecipients = initialData.recipients || [];
 
-      // Фильтруем "Кому" (type: 'to') и мапим в формат для UI
       const toRecipients: Recipient[] = rawRecipients
         .filter((r) => r.type === "to")
         .map((r) => ({
-          id: r.user.id, // Берем ID юзера, а не записи
+          id: r.user.id,
           full_name: r.user.full_name,
-          photo_path: r.user.photo_path || "", // fallback для null
+          photo_path: r.user.photo_path || "",
           position: r.user.position || "",
         }));
 
-      // Фильтруем "Копия" (type: 'copy') - если такие будут
       const ccRecipients: Recipient[] = rawRecipients
         .filter((r) => r.type === "copy")
         .map((r) => ({
@@ -131,27 +145,26 @@ export const InternalCorrespondece: React.FC<IProps> = ({
           position: r.user.position || "",
         }));
 
-      // 3. Устанавливаем значения в форму
+      // 3. Сеттим в форму
       form.setFieldsValue({
         subject: initialData.subject,
-        number: initialData.reg_number, // reg_number из JSON
+        number: initialData.reg_number,
         date: dateValue,
-        // Для формы нужны только ID
         recipients: toRecipients.map((r) => r.id),
         copy: ccRecipients.map((r) => r.id),
       });
 
-      // 4. Обновляем стейт для визуального отображения (чипсы)
+      // 4. Стейты для UI
       setInitialRecipients(toRecipients);
       setInitialCC(ccRecipients);
 
-      // 5. Контент редактора
+      // 5. Редактор
       if (initialData.body) {
         setInitialEditorContent(initialData.body);
         setEditorBody(initialData.body);
       }
     }
-  }, [mode, initialData, form]);
+  }, [initialData, form]);
 
   return (
     <div
@@ -170,7 +183,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         />
         <DocumentEditor
           isDarkMode={isDarkMode}
-          mode={currentMode}
+          mode={effectiveMode}
           onChange={setEditorBody}
           initialContent={initialEditorContent}
         />
@@ -179,15 +192,16 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         open={isOpen}
         onClose={close}
         docId={id}
-        mode={currentMode}
+        mode={effectiveMode}
         onReply={handleReply}
       />
       <ActionToolbar
         setIsInspectorOpen={open}
         setShowPreview={() => setIsPreviewOpen(true)}
         handleSend={() => console.log("Отправить")}
-        onSave={onSendClick}
-        mode={currentMode}
+        onSave={onSaveClick}
+        mode={effectiveMode}
+        onSaveLoading={isCreating || isUpdating}
       />
       <Modal
         title="Предварительный просмотр"

@@ -29,8 +29,6 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 
-export type CorrespondenceType = "incoming" | "outgoing";
-
 export type CorrespondenceFormVariant = "create" | "view";
 
 export interface CorrespondenceFormData {
@@ -49,7 +47,7 @@ export interface CorrespondenceFormData {
 
 interface CorrespondenceFormProps {
   variant: CorrespondenceFormVariant;
-  type: CorrespondenceType;
+  type: string;
   initialValues?: CorrespondenceResponse;
   onFinish: (values: CorrespondenceFormData) => void;
   isLoading?: boolean;
@@ -212,8 +210,8 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
   const [form] = Form.useForm();
   const executionModalState = useModalState();
 
-  const isIncoming = type === "incoming";
-  const isOutgoing = type === "outgoing";
+  const isIncoming = type === "external-incoming";
+  const isOutgoing = type === "external-outgoing";
 
   const location = useLocation();
 

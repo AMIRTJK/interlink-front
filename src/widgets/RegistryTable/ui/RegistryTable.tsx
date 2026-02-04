@@ -53,9 +53,6 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const [searchParams] = useSearchParams();
   const folderId = searchParams.get("folderId");
 
-  const isIncoming = location.pathname === AppRoutes.CORRESPONDENCE_INCOMING;
-  const isOutgoing = location.pathname === AppRoutes.CORRESPONDENCE_OUTGOING;
-
   const isDefaultFolder = !!searchParams.get("defaultFolder");
 
   const customTabs = useMemo(() => {
@@ -144,9 +141,15 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   };
 
   const handleNavigateToLetter = (record: CorrespondenceResponse) => {
-    const route = type.includes("outgoing")
-      ? AppRoutes.CORRESPONDENCE_OUTGOING_SHOW
-      : AppRoutes.CORRESPONDENCE_INCOMING_SHOW;
+    console.log(type);
+
+    const route = type.includes("external-incoming")
+      ? AppRoutes.CORRESPONDENCE_INCOMING_SHOW
+      : type.includes("internal-incoming")
+        ? AppRoutes.INTERNAL_INCOMING_SHOW
+        : type.includes("internal-outgoing") || type.includes("internal-drafts")
+          ? AppRoutes.INTERNAL_OUTGOING_SHOW
+          : "";
 
     navigate(route.replace(":id", String(record.id)));
   };
