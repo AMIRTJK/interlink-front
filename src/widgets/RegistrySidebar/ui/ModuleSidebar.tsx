@@ -260,51 +260,7 @@ export const ModuleSidebar = ({ collapsed }: { collapsed: boolean }) => {
     ],
   );
 
-  const footerItems = useMemo(
-    () => [
-      {
-        key: "help",
-        icon: <img src={sideBarIcons.helpIcon} alt="" />,
-        label: "Помощь",
-        path: "#",
-      },
-      {
-        key: "settings",
-        icon: <img src={sideBarIcons.settingsIcon} alt="" />,
-        label: "Настройки",
-        path: "#",
-      },
-    ],
-    [],
-  );
 
-  const handleMenuClick = useCallback(
-    ({ key }: { key: string }) => {
-      const findInTree = (items: any[], searchKey: string): any => {
-        for (const item of items) {
-          if (item.key === searchKey) return item;
-          if (item.children) {
-            const found = findInTree(item.children, searchKey);
-            if (found) return found;
-          }
-        }
-        return null;
-      };
-
-      const item = findInTree([...finalMenuItems, ...footerItems], key);
-
-      if (key.startsWith("create-placeholder-")) {
-        const parentFolderId = item?.parent_id || null;
-        handleAddClick(parentFolderId);
-        return;
-      }
-
-      if (item?.path && !item.path.startsWith("#")) {
-        navigate(item.path);
-      }
-    },
-    [finalMenuItems, footerItems, navigate, handleAddClick],
-  );
 
   const [searchParams] = useSearchParams();
   const folderIdParam = searchParams.get("folderId");
@@ -367,7 +323,7 @@ export const ModuleSidebar = ({ collapsed }: { collapsed: boolean }) => {
 
         {!collapsed && (
           <div className="px-5 pb-5 text-xs text-gray-400 text-center">
-            v1.0.12 © 2024 Interlink
+            AM | KM
           </div>
         )}
       </div>
