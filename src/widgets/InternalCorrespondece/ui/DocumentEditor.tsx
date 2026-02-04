@@ -185,7 +185,6 @@ export const DocumentEditor = ({
             fontSize: {
               options: [10, 12, 14, "default", 18, 20, 24],
             },
-            placeholder: "Type the content here!",
           }}
         />
       </div>

@@ -192,7 +192,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
 
         <Form.Item name="subject" className="mb-4" rules={[requiredRule]}>
           <Input
-            placeholder="Заголовок документа..."
+            placeholder="Тема письма..."
             variant="borderless"
             className="p-0! h-12! text-4xl! font-bold! text-gray-900! placeholder:text-4xl! placeholder:text-gray-300! dark:placeholder:text-gray-600! bg-transparent! border-none! focus:outline-none! focus:ring-0! transition-all!"
             autoComplete="off"

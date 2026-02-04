@@ -47,9 +47,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
 
   // Получение текущего workflow (согласующие, подписанты)
   const { data: workflowData, refetch: refetchWorkflow } = useGetQuery({
-    url: docId
-      ? ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", docId)
-      : "",
+    url: docId ? ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", docId) : "",
     useToken: true,
     options: {
       enabled: !!docId && open, // Загружаем только когда открыто и есть ID
@@ -86,12 +84,9 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
   });
 
   const { mutate: inviteApprover } = useMutationQuery({
-    url: docId
-      ? ApiRoutes.INTERNAL_INVITE_APPROVER.replace(":id", docId)
-      : "",
+    url: docId ? ApiRoutes.INTERNAL_INVITE_APPROVER.replace(":id", docId) : "",
     method: "POST",
   });
-
 
   const handleOpenModal = (type: TModalType) => {
     setActiveModalType(type);
@@ -130,19 +125,15 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
 
     if (docId) {
       if (selectedSigner) {
-        inviteSigner(
-          { user_id: selectedSigner.id },
-          {
-            onSuccess: () => {
-              console.log("Signer invited");
-            },
-          },
-        );
+        const payload = {
+          users: [selectedSigner.id],
+        };
+        inviteSigner(payload);
       }
 
       selectedApprovers.forEach((item) => {
         inviteApprover(
-          { user_id: item.id },
+          { users: [item.id] },
           {
             onSuccess: () => {
               console.log("Approver invited", item.id);
@@ -202,7 +193,9 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
           title: "Выбрать подписывающего",
           mode: "select" as const,
           // Используем специфичный поиск сотрудников для внутренних писем
-          querySettings: { url: ApiRoutes.GET_INTERNAL_RECIPIENTS_USERS as string },
+          querySettings: {
+            url: ApiRoutes.GET_INTERNAL_RECIPIENTS_USERS as string,
+          },
           transformResponse: (
             items: Array<{
               id: string;
@@ -225,7 +218,9 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
           title: "Выбрать согласующих",
           mode: "select" as const,
           // Используем специфичный поиск сотрудников для внутренних писем
-          querySettings: { url: ApiRoutes.GET_INTERNAL_RECIPIENTS_USERS as string },
+          querySettings: {
+            url: ApiRoutes.GET_INTERNAL_RECIPIENTS_USERS as string,
+          },
           transformResponse: (
             items: Array<{
               id: string;
@@ -310,7 +305,11 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                             onClick={onReply}
                             size="large"
                             className="w-full! h-14! px-4! py-3! bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm!"
-                            icon={<Icons.MailOutlined style={{ fontSize: '18px', color: '#6B7280' }} />}
+                            icon={
+                              <Icons.MailOutlined
+                                style={{ fontSize: "18px", color: "#6B7280" }}
+                              />
+                            }
                           >
                             <span className="font-medium">Ответить</span>
                           </Ui.Button>
@@ -318,9 +317,19 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                             onClick={() => console.log("Переслать")}
                             size="large"
                             className="w-full! h-14! px-4! py-3! bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm!"
-                            icon={<Icons.SendOutlined style={{ fontSize: '18px', color: '#6B7280', transform: 'rotate(0deg)' }} />}
+                            icon={
+                              <Icons.SendOutlined
+                                style={{
+                                  fontSize: "18px",
+                                  color: "#6B7280",
+                                  transform: "rotate(0deg)",
+                                }}
+                              />
+                            }
                           >
-                            <span className="text-base font-medium">Переслать</span>
+                            <span className="text-base font-medium">
+                              Переслать
+                            </span>
                           </Ui.Button>
                         </div>
                       ) : (
@@ -393,7 +402,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                               type="primary"
                               className=" w-full! p-5! font-bold! bg-[#FF6B6B]! hover:bg-[#ff5252]! text-white rounded-xl! transition-colors duration-200 flex items-center justify-center gap-2"
                             >
-                             Сохранить участников
+                              Сохранить участников
                             </Ui.Button>
                           </div>
                         </div>
