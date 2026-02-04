@@ -27,6 +27,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
 }) => {
   const { id } = useParams<{ id: string }>();
 
+  const isDraftCreated = !!id || !!initialData;
+
   const navigate = useNavigate();
   const { open, close, isOpen } = useModalState();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -202,6 +204,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         onSave={onSaveClick}
         mode={effectiveMode}
         onSaveLoading={isCreating || isUpdating}
+        isActionsEnabled={isDraftCreated}
       />
       <Modal
         title="Предварительный просмотр"

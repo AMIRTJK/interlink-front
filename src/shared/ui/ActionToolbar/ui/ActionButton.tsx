@@ -6,6 +6,7 @@ interface IProps {
   label: string;
   onClick?: () => void;
   loading?: boolean;
+  disabled?: boolean;
 }
 
 export const ActionButton: React.FC<IProps> = ({
@@ -13,10 +14,12 @@ export const ActionButton: React.FC<IProps> = ({
   label,
   onClick,
   loading,
+  disabled,
 }) => {
   return (
     <Button
       loading={loading}
+      disabled={disabled}
       type="text"
       onClick={onClick}
       className="
