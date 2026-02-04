@@ -18,16 +18,15 @@ export const FolderLabel: React.FC<IFolderLabelProps> = ({
 }) => {
   return (
     <div
-      className="flex items-center gap-16"
+      className="flex items-center justify-between w-full group overflow-hidden pr-6"
       draggable={isDraggable}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
-      
       <div
-        className="flex items-center flex-1 cursor-pointer min-w-[125px] max-w-[101px]"
+        className="flex items-center flex-1 min-w-0 cursor-pointer gap-2"
         onClick={(e) => {
           e.stopPropagation();
           if (folderPath) {
@@ -35,17 +34,13 @@ export const FolderLabel: React.FC<IFolderLabelProps> = ({
           }
         }}
       >
-        <span className="mr-[170px]!">{folder.name}</span>
-        <FolderActions menuActions={menuActions} collapsed={collapsed} />
+        <span className="truncate">{folder.name}</span>
       </div>
 
-      <div
-        className="flex items-center justify-end"
-        style={{ width: "40px" }}
-      >
+      <div className="flex items-center gap-1 shrink-0 ml-1">
+        <FolderActions menuActions={menuActions} collapsed={collapsed} />
         <FolderCounter definition={definition} collapsed={collapsed} />
       </div>
-      
     </div>
   );
 };

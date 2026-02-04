@@ -14,7 +14,7 @@ export const FolderCounter: React.FC<IProps> = ({ definition, collapsed }) => {
   }
 
   return (
-    <span className="bg-[#E30613] text-white text-[11px] font-bold px-1.5 rounded-full min-w-6 h-6 flex items-center justify-center">
+    <span className="bg-[#E30613] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shrink-0 leading-none">
       {count}
     </span>
   );
