@@ -6,7 +6,7 @@ import { IFolder } from "../model";
  */
 export const getParentSystemFolder = (
   folderId: number,
-  folders: IFolder[]
+  folders: IFolder[],
 ): "incoming" | "outgoing" | null => {
   const findParent = (id: number): "incoming" | "outgoing" | null => {
     const currentFolder = folders.find((f) => f.id === id);
@@ -31,7 +31,7 @@ export const getParentSystemFolder = (
 export const buildFolderPath = (
   folder: IFolder,
   folders: IFolder[],
-  definition?: { path: string }
+  definition?: { path: string },
 ): string => {
   // Путь для системной папки
   if (definition?.path) {
@@ -41,18 +41,21 @@ export const buildFolderPath = (
   // Путь для пользовательской папки
   if (folder.id) {
     const parentType = getParentSystemFolder(folder.id, folders);
-    
+
     if (parentType === "incoming") {
-      return `${ROUTES.INCOMING}?folderId=${folder.id}`;
+      return `${ROUTES.INCOMING}?folder_id=${folder.id}`;
     } else if (parentType === "outgoing") {
-      return `${ROUTES.OUTGOING}?folderId=${folder.id}`;
+      return `${ROUTES.OUTGOING}?folder_id=${folder.id}`;
     }
   }
 
   // Default fallback
-  return `${ROUTES.FOLDERS}?folderId=${folder.id}`;
+  return `${ROUTES.FOLDERS}?folder_id=${folder.id}`;
 };
 
 export const isIncomingOrOutgoingFolder = (folderName: string): boolean => {
-  return folderName === SYSTEM_FOLDERS.INCOMING || folderName === SYSTEM_FOLDERS.OUTGOING;
+  return (
+    folderName === SYSTEM_FOLDERS.INCOMING ||
+    folderName === SYSTEM_FOLDERS.OUTGOING
+  );
 };
