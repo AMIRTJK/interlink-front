@@ -4,16 +4,21 @@ import { IFolder } from "../model";
 /**
  * Поиск родительской системной папки вверх по дереву
  */
-export const getParentSystemFolder = (
+export const getRootSystemFolder = (
   folderId: number,
   folders: IFolder[],
-): "incoming" | "outgoing" | null => {
-  const findParent = (id: number): "incoming" | "outgoing" | null => {
+): string | null => {
+  const findParent = (id: number): string | null => {
     const currentFolder = folders.find((f) => f.id === id);
     if (!currentFolder) return null;
 
-    if (currentFolder.name === SYSTEM_FOLDERS.INCOMING) return "incoming";
-    if (currentFolder.name === SYSTEM_FOLDERS.OUTGOING) return "outgoing";
+    if (
+      currentFolder.name === SYSTEM_FOLDERS.INCOMING ||
+      currentFolder.name === SYSTEM_FOLDERS.OUTGOING ||
+      currentFolder.name === SYSTEM_FOLDERS.ARCHIVE
+    ) {
+      return currentFolder.name;
+    }
 
     if (currentFolder.parent_id) {
       return findParent(currentFolder.parent_id);
@@ -31,6 +36,7 @@ export const getParentSystemFolder = (
 export const buildFolderPath = (
   folder: IFolder,
   folders: IFolder[],
+  definitions: Record<string, any>,
   definition?: { path: string },
 ): string => {
   // Путь для системной папки
@@ -40,22 +46,22 @@ export const buildFolderPath = (
 
   // Путь для пользовательской папки
   if (folder.id) {
-    const parentType = getParentSystemFolder(folder.id, folders);
+    const rootFolderName = getRootSystemFolder(folder.id, folders);
 
-    if (parentType === "incoming") {
-      return `${ROUTES.INCOMING}?folder_id=${folder.id}`;
-    } else if (parentType === "outgoing") {
-      return `${ROUTES.OUTGOING}?folder_id=${folder.id}`;
+    if (rootFolderName && definitions[rootFolderName]) {
+      const basePath = definitions[rootFolderName].path;
+      return `${basePath}?folder_id=${folder.id}`;
     }
   }
 
-  // Default fallback
-  return `${ROUTES.FOLDERS}?folder_id=${folder.id}`;
+  // Default fallback (если не нашли родителя, ведем в базу реестра)
+  return `${ROUTES.CORRESPONDENCE_BASE}?folder_id=${folder.id}`;
 };
 
-export const isIncomingOrOutgoingFolder = (folderName: string): boolean => {
+export const canHaveSubfolders = (folderName: string): boolean => {
   return (
     folderName === SYSTEM_FOLDERS.INCOMING ||
-    folderName === SYSTEM_FOLDERS.OUTGOING
+    folderName === SYSTEM_FOLDERS.OUTGOING ||
+    folderName === SYSTEM_FOLDERS.ARCHIVE
   );
 };

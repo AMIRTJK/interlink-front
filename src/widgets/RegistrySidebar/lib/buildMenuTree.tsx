@@ -7,7 +7,7 @@ import {
   MenuItem,
   IBuildMenuTreeParams,
 } from "../model";
-import { buildFolderPath, isIncomingOrOutgoingFolder } from "./folderPathUtils";
+import { buildFolderPath, canHaveSubfolders } from "./folderPathUtils";
 import {
   getChildFolders,
   getRootFolders,
@@ -46,7 +46,7 @@ export const buildMenuTree = ({
     const definition = definitions[folder.name];
     const isSystemFolder = !!definition;
     const folderKey = definition ? definition.key : `folder-${folder.id}`;
-    const folderPath = buildFolderPath(folder, folders, definition);
+    const folderPath = buildFolderPath(folder, folders, definitions, definition);
 
     const childFolders = getChildFolders(folder.id, folders);
     const nestedFolders = childFolders
@@ -55,7 +55,8 @@ export const buildMenuTree = ({
 
     let children: MenuItem[] | undefined =
       nestedFolders.length > 0 ? nestedFolders : undefined;
-    if (isIncomingOrOutgoingFolder(folder.name)) {
+      
+    if (folder.id && canHaveSubfolders(folder.name)) {
       const createPlaceholder: MenuItem = {
         key: `create-placeholder-${folder.id || folder.name}`,
         folderName: "Создать новую папку",
@@ -66,7 +67,7 @@ export const buildMenuTree = ({
           </span>
         ),
         path: "",
-        parent_id: folder.id || null,
+        parent_id: folder.id,
       };
 
       // Добавляем дефолтные папки ("Полученные", "Отправленные") только во "Внутреннюю корреспонденцию"
