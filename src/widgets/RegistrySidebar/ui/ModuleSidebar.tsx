@@ -324,6 +324,7 @@ export const ModuleSidebar = () => {
               key={item.key}
               item={item}
               isActive={[activeKey].includes(item.key as string)}
+              collapsed={collapsed}
             />
           ))}
         </div>
