@@ -48,7 +48,6 @@ export const RenderJSX = ({
   if(isPending) return <UseSkeleton loading={true} variant="profile"/>;
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6">
-
       {/* Модалка настроек */}
       <Modal
         title="Настройки"
