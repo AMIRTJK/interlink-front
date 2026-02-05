@@ -26,6 +26,16 @@ export default defineConfig({
     },
   },
 
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://62.122.141.220:80/",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
+  },
+
   build: {
     minify: "terser",
     terserOptions: {
