@@ -365,7 +365,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                               items: selectedApprovers,
                             },
                           ].map((section) => (
-                            <div key={section.id}>
+                            <div key={section.id} className="flex flex-col gap-2">
                               <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                                 {section.title}
                               </h4>
@@ -393,9 +393,9 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                             </div>
                           ))}
 
-                          <div>
+                          {/* <div>
                             <DrawerQRCodeSection />
-                          </div>
+                          </div> */}
                           <div>
                             <Ui.Button
                               onClick={handleSave}
