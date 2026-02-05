@@ -1,4 +1,4 @@
-export type SkeletonVariant = 'text' | 'avatar' | 'button' | 'input' | 'image' | 'card' | 'table';
+export type SkeletonVariant = 'text' | 'avatar' | 'button' | 'input' | 'image' | 'card' | 'table' | 'profile';
 
 export interface ISkeletonProps {
   loading: boolean | undefined;

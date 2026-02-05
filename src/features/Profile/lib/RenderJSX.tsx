@@ -44,10 +44,11 @@ export const RenderJSX = ({
   activeTab,
   onMenuClick,
 }: IProps) => {
-  if (isPending) return <UseSkeleton loading={true} variant="card" count={1} rows={5}  />;
 
+  if(isPending) return <UseSkeleton loading={true} variant="profile"/>;
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6">
+
       {/* Модалка настроек */}
       <Modal
         title="Настройки"
