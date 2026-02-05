@@ -8,6 +8,7 @@ import { TasksColumn } from "./ui/TasksColumn";
 import { TasksFilters } from "./ui/TasksFilters";
 import "./style.css";
 import { Loader } from "@shared/ui";
+import { UseSkeleton } from "@shared/ui/Skeleton/ui";
 
 interface IProps {
   onAddTask?: (status: string) => void;
@@ -18,7 +19,7 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
   const [localTasks, setLocalTasks] = useState<ITaskItem[]>([]);
   const { params } = useDynamicSearchParams();
 
-  const { isLoading: loading } = useGetQuery<
+  const { isPending } = useGetQuery<
     any,
     ITasksResponse
   >({
@@ -95,13 +96,14 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
        const revertedTasks = [...localTasks]; 
        revertedTasks[taskIndex] = { ...revertedTasks[taskIndex], status: oldStatus };
        setLocalTasks(revertedTasks);
+       console.error(error);
     }
   };
 
   const tasks = localTasks || [];
 
-  if (loading) {
-    return <Loader />;
+  if (isPending) {
+    return <UseSkeleton loading={true} variant="card" count={1} rows={5}  />;
   }
 
   return (
@@ -110,6 +112,7 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
       <div className="flex flex-col lg:flex-row lg:flex-nowrap gap-4 overflow-x-auto p-2">
         {TASK_STATUS_OPTIONS?.map((option) => (
           <TasksColumn
+            isPending={isPending}
             key={option.value}
             status={option.value}
             label={option.label}

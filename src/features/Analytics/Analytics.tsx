@@ -2,6 +2,7 @@ import { useEffect, lazy, Suspense } from "react";
 import { useAnalytics } from "@shared/lib/hooks/useAnalytics";
 import { tokenControl } from "@shared/lib";
 import { If, Loader } from "@shared/ui";
+import { UseSkeleton } from "@shared/ui/Skeleton/ui";
 
 const Alert = lazy(() =>
   import("antd/es/alert").then((m) => ({ default: m.default }))
@@ -37,11 +38,9 @@ export const Analytics = () => {
         <h2 className="text-2xl font-bold mb-6 text-gray-800">
           Аналитика
         </h2>
-
         <If is={isPending}>
-          <Loader />
+          <UseSkeleton loading={true} variant="card" count={1} rows={5}  />
         </If>
-
         <If is={isError}>
           <Suspense fallback={null}>
             <Alert
