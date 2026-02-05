@@ -31,6 +31,7 @@ export const FolderModal = ({
       onCancel={onCancel}
       footer={null}
       centered
+      className="create__folder-content"
       closeIcon={
         <span className="text-gray-400 hover:text-gray-500 transition-colors">
           <CloseOutlined className="text-base" />
@@ -56,7 +57,6 @@ export const FolderModal = ({
       >
         <Form.Item
           name="name"
-          label={<span className="text-[13px] font-medium text-[#1a202c]">Название папки</span>}
           rules={[{ required: true, message: "Введите название" }]}
           className="mb-5"
         >
@@ -68,7 +68,6 @@ export const FolderModal = ({
         
         <Form.Item
           name="prefix"
-          label={<span className="text-[13px] font-medium text-[#1a202c]">№ папки</span>}
           rules={[{ required: false }]}
           className="mb-8"
         >
