@@ -1,6 +1,6 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { MenuProps } from "antd";
-import folderIcon from "../../../assets/icons/folder-icon.svg";
+import folderIcon from "../../../assets/icons/folder.svg?raw";
 import {
   IFolder,
   IFolderDefinition,
@@ -62,8 +62,8 @@ export const buildMenuTree = ({
         folderName: "Создать новую папку",
         icon: <PlusOutlined />,
         label: (
-          <span className="text-[#0037AF] font-medium">
-            Создать новую папку
+          <span className="text-[#0037AF]">
+            Добавить
           </span>
         ),
         path: "",
@@ -97,7 +97,7 @@ export const buildMenuTree = ({
     return {
       key: folderKey,
       folderName: folder.name,
-      icon: definition ? definition.icon : <img src={folderIcon} />,
+      icon: definition ? definition.icon : folderIcon,
       path: folderPath,
       children,
       onTitleClick: () => {

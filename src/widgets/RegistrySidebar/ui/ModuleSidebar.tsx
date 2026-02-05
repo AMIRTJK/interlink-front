@@ -124,7 +124,7 @@ export const ModuleSidebar = () => {
         key: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING
           : AppRoutes.CORRESPONDENCE_EXTERNAL_INCOMING,
-        icon: <img src={sideBarIcons.incomingIcon} />,
+        icon: sideBarIcons.incomingIcon,
         count: counts.incoming_total,
         path: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING
@@ -134,7 +134,7 @@ export const ModuleSidebar = () => {
         key: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_OUTGOING
           : AppRoutes.CORRESPONDENCE_EXTERNAL_OUTGOING,
-        icon: <img src={sideBarIcons.outgoingIcon} />,
+        icon: sideBarIcons.outgoingIcon,
         count: counts.outgoing_total,
         path: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_OUTGOING
@@ -144,7 +144,7 @@ export const ModuleSidebar = () => {
         ? {
             Черновики: {
               key: AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS,
-              icon: <img src={sideBarIcons.incomingIcon} />,
+              icon: sideBarIcons.draftIcon,
 
               count: isInternal ? counts.drafts : counts.drafts_total || 0,
               path: AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS,
@@ -155,7 +155,7 @@ export const ModuleSidebar = () => {
         key: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_ARCHIVE
           : AppRoutes.CORRESPONDENCE_ARCHIVE,
-        icon: <img src={sideBarIcons.archiveIcon} />,
+        icon: sideBarIcons.archiveIcon,
         count: counts.archived_total,
         path: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_ARCHIVE
@@ -165,7 +165,7 @@ export const ModuleSidebar = () => {
         key: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_PINNED
           : AppRoutes.CORRESPONDENCE_PINNED,
-        icon: <img src={sideBarIcons.pinnedIcon} />,
+        icon: sideBarIcons.pinnedIcon,
         count: counts.pinned_total,
         path: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_PINNED
@@ -175,7 +175,7 @@ export const ModuleSidebar = () => {
         key: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_TRASHED
           : AppRoutes.CORRESPONDENCE_TRASHED,
-        icon: <img src={sideBarIcons.garbageIcon} />,
+        icon: sideBarIcons.garbageIcon,
         count: isInternal ? counts.trash : counts.trash_total,
         path: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_TRASHED
@@ -282,8 +282,8 @@ export const ModuleSidebar = () => {
         trigger={null}
         width="325px"
         collapsedWidth="80px"
-        className={`h-full! border-none! rounded-2xl p-3 ${
-          collapsed ? "w-[80px]! max-w-[80px]!" : "w-[260px]! max-w-[260px]!"
+        className={`h-full! border-none! bg-white/50! backdrop-blur-2xl! rounded-3xl! shadow-2xl! shadow-indigo-500/20! p-6! ${
+          collapsed ? "w-[80px]! max-w-[80px]!" : "w-[300px]! max-w-[340px]!"
         }`}
       >
         <div className="flex flex-col h-full">
@@ -312,19 +312,21 @@ export const ModuleSidebar = () => {
               <Button
                 type="text"
                 onClick={() => setCollapsed(!collapsed)}
-                className={collapsed ? "mx-auto h-7! w-7!" : "ml-auto"}
-                icon={<img src={sideBarIcons.collapseIcon} />}
+                className={collapsed ? "mx-auto h-7! w-7! outline-none! focus:outline-none!" : "ml-auto outline-none! focus:outline-none!"}
+                icon={<img src={sideBarIcons.collapseIcon} alt="collapse" />}
               />
             </div>
           </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-2 custom-scrollbar">
-          {finalMenuItems.map((item) => (
+        <div className="flex-1 overflow-y-auto  custom-scrollbar">
+          {finalMenuItems.map((item, index) => (
             <SidebarItem
               key={item.key}
               item={item}
               isActive={[activeKey].includes(item.key as string)}
               collapsed={collapsed}
+              activeKey={activeKey}
+              index={index}
             />
           ))}
         </div>
