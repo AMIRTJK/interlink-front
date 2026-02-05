@@ -67,7 +67,7 @@ export const Profile = () => {
   return (
     <>
     <RenderJSX
-      loading={loading}
+      isPending={loading}
       isSnowEnabled={isSnowEnabled}
       setIsSnowEnabled={setIsSnowEnabled}
       isRainEnabled={isRainEnabled}
