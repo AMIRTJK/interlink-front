@@ -1,9 +1,9 @@
 import dayjsLib from "dayjs";
-import { useModalState, useMutationQuery } from "@shared/lib";
-import { ActionToolbar } from "@shared/ui";
+import { useGetQuery, useModalState, useMutationQuery } from "@shared/lib";
+import { ActionToolbar, If, ISearchItem } from "@shared/ui";
 import { DrawerActionsModal } from "@widgets/DrawerActionsModal";
 import { TopNavigation } from "./ui/TopNavigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DocumentHeaderForm, Recipient } from "./ui/DocumentHeaderForm";
 import { Form, Modal } from "antd";
 import { useNavigate, useParams } from "react-router";
@@ -13,6 +13,8 @@ import {
   InternalCorrespondenceResponse,
 } from "@entities/correspondence";
 import { ApiRoutes } from "@shared/api";
+import { WorkflowParticipantsPanel } from "./ui/WorkflowParticipantsPanel";
+import { generateMockWorkflow } from "./lib";
 
 interface IProps {
   mode: "create" | "show";
@@ -35,6 +37,9 @@ export const InternalCorrespondece: React.FC<IProps> = ({
 
   const [isDarkMode, setIsDarkMode] = useState(false);
 
+  const [isParticipantsPanelCollapsed, setIsParticipantsPanelCollapsed] =
+    useState(false);
+
   const effectiveMode = "create";
   const [currentMode, setCurrentMode] = useState<"create" | "show">(mode);
 
@@ -43,14 +48,22 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   // Состояние для начального контента редактора
   const [initialEditorContent, setInitialEditorContent] = useState<string>("");
 
-  // Определяем классы для фона всей страницы
-  // const bgClass = isDarkMode
-  //   ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100"
-  //   : "bg-gradient-to-br from-white via-gray-50 to-white text-gray-900";
-
   const [form] = Form.useForm();
 
   const [editorBody, setEditorBody] = useState<string>("");
+
+  const { data: rawWorkflowData, refetch: refetchWorkflow } = useGetQuery({
+    url: id ? ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", id) : "",
+    useToken: true,
+    options: { enabled: !!id },
+  });
+
+  const workflowData = useMemo(() => {
+    // В реальном проекте здесь будет просто: return rawWorkflowData;
+    // Но для демонстрации мы мержим или подменяем
+    if (!rawWorkflowData) return null;
+    return generateMockWorkflow(rawWorkflowData);
+  }, [rawWorkflowData]);
 
   const handleReply = () => {
     setCurrentMode("create");
@@ -178,26 +191,44 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         isDarkMode={isDarkMode}
         toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
       />
-      <main className="max-w-4xl flex flex-col gap-4 mx-auto px-8 py-12">
-        <DocumentHeaderForm
-          isDarkMode={isDarkMode}
-          form={form}
-          initialRecipients={initialRecipients}
-          initialCC={initialCC}
-        />
-        <DocumentEditor
-          isDarkMode={isDarkMode}
-          mode={effectiveMode}
-          onChange={setEditorBody}
-          initialContent={initialEditorContent}
-        />
-      </main>
+
+      <div className="flex w-full justify-between">
+        <main className="flex-1 mx-auto max-w-[1000px] px-4 py-8 md:px-8 md:py-12 transition-all duration-300">
+          <div className="flex flex-col gap-4">
+            {/* <div className="max-w-4xl flex flex-col gap-4 mx-auto px-8 py-12"> */}
+            <DocumentHeaderForm
+              isDarkMode={isDarkMode}
+              form={form}
+              initialRecipients={initialRecipients}
+              initialCC={initialCC}
+            />
+            <DocumentEditor
+              isDarkMode={isDarkMode}
+              mode={effectiveMode}
+              onChange={setEditorBody}
+              initialContent={initialEditorContent}
+            />
+          </div>
+        </main>
+        <If is={isDraftCreated}>
+          <div className="hidden lg:block shrink-0 z-10 h-[calc(100vh-64px)] sticky top-[64px]">
+            <WorkflowParticipantsPanel
+              workflowData={workflowData}
+              isCollapsed={isParticipantsPanelCollapsed}
+              toggleCollapse={() =>
+                setIsParticipantsPanelCollapsed(!isParticipantsPanelCollapsed)
+              }
+            />
+          </div>
+        </If>
+      </div>
       <DrawerActionsModal
         open={isOpen}
         onClose={close}
         docId={id}
         mode={effectiveMode}
         onReply={handleReply}
+        onRefresh={refetchWorkflow}
       />
       <ActionToolbar
         setIsInspectorOpen={open}
