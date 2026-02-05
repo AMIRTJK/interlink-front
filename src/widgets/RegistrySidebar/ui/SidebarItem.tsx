@@ -60,7 +60,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         whileTap={{ scale: 0.97 }}
         className={cn(
           "flex items-center w-full group text-left outline-none! focus:outline-none! active:outline-none! border border-transparent rounded-2xl cursor-pointer mb-2 relative select-none px-3 py-2",
-          isCollapsedMode ? "justify-center px-0" : "gap-2.5",
+          isCollapsedMode ? "justify-center px-0" : "gap-1",
           isSelected
             ? (isCollapsedMode 
                 ? "text-indigo-700!" 
