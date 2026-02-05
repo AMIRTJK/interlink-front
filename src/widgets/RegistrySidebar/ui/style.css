@@ -1,6 +1,5 @@
 /* === Registry Sidebar Overrides (Refactored) === */
 
-/* === Scrollbar Hider === */
 .custom-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -9,7 +8,6 @@
   scrollbar-width: none;
 }
 
-/* --- General Adjustments --- */
 .registry-sidebar-style .ant-menu-title-content {
   flex: 1 !important;
   display: flex !important;
@@ -23,7 +21,6 @@
   z-index: 10;
 }
 
-/* Reset backgrounds */
 .registry-sidebar-style .ant-menu-sub,
 .registry-sidebar-style .ant-menu-submenu,
 .registry-sidebar-style .ant-menu-item,
@@ -40,28 +37,24 @@
   padding: 0 !important;
 }
 
-/* Item Spacing & Shape */
 .registry-sidebar-style .ant-menu-item,
 .registry-sidebar-style .ant-menu-submenu-title {
   margin-bottom: 2px !important;
   border-radius: 8px !important;
   transition: all 0.2s ease;
   position: relative;
-  overflow: hidden; /* Ensures cleaner corners */
+  overflow: hidden;
 }
 
 .registry-sidebar-style .ant-menu-submenu-title {
   padding: 0 16px !important;
 }
 
-/* Collapsed State */
 .collapsed-style .ant-menu-item,
 .collapsed-style .ant-menu-submenu-title {
   padding: 0 !important;
 }
 
-/* --- Shared Vertical Line & Hover Logic --- */
-/* Base Line Style (Invisible by default, colored by level) */
 .registry-sidebar-style .ant-menu-item::before,
 .registry-sidebar-style .ant-menu-submenu-title::before {
   content: "";
@@ -74,13 +67,11 @@
   transition: all 0.2s ease;
 }
 
-/* Hover Effect (Common) */
 .registry-sidebar-style .ant-menu-item:hover::before,
 .registry-sidebar-style .ant-menu-submenu-title:hover::before {
   opacity: 0.8;
 }
 
-/* Selected Effect (Common) */
 .registry-sidebar-style .ant-menu-item-selected::before,
 .registry-sidebar-style
   .ant-menu-submenu-selected
@@ -89,15 +80,11 @@
   width: 4px;
 }
 
-/* Hide line for "Create Placeholder" button */
 .registry-sidebar-style
   .ant-menu-item[data-menu-id*="create-placeholder"]::before {
   display: none !important;
 }
 
-/* --- LEVEL SPECIFIC STYLES (Colors & Indentation) --- */
-
-/* LEVEL 1: Blue (#3b82f6) */
 .registry-sidebar-style .ant-menu-submenu > .ant-menu-sub > .ant-menu-item,
 .registry-sidebar-style
   .ant-menu-submenu
@@ -106,7 +93,6 @@
   > .ant-menu-submenu-title {
   padding-left: 12px !important;
 }
-/* Color */
 .registry-sidebar-style
   .ant-menu-submenu
   > .ant-menu-sub
@@ -131,7 +117,6 @@
   > .ant-menu-submenu-title:hover {
   background-color: rgba(59, 130, 246, 0.08) !important;
 }
-/* Selected Bg & Shadow */
 .registry-sidebar-style
   .ant-menu-submenu
   > .ant-menu-sub
@@ -155,7 +140,6 @@
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
 }
 
-/* LEVEL 2: Violet (#8b5cf6) */
 .registry-sidebar-style
   .ant-menu-submenu
   .ant-menu-sub
@@ -233,7 +217,6 @@
   box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
 }
 
-/* LEVEL 3: Pink (#ec4899) */
 .registry-sidebar-style
   .ant-menu-submenu
   .ant-menu-sub
@@ -331,7 +314,6 @@
   box-shadow: 0 0 8px rgba(236, 72, 153, 0.4);
 }
 
-/* LEVEL 4: Orange (#f97316) */
 .registry-sidebar-style
   .ant-menu-submenu
   .ant-menu-sub
@@ -449,7 +431,6 @@
   box-shadow: 0 0 8px rgba(249, 115, 22, 0.4);
 }
 
-/* LEVEL 5: Teal (#14b8a6) */
 .registry-sidebar-style
   .ant-menu-submenu
   .ant-menu-sub
@@ -587,7 +568,6 @@
   box-shadow: 0 0 8px rgba(20, 184, 166, 0.4);
 }
 
-/* --- Dropdown Styles --- */
 .custom-registry-dropdown {
   background-color: rgba(255, 255, 255, 0.9) !important;
   backdrop-filter: blur(10px);
@@ -609,9 +589,8 @@
   background-color: rgba(0, 0, 0, 0.04) !important;
 }
 
-/* === Drag & Drop Styles (Blue Text Highlight) === */
+/* === Drag & Drop */
 
-/* Source Row */
 .ant-table-row.dragging {
   background-color: transparent !important;
   opacity: 1 !important;
@@ -631,26 +610,22 @@
   border-top: none !important;
 }
 
-/* Target Folder */
 .folder-drag-over {
   background-color: transparent !important;
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
 
-  /* Только цвет текста */
   color: #1890ff !important;
   font-weight: 600 !important;
   transition: color 0.1s ease;
 }
 
-/* Красим иконки и текст папки */
 .folder-drag-over .ant-menu-title-content,
 .folder-drag-over .anticon {
   color: #1890ff !important;
 }
 
-/* Убираем лишние псевдо-элементы */
 .folder-drag-over::after {
   display: none !important;
 }
@@ -673,7 +648,6 @@
   margin-inline-end: 0 !important;
 }
 
-/* Hide title content only in the main collapsed sidebar, not in popups */
 .registry-sidebar-style.collapsed-style .ant-menu-item .ant-menu-title-content,
 .registry-sidebar-style.collapsed-style
   .ant-menu-submenu-title
@@ -681,8 +655,6 @@
   display: none !important;
 }
 
-/* --- Collapsed Sidebar Popup Submenu Styles --- */
-/* Ensure popup submenus show full folder names with proper styling */
 .ant-menu-submenu-popup {
   max-width: 220px !important;
 }
@@ -697,7 +669,6 @@
   padding: 0px !important;
 }
 
-/* Compact item styling with proper alignment */
 .ant-menu-submenu-popup .ant-menu-item,
 .ant-menu-submenu-popup .ant-menu-submenu-title {
   display: flex !important;
@@ -709,7 +680,6 @@
   line-height: 20px !important;
 }
 
-/* Ensure text is visible in popups with proper alignment */
 .ant-menu-submenu-popup .ant-menu-title-content {
   display: flex !important;
   align-items: center !important;
@@ -722,7 +692,6 @@
   line-height: 20px !important;
 }
 
-/* Icon spacing and alignment in popups */
 .ant-menu-submenu-popup .ant-menu-item-icon {
   display: flex !important;
   align-items: center !important;
@@ -740,7 +709,6 @@
   object-fit: contain !important;
 }
 
-/* Submenu arrow alignment */
 .ant-menu-submenu-popup .ant-menu-submenu-arrow {
   right: 12px !important;
   display: flex !important;
@@ -748,13 +716,24 @@
   justify-content: center !important;
 }
 
-/* Hover effect for popup items */
 .ant-menu-submenu-popup .ant-menu-item:hover,
 .ant-menu-submenu-popup .ant-menu-submenu-title:hover {
   background-color: rgba(0, 55, 175, 0.06) !important;
 }
 
-/* Selected state */
 .ant-menu-submenu-popup .ant-menu-item-selected {
   background-color: rgba(0, 55, 175, 0.1) !important;
+}
+
+
+/* Создание папки */
+.create__folder-content .ant-modal-container{
+  background: rgba(245, 245, 245, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }

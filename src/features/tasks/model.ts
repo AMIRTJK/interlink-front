@@ -7,7 +7,7 @@ export const TASK_STATUS = {
 } as const;
 
 export const TASK_STATUS_LABELS = {
-  [TASK_STATUS.PENDING]: 'Ожидают начала',
+  [TASK_STATUS.PENDING]: 'Ожидают начала1',
   [TASK_STATUS.IN_PROGRESS]: 'В исполнении',
   [TASK_STATUS.COMPLETED]: 'Завершены',
 } as const;

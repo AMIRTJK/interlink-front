@@ -26,7 +26,7 @@ export const FolderLabel: React.FC<IFolderLabelProps> = ({
       onDrop={onDrop}
     >
       <div
-        className="flex items-center flex-1 min-w-0 cursor-pointer gap-2"
+        className="flex items-center cursor-pointer"
         onClick={(e) => {
           e.stopPropagation();
           if (folderPath) {

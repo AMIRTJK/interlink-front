@@ -1,4 +1,5 @@
-import { Modal, Form, Input, FormInstance } from "antd";
+import { Modal, Form, Input, FormInstance, Button } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
 
 interface IProps {
   isOpen: boolean;
@@ -6,7 +7,7 @@ interface IProps {
   parentId: number | null;
   form: FormInstance;
   onCancel: () => void;
-  onFinish: (values: { name: string }) => void;
+  onFinish: (values: { name: string; prefix?: string }) => void;
 }
 
 export const FolderModal = ({
@@ -19,32 +20,79 @@ export const FolderModal = ({
 }: IProps) => {
   const getTitle = () => {
     if (isEditing) return "Редактировать папку";
-    if (parentId) return "Создать подпапку";
+    if (parentId) return "Создать папку";
     return "Создать папку";
   };
 
   return (
     <Modal
-      title={getTitle()}
+      title={<span className="text-[19px] font-semibold text-[#2d3748]">{getTitle()}</span>}
       open={isOpen}
-      onOk={() => form.submit()}
       onCancel={onCancel}
-      okText={isEditing ? "Редактировать" : "Создать"}
-      cancelText="Отмена"
+      footer={null}
+      centered
+      className="create__folder-content"
+      closeIcon={
+        <span className="text-gray-400 hover:text-gray-500 transition-all duration-300 hover:rotate-90 inline-flex items-center justify-center">
+          <CloseOutlined className="text-base" />
+        </span>
+      }
+      styles={{
+        mask: {
+          backdropFilter: "blur(3px)",
+          backgroundColor: "rgba(0, 0, 0, 0.25)",
+        },
+        body: {
+          padding: 0
+        }
+      }}
+      width={380}
     >
-      <Form form={form} onFinish={onFinish} layout="vertical">
+      <Form 
+        form={form} 
+        onFinish={onFinish} 
+        layout="vertical"
+        autoComplete="off"
+        className="pt-6"
+      >
         <Form.Item
           name="name"
           rules={[{ required: true, message: "Введите название" }]}
+          className="mb-5"
         >
-          <Input placeholder="Введите название папки" />
+          <Input 
+            placeholder="Введите название" 
+            className="h-[46px]! px-4! text-[15px]! bg-white! border border-gray-200! rounded-[22px]! placeholder:text-gray-400! focus:border-indigo-400! focus:ring-1! focus:ring-indigo-200! transition-all!"
+          />
         </Form.Item>
+        
         <Form.Item
           name="prefix"
-          rules={[{ required: false, }]}
+          rules={[{ required: false }]}
+          className="mb-8"
         >
-          <Input placeholder="Введите префикс папки" />
+          <Input 
+            placeholder="Введите префикс" 
+            className="h-[46px]! px-4! text-[15px]! bg-white! border border-gray-200! rounded-[22px]! placeholder:text-gray-400! focus:border-indigo-400! focus:ring-1! focus:ring-indigo-200! transition-all!"
+          />
         </Form.Item>
+
+        <div className="flex gap-3 pt-2">
+          <Button
+            onClick={onCancel}
+            className="flex-1! h-[50px]! text-[15px]! font-semibold! bg-white! border border-gray-200! text-[#4a5568]! rounded-[25px]! hover:bg-gray-50! transition-all! shadow-sm!"
+          >
+            Отмена
+          </Button>
+          <Button
+            type="primary"
+            htmlType="submit"
+            onClick={() => form.submit()}
+            className="flex-1! h-[50px]! text-[15px]! font-semibold! bg-linear-to-r! from-[#7c3aed]! to-[#a855f7]! border-none! text-white! rounded-[25px]! hover:opacity-95! transition-all! shadow-lg! shadow-purple-400/40!"
+          >
+            {isEditing ? "Сохранить" : "Создать"}
+          </Button>
+        </div>
       </Form>
     </Modal>
   );

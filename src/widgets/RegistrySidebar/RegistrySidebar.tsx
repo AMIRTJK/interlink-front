@@ -10,6 +10,7 @@ export const RegistrySidebar = ({ isDetailView }: IProps) => {
       <div className="shrink-0">
         <ModuleSidebar />
       </div>
+      {/* test commit */}
 
       <If is={isDetailView}>
         <CorrespondenceListSidebar />
