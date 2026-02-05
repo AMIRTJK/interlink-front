@@ -2,7 +2,7 @@ import { Avatar, Modal, Switch } from "antd";
 import { UserOutlined, SettingOutlined } from "@ant-design/icons";
 import { Outlet } from "react-router-dom";
 import { IUser } from "@entities/login";
-import { Tabs, Loader } from "@shared/ui";
+import { Tabs } from "@shared/ui";
 import { profileRightNav } from "../model";
 import userAvatar from '../../../assets/images/user-avatar.jpg'
 import { UseSkeleton } from "@shared/ui/Skeleton/ui";
@@ -85,6 +85,7 @@ export const RenderJSX = ({
       {/* Левая часть профиля */}
       <aside className="w-full lg:w-[28%]">
         <div className="bg-white p-6 rounded-xl shadow">
+          <UseSkeleton loading={isPending} variant="card" count={1} rows={4}  />
           <div className="flex justify-end">
             <SettingOutlined
               className="text-gray-500 hover:text-blue-600 cursor-pointer transition-colors"
