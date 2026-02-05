@@ -5,9 +5,10 @@ import { IUser } from "@entities/login";
 import { Tabs, Loader } from "@shared/ui";
 import { profileRightNav } from "../model";
 import userAvatar from '../../../assets/images/user-avatar.jpg'
+import { UseSkeleton } from "@shared/ui/Skeleton/ui";
 
 interface IProps {
-  loading: boolean;
+  isPending: boolean;
   isSnowEnabled: boolean;
   setIsSnowEnabled: (v: boolean) => void;
   isRainEnabled: boolean;
@@ -26,7 +27,7 @@ interface IProps {
 }
 
 export const RenderJSX = ({
-  loading,
+  isPending,
   isSnowEnabled,
   setIsSnowEnabled,
   isRainEnabled,
@@ -43,7 +44,7 @@ export const RenderJSX = ({
   activeTab,
   onMenuClick,
 }: IProps) => {
-  if (loading) return <Loader />;
+  if (isPending) return <UseSkeleton loading={true} variant="card" count={1} rows={5}  />;
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6">

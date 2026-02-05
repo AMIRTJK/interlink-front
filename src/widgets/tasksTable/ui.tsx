@@ -8,6 +8,7 @@ import { TasksColumn } from "./ui/TasksColumn";
 import { TasksFilters } from "./ui/TasksFilters";
 import "./style.css";
 import { Loader } from "@shared/ui";
+import { UseSkeleton } from "@shared/ui/Skeleton/ui";
 
 interface IProps {
   onAddTask?: (status: string) => void;
@@ -95,13 +96,14 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
        const revertedTasks = [...localTasks]; 
        revertedTasks[taskIndex] = { ...revertedTasks[taskIndex], status: oldStatus };
        setLocalTasks(revertedTasks);
+       console.error(error);
     }
   };
 
   const tasks = localTasks || [];
 
   if (loading) {
-    return <Loader />;
+    return <UseSkeleton loading={true} variant="card" count={1} rows={5}  />;
   }
 
   return (
