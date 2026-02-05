@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IActionsModal, TTab, TABS_LIST } from "./model";
 import { DrawerQRCodeSection } from "./ui/QRCodeSection";
 import { SelectedCard } from "./ui/SelectedCard";
@@ -27,6 +27,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
   docId,
   mode = "create",
   onReply,
+  onRefresh,
 }) => {
   const [activeTab, setActiveTab] = useState<TTab>("actions");
 
@@ -44,38 +45,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
     null,
   );
   const [selectedApprovers, setSelectedApprovers] = useState<ISearchItem[]>([]);
-
-  // Получение текущего workflow (согласующие, подписанты)
-  const { data: workflowData, refetch: refetchWorkflow } = useGetQuery({
-    url: docId ? ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", docId) : "",
-    useToken: true,
-    options: {
-      enabled: !!docId && open, // Загружаем только когда открыто и есть ID
-    },
-  });
-
-  // Синхронизация данных с сервера в стейт (при открытии/успешной загрузке)
-  React.useEffect(() => {
-    if (workflowData) {
-      if (workflowData.signers && workflowData.signers.length > 0) {
-        const s = workflowData.signers[0];
-        setSelectedSigner({
-          id: s.user_id || s.id,
-          title: s.full_name || s.user?.full_name || "Подписант",
-          subtitle: s.position,
-        });
-      }
-      if (workflowData.approvers) {
-        setSelectedApprovers(
-          workflowData.approvers.map((a: any) => ({
-            id: a.user_id || a.id,
-            title: a.full_name || a.user?.full_name || "Согласующий",
-            subtitle: a.status || "Pending",
-          })),
-        );
-      }
-    }
-  }, [workflowData]);
 
   // 2. Мутации для приглашения
   const { mutate: inviteSigner } = useMutationQuery({
@@ -142,9 +111,15 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
         );
       });
 
-      setTimeout(() => {
-        refetchWorkflow();
-      }, 500);
+      if (onRefresh) {
+        setTimeout(() => {
+          onRefresh();
+        }, 500);
+      }
+
+      // ОЧИЩАЕМ СТЕЙТ ПОСЛЕ ОТПРАВКИ
+      setSelectedSigner(null);
+      setSelectedApprovers([]);
     } else {
       alert("Ошибка: ID документа не найден. Сначала сохраните черновик.");
     }
@@ -365,7 +340,10 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                               items: selectedApprovers,
                             },
                           ].map((section) => (
-                            <div key={section.id} className="flex flex-col gap-2">
+                            <div
+                              key={section.id}
+                              className="flex flex-col gap-2"
+                            >
                               <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                                 {section.title}
                               </h4>
