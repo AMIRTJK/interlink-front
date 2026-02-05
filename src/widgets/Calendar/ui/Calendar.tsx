@@ -5,7 +5,7 @@ import { useCalendarEvents } from "@shared/lib/hooks/useCalendarEvents";
 import type { Task } from "@features/tasks";
 import dayjs, { Dayjs } from "dayjs";
 
-import "@features/calendar/task-details-modal.css";
+// import "@features/calendar/task-details-modal.css";
 
 /**
  * Компонент Calendar является корневым для функционала календаря.
