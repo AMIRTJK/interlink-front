@@ -18,7 +18,7 @@ export const TasksColumn = ({
   onTaskDrop,
   onDelete,
 }: {
-  isPending: boolean;
+  isPending?: boolean | undefined;
   status: string;
   label: string;
   tasks: ITaskItem[];
