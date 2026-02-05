@@ -33,7 +33,7 @@ export const FolderModal = ({
       centered
       className="create__folder-content"
       closeIcon={
-        <span className="text-gray-400 hover:text-gray-500 transition-colors">
+        <span className="text-gray-400 hover:text-gray-500 transition-all duration-300 hover:rotate-90 inline-flex items-center justify-center">
           <CloseOutlined className="text-base" />
         </span>
       }
