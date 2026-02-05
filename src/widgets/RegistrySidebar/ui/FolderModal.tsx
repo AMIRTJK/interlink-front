@@ -72,7 +72,7 @@ export const FolderModal = ({
           className="mb-8"
         >
           <Input 
-            placeholder="Введите номер" 
+            placeholder="Введите префикс" 
             className="h-[46px]! px-4! text-[15px]! bg-white! border border-gray-200! rounded-[22px]! placeholder:text-gray-400! focus:border-indigo-400! focus:ring-1! focus:ring-indigo-200! transition-all!"
           />
         </Form.Item>
