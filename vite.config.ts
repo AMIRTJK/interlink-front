@@ -49,8 +49,26 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        // Убираем агрессивный manualChunks, оставляем стандартное разбиение Vite
-        manualChunks: undefined,
+        // Мы разбиваем тяжелые библиотеки на отдельные файлы,
+        // чтобы Vercel не падал от нехватки памяти
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            // CKEditor - очень тяжелый, выделяем отдельно
+            if (id.includes("ckeditor")) {
+              return "ckeditor";
+            }
+            // PDF.js - тоже тяжелый
+            if (id.includes("pdfjs")) {
+              return "pdfjs";
+            }
+            // Ant Design
+            if (id.includes("antd") || id.includes("@ant-design")) {
+              return "antd";
+            }
+            // Все остальные библиотеки
+            return "vendor";
+          }
+        },
       },
     },
     chunkSizeWarningLimit: 2000,
