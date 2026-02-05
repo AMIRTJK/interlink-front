@@ -1,6 +1,6 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { MenuProps } from "antd";
-import folderIcon from "../../../assets/icons/folder-icon.svg";
+import folderIcon from "../../../assets/icons/folder.svg";
 import {
   IFolder,
   IFolderDefinition,

@@ -144,7 +144,7 @@ export const ModuleSidebar = () => {
         ? {
             Черновики: {
               key: AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS,
-              icon: <img src={sideBarIcons.incomingIcon} />,
+              icon: <img src={sideBarIcons.draftIcon} />,
 
               count: isInternal ? counts.drafts : counts.drafts_total || 0,
               path: AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS,

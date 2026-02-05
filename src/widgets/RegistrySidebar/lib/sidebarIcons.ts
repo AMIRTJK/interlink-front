@@ -1,6 +1,7 @@
-import incomingIcon from '../../../assets/icons/incoming-icon.svg';
-import outgoingIcon from '../../../assets/icons/outgoing-icon.svg';
-import archiveIcon from '../../../assets/icons/archive-icon.svg';
+import incomingIcon from '../../../assets/icons/incomingLetter.svg';
+import outgoingIcon from '../../../assets/icons/outgoing.svg';
+import archiveIcon from '../../../assets/icons/archive.svg';
+import draftIcon from '../../../assets/icons/draft.svg';
 import pinnedIcon from '../../../assets/icons/pinned-icon.svg';
 import garbageIcon from '../../../assets/icons/garbage-icon.svg';
 import helpIcon from '../../../assets/icons/help-icon.svg';
@@ -11,6 +12,7 @@ export const sideBarIcons = {
   incomingIcon,
   outgoingIcon,
   archiveIcon,
+  draftIcon,
   pinnedIcon,
   garbageIcon,
   helpIcon,
