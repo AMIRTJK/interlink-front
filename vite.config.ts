@@ -26,16 +26,6 @@ export default defineConfig({
     },
   },
 
-  server: {
-    proxy: {
-      "/api": {
-        target: "http://62.122.141.220:80/",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
-      },
-    },
-  },
-
   build: {
     minify: "terser",
     terserOptions: {
@@ -49,26 +39,8 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        // Мы разбиваем тяжелые библиотеки на отдельные файлы,
-        // чтобы Vercel не падал от нехватки памяти
-        manualChunks(id) {
-          if (id.includes("node_modules")) {
-            // CKEditor - очень тяжелый, выделяем отдельно
-            if (id.includes("ckeditor")) {
-              return "ckeditor";
-            }
-            // PDF.js - тоже тяжелый
-            if (id.includes("pdfjs")) {
-              return "pdfjs";
-            }
-            // Ant Design
-            if (id.includes("antd") || id.includes("@ant-design")) {
-              return "antd";
-            }
-            // Все остальные библиотеки
-            return "vendor";
-          }
-        },
+        // Убираем агрессивный manualChunks, оставляем стандартное разбиение Vite
+        manualChunks: undefined,
       },
     },
     chunkSizeWarningLimit: 2000,

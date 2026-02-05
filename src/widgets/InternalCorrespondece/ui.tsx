@@ -221,6 +221,5 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         </div>
       </Modal>
     </div>
-    // Comment for test
   );
 };
