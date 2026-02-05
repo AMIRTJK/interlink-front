@@ -319,12 +319,14 @@ export const ModuleSidebar = () => {
           </div>
 
         <div className="flex-1 overflow-y-auto  custom-scrollbar">
-          {finalMenuItems.map((item) => (
+          {finalMenuItems.map((item, index) => (
             <SidebarItem
               key={item.key}
               item={item}
               isActive={[activeKey].includes(item.key as string)}
               collapsed={collapsed}
+              activeKey={activeKey}
+              index={index}
             />
           ))}
         </div>
