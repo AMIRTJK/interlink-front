@@ -40,12 +40,25 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
   initialRecipients = [],
   initialCC = [],
 }) => {
-  const [selectedRecipients, setSelectedRecipients] = useState<Recipient[]>([]);
-  const [selectedCC, setSelectedCC] = useState<Recipient[]>([]);
+  const [selectedRecipients, setSelectedRecipients] =
+    useState<Recipient[]>(initialRecipients);
+  const [selectedCC, setSelectedCC] = useState<Recipient[]>(initialCC);
 
   const [activeSelectorMode, setActiveSelectorMode] =
     useState<SelectionMode>(null);
   const [activeViewerMode, setActiveViewerMode] = useState<SelectionMode>(null);
+
+  useEffect(() => {
+    if (initialRecipients.length > 0) {
+      setSelectedRecipients(initialRecipients);
+    }
+  }, [initialRecipients]);
+
+  useEffect(() => {
+    if (initialCC.length > 0) {
+      setSelectedCC(initialCC);
+    }
+  }, [initialCC]);
 
   useEffect(() => {
     form.setFieldsValue({
@@ -135,7 +148,11 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
               ${chipClass}
             `}
           >
-            <Avatar src={user.photo_path} size={24} icon={<UserOutlined />} />
+            <Avatar
+              src={user.photo_path || null}
+              size={24}
+              icon={<UserOutlined />}
+            />
             <span className="text-xs font-medium whitespace-nowrap">
               {user.full_name}
             </span>

@@ -72,7 +72,7 @@ export const SelectedRecipientsModal: React.FC<
                     `}
                   >
                     <Avatar
-                      src={recipient.photo_path}
+                      src={recipient.photo_path || null}
                       size={40}
                       icon={<UserOutlined />}
                     />
