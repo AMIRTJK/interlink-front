@@ -1,5 +1,4 @@
-import { Form, Input, FormInstance } from "antd";
-import { motion, AnimatePresence } from "framer-motion";
+import { Modal, Form, Input, FormInstance, Button } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 
 interface IProps {
@@ -26,80 +25,76 @@ export const FolderModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-1000"
-            onClick={onCancel}
+    <Modal
+      title={<span className="text-[19px] font-semibold text-[#2d3748]">{getTitle()}</span>}
+      open={isOpen}
+      onCancel={onCancel}
+      footer={null}
+      centered
+      closeIcon={
+        <span className="text-gray-400 hover:text-gray-500 transition-colors">
+          <CloseOutlined className="text-base" />
+        </span>
+      }
+      styles={{
+        mask: {
+          backdropFilter: "blur(3px)",
+          backgroundColor: "rgba(0, 0, 0, 0.25)",
+        },
+        body: {
+          padding: 0
+        }
+      }}
+      width={380}
+    >
+      <Form 
+        form={form} 
+        onFinish={onFinish} 
+        layout="vertical"
+        autoComplete="off"
+        className="pt-6"
+      >
+        <Form.Item
+          name="name"
+          label={<span className="text-[13px] font-medium text-[#1a202c]">Название папки</span>}
+          rules={[{ required: true, message: "Введите название" }]}
+          className="mb-5"
+        >
+          <Input 
+            placeholder="Введите название" 
+            className="h-[46px]! px-4! text-[15px]! bg-white! border border-gray-200! rounded-[22px]! placeholder:text-gray-400! focus:border-indigo-400! focus:ring-1! focus:ring-indigo-200! transition-all!"
           />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20, x: "-50%" }}
-            animate={{ opacity: 1, scale: 1, y: 0, x: "-50%" }}
-            exit={{ opacity: 0, scale: 0.95, y: 20, x: "-50%" }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="fixed left-1/2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-2xl border border-white/40 rounded-3xl shadow-2xl shadow-indigo-500/20 z-1001 w-full max-w-md p-6"
-            onClick={(e) => e.stopPropagation()}
+        </Form.Item>
+        
+        <Form.Item
+          name="prefix"
+          label={<span className="text-[13px] font-medium text-[#1a202c]">№ папки</span>}
+          rules={[{ required: false }]}
+          className="mb-8"
+        >
+          <Input 
+            placeholder="Введите номер" 
+            className="h-[46px]! px-4! text-[15px]! bg-white! border border-gray-200! rounded-[22px]! placeholder:text-gray-400! focus:border-indigo-400! focus:ring-1! focus:ring-indigo-200! transition-all!"
+          />
+        </Form.Item>
+
+        <div className="flex gap-3 pt-2">
+          <Button
+            onClick={onCancel}
+            className="flex-1! h-[50px]! text-[15px]! font-semibold! bg-white! border border-gray-200! text-[#4a5568]! rounded-[25px]! hover:bg-gray-50! transition-all! shadow-sm!"
           >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-800">{getTitle()}</h2>
-              <button
-                onClick={onCancel}
-                className="text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-white/60 hover:backdrop-blur-md p-1.5 flex items-center justify-center cursor-pointer group"
-              >
-                <CloseOutlined className="text-lg transition-transform duration-300 group-hover:rotate-90" />
-              </button>
-            </div>
-            <Form 
-              form={form} 
-              onFinish={onFinish} 
-              layout="vertical"
-              autoComplete="off"
-            >
-              <Form.Item
-                name="name"
-                rules={[{ required: true, message: "Введите название" }]}
-                className="mb-4"
-              >
-                <Input 
-                  placeholder="Введите название папки" 
-                  className="w-full! px-4! py-2.5! bg-white/60! backdrop-blur-md! border-white/50! rounded-2xl! focus:ring-2! focus:ring-indigo-400/50! focus:border-transparent! transition-all! shadow-sm! shadow-indigo-100/30! text-sm!"
-                />
-              </Form.Item>
-              <Form.Item
-                name="prefix"
-                rules={[{ required: false }]}
-                className="mb-6"
-              >
-                <Input 
-                  placeholder="Введите префикс папки" 
-                  className="w-full! px-4! py-2.5! bg-white/60! backdrop-blur-md! border-white/50! rounded-2xl! focus:ring-2! focus:ring-indigo-400/50! focus:border-transparent! transition-all! shadow-sm! shadow-indigo-100/30! text-sm!"
-                />
-              </Form.Item>
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={onCancel}
-                  className="flex-1 px-4 py-2.5 bg-white/60 backdrop-blur-md border border-white/50 rounded-2xl text-gray-700 hover:bg-white/80 transition-colors font-medium shadow-sm shadow-indigo-100/30 text-sm cursor-pointer"
-                >
-                  Отмена
-                </button>
-                <button
-                  type="submit"
-                  onClick={() => form.submit()}
-                  className="flex-1 px-4 py-2.5 bg-linear-to-r from-indigo-500 to-purple-500 text-white rounded-2xl hover:from-indigo-600 hover:to-purple-600 transition-colors font-medium shadow-lg shadow-indigo-300/40 text-sm cursor-pointer"
-                >
-                  {isEditing ? "Сохранить" : "Создать"}
-                </button>
-              </div>
-            </Form>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+            Отмена
+          </Button>
+          <Button
+            type="primary"
+            htmlType="submit"
+            onClick={() => form.submit()}
+            className="flex-1! h-[50px]! text-[15px]! font-semibold! bg-linear-to-r! from-[#7c3aed]! to-[#a855f7]! border-none! text-white! rounded-[25px]! hover:opacity-95! transition-all! shadow-lg! shadow-purple-400/40!"
+          >
+            {isEditing ? "Сохранить" : "Создать"}
+          </Button>
+        </div>
+      </Form>
+    </Modal>
   );
 };
