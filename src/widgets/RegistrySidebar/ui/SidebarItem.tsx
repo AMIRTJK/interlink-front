@@ -77,7 +77,15 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
             "shrink-0! flex items-center justify-center w-10 h-10",
             isSelected
               ? "text-indigo-600! shadow-indigo-200/40"
-              : "text-indigo-500! group-hover:text-indigo-600!"
+              : cn(
+                  "group-hover:text-indigo-600!",
+                  depth === 0 ? "text-indigo-500!" :
+                  depth === 1 ? "text-blue-500!" :
+                  depth === 2 ? "text-violet-500!" :
+                  depth === 3 ? "text-pink-500!" :
+                  depth === 4 ? "text-orange-500!" :
+                  "text-teal-500!"
+                )
           )}
         >
           {typeof item.icon === 'string' ? (

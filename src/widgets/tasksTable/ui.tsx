@@ -19,7 +19,7 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
   const [localTasks, setLocalTasks] = useState<ITaskItem[]>([]);
   const { params } = useDynamicSearchParams();
 
-  const { isLoading: loading } = useGetQuery<
+  const { isPending } = useGetQuery<
     any,
     ITasksResponse
   >({
@@ -102,7 +102,7 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
 
   const tasks = localTasks || [];
 
-  if (loading) {
+  if (isPending) {
     return <UseSkeleton loading={true} variant="card" count={1} rows={5}  />;
   }
 
@@ -112,6 +112,7 @@ export const TasksTable = ({ onAddTask, onTaskClick }: IProps) => {
       <div className="flex flex-col lg:flex-row lg:flex-nowrap gap-4 overflow-x-auto p-2">
         {TASK_STATUS_OPTIONS?.map((option) => (
           <TasksColumn
+            isPending={isPending}
             key={option.value}
             status={option.value}
             label={option.label}

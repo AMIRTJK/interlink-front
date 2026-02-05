@@ -5,9 +5,11 @@ import { ITaskItem } from "../model";
 import { StatusIcon } from "./StatusIcon";
 import { TaskCard } from "./TaskCard";
 import { useGetQuery } from "@shared/lib";
+import { UseSkeleton } from "@shared/ui/Skeleton/ui";
 import "../style.css";
 
 export const TasksColumn = ({
+  isPending,
   status,
   label,
   tasks,
@@ -16,6 +18,7 @@ export const TasksColumn = ({
   onTaskDrop,
   onDelete,
 }: {
+  isPending: boolean;
   status: string;
   label: string;
   tasks: ITaskItem[];
@@ -82,6 +85,7 @@ export const TasksColumn = ({
         />
       </div>
       <div className="tasks-list">
+        <UseSkeleton loading={isPending} variant="card" count={1} rows={4}  />
         {currentTasks?.length > 0 ? (
           currentTasks?.map((task) => (
             <TaskCard key={task?.id} task={task} onClick={onTaskClick} onEdit={onTaskClick} onDelete={onDelete} />
