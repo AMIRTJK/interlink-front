@@ -59,7 +59,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         }}
         whileTap={{ scale: 0.97 }}
         className={cn(
-          "flex items-center w-full group text-left outline-none! focus:outline-none! active:outline-none! border border-transparent rounded-2xl cursor-pointer mb-2 relative select-none px-3 py-2",
+          "flex items-center w-full group focus:outline-none! active:outline-none! border-transparent rounded-2xl cursor-pointer mb-1 relative select-none px-3 py-2",
           isCollapsedMode ? "justify-center px-0" : "gap-1",
           isSelected
             ? (isCollapsedMode 
@@ -144,7 +144,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
             }}
             className="overflow-hidden"
           >
-            <div className="ml-8 pl-1 border-l-2 border-dotted border-indigo-200/50 mt-1">
+            <div className="ml-4 pl-1 border-l-2 border-dotted border-indigo-200/50 mt-1">
                 {item.children!.map((child: MenuItem, idx: number) => (
                   <SidebarItem
                     key={child.key}
