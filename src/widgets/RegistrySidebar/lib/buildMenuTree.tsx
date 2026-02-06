@@ -20,9 +20,6 @@ import { SystemFolderLabel } from "./SystemFolderLabel";
 
 export type { IBuildMenuTreeParams, MenuItem, IFolder, IFolderDefinition };
 
-/**
- * Сборка дерева меню
- */
 export const buildMenuTree = ({
   folders,
   collapsed,
@@ -62,16 +59,15 @@ export const buildMenuTree = ({
         folderName: "Создать новую папку",
         icon: <PlusOutlined />,
         label: (
-          <span className="text-[#0037AF]">
+          <div className="text-[#0037AF] hover:text-[#32063bcc]">
             Добавить
-          </span>
+          </div>
         ),
         path: "",
         parent_id: folder.id,
         onTitleClick: () => handleAddClick(folder.id),
       };
 
-      // Добавляем дефолтные папки ("Полученные", "Отправленные") только во "Внутреннюю корреспонденцию"
       children = children
         ? [createPlaceholder, ...children]
         : [createPlaceholder];
