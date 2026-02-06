@@ -1,6 +1,4 @@
 export const generateMockWorkflow = (originalData: any) => {
-  // if (originalData?.data?.signatures?.length > 0) return originalData;
-
   const mockDocs = [
     {
       id: 101,
@@ -32,43 +30,20 @@ export const generateMockWorkflow = (originalData: any) => {
     },
   ];
 
-  // Генерируем 15 согласующих для теста скролла
-  const mockApprovers = Array.from({ length: 15 }).map((_, index) => ({
-    id: 100 + index,
-    status:
-      index < 2
-        ? "approved"
-        : index === 2
-          ? "rejected"
-          : index === 3
-            ? "pending"
-            : "pending",
-    updated_at: index < 3 ? "2026-02-05T10:00:00" : null,
-    user: {
-      id: 100 + index,
-      full_name: `Пользователь Согласующий ${index + 1}`,
-      position:
-        index === 3 ? "Начальник управления (Текущий)" : "Главный специалист",
-      photo_path: null,
-    },
-  }));
+  const realSignatures = originalData?.data?.signatures || [];
+
+  const realApprovals = (originalData?.data?.approvals || []).map(
+    (item: any) => ({
+      ...item,
+      user: item.approver || item.user,
+    }),
+  );
 
   return {
     data: {
       documents: mockDocs,
-      signatures: [
-        {
-          id: 99,
-          status: "pending", // Ждем подписи
-          user: {
-            id: 99,
-            full_name: "Директор Генеральный И.",
-            position: "Генеральный директор",
-            photo_path: null,
-          },
-        },
-      ],
-      approvals: mockApprovers,
+      signatures: realSignatures,
+      approvals: realApprovals,
     },
   };
 };
