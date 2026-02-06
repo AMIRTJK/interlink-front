@@ -11,7 +11,6 @@ import {
   SearchOutlined,
   HistoryOutlined,
   EyeOutlined,
-  FolderOpenOutlined,
 } from "@ant-design/icons";
 import {
   Avatar,
@@ -56,9 +55,12 @@ const FullHistoryModal = ({
   const approvers = sourceData.approvals || [];
   const documents = sourceData.documents || [];
 
-  const allParticipants = [...signers, ...approvers];
+  // 1. Фильтруем списки раздельно
+  const filteredSigners = signers.filter((p: any) =>
+    (p.user?.full_name || "").toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
-  const filteredParticipants = allParticipants.filter((p: any) =>
+  const filteredApprovers = approvers.filter((p: any) =>
     (p.user?.full_name || "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
@@ -67,6 +69,8 @@ const FullHistoryModal = ({
       (d.subject || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (d.reg_number || "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  const totalParticipants = filteredSigners.length + filteredApprovers.length;
 
   const renderStatusTag = (status: string) => {
     const map: Record<string, any> = {
@@ -79,38 +83,92 @@ const FullHistoryModal = ({
     return <Tag color={s.color}>{s.text}</Tag>;
   };
 
+  // Вспомогательная функция для рендера строки участника внутри модалки
+  const renderParticipantRow = (item: any, type: "signer" | "approver") => (
+    <div
+      key={item.id}
+      className="flex items-start justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-white hover:shadow-sm transition-all mb-2"
+    >
+      <div className="flex items-center gap-3">
+        <Avatar src={item.user?.photo_path} icon={<UserOutlined />} />
+        <div>
+          <div className="font-medium text-gray-800">
+            {item.user?.full_name}
+          </div>
+          <div className="text-xs text-gray-500">{item.user?.position}</div>
+          {item.updated_at && (
+            <div className="text-[10px] text-gray-400 mt-1">
+              {new Date(item.updated_at).toLocaleString()}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col items-end gap-2">
+        <div>{renderStatusTag(item.status)}</div>
+
+        {/* Кнопка зависит от типа, переданного в функцию */}
+        {type === "signer" && (
+          <Button
+            type="primary"
+            size="small"
+            className="bg-blue-600 hover:bg-blue-500"
+            onClick={() => console.log("Подписать (Modal)", item.id)}
+          >
+            Подписать
+          </Button>
+        )}
+
+        {type === "approver" && (
+          <Button
+            type="primary"
+            size="small"
+            className="bg-green-600 hover:bg-green-500 border-green-600"
+            onClick={() => console.log("Согласовать (Modal)", item.id)}
+          >
+            Согласовать
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+
   const items = [
     {
       key: "participants",
-      label: `Участники (${allParticipants.length})`,
+      label: `Участники (${totalParticipants})`,
       children: (
-        // Здесь оставляем h-[60vh]! чтобы перебить дефолтное поведение табов
-        <div className="flex flex-col gap-2 h-[60vh]! overflow-y-auto pr-2 custom-scrollbar">
-          {filteredParticipants.map((item: any) => (
-            <div
-              key={item.id}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-white hover:shadow-sm transition-all"
-            >
-              <div className="flex items-center gap-3">
-                <Avatar src={item.user?.photo_path} icon={<UserOutlined />} />
-                <div>
-                  <div className="font-medium text-gray-800">
-                    {item.user?.full_name}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {item.user?.position}
-                  </div>
-                  {item.updated_at && (
-                    <div className="text-[10px] text-gray-400 mt-1">
-                      {new Date(item.updated_at).toLocaleString()}
-                    </div>
-                  )}
-                </div>
+        <div className="flex flex-col h-[60vh]! overflow-y-auto pr-2 custom-scrollbar">
+          {/* СЕКЦИЯ ПОДПИСАНТОВ */}
+          {filteredSigners.length > 0 && (
+            <div>
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1">
+                Подписанты ({filteredSigners.length})
               </div>
-              <div>{renderStatusTag(item.status)}</div>
+              {filteredSigners.map((s: any) =>
+                renderParticipantRow(s, "signer"),
+              )}
             </div>
-          ))}
-          {filteredParticipants.length === 0 && (
+          )}
+
+          {/* СЕКЦИЯ СОГЛАСУЮЩИХ */}
+          {filteredApprovers.length > 0 && (
+            <div>
+              {/* Разделитель, если есть и те и другие */}
+              {filteredSigners.length > 0 && (
+                <Divider className="my-4! border-gray-200!" />
+              )}
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1">
+                Согласующие ({filteredApprovers.length})
+              </div>
+              {filteredApprovers.map((a: any) =>
+                renderParticipantRow(a, "approver"),
+              )}
+            </div>
+          )}
+
+          {/* ЕСЛИ ПУСТО */}
+          {totalParticipants === 0 && (
             <div className="text-center text-gray-400 py-4">
               Никого не найдено
             </div>
@@ -222,9 +280,6 @@ export const WorkflowParticipantsPanel = ({
   const signers = sourceData.signatures || [];
   const approvers = sourceData.approvals || [];
   const documents = sourceData.documents || [];
-
-  const isEmpty =
-    signers.length === 0 && approvers.length === 0 && documents.length === 0;
 
   const visibleDocuments = isCollapsed
     ? []
@@ -354,6 +409,30 @@ export const WorkflowParticipantsPanel = ({
           >
             {position}
           </div>
+
+          {/* --- КНОПКИ ДЛЯ ПАНЕЛИ --- */}
+          <div className="mt-2">
+            {role === "signer" && (
+              <Button
+                type="primary"
+                size="small"
+                className="bg-blue-600! hover:bg-blue-500!"
+                onClick={() => console.log("Подписать", item.id)}
+              >
+                Подписать
+              </Button>
+            )}
+            {role === "approver" && (
+              <Button
+                type="primary"
+                size="small"
+                className="bg-blue-600! hover:bg-blue-500!"
+                onClick={() => console.log("Согласовать", item.id)}
+              >
+                Согласовать
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -408,7 +487,6 @@ export const WorkflowParticipantsPanel = ({
               Информация
             </h3>
             <Tooltip title="Полная история">
-              {/* Button из Antd, тут нужен important для классов */}
               <Button
                 type="text"
                 size="small"
