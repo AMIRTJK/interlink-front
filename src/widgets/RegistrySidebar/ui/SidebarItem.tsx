@@ -65,7 +65,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
             ? (isCollapsedMode 
                 ? "text-indigo-700!" 
                 : "bg-linear-to-r! from-indigo-400/30! to-purple-400/30! border-white/50! text-indigo-700! shadow-lg! shadow-indigo-200/40!")
-            : "text-gray-600! hover:text-indigo-600! hover:shadow-sm hover:shadow-indigo-200/20 transition-shadow duration-200"
+            : "text-gray-600! hover:text-indigo-600! hover:shadow-sm hover:shadow-indigo-200/20 transition-shadow duration-200",
+          item.folderName === "Создать новую папку" && "crtChildrenFolderHidden"
         )}
         onClick={(e) => {
              item.onTitleClick?.(e);
@@ -111,7 +112,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
              <div
                onClick={toggleOpen}
                className={cn(
-                 "transition-colors duration-200 cursor-pointer p-1 rounded-full hover:bg-black/5 ml-2",
+                 "transition-colors duration-200 cursor-pointer p-1 rounded-full hover:bg-black/5 ml-2 crtChildrenFolderHidden",
                  isSelected ? "text-purple-600!" : "text-gray-400"
                )}
              >
@@ -150,7 +151,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
               duration: 0.35,
               ease: [0.4, 0, 0.2, 1],
             }}
-            className="overflow-hidden"
+            className="overflow-hidden crtChildrenFolderHidden"
           >
             <div className="ml-4 pl-1 border-l-2 border-dotted border-indigo-200/50 mt-1">
                 {item.children!.map((child: MenuItem, idx: number) => (

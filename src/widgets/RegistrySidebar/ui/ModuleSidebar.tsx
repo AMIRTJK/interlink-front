@@ -306,7 +306,8 @@ export const ModuleSidebar = () => {
                   type="text"
                   icon={<PlusOutlined />}
                   onClick={() => handleAddClick(null)}
-                  className="h-6! w-6! hidden! addFolderRootSideBar"
+                  // hidden скрывает кнопку добавления папки в корневой раздел
+                  className="h-6! w-6! addFolderRootSideBar"
                 />
               )}
               <Button

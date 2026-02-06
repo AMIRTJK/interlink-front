@@ -191,3 +191,8 @@ body.no-animations *:hover {
   box-shadow: none !important;
   filter: none !important;
 }
+
+/* Для скрытия дочерних папок и добавление папки  */
+.crtChildrenFolderHidden {
+  display: none !important;
+}

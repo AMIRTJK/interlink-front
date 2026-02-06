@@ -59,7 +59,7 @@ export const buildMenuTree = ({
         folderName: "Создать новую папку",
         icon: <PlusOutlined />,
         label: (
-          <div className="text-[#0037AF] hover:text-[#32063bcc]">
+          <div className="text-[#0037AF] hover:text-[#32063bcc] crtChildrenFolderHidden">
             Добавить
           </div>
         ),
@@ -144,6 +144,11 @@ export const buildMenuTree = ({
           />
         ),
         path: def.path,
+        onTitleClick: () => {
+          if (def.path) {
+            onNavigate(def.path);
+          }
+        },
       });
     }
   });
