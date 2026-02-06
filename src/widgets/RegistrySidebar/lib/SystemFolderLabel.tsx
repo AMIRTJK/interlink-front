@@ -18,8 +18,7 @@ export const SystemFolderLabel: React.FC<IProps> = ({
     <div className="flex items-center w-full">
       <div
         className="flex items-center flex-1 overflow-hidden cursor-pointer"
-        onClick={(e) => {
-          e.stopPropagation();
+        onClick={() => {
           if (definition.path) {
             onNavigate(definition.path);
           }

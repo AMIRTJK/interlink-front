@@ -27,8 +27,7 @@ export const FolderLabel: React.FC<IFolderLabelProps> = ({
     >
       <div
         className="flex items-center cursor-pointer"
-        onClick={(e) => {
-          e.stopPropagation();
+        onClick={() => {
           if (folderPath) {
             onNavigate(folderPath);
           }
