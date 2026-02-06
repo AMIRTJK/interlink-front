@@ -112,7 +112,7 @@ const FullHistoryModal = ({
           <Button
             type="primary"
             size="small"
-            className="bg-blue-600 hover:bg-blue-500"
+            className="bg-blue-600! hover:bg-blue-500!"
             onClick={() => console.log("Подписать (Modal)", item.id)}
           >
             Подписать
@@ -345,7 +345,7 @@ export const WorkflowParticipantsPanel = ({
     const user = item.user || {};
     const fullName = user.full_name || "Пользователь";
     const position = user.position || "Сотрудник";
-    const status = item.status || "pending";
+    const status = item.status || "Ожидание";
     const meta = getStatusMeta(status);
 
     if (isCollapsed) {
