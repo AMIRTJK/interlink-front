@@ -14,11 +14,8 @@
   border-bottom-right-radius: 10px;
 }
 
-/* Этот класс применится в конце анимации открытия */
 .card.no-perspective {
-  /* Убираем perspective, оставляя остальные параметры */
   transform: perspective(none) rotateZ(0) !important;
-  /* Можно также добавить сглаживание шрифтов здесь */
   -webkit-font-smoothing: subpixel-antialiased;
 }
 
@@ -46,23 +43,22 @@
   left: 0;
   width: 100%;
   height: 100%;
-  backface-visibility: hidden; /* Скрываем "заднюю" часть элемента */
+  backface-visibility: hidden; 
   -webkit-backface-visibility: hidden;
 }
 
 .face.front {
-  background-image: url("../../assets/images/cover.png"); /* Ваша картинка */
+  background-image: url("../../assets/images/cover.png"); 
   background-size: cover;
-  background-color: #0037af; /* Фоллбек цвет */
+  background-color: #0037af; 
   z-index: 2;
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
 }
 
-/* Обратная сторона (Внутренняя часть с контентом) */
 .face.back {
   background-color: white;
-  transform: rotateY(180deg) translateZ(1px); /* Разворачиваем её изначально на 180 */
+  transform: rotateY(180deg) translateZ(1px); 
   z-index: 1;
   display: flex;
   flex-direction: column;
@@ -77,13 +73,10 @@
 
 .cover p {
   position: relative;
-  z-index: 5; /* Выше чем ::after */
+  z-index: 5; 
 
-  /* Разворачиваем текст изначально "спиной", 
-     чтобы при открытии книги он стал лицом */
   transform: rotateY(180deg);
 
-  /* Скрываем его, когда книга закрыта (чтобы не просвечивал сквозь обложку) */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 
@@ -98,11 +91,9 @@
   background-image: url("../../assets/images/cover.png");
   background-size: cover;
 
-  /* Важно: заставляем картинку исчезнуть, когда она поворачивается спиной */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 
-  /* Картинка должна быть над белым фоном .cover */
   z-index: 1;
   display: none;
 }
@@ -111,14 +102,11 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-color: white; /* Цвет внутренней стороны обложки */
-  /* border-radius: 10px; */
-  /* Разворачиваем этот слой изначально "спиной" к пользователю */
+  background-color: white; 
   transform: rotateY(180deg);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   z-index: 1;
-  /* Добавим легкую тень для реализма внутренней страницы */
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
   display: none;
@@ -168,7 +156,6 @@
   flex-wrap: wrap;
 }
 
-/* Карточки из макета */
 .file-card {
   border: 1px solid #0037af;
   border-radius: 8px;
