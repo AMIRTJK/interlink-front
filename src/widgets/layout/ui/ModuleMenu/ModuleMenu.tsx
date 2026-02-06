@@ -5,10 +5,11 @@ import { getModuleItems, MenuItem } from "./lib";
 import { tokenControl, useGetQuery } from "@shared/lib";
 import { useEffect, useMemo } from "react";
 import { ApiRoutes } from "@shared/api";
+import { motion, AnimatePresence } from "framer-motion";
 import "./style.css";
 
 interface IProps {
-  variant: "horizontal" | "compact";
+  variant: "horizontal" | "compact" | "modern";
 }
 type TSubMenuItem = {
   key: string;
@@ -162,7 +163,7 @@ export const ModuleMenu = ({ variant }: IProps) => {
   };
 
   const menuItems = useMemo(() => {
-    if (variant === "compact") {
+    if (variant === "compact" || variant === "modern") {
       return filteredItems.map((item) => {
         if (item && "children" in item) {
           const { children: _, ...rest } = item as TSubMenuItem;
@@ -184,45 +185,72 @@ export const ModuleMenu = ({ variant }: IProps) => {
         theme="light"
         disabledOverflow
         className={`flex-wrap p-2 border-b-0! ${
-          variant === "compact" ? "compact-style" : "full-style"
+          variant === "compact"
+            ? "compact-style"
+            : variant === "modern"
+            ? "modern-style"
+            : "full-style"
         }`}
       />
-      {/* Вторая синяя полоса для подмодулей */}
-      {variant === "compact" && (
-        <div className="sub-menu-bar">
-          {subItems?.map((sub) => {
-            if (!sub || !("key" in sub)) return null;
+      <AnimatePresence mode="wait">
+        {(variant === "compact" || variant === "modern") && subItems && (
+          <motion.div
+            key={activeKey}
+            className="sub-menu-bar"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+          >
+            {subItems?.map((sub) => {
+              if (!sub || !("key" in sub)) return null;
 
-            const subKey = String(sub.key);
+              const subKey = String(sub.key);
 
-            const isDirectMatch =
-              pathname === subKey || pathname.startsWith(subKey + "/");
+              const isDirectMatch =
+                pathname === subKey || pathname.startsWith(subKey + "/");
 
-            const isRestoredMatch = (() => {
-              const isSharedRoute = SHARED_ROUTES.some((route) =>
-                pathname.includes(route),
+              const isRestoredMatch = (() => {
+                const isSharedRoute = SHARED_ROUTES.some((route) =>
+                  pathname.includes(route),
+                );
+                if (isSharedRoute) {
+                  const lastActiveKey = sessionStorage.getItem(STORAGE_KEY);
+                  return lastActiveKey === subKey;
+                }
+                return false;
+              })();
+
+              const isActive = isDirectMatch || isRestoredMatch;
+
+              return (
+                <motion.div
+                  key={sub.key}
+                  className="sub-menu-item"
+                  onClick={() => handleNavigate(sub.key as string)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  style={{ position: "relative" }}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeBorder"
+                      className="active-border"
+                      transition={{
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 25,
+                      }}
+                    />
+                  )}
+                  {variant === "modern" && "icon" in sub && sub.icon}
+                  <span>{"label" in sub ? sub.label : ""}</span>
+                </motion.div>
               );
-              if (isSharedRoute) {
-                const lastActiveKey = sessionStorage.getItem(STORAGE_KEY);
-                return lastActiveKey === subKey;
-              }
-              return false;
-            })();
-
-            const isActive = isDirectMatch || isRestoredMatch;
-
-            return (
-              <div
-                key={sub.key}
-                className={`sub-menu-item ${isActive ? "active" : ""}`}
-                onClick={() => handleNavigate(sub.key as string)}
-              >
-                {"label" in sub ? sub.label : ""}
-              </div>
-            );
-          })}
-        </div>
-      )}
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

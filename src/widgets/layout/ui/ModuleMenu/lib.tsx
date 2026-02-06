@@ -13,7 +13,7 @@ export type MenuItem = Required<MenuProps>["items"][number] & {
 };
 
 export const getModuleItems = (
-  variant: "horizontal" | "compact",
+  variant: "horizontal" | "compact" | "modern",
 ): MenuItem[] => [
   {
     key: AppRoutes.PROFILE,
@@ -38,17 +38,25 @@ export const getModuleItems = (
     requiredRole: ["correspondence.view"],
     icon:
       variant === "horizontal" ? <img src={CorrespondenceIcon} alt="" /> : null,
-    ...(variant === "compact" && {
+    ...((variant === "compact" || variant === "modern") && {
       children: [
         {
           key: AppRoutes.CORRESPONDENCE_INCOMING,
           label: "Внешняя корреспонденция",
           requiredRole: ["correspondence.view"],
+          icon:
+            variant === "modern" ? (
+              <img src={OrganizationIcon} alt="" className="opacity-50" />
+            ) : null,
         },
         {
           key: AppRoutes.CORRESPONDENCE_OUTGOING,
           label: "Внутренняя корреспонденция",
           requiredRole: ["internal_correspondence.view"],
+          icon:
+            variant === "modern" ? (
+              <img src={OrganizationIcon} alt="" />
+            ) : null,
         },
       ],
     }),
