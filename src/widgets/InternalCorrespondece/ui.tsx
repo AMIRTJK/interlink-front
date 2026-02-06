@@ -52,11 +52,64 @@ export const InternalCorrespondece: React.FC<IProps> = ({
 
   const [editorBody, setEditorBody] = useState<string>("");
 
-  const { data: rawWorkflowData, refetch: refetchWorkflow } = useGetQuery({
+  const {
+    data: rawWorkflowData,
+    refetch: refetchWorkflow,
+    preloadData,
+  } = useGetQuery({
     url: id ? ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", id) : "",
     useToken: true,
     options: { enabled: !!id },
+    preload: true,
   });
+
+  const canSign = useMemo(() => {
+    if (!preloadData || !Array.isArray(preloadData)) return false;
+    return preloadData.some((p: any) => p.name === "signatures.payload");
+  }, [preloadData]);
+
+  const { mutate: signaturesConfirm, isPending: isConfirming } =
+    useMutationQuery<any>({
+      url: ApiRoutes.INTERNAL_SIGNATURES_CONFIRM.replace(
+        ":id",
+        String(id || ""),
+      ),
+      method: "POST",
+      messages: {
+        success: "Подписано успешно",
+        invalidate: [ApiRoutes.INTERNAL_GET_WORKFLOW],
+      },
+      preload: true,
+      preloadConditional: ["signatures.confirm"],
+    });
+
+  const { mutate: signaturesPayload, isPending: isPayloadLoading } =
+    useMutationQuery<any>({
+      url: ApiRoutes.INTERNAL_SIGNATURES_PAYLOAD.replace(
+        ":id",
+        String(id || ""),
+      ),
+      method: "POST",
+      preload: true,
+      preloadConditional: ["signatures.payload"],
+      queryOptions: {
+        onSuccess: (response: any) => {
+          if (response?.success && response?.data) {
+            signaturesConfirm({
+              signature_id: response.data.signature_id,
+              nonce: response.data.nonce,
+              method: "simple",
+            });
+          }
+        },
+      },
+    });
+
+  const handleSign = () => {
+    if (canSign) {
+      signaturesPayload({ action: "sign" });
+    }
+  };
 
   const workflowData = useMemo(() => {
     // В реальном проекте здесь будет просто: return rawWorkflowData;
@@ -218,6 +271,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
               toggleCollapse={() =>
                 setIsParticipantsPanelCollapsed(!isParticipantsPanelCollapsed)
               }
+              onSign={handleSign}
+              isSigning={isPayloadLoading || isConfirming}
             />
           </div>
         </If>

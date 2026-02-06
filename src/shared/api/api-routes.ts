@@ -98,6 +98,10 @@ export const ApiRoutes = {
     "/api/v1/internal-correspondences/approvals/:approval_id/status",
   INTERNAL_INVITE_SIGNER: "/api/v1/internal-correspondences/:id/signers/invite",
   INTERNAL_GET_WORKFLOW: "/api/v1/internal-correspondences/:id/workflow",
+  INTERNAL_SIGNATURES_PAYLOAD:
+    "/api/v1/internal-correspondences/:id/signatures/payload",
+  INTERNAL_SIGNATURES_CONFIRM:
+    "/api/v1/internal-correspondences/:id/signatures/confirm",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];

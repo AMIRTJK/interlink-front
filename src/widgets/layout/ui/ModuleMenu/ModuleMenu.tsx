@@ -47,6 +47,8 @@ export const ModuleMenu = ({ variant }: IProps) => {
     return Array.isArray(roles) ? roles : [];
   }, [data]);
 
+  console.log(userRolesArray);
+
   // Получаем список имен всех ролей пользователя (включая preloadData)
   const userRoleNames = useMemo(() => {
     const namesFromRoles = userRolesArray.map((item) => item.name);
@@ -54,6 +56,8 @@ export const ModuleMenu = ({ variant }: IProps) => {
       preloadData?.map((item: { name: string }) => item.name) || [];
     return [...new Set([...namesFromRoles, ...namesFromPreload])];
   }, [userRolesArray, preloadData]);
+
+  console.log(userRoleNames);
 
   // Получаем должность пользователя
   const userPosition = useMemo(() => {
