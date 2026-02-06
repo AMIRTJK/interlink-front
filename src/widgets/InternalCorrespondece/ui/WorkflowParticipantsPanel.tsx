@@ -35,11 +35,15 @@ const FullHistoryModal = ({
   onClose,
   workflowData,
   initialTab = "participants",
+  onSign,
+  isSigning,
 }: {
   isOpen: boolean;
   onClose: () => void;
   workflowData: any;
   initialTab?: string;
+  onSign: () => void;
+  isSigning: boolean;
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -110,10 +114,11 @@ const FullHistoryModal = ({
         {/* Кнопка зависит от типа, переданного в функцию */}
         {type === "signer" && (
           <Button
+            onClick={onSign}
+            loading={isSigning}
             type="primary"
             size="small"
             className="bg-blue-600! hover:bg-blue-500!"
-            onClick={() => console.log("Подписать (Modal)", item.id)}
           >
             Подписать
           </Button>
@@ -124,7 +129,6 @@ const FullHistoryModal = ({
             type="primary"
             size="small"
             className="bg-green-600 hover:bg-green-500 border-green-600"
-            onClick={() => console.log("Согласовать (Modal)", item.id)}
           >
             Согласовать
           </Button>
@@ -253,10 +257,14 @@ export const WorkflowParticipantsPanel = ({
   workflowData,
   isCollapsed,
   toggleCollapse,
+  onSign,
+  isSigning,
 }: {
   workflowData: any;
   isCollapsed: boolean;
   toggleCollapse: () => void;
+  onSign: () => void;
+  isSigning: boolean;
 }) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -416,8 +424,9 @@ export const WorkflowParticipantsPanel = ({
               <Button
                 type="primary"
                 size="small"
+                loading={isSigning}
                 className="bg-blue-600! hover:bg-blue-500!"
-                onClick={() => console.log("Подписать", item.id)}
+                onClick={onSign}
               >
                 Подписать
               </Button>
@@ -427,7 +436,6 @@ export const WorkflowParticipantsPanel = ({
                 type="primary"
                 size="small"
                 className="bg-blue-600! hover:bg-blue-500!"
-                onClick={() => console.log("Согласовать", item.id)}
               >
                 Согласовать
               </Button>
@@ -610,6 +618,8 @@ export const WorkflowParticipantsPanel = ({
         onClose={closeModal}
         workflowData={workflowData}
         initialTab={modalState.tab}
+        onSign={onSign}
+        isSigning={isSigning}
       />
     </>
   );
