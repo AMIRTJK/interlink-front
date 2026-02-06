@@ -28,53 +28,6 @@ export const ModuleMenu = ({ variant }: IProps) => {
   // Мемоизируем items
   const items = useMemo(() => getModuleItems(variant), [variant]);
 
-  const hasChildren = (item: MenuItem): item is TSubMenuItem => {
-    return item !== null && typeof item === "object" && "children" in item;
-  };
-
-  useEffect(() => {
-    const isSharedRoute = SHARED_ROUTES.some((route) =>
-      pathname.includes(route),
-    );
-
-    if (!isSharedRoute && pathname.includes("/correspondence")) {
-      // Находим основной пункт "Корреспонденция"
-      const correspondenceMenu = items.find(
-        (item) => item?.key === AppRoutes.CORRESPONDENCE,
-      );
-
-      // Безопасно проверяем наличие детей через Type Guard
-      if (correspondenceMenu && hasChildren(correspondenceMenu)) {
-        const activeTab = correspondenceMenu.children?.find((sub) => {
-          // Проверяем sub на null и наличие ключа (так как подпункты тоже Union)
-          return sub && "key" in sub && pathname.startsWith(String(sub.key));
-        });
-
-        if (activeTab && "key" in activeTab) {
-          sessionStorage.setItem(STORAGE_KEY, String(activeTab.key));
-        }
-      }
-    }
-  }, [pathname, items]);
-
-  const activeItem = items.find((item) => {
-    if (!item || !("key" in item)) return false;
-    const itemKey = String(item.key);
-    return pathname === itemKey || pathname.startsWith(itemKey + "/");
-  }) as TSubMenuItem | undefined;
-
-  const activeKey =
-    activeItem?.key ||
-    (pathname.includes("modules") ? "" : AppRoutes.PROFILE_TASKS);
-
-  const subItems = activeItem?.children;
-
-  const handleNavigate = (path: string) => {
-    if (pathname !== path) {
-      navigate(path);
-    }
-  };
-
   // Получаем права пользователя
   const { data, preloadData } = useGetQuery({
     method: "GET",
@@ -105,9 +58,14 @@ export const ModuleMenu = ({ variant }: IProps) => {
   const userPosition = useMemo(() => {
     return (data as { data: { position: string } } | undefined)?.data?.position;
   }, [data]);
+
+  const hasChildren = (item: MenuItem): item is TSubMenuItem => {
+    return item !== null && typeof item === "object" && "children" in item;
+  };
+
   // Фильтруем элементы меню на основе ролей пользователя
   const filteredItems = useMemo(() => {
-    const filtered = items.filter((item) => {
+    const checkAccess = (item: MenuItem): boolean => {
       if (!item || !("requiredRole" in item)) {
         return true;
       }
@@ -122,16 +80,86 @@ export const ModuleMenu = ({ variant }: IProps) => {
       }
 
       // Проверяем, есть ли хотя бы одна роль из requiredRole у пользователя
-      const hasRole = menuItem.requiredRole.some(
+      return menuItem.requiredRole.some(
         (role) =>
           userRoleNames.includes(role) ||
           preloadData?.some((p: { name: string }) => p.name === role),
       );
-      return hasRole;
-    });
-    return filtered;
-    // Добавлены все зависимости, которые используются внутри filter
+    };
+
+    const filterRecursively = (itemsToFilter: MenuItem[]): MenuItem[] => {
+      return itemsToFilter.reduce((acc, item) => {
+        if (!checkAccess(item)) {
+          return acc;
+        }
+
+        if (hasChildren(item)) {
+          const { children, ...rest } = item;
+          const filteredChildren = filterRecursively(children || []);
+          // Если есть дети, обновляем их в элементе
+          if (filteredChildren.length > 0) {
+            acc.push({ ...rest, children: filteredChildren });
+          } else {
+             // Если все дети отфильтрованы, но родитель доступен, решаем, показывать ли его.
+             // В данном случае, если родитель доступен, но у него пустые подмодули (которые были),
+             // возможно, стоит все равно показать родителя (если у него самого есть функционал)
+             // или скрыть. Для меню обычно если это dropdown, то лучше оставить как есть
+             // но в данном дизайне "compact" дети показываются отдельно.
+             // В данном случае, сохраняем элемент, даже если детей не осталось, так как это может быть родительский пункт
+             acc.push({ ...rest, children: filteredChildren });
+          }
+        } else {
+          acc.push(item);
+        }
+        return acc;
+      }, [] as MenuItem[]);
+    };
+
+    return filterRecursively(items);
   }, [items, userRoleNames, userPosition, preloadData]);
+
+  useEffect(() => {
+    const isSharedRoute = SHARED_ROUTES.some((route) =>
+      pathname.includes(route),
+    );
+
+    if (!isSharedRoute && pathname.includes("/correspondence")) {
+      // Находим основной пункт "Корреспонденция"
+      const correspondenceMenu = filteredItems.find(
+        (item) => item?.key === AppRoutes.CORRESPONDENCE,
+      );
+
+      // Безопасно проверяем наличие детей через Type Guard
+      if (correspondenceMenu && hasChildren(correspondenceMenu)) {
+        const activeTab = correspondenceMenu.children?.find((sub) => {
+          // Проверяем sub на null и наличие ключа (так как подпункты тоже Union)
+          return sub && "key" in sub && pathname.startsWith(String(sub.key));
+        });
+
+        if (activeTab && "key" in activeTab) {
+          sessionStorage.setItem(STORAGE_KEY, String(activeTab.key));
+        }
+      }
+    }
+  }, [pathname, filteredItems]);
+
+  const activeItem = filteredItems.find((item) => {
+    if (!item || !("key" in item)) return false;
+    const itemKey = String(item.key);
+    return pathname === itemKey || pathname.startsWith(itemKey + "/");
+  }) as TSubMenuItem | undefined;
+
+  const activeKey =
+    activeItem?.key ||
+    (pathname.includes("modules") ? "" : AppRoutes.PROFILE_TASKS);
+
+  const subItems = activeItem?.children;
+
+  const handleNavigate = (path: string) => {
+    if (pathname !== path) {
+      navigate(path);
+    }
+  };
 
   const menuItems = useMemo(() => {
     if (variant === "compact") {

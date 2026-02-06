@@ -43,10 +43,12 @@ export const getModuleItems = (
         {
           key: AppRoutes.CORRESPONDENCE_INCOMING,
           label: "Внешняя корреспонденция",
+          requiredRole: ["correspondence.view"],
         },
         {
           key: AppRoutes.CORRESPONDENCE_OUTGOING,
           label: "Внутренняя корреспонденция",
+          requiredRole: ["internal_correspondence.view"],
         },
       ],
     }),
