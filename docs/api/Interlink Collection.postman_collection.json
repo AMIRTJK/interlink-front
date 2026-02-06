@@ -32,9 +32,9 @@
           }
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/auth/login",
+          "raw": "{{prodUrl}}/api/v1/auth/login",
           "host": [
-            "{{baseURL}}"
+            "{{prodUrl}}"
           ],
           "path": [
             "api",
@@ -175,7 +175,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "KAh7xgxZMiJ3Miv0V0iHZp5QAXRegSjx6bFPRiph3133bb77",
+              "value": "1IefS8tbLzZdaZd39azverV1jeR2l9KWH71ykb5Zb58fb9ac",
               "type": "string"
             }
           ]
@@ -195,15 +195,14 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"last_name\": \"Иванов\",\r\n  \"first_name\": \"Иван\",\r\n  \"phone\": \"+992900000015\",\r\n  \"password\": \"secret123\",\r\n  \"position\": \"Сотрудник\",\r\n  \"organization_id\": 1,\r\n  \"roles\": [\"manager_test\"]\r\n}\r\n\r\n"
+          "raw": "{\r\n  \"last_name\": \"Иванов\",\r\n  \"first_name\": \"Иван\",\r\n  \"phone\": \"+992900000015\",\r\n  \"password\": \"secret123\",\r\n  \"position\": \"Сотрудник\",\r\n  \"organization_id\": 1,\r\n  \"roles\": [\"super_admin\"]\r\n}\r\n\r\n"
         },
         "url": {
-          "raw": "http://localhost:8000/api/v1/admin/users",
+          "raw": "http://{{baseURL}}/api/v1/admin/users",
           "protocol": "http",
           "host": [
-            "localhost"
+            "{{baseURL}}"
           ],
-          "port": "8000",
           "path": [
             "api",
             "v1",
@@ -222,15 +221,26 @@
           "bearer": [
             {
               "key": "token",
-              "value": "KAh7xgxZMiJ3Miv0V0iHZp5QAXRegSjx6bFPRiph3133bb77",
+              "value": "1IefS8tbLzZdaZd39azverV1jeR2l9KWH71ykb5Zb58fb9ac",
               "type": "string"
             }
           ]
         },
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
         "url": {
-          "raw": "{{baseURL}}/api/v1/admin/roles/5",
+          "raw": "{{baseURL}}/api/v1/admin/roles/2",
           "host": [
             "{{baseURL}}"
           ],
@@ -239,7 +249,7 @@
             "v1",
             "admin",
             "roles",
-            "5"
+            "2"
           ]
         }
       },
@@ -484,7 +494,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "KAh7xgxZMiJ3Miv0V0iHZp5QAXRegSjx6bFPRiph3133bb77",
+              "value": "1IefS8tbLzZdaZd39azverV1jeR2l9KWH71ykb5Zb58fb9ac",
               "type": "string"
             }
           ]
@@ -1819,7 +1829,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "8bH4Siakr1SV6ngvyOXX3YOpvaHMB7ksz9RyuQKg857e8b76",
+              "value": "7WqVeL1xmuGUXJt9APYSh323YzNrF3tDAPoZYaap0b4450ba",
               "type": "string"
             }
           ]
@@ -1832,8 +1842,8 @@
             "type": "text"
           },
           {
-            "key": "Content-Type",
-            "value": "multipart/form-data boundary=...",
+            "key": "",
+            "value": "",
             "type": "text",
             "disabled": true
           },
@@ -1858,7 +1868,14 @@
               "key": "file",
               "type": "file",
               "uuid": "28076ef1-55e5-4142-af66-1b4688ecaadc",
-              "src": "/C:/Users/User/Desktop/GGJejMy9Ble22ijPdKn2Ai542sauHdYdntwz-RpduqqxzV77ZIZCPBtmuhfL3W8reNYaWp_bH7_lsG9vhXvYFEof.jpg"
+              "src": "/C:/Users/User/Desktop/GGJejMy9Ble22ijPdKn2Ai542sauHdYdntwz-RpduqqxzV77ZIZCPBtmuhfL3W8reNYaWp_bH7_lsG9vhXvYFEof.jpg",
+              "disabled": true
+            },
+            {
+              "key": "file",
+              "type": "file",
+              "uuid": "ff1b27d4-bbbc-4a20-8d42-b9ce3f65b518",
+              "src": "/C:/Users/User/Desktop/69rMWP6-tuOfeH-lI904opWuqdRcBZyd_P2AgKYoOJHGmBCEk63YciRhubA2FdT-wOAIqiDoQiKiLWBAZkayKb6y.jpg"
             }
           ]
         },
@@ -2718,7 +2735,18 @@
           ]
         },
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
         "url": {
           "raw": "{{baseURL}}/api/v1/correspondences/8?view=full",
           "host": [
@@ -2822,7 +2850,7 @@
           "raw": "{ \"action\": \"visa\", \"method\": \"cms\" }\r\n"
         },
         "url": {
-          "raw": "{{baseURL}}/api/v1/correspondences/8/signature/payload",
+          "raw": "{{baseURL}}/api/v1/correspondences/9/signature/payload",
           "host": [
             "{{baseURL}}"
           ],
@@ -2830,7 +2858,7 @@
             "api",
             "v1",
             "correspondences",
-            "8",
+            "9",
             "signature",
             "payload"
           ]
@@ -2975,6 +3003,842 @@
             "v1",
             "correspondence-resolutions",
             "{id}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Исполнитель приглашает согласующих",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "ojPbWJF1j17JUEApIizw32lEWS5xrU6C4dwof8Xa20cb5a54",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "",
+            "value": "",
+            "type": "text",
+            "disabled": true
+          },
+          {
+            "key": "",
+            "value": "",
+            "type": "text",
+            "disabled": true
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"approver_users\": [3,4], \"note\": \"согласуйте\" }\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/correspondence-assignments/7/approvers",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "correspondence-assignments",
+            "7",
+            "approvers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Согласование",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "ojPbWJF1j17JUEApIizw32lEWS5xrU6C4dwof8Xa20cb5a54",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"status\": \"approved\", \"note\": \"ок\" }\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/correspondence-approvals/16/status",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "correspondence-approvals",
+            "16",
+            "status"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Внутренняя корреспонденция создать документ",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "svZaAts4083lktXs9F9i6vDIyWJcXun6MlEq7ERlc81d3e8d",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"subject\": \"Внутреннее письмо\",\r\n  \"body\": \"<p>Текст</p>\",\r\n  \"recipients\": { \"to\": [2] }\r\n}\r\n// {\r\n//   \"subject\": \"Внутреннее письмо всему департаменту\",\r\n//   \"body\": \"<p>Текст</p>\",\r\n//   \"recipients\": {\r\n//     \"to_departments\": [2]\r\n//   }\r\n// }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/internal-correspondences/",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "internal-correspondences",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Список драфт",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "ojPbWJF1j17JUEApIizw32lEWS5xrU6C4dwof8Xa20cb5a54",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/internal-correspondences/drafts",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "internal-correspondences",
+            "drafts"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Отправить внутренную кореспонцию",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "ojPbWJF1j17JUEApIizw32lEWS5xrU6C4dwof8Xa20cb5a54",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/internal-correspondences/9/send",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "internal-correspondences",
+            "9",
+            "send"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "inbox внутренная кореспондеция",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "svZaAts4083lktXs9F9i6vDIyWJcXun6MlEq7ERlc81d3e8d",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/atom+xml",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseURL}}/api/v1/internal-correspondences/inbox",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "internal-correspondences",
+            "inbox"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "markRead внутренний корреспонденция",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "ojPbWJF1j17JUEApIizw32lEWS5xrU6C4dwof8Xa20cb5a54",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "//unread badge уменьшается",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/internal-correspondences/9/read",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "internal-correspondences",
+            "9",
+            "read"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "trash / restore Внутренний корреспонденция",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "ojPbWJF1j17JUEApIizw32lEWS5xrU6C4dwof8Xa20cb5a54",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "// item folder=trash, письмо не удаляется глобально\r\n// /api/v1/internal-correspondences/{id}/restore\r\n// ✅ вернётся либо inbox либо sent"
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/internal-correspondences/9",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "internal-correspondences",
+            "9"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Создать новую вкладку (версию) внутренни",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "ojPbWJF1j17JUEApIizw32lEWS5xrU6C4dwof8Xa20cb5a54",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"title\": \"Версия 1\" }\r\n"
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/correspondence-assignments/8/contents/new",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "correspondence-assignments",
+            "8",
+            "contents",
+            "new"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Сохранение  из CKEditor внешний корреспонденция",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "ojPbWJF1j17JUEApIizw32lEWS5xrU6C4dwof8Xa20cb5a54",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"Версия 1\",\r\n  \"html\": \"<p>Текст исполнителя...</p>\"\r\n}\r\n// /correspondence-assignments/{assignment_id}/contents/{content_id}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/correspondence-assignments/8/contents/1",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "correspondence-assignments",
+            "8",
+            "contents",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Пригласить на подпись внутренная",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "1IefS8tbLzZdaZd39azverV1jeR2l9KWH71ykb5Zb58fb9ac",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"users\": [1,2],\r\n  \"note\": \"Подписать\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/internal-correspondences/9/signers/invite",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "internal-correspondences",
+            "9",
+            "signers",
+            "invite"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Workflow Внутренняя корреспонденция",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "u4HFcaFKts5gIXN76al79e5pp6Zxn3zOLr0DWg4o4bba6bac",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "// текущий status письма\r\n\r\n// список approvals (если приглашали)\r\n\r\n// список signers (если приглашали)\r\n\r\n// кто уже approved / кто pending\r\n\r\n// кто подписал / кто pending\r\n\r\n// флаги типа can_approve, can_sign",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/internal-correspondences/9/workflow",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "internal-correspondences",
+            "9",
+            "workflow"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Прикрепляем входящее письмо",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "u4HFcaFKts5gIXN76al79e5pp6Zxn3zOLr0DWg4o4bba6bac",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"incoming_id\": 8\r\n}\r\n"
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/internal-correspondences/9/incoming/attach",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "internal-correspondences",
+            "9",
+            "incoming",
+            "attach"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Внутренний Создать кастомную папку с префиксом",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "u4HFcaFKts5gIXN76al79e5pp6Zxn3zOLr0DWg4o4bba6bac",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"name\": \"finance\", \"prefix\": \"FIN\", \"sort\": 10 }\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/internal-mail-folders",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "internal-mail-folders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Переместить письмо и присвоить номер внутренний",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "u4HFcaFKts5gIXN76al79e5pp6Zxn3zOLr0DWg4o4bba6bac",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "//Ручной номер { \"folder\": \"finance\", \"reg_seq\": 15 }\r\n//Авто  { \"folder\": \"finance\", \"reg_seq\": 15 }\r\n\r\n"
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/internal-correspondences/9/move-folder",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "internal-correspondences",
+            "9",
+            "move-folder"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Запрашивать payload",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "u4HFcaFKts5gIXN76al79e5pp6Zxn3zOLr0DWg4o4bba6bac",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"action\": \"sign\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/internal-correspondences/9/signatures/payload",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "internal-correspondences",
+            "9",
+            "signatures",
+            "payload"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Подписать внутренный",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "u4HFcaFKts5gIXN76al79e5pp6Zxn3zOLr0DWg4o4bba6bac",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"signature_id\": 123,\r\n  \"nonce\": \"....\",\r\n  \"method\": \"simple\"\r\n}\r\n"
+        },
+        "url": {
+          "raw": "{{baseURL}}/api/v1/internal-correspondences/9/signatures/confirm",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "internal-correspondences",
+            "9",
+            "signatures",
+            "confirm"
           ]
         }
       },
