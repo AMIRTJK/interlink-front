@@ -415,7 +415,7 @@ body.no-animations
   min-height: 56px;
   display: flex;
   align-items: center;
-  padding: 10px 32px;
+  padding: 10px 25px;
   gap: 12px;
   position: relative;
   z-index: 1;
