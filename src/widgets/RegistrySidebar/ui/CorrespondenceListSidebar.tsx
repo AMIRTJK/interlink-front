@@ -1,11 +1,10 @@
 import { ApiRoutes } from "@shared/api";
 import { useGetQuery } from "@shared/lib";
 import { Loader } from "@shared/ui";
-import { useNavigate, useParams } from "react-router-dom"; // 1. Добавили useParams
+import { useNavigate, useParams } from "react-router-dom";
 import { AppRoutes } from "@shared/config";
 import { useMemo } from "react";
 
-// Функция для стилизации статусов
 const getStatusStyle = (status: string) => {
   const s = status?.toLowerCase() || "";
   if (s === "draft") return "bg-gray-200 text-gray-600";
@@ -15,7 +14,6 @@ const getStatusStyle = (status: string) => {
   return "bg-gray-100 text-gray-500";
 };
 
-// Функция для красивого отображения названия статуса
 const getStatusName = (status: string) => {
   const map: Record<string, string> = {
     draft: "Черновик",
@@ -29,7 +27,7 @@ const getStatusName = (status: string) => {
 
 export const CorrespondenceListSidebar = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // 2. Получаем текущий ID из URL
+  const { id } = useParams();
 
   const { data, isLoading } = useGetQuery({
     url: ApiRoutes.GET_CORRESPONDENCES,
@@ -53,7 +51,6 @@ export const CorrespondenceListSidebar = () => {
       return responseBody;
     }
 
-    // console.warn("Не удалось найти массив писем", responseBody);
     return [];
   }, [data]);
 
@@ -70,10 +67,7 @@ export const CorrespondenceListSidebar = () => {
       <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
         {list.length > 0 ? (
           list.map((item: any) => {
-            // 3. Проверяем, активен ли этот элемент
-            // Приводим к строке, так как id из URL - это строка, а item.id - число
             const isActive = String(item.id) === id;
-
             return (
               <div
                 key={item.id}
@@ -85,9 +79,6 @@ export const CorrespondenceListSidebar = () => {
                     ),
                   )
                 }
-                // 4. Условные стили:
-                // Если активен: синяя рамка, легкий синий фон, тень
-                // Если не активен: белый фон, прозрачная рамка, ховер эффекты
                 className={`p-3 rounded-xl mb-2 cursor-pointer border transition-all duration-200
                   ${
                     isActive
@@ -96,7 +87,6 @@ export const CorrespondenceListSidebar = () => {
                   }
                 `}
               >
-                {/* Тема */}
                 <div
                   className={`font-bold text-sm mb-1 line-clamp-2 leading-tight ${
                     isActive ? "text-[#0037AF]" : "text-gray-900"
@@ -105,12 +95,9 @@ export const CorrespondenceListSidebar = () => {
                   {item.subject || "Без темы"}
                 </div>
 
-                {/* Отправитель */}
                 <div className="text-xs text-gray-400 mb-3 line-clamp-1">
                   {item.sender_name || "Отправитель не указан"}
                 </div>
-
-                {/* Статус и Дата */}
                 <div className="flex items-center justify-between mt-2">
                   <span
                     className={`px-2 py-1 rounded-md text-[10px] font-medium truncate max-w-[65%] ${getStatusStyle(

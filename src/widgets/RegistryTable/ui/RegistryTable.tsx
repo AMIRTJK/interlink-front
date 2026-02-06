@@ -24,7 +24,7 @@ interface RegistryTableProps<T extends Record<string, unknown>> {
   type: string;
   createButtonText?: string;
   extraParams?: Record<string, unknown>;
-  url?: string; // URL для загрузки данных (по умолчанию GET_CORRESPONDENCES)
+  url?: string;
 }
 
 export const RegistryTable = <T extends Record<string, unknown>>({
@@ -32,7 +32,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   createButtonText,
   type,
   extraParams,
-  url = ApiRoutes.GET_CORRESPONDENCES, // Если URL не передан, используем стандартный
+  url = ApiRoutes.GET_CORRESPONDENCES,
 }: RegistryTableProps<T>) => {
   const tabFromParams = extraParams?.tab;
 
@@ -57,7 +57,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 
   const customTabs = useMemo(() => {
     if (type === "internal-incoming") {
-      return []; // Пустой массив скроет табы
+      return [];
     }
     if (type === "internal-outgoing") {
       return [];
@@ -65,7 +65,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
     if (type === "internal-drafts") {
       return INTERNAL_OUTGOING_TABS;
     }
-    return undefined; // undefined заставит StatusTabs использовать дефолтные
+    return undefined;
   }, [type]);
 
   const currentUrl = url;
