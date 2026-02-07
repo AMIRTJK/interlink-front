@@ -1,13 +1,11 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { ModuleMenu } from "./ModuleMenu";
 import { Header } from "./Header";
 import { If } from "@shared/ui";
 import { useCorrespondenceRoute } from "@shared/lib";
-import { motion } from "framer-motion";
 
 export const MainLayout = () => {
   const { shouldHideUI } = useCorrespondenceRoute();
-  const location = useLocation();
 
   return (
     <div
@@ -23,14 +21,9 @@ export const MainLayout = () => {
           <ModuleMenu variant="modern" />
         </div>
       </If>
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, ease: "easeInOut" }}
-      >
+      <div>
         <Outlet />
-      </motion.div>
+      </div>
     </div>
   );
 };
