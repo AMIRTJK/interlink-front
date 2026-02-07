@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { AppRoutes } from "@shared/config";
 import "./style.css";
@@ -17,12 +18,32 @@ import { FolderModal } from "./FolderModal";
 
 const { Sider } = Layout;
 
+// Variants for the sidebar container
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const itemWrapperVariants = {
+  hidden: { opacity: 0, y: -20 },
+  visible: { opacity: 1, y: 0 },
+};
+
 export const ModuleSidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [parentId, setParentId] = useState<number | null>(null);
   const [editingFolderId, setEditingFolderId] = useState<number | null>(null);
   const [form] = Form.useForm();
+  
+  // Track if animation has already been shown to prevent restart on re-renders
+  const [hasAnimated, setHasAnimated] = useState(false);
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -192,7 +213,6 @@ export const ModuleSidebar = () => {
       folder_id: number | null;
       type: "folder" | "correspondence";
     }) => {
-      // Пользователь обновил роут на /api/v1/correspondences/:DOC_ID/move
       const url = ApiRoutes.MOVE_FOLDER.replace(":DOC_ID", String(data.id));
 
       const response = await _axios({
@@ -319,18 +339,28 @@ export const ModuleSidebar = () => {
             </div>
           </div>
 
-        <div className="flex-1 overflow-y-auto  custom-scrollbar">
+        <motion.div 
+          className="flex-1 overflow-y-auto custom-scrollbar"
+          initial={hasAnimated ? false : "hidden"}
+          animate="visible"
+          variants={containerVariants}
+          onAnimationComplete={() => { setHasAnimated(true); }}
+        >
           {finalMenuItems.map((item, index) => (
-            <SidebarItem
+            <motion.div
               key={item.key}
-              item={item}
-              isActive={[activeKey].includes(item.key as string)}
-              collapsed={collapsed}
-              activeKey={activeKey}
-              index={index}
-            />
+              variants={itemWrapperVariants}
+            >
+              <SidebarItem
+                item={item}
+                isActive={[activeKey].includes(item.key as string)}
+                collapsed={collapsed}
+                activeKey={activeKey}
+                index={index}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {!collapsed && (
           <div className="px-5 pb-5 text-xs text-gray-400 text-center">

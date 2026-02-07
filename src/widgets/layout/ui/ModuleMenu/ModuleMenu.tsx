@@ -26,10 +26,8 @@ export const ModuleMenu = ({ variant }: IProps) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  // Мемоизируем items
   const items = useMemo(() => getModuleItems(variant), [variant]);
 
-  // Получаем права пользователя
   const { data, preloadData } = useGetQuery({
     method: "GET",
     url: `${ApiRoutes.FETCH_USER_BY_ID}${tokenControl.getUserId()}`,
@@ -37,7 +35,6 @@ export const ModuleMenu = ({ variant }: IProps) => {
     preload: true,
   });
 
-  // Получаем ВСЕ роли пользователя (безопасное получение из профиля, если есть)
   const userRolesArray = useMemo(() => {
     const roles = (
       data as
@@ -49,7 +46,6 @@ export const ModuleMenu = ({ variant }: IProps) => {
 
   console.log(userRolesArray);
 
-  // Получаем список имен всех ролей пользователя (включая preloadData)
   const userRoleNames = useMemo(() => {
     const namesFromRoles = userRolesArray.map((item) => item.name);
     const namesFromPreload =
@@ -59,7 +55,6 @@ export const ModuleMenu = ({ variant }: IProps) => {
 
   console.log(userRoleNames);
 
-  // Получаем должность пользователя
   const userPosition = useMemo(() => {
     return (data as { data: { position: string } } | undefined)?.data?.position;
   }, [data]);
@@ -68,23 +63,19 @@ export const ModuleMenu = ({ variant }: IProps) => {
     return item !== null && typeof item === "object" && "children" in item;
   };
 
-  // Фильтруем элементы меню на основе ролей пользователя
   const filteredItems = useMemo(() => {
     const checkAccess = (item: MenuItem): boolean => {
       if (!item || !("requiredRole" in item)) {
         return true;
       }
       const menuItem = item as TSubMenuItem;
-      // Если нет requiredRole, показываем элемент всем
       if (!menuItem.requiredRole || menuItem.requiredRole.length === 0) {
         return true;
       }
-      // Проверяем должность - если Super Administrator, показываем все
       if (userPosition === "Super Administrator") {
         return true;
       }
 
-      // Проверяем, есть ли хотя бы одна роль из requiredRole у пользователя
       return menuItem.requiredRole.some(
         (role) =>
           userRoleNames.includes(role) ||
@@ -101,17 +92,10 @@ export const ModuleMenu = ({ variant }: IProps) => {
         if (hasChildren(item)) {
           const { children, ...rest } = item;
           const filteredChildren = filterRecursively(children || []);
-          // Если есть дети, обновляем их в элементе
           if (filteredChildren.length > 0) {
             acc.push({ ...rest, children: filteredChildren });
           } else {
-             // Если все дети отфильтрованы, но родитель доступен, решаем, показывать ли его.
-             // В данном случае, если родитель доступен, но у него пустые подмодули (которые были),
-             // возможно, стоит все равно показать родителя (если у него самого есть функционал)
-             // или скрыть. Для меню обычно если это dropdown, то лучше оставить как есть
-             // но в данном дизайне "compact" дети показываются отдельно.
-             // В данном случае, сохраняем элемент, даже если детей не осталось, так как это может быть родительский пункт
-             acc.push({ ...rest, children: filteredChildren });
+            acc.push({ ...rest, children: filteredChildren });
           }
         } else {
           acc.push(item);
@@ -129,15 +113,12 @@ export const ModuleMenu = ({ variant }: IProps) => {
     );
 
     if (!isSharedRoute && pathname.includes("/correspondence")) {
-      // Находим основной пункт "Корреспонденция"
       const correspondenceMenu = filteredItems.find(
         (item) => item?.key === AppRoutes.CORRESPONDENCE,
       );
 
-      // Безопасно проверяем наличие детей через Type Guard
       if (correspondenceMenu && hasChildren(correspondenceMenu)) {
         const activeTab = correspondenceMenu.children?.find((sub) => {
-          // Проверяем sub на null и наличие ключа (так как подпункты тоже Union)
           return sub && "key" in sub && pathname.startsWith(String(sub.key));
         });
 
@@ -179,6 +160,34 @@ export const ModuleMenu = ({ variant }: IProps) => {
     return filteredItems;
   }, [variant, filteredItems]);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.1,
+      },
+    },
+    exit: { opacity: 0 },
+  };
+
+  const itemVariants = {
+    hidden: { y: -10, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const contentVariants = {
+    hidden: { y: 5, opacity: 0 },
+    visible: { y: 0, opacity: 1 },
+  };
+
   return (
     <div className={`menu-container ${variant}-mode`}>
       <Menu
@@ -192,8 +201,8 @@ export const ModuleMenu = ({ variant }: IProps) => {
           variant === "compact"
             ? "compact-style"
             : variant === "modern"
-            ? "modern-style"
-            : "full-style"
+              ? "modern-style"
+              : "full-style"
         }`}
       />
       <AnimatePresence mode="wait">
@@ -201,10 +210,10 @@ export const ModuleMenu = ({ variant }: IProps) => {
           <motion.div
             key={activeKey}
             className="sub-menu-bar"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease: "easeInOut" }}
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
           >
             {subItems?.map((sub) => {
               if (!sub || !("key" in sub)) return null;
@@ -232,6 +241,7 @@ export const ModuleMenu = ({ variant }: IProps) => {
                   key={sub.key}
                   className="sub-menu-item"
                   onClick={() => handleNavigate(sub.key as string)}
+                  variants={itemVariants}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   style={{ position: "relative" }}
@@ -247,8 +257,17 @@ export const ModuleMenu = ({ variant }: IProps) => {
                       }}
                     />
                   )}
-                  {variant === "modern" && "icon" in sub && sub.icon}
-                  <span>{"label" in sub ? sub.label : ""}</span>
+                  {variant === "modern" && "icon" in sub && (
+                    <motion.span
+                      variants={contentVariants}
+                      className="flex items-center"
+                    >
+                      {sub.icon}
+                    </motion.span>
+                  )}
+                  <motion.span variants={contentVariants}>
+                    {"label" in sub ? sub.label : ""}
+                  </motion.span>
                 </motion.div>
               );
             })}

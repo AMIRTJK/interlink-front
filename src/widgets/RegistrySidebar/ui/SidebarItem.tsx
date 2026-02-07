@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MenuItem } from "../model";
 import { cn } from "@shared/lib/utils";
 import sidebarArrow from '../../../assets/icons/sidebarArrow.svg?raw'
 import { Tooltip } from "antd";
+
+
 
 interface SidebarItemProps {
   item: MenuItem;
@@ -13,20 +15,33 @@ interface SidebarItemProps {
   activeKey?: string | number;
   index?: number;
 }
+
+/* Variants for the row content (to stagger icon and text) */
+const rowVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+/* Variants for the inner elements (Icon, Text) */
+const contentVariants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: { opacity: 1, x: 0 },
+};
+
 export const SidebarItem: React.FC<SidebarItemProps> = ({
   item,
   isActive,
   depth = 0,
   collapsed = false,
   activeKey,
-  index = 0,
+  _index = 0,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  useEffect(() => {
-    if (isActive) {
-      setIsOpen(true);
-    }
-  }, [isActive]);
+  const [isOpen, setIsOpen] = useState(isActive);
+  
   const toggleOpen = (e: React.MouseEvent) => {
     if (collapsed) return; 
     if (item.children && item.children.length > 0) {
@@ -40,19 +55,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
 
   const content = (
       <motion.div
-        initial={{ opacity: 0, x: 0 }}
-        animate={{ opacity: 1, x: depth === 0 ? 0 : 10 }}
-        transition={{ 
-          opacity: { 
-            delay: depth === 0 ? index * 0.05 : index * 0.08, 
-            duration: 0.2 
-          },
-          x: { 
-            delay: (depth === 0 ? index * 0.05 : index * 0.08) + 0.15, 
-            duration: 0.35, 
-            ease: "easeOut" 
-          }
-        }}
+        variants={rowVariants}
+        // Removed initial/animate props to allow inheritance from parent
         whileHover={{ 
           x: isCollapsedMode ? 0 : (depth === 0 ? 1.2 : 8),
           transition: { duration: 0.15, ease: "easeOut" }
@@ -73,7 +77,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         }}
         style={{ paddingLeft: (!isCollapsedMode && depth > 0) ? `8px` : undefined }}
       >
-        <div
+        <motion.div
+          variants={contentVariants}
           className={cn(
             "shrink-0! flex items-center justify-center w-10 h-10",
             isSelected
@@ -97,19 +102,20 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           ) : (
             item.icon
           )}
-        </div>
+        </motion.div>
         
         {!isCollapsedMode && (
          <div className="flex-1 flex items-center justify-between min-w-0">
-           <div className={cn(
+           <motion.div variants={contentVariants} className={cn(
              "flex-1 truncate text-xs font-medium tracking-wide",
              isSelected ? "font-semibold" : ""
            )}>
               {item.label}
-           </div>
+           </motion.div>
          
            {hasChildren && (
-             <div
+             <motion.div
+               variants={contentVariants}
                onClick={toggleOpen}
                className={cn(
                  "transition-colors duration-200 cursor-pointer p-1 rounded-full hover:bg-black/5 ml-2 crtChildrenFolderHidden",
@@ -125,7 +131,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
                      dangerouslySetInnerHTML={{ __html: sidebarArrow }}
                    />
                  </motion.div>
-             </div>
+             </motion.div>
            )}
          </div>
         )}
