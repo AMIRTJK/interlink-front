@@ -38,7 +38,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   depth = 0,
   collapsed = false,
   activeKey,
-  _index = 0,
+  // _index = 0,
 }) => {
   const [isOpen, setIsOpen] = useState(isActive);
   
