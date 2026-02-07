@@ -18,7 +18,6 @@ import { FolderModal } from "./FolderModal";
 
 const { Sider } = Layout;
 
-// Variants for the sidebar container
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -42,7 +41,6 @@ export const ModuleSidebar = () => {
   const [editingFolderId, setEditingFolderId] = useState<number | null>(null);
   const [form] = Form.useForm();
   
-  // Track if animation has already been shown to prevent restart on re-renders
   const [hasAnimated, setHasAnimated] = useState(false);
 
   const navigate = useNavigate();
