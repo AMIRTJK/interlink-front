@@ -21,6 +21,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
     selectedIds: [],
     activePreviewItem: null,
   });
+
   const [selectedItemsMap, setSelectedItemsMap] = useState<
     Record<string, ISearchItem>
   >({});

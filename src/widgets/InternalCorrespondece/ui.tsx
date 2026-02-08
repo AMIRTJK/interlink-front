@@ -202,7 +202,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         body: editorBody,
         recipients: {
           to: values.recipients,
-          // copy: values.copy, // Если нужно
+          cc: values.copy,
         },
       };
 
@@ -243,7 +243,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         }));
 
       const ccRecipients: Recipient[] = rawRecipients
-        .filter((r) => r.type === "copy")
+        .filter((r) => r.type === "cc")
         .map((r) => ({
           id: r.user.id,
           full_name: r.user.full_name,
@@ -254,7 +254,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       // 3. Сеттим в форму
       form.setFieldsValue({
         subject: initialData.subject,
-        number: initialData.reg_number,
+        number: initialData.reg_number || "Не указано",
         date: dateValue,
         recipients: toRecipients.map((r) => r.id),
         copy: ccRecipients.map((r) => r.id),

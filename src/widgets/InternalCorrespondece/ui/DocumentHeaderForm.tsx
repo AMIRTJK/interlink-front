@@ -44,6 +44,8 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
     useState<Recipient[]>(initialRecipients);
   const [selectedCC, setSelectedCC] = useState<Recipient[]>(initialCC);
 
+  console.log(selectedCC);
+
   const [activeSelectorMode, setActiveSelectorMode] =
     useState<SelectionMode>(null);
   const [activeViewerMode, setActiveViewerMode] = useState<SelectionMode>(null);
@@ -256,7 +258,6 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
             <Form.Item name="number" noStyle>
               <Input
                 disabled
-                placeholder="Номер письма"
                 variant="borderless"
                 className={`
                   px-0! py-0! h-auto! w-32! text-sm! ${textSecondary}
