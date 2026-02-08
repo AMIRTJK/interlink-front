@@ -273,8 +273,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     }
   }, [initialData, form]);
 
-  console.log(initialRecipients);
-
   return (
     <div
       className={`relative min-h-screen bg-[#f9fafb] ${isOpen ? "max-h-[768px] overflow-hidden" : ""}`}
