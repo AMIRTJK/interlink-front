@@ -26,14 +26,5 @@ export const getCorrespondenceOutgoingFilters = (): IFilterItem[] => {
         { label: "Организация 2", value: 2 },
       ],
     },
-    {
-      type: FilterType.SELECT,
-      name: "status",
-      placeholder: "Статус",
-      options: [
-        { label: "В работе", value: "processing" },
-        { label: "Завершено", value: "completed" },
-      ],
-    },
   ] as IFilterItem[];
 };

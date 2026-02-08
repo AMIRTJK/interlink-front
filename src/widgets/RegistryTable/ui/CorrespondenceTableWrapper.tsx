@@ -61,6 +61,20 @@ export const CorrespondenceTableWrapper = ({
       };
     }
 
+    if (type === "internal-to-sign") {
+      return {
+        params: currentParams,
+        url: ApiRoutes.GET_INTERNAL_TO_SIGN,
+      };
+    }
+
+    if (type === "internal-to-approve") {
+      return {
+        params: currentParams,
+        url: ApiRoutes.GET_INTERNAL_TO_APPROVE,
+      };
+    }
+
     if (folderId) {
       return {
         params: {

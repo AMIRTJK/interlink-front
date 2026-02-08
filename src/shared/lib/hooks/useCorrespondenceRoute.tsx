@@ -20,22 +20,30 @@ export const useCorrespondenceRoute = (): CorrespondenceRouteState => {
       pathname,
     );
 
+    const internalDetailMatch = matchPath(
+      { path: "/modules/correspondence/internal/:type/:id" },
+      pathname,
+    );
+
     const { scope, type, actionOrId } = match?.params || {};
 
-    const isCreate = actionOrId === "create";
-    const isShow = !!actionOrId && actionOrId !== "create";
+    const effectiveType = type || internalDetailMatch?.params.type;
+    const effectiveId = actionOrId || internalDetailMatch?.params.id;
+
+    const isCreate = effectiveId === "create";
+    const isShow = !!effectiveId && effectiveId !== "create";
 
     const isDetailView = isCreate || isShow;
 
     const shouldHideUI = (() => {
-      if (!match) return false;
+      if (internalDetailMatch && isShow) {
+        return true;
+      }
 
-      if (scope === "internal") {
-        if (type === "outgoing") {
-          return true;
-        }
+      if (match && scope === "internal") {
+        if (isShow) return true;
 
-        if (type === "external-incoming" && !isCreate) {
+        if (effectiveType === "outgoing" && isCreate) {
           return true;
         }
       }
@@ -44,9 +52,9 @@ export const useCorrespondenceRoute = (): CorrespondenceRouteState => {
     })();
 
     return {
-      scope,
-      type,
-      actionOrId,
+      scope: scope || "internal",
+      type: effectiveType,
+      actionOrId: effectiveId,
       isCreate,
       isShow,
       isDetailView,

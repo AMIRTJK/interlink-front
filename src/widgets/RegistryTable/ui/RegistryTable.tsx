@@ -63,7 +63,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
       return [];
     }
     if (type === "internal-drafts") {
-      return INTERNAL_OUTGOING_TABS;
+      // return INTERNAL_OUTGOING_TABS;
     }
     return undefined;
   }, [type]);
@@ -147,7 +147,10 @@ export const RegistryTable = <T extends Record<string, unknown>>({
       ? AppRoutes.CORRESPONDENCE_INCOMING_SHOW
       : type.includes("internal-incoming")
         ? AppRoutes.INTERNAL_INCOMING_SHOW
-        : type.includes("internal-outgoing") || type.includes("internal-drafts")
+        : type.includes("internal-outgoing") ||
+            type.includes("internal-drafts") ||
+            type.includes("internal-to-sign") ||
+            type.includes("internal-to-approve")
           ? AppRoutes.INTERNAL_OUTGOING_SHOW
           : "";
 

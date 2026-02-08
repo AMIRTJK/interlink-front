@@ -270,6 +270,22 @@ export const AppRouter = () => {
                       }
                     />
                   </Route>
+                  <Route path="to-sign">
+                    <Route
+                      index
+                      element={
+                        <CorrespondenceTableWrapper type="internal-to-sign" />
+                      }
+                    />
+                  </Route>
+                  <Route path="to-approve">
+                    <Route
+                      index
+                      element={
+                        <CorrespondenceTableWrapper type="internal-to-approve" />
+                      }
+                    />
+                  </Route>
                   <Route path="archive">
                     <Route
                       index

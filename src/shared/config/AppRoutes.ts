@@ -11,6 +11,9 @@ export const AppRoutes = {
   CORRESPONDENCE_INTERNAL_INCOMING: "/modules/correspondence/internal/incoming",
   CORRESPONDENCE_INTERNAL_OUTGOING: "/modules/correspondence/internal/outgoing",
   CORRESPONDENCE_INTERNAL_DRAFTS: "/modules/correspondence/internal/drafts",
+  CORRESPONDENCE_INTERNAL_TO_SIGN: "/modules/correspondence/internal/to-sign",
+  CORRESPONDENCE_INTERNAL_TO_APPROVE:
+    "/modules/correspondence/internal/to-approve",
   CORRESPONDENCE_INTERNAL_ARCHIVE: "/modules/correspondence/internal/archive",
   CORRESPONDENCE_INTERNAL_PINNED: "/modules/correspondence/internal/pinned",
   CORRESPONDENCE_INTERNAL_TRASHED: "/modules/correspondence/internal/trashed",

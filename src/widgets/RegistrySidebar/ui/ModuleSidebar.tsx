@@ -40,7 +40,7 @@ export const ModuleSidebar = () => {
   const [parentId, setParentId] = useState<number | null>(null);
   const [editingFolderId, setEditingFolderId] = useState<number | null>(null);
   const [form] = Form.useForm();
-  
+
   const [hasAnimated, setHasAnimated] = useState(false);
 
   const navigate = useNavigate();
@@ -180,6 +180,18 @@ export const ModuleSidebar = () => {
           ? AppRoutes.CORRESPONDENCE_INTERNAL_ARCHIVE
           : AppRoutes.CORRESPONDENCE_ARCHIVE,
       },
+      ["На подпись"]: {
+        key: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_SIGN : "",
+        icon: sideBarIcons.draftIcon,
+        count: counts.to_sign,
+        path: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_SIGN : "",
+      },
+      ["На согласование"]: {
+        key: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_APPROVE : "",
+        icon: sideBarIcons.draftIcon,
+        count: counts.to_approve,
+        path: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_APPROVE : "",
+      },
       Закреплённые: {
         key: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_PINNED
@@ -279,8 +291,6 @@ export const ModuleSidebar = () => {
     ],
   );
 
-
-
   const [searchParams] = useSearchParams();
   const folderIdParam = searchParams.get("folderId");
 
@@ -331,51 +341,54 @@ export const ModuleSidebar = () => {
               <Button
                 type="text"
                 onClick={() => setCollapsed(!collapsed)}
-                className={collapsed ? "mx-auto h-7! w-7! outline-none! focus:outline-none!" : "ml-auto outline-none! focus:outline-none!"}
+                className={
+                  collapsed
+                    ? "mx-auto h-7! w-7! outline-none! focus:outline-none!"
+                    : "ml-auto outline-none! focus:outline-none!"
+                }
                 icon={<img src={sideBarIcons.collapseIcon} alt="collapse" />}
               />
             </div>
           </div>
 
-        <motion.div 
-          className="flex-1 overflow-y-auto custom-scrollbar"
-          initial={hasAnimated ? false : "hidden"}
-          animate="visible"
-          variants={containerVariants}
-          onAnimationComplete={() => { setHasAnimated(true); }}
-        >
-          {finalMenuItems.map((item, index) => (
-            <motion.div
-              key={item.key}
-              variants={itemWrapperVariants}
-            >
-              <SidebarItem
-                item={item}
-                isActive={[activeKey].includes(item.key as string)}
-                collapsed={collapsed}
-                activeKey={activeKey}
-                index={index}
-              />
-            </motion.div>
-          ))}
-        </motion.div>
+          <motion.div
+            className="flex-1 overflow-y-auto custom-scrollbar"
+            initial={hasAnimated ? false : "hidden"}
+            animate="visible"
+            variants={containerVariants}
+            onAnimationComplete={() => {
+              setHasAnimated(true);
+            }}
+          >
+            {finalMenuItems.map((item, index) => (
+              <motion.div key={item.key} variants={itemWrapperVariants}>
+                <SidebarItem
+                  item={item}
+                  isActive={[activeKey].includes(item.key as string)}
+                  collapsed={collapsed}
+                  activeKey={activeKey}
+                  index={index}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
 
-        {!collapsed && (
-          <div className="px-5 pb-5 text-xs text-gray-400 text-center">
-            AM | KM
-          </div>
-        )}
-      </div>
+          {!collapsed && (
+            <div className="px-5 pb-5 text-xs text-gray-400 text-center">
+              AM | KM
+            </div>
+          )}
+        </div>
 
-      <FolderModal
-        isOpen={isModalOpen}
-        isEditing={!!editingFolderId}
-        parentId={parentId}
-        form={form}
-        onCancel={() => setIsModalOpen(false)}
-        onFinish={onFinish}
-      />
-    </Sider>
-  </App>
+        <FolderModal
+          isOpen={isModalOpen}
+          isEditing={!!editingFolderId}
+          parentId={parentId}
+          form={form}
+          onCancel={() => setIsModalOpen(false)}
+          onFinish={onFinish}
+        />
+      </Sider>
+    </App>
   );
 };

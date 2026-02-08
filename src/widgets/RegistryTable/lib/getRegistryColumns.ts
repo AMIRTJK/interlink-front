@@ -23,6 +23,10 @@ export const useRegistryColumns = (type: string): TableColumnsType<any> => {
       return outgoingColumns;
     case "internal-drafts":
       return outgoingColumns;
+    case "internal-to-sign":
+      return outgoingColumns;
+    case "internal-to-approve":
+      return outgoingColumns;
 
     // Служебные
     case "archived":

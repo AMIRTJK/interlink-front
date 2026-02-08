@@ -1,5 +1,10 @@
 import dayjsLib from "dayjs";
-import { useGetQuery, useModalState, useMutationQuery } from "@shared/lib";
+import {
+  tokenControl,
+  useGetQuery,
+  useModalState,
+  useMutationQuery,
+} from "@shared/lib";
 import { ActionToolbar, If, ISearchItem } from "@shared/ui";
 import { DrawerActionsModal } from "@widgets/DrawerActionsModal";
 import { TopNavigation } from "./ui/TopNavigation";
@@ -28,6 +33,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   isLoading,
 }) => {
   const { id } = useParams<{ id: string }>();
+
+  const currentUserId = tokenControl.getUserId();
 
   const isDraftCreated = !!id || !!initialData;
 
@@ -63,11 +70,14 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     preload: true,
   });
 
+  console.log(preloadData);
+
   const canSign = useMemo(() => {
     if (!preloadData || !Array.isArray(preloadData)) return false;
     return preloadData.some((p: any) => p.name === "signatures.payload");
   }, [preloadData]);
 
+  // Мутация подтверждения подписи
   const { mutate: signaturesConfirm, isPending: isConfirming } =
     useMutationQuery<any>({
       url: ApiRoutes.INTERNAL_SIGNATURES_CONFIRM.replace(
@@ -76,14 +86,13 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       ),
       method: "POST",
       messages: {
-        success: "Подписано успешно",
         invalidate: [ApiRoutes.INTERNAL_GET_WORKFLOW],
       },
       preload: true,
       preloadConditional: ["signatures.confirm"],
     });
 
-  const { mutate: signaturesPayload, isPending: isPayloadLoading } =
+  const { mutateAsync: signaturesPayloadAsync, isPending: isPayloadLoading } =
     useMutationQuery<any>({
       url: ApiRoutes.INTERNAL_SIGNATURES_PAYLOAD.replace(
         ":id",
@@ -92,23 +101,52 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       method: "POST",
       preload: true,
       preloadConditional: ["signatures.payload"],
-      queryOptions: {
-        onSuccess: (response: any) => {
-          if (response?.success && response?.data) {
-            signaturesConfirm({
-              signature_id: response.data.signature_id,
-              nonce: response.data.nonce,
-              method: "simple",
-            });
-          }
-        },
-      },
     });
 
-  const handleSign = () => {
-    if (canSign) {
-      signaturesPayload({ action: "sign" });
+  const { mutate: sendCorrespondence, isPending: isSending } =
+    useMutationQuery<any>({
+      url: ApiRoutes.SEND_INTERNAL.replace(":id", String(id || "")),
+      method: "POST",
+      messages: {
+        invalidate: [
+          ApiRoutes.INTERNAL_GET_WORKFLOW,
+          ApiRoutes.GET_INTERNAL_BY_ID,
+        ],
+      },
+      // queryOptions: {
+      //   onSuccess: () => {
+      //     navigate("/modules/correspondence/internal/outgoing");
+      //   },
+      // },
+    });
+
+  const handleSign = async () => {
+    if (!canSign) return;
+
+    try {
+      const payloadData = await signaturesPayloadAsync({ action: "sign" });
+
+      console.log("Payload received:", payloadData);
+
+      if (payloadData?.signature_id && payloadData?.nonce) {
+        signaturesConfirm({
+          signature_id: payloadData.signature_id,
+          nonce: payloadData.nonce,
+          method: "simple",
+        });
+      } else {
+        console.error(
+          "Отсутствуют signature_id или nonce в ответе",
+          payloadData,
+        );
+      }
+    } catch (error) {
+      console.error("Ошибка при процессе подписания:", error);
     }
+  };
+
+  const handleSendClick = () => {
+    sendCorrespondence({});
   };
 
   const workflowData = useMemo(() => {
@@ -273,6 +311,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
               }
               onSign={handleSign}
               isSigning={isPayloadLoading || isConfirming}
+              currentUserId={currentUserId}
             />
           </div>
         </If>
@@ -288,7 +327,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       <ActionToolbar
         setIsInspectorOpen={open}
         setShowPreview={() => setIsPreviewOpen(true)}
-        handleSend={() => console.log("Отправить")}
+        handleSend={handleSendClick}
+        onSendLoading={isSending}
         onSave={onSaveClick}
         mode={effectiveMode}
         onSaveLoading={isCreating || isUpdating}
