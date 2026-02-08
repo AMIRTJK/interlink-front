@@ -22,18 +22,23 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
 
   const { shouldHideUI } = useCorrespondenceRoute();
 
+  const isInternalView = type === "internal-incoming" || shouldHideUI;
+
   const currentApi = shouldHideUI
     ? ApiRoutes.GET_INTERNAL_BY_ID
     : ApiRoutes.GET_CORRESPONDENCE_BY_ID;
 
   const currentParam = shouldHideUI ? {} : { view: "full" };
 
-  const { isLoading, data: correspondenceData } = useGetQuery({
+  const {
+    isLoading,
+    data: correspondenceData,
+    isError,
+    error,
+  } = useGetQuery({
     url: currentApi.replace(":id", String(id || "")),
     params: currentParam,
   });
-
-  console.log(correspondenceData);
 
   const handleFinish = (values: CorrespondenceFormData) => {
     console.log("Updating:", values);
@@ -50,7 +55,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
   const shouldOpenExecution = (location.state as { openExecution?: boolean })
     ?.openExecution;
 
-  if (shouldHideUI) {
+  if (isInternalView) {
     // show||create
     return (
       <InternalCorrespondece

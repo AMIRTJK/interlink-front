@@ -12,6 +12,7 @@ import {
   HistoryOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
+import { If } from "@shared/ui";
 import {
   Avatar,
   Tooltip,
@@ -37,6 +38,7 @@ const FullHistoryModal = ({
   initialTab = "participants",
   onSign,
   isSigning,
+  currentUserId,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -44,6 +46,7 @@ const FullHistoryModal = ({
   initialTab?: string;
   onSign: () => void;
   isSigning: boolean;
+  currentUserId: string | number | null;
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -88,54 +91,66 @@ const FullHistoryModal = ({
   };
 
   // Вспомогательная функция для рендера строки участника внутри модалки
-  const renderParticipantRow = (item: any, type: "signer" | "approver") => (
-    <div
-      key={item.id}
-      className="flex items-start justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-white hover:shadow-sm transition-all mb-2"
-    >
-      <div className="flex items-center gap-3">
-        <Avatar src={item.user?.photo_path} icon={<UserOutlined />} />
-        <div>
-          <div className="font-medium text-gray-800">
-            {item.user?.full_name}
-          </div>
-          <div className="text-xs text-gray-500">{item.user?.position}</div>
-          {item.updated_at && (
-            <div className="text-[10px] text-gray-400 mt-1">
-              {new Date(item.updated_at).toLocaleString()}
+  const renderParticipantRow = (item: any, type: "signer" | "approver") => {
+    const isCurrentUser = String(item.user?.id) === String(currentUserId);
+    const isPending = item.status === "pending";
+
+    return (
+      <div
+        key={item.id}
+        className="flex items-start justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-white hover:shadow-sm transition-all mb-2"
+      >
+        <div className="flex items-center gap-3">
+          <Avatar src={item.user?.photo_path} icon={<UserOutlined />} />
+          <div>
+            <div className="font-medium text-gray-800">
+              {item.user?.full_name}
+              <If is={isCurrentUser}>
+                <span className="text-gray-400 text-xs ml-1">(Вы)</span>
+              </If>
             </div>
+            <div className="text-xs text-gray-500">{item.user?.position}</div>
+            {item.updated_at && (
+              <div className="text-[10px] text-gray-400 mt-1">
+                {new Date(item.updated_at).toLocaleString()}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col items-end gap-2">
+          <div>{renderStatusTag(item.status)}</div>
+
+          {/* Кнопка зависит от типа, переданного в функцию */}
+          {type === "signer" && isCurrentUser && isPending && (
+            <Button
+              htmlType="button"
+              onClick={onSign}
+              loading={isSigning}
+              disabled={item.status !== "pending"}
+              type="primary"
+              size="small"
+              className={`bg-blue-600! hover:bg-blue-500! ${item.status !== "pending" ? "text-white! opacity-50!" : ""}`}
+            >
+              Подписать
+            </Button>
+          )}
+
+          {type === "approver" && isCurrentUser && isPending && (
+            <Button
+              htmlType="button"
+              type="primary"
+              size="small"
+              disabled={item.status !== "pending"}
+              className="bg-green-600 hover:bg-green-500 border-green-600"
+            >
+              Согласовать
+            </Button>
           )}
         </div>
       </div>
-
-      <div className="flex flex-col items-end gap-2">
-        <div>{renderStatusTag(item.status)}</div>
-
-        {/* Кнопка зависит от типа, переданного в функцию */}
-        {type === "signer" && (
-          <Button
-            onClick={onSign}
-            loading={isSigning}
-            type="primary"
-            size="small"
-            className="bg-blue-600! hover:bg-blue-500!"
-          >
-            Подписать
-          </Button>
-        )}
-
-        {type === "approver" && (
-          <Button
-            type="primary"
-            size="small"
-            className="bg-green-600 hover:bg-green-500 border-green-600"
-          >
-            Согласовать
-          </Button>
-        )}
-      </div>
-    </div>
-  );
+    );
+  };
 
   const items = [
     {
@@ -259,12 +274,14 @@ export const WorkflowParticipantsPanel = ({
   toggleCollapse,
   onSign,
   isSigning,
+  currentUserId,
 }: {
   workflowData: any;
   isCollapsed: boolean;
   toggleCollapse: () => void;
   onSign: () => void;
   isSigning: boolean;
+  currentUserId: string | number | null;
 }) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -356,6 +373,9 @@ export const WorkflowParticipantsPanel = ({
     const status = item.status || "Ожидание";
     const meta = getStatusMeta(status);
 
+    const isCurrentUser = String(user.id) === String(currentUserId);
+    const isPending = status === "pending";
+
     if (isCollapsed) {
       return (
         <Tooltip
@@ -409,6 +429,11 @@ export const WorkflowParticipantsPanel = ({
               className={`text-sm font-medium truncate pr-2 ${status === "pending" ? "text-gray-500" : "text-gray-800"}`}
             >
               {fullName}
+              <If is={isCurrentUser}>
+                <span className="text-blue-500 text-xs ml-1 font-normal">
+                  (Вы)
+                </span>
+              </If>
             </span>
           </div>
           <div
@@ -420,18 +445,19 @@ export const WorkflowParticipantsPanel = ({
 
           {/* --- КНОПКИ ДЛЯ ПАНЕЛИ --- */}
           <div className="mt-2">
-            {role === "signer" && (
+            {role === "signer" && isCurrentUser && isPending && (
               <Button
                 type="primary"
                 size="small"
                 loading={isSigning}
-                className="bg-blue-600! hover:bg-blue-500!"
+                disabled={status !== "pending"}
+                className={`bg-blue-600! hover:bg-blue-500! ${status !== "pending" ? "text-white! opacity-50!" : ""}`}
                 onClick={onSign}
               >
                 Подписать
               </Button>
             )}
-            {role === "approver" && (
+            {role === "approver" && isCurrentUser && isPending && (
               <Button
                 type="primary"
                 size="small"
@@ -620,6 +646,7 @@ export const WorkflowParticipantsPanel = ({
         initialTab={modalState.tab}
         onSign={onSign}
         isSigning={isSigning}
+        currentUserId={currentUserId}
       />
     </>
   );

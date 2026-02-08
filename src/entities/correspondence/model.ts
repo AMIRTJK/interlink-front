@@ -7,6 +7,7 @@ export enum CorrespondenseStatus {
   TO_SIGN = "to_sign",
   DONE = "done",
   CANCELLED = "cancelled",
+  SENT = "sent",
 }
 
 export enum InternalCorrespondenceStatus {

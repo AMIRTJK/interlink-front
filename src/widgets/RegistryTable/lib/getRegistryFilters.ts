@@ -13,6 +13,8 @@ export const getRegistryFilters = (type: string): IFilterItem[] => {
     "internal-incoming": getCorrespondenceIncomingFilters,
     "internal-outgoing": getCorrespondenceOutgoingFilters,
     "internal-drafts": getCorrespondenceOutgoingFilters,
+    "internal-to-sign": getCorrespondenceOutgoingFilters,
+    "internal-to-approve": getCorrespondenceOutgoingFilters,
     "internal-archived": getCorrespondenceIncomingFilters,
     "internal-pinned": getCorrespondenceIncomingFilters,
     "internal-trashed": getCorrespondenceIncomingFilters,

@@ -16,6 +16,7 @@ interface IProps {
   handleSend: () => void;
   mode?: "create" | "show";
   onSaveLoading: boolean;
+  onSendLoading: boolean;
   isActionsEnabled: boolean;
 }
 
@@ -25,6 +26,7 @@ export const ActionToolbar: React.FC<IProps> = ({
   setIsInspectorOpen,
   handleSend,
   onSaveLoading,
+  onSendLoading,
   mode = "create",
   isActionsEnabled,
 }) => {
@@ -57,6 +59,7 @@ export const ActionToolbar: React.FC<IProps> = ({
           <Button
             type="primary"
             size="large"
+            loading={onSendLoading}
             disabled={!isActionsEnabled}
             onClick={handleSend}
             icon={<SendOutlined style={{ transform: "rotate(-30deg)" }} />}

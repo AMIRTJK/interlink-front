@@ -3,6 +3,7 @@ import { CorrespondenseStatus } from "@entities/correspondence";
 export const getCorrespondenseOutgoingStatusLabel = (status: string) => {
   const statusMap: Record<string, { label: string; color: string }> = {
     [CorrespondenseStatus.DRAFT]: { label: "Черновик", color: "#FFAC33" },
+    [CorrespondenseStatus.SENT]: { label: "Отправлено", color: "#FFAC33" },
     [CorrespondenseStatus.TO_REGISTER]: {
       label: "Регистрация",
       color: "#7B46C0",
