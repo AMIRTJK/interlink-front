@@ -181,16 +181,16 @@ export const ModuleSidebar = () => {
           : AppRoutes.CORRESPONDENCE_ARCHIVE,
       },
       ["На подпись"]: {
-        key: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_SIGN : null,
+        key: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_SIGN : "",
         icon: sideBarIcons.draftIcon,
         count: counts.to_sign,
-        path: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_SIGN : null,
+        path: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_SIGN : "",
       },
       ["На согласование"]: {
-        key: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_APPROVE : null,
+        key: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_APPROVE : "",
         icon: sideBarIcons.draftIcon,
         count: counts.to_approve,
-        path: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_APPROVE : null,
+        path: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_APPROVE : "",
       },
       Закреплённые: {
         key: isInternal

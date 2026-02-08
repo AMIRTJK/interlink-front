@@ -30,12 +30,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
 
   const currentParam = shouldHideUI ? {} : { view: "full" };
 
-  const {
-    isLoading,
-    data: correspondenceData,
-    isError,
-    error,
-  } = useGetQuery({
+  const { isLoading, data: correspondenceData } = useGetQuery({
     url: currentApi.replace(":id", String(id || "")),
     params: currentParam,
   });
