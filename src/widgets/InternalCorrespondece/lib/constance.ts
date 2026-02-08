@@ -4,7 +4,7 @@ export const EXPORT_FIX_STYLES =
     /* 1. Возвращаем отступы параграфам (которые убил Tailwind) */
     p {
         margin-top: 0;
-        margin-bottom: 1em; /* Отступ снизу как в обычном тексте */
+        margin-bottom: 0.5em; /* Отступ снизу как в обычном тексте */
         line-height: 1.5;
     }
 
@@ -17,7 +17,7 @@ export const EXPORT_FIX_STYLES =
     
     /* 3. И списки */
     ul, ol {
-        margin-bottom: 1em;
+        margin-bottom: 0.5em;
         padding-left: 20px;
     }
 
