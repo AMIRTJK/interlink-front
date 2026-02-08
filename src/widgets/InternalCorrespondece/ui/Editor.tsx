@@ -88,6 +88,7 @@ import {
 
 import "ckeditor5/ckeditor5.css";
 import "ckeditor5-premium-features/ckeditor5-premium-features.css";
+import { EXPORT_FIX_STYLES } from "../lib/constance";
 
 const LICENSE_KEY =
   "eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3NzA5NDA3OTksImp0aSI6IjYxNmUzMTYzLTAwNDItNDYzYS05MWZmLWViNDA4MjIxMzZmNiIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiLCJzaCJdLCJ3aGl0ZUxhYmVsIjp0cnVlLCJsaWNlbnNlVHlwZSI6InRyaWFsIiwiZmVhdHVyZXMiOlsiKiJdLCJ2YyI6Ijc4NTQzYmQ2In0.5fu9jpzMqZ6Y0vptqRSnt55NplhFPsSYrP2HfYpxdz3OYmKpYo0EBUn5Mgv-LaTCScJoOXiDs3t-VB9xNMarfA";
@@ -233,6 +234,7 @@ export const Editor = ({ onChange, initialContent = "" }: EditorProps) => {
         },
         exportPdf: {
           stylesheets: [
+            EXPORT_FIX_STYLES,
             "https://cdn.ckeditor.com/ckeditor5/47.4.0/ckeditor5.css",
             "https://cdn.ckeditor.com/ckeditor5-premium-features/47.4.0/ckeditor5-premium-features.css",
           ],
@@ -248,6 +250,7 @@ export const Editor = ({ onChange, initialContent = "" }: EditorProps) => {
         },
         exportWord: {
           stylesheets: [
+            EXPORT_FIX_STYLES,
             "https://cdn.ckeditor.com/ckeditor5/47.4.0/ckeditor5.css",
             "https://cdn.ckeditor.com/ckeditor5-premium-features/47.4.0/ckeditor5-premium-features.css",
           ],

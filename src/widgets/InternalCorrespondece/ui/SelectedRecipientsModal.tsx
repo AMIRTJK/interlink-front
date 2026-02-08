@@ -78,12 +78,12 @@ export const SelectedRecipientsModal: React.FC<
                     />
                     <div className="flex-1 min-w-0">
                       <p
-                        className={`font-semibold text-sm truncate ${textPrimary}`}
+                        className={`font-semibold text-sm truncate m-0  ${textPrimary}`}
                       >
                         {recipient.full_name}
                       </p>{" "}
                       {/* ИСПРАВЛЕНО */}
-                      <p className={`text-xs truncate ${textSecondary}`}>
+                      <p className={`text-xs truncate m-0 ${textSecondary}`}>
                         {recipient.position}
                       </p>
                     </div>

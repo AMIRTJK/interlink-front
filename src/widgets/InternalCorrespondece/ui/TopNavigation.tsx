@@ -280,7 +280,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                         : "rgba(229, 231, 235, 0.5)",
                     }}
                   >
-                    <div className="flex justify-between mb-1">
+                    <div className="flex items-center justify-between mb-1">
                       <p className={`font-semibold text-sm ${textPrimary}`}>
                         {item.title}
                       </p>

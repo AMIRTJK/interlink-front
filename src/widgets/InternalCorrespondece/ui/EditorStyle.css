@@ -1,5 +1,30 @@
 @import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
+.ck-content p {
+  margin-bottom: 1em !important;
+  line-height: 1.5;
+}
+
+.ck-content h1,
+.ck-content h2,
+.ck-content h3 {
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
+  font-weight: bold;
+}
+
+.ck-content ul {
+  list-style: disc;
+  padding-left: 20px;
+  margin-bottom: 1em;
+}
+
+.ck-content ol {
+  list-style: decimal;
+  padding-left: 20px;
+  margin-bottom: 1em;
+}
+
 @media print {
   body {
     margin: 0 !important;
@@ -132,6 +157,11 @@
   margin-left: 0;
 }
 
+.ck-focused {
+  border-color: hsl(0, 0%, 82.7%) !important;
+  box-shadow: none !important;
+}
+
 .editor-container_include-outline.editor-container_include-fullscreen
   .ck-fullscreen__document-outline-header {
   display: none;
@@ -157,4 +187,8 @@
 .ck-content .table tr {
   break-inside: avoid;
   break-after: auto;
+}
+
+.ck.ck-balloon-panel.ck-balloon-panel_position_border-side_left.ck-balloon-panel_visible.ck-evaluation-badge-balloon {
+  display: none !important;
 }
