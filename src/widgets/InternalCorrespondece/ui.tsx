@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DocumentHeaderForm, Recipient } from "./ui/DocumentHeaderForm";
 import { Form, Modal } from "antd";
 import { useNavigate, useParams } from "react-router";
-import { DocumentEditor } from "./ui/DocumentEditor";
+// import { DocumentEditor } from "./ui/DocumentEditor";
 import {
   CreateInternalRequest,
   InternalCorrespondenceResponse,
@@ -20,6 +20,7 @@ import {
 import { ApiRoutes } from "@shared/api";
 import { WorkflowParticipantsPanel } from "./ui/WorkflowParticipantsPanel";
 import { generateMockWorkflow } from "./lib";
+import { Editor } from "./ui/Editor";
 
 interface IProps {
   mode: "create" | "show";
@@ -284,7 +285,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       />
 
       <div className="flex w-full justify-between">
-        <main className="flex-1 mx-auto max-w-[1000px] px-4 py-8 md:px-8 md:py-12 transition-all duration-300">
+        <main className="flex-1 mx-auto max-w-[1000px]  md:py-2 transition-all duration-300">
           <div className="flex flex-col gap-4">
             {/* <div className="max-w-4xl flex flex-col gap-4 mx-auto px-8 py-12"> */}
             <DocumentHeaderForm
@@ -293,9 +294,13 @@ export const InternalCorrespondece: React.FC<IProps> = ({
               initialRecipients={initialRecipients}
               initialCC={initialCC}
             />
-            <DocumentEditor
+            {/* <DocumentEditor
               isDarkMode={isDarkMode}
               mode={effectiveMode}
+              onChange={setEditorBody}
+              initialContent={initialEditorContent}
+            /> */}
+            <Editor
               onChange={setEditorBody}
               initialContent={initialEditorContent}
             />
@@ -345,7 +350,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         bodyStyle={{ height: "80vh", padding: 0, overflow: "hidden" }}
       >
         <div className="p-4 bg-gray-100 rounded-lg max-h-[80vh] overflow-y-auto">
-          <DocumentEditor isDarkMode={isDarkMode} mode="show" />
+          {/* <DocumentEditor isDarkMode={isDarkMode} mode="show" /> */}
         </div>
       </Modal>
     </div>

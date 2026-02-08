@@ -1,0 +1,160 @@
+@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+
+@media print {
+  body {
+    margin: 0 !important;
+  }
+}
+
+:root {
+  --ck-content-font-family: "Lato";
+  --ck-sidebar-width: 270px;
+  --ck-editor-height: 700px;
+}
+
+.main-container {
+  font-family: var(--ck-content-font-family);
+  width: fit-content;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.editor-container__editor-wrapper {
+  display: flex;
+  width: fit-content;
+}
+
+.editor-container_document-editor {
+  border-width: 1px;
+  border-color: rgba(229, 231, 235, 0.5);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* App.css */
+
+/* 1. Убедимся, что главный контейнер является "опорной точкой" для позиционирования */
+.editor-container {
+  position: relative;
+  /* Убираем overflow: hidden, если он был, чтобы тени не обрезались, 
+     но если нужно обрезать контент - оставьте. */
+}
+
+/* 2. Стилизация контейнера тулбара (белый, круглый, плавающий) */
+.editor-container__toolbar {
+  /* Позиционирование */
+  position: absolute;
+  top: 15px; /* Отступ от верхнего края редактора */
+  left: 50%; /* Центрирование по горизонтали */
+  transform: translateX(-50%) translateY(-20px); /* Сдвигаем влево для центра и чуть вверх для старта анимации */
+  z-index: 100; /* Чтобы был поверх текста */
+
+  /* Внешний вид "капсулы" */
+  background-color: #ffffff;
+  border-radius: 24px; /* Сильное закругление */
+  border: 1px solid #e0e0e0; /* Аккуратная рамка */
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15); /* Мягкая тень */
+  padding: 4px 10px; /* Отступы внутри капсулы */
+  width: auto; /* Ширина по содержимому */
+  display: flex;
+  justify-content: center;
+
+  /* Состояние "Скрыто" */
+  opacity: 0;
+  visibility: hidden; /* Чтобы сквозь него можно было кликать, пока он невидим */
+  pointer-events: none;
+
+  /* Плавная анимация */
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 3. Состояние при наведении на редактор */
+.editor-container:hover .editor-container__toolbar {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto; /* Возвращаем возможность кликать */
+  transform: translateX(-50%) translateY(0); /* Плавно опускается на место */
+}
+
+/* 4. Небольшая чистка внутренних стилей CKEditor, чтобы они не перекрывали нашу капсулу */
+.editor-container__toolbar .ck.ck-toolbar {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.editor-container_document-editor
+  .editor-container__menu-bar
+  > .ck.ck-menu-bar {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+}
+
+.editor-container_document-editor .editor-container__editor-wrapper {
+  max-height: var(--ck-editor-height);
+  min-height: var(--ck-editor-height);
+  overflow-y: scroll;
+  background: var(--ck-color-base-foreground);
+}
+
+.editor-container_document-editor .editor-container__editor {
+  margin-top: 28px;
+  margin-bottom: 28px;
+  height: 100%;
+}
+
+.editor-container_document-editor
+  .editor-container__editor
+  .ck.ck-editor__editable {
+  box-sizing: border-box;
+  min-width: calc(210mm + 2px);
+  max-width: calc(210mm + 2px);
+  min-height: 297mm;
+  height: fit-content;
+  padding: 20mm 12mm;
+  border: 1px hsl(0, 0%, 82.7%) solid;
+  background: hsl(0, 0%, 100%);
+  box-shadow: 0 2px 3px hsla(0, 0%, 0%, 0.078);
+  flex: 1 1 auto;
+  margin-left: 72px;
+  margin-right: 72px;
+}
+
+.editor-container_include-outline
+  .editor-container__editor
+  .ck.ck-editor__editable {
+  margin-left: 0;
+}
+
+.editor-container_include-outline.editor-container_include-fullscreen
+  .ck-fullscreen__document-outline-header {
+  display: none;
+}
+
+.editor-container__sidebar {
+  min-width: var(--ck-sidebar-width);
+  max-width: var(--ck-sidebar-width);
+  margin-top: 28px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.editor-container__sidebar_ckeditor-ai:has(.ck-tabs.ck-hidden) {
+  max-width: 0;
+  min-width: 0;
+}
+
+.ck-content .table thead {
+  display: table-row-group;
+}
+
+.ck-content .table tr {
+  break-inside: avoid;
+  break-after: auto;
+}

@@ -34,9 +34,9 @@ export const ActionToolbar: React.FC<IProps> = ({
     <motion.div
       initial={{ y: 80, x: "-50%", opacity: 0 }}
       animate={{ y: 0, x: "-50%", opacity: 1 }}
-      className="fixed bottom-8 left-1/2 z-40"
+      className="fixed bottom-20 left-1/2 z-40"
     >
-      <div className="flex items-center gap-1 px-3 py-2 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl bg-white/90 border border-white">
+      <div className="flex items-center gap-1 px-3 py-2 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.2)] backdrop-blur-xl bg-white/90 border border-white">
         <ActionButton
           icon={<SaveOutlined style={{ fontSize: "18px" }} />}
           label="Сохранить"

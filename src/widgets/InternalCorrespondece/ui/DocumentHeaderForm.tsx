@@ -193,7 +193,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
       <Form
         form={form}
         layout="vertical"
-        className="flex flex-col gap-3"
+        className="flex flex-col gap-1"
         initialValues={{
           date: dayjs(),
           number: "",
@@ -209,11 +209,11 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           <Input />
         </Form.Item>
 
-        <Form.Item name="subject" className="mb-4" rules={[requiredRule]}>
+        <Form.Item name="subject" rules={[requiredRule]} noStyle>
           <Input
             placeholder="Тема письма..."
             variant="borderless"
-            className="p-0! h-12! text-4xl! font-bold! text-gray-900! placeholder:text-4xl! placeholder:text-gray-300! dark:placeholder:text-gray-600! bg-transparent! border-none! focus:outline-none! focus:ring-0! transition-all!"
+            className="p-0! h-12! text-2xl! font-bold! text-gray-900! placeholder:text-2xl! placeholder:text-gray-300! dark:placeholder:text-gray-600! bg-transparent! border-none! focus:outline-none! focus:ring-0! transition-all!"
             autoComplete="off"
             styles={{ input: { caretColor: "#A78BFA" } }}
           />
