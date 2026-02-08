@@ -72,6 +72,7 @@ export const ApiRoutes = {
   // ==================== INTERNAL CORRESPONDENCE ====================
   GET_INTERNAL_COUNTERS: "/api/v1/internal-correspondences/counters",
   GET_INTERNAL_INCOMING: "/api/v1/internal-correspondences/inbox",
+  GET_INTERNAL_INCOMING_PICKER: "/api/internal-correspondences/picker/inbox",
   GET_INTERNAL_OUTGOING: "/api/v1/internal-correspondences/sent",
   GET_INTERNAL_DRAFTS: "/api/v1/internal-correspondences/drafts",
   GET_INTERNAL_TO_SIGN: "/api/v1/internal-correspondences/to-sign",

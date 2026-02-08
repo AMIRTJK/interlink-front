@@ -143,7 +143,10 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
           title: "Прикрепить письмо",
           mode: "attach" as const,
           // Используем внутренние входящие письма согласно спецификации
-          querySettings: { url: ApiRoutes.GET_INTERNAL_INCOMING as string },
+          // querySettings: { url: ApiRoutes.GET_INTERNAL_INCOMING as string },
+          querySettings: {
+            url: ApiRoutes.GET_INTERNAL_INCOMING_PICKER as string,
+          },
           transformResponse: (
             items: Array<{
               id: string;
