@@ -4,7 +4,7 @@ export const EXPORT_FIX_STYLES =
     /* 1. БАЗА ДОКУМЕНТА */
     body, .ck-content {
         font-size: 14pt;
-        line-height: 1;
+        line-height: 1.5;
         font-family: "Times New Roman", serif;
         /* ВАЖНО: Убрали padding отсюда! Отступы в PDF/Word задает сам конвертер. */
         margin: 0; 

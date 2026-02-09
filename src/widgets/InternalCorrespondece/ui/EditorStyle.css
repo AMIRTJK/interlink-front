@@ -2,7 +2,7 @@
 
 .ck-content p {
   margin-bottom: 0.5em !important;
-  line-height: 1;
+  line-height: 1.5;
 }
 
 .ck-content h1,
@@ -151,7 +151,7 @@
   margin-right: 72px;
   font-size: 14pt !important;
   font-family: "Times New Roman", serif;
-  line-height: 1;
+  line-height: 1.5;
 }
 
 .editor-container_include-outline
