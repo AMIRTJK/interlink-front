@@ -14,6 +14,7 @@ interface SidebarItemProps {
   collapsed?: boolean;
   activeKey?: string | number;
   index?: number;
+  variant?: "horizontal" | "vertical";
 }
 
 /* Variants for the row content (to stagger icon and text) */
@@ -38,6 +39,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   depth = 0,
   collapsed = false,
   activeKey,
+  variant = "vertical",
   // _index = 0,
 }) => {
   const [isOpen, setIsOpen] = useState(isActive);
@@ -70,7 +72,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
                 ? "text-indigo-700!" 
                 : "bg-linear-to-r! from-indigo-400/30! to-purple-400/30! border-white/50! text-indigo-700! shadow-lg! shadow-indigo-200/40!")
             : "text-gray-600! hover:text-indigo-600! hover:shadow-sm hover:shadow-indigo-200/20 transition-shadow duration-200",
-          item.folderName === "Создать новую папку" && "crtChildrenFolderHidden"
+          item.folderName === "Создать новую папку" && "crtChildrenFolderHidden",
+          variant === "horizontal" && "crtChildrenFolderHidden"
         )}
         onClick={(e) => {
              item.onTitleClick?.(e);
@@ -157,7 +160,10 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
               duration: 0.35,
               ease: [0.4, 0, 0.2, 1],
             }}
-            className="overflow-hidden crtChildrenFolderHidden"
+            className={cn(
+               "overflow-hidden",
+               variant === "horizontal" && "crtChildrenFolderHidden"
+            )}
           >
             <div className="ml-4 pl-1 border-l-2 border-dotted border-indigo-200/50 mt-1">
                 {item.children!.map((child: MenuItem, idx: number) => (

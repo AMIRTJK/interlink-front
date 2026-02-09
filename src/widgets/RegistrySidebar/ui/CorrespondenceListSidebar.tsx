@@ -1,5 +1,5 @@
 import { ApiRoutes } from "@shared/api";
-import { useGetQuery } from "@shared/lib";
+import { useGetQuery, cn } from "@shared/lib";
 import { Loader } from "@shared/ui";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppRoutes } from "@shared/config";
@@ -25,7 +25,11 @@ const getStatusName = (status: string) => {
   return map[status] || status;
 };
 
-export const CorrespondenceListSidebar = () => {
+export const CorrespondenceListSidebar = ({
+  variant = "horizontal",
+}: {
+  variant?: "horizontal" | "vertical";
+}) => {
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -63,8 +67,20 @@ export const CorrespondenceListSidebar = () => {
   }
 
   return (
-    <div className="w-full bg-[#F5F6F8] rounded-2xl overflow-hidden flex flex-col border border-gray-200">
-      <div className="flex flex-row items-center gap-2 overflow-x-auto p-2 custom-scrollbar no-scrollbar">
+    <div
+      className={cn(
+        "w-full bg-[#F5F6F8] rounded-2xl overflow-hidden border border-gray-200",
+        variant === "horizontal" ? "flex flex-col" : "flex-1 flex flex-col h-full"
+      )}
+    >
+      <div
+        className={cn(
+          "p-2 custom-scrollbar no-scrollbar",
+          variant === "horizontal"
+            ? "flex flex-row items-center gap-2 overflow-x-auto"
+            : "flex-1 flex flex-col gap-2 overflow-y-auto"
+        )}
+      >
         {list.length > 0 ? (
           list.map((item: any) => {
             const isActive = String(item.id) === id;
@@ -79,20 +95,21 @@ export const CorrespondenceListSidebar = () => {
                     ),
                   )
                 }
-                className={`p-3 rounded-xl cursor-pointer border transition-all duration-200 shrink-0 w-[280px]
-                  ${
-                    isActive
-                      ? "bg-[#F2F5FF] border-[#0037AF] shadow-sm ring-1 ring-[#0037AF]/20"
-                      : "bg-white border-transparent hover:border-blue-300 hover:shadow-md"
-                  }
-                `}
+                className={cn(
+                  "p-3 rounded-xl cursor-pointer border transition-all duration-200 shrink-0",
+                  variant === "horizontal" ? "w-[280px]" : "w-full",
+                  isActive
+                    ? "bg-[#F2F5FF] border-[#0037AF] shadow-sm ring-1 ring-[#0037AF]/20"
+                    : "bg-white border-transparent hover:border-blue-300 hover:shadow-md"
+                )}
               >
                 <div className="flex flex-col h-full justify-between">
                   <div>
                     <div
-                      className={`font-bold text-xs mb-1 line-clamp-1 leading-tight ${
+                      className={cn(
+                        "font-bold text-xs mb-1 line-clamp-1 leading-tight",
                         isActive ? "text-[#0037AF]" : "text-gray-900"
-                      }`}
+                      )}
                     >
                       {item.subject || "Без темы"}
                     </div>
@@ -100,12 +117,13 @@ export const CorrespondenceListSidebar = () => {
                       {item.sender_name || "Отправитель не указан"}
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <span
-                      className={`px-2 py-0.5 rounded-md text-[9px] font-medium truncate max-w-[60%] ${getStatusStyle(
-                        item.status,
-                      )}`}
+                      className={cn(
+                        "px-2 py-0.5 rounded-md text-[9px] font-medium truncate max-w-[60%]",
+                        getStatusStyle(item.status)
+                      )}
                     >
                       {getStatusName(item.status)}
                     </span>

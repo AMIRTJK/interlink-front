@@ -9,7 +9,13 @@ export const CorrespondencePage = () => {
   return (
     <div className="flex flex-col w-full gap-3 h-full">
       <If is={!shouldHideUI}>
-        <RegistrySidebar isDetailView={isDetailView} />
+        <aside>
+          {/* variant: "horizontal" | "vertical" */}
+          <RegistrySidebar
+            isDetailView={isDetailView}
+            variant="vertical"
+          />
+        </aside>
       </If>
       <main className="w-full min-w-0">
         <Outlet />
