@@ -152,7 +152,11 @@ export const NewRegistry = ({
     // Сброс фильтров (кроме служебных)
     setParams("incomingNumber", undefined);
     setParams("outgoingNumber", undefined);
-    setParams("sender", undefined);
+    setParams("sender", undefined); // Для селекта
+    setParams("sender_name", undefined); // Если селект называется так
+    setParams("date", undefined); // Для даты
+    setParams("date_from", undefined); // Для диапазона
+    setParams("date_to", undefined); // Для диапазона
     setParams("page", 1);
   };
 

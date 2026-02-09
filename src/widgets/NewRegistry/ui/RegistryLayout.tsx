@@ -1,4 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import locale from "antd/es/date-picker/locale/ru_RU";
+import dayjs from "dayjs";
+import "dayjs/locale/ru";
+
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -10,9 +14,16 @@ import {
   FileType,
   ChevronDown,
 } from "lucide-react";
-import { Dropdown, Spin } from "antd"; // Добавили Dropdown для действий
+import {
+  ConfigProvider,
+  DatePicker,
+  Dropdown,
+  Input,
+  Select,
+  theme,
+} from "antd";
 
-// --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
+dayjs.locale("ru");
 
 // Хелпер для цветов бейджей (Tailwind)
 const getBadgeStyles = (color: string) => {
@@ -363,68 +374,6 @@ import {
   Calendar,
 } from "lucide-react";
 
-const FilterInput = ({
-  value,
-  onChange,
-  placeholder,
-  icon: Icon,
-  onClear,
-}: any) => {
-  const [isFocused, setIsFocused] = useState(false);
-
-  return (
-    <motion.div
-      whileHover={{ scale: 1.01 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className="relative flex items-center group"
-    >
-      <AnimatePresence>
-        {Icon && (
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="absolute left-3 z-10"
-          >
-            <Icon
-              className={`w-4 h-4 transition-all duration-300 ${
-                isFocused
-                  ? "text-white scale-110"
-                  : "text-blue-200/60 group-hover:text-white"
-              }`}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <input
-        type="text"
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        className={`w-full h-10 pr-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-blue-100/50 outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/20 focus:border-white/40 transition-all duration-300 text-sm backdrop-blur-sm ${
-          Icon ? "pl-9" : "pl-4"
-        }`}
-      />
-
-      {value && onClear && (
-        <motion.button
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0, opacity: 0 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={onClear}
-          className="absolute right-3 text-white/60 hover:text-white transition-colors"
-        >
-          <X className="w-4 h-4" />
-        </motion.button>
-      )}
-    </motion.div>
-  );
-};
-
 // --- SECTION HEADER ---
 export const SectionHeader = ({
   activeStatusData,
@@ -762,8 +711,36 @@ const FilterDrawer = ({
 }: any) => {
   const [localFilters, setLocalFilters] = useState(filters);
 
-  const handleChange = (key: string, value: string) => {
-    setLocalFilters((prev: any) => ({ ...prev, [key]: value }));
+  const glassTheme = {
+    algorithm: theme.darkAlgorithm,
+    token: {
+      colorBgContainer: "rgba(255, 255, 255, 0.1)",
+      colorBorder: "rgba(255, 255, 255, 0.2)",
+      colorText: "#ffffff",
+      colorTextPlaceholder: "rgba(255, 255, 255, 0.5)",
+      controlHeight: 40,
+      borderRadius: 8,
+      colorPrimary: "#ffffff",
+    },
+    components: {
+      Select: {
+        selectorBg: "rgba(255, 255, 255, 0.1)",
+        optionSelectedBg: "rgba(255, 255, 255, 0.2)",
+      },
+    },
+  };
+
+  const handleChange = (key: string, value: any) => {
+    setLocalFilters((prev: any) => {
+      const next = { ...prev };
+      // Если значение пустое/null/undefined - удаляем ключ, чтобы Antd сбросил поле
+      if (value === null || value === undefined || value === "") {
+        delete next[key];
+      } else {
+        next[key] = value;
+      }
+      return next;
+    });
   };
 
   const handleApply = () => {
@@ -771,18 +748,46 @@ const FilterDrawer = ({
     onClose();
   };
 
+  const handleResetClick = () => {
+    setLocalFilters({});
+
+    // Create a complete clear object with ALL possible keys set to null
+    const clearedFilters: Record<string, any> = {};
+
+    // 1. Add current local keys to be cleared
+    Object.keys(localFilters).forEach((key) => {
+      clearedFilters[key] = null;
+    });
+
+    // 2. Add keys from config to be absolutely sure
+    configItems.forEach((item: any) => {
+      clearedFilters[item.name] = null;
+      if (item.rangeNames) {
+        clearedFilters[item.rangeNames[0]] = null;
+        clearedFilters[item.rangeNames[1]] = null;
+      }
+    });
+
+    onApply(clearedFilters); // Send 'null' values to clear params
+    onReset(); // Trigger standard reset (optional but good for side effects)
+    onClose();
+  };
+
   const getIcon = (name: string) => {
-    if (name.toLowerCase().includes("incoming")) return Mail;
-    if (name.toLowerCase().includes("outgoing")) return Search;
-    if (name.toLowerCase().includes("sender")) return User;
-    return Filter;
+    const iconClass = "w-4 h-4 text-blue-200/60 mr-1";
+    if (name.toLowerCase().includes("incoming"))
+      return <Mail className={iconClass} />;
+    if (name.toLowerCase().includes("outgoing"))
+      return <Search className={iconClass} />;
+    if (name.toLowerCase().includes("sender"))
+      return <User className={iconClass} />;
+    return <Filter className={iconClass} />;
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -792,7 +797,6 @@ const FilterDrawer = ({
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 m-0"
           />
 
-          {/* Drawer */}
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -800,7 +804,7 @@ const FilterDrawer = ({
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             className="fixed right-0 top-0 h-full w-full max-w-md bg-gradient-to-br from-[#0047AB] via-[#0052CC] to-[#0047AB] shadow-2xl z-50 overflow-hidden flex flex-col"
           >
-            {/* Animated background pattern */}
+            {/* ... (Header и Background остаются без изменений) ... */}
             <div className="absolute inset-0 opacity-10 pointer-events-none">
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
@@ -814,7 +818,6 @@ const FilterDrawer = ({
               />
             </div>
 
-            {/* Header */}
             <div className="relative flex items-center justify-between px-6 h-16 border-b border-white/10 backdrop-blur-sm flex-shrink-0">
               <div className="flex items-center gap-3">
                 <motion.div
@@ -830,7 +833,6 @@ const FilterDrawer = ({
                 <h3 className="text-white font-semibold text-lg">
                   Фильтр документов
                 </h3>
-
                 <AnimatePresence>
                   {Object.values(localFilters).some((v) => !!v) && (
                     <motion.div
@@ -844,157 +846,148 @@ const FilterDrawer = ({
                   )}
                 </AnimatePresence>
               </div>
-
               <motion.button
                 onClick={onClose}
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
-                className="text-white/80 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
+                className="text-white/80 hover:text-white cursor-pointer transition-colors p-2 rounded-lg hover:bg-white/10"
               >
                 <X className="w-5 h-5" />
               </motion.button>
             </div>
 
-            {/* Filter Controls (DYNAMIC) */}
-            <div className="relative p-6 space-y-4 overflow-y-auto flex-1">
-              <motion.div
-                className="space-y-4"
-                variants={{
-                  hidden: { opacity: 0 },
-                  show: {
-                    opacity: 1,
-                    transition: { staggerChildren: 0.08 },
-                  },
-                }}
-                initial="hidden"
-                animate="show"
-              >
-                {configItems.map((item: any, index: number) => {
-                  // Определяем тип поля
-                  const isInput = item.type === "input" || !item.type;
-                  const isSelect = item.type === "select";
-                  // Проверка на разные написания date-range для надежности
-                  const isDate =
-                    item.type === "date" ||
-                    item.type === "date_range" ||
-                    item.type === "date-range";
+            {/* Filter Controls (ANTD + DYNAMIC) */}
+            <ConfigProvider theme={glassTheme} locale={locale}>
+              <div className="relative p-6 space-y-4 flex-1">
+                <motion.div
+                  className="space-y-4"
+                  initial="hidden"
+                  animate="show"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    show: { opacity: 1, transition: { staggerChildren: 0.08 } },
+                  }}
+                >
+                  {configItems.map((item: any, index: number) => {
+                    const isDate = item.type === "date";
+                    const isDateRange =
+                      item.type === "date_range" || item.type === "date-range";
+                    const isSelect = item.type === "select";
+                    const isInput = item.type === "input" || !item.type;
 
-                  return (
-                    <motion.div
-                      key={index}
-                      variants={{
-                        hidden: { opacity: 0, x: 50 },
-                        show: { opacity: 1, x: 0 },
-                      }}
-                    >
-                      <label className="text-white/80 text-sm font-medium mb-2 block">
-                        {item.label}
-                      </label>
+                    return (
+                      <motion.div
+                        key={index}
+                        variants={{
+                          hidden: { opacity: 0, x: 50 },
+                          show: { opacity: 1, x: 0 },
+                        }}
+                      >
+                        <label className="text-white/80 text-sm font-medium mb-2 block">
+                          {item.label}
+                        </label>
 
-                      {/* INPUT */}
-                      {isInput && (
-                        <FilterInput
-                          placeholder={item.placeholder}
-                          icon={getIcon(item.name)}
-                          value={localFilters[item.name] || ""}
-                          onChange={(val: string) =>
-                            handleChange(item.name, val)
-                          }
-                          onClear={() => handleChange(item.name, "")}
-                        />
-                      )}
-
-                      {/* SELECT (Styled to match FilterInput) */}
-                      {isSelect && (
-                        <motion.div
-                          whileHover={{ scale: 1.01 }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 400,
-                            damping: 25,
-                          }}
-                          className="relative group"
-                        >
-                          <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
-                            {/* Select Icon */}
-                            {getIcon(item.name) === User ? (
-                              <User className="w-4 h-4 text-blue-200/60 group-hover:text-white transition-colors" />
-                            ) : (
-                              <Filter className="w-4 h-4 text-blue-200/60 group-hover:text-white transition-colors" />
-                            )}
-                          </div>
-                          <select
-                            value={localFilters[item.name] || ""}
+                        {isInput && (
+                          <Input
+                            placeholder={item.placeholder}
+                            prefix={getIcon(item.name)}
+                            value={localFilters[item.name]} // undefined сбросит поле
                             onChange={(e) =>
                               handleChange(item.name, e.target.value)
                             }
-                            className="w-full h-10 pl-9 pr-8 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-blue-100/50 outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/20 focus:border-white/40 transition-all duration-300 text-sm backdrop-blur-sm appearance-none cursor-pointer"
-                          >
-                            <option value="" className="text-black">
-                              Все
-                            </option>
-                            {item.options?.map((opt: any) => (
-                              <option
-                                key={opt.value}
-                                value={opt.value}
-                                className="text-black"
-                              >
-                                {opt.label}
-                              </option>
-                            ))}
-                          </select>
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/60">
-                            <ChevronDown className="w-4 h-4" />
-                          </div>
-                        </motion.div>
-                      )}
+                            allowClear
+                            className="backdrop-blur-sm [&_input::placeholder]:text-blue-100/50! [&_input::placeholder]:text-sm! transition-colors! focus-within:shadow-none! focus-within:border-[#e8e8e8]!"
+                          />
+                        )}
 
-                      {/* DATE / DATE RANGE */}
-                      {isDate && (
-                        <motion.div
-                          whileHover={{ scale: 1.01 }}
-                          className="relative group"
-                        >
-                          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-200/60 group-hover:text-white transition-colors z-10" />
-                          <div className="flex items-center h-10 w-full pl-9 pr-4 bg-white/10 border border-white/20 rounded-lg text-white/50 text-xs gap-2 cursor-pointer hover:bg-white/15 hover:border-white/30 transition-all">
-                            <span>
-                              {Array.isArray(item.placeholder)
-                                ? item.placeholder[0]
-                                : item.placeholder}
-                            </span>
-                            {(item.type === "date_range" ||
-                              item.type === "date-range") && (
-                              <>
-                                <span className="text-white/20">→</span>
-                                <span>
-                                  {Array.isArray(item.placeholder)
-                                    ? item.placeholder[1]
-                                    : "По дату"}
-                                </span>
-                              </>
-                            )}
-                            <Calendar className="ml-auto w-4 h-4 opacity-50" />
-                          </div>
-                        </motion.div>
-                      )}
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
-            </div>
+                        {isSelect && (
+                          <Select
+                            placeholder={item.placeholder}
+                            value={localFilters[item.name] || undefined} // undefined для сброса
+                            onChange={(val) => handleChange(item.name, val)}
+                            options={item.options}
+                            allowClear
+                            className="w-full backdrop-blur-sm [--ant-select-active-outline-color:transparent]!"
+                            suffixIcon={
+                              <ChevronDown className="w-4 h-4 text-white/60" />
+                            }
+                          />
+                        )}
+
+                        {isDate && (
+                          <DatePicker
+                            className="w-full backdrop-blur-sm [&.ant-picker-focused]:border-[#e8e8e8]! [&.ant-picker-focused]:shadow-none!"
+                            placeholder={item.placeholder}
+                            value={
+                              localFilters[item.name]
+                                ? dayjs(localFilters[item.name])
+                                : null // null сбросит поле
+                            }
+                            onChange={
+                              (date, dateString) =>
+                                handleChange(item.name, dateString) // dateString будет пустой строкой при очистке
+                            }
+                            suffixIcon={
+                              <Calendar className="w-4 h-4 text-blue-200/60" />
+                            }
+                          />
+                        )}
+
+                        {isDateRange && (
+                          <DatePicker.RangePicker
+                            className="w-full backdrop-blur-sm [&.ant-picker-focused]:border-[#e8e8e8]! [&.ant-picker-focused]:shadow-none!"
+                            placeholder={
+                              Array.isArray(item.placeholder)
+                                ? item.placeholder
+                                : ["С даты", "По дату"]
+                            }
+                            value={
+                              localFilters[item.rangeNames?.[0]] &&
+                              localFilters[item.rangeNames?.[1]]
+                                ? [
+                                    dayjs(localFilters[item.rangeNames[0]]),
+                                    dayjs(localFilters[item.rangeNames[1]]),
+                                  ]
+                                : null // Сброс при отсутствии дат
+                            }
+                            onChange={(dates, dateStrings) => {
+                              if (item.rangeNames) {
+                                setLocalFilters((prev: any) => {
+                                  const next = { ...prev };
+                                  if (!dates) {
+                                    // Сброс
+                                    delete next[item.rangeNames[0]];
+                                    delete next[item.rangeNames[1]];
+                                  } else {
+                                    next[item.rangeNames[0]] = dateStrings[0];
+                                    next[item.rangeNames[1]] = dateStrings[1];
+                                  }
+                                  return next;
+                                });
+                              }
+                            }}
+                            suffixIcon={
+                              <Calendar className="w-4 h-4 text-blue-200/60" />
+                            }
+                            separator={<span className="text-white/40">→</span>}
+                            allowClear
+                          />
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
+              </div>
+            </ConfigProvider>
 
             {/* Footer Actions */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-white/10 backdrop-blur-sm bg-black/10">
+            <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-white/10 bg-black/10">
               <div className="flex gap-3">
                 <motion.button
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => {
-                    setLocalFilters({});
-                    onReset();
-                    onClose();
-                  }}
-                  className="flex-1 flex items-center justify-center gap-2 h-11 px-4 bg-white/10 hover:bg-white/20 text-white rounded-lg border border-white/20 hover:border-white/30 transition-all text-sm font-medium backdrop-blur-sm"
+                  onClick={handleResetClick} // Используем новую функцию сброса
+                  className="flex-1 flex items-center cursor-pointer justify-center gap-2 h-11 px-4 bg-white/10 hover:bg-white/20 text-white rounded-lg border border-white/20 hover:border-white/30 transition-all text-sm font-medium backdrop-blur-sm"
                 >
                   <motion.div
                     whileHover={{ rotate: -180 }}
@@ -1002,14 +995,14 @@ const FilterDrawer = ({
                   >
                     <RotateCcw className="w-4 h-4" />
                   </motion.div>
-                  Сброс
+                  Сбросить
                 </motion.button>
 
                 <motion.button
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={handleApply}
-                  className="flex-1 flex items-center justify-center gap-2 h-11 px-4 bg-white hover:bg-white/90 text-blue-600 rounded-lg font-semibold text-sm transition-all shadow-lg"
+                  className="flex-1 flex items-center cursor-pointer justify-center gap-2 h-11 px-4 bg-white hover:bg-white/90 text-blue-600 rounded-lg font-semibold text-sm transition-all shadow-lg"
                 >
                   <Filter className="w-4 h-4" />
                   Применить
