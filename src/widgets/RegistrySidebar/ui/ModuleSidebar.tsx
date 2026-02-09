@@ -26,7 +26,8 @@ export const ModuleSidebar = ({
     handleAddClick,
     onFinish,
     navigate,
-  } = useModuleSidebar(variant);
+    isInternal,
+  } = useModuleSidebar();
 
   return (
     <App>
@@ -37,6 +38,7 @@ export const ModuleSidebar = ({
           finalMenuItems={finalMenuItems}
           activeKey={activeKey}
           handleAddClick={handleAddClick}
+          isInternal={isInternal}
         />
       ) : (
         <ModuleSidebarVertical
@@ -48,6 +50,7 @@ export const ModuleSidebar = ({
           activeKey={activeKey}
           handleAddClick={handleAddClick}
           navigate={navigate}
+          isInternal={isInternal}
         />
       )}
 

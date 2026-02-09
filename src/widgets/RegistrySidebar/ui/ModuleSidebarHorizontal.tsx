@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Button, Tooltip } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { SidebarItem } from "./SidebarItem";
-import { containerVariants, layoutVerticalIcon } from "../lib/constants";
+import { containerVariants, itemWrapperVariants, layoutVerticalIcon } from "../lib/constants";
 import { MenuItem } from "../model";
 
 interface IProps {
@@ -12,6 +12,7 @@ interface IProps {
   finalMenuItems: MenuItem[];
   activeKey: string;
   handleAddClick: (pId: number | null) => void;
+  isInternal: boolean;
 }
 
 export const ModuleSidebarHorizontal: React.FC<IProps> = ({
@@ -20,6 +21,7 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
   finalMenuItems,
   activeKey,
   handleAddClick,
+  isInternal,
 }) => {
   return (
     <div className="w-full border-none! bg-white/50! backdrop-blur-2xl! rounded-xl! shadow-2xl! shadow-indigo-500/20! pt-0 px-4 pb-4!">
@@ -47,14 +49,14 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
         </div>
 
         <motion.div
-          key={variant}
+          key={`${variant}-${isInternal ? 'internal' : 'external'}`}
           className="flex-1 flex flex-row items-center gap-2 overflow-x-auto custom-scrollbar no-scrollbar py-1"
           initial="hidden"
           animate="visible"
           variants={containerVariants}
         >
           {finalMenuItems.map((item, index) => (
-            <div key={item.key} className="shrink-0 min-w-max">
+            <motion.div key={item.key} variants={itemWrapperVariants} className="shrink-0 min-w-max">
               <SidebarItem
                 item={item}
                 isActive={[activeKey].includes(item.key as string)}
@@ -63,7 +65,7 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
                 index={index}
                 variant={variant}
               />
-            </div>
+            </motion.div>
           ))}
         </motion.div>
       </div>

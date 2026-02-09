@@ -18,17 +18,28 @@ interface SidebarItemProps {
 }
 
 const rowVariants = {
-  hidden: {},
+  hidden: { opacity: 0, x: -25 },
   visible: {
+    opacity: 1,
+    x: 0,
     transition: {
-      staggerChildren: 0.1,
+      duration: 0.4,
+      ease: "easeOut",
+      staggerChildren: 0.15,
     },
   },
 };
 
 const contentVariants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: { opacity: 1, x: 0 },
+  hidden: { opacity: 0, x: -15 },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut"
+    }
+  },
 };
 
 export const SidebarItem: React.FC<SidebarItemProps> = ({
@@ -136,8 +147,14 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         )}
       </motion.div>
   );
+
   return (
-    <div className="select-none">
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={rowVariants}
+      className="select-none"
+    >
        {isCollapsedMode ? (
            <Tooltip title={item.label} placement="right">
                {content}
@@ -149,12 +166,20 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
       <AnimatePresence>
         {!isCollapsedMode && hasChildren && isOpen && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{
-              duration: 0.35,
-              ease: [0.4, 0, 0.2, 1],
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={{
+              hidden: { height: 0, opacity: 0 },
+              visible: { 
+                height: "auto", 
+                opacity: 1,
+                transition: {
+                  height: { duration: 0.35, ease: "easeInOut" },
+                  opacity: { duration: 0.3 },
+                  staggerChildren: 0.15,
+                }
+              }
             }}
             className={cn(
                "overflow-hidden",
@@ -178,6 +203,6 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 };

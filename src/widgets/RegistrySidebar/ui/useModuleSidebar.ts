@@ -154,18 +154,22 @@ export const useModuleSidebar = () => {
           ? AppRoutes.CORRESPONDENCE_INTERNAL_ARCHIVE
           : AppRoutes.CORRESPONDENCE_ARCHIVE,
       },
-      ["На подпись"]: {
-        key: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_SIGN : "",
-        icon: sideBarIcons.draftIcon,
-        count: counts.to_sign,
-        path: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_SIGN : "",
-      },
-      ["На согласование"]: {
-        key: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_APPROVE : "",
-        icon: sideBarIcons.draftIcon,
-        count: counts.to_approve,
-        path: isInternal ? AppRoutes.CORRESPONDENCE_INTERNAL_TO_APPROVE : "",
-      },
+      ...(isInternal
+        ? {
+            ["На подпись"]: {
+              key: AppRoutes.CORRESPONDENCE_INTERNAL_TO_SIGN,
+              icon: sideBarIcons.draftIcon,
+              count: counts.to_sign,
+              path: AppRoutes.CORRESPONDENCE_INTERNAL_TO_SIGN,
+            },
+            ["На согласование"]: {
+              key: AppRoutes.CORRESPONDENCE_INTERNAL_TO_APPROVE,
+              icon: sideBarIcons.draftIcon,
+              count: counts.to_approve,
+              path: AppRoutes.CORRESPONDENCE_INTERNAL_TO_APPROVE,
+            },
+          }
+        : {}),
       Закреплённые: {
         key: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_PINNED
@@ -285,5 +289,6 @@ export const useModuleSidebar = () => {
     onFinish,
     navigate,
     pathname,
+    isInternal,
   };
 };

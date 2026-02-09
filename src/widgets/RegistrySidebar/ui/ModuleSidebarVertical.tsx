@@ -20,6 +20,7 @@ interface IProps {
   activeKey: string;
   handleAddClick: (pId: number | null) => void;
   navigate: (p: string) => void;
+  isInternal: boolean;
 }
 
 export const ModuleSidebarVertical: React.FC<IProps> = ({
@@ -31,6 +32,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
   activeKey,
   handleAddClick,
   navigate,
+  isInternal,
 }) => {
   return (
     <Sider
@@ -96,7 +98,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
         </div>
 
         <motion.div
-          key={variant}
+          key={`${variant}-${isInternal ? 'internal' : 'external'}`}
           className="flex-1 overflow-y-auto custom-scrollbar"
           initial="hidden"
           animate="visible"
