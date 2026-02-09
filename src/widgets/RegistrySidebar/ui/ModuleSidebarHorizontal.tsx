@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, LayoutGroup } from "framer-motion";
 import { Button, Tooltip } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { SidebarItem } from "./SidebarItem";
@@ -55,18 +55,20 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
           animate="visible"
           variants={containerVariants}
         >
-          {finalMenuItems.map((item, index) => (
-            <motion.div key={item.key} variants={itemWrapperVariants} className="shrink-0 min-w-[170px]">
-              <SidebarItem
-                item={item}
-                isActive={[activeKey].includes(item.key as string)}
-                collapsed={false}
-                activeKey={activeKey}
-                index={index}
-                variant={variant}
-              />
-            </motion.div>
-          ))}
+          <LayoutGroup id="sidebar-items">
+            {finalMenuItems.map((item, index) => (
+              <motion.div key={item.key} variants={itemWrapperVariants} className="shrink-0 min-w-[170px]">
+                <SidebarItem
+                  item={item}
+                  isActive={[activeKey].includes(item.key as string)}
+                  collapsed={false}
+                  activeKey={activeKey}
+                  index={index}
+                  variant={variant}
+                />
+              </motion.div>
+            ))}
+          </LayoutGroup>
         </motion.div>
       </div>
     </div>

@@ -73,9 +73,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           variant === "vertical" ? "w-full" : "min-w-max",
           isCollapsedMode ? "justify-center px-0" : "gap-1",
           isSelected
-            ? (isCollapsedMode 
-                ? "text-indigo-700!" 
-                : "bg-linear-to-r! from-indigo-400/30! to-purple-400/30! border-white/50! text-indigo-700! shadow-lg! shadow-indigo-200/40!")
+            ? "text-indigo-700!"
             : "text-gray-600! hover:text-indigo-600! hover:shadow-sm hover:shadow-indigo-200/20 transition-shadow duration-200",
           item.folderName === "Создать новую папку" && "crtChildrenFolderHidden",
           variant === "horizontal" && "crtChildrenFolderHidden"
@@ -85,6 +83,17 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         }}
         style={{ paddingLeft: (!isCollapsedMode && depth > 0) ? `8px` : undefined }}
       >
+        {isSelected && (
+          <motion.div
+            layoutId="active-pill"
+            className={cn(
+               "absolute inset-0 bg-linear-to-r! from-indigo-400/30! to-purple-400/30! border-white/50! rounded-2xl shadow-lg! shadow-indigo-200/40!",
+               isCollapsedMode && "bg-transparent! border-none! shadow-none!"
+            )}
+            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+            style={{ zIndex: -1 }}
+          />
+        )}
         <motion.div
           variants={contentVariants}
           className={cn(
