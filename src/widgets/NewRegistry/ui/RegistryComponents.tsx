@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Building2,
@@ -78,20 +78,80 @@ const FilterInput = ({
   );
 };
 
+// --- SECTION HEADER ---
+export const SectionHeader = ({
+  activeStatusData,
+  t,
+  currentDocuments,
+  startIndex,
+  endIndex,
+}: any) => {
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 m-0">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <motion.div
+            animate={{
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className={`p-2 rounded-lg bg-gradient-to-r ${
+              activeStatusData?.gradient || "from-gray-100 to-gray-200"
+            }`}
+          >
+            {activeStatusData?.icon && (
+              <div className="text-white">{activeStatusData.icon}</div>
+            )}
+          </motion.div>
+          <div>
+            <h3 className="font-semibold text-gray-900">
+              <span
+                className={`bg-gradient-to-r bg-clip-text text-transparent ${
+                  activeStatusData?.gradient || "from-gray-700 to-gray-900"
+                }`}
+              >
+                {activeStatusData?.label || "Все документы"}
+              </span>
+            </h3>
+            <p className="text-sm text-gray-500">
+              {t?.total || "Всего"} {t?.documents || "документов"}:{" "}
+              {currentDocuments?.length || 0} | {t?.shown || "Показано"}:{" "}
+              {startIndex + 1}-
+              {Math.min(endIndex, currentDocuments?.length || 0)}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- CARD VIEW ---
-export const DocumentCard = ({ data, statusData, index, onClick }: any) => {
+export const DocumentCard = ({
+  data,
+  statusData,
+  index,
+  onClick,
+  activeStatusData,
+}: any) => {
   return (
     <motion.div
       layout
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: index * 0.05 }}
+      transition={{ delay: index * 0.05, duration: 0.1 }}
       whileHover={{ y: -4, boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.15)" }}
       onClick={onClick}
       className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-blue-300 transition-all cursor-pointer group"
     >
       {/* Header */}
-      <div className={`p-3 bg-gradient-to-r ${statusData.gradient}`}>
+      <div
+        className={`p-3 bg-gradient-to-r  ${activeStatusData?.gradient || "from-gray-100 to-gray-200"}`}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-white">
             <div className="p-1.5 bg-white/20 rounded-md backdrop-blur-sm">
@@ -163,37 +223,126 @@ export const DocumentCard = ({ data, statusData, index, onClick }: any) => {
 };
 
 // --- LIST VIEW ---
-export const DocumentListItem = ({ data, statusData, index, onClick }: any) => {
+export const DocumentListItem = ({
+  data,
+  statusData,
+  index,
+  onClick,
+  activeStatusData,
+}: any) => {
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.03 }}
+      initial={{
+        opacity: 0,
+        x: -20,
+      }}
+      animate={{
+        opacity: 1,
+        x: 0,
+      }}
+      exit={{
+        opacity: 0,
+        x: 20,
+      }}
+      transition={{
+        delay: index * 0.03,
+        duration: 0.1,
+        ease: [0.4, 0, 0.2, 1],
+      }}
+      whileHover={{
+        x: 4,
+        boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.1)",
+      }}
       onClick={onClick}
-      className="bg-white rounded-lg border border-gray-200 p-3 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer flex items-center gap-4"
+      className="bg-white rounded-lg border border-gray-200 transition-all duration-300 cursor-pointer mb-2"
     >
-      <div
-        className={`p-2 rounded-lg bg-gradient-to-br flex-shrink-0 text-white shadow-sm ${statusData.gradient}`}
-      >
-        {statusData.icon}
-      </div>
-
-      <div className="flex-1 grid grid-cols-12 gap-4 items-center">
-        <div className="col-span-1 text-xs text-gray-500">#{data.id}</div>
-        <div className="col-span-2 text-xs font-medium">{data.created_at}</div>
-        <div className="col-span-4 font-semibold text-sm text-gray-800 truncate">
-          {data.subject}
-        </div>
-        <div className="col-span-3 text-xs text-gray-600 truncate">
-          {data.sender_name}
-        </div>
-        <div className="col-span-2">
-          <span
-            className={`px-2 py-0.5 rounded-full text-[10px] text-white bg-gradient-to-r ${statusData.gradient}`}
+      <div className="p-4">
+        <div className="flex items-center gap-4">
+          {/* Status Icon */}
+          <motion.div
+            animate={{
+              rotate: [0, 5, -5, 0],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              repeatDelay: 3,
+            }}
+            className={`flex-shrink-0 p-2.5 rounded-lg bg-gradient-to-r  ${activeStatusData?.gradient || "from-gray-100 to-gray-200"}`}
           >
-            {statusData.label}
-          </span>
+            {statusData?.icon && (
+              <div className="text-white">{statusData.icon}</div>
+            )}
+          </motion.div>
+
+          {/* Document Info Grid */}
+          <div className="flex-1 grid grid-cols-12 gap-4 items-center min-w-0">
+            {/* ID & Date */}
+            <div className="col-span-2">
+              <div className="text-xs text-gray-500 mb-0.5">№ {data.id}</div>
+              <div className="text-xs font-medium text-gray-700">
+                {data.created_at}
+              </div>
+            </div>
+
+            {/* Subject */}
+            <div className="col-span-3 min-w-0">
+              <div className="text-xs text-gray-500 mb-0.5">Тема</div>
+              <div className="text-sm font-semibold text-gray-900 truncate">
+                {data.subject}
+              </div>
+            </div>
+
+            {/* Sender */}
+            <div className="col-span-2 min-w-0">
+              <div className="text-xs text-gray-500 mb-0.5">Отправитель</div>
+              <div className="text-sm text-gray-900 font-medium truncate">
+                {data.sender_name}
+              </div>
+            </div>
+
+            {/* Executor */}
+            <div className="col-span-2 min-w-0">
+              <div className="text-xs text-gray-500 mb-0.5">Исполнитель</div>
+              <div className="text-sm text-gray-900 font-medium truncate">
+                {data.recipient_name ||
+                  data.recipients?.[0]?.user?.full_name ||
+                  "—"}
+              </div>
+            </div>
+
+            {/* Document Numbers */}
+            <div className="col-span-3 flex gap-2">
+              <div className="flex-1">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <Mail className="w-3 h-3 text-blue-500" />
+                  <span className="text-xs text-gray-500">Вх.</span>
+                </div>
+                <div className="text-xs font-mono font-semibold text-gray-900 bg-blue-50 px-2 py-1 rounded truncate">
+                  {data.reg_number || "—"}
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <Send className="w-3 h-3 text-emerald-500" />
+                  <span className="text-xs text-gray-500">Исх.</span>
+                </div>
+                <div className="text-xs font-mono font-semibold text-gray-900 bg-emerald-50 px-2 py-1 rounded truncate">
+                  {data.outgoing_number || "—"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Status Badge */}
+          <div className="flex-shrink-0">
+            <div
+              className={`px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r text-white  ${activeStatusData?.gradient || "from-gray-100 to-gray-200"}`}
+            >
+              {statusData?.label}
+            </div>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -435,27 +584,125 @@ export const FilterDrawer = ({
   );
 };
 
-// --- PAGINATION ---
-export const Pagination = ({ currentPage, totalPages, onPageChange }: any) => {
+// --- PAGINATION (Updated) ---
+export const Pagination = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  t,
+}: any) => {
+  // Тексты по умолчанию, если t не передан
+  const texts = t || { back: "Назад", forward: "Вперед" };
+
+  const pages = useMemo(() => {
+    const arr: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        arr.push(i);
+      }
+    } else {
+      arr.push(1);
+      if (currentPage > 3) {
+        arr.push("...");
+      }
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) {
+        arr.push(i);
+      }
+      if (currentPage < totalPages - 2) {
+        arr.push("...");
+      }
+      arr.push(totalPages);
+    }
+    return arr;
+  }, [currentPage, totalPages]);
+
   return (
-    <div className="flex justify-center items-center gap-2">
-      <button
-        disabled={currentPage === 1}
+    <motion.div
+      initial={{
+        opacity: 0,
+        y: 20,
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      className="flex items-center justify-center gap-2 py-4"
+    >
+      <motion.button
+        whileHover={{
+          scale: 1.05,
+        }}
+        whileTap={{
+          scale: 0.95,
+        }}
         onClick={() => onPageChange(currentPage - 1)}
-        className="p-2 border rounded hover:bg-gray-50 disabled:opacity-50"
+        disabled={currentPage === 1}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+          currentPage === 1
+            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+            : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200"
+        }`}
       >
-        <ChevronLeft size={16} />
-      </button>
-      <span className="text-sm font-medium text-gray-600">
-        Страница {currentPage} из {totalPages}
-      </span>
-      <button
-        disabled={currentPage === totalPages}
+        <ChevronLeft className="w-4 h-4" />
+        <span className="hidden sm:inline">{texts.back}</span>
+      </motion.button>
+
+      <div className="flex items-center gap-1">
+        {pages.map((page, index) => {
+          if (page === "...") {
+            return (
+              <span
+                key={`ellipsis-${index}`}
+                className="px-3 py-2 text-gray-400"
+              >
+                ...
+              </span>
+            );
+          }
+          const pageNum = page as number;
+          const isActive = pageNum === currentPage;
+          return (
+            <motion.button
+              key={pageNum}
+              whileHover={{
+                scale: isActive ? 1 : 1.1,
+              }}
+              whileTap={{
+                scale: 0.95,
+              }}
+              onClick={() => onPageChange(pageNum)}
+              className={`min-w-[36px] h-9 px-3 rounded-lg text-sm font-medium transition-all ${
+                isActive
+                  ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md"
+                  : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+              }`}
+            >
+              {pageNum}
+            </motion.button>
+          );
+        })}
+      </div>
+
+      <motion.button
+        whileHover={{
+          scale: 1.05,
+        }}
+        whileTap={{
+          scale: 0.95,
+        }}
         onClick={() => onPageChange(currentPage + 1)}
-        className="p-2 border rounded hover:bg-gray-50 disabled:opacity-50"
+        disabled={currentPage === totalPages}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+          currentPage === totalPages
+            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+            : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200"
+        }`}
       >
-        <ChevronRight size={16} />
-      </button>
-    </div>
+        <span className="hidden sm:inline">{texts.forward}</span>
+        <ChevronRight className="w-4 h-4" />
+      </motion.button>
+    </motion.div>
   );
 };

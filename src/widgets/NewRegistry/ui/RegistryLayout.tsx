@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, LayoutGrid, List, TrendingUp, Filter } from "lucide-react";
 import {
@@ -6,6 +6,7 @@ import {
   DocumentListItem,
   FilterDrawer,
   Pagination,
+  SectionHeader,
 } from "./RegistryComponents";
 import { Spin } from "antd";
 
@@ -66,6 +67,37 @@ export const RegistryLayout = ({
   const [viewMode, setViewMode] = useState<"list" | "block">("block");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+  const activeTab = tabs.find((t) => t.id === activeTabId);
+
+  // --- MOCK DATA ДЛЯ ТЕСТА ---
+  // Генерируем 12 элементов на основе первого, если он есть
+  const displayDocuments = useMemo(() => {
+    if (!documents || documents.length === 0) return [];
+
+    // Берем реальный документ как шаблон
+    const template = documents[0];
+
+    // Создаем 12 копий
+    return Array.from({ length: 12 }).map((_, index) => ({
+      ...template,
+      // Генерируем уникальный ID, чтобы React keys работали корректно
+      id: parseInt(`${template.id}${index}`),
+      // Добавляем индекс в тему, чтобы видеть разницу визуально
+      subject:
+        index === 0
+          ? template.subject
+          : `${template.subject} (Копия ${index + 1})`,
+    }));
+  }, [documents]);
+
+  // Подменяем meta для теста пагинации
+  const effectiveMeta = {
+    ...meta,
+    last_page: 10, // Форсируем 10 страниц
+    total: 120, // Форсируем кол-во записей
+  };
+  // ----------------------------
+
   // Состояние для эффекта Ripple
   const [ripples, setRipples] = useState<
     Array<{ id: number; x: number; y: number }>
@@ -93,10 +125,12 @@ export const RegistryLayout = ({
   };
 
   return (
-    <div className="w-full h-full px-2 space-y-4 flex flex-col overflow-hidden">
+    <div
+      className={`w-full h-full space-y-4 flex flex-col gap-6 overflow-hidden`}
+    >
       {/* --- HEADER BLOCK --- */}
       <motion.div
-        className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 space-y-3 flex-shrink-0"
+        className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 space-y-3 flex-shrink-0 m-0"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -146,7 +180,7 @@ export const RegistryLayout = ({
               <span className="font-medium">
                 Всего:{" "}
                 <span className="text-blue-600 font-bold">
-                  {meta.total || 0}
+                  {effectiveMeta.total || 0}
                 </span>
               </span>
             </div>
@@ -157,7 +191,7 @@ export const RegistryLayout = ({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setViewMode("list")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                   viewMode === "list"
                     ? "bg-white text-blue-600 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
@@ -170,7 +204,7 @@ export const RegistryLayout = ({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setViewMode("block")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                   viewMode === "block"
                     ? "bg-white text-blue-600 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
@@ -186,7 +220,7 @@ export const RegistryLayout = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsFilterOpen(true)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all relative ${
+              className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all relative ${
                 hasActiveFilters
                   ? "bg-blue-600 text-white shadow-md"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -212,7 +246,7 @@ export const RegistryLayout = ({
               transition={{ delay: index * 0.05, duration: 0.3 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap ${
+              className={`relative cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap ${
                 activeTabId === tab.id
                   ? `bg-gradient-to-r ${tab.gradient} text-white shadow-md`
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -244,59 +278,94 @@ export const RegistryLayout = ({
         </div>
       </motion.div>
 
-      {/* --- CONTENT AREA --- */}
-      <div className="flex-1 overflow-y-auto min-h-0 pr-1">
-        {isLoading ? (
-          <div className="w-full h-40 flex items-center justify-center text-gray-400">
-            <Spin />
-          </div>
-        ) : (
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTabId + meta.current_page}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className={
-                viewMode === "block"
-                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4"
-                  : "space-y-2"
-              }
-            >
-              {documents.map((doc, idx) => {
-                const statusData =
-                  statusConfig[doc.status] || statusConfig.default;
-
-                const props = {
-                  key: doc.id,
-                  data: doc,
-                  statusData,
-                  index: idx,
-                  onClick: () => onCardClick(doc.id),
-                };
-
-                return viewMode === "block" ? (
-                  <DocumentCard {...props} />
-                ) : (
-                  <DocumentListItem {...props} />
-                );
-              })}
-            </motion.div>
-          </AnimatePresence>
-        )}
-      </div>
-
-      {/* --- PAGINATION --- */}
-      {meta.last_page > 1 && (
-        <div className="flex-shrink-0 bg-white rounded-xl shadow-sm border border-gray-100 p-2">
-          <Pagination
-            currentPage={meta.current_page}
-            totalPages={meta.last_page}
-            onPageChange={onPageChange}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTabId + effectiveMeta.current_page}
+          initial={{
+            opacity: 0,
+            y: 20,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          exit={{
+            opacity: 0,
+            y: -20,
+          }}
+          transition={{
+            duration: 0.5,
+            ease: [0.4, 0, 0.2, 1],
+          }}
+          className="flex flex-col gap-6"
+        >
+          <SectionHeader
+            activeStatusData={activeTab}
+            t={{ total: "Всего", documents: "документов", shown: "Показано" }}
+            currentDocuments={displayDocuments}
+            startIndex={
+              (effectiveMeta.current_page - 1) * displayDocuments.length
+            }
+            endIndex={effectiveMeta.current_page * displayDocuments.length}
           />
-        </div>
-      )}
+
+          {/* --- CONTENT AREA --- */}
+          <div className="flex-1  min-h-0 pr-1 m-0">
+            {isLoading ? (
+              <div className="w-full h-40 flex items-center justify-center text-gray-400">
+                <Spin />
+              </div>
+            ) : (
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTabId + effectiveMeta.current_page}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className={
+                    viewMode === "block"
+                      ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4"
+                      : "space-y-2"
+                  }
+                >
+                  {displayDocuments.map((doc: any, idx: number) => {
+                    const statusData =
+                      statusConfig[doc.status] || statusConfig.default;
+
+                    const props = {
+                      key: doc.id,
+                      data: doc,
+                      statusData,
+                      index: idx,
+                      onClick: () => onCardClick(doc.id),
+                      activeStatusData: activeTab,
+                    };
+
+                    return viewMode === "block" ? (
+                      <DocumentCard {...props} />
+                    ) : (
+                      <DocumentListItem {...props} />
+                    );
+                  })}
+                </motion.div>
+              </AnimatePresence>
+            )}
+          </div>
+
+          {/* --- PAGINATION --- */}
+          {/* Мы используем effectiveMeta.last_page, который мы задали как 10, поэтому условие сработает */}
+          {effectiveMeta.last_page > 1 && (
+            <div className="flex-shrink-0 bg-white rounded-xl shadow-sm border border-gray-100 p-2">
+              <Pagination
+                currentPage={effectiveMeta.current_page}
+                totalPages={effectiveMeta.last_page}
+                onPageChange={onPageChange}
+              />
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
 
       {/* --- FILTER DRAWER --- */}
       <FilterDrawer

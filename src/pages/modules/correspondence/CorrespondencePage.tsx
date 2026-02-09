@@ -22,12 +22,12 @@ export const CorrespondencePage = () => {
   return (
     <div
       className={cn(
-        "flex w-full gap-3 h-full",
+        "flex w-full h-full",
         variant === "horizontal" ? "flex-col" : "flex-row",
       )}
     >
       <If is={!shouldHideUI}>
-        <div className={variant === "vertical" ? "shrink-0" : ""}>
+        <div className={variant === "vertical" ? "shrink-0 pl-6 py-6" : ""}>
           <RegistrySidebar
             isDetailView={isDetailView}
             variant={variant}
@@ -35,7 +35,8 @@ export const CorrespondencePage = () => {
           />
         </div>
       </If>
-      <main className="w-full min-w-0">
+      {/* <main className="w-full min-w-0 m-4"> */}
+      <main className={`w-full  mx-auto space-y-4 p-6`}>
         <Outlet />
       </main>
     </div>

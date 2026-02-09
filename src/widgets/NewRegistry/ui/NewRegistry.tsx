@@ -13,6 +13,8 @@ import {
   Eye,
 } from "lucide-react";
 import { RegistryLayout } from "./RegistryLayout";
+import { AppRoutes } from "@shared/config";
+import { CorrespondenceResponse } from "@entities/correspondence";
 
 // Типы статусов, сопоставленные с твоим API
 const STATUS_CONFIG: Record<string, any> = {
@@ -155,12 +157,19 @@ export const NewRegistry = ({
     setParams("page", 1);
   };
 
-  const handleCardClick = (id: number) => {
-    // Логика роутинга из старого файла
+  const handleCardClick = (id: string | number) => {
     const route = type.includes("external-incoming")
-      ? `/correspondence/incoming/${id}` // Пример, подставь свои AppRoutes
-      : `/correspondence/outgoing/${id}`;
-    navigate(route);
+      ? AppRoutes.CORRESPONDENCE_INCOMING_SHOW
+      : type.includes("internal-incoming")
+        ? AppRoutes.INTERNAL_INCOMING_SHOW
+        : type.includes("internal-outgoing") ||
+            type.includes("internal-drafts") ||
+            type.includes("internal-to-sign") ||
+            type.includes("internal-to-approve")
+          ? AppRoutes.INTERNAL_OUTGOING_SHOW
+          : "";
+
+    navigate(route.replace(":id", String(id)));
   };
 
   const handleCreate = () => {
