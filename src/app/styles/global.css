@@ -189,6 +189,6 @@ body.no-animations *:hover {
 }
 
 /* Для скрытия дочерних папок и добавление папки  */
-.crtChildrenFolderHidden {
+/* .crtChildrenFolderHidden {
   display: none !important;
-}
+} */

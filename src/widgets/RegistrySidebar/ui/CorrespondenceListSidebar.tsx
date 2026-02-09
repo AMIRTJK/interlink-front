@@ -56,15 +56,15 @@ export const CorrespondenceListSidebar = () => {
 
   if (isLoading) {
     return (
-      <aside className="w-75 h-full bg-white rounded-2xl p-4 flex items-center justify-center border-l border-gray-200 ml-2">
+      <div className="w-full h-20 bg-white rounded-2xl p-4 flex items-center justify-center border border-gray-200">
         <Loader />
-      </aside>
+      </div>
     );
   }
 
   return (
-    <aside className="w-75 min-w-75 h-full bg-[#F5F6F8] rounded-2xl overflow-hidden flex flex-col ml-2 border border-gray-200">
-      <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
+    <div className="w-full bg-[#F5F6F8] rounded-2xl overflow-hidden flex flex-col border border-gray-200">
+      <div className="flex flex-row items-center gap-2 overflow-x-auto p-2 custom-scrollbar no-scrollbar">
         {list.length > 0 ? (
           list.map((item: any) => {
             const isActive = String(item.id) === id;
@@ -79,7 +79,7 @@ export const CorrespondenceListSidebar = () => {
                     ),
                   )
                 }
-                className={`p-3 rounded-xl mb-2 cursor-pointer border transition-all duration-200
+                className={`p-3 rounded-xl cursor-pointer border transition-all duration-200 shrink-0 w-[280px]
                   ${
                     isActive
                       ? "bg-[#F2F5FF] border-[#0037AF] shadow-sm ring-1 ring-[#0037AF]/20"
@@ -87,40 +87,44 @@ export const CorrespondenceListSidebar = () => {
                   }
                 `}
               >
-                <div
-                  className={`font-bold text-sm mb-1 line-clamp-2 leading-tight ${
-                    isActive ? "text-[#0037AF]" : "text-gray-900"
-                  }`}
-                >
-                  {item.subject || "Без темы"}
-                </div>
-
-                <div className="text-xs text-gray-400 mb-3 line-clamp-1">
-                  {item.sender_name || "Отправитель не указан"}
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <span
-                    className={`px-2 py-1 rounded-md text-[10px] font-medium truncate max-w-[65%] ${getStatusStyle(
-                      item.status,
-                    )}`}
-                  >
-                    {getStatusName(item.status)}
-                  </span>
-                  <span className="text-[10px] text-gray-400 font-medium whitespace-nowrap ml-2">
-                    {new Date(
-                      item.created_at || item.doc_date,
-                    ).toLocaleDateString("ru-RU")}
-                  </span>
+                <div className="flex flex-col h-full justify-between">
+                  <div>
+                    <div
+                      className={`font-bold text-xs mb-1 line-clamp-1 leading-tight ${
+                        isActive ? "text-[#0037AF]" : "text-gray-900"
+                      }`}
+                    >
+                      {item.subject || "Без темы"}
+                    </div>
+                    <div className="text-[10px] text-gray-400 mb-2 line-clamp-1">
+                      {item.sender_name || "Отправитель не указан"}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-[9px] font-medium truncate max-w-[60%] ${getStatusStyle(
+                        item.status,
+                      )}`}
+                    >
+                      {getStatusName(item.status)}
+                    </span>
+                    <span className="text-[9px] text-gray-400 font-medium whitespace-nowrap ml-2">
+                      {new Date(
+                        item.created_at || item.doc_date,
+                      ).toLocaleDateString("ru-RU")}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
           })
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400">
-            <p className="text-sm">Список писем пуст</p>
+          <div className="flex items-center justify-center w-full py-4 text-gray-400">
+            <p className="text-xs">Список писем пуст</p>
           </div>
         )}
       </div>
-    </aside>
+    </div>
   );
 };

@@ -7,11 +7,9 @@ export const CorrespondencePage = () => {
   const { isDetailView, shouldHideUI } = useCorrespondenceRoute();
 
   return (
-    <div className="flex w-full gap-3 h-full">
+    <div className="flex flex-col w-full gap-3 h-full">
       <If is={!shouldHideUI}>
-        <aside>
-          <RegistrySidebar isDetailView={isDetailView} />
-        </aside>
+        <RegistrySidebar isDetailView={isDetailView} />
       </If>
       <main className="w-full min-w-0">
         <Outlet />

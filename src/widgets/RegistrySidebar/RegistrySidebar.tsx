@@ -7,8 +7,8 @@ interface IProps {
 }
 export const RegistrySidebar = React.memo(({ isDetailView }: IProps) => {
   return (
-    <div className="flex h-full items-stretch">
-      <div className="shrink-0">
+    <div className="flex flex-col gap-4">
+      <div className="w-full">
         <ModuleSidebar />
       </div>
       <If is={isDetailView}>
