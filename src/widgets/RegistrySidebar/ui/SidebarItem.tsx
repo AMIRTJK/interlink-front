@@ -24,7 +24,6 @@ const rowVariants = {
     x: 0,
     transition: {
       duration: 0.4,
-      ease: "easeOut",
     },
   },
 };
@@ -36,7 +35,6 @@ const contentVariants = {
     x: 0,
     transition: {
       duration: 0.3,
-      ease: "easeOut"
     }
   },
 };
@@ -67,7 +65,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         variants={rowVariants}
         whileHover={{ 
           x: isCollapsedMode ? 0 : (depth === 0 ? 1.2 : 8),
-          transition: { duration: 0.15, ease: "easeOut" }
+          transition: { duration: 0.15 }
         }}
         whileTap={{ scale: 0.97 }}
         className={cn(
@@ -132,9 +130,9 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
                )}
              >
                 <motion.div
-                   animate={{ rotate: isOpen ? 0 : -90 }}
-                   transition={{ duration: 0.3, ease: "easeInOut" }}
-                 >
+                    animate={{ rotate: isOpen ? 0 : -90 }}
+                    transition={{ duration: 0.3 }}
+                  >
                    <span 
                      className="flex items-center justify-center w-4 h-4 [&>svg]:w-full [&>svg]:h-full [&>svg]:fill-current"
                      dangerouslySetInnerHTML={{ __html: sidebarArrow }}
@@ -172,9 +170,9 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
                 height: "auto", 
                 opacity: 1,
                 transition: {
-                  height: { duration: 0.35, ease: "easeInOut" },
+                  height: { duration: 0.35 },
                   opacity: { duration: 0.3 },
-                  staggerChildren: 0.2, // Consistent clearly visible sequence
+                  staggerChildren: 0.2, 
                 }
               }
             }}

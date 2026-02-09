@@ -44,7 +44,7 @@ export const containerVariants = {
       delayChildren: 0.1,
     },
   },
-};
+} as const;
 
 export const itemWrapperVariants = {
   hidden: { opacity: 0, x: -30 }, 
@@ -55,6 +55,6 @@ export const itemWrapperVariants = {
       type: "spring",
       damping: 25,
       stiffness: 120,
-    }
+    },
   },
-};
+} as const;
