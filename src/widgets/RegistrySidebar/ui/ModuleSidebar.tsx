@@ -51,7 +51,7 @@ export const ModuleSidebar = ({
   const [editingFolderId, setEditingFolderId] = useState<number | null>(null);
   const [form] = Form.useForm();
 
-  const [hasAnimated, setHasAnimated] = useState(false);
+
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -338,13 +338,11 @@ export const ModuleSidebar = ({
             </div>
 
             <motion.div
+              key={variant}
               className="flex-1 flex flex-row items-center gap-2 overflow-x-auto custom-scrollbar no-scrollbar py-1"
-              initial={hasAnimated ? false : "hidden"}
+              initial="hidden"
               animate="visible"
               variants={containerVariants}
-              onAnimationComplete={() => {
-                setHasAnimated(true);
-              }}
             >
               {finalMenuItems.map((item, index) => (
                 <div key={item.key} className="shrink-0 min-w-max">
@@ -439,13 +437,11 @@ export const ModuleSidebar = ({
           </div>
 
           <motion.div
+            key={variant}
             className="flex-1 overflow-y-auto custom-scrollbar"
-            initial={hasAnimated ? false : "hidden"}
+            initial="hidden"
             animate="visible"
             variants={containerVariants}
-            onAnimationComplete={() => {
-              setHasAnimated(true);
-            }}
           >
             {finalMenuItems.map((item, index) => (
               <motion.div key={item.key} variants={itemWrapperVariants}>
