@@ -423,7 +423,7 @@ export const Editor = ({ onChange, initialContent = "" }: EditorProps) => {
         },
         pagination: {
           pageWidth: "21cm",
-          pageHeight: "29.7cm",
+          pageHeight: "33.7cm",
           pageMargins: {
             top: "20mm",
             bottom: "20mm",
