@@ -308,7 +308,7 @@ body.no-animations
 
 /* --- Синяя полоса снизу --- */
 .sub-menu-bar {
-  background-color: #0037af;
+  background-color: #f7fafe !important;
   height: 32px;
   display: flex;
   align-items: center;
@@ -372,7 +372,8 @@ body.no-animations
   padding: 0 20px !important;
   transition: all 0.2s ease !important;
   border-radius: 12px 12px 0 0 !important;
-  color: #595959 !important;
+  color: #46566d !important;
+  font-weight: 600;
   overflow: visible !important;
   margin: 0 4px !important;
   top: 0;
@@ -382,18 +383,18 @@ body.no-animations
 
 .modern-style .ant-menu-item:not(.ant-menu-item-selected):hover {
   background-color: rgba(0, 0, 0, 0.04) !important;
-  color: #156bf6 !important;
+  color: #2151e7 !important;
 }
 
 .modern-style .ant-menu-item-selected {
-  background-color: #E0EBFF !important;
-  color: #0037AF !important;
+  background-color: #e0ebff !important;
+  color: #2151e7 !important;
   font-weight: 500;
   border-radius: 12px 12px 0 0 !important;
   height: 42px !important;
   line-height: 42px !important;
   align-self: flex-end;
-  border-bottom: 3px solid #0037AF !important;
+  border-bottom: 3px solid #0037af !important;
   z-index: 5 !important;
   margin: 0 !important;
   top: 0;
@@ -429,13 +430,15 @@ body.no-animations
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 10px 24px;
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 2px solid transparent;
   background-color: transparent;
-  color: #0a2df7;
+  color: #647690;
   opacity: 1;
   transition: color 0.2s ease;
+  font-size: 14px !important;
+  font-weight: 600;
 }
 
 .modern-mode .sub-menu-item img {
@@ -445,11 +448,15 @@ body.no-animations
 }
 
 .modern-mode .sub-menu-item:hover {
-  color: #0037AF;
+  color: #0037af;
 }
 
 .modern-mode .sub-menu-item:hover {
   color: #156bf6;
+}
+
+.active-modern-class {
+  color: #1447e6 !important;
 }
 
 .modern-mode .active-border {
@@ -459,9 +466,8 @@ body.no-animations
   right: 0;
   bottom: 0;
   border-radius: 8px;
-  border: 1px solid #0037AF;
-  background-color: #E0EBFF;
+  border: 2px solid #b7cdfd;
+  background-color: #fefeff;
   z-index: -1;
   pointer-events: none;
 }
-

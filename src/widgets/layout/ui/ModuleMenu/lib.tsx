@@ -7,6 +7,7 @@ import CorrespondenceIcon from "../../../../assets/icons/correspondence-icon.svg
 import PrimaryDocumentsIcon from "../../../../assets/icons/primary documents-icon.svg";
 import ApplicationsIcon from "../../../../assets/icons/applications-icon.svg";
 import CrmIcon from "../../../../assets/icons/crm-icon.svg";
+import { FileTextOutlined, GlobalOutlined } from "@ant-design/icons";
 
 export type MenuItem = Required<MenuProps>["items"][number] & {
   requiredRole?: string[];
@@ -44,19 +45,13 @@ export const getModuleItems = (
           key: AppRoutes.CORRESPONDENCE_INCOMING,
           label: "Внешняя корреспонденция",
           requiredRole: ["correspondence.view"],
-          icon:
-            variant === "modern" ? (
-              <img src={OrganizationIcon} alt="" className="opacity-50" />
-            ) : null,
+          icon: variant === "modern" ? <FileTextOutlined /> : null,
         },
         {
           key: AppRoutes.CORRESPONDENCE_OUTGOING,
           label: "Внутренняя корреспонденция",
           requiredRole: ["internal_correspondence.view"],
-          icon:
-            variant === "modern" ? (
-              <img src={OrganizationIcon} alt="" />
-            ) : null,
+          icon: variant === "modern" ? <GlobalOutlined /> : null,
         },
       ],
     }),
