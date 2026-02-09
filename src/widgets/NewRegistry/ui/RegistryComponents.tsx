@@ -230,7 +230,7 @@ export const FilterDrawer = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 m-0"
           />
 
           {/* Drawer */}
