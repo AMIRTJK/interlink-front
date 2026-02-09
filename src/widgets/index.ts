@@ -6,3 +6,4 @@ export * from "./RegistrySidebar";
 export * from "./DocView";
 export * from "./BookModal";
 export * from "./CorrespondenceForm";
+export * from "./NewRegistry";

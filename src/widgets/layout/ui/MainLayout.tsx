@@ -9,10 +9,10 @@ export const MainLayout = () => {
 
   return (
     <div
-      className={`${!shouldHideUI ? "p-6!" : "p-0"}  bg-[#F2F5FF] min-h-screen flex flex-col`}
+      className={`${!shouldHideUI ? "p-6!" : "p-0"}  bg-[#F2F5FF] min-h-screen flex flex-col gap-6`}
     >
       <If is={!shouldHideUI}>
-        <div className="mb-6">
+        <div>
           <Header />
         </div>
       </If>
