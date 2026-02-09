@@ -87,7 +87,10 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           <motion.div
             layoutId="active-pill"
             className={cn(
-               "absolute inset-0 bg-linear-to-r! from-indigo-400/30! to-purple-400/30! border-white/50! rounded-2xl shadow-lg! shadow-indigo-200/40!",
+               "absolute inset-0 bg-linear-to-r! border-white/50! rounded-2xl",
+               depth > 0 
+                 ? "from-indigo-300/20! to-purple-300/20! shadow-sm!" 
+                 : "from-indigo-400/30! to-purple-400/30! shadow-lg! shadow-indigo-200/40!",
                isCollapsedMode && "bg-transparent! border-none! shadow-none!"
             )}
             transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
