@@ -18,14 +18,13 @@ interface SidebarItemProps {
 }
 
 const rowVariants = {
-  hidden: { opacity: 0, x: -25 },
+  hidden: { opacity: 0, x: -30 },
   visible: {
     opacity: 1,
     x: 0,
     transition: {
       duration: 0.4,
       ease: "easeOut",
-      staggerChildren: 0.15,
     },
   },
 };
@@ -150,8 +149,6 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
 
   return (
     <motion.div 
-      initial="hidden"
-      animate="visible"
       variants={rowVariants}
       className="select-none"
     >
@@ -177,7 +174,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
                 transition: {
                   height: { duration: 0.35, ease: "easeInOut" },
                   opacity: { duration: 0.3 },
-                  staggerChildren: 0.15,
+                  staggerChildren: 0.2, // Consistent clearly visible sequence
                 }
               }
             }}

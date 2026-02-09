@@ -40,21 +40,21 @@ export const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15,
+      staggerChildren: 0.2, 
       delayChildren: 0.1,
     },
   },
 };
 
 export const itemWrapperVariants = {
-  hidden: { opacity: 0, x: -25 },
+  hidden: { opacity: 0, x: -30 }, 
   visible: { 
     opacity: 1, 
     x: 0,
     transition: {
       type: "spring",
       damping: 25,
-      stiffness: 150,
+      stiffness: 120,
     }
   },
 };
