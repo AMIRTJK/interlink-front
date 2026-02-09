@@ -234,9 +234,9 @@ export const Editor = ({ onChange, initialContent = "" }: EditorProps) => {
         },
         exportPdf: {
           stylesheets: [
-            EXPORT_FIX_STYLES,
             "https://cdn.ckeditor.com/ckeditor5/47.4.0/ckeditor5.css",
             "https://cdn.ckeditor.com/ckeditor5-premium-features/47.4.0/ckeditor5-premium-features.css",
+            EXPORT_FIX_STYLES,
           ],
           fileName: "export-pdf-demo.pdf",
           converterOptions: {
@@ -250,9 +250,9 @@ export const Editor = ({ onChange, initialContent = "" }: EditorProps) => {
         },
         exportWord: {
           stylesheets: [
-            EXPORT_FIX_STYLES,
             "https://cdn.ckeditor.com/ckeditor5/47.4.0/ckeditor5.css",
             "https://cdn.ckeditor.com/ckeditor5-premium-features/47.4.0/ckeditor5-premium-features.css",
+            EXPORT_FIX_STYLES,
           ],
           fileName: "export-word-demo.docx",
           converterOptions: {
@@ -272,8 +272,60 @@ export const Editor = ({ onChange, initialContent = "" }: EditorProps) => {
           supportAllValues: true,
         },
         fontSize: {
-          options: [10, 12, 14, "default", 18, 20, 22],
-          supportAllValues: true,
+          options: [
+            {
+              model: "10pt",
+              title: "10pt",
+              view: {
+                name: "span",
+                styles: {
+                  "font-size": "10pt",
+                },
+              },
+            },
+            {
+              model: "12pt",
+              title: "12pt",
+              view: {
+                name: "span",
+                styles: {
+                  "font-size": "12pt",
+                },
+              },
+            },
+            {
+              model: "14pt",
+              title: "14pt",
+              view: {
+                name: "span",
+                styles: {
+                  "font-size": "14pt",
+                },
+              },
+            },
+            {
+              model: "18pt",
+              title: "18pt",
+              view: {
+                name: "span",
+                styles: {
+                  "font-size": "18pt",
+                },
+              },
+            },
+            {
+              model: "24pt",
+              title: "24pt",
+              view: {
+                name: "span",
+                styles: {
+                  "font-size": "24pt",
+                },
+              },
+            },
+            "default",
+          ],
+          supportAllValues: true, // Разрешает ввод ручных значений (они могут быть в px)
         },
         fullscreen: {
           onEnterCallback: (container: HTMLElement) =>
