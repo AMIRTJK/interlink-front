@@ -308,7 +308,7 @@ body.no-animations
 
 /* --- Синяя полоса снизу --- */
 .sub-menu-bar {
-  background-color: #0037af;
+  background-color: #f7fafe !important;
   height: 32px;
   display: flex;
   align-items: center;
@@ -429,7 +429,7 @@ body.no-animations
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 10px 24px;
   border-radius: 8px;
   border: 2px solid transparent;
   background-color: transparent;
@@ -466,7 +466,7 @@ body.no-animations
   bottom: 0;
   border-radius: 8px;
   border: 2px solid #b7cdfd;
-  background-color: #e0ebff;
+  background-color: #fefeff;
   z-index: -1;
   pointer-events: none;
 }
