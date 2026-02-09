@@ -53,7 +53,7 @@ export const SelectedRecipientsModal: React.FC<
               </h3>
               <button
                 onClick={onClose}
-                className={`p-2 rounded-lg transition-all hover:bg-black/5 dark:hover:bg-white/5 ${textSecondary}`}
+                className={`p-2 cursor-pointer rounded-lg transition-all hover:bg-black/5 dark:hover:bg-white/5 ${textSecondary}`}
               >
                 <CloseOutlined />
               </button>
@@ -92,7 +92,7 @@ export const SelectedRecipientsModal: React.FC<
                     <If is={!isIncoming}>
                       <button
                         onClick={() => onRemove(recipient.id)}
-                        className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                        className="p-2 cursor-pointer text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                         title="Удалить"
                       >
                         <DeleteOutlined />
@@ -108,7 +108,7 @@ export const SelectedRecipientsModal: React.FC<
             >
               <button
                 onClick={onClose}
-                className={`w-full py-2.5 rounded-xl font-medium text-sm transition-all ${isDarkMode ? "bg-gray-700 text-white hover:bg-gray-600" : "bg-gray-100 text-gray-900 hover:bg-gray-200"}`}
+                className={`w-full cursor-pointer py-2.5 rounded-xl font-medium text-sm transition-all ${isDarkMode ? "bg-gray-700 text-white hover:bg-gray-600" : "bg-gray-100 text-gray-900 hover:bg-gray-200"}`}
               >
                 Закрыть
               </button>
