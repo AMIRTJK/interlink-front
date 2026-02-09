@@ -249,13 +249,17 @@ export const AppRouter = () => {
                     <Route
                       path="create"
                       element={
-                        <CreateCorrespondencePage type="internal-outgoing" />
+                        <Suspense fallback={<Loader />}>
+                          <CreateCorrespondencePage type="internal-outgoing" />
+                        </Suspense>
                       }
                     />
                     <Route
                       path=":id"
                       element={
-                        <ShowCorrespondencePage type="internal-outgoing" />
+                        <Suspense fallback={<Loader />}>
+                          <ShowCorrespondencePage type="internal-outgoing" />
+                        </Suspense>
                       }
                     />
                   </Route>
