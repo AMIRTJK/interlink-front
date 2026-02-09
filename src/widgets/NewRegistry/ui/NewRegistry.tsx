@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { RegistryLayout } from "./RegistryLayout";
 import { AppRoutes } from "@shared/config";
+import { useRegistryConfig } from "../lib";
 
 // Типы статусов, сопоставленные с твоим API
 const STATUS_CONFIG: Record<string, any> = {
@@ -80,6 +81,8 @@ export const NewRegistry = ({
   const navigate = useNavigate();
   const location = useLocation();
 
+  const fieldConfig = useRegistryConfig(type);
+
   // --- ЛОГИКА ИЗ СТАРОГО RegistryTable ---
   const { params: searchParams, setParams } = useDynamicSearchParams();
   const currentTab =
@@ -104,11 +107,11 @@ export const NewRegistry = ({
     },
   });
 
-  
-
   const documents = (responseData as any)?.data?.data || [];
-  const meta = (responseData as any)?.data?.meta || {};
+  const meta = (responseData as any)?.data || {};
   const counts = (countersData as any)?.data || {};
+
+  console.log(responseData);
 
   // Формируем конфиг табов на основе данных счетчиков и конфига
   const statusTabs = useMemo(() => {
@@ -191,6 +194,7 @@ export const NewRegistry = ({
         sender: searchParams.sender,
       }}
       statusConfig={STATUS_CONFIG}
+      fieldConfig={fieldConfig}
     />
   );
 };

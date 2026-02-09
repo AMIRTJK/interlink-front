@@ -1,6 +1,36 @@
 import React, { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, LayoutGrid, List, TrendingUp, Filter } from "lucide-react";
+import {
+  Plus,
+  LayoutGrid,
+  List,
+  TrendingUp,
+  Filter,
+  MoreHorizontal,
+  FileType,
+  ChevronDown,
+} from "lucide-react";
+import { Dropdown, Spin } from "antd"; // Добавили Dropdown для действий
+
+// --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
+
+// Хелпер для цветов бейджей (Tailwind)
+const getBadgeStyles = (color: string) => {
+  switch (color) {
+    case "blue":
+      return "bg-blue-50 text-blue-600";
+    case "emerald":
+      return "bg-emerald-50 text-emerald-600";
+    case "purple":
+      return "bg-purple-50 text-purple-600";
+    case "amber":
+      return "bg-amber-50 text-amber-600";
+    case "rose":
+      return "bg-rose-50 text-rose-600";
+    default:
+      return "bg-gray-50 text-gray-600";
+  }
+};
 
 // Компонент эффекта волны (Ripple)
 const RippleEffect = ({ x, y }: { x: number; y: number }) => (
@@ -25,7 +55,7 @@ const RippleEffect = ({ x, y }: { x: number; y: number }) => (
 
 interface RegistryLayoutProps {
   documents: any[];
-  meta: any; // { current_page, last_page, total, per_page, from, to }
+  meta: any;
   tabs: any[];
   activeTabId: string;
   createButtonText?: string;
@@ -37,6 +67,7 @@ interface RegistryLayoutProps {
   onCreate: () => void;
   currentFilters: any;
   statusConfig: any;
+  fieldConfig: any; // Наш конфиг полей и действий
 }
 
 export const RegistryLayout = ({
@@ -53,18 +84,17 @@ export const RegistryLayout = ({
   onCreate,
   currentFilters,
   statusConfig,
+  fieldConfig,
 }: RegistryLayoutProps) => {
-  const [viewMode, setViewMode] = useState<"list" | "block">("block");
+  const [viewMode, setViewMode] = useState<"list" | "block">("list");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // --- ДАННЫЕ ИЗ API (META) ---
-  // Используем данные напрямую из meta, или дефолтные значения
   const currentPage = meta?.current_page || 1;
   const lastPage = meta?.last_page || 1;
   const totalRecords = meta?.total || 0;
   const perPage = meta?.per_page || 15;
 
-  // Если API отдает from/to, используем их, иначе считаем сами
   const showFrom = meta?.from || (currentPage - 1) * perPage;
   const showTo = meta?.to || showFrom + (documents?.length || 0);
 
@@ -274,6 +304,7 @@ export const RegistryLayout = ({
                       index: idx,
                       onClick: () => onCardClick(doc.id),
                       activeStatusData: activeTab,
+                      fieldConfig, // !!! ВАЖНО: Передаем конфиг внутрь
                     };
                     return viewMode === "block" ? (
                       <DocumentCard {...props} />
@@ -309,18 +340,18 @@ export const RegistryLayout = ({
         filters={currentFilters}
         onApply={onFilterApply}
         onReset={onFilterReset}
+        configItems={fieldConfig.filters}
       />
     </div>
   );
 };
 
 // ==========================================
-// ВСПОМОГАТЕЛЬНЫЕ КОМПОНЕНТЫ (Без изменений)
+// ВСПОМОГАТЕЛЬНЫЕ КОМПОНЕНТЫ
 // ==========================================
 
 import {
   Building2,
-  FileType,
   User,
   Mail,
   Send,
@@ -445,14 +476,20 @@ export const SectionHeader = ({
   );
 };
 
-// --- CARD VIEW ---
+// --- CARD VIEW (UPDATED WITH fieldConfig) ---
 export const DocumentCard = ({
   data,
   statusData,
   index,
   onClick,
   activeStatusData,
+  fieldConfig,
 }: any) => {
+  // Получаем действия (меню) для этой записи
+  const actionItems = fieldConfig?.getActions
+    ? fieldConfig.getActions(data)
+    : [];
+
   return (
     <motion.div
       layout
@@ -465,20 +502,37 @@ export const DocumentCard = ({
     >
       {/* Header */}
       <div
-        className={`p-3 bg-gradient-to-r  ${
+        className={`p-3 bg-gradient-to-r ${
           activeStatusData?.gradient || "from-gray-100 to-gray-200"
-        }`}
+        } flex justify-between items-center`}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-white">
-            <div className="p-1.5 bg-white/20 rounded-md backdrop-blur-sm">
-              {statusData.icon}
-            </div>
-            <div className="text-xs font-medium opacity-90">ID: {data.id}</div>
+        <div className="flex items-center gap-2 text-white">
+          <div className="p-1.5 bg-white/20 rounded-md backdrop-blur-sm">
+            {statusData.icon}
           </div>
+          <div className="text-xs font-medium opacity-90">ID: {data.id}</div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Дата */}
           <div className="px-2 py-0.5 bg-white/20 rounded-full text-[10px] text-white font-medium">
-            {data.created_at}
+            {new Date(data.created_at).toLocaleDateString("ru-RU")}
           </div>
+
+          {/* Actions Dropdown */}
+          {actionItems.length > 0 && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <Dropdown
+                menu={{ items: actionItems }}
+                trigger={["click"]}
+                placement="bottomRight"
+              >
+                <button className="p-1 hover:bg-white/20 rounded-md text-white transition-colors">
+                  <MoreHorizontal size={16} />
+                </button>
+              </Dropdown>
+            </div>
+          )}
         </div>
       </div>
 
@@ -496,80 +550,91 @@ export const DocumentCard = ({
           </p>
         </div>
 
+        {/* DYNAMIC FIELDS FROM CONFIG */}
         <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="space-y-1">
-            <div className="flex items-center gap-1 text-gray-400">
-              <Building2 size={12} />
-              <span>Отправитель</span>
+          {fieldConfig?.primary && (
+            <div className="space-y-1">
+              <div className="flex items-center gap-1 text-gray-400">
+                {fieldConfig.primary.icon}
+                <span>{fieldConfig.primary.label}</span>
+              </div>
+              <div
+                className="font-medium text-gray-700 truncate"
+                title={String(fieldConfig.primary.render(data))}
+              >
+                {fieldConfig.primary.render(data)}
+              </div>
             </div>
-            <div
-              className="font-medium text-gray-700 truncate"
-              title={data.sender_name}
-            >
-              {data.sender_name}
+          )}
+
+          {fieldConfig?.secondary && (
+            <div className="space-y-1">
+              <div className="flex items-center gap-1 text-gray-400">
+                {fieldConfig.secondary.icon}
+                <span>{fieldConfig.secondary.label}</span>
+              </div>
+              <div className="font-medium text-gray-700 truncate">
+                {fieldConfig.secondary.render(data)}
+              </div>
             </div>
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-1 text-gray-400">
-              <User size={12} />
-              <span>Исполнитель</span>
-            </div>
-            <div className="font-medium text-gray-700 truncate">
-              {data.recipient_name ||
-                data.recipients?.[0]?.user?.full_name ||
-                "—"}
-            </div>
-          </div>
+          )}
         </div>
 
-        <div className="pt-3 border-t border-gray-100 flex gap-2">
-          <div className="flex-1 bg-blue-50/50 rounded p-1.5">
-            <div className="flex items-center gap-1 text-blue-500 mb-0.5">
-              <Mail size={10} />
-              <span className="text-[10px]">Входящий</span>
-            </div>
-            <div className="text-xs font-mono font-semibold text-gray-700">
-              {data.reg_number || "—"}
-            </div>
+        {/* DYNAMIC BADGES */}
+        {fieldConfig?.badges && fieldConfig.badges.length > 0 && (
+          <div className="pt-3 border-t border-gray-100 flex gap-2">
+            {fieldConfig.badges.map((badge: any, i: number) => {
+              const style = getBadgeStyles(badge.color);
+              return (
+                <div
+                  key={i}
+                  className={`flex-1 rounded p-1.5 ${style.split(" ")[0]} bg-opacity-50`}
+                >
+                  <div
+                    className={`flex items-center gap-1 mb-0.5 ${style.split(" ")[1]}`}
+                  >
+                    {badge.icon}
+                    <span className="text-[10px]">{badge.label}</span>
+                  </div>
+                  <div className="text-xs font-mono font-semibold text-gray-700">
+                    {badge.render(data)}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        )}
       </div>
     </motion.div>
   );
 };
 
-// --- LIST VIEW ---
+// --- LIST VIEW (UPDATED WITH fieldConfig) ---
 export const DocumentListItem = ({
   data,
   statusData,
   index,
   onClick,
   activeStatusData,
+  fieldConfig,
 }: any) => {
+  // Получаем действия
+  const actionItems = fieldConfig?.getActions
+    ? fieldConfig.getActions(data)
+    : [];
+
   return (
     <motion.div
       layout
-      initial={{
-        opacity: 0,
-        x: -20,
-      }}
-      animate={{
-        opacity: 1,
-        x: 0,
-      }}
-      exit={{
-        opacity: 0,
-        x: 20,
-      }}
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
       transition={{
         delay: index * 0.03,
         duration: 0.1,
         ease: [0.4, 0, 0.2, 1],
       }}
-      whileHover={{
-        x: 4,
-        boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.1)",
-      }}
+      whileHover={{ x: 4, boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.1)" }}
       onClick={onClick}
       className="bg-white rounded-lg border border-gray-200 transition-all duration-300 cursor-pointer mb-2"
     >
@@ -577,15 +642,9 @@ export const DocumentListItem = ({
         <div className="flex items-center gap-4">
           {/* Status Icon */}
           <motion.div
-            animate={{
-              rotate: [0, 5, -5, 0],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              repeatDelay: 3,
-            }}
-            className={`flex-shrink-0 p-2.5 rounded-lg bg-gradient-to-r  ${
+            animate={{ rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            className={`flex-shrink-0 p-2.5 rounded-lg bg-gradient-to-r ${
               activeStatusData?.gradient || "from-gray-100 to-gray-200"
             }`}
           >
@@ -600,7 +659,7 @@ export const DocumentListItem = ({
             <div className="col-span-2">
               <div className="text-xs text-gray-500 mb-0.5">№ {data.id}</div>
               <div className="text-xs font-medium text-gray-700">
-                {data.created_at}
+                {new Date(data.created_at).toLocaleDateString("ru-RU")}
               </div>
             </div>
 
@@ -612,56 +671,79 @@ export const DocumentListItem = ({
               </div>
             </div>
 
-            {/* Sender */}
-            <div className="col-span-2 min-w-0">
-              <div className="text-xs text-gray-500 mb-0.5">Отправитель</div>
-              <div className="text-sm text-gray-900 font-medium truncate">
-                {data.sender_name || "Не указано"}
+            {/* DYNAMIC PRIMARY */}
+            {fieldConfig?.primary && (
+              <div className="col-span-2 min-w-0">
+                <div className="text-xs text-gray-500 mb-0.5">
+                  {fieldConfig.primary.label}
+                </div>
+                <div className="text-sm text-gray-900 font-medium truncate">
+                  {fieldConfig.primary.render(data)}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Executor */}
-            <div className="col-span-2 min-w-0">
-              <div className="text-xs text-gray-500 mb-0.5">Исполнитель</div>
-              <div className="text-sm text-gray-900 font-medium truncate">
-                {data.recipient_name ||
-                  data.recipients?.[0]?.user?.full_name ||
-                  "—"}
+            {/* DYNAMIC SECONDARY */}
+            {fieldConfig?.secondary && (
+              <div className="col-span-2 min-w-0">
+                <div className="text-xs text-gray-500 mb-0.5">
+                  {fieldConfig.secondary.label}
+                </div>
+                <div className="text-sm text-gray-900 font-medium truncate">
+                  {fieldConfig.secondary.render(data)}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Document Numbers */}
+            {/* DYNAMIC BADGES (Compact view) */}
             <div className="col-span-3 flex gap-2">
-              <div className="flex-1">
-                <div className="flex items-center gap-1 mb-0.5">
-                  <Mail className="w-3 h-3 text-blue-500" />
-                  <span className="text-xs text-gray-500">Вх.</span>
-                </div>
-                <div className="text-xs font-mono font-semibold text-gray-900 bg-blue-50 px-2 py-1 rounded truncate">
-                  {data.reg_number || "Не указано"}
-                </div>
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-1 mb-0.5">
-                  <Send className="w-3 h-3 text-emerald-500" />
-                  <span className="text-xs text-gray-500">Исх.</span>
-                </div>
-                <div className="text-xs font-mono font-semibold text-gray-900 bg-emerald-50 px-2 py-1 rounded truncate">
-                  {data.outgoing_number || "Не указано"}
-                </div>
-              </div>
+              {fieldConfig?.badges?.map((badge: any, i: number) => {
+                const style = getBadgeStyles(badge.color);
+                // Берем только text color класс, чтобы не было фона в списке (для чистоты)
+                // Или оставляем как есть. Давайте сделаем легкий фон.
+                return (
+                  <div key={i} className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1 mb-0.5">
+                      {badge.icon}
+                      <span className="text-xs text-gray-500">
+                        {badge.label}
+                      </span>
+                    </div>
+                    <div
+                      className={`text-xs font-mono font-semibold px-2 py-1 rounded truncate ${style}`}
+                    >
+                      {badge.render(data)}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Status Badge */}
-          <div className="flex-shrink-0">
+          {/* Right Side: Status + Actions */}
+          <div className="flex items-center gap-3 flex-shrink-0">
             <div
-              className={`px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r text-white  ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r text-white ${
                 activeStatusData?.gradient || "from-gray-100 to-gray-200"
               }`}
             >
               {statusData?.label}
             </div>
+
+            {/* Action Menu List View */}
+            {actionItems.length > 0 && (
+              <div onClick={(e) => e.stopPropagation()}>
+                <Dropdown
+                  menu={{ items: actionItems }}
+                  trigger={["click"]}
+                  placement="bottomRight"
+                >
+                  <button className="p-1.5 hover:bg-gray-100 rounded-md text-gray-500 transition-colors">
+                    <MoreHorizontal size={16} />
+                  </button>
+                </Dropdown>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -669,7 +751,15 @@ export const DocumentListItem = ({
   );
 };
 
-const FilterDrawer = ({ isOpen, onClose, filters, onApply, onReset }: any) => {
+// --- FILTER DRAWER ---
+const FilterDrawer = ({
+  isOpen,
+  onClose,
+  filters,
+  onApply,
+  onReset,
+  configItems = [],
+}: any) => {
   const [localFilters, setLocalFilters] = useState(filters);
 
   const handleChange = (key: string, value: string) => {
@@ -679,6 +769,13 @@ const FilterDrawer = ({ isOpen, onClose, filters, onApply, onReset }: any) => {
   const handleApply = () => {
     onApply(localFilters);
     onClose();
+  };
+
+  const getIcon = (name: string) => {
+    if (name.toLowerCase().includes("incoming")) return Mail;
+    if (name.toLowerCase().includes("outgoing")) return Search;
+    if (name.toLowerCase().includes("sender")) return User;
+    return Filter;
   };
 
   return (
@@ -701,7 +798,7 @@ const FilterDrawer = ({ isOpen, onClose, filters, onApply, onReset }: any) => {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 h-full w-full max-w-md bg-gradient-to-br from-[#0047AB] via-[#0052CC] to-[#0047AB] shadow-2xl z-50 overflow-hidden"
+            className="fixed right-0 top-0 h-full w-full max-w-md bg-gradient-to-br from-[#0047AB] via-[#0052CC] to-[#0047AB] shadow-2xl z-50 overflow-hidden flex flex-col"
           >
             {/* Animated background pattern */}
             <div className="absolute inset-0 opacity-10 pointer-events-none">
@@ -718,7 +815,7 @@ const FilterDrawer = ({ isOpen, onClose, filters, onApply, onReset }: any) => {
             </div>
 
             {/* Header */}
-            <div className="relative flex items-center justify-between px-6 h-16 border-b border-white/10 backdrop-blur-sm">
+            <div className="relative flex items-center justify-between px-6 h-16 border-b border-white/10 backdrop-blur-sm flex-shrink-0">
               <div className="flex items-center gap-3">
                 <motion.div
                   animate={{ rotate: [0, 360], scale: [1, 1.1, 1] }}
@@ -735,9 +832,7 @@ const FilterDrawer = ({ isOpen, onClose, filters, onApply, onReset }: any) => {
                 </h3>
 
                 <AnimatePresence>
-                  {(localFilters.incomingNumber ||
-                    localFilters.outgoingNumber ||
-                    localFilters.sender) && (
+                  {Object.values(localFilters).some((v) => !!v) && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
@@ -760,8 +855,8 @@ const FilterDrawer = ({ isOpen, onClose, filters, onApply, onReset }: any) => {
               </motion.button>
             </div>
 
-            {/* Filter Controls */}
-            <div className="relative p-6 space-y-4 overflow-y-auto h-[calc(100%-8rem)]">
+            {/* Filter Controls (DYNAMIC) */}
+            <div className="relative p-6 space-y-4 overflow-y-auto flex-1">
               <motion.div
                 className="space-y-4"
                 variants={{
@@ -774,86 +869,117 @@ const FilterDrawer = ({ isOpen, onClose, filters, onApply, onReset }: any) => {
                 initial="hidden"
                 animate="show"
               >
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0, x: 50 },
-                    show: { opacity: 1, x: 0 },
-                  }}
-                >
-                  <label className="text-white/80 text-sm font-medium mb-2 block">
-                    Входящий номер
-                  </label>
-                  <FilterInput
-                    placeholder="Например: ВХ-123"
-                    icon={Mail}
-                    value={localFilters.incomingNumber || ""}
-                    onChange={(val: string) =>
-                      handleChange("incomingNumber", val)
-                    }
-                    onClear={() => handleChange("incomingNumber", "")}
-                  />
-                </motion.div>
+                {configItems.map((item: any, index: number) => {
+                  // Определяем тип поля
+                  const isInput = item.type === "input" || !item.type;
+                  const isSelect = item.type === "select";
+                  // Проверка на разные написания date-range для надежности
+                  const isDate =
+                    item.type === "date" ||
+                    item.type === "date_range" ||
+                    item.type === "date-range";
 
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0, x: 50 },
-                    show: { opacity: 1, x: 0 },
-                  }}
-                >
-                  <label className="text-white/80 text-sm font-medium mb-2 block">
-                    Исходящий номер
-                  </label>
-                  <FilterInput
-                    placeholder="Например: ИСХ-456"
-                    icon={Search}
-                    value={localFilters.outgoingNumber || ""}
-                    onChange={(val: string) =>
-                      handleChange("outgoingNumber", val)
-                    }
-                    onClear={() => handleChange("outgoingNumber", "")}
-                  />
-                </motion.div>
+                  return (
+                    <motion.div
+                      key={index}
+                      variants={{
+                        hidden: { opacity: 0, x: 50 },
+                        show: { opacity: 1, x: 0 },
+                      }}
+                    >
+                      <label className="text-white/80 text-sm font-medium mb-2 block">
+                        {item.label}
+                      </label>
 
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0, x: 50 },
-                    show: { opacity: 1, x: 0 },
-                  }}
-                >
-                  <label className="text-white/80 text-sm font-medium mb-2 block">
-                    Период
-                  </label>
-                  <motion.div
-                    whileHover={{ scale: 1.01 }}
-                    className="relative group"
-                  >
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-200/60 group-hover:text-white transition-colors z-10" />
-                    <div className="flex items-center h-10 w-full pl-9 pr-4 bg-white/10 border border-white/20 rounded-lg text-white/50 text-xs gap-2 cursor-pointer hover:bg-white/15 hover:border-white/30 transition-all">
-                      <span>С даты</span>
-                      <span className="text-white/20">→</span>
-                      <span>По дату</span>
-                      <Calendar className="ml-auto w-4 h-4 opacity-50" />
-                    </div>
-                  </motion.div>
-                </motion.div>
+                      {/* INPUT */}
+                      {isInput && (
+                        <FilterInput
+                          placeholder={item.placeholder}
+                          icon={getIcon(item.name)}
+                          value={localFilters[item.name] || ""}
+                          onChange={(val: string) =>
+                            handleChange(item.name, val)
+                          }
+                          onClear={() => handleChange(item.name, "")}
+                        />
+                      )}
 
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0, x: 50 },
-                    show: { opacity: 1, x: 0 },
-                  }}
-                >
-                  <label className="text-white/80 text-sm font-medium mb-2 block">
-                    Отправитель
-                  </label>
-                  <FilterInput
-                    placeholder="Название организации"
-                    icon={User}
-                    value={localFilters.sender || ""}
-                    onChange={(val: string) => handleChange("sender", val)}
-                    onClear={() => handleChange("sender", "")}
-                  />
-                </motion.div>
+                      {/* SELECT (Styled to match FilterInput) */}
+                      {isSelect && (
+                        <motion.div
+                          whileHover={{ scale: 1.01 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 25,
+                          }}
+                          className="relative group"
+                        >
+                          <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
+                            {/* Select Icon */}
+                            {getIcon(item.name) === User ? (
+                              <User className="w-4 h-4 text-blue-200/60 group-hover:text-white transition-colors" />
+                            ) : (
+                              <Filter className="w-4 h-4 text-blue-200/60 group-hover:text-white transition-colors" />
+                            )}
+                          </div>
+                          <select
+                            value={localFilters[item.name] || ""}
+                            onChange={(e) =>
+                              handleChange(item.name, e.target.value)
+                            }
+                            className="w-full h-10 pl-9 pr-8 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-blue-100/50 outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/20 focus:border-white/40 transition-all duration-300 text-sm backdrop-blur-sm appearance-none cursor-pointer"
+                          >
+                            <option value="" className="text-black">
+                              Все
+                            </option>
+                            {item.options?.map((opt: any) => (
+                              <option
+                                key={opt.value}
+                                value={opt.value}
+                                className="text-black"
+                              >
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/60">
+                            <ChevronDown className="w-4 h-4" />
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* DATE / DATE RANGE */}
+                      {isDate && (
+                        <motion.div
+                          whileHover={{ scale: 1.01 }}
+                          className="relative group"
+                        >
+                          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-200/60 group-hover:text-white transition-colors z-10" />
+                          <div className="flex items-center h-10 w-full pl-9 pr-4 bg-white/10 border border-white/20 rounded-lg text-white/50 text-xs gap-2 cursor-pointer hover:bg-white/15 hover:border-white/30 transition-all">
+                            <span>
+                              {Array.isArray(item.placeholder)
+                                ? item.placeholder[0]
+                                : item.placeholder}
+                            </span>
+                            {(item.type === "date_range" ||
+                              item.type === "date-range") && (
+                              <>
+                                <span className="text-white/20">→</span>
+                                <span>
+                                  {Array.isArray(item.placeholder)
+                                    ? item.placeholder[1]
+                                    : "По дату"}
+                                </span>
+                              </>
+                            )}
+                            <Calendar className="ml-auto w-4 h-4 opacity-50" />
+                          </div>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  );
+                })}
               </motion.div>
             </div>
 

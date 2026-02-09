@@ -9,7 +9,7 @@ declare global {
   interface ISelectOption<T = any> {
     label: ReactNode | string;
     value: string | number;
-    data: T;
+    data?: T;
   }
 
   interface IModalState {
