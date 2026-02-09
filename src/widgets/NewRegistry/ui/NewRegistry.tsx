@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useGetQuery, useDynamicSearchParams } from "@shared/lib"; // Твои хуки
 import { ApiRoutes } from "@shared/api";
@@ -7,14 +7,12 @@ import {
   Loader,
   Handshake,
   Signature,
-  Send,
   CheckCheck,
   XCircle,
   Eye,
 } from "lucide-react";
 import { RegistryLayout } from "./RegistryLayout";
 import { AppRoutes } from "@shared/config";
-import { CorrespondenceResponse } from "@entities/correspondence";
 
 // Типы статусов, сопоставленные с твоим API
 const STATUS_CONFIG: Record<string, any> = {
@@ -95,11 +93,7 @@ export const NewRegistry = ({
   });
 
   // Основной запрос данных
-  const {
-    data: responseData,
-    isPending,
-    refetch,
-  } = useGetQuery({
+  const { data: responseData } = useGetQuery({
     url,
     params: {
       ...extraParams,
@@ -109,6 +103,8 @@ export const NewRegistry = ({
       per_page: searchParams.per_page || 9, // 9 для красивой сетки 3x3
     },
   });
+
+  
 
   const documents = (responseData as any)?.data?.data || [];
   const meta = (responseData as any)?.data?.meta || {};
@@ -179,7 +175,6 @@ export const NewRegistry = ({
   return (
     <RegistryLayout
       documents={documents}
-      isLoading={isPending}
       meta={meta}
       tabs={statusTabs}
       activeTabId={currentTab}

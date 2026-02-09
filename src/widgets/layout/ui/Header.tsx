@@ -12,7 +12,7 @@ interface IProps {
   isModulesPage?: boolean;
 }
 
-export const Header = ({ isModulesPage }) => {
+export const Header = ({ isModulesPage }: IProps) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
