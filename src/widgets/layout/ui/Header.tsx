@@ -20,16 +20,22 @@ export const Header = () => {
   };
 
   return (
-    <header className="bg-white p-4 flex justify-between items-center rounded-[15px] h-[61px]">
+    <header className="bg-white p-4 flex justify-between items-center shadow-sm border border-gray-100 rounded-[15px] h-[61px]">
       <Link to={AppRoutes.PROFILE} className="mt-2" aria-label="На главную">
-        <Image src={Logo} preview={false} alt="Интерлинк Лого" width={175} height={35} />
+        <Image
+          src={Logo}
+          preview={false}
+          alt="Интерлинк Лого"
+          width={175}
+          height={35}
+        />
       </Link>
       <div className="flex items-center gap-2">
         <Button
           type="text"
           shape="circle"
           aria-label="Уведомления"
-          style={{ width: 40, height: 40, padding: 0 }} 
+          style={{ width: 40, height: 40, padding: 0 }}
           icon={<BellOutlined style={{ fontSize: 24 }} />}
         />
         <Button
@@ -37,8 +43,16 @@ export const Header = () => {
           type="text"
           shape="circle"
           aria-label="Выход"
-          style={{ width: 40, height: 40, padding: 0 }} 
-          icon={<img src={LogoutIcon} alt="Выйти" style={{ fontSize: 24 }} width={24} height={24} />}
+          style={{ width: 40, height: 40, padding: 0 }}
+          icon={
+            <img
+              src={LogoutIcon}
+              alt="Выйти"
+              style={{ fontSize: 24 }}
+              width={24}
+              height={24}
+            />
+          }
         />
         <Avatar size={45} src={UserAvatar} alt="Аватар пользователя" />
       </div>

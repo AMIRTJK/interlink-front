@@ -3,7 +3,11 @@ import { motion, LayoutGroup } from "framer-motion";
 import { Button, Tooltip } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { SidebarItem } from "./SidebarItem";
-import { containerVariants, itemWrapperVariants, layoutVerticalIcon } from "../lib/constants";
+import {
+  containerVariants,
+  itemWrapperVariants,
+  layoutVerticalIcon,
+} from "../lib/constants";
 import { MenuItem } from "../model";
 
 interface IProps {
@@ -24,7 +28,7 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
   isInternal,
 }) => {
   return (
-    <div className="w-full border-none! bg-white/50! backdrop-blur-2xl! rounded-xl! shadow-2xl! shadow-indigo-500/20! pt-0 px-4 pb-4!">
+    <div className="w-full border-none! bg-white/70 backdrop-blur-xl! transition-colors duration-500 rounded-b-2xl shadow-inner p-4!">
       <div className="flex items-center gap-6 h-full">
         <div className="flex items-center shrink-0 gap-2">
           <Button
@@ -37,9 +41,9 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
             <Button
               type="text"
               icon={
-                <span 
-                  dangerouslySetInnerHTML={{ __html: layoutVerticalIcon }} 
-                  className="flex items-center justify-center opacity-60 group-hover:opacity-100 group-hover:text-indigo-600 transition-all" 
+                <span
+                  dangerouslySetInnerHTML={{ __html: layoutVerticalIcon }}
+                  className="flex items-center justify-center opacity-60 group-hover:opacity-100 group-hover:text-indigo-600 transition-all"
                 />
               }
               onClick={() => onVariantChange?.("vertical")}
@@ -57,7 +61,11 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
         >
           <LayoutGroup id="sidebar-items">
             {finalMenuItems.map((item, index) => (
-              <motion.div key={item.key} variants={itemWrapperVariants} className="shrink-0 min-w-[170px]">
+              <motion.div
+                key={item.key}
+                variants={itemWrapperVariants}
+                className="shrink-0 min-w-[170px]"
+              >
                 <SidebarItem
                   item={item}
                   isActive={[activeKey].includes(item.key as string)}

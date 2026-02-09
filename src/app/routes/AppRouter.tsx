@@ -85,6 +85,12 @@ const CorrespondenceTableWrapper = lazy(() =>
   })),
 );
 
+const NewCorrespondenceTableWrapper = lazy(() =>
+  import("@widgets/NewRegistry").then((m) => ({
+    default: m.NewCorrespondenceTableWrapper,
+  })),
+);
+
 const HrPage = lazy(() =>
   import("@pages/modules/hr/Hr").then((m) => ({ default: m.HrPage })),
 );
@@ -220,7 +226,11 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        <CorrespondenceTableWrapper type="internal-incoming" />
+                        // <CorrespondenceTableWrapper type="internal-incoming" />
+                        <NewCorrespondenceTableWrapper
+                          type="internal-incoming"
+                          createButtonText="Добавить"
+                        />
                       }
                     />
                     <Route

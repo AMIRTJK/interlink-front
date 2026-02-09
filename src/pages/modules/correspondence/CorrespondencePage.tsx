@@ -6,9 +6,13 @@ import { useState, useEffect } from "react";
 
 export const CorrespondencePage = () => {
   const { isDetailView, shouldHideUI } = useCorrespondenceRoute();
-  
+
   const [variant, setVariant] = useState<"horizontal" | "vertical">(() => {
-    return (localStorage.getItem("registry-sidebar-variant") as "horizontal" | "vertical") || "horizontal";
+    return (
+      (localStorage.getItem("registry-sidebar-variant") as
+        | "horizontal"
+        | "vertical") || "horizontal"
+    );
   });
 
   useEffect(() => {
@@ -16,10 +20,12 @@ export const CorrespondencePage = () => {
   }, [variant]);
 
   return (
-    <div className={cn(
-      "flex w-full gap-3 h-full",
-      variant === "horizontal" ? "flex-col" : "flex-row"
-    )}>
+    <div
+      className={cn(
+        "flex w-full gap-3 h-full",
+        variant === "horizontal" ? "flex-col" : "flex-row",
+      )}
+    >
       <If is={!shouldHideUI}>
         <div className={variant === "vertical" ? "shrink-0" : ""}>
           <RegistrySidebar
