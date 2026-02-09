@@ -16,6 +16,10 @@ import { buildMenuTree } from "../lib/buildMenuTree";
 import { SidebarItem } from "./SidebarItem";
 import { FolderModal } from "./FolderModal";
 
+const layoutHorizontalIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/></svg>`;
+const layoutVerticalIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="9" x2="9" y1="3" y2="21"/></svg>`;
+
+
 const { Sider } = Layout;
 
 const containerVariants = {
@@ -36,8 +40,10 @@ const itemWrapperVariants = {
 
 export const ModuleSidebar = ({
   variant = "horizontal",
+  onVariantChange,
 }: {
   variant?: "horizontal" | "vertical";
+  onVariantChange?: (variant: "horizontal" | "vertical") => void;
 }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -316,6 +322,13 @@ export const ModuleSidebar = ({
                 onClick={() => handleAddClick(null)}
                 className="h-8! w-8! rounded-full! hover:bg-indigo-50!"
               />
+              <Button
+                type="text"
+                icon={<span dangerouslySetInnerHTML={{ __html: layoutVerticalIcon }} className="flex items-center justify-center opacity-60" />}
+                onClick={() => onVariantChange?.("vertical")}
+                className="h-8! w-8! rounded-full! hover:bg-gray-100!"
+                title="Переключить на боковой вид"
+              />
             </div>
 
             <motion.div
@@ -391,16 +404,25 @@ export const ModuleSidebar = ({
                   className="h-6! w-6! addFolderRootSideBar"
                 />
               )}
-              <Button
-                type="text"
-                onClick={() => setCollapsed(!collapsed)}
-                className={
-                  collapsed
-                    ? "mx-auto h-7! w-7! outline-none! focus:outline-none!"
-                    : "ml-auto outline-none! focus:outline-none!"
+                <Button
+                  type="text"
+                  onClick={() => setCollapsed(!collapsed)}
+                  className={
+                    collapsed
+                      ? "mx-auto h-7! w-7! outline-none! focus:outline-none!"
+                      : "ml-auto outline-none! focus:outline-none!"
                 }
                 icon={<img src={sideBarIcons.collapseIcon} alt="collapse" />}
-              />
+                />
+                {!collapsed && (
+                  <Button
+                    type="text"
+                    icon={<span dangerouslySetInnerHTML={{ __html: layoutHorizontalIcon }} className="flex items-center justify-center opacity-60" />}
+                    onClick={() => onVariantChange?.("horizontal")}
+                    className="h-7! w-7! flex items-center justify-center hover:bg-black/5 rounded-lg"
+                    title="Переключить на верхний вид"
+                  />
+                )}
             </div>
           </div>
 

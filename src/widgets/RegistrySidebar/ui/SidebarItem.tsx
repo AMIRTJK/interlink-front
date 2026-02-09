@@ -42,7 +42,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   variant = "vertical",
   // _index = 0,
 }) => {
-  const [isOpen, setIsOpen] = useState(isActive);
+  const [isOpen, setIsOpen] = useState(false);
   
   const toggleOpen = (e: React.MouseEvent) => {
     if (collapsed) return; 
@@ -175,6 +175,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
                     collapsed={collapsed}
                     activeKey={activeKey}
                     index={idx}
+                    variant={variant}
                   />
                 ))}
             </div>
