@@ -4,7 +4,7 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { AppRoutes } from "@shared/config";
 import "./style.css";
 import { PlusOutlined } from "@ant-design/icons";
-import { Layout, Button, App, Form } from "antd";
+import { Layout, Button, App, Form, Tooltip } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { _axios, ApiRoutes } from "@shared/api";
@@ -322,13 +322,19 @@ export const ModuleSidebar = ({
                 onClick={() => handleAddClick(null)}
                 className="h-8! w-8! rounded-full! hover:bg-indigo-50!"
               />
-              <Button
-                type="text"
-                icon={<span dangerouslySetInnerHTML={{ __html: layoutVerticalIcon }} className="flex items-center justify-center opacity-60" />}
-                onClick={() => onVariantChange?.("vertical")}
-                className="h-8! w-8! rounded-full! hover:bg-gray-100!"
-                title="Переключить на боковой вид"
-              />
+              <Tooltip title="Вертикальный вид" placement="bottom">
+                <Button
+                  type="text"
+                  icon={
+                    <span 
+                      dangerouslySetInnerHTML={{ __html: layoutVerticalIcon }} 
+                      className="flex items-center justify-center opacity-60 group-hover:opacity-100 group-hover:text-indigo-600 transition-all" 
+                    />
+                  }
+                  onClick={() => onVariantChange?.("vertical")}
+                  className="h-8! w-8! rounded-full! hover:bg-gray-100! group"
+                />
+              </Tooltip>
             </div>
 
             <motion.div
@@ -415,13 +421,19 @@ export const ModuleSidebar = ({
                 icon={<img src={sideBarIcons.collapseIcon} alt="collapse" />}
                 />
                 {!collapsed && (
-                  <Button
-                    type="text"
-                    icon={<span dangerouslySetInnerHTML={{ __html: layoutHorizontalIcon }} className="flex items-center justify-center opacity-60" />}
-                    onClick={() => onVariantChange?.("horizontal")}
-                    className="h-7! w-7! flex items-center justify-center hover:bg-black/5 rounded-lg"
-                    title="Переключить на верхний вид"
-                  />
+                  <Tooltip title="Горизонтальный вид" placement="right">
+                    <Button
+                      type="text"
+                      icon={
+                        <span 
+                          dangerouslySetInnerHTML={{ __html: layoutHorizontalIcon }} 
+                          className="flex items-center justify-center opacity-60 group-hover:opacity-100 group-hover:text-indigo-600 transition-all" 
+                        />
+                      }
+                      onClick={() => onVariantChange?.("horizontal")}
+                      className="h-7! w-7! flex items-center justify-center hover:bg-black/5 rounded-lg group"
+                    />
+                  </Tooltip>
                 )}
             </div>
           </div>
