@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DocumentHeaderForm, Recipient } from "./ui/DocumentHeaderForm";
 import { Form, Modal } from "antd";
 import { useNavigate, useParams } from "react-router";
-import { DocumentEditor } from "./ui/DocumentEditor";
+// import { DocumentEditor } from "./ui/DocumentEditor";
 import {
   CreateInternalRequest,
   InternalCorrespondenceResponse,
@@ -20,17 +20,21 @@ import {
 import { ApiRoutes } from "@shared/api";
 import { WorkflowParticipantsPanel } from "./ui/WorkflowParticipantsPanel";
 import { generateMockWorkflow } from "./lib";
+import { Editor } from "./ui/Editor";
+import { AppRoutes } from "@shared/config";
 
 interface IProps {
   mode: "create" | "show";
   initialData?: InternalCorrespondenceResponse;
   isLoading?: boolean;
+  type: string;
 }
 
 export const InternalCorrespondece: React.FC<IProps> = ({
   mode,
   initialData,
   isLoading,
+  type,
 }) => {
   const { id } = useParams<{ id: string }>();
 
@@ -47,9 +51,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   const [isParticipantsPanelCollapsed, setIsParticipantsPanelCollapsed] =
     useState(false);
 
-  const effectiveMode = "create";
-  const [currentMode, setCurrentMode] = useState<"create" | "show">(mode);
-
   const [initialRecipients, setInitialRecipients] = useState<any[]>([]);
   const [initialCC, setInitialCC] = useState<any[]>([]);
   // Состояние для начального контента редактора
@@ -58,6 +59,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   const [form] = Form.useForm();
 
   const [editorBody, setEditorBody] = useState<string>("");
+
+  const isIncoming = type === "internal-incoming";
 
   const {
     data: rawWorkflowData,
@@ -157,8 +160,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   }, [rawWorkflowData]);
 
   const handleReply = () => {
-    setCurrentMode("create");
     close();
+    navigate(AppRoutes.INTERNAL_OUTGOING_CREATE);
   };
 
   const { mutate: createDraft, isPending: isCreating } =
@@ -202,7 +205,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         body: editorBody,
         recipients: {
           to: values.recipients,
-          // copy: values.copy, // Если нужно
+          cc: values.copy,
         },
       };
 
@@ -243,7 +246,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         }));
 
       const ccRecipients: Recipient[] = rawRecipients
-        .filter((r) => r.type === "copy")
+        .filter((r) => r.type === "cc")
         .map((r) => ({
           id: r.user.id,
           full_name: r.user.full_name,
@@ -254,7 +257,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       // 3. Сеттим в форму
       form.setFieldsValue({
         subject: initialData.subject,
-        number: initialData.reg_number,
+        number: initialData.reg_number || "Не указано",
         date: dateValue,
         recipients: toRecipients.map((r) => r.id),
         copy: ccRecipients.map((r) => r.id),
@@ -272,8 +275,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     }
   }, [initialData, form]);
 
-  console.log(initialRecipients);
-
   return (
     <div
       className={`relative min-h-screen bg-[#f9fafb] ${isOpen ? "max-h-[768px] overflow-hidden" : ""}`}
@@ -284,20 +285,27 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       />
 
       <div className="flex w-full justify-between">
-        <main className="flex-1 mx-auto max-w-[1000px] px-4 py-8 md:px-8 md:py-12 transition-all duration-300">
-          <div className="flex flex-col gap-4">
+        <main className="flex-1 mx-auto max-w-[1000px]  md:py-2 transition-all duration-300">
+          <div className="flex flex-col gap-4 ml-20">
             {/* <div className="max-w-4xl flex flex-col gap-4 mx-auto px-8 py-12"> */}
             <DocumentHeaderForm
               isDarkMode={isDarkMode}
               form={form}
               initialRecipients={initialRecipients}
               initialCC={initialCC}
+              isIncoming={isIncoming}
             />
-            <DocumentEditor
+            {/* <DocumentEditor
               isDarkMode={isDarkMode}
               mode={effectiveMode}
               onChange={setEditorBody}
               initialContent={initialEditorContent}
+            /> */}
+            <Editor
+              onChange={setEditorBody}
+              initialContent={initialEditorContent}
+              type={type}
+              isIncoming={isIncoming}
             />
           </div>
         </main>
@@ -320,9 +328,9 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         open={isOpen}
         onClose={close}
         docId={id}
-        mode={effectiveMode}
         onReply={handleReply}
         onRefresh={refetchWorkflow}
+        isIncoming={isIncoming}
       />
       <ActionToolbar
         setIsInspectorOpen={open}
@@ -330,22 +338,27 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         handleSend={handleSendClick}
         onSendLoading={isSending}
         onSave={onSaveClick}
-        mode={effectiveMode}
         onSaveLoading={isCreating || isUpdating}
         isActionsEnabled={isDraftCreated}
+        isIncoming={isIncoming}
       />
       <Modal
         title="Предварительный просмотр"
         open={isPreviewOpen}
         onCancel={() => setIsPreviewOpen(false)}
         footer={null}
-        width={1000}
         centered
+        width="100%"
         destroyOnClose
-        bodyStyle={{ height: "80vh", padding: 0, overflow: "hidden" }}
+        bodyStyle={{ height: "90vh", padding: 0, overflow: "hidden" }}
       >
-        <div className="p-4 bg-gray-100 rounded-lg max-h-[80vh] overflow-y-auto">
-          <DocumentEditor isDarkMode={isDarkMode} mode="show" />
+        <div className="flex justify-center">
+          <Editor
+            onChange={setEditorBody}
+            initialContent={initialEditorContent || editorBody}
+            type={type}
+            isPreviewOpen={isPreviewOpen}
+          />
         </div>
       </Modal>
     </div>

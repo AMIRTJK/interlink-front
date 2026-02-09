@@ -8,16 +8,17 @@ import {
   SendOutlined,
 } from "@ant-design/icons";
 import { ActionButton } from "./ui/ActionButton";
+import { If } from "../If";
 
 interface IProps {
   onSave?: () => void;
   setShowPreview: (val: boolean) => void;
   setIsInspectorOpen: (val: boolean) => void;
   handleSend: () => void;
-  mode?: "create" | "show";
   onSaveLoading: boolean;
   onSendLoading: boolean;
   isActionsEnabled: boolean;
+  isIncoming: boolean;
 }
 
 export const ActionToolbar: React.FC<IProps> = ({
@@ -27,22 +28,24 @@ export const ActionToolbar: React.FC<IProps> = ({
   handleSend,
   onSaveLoading,
   onSendLoading,
-  mode = "create",
   isActionsEnabled,
+  isIncoming,
 }) => {
   return (
     <motion.div
       initial={{ y: 80, x: "-50%", opacity: 0 }}
       animate={{ y: 0, x: "-50%", opacity: 1 }}
-      className="fixed bottom-8 left-1/2 z-40"
+      className="fixed bottom-20 left-1/2 z-40"
     >
-      <div className="flex items-center gap-1 px-3 py-2 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl bg-white/90 border border-white">
-        <ActionButton
-          icon={<SaveOutlined style={{ fontSize: "18px" }} />}
-          label="Сохранить"
-          onClick={onSave}
-          loading={onSaveLoading}
-        />
+      <div className="flex items-center gap-1 px-3 py-2 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.2)] backdrop-blur-xl bg-white/90 border border-white">
+        <If is={!isIncoming}>
+          <ActionButton
+            icon={<SaveOutlined style={{ fontSize: "18px" }} />}
+            label="Сохранить"
+            onClick={onSave}
+            loading={onSaveLoading}
+          />
+        </If>
         <ActionButton
           icon={<EyeOutlined style={{ fontSize: "18px" }} />}
           label="Просмотр"
@@ -55,7 +58,7 @@ export const ActionToolbar: React.FC<IProps> = ({
           onClick={() => setIsInspectorOpen(true)}
           disabled={!isActionsEnabled}
         />
-        {mode !== "show" && (
+        <If is={!isIncoming}>
           <Button
             type="primary"
             size="large"
@@ -76,7 +79,7 @@ export const ActionToolbar: React.FC<IProps> = ({
           >
             Отправить
           </Button>
-        )}
+        </If>
       </div>
     </motion.div>
   );

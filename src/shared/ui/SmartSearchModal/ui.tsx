@@ -21,17 +21,17 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
     selectedIds: [],
     activePreviewItem: null,
   });
+
   const [selectedItemsMap, setSelectedItemsMap] = useState<
     Record<string, ISearchItem>
   >({});
   const [searchText, setSearchText] = useState("");
+
   const { data: fetchedData, isLoading } = useGetQuery<any, any>({
     url: querySettings?.url,
     params: {
       ...querySettings?.params,
-      ...(mode === "attach"
-        ? { subject: searchText, sender_name: searchText }
-        : { search: searchText }), // Для поиска людей теперь используем один ключ search
+      ...(mode === "attach" ? { q: searchText } : { search: searchText }), // Для поиска людей теперь используем один ключ search
       page: 1,
       per_page: 50,
     },

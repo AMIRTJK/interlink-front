@@ -25,9 +25,9 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
   open,
   onClose,
   docId,
-  mode = "create",
   onReply,
   onRefresh,
+  isIncoming,
 }) => {
   const [activeTab, setActiveTab] = useState<TTab>("actions");
 
@@ -46,9 +46,19 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
   );
   const [selectedApprovers, setSelectedApprovers] = useState<ISearchItem[]>([]);
 
+  const { data: usersData } = useGetQuery({
+    url: ApiRoutes.GET_USERS,
+    useToken: true,
+  });
+
   // 2. Мутации для приглашения
   const { mutate: inviteSigner } = useMutationQuery({
     url: docId ? ApiRoutes.INTERNAL_INVITE_SIGNER.replace(":id", docId) : "",
+    method: "POST",
+  });
+
+  const { mutate: attachIncoming } = useMutationQuery({
+    url: docId ? ApiRoutes.ATTACH_INTERNAL_INCOMING.replace(":id", docId) : "",
     method: "POST",
   });
 
@@ -111,6 +121,12 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
         );
       });
 
+      const incomingId = selectedItems[0]?.id;
+
+      if (incomingId) {
+        attachIncoming({ incoming_id: incomingId });
+      }
+
       if (onRefresh) {
         setTimeout(() => {
           onRefresh();
@@ -143,24 +159,33 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
           title: "Прикрепить письмо",
           mode: "attach" as const,
           // Используем внутренние входящие письма согласно спецификации
-          querySettings: { url: ApiRoutes.GET_INTERNAL_INCOMING as string },
+          // querySettings: { url: ApiRoutes.GET_INTERNAL_INCOMING as string },
+          querySettings: {
+            url: ApiRoutes.GET_INTERNAL_INCOMING_PICKER as string,
+          },
           transformResponse: (
             items: Array<{
               id: string;
               subject?: string;
-              sender_name?: string;
-              doc_date?: string;
-              created_at?: string;
-              kind?: string;
+              creator_id?: string;
+              reg_number?: string;
+              sent_at?: string;
             }>,
           ) =>
-            items.map((item) => ({
-              id: item.id,
-              title: item.subject || "Без темы",
-              subtitle: item.sender_name || "Неизвестный отправитель",
-              date: item.doc_date || item.created_at,
-              tag: item.kind === "incoming" ? "Входящее" : "Исходящее",
-            })),
+            items.map((item) => {
+              const creator = usersData?.data?.data.find(
+                (user: any) => user.id === item.creator_id,
+              );
+
+              return {
+                id: item.id,
+                title: item.subject || "Без темы",
+                subtitle: creator?.full_name || "Не указано",
+                reg_number: item.reg_number || "Не указано",
+                date: item.sent_at,
+                tag: "Входящее",
+              };
+            }),
           multiple: true,
         };
       case "signer":
@@ -274,7 +299,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
 
                   <div className="drawer-content-scroll custom-scrollbar">
                     <If is={activeTab === "actions"}>
-                      {mode === "show" ? (
+                      {isIncoming === true ? (
                         <div className="flex flex-col gap-3 mt-5">
                           <Ui.Button
                             onClick={onReply}
@@ -380,7 +405,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                               type="primary"
                               className=" w-full! p-5! font-bold! bg-[#FF6B6B]! hover:bg-[#ff5252]! text-white rounded-xl! transition-colors duration-200 flex items-center justify-center gap-2"
                             >
-                              Сохранить участников
+                              Сохранить
                             </Ui.Button>
                           </div>
                         </div>

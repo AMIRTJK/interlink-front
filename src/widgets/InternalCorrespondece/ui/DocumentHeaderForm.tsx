@@ -23,6 +23,7 @@ interface DocumentHeaderFormProps {
   form: FormInstance;
   initialRecipients?: Recipient[];
   initialCC?: Recipient[];
+  isIncoming: boolean;
 }
 
 export interface Recipient {
@@ -39,10 +40,13 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
   form,
   initialRecipients = [],
   initialCC = [],
+  isIncoming,
 }) => {
   const [selectedRecipients, setSelectedRecipients] =
     useState<Recipient[]>(initialRecipients);
   const [selectedCC, setSelectedCC] = useState<Recipient[]>(initialCC);
+
+  console.log(selectedCC);
 
   const [activeSelectorMode, setActiveSelectorMode] =
     useState<SelectionMode>(null);
@@ -173,15 +177,17 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           </Tooltip>
         )}
 
-        <Button
-          antdIcon={<PlusOutlined style={{ fontSize: "12px" }} />}
-          type="text"
-          onClick={() => setActiveSelectorMode(mode)}
-          className={`
+        <If is={!isIncoming}>
+          <Button
+            antdIcon={<PlusOutlined style={{ fontSize: "12px" }} />}
+            type="text"
+            onClick={() => setActiveSelectorMode(mode)}
+            className={`
             min-w-[32px]! h-[32px]! w-[32px]! rounded-full! flex items-center justify-center p-0!
             ${textSecondary} hover:bg-gray-100 dark:hover:bg-gray-800
           `}
-        />
+          />
+        </If>
       </div>
     );
   };
@@ -191,7 +197,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
       <Form
         form={form}
         layout="vertical"
-        className="flex flex-col gap-3"
+        className="flex flex-col gap-1"
         initialValues={{
           date: dayjs(),
           number: "",
@@ -207,11 +213,11 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           <Input />
         </Form.Item>
 
-        <Form.Item name="subject" className="mb-4" rules={[requiredRule]}>
+        <Form.Item name="subject" rules={[requiredRule]} noStyle>
           <Input
             placeholder="Тема письма..."
             variant="borderless"
-            className="p-0! h-12! text-4xl! font-bold! text-gray-900! placeholder:text-4xl! placeholder:text-gray-300! dark:placeholder:text-gray-600! bg-transparent! border-none! focus:outline-none! focus:ring-0! transition-all!"
+            className="p-0! h-12! text-2xl! font-bold! text-gray-900! placeholder:text-2xl! placeholder:text-gray-300! dark:placeholder:text-gray-600! bg-transparent! border-none! focus:outline-none! focus:ring-0! transition-all!"
             autoComplete="off"
             styles={{ input: { caretColor: "#A78BFA" } }}
           />
@@ -256,7 +262,6 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
             <Form.Item name="number" noStyle>
               <Input
                 disabled
-                placeholder="Номер письма"
                 variant="borderless"
                 className={`
                   px-0! py-0! h-auto! w-32! text-sm! ${textSecondary}
@@ -275,13 +280,13 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           {renderSelectionArea(
             selectedCC,
             "copy",
-            "Копия (необязательно)",
+            `Копия ${isIncoming ? "(Не указано)" : "(необязательно)"} `,
             <CopyOutlined style={{ fontSize: "14px" }} />,
           )}
         </div>
       </Form>
 
-      <If is={activeSelectorMode !== null}>
+      <If is={activeSelectorMode !== null && !isIncoming}>
         <RecipientSelectorModal
           isOpen={true}
           onClose={closeSelector}
@@ -300,6 +305,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           isDarkMode={isDarkMode}
           recipients={viewerProps.list}
           onRemove={viewerProps.onRemove}
+          isIncoming={isIncoming}
         />
       </If>
     </div>

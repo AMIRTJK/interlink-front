@@ -40,7 +40,7 @@ const softMaterialPresets = [
 const NavButton = ({ icon, label, active, onClick }: any) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-sm font-medium ${
+    className={`flex items-center cursor-pointer gap-2 px-3 py-2 rounded-lg transition-all text-sm font-medium ${
       active
         ? "bg-black/5 dark:bg-white/5 text-gray-900 dark:text-gray-100"
         : "text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5"
@@ -89,46 +89,54 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
     }),
   );
 
+  const { data: incomingDataResponse } = useGetQuery({
+    method: "GET",
+    url: ApiRoutes.GET_INTERNAL_INCOMING,
+  });
+
+  const incomingData = (incomingDataResponse?.data?.data || []).map(
+    (item: any) => ({
+      id: String(item.id),
+      // 1. Тема
+      title: item.subject || "Без темы",
+      date: item.created_at
+        ? new Date(item.created_at).toLocaleDateString()
+        : "",
+      from: item.recipients?.[0]?.user?.full_name,
+      status: "Отправлено",
+    }),
+  );
+
+  const { data: outgoingDataResponse } = useGetQuery({
+    method: "GET",
+    url: ApiRoutes.GET_INTERNAL_OUTGOING,
+  });
+
+  const outgoingData = (outgoingDataResponse?.data?.data || []).map(
+    (item: any) => ({
+      id: String(item.id),
+      // 1. Тема
+      title: item.subject || "Без темы",
+      date: item.created_at
+        ? new Date(item.created_at).toLocaleDateString()
+        : "",
+      from: item.recipients?.[0]?.user?.full_name,
+      status: "Отправлено",
+    }),
+  );
+
   const navRegistries: Record<string, NavRegistry> = {
     inbox: {
       label: "Входящие",
-      items: [
-        {
-          id: "1",
-          title: "О согласовании бюджета",
-          date: "16.04.2024",
-          from: "Иванов И.И.",
-          status: "Новое",
-        },
-        {
-          id: "2",
-          title: "Запрос документов",
-          date: "15.04.2024",
-          from: "Петрова М.А.",
-          status: "Прочитано",
-        },
-      ],
+      items: incomingData,
     },
     sent: {
       label: "Отправленные",
-      items: [
-        {
-          id: "1",
-          title: "Отчет за квартал",
-          date: "15.04.2024",
-          status: "Доставлено",
-        },
-      ],
+      items: outgoingData,
     },
     drafts: {
       label: "Черновики",
       items: draftsData,
-    },
-    history: {
-      label: "История",
-      items: [
-        { id: "1", title: "Приказ №125", date: "10.04.2024", status: "Архив" },
-      ],
     },
   };
 
@@ -178,16 +186,6 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                 )
               }
             />
-            <NavButton
-              icon={<HistoryOutlined />}
-              label="История"
-              active={activeNavRegistry === "history"}
-              onClick={() =>
-                setActiveNavRegistry(
-                  activeNavRegistry === "history" ? null : "history",
-                )
-              }
-            />
           </div>
         </div>
 
@@ -195,14 +193,14 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowColorPicker(!showColorPicker)}
-            className={`p-2 rounded-lg transition-all ${textSecondary} hover:bg-black/5 dark:hover:bg-white/5`}
+            className={`p-2 rounded-lg transition-all cursor-pointer ${textSecondary} hover:bg-black/5 dark:hover:bg-white/5`}
           >
             <BgColorsOutlined className="text-[20px]" />
           </button>
 
           <button
             onClick={toggleDarkMode}
-            className={`p-2 rounded-lg transition-all ${textSecondary} hover:bg-black/5 dark:hover:bg-white/5`}
+            className={`p-2 rounded-lg transition-all cursor-pointer ${textSecondary} hover:bg-black/5 dark:hover:bg-white/5`}
           >
             {isDarkMode ? (
               <SunOutlined className="text-[20px]" />
@@ -211,19 +209,19 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
             )}
           </button>
 
-          <button
+          {/* <button
             className={`p-2 rounded-lg transition-all ${textSecondary} hover:bg-black/5 dark:hover:bg-white/5`}
           >
             <SettingOutlined className="text-[20px]" />
-          </button>
+          </button> */}
 
-          <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-2" />
+          {/* <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-2" /> */}
 
-          <button
+          {/* <button
             className={`px-4 py-2 rounded-lg transition-all ${textSecondary} hover:bg-black/5 dark:hover:bg-white/5 text-sm font-medium`}
           >
             <SearchOutlined className="text-[16px]" />
-          </button>
+          </button> */}
         </div>
       </nav>
 
@@ -282,7 +280,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                         : "rgba(229, 231, 235, 0.5)",
                     }}
                   >
-                    <div className="flex justify-between mb-1">
+                    <div className="flex items-center justify-between mb-1">
                       <p className={`font-semibold text-sm ${textPrimary}`}>
                         {item.title}
                       </p>

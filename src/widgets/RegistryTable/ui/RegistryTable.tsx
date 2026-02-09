@@ -102,6 +102,8 @@ export const RegistryTable = <T extends Record<string, unknown>>({
     [],
   );
 
+  const showExpandRow = type.includes("internal");
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleOpenModal = () => {
@@ -301,21 +303,32 @@ export const RegistryTable = <T extends Record<string, unknown>>({
               onDragEnd: (e) => {
                 (e.currentTarget as HTMLElement).classList.remove("dragging");
               },
-            })}
-            expandable={{
-              expandedRowRender: expandedRowRender,
-              expandRowByClick: true,
-              expandedRowKeys: expandedRowKeys,
-              onExpand: (expanded, record) => {
-                const key = record.id as number;
-                setExpandedRowKeys(
-                  expanded
-                    ? [...expandedRowKeys, key]
-                    : expandedRowKeys.filter((k) => k !== key),
-                );
+              onClick: () => {
+                handleGetIdCorrespondence(record);
+
+                if (showExpandRow) {
+                  handleNavigateToLetter(record);
+                }
               },
-              showExpandColumn: false,
-            }}
+            })}
+            expandable={
+              !showExpandRow
+                ? {
+                    expandedRowRender: expandedRowRender,
+                    expandRowByClick: true,
+                    expandedRowKeys: expandedRowKeys,
+                    onExpand: (expanded, record) => {
+                      const key = record.id as number;
+                      setExpandedRowKeys(
+                        expanded
+                          ? [...expandedRowKeys, key]
+                          : expandedRowKeys.filter((k) => k !== key),
+                      );
+                    },
+                    showExpandColumn: false,
+                  }
+                : undefined
+            }
           />
         </div>
       </div>
