@@ -14,22 +14,29 @@ interface SidebarItemProps {
   collapsed?: boolean;
   activeKey?: string | number;
   index?: number;
+  variant?: "horizontal" | "vertical";
 }
 
-/* Variants for the row content (to stagger icon and text) */
 const rowVariants = {
-  hidden: {},
+  hidden: { opacity: 0, x: -30 },
   visible: {
+    opacity: 1,
+    x: 0,
     transition: {
-      staggerChildren: 0.1,
+      duration: 0.4,
     },
   },
 };
 
-/* Variants for the inner elements (Icon, Text) */
 const contentVariants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: { opacity: 1, x: 0 },
+  hidden: { opacity: 0, x: -15 },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    transition: {
+      duration: 0.3,
+    }
+  },
 };
 
 export const SidebarItem: React.FC<SidebarItemProps> = ({
@@ -38,9 +45,9 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   depth = 0,
   collapsed = false,
   activeKey,
-  // _index = 0,
+  variant = "vertical",
 }) => {
-  const [isOpen, setIsOpen] = useState(isActive);
+  const [isOpen, setIsOpen] = useState(false);
   
   const toggleOpen = (e: React.MouseEvent) => {
     if (collapsed) return; 
@@ -56,21 +63,22 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   const content = (
       <motion.div
         variants={rowVariants}
-        // Removed initial/animate props to allow inheritance from parent
         whileHover={{ 
           x: isCollapsedMode ? 0 : (depth === 0 ? 1.2 : 8),
-          transition: { duration: 0.15, ease: "easeOut" }
+          transition: { duration: 0.15 }
         }}
         whileTap={{ scale: 0.97 }}
         className={cn(
-          "flex items-center w-full group focus:outline-none! active:outline-none! border-transparent rounded-2xl cursor-pointer mb-1 relative select-none px-3 py-2",
+          "flex items-center group focus:outline-none! active:outline-none! border border-transparent rounded-2xl cursor-pointer relative select-none px-3 py-2",
+          variant === "vertical" ? "w-full" : "min-w-max",
           isCollapsedMode ? "justify-center px-0" : "gap-1",
           isSelected
             ? (isCollapsedMode 
                 ? "text-indigo-700!" 
                 : "bg-linear-to-r! from-indigo-400/30! to-purple-400/30! border-white/50! text-indigo-700! shadow-lg! shadow-indigo-200/40!")
             : "text-gray-600! hover:text-indigo-600! hover:shadow-sm hover:shadow-indigo-200/20 transition-shadow duration-200",
-          item.folderName === "Создать новую папку" && "crtChildrenFolderHidden"
+          item.folderName === "Создать новую папку" && "crtChildrenFolderHidden",
+          variant === "horizontal" && "crtChildrenFolderHidden"
         )}
         onClick={(e) => {
              item.onTitleClick?.(e);
@@ -107,7 +115,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         {!isCollapsedMode && (
          <div className="flex-1 flex items-center justify-between min-w-0">
            <motion.div variants={contentVariants} className={cn(
-             "flex-1 truncate text-xs font-medium tracking-wide",
+             "flex-1 text-xs font-medium tracking-wide whitespace-nowrap",
              isSelected ? "font-semibold" : ""
            )}>
               {item.label}
@@ -123,9 +131,9 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
                )}
              >
                 <motion.div
-                   animate={{ rotate: isOpen ? 0 : -90 }}
-                   transition={{ duration: 0.3, ease: "easeInOut" }}
-                 >
+                    animate={{ rotate: isOpen ? 0 : -90 }}
+                    transition={{ duration: 0.3 }}
+                  >
                    <span 
                      className="flex items-center justify-center w-4 h-4 [&>svg]:w-full [&>svg]:h-full [&>svg]:fill-current"
                      dangerouslySetInnerHTML={{ __html: sidebarArrow }}
@@ -137,8 +145,12 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         )}
       </motion.div>
   );
+
   return (
-    <div className="select-none">
+    <motion.div 
+      variants={rowVariants}
+      className="select-none"
+    >
        {isCollapsedMode ? (
            <Tooltip title={item.label} placement="right">
                {content}
@@ -150,14 +162,25 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
       <AnimatePresence>
         {!isCollapsedMode && hasChildren && isOpen && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{
-              duration: 0.35,
-              ease: [0.4, 0, 0.2, 1],
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={{
+              hidden: { height: 0, opacity: 0 },
+              visible: { 
+                height: "auto", 
+                opacity: 1,
+                transition: {
+                  height: { duration: 0.35 },
+                  opacity: { duration: 0.3 },
+                  staggerChildren: 0.2, 
+                }
+              }
             }}
-            className="overflow-hidden crtChildrenFolderHidden"
+            className={cn(
+               "overflow-hidden",
+               variant === "horizontal" && "crtChildrenFolderHidden"
+            )}
           >
             <div className="ml-4 pl-1 border-l-2 border-dotted border-indigo-200/50 mt-1">
                 {item.children!.map((child: MenuItem, idx: number) => (
@@ -169,12 +192,13 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
                     collapsed={collapsed}
                     activeKey={activeKey}
                     index={idx}
+                    variant={variant}
                   />
                 ))}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 };
