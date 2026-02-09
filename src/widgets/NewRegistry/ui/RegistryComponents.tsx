@@ -591,58 +591,60 @@ export const Pagination = ({
   onPageChange,
   t,
 }: any) => {
-  // Тексты по умолчанию, если t не передан
   const texts = t || { back: "Назад", forward: "Вперед" };
 
+  // Приводим к числу на всякий случай, чтобы сравнение работало корректно
+  const current = Number(currentPage);
+
   const pages = useMemo(() => {
-    const arr: (number | string)[] = [];
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) {
-        arr.push(i);
+    const delta = 2; // Сколько страниц показывать слева и справа от текущей
+    const range = [];
+    const rangeWithDots: (number | string)[] = [];
+    let l;
+
+    // Алгоритм генерации массива страниц
+    range.push(1);
+
+    if (totalPages <= 1) return [1];
+
+    for (let i = current - delta; i <= current + delta; i++) {
+      if (i < totalPages && i > 1) {
+        range.push(i);
       }
-    } else {
-      arr.push(1);
-      if (currentPage > 3) {
-        arr.push("...");
-      }
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(totalPages - 1, currentPage + 1);
-      for (let i = start; i <= end; i++) {
-        arr.push(i);
-      }
-      if (currentPage < totalPages - 2) {
-        arr.push("...");
-      }
-      arr.push(totalPages);
     }
-    return arr;
-  }, [currentPage, totalPages]);
+    range.push(totalPages);
+
+    // Добавление троеточий
+    for (const i of range) {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push("...");
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    }
+
+    return rangeWithDots;
+  }, [current, totalPages]);
 
   return (
     <motion.div
-      initial={{
-        opacity: 0,
-        y: 20,
-      }}
-      animate={{
-        opacity: 1,
-        y: 0,
-      }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       className="flex items-center justify-center gap-2 py-4"
     >
       <motion.button
-        whileHover={{
-          scale: 1.05,
-        }}
-        whileTap={{
-          scale: 0.95,
-        }}
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => onPageChange(current - 1)}
+        disabled={current === 1}
         className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-          currentPage === 1
+          current === 1
             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-            : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200"
+            : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200 cursor-pointer"
         }`}
       >
         <ChevronLeft className="w-4 h-4" />
@@ -661,19 +663,16 @@ export const Pagination = ({
               </span>
             );
           }
-          const pageNum = page as number;
-          const isActive = pageNum === currentPage;
+          const pageNum = Number(page);
+          const isActive = pageNum === current;
+
           return (
             <motion.button
               key={pageNum}
-              whileHover={{
-                scale: isActive ? 1 : 1.1,
-              }}
-              whileTap={{
-                scale: 0.95,
-              }}
+              whileHover={{ scale: isActive ? 1 : 1.1 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => onPageChange(pageNum)}
-              className={`min-w-[36px] h-9 px-3 rounded-lg text-sm font-medium transition-all ${
+              className={`min-w-[36px] h-9 px-3 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                 isActive
                   ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md"
                   : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
@@ -686,18 +685,14 @@ export const Pagination = ({
       </div>
 
       <motion.button
-        whileHover={{
-          scale: 1.05,
-        }}
-        whileTap={{
-          scale: 0.95,
-        }}
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => onPageChange(current + 1)}
+        disabled={current === totalPages}
         className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-          currentPage === totalPages
+          current === totalPages
             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-            : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200"
+            : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200 cursor-pointer"
         }`}
       >
         <span className="hidden sm:inline">{texts.forward}</span>
