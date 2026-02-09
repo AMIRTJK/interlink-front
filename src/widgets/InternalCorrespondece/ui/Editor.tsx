@@ -99,9 +99,17 @@ const CLOUD_SERVICES_TOKEN_URL =
 interface EditorProps {
   onChange?: (data: string) => void;
   initialContent?: string;
+  type: string;
+  isIncoming?: boolean;
+  isPreviewOpen?: boolean;
 }
 
-export const Editor = ({ onChange, initialContent = "" }: EditorProps) => {
+export const Editor = ({
+  onChange,
+  initialContent = "",
+  isIncoming,
+  isPreviewOpen,
+}: EditorProps) => {
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const editorMenuBarRef = useRef<HTMLDivElement>(null);
   const editorToolbarRef = useRef<HTMLDivElement>(null);
@@ -462,7 +470,7 @@ export const Editor = ({ onChange, initialContent = "" }: EditorProps) => {
   return (
     <div className="main-container">
       <div
-        className="editor-container editor-container_document-editor editor-container_include-pagination editor-container_include-fullscreen"
+        className={`editor-container editor-container_document-editor editor-container_include-pagination editor-container_include-fullscreen `}
         ref={editorContainerRef}
       >
         <div
@@ -470,11 +478,13 @@ export const Editor = ({ onChange, initialContent = "" }: EditorProps) => {
           ref={editorMenuBarRef}
         ></div>
         <div className="editor-container__toolbar" ref={editorToolbarRef}></div>
-        <div className="editor-container__editor-wrapper">
+        <div
+          className={`${isPreviewOpen ? "custom-editor-container__editor-wrapper" : "editor-container__editor-wrapper"}`}
+        >
           <div className="editor-container__editor">
             <div ref={editorRef}>
-              {/* Проверку editorConfig удаляем, так как он всегда есть */}
               <CKEditor
+                disabled={isIncoming || isPreviewOpen}
                 data={initialContent}
                 onReady={(editor) => {
                   const decoupledEditor = editor as DecoupledEditor;

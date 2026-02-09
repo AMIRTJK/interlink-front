@@ -36,7 +36,7 @@ export const CreateCorrespondencePage = ({ type }: { type: string }) => {
 
   if (isInternal) {
     // show||create
-    return <InternalCorrespondece mode="create" />;
+    return <InternalCorrespondece mode="create" type={type} />;
   }
 
   return (

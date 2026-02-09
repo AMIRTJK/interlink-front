@@ -23,7 +23,6 @@ export const AppRoutes = {
   CORRESPONDENCE_OUTGOING: "/modules/correspondence/internal", // Keeps compatibility with "Outgoing" folder logic if needed
 
   CORRESPONDENCE_INCOMING_CREATE: "/modules/correspondence/external/create",
-  CORRESPONDENCE_OUTGOING_CREATE: "/modules/correspondence/internal/create",
 
   CORRESPONDENCE_ARCHIVE: "/modules/correspondence/archive",
   CORRESPONDENCE_PINNED: "/modules/correspondence/pinned",
@@ -31,6 +30,7 @@ export const AppRoutes = {
   CORRESPONDENCE_TRASHED: "/modules/correspondence/trashed",
   CORRESPONDENCE_INCOMING_SHOW: "/modules/correspondence/external/incoming/:id",
   CORRESPONDENCE_OUTGOING_SHOW: "/modules/correspondence/external/outgoing/:id",
+  INTERNAL_OUTGOING_CREATE: "/modules/correspondence/internal/outgoing/create",
   INTERNAL_INCOMING_SHOW: "/modules/correspondence/internal/incoming/:id",
   INTERNAL_OUTGOING_SHOW: "/modules/correspondence/internal/outgoing/:id",
   // CORRESPONDENCE_INTERNAL: "/modules/correspondence/internal",

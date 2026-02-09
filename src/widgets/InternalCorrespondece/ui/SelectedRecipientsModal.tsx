@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { UserOutlined, CloseOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Recipient } from "./DocumentHeaderForm";
 import { Avatar } from "antd";
+import { If } from "@shared/ui";
 
 interface SelectedRecipientsModalProps {
   isOpen: boolean;
@@ -10,11 +11,12 @@ interface SelectedRecipientsModalProps {
   isDarkMode: boolean;
   recipients: Recipient[];
   onRemove: (id: number) => void;
+  isIncoming: boolean;
 }
 
 export const SelectedRecipientsModal: React.FC<
   SelectedRecipientsModalProps
-> = ({ isOpen, onClose, isDarkMode, recipients, onRemove }) => {
+> = ({ isOpen, onClose, isDarkMode, recipients, onRemove, isIncoming }) => {
   const textPrimary = isDarkMode ? "text-gray-100" : "text-gray-900";
   const textSecondary = isDarkMode ? "text-gray-400" : "text-gray-500";
 
@@ -87,13 +89,15 @@ export const SelectedRecipientsModal: React.FC<
                         {recipient.position}
                       </p>
                     </div>
-                    <button
-                      onClick={() => onRemove(recipient.id)}
-                      className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                      title="Удалить"
-                    >
-                      <DeleteOutlined />
-                    </button>
+                    <If is={!isIncoming}>
+                      <button
+                        onClick={() => onRemove(recipient.id)}
+                        className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                        title="Удалить"
+                      >
+                        <DeleteOutlined />
+                      </button>
+                    </If>
                   </div>
                 ))
               )}

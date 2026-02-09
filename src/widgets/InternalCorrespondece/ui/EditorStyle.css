@@ -128,6 +128,15 @@
   background: var(--ck-color-base-foreground);
 }
 
+.custom-editor-container__editor-wrapper {
+  display: flex;
+  width: fit-content;
+  overflow-y: scroll;
+  height: 100%;
+  max-height: 90vh;
+  background: var(--ck-color-base-foreground);
+}
+
 .editor-container_document-editor .editor-container__editor {
   margin-top: 28px;
   margin-bottom: 28px;

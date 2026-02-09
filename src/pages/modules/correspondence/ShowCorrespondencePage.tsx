@@ -57,6 +57,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
         mode="show"
         initialData={correspondenceData?.data}
         isLoading={isLoading}
+        type={type}
       />
     );
   }

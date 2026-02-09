@@ -25,9 +25,9 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
   open,
   onClose,
   docId,
-  mode = "create",
   onReply,
   onRefresh,
+  isIncoming,
 }) => {
   const [activeTab, setActiveTab] = useState<TTab>("actions");
 
@@ -299,7 +299,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
 
                   <div className="drawer-content-scroll custom-scrollbar">
                     <If is={activeTab === "actions"}>
-                      {mode === "show" ? (
+                      {isIncoming === true ? (
                         <div className="flex flex-col gap-3 mt-5">
                           <Ui.Button
                             onClick={onReply}

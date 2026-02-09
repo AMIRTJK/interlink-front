@@ -23,6 +23,7 @@ interface DocumentHeaderFormProps {
   form: FormInstance;
   initialRecipients?: Recipient[];
   initialCC?: Recipient[];
+  isIncoming: boolean;
 }
 
 export interface Recipient {
@@ -39,6 +40,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
   form,
   initialRecipients = [],
   initialCC = [],
+  isIncoming,
 }) => {
   const [selectedRecipients, setSelectedRecipients] =
     useState<Recipient[]>(initialRecipients);
@@ -175,15 +177,17 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           </Tooltip>
         )}
 
-        <Button
-          antdIcon={<PlusOutlined style={{ fontSize: "12px" }} />}
-          type="text"
-          onClick={() => setActiveSelectorMode(mode)}
-          className={`
+        <If is={!isIncoming}>
+          <Button
+            antdIcon={<PlusOutlined style={{ fontSize: "12px" }} />}
+            type="text"
+            onClick={() => setActiveSelectorMode(mode)}
+            className={`
             min-w-[32px]! h-[32px]! w-[32px]! rounded-full! flex items-center justify-center p-0!
             ${textSecondary} hover:bg-gray-100 dark:hover:bg-gray-800
           `}
-        />
+          />
+        </If>
       </div>
     );
   };
@@ -276,13 +280,13 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           {renderSelectionArea(
             selectedCC,
             "copy",
-            "Копия (необязательно)",
+            `Копия ${isIncoming ? "(Не указано)" : "(необязательно)"} `,
             <CopyOutlined style={{ fontSize: "14px" }} />,
           )}
         </div>
       </Form>
 
-      <If is={activeSelectorMode !== null}>
+      <If is={activeSelectorMode !== null && !isIncoming}>
         <RecipientSelectorModal
           isOpen={true}
           onClose={closeSelector}
@@ -301,6 +305,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           isDarkMode={isDarkMode}
           recipients={viewerProps.list}
           onRemove={viewerProps.onRemove}
+          isIncoming={isIncoming}
         />
       </If>
     </div>
