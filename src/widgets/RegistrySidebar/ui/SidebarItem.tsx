@@ -17,7 +17,6 @@ interface SidebarItemProps {
   variant?: "horizontal" | "vertical";
 }
 
-/* Variants for the row content (to stagger icon and text) */
 const rowVariants = {
   hidden: {},
   visible: {
@@ -27,7 +26,6 @@ const rowVariants = {
   },
 };
 
-/* Variants for the inner elements (Icon, Text) */
 const contentVariants = {
   hidden: { opacity: 0, x: -10 },
   visible: { opacity: 1, x: 0 },
@@ -40,7 +38,6 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   collapsed = false,
   activeKey,
   variant = "vertical",
-  // _index = 0,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   
@@ -58,7 +55,6 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   const content = (
       <motion.div
         variants={rowVariants}
-        // Removed initial/animate props to allow inheritance from parent
         whileHover={{ 
           x: isCollapsedMode ? 0 : (depth === 0 ? 1.2 : 8),
           transition: { duration: 0.15, ease: "easeOut" }
