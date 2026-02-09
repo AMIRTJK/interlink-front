@@ -242,9 +242,9 @@ export const Editor = ({ onChange, initialContent = "" }: EditorProps) => {
           converterOptions: {
             format: "A4",
             margin_top: "20mm",
+            margin_right: "15mm",
             margin_bottom: "20mm",
-            margin_right: "12mm",
-            margin_left: "12mm",
+            margin_left: "30mm",
             page_orientation: "portrait",
           },
         },
@@ -261,9 +261,9 @@ export const Editor = ({ onChange, initialContent = "" }: EditorProps) => {
               size: "A4",
               margins: {
                 top: "20mm",
+                right: "15mm",
                 bottom: "20mm",
-                right: "12mm",
-                left: "12mm",
+                left: "30mm",
               },
             },
           },
@@ -295,7 +295,7 @@ export const Editor = ({ onChange, initialContent = "" }: EditorProps) => {
             },
             {
               model: "14pt",
-              title: "14pt",
+              title: "14pt (Основной)",
               view: {
                 name: "span",
                 styles: {
@@ -323,9 +323,13 @@ export const Editor = ({ onChange, initialContent = "" }: EditorProps) => {
                 },
               },
             },
-            "default",
+            {
+              model: "undefined",
+              title: "По умолчанию",
+              class: "ck-heading_paragraph",
+            },
           ],
-          supportAllValues: true, // Разрешает ввод ручных значений (они могут быть в px)
+          supportAllValues: true,
         },
         fullscreen: {
           onEnterCallback: (container: HTMLElement) =>
@@ -423,8 +427,8 @@ export const Editor = ({ onChange, initialContent = "" }: EditorProps) => {
           pageMargins: {
             top: "20mm",
             bottom: "20mm",
-            right: "12mm",
-            left: "12mm",
+            right: "15mm",
+            left: "30mm",
           },
         },
         table: {
