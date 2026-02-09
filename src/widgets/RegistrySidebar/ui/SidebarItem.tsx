@@ -63,6 +63,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   const content = (
       <motion.div
         variants={rowVariants}
+        initial="visible"
         whileHover={{ 
           x: isCollapsedMode ? 0 : (depth === 0 ? 1.2 : 8),
           transition: { duration: 0.15 }
