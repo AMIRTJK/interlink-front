@@ -53,8 +53,8 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
         </div>
 
         <motion.div
-          key={`${variant}-${isInternal ? "internal" : "external"}`}
-          className="flex-1 flex flex-row items-center gap-2 overflow-x-auto custom-scrollbar no-scrollbar py-1"
+          key={`${variant}-${isInternal ? 'internal' : 'external'}`}
+          className="flex-1 flex flex-row items-start gap-2 overflow-x-auto custom-scrollbar no-scrollbar py-1"
           initial="hidden"
           animate="visible"
           variants={containerVariants}

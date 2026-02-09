@@ -63,6 +63,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   const content = (
       <motion.div
         variants={rowVariants}
+        initial="visible"
         whileHover={{ 
           x: isCollapsedMode ? 0 : (depth === 0 ? 1.2 : 8),
           transition: { duration: 0.15 }
@@ -70,7 +71,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         whileTap={{ scale: 0.97 }}
         className={cn(
           "flex items-center group focus:outline-none! active:outline-none! border border-transparent rounded-2xl cursor-pointer relative select-none px-3 py-2",
-          variant === "vertical" ? "w-full" : "min-w-max",
+          variant === "vertical" ? "w-full" : "max-w-[170px]",
           isCollapsedMode ? "justify-center px-0" : "gap-1",
           isSelected
             ? "text-indigo-700!"
@@ -87,8 +88,11 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           <motion.div
             layoutId="active-pill"
             className={cn(
-               "absolute inset-0 bg-linear-to-r! from-indigo-400/30! to-purple-400/30! border-white/50! rounded-2xl shadow-lg! shadow-indigo-200/40!",
-               isCollapsedMode && "bg-transparent! border-none! shadow-none!"
+               "absolute border-white/50! shadow-lg! shadow-indigo-200/40!",
+               isCollapsedMode 
+                 ? "w-10 h-10 left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 rounded-full! shadow-md! from-indigo-500/20! to-purple-500/20! bg-linear-to-r!" 
+                 : "inset-0 rounded-2xl bg-linear-to-r! from-indigo-400/30! to-purple-400/30!",
+               depth > 0 && !isCollapsedMode && "from-indigo-300/20! to-purple-300/20! shadow-sm!"
             )}
             transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
             style={{ zIndex: -1 }}
