@@ -372,7 +372,8 @@ body.no-animations
   padding: 0 20px !important;
   transition: all 0.2s ease !important;
   border-radius: 12px 12px 0 0 !important;
-  color: #595959 !important;
+  color: #46566d !important;
+  font-weight: 600;
   overflow: visible !important;
   margin: 0 4px !important;
   top: 0;
@@ -382,12 +383,12 @@ body.no-animations
 
 .modern-style .ant-menu-item:not(.ant-menu-item-selected):hover {
   background-color: rgba(0, 0, 0, 0.04) !important;
-  color: #156bf6 !important;
+  color: #2151e7 !important;
 }
 
 .modern-style .ant-menu-item-selected {
   background-color: #e0ebff !important;
-  color: #0037af !important;
+  color: #2151e7 !important;
   font-weight: 500;
   border-radius: 12px 12px 0 0 !important;
   height: 42px !important;
