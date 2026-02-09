@@ -69,7 +69,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         }}
         whileTap={{ scale: 0.97 }}
         className={cn(
-          "flex items-center group focus:outline-none! active:outline-none! border border-transparent rounded-2xl cursor-pointer relative select-none px-3 py-2 w-full",
+          "flex items-center group focus:outline-none! active:outline-none! border border-transparent rounded-2xl cursor-pointer relative select-none px-3 py-2",
+          variant === "vertical" ? "w-full" : "min-w-max",
           isCollapsedMode ? "justify-center px-0" : "gap-1",
           isSelected
             ? (isCollapsedMode 
@@ -114,7 +115,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         {!isCollapsedMode && (
          <div className="flex-1 flex items-center justify-between min-w-0">
            <motion.div variants={contentVariants} className={cn(
-             "flex-1 truncate text-xs font-medium tracking-wide",
+             "flex-1 text-xs font-medium tracking-wide whitespace-nowrap",
              isSelected ? "font-semibold" : ""
            )}>
               {item.label}

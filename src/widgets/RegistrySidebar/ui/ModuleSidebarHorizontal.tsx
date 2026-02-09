@@ -56,7 +56,7 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
           variants={containerVariants}
         >
           {finalMenuItems.map((item, index) => (
-            <motion.div key={item.key} variants={itemWrapperVariants} className="shrink-0 w-[160px]">
+            <motion.div key={item.key} variants={itemWrapperVariants} className="shrink-0 min-w-[170px]">
               <SidebarItem
                 item={item}
                 isActive={[activeKey].includes(item.key as string)}
