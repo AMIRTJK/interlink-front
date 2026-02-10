@@ -22,37 +22,37 @@ const STATUS_CONFIG: Record<string, any> = {
     icon: <FileEdit size={14} />,
     gradient: "from-blue-500 to-blue-600",
   },
-  to_register: {
-    label: "Регистрация",
+  analysis: {
+    label: "Анализ",
     icon: <FileEdit size={14} />,
     gradient: "from-blue-500 to-blue-600",
   },
-  to_visa: {
-    label: "Визирование",
-    icon: <Eye size={14} />,
-    gradient: "from-purple-500 to-purple-600",
-  },
-  to_execute: {
-    label: "Исполнение",
-    icon: <Loader size={14} />,
+  ["in-progress"]: {
+    label: "В процессе исполнения",
+    icon: <FileEdit size={14} />,
     gradient: "from-amber-500 to-amber-600",
   },
-  to_approve: {
+  ["to-approve"]: {
     label: "Согласование",
-    icon: <Handshake size={14} />,
+    icon: <Eye size={14} />,
     gradient: "from-emerald-500 to-emerald-600",
   },
-  to_sign: {
-    label: "Подпись",
-    icon: <Signature size={14} />,
+  ["to-sign"]: {
+    label: "На подпись",
+    icon: <Loader size={14} />,
     gradient: "from-rose-500 to-rose-600",
   },
-  done: {
+  sent: {
+    label: "Отправлено",
+    icon: <Handshake size={14} />,
+    gradient: "from-indigo-500 to-indigo-600",
+  },
+  completed: {
     label: "Завершено",
     icon: <CheckCheck size={14} />,
     gradient: "from-green-500 to-green-600",
   },
-  cancelled: {
+  canceled: {
     label: "Отменено",
     icon: <XCircle size={14} />,
     gradient: "from-red-500 to-red-600",
@@ -85,9 +85,20 @@ export const NewRegistry = ({
 
   // --- ЛОГИКА ИЗ СТАРОГО RegistryTable ---
   const { params: searchParams, setParams } = useDynamicSearchParams();
+
   const currentTab =
     searchParams.status ||
-    (type === "internal-outgoing" ? "to_approve" : "draft");
+    (type === "internal-incoming"
+      ? "analysis"
+      : type === "internal-outgoing"
+        ? "sent"
+        : type === "internal-draft"
+          ? "draft"
+          : type === "internal-to-sign"
+            ? "to-sign"
+            : type === "internal-to-approve"
+              ? "to-approve"
+              : "draft");
 
   // Запрос счетчиков (для табов)
   const { data: countersData } = useGetQuery({

@@ -34,7 +34,7 @@ export const getModuleItems = (
       variant === "horizontal" ? <img src={MainDocumentsIcon} alt="" /> : null,
   },
   {
-    key: AppRoutes.CORRESPONDENCE,
+    key: AppRoutes.CORRESPONDENCE_OUTGOING,
     label: "Корреспонденция",
     requiredRole: ["correspondence.view"],
     icon:

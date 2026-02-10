@@ -36,10 +36,7 @@ export const RegistryTable = <T extends Record<string, unknown>>({
 }: RegistryTableProps<T>) => {
   const tabFromParams = extraParams?.tab;
 
-  const defaultTab =
-    type === "internal-outgoing"
-      ? InternalCorrespondenceStatus.TO_APPROVE
-      : "draft";
+  const defaultTab = type === "internal-incoming" ? "analysis" : "";
 
   const initialTab =
     typeof tabFromParams === "string" ? tabFromParams : defaultTab;

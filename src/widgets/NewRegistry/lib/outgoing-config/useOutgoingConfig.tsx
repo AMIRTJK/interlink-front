@@ -3,8 +3,10 @@ import { User, CheckCheck, FileText, Loader, Trash2 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 import { RegistryConfig } from "../types";
+import { getOutgoingFilters } from "../filters.config";
+import { RecipientsViewer } from "@widgets/NewRegistry/ui";
 
-export const useOutgoingConfig = (type: string): RegistryConfig => {
+export const useOutgoingConfig = (): RegistryConfig => {
   // --- MUTATIONS (Можно дублировать логику или вынести в отдельный хук useCorrespondenceActions) ---
   const { mutate: deleteCorrespondence } = useMutationQuery({
     url: (data) =>
@@ -18,17 +20,18 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
 
   return {
     primary: {
-      label: "Инициатор",
+      label: "Отправитель",
       icon: <User size={12} />,
       render: (d) => d.creator?.full_name || "Я",
     },
     secondary: {
-      label: "Получатель / Этап",
+      label: "Получатель",
       icon: <Loader size={12} />,
-      render: (d) => {
-        if (d.status === "to_sign") return "На подписании";
-        return d.recipient_name || d.recipients?.[0]?.user?.full_name || "—";
-      },
+      // render: (d) => {
+      //   if (d.status === "to_sign") return "На подписании";
+      //   return d.recipient_name || d.recipients?.[0]?.user?.full_name || "—";
+      // },
+      render: (d) => <RecipientsViewer data={d} />,
     },
     badges: [
       {
@@ -56,5 +59,6 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
         },
       ];
     },
+    filters: getOutgoingFilters(),
   };
 };

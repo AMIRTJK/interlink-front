@@ -114,7 +114,7 @@ export const ModuleMenu = ({ variant }: IProps) => {
 
     if (!isSharedRoute && pathname.includes("/correspondence")) {
       const correspondenceMenu = filteredItems.find(
-        (item) => item?.key === AppRoutes.CORRESPONDENCE,
+        (item) => item?.key === AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING,
       );
 
       if (correspondenceMenu && hasChildren(correspondenceMenu)) {

@@ -1,3 +1,4 @@
+import { MenuProps } from "antd";
 import {
   Building2,
   User,
@@ -83,13 +84,13 @@ export const useIncomingConfig = (type: string): RegistryConfig => {
         label: isInternal ? "Рег. №" : "Вх.",
         icon: <Mail size={10} />,
         color: "blue",
-        render: (d) => d.reg_number || "—",
+        render: (d) => d.reg_number || "Не присвоен",
       },
       {
         label: "Исх.",
         icon: <Send size={10} />,
         color: "emerald",
-        render: (d) => d.outgoing_number || "—",
+        render: (d) => d.outgoing_number || "Не присвоен",
       },
     ],
     getActions: (record) => {
@@ -97,7 +98,7 @@ export const useIncomingConfig = (type: string): RegistryConfig => {
       const isArchived = type.includes("archived");
       const isPinned = record.is_pinned;
 
-      const items = [];
+      const items: MenuProps["items"] = [];
 
       if (!isArchived) {
         items.push({

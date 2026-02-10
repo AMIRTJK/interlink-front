@@ -100,6 +100,10 @@ export const RegistryLayout = ({
   const [viewMode, setViewMode] = useState<"list" | "block">("list");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+  const { pathname } = useLocation();
+
+  const isStatusNavActive = pathname.includes("incoming");
+
   // --- ДАННЫЕ ИЗ API (META) ---
   const currentPage = meta?.current_page || 1;
   const lastPage = meta?.last_page || 1;
@@ -230,46 +234,48 @@ export const RegistryLayout = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 pb-1 scrollbar-hide flex-wrap">
-          {tabs.map((tab, index) => (
-            <motion.button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05, duration: 0.3 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`relative cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap ${
-                activeTabId === tab.id
-                  ? `bg-gradient-to-r ${tab.gradient} text-white shadow-md`
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              <span
-                className={`flex items-center justify-center ${
-                  activeTabId !== tab.id ? "opacity-70" : ""
+        <If is={isStatusNavActive}>
+          <div className="flex items-center gap-2 pb-1 scrollbar-hide flex-wrap">
+            {tabs.map((tab, index) => (
+              <motion.button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.05, duration: 0.3 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`relative cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap ${
+                  activeTabId === tab.id
+                    ? `bg-gradient-to-r ${tab.gradient} text-white shadow-md`
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
-                {tab.icon}
-              </span>
-              <span>{tab.label}</span>
-              {tab.count > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className={`px-1.5 py-0.5 text-[10px] rounded-full font-bold ml-1 min-w-[18px] text-center ${
-                    activeTabId === tab.id
-                      ? "bg-white/25 text-white"
-                      : "bg-white text-gray-700"
+                <span
+                  className={`flex items-center justify-center ${
+                    activeTabId !== tab.id ? "opacity-70" : ""
                   }`}
                 >
-                  {tab.count}
-                </motion.span>
-              )}
-            </motion.button>
-          ))}
-        </div>
+                  {tab.icon}
+                </span>
+                <span>{tab.label}</span>
+                {tab.count > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className={`px-1.5 py-0.5 text-[10px] rounded-full font-bold ml-1 min-w-[18px] text-center ${
+                      activeTabId === tab.id
+                        ? "bg-white/25 text-white"
+                        : "bg-white text-gray-700"
+                    }`}
+                  >
+                    {tab.count}
+                  </motion.span>
+                )}
+              </motion.button>
+            ))}
+          </div>
+        </If>
       </motion.div>
 
       <AnimatePresence mode="wait">
@@ -373,6 +379,8 @@ import {
   ChevronRight,
   Calendar,
 } from "lucide-react";
+import { If } from "@shared/ui";
+import { useLocation } from "react-router";
 
 // --- SECTION HEADER ---
 export const SectionHeader = ({
@@ -459,7 +467,12 @@ export const DocumentCard = ({
           <div className="p-1.5 bg-white/20 rounded-md backdrop-blur-sm">
             {statusData.icon}
           </div>
-          <div className="text-xs font-medium opacity-90">ID: {data.id}</div>
+          <div>
+            <div className="text-xs font-medium opacity-90">ID: {data.id}</div>
+            <div className="text-white font-semibold text-sm">
+              {activeStatusData?.label}
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">

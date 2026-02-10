@@ -49,6 +49,12 @@ const RegistryTable = lazy(() =>
   })),
 );
 
+const NewRegistry = lazy(() =>
+  import("@widgets/NewRegistry").then((m) => ({
+    default: m.NewRegistry,
+  })),
+);
+
 const CorrespondencePage = lazy(() =>
   import("@pages/modules/correspondence/CorrespondencePage").then((m) => ({
     default: m.CorrespondencePage,
@@ -227,10 +233,7 @@ export const AppRouter = () => {
                       index
                       element={
                         // <CorrespondenceTableWrapper type="internal-incoming" />
-                        <NewCorrespondenceTableWrapper
-                          type="internal-incoming"
-                          createButtonText="Добавить"
-                        />
+                        <NewCorrespondenceTableWrapper type="internal-incoming" />
                       }
                     />
                     <Route
@@ -250,9 +253,13 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        <CorrespondenceTableWrapper
+                        // <CorrespondenceTableWrapper
+                        //   type="internal-outgoing"
+                        //   createButtonText="Добавить письмо"
+                        // />
+                        <NewCorrespondenceTableWrapper
                           type="internal-outgoing"
-                          createButtonText="Добавить письмо"
+                          createButtonText="Добавить"
                         />
                       }
                     />
@@ -277,9 +284,13 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        <CorrespondenceTableWrapper
+                        // <CorrespondenceTableWrapper
+                        //   type="internal-drafts"
+                        //   createButtonText="Добавить письмо"
+                        // />
+                        <NewCorrespondenceTableWrapper
                           type="internal-drafts"
-                          createButtonText="Добавить письмо"
+                          createButtonText="Добавить"
                         />
                       }
                     />
@@ -288,7 +299,8 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        <CorrespondenceTableWrapper type="internal-to-sign" />
+                        // <CorrespondenceTableWrapper type="internal-to-sign" />
+                        <NewCorrespondenceTableWrapper type="internal-to-sign" />
                       }
                     />
                   </Route>
@@ -296,7 +308,8 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        <CorrespondenceTableWrapper type="internal-to-approve" />
+                        // <CorrespondenceTableWrapper type="internal-to-approve" />
+                        <NewCorrespondenceTableWrapper type="internal-to-approve" />
                       }
                     />
                   </Route>
@@ -304,7 +317,12 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        <RegistryTable
+                        // <RegistryTable
+                        //   type="internal-archived"
+                        //   url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
+                        //   extraParams={archivedParams}
+                        // />
+                        <NewRegistry
                           type="internal-archived"
                           url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
                           extraParams={archivedParams}
@@ -316,7 +334,12 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        <RegistryTable
+                        // <RegistryTable
+                        //   type="internal-pinned"
+                        //   url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
+                        //   extraParams={pinnedParams}
+                        // />
+                        <NewRegistry
                           type="internal-pinned"
                           url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
                           extraParams={pinnedParams}
@@ -328,7 +351,11 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        <RegistryTable
+                        // <RegistryTable
+                        //   type="internal-trashed"
+                        //   url={ApiRoutes.GET_INTERNAL_TRASH}
+                        // />
+                        <NewRegistry
                           type="internal-trashed"
                           url={ApiRoutes.GET_INTERNAL_TRASH}
                         />
