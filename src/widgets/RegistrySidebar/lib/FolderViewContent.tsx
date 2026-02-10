@@ -23,9 +23,9 @@ export const FolderViewContent: React.FC<IProps> = ({ folder, onClose }) => {
         <div className="bg-[#FFD700] p-3 rounded-2xl rounded-tl-none shadow-2xl relative z-10 min-h-[500px] flex flex-col">
             <div className="bg-[#FFFFF0] flex-1 rounded-xl p-6 flex flex-col shadow-inner items-stretch">
                <div className="flex justify-between items-center mb-6">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                          <span 
-                            className="w-8 h-8 text-[#E6B800]"
+                            className="w-8 h-8 flex items-center justify-center text-[#E6B800] [&_svg]:w-full! [&_svg]:h-full! [&_svg]:text-inherit!"
                             dangerouslySetInnerHTML={{ __html: folderIcon }} 
                          />
                          <span className="text-xl font-bold text-gray-800">
