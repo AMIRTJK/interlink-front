@@ -6,12 +6,12 @@ import { PlusOutlined } from "@ant-design/icons";
 import { cn } from "@shared/lib/utils";
 import { FolderActions } from "./FolderActions";
 
-interface IFolderTreeItemProps {
+interface IProps {
   item: MenuItem;
   depth?: number;
 }
 
-export const FolderTreeItem: React.FC<IFolderTreeItemProps> = ({ item, depth = 0 }) => {
+export const FolderTreeItem: React.FC<IProps> = ({ item, depth = 0 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const hasChildren = item.children && item.children.length > 0;
   const isCreatePlaceholder = item.folderName === "Создать новую папку";
