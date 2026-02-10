@@ -6,12 +6,12 @@ import { CloseOutlined } from "@ant-design/icons";
 import folderIcon from "../../../assets/icons/folder.svg?raw";
 import { FolderActions } from "./FolderActions";
 
-interface IFolderViewContentProps {
+interface IProps {
   folder: MenuItem;
   onClose: () => void;
 }
 
-export const FolderViewContent: React.FC<IFolderViewContentProps> = ({ folder, onClose }) => {
+export const FolderViewContent: React.FC<IProps> = ({ folder, onClose }) => {
   const children = folder.children || [];
 
   const displayItems = children.filter((c: MenuItem) => c.folderName !== "Создать новую папку");

@@ -3,7 +3,7 @@ import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 import trashIcon from "../../../assets/icons/trash-icon.svg";
 import { MAX_FOLDER_DEPTH } from "./constants";
 
-interface MenuActionParams {
+interface IProps {
   folderId: number;
   folderName: string;
   depth: number;
@@ -22,7 +22,7 @@ export const createFolderMenuActions = ({
   handleEditClick,
   handleAddClick,
   deleteFolder,
-}: MenuActionParams): MenuProps["items"] => {
+}: IProps): MenuProps["items"] => {
   const menuActions: MenuProps["items"] = [];
 
 // Редактирование

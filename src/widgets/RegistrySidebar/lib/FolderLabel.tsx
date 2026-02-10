@@ -2,7 +2,6 @@ import React from "react";
 import { IFolderLabelProps } from "../model";
 import { FolderCounter } from "./FolderCounter";
 import { FolderActions } from "./FolderActions";
-// Поправить троеточие)
 export const FolderLabel: React.FC<IFolderLabelProps> = ({
   folder,
   folderPath,

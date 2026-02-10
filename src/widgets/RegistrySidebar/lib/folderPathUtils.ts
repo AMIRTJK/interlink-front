@@ -54,7 +54,6 @@ export const buildFolderPath = (
     }
   }
 
-  // Default fallback (если не нашли родителя, ведем в базу реестра)
   return `${ROUTES.CORRESPONDENCE_BASE}?folder_id=${folder.id}`;
 };
 
