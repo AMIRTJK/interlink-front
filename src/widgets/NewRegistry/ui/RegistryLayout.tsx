@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import locale from "antd/es/date-picker/locale/ru_RU";
+import React, { useMemo, useState } from "react";
+import locale from "antd/es/locale/ru_RU";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
 
