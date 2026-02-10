@@ -65,7 +65,6 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         variants={rowVariants}
         initial="visible"
         whileHover={{ 
-          x: isCollapsedMode ? 0 : (depth === 0 ? 1.2 : 8),
           transition: { duration: 0.15 }
         }}
         whileTap={{ scale: 0.97 }}
@@ -75,7 +74,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           isCollapsedMode ? "justify-center px-0" : "gap-1",
           isSelected
             ? "text-indigo-700!"
-            : "text-gray-600! hover:text-indigo-600! hover:shadow-sm hover:shadow-indigo-200/20 transition-shadow duration-200",
+            : "text-gray-600! hover:text-indigo-600! hover:shadow-sm hover:shadow-indigo-200/20 transition-all duration-300",
           item.folderName === "Создать новую папку" && "crtChildrenFolderHidden",
           variant === "horizontal" && "crtChildrenFolderHidden"
         )}
@@ -101,7 +100,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         <motion.div
           variants={contentVariants}
           className={cn(
-            "shrink-0! flex items-center justify-center w-10 h-10",
+            "shrink-0! flex items-center justify-center w-10 h-10 transition-all duration-300",
             isSelected
               ? "text-indigo-600! shadow-indigo-200/40"
               : cn(
@@ -128,7 +127,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         {!isCollapsedMode && (
          <div className="flex-1 flex items-center justify-between min-w-0">
            <motion.div variants={contentVariants} className={cn(
-             "flex-1 text-xs font-medium tracking-wide whitespace-nowrap",
+             "flex-1 text-xs font-medium tracking-wide whitespace-nowrap transition-all duration-300",
              isSelected ? "font-semibold" : ""
            )}>
               {item.label}
