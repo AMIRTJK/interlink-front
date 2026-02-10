@@ -65,16 +65,10 @@ export const ModuleMenu = ({ variant }: IProps) => {
 
   const filteredItems = useMemo(() => {
     const checkAccess = (item: MenuItem): boolean => {
-      if (!item || !("requiredRole" in item)) {
-        return true;
-      }
+      if (!item || !("requiredRole" in item)) return true;
       const menuItem = item as TSubMenuItem;
-      if (!menuItem.requiredRole || menuItem.requiredRole.length === 0) {
-        return true;
-      }
-      if (userPosition === "Super Administrator") {
-        return true;
-      }
+      if (!menuItem.requiredRole?.length) return true;
+      if (userPosition === "Super Administrator") return true;
 
       return menuItem.requiredRole.some(
         (role) =>
@@ -85,18 +79,13 @@ export const ModuleMenu = ({ variant }: IProps) => {
 
     const filterRecursively = (itemsToFilter: MenuItem[]): MenuItem[] => {
       return itemsToFilter.reduce((acc, item) => {
-        if (!checkAccess(item)) {
-          return acc;
-        }
+        if (!checkAccess(item)) return acc;
 
         if (hasChildren(item)) {
           const { children, ...rest } = item;
           const filteredChildren = filterRecursively(children || []);
-          if (filteredChildren.length > 0) {
-            acc.push({ ...rest, children: filteredChildren });
-          } else {
-            acc.push({ ...rest, children: filteredChildren });
-          }
+          // Показываем родителя, даже если детей нет (или можно скрыть, добавив проверку length > 0)
+          acc.push({ ...rest, children: filteredChildren });
         } else {
           acc.push(item);
         }
@@ -129,11 +118,54 @@ export const ModuleMenu = ({ variant }: IProps) => {
     }
   }, [pathname, filteredItems]);
 
-  const activeItem = filteredItems.find((item) => {
-    if (!item || !("key" in item)) return false;
-    const itemKey = String(item.key);
-    return pathname === itemKey || pathname.startsWith(itemKey + "/");
-  }) as TSubMenuItem | undefined;
+  const activeItem = useMemo(() => {
+    const isSharedRoute = SHARED_ROUTES.some((route) =>
+      pathname.includes(route),
+    );
+
+    // 1. Если мы на общем роуте (архив и т.д.), пытаемся восстановить контекст родителя
+    if (isSharedRoute) {
+      const lastContextKey = sessionStorage.getItem(STORAGE_KEY);
+      if (lastContextKey) {
+        // Ищем родителя, у которого есть ребенок с ключом lastContextKey
+        // Это связывает "Архив" с тем модулем, откуда мы в него пришли
+        const parent = filteredItems.find(
+          (item) =>
+            hasChildren(item) &&
+            item.children?.some(
+              (child) => String(child.key) === lastContextKey,
+            ),
+        );
+        if (parent) return parent as TSubMenuItem;
+      }
+    }
+
+    // 2. Стандартный поиск по URL (fallback)
+    return filteredItems.find((item) => {
+      if (!item || !("key" in item)) return false;
+      const itemKey = String(item.key);
+      return pathname === itemKey || pathname.startsWith(itemKey + "/");
+    }) as TSubMenuItem | undefined;
+  }, [pathname, filteredItems]);
+
+  useEffect(() => {
+    const isSharedRoute = SHARED_ROUTES.some((route) =>
+      pathname.includes(route),
+    );
+
+    // Сохраняем ключ ТОЛЬКО если это НЕ общий роут.
+    // Это запоминает "последний нормальный раздел" (например, Входящие)
+    if (!isSharedRoute && activeItem && hasChildren(activeItem)) {
+      // Ищем, какой именно таб активен сейчас
+      const currentActiveChild = activeItem.children?.find((sub) =>
+        pathname.startsWith(String(sub.key)),
+      );
+
+      if (currentActiveChild) {
+        sessionStorage.setItem(STORAGE_KEY, String(currentActiveChild.key));
+      }
+    }
+  }, [pathname, activeItem]);
 
   const activeKey =
     activeItem?.key ||
@@ -142,8 +174,15 @@ export const ModuleMenu = ({ variant }: IProps) => {
   const subItems = activeItem?.children;
 
   const handleNavigate = (path: string) => {
-    if (pathname !== path) {
-      navigate(path);
+    let targetPath = path;
+
+    if (path === "/modules/correspondence") {
+      const saved = sessionStorage.getItem(STORAGE_KEY);
+      targetPath = saved || AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING;
+    }
+
+    if (pathname !== targetPath) {
+      navigate(targetPath);
     }
   };
 
