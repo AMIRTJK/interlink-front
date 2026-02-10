@@ -60,8 +60,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
 
   const [editorBody, setEditorBody] = useState<string>("");
 
-  const isIncoming = type === "internal-incoming";
-
   const {
     data: rawWorkflowData,
     refetch: refetchWorkflow,
@@ -73,7 +71,19 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     preload: true,
   });
 
-  console.log(preloadData);
+  const isSigned = useMemo(() => {
+    const signatures = rawWorkflowData?.data?.signatures || [];
+    if (!signatures || !Array.isArray(signatures)) {
+      return false;
+    }
+    console.log(signatures);
+
+    return signatures.some((s: any) => s.status === "signed");
+  }, [rawWorkflowData]);
+
+  const isIncoming = type === "internal-incoming";
+
+  const isReadOnly = isSigned;
 
   const canSign = useMemo(() => {
     if (!preloadData || !Array.isArray(preloadData)) return false;
@@ -89,7 +99,9 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       ),
       method: "POST",
       messages: {
-        invalidate: [ApiRoutes.INTERNAL_GET_WORKFLOW],
+        invalidate: [
+          ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", String(id || "")),
+        ],
       },
       preload: true,
       preloadConditional: ["signatures.confirm"],
@@ -158,6 +170,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     if (!rawWorkflowData) return null;
     return generateMockWorkflow(rawWorkflowData);
   }, [rawWorkflowData]);
+
+  console.log(workflowData);
 
   const handleReply = () => {
     close();
@@ -267,6 +281,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       setInitialRecipients(toRecipients);
       setInitialCC(ccRecipients);
 
+      console.log(initialData);
+
       // 5. Редактор
       if (initialData.body) {
         setInitialEditorContent(initialData.body);
@@ -294,18 +310,14 @@ export const InternalCorrespondece: React.FC<IProps> = ({
               initialRecipients={initialRecipients}
               initialCC={initialCC}
               isIncoming={isIncoming}
+              isReadOnly={isReadOnly}
             />
-            {/* <DocumentEditor
-              isDarkMode={isDarkMode}
-              mode={effectiveMode}
-              onChange={setEditorBody}
-              initialContent={initialEditorContent}
-            /> */}
             <Editor
               onChange={setEditorBody}
               initialContent={initialEditorContent}
               type={type}
               isIncoming={isIncoming}
+              disabled={isReadOnly}
             />
           </div>
         </main>
@@ -341,6 +353,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         onSaveLoading={isCreating || isUpdating}
         isActionsEnabled={isDraftCreated}
         isIncoming={isIncoming}
+        disabled={isReadOnly}
       />
       <Modal
         title="Предварительный просмотр"
