@@ -34,7 +34,7 @@ export const FolderViewContent: React.FC<IProps> = ({ folder, onClose }) => {
                     </div>
                     <div className="flex gap-2 items-center">
                          <FolderActions menuActions={folder.menuActions} collapsed={false} />
-                         <Button type="text" icon={<CloseOutlined />} onClick={onClose} className="text-gray-400" />
+                         <Button type="text" icon={<CloseOutlined />} onClick={onClose} className="text-gray-400 hover:rotate-90 transition-transform duration-300 hover:bg-black/5" />
                     </div>
                </div>
 
