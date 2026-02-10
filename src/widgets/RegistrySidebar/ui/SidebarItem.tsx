@@ -98,7 +98,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         <motion.div
           variants={contentVariants}
           className={cn(
-            "shrink-0! flex items-center justify-center w-10 h-10 transition-all duration-300",
+            "shrink-0! flex items-center justify-center w-8 h-8 transition-all duration-300",
+            isSelected && !isCollapsedMode && "bg-[#EEF2FF] rounded-xl",
             isSelected
               ? "text-indigo-600! shadow-indigo-200/40"
               : cn(
