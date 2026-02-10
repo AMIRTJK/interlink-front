@@ -290,7 +290,6 @@ export const AppRouter = () => {
                         // />
                         <NewCorrespondenceTableWrapper
                           type="internal-drafts"
-                          createButtonText="Добавить"
                         />
                       }
                     />
