@@ -11,6 +11,7 @@ export interface IActionsModal {
   onReply?: () => void;
   onRefresh?: () => void;
   isIncoming: boolean;
+  isReadOnly: boolean;
 }
 
 export interface IActionItem {

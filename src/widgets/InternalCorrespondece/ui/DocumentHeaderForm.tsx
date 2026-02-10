@@ -24,6 +24,7 @@ interface DocumentHeaderFormProps {
   initialRecipients?: Recipient[];
   initialCC?: Recipient[];
   isIncoming: boolean;
+  isReadOnly: boolean;
 }
 
 export interface Recipient {
@@ -41,12 +42,11 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
   initialRecipients = [],
   initialCC = [],
   isIncoming,
+  isReadOnly = false,
 }) => {
   const [selectedRecipients, setSelectedRecipients] =
     useState<Recipient[]>(initialRecipients);
   const [selectedCC, setSelectedCC] = useState<Recipient[]>(initialCC);
-
-  console.log(selectedCC);
 
   const [activeSelectorMode, setActiveSelectorMode] =
     useState<SelectionMode>(null);
@@ -141,6 +141,8 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
       .map((u) => u.full_name)
       .join(", ");
 
+    console.log(isIncoming, isReadOnly, "=============");
+
     return (
       <div className="flex flex-wrap items-center gap-2">
         {visibleUsers.map((user) => (
@@ -177,7 +179,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           </Tooltip>
         )}
 
-        <If is={!isIncoming}>
+        <If is={!isIncoming && !isReadOnly}>
           <Button
             antdIcon={<PlusOutlined style={{ fontSize: "12px" }} />}
             type="text"
@@ -216,6 +218,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
         <Form.Item name="subject" rules={[requiredRule]} noStyle>
           <Input
             placeholder="Тема письма..."
+            disabled={isIncoming || isReadOnly}
             variant="borderless"
             className="p-0! h-12! text-2xl! font-bold! text-gray-900! placeholder:text-2xl! placeholder:text-gray-300! dark:placeholder:text-gray-600! bg-transparent! border-none! focus:outline-none! focus:ring-0! transition-all!"
             autoComplete="off"
@@ -280,13 +283,13 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           {renderSelectionArea(
             selectedCC,
             "copy",
-            `Копия ${isIncoming ? "(Не указано)" : "(необязательно)"} `,
+            `Копия ${selectedCC.length === 0 ? "(Не указано)" : "(необязательно)"} `,
             <CopyOutlined style={{ fontSize: "14px" }} />,
           )}
         </div>
       </Form>
 
-      <If is={activeSelectorMode !== null && !isIncoming}>
+      <If is={activeSelectorMode !== null && !isIncoming && !isReadOnly}>
         <RecipientSelectorModal
           isOpen={true}
           onClose={closeSelector}
@@ -306,6 +309,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           recipients={viewerProps.list}
           onRemove={viewerProps.onRemove}
           isIncoming={isIncoming}
+          isReadOnly={isReadOnly}
         />
       </If>
     </div>

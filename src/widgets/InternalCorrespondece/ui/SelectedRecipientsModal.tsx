@@ -12,11 +12,20 @@ interface SelectedRecipientsModalProps {
   recipients: Recipient[];
   onRemove: (id: number) => void;
   isIncoming: boolean;
+  isReadOnly: boolean;
 }
 
 export const SelectedRecipientsModal: React.FC<
   SelectedRecipientsModalProps
-> = ({ isOpen, onClose, isDarkMode, recipients, onRemove, isIncoming }) => {
+> = ({
+  isOpen,
+  onClose,
+  isDarkMode,
+  recipients,
+  onRemove,
+  isIncoming,
+  isReadOnly,
+}) => {
   const textPrimary = isDarkMode ? "text-gray-100" : "text-gray-900";
   const textSecondary = isDarkMode ? "text-gray-400" : "text-gray-500";
 
@@ -89,7 +98,7 @@ export const SelectedRecipientsModal: React.FC<
                         {recipient.position}
                       </p>
                     </div>
-                    <If is={!isIncoming}>
+                    <If is={!isIncoming && !isReadOnly}>
                       <button
                         onClick={() => onRemove(recipient.id)}
                         className="p-2 cursor-pointer text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"

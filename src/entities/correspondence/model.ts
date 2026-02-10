@@ -178,4 +178,5 @@ export interface InternalCorrespondenceResponse {
   created_at: string;
   reg_number: string | null;
   recipients: RecipientEntry[]; // <--- Массив, а не объект
+  status?: string;
 }
