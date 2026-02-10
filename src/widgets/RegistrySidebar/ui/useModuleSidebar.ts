@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Form } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
@@ -10,7 +10,13 @@ import { sideBarIcons } from "../lib/sidebarIcons";
 import { buildMenuTree } from "../lib/buildMenuTree";
 
 export const useModuleSidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    return localStorage.getItem("registry-sidebar-collapsed") === "true";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("registry-sidebar-collapsed", String(collapsed));
+  }, [collapsed]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [parentId, setParentId] = useState<number | null>(null);
   const [editingFolderId, setEditingFolderId] = useState<number | null>(null);
