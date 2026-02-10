@@ -25,7 +25,7 @@ export const useOutgoingConfig = (): RegistryConfig => {
       render: (d) => d.creator?.full_name || "Я",
     },
     secondary: {
-      label: "Получатель",
+      label: "Получатели",
       icon: <Loader size={12} />,
       // render: (d) => {
       //   if (d.status === "to_sign") return "На подписании";

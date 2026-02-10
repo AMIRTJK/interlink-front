@@ -14,6 +14,7 @@ import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib"; // Ваши хуки
 import { RegistryConfig } from "../types";
 import { getIncomingFilters } from "../filters.config";
+import { RecipientsViewer } from "@widgets/NewRegistry/ui";
 
 export const useIncomingConfig = (type: string): RegistryConfig => {
   const isInternal = type.includes("internal");
@@ -72,12 +73,9 @@ export const useIncomingConfig = (type: string): RegistryConfig => {
       render: (d) => d.sender_name || "Не указано",
     },
     secondary: {
-      label: "Исполнитель",
+      label: "Получатели",
       icon: <User size={12} />,
-      render: (d) =>
-        isInternal
-          ? d.recipients?.[0]?.user?.full_name || "—"
-          : d.recipient_name || "—",
+      render: (d) => <RecipientsViewer data={d} />,
     },
     badges: [
       {
