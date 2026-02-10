@@ -5,7 +5,11 @@ import { PlusOutlined } from "@ant-design/icons";
 import { AppRoutes } from "@shared/config";
 import { SidebarItem } from "./SidebarItem";
 import { sideBarIcons } from "../lib/sidebarIcons";
-import { containerVariants, itemWrapperVariants, layoutHorizontalIcon } from "../lib/constants";
+import {
+  containerVariants,
+  itemWrapperVariants,
+  layoutHorizontalIcon,
+} from "../lib/constants";
 import { MenuItem } from "../model";
 import Logo from "../../../assets/images/logo.svg";
 
@@ -69,6 +73,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
                 className="h-6! w-6! addFolderRootSideBar"
               />
             )}
+
             <Button
               type="text"
               onClick={() => setCollapsed(!collapsed)}
@@ -84,9 +89,9 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
                 <Button
                   type="text"
                   icon={
-                    <span 
-                      dangerouslySetInnerHTML={{ __html: layoutHorizontalIcon }} 
-                      className="flex items-center justify-center opacity-60 group-hover:opacity-100 group-hover:text-indigo-600 transition-all" 
+                    <span
+                      dangerouslySetInnerHTML={{ __html: layoutHorizontalIcon }}
+                      className="flex items-center justify-center opacity-60 group-hover:opacity-100 group-hover:text-indigo-600 transition-all"
                     />
                   }
                   onClick={() => onVariantChange?.("horizontal")}
@@ -98,7 +103,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
         </div>
 
         <motion.div
-          key={`${variant}-${isInternal ? 'internal' : 'external'}`}
+          key={`${variant}-${isInternal ? "internal" : "external"}`}
           className="flex-1 overflow-y-auto custom-scrollbar"
           initial="hidden"
           animate="visible"

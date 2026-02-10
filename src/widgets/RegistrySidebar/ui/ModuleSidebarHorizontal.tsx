@@ -28,7 +28,7 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
   isInternal,
 }) => {
   return (
-    <div className="w-full border-none! bg-white/70 backdrop-blur-xl! transition-colors duration-500 rounded-b-2xl shadow-inner p-4!">
+    <div className="w-full border-none! bg-white/70 backdrop-blur-xl! transition-colors duration-500 rounded-b-2xl shadow-inner py-2.5 px-6">
       <div className="flex items-center gap-6 h-full">
         <div className="flex items-center shrink-0 gap-2">
           <Button
@@ -53,7 +53,7 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
         </div>
 
         <motion.div
-          key={`${variant}-${isInternal ? 'internal' : 'external'}`}
+          key={`${variant}-${isInternal ? "internal" : "external"}`}
           className="flex-1 flex flex-row items-start gap-2 overflow-x-auto custom-scrollbar no-scrollbar py-1"
           initial="hidden"
           animate="visible"

@@ -8,7 +8,11 @@ import { tokenControl } from "@shared/lib";
 import { AppRoutes } from "@shared/config";
 import { toast } from "react-toastify";
 
-export const Header = () => {
+interface IProps {
+  isModulesPage?: boolean;
+}
+
+export const Header = ({ isModulesPage }: IProps) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -20,7 +24,9 @@ export const Header = () => {
   };
 
   return (
-    <header className="bg-white p-4 flex justify-between items-center shadow-sm border border-gray-100 rounded-[15px] h-[61px]">
+    <header
+      className={`bg-white py-4 px-6 flex justify-between items-center shadow-sm border border-gray-100 h-[61px] ${isModulesPage ? "rounded-none" : "rounded-[15px]"} `}
+    >
       <Link to={AppRoutes.PROFILE} className="mt-2" aria-label="На главную">
         <Image
           src={Logo}

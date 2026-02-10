@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useGetQuery, useDynamicSearchParams } from "@shared/lib"; // Твои хуки
 import { ApiRoutes } from "@shared/api";
@@ -7,12 +7,13 @@ import {
   Loader,
   Handshake,
   Signature,
-  Send,
   CheckCheck,
   XCircle,
   Eye,
 } from "lucide-react";
 import { RegistryLayout } from "./RegistryLayout";
+import { AppRoutes } from "@shared/config";
+import { useRegistryConfig } from "../lib";
 
 // Типы статусов, сопоставленные с твоим API
 const STATUS_CONFIG: Record<string, any> = {
@@ -21,37 +22,37 @@ const STATUS_CONFIG: Record<string, any> = {
     icon: <FileEdit size={14} />,
     gradient: "from-blue-500 to-blue-600",
   },
-  to_register: {
-    label: "Регистрация",
+  analysis: {
+    label: "Анализ",
     icon: <FileEdit size={14} />,
     gradient: "from-blue-500 to-blue-600",
   },
-  to_visa: {
-    label: "Визирование",
-    icon: <Eye size={14} />,
-    gradient: "from-purple-500 to-purple-600",
-  },
-  to_execute: {
-    label: "Исполнение",
-    icon: <Loader size={14} />,
+  ["in-progress"]: {
+    label: "В процессе исполнения",
+    icon: <FileEdit size={14} />,
     gradient: "from-amber-500 to-amber-600",
   },
-  to_approve: {
+  ["to-approve"]: {
     label: "Согласование",
-    icon: <Handshake size={14} />,
+    icon: <Eye size={14} />,
     gradient: "from-emerald-500 to-emerald-600",
   },
-  to_sign: {
-    label: "Подпись",
-    icon: <Signature size={14} />,
+  ["to-sign"]: {
+    label: "На подпись",
+    icon: <Loader size={14} />,
     gradient: "from-rose-500 to-rose-600",
   },
-  done: {
+  sent: {
+    label: "Отправлено",
+    icon: <Handshake size={14} />,
+    gradient: "from-indigo-500 to-indigo-600",
+  },
+  completed: {
     label: "Завершено",
     icon: <CheckCheck size={14} />,
     gradient: "from-green-500 to-green-600",
   },
-  cancelled: {
+  canceled: {
     label: "Отменено",
     icon: <XCircle size={14} />,
     gradient: "from-red-500 to-red-600",
@@ -80,11 +81,24 @@ export const NewRegistry = ({
   const navigate = useNavigate();
   const location = useLocation();
 
+  const fieldConfig = useRegistryConfig(type);
+
   // --- ЛОГИКА ИЗ СТАРОГО RegistryTable ---
   const { params: searchParams, setParams } = useDynamicSearchParams();
+
   const currentTab =
     searchParams.status ||
-    (type === "internal-outgoing" ? "to_approve" : "draft");
+    (type === "internal-incoming"
+      ? "analysis"
+      : type === "internal-outgoing"
+        ? "sent"
+        : type === "internal-draft"
+          ? "draft"
+          : type === "internal-to-sign"
+            ? "to-sign"
+            : type === "internal-to-approve"
+              ? "to-approve"
+              : "draft");
 
   // Запрос счетчиков (для табов)
   const { data: countersData } = useGetQuery({
@@ -93,11 +107,7 @@ export const NewRegistry = ({
   });
 
   // Основной запрос данных
-  const {
-    data: responseData,
-    isPending,
-    refetch,
-  } = useGetQuery({
+  const { data: responseData } = useGetQuery({
     url,
     params: {
       ...extraParams,
@@ -109,8 +119,10 @@ export const NewRegistry = ({
   });
 
   const documents = (responseData as any)?.data?.data || [];
-  const meta = (responseData as any)?.data?.meta || {};
+  const meta = (responseData as any)?.data || {};
   const counts = (countersData as any)?.data || {};
+
+  console.log(responseData);
 
   // Формируем конфиг табов на основе данных счетчиков и конфига
   const statusTabs = useMemo(() => {
@@ -151,16 +163,27 @@ export const NewRegistry = ({
     // Сброс фильтров (кроме служебных)
     setParams("incomingNumber", undefined);
     setParams("outgoingNumber", undefined);
-    setParams("sender", undefined);
+    setParams("sender", undefined); // Для селекта
+    setParams("sender_name", undefined); // Если селект называется так
+    setParams("date", undefined); // Для даты
+    setParams("date_from", undefined); // Для диапазона
+    setParams("date_to", undefined); // Для диапазона
     setParams("page", 1);
   };
 
-  const handleCardClick = (id: number) => {
-    // Логика роутинга из старого файла
+  const handleCardClick = (id: string | number) => {
     const route = type.includes("external-incoming")
-      ? `/correspondence/incoming/${id}` // Пример, подставь свои AppRoutes
-      : `/correspondence/outgoing/${id}`;
-    navigate(route);
+      ? AppRoutes.CORRESPONDENCE_INCOMING_SHOW
+      : type.includes("internal-incoming")
+        ? AppRoutes.INTERNAL_INCOMING_SHOW
+        : type.includes("internal-outgoing") ||
+            type.includes("internal-drafts") ||
+            type.includes("internal-to-sign") ||
+            type.includes("internal-to-approve")
+          ? AppRoutes.INTERNAL_OUTGOING_SHOW
+          : "";
+
+    navigate(route.replace(":id", String(id)));
   };
 
   const handleCreate = () => {
@@ -170,7 +193,6 @@ export const NewRegistry = ({
   return (
     <RegistryLayout
       documents={documents}
-      isLoading={isPending}
       meta={meta}
       tabs={statusTabs}
       activeTabId={currentTab}
@@ -187,6 +209,7 @@ export const NewRegistry = ({
         sender: searchParams.sender,
       }}
       statusConfig={STATUS_CONFIG}
+      fieldConfig={fieldConfig}
     />
   );
 };
