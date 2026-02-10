@@ -101,6 +101,7 @@ interface EditorProps {
   initialContent?: string;
   type: string;
   isIncoming?: boolean;
+  isReadOnly?: boolean;
   isPreviewOpen?: boolean;
 }
 
@@ -108,6 +109,7 @@ export const Editor = ({
   onChange,
   initialContent = "",
   isIncoming,
+  isReadOnly,
   isPreviewOpen,
 }: EditorProps) => {
   const editorContainerRef = useRef<HTMLDivElement>(null);
@@ -484,7 +486,7 @@ export const Editor = ({
           <div className="editor-container__editor">
             <div ref={editorRef}>
               <CKEditor
-                disabled={isIncoming || isPreviewOpen}
+                disabled={isIncoming || isPreviewOpen || isReadOnly}
                 data={initialContent}
                 onReady={(editor) => {
                   const decoupledEditor = editor as DecoupledEditor;

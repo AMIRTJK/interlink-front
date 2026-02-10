@@ -28,6 +28,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
   onReply,
   onRefresh,
   isIncoming,
+  isReadOnly,
 }) => {
   const [activeTab, setActiveTab] = useState<TTab>("actions");
 
@@ -404,6 +405,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                               onClick={handleSave}
                               type="primary"
                               className=" w-full! p-5! font-bold! bg-[#FF6B6B]! hover:bg-[#ff5252]! text-white rounded-xl! transition-colors duration-200 flex items-center justify-center gap-2"
+                              disabled={isReadOnly}
                             >
                               Сохранить
                             </Ui.Button>

@@ -19,6 +19,8 @@ interface IProps {
   onSendLoading: boolean;
   isActionsEnabled: boolean;
   isIncoming: boolean;
+  isReadOnly: boolean;
+  isSentStatusEnabled: boolean;
 }
 
 export const ActionToolbar: React.FC<IProps> = ({
@@ -30,7 +32,11 @@ export const ActionToolbar: React.FC<IProps> = ({
   onSendLoading,
   isActionsEnabled,
   isIncoming,
+  isReadOnly,
+  isSentStatusEnabled = false,
 }) => {
+  console.log(isSentStatusEnabled);
+
   return (
     <motion.div
       initial={{ y: 80, x: "-50%", opacity: 0 }}
@@ -44,6 +50,7 @@ export const ActionToolbar: React.FC<IProps> = ({
             label="Сохранить"
             onClick={onSave}
             loading={onSaveLoading}
+            disabled={isReadOnly}
           />
         </If>
         <ActionButton
@@ -63,12 +70,16 @@ export const ActionToolbar: React.FC<IProps> = ({
             type="primary"
             size="large"
             loading={onSendLoading}
-            disabled={!isActionsEnabled}
+            disabled={!isActionsEnabled || isSentStatusEnabled || !isReadOnly}
             onClick={handleSend}
             icon={<SendOutlined style={{ transform: "rotate(-30deg)" }} />}
-            className="ml-2 rounded-full border-none flex items-center font-semibold shadow-lg shadow-purple-200/50 transition-all duration-300 hover:brightness-110 hover:shadow-purple-300 active:scale-95"
+            className="ml-2 rounded-full! border-none! flex! items-center! font-semibold  transition-all! duration-300! hover:brightness-110! hover:shadow-purple-300! active:scale-95!"
             style={{
-              background: "linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)",
+              background:
+                isSentStatusEnabled || !isReadOnly
+                  ? "none"
+                  : "linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)",
+              fontWeight: isSentStatusEnabled || !isReadOnly ? "600" : "",
               height: "42px",
               paddingLeft: "24px",
               paddingRight: "24px",

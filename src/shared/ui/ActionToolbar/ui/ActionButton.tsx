@@ -22,16 +22,8 @@ export const ActionButton: React.FC<IProps> = ({
       disabled={disabled}
       type="text"
       onClick={onClick}
-      className="
-        group 
-        flex items-center gap-2 
-        h-10 px-3 
-        rounded-xl 
-        border-none 
-        bg-transparent 
-        hover:bg-gray-50/50 
-        transition-all duration-300
-      "
+      className={`group flex items-center gap-2 h-10 px-3 rounded-xl border-none bg-transparent hover:bg-gray-50/50 transition-all duration-300 ${disabled ? "opacity-30" : ""}
+      `}
     >
       <div className="flex items-center gap-2">
         <span className="text-gray-400 group-hover:text-[#F87171] transition-colors duration-300 flex items-center text-[18px]">

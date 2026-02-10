@@ -25,7 +25,7 @@ import { AppRoutes } from "@shared/config";
 
 interface IProps {
   mode: "create" | "show";
-  initialData?: InternalCorrespondenceResponse;
+  initialData?: any;
   isLoading?: boolean;
   type: string;
 }
@@ -39,6 +39,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   const { id } = useParams<{ id: string }>();
 
   const currentUserId = tokenControl.getUserId();
+
+  const afterSentStatusButton = initialData?.status === "sent";
 
   const isDraftCreated = !!id || !!initialData;
 
@@ -125,7 +127,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       messages: {
         invalidate: [
           ApiRoutes.INTERNAL_GET_WORKFLOW,
-          ApiRoutes.GET_INTERNAL_BY_ID,
+          ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
         ],
       },
       // queryOptions: {
@@ -317,7 +319,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
               initialContent={initialEditorContent}
               type={type}
               isIncoming={isIncoming}
-              disabled={isReadOnly}
+              isReadOnly={isReadOnly}
             />
           </div>
         </main>
@@ -343,6 +345,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         onReply={handleReply}
         onRefresh={refetchWorkflow}
         isIncoming={isIncoming}
+        isReadOnly={isReadOnly}
       />
       <ActionToolbar
         setIsInspectorOpen={open}
@@ -353,7 +356,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         onSaveLoading={isCreating || isUpdating}
         isActionsEnabled={isDraftCreated}
         isIncoming={isIncoming}
-        disabled={isReadOnly}
+        isReadOnly={isReadOnly}
+        isSentStatusEnabled={afterSentStatusButton}
       />
       <Modal
         title="Предварительный просмотр"

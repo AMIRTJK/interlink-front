@@ -55,7 +55,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
     return (
       <InternalCorrespondece
         mode="show"
-        initialData={correspondenceData?.data}
+        initialData={data}
         isLoading={isLoading}
         type={type}
       />
