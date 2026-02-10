@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { MenuItem } from "../model";
 import { cn } from "@shared/lib/utils";
-import sidebarArrow from '../../../assets/icons/sidebarArrow.svg?raw'
+
 import { Tooltip } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 import { ExpandedFolderViewModal } from "./ExpandedFolderViewModal";
 
 interface SidebarItemProps {
@@ -98,7 +99,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         <motion.div
           variants={contentVariants}
           className={cn(
-            "shrink-0! flex items-center justify-center w-10 h-10 transition-all duration-300",
+            "shrink-0! flex items-center justify-center w-8 h-8 transition-all duration-300 [&_svg_path]:stroke-current!",
+            isSelected && !isCollapsedMode && "bg-[#EEF2FF] rounded-xl",
             isSelected
               ? "text-indigo-600! shadow-indigo-200/40"
               : cn(
@@ -143,10 +145,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
                 <motion.div
                     transition={{ duration: 0.3 }}
                   >
-                   <span 
-                     className="flex items-center justify-center w-4 h-4 [&>svg]:w-full [&>svg]:h-full [&>svg]:fill-current"
-                     dangerouslySetInnerHTML={{ __html: sidebarArrow }}
-                   />
+                   <EyeOutlined className="w-4 h-4" />
                  </motion.div>
              </motion.div>
            )}

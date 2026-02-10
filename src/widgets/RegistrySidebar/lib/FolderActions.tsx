@@ -25,6 +25,7 @@ export const FolderActions: React.FC<IProps> = ({ menuActions, collapsed }) => {
         size="small"
         icon={<MoreOutlined />}
         onClick={(e) => e.stopPropagation()}
+        className="hover:bg-black/5 transition-colors"
       />
     </Dropdown>
   );
