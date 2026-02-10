@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { MenuItem } from "../model";
 import { cn } from "@shared/lib/utils";
 import sidebarArrow from '../../../assets/icons/sidebarArrow.svg?raw'
 import { Tooltip } from "antd";
-
-
+import { ExpandedFolderViewModal } from "./ExpandedFolderViewModal";
 
 interface SidebarItemProps {
   item: MenuItem;
@@ -44,16 +43,15 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   isActive,
   depth = 0,
   collapsed = false,
-  activeKey,
   variant = "vertical",
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   const toggleOpen = (e: React.MouseEvent) => {
     if (collapsed) return; 
     if (item.children && item.children.length > 0) {
       e.stopPropagation();
-      setIsOpen(!isOpen);
+      setIsModalOpen(true);
     }
   };
   const hasChildren = item.children && item.children.length > 0;
@@ -70,7 +68,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         whileTap={{ scale: 0.97 }}
         className={cn(
           "flex items-center group focus:outline-none! active:outline-none! border border-transparent rounded-2xl cursor-pointer relative select-none px-3 py-2",
-          variant === "vertical" ? "w-full" : "max-w-[170px]",
+          variant === "vertical" ? "w-full" : "max-w-[180px]",
           isCollapsedMode ? "justify-center px-0" : "gap-1",
           isSelected
             ? "text-indigo-700!"
@@ -143,7 +141,6 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
                )}
              >
                 <motion.div
-                    animate={{ rotate: isOpen ? 0 : -90 }}
                     transition={{ duration: 0.3 }}
                   >
                    <span 
@@ -170,47 +167,12 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
        ) : (
            content
        )}
-
-      <AnimatePresence>
-        {!isCollapsedMode && hasChildren && isOpen && (
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            variants={{
-              hidden: { height: 0, opacity: 0 },
-              visible: { 
-                height: "auto", 
-                opacity: 1,
-                transition: {
-                  height: { duration: 0.35 },
-                  opacity: { duration: 0.3 },
-                  staggerChildren: 0.2, 
-                }
-              }
-            }}
-            className={cn(
-               "overflow-hidden",
-               variant === "horizontal" && "crtChildrenFolderHidden"
-            )}
-          >
-            <div className="ml-4 pl-1 border-l-2 border-dotted border-indigo-200/50 mt-1">
-                {item.children!.map((child: MenuItem, idx: number) => (
-                  <SidebarItem
-                    key={child.key}
-                    item={child}
-                    isActive={activeKey === child.key} 
-                    depth={depth + 1} 
-                    collapsed={collapsed}
-                    activeKey={activeKey}
-                    index={idx}
-                    variant={variant}
-                  />
-                ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+       
+       <ExpandedFolderViewModal 
+         isOpen={isModalOpen}
+         onClose={() => setIsModalOpen(false)}
+         folder={item}
+       />
     </motion.div>
   );
 };

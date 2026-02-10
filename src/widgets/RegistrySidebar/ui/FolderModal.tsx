@@ -47,6 +47,7 @@ export const FolderModal = ({
         }
       }}
       width={380}
+      zIndex={2000}
     >
       <Form 
         form={form} 

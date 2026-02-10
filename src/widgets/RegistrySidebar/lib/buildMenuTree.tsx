@@ -73,9 +73,24 @@ export const buildMenuTree = ({
         : [createPlaceholder];
     }
 
-    const menuActions: MenuProps["items"] = isSystemFolder
-      ? []
-      : createFolderMenuActions({
+    let menuActions: MenuProps["items"] = [];
+
+    if (isSystemFolder) {
+        if (folder.id && canHaveSubfolders(folder.name)) {
+             menuActions = [
+                {
+                    key: "create-sub",
+                    label: "Создать папку",
+                    icon: <PlusOutlined className="text-[#0037AF]!" />,
+                    onClick: (e) => {
+                        e.domEvent.stopPropagation();
+                        handleAddClick(folder.id);
+                    },
+                }
+             ];
+        }
+    } else {
+        menuActions = createFolderMenuActions({
           folderId: folder.id,
           folderName: folder.name,
           depth,
@@ -83,6 +98,7 @@ export const buildMenuTree = ({
           handleAddClick,
           deleteFolder,
         });
+    }
 
     const isDraggable = !isSystemFolder;
     const handleDragStart = (e: React.DragEvent) =>
@@ -96,6 +112,8 @@ export const buildMenuTree = ({
       icon: definition ? definition.icon : folderIcon,
       path: folderPath,
       children,
+      menuActions,
+      count: definition?.count,
       onTitleClick: () => {
         if (folderPath) {
           onNavigate(folderPath);
@@ -107,7 +125,7 @@ export const buildMenuTree = ({
           folderPath={folderPath}
           collapsed={depth === 0 ? collapsed : false}
           definition={definition}
-          menuActions={menuActions}
+          menuActions={isSystemFolder ? [] : menuActions}
           onNavigate={onNavigate}
           onDragStart={handleDragStart}
           onDragOver={dragHandlers.handleDragOver}
