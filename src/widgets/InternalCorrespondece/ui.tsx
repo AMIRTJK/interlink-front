@@ -253,8 +253,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       const rawRecipients = initialData.recipients || [];
 
       const toRecipients: Recipient[] = rawRecipients
-        .filter((r) => r.type === "to")
-        .map((r) => ({
+        .filter((r: any) => r.type === "to")
+        .map((r: any) => ({
           id: r.user.id,
           full_name: r.user.full_name,
           photo_path: r.user.photo_path || "",
@@ -262,8 +262,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         }));
 
       const ccRecipients: Recipient[] = rawRecipients
-        .filter((r) => r.type === "cc")
-        .map((r) => ({
+        .filter((r: any) => r.type === "cc")
+        .map((r: any) => ({
           id: r.user.id,
           full_name: r.user.full_name,
           photo_path: r.user.photo_path || "",
