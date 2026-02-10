@@ -13,7 +13,7 @@ interface IFolderViewContentProps {
 
 export const FolderViewContent: React.FC<IFolderViewContentProps> = ({ folder, onClose }) => {
   const children = folder.children || [];
-  const createItem = children.find((c: MenuItem) => c.folderName === "Создать новую папку");
+
   const displayItems = children.filter((c: MenuItem) => c.folderName !== "Создать новую папку");
   const isEmpty = displayItems.length === 0;
 
@@ -41,24 +41,9 @@ export const FolderViewContent: React.FC<IFolderViewContentProps> = ({ folder, o
                <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
                    {isEmpty ? (
                        <div className="h-full flex flex-col items-center justify-center text-gray-400">
-                           <div className="w-24 h-24 mb-4 text-[#FDE047] opacity-60 bg-yellow-100 rounded-3xl flex items-center justify-center">
-                                <span 
-                                    className="w-12 h-12 text-[#E6B800]"
-                                    dangerouslySetInnerHTML={{ __html: folderIcon }} 
-                                />
-                           </div>
+
                            <p className="text-lg mb-6">Папки отсутствуют</p>
-                           {createItem && (
-                               <Button 
-                                  type="primary" 
-                                  className="bg-[#00C853] hover:bg-[#00BFA5] border-none px-6 h-10 rounded-full font-medium shadow-lg shadow-green-200"
-                                  onClick={(e) => {
-                                      createItem.onTitleClick?.(e);
-                                  }}
-                               >
-                                  + Создать папку
-                               </Button>
-                           )}
+
                        </div>
                    ) : (
                        <div className="grid grid-cols-3 gap-4">
