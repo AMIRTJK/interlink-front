@@ -14,7 +14,7 @@ interface IProps {
   folder: MenuItem;
 }
 
-// Recursive component for the tree view inside the modal
+
 const FolderTreeItem: React.FC<{ item: MenuItem; depth?: number }> = ({ item, depth = 0 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const hasChildren = item.children && item.children.length > 0;
@@ -27,7 +27,7 @@ const FolderTreeItem: React.FC<{ item: MenuItem; depth?: number }> = ({ item, de
     }
   };
 
-  // Card-like styling for the row
+
   const cardContent = (
       <div 
         className={cn(
@@ -53,9 +53,9 @@ const FolderTreeItem: React.FC<{ item: MenuItem; depth?: number }> = ({ item, de
             </div>
         ) : (
             <>
-                {/* Header: Icon + Info */}
+
                 <div className="flex items-center gap-2 w-full">
-                     {/* Icon */}
+
                      <div className="relative shrink-0">
                         <div className="w-8 h-8 text-yellow-600">
                              {typeof item.icon === 'string' ? (
@@ -67,7 +67,7 @@ const FolderTreeItem: React.FC<{ item: MenuItem; depth?: number }> = ({ item, de
                         </div>
                     </div>
 
-                    {/* Text Content */}
+
                     <div className="flex flex-col flex-1 min-w-0 leading-tight">
                          <span className="text-sm font-bold text-gray-800 truncate" title={item.folderName || item.label}>
                             {item.folderName || item.label}
@@ -78,16 +78,16 @@ const FolderTreeItem: React.FC<{ item: MenuItem; depth?: number }> = ({ item, de
                     </div>
                 </div>
 
-                {/* Divider */}
+
                 <div className="h-px bg-yellow-200/50 w-full my-0.5" />
 
-                {/* Footer: Actions + Arrow (Right Aligned) */}
+
                 <div className="flex items-center justify-end gap-1 h-6" onClick={(e) => e.stopPropagation()}>
                     <div className="scale-75 origin-right">
                         <FolderActions menuActions={item.menuActions} collapsed={false} />
                     </div>
                     
-                    {/* Expansion Arrow */}
+
                     {hasChildren && (
                         <div 
                              onClick={toggleOpen}
@@ -120,7 +120,7 @@ const FolderTreeItem: React.FC<{ item: MenuItem; depth?: number }> = ({ item, de
         {cardContent}
       </div>
 
-      {/* Children Grid */}
+
       <AnimatePresence>
         {hasChildren && isOpen && (
           <motion.div
@@ -140,11 +140,11 @@ const FolderTreeItem: React.FC<{ item: MenuItem; depth?: number }> = ({ item, de
             }}
             className="overflow-hidden"
           >
-             {/* Render children in a Grid, indented */}
+
              <div 
                 className={cn(
                     "mt-2 pl-4 border-l border-dotted ml-5 pb-2 pr-1",
-                    // Cycle through nice colors based on depth
+
                     [
                         "border-blue-400",
                         "border-purple-400",
@@ -175,14 +175,7 @@ export const ExpandedFolderViewModal: React.FC<IProps> = ({
 }) => {
   const children = folder.children || [];
   const createItem = children.find((c: MenuItem) => c.folderName === "Создать новую папку");
-  // We want to show everything in the tree, including the 'Create' item at the end of the root list if it exists.
-  // Actually, standard children array usually already includes it if we built it that way.
-  // If we filter it out, we should re-append it.
-  
-  // Let's use the children as is, assuming buildMenuTree handles the placeholder structure.
-  // However, buildMenuTree adds placeholder to *folder.children*.
-  
-  // Filter out create item for display list, as requested to move it to header actions
+
   const displayItems = children.filter((c: MenuItem) => c.folderName !== "Создать новую папку");
   const isEmpty = displayItems.length === 0;
 
@@ -196,15 +189,15 @@ export const ExpandedFolderViewModal: React.FC<IProps> = ({
       width={900}
       modalRender={() => (
         <div className="relative pointer-events-auto">
-            {/* Tab */}
+
             <div className="absolute -top-10 left-0 w-32 h-12 bg-[#FFD700] rounded-t-2xl z-0" />
             
-            {/* Main Folder Body */}
+
             <div className="bg-[#FFD700] p-3 rounded-2xl rounded-tl-none shadow-2xl relative z-10 min-h-[500px] flex flex-col">
-                {/* White Content Card */}
+
                 <div className="bg-[#FFFFF0] flex-1 rounded-xl p-6 flex flex-col shadow-inner items-stretch">
                    
-                   {/* Header */}
+
                    <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
                              <span 
@@ -221,7 +214,7 @@ export const ExpandedFolderViewModal: React.FC<IProps> = ({
                         </div>
                    </div>
 
-                   {/* Content */}
+
                    <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
                        {isEmpty ? (
                            <div className="h-full flex flex-col items-center justify-center text-gray-400">
