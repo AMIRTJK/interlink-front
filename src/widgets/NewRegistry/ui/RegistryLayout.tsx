@@ -1,3 +1,4 @@
+import "./style.css";
 import React, { useMemo, useState } from "react";
 import locale from "antd/es/locale/ru_RU";
 import dayjs from "dayjs";
@@ -488,6 +489,7 @@ export const DocumentCard = ({
                 menu={{ items: actionItems }}
                 trigger={["click"]}
                 placement="bottomRight"
+                overlayClassName="custom-registry-dropdown"
               >
                 <button className="p-1 hover:bg-white/20 rounded-md text-white transition-colors">
                   <MoreHorizontal size={16} />
@@ -699,6 +701,7 @@ export const DocumentListItem = ({
                   menu={{ items: actionItems }}
                   trigger={["click"]}
                   placement="bottomRight"
+                  overlayClassName="custom-registry-dropdown"
                 >
                   <button className="p-1.5 hover:bg-gray-100 rounded-md text-gray-500 transition-colors">
                     <MoreHorizontal size={16} />
