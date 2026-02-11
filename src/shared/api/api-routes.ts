@@ -107,6 +107,8 @@ export const ApiRoutes = {
     "/api/v1/internal-correspondences/:id/signatures/payload",
   INTERNAL_SIGNATURES_CONFIRM:
     "/api/v1/internal-correspondences/:id/signatures/confirm",
+  INTERNAL_APPROVALS_CONFIRM:
+    "/api/v1/internal-correspondences/approvals/:id/status",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];
