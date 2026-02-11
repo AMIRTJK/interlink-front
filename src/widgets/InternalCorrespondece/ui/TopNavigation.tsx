@@ -12,10 +12,13 @@ import {
   SearchOutlined,
   ClockCircleOutlined,
   UserOutlined,
+  ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { useNavigate } from "react-router";
+import { ChevronLeft } from "lucide-react";
 
 // --- Types & Mocks ---
 interface NavRegistry {
@@ -65,6 +68,8 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   const [activeNavRegistry, setActiveNavRegistry] = useState<string | null>(
     null,
   );
+
+  const navigate = useNavigate();
   const [showColorPicker, setShowColorPicker] = useState(false);
   const currentPreset = softMaterialPresets[0];
 
@@ -145,16 +150,37 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
       <nav
         className="h-16 px-14 flex items-center justify-between backdrop-blur-xl border-b z-30 transition-all duration-300 sticky top-0"
         style={{
-          backgroundColor: isDarkMode
-            ? "rgba(17, 24, 39, 0.7)"
-            : "rgba(255, 255, 255, 0.7)",
-          borderColor: isDarkMode
-            ? "rgba(75, 85, 99, 0.3)"
-            : "rgba(229, 231, 235, 0.5)",
+          backgroundColor: "rgba(255, 255, 255, 0.7)",
+          borderColor: "rgba(229, 231, 235, 0.5)",
         }}
       >
         {/* Left - Navigation */}
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-6">
+          <motion.button
+            onClick={() => navigate(-1)}
+            whileHover={{
+              scale: 1.1,
+            }}
+            whileTap={{ scale: 0.95 }}
+            className={`
+                group relative flex items-center justify-center w-8 h-8 rounded-full 
+                transition-colors duration-300 border backdrop-blur-md cursor-pointer overflow-hidden
+               border-black/5 bg-black/5 text-gray-600"
+              `}
+            title="Назад"
+          >
+            <ChevronLeft
+              size={15}
+              strokeWidth={3}
+              className="relative z-10 transition-colors text-[#555f6e]! duration-300"
+            />
+          </motion.button>
+
+          <div
+            className={`h-6 w-[1px] rounded-full ml-3 ${
+              isDarkMode ? "bg-white/10" : "bg-black/10"
+            }`}
+          />
           <div className="flex items-center gap-1">
             <NavButton
               icon={<InboxOutlined />}
