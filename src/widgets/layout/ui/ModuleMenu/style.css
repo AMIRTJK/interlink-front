@@ -386,7 +386,9 @@ body.no-animations
   color: #2151e7 !important;
 }
 
-.modern-style .ant-menu-item-selected {
+.modern-style .ant-menu-item-selected,
+.modern-style .ant-menu-item.ant-menu-item-selected,
+.modern-style li.ant-menu-item-selected {
   background-color: #e0ebff !important;
   color: #2151e7 !important;
   font-weight: 500;
@@ -394,7 +396,7 @@ body.no-animations
   height: 42px !important;
   line-height: 42px !important;
   align-self: flex-end;
-  border-bottom: 3px solid #0037af !important;
+  border-bottom: 5px solid #0037af !important;
   z-index: 5 !important;
   margin: 0 !important;
   top: 0;
