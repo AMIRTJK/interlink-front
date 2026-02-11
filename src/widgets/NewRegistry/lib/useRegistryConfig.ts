@@ -4,7 +4,7 @@ import { RegistryConfig } from "./types";
 
 export const useRegistryConfig = (type: string): RegistryConfig => {
   const incomingConfig = useIncomingConfig(type);
-  const outgoingConfig = useOutgoingConfig();
+  const outgoingConfig = useOutgoingConfig(type);
 
   switch (type) {
     // Входящие
