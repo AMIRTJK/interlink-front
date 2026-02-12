@@ -14,7 +14,6 @@ export const IosVariant = ({ items, activeKey, handleNavigate, subItems, pathnam
   return (
     <div className="ios-dock-wrapper">
       <div className="ios-dock-group">
-        {/* Sub Dock */}
         {subItems && subItems.length > 0 && (
           <motion.div
             className="ios-sub-dock-container"
@@ -26,9 +25,7 @@ export const IosVariant = ({ items, activeKey, handleNavigate, subItems, pathnam
             {subItems.map((sub) => {
               if (!sub || !("key" in sub)) return null;
               const subKey = String(sub.key);
-              
               const isDirectMatch = pathname === subKey || pathname.startsWith(subKey + "/");
-              // Optional: Add restoration logic if needed, but direct match is best for visual feedback
               const isActive = isDirectMatch; 
 
               return (
@@ -58,7 +55,6 @@ export const IosVariant = ({ items, activeKey, handleNavigate, subItems, pathnam
           </motion.div>
         )}
 
-        {/* Main Dock */}
         <div className="ios-dock-container">
           {items.map((item) => {
             if (!item || !("key" in item)) return null;
