@@ -35,7 +35,7 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
             type="text"
             icon={<PlusOutlined />}
             onClick={() => handleAddClick(null)}
-            className="h-8! w-8! rounded-full! hover:bg-indigo-50! text-gray-500 hover:text-indigo-600"
+            className="h-8! w-8! rounded-full! hover:bg-indigo-50! text-gray-500! hover:text-indigo-600"
           />
           <Tooltip title="Вертикальный вид" placement="bottom">
             <Button
@@ -47,7 +47,7 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
                 />
               }
               onClick={() => onVariantChange?.("vertical")}
-              className="h-8! w-8! rounded-full! hover:bg-gray-100! group text-gray-500 hover:text-indigo-600"
+              className="h-8! w-8! rounded-full! hover:bg-gray-100! group text-gray-500! hover:text-indigo-600"
             />
           </Tooltip>
         </div>
