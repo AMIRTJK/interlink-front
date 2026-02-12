@@ -6,7 +6,7 @@ import pinnedIcon from '../../../assets/icons/pinned-icon.svg?raw';
 import garbageIcon from '../../../assets/icons/garbage-icon.svg?raw';
 import helpIcon from '../../../assets/icons/help-icon.svg?raw';
 import settingsIcon from '../../../assets/icons/settings-icon.svg?raw';
-import collapseIcon from '../../../assets/icons/collapse-icon.svg';
+import collapseIcon from '../../../assets/icons/collapse-icon.svg?raw';
 
 export const sideBarIcons = {
   incomingIcon,

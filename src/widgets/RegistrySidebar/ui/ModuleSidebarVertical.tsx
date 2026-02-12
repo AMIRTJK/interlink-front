@@ -70,7 +70,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
                 type="text"
                 icon={<PlusOutlined />}
                 onClick={() => handleAddClick(null)}
-                className="h-6! w-6! addFolderRootSideBar"
+                className="h-6! w-6! text-gray-500! hover:text-indigo-600 addFolderRootSideBar"
               />
             )}
 
@@ -79,10 +79,15 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
               onClick={() => setCollapsed(!collapsed)}
               className={
                 collapsed
-                  ? "mx-auto h-7! w-7! outline-none! focus:outline-none!"
-                  : "ml-auto outline-none! focus:outline-none!"
+                  ? "mx-auto h-7! w-7! outline-none! focus:outline-none! text-gray-500! hover:text-indigo-600"
+                  : "ml-auto outline-none! focus:outline-none! text-gray-500! hover:text-indigo-600"
               }
-              icon={<img src={sideBarIcons.collapseIcon} alt="collapse" />}
+              icon={
+                <span
+                  dangerouslySetInnerHTML={{ __html: sideBarIcons.collapseIcon }}
+                  className="flex items-center justify-center w-full h-full"
+                />
+              }
             />
             {!collapsed && (
               <Tooltip title="Горизонтальный вид" placement="right">
@@ -91,11 +96,11 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
                   icon={
                     <span
                       dangerouslySetInnerHTML={{ __html: layoutHorizontalIcon }}
-                      className="flex items-center justify-center opacity-60 group-hover:opacity-100 group-hover:text-indigo-600 transition-all"
+                      className="flex items-center justify-center transition-all"
                     />
                   }
                   onClick={() => onVariantChange?.("horizontal")}
-                  className="h-7! w-7! flex items-center justify-center hover:bg-black/5 rounded-lg group"
+                  className="h-7! w-7! flex items-center justify-center hover:bg-black/5 rounded-lg group text-gray-500! hover:text-indigo-600"
                 />
               </Tooltip>
             )}
