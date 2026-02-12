@@ -311,21 +311,20 @@ body.no-animations
   flex-direction: column;
 }
 
-/* --- Синяя полоса снизу --- */
-.sub-menu-bar {
-  min-height: 44px; /* Увеличил высоту для лучшего вида пилюль */
+/* --- Стили подменю для COMPACT режима (Синяя полоса) --- */
+.compact-mode .sub-menu-bar {
+  min-height: 44px;
   display: flex;
   align-items: center;
   padding: 0 32px;
-  gap: 8px; /* Меньшее расстояние для компактности */
+  gap: 8px;
   position: relative;
   z-index: 1;
   color: rgba(255, 255, 255, 0.7);
   background: #0037AF !important;
 }
 
-/* Стили для элементов подменю */
-.sub-menu-item {
+.compact-mode .sub-menu-item {
   cursor: pointer;
   padding: 10px 16px;
   border-radius: 8px;
@@ -338,17 +337,12 @@ body.no-animations
   color: inherit;
 }
 
-.sub-menu-item:hover {
+.compact-mode .sub-menu-item:hover,
+.compact-mode .sub-menu-item.active {
   color: #fff;
 }
 
-/* СОСТОЯНИЕ ACTIVE для подменю */
-.sub-menu-item.active {
-  color: #fff;
-}
-
-/* Скользящая пилюля для Compact режима */
-.sub-menu-bar .active-border {
+.compact-mode .active-border {
   position: absolute;
   top: 6px;
   bottom: 6px;
@@ -368,7 +362,6 @@ body.no-animations
 .modern-mode {
   position: relative;
   background: #ffffff;
-  /* border-radius: 15px; */
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   border: 1px solid #f3f4f6;
   overflow: hidden;
@@ -436,6 +429,7 @@ body.no-animations
   border-bottom: none !important;
 }
 
+/* --- Стили подменю для MODERN режима --- */
 .modern-mode .sub-menu-bar {
   background-color: transparent;
   height: auto;
@@ -480,16 +474,9 @@ body.no-animations
   display: block;
 }
 
-.modern-mode .sub-menu-item:hover {
+.modern-mode .sub-menu-item:hover,
+.modern-mode .sub-menu-item.active {
   color: #0037af;
-}
-
-.modern-mode .sub-menu-item:hover {
-  color: #156bf6;
-}
-
-.active-modern-class {
-  color: #fff !important;
 }
 
 .modern-mode .active-border {
