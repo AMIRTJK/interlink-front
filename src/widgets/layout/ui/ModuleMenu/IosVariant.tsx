@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { MenuItem } from "./lib";
 import "./style.css";
 
-interface IosVariantProps {
+interface IProps {
   items: MenuItem[];
   activeKey: string;
   handleNavigate: (path: string) => void;
@@ -10,7 +10,7 @@ interface IosVariantProps {
   pathname: string;
 }
 
-export const IosVariant = ({ items, activeKey, handleNavigate, subItems, pathname }: IosVariantProps) => {
+export const IosVariant = ({ items, activeKey, handleNavigate, subItems, pathname }: IProps) => {
   return (
     <div className="ios-dock-wrapper">
       <div className="ios-dock-group">
