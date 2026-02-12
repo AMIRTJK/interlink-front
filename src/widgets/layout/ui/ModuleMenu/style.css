@@ -373,3 +373,173 @@ body.no-animations
   z-index: -1;
   pointer-events: none;
 }
+
+/* iOS Floating Dock Styles */
+
+/* iOS Floating Dock Styles - Premium Polish */
+.ios-dock-wrapper {
+  position: fixed;
+  bottom: 32px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.ios-dock-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    pointer-events: none;
+}
+
+/* Sub Dock - Segmented Control Style */
+.ios-sub-dock-container {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    background: rgba(118, 118, 128, 0.12); /* Standard iOS Segmented Control BG */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 99px; /* Pill shape */
+    border: none;
+    box-shadow: none;
+}
+
+.ios-sub-dock-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 16px;
+    cursor: pointer;
+    border-radius: 99px;
+    color: #555; /* Simulating inactive state */
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+    min-width: 120px; /* Ensure typical touch target size */
+}
+
+.ios-sub-dock-item:hover {
+    color: #000;
+}
+
+.ios-sub-dock-item.active {
+    color: #0037af;
+    font-weight: 600;
+}
+
+.ios-sub-active-bg {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    background-color: #ffffff;
+    border-radius: 99px;
+    z-index: -1;
+    box-shadow: 
+      0 3px 8px rgba(0, 0, 0, 0.12), 
+      0 3px 1px rgba(0, 0, 0, 0.04);
+}
+
+.ios-sub-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.ios-sub-dock-item.active .ios-sub-icon-wrapper {
+    opacity: 1;
+    color: #0037af; /* Blue icon for active state */
+}
+
+/* Main Dock - Glassmorphism Dock */
+.ios-dock-container {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(250, 250, 250, 0.75);
+  backdrop-filter: blur(30px) saturate(190%);
+  -webkit-backdrop-filter: blur(30px) saturate(190%);
+  border-radius: 26px;
+  box-shadow: 
+    0 20px 50px -12px rgba(0, 0, 0, 0.15),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.ios-dock-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  cursor: pointer;
+  border-radius: 20px;
+  z-index: 1;
+}
+
+.ios-active-pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #007aff, #0056e0);
+  border-radius: 20px;
+  z-index: -1;
+  box-shadow: 0 8px 16px -4px rgba(0, 122, 255, 0.4);
+}
+
+.ios-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.ios-icon-wrapper img,
+.ios-icon-wrapper .anticon {
+  width: 26px;
+  height: 26px;
+  font-size: 26px;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  filter: grayscale(100%) opacity(0.5);
+}
+
+.ios-dock-item:hover .ios-icon-wrapper img,
+.ios-dock-item:hover .ios-icon-wrapper .anticon {
+  filter: grayscale(0%) opacity(0.8);
+  transform: translateY(-2px);
+}
+
+.ios-dock-item.active .ios-icon-wrapper img,
+.ios-dock-item.active .ios-icon-wrapper .anticon {
+  filter: brightness(0) invert(1);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .ios-dock-wrapper {
+    bottom: calc(32px + env(safe-area-inset-bottom));
+  }
+}

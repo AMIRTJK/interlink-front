@@ -14,13 +14,13 @@ export type MenuItem = Required<MenuProps>["items"][number] & {
 };
 
 export const getModuleItems = (
-  variant: "horizontal" | "compact" | "modern" | "full",
+  variant: "horizontal" | "compact" | "modern" | "full" | "ios",
 ): MenuItem[] => [
   {
     key: AppRoutes.PROFILE,
     label: "Личный кабинет",
     icon:
-      variant === "horizontal" || variant === "full" ? (
+      variant === "horizontal" || variant === "full" || variant === "ios" ? (
         <img src={ProfileIcon} alt="" />
       ) : null,
   },
@@ -28,7 +28,7 @@ export const getModuleItems = (
     key: "/modules/temp-organization",
     label: "Организация",
     icon:
-      variant === "horizontal" || variant === "full" ? (
+      variant === "horizontal" || variant === "full" || variant === "ios" ? (
         <img src={OrganizationIcon} alt="" />
       ) : null,
   },
@@ -36,7 +36,7 @@ export const getModuleItems = (
     key: "/modules/temp-docs_main",
     label: "Основные документы",
     icon:
-      variant === "horizontal" || variant === "full" ? (
+      variant === "horizontal" || variant === "full" || variant === "ios" ? (
         <img src={MainDocumentsIcon} alt="" />
       ) : null,
   },
@@ -45,22 +45,22 @@ export const getModuleItems = (
     label: "Корреспонденция",
     requiredRole: ["correspondence.view"],
     icon:
-      variant === "horizontal" || variant === "full" ? (
+      variant === "horizontal" || variant === "full" || variant === "ios" ? (
         <img src={CorrespondenceIcon} alt="" />
       ) : null,
-    ...((variant === "compact" || variant === "modern") && {
+    ...((variant === "compact" || variant === "modern" || variant === "ios") && {
       children: [
         {
           key: AppRoutes.CORRESPONDENCE_INCOMING,
           label: "Внешняя корреспонденция",
           requiredRole: ["correspondence.view"],
-          icon: variant === "modern" ? <FileTextOutlined /> : null,
+          icon: variant === "modern" || variant === "ios" ? <FileTextOutlined /> : null,
         },
         {
           key: AppRoutes.CORRESPONDENCE_OUTGOING,
           label: "Внутренняя корреспонденция",
           requiredRole: ["internal_correspondence.view"],
-          icon: variant === "modern" ? <GlobalOutlined /> : null,
+          icon: variant === "modern" || variant === "ios" ? <GlobalOutlined /> : null,
         },
       ],
     }),
@@ -70,7 +70,7 @@ export const getModuleItems = (
     label: "Первичные документы",
     requiredRole: ["primary_documents.view"],
     icon:
-      variant === "horizontal" || variant === "full" ? (
+      variant === "horizontal" || variant === "full" || variant === "ios" ? (
         <img src={PrimaryDocumentsIcon} alt="" />
       ) : null,
   },
@@ -79,7 +79,7 @@ export const getModuleItems = (
     label: "Заявки",
     requiredRole: ["apps.view"],
     icon:
-      variant === "horizontal" || variant === "full" ? (
+      variant === "horizontal" || variant === "full" || variant === "ios" ? (
         <img src={ApplicationsIcon} alt="" />
       ) : null,
   },
@@ -88,7 +88,7 @@ export const getModuleItems = (
     label: "CRM",
     requiredRole: ["crm.view"],
     icon:
-      variant === "horizontal" || variant === "full" ? (
+      variant === "horizontal" || variant === "full" || variant === "ios" ? (
         <img src={CrmIcon} alt="" />
       ) : null,
   },

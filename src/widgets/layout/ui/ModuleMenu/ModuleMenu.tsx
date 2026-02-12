@@ -6,10 +6,11 @@ import { tokenControl, useGetQuery } from "@shared/lib";
 import { useEffect, useMemo } from "react";
 import { ApiRoutes } from "@shared/api";
 import { motion, AnimatePresence } from "framer-motion";
+import { IosVariant } from "./IosVariant";
 import "./style.css";
 
 interface IProps {
-  variant: "horizontal" | "compact" | "modern" | "full";
+  variant: "horizontal" | "compact" | "modern" | "full" | "ios";
 }
 type TSubMenuItem = {
   key: string;
@@ -225,6 +226,14 @@ export const ModuleMenu = ({ variant }: IProps) => {
           theme="light"
           disabledOverflow
           className="flex-wrap p-2 border-b-0! full-style"
+        />
+      ) : variant === "ios" ? (
+        <IosVariant 
+            items={menuItems}
+            activeKey={activeKey}
+            handleNavigate={handleNavigate}
+            subItems={subItems}
+            pathname={pathname}
         />
       ) : (
         <div className={`custom-main-menu ${variant}-style`}>
