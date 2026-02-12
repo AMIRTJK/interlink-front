@@ -172,53 +172,97 @@ body.no-animations
   background: #ffffff;
   border-radius: 15px;
   margin-bottom: 24px;
+  overflow: visible !important; /* Critical for ears */
 }
 
-.compact-style.ant-menu-horizontal {
-  background: transparent !important;
-  border-bottom: none !important;
-  margin-bottom: -1px;
+.menu-container {
+  overflow: visible !important;
+}
+
+/* --- Custom Main Menu (Framer-Motion based) --- */
+.custom-main-menu {
+  display: flex;
+  align-items: center;
   position: relative;
   z-index: 2;
-  display: flex !important;
-  align-items: center !important; /* Центрируем вкладки по вертикали */
-  height: 40px !important;
-  gap: 0 !important;
-  padding: 0 8px !important;
+  user-select: none;
 }
 
-/* --- Базовый стиль элемента --- */
-.compact-style .ant-menu-item {
-  position: relative !important;
-  height: 28px !important; /* Чуть меньше высоты контейнера */
-  line-height: 28px !important;
-  border: none !important;
-  margin: 0 !important;
-  padding: 0 20px !important;
-  transition: all 0.2s ease !important;
-  border-radius: 8px !important; /* Скругление для HOVER состояния */
-  color: #595959 !important;
-  overflow: visible !important;
-  margin: 0 4px !important;
+.custom-menu-item {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.25s ease;
+  z-index: 1;
+  text-align: center;
 }
 
-.compact-style .ant-menu-item::before {
-  left: -10px;
-  border-bottom-right-radius: 12px;
-  box-shadow: 6px 6px 0 6px transparent;
-  clip-path: inset(0 0 0 -10px);
+.custom-menu-title {
+  position: relative;
+  z-index: 2;
 }
 
-.compact-style .ant-menu-item .ant-menu-title-content::after {
-  right: -10px;
+.main-active-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   bottom: 0;
-  border-bottom-left-radius: 12px;
-  box-shadow: -6px 6px 0 6px transparent;
-  clip-path: inset(0 -10px 0 0);
+  z-index: 1;
 }
 
-.compact-style .ant-menu-item::before,
-.compact-style .ant-menu-item .ant-menu-title-content::after {
+/* COMPACT-STYLE */
+.compact-style.custom-main-menu {
+  height: 44px; /* Restored more elegant height */
+  padding: 0 12px;
+  gap: 4px;
+  border-bottom: none;
+  align-items: center; /* Center items vertically */
+}
+
+.compact-style .custom-menu-item {
+  height: 32px; /* Inner item height for hover capsule */
+  padding: 0 20px;
+  color: #595959;
+  font-size: 14px;
+  transition: color 0.2s ease;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.compact-style .custom-menu-item.selected {
+  color: white;
+  height: 100%; /* Selected tab fills full height to connect with ears */
+}
+
+/* Capsule hover effect for inactive items */
+.compact-style .custom-menu-item:not(.selected):hover::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  z-index: -1;
+}
+
+.compact-style .main-active-indicator {
+  background-color: #0037af;
+  border-radius: 12px 12px 0 0;
+  height: 40px; /* Specific height for the tab */
+  bottom: 0;
+  top: auto;
+  z-index: -1;
+}
+
+/* Restored and perfected "ears" for the sliding indicator */
+.compact-style .main-active-indicator::before,
+.compact-style .main-active-indicator::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -226,14 +270,20 @@ body.no-animations
   height: 12px;
   background: transparent;
   pointer-events: none;
-
-  /* Добавляем переход для тени и прозрачности */
-  transition: all 0.2s ease !important;
-  opacity: 0;
 }
 
-.compact-style .ant-menu-item::after {
-  display: none !important;
+.compact-style .main-active-indicator::before {
+  left: -12px;
+  border-bottom-right-radius: 12px;
+  box-shadow: 6px 6px 0 6px #0037af;
+  clip-path: inset(0 0 0 -12px);
+}
+
+.compact-style .main-active-indicator::after {
+  right: -12px;
+  border-bottom-left-radius: 12px;
+  box-shadow: -6px 6px 0 6px #0037af;
+  clip-path: inset(0 -12px 0 0);
 }
 
 /* --- СОСТОЯНИЕ HOVER (как в Chrome) --- */
@@ -248,62 +298,9 @@ body.no-animations
 }
 
 /* --- СОСТОЯНИЕ SELECTED (Перетекание) --- */
+/* Удаляем старые AntD селекторы для компактного стиля */
 .compact-style .ant-menu-item-selected {
-  background-color: #0037af !important;
-  color: white !important;
-  border-radius: 15px 15px 0 0 !important;
-  height: 36px !important;
-  line-height: 36px !important;
-  align-self: flex-end;
-  z-index: 5 !important;
-  margin: 0 !important;
-}
-
-.compact-style .ant-menu-item-selected::before {
-  opacity: 1;
-  box-shadow: 6px 6px 0 6px #0037af;
-}
-
-.compact-style .ant-menu-item-selected .ant-menu-title-content::after {
-  opacity: 1;
-  box-shadow: -6px 6px 0 6px #0037af;
-}
-
-/* Ушки только для выбранного элемента */
-.compact-style .ant-menu-item-selected::before,
-.compact-style .ant-menu-item-selected .ant-menu-title-content::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  width: 12px;
-  height: 12px;
-  background: transparent;
-  pointer-events: none;
-}
-
-.compact-style .ant-menu-item-selected::before {
-  left: -10px;
-  border-bottom-right-radius: 12px;
-  box-shadow: 6px 6px 0 6px #0037af;
-  clip-path: inset(0 0 0 -10px);
-}
-
-.compact-style .ant-menu-item-selected .ant-menu-title-content::after {
-  right: -10px;
-  bottom: 0;
-  border-bottom-left-radius: 12px;
-  box-shadow: -6px 6px 0 6px #0037af;
-  clip-path: inset(0 -10px 0 0);
-}
-
-/* Фикс для отрисовки ушек за пределами li */
-.compact-style .ant-menu-item-selected {
-  overflow: visible !important;
-}
-
-.compact-style .ant-menu-item .ant-menu-title-content {
-  overflow: visible !important;
-  display: block !important;
+  display: none !important;
 }
 
 .compact-mode-container {
@@ -367,66 +364,41 @@ body.no-animations
   overflow: hidden;
 }
 
-.modern-style.ant-menu-horizontal {
-  background: transparent !important;
-  border-bottom: none !important;
-  margin-bottom: -1px;
-  position: relative;
-  z-index: 2;
-  display: flex !important;
-  align-items: center !important;
-  height: 48px !important;
-  gap: 0 !important;
-  padding: 0 24px !important;
+/* MODERN-STYLE */
+.modern-style.custom-main-menu {
+  height: 48px;
+  padding: 0 24px;
+  gap: 8px;
+  border-bottom: none;
 }
 
-.modern-style .ant-menu-item {
-  position: relative !important;
-  height: 42px !important;
-  line-height: 42px !important;
-  border: none !important;
-  margin: 0 !important;
-  padding: 0 20px !important;
-  transition: all 0.2s ease !important;
-  border-radius: 12px 12px 0 0 !important;
-  color: #46566d !important;
+.modern-style .custom-menu-item {
+  height: 42px;
+  min-width: 140px;
+  padding: 0 20px;
+  color: #46566d;
   font-weight: 600;
-  overflow: visible !important;
-  margin: 0 4px !important;
-  top: 0;
-  min-width: 140px !important;
-  text-align: center !important;
+  font-size: 14px;
+  border-radius: 12px 12px 0 0;
 }
 
-.modern-style .ant-menu-item:not(.ant-menu-item-selected):hover {
-  background-color: rgba(0, 0, 0, 0.04) !important;
-  color: #2151e7 !important;
+.modern-style .custom-menu-item.selected {
+  color: #2151e7;
+  background: transparent !important;
 }
 
-.modern-style .ant-menu-item-selected,
-.modern-style .ant-menu-item.ant-menu-item-selected,
-.modern-style li.ant-menu-item-selected {
-  background-color: #e0ebff !important;
-  color: #2151e7 !important;
-  font-weight: 500;
-  border-radius: 12px 12px 0 0 !important;
-  height: 42px !important;
-  line-height: 42px !important;
-  align-self: flex-end;
-  border-bottom: 4px solid #0037af !important;
-  z-index: 5 !important;
-  margin: 0 !important;
-  top: 0;
+.modern-style .custom-menu-item:not(.selected):hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  color: #2151e7;
 }
 
-.modern-style .ant-menu-item-selected::before,
-.modern-style .ant-menu-item-selected .ant-menu-title-content::after,
-.modern-style .ant-menu-item::before,
-.modern-style .ant-menu-item .ant-menu-title-content::after,
-.modern-style .ant-menu-item::after,
-.modern-style .ant-menu-item-selected::after {
-  display: none !important;
-  border-bottom: none !important;
+.modern-style .main-active-indicator {
+  background-color: #e0ebff;
+  border-radius: 12px 12px 0 0;
+  border-bottom: 3px solid #0037af;
+  bottom: 0;
+  top: auto;
+  height: 42px;
 }
 
 /* --- Стили подменю для MODERN режима --- */

@@ -229,21 +229,48 @@ export const ModuleMenu = ({ variant }: IProps) => {
 
   return (
     <div className={`menu-container ${variant}-mode`}>
-      <Menu
-        onClick={(e) => handleNavigate(e.key)}
-        selectedKeys={[activeKey]}
-        mode="horizontal"
-        items={menuItems}
-        theme="light"
-        disabledOverflow
-        className={`flex-wrap p-2 border-b-0! ${
-          variant === "compact"
-            ? "compact-style"
-            : variant === "modern"
-              ? "modern-style"
-              : "full-style"
-        }`}
-      />
+      {variant === "horizontal" ? (
+        <Menu
+          onClick={(e) => handleNavigate(e.key)}
+          selectedKeys={[activeKey]}
+          mode="horizontal"
+          items={menuItems}
+          theme="light"
+          disabledOverflow
+          className="flex-wrap p-2 border-b-0! full-style"
+        />
+      ) : (
+        <div className={`custom-main-menu ${variant === "compact" ? "compact-style" : "modern-style"}`}>
+          {menuItems.map((item) => {
+            if (!item || !("key" in item)) return null;
+            const itemKey = String(item.key);
+            const isActive = activeKey === itemKey;
+
+            return (
+              <div
+                key={itemKey}
+                className={`custom-menu-item ${isActive ? "selected" : ""}`}
+                onClick={() => handleNavigate(itemKey)}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="mainActiveIndicator"
+                    className="main-active-indicator"
+                    transition={{
+                      type: "spring",
+                      stiffness: 380,
+                      damping: 30,
+                    }}
+                  />
+                )}
+                <span className="custom-menu-title">
+                  {"label" in item ? item.label : ""}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
       <AnimatePresence mode="wait">
         {(variant === "compact" || variant === "modern") && subItems && (
           <motion.div

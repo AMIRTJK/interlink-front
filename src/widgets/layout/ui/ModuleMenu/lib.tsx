@@ -9,13 +9,13 @@ import ApplicationsIcon from "../../../../assets/icons/applications-icon.svg";
 import CrmIcon from "../../../../assets/icons/crm-icon.svg";
 import { FileTextOutlined, GlobalOutlined } from "@ant-design/icons";
 
-export type TType = Required<MenuProps>["items"][number] & {
+export type MenuItem = Required<MenuProps>["items"][number] & {
   requiredRole?: string[];
 };
 
 export const getModuleItems = (
   variant: "horizontal" | "compact" | "modern",
-): TType[] => [
+): MenuItem[] => [
   {
     key: AppRoutes.PROFILE,
     label: "Личный кабинет",
