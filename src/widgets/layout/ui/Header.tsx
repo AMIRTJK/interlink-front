@@ -25,7 +25,7 @@ export const Header = ({ isModulesPage }: IProps) => {
 
   return (
     <header
-      className={`bg-white py-4 px-6 flex justify-between items-center shadow-sm border border-gray-100 h-[61px] ${isModulesPage ? "rounded-none" : "rounded-[15px]"} `}
+      className={`bg-white py-4 px-6 flex justify-between items-center mb-3! shadow-sm border border-gray-100 h-[61px] ${isModulesPage ? "rounded-none" : "rounded-[15px]"} `}
     >
       <Link to={AppRoutes.PROFILE} className="mt-2" aria-label="На главную">
         <Image
