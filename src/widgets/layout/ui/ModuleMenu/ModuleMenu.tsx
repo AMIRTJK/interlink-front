@@ -278,7 +278,7 @@ export const ModuleMenu = ({ variant }: IProps) => {
               return (
                 <motion.div
                   key={sub.key}
-                  className={`sub-menu-item ${isActive ? "active-modern-class" : ""} `}
+                  className={`sub-menu-item ${isActive ? "active" : ""} `}
                   onClick={() => handleNavigate(sub.key as string)}
                   variants={itemVariants}
                   whileHover={{ scale: 1.02 }}

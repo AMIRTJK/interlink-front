@@ -23,7 +23,7 @@ export const MainLayout = () => {
       </If>
       <If is={!shouldHideUI}>
         <div>
-          <ModuleMenu variant="compact" />
+          <ModuleMenu variant="modern" />
         </div>
       </If>
       <div>

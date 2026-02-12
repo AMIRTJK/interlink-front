@@ -306,36 +306,59 @@ body.no-animations
   display: block !important;
 }
 
+.compact-mode-container {
+  display: flex;
+  flex-direction: column;
+}
+
 /* --- Синяя полоса снизу --- */
 .sub-menu-bar {
-  min-height: 32px;
-  max-height: 33px;
+  min-height: 44px; /* Увеличил высоту для лучшего вида пилюль */
   display: flex;
   align-items: center;
-  padding: 10px 32px;
-  gap: 24px;
+  padding: 0 32px;
+  gap: 8px; /* Меньшее расстояние для компактности */
   position: relative;
   z-index: 1;
-  color: rgba(255, 255, 255, 0.616);
+  color: rgba(255, 255, 255, 0.7);
   background: #0037AF !important;
 }
 
 /* Стили для элементов подменю */
 .sub-menu-item {
   cursor: pointer;
-  opacity: 0.7;
-  transition: all 0.2s ease;
-  font-weight: 400;
+  padding: 10px 16px;
+  border-radius: 8px;
+  transition: color 0.2s ease;
+  font-weight: 500;
   position: relative;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  color: inherit;
 }
 
 .sub-menu-item:hover {
-  opacity: 1;
+  color: #fff;
 }
 
 /* СОСТОЯНИЕ ACTIVE для подменю */
 .sub-menu-item.active {
-  opacity: 1;
+  color: #fff;
+}
+
+/* Скользящая пилюля для Compact режима */
+.sub-menu-bar .active-border {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+  right: 0;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: -1;
+  pointer-events: none;
 }
 
 .modern-style .ant-menu-item:not(.ant-menu-item-selected):hover {
