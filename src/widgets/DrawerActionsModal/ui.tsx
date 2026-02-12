@@ -111,16 +111,11 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
         inviteSigner(payload);
       }
 
-      selectedApprovers.forEach((item) => {
-        inviteApprover(
-          { users: [item.id] },
-          {
-            onSuccess: () => {
-              console.log("Approver invited", item.id);
-            },
-          },
-        );
-      });
+      if (selectedApprovers.length > 0) {
+        const approverIds = selectedApprovers.map((item) => item.id);
+
+        inviteApprover({ users: approverIds });
+      }
 
       const incomingId = selectedItems[0]?.id;
 
