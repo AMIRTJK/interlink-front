@@ -277,7 +277,8 @@ body.no-animations
 }
 
 .modern-style.custom-main-menu {
-  height: 48px;
+  min-height: 48px !important;
+  max-height: 49px !important;
   padding: 0 24px;
   gap: 8px;
   border-bottom: none;
@@ -314,7 +315,6 @@ body.no-animations
 
 .modern-mode .sub-menu-bar {
   background-color: transparent;
-  height: auto;
   min-height: 56px;
   display: flex;
   align-items: center;

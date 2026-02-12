@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import "./style.css";
 
 interface IProps {
-  variant: "horizontal" | "compact" | "modern";
+  variant: "horizontal" | "compact" | "modern" | "full";
 }
 type TSubMenuItem = {
   key: string;
@@ -100,23 +100,10 @@ export const ModuleMenu = ({ variant }: IProps) => {
     const isSharedRoute = SHARED_ROUTES.some((route) =>
       pathname.includes(route),
     );
-
-    if (!isSharedRoute && pathname.includes("/correspondence")) {
-      const correspondenceMenu = filteredItems.find(
-        (item) => item?.key === AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING,
-      );
-
-      if (correspondenceMenu && hasChildren(correspondenceMenu)) {
-        const activeTab = correspondenceMenu.children?.find((sub) => {
-          return sub && "key" in sub && pathname.startsWith(String(sub.key));
-        });
-
-        if (activeTab && "key" in activeTab) {
-          sessionStorage.setItem(STORAGE_KEY, String(activeTab.key));
-        }
-      }
+    if (isSharedRoute) {
+      sessionStorage.setItem(STORAGE_KEY, pathname);
     }
-  }, [pathname, filteredItems]);
+  }, [pathname]);
 
   const activeItem = useMemo(() => {
     const isSharedRoute = SHARED_ROUTES.some((route) =>
@@ -229,7 +216,7 @@ export const ModuleMenu = ({ variant }: IProps) => {
 
   return (
     <div className={`menu-container ${variant}-mode`}>
-      {variant === "horizontal" ? (
+      {variant === "horizontal" || variant === "full" ? (
         <Menu
           onClick={(e) => handleNavigate(e.key)}
           selectedKeys={[activeKey]}
@@ -240,7 +227,7 @@ export const ModuleMenu = ({ variant }: IProps) => {
           className="flex-wrap p-2 border-b-0! full-style"
         />
       ) : (
-        <div className={`custom-main-menu ${variant === "compact" ? "compact-style" : "modern-style"}`}>
+        <div className={`custom-main-menu ${variant}-style`}>
           {menuItems.map((item) => {
             if (!item || !("key" in item)) return null;
             const itemKey = String(item.key);
