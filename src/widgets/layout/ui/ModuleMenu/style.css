@@ -308,15 +308,16 @@ body.no-animations
 
 /* --- Синяя полоса снизу --- */
 .sub-menu-bar {
-  background-color: #f7fafe !important;
-  height: 32px;
+  min-height: 32px;
+  max-height: 33px;
   display: flex;
   align-items: center;
   padding: 10px 32px;
   gap: 24px;
   position: relative;
   z-index: 1;
-  color: white;
+  color: rgba(255, 255, 255, 0.616);
+  background: #0037AF !important;
 }
 
 /* Стили для элементов подменю */
@@ -465,7 +466,7 @@ body.no-animations
 }
 
 .active-modern-class {
-  color: #1447e6 !important;
+  color: #fff !important;
 }
 
 .modern-mode .active-border {
