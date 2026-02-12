@@ -374,9 +374,7 @@ body.no-animations
   pointer-events: none;
 }
 
-/* iOS Floating Dock Styles */
-
-/* iOS Floating Dock Styles - Premium Polish */
+/* iOS стиль (Premium) */
 .ios-dock-wrapper {
   position: fixed;
   bottom: 32px;
@@ -399,16 +397,16 @@ body.no-animations
     pointer-events: none;
 }
 
-/* Sub Dock - Segmented Control Style */
+/* Подменю - стиль Segmented Control */
 .ios-sub-dock-container {
     pointer-events: auto;
     display: flex;
     align-items: center;
     padding: 4px;
-    background: rgba(118, 118, 128, 0.12); /* Standard iOS Segmented Control BG */
+    background: rgba(118, 118, 128, 0.12);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-radius: 99px; /* Pill shape */
+    border-radius: 99px;
     border: none;
     box-shadow: none;
 }
@@ -422,12 +420,12 @@ body.no-animations
     padding: 6px 16px;
     cursor: pointer;
     border-radius: 99px;
-    color: #555; /* Simulating inactive state */
+    color: #555;
     font-size: 13px;
     font-weight: 500;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1;
-    min-width: 120px; /* Ensure typical touch target size */
+    min-width: 120px;
 }
 
 .ios-sub-dock-item:hover {
@@ -463,10 +461,10 @@ body.no-animations
 
 .ios-sub-dock-item.active .ios-sub-icon-wrapper {
     opacity: 1;
-    color: #0037af; /* Blue icon for active state */
+    color: #0037af;
 }
 
-/* Main Dock - Glassmorphism Dock */
+/* Главное меню - стиль Glassmorphism */
 .ios-dock-container {
   pointer-events: auto;
   display: flex;
@@ -538,6 +536,7 @@ body.no-animations
   transform: scale(1.05);
 }
 
+/* Безопасная зона для мобильных устройств */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .ios-dock-wrapper {
     bottom: calc(32px + env(safe-area-inset-bottom));
