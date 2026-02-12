@@ -24,5 +24,4 @@ dist-ssr
 *.sw?
 tsconfig.tsbuildinfo
 
-# Gemini file
-GEMINI.md
+# GEMINI.md
