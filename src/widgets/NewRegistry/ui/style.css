@@ -1,17 +1,16 @@
-/* 1. Стилизуем внешний контейнер Dropdown, чтобы блюр был сразу */
 .custom-registry-dropdown {
   background-color: rgba(
     255,
     255,
     255,
     0.1
-  ) !important; /* Увеличил плотность для стабильности */
+  ) !important; 
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
-  overflow: hidden; /* Чтобы блюр не вылезал за границы */
+  overflow: hidden; 
 }
 
 /* Контейнер выпадающего меню */
@@ -29,7 +28,7 @@
   display: flex;
   align-items: center;
   transition: all 0.2s ease;
-  background: transparent !important; /* Чтобы не перекрывать блюр */
+  background: transparent !important; 
 }
 
 /* Ховер на элементы (легкое подсвечивание) */
@@ -37,9 +36,8 @@
   background-color: rgba(0, 55, 175, 0.05) !important;
 }
 
-/* Базовый цвет для всех иконок в меню, чтобы они не становились белыми */
 .custom-registry-dropdown .ant-dropdown-menu-item .anticon {
-  transition: color 0.2s ease; /* Плавный переход цвета */
+  transition: color 0.2s ease;
 }
 
 .custom-registry-dropdown
@@ -60,7 +58,6 @@
   background-color: rgba(0, 0, 0, 0.06);
 }
 
-/* Стили текста и иконок остаются прежними */
 .custom-registry-dropdown .ant-dropdown-menu-title-content {
   font-size: 16px;
   font-weight: 400;
@@ -176,7 +173,7 @@
   border: none !important;
 }
 
-/* Вертикальные направляющие линии (guide lines) - Премиальный вид */
+/* Вертикальные направляющие линии  */
 .folder-tree-premium .ant-tree-indent-unit {
   position: relative;
   width: 24px !important;
