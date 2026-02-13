@@ -64,119 +64,132 @@
   color: #252525;
 }
 
-/* --- MoveToFolderModal Styles --- */
+/* --- Премиальный дизайн модального окна --- */
+.premium-modal .ant-modal-content {
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
+  border-radius: 24px !important;
+  padding: 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 
+    0 20px 50px -12px rgba(0, 0, 0, 0.15),
+    inset 0 0 40px rgba(255, 255, 255, 0.5) !important;
+  overflow: hidden !important;
+}
+
+.premium-modal .ant-modal-header {
+  background: transparent !important;
+  padding: 24px 24px 16px 24px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
+  margin-bottom: 0 !important;
+}
+
+.premium-modal .ant-modal-body {
+  padding: 0 24px 24px 24px !important;
+}
+
+.premium-modal .ant-modal-footer {
+  background: rgba(0, 0, 0, 0.02) !important;
+  padding: 16px 24px !important;
+  margin: 0 !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.04) !important;
+  display: flex !important;
+  gap: 12px !important;
+  justify-content: flex-end !important;
+}
+
+/* Кнопки в футере */
+.premium-modal .premium-ok-button {
+  height: 44px !important;
+  padding: 0 24px !important;
+  border-radius: 14px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  letter-spacing: -0.01em !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+  transition: all 0.3s ease !important;
+}
+
+.premium-modal .premium-ok-button:not(:disabled):hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35) !important;
+}
+
+.premium-modal .premium-cancel-button {
+  height: 44px !important;
+  padding: 0 20px !important;
+  border-radius: 14px !important;
+  font-weight: 500 !important;
+  color: #6b7280 !important;
+  border-color: #e5e7eb !important;
+  transition: all 0.2s ease !important;
+}
+
+.premium-modal .premium-cancel-button:hover {
+  background: #f3f4f6 !important;
+  color: #374151 !important;
+  border-color: #d1d5db !important;
+}
+
+/* Эффект вдавленности для контейнера дерева */
+.premium-modal .custom-scrollbar {
+  box-shadow: 
+    inset 0 2px 8px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* --- Стили дерева папок внутри модалки --- */
 .folder-tree-premium {
   background: transparent !important;
 }
 
-/* Центрирование всей строки дерева */
 .folder-tree-premium .ant-tree-treenode {
   display: flex !important;
   align-items: center !important;
-  padding: 2px 0 !important;
+  padding: 4px 0 !important;
   width: 100% !important;
+  border-radius: 12px !important;
+  transition: background 0.2s ease !important;
 }
 
-/* Центрирование шеврона (стрелочки) */
 .folder-tree-premium .ant-tree-switcher {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  width: 24px !important;
+  width: 28px !important;
   height: 36px !important;
-  line-height: normal !important;
-  margin: 0 !important;
 }
 
-.folder-tree-premium .ant-tree-switcher-icon {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.folder-tree-premium .ant-tree-switcher_open .ant-tree-switcher-icon {
-  transform: rotate(90deg) !important;
-}
-
-/* Контейнер иконки и текста */
 .folder-tree-premium .ant-tree-node-content-wrapper {
   display: flex !important;
   align-items: center !important;
   flex: 1 !important;
-  padding: 0 10px !important;
-  height: 36px !important;
-  border-radius: 10px !important;
-  transition: all 0.2s ease !important;
+  padding: 0 12px !important;
+  height: 38px !important;
+  border-radius: 12px !important;
   margin: 0 4px !important;
-  background: transparent !important;
 }
 
-/* Общий контейнер для иконки и заголовка */
-.folder-tree-premium .ant-tree-node-content-wrapper .ant-tree-title {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px; 
-}
-
-/* Фикс для иконки */
-.folder-tree-premium .ant-tree-iconEle {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 20px !important;
-  height: 36px !important; 
-  margin: 0 !important;
-}
-
-.folder-tree-premium .ant-tree-iconEle svg {
-  margin-top: 2px; 
-}
-
-/* Текст папки */
 .folder-tree-premium .ant-tree-title {
   font-weight: 500 !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
   color: #374151 !important;
-  height: 36px !important;
-  line-height: 36px !important;
 }
 
-/* Состояние при выборе */
+/* Состояние при выборе и ховере */
 .folder-tree-premium .ant-tree-node-selected {
   background-color: #ffffff !important;
-  box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.12) !important;
-  border: none !important; 
-}
-
-.folder-tree-premium .ant-tree-node-selected .ant-tree-title {
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12) !important;
   color: #2563eb !important;
 }
 
-/* Удаление стандартных обводок и фокусов + Hover эффект (Indigo) */
 .folder-tree-premium .ant-tree-node-content-wrapper:hover {
-  background-color: rgba(79, 70, 229, 0.06) !important;
+  background-color: rgba(79, 70, 229, 0.05) !important;
 }
 
-.folder-tree-premium .ant-tree-node-content-wrapper:hover .ant-tree-title,
-.folder-tree-premium .ant-tree-node-content-wrapper:hover .ant-tree-iconEle svg {
-  color: #4f46e5 !important;
-}
-
-.folder-tree-premium .ant-tree-node-content-wrapper:focus,
-.folder-tree-premium .ant-tree-node-selected,
-.folder-tree-premium .ant-tree-treenode:focus,
-.folder-tree-premium .ant-tree-node-content-wrapper:active,
-.folder-tree-premium *:focus {
-  outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
-}
-
-/* Вертикальные направляющие линии  */
+/* Направляющие линии в модалке */
 .folder-tree-premium .ant-tree-indent-unit {
   position: relative;
-  width: 24px !important;
+  width: 28px !important;
 }
 
 .folder-tree-premium .ant-tree-indent-unit::before {
@@ -184,38 +197,103 @@
   position: absolute;
   top: 4px;
   bottom: 4px;
-  left: 11px;
-  width: 2px;
-  border-radius: 10px;
+  left: 13px;
+  width: 1.5px;
   background: #e5e7eb;
-  opacity: 0.4;
+  opacity: 0.6;
+  border-radius: 10px;
+}
+/* === Premium Breadcrumb Dropdown === */
+.premium-breadcrumb-dropdown .ant-dropdown-menu {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-radius: 18px !important;
+  padding: 10px !important;
+  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.12) !important;
+  min-width: 220px !important;
+}
+
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item {
+  border-radius: 12px !important;
+  margin: 4px 0 !important;
+  padding: 0 8px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+}
+
+/* Визуальный путь (Path Trace) - Максимальная выразительность */
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item::before {
+  content: "";
+  position: absolute;
+  left: 21px; /* Центр под иконкой */
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: #94a3b8; /* Более насыщенный серый (slate-400) */
+  opacity: 0.8; /* Теперь видно отчетливо и без ховера */
+  z-index: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Эффект свечения и градиента по уровням вложенности */
-.folder-tree-premium .ant-tree-treenode:nth-child(6n+1) .ant-tree-indent-unit::before { 
-  background: linear-gradient(to bottom, #60a5fa, #3b82f6, #60a5fa); 
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
-} 
-.folder-tree-premium .ant-tree-treenode:nth-child(6n+2) .ant-tree-indent-unit::before { 
-  background: linear-gradient(to bottom, #a78bfa, #8b5cf6, #a78bfa); 
-  box-shadow: 0 0 8px rgba(139, 92, 246, 0.2);
-}
-.folder-tree-premium .ant-tree-treenode:nth-child(6n+3) .ant-tree-indent-unit::before { 
-  background: linear-gradient(to bottom, #f472b6, #ec4899, #f472b6); 
-  box-shadow: 0 0 8px rgba(236, 72, 153, 0.2);
-}
-.folder-tree-premium .ant-tree-treenode:nth-child(6n+4) .ant-tree-indent-unit::before { 
-  background: linear-gradient(to bottom, #fb923c, #f97316, #fb923c); 
-  box-shadow: 0 0 8px rgba(249, 115, 22, 0.2);
-}
-.folder-tree-premium .ant-tree-treenode:nth-child(6n+5) .ant-tree-indent-unit::before { 
-  background: linear-gradient(to bottom, #2dd4bf, #14b8a6, #2dd4bf); 
-  box-shadow: 0 0 8px rgba(20, 184, 166, 0.2);
+/* При наведении: линия становится интенсивнее и ярче */
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:hover::before {
+  background: #2563eb !important; /* Ярко-синий (blue-600) */
+  opacity: 1 !important;
+  width: 2px !important;
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
 }
 
-/* Усиливаем яркость при ховере */
-.folder-tree-premium .ant-tree-treenode:hover .ant-tree-indent-unit::before {
-  opacity: 0.8;
-  width: 2.5px;
+/* Убираем разрывы между пунктами для эффекта цельной линии */
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item + .ant-dropdown-menu-item::before {
+  top: -8px; 
 }
+
+/* Для первого элемента в списке инвертируем отступ сверху */
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:first-of-type::before {
+  top: 18px; /* Начинаем от центра первой иконки */
+}
+
+/* Для последнего элемента обрезаем снизу */
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:last-of-type::before {
+  bottom: 18px; /* Заканчиваем на центре последней иконки */
+}
+
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08) !important;
+}
+
+/* Разделитель групп */
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item-group-title {
+  padding: 8px 4px 4px 4px !important;
+  color: #9ca3af !important;
+}
+
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item-divider {
+  margin: 8px 12px !important;
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Каскадная анимация появления (для красоты) */
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item,
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item-group {
+  animation: breadcrumbItemFade 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+@keyframes breadcrumbItemFade {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:nth-child(1) { animation-delay: 0.02s; }
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:nth-child(2) { animation-delay: 0.04s; }
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:nth-child(3) { animation-delay: 0.06s; }
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:nth-child(4) { animation-delay: 0.08s; }
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:nth-child(5) { animation-delay: 0.1s; }

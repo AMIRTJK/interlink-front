@@ -34,20 +34,36 @@ export const Breadcrumbs: React.FC<IBreadcrumbsProps> = ({
 
           const menuItems: MenuProps["items"] = item.options?.map((opt: any, i) => {
             if (opt.isDivider) return { type: 'divider', key: `d-${i}` };
+            
+            // Заголовок группы (Вложенные/Другие папки)
             if (opt.isHeader) return { 
               type: 'group', 
-              label: <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold px-1">{opt.label}</span>,
+              label: (
+                <div className="flex items-center gap-2 px-1 py-1">
+                  <div className="w-1 h-3 rounded-full bg-blue-500/50" />
+                  <span className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">
+                    {opt.label}
+                  </span>
+                </div>
+              ),
               key: `h-${i}` 
             };
             
             return {
               key: i,
               label: (
-                <div className="flex items-center gap-2.5 py-1 px-1">
-                  <span className="text-blue-500/70 shrink-0">
-                    {opt.icon || <Folder size={14} />}
-                  </span>
-                  <span className="text-[13px] font-medium text-gray-700">{opt.label}</span>
+                <div className="flex items-center justify-between group/item py-1 relative">
+                  <div className="flex items-center gap-3 relative">
+                    <div className="p-1.5 bg-gray-50 rounded-lg group-hover/item:bg-blue-50 transition-colors duration-200 relative z-[1]">
+                      <span className="text-blue-500/70 group-hover/item:text-blue-600 transition-colors">
+                        {opt.icon || <Folder size={14} />}
+                      </span>
+                    </div>
+                    <span className="text-[13px] font-medium text-gray-700 group-hover/item:text-blue-700 transition-colors">
+                      {opt.label}
+                    </span>
+                  </div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 opacity-0 group-hover/item:opacity-100 transition-all scale-0 group-hover/item:scale-100 mr-1 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
                 </div>
               ),
               onClick: () => opt.onClick(),
