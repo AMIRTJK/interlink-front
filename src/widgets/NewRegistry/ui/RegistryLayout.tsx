@@ -107,7 +107,8 @@ export const RegistryLayout = ({
 
   const { pathname } = useLocation();
 
-  const isStatusNavActive = pathname.includes("incoming");
+  const isStatusNavActive =
+    pathname.includes("incoming") || pathname.includes("outgoing");
 
   // --- ДАННЫЕ ИЗ API (META) ---
   const currentPage = meta?.current_page || 1;

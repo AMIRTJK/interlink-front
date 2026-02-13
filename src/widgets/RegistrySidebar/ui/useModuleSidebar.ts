@@ -35,7 +35,7 @@ export const useModuleSidebar = () => {
   });
 
   const counts = useMemo(() => countersData?.data || {}, [countersData]);
-  
+
   const { data: foldersData, refetch: refetchFolders } = useGetQuery({
     url: ApiRoutes.GET_FOLDERS,
     params: {},
@@ -160,22 +160,6 @@ export const useModuleSidebar = () => {
           ? AppRoutes.CORRESPONDENCE_INTERNAL_ARCHIVE
           : AppRoutes.CORRESPONDENCE_ARCHIVE,
       },
-      ...(isInternal
-        ? {
-            ["На подпись"]: {
-              key: AppRoutes.CORRESPONDENCE_INTERNAL_TO_SIGN,
-              icon: sideBarIcons.draftIcon,
-              count: counts.to_sign,
-              path: AppRoutes.CORRESPONDENCE_INTERNAL_TO_SIGN,
-            },
-            ["На согласование"]: {
-              key: AppRoutes.CORRESPONDENCE_INTERNAL_TO_APPROVE,
-              icon: sideBarIcons.draftIcon,
-              count: counts.to_approve,
-              path: AppRoutes.CORRESPONDENCE_INTERNAL_TO_APPROVE,
-            },
-          }
-        : {}),
       Закреплённые: {
         key: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_PINNED

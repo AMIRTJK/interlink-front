@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useGetQuery, useDynamicSearchParams } from "@shared/lib"; // Твои хуки
+import { useGetQuery, useDynamicSearchParams } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import {
   FileEdit,
@@ -16,7 +16,6 @@ import { AppRoutes } from "@shared/config";
 import { useRegistryConfig } from "../lib";
 import { IBreadcrumbItem } from "@shared/ui";
 
-// Типы статусов, сопоставленные с твоим API
 const STATUS_CONFIG: Record<string, any> = {
   draft: {
     label: "Черновик",
@@ -37,6 +36,7 @@ const STATUS_CONFIG: Record<string, any> = {
     label: "Согласование",
     icon: <Eye size={14} />,
     gradient: "from-emerald-500 to-emerald-600",
+    apiUrl: ApiRoutes.GET_INTERNAL_TO_APPROVE,
   },
   to_approve: {
     label: "Согласование",
@@ -47,6 +47,7 @@ const STATUS_CONFIG: Record<string, any> = {
     label: "На подпись",
     icon: <Loader size={14} />,
     gradient: "from-rose-500 to-rose-600",
+    apiUrl: ApiRoutes.GET_INTERNAL_TO_SIGN,
   },
   to_sign: {
     label: "На подпись",
@@ -57,6 +58,7 @@ const STATUS_CONFIG: Record<string, any> = {
     label: "Отправлено",
     icon: <Handshake size={14} />,
     gradient: "from-indigo-500 to-indigo-600",
+    apiUrl: ApiRoutes.GET_INTERNAL_OUTGOING,
   },
   completed: {
     label: "Завершено",
@@ -68,12 +70,17 @@ const STATUS_CONFIG: Record<string, any> = {
     icon: <XCircle size={14} />,
     gradient: "from-red-500 to-red-600",
   },
-  // Дефолт
   default: {
     label: "Документ",
     icon: <FileEdit size={14} />,
     gradient: "from-gray-500 to-gray-600",
   },
+};
+
+const REGISTRY_STATUS_MAP: Record<string, string[]> = {
+  incoming: ["analysis", "completed"],
+  outgoing: ["to-approve", "to-sign", "sent"],
+  default: ["draft", "in-progress", "completed"],
 };
 
 interface NewRegistryProps {
@@ -97,8 +104,14 @@ export const NewRegistry = ({
 
   const isInternal = type.startsWith("internal");
 
+  const activeStatusKeys = useMemo(() => {
+    if (type.includes("incoming")) return REGISTRY_STATUS_MAP["incoming"];
+    if (type.includes("outgoing")) return REGISTRY_STATUS_MAP["outgoing"];
+    return REGISTRY_STATUS_MAP["default"];
+  }, [type]);
+
   const defaultStatus = useMemo(() => {
-    if (searchParams.folder_id) return ""; // Показываем всё в папке
+    if (searchParams.folder_id) return "";
     if (type === "internal-incoming") return "analysis";
     if (type === "internal-outgoing") return "sent";
     if (type === "internal-drafts") return "draft";
@@ -107,9 +120,13 @@ export const NewRegistry = ({
     return "";
   }, [type, searchParams.folder_id]);
 
-  const currentTab = searchParams.status || defaultStatus;
+  const currentTab = searchParams.status || defaultStatus || activeStatusKeys[0];
 
-  // Запрос счетчиков (для таборов)
+  const fetchUrl = useMemo(() => {
+    const configUrl = STATUS_CONFIG[currentTab]?.apiUrl;
+    return configUrl || url;
+  }, [currentTab, url]);
+
   const { data: countersData } = useGetQuery({
     url: isInternal
       ? ApiRoutes.GET_INTERNAL_COUNTERS
@@ -117,7 +134,6 @@ export const NewRegistry = ({
     params: extraParams?.kind ? { kind: extraParams.kind } : {},
   });
 
-  // Запрос папок для построения крошек
   const { data: foldersData } = useGetQuery({
     url: ApiRoutes.GET_FOLDERS,
     params: {},
@@ -125,19 +141,17 @@ export const NewRegistry = ({
 
   const folders = useMemo(() => foldersData?.data || [], [foldersData]);
 
-  // Основной запрос данных
   const { data: responseData } = useGetQuery({
-    url,
+    url: fetchUrl,
     params: {
       ...extraParams,
       ...searchParams,
       status: currentTab,
       page: searchParams.page || 1,
-      per_page: searchParams.per_page || 9, // 9 для красивой сетки 3x3
+      per_page: searchParams.per_page || 9,
     },
   });
 
-  // Расчет хлебных крошек
   const breadcrumbs = useMemo(() => {
     const items: IBreadcrumbItem[] = [];
 
@@ -222,27 +236,23 @@ export const NewRegistry = ({
   const meta = (responseData as any)?.data || {};
   const counts = (countersData as any)?.data || {};
 
-  console.log(responseData);
-
-  // Формируем конфиг табов на основе данных счетчиков и конфига
   const statusTabs = useMemo(() => {
-    // Здесь можно пробежаться по ключам counts или задать жесткий список
-    return Object.keys(STATUS_CONFIG)
+    return activeStatusKeys
       .map((key) => {
-        if (key === "default") return null;
-        // Если это внутренняя папка и выбран "Все" (пустой статус), можно добавить вкладку или оставить как есть
+        const config = STATUS_CONFIG[key];
+        if (!config) return null;
+
         return {
           id: key,
-          label: STATUS_CONFIG[key].label,
+          label: config.label,
+          icon: config.icon,
+          gradient: config.gradient,
           count: counts[key] || 0,
-          icon: STATUS_CONFIG[key].icon,
-          gradient: STATUS_CONFIG[key].gradient,
         };
       })
       .filter(Boolean);
-  }, [counts]);
+  }, [counts, activeStatusKeys]);
 
-  // Обработчики
   const handleTabChange = (statusId: string) => {
     setParams("status", statusId);
     setParams("page", 1);
@@ -260,14 +270,13 @@ export const NewRegistry = ({
   };
 
   const handleFilterReset = () => {
-    // Сброс фильтров (кроме служебных)
     setParams("incomingNumber", undefined);
     setParams("outgoingNumber", undefined);
-    setParams("sender", undefined); // Для селекта
-    setParams("sender_name", undefined); // Если селект называется так
-    setParams("date", undefined); // Для даты
-    setParams("date_from", undefined); // Для диапазона
-    setParams("date_to", undefined); // Для диапазона
+    setParams("sender", undefined);
+    setParams("sender_name", undefined);
+    setParams("date", undefined);
+    setParams("date_from", undefined);
+    setParams("date_to", undefined);
     setParams("page", 1);
   };
 
