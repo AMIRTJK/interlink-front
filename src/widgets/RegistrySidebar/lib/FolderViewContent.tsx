@@ -48,7 +48,7 @@ export const FolderViewContent: React.FC<IProps> = ({ folder, onClose }) => {
                    ) : (
                        <div className="grid grid-cols-3 gap-4">
                            {displayItems.map((item: MenuItem) => (
-                               <FolderTreeItem key={item.key} item={item} />
+                               <FolderTreeItem key={item.key} item={item} onSelect={onClose} />
                            ))}
                        </div>
                    )}

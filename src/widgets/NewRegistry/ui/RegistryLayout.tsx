@@ -13,6 +13,7 @@ import {
   Filter,
   MoreHorizontal,
   FileType,
+  FileText,
   ChevronDown,
 } from "lucide-react";
 import {
@@ -23,6 +24,7 @@ import {
   Select,
   theme,
 } from "antd";
+import { Breadcrumbs, IBreadcrumbItem } from "@shared/ui";
 
 dayjs.locale("ru");
 
@@ -80,6 +82,7 @@ interface RegistryLayoutProps {
   currentFilters: any;
   statusConfig: any;
   fieldConfig: any; // Наш конфиг полей и действий
+  breadcrumbs?: IBreadcrumbItem[]; // Крошки для навигации
 }
 
 export const RegistryLayout = ({
@@ -97,6 +100,7 @@ export const RegistryLayout = ({
   currentFilters,
   statusConfig,
   fieldConfig,
+  breadcrumbs,
 }: RegistryLayoutProps) => {
   const [viewMode, setViewMode] = useState<"list" | "block">("list");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -294,6 +298,7 @@ export const RegistryLayout = ({
             currentDocuments={documents}
             startIndex={showFrom - 1}
             endIndex={showTo}
+            breadcrumbs={breadcrumbs}
           />
 
           {/* --- CONTENT AREA --- */}
@@ -390,9 +395,13 @@ export const SectionHeader = ({
   currentDocuments,
   startIndex,
   endIndex,
+  breadcrumbs,
 }: any) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 m-0">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 m-0 flex flex-col gap-2">
+      {breadcrumbs && breadcrumbs.length > 0 && (
+        <Breadcrumbs items={breadcrumbs} className="py-0 mb-1" />
+      )}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <motion.div
@@ -405,11 +414,13 @@ export const SectionHeader = ({
               ease: "easeInOut",
             }}
             className={`p-2 rounded-lg bg-gradient-to-r ${
-              activeStatusData?.gradient || "from-gray-100 to-gray-200"
+              activeStatusData?.gradient || "from-blue-50 to-blue-100"
             }`}
           >
-            {activeStatusData?.icon && (
+            {activeStatusData?.icon ? (
               <div className="text-white">{activeStatusData.icon}</div>
+            ) : (
+              <FileText size={18} className="text-blue-600" />
             )}
           </motion.div>
           <div>

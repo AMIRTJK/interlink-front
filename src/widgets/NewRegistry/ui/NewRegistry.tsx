@@ -14,6 +14,7 @@ import {
 import { RegistryLayout } from "./RegistryLayout";
 import { AppRoutes } from "@shared/config";
 import { useRegistryConfig } from "../lib";
+import { IBreadcrumbItem } from "@shared/ui";
 
 // Типы статусов, сопоставленные с твоим API
 const STATUS_CONFIG: Record<string, any> = {
@@ -116,6 +117,14 @@ export const NewRegistry = ({
     params: extraParams?.kind ? { kind: extraParams.kind } : {},
   });
 
+  // Запрос папок для построения крошек
+  const { data: foldersData } = useGetQuery({
+    url: ApiRoutes.GET_FOLDERS,
+    params: {},
+  });
+
+  const folders = useMemo(() => foldersData?.data || [], [foldersData]);
+
   // Основной запрос данных
   const { data: responseData } = useGetQuery({
     url,
@@ -127,6 +136,60 @@ export const NewRegistry = ({
       per_page: searchParams.per_page || 9, // 9 для красивой сетки 3x3
     },
   });
+
+  // Расчет хлебных крошек
+  const breadcrumbs = useMemo(() => {
+    const items: IBreadcrumbItem[] = [];
+
+    // 1. Добавляем корневой элемент (зависит от типа)
+    const rootLabel =
+      type === "internal-incoming"
+        ? "Входящие"
+        : type === "internal-outgoing"
+          ? "Исходящие"
+          : type === "internal-drafts"
+            ? "Черновики"
+            : type === "internal-to-sign"
+              ? "На подпись"
+              : type === "internal-to-approve"
+                ? "На согласование"
+                : "Реестр";
+
+    items.push({
+      label: rootLabel,
+      onClick: () => {
+        setParams("folder_id", undefined);
+        setParams("status", undefined);
+      },
+    });
+
+    // 2. Если мы в папке, строим цепочку
+    if (searchParams.folder_id && folders.length > 0) {
+      const path: IBreadcrumbItem[] = [];
+      let currentId: number | null = parseInt(searchParams.folder_id, 10);
+
+      while (currentId) {
+        const folder = folders.find((f: any) => f.id === currentId);
+        if (folder) {
+          path.unshift({
+            label: folder.name,
+            onClick: () => setParams("folder_id", String(folder.id)),
+          });
+          currentId = folder.parent_id;
+        } else {
+          currentId = null;
+        }
+      }
+      items.push(...path);
+    }
+
+    // Помечаем последний элемент как активный
+    if (items.length > 0) {
+      items[items.length - 1].isActive = true;
+    }
+
+    return items;
+  }, [type, searchParams.folder_id, folders, setParams]);
 
   const documents = (responseData as any)?.data?.data || [];
   const meta = (responseData as any)?.data || {};
@@ -220,6 +283,7 @@ export const NewRegistry = ({
       }}
       statusConfig={STATUS_CONFIG}
       fieldConfig={fieldConfig}
+      breadcrumbs={breadcrumbs}
     />
   );
 };
