@@ -219,3 +219,59 @@
   opacity: 0.8;
   width: 2.5px;
 }
+/* === Premium Breadcrumb Dropdown === */
+.premium-breadcrumb-dropdown .ant-dropdown-menu {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-radius: 18px !important;
+  padding: 10px !important;
+  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.12) !important;
+  min-width: 220px !important;
+}
+
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item {
+  border-radius: 12px !important;
+  margin: 2px 0 !important;
+  padding: 0 8px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08) !important;
+}
+
+/* Разделитель групп */
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item-group-title {
+  padding: 8px 4px 4px 4px !important;
+  color: #9ca3af !important;
+}
+
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item-divider {
+  margin: 8px 12px !important;
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Каскадная анимация появления (для красоты) */
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item,
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item-group {
+  animation: breadcrumbItemFade 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+@keyframes breadcrumbItemFade {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:nth-child(1) { animation-delay: 0.02s; }
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:nth-child(2) { animation-delay: 0.04s; }
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:nth-child(3) { animation-delay: 0.06s; }
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:nth-child(4) { animation-delay: 0.08s; }
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:nth-child(5) { animation-delay: 0.1s; }
