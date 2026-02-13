@@ -116,21 +116,21 @@
 .folder-tree-premium .ant-tree-node-content-wrapper .ant-tree-title {
   display: flex !important;
   align-items: center !important;
-  gap: 8px; /* Расстояние между иконкой и текстом */
+  gap: 8px; 
 }
 
-/* Фикс для иконки (чтобы она не плавала) */
+/* Фикс для иконки */
 .folder-tree-premium .ant-tree-iconEle {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   width: 20px !important;
-  height: 36px !important; /* На всю высоту враппера */
+  height: 36px !important; 
   margin: 0 !important;
 }
 
 .folder-tree-premium .ant-tree-iconEle svg {
-  margin-top: 2px; /* Микро-коррекция для визуального центра */
+  margin-top: 2px; 
 }
 
 /* Текст папки */
