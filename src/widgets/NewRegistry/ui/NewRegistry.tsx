@@ -141,7 +141,6 @@ export const NewRegistry = ({
   const breadcrumbs = useMemo(() => {
     const items: IBreadcrumbItem[] = [];
 
-    // 1. Добавляем корневой элемент (зависит от типа)
     const rootLabel =
       type === "internal-incoming"
         ? "Входящие"
@@ -163,7 +162,6 @@ export const NewRegistry = ({
       },
     });
 
-    // 2. Если мы в папке, строим цепочку
     if (searchParams.folder_id && folders.length > 0) {
       const path: IBreadcrumbItem[] = [];
       let currentId: number | null = parseInt(searchParams.folder_id, 10);
@@ -171,10 +169,40 @@ export const NewRegistry = ({
       while (currentId) {
         const folder = folders.find((f: any) => f.id === currentId);
         if (folder) {
-          path.unshift({
-            label: folder.name,
-            onClick: () => setParams("folder_id", String(folder.id)),
-          });
+          if (folder.name !== rootLabel) {
+            const siblings = folders
+              .filter((f: any) => f.parent_id === folder.parent_id && f.id !== folder.id)
+              .map((s: any) => ({
+                label: s.name,
+                onClick: () => setParams("folder_id", String(s.id)),
+              }));
+
+            const subfolders = folders
+              .filter((f: any) => f.parent_id === folder.id)
+              .map((s: any) => ({
+                label: s.name,
+                onClick: () => setParams("folder_id", String(s.id)),
+              }));
+
+            const allOptions: any[] = [];
+            
+            if (subfolders.length > 0) {
+              allOptions.push({ label: "Вложенные папки", isHeader: true });
+              allOptions.push(...subfolders);
+            }
+            
+            if (siblings.length > 0) {
+              if (allOptions.length > 0) allOptions.push({ isDivider: true });
+              allOptions.push({ label: "Другие папки", isHeader: true });
+              allOptions.push(...siblings);
+            }
+
+            path.unshift({
+              label: folder.name,
+              onClick: () => setParams("folder_id", String(folder.id)),
+              options: allOptions.length > 0 ? allOptions : undefined,
+            });
+          }
           currentId = folder.parent_id;
         } else {
           currentId = null;
@@ -183,7 +211,6 @@ export const NewRegistry = ({
       items.push(...path);
     }
 
-    // Помечаем последний элемент как активный
     if (items.length > 0) {
       items[items.length - 1].isActive = true;
     }
