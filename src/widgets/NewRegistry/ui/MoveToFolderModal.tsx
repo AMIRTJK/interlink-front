@@ -81,7 +81,7 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
         <Folder size={20} />
       </div>
       <div>
-        <h3 className="font-bold text-gray-900 leading-none text-base">Смарт-перемещение</h3>
+        <h3 className="font-bold text-gray-900 leading-none text-base">Перемещение документа</h3>
         <p className="text-[11px] text-gray-400 font-normal mt-1">Выберите целевую папку для перемещения документа</p>
       </div>
     </div>

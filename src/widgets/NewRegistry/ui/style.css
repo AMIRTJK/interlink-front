@@ -149,19 +149,31 @@
 .folder-tree-premium .ant-tree-node-selected {
   background-color: #ffffff !important;
   box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.12) !important;
-  border: 1px solid #e5e7eb !important;
+  border: none !important; 
 }
 
 .folder-tree-premium .ant-tree-node-selected .ant-tree-title {
   color: #2563eb !important;
 }
 
-/* Удаление стандартных обводок и фокусов */
+/* Удаление стандартных обводок и фокусов + Hover эффект (Indigo) */
+.folder-tree-premium .ant-tree-node-content-wrapper:hover {
+  background-color: rgba(79, 70, 229, 0.06) !important;
+}
+
+.folder-tree-premium .ant-tree-node-content-wrapper:hover .ant-tree-title,
+.folder-tree-premium .ant-tree-node-content-wrapper:hover .ant-tree-iconEle svg {
+  color: #4f46e5 !important;
+}
+
 .folder-tree-premium .ant-tree-node-content-wrapper:focus,
+.folder-tree-premium .ant-tree-node-selected,
 .folder-tree-premium .ant-tree-treenode:focus,
+.folder-tree-premium .ant-tree-node-content-wrapper:active,
 .folder-tree-premium *:focus {
   outline: none !important;
   box-shadow: none !important;
+  border: none !important;
 }
 
 /* Вертикальные направляющие линии (guide lines) - Премиальный вид */
