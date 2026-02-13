@@ -37,7 +37,17 @@ const STATUS_CONFIG: Record<string, any> = {
     icon: <Eye size={14} />,
     gradient: "from-emerald-500 to-emerald-600",
   },
+  to_approve: {
+    label: "Согласование",
+    icon: <Eye size={14} />,
+    gradient: "from-emerald-500 to-emerald-600",
+  },
   ["to-sign"]: {
+    label: "На подпись",
+    icon: <Loader size={14} />,
+    gradient: "from-rose-500 to-rose-600",
+  },
+  to_sign: {
     label: "На подпись",
     icon: <Loader size={14} />,
     gradient: "from-rose-500 to-rose-600",
@@ -82,27 +92,27 @@ export const NewRegistry = ({
   const location = useLocation();
 
   const fieldConfig = useRegistryConfig(type);
-
-  // --- ЛОГИКА ИЗ СТАРОГО RegistryTable ---
   const { params: searchParams, setParams } = useDynamicSearchParams();
 
-  const currentTab =
-    searchParams.status ||
-    (type === "internal-incoming"
-      ? "analysis"
-      : type === "internal-outgoing"
-        ? "sent"
-        : type === "internal-draft"
-          ? "draft"
-          : type === "internal-to-sign"
-            ? "to-sign"
-            : type === "internal-to-approve"
-              ? "to-approve"
-              : "draft");
+  const isInternal = type.startsWith("internal");
 
-  // Запрос счетчиков (для табов)
+  const defaultStatus = useMemo(() => {
+    if (searchParams.folder_id) return ""; // Показываем всё в папке
+    if (type === "internal-incoming") return "analysis";
+    if (type === "internal-outgoing") return "sent";
+    if (type === "internal-drafts") return "draft";
+    if (type === "internal-to-sign") return "to-sign";
+    if (type === "internal-to-approve") return "to-approve";
+    return "";
+  }, [type, searchParams.folder_id]);
+
+  const currentTab = searchParams.status || defaultStatus;
+
+  // Запрос счетчиков (для таборов)
   const { data: countersData } = useGetQuery({
-    url: ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+    url: isInternal
+      ? ApiRoutes.GET_INTERNAL_COUNTERS
+      : ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
     params: extraParams?.kind ? { kind: extraParams.kind } : {},
   });
 
@@ -130,7 +140,7 @@ export const NewRegistry = ({
     return Object.keys(STATUS_CONFIG)
       .map((key) => {
         if (key === "default") return null;
-        // Если для этого типа (type) такой статус не актуален, можно отфильтровать
+        // Если это внутренняя папка и выбран "Все" (пустой статус), можно добавить вкладку или оставить как есть
         return {
           id: key,
           label: STATUS_CONFIG[key].label,

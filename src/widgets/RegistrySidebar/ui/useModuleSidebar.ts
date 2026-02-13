@@ -274,7 +274,7 @@ export const useModuleSidebar = () => {
 
   const activeKey = useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const folderIdParam = urlParams.get("folderId");
+    const folderIdParam = urlParams.get("folder_id");
     if (folderIdParam) {
       return `folder-${folderIdParam}`;
     }

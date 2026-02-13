@@ -15,41 +15,26 @@ export const NewCorrespondenceTableWrapper = ({
   baseParams,
 }: IncomingTableWrapperProps) => {
   const [searchParams] = useSearchParams();
-  const folderId = searchParams.get("folderId");
+  const folder_id = searchParams.get("folder_id");
 
   const { params, url } = useMemo(() => {
     let currentParams = { ...baseParams };
 
-    const currentUrl = ApiRoutes.GET_CORRESPONDENCES;
-
-    // Если в URL есть defaultFolder (папки "Полученные"/"Отправленные"),
-    // добавляем фильтрацию по внутреннему каналу через параметр channel
-    const defaultFolder = searchParams.get("defaultFolder");
-    if (defaultFolder) {
-      currentParams = {
-        ...currentParams,
-        channel: "internal",
-      };
+    if (folder_id) {
+      currentParams.folder_id = parseInt(folder_id, 10);
     }
 
-    // EXTERNAL-INCOMING
-    if (type === "external-incoming" || type === "external-outgoing") {
-      return {
-        params: currentParams,
-        url: currentUrl,
-      };
-    }
-
+    // Выбор URL на основе типа (Internal API)
     if (type === "internal-incoming") {
       return {
-        params: { ...currentParams },
+        params: currentParams,
         url: ApiRoutes.GET_INTERNAL_INCOMING,
       };
     }
 
     if (type === "internal-outgoing") {
       return {
-        params: { ...currentParams },
+        params: currentParams,
         url: ApiRoutes.GET_INTERNAL_OUTGOING,
       };
     }
@@ -75,21 +60,12 @@ export const NewCorrespondenceTableWrapper = ({
       };
     }
 
-    if (folderId) {
-      return {
-        params: {
-          ...currentParams,
-          folder_id: parseInt(folderId, 10),
-        },
-        url: currentUrl,
-      };
-    }
-
+    // По умолчанию для этого ворпера используем GET_CORRESPONDENCES (например для внешних если они сюда попадут)
     return {
       params: currentParams,
-      url: currentUrl,
+      url: ApiRoutes.GET_CORRESPONDENCES,
     };
-  }, [baseParams, folderId, searchParams, type]);
+  }, [baseParams, folder_id, type]);
 
   return (
     <>
