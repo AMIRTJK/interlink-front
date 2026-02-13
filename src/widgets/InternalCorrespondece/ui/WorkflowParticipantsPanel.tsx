@@ -403,11 +403,6 @@ export const WorkflowParticipantsPanel = ({
 
     return (
       <div key={item.id} className="relative flex gap-3 group">
-        {/* Линия таймлайна */}
-        {!isLast && (
-          <div className="absolute left-[15px] top-8 bottom-[-12px] w-[2px] bg-gray-100 group-hover:bg-gray-200 transition-colors" />
-        )}
-
         <div className="relative z-10 shrink-0">
           <Avatar
             src={user.photo_path}
@@ -597,9 +592,6 @@ export const WorkflowParticipantsPanel = ({
             <div>
               {!isCollapsed && (
                 <>
-                  {signers.length > 0 && (
-                    <div className="ml-[15px] h-4 w-[2px] bg-gray-100 mb-1 -mt-2" />
-                  )}
                   <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1 flex justify-between items-center">
                     <span>Согласующие</span>
                     <span className="bg-gray-100 text-gray-500 px-1.5 rounded text-[9px]">
