@@ -59,17 +59,20 @@ const NavButton = ({ icon, label, active, onClick }: any) => (
 interface TopNavigationProps {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
+  type: string;
 }
 
 export const TopNavigation: React.FC<TopNavigationProps> = ({
   isDarkMode,
   toggleDarkMode,
+  type,
 }) => {
   const [activeNavRegistry, setActiveNavRegistry] = useState<string | null>(
     null,
   );
 
   const navigate = useNavigate();
+
   const [showColorPicker, setShowColorPicker] = useState(false);
   const currentPreset = softMaterialPresets[0];
 
@@ -145,6 +148,15 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
     },
   };
 
+  const handleNavigate = () => {
+    if (type === "internal-incoming") {
+      navigate("/modules/correspondence/internal/incoming");
+    } else if (type === "internal-outgoing") {
+      navigate("/modules/correspondence/internal/outgoing");
+    }
+    return null;
+  };
+
   return (
     <>
       <nav
@@ -157,7 +169,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
         {/* Left - Navigation */}
         <div className="flex items-center gap-6">
           <motion.button
-            onClick={() => navigate(-1)}
+            onClick={handleNavigate}
             whileHover={{
               scale: 1.1,
             }}

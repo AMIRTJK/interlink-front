@@ -300,6 +300,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       <TopNavigation
         isDarkMode={isDarkMode}
         toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+        type={type}
       />
 
       <div className="flex w-full justify-between">

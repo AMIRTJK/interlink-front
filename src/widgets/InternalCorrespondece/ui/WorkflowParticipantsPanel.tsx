@@ -11,6 +11,7 @@ import {
   SearchOutlined,
   HistoryOutlined,
   EyeOutlined,
+  SafetyCertificateOutlined,
 } from "@ant-design/icons";
 import { If } from "@shared/ui";
 import {
@@ -25,6 +26,7 @@ import {
 } from "antd";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { SignatureDetailsModal } from "./SignatureDetailsModal";
 
 // --- КОНСТАНТЫ ---
 const MAX_VISIBLE_DOCS = 2;
@@ -39,6 +41,7 @@ const FullHistoryModal = ({
   onSign,
   isSigning,
   currentUserId,
+  onShowSignature,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -47,6 +50,7 @@ const FullHistoryModal = ({
   onSign: () => void;
   isSigning: boolean;
   currentUserId: string | number | null;
+  onShowSignature: (e: any, item: any) => void;
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -95,6 +99,10 @@ const FullHistoryModal = ({
     const isCurrentUser = String(item.user?.id) === String(currentUserId);
     const isPending = item.status === "pending";
 
+    const hasSignature =
+      (item.status === "signed" || item.status === "approved") &&
+      item.payload_hash;
+
     return (
       <div
         key={item.id}
@@ -103,8 +111,21 @@ const FullHistoryModal = ({
         <div className="flex items-center gap-3">
           <Avatar src={item.user?.photo_path} icon={<UserOutlined />} />
           <div>
-            <div className="font-medium text-gray-800">
+            <div className="font-medium text-gray-800 flex items-center gap-2">
               {item.user?.full_name}
+              <If is={hasSignature}>
+                <Tooltip title="Показать данные ЭЦП">
+                  <Button
+                    type="text"
+                    size="small"
+                    className="text-green-600! bg-green-50! h-[20px]! w-[20px]! flex items-center justify-center rounded-full"
+                    onClick={(e) => onShowSignature(e, item)}
+                    icon={
+                      <SafetyCertificateOutlined className="text-[12px]!" />
+                    }
+                  />
+                </Tooltip>
+              </If>
               <If is={isCurrentUser}>
                 <span className="text-gray-400 text-xs ml-1">(Вы)</span>
               </If>
@@ -162,7 +183,7 @@ const FullHistoryModal = ({
           {filteredSigners.length > 0 && (
             <div>
               <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1">
-                Подписанты ({filteredSigners.length})
+                Подписывающие ({filteredSigners.length})
               </div>
               {filteredSigners.map((s: any) =>
                 renderParticipantRow(s, "signer"),
@@ -291,6 +312,17 @@ export const WorkflowParticipantsPanel = ({
     tab: "participants",
   });
 
+  const [signatureModal, setSignatureModal] = useState<{
+    isOpen: boolean;
+    data: any | null;
+  }>({ isOpen: false, data: null });
+
+  const openSignatureModal = (e: React.MouseEvent, item: any) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setSignatureModal({ isOpen: true, data: item });
+  };
+
   const openModal = (tab: "participants" | "documents") => {
     setModalState({ isOpen: true, tab });
   };
@@ -323,7 +355,7 @@ export const WorkflowParticipantsPanel = ({
         return {
           color: "text-green-500",
           bg: "bg-white",
-          // Важно: ! нужен для перебивания цвета иконки Antd
+          bgList: "bg-[#00c95026]",
           icon: <CheckCircleFilled className="text-green-500!" />,
         };
       case "rejected":
@@ -336,6 +368,7 @@ export const WorkflowParticipantsPanel = ({
         return {
           color: "text-gray-400",
           bg: "bg-white",
+          bgList: "bg-[#99a1af26]",
           icon: <ClockCircleFilled className="text-gray-400!" />,
         };
     }
@@ -373,8 +406,13 @@ export const WorkflowParticipantsPanel = ({
     const status = item.status || "Ожидание";
     const meta = getStatusMeta(status);
 
+    console.log(meta);
+
     const isCurrentUser = String(user.id) === String(currentUserId);
     const isPending = status === "pending";
+
+    const hasSignature =
+      (status === "signed" || status === "approved") && item.payload_hash;
 
     if (isCollapsed) {
       return (
@@ -402,12 +440,10 @@ export const WorkflowParticipantsPanel = ({
     }
 
     return (
-      <div key={item.id} className="relative flex gap-3 group">
-        {/* Линия таймлайна */}
-        {!isLast && (
-          <div className="absolute left-[15px] top-8 bottom-[-12px] w-[2px] bg-gray-100 group-hover:bg-gray-200 transition-colors" />
-        )}
-
+      <div
+        key={item.id}
+        className={`relative flex gap-3 group items-center mb-4 p-2 rounded-xl ${meta.bgList}`}
+      >
         <div className="relative z-10 shrink-0">
           <Avatar
             src={user.photo_path}
@@ -423,7 +459,7 @@ export const WorkflowParticipantsPanel = ({
           </div>
         </div>
 
-        <div className="flex-1 min-w-0 pb-4">
+        <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start">
             <span
               className={`text-sm font-medium truncate pr-2 ${status === "pending" ? "text-gray-500" : "text-gray-800"}`}
@@ -435,6 +471,16 @@ export const WorkflowParticipantsPanel = ({
                 </span>
               </If>
             </span>
+            <If is={hasSignature}>
+              <Tooltip title="Показать ЭЦП">
+                <div
+                  onClick={(e) => openSignatureModal(e, item)}
+                  className="text-green-600! cursor-pointer h-[20px]! w-[20px]! flex items-center justify-center rounded-full"
+                >
+                  <SafetyCertificateOutlined />
+                </div>
+              </Tooltip>
+            </If>
           </div>
           <div
             className="text-xs text-gray-400 truncate mt-0.5"
@@ -518,7 +564,7 @@ export const WorkflowParticipantsPanel = ({
           <div className="px-4 py-4 border-b border-gray-100 shrink-0 bg-white z-10 flex justify-between items-center">
             <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2 m-0">
               <InfoCircleOutlined className="text-gray-400!" />
-              Информация
+              История
             </h3>
             <Tooltip title="Полная история">
               <Button
@@ -577,10 +623,10 @@ export const WorkflowParticipantsPanel = ({
           )}
 
           {signers.length > 0 && (
-            <div className="mb-2">
+            <div>
               {!isCollapsed && (
                 <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1">
-                  Подписанты
+                  Подписывающие
                 </div>
               )}
               {signers.map((s: any, idx: number) =>
@@ -597,9 +643,6 @@ export const WorkflowParticipantsPanel = ({
             <div>
               {!isCollapsed && (
                 <>
-                  {signers.length > 0 && (
-                    <div className="ml-[15px] h-4 w-[2px] bg-gray-100 mb-1 -mt-2" />
-                  )}
                   <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1 flex justify-between items-center">
                     <span>Согласующие</span>
                     <span className="bg-gray-100 text-gray-500 px-1.5 rounded text-[9px]">
@@ -647,6 +690,12 @@ export const WorkflowParticipantsPanel = ({
         onSign={onSign}
         isSigning={isSigning}
         currentUserId={currentUserId}
+        onShowSignature={openSignatureModal}
+      />
+      <SignatureDetailsModal
+        isOpen={signatureModal.isOpen}
+        onClose={() => setSignatureModal({ ...signatureModal, isOpen: false })}
+        data={signatureModal.data}
       />
     </>
   );
