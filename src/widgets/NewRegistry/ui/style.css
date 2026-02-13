@@ -66,3 +66,67 @@
   font-weight: 400;
   color: #252525;
 }
+
+/* --- MoveToFolderModal Styles --- */
+.folder-tree-premium {
+  background: transparent !important;
+}
+
+.folder-tree-premium .ant-tree-node-content-wrapper {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  border-radius: 12px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  margin: 2px 0 !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+}
+
+.folder-tree-premium .ant-tree-node-selected {
+  background-color: #ffffff !important;
+  color: #2563eb !important;
+  box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.15) !important;
+  border: 1px solid #dbeafe !important;
+}
+
+.premium-segmented {
+  background: rgba(255, 255, 255, 0.5) !important;
+  padding: 3px !important;
+  border-radius: 10px !important;
+}
+
+.premium-segmented .ant-segmented-item-selected {
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 8px !important;
+  color: #2563eb !important;
+}
+
+.premium-modal .ant-modal-content {
+  border-radius: 24px !important;
+  padding: 24px !important;
+}
+
+.premium-modal .ant-modal-header {
+  margin-bottom: 12px !important;
+}
+
+.premium-modal .ant-modal-footer {
+  margin-top: 24px !important;
+  border-top: none !important;
+  display: flex !important;
+  gap: 12px !important;
+  justify-content: flex-end !important;
+}
+
+.premium-modal .ant-modal-footer .ant-btn {
+  height: 44px !important;
+  border-radius: 14px !important;
+  font-weight: 600 !important;
+  min-width: 120px !important;
+}
+
+.premium-modal .ant-modal-footer .ant-btn-primary {
+  background: #2563eb !important;
+  box-shadow: 0 8px 20px -6px rgba(37, 99, 235, 0.4) !important;
+}

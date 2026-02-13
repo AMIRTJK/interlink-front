@@ -1,38 +1,43 @@
-import React, { useState, useMemo } from "react";
+
+import React, { useState } from "react";
 import { Modal, Tree, Input, Empty, Segmented, InputNumber } from "antd";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Folder, ChevronRight, Hash, Sparkles } from "lucide-react";
 import { useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { IFolder, IMoveToFolderModalProps, TRegMode } from "../model/types";
+import { useFolderTree, TFolderTreeNode } from "../lib/useFolderTree";
 
-interface MoveToFolderModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  documentId: number | null;
-  folders: any[];
-  isInternal?: boolean;
-}
-
-export const MoveToFolderModal: React.FC<MoveToFolderModalProps> = ({
+/**
+ * Модальное окно для перемещения документа в папку
+ * Реализовано согласно правилам GEMINI.md:
+ * - Русский язык (правила 2, 3, 4)
+ * - Декомпозиция (правило 37)
+ * - Типизация (правило 26)
+ * - FSD архитектура
+ */
+export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
   isOpen,
   onClose,
   documentId,
   folders,
   isInternal = true,
 }) => {
+  // --- Состояние ---
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFolder, setSelectedFolder] = useState<any | null>(null);
-  const [regMode, setRegMode] = useState<"auto" | "manual">("auto");
+  const [selectedFolder, setSelectedFolder] = useState<IFolder | null>(null);
+  const [regMode, setRegMode] = useState<TRegMode>("auto");
   const [regSeq, setRegSeq] = useState<number | null>(null);
 
+  // --- Логика сервера ---
   const { mutate: moveDocument, isPending } = useMutationQuery({
-    url: (data: any) => 
+    url: (data: { id: number | string }) => 
       isInternal 
         ? ApiRoutes.INTERNAL_MOVE_FOLDER.replace(":id", String(data.id))
         : ApiRoutes.FOLDER_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "PATCH",
     messages: {
-      success: "Документ перемещен",
+      success: "Документ успешно перемещен",
       invalidate: [
         ApiRoutes.GET_CORRESPONDENCES, 
         ApiRoutes.GET_INTERNAL_COUNTERS, 
@@ -44,51 +49,85 @@ export const MoveToFolderModal: React.FC<MoveToFolderModalProps> = ({
     },
   });
 
-  const treeData = useMemo(() => {
-    const buildTree = (parentId: number | null = null): any[] => {
-      return folders
-        .filter((f) => f.parent_id === parentId)
-        .map((f) => ({
-          title: f.name,
-          key: f.id,
-          folder: f,
-          children: buildTree(f.id),
-          icon: <Folder size={16} className={selectedFolder?.id === f.id ? "text-blue-500" : "text-gray-400"} />,
-        }));
-    };
+  // --- Подготовка дерева данных (хук) ---
+  const treeData = useFolderTree(folders, searchQuery, selectedFolder?.id || null);
 
-    const fullTree = buildTree();
-    
-    if (!searchQuery) return fullTree;
-
-    const filterTree = (nodes: any[]): any[] => {
-      return nodes
-        .map((node) => {
-          const match = node.title.toLowerCase().includes(searchQuery.toLowerCase());
-          const filteredChildren = node.children ? filterTree(node.children) : [];
-          if (match || filteredChildren.length > 0) {
-            return { ...node, children: filteredChildren };
-          }
-          return null;
-        })
-        .filter(Boolean) as any[];
-    };
-
-    return filterTree(fullTree);
-  }, [folders, searchQuery, selectedFolder]);
-
+  // --- Обработчики ---
   const handleMove = () => {
-    if (selectedFolder !== null && documentId !== null) {
-      // Формируем чистый body по спецификации Комила
-      const body: any = {
-        id: documentId, // Нужно для формирования URL в useMutationQuery
+    if (selectedFolder && documentId !== null) {
+      moveDocument({
+        id: documentId,
         folder: selectedFolder.slug || String(selectedFolder.id),
-        reg_seq: regMode === "manual" ? regSeq : (regSeq || 15), // Для авто пока шлем 15 как в примере или regSeq если есть
-      };
-
-      moveDocument(body);
+        reg_seq: regMode === "manual" ? regSeq : (regSeq || 15),
+      });
     }
   };
+
+  // --- Вспомогательные рендеры (правило 37) ---
+  const renderHeader = () => (
+    <div className="flex items-center gap-2 pb-2">
+      <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+        <Folder size={20} />
+      </div>
+      <div>
+        <h3 className="font-bold text-gray-900 leading-none text-base">Смарт-перемещение</h3>
+        <p className="text-[11px] text-gray-400 font-normal mt-1">Выберите целевую папку и режим нумерации</p>
+      </div>
+    </div>
+  );
+
+  const renderRegModeSelector = () => (
+    <div className="p-4 bg-blue-50/40 rounded-2xl border border-blue-100/50 space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-blue-700 font-semibold text-xs uppercase tracking-wider">
+          <Sparkles size={14} />
+          <span>Режим нумерации</span>
+        </div>
+        <Segmented
+          options={[
+            { label: "Авто", value: "auto", icon: <Sparkles size={12} /> },
+            { label: "Ручной", value: "manual", icon: <Hash size={12} /> },
+          ]}
+          value={regMode}
+          onChange={(val) => setRegMode(val as TRegMode)}
+          className="premium-segmented"
+        />
+      </div>
+
+      <AnimatePresence mode="wait">
+        {regMode === "manual" ? (
+          <motion.div
+            key="manual"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            className="space-y-2"
+          >
+            <div className="text-[11px] text-blue-600/70 font-medium px-1">Введите порядковый номер</div>
+            <InputNumber
+              placeholder="Например: 15"
+              value={regSeq}
+              onChange={(val) => setRegSeq(val)}
+              className="w-full h-10 rounded-xl border-blue-100 hover:border-blue-400 focus:border-blue-500"
+              min={1}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="auto"
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            className="py-2 px-1"
+          >
+            <p className="text-xs text-blue-600/60 leading-relaxed italic">
+              Будет использован следующий доступный номер в системе.
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 
   return (
     <Modal
@@ -96,20 +135,10 @@ export const MoveToFolderModal: React.FC<MoveToFolderModalProps> = ({
       onCancel={onClose}
       onOk={handleMove}
       confirmLoading={isPending}
-      okButtonProps={{ disabled: selectedFolder === null || (regMode === "manual" && regSeq === null) }}
+      okButtonProps={{ disabled: !selectedFolder || (regMode === "manual" && regSeq === null) }}
       okText="Переместить"
       cancelText="Отмена"
-      title={
-        <div className="flex items-center gap-2 pb-2">
-          <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
-            <Folder size={20} />
-          </div>
-          <div>
-            <h3 className="font-bold text-gray-900 leading-none text-base">Смарт-перемещение</h3>
-            <p className="text-[11px] text-gray-400 font-normal mt-1">Выберите целевую папку и режим нумерации</p>
-          </div>
-        </div>
-      }
+      title={renderHeader()}
       centered
       width={460}
       className="premium-modal"
@@ -129,6 +158,7 @@ export const MoveToFolderModal: React.FC<MoveToFolderModalProps> = ({
       )}
     >
       <div className="space-y-5 pt-3">
+        {/* Поиск и дерево папок */}
         <div className="space-y-3">
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={16} />
@@ -149,7 +179,10 @@ export const MoveToFolderModal: React.FC<MoveToFolderModalProps> = ({
                 defaultExpandAll
                 treeData={treeData}
                 selectedKeys={selectedFolder ? [selectedFolder.id] : []}
-                onSelect={(_, info: any) => setSelectedFolder(info.selected ? info.node.folder : null)}
+                onSelect={(_, info) => {
+                  const node = info.node as unknown as TFolderTreeNode;
+                  setSelectedFolder(info.selected ? node.folder : null);
+                }}
                 switcherIcon={<ChevronRight size={14} className="text-gray-400" />}
                 className="folder-tree-premium"
               />
@@ -161,113 +194,9 @@ export const MoveToFolderModal: React.FC<MoveToFolderModalProps> = ({
           </div>
         </div>
 
-        <div className="p-4 bg-blue-50/40 rounded-2xl border border-blue-100/50 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-blue-700 font-semibold text-xs uppercase tracking-wider">
-              <Sparkles size={14} />
-              <span>Режим нумерации</span>
-            </div>
-            <Segmented
-              options={[
-                { label: "Авто", value: "auto", icon: <Sparkles size={12} /> },
-                { label: "Ручной", value: "manual", icon: <Hash size={12} /> },
-              ]}
-              value={regMode}
-              onChange={(val: any) => setRegMode(val)}
-              className="premium-segmented"
-            />
-          </div>
-
-          <AnimatePresence mode="wait">
-            {regMode === "manual" ? (
-              <motion.div
-                key="manual"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                className="space-y-2"
-              >
-                <div className="text-[11px] text-blue-600/70 font-medium px-1">Введите порядковый номер (reg_seq)</div>
-                <InputNumber
-                  placeholder="Например: 15"
-                  value={regSeq}
-                  onChange={(val) => setRegSeq(val)}
-                  className="w-full h-10 rounded-xl border-blue-100 hover:border-blue-400 focus:border-blue-500"
-                  min={1}
-                />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="auto"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="py-2 px-1"
-              >
-                <p className="text-xs text-blue-600/60 leading-relaxed italic">
-                  Для автоматического режима будет использован следующий доступный номер.
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        {/* Секция режима нумерации */}
+        {renderRegModeSelector()}
       </div>
-
-      <style>{`
-        .folder-tree-premium {
-          background: transparent !important;
-        }
-        .folder-tree-premium .ant-tree-node-content-wrapper {
-          padding-top: 8px !important;
-          padding-bottom: 8px !important;
-          border-radius: 12px !important;
-          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-          margin: 2px 0 !important;
-          font-weight: 500 !important;
-          font-size: 13px !important;
-        }
-        .folder-tree-premium .ant-tree-node-selected {
-          background-color: #ffffff !important;
-          color: #2563eb !important;
-          box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.15) !important;
-          border: 1px solid #dbeafe !important;
-        }
-        .premium-segmented {
-          background: rgba(255, 255, 255, 0.5) !important;
-          padding: 3px !important;
-          border-radius: 10px !important;
-        }
-        .premium-segmented .ant-segmented-item-selected {
-          background: #ffffff !important;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-          border-radius: 8px !important;
-          color: #2563eb !important;
-        }
-        .premium-modal .ant-modal-content {
-          border-radius: 24px !important;
-          padding: 24px !important;
-        }
-        .premium-modal .ant-modal-header {
-          margin-bottom: 12px !important;
-        }
-        .premium-modal .ant-modal-footer {
-          margin-top: 24px !important;
-          border-top: none !important;
-          display: flex !important;
-          gap: 12px !important;
-          justify-content: flex-end !important;
-        }
-        .premium-modal .ant-modal-footer .ant-btn {
-          height: 44px !important;
-          border-radius: 14px !important;
-          font-weight: 600 !important;
-          min-width: 120px !important;
-        }
-        .premium-modal .ant-modal-footer .ant-btn-primary {
-          background: #2563eb !important;
-          box-shadow: 0 8px 20px -6px rgba(37, 99, 235, 0.4) !important;
-        }
-      `}</style>
     </Modal>
   );
 };
