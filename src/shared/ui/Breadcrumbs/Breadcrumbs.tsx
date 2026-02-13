@@ -59,7 +59,7 @@ export const Breadcrumbs: React.FC<IBreadcrumbsProps> = ({
               whileHover={!isActive ? { scale: 1.01, y: -0.5 } : {}}
               whileTap={!isActive ? { scale: 0.98 } : {}}
               className={cn(
-                "flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all duration-200 select-none group border border-transparent",
+                "flex items-center justify-center px-2 py-1 rounded-lg min-w-[100px] max-w-[101px] transition-all duration-200 select-none group border border-transparent",
                 !isActive 
                   ? "cursor-pointer text-gray-500 hover:text-blue-700 hover:bg-blue-50/80 hover:border-blue-100/50" 
                   : "text-gray-900 font-bold cursor-default bg-gray-100/30 border-gray-200/50 shadow-sm"
@@ -74,11 +74,11 @@ export const Breadcrumbs: React.FC<IBreadcrumbsProps> = ({
                   {item.icon}
                 </span>
               )}
-              <span className="text-sm whitespace-nowrap">
+              <span className="text-sm whitespace-nowrap mr-auto">
                 {item.label}
               </span>
               {hasOptions && (
-                <ChevronDown size={12} className={cn(
+                <ChevronDown size={16} className={cn(
                   "transition-transform duration-300 shrink-0 opacity-60",
                   !isActive ? "group-hover:text-blue-500 group-hover:rotate-180" : ""
                 )} />
