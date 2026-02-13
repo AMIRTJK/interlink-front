@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 import { IUser } from "@entities/login";
 import { Tabs } from "@shared/ui";
 import { profileRightNav } from "../model";
-import userAvatar from '../../../assets/images/user-avatar.jpg'
+import userAvatar from "../../../assets/images/user-avatar.jpg";
 import { UseSkeleton } from "@shared/ui/Skeleton/ui";
 
 interface IProps {
@@ -44,8 +44,7 @@ export const RenderJSX = ({
   activeTab,
   onMenuClick,
 }: IProps) => {
-
-  if(isPending) return <UseSkeleton loading={true} variant="profile"/>;
+  if (isPending) return <UseSkeleton loading={true} variant="profile" />;
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6">
       {/* Модалка настроек */}
@@ -85,7 +84,7 @@ export const RenderJSX = ({
       {/* Левая часть профиля */}
       <aside className="w-full lg:w-[28%]">
         <div className="bg-white p-6 rounded-xl shadow">
-          <UseSkeleton loading={isPending} variant="card" count={1} rows={4}  />
+          <UseSkeleton loading={isPending} variant="card" count={1} rows={4} />
           <div className="flex justify-end">
             <SettingOutlined
               className="text-gray-500 hover:text-blue-600 cursor-pointer transition-colors"
@@ -99,7 +98,7 @@ export const RenderJSX = ({
           </div>
 
           <p className="text-center text-[#0037AF] text-xl font-semibold mb-6">
-            {`${userData?.first_name} ${userData?.last_name}`}
+            {userData?.full_name}
           </p>
 
           <div className="flex justify-between text-sm">
