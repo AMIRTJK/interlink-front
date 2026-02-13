@@ -323,7 +323,7 @@ export const WorkflowParticipantsPanel = ({
         return {
           color: "text-green-500",
           bg: "bg-white",
-          // Важно: ! нужен для перебивания цвета иконки Antd
+          bgList: "bg-[#00c95026]",
           icon: <CheckCircleFilled className="text-green-500!" />,
         };
       case "rejected":
@@ -336,6 +336,7 @@ export const WorkflowParticipantsPanel = ({
         return {
           color: "text-gray-400",
           bg: "bg-white",
+          bgList: "bg-[#99a1af26]",
           icon: <ClockCircleFilled className="text-gray-400!" />,
         };
     }
@@ -373,6 +374,8 @@ export const WorkflowParticipantsPanel = ({
     const status = item.status || "Ожидание";
     const meta = getStatusMeta(status);
 
+    console.log(meta);
+
     const isCurrentUser = String(user.id) === String(currentUserId);
     const isPending = status === "pending";
 
@@ -402,7 +405,10 @@ export const WorkflowParticipantsPanel = ({
     }
 
     return (
-      <div key={item.id} className="relative flex gap-3 group">
+      <div
+        key={item.id}
+        className={`relative flex gap-3 group items-center mb-4 p-2 rounded-xl ${meta.bgList}`}
+      >
         <div className="relative z-10 shrink-0">
           <Avatar
             src={user.photo_path}
@@ -418,7 +424,7 @@ export const WorkflowParticipantsPanel = ({
           </div>
         </div>
 
-        <div className="flex-1 min-w-0 pb-4">
+        <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start">
             <span
               className={`text-sm font-medium truncate pr-2 ${status === "pending" ? "text-gray-500" : "text-gray-800"}`}
@@ -513,7 +519,7 @@ export const WorkflowParticipantsPanel = ({
           <div className="px-4 py-4 border-b border-gray-100 shrink-0 bg-white z-10 flex justify-between items-center">
             <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2 m-0">
               <InfoCircleOutlined className="text-gray-400!" />
-              Информация
+              История
             </h3>
             <Tooltip title="Полная история">
               <Button
@@ -572,7 +578,7 @@ export const WorkflowParticipantsPanel = ({
           )}
 
           {signers.length > 0 && (
-            <div className="mb-2">
+            <div>
               {!isCollapsed && (
                 <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1">
                   Подписывающие
