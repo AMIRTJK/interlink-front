@@ -15,44 +15,28 @@ export const NewCorrespondenceTableWrapper = ({
   baseParams,
 }: IncomingTableWrapperProps) => {
   const [searchParams] = useSearchParams();
-  const folderId = searchParams.get("folderId");
+  const folder_id = searchParams.get("folder_id");
 
   const { params, url } = useMemo(() => {
     let currentParams = { ...baseParams };
 
-    const currentUrl = ApiRoutes.GET_CORRESPONDENCES;
-
-    // Если в URL есть defaultFolder (папки "Полученные"/"Отправленные"),
-    // добавляем фильтрацию по внутреннему каналу через параметр channel
-    const defaultFolder = searchParams.get("defaultFolder");
-    if (defaultFolder) {
-      currentParams = {
-        ...currentParams,
-        channel: "internal",
-      };
-    }
-
-    // EXTERNAL-INCOMING
-    if (type === "external-incoming" || type === "external-outgoing") {
-      return {
-        params: currentParams,
-        url: currentUrl,
-      };
+    if (folder_id) {
+      currentParams.folder_id = parseInt(folder_id, 10);
     }
 
     if (type === "internal-incoming") {
       return {
-        params: { ...currentParams },
+        params: currentParams,
         url: ApiRoutes.GET_INTERNAL_INCOMING,
       };
     }
 
-    // if (type === "internal-outgoing") {
-    //   return {
-    //     params: { ...currentParams },
-    //     url: ApiRoutes.GET_INTERNAL_OUTGOING,
-    //   };
-    // }
+    if (type === "internal-outgoing") {
+      return {
+        params: currentParams,
+        url: ApiRoutes.GET_INTERNAL_OUTGOING,
+      };
+    }
 
     if (type === "internal-drafts") {
       return {
@@ -61,35 +45,11 @@ export const NewCorrespondenceTableWrapper = ({
       };
     }
 
-    // if (type === "internal-to-sign") {
-    //   return {
-    //     params: currentParams,
-    //     url: ApiRoutes.GET_INTERNAL_TO_SIGN,
-    //   };
-    // }
-
-    // if (type === "internal-to-approve") {
-    //   return {
-    //     params: currentParams,
-    //     url: ApiRoutes.GET_INTERNAL_TO_APPROVE,
-    //   };
-    // }
-
-    if (folderId) {
-      return {
-        params: {
-          ...currentParams,
-          folder_id: parseInt(folderId, 10),
-        },
-        url: currentUrl,
-      };
-    }
-
     return {
       params: currentParams,
-      url: currentUrl,
+      url: ApiRoutes.GET_CORRESPONDENCES,
     };
-  }, [baseParams, folderId, searchParams, type]);
+  }, [baseParams, folder_id, type]);
 
   return (
     <>

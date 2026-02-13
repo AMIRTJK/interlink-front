@@ -9,9 +9,10 @@ import { FolderActions } from "./FolderActions";
 interface IProps {
   item: MenuItem;
   depth?: number;
+  onSelect?: () => void;
 }
 
-export const FolderTreeItem: React.FC<IProps> = ({ item, depth = 0 }) => {
+export const FolderTreeItem: React.FC<IProps> = ({ item, depth = 0, onSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
   const hasChildren = item.children && item.children.length > 0;
   const isCreatePlaceholder = item.folderName === "Создать новую папку";
@@ -35,6 +36,7 @@ export const FolderTreeItem: React.FC<IProps> = ({ item, depth = 0 }) => {
                 return;
             }
              item.onTitleClick?.(e);
+             onSelect?.();
         }}
       >
         {isCreatePlaceholder ? (
@@ -136,9 +138,9 @@ export const FolderTreeItem: React.FC<IProps> = ({ item, depth = 0 }) => {
                     ][depth % 6]
                 )}
              >
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-4">
                     {item.children!.map((child: MenuItem) => (
-                        <FolderTreeItem key={child.key} item={child} depth={depth + 1} />
+                        <FolderTreeItem key={child.key} item={child} depth={depth + 1} onSelect={onSelect} />
                     ))}
                 </div>
              </div>

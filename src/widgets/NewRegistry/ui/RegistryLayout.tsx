@@ -13,6 +13,7 @@ import {
   Filter,
   MoreHorizontal,
   FileType,
+  FileText,
   ChevronDown,
 } from "lucide-react";
 import {
@@ -23,6 +24,7 @@ import {
   Select,
   theme,
 } from "antd";
+import { Breadcrumbs, IBreadcrumbItem } from "@shared/ui";
 
 dayjs.locale("ru");
 
@@ -80,6 +82,7 @@ interface RegistryLayoutProps {
   currentFilters: any;
   statusConfig: any;
   fieldConfig: any; // Наш конфиг полей и действий
+  breadcrumbs?: IBreadcrumbItem[]; // Крошки для навигации
 }
 
 export const RegistryLayout = ({
@@ -97,6 +100,7 @@ export const RegistryLayout = ({
   currentFilters,
   statusConfig,
   fieldConfig,
+  breadcrumbs,
 }: RegistryLayoutProps) => {
   const [viewMode, setViewMode] = useState<"list" | "block">("list");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -295,6 +299,7 @@ export const RegistryLayout = ({
             currentDocuments={documents}
             startIndex={showFrom - 1}
             endIndex={showTo}
+            breadcrumbs={breadcrumbs}
           />
 
           {/* --- CONTENT AREA --- */}
@@ -391,9 +396,13 @@ export const SectionHeader = ({
   currentDocuments,
   startIndex,
   endIndex,
+  breadcrumbs,
 }: any) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 m-0">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 m-0 flex flex-col gap-2">
+      {breadcrumbs && breadcrumbs.length > 0 && (
+        <Breadcrumbs items={breadcrumbs} className="py-0 mb-1" />
+      )}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <motion.div
@@ -406,11 +415,13 @@ export const SectionHeader = ({
               ease: "easeInOut",
             }}
             className={`p-2 rounded-lg bg-gradient-to-r ${
-              activeStatusData?.gradient || "from-gray-100 to-gray-200"
+              activeStatusData?.gradient || "from-blue-50 to-blue-100"
             }`}
           >
-            {activeStatusData?.icon && (
+            {activeStatusData?.icon ? (
               <div className="text-white">{activeStatusData.icon}</div>
+            ) : (
+              <FileText size={18} className="text-blue-600" />
             )}
           </motion.div>
           <div>
@@ -462,7 +473,7 @@ export const DocumentCard = ({
       {/* Header */}
       <div
         className={`p-3 bg-gradient-to-r ${
-          activeStatusData?.gradient || "from-gray-100 to-gray-200"
+          activeStatusData?.gradient || statusData?.gradient || "from-gray-100 to-gray-200"
         } flex justify-between items-center`}
       >
         <div className="flex items-center gap-2 text-white">
@@ -472,7 +483,7 @@ export const DocumentCard = ({
           <div>
             <div className="text-xs font-medium opacity-90">ID: {data.id}</div>
             <div className="text-white font-semibold text-sm">
-              {activeStatusData?.label}
+              {activeStatusData?.label || statusData?.label}
             </div>
           </div>
         </div>
@@ -610,7 +621,7 @@ export const DocumentListItem = ({
             animate={{ rotate: [0, 5, -5, 0] }}
             transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
             className={`flex-shrink-0 p-2.5 rounded-lg bg-gradient-to-r ${
-              activeStatusData?.gradient || "from-gray-100 to-gray-200"
+              activeStatusData?.gradient || statusData?.gradient || "from-gray-100 to-gray-200"
             }`}
           >
             {statusData?.icon && (
@@ -689,7 +700,7 @@ export const DocumentListItem = ({
           <div className="flex items-center gap-3 flex-shrink-0">
             <div
               className={`px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r text-white ${
-                activeStatusData?.gradient || "from-gray-100 to-gray-200"
+                activeStatusData?.gradient || statusData?.gradient || "from-gray-100 to-gray-200"
               }`}
             >
               {statusData?.label}

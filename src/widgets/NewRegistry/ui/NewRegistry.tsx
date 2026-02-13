@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useGetQuery, useDynamicSearchParams } from "@shared/lib"; // Твои хуки
+import { useGetQuery, useDynamicSearchParams } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import {
   FileEdit,
@@ -14,8 +14,8 @@ import {
 import { RegistryLayout } from "./RegistryLayout";
 import { AppRoutes } from "@shared/config";
 import { useRegistryConfig } from "../lib";
+import { IBreadcrumbItem } from "@shared/ui";
 
-// Типы статусов, сопоставленные с твоим API
 const STATUS_CONFIG: Record<string, any> = {
   draft: {
     label: "Черновик",
@@ -38,11 +38,21 @@ const STATUS_CONFIG: Record<string, any> = {
     gradient: "from-emerald-500 to-emerald-600",
     apiUrl: ApiRoutes.GET_INTERNAL_TO_APPROVE,
   },
+  to_approve: {
+    label: "Согласование",
+    icon: <Eye size={14} />,
+    gradient: "from-emerald-500 to-emerald-600",
+  },
   ["to-sign"]: {
     label: "На подпись",
     icon: <Loader size={14} />,
     gradient: "from-rose-500 to-rose-600",
     apiUrl: ApiRoutes.GET_INTERNAL_TO_SIGN,
+  },
+  to_sign: {
+    label: "На подпись",
+    icon: <Loader size={14} />,
+    gradient: "from-rose-500 to-rose-600",
   },
   sent: {
     label: "Отправлено",
@@ -60,7 +70,6 @@ const STATUS_CONFIG: Record<string, any> = {
     icon: <XCircle size={14} />,
     gradient: "from-red-500 to-red-600",
   },
-  // Дефолт
   default: {
     label: "Документ",
     icon: <FileEdit size={14} />,
@@ -91,9 +100,9 @@ export const NewRegistry = ({
   const location = useLocation();
 
   const fieldConfig = useRegistryConfig(type);
-
-  // --- ЛОГИКА ИЗ СТАРОГО RegistryTable ---
   const { params: searchParams, setParams } = useDynamicSearchParams();
+
+  const isInternal = type.startsWith("internal");
 
   const activeStatusKeys = useMemo(() => {
     if (type.includes("incoming")) return REGISTRY_STATUS_MAP["incoming"];
@@ -101,21 +110,37 @@ export const NewRegistry = ({
     return REGISTRY_STATUS_MAP["default"];
   }, [type]);
 
-  const currentTab = searchParams.status || activeStatusKeys[0];
+  const defaultStatus = useMemo(() => {
+    if (searchParams.folder_id) return "";
+    if (type === "internal-incoming") return "analysis";
+    if (type === "internal-outgoing") return "sent";
+    if (type === "internal-drafts") return "draft";
+    if (type === "internal-to-sign") return "to-sign";
+    if (type === "internal-to-approve") return "to-approve";
+    return "";
+  }, [type, searchParams.folder_id]);
+
+  const currentTab = searchParams.status || defaultStatus || activeStatusKeys[0];
 
   const fetchUrl = useMemo(() => {
     const configUrl = STATUS_CONFIG[currentTab]?.apiUrl;
-
     return configUrl || url;
   }, [currentTab, url]);
 
-  // Запрос счетчиков (для табов)
   const { data: countersData } = useGetQuery({
-    url: ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
+    url: isInternal
+      ? ApiRoutes.GET_INTERNAL_COUNTERS
+      : ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
     params: extraParams?.kind ? { kind: extraParams.kind } : {},
   });
 
-  // Основной запрос данных
+  const { data: foldersData } = useGetQuery({
+    url: ApiRoutes.GET_FOLDERS,
+    params: {},
+  });
+
+  const folders = useMemo(() => foldersData?.data || [], [foldersData]);
+
   const { data: responseData } = useGetQuery({
     url: fetchUrl,
     params: {
@@ -123,21 +148,98 @@ export const NewRegistry = ({
       ...searchParams,
       status: currentTab,
       page: searchParams.page || 1,
-      per_page: searchParams.per_page || 9, // 9 для красивой сетки 3x3
+      per_page: searchParams.per_page || 9,
     },
   });
+
+  const breadcrumbs = useMemo(() => {
+    const items: IBreadcrumbItem[] = [];
+
+    const rootLabel =
+      type === "internal-incoming"
+        ? "Входящие"
+        : type === "internal-outgoing"
+          ? "Исходящие"
+          : type === "internal-drafts"
+            ? "Черновики"
+            : type === "internal-to-sign"
+              ? "На подпись"
+              : type === "internal-to-approve"
+                ? "На согласование"
+                : "Реестр";
+
+    items.push({
+      label: rootLabel,
+      onClick: () => {
+        setParams("folder_id", undefined);
+        setParams("status", undefined);
+      },
+    });
+
+    if (searchParams.folder_id && folders.length > 0) {
+      const path: IBreadcrumbItem[] = [];
+      let currentId: number | null = parseInt(searchParams.folder_id, 10);
+
+      while (currentId) {
+        const folder = folders.find((f: any) => f.id === currentId);
+        if (folder) {
+          if (folder.name !== rootLabel) {
+            const siblings = folders
+              .filter((f: any) => f.parent_id === folder.parent_id && f.id !== folder.id)
+              .map((s: any) => ({
+                label: s.name,
+                onClick: () => setParams("folder_id", String(s.id)),
+              }));
+
+            const subfolders = folders
+              .filter((f: any) => f.parent_id === folder.id)
+              .map((s: any) => ({
+                label: s.name,
+                onClick: () => setParams("folder_id", String(s.id)),
+              }));
+
+            const allOptions: any[] = [];
+            
+            if (subfolders.length > 0) {
+              allOptions.push({ label: "Вложенные папки", isHeader: true });
+              allOptions.push(...subfolders);
+            }
+            
+            if (siblings.length > 0) {
+              if (allOptions.length > 0) allOptions.push({ isDivider: true });
+              allOptions.push({ label: "Другие папки", isHeader: true });
+              allOptions.push(...siblings);
+            }
+
+            path.unshift({
+              label: folder.name,
+              onClick: () => setParams("folder_id", String(folder.id)),
+              options: allOptions.length > 0 ? allOptions : undefined,
+            });
+          }
+          currentId = folder.parent_id;
+        } else {
+          currentId = null;
+        }
+      }
+      items.push(...path);
+    }
+
+    if (items.length > 0) {
+      items[items.length - 1].isActive = true;
+    }
+
+    return items;
+  }, [type, searchParams.folder_id, folders, setParams]);
 
   const documents = (responseData as any)?.data?.data || [];
   const meta = (responseData as any)?.data || {};
   const counts = (countersData as any)?.data || {};
 
-  console.log(responseData);
-
   const statusTabs = useMemo(() => {
     return activeStatusKeys
       .map((key) => {
         const config = STATUS_CONFIG[key];
-
         if (!config) return null;
 
         return {
@@ -151,7 +253,6 @@ export const NewRegistry = ({
       .filter(Boolean);
   }, [counts, activeStatusKeys]);
 
-  // Обработчики
   const handleTabChange = (statusId: string) => {
     setParams("status", statusId);
     setParams("page", 1);
@@ -169,14 +270,13 @@ export const NewRegistry = ({
   };
 
   const handleFilterReset = () => {
-    // Сброс фильтров (кроме служебных)
     setParams("incomingNumber", undefined);
     setParams("outgoingNumber", undefined);
-    setParams("sender", undefined); // Для селекта
-    setParams("sender_name", undefined); // Если селект называется так
-    setParams("date", undefined); // Для даты
-    setParams("date_from", undefined); // Для диапазона
-    setParams("date_to", undefined); // Для диапазона
+    setParams("sender", undefined);
+    setParams("sender_name", undefined);
+    setParams("date", undefined);
+    setParams("date_from", undefined);
+    setParams("date_to", undefined);
     setParams("page", 1);
   };
 
@@ -219,6 +319,7 @@ export const NewRegistry = ({
       }}
       statusConfig={STATUS_CONFIG}
       fieldConfig={fieldConfig}
+      breadcrumbs={breadcrumbs}
     />
   );
 };
