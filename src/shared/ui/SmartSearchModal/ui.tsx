@@ -82,9 +82,9 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
 
       if (multiple) {
         const isSelected = prev.selectedIds.includes(item.id);
-        if (!isSelected && prev.selectedIds.length >= 3) {
-          return prev;
-        }
+        // if (!isSelected && prev.selectedIds.length >= 3) {
+        //   return prev;
+        // }
         newSelectedIds = isSelected
           ? prev.selectedIds.filter((id) => id !== item.id)
           : [...prev.selectedIds, item.id];
@@ -105,6 +105,12 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
       .map((id) => selectedItemsMap[id])
       .filter(Boolean);
     onConfirm(state.selectedIds, selectedItems);
+    setState({
+      selectedIds: [],
+      activePreviewItem: null,
+    });
+    setSelectedItemsMap({});
+    setSearchText("");
   };
 
   const handleClosePreview = () => {

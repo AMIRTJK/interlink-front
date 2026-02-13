@@ -19,6 +19,8 @@ import { useModalState } from "@shared/lib/hooks";
 
 type TModalType = "attach" | "signer" | "approvers";
 
+const VISIBLE_ITEMS_LIMIT = 3;
+
 import { useGetQuery, useMutationQuery } from "@shared/lib/hooks";
 
 export const DrawerActionsModal: React.FC<IActionsModal> = ({
@@ -41,10 +43,10 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
     null,
   );
 
+  const [viewAllSection, setViewAllSection] = useState<string | null>(null);
+
   const [selectedItems, setSelectedItems] = useState<ISearchItem[]>([]);
-  const [selectedSigner, setSelectedSigner] = useState<ISearchItem | null>(
-    null,
-  );
+  const [selectedSigners, setSelectedSigners] = useState<ISearchItem[]>([]);
   const [selectedApprovers, setSelectedApprovers] = useState<ISearchItem[]>([]);
 
   const { data: usersData } = useGetQuery({
@@ -78,35 +80,33 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
   };
 
   const handleConfirm = (ids: string[], items: ISearchItem[]) => {
+    const addUniqueItems = (prev: ISearchItem[], newItems: ISearchItem[]) => {
+      const uniqueNew = newItems.filter(
+        (newItem) => !prev.some((existing) => existing.id === newItem.id),
+      );
+      return [...prev, ...uniqueNew];
+    };
+
     if (activeModalType === "attach") {
-      setSelectedItems((prev) => {
-        const newItems = items.filter(
-          (newItem) => !prev.some((existing) => existing.id === newItem.id),
-        );
-        return [...prev, ...newItems];
-      });
+      setSelectedItems((prev) => addUniqueItems(prev, items));
     } else if (activeModalType === "signer") {
-      if (items.length > 0) setSelectedSigner(items[0]);
+      // Теперь добавляем в массив, а не перезаписываем первым элементом
+      setSelectedSigners((prev) => addUniqueItems(prev, items));
     } else if (activeModalType === "approvers") {
-      setSelectedApprovers((prev) => {
-        const newItems = items.filter(
-          (newItem) => !prev.some((existing) => existing.id === newItem.id),
-        );
-        return [...prev, ...newItems];
-      });
+      setSelectedApprovers((prev) => addUniqueItems(prev, items));
     }
     closeModal();
   };
 
   const handleSave = () => {
     console.log("handleSave called. docId:", docId);
-    console.log("Selected Signer:", selectedSigner);
+    console.log("Selected Signer:", selectedSigners);
     console.log("Selected Approvers:", selectedApprovers);
 
     if (docId) {
-      if (selectedSigner) {
+      if (selectedSigners) {
         const payload = {
-          users: [selectedSigner.id],
+          users: selectedSigners.map((s) => s.id),
         };
         inviteSigner(payload);
       }
@@ -130,7 +130,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
       }
 
       // ОЧИЩАЕМ СТЕЙТ ПОСЛЕ ОТПРАВКИ
-      setSelectedSigner(null);
+      setSelectedSigners([]);
       setSelectedApprovers([]);
     } else {
       alert("Ошибка: ID документа не найден. Сначала сохраните черновик.");
@@ -138,41 +138,49 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
     onClose();
   };
 
-  const handleRemoveItem = (id: string, type: TModalType) => {
+  const handleRemoveItem = (id: string, type: string) => {
     if (type === "attach")
       setSelectedItems((prev) => prev.filter((i) => i.id !== id));
-    if (type === "signer") setSelectedSigner(null);
+    if (type === "signer")
+      setSelectedSigners((prev) => prev.filter((i) => i.id !== id));
     if (type === "approvers")
       setSelectedApprovers((prev) => prev.filter((i) => i.id !== id));
   };
 
+  const getViewAllItems = () => {
+    if (viewAllSection === "attach") return selectedItems;
+    if (viewAllSection === "signer") return selectedSigners;
+    if (viewAllSection === "approvers") return selectedApprovers;
+    return [];
+  };
+
+  const viewAllItems = getViewAllItems();
+
   const getModalConfig = (): Omit<ISmartSearchModalProps, "onConfirm"> & {
     mode: "attach" | "select";
   } => {
+    // Общая функция трансформации для пользователей
+    const transformUser = (items: any[]) =>
+      items.map((item) => ({
+        id: item.id,
+        title: item.full_name || `${item.last_name} ${item.first_name}`,
+        subtitle: item.position || "Сотрудник",
+        tag: item.position || "Сотрудник",
+      }));
+
     switch (activeModalType) {
       case "attach":
         return {
           title: "Прикрепить письмо",
           mode: "attach" as const,
-          // Используем внутренние входящие письма согласно спецификации
-          // querySettings: { url: ApiRoutes.GET_INTERNAL_INCOMING as string },
           querySettings: {
             url: ApiRoutes.GET_INTERNAL_INCOMING_PICKER as string,
           },
-          transformResponse: (
-            items: Array<{
-              id: string;
-              subject?: string;
-              creator_id?: string;
-              reg_number?: string;
-              sent_at?: string;
-            }>,
-          ) =>
+          transformResponse: (items: any[]) =>
             items.map((item) => {
               const creator = usersData?.data?.data.find(
                 (user: any) => user.id === item.creator_id,
               );
-
               return {
                 id: item.id,
                 title: item.subject || "Без темы",
@@ -186,52 +194,22 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
         };
       case "signer":
         return {
-          title: "Выбрать подписывающего",
+          title: "Выбрать подписывающих",
           mode: "select" as const,
-          // Используем специфичный поиск сотрудников для внутренних писем
           querySettings: {
             url: ApiRoutes.GET_INTERNAL_RECIPIENTS_USERS as string,
           },
-          transformResponse: (
-            items: Array<{
-              id: string;
-              full_name?: string;
-              last_name?: string;
-              first_name?: string;
-              position?: string;
-            }>,
-          ) =>
-            items.map((item) => ({
-              id: item.id,
-              title: item.full_name || `${item.last_name} ${item.first_name}`,
-              subtitle: item.position || "Сотрудник",
-              tag: item.position || "Сотрудник",
-            })),
+          transformResponse: transformUser,
           multiple: true,
         };
       case "approvers":
         return {
           title: "Выбрать согласующих",
           mode: "select" as const,
-          // Используем специфичный поиск сотрудников для внутренних писем
           querySettings: {
             url: ApiRoutes.GET_INTERNAL_RECIPIENTS_USERS as string,
           },
-          transformResponse: (
-            items: Array<{
-              id: string;
-              full_name?: string;
-              last_name?: string;
-              first_name?: string;
-              position?: string;
-            }>,
-          ) =>
-            items.map((item) => ({
-              id: item.id,
-              title: item.full_name || `${item.last_name} ${item.first_name}`,
-              subtitle: item.position || "Сотрудник",
-              tag: item.position || "Сотрудник",
-            })),
+          transformResponse: transformUser,
           multiple: true,
         };
       default:
@@ -345,10 +323,11 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                               id: "signer" as const,
                               title: "Подписывающий",
                               icon: <Icons.UserOutlined />,
-                              label: selectedSigner
-                                ? selectedSigner.title
-                                : "Выбрать подписывающего",
-                              items: selectedSigner ? [selectedSigner] : [],
+                              label:
+                                selectedSigners.length > 0
+                                  ? `Выбрано: ${selectedSigners.length}`
+                                  : "Выбрать подписывающего",
+                              items: selectedSigners,
                             },
                             {
                               id: "approvers" as const,
@@ -360,37 +339,55 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                                   : "Выбрать согласующих",
                               items: selectedApprovers,
                             },
-                          ].map((section) => (
-                            <div
-                              key={section.id}
-                              className="flex flex-col gap-2"
-                            >
-                              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                                {section.title}
-                              </h4>
+                          ].map((section) => {
+                            const visibleItems = section.items.slice(
+                              0,
+                              VISIBLE_ITEMS_LIMIT,
+                            );
+                            const hiddenCount =
+                              section.items.length - VISIBLE_ITEMS_LIMIT;
+                            return (
+                              <div
+                                key={section.id}
+                                className="flex flex-col gap-2"
+                              >
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                  {section.title}
+                                </h4>
 
-                              <ActionSelector
-                                icon={section.icon}
-                                label={section.label}
-                                onClick={() => handleOpenModal(section.id)}
-                              />
+                                <ActionSelector
+                                  icon={section.icon}
+                                  label={section.label}
+                                  onClick={() => handleOpenModal(section.id)}
+                                />
 
-                              <If is={section.items.length > 0}>
-                                <div className="flex flex-col gap-2">
-                                  {section.items.map((item) => (
-                                    <SelectedCard
-                                      key={item.id}
-                                      title={item.title}
-                                      subtitle={item.subtitle}
-                                      onRemove={() =>
-                                        handleRemoveItem(item.id, section.id)
-                                      }
-                                    />
-                                  ))}
-                                </div>
-                              </If>
-                            </div>
-                          ))}
+                                <If is={section.items.length > 0}>
+                                  <div className="flex flex-col gap-2">
+                                    {visibleItems.map((item) => (
+                                      <SelectedCard
+                                        key={item.id}
+                                        title={item.title}
+                                        subtitle={item.subtitle}
+                                        onRemove={() =>
+                                          handleRemoveItem(item.id, section.id)
+                                        }
+                                      />
+                                    ))}
+                                    <If is={hiddenCount > 0}>
+                                      <div
+                                        onClick={() =>
+                                          setViewAllSection(section.id)
+                                        }
+                                        className="py-2 px-3 text-center text-sm font-medium text-gray-500 bg-gray-50 hover:bg-gray-100 hover:text-gray-700 rounded-lg cursor-pointer transition-all border border-dashed border-gray-200"
+                                      >
+                                        Показать еще (+{hiddenCount})
+                                      </div>
+                                    </If>
+                                  </div>
+                                </If>
+                              </div>
+                            );
+                          })}
 
                           {/* <div>
                             <DrawerQRCodeSection />
@@ -519,6 +516,36 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
       >
         <div className="h-[600px]">
           <SmartSearchUI {...modalConfig} onConfirm={handleConfirm} />
+        </div>
+      </Ui.Modal>
+      <Ui.Modal
+        open={!!viewAllSection}
+        onCancel={() => setViewAllSection(null)}
+        footer={null}
+        title="Выбранные элементы"
+        width={500}
+        centered
+        zIndex={1200}
+      >
+        <div className="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar p-1">
+          {viewAllItems.map((item) => (
+            <SelectedCard
+              key={item.id}
+              title={item.title}
+              subtitle={item.subtitle}
+              onRemove={() => {
+                if (viewAllSection) {
+                  handleRemoveItem(item.id, viewAllSection);
+                }
+              }}
+            />
+          ))}
+          {viewAllItems.length === 0 && (
+            <div className="text-center text-gray-400 py-5">Список пуст</div>
+          )}
+        </div>
+        <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
+          <Ui.Button onClick={() => setViewAllSection(null)}>Закрыть</Ui.Button>
         </div>
       </Ui.Modal>
     </>

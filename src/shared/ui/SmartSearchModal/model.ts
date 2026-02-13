@@ -5,6 +5,7 @@ export interface ISearchItem {
   date?: string;
   tag?: string;
   previewUrl?: string;
+  reg_number?: string;
 }
 
 export interface ISmartSearchModalProps {
@@ -12,17 +13,17 @@ export interface ISmartSearchModalProps {
   onClose?: () => void;
   title?: string;
   placeholder?: string;
-  
+
   items?: ISearchItem[];
   querySettings?: {
     url: string;
     params?: Record<string, any>;
-    queryKey?: any[]; 
+    queryKey?: any[];
   };
   transformResponse?: (data: any) => ISearchItem[];
-  mode?: 'attach' | 'select'; 
+  mode?: "attach" | "select";
   onSelect?: (item: ISearchItem) => void;
-  onConfirm: (selectedIds: string[], items: ISearchItem[]) => void; 
+  onConfirm: (selectedIds: string[], items: ISearchItem[]) => void;
   multiple?: boolean;
 }
 
