@@ -2,10 +2,10 @@
 import React, { useState } from "react";
 import { Modal, Tree, Input, Empty, Segmented, InputNumber } from "antd";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Folder, ChevronRight, Hash, Sparkles } from "lucide-react";
+import { Search, Folder, FolderOpen, ChevronRight, Hash, Sparkles } from "lucide-react";
 import { useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { IFolder, IMoveToFolderModalProps, TRegMode } from "../model/types";
+import { IFolder, IMoveToFolderModalProps, TRegMode } from "../model";
 import { useFolderTree, TFolderTreeNode } from "../lib/useFolderTree";
 
 /**
@@ -31,7 +31,7 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
 
   // --- Логика сервера ---
   const { mutate: moveDocument, isPending } = useMutationQuery({
-    url: (data: { id: number | string }) => 
+    url: (data: { id: number | string; folder: string; reg_seq: number | null }) => 
       isInternal 
         ? ApiRoutes.INTERNAL_MOVE_FOLDER.replace(":id", String(data.id))
         : ApiRoutes.FOLDER_CORRESPONDENCE.replace(":id", String(data.id)),
@@ -50,7 +50,7 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
   });
 
   // --- Подготовка дерева данных (хук) ---
-  const treeData = useFolderTree(folders, searchQuery, selectedFolder?.id || null);
+  const treeData = useFolderTree(folders, searchQuery);
 
   // --- Обработчики ---
   const handleMove = () => {
@@ -61,6 +61,19 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
         reg_seq: regMode === "manual" ? regSeq : (regSeq || 15),
       });
     }
+  };
+
+  // --- Динамический рендер иконок ---
+  const renderFolderIcon = (props: { key?: string | number; expanded?: boolean }) => {
+    const isSelected = selectedFolder?.id === Number(props.key);
+    const Icon = props.expanded ? FolderOpen : Folder;
+    
+    return (
+      <Icon 
+        size={16} 
+        className={`${isSelected ? "text-blue-500" : "text-gray-400"} transition-colors duration-200`} 
+      />
+    );
   };
 
   // --- Вспомогательные рендеры (правило 37) ---
@@ -175,9 +188,11 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
             {treeData.length > 0 ? (
               <Tree
                 showIcon
+                showLine={{ showLeafIcon: false }}
                 blockNode
                 defaultExpandAll
                 treeData={treeData}
+                icon={renderFolderIcon}
                 selectedKeys={selectedFolder ? [selectedFolder.id] : []}
                 onSelect={(_, info) => {
                   const node = info.node as unknown as TFolderTreeNode;

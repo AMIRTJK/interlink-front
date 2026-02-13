@@ -1,8 +1,6 @@
 
 import { useMemo } from "react";
-import { Folder } from "lucide-react";
-import { IFolder } from "../model/types";
-import React from "react";
+import { IFolder } from "../model";
 
 /**
  * Тип узла дерева для Ant Design Tree
@@ -12,7 +10,6 @@ export type TFolderTreeNode = {
   key: number;
   folder: IFolder;
   children: TFolderTreeNode[];
-  icon: React.ReactNode;
 };
 
 /**
@@ -20,8 +17,7 @@ export type TFolderTreeNode = {
  */
 export const useFolderTree = (
   folders: IFolder[],
-  searchQuery: string,
-  selectedFolderId: number | null
+  searchQuery: string
 ): TFolderTreeNode[] => {
   return useMemo(() => {
     /**
@@ -35,10 +31,6 @@ export const useFolderTree = (
           key: f.id,
           folder: f,
           children: buildTree(f.id),
-          icon: React.createElement(Folder, {
-            size: 16,
-            className: selectedFolderId === f.id ? "text-blue-500" : "text-gray-400"
-          }),
         }));
     };
 
@@ -64,5 +56,5 @@ export const useFolderTree = (
     };
 
     return filterTree(fullTree);
-  }, [folders, searchQuery, selectedFolderId]);
+  }, [folders, searchQuery]);
 };
