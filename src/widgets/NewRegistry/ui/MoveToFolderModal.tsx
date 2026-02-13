@@ -1,11 +1,11 @@
 
 import React, { useState } from "react";
-import { Modal, Tree, Input, Empty, Segmented, InputNumber } from "antd";
+import { Modal, Tree, Input, Empty } from "antd";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Folder, FolderOpen, ChevronRight, Hash, Sparkles } from "lucide-react";
+import { Search, Folder, FolderOpen, ChevronRight } from "lucide-react";
 import { useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { IFolder, IMoveToFolderModalProps, TRegMode } from "../model";
+import { IFolder, IMoveToFolderModalProps } from "../model";
 import { useFolderTree, TFolderTreeNode } from "../lib/useFolderTree";
 
 /**
@@ -26,8 +26,6 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
   // --- Состояние ---
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFolder, setSelectedFolder] = useState<IFolder | null>(null);
-  const [regMode, setRegMode] = useState<TRegMode>("auto");
-  const [regSeq, setRegSeq] = useState<number | null>(null);
 
   // --- Логика сервера ---
   const { mutate: moveDocument, isPending } = useMutationQuery({
@@ -58,7 +56,7 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
       moveDocument({
         id: documentId,
         folder: selectedFolder.slug || String(selectedFolder.id),
-        reg_seq: regMode === "manual" ? regSeq : (regSeq || 15),
+        reg_seq: null, // Автоматический режим — сервер сам назначит номер
       });
     }
   };
@@ -84,61 +82,8 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
       </div>
       <div>
         <h3 className="font-bold text-gray-900 leading-none text-base">Смарт-перемещение</h3>
-        <p className="text-[11px] text-gray-400 font-normal mt-1">Выберите целевую папку и режим нумерации</p>
+        <p className="text-[11px] text-gray-400 font-normal mt-1">Выберите целевую папку для перемещения документа</p>
       </div>
-    </div>
-  );
-
-  const renderRegModeSelector = () => (
-    <div className="p-4 bg-blue-50/40 rounded-2xl border border-blue-100/50 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-blue-700 font-semibold text-xs uppercase tracking-wider">
-          <Sparkles size={14} />
-          <span>Режим нумерации</span>
-        </div>
-        <Segmented
-          options={[
-            { label: "Авто", value: "auto", icon: <Sparkles size={12} /> },
-            { label: "Ручной", value: "manual", icon: <Hash size={12} /> },
-          ]}
-          value={regMode}
-          onChange={(val) => setRegMode(val as TRegMode)}
-          className="premium-segmented"
-        />
-      </div>
-
-      <AnimatePresence mode="wait">
-        {regMode === "manual" ? (
-          <motion.div
-            key="manual"
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 10 }}
-            className="space-y-2"
-          >
-            <div className="text-[11px] text-blue-600/70 font-medium px-1">Введите порядковый номер</div>
-            <InputNumber
-              placeholder="Например: 15"
-              value={regSeq}
-              onChange={(val) => setRegSeq(val)}
-              className="w-full h-10 rounded-xl border-blue-100 hover:border-blue-400 focus:border-blue-500"
-              min={1}
-            />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="auto"
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            className="py-2 px-1"
-          >
-            <p className="text-xs text-blue-600/60 leading-relaxed italic">
-              Будет использован следующий доступный номер в системе.
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 
@@ -148,7 +93,7 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
       onCancel={onClose}
       onOk={handleMove}
       confirmLoading={isPending}
-      okButtonProps={{ disabled: !selectedFolder || (regMode === "manual" && regSeq === null) }}
+      okButtonProps={{ disabled: !selectedFolder }}
       okText="Переместить"
       cancelText="Отмена"
       title={renderHeader()}
@@ -184,7 +129,7 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
             />
           </div>
 
-          <div className="max-h-[280px] overflow-y-auto pr-1 custom-scrollbar min-h-[120px] bg-gray-50/30 rounded-xl p-2 border border-dashed border-gray-100">
+          <div className="max-h-[350px] overflow-y-auto pr-1 custom-scrollbar min-h-[120px] bg-gray-50/30 rounded-xl p-2 border border-dashed border-gray-100">
             {treeData.length > 0 ? (
               <Tree
                 showIcon
@@ -208,9 +153,6 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
             )}
           </div>
         </div>
-
-        {/* Секция режима нумерации */}
-        {renderRegModeSelector()}
       </div>
     </Modal>
   );

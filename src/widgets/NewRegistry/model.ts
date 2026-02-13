@@ -10,10 +10,6 @@ export interface IFolder {
   slug?: string;
 }
 
-/**
- * Тип режима нумерации
- */
-export type TRegMode = "auto" | "manual";
 
 /**
  * Пропсы для модального окна перемещения документа
