@@ -91,7 +91,7 @@ export const useIncomingConfig = (type: string): RegistryConfig => {
         render: (d) => d.outgoing_number || "Не присвоен",
       },
     ],
-    getActions: (record) => {
+    getActions: (record, onMove) => {
       const isTrashed = type.includes("trashed");
       const isArchived = type.includes("archived");
       const isPinned = record.is_pinned;
@@ -121,7 +121,7 @@ export const useIncomingConfig = (type: string): RegistryConfig => {
         key: "folder",
         label: "В папку",
         icon: <FolderInput size={16} />,
-        onClick: () => console.log("Open folder modal", record.id),
+        onClick: () => onMove?.(record.id),
       });
 
       items.push({ type: "divider" });
