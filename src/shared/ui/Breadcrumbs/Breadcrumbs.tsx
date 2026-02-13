@@ -41,7 +41,7 @@ export const Breadcrumbs: React.FC<IBreadcrumbsProps> = ({
               label: (
                 <div className="flex items-center gap-2 px-1 py-1">
                   <div className="w-1 h-3 rounded-full bg-blue-500/50" />
-                  <span className="text-[10px] uppercase tracking-[0.1em] text-gray-400 font-bold">
+                  <span className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">
                     {opt.label}
                   </span>
                 </div>
@@ -52,9 +52,9 @@ export const Breadcrumbs: React.FC<IBreadcrumbsProps> = ({
             return {
               key: i,
               label: (
-                <div className="flex items-center justify-between group/item py-1">
-                  <div className="flex items-center gap-3">
-                    <div className="p-1.5 bg-gray-50 rounded-lg group-hover/item:bg-blue-50 transition-colors duration-200">
+                <div className="flex items-center justify-between group/item py-1 relative">
+                  <div className="flex items-center gap-3 relative">
+                    <div className="p-1.5 bg-gray-50 rounded-lg group-hover/item:bg-blue-50 transition-colors duration-200 relative z-[1]">
                       <span className="text-blue-500/70 group-hover/item:text-blue-600 transition-colors">
                         {opt.icon || <Folder size={14} />}
                       </span>
