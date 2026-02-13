@@ -36,16 +36,19 @@ const STATUS_CONFIG: Record<string, any> = {
     label: "Согласование",
     icon: <Eye size={14} />,
     gradient: "from-emerald-500 to-emerald-600",
+    apiUrl: ApiRoutes.GET_INTERNAL_TO_APPROVE,
   },
   ["to-sign"]: {
     label: "На подпись",
     icon: <Loader size={14} />,
     gradient: "from-rose-500 to-rose-600",
+    apiUrl: ApiRoutes.GET_INTERNAL_TO_SIGN,
   },
   sent: {
     label: "Отправлено",
     icon: <Handshake size={14} />,
     gradient: "from-indigo-500 to-indigo-600",
+    apiUrl: ApiRoutes.GET_INTERNAL_OUTGOING,
   },
   completed: {
     label: "Завершено",
@@ -63,6 +66,12 @@ const STATUS_CONFIG: Record<string, any> = {
     icon: <FileEdit size={14} />,
     gradient: "from-gray-500 to-gray-600",
   },
+};
+
+const REGISTRY_STATUS_MAP: Record<string, string[]> = {
+  incoming: ["analysis", "completed"],
+  outgoing: ["to-approve", "to-sign", "sent"],
+  default: ["draft", "in-progress", "completed"],
 };
 
 interface NewRegistryProps {
@@ -86,19 +95,19 @@ export const NewRegistry = ({
   // --- ЛОГИКА ИЗ СТАРОГО RegistryTable ---
   const { params: searchParams, setParams } = useDynamicSearchParams();
 
-  const currentTab =
-    searchParams.status ||
-    (type === "internal-incoming"
-      ? "analysis"
-      : type === "internal-outgoing"
-        ? "sent"
-        : type === "internal-draft"
-          ? "draft"
-          : type === "internal-to-sign"
-            ? "to-sign"
-            : type === "internal-to-approve"
-              ? "to-approve"
-              : "draft");
+  const activeStatusKeys = useMemo(() => {
+    if (type.includes("incoming")) return REGISTRY_STATUS_MAP["incoming"];
+    if (type.includes("outgoing")) return REGISTRY_STATUS_MAP["outgoing"];
+    return REGISTRY_STATUS_MAP["default"];
+  }, [type]);
+
+  const currentTab = searchParams.status || activeStatusKeys[0];
+
+  const fetchUrl = useMemo(() => {
+    const configUrl = STATUS_CONFIG[currentTab]?.apiUrl;
+
+    return configUrl || url;
+  }, [currentTab, url]);
 
   // Запрос счетчиков (для табов)
   const { data: countersData } = useGetQuery({
@@ -108,7 +117,7 @@ export const NewRegistry = ({
 
   // Основной запрос данных
   const { data: responseData } = useGetQuery({
-    url,
+    url: fetchUrl,
     params: {
       ...extraParams,
       ...searchParams,
@@ -124,23 +133,23 @@ export const NewRegistry = ({
 
   console.log(responseData);
 
-  // Формируем конфиг табов на основе данных счетчиков и конфига
   const statusTabs = useMemo(() => {
-    // Здесь можно пробежаться по ключам counts или задать жесткий список
-    return Object.keys(STATUS_CONFIG)
+    return activeStatusKeys
       .map((key) => {
-        if (key === "default") return null;
-        // Если для этого типа (type) такой статус не актуален, можно отфильтровать
+        const config = STATUS_CONFIG[key];
+
+        if (!config) return null;
+
         return {
           id: key,
-          label: STATUS_CONFIG[key].label,
+          label: config.label,
+          icon: config.icon,
+          gradient: config.gradient,
           count: counts[key] || 0,
-          icon: STATUS_CONFIG[key].icon,
-          gradient: STATUS_CONFIG[key].gradient,
         };
       })
       .filter(Boolean);
-  }, [counts]);
+  }, [counts, activeStatusKeys]);
 
   // Обработчики
   const handleTabChange = (statusId: string) => {

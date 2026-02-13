@@ -288,27 +288,7 @@ export const AppRouter = () => {
                         //   type="internal-drafts"
                         //   createButtonText="Добавить письмо"
                         // />
-                        <NewCorrespondenceTableWrapper
-                          type="internal-drafts"
-                        />
-                      }
-                    />
-                  </Route>
-                  <Route path="to-sign">
-                    <Route
-                      index
-                      element={
-                        // <CorrespondenceTableWrapper type="internal-to-sign" />
-                        <NewCorrespondenceTableWrapper type="internal-to-sign" />
-                      }
-                    />
-                  </Route>
-                  <Route path="to-approve">
-                    <Route
-                      index
-                      element={
-                        // <CorrespondenceTableWrapper type="internal-to-approve" />
-                        <NewCorrespondenceTableWrapper type="internal-to-approve" />
+                        <NewCorrespondenceTableWrapper type="internal-drafts" />
                       }
                     />
                   </Route>
