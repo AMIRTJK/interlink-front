@@ -1,17 +1,16 @@
-/* 1. Стилизуем внешний контейнер Dropdown, чтобы блюр был сразу */
 .custom-registry-dropdown {
   background-color: rgba(
     255,
     255,
     255,
     0.1
-  ) !important; /* Увеличил плотность для стабильности */
+  ) !important; 
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
-  overflow: hidden; /* Чтобы блюр не вылезал за границы */
+  overflow: hidden; 
 }
 
 /* Контейнер выпадающего меню */
@@ -29,7 +28,7 @@
   display: flex;
   align-items: center;
   transition: all 0.2s ease;
-  background: transparent !important; /* Чтобы не перекрывать блюр */
+  background: transparent !important; 
 }
 
 /* Ховер на элементы (легкое подсвечивание) */
@@ -37,9 +36,8 @@
   background-color: rgba(0, 55, 175, 0.05) !important;
 }
 
-/* Базовый цвет для всех иконок в меню, чтобы они не становились белыми */
 .custom-registry-dropdown .ant-dropdown-menu-item .anticon {
-  transition: color 0.2s ease; /* Плавный переход цвета */
+  transition: color 0.2s ease;
 }
 
 .custom-registry-dropdown
@@ -60,9 +58,164 @@
   background-color: rgba(0, 0, 0, 0.06);
 }
 
-/* Стили текста и иконок остаются прежними */
 .custom-registry-dropdown .ant-dropdown-menu-title-content {
   font-size: 16px;
   font-weight: 400;
   color: #252525;
+}
+
+/* --- MoveToFolderModal Styles --- */
+.folder-tree-premium {
+  background: transparent !important;
+}
+
+/* Центрирование всей строки дерева */
+.folder-tree-premium .ant-tree-treenode {
+  display: flex !important;
+  align-items: center !important;
+  padding: 2px 0 !important;
+  width: 100% !important;
+}
+
+/* Центрирование шеврона (стрелочки) */
+.folder-tree-premium .ant-tree-switcher {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 24px !important;
+  height: 36px !important;
+  line-height: normal !important;
+  margin: 0 !important;
+}
+
+.folder-tree-premium .ant-tree-switcher-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.folder-tree-premium .ant-tree-switcher_open .ant-tree-switcher-icon {
+  transform: rotate(90deg) !important;
+}
+
+/* Контейнер иконки и текста */
+.folder-tree-premium .ant-tree-node-content-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 !important;
+  padding: 0 10px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  transition: all 0.2s ease !important;
+  margin: 0 4px !important;
+  background: transparent !important;
+}
+
+/* Общий контейнер для иконки и заголовка */
+.folder-tree-premium .ant-tree-node-content-wrapper .ant-tree-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px; 
+}
+
+/* Фикс для иконки */
+.folder-tree-premium .ant-tree-iconEle {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
+  height: 36px !important; 
+  margin: 0 !important;
+}
+
+.folder-tree-premium .ant-tree-iconEle svg {
+  margin-top: 2px; 
+}
+
+/* Текст папки */
+.folder-tree-premium .ant-tree-title {
+  font-weight: 500 !important;
+  font-size: 13.5px !important;
+  color: #374151 !important;
+  height: 36px !important;
+  line-height: 36px !important;
+}
+
+/* Состояние при выборе */
+.folder-tree-premium .ant-tree-node-selected {
+  background-color: #ffffff !important;
+  box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.12) !important;
+  border: none !important; 
+}
+
+.folder-tree-premium .ant-tree-node-selected .ant-tree-title {
+  color: #2563eb !important;
+}
+
+/* Удаление стандартных обводок и фокусов + Hover эффект (Indigo) */
+.folder-tree-premium .ant-tree-node-content-wrapper:hover {
+  background-color: rgba(79, 70, 229, 0.06) !important;
+}
+
+.folder-tree-premium .ant-tree-node-content-wrapper:hover .ant-tree-title,
+.folder-tree-premium .ant-tree-node-content-wrapper:hover .ant-tree-iconEle svg {
+  color: #4f46e5 !important;
+}
+
+.folder-tree-premium .ant-tree-node-content-wrapper:focus,
+.folder-tree-premium .ant-tree-node-selected,
+.folder-tree-premium .ant-tree-treenode:focus,
+.folder-tree-premium .ant-tree-node-content-wrapper:active,
+.folder-tree-premium *:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Вертикальные направляющие линии  */
+.folder-tree-premium .ant-tree-indent-unit {
+  position: relative;
+  width: 24px !important;
+}
+
+.folder-tree-premium .ant-tree-indent-unit::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 11px;
+  width: 2px;
+  border-radius: 10px;
+  background: #e5e7eb;
+  opacity: 0.4;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Эффект свечения и градиента по уровням вложенности */
+.folder-tree-premium .ant-tree-treenode:nth-child(6n+1) .ant-tree-indent-unit::before { 
+  background: linear-gradient(to bottom, #60a5fa, #3b82f6, #60a5fa); 
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+} 
+.folder-tree-premium .ant-tree-treenode:nth-child(6n+2) .ant-tree-indent-unit::before { 
+  background: linear-gradient(to bottom, #a78bfa, #8b5cf6, #a78bfa); 
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.2);
+}
+.folder-tree-premium .ant-tree-treenode:nth-child(6n+3) .ant-tree-indent-unit::before { 
+  background: linear-gradient(to bottom, #f472b6, #ec4899, #f472b6); 
+  box-shadow: 0 0 8px rgba(236, 72, 153, 0.2);
+}
+.folder-tree-premium .ant-tree-treenode:nth-child(6n+4) .ant-tree-indent-unit::before { 
+  background: linear-gradient(to bottom, #fb923c, #f97316, #fb923c); 
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.2);
+}
+.folder-tree-premium .ant-tree-treenode:nth-child(6n+5) .ant-tree-indent-unit::before { 
+  background: linear-gradient(to bottom, #2dd4bf, #14b8a6, #2dd4bf); 
+  box-shadow: 0 0 8px rgba(20, 184, 166, 0.2);
+}
+
+/* Усиливаем яркость при ховере */
+.folder-tree-premium .ant-tree-treenode:hover .ant-tree-indent-unit::before {
+  opacity: 0.8;
+  width: 2.5px;
 }

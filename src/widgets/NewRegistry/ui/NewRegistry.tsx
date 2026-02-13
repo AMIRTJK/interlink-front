@@ -15,6 +15,7 @@ import { RegistryLayout } from "./RegistryLayout";
 import { AppRoutes } from "@shared/config";
 import { useRegistryConfig } from "../lib";
 import { IBreadcrumbItem } from "@shared/ui";
+import { MoveToFolderModal } from "./MoveToFolderModal";
 
 const STATUS_CONFIG: Record<string, any> = {
   draft: {
@@ -101,6 +102,14 @@ export const NewRegistry = ({
 
   const fieldConfig = useRegistryConfig(type);
   const { params: searchParams, setParams } = useDynamicSearchParams();
+
+  const [isMoveModalOpen, setIsMoveModalOpen] = React.useState(false);
+  const [movingDocId, setMovingDocId] = React.useState<number | null>(null);
+
+  const handleOpenMoveModal = React.useCallback((id: number) => {
+    setMovingDocId(id);
+    setIsMoveModalOpen(true);
+  }, []);
 
   const isInternal = type.startsWith("internal");
 
@@ -300,26 +309,39 @@ export const NewRegistry = ({
   };
 
   return (
-    <RegistryLayout
-      documents={documents}
-      meta={meta}
-      tabs={statusTabs}
-      activeTabId={currentTab}
-      createButtonText={createButtonText}
-      onTabChange={handleTabChange}
-      onPageChange={handlePageChange}
-      onFilterApply={handleFilterApply}
-      onFilterReset={handleFilterReset}
-      onCardClick={handleCardClick}
-      onCreate={handleCreate}
-      currentFilters={{
-        incomingNumber: searchParams.incomingNumber,
-        outgoingNumber: searchParams.outgoingNumber,
-        sender: searchParams.sender,
-      }}
-      statusConfig={STATUS_CONFIG}
-      fieldConfig={fieldConfig}
-      breadcrumbs={breadcrumbs}
-    />
+    <div className="relative">
+      <RegistryLayout
+        documents={documents}
+        meta={meta}
+        tabs={statusTabs}
+        activeTabId={currentTab}
+        createButtonText={createButtonText}
+        onTabChange={handleTabChange}
+        onPageChange={handlePageChange}
+        onFilterApply={handleFilterApply}
+        onFilterReset={handleFilterReset}
+        onCardClick={handleCardClick}
+        onCreate={handleCreate}
+        currentFilters={{
+          incomingNumber: searchParams.incomingNumber,
+          outgoingNumber: searchParams.outgoingNumber,
+          sender: searchParams.sender,
+        }}
+        statusConfig={STATUS_CONFIG}
+        fieldConfig={{
+          ...fieldConfig,
+          getActions: (record: any) => fieldConfig.getActions(record, handleOpenMoveModal),
+        }}
+        breadcrumbs={breadcrumbs}
+      />
+
+      <MoveToFolderModal
+        isOpen={isMoveModalOpen}
+        onClose={() => setIsMoveModalOpen(false)}
+        documentId={movingDocId}
+        folders={folders}
+        isInternal={isInternal}
+      />
+    </div>
   );
 };

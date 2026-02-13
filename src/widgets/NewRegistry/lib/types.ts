@@ -23,6 +23,6 @@ export interface RegistryConfig {
   secondary: FieldDefinition;
   badges: BadgeDefinition[];
   // Функция, возвращающая пункты меню для конкретной записи
-  getActions: (record: any) => MenuProps["items"];
+  getActions: (record: any, onMove?: (id: number) => void) => MenuProps["items"];
   filters: IFilterItem[];
 }

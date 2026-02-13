@@ -747,3 +747,56 @@
   color: #ff4d4f !important;
   background-color: #fff1f0 !important;
 }
+/* === Sidebar Tree Premium Guide Lines === */
+
+.sidebar-tree-guide::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  border-radius: 10px;
+  background: #e5e7eb;
+  opacity: 0.5;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-tree-guide.guide-blue::before { 
+  background: linear-gradient(to bottom, #60a5fa, #3b82f6, #60a5fa); 
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+.sidebar-tree-guide.guide-purple::before { 
+  background: linear-gradient(to bottom, #a78bfa, #8b5cf6, #a78bfa); 
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+}
+.sidebar-tree-guide.guide-pink::before { 
+  background: linear-gradient(to bottom, #f472b6, #ec4899, #f472b6); 
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.3);
+}
+.sidebar-tree-guide.guide-orange::before { 
+  background: linear-gradient(to bottom, #fb923c, #f97316, #fb923c); 
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.3);
+}
+.sidebar-tree-guide.guide-teal::before { 
+  background: linear-gradient(to bottom, #2dd4bf, #14b8a6, #2dd4bf); 
+  box-shadow: 0 0 10px rgba(20, 184, 166, 0.3);
+}
+.sidebar-tree-guide.guide-indigo::before { 
+  background: linear-gradient(to bottom, #818cf8, #6366f1, #818cf8); 
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+.sidebar-tree-guide:hover::before {
+  opacity: 1;
+  width: 3px;
+  box-shadow: 0 0 15px currentColor; /* Будет использовать цвет градиента если задать currentColor в анимации */
+}
+
+/* Фикс для ховера на конкретные цвета */
+.sidebar-tree-guide.guide-blue:hover::before { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+.sidebar-tree-guide.guide-purple:hover::before { box-shadow: 0 0 15px rgba(139, 92, 246, 0.5); }
+.sidebar-tree-guide.guide-pink:hover::before { box-shadow: 0 0 15px rgba(236, 72, 153, 0.5); }
+.sidebar-tree-guide.guide-orange:hover::before { box-shadow: 0 0 15px rgba(249, 115, 22, 0.5); }
+.sidebar-tree-guide.guide-teal:hover::before { box-shadow: 0 0 15px rgba(20, 184, 166, 0.5); }
+.sidebar-tree-guide.guide-indigo:hover::before { box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
