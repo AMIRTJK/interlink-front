@@ -127,14 +127,14 @@ export const FolderTreeItem: React.FC<IProps> = ({ item, depth = 0, onSelect }) 
           >
              <div 
                 className={cn(
-                    "mt-2 pl-4 border-l border-dotted ml-5 pb-2 pr-1",
+                    "mt-2 pl-6 relative ml-5 pb-2 pr-1 sidebar-tree-guide",
                     [
-                        "border-blue-400",
-                        "border-purple-400",
-                        "border-pink-400", 
-                        "border-orange-400",
-                        "border-teal-400",
-                        "border-indigo-400"
+                        "guide-blue",
+                        "guide-purple",
+                        "guide-pink", 
+                        "guide-orange",
+                        "guide-teal",
+                        "guide-indigo"
                     ][depth % 6]
                 )}
              >

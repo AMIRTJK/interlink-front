@@ -175,15 +175,15 @@
   position: absolute;
   top: 4px;
   bottom: 4px;
-  left: 11px; /* Смещение для идеальной центровки под шевроном */
+  left: 11px;
   width: 2px;
   border-radius: 10px;
-  background: #e5e7eb; /* Базовый цвет */
+  background: #e5e7eb;
   opacity: 0.4;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Эффект свечения и градиента для направляющих по уровням вложенности */
+/* Эффект свечения и градиента по уровням вложенности */
 .folder-tree-premium .ant-tree-treenode:nth-child(6n+1) .ant-tree-indent-unit::before { 
   background: linear-gradient(to bottom, #60a5fa, #3b82f6, #60a5fa); 
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
@@ -204,12 +204,8 @@
   background: linear-gradient(to bottom, #2dd4bf, #14b8a6, #2dd4bf); 
   box-shadow: 0 0 8px rgba(20, 184, 166, 0.2);
 }
-.folder-tree-premium .ant-tree-treenode:nth-child(6n+6) .ant-tree-indent-unit::before { 
-  background: linear-gradient(to bottom, #818cf8, #6366f1, #818cf8); 
-  box-shadow: 0 0 8px rgba(99, 102, 241, 0.2);
-}
 
-/* Усиливаем яркость активной ветки при ховере */
+/* Усиливаем яркость при ховере */
 .folder-tree-premium .ant-tree-treenode:hover .ant-tree-indent-unit::before {
   opacity: 0.8;
   width: 2.5px;
