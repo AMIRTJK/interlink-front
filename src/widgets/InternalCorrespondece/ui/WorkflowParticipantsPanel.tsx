@@ -162,7 +162,7 @@ const FullHistoryModal = ({
           {filteredSigners.length > 0 && (
             <div>
               <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1">
-                Подписанты ({filteredSigners.length})
+                Подписывающие ({filteredSigners.length})
               </div>
               {filteredSigners.map((s: any) =>
                 renderParticipantRow(s, "signer"),
@@ -580,7 +580,7 @@ export const WorkflowParticipantsPanel = ({
             <div className="mb-2">
               {!isCollapsed && (
                 <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1">
-                  Подписанты
+                  Подписывающие
                 </div>
               )}
               {signers.map((s: any, idx: number) =>
