@@ -207,7 +207,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
               subtitle: item.position || "Сотрудник",
               tag: item.position || "Сотрудник",
             })),
-          multiple: false,
+          multiple: true,
         };
       case "approvers":
         return {
