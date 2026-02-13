@@ -33,6 +33,7 @@ export const SignatureDetailsModal = ({
       }
       centered
       width={500}
+      zIndex={2000}
     >
       <div className="flex flex-col gap-4 py-2">
         {/* Блок пользователя */}
