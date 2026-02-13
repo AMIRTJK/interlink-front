@@ -47,12 +47,12 @@ export const NewCorrespondenceTableWrapper = ({
       };
     }
 
-    if (type === "internal-outgoing") {
-      return {
-        params: { ...currentParams },
-        url: ApiRoutes.GET_INTERNAL_OUTGOING,
-      };
-    }
+    // if (type === "internal-outgoing") {
+    //   return {
+    //     params: { ...currentParams },
+    //     url: ApiRoutes.GET_INTERNAL_OUTGOING,
+    //   };
+    // }
 
     if (type === "internal-drafts") {
       return {
@@ -61,19 +61,19 @@ export const NewCorrespondenceTableWrapper = ({
       };
     }
 
-    if (type === "internal-to-sign") {
-      return {
-        params: currentParams,
-        url: ApiRoutes.GET_INTERNAL_TO_SIGN,
-      };
-    }
+    // if (type === "internal-to-sign") {
+    //   return {
+    //     params: currentParams,
+    //     url: ApiRoutes.GET_INTERNAL_TO_SIGN,
+    //   };
+    // }
 
-    if (type === "internal-to-approve") {
-      return {
-        params: currentParams,
-        url: ApiRoutes.GET_INTERNAL_TO_APPROVE,
-      };
-    }
+    // if (type === "internal-to-approve") {
+    //   return {
+    //     params: currentParams,
+    //     url: ApiRoutes.GET_INTERNAL_TO_APPROVE,
+    //   };
+    // }
 
     if (folderId) {
       return {
