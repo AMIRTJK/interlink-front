@@ -93,12 +93,18 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
       onCancel={onClose}
       onOk={handleMove}
       confirmLoading={isPending}
-      okButtonProps={{ disabled: !selectedFolder }}
-      okText="Переместить"
-      cancelText="Отмена"
+      okButtonProps={{ 
+        disabled: !selectedFolder,
+        className: "premium-ok-button"
+      }}
+      cancelButtonProps={{
+        className: "premium-cancel-button"
+      }}
+      okText="Переместить документ"
+      cancelText="Отменить"
       title={renderHeader()}
       centered
-      width={460}
+      width={520}
       className="premium-modal"
       modalRender={(modal) => (
         <AnimatePresence>
@@ -129,7 +135,7 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
             />
           </div>
 
-          <div className="max-h-[350px] overflow-y-auto pr-1 custom-scrollbar min-h-[120px] bg-gray-50/30 rounded-xl p-2 border border-dashed border-gray-100">
+          <div className="max-h-[450px] overflow-y-auto pr-1 custom-scrollbar min-h-[150px] bg-gray-50/40 rounded-2xl p-3 border border-dashed border-gray-200/60 transition-all">
             {treeData.length > 0 ? (
               <Tree
                 showIcon
