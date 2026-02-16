@@ -34,7 +34,7 @@
 :root {
   --ck-content-font-family: "Lato";
   --ck-sidebar-width: 270px;
-  --ck-editor-height: 700px;
+  --ck-editor-height: 650px;
 }
 
 .main-container {
@@ -70,39 +70,43 @@
 
 /* 2. Стилизация контейнера тулбара (белый, круглый, плавающий) */
 .editor-container__toolbar {
-  /* Позиционирование */
-  position: absolute;
-  top: 15px; /* Отступ от верхнего края редактора */
-  left: 50%; /* Центрирование по горизонтали */
-  transform: translateX(-50%) translateY(-20px); /* Сдвигаем влево для центра и чуть вверх для старта анимации */
-  z-index: 100; /* Чтобы был поверх текста */
+  /* Делаем блок обычным (не плавающим) */
+  position: relative;
+  top: 0;
+  left: 0;
+  transform: none;
 
-  /* Внешний вид "капсулы" */
-  background-color: #ffffff;
-  border-radius: 24px; /* Сильное закругление */
-  border: 1px solid #e0e0e0; /* Аккуратная рамка */
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15); /* Мягкая тень */
-  padding: 4px 10px; /* Отступы внутри капсулы */
-  width: auto; /* Ширина по содержимому */
+  /* Растягиваем на всю ширину */
+  width: 100%;
+
+  /* Стилизация фона и границ */
+  background-color: #f8f9fa; /* Светло-серый фон, как у стандартных редакторов */
+  border-bottom: 1px solid #c4c4c4; /* Линия разделителя снизу */
+  border-radius: 24px 24px 0 0; /* Скругление только сверху, чтобы совпадало с контейнером */
+
+  /* Отступы и выравнивание */
+  padding: 8px 16px;
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap; /* Чтобы иконки переносились на новую строку, если их много */
+  align-items: center;
+  justify-content: flex-start; /* Выравнивание по левому краю */
 
-  /* Состояние "Скрыто" */
-  opacity: 0;
-  visibility: hidden; /* Чтобы сквозь него можно было кликать, пока он невидим */
-  pointer-events: none;
+  /* Видимость (всегда видим) */
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 10;
 
-  /* Плавная анимация */
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: none; /* Убираем тень от "пузыря" */
 }
 
 /* 3. Состояние при наведении на редактор */
-.editor-container:hover .editor-container__toolbar {
+/* .editor-container:hover .editor-container__toolbar {
   opacity: 1;
   visibility: visible;
-  pointer-events: auto; /* Возвращаем возможность кликать */
-  transform: translateX(-50%) translateY(0); /* Плавно опускается на место */
-}
+  pointer-events: auto; 
+  transform: translateX(-50%) translateY(0); 
+} */
 
 /* 4. Небольшая чистка внутренних стилей CKEditor, чтобы они не перекрывали нашу капсулу */
 .editor-container__toolbar .ck.ck-toolbar {
