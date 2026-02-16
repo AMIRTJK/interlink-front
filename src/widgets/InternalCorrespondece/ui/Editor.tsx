@@ -253,7 +253,7 @@ export const Editor = ({
             format: "A4",
             margin_top: "20mm",
             margin_right: "15mm",
-            margin_bottom: "20mm",
+            margin_bottom: "24mm",
             margin_left: "30mm",
             page_orientation: "portrait",
           },
@@ -433,7 +433,8 @@ export const Editor = ({
         },
         pagination: {
           pageWidth: "21cm",
-          pageHeight: "33.7cm",
+          // pageHeight: "33.7cm",
+          pageHeight: "29.7cm",
           pageMargins: {
             top: "20mm",
             bottom: "20mm",
