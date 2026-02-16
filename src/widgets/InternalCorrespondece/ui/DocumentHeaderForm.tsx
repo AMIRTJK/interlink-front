@@ -131,11 +131,6 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
     const normalClass = `${textSecondary} text-[#4a5565]! hover:text-gray-400! dark:hover:text-gray-300!`;
 
     if (list.length === 0) {
-      const styledIcon = hasError
-        ? React.cloneElement(emptyIcon as React.ReactElement, {
-            style: { color: errorColor, fontSize: "14px" },
-          })
-        : emptyIcon;
       return (
         <Button
           antdIcon={emptyIcon}
