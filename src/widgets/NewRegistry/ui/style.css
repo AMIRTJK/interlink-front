@@ -186,7 +186,6 @@
   background-color: rgba(79, 70, 229, 0.05) !important;
 }
 
-/* Направляющие линии в модалке */
 .folder-tree-premium .ant-tree-indent-unit {
   position: relative;
   width: 28px !important;
@@ -223,41 +222,52 @@
   position: relative !important;
 }
 
-/* Визуальный путь (Path Trace) - Максимальная выразительность */
 .premium-breadcrumb-dropdown .ant-dropdown-menu-item::before {
   content: "";
   position: absolute;
-  left: 21px; /* Центр под иконкой */
+  left: 21px;
   top: 0;
   bottom: 0;
   width: 1.5px;
-  background: #94a3b8; /* Более насыщенный серый (slate-400) */
-  opacity: 0.8; /* Теперь видно отчетливо и без ховера */
+  background: #94a3b8;
+  opacity: 0.8;
   z-index: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+```css
 }
 
-/* При наведении: линия становится интенсивнее и ярче */
 .premium-breadcrumb-dropdown .ant-dropdown-menu-item:hover::before {
-  background: #2563eb !important; /* Ярко-синий (blue-600) */
+  background: #2563eb !important;
   opacity: 1 !important;
   width: 2px !important;
   box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
 }
 
-/* Убираем разрывы между пунктами для эффекта цельной линии */
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item + .ant-dropdown-menu-item::before {
+  top: -8px;
+}
+
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:first-of-type::before {
+  top: 18px;
+}
+
+.premium-breadcrumb-dropdown .ant-dropdown-menu-item:hover::before {
+  background: #2563eb !important;
+  opacity: 1 !important;
+  width: 2px !important;
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+}
+
 .premium-breadcrumb-dropdown .ant-dropdown-menu-item + .ant-dropdown-menu-item::before {
   top: -8px; 
 }
 
-/* Для первого элемента в списке инвертируем отступ сверху */
 .premium-breadcrumb-dropdown .ant-dropdown-menu-item:first-of-type::before {
-  top: 18px; /* Начинаем от центра первой иконки */
+  top: 18px;
 }
 
-/* Для последнего элемента обрезаем снизу */
 .premium-breadcrumb-dropdown .ant-dropdown-menu-item:last-of-type::before {
-  bottom: 18px; /* Заканчиваем на центре последней иконки */
+  bottom: 18px;
 }
 
 .premium-breadcrumb-dropdown .ant-dropdown-menu-item:hover {
@@ -277,7 +287,6 @@
   background: rgba(0, 0, 0, 0.04) !important;
 }
 
-/* Каскадная анимация появления (для красоты) */
 .premium-breadcrumb-dropdown .ant-dropdown-menu-item,
 .premium-breadcrumb-dropdown .ant-dropdown-menu-item-group {
   animation: breadcrumbItemFade 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
