@@ -39,6 +39,7 @@ const FullHistoryModal = ({
   workflowData,
   initialTab = "participants",
   onSign,
+  onApprove,
   isSigning,
   currentUserId,
   onShowSignature,
@@ -48,6 +49,7 @@ const FullHistoryModal = ({
   workflowData: any;
   initialTab?: string;
   onSign: () => void;
+  onApprove: () => void;
   isSigning: boolean;
   currentUserId: string | number | null;
   onShowSignature: (e: any, item: any) => void;
@@ -162,6 +164,8 @@ const FullHistoryModal = ({
               htmlType="button"
               type="primary"
               size="small"
+              onClick={onApprove}
+              loading={isSigning}
               disabled={item.status !== "pending"}
               className="bg-green-600 hover:bg-green-500 border-green-600"
             >
@@ -294,6 +298,7 @@ export const WorkflowParticipantsPanel = ({
   isCollapsed,
   toggleCollapse,
   onSign,
+  onApprove,
   isSigning,
   currentUserId,
 }: {
@@ -301,6 +306,7 @@ export const WorkflowParticipantsPanel = ({
   isCollapsed: boolean;
   toggleCollapse: () => void;
   onSign: () => void;
+  onApprove: () => void;
   isSigning: boolean;
   currentUserId: string | number | null;
 }) => {
@@ -505,6 +511,9 @@ export const WorkflowParticipantsPanel = ({
             )}
             {role === "approver" && isCurrentUser && isPending && (
               <Button
+                onClick={onApprove}
+                disabled={status !== "pending"}
+                loading={isSigning}
                 type="primary"
                 size="small"
                 className="bg-blue-600! hover:bg-blue-500!"
@@ -691,6 +700,7 @@ export const WorkflowParticipantsPanel = ({
         isSigning={isSigning}
         currentUserId={currentUserId}
         onShowSignature={openSignatureModal}
+        onApprove={onApprove}
       />
       <SignatureDetailsModal
         isOpen={signatureModal.isOpen}

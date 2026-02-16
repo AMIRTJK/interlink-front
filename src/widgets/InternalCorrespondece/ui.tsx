@@ -73,6 +73,21 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     preload: true,
   });
 
+  const workflowData = useMemo(() => {
+    if (!rawWorkflowData) return null;
+    return generateMockWorkflow(rawWorkflowData);
+  }, [rawWorkflowData]);
+
+  const currentUserApprovalId = useMemo(() => {
+    const approvals = workflowData?.data?.approvals || [];
+
+    const foundApproval = approvals.find(
+      (item: any) => String(item.approver?.id) === String(currentUserId),
+    );
+
+    return foundApproval ? String(foundApproval.id) : "";
+  }, [workflowData, currentUserId]);
+
   const isSigned = useMemo(() => {
     const signatures = rawWorkflowData?.data?.signatures || [];
     if (!signatures || !Array.isArray(signatures)) {
@@ -109,6 +124,22 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       preloadConditional: ["signatures.confirm"],
     });
 
+  const { mutate: approvalsConfirm, isPending: isApprovalsConfirming } =
+    useMutationQuery<any>({
+      url: ApiRoutes.INTERNAL_APPROVALS_CONFIRM.replace(
+        ":id",
+        String(currentUserApprovalId || ""),
+      ),
+      method: "PATCH",
+      messages: {
+        invalidate: [
+          ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", String(id || "")),
+        ],
+      },
+      preload: true,
+      preloadConditional: ["internal_correspondence.approve"],
+    });
+
   const { mutateAsync: signaturesPayloadAsync, isPending: isPayloadLoading } =
     useMutationQuery<any>({
       url: ApiRoutes.INTERNAL_SIGNATURES_PAYLOAD.replace(
@@ -138,8 +169,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     });
 
   const handleSign = async () => {
-    if (!canSign) return;
-
     try {
       const payloadData = await signaturesPayloadAsync({ action: "sign" });
 
@@ -162,18 +191,23 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     }
   };
 
+  const handleApprove = async () => {
+    if (!canSign) return;
+
+    try {
+      // const payloadData = await signaturesPayloadAsync({ action: "sign" });
+
+      approvalsConfirm({
+        status: "approved",
+      });
+    } catch (error) {
+      console.error("Ошибка при процессе подписания:", error);
+    }
+  };
+
   const handleSendClick = () => {
     sendCorrespondence({});
   };
-
-  const workflowData = useMemo(() => {
-    // В реальном проекте здесь будет просто: return rawWorkflowData;
-    // Но для демонстрации мы мержим или подменяем
-    if (!rawWorkflowData) return null;
-    return generateMockWorkflow(rawWorkflowData);
-  }, [rawWorkflowData]);
-
-  console.log(workflowData);
 
   const handleReply = () => {
     close();
@@ -333,7 +367,10 @@ export const InternalCorrespondece: React.FC<IProps> = ({
                 setIsParticipantsPanelCollapsed(!isParticipantsPanelCollapsed)
               }
               onSign={handleSign}
-              isSigning={isPayloadLoading || isConfirming}
+              onApprove={handleApprove}
+              isSigning={
+                isPayloadLoading || isConfirming || isApprovalsConfirming
+              }
               currentUserId={currentUserId}
             />
           </div>
