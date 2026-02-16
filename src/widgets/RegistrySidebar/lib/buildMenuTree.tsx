@@ -9,7 +9,7 @@ import {
 } from "../model";
 import { buildFolderPath, canHaveSubfolders } from "./folderPathUtils";
 import {
-  getChildFolders,
+  groupFoldersByParent,
   getRootFolders,
   sortMenuItems,
 } from "./folderTreeUtils";
@@ -31,6 +31,8 @@ export const buildMenuTree = ({
   onDrop,
 }: IBuildMenuTreeParams): MenuItem[] => {
   const dragHandlers = createDragHandlers();
+  const groupedFolders = groupFoldersByParent(folders);
+
   const buildFullItem = (
     folder: IFolder,
     visited = new Set<number>(),
@@ -45,7 +47,7 @@ export const buildMenuTree = ({
     const folderKey = definition ? definition.key : `folder-${folder.id}`;
     const folderPath = buildFolderPath(folder, folders, definitions, definition);
 
-    const childFolders = getChildFolders(folder.id, folders);
+    const childFolders = groupedFolders.get(folder.id) || [];
     const nestedFolders = childFolders
       .map((f) => buildFullItem(f, new Set(visited), depth + 1))
       .filter(Boolean) as MenuItem[];
