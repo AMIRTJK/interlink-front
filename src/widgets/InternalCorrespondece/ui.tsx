@@ -338,8 +338,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       />
 
       <div className="flex w-full justify-between">
-        <main className="flex-1 mx-auto max-w-[1000px]  md:py-2 transition-all duration-300">
-          <div className="flex flex-col gap-4 ml-20">
+        <main className="flex-1 mx-auto max-w-250  md:py-2 transition-all duration-300">
+          <div className="flex flex-col gap-4 ml-10 mr-10">
             {/* <div className="max-w-4xl flex flex-col gap-4 mx-auto px-8 py-12"> */}
             <DocumentHeaderForm
               isDarkMode={isDarkMode}
@@ -349,13 +349,31 @@ export const InternalCorrespondece: React.FC<IProps> = ({
               isIncoming={isIncoming}
               isReadOnly={isReadOnly}
             />
-            <Editor
-              onChange={setEditorBody}
-              initialContent={initialEditorContent}
-              type={type}
-              isIncoming={isIncoming}
-              isReadOnly={isReadOnly}
-            />
+
+            <div className="flex gap-3 items-stretch">
+              <ActionToolbar
+                setIsInspectorOpen={open}
+                setShowPreview={() => setIsPreviewOpen(true)}
+                handleSend={handleSendClick}
+                onSendLoading={isSending}
+                onSave={onSaveClick}
+                onSaveLoading={isCreating || isUpdating}
+                isActionsEnabled={isDraftCreated}
+                isIncoming={isIncoming}
+                isReadOnly={isReadOnly}
+                isSentStatusEnabled={afterSentStatusButton}
+              />
+
+              <div className="flex-1 min-w-0">
+                <Editor
+                  onChange={setEditorBody}
+                  initialContent={initialEditorContent}
+                  type={type}
+                  isIncoming={isIncoming}
+                  isReadOnly={isReadOnly}
+                />
+              </div>
+            </div>
           </div>
         </main>
         <If is={isDraftCreated}>
@@ -385,18 +403,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         isIncoming={isIncoming}
         isReadOnly={isReadOnly}
       />
-      <ActionToolbar
-        setIsInspectorOpen={open}
-        setShowPreview={() => setIsPreviewOpen(true)}
-        handleSend={handleSendClick}
-        onSendLoading={isSending}
-        onSave={onSaveClick}
-        onSaveLoading={isCreating || isUpdating}
-        isActionsEnabled={isDraftCreated}
-        isIncoming={isIncoming}
-        isReadOnly={isReadOnly}
-        isSentStatusEnabled={afterSentStatusButton}
-      />
+
       <Modal
         title="Предварительный просмотр"
         open={isPreviewOpen}

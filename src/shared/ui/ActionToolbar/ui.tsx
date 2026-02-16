@@ -7,8 +7,8 @@ import {
   MessageOutlined,
   SendOutlined,
 } from "@ant-design/icons";
+import { If } from "@shared/ui";
 import { ActionButton } from "./ui/ActionButton";
-import { If } from "../If";
 
 interface IProps {
   onSave?: () => void;
@@ -35,61 +35,65 @@ export const ActionToolbar: React.FC<IProps> = ({
   isReadOnly,
   isSentStatusEnabled = false,
 }) => {
-  console.log(isSentStatusEnabled);
-
   return (
     <motion.div
-      initial={{ y: 80, x: "-50%", opacity: 0 }}
-      animate={{ y: 0, x: "-50%", opacity: 1 }}
-      className="fixed bottom-20 left-1/2 z-40"
+      initial={{ x: -20, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      className="flex flex-col"
     >
-      <div className="flex items-center gap-1 px-3 py-2 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.2)] backdrop-blur-xl bg-white/90 border border-white">
+      <div className="flex flex-col flex-1 items-center justify-start gap-3 px-2 py-4 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.1)] backdrop-blur-xl bg-white/90 border border-gray-200">
         <If is={!isIncoming}>
           <ActionButton
             icon={<SaveOutlined style={{ fontSize: "18px" }} />}
-            label="Сохранить"
+            label=""
             onClick={onSave}
+            tooltip="Сохранить"
             loading={onSaveLoading}
             disabled={isReadOnly}
           />
         </If>
+
         <ActionButton
           icon={<EyeOutlined style={{ fontSize: "18px" }} />}
-          label="Просмотр"
+          label=""
           onClick={() => setShowPreview(true)}
+          tooltip="Предварительный просмотр"
         />
 
         <ActionButton
           icon={<MessageOutlined style={{ fontSize: "18px" }} />}
-          label="Инспектор"
+          label=""
           onClick={() => setIsInspectorOpen(true)}
           disabled={!isActionsEnabled}
+          tooltip="Инспектор"
         />
+
         <If is={!isIncoming}>
-          <Button
+          <ActionButton
+            icon={<SendOutlined style={{ fontSize: "18px" }} />}
+            label=""
+            disabled={!isActionsEnabled || isSentStatusEnabled || !isReadOnly}
+            loading={onSendLoading}
+            onClick={handleSend}
+            tooltip="Отправить"
+          />
+          {/* <Button
             type="primary"
-            size="large"
             loading={onSendLoading}
             disabled={!isActionsEnabled || isSentStatusEnabled || !isReadOnly}
             onClick={handleSend}
             icon={<SendOutlined style={{ transform: "rotate(-30deg)" }} />}
-            className="ml-2 rounded-full! border-none! flex! items-center! font-semibold  transition-all! duration-300! hover:brightness-110! hover:shadow-purple-300! active:scale-95!"
+            className="flex items-center justify-center rounded-xl! transition-all! duration-300! hover:brightness-110! shadow-md!"
             style={{
               background:
                 isSentStatusEnabled || !isReadOnly
                   ? "none"
                   : "linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)",
-              fontWeight: isSentStatusEnabled || !isReadOnly ? "600" : "",
+              width: "42px",
               height: "42px",
-              paddingLeft: "24px",
-              paddingRight: "24px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              padding: 0,
             }}
-          >
-            Отправить
-          </Button>
+          /> */}
         </If>
       </div>
     </motion.div>
