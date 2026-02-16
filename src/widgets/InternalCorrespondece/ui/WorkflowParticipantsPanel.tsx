@@ -243,7 +243,7 @@ const FullHistoryModal = ({
                 <div className="text-sm text-gray-700 mt-1">{doc.subject}</div>
                 <div className="mt-2">
                   <a
-                    href={`/documents/${doc.id}`}
+                    href={`/modules/correspondence/internal/incoming/${doc.id}`}
                     target="_blank"
                     rel="noreferrer"
                     className="text-xs text-blue-600 hover:underline flex items-center gap-1"
@@ -382,7 +382,7 @@ export const WorkflowParticipantsPanel = ({
 
   const renderDocumentRow = (doc: any) => (
     <Link
-      to={`/documents/${doc.id}`}
+      to={`/modules/correspondence/internal/incoming/${doc.id}`}
       key={doc.id}
       className="flex items-start gap-3 p-3 bg-blue-50/40 rounded-lg border border-blue-100 mb-2 hover:bg-blue-50 hover:shadow-sm hover:border-blue-200 transition-all cursor-pointer group no-underline"
     >
