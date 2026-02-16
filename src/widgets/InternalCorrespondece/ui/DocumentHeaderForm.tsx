@@ -69,6 +69,10 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
       recipients: selectedRecipients.map((r) => r.id),
       copy: selectedCC.map((r) => r.id),
     });
+
+    if (selectedRecipients.length > 0) {
+      form.validateFields(["recipients"]);
+    }
   }, [selectedRecipients, selectedCC, form]);
 
   const closeSelector = () => setActiveSelectorMode(null);
@@ -120,15 +124,23 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
     mode: SelectionMode,
     emptyText: string,
     emptyIcon: React.ReactNode,
+    hasError: boolean = false,
   ) => {
+    const errorColor = "#ff4d4f";
+    const errorClass = "text-red-500! dark:text-red-500!";
+    const normalClass = `${textSecondary} text-[#4a5565]! hover:text-gray-400! dark:hover:text-gray-300!`;
+
     if (list.length === 0) {
       return (
         <Button
           antdIcon={emptyIcon}
           type="text"
-          text={emptyText}
+          text={hasError ? `${emptyText} (обязательно)` : emptyText}
           onClick={() => setActiveSelectorMode(mode)}
-          className={`text-sm! ${textSecondary} text-[#4a5565]! px-0! hover:bg-transparent! hover:text-gray-400! dark:hover:text-gray-300! transition-colors!`}
+          className={`text-sm! px-0! hover:bg-transparent! transition-colors! ${
+            hasError ? errorClass : normalClass
+          }`}
+          style={hasError ? { color: errorColor } : undefined}
         />
       );
     }
@@ -215,7 +227,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           <Input />
         </Form.Item>
 
-        <Form.Item name="subject" rules={[requiredRule]} noStyle>
+        <Form.Item name="subject" rules={[requiredRule]} className="m-0!">
           <Input
             placeholder="Тема письма..."
             disabled={isIncoming || isReadOnly}
@@ -230,12 +242,18 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           className={`flex flex-wrap items-center gap-y-2 gap-x-6 text-sm ${textSecondary}`}
         >
           <div className="flex items-center min-h-[32px]">
-            {renderSelectionArea(
-              selectedRecipients,
-              "recipients",
-              "Получатель",
-              <UserOutlined style={{ fontSize: "14px" }} />,
-            )}
+            <Form.Item noStyle shouldUpdate>
+              {() => {
+                const hasError = form.getFieldError("recipients").length > 0;
+                return renderSelectionArea(
+                  selectedRecipients,
+                  "recipients",
+                  "Получатель",
+                  <UserOutlined style={{ fontSize: "14px" }} />,
+                  hasError,
+                );
+              }}
+            </Form.Item>
           </div>
 
           <div className="hidden sm:block w-px h-5 bg-gray-200 dark:bg-gray-700"></div>

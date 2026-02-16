@@ -31,6 +31,7 @@ export const generateMockWorkflow = (originalData: any) => {
   ];
 
   const realSignatures = originalData?.data?.signatures || [];
+  const realDocs = originalData?.data?.incoming.items || [];
 
   const realApprovals = (originalData?.data?.approvals || []).map(
     (item: any) => ({
@@ -41,7 +42,7 @@ export const generateMockWorkflow = (originalData: any) => {
 
   return {
     data: {
-      documents: mockDocs,
+      documents: realDocs,
       signatures: realSignatures,
       approvals: realApprovals,
     },
