@@ -1,26 +1,20 @@
 import React, { useState } from "react";
-// Импортируем иконки из Ant Design
 import {
   InboxOutlined,
   SendOutlined,
   FileTextOutlined,
-  HistoryOutlined,
   BgColorsOutlined,
   SunOutlined,
   MoonOutlined,
-  SettingOutlined,
-  SearchOutlined,
   ClockCircleOutlined,
   UserOutlined,
-  ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { ChevronLeft } from "lucide-react";
 
-// --- Types & Mocks ---
 interface NavRegistry {
   label: string;
   items: {
@@ -72,6 +66,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   );
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [showColorPicker, setShowColorPicker] = useState(false);
   const currentPreset = softMaterialPresets[0];
@@ -149,12 +144,20 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   };
 
   const handleNavigate = () => {
-    if (type === "internal-incoming") {
-      navigate("/modules/correspondence/internal/incoming");
-    } else if (type === "internal-outgoing") {
-      navigate("/modules/correspondence/internal/outgoing");
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      const pathSegments = location.pathname.split("/").filter(Boolean);
+      const internalIndex = pathSegments.indexOf("internal");
+
+      if (internalIndex !== -1 && pathSegments[internalIndex + 1]) {
+        const registryPath =
+          "/" + pathSegments.slice(0, internalIndex + 2).join("/");
+        navigate(registryPath);
+      } else {
+        navigate("/modules/correspondence/internal/incoming");
+      }
     }
-    return null;
   };
 
   return (
