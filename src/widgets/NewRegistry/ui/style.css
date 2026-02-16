@@ -233,7 +233,6 @@
   opacity: 0.8;
   z-index: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-```css
 }
 
 .premium-breadcrumb-dropdown .ant-dropdown-menu-item:hover::before {
@@ -251,20 +250,6 @@
   top: 18px;
 }
 
-.premium-breadcrumb-dropdown .ant-dropdown-menu-item:hover::before {
-  background: #2563eb !important;
-  opacity: 1 !important;
-  width: 2px !important;
-  box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
-}
-
-.premium-breadcrumb-dropdown .ant-dropdown-menu-item + .ant-dropdown-menu-item::before {
-  top: -8px; 
-}
-
-.premium-breadcrumb-dropdown .ant-dropdown-menu-item:first-of-type::before {
-  top: 18px;
-}
 
 .premium-breadcrumb-dropdown .ant-dropdown-menu-item:last-of-type::before {
   bottom: 18px;
