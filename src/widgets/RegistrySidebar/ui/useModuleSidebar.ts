@@ -2,10 +2,9 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Form } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { _axios, ApiRoutes } from "@shared/api";
+import { useQueryClient } from "@tanstack/react-query";
 import { AppRoutes } from "@shared/config";
-import { toast } from "react-toastify";
+import { ApiRoutes } from "@shared/api";
 import { sideBarIcons } from "../lib/sidebarIcons";
 import { buildMenuTree } from "../lib/buildMenuTree";
 
@@ -185,35 +184,28 @@ export const useModuleSidebar = () => {
   );
 
   const queryClient = useQueryClient();
-  const { mutate: moveItem } = useMutation({
-    mutationFn: async (data: {
-      id: number;
-      folder_id: number | null;
-      type: "folder" | "correspondence";
-    }) => {
-      const url = ApiRoutes.MOVE_FOLDER.replace(":DOC_ID", String(data.id));
 
-      const response = await _axios({
-        url,
-        method: "PATCH",
-        data: { folder_id: data.folder_id },
-      });
-
-      if (!response.data.success) {
-        throw new Error(response.data.message || "Ошибка перемещения");
+  const { mutate: moveItem } = useMutationQuery<{
+    id: number;
+    folder_id: number | null;
+  }>({
+    url: (data) => {
+      const route = isInternal ? ApiRoutes.INTERNAL_MOVE_FOLDER : ApiRoutes.MOVE_FOLDER;
+      return route.replace(isInternal ? ":id" : ":DOC_ID", String(data.id));
+    },
+    method: "PATCH",
+    messages: {
+      onSuccessCb: () => {
+        refetchFolders();
+        queryClient.invalidateQueries({
+          queryKey: [ApiRoutes.GET_CORRESPONDENCES],
+        });
+        window.dispatchEvent(new CustomEvent("correspondence-moved"));
+      },
+      success: "Перемещено",
+      onErrorCb: () => {
+        // Ошибка обрабатывается внутри useMutationQuery через toast
       }
-      return response.data;
-    },
-    onSuccess: () => {
-      toast.success("Перемещено");
-      refetchFolders();
-      queryClient.invalidateQueries({
-        queryKey: [ApiRoutes.GET_CORRESPONDENCES],
-      });
-      window.dispatchEvent(new CustomEvent("correspondence-moved"));
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Ошибка при перемещении");
     },
   });
 
@@ -227,7 +219,6 @@ export const useModuleSidebar = () => {
       moveItem({
         id: draggedId,
         folder_id: targetFolderId,
-        type: draggedType,
       });
     },
     [moveItem],
