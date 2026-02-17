@@ -43,6 +43,7 @@ const FullHistoryModal = ({
   isSigning,
   currentUserId,
   onShowSignature,
+  isReadOnly,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -53,6 +54,7 @@ const FullHistoryModal = ({
   isSigning: boolean;
   currentUserId: string | number | null;
   onShowSignature: (e: any, item: any) => void;
+  isReadOnly: boolean;
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -166,7 +168,7 @@ const FullHistoryModal = ({
               size="small"
               onClick={onApprove}
               loading={isSigning}
-              disabled={item.status !== "pending"}
+              disabled={item.status !== "pending" || isReadOnly}
               className="bg-green-600 hover:bg-green-500 border-green-600"
             >
               Согласовать
@@ -301,6 +303,7 @@ export const WorkflowParticipantsPanel = ({
   onApprove,
   isSigning,
   currentUserId,
+  isReadOnly,
 }: {
   workflowData: any;
   isCollapsed: boolean;
@@ -309,6 +312,7 @@ export const WorkflowParticipantsPanel = ({
   onApprove: () => void;
   isSigning: boolean;
   currentUserId: string | number | null;
+  isReadOnly: boolean;
 }) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -512,7 +516,7 @@ export const WorkflowParticipantsPanel = ({
             {role === "approver" && isCurrentUser && isPending && (
               <Button
                 onClick={onApprove}
-                disabled={status !== "pending"}
+                disabled={status !== "pending" || isReadOnly}
                 loading={isSigning}
                 type="primary"
                 size="small"
@@ -701,6 +705,7 @@ export const WorkflowParticipantsPanel = ({
         currentUserId={currentUserId}
         onShowSignature={openSignatureModal}
         onApprove={onApprove}
+        isReadOnly={isReadOnly}
       />
       <SignatureDetailsModal
         isOpen={signatureModal.isOpen}
