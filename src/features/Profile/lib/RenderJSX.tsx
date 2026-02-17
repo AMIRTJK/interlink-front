@@ -82,7 +82,7 @@ export const RenderJSX = ({
             <span>Анимации ⚡</span>
             <Switch checked={isAnimEnabled} onChange={setIsAnimEnabled} />
           </div>
-          <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+          <div className="hidden! sm:flex justify-between items-center pt-4 border-t border-gray-100">
             <span>Стиль iOS 📱</span>
             <Switch 
               checked={navbarVariant === "ios"} 
