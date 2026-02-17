@@ -24,6 +24,8 @@ interface IProps {
   userData: IUser | null;
   activeTab: string;
   onMenuClick: (e: { key: string }) => void;
+  navbarVariant: "default" | "ios";
+  setNavbarVariant: (v: "default" | "ios") => void;
 }
 
 export const RenderJSX = ({
@@ -43,6 +45,8 @@ export const RenderJSX = ({
   userData,
   activeTab,
   onMenuClick,
+  navbarVariant,
+  setNavbarVariant,
 }: IProps) => {
   if (isPending) return <UseSkeleton loading={true} variant="profile" />;
   return (
@@ -77,6 +81,13 @@ export const RenderJSX = ({
           <div className="flex justify-between items-center">
             <span>Анимации ⚡</span>
             <Switch checked={isAnimEnabled} onChange={setIsAnimEnabled} />
+          </div>
+          <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+            <span>Стиль iOS 📱</span>
+            <Switch 
+              checked={navbarVariant === "ios"} 
+              onChange={(checked) => setNavbarVariant(checked ? "ios" : "default")} 
+            />
           </div>
         </div>
       </Modal>

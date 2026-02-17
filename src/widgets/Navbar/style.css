@@ -341,7 +341,7 @@ body.no-animations
   gap: 8px;
   padding: 10px 24px;
   border-radius: 8px;
-  /* border: 2px solid transparent; */
+  border: 2px solid transparent;
   background-color: transparent;
   color: #647690;
   opacity: 1;
@@ -350,10 +350,12 @@ body.no-animations
   font-weight: 600;
 }
 
-.modern-mode .sub-menu-item img {
+.modern-mode .sub-menu-item img,
+.modern-mode .sub-menu-item .anticon {
   width: 18px;
   height: 18px;
   display: block;
+  font-size: 18px;
 }
 
 .modern-mode .sub-menu-item:hover,
@@ -495,14 +497,16 @@ body.no-animations
 
 .ios-active-pill {
   position: absolute;
-  top: 0;
+  bottom: -6px;
   left: 0;
   right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, #007aff, #0056e0);
+  width: 4px;
+  height: 4px;
+  margin: 0 auto;
+  background: #1677ff;
   border-radius: 20px;
   z-index: -1;
-  box-shadow: 0 8px 16px -4px rgba(0, 122, 255, 0.4);
+  box-shadow: 0 0 6px rgba(22, 119, 255, 0.4);
 }
 
 .ios-icon-wrapper {
@@ -520,7 +524,8 @@ body.no-animations
   height: 26px;
   font-size: 26px;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  filter: grayscale(100%) opacity(0.5);
+  filter: none;
+  opacity: 1;
 }
 
 .ios-dock-item:hover .ios-icon-wrapper img,
@@ -531,7 +536,7 @@ body.no-animations
 
 .ios-dock-item.active .ios-icon-wrapper img,
 .ios-dock-item.active .ios-icon-wrapper .anticon {
-  filter: brightness(0) invert(1);
+  filter: none;
   opacity: 1;
   transform: scale(1.05);
 }
