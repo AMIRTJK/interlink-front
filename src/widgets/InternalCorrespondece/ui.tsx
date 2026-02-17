@@ -319,6 +319,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         date: dateValue,
         recipients: toRecipients.map((r) => r.id),
         copy: ccRecipients.map((r) => r.id),
+        folder: initialData.folder_id || initialData.system_folder
       });
 
       // 4. Стейты для UI

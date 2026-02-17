@@ -313,6 +313,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
             transformResponse={(data) => transformResponse(data)}
             className="mb-0!"
             searchParamKey="search"
+            disabled={isIncoming || isReadOnly}
           />
         </div>
 
