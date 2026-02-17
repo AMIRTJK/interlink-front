@@ -304,6 +304,7 @@ export const WorkflowParticipantsPanel = ({
   isSigning,
   currentUserId,
   isReadOnly,
+  isReadPage = false,
 }: {
   workflowData: any;
   isCollapsed: boolean;
@@ -313,6 +314,7 @@ export const WorkflowParticipantsPanel = ({
   isSigning: boolean;
   currentUserId: string | number | null;
   isReadOnly: boolean;
+  isReadPage?: boolean;
 }) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -558,7 +560,7 @@ export const WorkflowParticipantsPanel = ({
       <div
         className={`
         relative flex flex-col bg-white border-l border-gray-200 shadow-xl shadow-gray-200/50
-        transition-all duration-300 ease-in-out h-[calc(100vh-64px)]! sticky top-0
+        transition-all duration-300 ease-in-out ${isReadPage ? "h-full" : "h-[calc(100vh-64px)]!"}  sticky top-0
         ${isCollapsed ? "w-16 items-center py-4" : "w-80"}
       `}
       >
