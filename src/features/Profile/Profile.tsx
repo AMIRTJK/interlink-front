@@ -7,10 +7,12 @@ import { IUser } from "@entities/login";
 import { useEffect, useState } from "react";
 import { useCurrentTab } from "./lib/lib";
 import { RenderJSX } from "./lib/RenderJSX";
+import { useNavbar } from "@shared/lib/hooks";
 import "./style.css";
 
 export const Profile = () => {
   const navigate = useNavigate();
+  const { variant, setVariant } = useNavbar();
   const userId = tokenControl.getUserId();
   const [userData, setUserData] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,7 +84,10 @@ export const Profile = () => {
       setIsAnimEnabled={setIsAnimEnabled}
       userData={userData}
       activeTab={activeTab}
-      onMenuClick={handleMenuClick} />
+      onMenuClick={handleMenuClick}
+      navbarVariant={variant}
+      setNavbarVariant={setVariant}
+    />
     </>
   );
 

@@ -110,7 +110,14 @@ export const ApiRoutes = {
   INTERNAL_APPROVALS_CONFIRM:
     "/api/v1/internal-correspondences/approvals/:id/status",
 
+  // Folder
   INTERNAL_MOVE_FOLDER: "/api/v1/internal-correspondences/:id/move-folder",
+  CREATE_INTERNAL_FOLDER: "/api/v1/internal-mail-folders",
+  GET_INTERNAL_FOLDERS: "/api/v1/internal-mail-folders",
+  GET_INTERNAL_FOLDER: "/api/v1/internal-mail-folders/:id",
+  UPDATE_INTERNAL_FOLDER: "/api/v1/internal-mail-folders/:id",
+  DELETE_INTERNAL_FOLDER: "/api/v1/internal-mail-folders/:id",
+  
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];

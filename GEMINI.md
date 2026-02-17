@@ -120,14 +120,14 @@
     - Все типы и интерфейсы должны храниться в файле model.ts соответствующей директории.
     - Запрещено создавать отдельную папку model/.
     - Файл model.ts должен находиться на одном уровне с компонентом или логикой.
-    Правильно:
-    UserCard/
-    ├── UserCard.tsx
-    ├── model.ts
-    Неправильно:
-    UserCard/
-    ├── model/
-    │   └── model.ts
+      Правильно:
+      UserCard/
+      ├── UserCard.tsx
+      ├── model.ts
+      Неправильно:
+      UserCard/
+      ├── model/
+      │ └── model.ts
     - T для типов
     - I для интерфейсов
 
@@ -172,4 +172,27 @@
 
 ## Ключевое правило
 
-41. Если сомневаешься — спроси Комила.
+41. Запрещено создавать hooks внутри:
+
+components
+
+widgets
+
+features
+
+layout
+
+Navbar
+
+pages
+
+entities
+
+shared/
+└── lib/
+└── hooks/
+├── useNavbar.ts
+├── useScroll.ts
+└── index.ts
+
+42. Если сомневаешься — спроси Комила.
