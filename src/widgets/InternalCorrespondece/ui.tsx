@@ -246,11 +246,13 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     });
 
   const onSaveClick = async () => {
+    console.log(form.validateFields());
+
     try {
       // Валидируем форму
       const values = await form.validateFields();
 
-      const requestPayload = {
+      const requestPayload: any = {
         subject: values.subject,
         body: editorBody,
         recipients: {
@@ -258,6 +260,12 @@ export const InternalCorrespondece: React.FC<IProps> = ({
           cc: values.copy,
         },
       };
+
+      if (typeof values.folder === "number") {
+        requestPayload.folder_id = values.folder;
+      } else if (typeof values.folder === "string") {
+        requestPayload.system_folder = values.folder;
+      }
 
       if (id) {
         // Если ID есть - обновляем
@@ -311,6 +319,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         date: dateValue,
         recipients: toRecipients.map((r) => r.id),
         copy: ccRecipients.map((r) => r.id),
+        folder: initialData.folder_id || initialData.system_folder
       });
 
       // 4. Стейты для UI
