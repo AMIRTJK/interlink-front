@@ -507,7 +507,7 @@ export const WorkflowParticipantsPanel = ({
                 size="small"
                 loading={isSigning}
                 disabled={status !== "pending"}
-                className={`bg-blue-600! hover:bg-blue-500! ${status !== "pending" ? "text-white! opacity-50!" : ""}`}
+                className={`${status !== "penging" || isReadOnly ? "bg-[#f0f1f3]" : "bg-blue-600! hover:bg-blue-500!"}`}
                 onClick={onSign}
               >
                 Подписать
@@ -520,7 +520,7 @@ export const WorkflowParticipantsPanel = ({
                 loading={isSigning}
                 type="primary"
                 size="small"
-                className="bg-blue-600! hover:bg-blue-500!"
+                className={`${status !== "penging" || isReadOnly ? "bg-[#f0f1f3]" : "bg-blue-600! hover:bg-blue-500!"}`}
               >
                 Согласовать
               </Button>
