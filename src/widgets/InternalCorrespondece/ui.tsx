@@ -40,7 +40,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
 
   const currentUserId = tokenControl.getUserId();
 
-  const afterSentStatusButton = initialData?.status === "sent";
+  const afterSentStatusButton = initialData?.item?.status === "sent";
 
   const isDraftCreated = !!id || !!initialData;
 
@@ -84,6 +84,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     const foundApproval = approvals.find(
       (item: any) => String(item.approver?.id) === String(currentUserId),
     );
+
+    console.log(foundApproval);
 
     return foundApproval ? String(foundApproval.id) : "";
   }, [workflowData, currentUserId]);
@@ -225,7 +227,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         onSuccess: (data: any) => {
           console.log("Server response:", data);
 
-          const newId = data?.id;
+          const newId = data?.item?.id;
 
           if (newId) {
             navigate(`/modules/correspondence/internal/outgoing/${newId}`);
@@ -284,15 +286,16 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   // ЭФФЕКТ: Заполнение данных при просмотре
   useEffect(() => {
     if (initialData) {
+      const item = initialData.item || [];
       // 1. Дата
       let dateValue = dayjsLib();
-      const dateString = initialData.doc_date || initialData.created_at;
+      const dateString = item.doc_date || item.created_at;
       if (dateString) {
         dateValue = dayjsLib(dateString);
       }
 
       // 2. Получатели
-      const rawRecipients = initialData.recipients || [];
+      const rawRecipients = item.recipients || [];
 
       const toRecipients: Recipient[] = rawRecipients
         .filter((r: any) => r.type === "to")
@@ -314,24 +317,22 @@ export const InternalCorrespondece: React.FC<IProps> = ({
 
       // 3. Сеттим в форму
       form.setFieldsValue({
-        subject: initialData.subject,
-        number: initialData.reg_number || "Не указано",
+        subject: item.subject,
+        number: item.reg_number || "Не указано",
         date: dateValue,
         recipients: toRecipients.map((r) => r.id),
         copy: ccRecipients.map((r) => r.id),
-        folder: initialData.folder_id || initialData.system_folder
+        folder: initialData.my_folder,
       });
 
       // 4. Стейты для UI
       setInitialRecipients(toRecipients);
       setInitialCC(ccRecipients);
 
-      console.log(initialData);
-
       // 5. Редактор
-      if (initialData.body) {
-        setInitialEditorContent(initialData.body);
-        setEditorBody(initialData.body);
+      if (item.body) {
+        setInitialEditorContent(item.body);
+        setEditorBody(item.body);
       }
     }
   }, [initialData, form]);
@@ -399,6 +400,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
                 isPayloadLoading || isConfirming || isApprovalsConfirming
               }
               currentUserId={currentUserId}
+              isReadOnly={isReadOnly}
             />
           </div>
         </If>
