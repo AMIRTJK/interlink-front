@@ -1,47 +1,19 @@
-import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useGetQuery, tokenControl } from "@shared/lib";
+import { useMemo } from "react";
 import { ApiRoutes } from "@shared/api";
 import { AppRoutes } from "@shared/config";
 import { getModuleItems } from "../../config/menuItems";
-import { TMenuItem, TSubMenuItem, TNavbarVariant } from "./model";
+import { TMenuItem, TSubMenuItem } from "./model";
 
-const VARIANT_STORAGE_KEY = "navbar-variant";
-const TAB_STORAGE_KEY = "correspondence_active_tab";
 const SHARED_ROUTES = ["archive", "pinned", "trashed"];
+const STORAGE_KEY = "correspondence_active_tab";
 
-export const useNavbar = () => {
-  // Состояние варианта
-  const [variant, setVariantState] = useState<TNavbarVariant>(() => {
-    const stored = localStorage.getItem(VARIANT_STORAGE_KEY);
-    return (stored as TNavbarVariant) || "default";
-  });
-
-  const setVariant = (newVariant: TNavbarVariant) => {
-    localStorage.setItem(VARIANT_STORAGE_KEY, newVariant);
-    setVariantState(newVariant);
-    window.dispatchEvent(new Event("storage"));
-  };
-
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const stored = localStorage.getItem(VARIANT_STORAGE_KEY);
-      if (stored) {
-        setVariantState(stored as TNavbarVariant);
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
-
-  // Логика меню
+export const useMenuLogic = (variant: "horizontal" | "compact" | "modern" | "full" | "ios") => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const logicVariant = variant === "ios" ? "ios" : "modern";
-
-  const items = useMemo(() => getModuleItems(logicVariant), [logicVariant]);
+  const items = useMemo(() => getModuleItems(variant), [variant]);
 
   const { data, preloadData } = useGetQuery({
     method: "GET",
@@ -105,7 +77,7 @@ export const useNavbar = () => {
     );
 
     if (isSharedRoute) {
-      const lastContextKey = sessionStorage.getItem(TAB_STORAGE_KEY);
+      const lastContextKey = sessionStorage.getItem(STORAGE_KEY);
       if (lastContextKey) {
         const parent = filteredItems.find(
           (item) =>
@@ -135,7 +107,7 @@ export const useNavbar = () => {
     let targetPath = path;
 
     if (path === "/modules/correspondence") {
-      const saved = sessionStorage.getItem(TAB_STORAGE_KEY);
+      const saved = sessionStorage.getItem(STORAGE_KEY);
       targetPath = saved || AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING;
     }
 
@@ -145,7 +117,7 @@ export const useNavbar = () => {
   };
 
   const menuItems = useMemo(() => {
-    if (logicVariant === "modern") {
+    if (variant === "compact" || variant === "modern") {
       return filteredItems.map((item) => {
         if (item && "children" in item) {
           const { children: _, ...rest } = item as TSubMenuItem;
@@ -155,11 +127,9 @@ export const useNavbar = () => {
       });
     }
     return filteredItems;
-  }, [logicVariant, filteredItems]);
+  }, [variant, filteredItems]);
 
   return {
-    variant,
-    setVariant,
     menuItems,
     subItems,
     activeKey,

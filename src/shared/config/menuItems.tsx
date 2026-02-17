@@ -1,13 +1,13 @@
 import { AppRoutes } from "@shared/config";
-import ProfileIcon from "../../../assets/icons/profile-icon.svg";
-import OrganizationIcon from "../../../assets/icons/organization-icon.svg";
-import MainDocumentsIcon from "../../../assets/icons/main-documents-icon.svg";
-import CorrespondenceIcon from "../../../assets/icons/correspondence-icon.svg";
-import PrimaryDocumentsIcon from "../../../assets/icons/primary documents-icon.svg";
-import ApplicationsIcon from "../../../assets/icons/applications-icon.svg";
-import CrmIcon from "../../../assets/icons/crm-icon.svg";
+import ProfileIcon from "../../assets/icons/profile-icon.svg";
+import OrganizationIcon from "../../assets/icons/organization-icon.svg";
+import MainDocumentsIcon from "../../assets/icons/main-documents-icon.svg";
+import CorrespondenceIcon from "../../assets/icons/correspondence-icon.svg";
+import PrimaryDocumentsIcon from "../../assets/icons/primary documents-icon.svg";
+import ApplicationsIcon from "../../assets/icons/applications-icon.svg";
+import CrmIcon from "../../assets/icons/crm-icon.svg";
 import { FileTextOutlined, GlobalOutlined } from "@ant-design/icons";
-import { TMenuItem } from "./model";
+import { TMenuItem } from "../lib/hooks/model";
 
 export const getModuleItems = (
   variant: "horizontal" | "compact" | "modern" | "full" | "ios",
@@ -17,7 +17,7 @@ export const getModuleItems = (
     label: "Личный кабинет",
     icon:
       variant === "horizontal" || variant === "full" || variant === "ios" ? (
-        <img src={ProfileIcon} alt="" />
+        <img src={ProfileIcon} alt="profile" />
       ) : null,
   },
   {
@@ -25,7 +25,7 @@ export const getModuleItems = (
     label: "Организация",
     icon:
       variant === "horizontal" || variant === "full" || variant === "ios" ? (
-        <img src={OrganizationIcon} alt="" />
+        <img src={OrganizationIcon} alt="organization" />
       ) : null,
   },
   {
@@ -33,7 +33,7 @@ export const getModuleItems = (
     label: "Основные документы",
     icon:
       variant === "horizontal" || variant === "full" || variant === "ios" ? (
-        <img src={MainDocumentsIcon} alt="" />
+        <img src={MainDocumentsIcon} alt="main documents" />
       ) : null,
   },
   {
@@ -75,7 +75,7 @@ export const getModuleItems = (
     requiredRole: ["primary_documents.view"],
     icon:
       variant === "horizontal" || variant === "full" || variant === "ios" ? (
-        <img src={PrimaryDocumentsIcon} alt="" />
+        <img src={PrimaryDocumentsIcon} alt="primary documents" />
       ) : null,
   },
   {
@@ -84,7 +84,7 @@ export const getModuleItems = (
     requiredRole: ["apps.view"],
     icon:
       variant === "horizontal" || variant === "full" || variant === "ios" ? (
-        <img src={ApplicationsIcon} alt="" />
+        <img src={ApplicationsIcon} alt="request" />
       ) : null,
   },
   {
@@ -93,7 +93,7 @@ export const getModuleItems = (
     requiredRole: ["crm.view"],
     icon:
       variant === "horizontal" || variant === "full" || variant === "ios" ? (
-        <img src={CrmIcon} alt="" />
+        <img src={CrmIcon} alt="crm" />
       ) : null,
   },
 ];
