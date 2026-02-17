@@ -31,7 +31,7 @@ interface ISelectFieldProps {
   transformResponse?: (
     data: unknown,
     extraParams?: unknown,
-  ) => { value: string; label: string }[];
+  ) => { value: string | number; label: string }[];
   method?: "GET";
   extraTransformParams?: unknown;
   searchParamKey?: string;

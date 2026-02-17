@@ -9,12 +9,13 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
-import { Button, If } from "@shared/ui"; // Импортируем твой If
+import { Button, If, SelectField } from "@shared/ui"; // Импортируем твой If
 // useModalState нам больше не нужен, мы будем управлять состоянием через локальный стейт типа
 import { RecipientSelectorModal } from "./RecipientSelectorModal";
 import { SelectedRecipientsModal } from "./SelectedRecipientsModal";
 import { ApiRoutes } from "@shared/api";
 import { requiredRule } from "@shared/lib";
+import { transformResponse, transformSelectResponse } from "../lib";
 
 dayjs.locale("ru");
 
@@ -218,6 +219,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           subject: "",
           recipients: [],
           copy: [],
+          folder: "drafts",
         }}
       >
         <Form.Item name="recipients" rules={[requiredRule]} hidden>
@@ -295,6 +297,23 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
               />
             </Form.Item>
           </div>
+
+          <div className="hidden sm:block w-px h-5 bg-gray-200 dark:bg-gray-700"></div>
+          <span className="font-semibold! text-[#4a5565]! dark:text-gray-200 text-sm!">
+            Папки
+          </span>
+          <SelectField
+            rules={[requiredRule]}
+            name="folder"
+            label=""
+            url={ApiRoutes.GET_INTERNAL_FOLDERS}
+            placeholder="Выберите папку"
+            allowClear
+            showSearch
+            transformResponse={(data) => transformResponse(data)}
+            className="mb-0!"
+            searchParamKey="search"
+          />
         </div>
 
         <div className="flex items-center gap-4 mt-1 min-h-[32px]">

@@ -1,216 +1,216 @@
-  @import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
-  .ck-content p {
-    margin-bottom: 0.5em !important;
-    line-height: 1.5;
+.ck-content p {
+  margin-bottom: 0.5em !important;
+  line-height: 1.5;
+}
+
+.ck-content h1,
+.ck-content h2,
+.ck-content h3 {
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
+  font-weight: bold;
+}
+
+.ck-content ul {
+  list-style: disc;
+  padding-left: 20px;
+  margin-bottom: 1em;
+}
+
+.ck-content ol {
+  list-style: decimal;
+  padding-left: 20px;
+  margin-bottom: 1em;
+}
+
+@media print {
+  body {
+    margin: 0 !important;
   }
+}
 
-  .ck-content h1,
-  .ck-content h2,
-  .ck-content h3 {
-    margin-top: 1.2em;
-    margin-bottom: 0.6em;
-    font-weight: bold;
-  }
+:root {
+  --ck-content-font-family: "Lato";
+  --ck-sidebar-width: 270px;
+  --ck-editor-height: 650px;
+}
 
-  .ck-content ul {
-    list-style: disc;
-    padding-left: 20px;
-    margin-bottom: 1em;
-  }
+.main-container {
+  font-family: var(--ck-content-font-family);
+  width: fit-content;
+  margin-left: 0;
+  margin-right: 0;
+}
 
-  .ck-content ol {
-    list-style: decimal;
-    padding-left: 20px;
-    margin-bottom: 1em;
-  }
+.editor-container__editor-wrapper {
+  display: flex;
+  width: fit-content;
+}
 
-  @media print {
-    body {
-      margin: 0 !important;
-    }
-  }
+.editor-container_document-editor {
+  border-width: 1px;
+  border-color: rgba(229, 231, 235, 0.5);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
 
-  :root {
-    --ck-content-font-family: "Lato";
-    --ck-sidebar-width: 270px;
-    --ck-editor-height: 650px;
-  }
+/* App.css */
 
-  .main-container {
-    font-family: var(--ck-content-font-family);
-    width: fit-content;
-    margin-left: 0;
-    margin-right: 0;
-  }
-
-  .editor-container__editor-wrapper {
-    display: flex;
-    width: fit-content;
-  }
-
-  .editor-container_document-editor {
-    border-width: 1px;
-    border-color: rgba(229, 231, 235, 0.5);
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow:
-      0 20px 25px -5px rgba(0, 0, 0, 0.1),
-      0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  }
-
-  /* App.css */
-
-  /* 1. Убедимся, что главный контейнер является "опорной точкой" для позиционирования */
-  .editor-container {
-    position: relative;
-    /* Убираем overflow: hidden, если он был, чтобы тени не обрезались, 
+/* 1. Убедимся, что главный контейнер является "опорной точкой" для позиционирования */
+.editor-container {
+  position: relative;
+  /* Убираем overflow: hidden, если он был, чтобы тени не обрезались, 
       но если нужно обрезать контент - оставьте. */
-  }
+}
 
-  /* 2. Стилизация контейнера тулбара (белый, круглый, плавающий) */
-  .editor-container__toolbar {
-    /* Делаем блок обычным (не плавающим) */
-    position: relative;
-    top: 0;
-    left: 0;
-    transform: none;
+/* 2. Стилизация контейнера тулбара (белый, круглый, плавающий) */
+.editor-container__toolbar {
+  /* Делаем блок обычным (не плавающим) */
+  position: relative;
+  top: 0;
+  left: 0;
+  transform: none;
 
-    /* Растягиваем на всю ширину */
-    width: 100%;
+  /* Растягиваем на всю ширину */
+  width: 100%;
 
-    /* Стилизация фона и границ */
-    background-color: #f8f9fa; /* Светло-серый фон, как у стандартных редакторов */
-    border-bottom: 1px solid #c4c4c4; /* Линия разделителя снизу */
-    border-radius: 24px 24px 0 0; /* Скругление только сверху, чтобы совпадало с контейнером */
+  /* Стилизация фона и границ */
+  background-color: #f8f9fa; /* Светло-серый фон, как у стандартных редакторов */
+  border-bottom: 1px solid #c4c4c4; /* Линия разделителя снизу */
+  border-radius: 24px 24px 0 0; /* Скругление только сверху, чтобы совпадало с контейнером */
 
-    /* Отступы и выравнивание */
-    padding: 8px 16px;
-    display: flex;
-    flex-wrap: wrap; /* Чтобы иконки переносились на новую строку, если их много */
-    align-items: center;
-    justify-content: flex-start; /* Выравнивание по левому краю */
+  /* Отступы и выравнивание */
+  padding: 8px 16px;
+  display: flex;
+  flex-wrap: wrap; /* Чтобы иконки переносились на новую строку, если их много */
+  align-items: center;
+  justify-content: flex-start; /* Выравнивание по левому краю */
 
-    /* Видимость (всегда видим) */
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    z-index: 10;
+  /* Видимость (всегда видим) */
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 10;
 
-    box-shadow: none; /* Убираем тень от "пузыря" */
-  }
+  box-shadow: none; /* Убираем тень от "пузыря" */
+}
 
-  /* 3. Состояние при наведении на редактор */
-  /* .editor-container:hover .editor-container__toolbar {
+/* 3. Состояние при наведении на редактор */
+/* .editor-container:hover .editor-container__toolbar {
     opacity: 1;
     visibility: visible;
     pointer-events: auto; 
     transform: translateX(-50%) translateY(0); 
   } */
 
-  /* 4. Небольшая чистка внутренних стилей CKEditor, чтобы они не перекрывали нашу капсулу */
-  .editor-container__toolbar .ck.ck-toolbar {
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-  }
+/* 4. Небольшая чистка внутренних стилей CKEditor, чтобы они не перекрывали нашу капсулу */
+.editor-container__toolbar .ck.ck-toolbar {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
 
-  .editor-container_document-editor
-    .editor-container__menu-bar
-    > .ck.ck-menu-bar {
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
-    border-top: 0;
-    border-left: 0;
-    border-right: 0;
-  }
+.editor-container_document-editor
+  .editor-container__menu-bar
+  > .ck.ck-menu-bar {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+}
 
-  .editor-container_document-editor .editor-container__editor-wrapper {
-    max-height: var(--ck-editor-height);
-    min-height: var(--ck-editor-height);
-    overflow-y: scroll;
-    background: var(--ck-color-base-foreground);
-  }
+.editor-container_document-editor .editor-container__editor-wrapper {
+  max-height: var(--ck-editor-height);
+  min-height: var(--ck-editor-height);
+  overflow-y: scroll;
+  background: var(--ck-color-base-foreground);
+}
 
-  .custom-editor-container__editor-wrapper {
-    display: flex;
-    width: fit-content;
-    overflow-y: scroll;
-    height: 100%;
-    max-height: 90vh;
-    background: var(--ck-color-base-foreground);
-  }
+.custom-editor-container__editor-wrapper {
+  display: flex;
+  width: fit-content;
+  overflow-y: scroll;
+  height: 100%;
+  max-height: 90vh;
+  background: var(--ck-color-base-foreground);
+}
 
-  .editor-container_document-editor .editor-container__editor {
-    margin-top: 28px;
-    margin-bottom: 28px;
-    height: 100%;
-  }
+.editor-container_document-editor .editor-container__editor {
+  margin-top: 28px;
+  margin-bottom: 28px;
+  height: 100%;
+}
 
-  .editor-container_document-editor
-    .editor-container__editor
-    .ck.ck-editor__editable {
-    min-height: 297mm;
-  }
+.editor-container_document-editor
+  .editor-container__editor
+  .ck.ck-editor__editable {
+  min-height: 297mm;
+}
 
-  .editor-container_document-editor
-    .editor-container__editor
-    .ck.ck-editor__editable {
-    box-sizing: border-box;
-    min-width: calc(210mm + 2px);
-    max-width: calc(210mm + 2px);
-    min-height: 297mm;
-    height: fit-content;
-    padding: 20mm 15mm 20mm 30mm !important;
-    border: 1px hsl(0, 0%, 82.7%) solid;
-    background: hsl(0, 0%, 100%);
-    box-shadow: 0 2px 3px hsla(0, 0%, 0%, 0.078);
-    flex: 1 1 auto;
-    margin-left: 72px;
-    margin-right: 72px;
-    font-size: 14pt !important;
-    font-family: "Times New Roman", serif;
-    line-height: 1.5;
-  }
+.editor-container_document-editor
+  .editor-container__editor
+  .ck.ck-editor__editable {
+  box-sizing: border-box;
+  min-width: calc(210mm + 2px);
+  max-width: calc(210mm + 2px);
+  min-height: 297mm;
+  height: fit-content;
+  padding: 20mm 15mm 20mm 30mm !important;
+  border: 1px hsl(0, 0%, 82.7%) solid;
+  background: hsl(0, 0%, 100%);
+  box-shadow: 0 2px 3px hsla(0, 0%, 0%, 0.078);
+  flex: 1 1 auto;
+  margin-left: 72px;
+  margin-right: 72px;
+  font-size: 14pt !important;
+  font-family: "Times New Roman", serif;
+  line-height: 1.5;
+}
 
-  .editor-container_include-outline
-    .editor-container__editor
-    .ck.ck-editor__editable {
-    margin-left: 0;
-  }
+.editor-container_include-outline
+  .editor-container__editor
+  .ck.ck-editor__editable {
+  margin-left: 0;
+}
 
-  .ck-focused {
-    border-color: hsl(0, 0%, 82.7%) !important;
-    box-shadow: none !important;
-  }
+.ck-focused {
+  border-color: hsl(0, 0%, 82.7%) !important;
+  box-shadow: none !important;
+}
 
-  .editor-container_include-outline.editor-container_include-fullscreen
-    .ck-fullscreen__document-outline-header {
-    display: none;
-  }
+.editor-container_include-outline.editor-container_include-fullscreen
+  .ck-fullscreen__document-outline-header {
+  display: none;
+}
 
-  .editor-container__sidebar {
-    min-width: var(--ck-sidebar-width);
-    max-width: var(--ck-sidebar-width);
-    margin-top: 28px;
-    margin-left: 10px;
-    margin-right: 10px;
-  }
+.editor-container__sidebar {
+  min-width: var(--ck-sidebar-width);
+  max-width: var(--ck-sidebar-width);
+  margin-top: 28px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
 
-  .editor-container__sidebar_ckeditor-ai:has(.ck-tabs.ck-hidden) {
-    max-width: 0;
-    min-width: 0;
-  }
+.editor-container__sidebar_ckeditor-ai:has(.ck-tabs.ck-hidden) {
+  max-width: 0;
+  min-width: 0;
+}
 
-  .ck-content .table thead {
-    display: table-row-group;
-  }
+.ck-content .table thead {
+  display: table-row-group;
+}
 
-  .ck-content .table tr {
-    break-inside: avoid;
-    break-after: auto;
-  }
+.ck-content .table tr {
+  break-inside: avoid;
+  break-after: auto;
+}
 
-  .ck.ck-balloon-panel.ck-balloon-panel_position_border-side_left.ck-balloon-panel_visible.ck-evaluation-badge-balloon {
-    display: none !important;
-  }
+.ck.ck-balloon-panel.ck-balloon-panel_position_border-side_left.ck-balloon-panel_visible.ck-evaluation-badge-balloon {
+  display: none !important;
+}
