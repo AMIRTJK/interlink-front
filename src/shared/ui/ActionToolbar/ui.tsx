@@ -6,6 +6,7 @@ import {
   EyeOutlined,
   MessageOutlined,
   SendOutlined,
+  QrcodeOutlined,
 } from "@ant-design/icons";
 import { If } from "@shared/ui";
 import { ActionButton } from "./ui/ActionButton";
@@ -15,6 +16,7 @@ interface IProps {
   setShowPreview: (val: boolean) => void;
   setIsInspectorOpen: (val: boolean) => void;
   handleSend: () => void;
+  handleInsertQR: () => void;
   onSaveLoading: boolean;
   onSendLoading: boolean;
   isActionsEnabled: boolean;
@@ -34,6 +36,7 @@ export const ActionToolbar: React.FC<IProps> = ({
   isIncoming,
   isReadOnly,
   isSentStatusEnabled = false,
+  handleInsertQR,
 }) => {
   return (
     <motion.div
@@ -95,6 +98,13 @@ export const ActionToolbar: React.FC<IProps> = ({
             }}
           /> */}
         </If>
+        <ActionButton
+          icon={<QrcodeOutlined style={{ fontSize: "18px" }} />}
+          label=""
+          onClick={handleInsertQR}
+          disabled={isReadOnly}
+          tooltip="Вставить QR-код"
+        />
       </div>
     </motion.div>
   );

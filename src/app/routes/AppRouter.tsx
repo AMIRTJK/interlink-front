@@ -43,6 +43,12 @@ const AnalyticsPage = lazy(() =>
   })),
 );
 
+const InternalCorrespondenceReadPage = lazy(() =>
+  import("@pages/modules/correspondence/InternalCorrespondenceRead").then(
+    (m) => ({ default: m.InternalCorrespondenceRead }),
+  ),
+);
+
 const RegistryTable = lazy(() =>
   import("@widgets/RegistryTable").then((m) => ({
     default: m.RegistryTable,
@@ -227,6 +233,14 @@ export const AppRouter = () => {
 
                 {/* Internal Correspondence (Internal API) */}
                 <Route path="internal">
+                  <Route
+                    path="read/:id"
+                    element={
+                      <Suspense fallback={<Loader />}>
+                        <InternalCorrespondenceReadPage />
+                      </Suspense>
+                    }
+                  />
                   <Route index element={<Navigate to="incoming" replace />} />
                   <Route path="incoming">
                     <Route

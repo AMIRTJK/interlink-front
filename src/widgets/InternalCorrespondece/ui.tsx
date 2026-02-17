@@ -1,4 +1,6 @@
 import dayjsLib from "dayjs";
+import QRCode from "qrcode";
+import { useRef } from "react";
 import {
   tokenControl,
   useGetQuery,
@@ -20,7 +22,7 @@ import {
 import { ApiRoutes } from "@shared/api";
 import { WorkflowParticipantsPanel } from "./ui/WorkflowParticipantsPanel";
 import { generateMockWorkflow } from "./lib";
-import { Editor } from "./ui/Editor";
+import { Editor, EditorHandle } from "./ui/Editor";
 import { AppRoutes } from "@shared/config";
 
 interface IProps {
@@ -36,6 +38,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   isLoading,
   type,
 }) => {
+  const editorRef = useRef<EditorHandle>(null);
+
   const { id } = useParams<{ id: string }>();
 
   const currentUserId = tokenControl.getUserId();
@@ -283,6 +287,36 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     }
   };
 
+  const handleInsertQR = async () => {
+    try {
+      // Генерируем ссылку на страницу чтения
+      // window.location.origin вернет "http://localhost:3000" или ваш домен
+      const readUrl = `${window.location.origin}/modules/correspondence/internal/read/${id}`;
+
+      console.log("Generating QR for URL:", readUrl);
+
+      // Генерация Data URL (картинка в base64)
+      const qrDataUrl = await QRCode.toDataURL(readUrl, {
+        width: 150,
+        margin: 1,
+        color: {
+          dark: "#000000",
+          light: "#ffffff",
+        },
+      });
+
+      // Формируем HTML для вставки.
+      const imgHtml = `<img src="${qrDataUrl}" alt="Scan to read" />`;
+
+      // Вызываем метод редактора через Ref
+      if (editorRef.current) {
+        editorRef.current.insertHtml(imgHtml);
+      }
+    } catch (err) {
+      console.error("Ошибка при генерации QR-кода", err);
+    }
+  };
+
   // ЭФФЕКТ: Заполнение данных при просмотре
   useEffect(() => {
     if (initialData) {
@@ -372,10 +406,12 @@ export const InternalCorrespondece: React.FC<IProps> = ({
                 isIncoming={isIncoming}
                 isReadOnly={isReadOnly}
                 isSentStatusEnabled={afterSentStatusButton}
+                handleInsertQR={handleInsertQR}
               />
 
               <div className="flex-1 min-w-0">
                 <Editor
+                  ref={editorRef}
                   onChange={setEditorBody}
                   initialContent={initialEditorContent}
                   type={type}
