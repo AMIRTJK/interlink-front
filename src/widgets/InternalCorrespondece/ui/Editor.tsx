@@ -535,9 +535,9 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(
             ref={editorToolbarRef}
           ></div>
           <div
-            className={`${isPreviewOpen ? "custom-editor-container__editor-wrapper" : "editor-container__editor-wrapper"}`}
+            className={`${isPreviewOpen ? "custom-editor-container__editor-wrapper" : isReadPage ? "is-read-page" : "editor-container__editor-wrapper"}`}
           >
-            <div className="editor-container__editor">
+            <div className={`editor-container__editor`}>
               <div ref={editorRef}>
                 <CKEditor
                   disabled={isIncoming || isPreviewOpen || isReadOnly}
