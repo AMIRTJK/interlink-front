@@ -11,7 +11,7 @@ const TAB_STORAGE_KEY = "correspondence_active_tab";
 const SHARED_ROUTES = ["archive", "pinned", "trashed"];
 
 export const useNavbar = () => {
-  // --- Variant Logic ---
+  // Состояние варианта
   const [variant, setVariantState] = useState<TNavbarVariant>(() => {
     const stored = localStorage.getItem(VARIANT_STORAGE_KEY);
     return (stored as TNavbarVariant) || "default";
@@ -35,14 +35,10 @@ export const useNavbar = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // --- Menu Logic ---
+  // Логика меню
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  // Determine which variant to use for logic. iOS uses 'ios', default uses 'modern' (mostly).
-  // The original useMenuLogic accepted a variant string. 
-  // Here we derive the logic variant from the state variant.
-  // If variant is 'ios', we pass 'ios'. If 'default', we pass 'modern' as per previous usage in DefaultNavbar behavior.
   const logicVariant = variant === "ios" ? "ios" : "modern";
 
   const items = useMemo(() => getModuleItems(logicVariant), [logicVariant]);

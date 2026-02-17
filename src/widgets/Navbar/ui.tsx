@@ -22,7 +22,7 @@ export const Navbar = () => {
     );
   }
 
-  // Дефолтный 
+  // Дефолтный вариант
   
   const containerVariants = {
     hidden: { opacity: 0 },

@@ -19,7 +19,7 @@ export const IosVariant = ({
   return (
     <div className="ios-dock-wrapper">
       <div className="ios-dock-group">
-        {/* Sub Menu (Segmented Control) */}
+        {/* Подменю */}
         {subItems && subItems.length > 0 && (
           <motion.div
             className="ios-sub-dock-container"
@@ -60,7 +60,7 @@ export const IosVariant = ({
           </motion.div>
         )}
 
-        {/* Main Dock */}
+        {/* Основное меню */}
         <div className="ios-dock-container">
           {menuItems.map((item) => {
             if (!item || !("key" in item)) return null;
