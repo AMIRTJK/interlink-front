@@ -15,7 +15,7 @@ import { RecipientSelectorModal } from "./RecipientSelectorModal";
 import { SelectedRecipientsModal } from "./SelectedRecipientsModal";
 import { ApiRoutes } from "@shared/api";
 import { requiredRule } from "@shared/lib";
-import { transformResponse, transformSelectResponse } from "../lib";
+import { transformResponse } from "../lib";
 
 dayjs.locale("ru");
 
