@@ -5,6 +5,7 @@ import { ApiRoutes } from "@shared/api";
 import { generateMockWorkflow } from "@widgets/InternalCorrespondece/lib";
 import { WorkflowParticipantsPanel } from "@widgets/InternalCorrespondece/ui/WorkflowParticipantsPanel";
 import { Editor } from "../../../widgets/InternalCorrespondece/ui/Editor";
+import { UseSkeleton } from "@shared/ui/Skeleton/ui";
 
 export const InternalCorrespondenceRead: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,8 +46,13 @@ export const InternalCorrespondenceRead: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#f9fafb]">
-        Загрузка...
+      <div className="flex h-screen w-full bg-[#f9fafb] overflow-hidden">
+        <div className="flex-1 h-full overflow-hidden p-8">
+           <UseSkeleton loading={true} variant="editor" />
+        </div>
+        <div className="w-[310px] h-full bg-white border-l border-gray-200 p-6">
+           <UseSkeleton loading={true} variant="profile" />
+        </div>
       </div>
     );
   }
