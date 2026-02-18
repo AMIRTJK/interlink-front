@@ -24,9 +24,9 @@ export const useModuleSidebar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const isInternal = pathname.includes(AppRoutes.CORRESPONDENCE_OUTGOING);
+  const isInternal = pathname.includes("/internal");
 
-  const { data: countersData, isLoading: isLoadingCounters } = useGetQuery({
+  const { data: countersData } = useGetQuery({
     url: isInternal
       ? ApiRoutes.GET_INTERNAL_COUNTERS
       : ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
@@ -35,7 +35,7 @@ export const useModuleSidebar = () => {
 
   const counts = useMemo(() => countersData?.data || {}, [countersData]);
 
-  const { data: foldersData, refetch: refetchFolders, isLoading: isLoadingFolders } = useGetQuery({
+  const { data: foldersData, refetch: refetchFolders } = useGetQuery({
     url: ApiRoutes.GET_FOLDERS,
     params: {},
   });
@@ -271,7 +271,5 @@ export const useModuleSidebar = () => {
     navigate,
     pathname,
     isInternal,
-    isLoadingFolders,
-    isLoadingCounters,
   };
 };

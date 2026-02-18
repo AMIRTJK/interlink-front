@@ -3,7 +3,6 @@ import { motion, LayoutGroup } from "framer-motion";
 import { Layout, Button, Tooltip } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { AppRoutes } from "@shared/config";
-import { UseSkeleton } from "@shared/ui/Skeleton/ui";
 import { SidebarItem } from "./SidebarItem";
 import { sideBarIcons } from "../lib/sidebarIcons";
 import {
@@ -26,7 +25,6 @@ interface IProps {
   handleAddClick: (pId: number | null) => void;
   navigate: (p: string) => void;
   isInternal: boolean;
-  isLoadingFolders?: boolean;
 }
 
 export const ModuleSidebarVertical: React.FC<IProps> = ({
@@ -39,7 +37,6 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
   handleAddClick,
   navigate,
   isInternal,
-  isLoadingFolders,
 }) => {
   return (
     <Sider
@@ -117,24 +114,20 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
           animate="visible"
           variants={containerVariants}
         >
-          {isLoadingFolders ? (
-            <UseSkeleton loading={true} variant="sidebar" count={collapsed ? 5 : 8} />
-          ) : (
-            <LayoutGroup id="sidebar-items">
-              {finalMenuItems.map((item, index) => (
-                <motion.div key={item.key} variants={itemWrapperVariants}>
-                  <SidebarItem
-                    item={item}
-                    isActive={[activeKey].includes(item.key as string)}
-                    collapsed={collapsed}
-                    activeKey={activeKey}
-                    index={index}
-                    variant={variant}
-                  />
-                </motion.div>
-              ))}
-            </LayoutGroup>
-          )}
+          <LayoutGroup id="sidebar-items">
+            {finalMenuItems.map((item, index) => (
+              <motion.div key={item.key} variants={itemWrapperVariants}>
+                <SidebarItem
+                  item={item}
+                  isActive={[activeKey].includes(item.key as string)}
+                  collapsed={collapsed}
+                  activeKey={activeKey}
+                  index={index}
+                  variant={variant}
+                />
+              </motion.div>
+            ))}
+          </LayoutGroup>
         </motion.div>
 
         {!collapsed && (
