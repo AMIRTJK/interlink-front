@@ -1,6 +1,5 @@
 import { Badge } from "antd";
 import { motion } from "framer-motion";
-import { useTheme } from "@shared/lib";
 import { If } from "@shared/ui";
 import "./style.css";
 import { CorrespondenseStatus } from "@entities/correspondence";
@@ -36,8 +35,6 @@ export const StatusTabs = ({
   layoutId = "active-tab",
   items,
 }: IStatusTabs) => {
-  const { isAnimEnabled } = useTheme();
-
   const tabsRender = items || DEFAULT_TABS;
 
   return (
@@ -53,13 +50,9 @@ export const StatusTabs = ({
           >
             <If is={isActive}>
               <motion.div
-                layoutId={isAnimEnabled ? layoutId : undefined}
+                layoutId={layoutId}
                 className="status-tab-background"
-                transition={
-                  isAnimEnabled
-                    ? { type: "spring", bounce: 0, duration: 0.4 }
-                    : { duration: 0 }
-                }
+                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
               />
             </If>
 

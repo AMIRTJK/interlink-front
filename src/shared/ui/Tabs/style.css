@@ -1,84 +1,85 @@
-/* iOS Segmented Control Style */
 .ui-tabs {
-  display: inline-flex;
-  gap: 0;
-  background-color: rgba(118, 118, 128, 0.12); /* System Fill Color */
-  border-radius: 9px; /* Стандарт iOS: 8-9px для контролов */
-  padding: 2px;
-  position: relative;
-  z-index: 0;
-  backdrop-filter: blur(10px);
-  /* Если нужно, чтобы табы занимали всю ширину */
-  width: auto; 
-  /* Или fit-content, зависит от контекста, здесь оставим flex поведение */
-}
-
-/* Опционально: если табы должны тянуться */
-.ui-tabs.full-width {
-  width: 100%;
+  display: flex;
+  gap: 2px;
+  background-color: #e3ecff;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  overflow: hidden;
 }
 
 .ui-tab {
-  position: relative;
+  padding: 10px 40px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #64748b;
+  background-color: transparent;
   border: none;
-  background: transparent;
-  padding: 6px 12px;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  color: #000;
   cursor: pointer;
-  border-radius: 7px;
-  z-index: 1;
-  flex: 1;
-  text-align: center;
-  transition: color 0.2s ease;
-  white-space: nowrap;
-  /* Убираем старые стили */
+  border-radius: 12px 12px 0 0;
+  transition: color 0.3s ease;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
+  flex: 1;
 }
 
+.ui-tab:hover:not(.ui-tab--active) {
+  color: #0037af;
+}
 
+.ui-tab--active {
+  color: #0037af !important;
+}
 
 .ui-tab-text {
   position: relative;
   z-index: 2;
-  transition: color 0.2s ease;
 }
 
-/* Активный таб - текст */
-.ui-tab--active .ui-tab-text {
-  font-weight: 600;
-  color: #000;
-}
-
-/* Фон активного таба (плашка) */
 .ui-tab-background {
   position: absolute;
   inset: 0;
-  background-color: #ffffff;
-  border-radius: 7px;
-  box-shadow: 
-    0 3px 8px rgba(0, 0, 0, 0.12), 
-    0 3px 1px rgba(0, 0, 0, 0.04);
-  z-index: -1;
-  /* Убираем псевдоэлементы старого стиля */
+  background-color: #fff;
+  border-radius: 12px 12px 0 0;
+  z-index: 1;
+  will-change: transform;
 }
 
 .ui-tab-background::before,
 .ui-tab-background::after {
-  display: none !important;
+  content: "";
+  position: absolute;
+  bottom: 0px;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  pointer-events: none;
 }
 
-/* Анимация нажатия на сам таб */
-.ui-tab:active {
-  opacity: 0.7;
+.ui-tab-background::before {
+  left: -20px;
+  border-bottom-right-radius: 12px;
+  box-shadow: 6px 0 0 0 #fff;
 }
 
-.ui-tab--active:active {
-  opacity: 1; /* Активный таб не должен тускнеть */
+.ui-tab-background::after {
+  right: -20px;
+  border-bottom-left-radius: 12px;
+  box-shadow: -6px 0 0 0 #fff;
+}
+
+.ui-tab:first-child .ui-tab-background::before,
+.ui-tab:last-child .ui-tab-background::after {
+  display: none;
+}
+@media (max-width: 1024px) {
+  .ui-tab {
+    padding: 10px 20px;
+  }
+}
+/* No Animations Mode */
+body.no-animations .ui-tab:hover:not(.ui-tab--active) {
+  color: #64748b;
+  transition: none !important;
 }
