@@ -131,9 +131,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
         </motion.div>
 
         {!collapsed && (
-          <div className="px-5 pb-5 text-xs text-gray-400 text-center">
-            AM | KM
-          </div>
+          <div className="text-xs text-gray-400 text-center">AM | KM</div>
         )}
       </div>
     </Sider>
