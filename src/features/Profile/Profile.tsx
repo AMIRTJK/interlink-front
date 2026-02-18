@@ -1,7 +1,7 @@
 
 import { useNavigate } from "react-router-dom";
 import { AppRoutes } from "@shared/config/AppRoutes";
-import { tokenControl, useTheme } from "@shared/lib";
+import { tokenControl } from "@shared/lib";
 import { ApiRoutes, _axios } from "@shared/api";
 import { IUser } from "@entities/login";
 import { useEffect, useState } from "react";
@@ -17,18 +17,6 @@ export const Profile = () => {
   const [userData, setUserData] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
   const activeTab = useCurrentTab();
-  const {
-    isAnimEnabled,
-    setIsAnimEnabled,
-    isSnowEnabled,
-    setIsSnowEnabled,
-    isRainEnabled,
-    setIsRainEnabled,
-    isAutumnEnabled,
-    setIsAutumnEnabled,
-    isSakuraEnabled,
-    setIsSakuraEnabled,
-  } = useTheme();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -70,18 +58,8 @@ export const Profile = () => {
     <>
     <RenderJSX
       isPending={loading}
-      isSnowEnabled={isSnowEnabled}
-      setIsSnowEnabled={setIsSnowEnabled}
-      isRainEnabled={isRainEnabled}
-      setIsRainEnabled={setIsRainEnabled}
-      isAutumnEnabled={isAutumnEnabled}
-      setIsAutumnEnabled={setIsAutumnEnabled}
-      isSakuraEnabled={isSakuraEnabled}
-      setIsSakuraEnabled={setIsSakuraEnabled}
       isSettingsOpen={isSettingsOpen}
       setIsSettingsOpen={setIsSettingsOpen}
-      isAnimEnabled={isAnimEnabled}
-      setIsAnimEnabled={setIsAnimEnabled}
       userData={userData}
       activeTab={activeTab}
       onMenuClick={handleMenuClick}

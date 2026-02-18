@@ -9,16 +9,6 @@ import { UseSkeleton } from "@shared/ui/Skeleton/ui";
 
 interface IProps {
   isPending: boolean;
-  isSnowEnabled: boolean;
-  setIsSnowEnabled: (v: boolean) => void;
-  isRainEnabled: boolean;
-  setIsRainEnabled: (v: boolean) => void;
-  isAutumnEnabled: boolean;
-  setIsAutumnEnabled: (v: boolean) => void;
-  isSakuraEnabled: boolean;
-  setIsSakuraEnabled: (v: boolean) => void;
-  isAnimEnabled: boolean;
-  setIsAnimEnabled: (v: boolean) => void;
   isSettingsOpen: boolean;
   setIsSettingsOpen: (v: boolean) => void;
   userData: IUser | null;
@@ -30,16 +20,6 @@ interface IProps {
 
 export const RenderJSX = ({
   isPending,
-  isSnowEnabled,
-  setIsSnowEnabled,
-  isRainEnabled,
-  setIsRainEnabled,
-  isAutumnEnabled,
-  setIsAutumnEnabled,
-  isSakuraEnabled,
-  setIsSakuraEnabled,
-  isAnimEnabled,
-  setIsAnimEnabled,
   isSettingsOpen,
   setIsSettingsOpen,
   userData,
@@ -60,29 +40,12 @@ export const RenderJSX = ({
         width={300}
         closable
         maskClosable
+        centered
+        className="ios-settings-modal"
+        transitionName="ant-zoom"
       >
         <div className="space-y-2">
-          <div className="hidden! sm:flex justify-between items-center">
-            <span>Включить снег ❄️</span>
-            <Switch checked={isSnowEnabled} onChange={setIsSnowEnabled} />
-          </div>
-          <div className="hidden! sm:flex justify-between items-center">
-            <span>Включить дождь 🌧️</span>
-            <Switch checked={isRainEnabled} onChange={setIsRainEnabled} />
-          </div>
-          <div className="hidden! sm:flex justify-between items-center">
-            <span>Листопад 🍂</span>
-            <Switch checked={isAutumnEnabled} onChange={setIsAutumnEnabled} />
-          </div>
-          <div className="hidden! sm:flex justify-between items-center">
-            <span>Сакура 🌸</span>
-            <Switch checked={isSakuraEnabled} onChange={setIsSakuraEnabled} />
-          </div>
-          <div className="flex justify-between items-center">
-            <span>Анимации ⚡</span>
-            <Switch checked={isAnimEnabled} onChange={setIsAnimEnabled} />
-          </div>
-          <div className="hidden! sm:flex justify-between items-center pt-4 border-t border-gray-100">
+          <div className="sm:flex justify-between items-center pt-4 border-t border-gray-100">
             <span>Стиль iOS 📱</span>
             <Switch 
               checked={navbarVariant === "ios"} 
@@ -93,8 +56,8 @@ export const RenderJSX = ({
       </Modal>
 
       {/* Левая часть профиля */}
-      <aside className="w-full lg:w-[28%]">
-        <div className="bg-white p-6 rounded-xl shadow">
+      <aside className="w-full lg:w-[28%] premium-tracking">
+        <div className="bg-white/70 backdrop-blur-md p-6 rounded-3xl soft-shadow-ios border border-white/20">
           <UseSkeleton loading={isPending} variant="card" count={1} rows={4} />
           <div className="flex justify-end">
             <SettingOutlined
@@ -137,7 +100,7 @@ export const RenderJSX = ({
           onChange={(key) => onMenuClick({ key })}
           className="profile__tabs-wrapper"
         />
-        <div className="profile__content-card">
+        <div className="profile__content-card soft-shadow-ios rounded-3xl background-white/50 backdrop-blur-sm">
           <Outlet />
         </div>
       </aside>

@@ -23,10 +23,11 @@ const rowVariants = {
     opacity: 1,
     x: 0,
     transition: {
-      duration: 0.4,
+      duration: 0.5,
+      ease: [0.23, 1, 0.32, 1],
     },
   },
-};
+} as const;
 
 const contentVariants = {
   hidden: { opacity: 0, x: -15 },
@@ -34,10 +35,11 @@ const contentVariants = {
     opacity: 1, 
     x: 0,
     transition: {
-      duration: 0.3,
+      duration: 0.4,
+      ease: [0.23, 1, 0.32, 1],
     }
   },
-};
+} as const;
 
 export const SidebarItem: React.FC<SidebarItemProps> = ({
   item,
@@ -64,9 +66,10 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         variants={rowVariants}
         initial="visible"
         whileHover={{ 
-          transition: { duration: 0.15 }
+          backgroundColor: "rgba(0, 0, 0, 0.015)",
+          transition: { duration: 0.2 }
         }}
-        whileTap={{ scale: 0.97 }}
+        whileTap={{ scale: 0.98 }}
         className={cn(
           "flex items-center group focus:outline-none! active:outline-none! border border-transparent rounded-2xl cursor-pointer relative select-none px-3 py-2",
           variant === "vertical" ? "w-full" : "max-w-[180px]",
@@ -86,13 +89,13 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           <motion.div
             layoutId="active-pill"
             className={cn(
-               "absolute border-white/50! shadow-lg! shadow-indigo-200/40!",
+               "absolute border-white/50! active-pill-shadow!",
                isCollapsedMode 
-                 ? "w-10 h-10 left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 rounded-full! shadow-md! from-indigo-500/20! to-purple-500/20! bg-linear-to-r!" 
-                 : "inset-0 rounded-2xl bg-linear-to-r! from-indigo-400/30! to-purple-400/30!",
-               depth > 0 && !isCollapsedMode && "from-indigo-300/20! to-purple-300/20! shadow-sm!"
+                 ? "w-10 h-10 left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 rounded-full! from-indigo-500/15! to-purple-500/15! bg-linear-to-r!" 
+                 : "inset-0 rounded-2xl bg-linear-to-r! from-indigo-400/20! to-purple-400/20!",
+               depth > 0 && !isCollapsedMode && "from-indigo-300/10! to-purple-300/10!"
             )}
-            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+            transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
             style={{ zIndex: -1 }}
           />
         )}

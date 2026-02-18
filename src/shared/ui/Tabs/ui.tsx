@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
-import { useTheme } from "@shared/lib";
 import { If } from "../If";
 import "./style.css";
 import { ITabsProps } from "./model";
+
 export const Tabs = ({
   items,
   activeKey,
@@ -10,7 +10,6 @@ export const Tabs = ({
   className = "",
   layoutId = "active-tab",
 }: ITabsProps) => {
-  const { isAnimEnabled } = useTheme();
   return (
     <div className={`ui-tabs ${className}`}>
       {items?.map((item) => {
@@ -23,13 +22,9 @@ export const Tabs = ({
           >
             <If is={isActive}>
               <motion.div
-                layoutId={isAnimEnabled ? layoutId : undefined}
+                layoutId={layoutId}
                 className="ui-tab-background"
-                transition={
-                  isAnimEnabled
-                    ? { type: "spring", bounce: 0, duration: 0.4 }
-                    : { duration: 0 }
-                }
+                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
               />
             </If>
             <span className="ui-tab-text">{item.label}</span>

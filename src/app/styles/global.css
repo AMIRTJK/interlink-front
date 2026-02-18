@@ -24,6 +24,24 @@ body,
   color: #808080 !important;
 }
 
+/* Premium Typography & Shadows */
+.premium-tracking {
+  letter-spacing: -0.012em;
+}
+
+.soft-shadow-ios {
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.02),
+    0 10px 20px rgba(0, 0, 0, 0.04),
+    0 20px 40px rgba(0, 0, 0, 0.04);
+}
+
+.active-pill-shadow {
+  box-shadow: 
+    0 4px 12px rgba(79, 70, 229, 0.15),
+    0 2px 4px rgba(79, 70, 229, 0.1);
+}
+
 .custom-form-item {
   margin: 0 !important;
 }
@@ -32,19 +50,7 @@ body,
   font-size: 24px !important;
 }
 
-.dark {
-  --color-bg-primary: #1a1a1a;
-  --color-text-primary: #ffffff;
-  --color-bg-secondary: #2a2a2a;
-  --color-border: #404040;
-}
 
-.space {
-  --color-bg-primary: #0b0d17;
-  --color-text-primary: #e0e6ed;
-  --color-bg-secondary: #161b2e;
-  --color-border: #2d3748;
-}
 
 body {
   background-color: var(--color-bg-primary);
@@ -100,54 +106,7 @@ body {
   border: 1px solid var(--color-border);
 }
 
-.theme-switcher {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 5px 20px;
-  border-radius: 40px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0.05)
-  );
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
 
-.theme-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.theme-btn:hover {
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.1);
-  transform: scale(1.1);
-}
-
-.theme-btn.active {
-  color: #fff;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-  transform: scale(1.05);
-}
-
-.theme-btn.active:hover {
-  transform: scale(1.15);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-}
 
 .text-primary {
   color: var(--color-text-primary);
@@ -174,19 +133,8 @@ body {
   color: #fff;
 }
 
-/* No Animations Mode */
-body.no-animations * {
-  transition: none !important;
-  animation: none !important;
-  scroll-behavior: auto !important;
-}
+/* No Animations Mode - REMOVED */
 
-/* Global no animations hover */
-body.no-animations *:hover {
-  transform: none !important;
-  box-shadow: none !important;
-  filter: none !important;
-}
 
 /* Для скрытия дочерних папок и добавление папки  */
 /* .crtChildrenFolderHidden {
