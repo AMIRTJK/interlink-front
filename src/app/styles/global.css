@@ -24,6 +24,24 @@ body,
   color: #808080 !important;
 }
 
+/* Premium Typography & Shadows */
+.premium-tracking {
+  letter-spacing: -0.012em;
+}
+
+.soft-shadow-ios {
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.02),
+    0 10px 20px rgba(0, 0, 0, 0.04),
+    0 20px 40px rgba(0, 0, 0, 0.04);
+}
+
+.active-pill-shadow {
+  box-shadow: 
+    0 4px 12px rgba(79, 70, 229, 0.15),
+    0 2px 4px rgba(79, 70, 229, 0.1);
+}
+
 .custom-form-item {
   margin: 0 !important;
 }

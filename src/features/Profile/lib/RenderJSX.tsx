@@ -93,8 +93,8 @@ export const RenderJSX = ({
       </Modal>
 
       {/* Левая часть профиля */}
-      <aside className="w-full lg:w-[28%]">
-        <div className="bg-white p-6 rounded-xl shadow">
+      <aside className="w-full lg:w-[28%] premium-tracking">
+        <div className="bg-white/70 backdrop-blur-md p-6 rounded-3xl soft-shadow-ios border border-white/20">
           <UseSkeleton loading={isPending} variant="card" count={1} rows={4} />
           <div className="flex justify-end">
             <SettingOutlined
@@ -137,7 +137,7 @@ export const RenderJSX = ({
           onChange={(key) => onMenuClick({ key })}
           className="profile__tabs-wrapper"
         />
-        <div className="profile__content-card">
+        <div className="profile__content-card soft-shadow-ios rounded-3xl background-white/50 backdrop-blur-sm">
           <Outlet />
         </div>
       </aside>

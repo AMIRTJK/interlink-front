@@ -46,9 +46,9 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
       trigger={null}
       width="325px"
       collapsedWidth="80px"
-      className={`min-h-[480px]! border-none! bg-white/50! backdrop-blur-2xl! rounded-3xl! shadow-2xl! shadow-indigo-500/20! ${collapsed ? "p-4!" : "p-6!"} ${
-        collapsed ? "w-[80px]! max-w-[80px]!" : "min-w-[300px]! max-w-[330px]!"
-      }`}
+      className={`min-h-[480px]! border-none! bg-white/60! backdrop-blur-3xl! rounded-3xl! soft-shadow-ios! ${collapsed ? "p-4!" : "p-6!"} ${
+        collapsed ? "w-[80px]! max-w-[80px]!" : "min-w-[301px]! max-w-[330px]!"
+      } transition-all duration-500 ease-[0.23,1,0.32,1]`}
     >
       <div className="flex flex-col h-full">
         <div
