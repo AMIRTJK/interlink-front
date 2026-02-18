@@ -46,7 +46,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
       trigger={null}
       width="325px"
       collapsedWidth="80px"
-      className={`h-full! border-none! bg-white/50! backdrop-blur-2xl! rounded-3xl! shadow-2xl! shadow-indigo-500/20! ${collapsed ? "p-4!" : "p-6!"} ${
+      className={`min-h-[480px]! border-none! bg-white/50! backdrop-blur-2xl! rounded-3xl! shadow-2xl! shadow-indigo-500/20! ${collapsed ? "p-4!" : "p-6!"} ${
         collapsed ? "w-[80px]! max-w-[80px]!" : "min-w-[300px]! max-w-[330px]!"
       }`}
     >
