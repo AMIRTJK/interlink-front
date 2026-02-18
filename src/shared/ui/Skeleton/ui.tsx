@@ -101,6 +101,30 @@ export const UseSkeleton: React.FC<ISkeletonProps> = ({
             />
           </div>
         );
+      case 'sidebar':
+        return (
+          <div style={{ width: '100%', padding: '10px' }}>
+            <Space direction="vertical" style={{ width: '100%' }} size={16}>
+              {Array.from({ length: count || 6 }).map((_, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <Skeleton.Avatar active={active} size="small" shape="square" />
+                  <Skeleton.Input active={active} style={{ width: '70%', height: 16 }} size="small" />
+                </div>
+              ))}
+            </Space>
+          </div>
+        );
+      case 'editor':
+        return (
+          <div style={{ width: '100%', padding: '20px', background: '#fff', borderRadius: '8px' }}>
+            <div style={{ borderBottom: '1px solid #f0f0f0', paddingBottom: '12px', marginBottom: '20px', display: 'flex', gap: '10px' }}>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Skeleton.Button key={i} active={active} size="small" style={{ width: 24, height: 24 }} />
+              ))}
+            </div>
+            <Skeleton active={active} paragraph={{ rows: rows || 15, width: '100%' }} title={{ width: '40%' }} />
+          </div>
+        );
       default:
         return (
           <Skeleton 

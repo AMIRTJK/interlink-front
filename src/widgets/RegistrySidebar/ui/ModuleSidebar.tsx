@@ -27,6 +27,8 @@ export const ModuleSidebar = ({
     onFinish,
     navigate,
     isInternal,
+    isLoadingFolders,
+    isLoadingCounters,
   } = useModuleSidebar();
 
   return (
@@ -39,6 +41,7 @@ export const ModuleSidebar = ({
           activeKey={activeKey}
           handleAddClick={handleAddClick}
           isInternal={isInternal}
+          // Пока пропустим горизонтальный, если там нет поддержки
         />
       ) : (
         <ModuleSidebarVertical
@@ -51,6 +54,7 @@ export const ModuleSidebar = ({
           handleAddClick={handleAddClick}
           navigate={navigate}
           isInternal={isInternal}
+          isLoadingFolders={isLoadingFolders}
         />
       )}
 
