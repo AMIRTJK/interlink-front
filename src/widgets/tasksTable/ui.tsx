@@ -6,9 +6,8 @@ import { useMutationQuery } from "@shared/lib";
 import type { ITaskItem, ITasksResponse } from "./model";
 import { TasksColumn } from "./ui/TasksColumn";
 import { TasksFilters } from "./ui/TasksFilters";
-import "./style.css";
-import { Loader } from "@shared/ui";
 import { UseSkeleton } from "@shared/ui/Skeleton/ui";
+import "./style.css";
 
 interface IProps {
   onAddTask?: (status: string) => void;
