@@ -81,12 +81,14 @@ export const RenderJSX = ({
               <p>Должность:</p>
               <p>Номер телефона:</p>
               <p>ИНН:</p>
+              <p>Отдел:</p>
             </div>
             <div className="space-y-2 font-medium text-black text-right">
               <p>{userData?.organization.name}</p>
               <p>{userData?.position}</p>
               <p>{userData?.phone}</p>
               <p>{userData?.inn || "12345678"}</p>
+              <p>{userData?.departments.join(", ") || ""}</p>
             </div>
           </div>
         </div>

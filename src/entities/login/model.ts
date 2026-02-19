@@ -25,6 +25,8 @@ export interface IUser {
     name: string;
     short_name: string;
     
+},
+departments:string[]
 }
 
 export interface ILoginResponse {
