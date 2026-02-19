@@ -1,4 +1,5 @@
 import "./style.css";
+
 import React, { useMemo, useState } from "react";
 import locale from "antd/es/locale/ru_RU";
 import dayjs from "dayjs";
@@ -15,7 +16,18 @@ import {
   FileType,
   FileText,
   ChevronDown,
+  User,
+  Mail,
+  X,
+  RotateCcw,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
 } from "lucide-react";
+
+
+
 import {
   ConfigProvider,
   DatePicker,
@@ -24,9 +36,13 @@ import {
   Select,
   theme,
 } from "antd";
-import { Breadcrumbs, IBreadcrumbItem } from "@shared/ui";
+import { Breadcrumbs, IBreadcrumbItem, Count, If } from "@shared/ui";
+import { useLocation } from "react-router";
+
+
 
 dayjs.locale("ru");
+
 
 // Хелпер для цветов бейджей (Tailwind)
 const getBadgeStyles = (color: string) => {
@@ -148,7 +164,8 @@ export const RegistryLayout = ({
     >
       {/* --- HEADER BLOCK --- */}
       <motion.div
-        className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 space-y-3 flex-shrink-0 m-0"
+        className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 space-y-3 shrink-0 m-0"
+
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -251,11 +268,14 @@ export const RegistryLayout = ({
                 transition={{ delay: index * 0.05, duration: 0.3 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`relative cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap ${
+                data-active={activeTabId === tab.id}
+                className={`relative group/tab cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap ${
                   activeTabId === tab.id
-                    ? `bg-gradient-to-r ${tab.gradient} text-white shadow-md`
+                    ? `bg-linear-to-r ${tab.gradient} text-white shadow-md`
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
+
+
               >
                 <span
                   className={`flex items-center justify-center ${
@@ -265,19 +285,15 @@ export const RegistryLayout = ({
                   {tab.icon}
                 </span>
                 <span>{tab.label}</span>
-                {tab.count > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className={`px-1.5 py-0.5 text-[10px] rounded-full font-bold ml-1 min-w-[18px] text-center ${
-                      activeTabId === tab.id
-                        ? "bg-white/25 text-white"
-                        : "bg-white text-gray-700"
-                    }`}
-                  >
-                    {tab.count}
-                  </motion.span>
-                )}
+                <Count
+                  count={tab.count}
+                  showZero
+                  variant="white"
+                  className="absolute -top-1.5 -right-1.5 shadow-xs transition-colors"
+                />
+
+
+
               </motion.button>
             ))}
           </div>
@@ -347,7 +363,8 @@ export const RegistryLayout = ({
 
           {/* --- PAGINATION --- */}
           {lastPage > 1 && (
-            <div className="flex-shrink-0 bg-white rounded-xl shadow-sm border border-gray-100 p-2">
+            <div className="shrink-0 bg-white rounded-xl shadow-sm border border-gray-100 p-2">
+
               <Pagination
                 currentPage={currentPage}
                 totalPages={lastPage}
@@ -374,22 +391,8 @@ export const RegistryLayout = ({
 // ВСПОМОГАТЕЛЬНЫЕ КОМПОНЕНТЫ
 // ==========================================
 
-import {
-  Building2,
-  User,
-  Mail,
-  Send,
-  X,
-  RotateCcw,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  Calendar,
-} from "lucide-react";
-import { If } from "@shared/ui";
-import { useLocation } from "react-router";
-
 // --- SECTION HEADER ---
+
 export const SectionHeader = ({
   activeStatusData,
   t,
@@ -1125,9 +1128,10 @@ const Pagination = ({ currentPage, totalPages, onPageChange, t }: any) => {
               onClick={() => onPageChange(pageNum)}
               className={`min-w-[36px] h-9 px-3 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                 isActive
-                  ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md"
+                  ? "bg-linear-to-r from-blue-600 to-blue-700 text-white shadow-md"
                   : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
               }`}
+
             >
               {pageNum}
             </motion.button>
