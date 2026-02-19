@@ -83,7 +83,7 @@ export const RenderJSX = ({
               <p>ИНН:</p>
             </div>
             <div className="space-y-2 font-medium text-black text-right">
-              <p>{userData?.organization_id}</p>
+              <p>{userData?.organization.name}</p>
               <p>{userData?.position}</p>
               <p>{userData?.phone}</p>
               <p>{userData?.inn || "12345678"}</p>
