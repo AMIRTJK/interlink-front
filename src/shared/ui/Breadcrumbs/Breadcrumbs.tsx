@@ -85,7 +85,7 @@ export const Breadcrumbs: React.FC<IBreadcrumbsProps> = ({
               className={cn(
                 "flex items-center justify-center px-2 py-1 rounded-lg transition-all duration-200 select-none group border border-transparent",
                 !isActive
-                  ? "cursor-pointer text-gray-500 hover:text-blue-700 hover:bg-blue-50/80 hover:border-blue-100/50"
+                  ? "cursor-pointer text-gray-500 gap-2 hover:text-blue-700 hover:bg-blue-50/80 hover:border-blue-100/50"
                   : "text-gray-900 font-bold cursor-default bg-gray-100/30 border-gray-200/50 shadow-sm",
               )}
               onClick={!isActive ? item.onClick : undefined}
