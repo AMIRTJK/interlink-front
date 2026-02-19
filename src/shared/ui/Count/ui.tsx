@@ -23,11 +23,13 @@ export const Count: React.FC<IProps> = ({
   const content = (
     <span
       className={cn(
-        "flex items-center justify-center rounded-full shrink-0 leading-none font-bold text-[10px] h-5 min-w-[20px] px-1 transition-colors border",
+        "flex items-center justify-center rounded-full shrink-0 leading-none font-bold text-[10px] h-5 min-w-[20px] px-1 transition-all duration-300 border",
         // Стили для красного варианта (сайдбар)
-        variant === "red" && "bg-[#E30613] text-white border-transparent",
-        // Стили для белого варианта (реестр) - автоматически управляются через родительский tab group
-        variant === "white" && "bg-white text-gray-500 border-gray-200 group-data-[active=true]/tab:text-blue-600 group-data-[active=true]/tab:border-blue-100",
+        variant === "red" && "bg-[#E30613] text-white border-transparent shadow-sm",
+        // Стили для белого варианта (реестр)
+        // Скрыт по умолчанию (scale-0), появляется только при активности родительского таба
+        variant === "white" &&
+          "scale-0 opacity-0 bg-white text-gray-500 border-gray-200 group-data-[active=true]/tab:scale-100 group-data-[active=true]/tab:opacity-100 group-data-[active=true]/tab:text-blue-600 group-data-[active=true]/tab:border-blue-100",
 
         className
       )}
