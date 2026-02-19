@@ -455,7 +455,7 @@ export const SectionHeader = ({
 export const DocumentCard = ({
   data,
   statusData,
-  index,
+  _index,
   onClick,
   activeStatusData,
   fieldConfig,
@@ -468,9 +468,8 @@ export const DocumentCard = ({
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: index * 0.05, duration: 0.1 }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4, boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.15)" }}
       onClick={onClick}
       className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-blue-300 transition-all cursor-pointer group"
@@ -594,7 +593,7 @@ export const DocumentCard = ({
 export const DocumentListItem = ({
   data,
   statusData,
-  index,
+  _index,
   onClick,
   activeStatusData,
   fieldConfig,
@@ -607,11 +606,9 @@ export const DocumentListItem = ({
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, x: -20 }}
+      initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
       transition={{
-        delay: index * 0.03,
         duration: 0.1,
         ease: [0.4, 0, 0.2, 1],
       }}
