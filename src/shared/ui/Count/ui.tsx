@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { cn } from "@shared/lib/utils";
-import { motion } from "framer-motion";
+import { motion, useSpring, useTransform } from "framer-motion";
 
 interface IProps {
   count?: number;
@@ -9,14 +9,26 @@ interface IProps {
   showZero?: boolean;
   animate?: boolean;
 }
+
+const AnimatedNumber = ({ value }: { value: number }) => {
+  const spring = useSpring(value, { mass: 0.8, stiffness: 75, damping: 15 });
+  const display = useTransform(spring, (current) => Math.round(current));
+
+  useEffect(() => {
+    spring.set(value);
+  }, [value, spring]);
+
+  return <motion.span>{display}</motion.span>;
+};
+
 export const Count: React.FC<IProps> = ({
-  count,
+  count = 0,
   variant = "red",
   className,
   showZero = false,
   animate = true,
 }) => {
-  if (count === undefined || (count === 0 && !showZero)) {
+  if (count === 0 && !showZero) {
     return null;
   }
 
@@ -27,14 +39,13 @@ export const Count: React.FC<IProps> = ({
         // Стили для красного варианта (сайдбар)
         variant === "red" && "bg-[#E30613] text-white border-transparent shadow-sm",
         // Стили для белого варианта (реестр)
-        // Скрыт по умолчанию (scale-0), появляется только при активности родительского таба
         variant === "white" &&
           "scale-0 opacity-0 bg-white text-gray-500 border-gray-200 group-data-[active=true]/tab:scale-100 group-data-[active=true]/tab:opacity-100 group-data-[active=true]/tab:text-blue-600 group-data-[active=true]/tab:border-blue-100",
 
         className
       )}
     >
-      {count}
+      <AnimatedNumber value={count} />
     </span>
   );
   if (animate) {
