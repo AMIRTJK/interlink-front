@@ -7,12 +7,14 @@ interface IProps {
   name: string;
   definition: IFolderDefinition;
   onNavigate: (path: string) => void;
+  collapsed?: boolean;
 }
 
 export const SystemFolderLabel: React.FC<IProps> = ({
   name,
   definition,
   onNavigate,
+  collapsed: _collapsed,
 }) => {
 
   return (
