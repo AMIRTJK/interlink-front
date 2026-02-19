@@ -20,6 +20,13 @@ export interface IUser {
   full_name: string;
   roles: string[];
   permissions: string[];
+  organization: {
+    id: number;
+    name: string;
+    short_name: string;
+    
+},
+departments:string[]
 }
 
 export interface ILoginResponse {
