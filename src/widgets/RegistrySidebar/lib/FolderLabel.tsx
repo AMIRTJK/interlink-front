@@ -1,6 +1,6 @@
 import React from "react";
 import { IFolderLabelProps } from "../model";
-import { FolderCounter } from "./FolderCounter";
+import { Count } from "@shared/ui";
 import { FolderActions } from "./FolderActions";
 export const FolderLabel: React.FC<IFolderLabelProps> = ({
   folder,
@@ -37,8 +37,9 @@ export const FolderLabel: React.FC<IFolderLabelProps> = ({
 
       <div className="flex items-center gap-1 shrink-0 ml-1">
         <FolderActions menuActions={menuActions} collapsed={collapsed} />
-        <FolderCounter definition={definition} collapsed={collapsed} />
+        <Count count={definition?.count} />
       </div>
     </div>
   );
 };
+

@@ -54,7 +54,6 @@ export const RenderJSX = ({
           </div>
         </div>
       </Modal>
-
       {/* Левая часть профиля */}
       <aside className="w-full lg:w-[28%] premium-tracking">
         <div className="bg-white/70 backdrop-blur-md p-6 rounded-3xl soft-shadow-ios border border-white/20">
@@ -66,7 +65,6 @@ export const RenderJSX = ({
               onClick={() => setIsSettingsOpen(true)}
             />
           </div>
-
           <div className="flex flex-col items-center mb-4">
             <Avatar src={userAvatar} size={128} icon={<UserOutlined />} />
           </div>
@@ -74,7 +72,6 @@ export const RenderJSX = ({
           <p className="text-center text-[#0037AF] text-xl font-semibold mb-6">
             {userData?.full_name}
           </p>
-
           <div className="flex justify-between text-sm">
             <div className="space-y-2 text-black font-light">
               <p>Место работы:</p>
@@ -93,7 +90,6 @@ export const RenderJSX = ({
           </div>
         </div>
       </aside>
-
       {/* Правая часть — контент */}
       <aside className="w-full lg:w-[72%]">
         <Tabs

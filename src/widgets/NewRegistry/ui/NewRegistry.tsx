@@ -6,7 +6,7 @@ import {
   FileEdit,
   Loader,
   Handshake,
-  Signature,
+  // Signature,
   CheckCheck,
   XCircle,
   Eye,
@@ -243,24 +243,31 @@ export const NewRegistry = ({
 
   const documents = (responseData as any)?.data?.data || [];
   const meta = (responseData as any)?.data || {};
-  const counts = (countersData as any)?.data || {};
+  const counts = useMemo(() => (countersData as any)?.data || {}, [countersData]);
+
 
   const statusTabs = useMemo(() => {
     return activeStatusKeys
       .map((key) => {
         const config = STATUS_CONFIG[key];
         if (!config) return null;
+        let count = counts[key] ?? counts[key.replace("-", "_")] ?? 0;
+        if (key === currentTab && meta.total !== undefined) {
+          count = meta.total;
+        }
 
         return {
           id: key,
           label: config.label,
           icon: config.icon,
           gradient: config.gradient,
-          count: counts[key] || 0,
+          count,
         };
       })
       .filter(Boolean);
-  }, [counts, activeStatusKeys]);
+  }, [counts, activeStatusKeys, currentTab, meta.total]);
+
+
 
   const handleTabChange = (statusId: string) => {
     setParams("status", statusId);
