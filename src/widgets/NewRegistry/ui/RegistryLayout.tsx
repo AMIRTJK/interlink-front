@@ -270,30 +270,32 @@ export const RegistryLayout = ({
                 whileTap={{ scale: 0.95 }}
                 data-active={activeTabId === tab.id}
                 className={`relative group/tab cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap ${
-                  activeTabId === tab.id
-                    ? `bg-linear-to-r ${tab.gradient} text-white shadow-md`
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  activeTabId === tab.id ? "text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
-
-
               >
-                <span
-                  className={`flex items-center justify-center ${
-                    activeTabId !== tab.id ? "opacity-70" : ""
-                  }`}
-                >
-                  {tab.icon}
+                <If is={activeTabId === tab.id}>
+                  <motion.div
+                    layoutId="active-status-bg"
+                    className={`absolute inset-0 rounded-full bg-linear-to-r ${tab.gradient} shadow-md`}
+                    transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                  />
+                </If>
+                <span className="relative z-10 flex items-center justify-center">
+                  <span
+                    className={`flex items-center justify-center ${
+                      activeTabId !== tab.id ? "opacity-70" : ""
+                    }`}
+                  >
+                    {tab.icon}
+                  </span>
                 </span>
-                <span>{tab.label}</span>
+                <span className="relative z-10">{tab.label}</span>
                 <Count
                   count={tab.count}
                   showZero
                   variant="white"
-                  className="absolute -top-1.5 -right-1.5 shadow-xs transition-colors"
+                  className="absolute -top-1.5 -right-1.5 shadow-xs transition-colors z-20"
                 />
-
-
-
               </motion.button>
             ))}
           </div>
