@@ -179,7 +179,6 @@
 }
 
 .hover-lift:hover {
-  transform: translateY(-4px) scale(1.005) !important;
   box-shadow: 0 12px 40px rgba(31, 38, 135, 0.1) !important;
 }
 
