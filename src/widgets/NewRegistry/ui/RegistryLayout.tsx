@@ -192,7 +192,7 @@ export const RegistryLayout = ({
               <Plus className="w-4 h-4 relative z-10" />
               <span className="relative z-10">{createButtonText}</span>
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent"
                 animate={{ x: ["-100%", "200%"] }}
                 transition={{
                   duration: 2,
@@ -263,7 +263,7 @@ export const RegistryLayout = ({
 
         <If is={isStatusNavActive}>
           <div className="flex items-center gap-2 pb-1 scrollbar-hide flex-wrap">
-            {tabs.map((tab, index) => (
+            {tabs?.map((tab, index) => (
               <motion.button
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
@@ -273,7 +273,7 @@ export const RegistryLayout = ({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 data-active={activeTabId === tab.id}
-                className={`relative group/tab cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap ${
+                className={`relative group/tab cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap min-w-[108px] ${
                   activeTabId === tab.id
                     ? "text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -299,6 +299,7 @@ export const RegistryLayout = ({
                 <Count
                   count={tab.count}
                   showZero
+                  animate={false}
                   variant="white"
                   className="absolute -top-1.5 -right-1.5 shadow-xs transition-colors z-20"
                 />
