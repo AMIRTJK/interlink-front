@@ -27,6 +27,7 @@ export const ProfileSettingsModal = ({
       transitionName="ant-zoom"
     >
       <div className="space-y-2">
+        {/* IOS навигация */}
         <div className="hidden! sm:flex justify-between items-center pt-4 border-t border-gray-100">
           <span>Стиль iOS 📱</span>
           <Switch
