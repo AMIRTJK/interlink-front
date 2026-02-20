@@ -26,8 +26,6 @@ import {
   Calendar,
 } from "lucide-react";
 
-
-
 import {
   ConfigProvider,
   DatePicker,
@@ -38,11 +36,9 @@ import {
 } from "antd";
 import { Breadcrumbs, IBreadcrumbItem, Count, If } from "@shared/ui";
 import { useLocation } from "react-router";
-
-
+import { tokenControl } from "@shared/lib";
 
 dayjs.locale("ru");
-
 
 // Хелпер для цветов бейджей (Tailwind)
 const getBadgeStyles = (color: string) => {
@@ -118,7 +114,11 @@ export const RegistryLayout = ({
   fieldConfig,
   breadcrumbs,
 }: RegistryLayoutProps) => {
-  const [viewMode, setViewMode] = useState<"list" | "block">("list");
+  const [viewMode, setViewMode] = useState<"list" | "block">(() => {
+    const savedMode = tokenControl.getViewMode();
+    return (savedMode as "list" | "block") || "list";
+  });
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const { pathname } = useLocation();
@@ -144,6 +144,11 @@ export const RegistryLayout = ({
 
   const hasActiveFilters = Object.values(currentFilters).some((v) => !!v);
 
+  const handleViewModeChange = (mode: "list" | "block") => {
+    setViewMode(mode);
+    tokenControl.setViewMode(mode);
+  };
+
   const handleCreateClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     const button = e.currentTarget;
     const rect = button.getBoundingClientRect();
@@ -165,7 +170,6 @@ export const RegistryLayout = ({
       {/* --- HEADER BLOCK --- */}
       <motion.div
         className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 space-y-3 shrink-0 m-0"
-
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -213,7 +217,7 @@ export const RegistryLayout = ({
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setViewMode("list")}
+                onClick={() => handleViewModeChange("list")}
                 className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                   viewMode === "list"
                     ? "bg-white text-blue-600 shadow-sm"
@@ -226,7 +230,7 @@ export const RegistryLayout = ({
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setViewMode("block")}
+                onClick={() => handleViewModeChange("block")}
                 className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                   viewMode === "block"
                     ? "bg-white text-blue-600 shadow-sm"
@@ -270,7 +274,9 @@ export const RegistryLayout = ({
                 whileTap={{ scale: 0.95 }}
                 data-active={activeTabId === tab.id}
                 className={`relative group/tab cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap min-w-[108px] ${
-                  activeTabId === tab.id ? "text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  activeTabId === tab.id
+                    ? "text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
                 <If is={activeTabId === tab.id}>
@@ -367,7 +373,6 @@ export const RegistryLayout = ({
           {/* --- PAGINATION --- */}
           {lastPage > 1 && (
             <div className="shrink-0 bg-white rounded-xl shadow-sm border border-gray-100 p-2">
-
               <Pagination
                 currentPage={currentPage}
                 totalPages={lastPage}
@@ -478,7 +483,9 @@ export const DocumentCard = ({
       {/* Header */}
       <div
         className={`p-3 bg-gradient-to-r ${
-          activeStatusData?.gradient || statusData?.gradient || "from-gray-100 to-gray-200"
+          activeStatusData?.gradient ||
+          statusData?.gradient ||
+          "from-gray-100 to-gray-200"
         } flex justify-between items-center`}
       >
         <div className="flex items-center gap-2 text-white">
@@ -624,7 +631,9 @@ export const DocumentListItem = ({
             animate={{ rotate: [0, 5, -5, 0] }}
             transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
             className={`flex-shrink-0 p-2.5 rounded-lg bg-gradient-to-r ${
-              activeStatusData?.gradient || statusData?.gradient || "from-gray-100 to-gray-200"
+              activeStatusData?.gradient ||
+              statusData?.gradient ||
+              "from-gray-100 to-gray-200"
             }`}
           >
             {statusData?.icon && (
@@ -703,7 +712,9 @@ export const DocumentListItem = ({
           <div className="flex items-center gap-3 flex-shrink-0">
             <div
               className={`px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r text-white ${
-                activeStatusData?.gradient || statusData?.gradient || "from-gray-100 to-gray-200"
+                activeStatusData?.gradient ||
+                statusData?.gradient ||
+                "from-gray-100 to-gray-200"
               }`}
             >
               {statusData?.label}
@@ -1131,7 +1142,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange, t }: any) => {
                   ? "bg-linear-to-r from-blue-600 to-blue-700 text-white shadow-md"
                   : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
               }`}
-
             >
               {pageNum}
             </motion.button>
