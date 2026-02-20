@@ -1,5 +1,5 @@
 import { Avatar } from "antd";
-import { UserOutlined, SettingOutlined } from "@ant-design/icons";
+import { UserOutlined, SettingOutlined, CameraOutlined } from "@ant-design/icons";
 import { Outlet, useLocation } from "react-router-dom";
 import { IUser } from "@entities/login";
 import { Tabs } from "@shared/ui";
@@ -83,14 +83,17 @@ export const RenderJSX = ({
             />
           </div>
 
-          {/* Аватар с градиентным фоном */}
+          {/* Аватар с интерактивом */}
           <div className="flex! flex-col! items-center! mb-5!">
-            <div className="profile-avatar-glow avatar-breath">
+            <div className="profile-avatar-glow avatar-breath profile-avatar-container">
               <Avatar
                 src={userAvatar}
                 className="profile-avatar-img"
                 icon={<UserOutlined />}
               />
+              <div className="profile-avatar-overlay">
+                <CameraOutlined style={{ fontSize: 24, color: "#fff" }} />
+              </div>
             </div>
           </div>
 

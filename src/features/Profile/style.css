@@ -21,8 +21,39 @@
 
 .profile-avatar-glow:hover {
   box-shadow: 0 12px 40px rgba(102, 126, 234, 0.45) !important;
-  transform: scale(1.03) !important;
 }
+
+/* === Аватар с интерактивом (Camera Action) === */
+.profile-avatar-container {
+  position: relative !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+}
+
+.profile-avatar-overlay {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0, 0, 0, 0.45) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease !important;
+  border-radius: 50% !important;
+  z-index: 5 !important;
+}
+
+.profile-avatar-container:hover .profile-avatar-overlay {
+  opacity: 1 !important;
+}
+
+.profile-avatar-container:hover .profile-avatar-img {
+  filter: blur(1px) brightness(0.8) !important;
+}
+
 
 /* Адаптивный размер аватара: 96px на мобилке, 128px на десктопе */
 .profile-avatar-img {
@@ -147,7 +178,6 @@
 }
 
 .hover-lift:hover {
-  transform: translateY(-4px) scale(1.005) !important;
   box-shadow: 0 12px 40px rgba(31, 38, 135, 0.1) !important;
 }
 
@@ -158,11 +188,6 @@
   margin: -4px -8px !important;
   border-radius: 8px !important;
   cursor: default;
-}
-
-.field-highlight:hover {
-  background: rgba(255, 255, 255, 0.6) !important;
-  transform: translateX(4px) !important;
 }
 
 /* Аватар "дышащий" только при наведении */
