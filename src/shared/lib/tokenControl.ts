@@ -1,13 +1,14 @@
 const TOKEN_KEY = "interlink/token";
-const USER_ID='interlink/userId';
-const OUTGOING_LETTER_COUNT='interlink/outgoingLetterCount';
+const USER_ID = "interlink/userId";
+const OUTGOING_LETTER_COUNT = "interlink/outgoingLetterCount";
+const VIEW_MODE_KEY = "interlink/viewMode";
 interface IToken {
   token: string;
-  userId?:number;
+  userId?: number;
 }
 
 export const tokenControl = {
-// Token
+  // Token
   set: ({ token }: IToken) => {
     localStorage.setItem(TOKEN_KEY, token);
   },
@@ -19,43 +20,53 @@ export const tokenControl = {
   remove: () => {
     localStorage.removeItem(TOKEN_KEY);
   },
-// User id
-  setUserId:(userId:number)=>{
+  // User id
+  setUserId: (userId: number) => {
     localStorage.setItem(USER_ID, userId.toString());
   },
 
-  getUserId:()=>{
+  getUserId: () => {
     return localStorage.getItem(USER_ID);
   },
 
-  removeUserId:()=>{
+  removeUserId: () => {
     localStorage.removeItem(USER_ID);
   },
-  
-// Outgoing letter count
-  setIncomingLetterCount:(count:number)=>{
+
+  // Outgoing letter count
+  setIncomingLetterCount: (count: number) => {
     localStorage.setItem(OUTGOING_LETTER_COUNT, count.toString());
   },
 
-  getIncomingLetterCount:()=>{
+  getIncomingLetterCount: () => {
     return localStorage.getItem(OUTGOING_LETTER_COUNT);
   },
 
-  removeOutgoingLetterCount:()=>{
+  removeOutgoingLetterCount: () => {
     localStorage.removeItem(OUTGOING_LETTER_COUNT);
   },
 
-// User data
+  // User data
   setUserData: (user: any) => {
-    localStorage.setItem('interlink/userData', JSON.stringify(user));
+    localStorage.setItem("interlink/userData", JSON.stringify(user));
   },
 
   getUserData: () => {
-    const data = localStorage.getItem('interlink/userData');
+    const data = localStorage.getItem("interlink/userData");
     return data ? JSON.parse(data) : null;
   },
 
   removeUserData: () => {
-    localStorage.removeItem('interlink/userData');
-  }
+    localStorage.removeItem("interlink/userData");
+  },
+
+  setViewMode: (mode: "list" | "block") => {
+    localStorage.setItem(VIEW_MODE_KEY, mode);
+  },
+  getViewMode: () => {
+    return localStorage.getItem(VIEW_MODE_KEY);
+  },
+  removeViewMode: () => {
+    localStorage.removeItem(VIEW_MODE_KEY);
+  },
 };
