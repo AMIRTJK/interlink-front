@@ -92,8 +92,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       (item: any) => String(item.approver?.id) === String(currentUserId),
     );
 
-    console.log(foundApproval);
-
     return foundApproval ? String(foundApproval.id) : "";
   }, [workflowData, currentUserId]);
 
@@ -176,6 +174,16 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       //   },
       // },
     });
+
+  // const { data: currentUserResponse } = useGetQuery({
+  //   method: "GET",
+  //   url: `${ApiRoutes.FETCH_USER_BY_ID}${currentUserId}`,
+  //   useToken: true,
+  // });
+
+  // const currentUser = currentUserResponse?.data || [];
+
+  const creator = initialData?.item?.creator;
 
   const handleSign = async () => {
     try {
@@ -472,6 +480,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
               isReadOnly={isReadOnly}
               versions={versions}
               onSelectVersion={handleSelectVersion}
+              documentCreator={creator}
             />
           </div>
         </If>
