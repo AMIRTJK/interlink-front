@@ -32,6 +32,7 @@ import { SignatureDetailsModal } from "./SignatureDetailsModal";
 
 // --- КОНСТАНТЫ ---
 const MAX_VISIBLE_DOCS = 2;
+const MAX_VISIBLE_SIGNERS = 3;
 const MAX_VISIBLE_APPROVERS = 3;
 const MAX_VISIBLE_VERSIONS = 3;
 
@@ -582,9 +583,16 @@ export const WorkflowParticipantsPanel = ({
     : documents.slice(0, MAX_VISIBLE_DOCS);
   const hiddenDocsCount = documents.length - visibleDocuments.length;
 
+  const visibleSigners = isCollapsed
+    ? []
+    : signers.slice(0, MAX_VISIBLE_SIGNERS);
+
+  const hiddenSignersCount = signers.length - visibleSigners.length;
+
   const visibleApprovers = isCollapsed
     ? []
     : approvers.slice(0, MAX_VISIBLE_APPROVERS);
+
   const hiddenApproversCount = approvers.length - visibleApprovers.length;
 
   const getStatusMeta = (status: string) => {
@@ -942,17 +950,30 @@ export const WorkflowParticipantsPanel = ({
           {signers.length > 0 && (
             <div>
               {!isCollapsed && (
-                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1">
-                  Подписывающие
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1 flex justify-between items-center">
+                  <span>Подписывающие</span>
+                  <span className="bg-gray-100 text-gray-500 px-1.5 rounded text-[9px]">
+                    {signers.length}
+                  </span>
                 </div>
               )}
-              {signers.map((s: any, idx: number) =>
-                renderUserRow(
-                  s,
-                  "signer",
-                  idx === signers.length - 1 && approvers.length === 0,
-                ),
+
+              {/* --- ОБНОВЛЕННЫЙ ЦИКЛ ПОДПИСЫВАЮЩИХ --- */}
+              {(isCollapsed ? signers : visibleSigners).map(
+                (s: any, idx: number) =>
+                  renderUserRow(
+                    s,
+                    "signer",
+                    idx === visibleSigners.length - 1 &&
+                      hiddenSignersCount === 0 &&
+                      approvers.length === 0,
+                  ),
               )}
+
+              {/* --- КНОПКА ДЛЯ СКРЫТЫХ ПОДПИСЫВАЮЩИХ --- */}
+              {!isCollapsed &&
+                hiddenSignersCount > 0 &&
+                renderShowMoreParticipants(hiddenSignersCount)}
             </div>
           )}
 
