@@ -1,4 +1,4 @@
-import { Avatar, Modal, Switch } from "antd";
+import { Avatar } from "antd";
 import { UserOutlined, SettingOutlined } from "@ant-design/icons";
 import { Outlet } from "react-router-dom";
 import { IUser } from "@entities/login";
@@ -6,6 +6,7 @@ import { Tabs } from "@shared/ui";
 import { profileRightNav } from "../model";
 import userAvatar from "../../../assets/images/user-avatar.jpg";
 import { UseSkeleton } from "@shared/ui/Skeleton/ui";
+import { ProfileSettingsModal } from "../ui/ProfileSettingsModal";
 
 interface IProps {
   isPending: boolean;
@@ -32,32 +33,15 @@ export const RenderJSX = ({
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6">
       {/* Модалка настроек */}
-      <Modal
-        title="Настройки"
-        open={isSettingsOpen}
-        onCancel={() => setIsSettingsOpen(false)}
-        footer={null}
-        width={300}
-        closable
-        maskClosable
-        centered
-        className="ios-settings-modal"
-        transitionName="ant-zoom"
-      >
-        <div className="space-y-2">
-          <div className="hidden! sm:flex justify-between items-center pt-4 border-t border-gray-100">
-            <span>Стиль iOS 📱</span>
-            <Switch 
-              checked={navbarVariant === "ios"} 
-              onChange={(checked) => setNavbarVariant(checked ? "ios" : "default")} 
-            />
-          </div>
-        </div>
-      </Modal>
+      <ProfileSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        navbarVariant={navbarVariant}
+        setNavbarVariant={setNavbarVariant}
+      />
       {/* Левая часть профиля */}
       <aside className="w-full lg:w-[28%] premium-tracking">
         <div className="bg-white/70 backdrop-blur-md p-6 rounded-3xl soft-shadow-ios border border-white/20">
-          <UseSkeleton loading={isPending} variant="card" count={1} rows={4} />
           <div className="flex justify-end">
             <SettingOutlined
               className="text-gray-500 hover:text-blue-600 cursor-pointer transition-colors"
