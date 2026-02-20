@@ -21,7 +21,6 @@
 
 .profile-avatar-glow:hover {
   box-shadow: 0 12px 40px rgba(102, 126, 234, 0.45) !important;
-  transform: scale(1.03) !important;
 }
 
 /* === Аватар с интерактивом (Camera Action) === */
@@ -189,11 +188,6 @@
   margin: -4px -8px !important;
   border-radius: 8px !important;
   cursor: default;
-}
-
-.field-highlight:hover {
-  background: rgba(255, 255, 255, 0.6) !important;
-  transform: translateX(4px) !important;
 }
 
 /* Аватар "дышащий" только при наведении */
