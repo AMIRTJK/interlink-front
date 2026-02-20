@@ -31,6 +31,7 @@ import { SignatureDetailsModal } from "./SignatureDetailsModal";
 // --- КОНСТАНТЫ ---
 const MAX_VISIBLE_DOCS = 2;
 const MAX_VISIBLE_APPROVERS = 3;
+const MAX_VISIBLE_VERSIONS = 3;
 
 // --- КОМПОНЕНТ МОДАЛЬНОГО ОКНА ИСТОРИИ ---
 const FullHistoryModal = ({
@@ -44,6 +45,8 @@ const FullHistoryModal = ({
   currentUserId,
   onShowSignature,
   isReadOnly,
+  versions = [],
+  onSelectVersion,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -55,6 +58,8 @@ const FullHistoryModal = ({
   currentUserId: string | number | null;
   onShowSignature: (e: any, item: any) => void;
   isReadOnly: boolean;
+  versions?: any[];
+  onSelectVersion?: (content: string) => void;
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -84,6 +89,13 @@ const FullHistoryModal = ({
       (d.subject || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (d.reg_number || "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  const filteredVersions = versions.filter((v: any, index: number) => {
+    const versionName = `Версия ${versions.length - index}`.toLowerCase();
+    const dateStr = new Date(v.date).toLocaleString("ru-RU").toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
+    return versionName.includes(searchLower) || dateStr.includes(searchLower);
+  });
 
   const totalParticipants = filteredSigners.length + filteredApprovers.length;
 
@@ -264,6 +276,59 @@ const FullHistoryModal = ({
         </div>
       ),
     },
+    {
+      key: "versions",
+      label: `Версии (${versions.length})`,
+      children: (
+        <div className="flex flex-col gap-2 h-[60vh]! overflow-y-auto pr-2 custom-scrollbar">
+          {filteredVersions.map((v: any, index: number) => {
+            // Поскольку filteredVersions может изменить индекс, нам нужно найти
+            // реальный номер версии из исходного массива
+            const originalIndex = versions.findIndex(
+              (item) => item.id === v.id,
+            );
+            const versionNumber = versions.length - originalIndex;
+
+            return (
+              <div
+                key={v.id}
+                onClick={() => {
+                  if (onSelectVersion) {
+                    onSelectVersion(v.content);
+                    onClose(); // Закрываем модалку после выбора
+                  }
+                }}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition-all cursor-pointer group mb-2"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="mt-1 text-gray-400 group-hover:text-blue-500">
+                    <HistoryOutlined />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-700 group-hover:text-blue-700 transition-colors">
+                      Версия {versionNumber}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {new Date(v.date).toLocaleString("ru-RU")}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-gray-400 group-hover:text-blue-500">
+                  <Tooltip title="Восстановить в редакторе">
+                    <Button type="text" icon={<EyeOutlined />} size="small" />
+                  </Tooltip>
+                </div>
+              </div>
+            );
+          })}
+          {filteredVersions.length === 0 && (
+            <div className="text-center text-gray-400 py-4">
+              Версии не найдены
+            </div>
+          )}
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -305,6 +370,8 @@ export const WorkflowParticipantsPanel = ({
   currentUserId,
   isReadOnly,
   isReadPage = false,
+  versions = [],
+  onSelectVersion,
 }: {
   workflowData: any;
   isCollapsed: boolean;
@@ -315,6 +382,8 @@ export const WorkflowParticipantsPanel = ({
   currentUserId: string | number | null;
   isReadOnly: boolean;
   isReadPage?: boolean;
+  versions?: any[];
+  onSelectVersion?: (content: string) => void;
 }) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -329,19 +398,27 @@ export const WorkflowParticipantsPanel = ({
     data: any | null;
   }>({ isOpen: false, data: null });
 
+  const [isVersionsExpanded, setIsVersionsExpanded] = useState(false);
+
   const openSignatureModal = (e: React.MouseEvent, item: any) => {
     e.stopPropagation();
     e.preventDefault();
     setSignatureModal({ isOpen: true, data: item });
   };
 
-  const openModal = (tab: "participants" | "documents") => {
+  const openModal = (tab: "participants" | "documents" | "versions") => {
     setModalState({ isOpen: true, tab });
   };
 
   const closeModal = () => {
     setModalState((prev) => ({ ...prev, isOpen: false }));
   };
+
+  const visibleVersions = isCollapsed
+    ? []
+    : versions.slice(0, MAX_VISIBLE_VERSIONS);
+
+  const hiddenVersionsCount = versions.length - visibleVersions.length;
 
   if (!workflowData) return null;
 
@@ -637,6 +714,73 @@ export const WorkflowParticipantsPanel = ({
             </div>
           )}
 
+          {versions.length > 0 && (
+            <div className="mb-4">
+              {!isCollapsed ? (
+                <>
+                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <HistoryOutlined /> Версии редактора
+                    </span>
+                    <span className="bg-gray-100 px-1.5 rounded text-gray-600 text-[10px]">
+                      {versions.length}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    {visibleVersions.map((v: any, index: number) => (
+                      <div
+                        key={v.id}
+                        onClick={() =>
+                          onSelectVersion && onSelectVersion(v.content)
+                        }
+                        className="flex items-start gap-3 p-2 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:border-blue-300 transition-all cursor-pointer group"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
+                            Версия {versions.length - index}
+                          </div>
+                          <div className="text-[10px] text-gray-400 mt-0.5">
+                            {new Date(v.date).toLocaleString("ru-RU")}
+                          </div>
+                        </div>
+                        <div className="text-gray-400 group-hover:text-blue-500 flex items-center mt-1">
+                          <EyeOutlined />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Кнопка "Показать все" аналогичная документам */}
+                  {hiddenVersionsCount > 0 && (
+                    <div
+                      onClick={() => openModal("versions")}
+                      className="mt-2 w-full py-2 px-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg cursor-pointer transition-colors flex items-center justify-center gap-2 group"
+                    >
+                      <span className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+                        Показать все версии: {versions.length}
+                      </span>
+                    </div>
+                  )}
+
+                  <Divider className="my-4! border-gray-100!" />
+                </>
+              ) : (
+                <Tooltip
+                  title={`Версии: ${versions.length} шт.`}
+                  placement="left"
+                >
+                  <div
+                    className="mb-4 w-8 h-8 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => openModal("versions")}
+                  >
+                    <HistoryOutlined />
+                  </div>
+                </Tooltip>
+              )}
+            </div>
+          )}
+
           {signers.length > 0 && (
             <div>
               {!isCollapsed && (
@@ -708,6 +852,8 @@ export const WorkflowParticipantsPanel = ({
         onShowSignature={openSignatureModal}
         onApprove={onApprove}
         isReadOnly={isReadOnly}
+        versions={versions}
+        onSelectVersion={onSelectVersion}
       />
       <SignatureDetailsModal
         isOpen={signatureModal.isOpen}

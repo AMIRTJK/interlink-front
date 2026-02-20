@@ -70,3 +70,32 @@ export const tokenControl = {
     localStorage.removeItem(VIEW_MODE_KEY);
   },
 };
+
+export interface IDocumentVersion {
+  id: string;
+  date: string;
+  authorId: string | number | null;
+  content: string;
+}
+
+export const versionControl = {
+  getVersions: (docId: string): IDocumentVersion[] => {
+    if (!docId) return [];
+    const data = localStorage.getItem(`interlink/versions_${docId}`);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveVersion: (docId: string, version: IDocumentVersion) => {
+    if (!docId) return;
+    const current = versionControl.getVersions(docId);
+    // Добавляем новую версию в начало массива
+    localStorage.setItem(
+      `interlink/versions_${docId}`,
+      JSON.stringify([version, ...current]),
+    );
+  },
+
+  clearVersions: (docId: string) => {
+    localStorage.removeItem(`interlink/versions_${docId}`);
+  },
+};
