@@ -57,7 +57,12 @@ export const RenderJSX = ({
   if (isPending) return <UseSkeleton loading={true} variant="profile" />;
 
   return (
-    <div className="flex! flex-col! lg:flex-row! gap-6! p-3! sm:p-4! lg:p-6!">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="flex! flex-col! lg:flex-row! gap-6! p-3! sm:p-4! lg:p-6!"
+    >
       {/* Модалка настроек */}
       <ProfileSettingsModal
         isOpen={isSettingsOpen}
@@ -68,7 +73,7 @@ export const RenderJSX = ({
 
       {/* Левая часть профиля */}
       <aside className="w-full! lg:w-[28%]! premium-tracking">
-        <div className="bg-white/70! backdrop-blur-md! p-6! rounded-3xl! soft-shadow-ios border! border-white/20!">
+        <div className="subtle-glass hover-lift p-6! rounded-3xl!">
           {/* Иконка настроек с анимацией вращения */}
           <div className="flex! justify-end!">
             <SettingOutlined
@@ -80,7 +85,7 @@ export const RenderJSX = ({
 
           {/* Аватар с градиентным фоном */}
           <div className="flex! flex-col! items-center! mb-5!">
-            <div className="profile-avatar-glow">
+            <div className="profile-avatar-glow avatar-breath">
               <Avatar
                 src={userAvatar}
                 className="profile-avatar-img"
@@ -94,17 +99,31 @@ export const RenderJSX = ({
             {userData?.full_name}
           </p>
 
-          {/* Информационные поля */}
-          <div className="flex! flex-col! gap-3! text-sm!">
+          {/* Информационные поля с последовательным появлением */}
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: { transition: { staggerChildren: 0.1 } }
+            }}
+            className="flex! flex-col! gap-3! text-sm!"
+          >
             {profileInfoFields.map(({ label, key }) => (
-              <div key={key} className="flex! justify-between! items-baseline! gap-2!">
+              <motion.div 
+                key={key} 
+                variants={{
+                  hidden: { opacity: 0, x: -10 },
+                  visible: { opacity: 1, x: 0 }
+                }}
+                className="flex! justify-between! items-baseline! gap-2! field-highlight"
+              >
                 <span className="text-gray-400! font-light! shrink-0!">{label}:</span>
                 <span className="font-medium! text-slate-700! text-right! truncate! max-w-[60%]!" title={getFieldValue(userData, key)}>
                   {getFieldValue(userData, key)}
                 </span>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </aside>
 
@@ -116,21 +135,21 @@ export const RenderJSX = ({
           onChange={(key) => onMenuClick({ key })}
           className="profile__tabs-wrapper"
         />
-        <div className="profile__content-card soft-shadow-ios rounded-3xl background-white/50 backdrop-blur-sm">
+        <div className="subtle-glass hover-lift profile__content-card rounded-3xl border-t-0!">
           {/* Плавная анимация при смене вкладки */}
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
             >
               <Outlet />
             </motion.div>
           </AnimatePresence>
         </div>
       </aside>
-    </div>
+    </motion.div>
   );
 };

@@ -131,3 +131,64 @@
 .hidden-no-animations-switcher{
   display:none;
 }
+/* === Эффекты "Под стеклом" (Subtle Glass) === */
+.subtle-glass {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.05) !important;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
+}
+
+/* Эффект легкого подъема */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px) scale(1.005) !important;
+  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.1) !important;
+}
+
+/* Подсветка полей при наведении */
+.field-highlight {
+  transition: all 0.25s ease !important;
+  padding: 4px 8px !important;
+  margin: -4px -8px !important;
+  border-radius: 8px !important;
+  cursor: default;
+}
+
+.field-highlight:hover {
+  background: rgba(255, 255, 255, 0.6) !important;
+  transform: translateX(4px) !important;
+}
+
+/* Аватар "дышащий" только при наведении */
+.avatar-breath {
+  position: relative;
+}
+
+.avatar-breath::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+  pointer-events: none;
+  transition: box-shadow 0.3s ease;
+}
+
+.avatar-breath:hover::after {
+  animation: pulse-avatar 1.5s infinite;
+}
+
+@keyframes pulse-avatar {
+  0% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(102, 126, 234, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+}
