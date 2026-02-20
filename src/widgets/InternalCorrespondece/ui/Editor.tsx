@@ -105,6 +105,7 @@ const CLOUD_SERVICES_TOKEN_URL =
 // 1. Описываем интерфейс методов, которые будут доступны родителю
 export interface EditorHandle {
   insertHtml: (htmlContent: string) => void;
+  setContent: (content: string) => void;
 }
 
 interface EditorProps {
@@ -149,6 +150,12 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(
             // Вставляем контент в текущую позицию курсора
             editor.model.insertContent(modelFragment);
           });
+        }
+      },
+      setContent: (content: string) => {
+        const editor = editorInstanceRef.current;
+        if (editor) {
+          editor.setData(content);
         }
       },
     }));

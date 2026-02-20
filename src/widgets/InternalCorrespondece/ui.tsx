@@ -24,6 +24,7 @@ import { WorkflowParticipantsPanel } from "./ui/WorkflowParticipantsPanel";
 import { generateMockWorkflow } from "./lib";
 import { Editor, EditorHandle } from "./ui/Editor";
 import { AppRoutes } from "@shared/config";
+import { versionControl, IDocumentVersion } from "@shared/lib";
 
 interface IProps {
   mode: "create" | "show";
@@ -41,6 +42,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   const editorRef = useRef<EditorHandle>(null);
 
   const { id } = useParams<{ id: string }>();
+
+  const [versions, setVersions] = useState<IDocumentVersion[]>([]);
 
   const currentUserId = tokenControl.getUserId();
 
@@ -88,8 +91,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     const foundApproval = approvals.find(
       (item: any) => String(item.approver?.id) === String(currentUserId),
     );
-
-    console.log(foundApproval);
 
     return foundApproval ? String(foundApproval.id) : "";
   }, [workflowData, currentUserId]);
@@ -174,6 +175,16 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       // },
     });
 
+  // const { data: currentUserResponse } = useGetQuery({
+  //   method: "GET",
+  //   url: `${ApiRoutes.FETCH_USER_BY_ID}${currentUserId}`,
+  //   useToken: true,
+  // });
+
+  // const currentUser = currentUserResponse?.data || [];
+
+  const creator = initialData?.item?.creator;
+
   const handleSign = async () => {
     try {
       const payloadData = await signaturesPayloadAsync({ action: "sign" });
@@ -251,6 +262,13 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       },
     });
 
+  const handleSelectVersion = (content: string) => {
+    if (editorRef.current) {
+      editorRef.current.setContent(content);
+      setEditorBody(content);
+    }
+  };
+
   const onSaveClick = async () => {
     console.log(form.validateFields());
 
@@ -267,6 +285,17 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         },
       };
 
+      const saveLocalVersion = (documentId: string) => {
+        const newVersion: IDocumentVersion = {
+          id: Date.now().toString(),
+          date: new Date().toISOString(),
+          authorId: currentUserId,
+          content: editorBody,
+        };
+        versionControl.saveVersion(documentId, newVersion);
+        setVersions(versionControl.getVersions(documentId));
+      };
+
       if (typeof values.folder === "number") {
         requestPayload.folder_id = values.folder;
       } else if (typeof values.folder === "string") {
@@ -277,10 +306,16 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         // Если ID есть - обновляем
         console.log("Обновление черновика:", id, requestPayload);
         updateDraft(requestPayload);
+        saveLocalVersion(id);
       } else {
         // Если ID нет - создаем
         console.log("Создание черновика:", requestPayload);
-        createDraft(requestPayload, {});
+        createDraft(requestPayload, {
+          onSuccess: (data: any) => {
+            const newId = data?.item?.id;
+            if (newId) saveLocalVersion(newId);
+          },
+        });
       }
     } catch (errorInfo) {
       console.log("Ошибка валидации:", errorInfo);
@@ -316,6 +351,12 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       console.error("Ошибка при генерации QR-кода", err);
     }
   };
+
+  useEffect(() => {
+    if (id) {
+      setVersions(versionControl.getVersions(id));
+    }
+  }, [id]);
 
   // ЭФФЕКТ: Заполнение данных при просмотре
   useEffect(() => {
@@ -437,6 +478,9 @@ export const InternalCorrespondece: React.FC<IProps> = ({
               }
               currentUserId={currentUserId}
               isReadOnly={isReadOnly}
+              versions={versions}
+              onSelectVersion={handleSelectVersion}
+              documentCreator={creator}
             />
           </div>
         </If>

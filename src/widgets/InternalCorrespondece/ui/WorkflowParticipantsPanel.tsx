@@ -12,6 +12,8 @@ import {
   HistoryOutlined,
   EyeOutlined,
   SafetyCertificateOutlined,
+  UpOutlined,
+  DownOutlined,
 } from "@ant-design/icons";
 import { If } from "@shared/ui";
 import {
@@ -24,13 +26,14 @@ import {
   Tabs,
   Tag,
 } from "antd";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { SignatureDetailsModal } from "./SignatureDetailsModal";
 
 // --- КОНСТАНТЫ ---
 const MAX_VISIBLE_DOCS = 2;
 const MAX_VISIBLE_APPROVERS = 3;
+const MAX_VISIBLE_VERSIONS = 3;
 
 // --- КОМПОНЕНТ МОДАЛЬНОГО ОКНА ИСТОРИИ ---
 const FullHistoryModal = ({
@@ -44,6 +47,9 @@ const FullHistoryModal = ({
   currentUserId,
   onShowSignature,
   isReadOnly,
+  versions = [],
+  onSelectVersion,
+  documentCreator,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -55,13 +61,20 @@ const FullHistoryModal = ({
   currentUserId: string | number | null;
   onShowSignature: (e: any, item: any) => void;
   isReadOnly: boolean;
+  versions?: any[];
+  onSelectVersion?: (content: string) => void;
+  documentCreator?: any;
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState(initialTab);
 
+  // Состояние для раскрытых строк участников (id участника -> boolean)
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+
   useEffect(() => {
     if (isOpen) {
       setActiveTab(initialTab);
+      setExpandedRows({}); // Сбрасываем при открытии
     }
   }, [isOpen, initialTab]);
 
@@ -69,6 +82,51 @@ const FullHistoryModal = ({
   const signers = sourceData.signatures || [];
   const approvers = sourceData.approvals || [];
   const documents = sourceData.documents || [];
+
+  console.log(documentCreator);
+
+  // Создаем словарь пользователей для быстрого поиска автора версии
+  const userMap = useMemo(() => {
+    const map = new Map();
+
+    if (documentCreator) {
+      map.set(String(documentCreator.id), documentCreator);
+    }
+
+    signers.forEach((s: any) => {
+      if (s.user) map.set(String(s.user.id), s.user);
+    });
+    approvers.forEach((a: any) => {
+      if (a.user) map.set(String(a.user.id), a.user);
+    });
+    return map;
+  }, [signers, approvers, documentCreator]);
+
+  // Обогащаем версии их порядковым номером, чтобы он не ломался при фильтрации
+  const versionsWithMeta = useMemo(() => {
+    return versions.map((v, idx) => ({
+      ...v,
+      versionNumber: versions.length - idx,
+    }));
+  }, [versions]);
+
+  // --- ФИЛЬТРАЦИЯ УЧАСТНИКОВ ---
+  // Создаем искусственный элемент для Автора, чтобы он рендерился так же, как и остальные
+  const creatorItem = documentCreator
+    ? {
+        id: "creator-" + documentCreator.id,
+        user: documentCreator,
+        status: "created",
+      }
+    : null;
+
+  const filteredCreator =
+    creatorItem &&
+    (creatorItem.user?.full_name || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+      ? creatorItem
+      : null;
 
   // 1. Фильтруем списки раздельно
   const filteredSigners = signers.filter((p: any) =>
@@ -85,7 +143,25 @@ const FullHistoryModal = ({
       (d.reg_number || "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const totalParticipants = filteredSigners.length + filteredApprovers.length;
+  console.log(userMap);
+
+  const filteredVersions = versionsWithMeta.filter((v: any) => {
+    const author = userMap.get(String(v.authorId));
+    const authorName = (author?.full_name || "").toLowerCase();
+    const versionName = `Версия ${v.versionNumber}`.toLowerCase();
+    const dateStr = new Date(v.date).toLocaleString("ru-RU").toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      versionName.includes(searchLower) ||
+      dateStr.includes(searchLower) ||
+      authorName.includes(searchLower)
+    );
+  });
+
+  const totalParticipants =
+    filteredSigners.length +
+    filteredApprovers.length +
+    (filteredCreator ? 1 : 0);
 
   const renderStatusTag = (status: string) => {
     const map: Record<string, any> = {
@@ -93,13 +169,21 @@ const FullHistoryModal = ({
       approved: { color: "success", text: "Согласовано" },
       rejected: { color: "error", text: "Отказано" },
       pending: { color: "default", text: "Ожидание" },
+      created: { color: "blue", text: "Автор" },
     };
     const s = map[status] || map.pending;
     return <Tag color={s.color}>{s.text}</Tag>;
   };
 
+  const toggleRow = (id: string) => {
+    setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   // Вспомогательная функция для рендера строки участника внутри модалки
-  const renderParticipantRow = (item: any, type: "signer" | "approver") => {
+  const renderParticipantRow = (
+    item: any,
+    type: "signer" | "approver" | "creator",
+  ) => {
     const isCurrentUser = String(item.user?.id) === String(currentUserId);
     const isPending = item.status === "pending";
 
@@ -107,74 +191,126 @@ const FullHistoryModal = ({
       (item.status === "signed" || item.status === "approved") &&
       item.payload_hash;
 
+    // Находим версии именно этого участника
+    const userVersions = versionsWithMeta.filter(
+      (v) => String(v.authorId) === String(item.user?.id),
+    );
+    const isExpanded = !!expandedRows[item.id];
+
     return (
-      <div
-        key={item.id}
-        className="flex items-start justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-white hover:shadow-sm transition-all mb-2"
-      >
-        <div className="flex items-center gap-3">
-          <Avatar src={item.user?.photo_path} icon={<UserOutlined />} />
-          <div>
-            <div className="font-medium text-gray-800 flex items-center gap-2">
-              {item.user?.full_name}
-              <If is={hasSignature}>
-                <Tooltip title="Показать данные ЭЦП">
-                  <Button
-                    type="text"
-                    size="small"
-                    className="text-green-600! bg-green-50! h-[20px]! w-[20px]! flex items-center justify-center rounded-full"
-                    onClick={(e) => onShowSignature(e, item)}
-                    icon={
-                      <SafetyCertificateOutlined className="text-[12px]!" />
-                    }
-                  />
-                </Tooltip>
-              </If>
-              <If is={isCurrentUser}>
-                <span className="text-gray-400 text-xs ml-1">(Вы)</span>
+      <div key={item.id} className="mb-2">
+        <div className="flex items-start justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-white hover:shadow-sm transition-all relative z-10">
+          <div className="flex items-center gap-3">
+            <Avatar src={item.user?.photo_path} icon={<UserOutlined />} />
+            <div>
+              <div className="font-medium text-gray-800 flex items-center gap-2">
+                {item.user?.full_name}
+                <If is={hasSignature}>
+                  <Tooltip title="Показать данные ЭЦП">
+                    <Button
+                      type="text"
+                      size="small"
+                      className="text-green-600! bg-green-50! h-[20px]! w-[20px]! flex items-center justify-center rounded-full"
+                      onClick={(e) => onShowSignature(e, item)}
+                      icon={
+                        <SafetyCertificateOutlined className="text-[12px]!" />
+                      }
+                    />
+                  </Tooltip>
+                </If>
+                <If is={isCurrentUser}>
+                  <span className="text-gray-400 text-xs ml-1">(Вы)</span>
+                </If>
+              </div>
+              <div className="text-xs text-gray-500">{item.user?.position}</div>
+
+              {/* --- КНОПКА РАСКРЫТИЯ ВЕРСИЙ --- */}
+              <If is={userVersions.length > 0}>
+                <div
+                  className="mt-1 flex items-center gap-1 text-[11px] font-medium text-blue-500 hover:text-blue-600 cursor-pointer select-none transition-colors"
+                  onClick={() => toggleRow(item.id)}
+                >
+                  <HistoryOutlined />
+                  {userVersions.length}{" "}
+                  {userVersions.length === 1
+                    ? "версия"
+                    : userVersions.length < 5
+                      ? "версии"
+                      : "версий"}
+                  {isExpanded ? (
+                    <UpOutlined className="text-[9px]! ml-0.5" />
+                  ) : (
+                    <DownOutlined className="text-[9px]! ml-0.5" />
+                  )}
+                </div>
               </If>
             </div>
-            <div className="text-xs text-gray-500">{item.user?.position}</div>
-            {item.updated_at && (
-              <div className="text-[10px] text-gray-400 mt-1">
-                {new Date(item.updated_at).toLocaleString()}
-              </div>
+          </div>
+
+          <div className="flex flex-col items-end gap-2">
+            <div>{renderStatusTag(item.status)}</div>
+
+            {type === "signer" && isCurrentUser && isPending && (
+              <Button
+                htmlType="button"
+                onClick={onSign}
+                loading={isSigning}
+                disabled={item.status !== "pending"}
+                type="primary"
+                size="small"
+                className={`bg-blue-600! hover:bg-blue-500! ${item.status !== "pending" ? "text-white! opacity-50!" : ""}`}
+              >
+                Подписать
+              </Button>
+            )}
+
+            {type === "approver" && isCurrentUser && isPending && (
+              <Button
+                htmlType="button"
+                type="primary"
+                size="small"
+                onClick={onApprove}
+                loading={isSigning}
+                disabled={item.status !== "pending" || isReadOnly}
+                className="bg-green-600 hover:bg-green-500 border-green-600"
+              >
+                Согласовать
+              </Button>
             )}
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-2">
-          <div>{renderStatusTag(item.status)}</div>
-
-          {/* Кнопка зависит от типа, переданного в функцию */}
-          {type === "signer" && isCurrentUser && isPending && (
-            <Button
-              htmlType="button"
-              onClick={onSign}
-              loading={isSigning}
-              disabled={item.status !== "pending"}
-              type="primary"
-              size="small"
-              className={`bg-blue-600! hover:bg-blue-500! ${item.status !== "pending" ? "text-white! opacity-50!" : ""}`}
-            >
-              Подписать
-            </Button>
-          )}
-
-          {type === "approver" && isCurrentUser && isPending && (
-            <Button
-              htmlType="button"
-              type="primary"
-              size="small"
-              onClick={onApprove}
-              loading={isSigning}
-              disabled={item.status !== "pending" || isReadOnly}
-              className="bg-green-600 hover:bg-green-500 border-green-600"
-            >
-              Согласовать
-            </Button>
-          )}
-        </div>
+        {/* --- СПИСОК ВЕРСИЙ УЧАСТНИКА --- */}
+        {isExpanded && userVersions.length > 0 && (
+          <div className="pl-[52px] pr-2 py-2 flex flex-col gap-2 border-l-2 border-blue-100 ml-[22px] -mt-1 bg-white/50 rounded-b-lg">
+            {userVersions.map((v) => (
+              <div
+                key={v.id}
+                onClick={() => {
+                  if (onSelectVersion) {
+                    onSelectVersion(v.content);
+                    onClose();
+                  }
+                }}
+                className="flex items-center justify-between p-2 bg-white rounded border border-gray-100 hover:border-blue-300 hover:shadow-sm cursor-pointer group transition-all"
+              >
+                <div>
+                  <div className="text-xs font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
+                    Версия {v.versionNumber}
+                  </div>
+                  <div className="text-[10px] text-gray-400 mt-0.5">
+                    {new Date(v.date).toLocaleString("ru-RU")}
+                  </div>
+                </div>
+                <div className="text-gray-300 group-hover:text-blue-500">
+                  <Tooltip title="Восстановить в редакторе">
+                    <Button type="text" icon={<EyeOutlined />} size="small" />
+                  </Tooltip>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
@@ -185,7 +321,15 @@ const FullHistoryModal = ({
       label: `Участники (${totalParticipants})`,
       children: (
         <div className="flex flex-col h-[60vh]! overflow-y-auto pr-2 custom-scrollbar">
-          {/* СЕКЦИЯ ПОДПИСАНТОВ */}
+          {filteredCreator && (
+            <div>
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1">
+                Автор
+              </div>
+              {renderParticipantRow(filteredCreator, "creator")}
+            </div>
+          )}
+
           {filteredSigners.length > 0 && (
             <div>
               <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1">
@@ -197,10 +341,8 @@ const FullHistoryModal = ({
             </div>
           )}
 
-          {/* СЕКЦИЯ СОГЛАСУЮЩИХ */}
           {filteredApprovers.length > 0 && (
             <div>
-              {/* Разделитель, если есть и те и другие */}
               {filteredSigners.length > 0 && (
                 <Divider className="my-4! border-gray-200!" />
               )}
@@ -213,7 +355,6 @@ const FullHistoryModal = ({
             </div>
           )}
 
-          {/* ЕСЛИ ПУСТО */}
           {totalParticipants === 0 && (
             <div className="text-center text-gray-400 py-4">
               Никого не найдено
@@ -264,6 +405,60 @@ const FullHistoryModal = ({
         </div>
       ),
     },
+    {
+      key: "versions",
+      label: `Версии (${versions.length})`,
+      children: (
+        <div className="flex flex-col gap-2 h-[60vh]! overflow-y-auto pr-2 custom-scrollbar">
+          {filteredVersions.map((v: any) => {
+            const author = userMap.get(String(v.authorId)) || {};
+
+            return (
+              <div
+                key={v.id}
+                onClick={() => {
+                  if (onSelectVersion) {
+                    onSelectVersion(v.content);
+                    onClose();
+                  }
+                }}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition-all cursor-pointer group mb-2"
+              >
+                <div className="flex items-start gap-3">
+                  <Avatar
+                    src={author.photo_path}
+                    icon={<UserOutlined />}
+                    className="mt-1 shrink-0 bg-gray-200!"
+                  />
+                  <div>
+                    <div className="font-semibold text-gray-700 group-hover:text-blue-700 transition-colors">
+                      Версия {v.versionNumber}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1 font-medium">
+                      {author.full_name || "Неизвестный автор"}
+                    </div>
+                    <div className="text-[10px] text-gray-400 mt-0.5">
+                      {author.position ? `${author.position} • ` : ""}
+                      {new Date(v.date).toLocaleString("ru-RU")}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-gray-300 group-hover:text-blue-500 self-center">
+                  <Tooltip title="Восстановить в редакторе">
+                    <Button type="text" icon={<EyeOutlined />} size="small" />
+                  </Tooltip>
+                </div>
+              </div>
+            );
+          })}
+          {filteredVersions.length === 0 && (
+            <div className="text-center text-gray-400 py-4">
+              Версии не найдены
+            </div>
+          )}
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -277,9 +472,9 @@ const FullHistoryModal = ({
       destroyOnClose
     >
       <Input
-        placeholder="Поиск по участникам или документам..."
-        prefix={<SearchOutlined className="text-gray-400!" />} // Important сохранен
-        className="mb-4!" // Important сохранен
+        placeholder="Поиск по участникам, документам или версиям..."
+        prefix={<SearchOutlined className="text-gray-400!" />}
+        className="mb-4!"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -287,7 +482,7 @@ const FullHistoryModal = ({
         activeKey={activeTab}
         onChange={setActiveTab}
         items={items}
-        className="h-full!" // Important сохранен
+        className="h-full!"
       />
     </Modal>
   );
@@ -305,6 +500,9 @@ export const WorkflowParticipantsPanel = ({
   currentUserId,
   isReadOnly,
   isReadPage = false,
+  versions = [],
+  onSelectVersion,
+  documentCreator,
 }: {
   workflowData: any;
   isCollapsed: boolean;
@@ -315,6 +513,9 @@ export const WorkflowParticipantsPanel = ({
   currentUserId: string | number | null;
   isReadOnly: boolean;
   isReadPage?: boolean;
+  versions?: any[];
+  onSelectVersion?: (content: string) => void;
+  documentCreator?: any;
 }) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -335,7 +536,7 @@ export const WorkflowParticipantsPanel = ({
     setSignatureModal({ isOpen: true, data: item });
   };
 
-  const openModal = (tab: "participants" | "documents") => {
+  const openModal = (tab: "participants" | "documents" | "versions") => {
     setModalState({ isOpen: true, tab });
   };
 
@@ -343,12 +544,38 @@ export const WorkflowParticipantsPanel = ({
     setModalState((prev) => ({ ...prev, isOpen: false }));
   };
 
-  if (!workflowData) return null;
+  // --- ВАЖНО: ВСЕ ВЫЗОВЫ ХУКОВ ДОЛЖНЫ БЫТЬ ДО `if (!workflowData) return null` ---
 
-  const sourceData = workflowData.data || workflowData;
+  const sourceData = workflowData?.data || workflowData || {};
   const signers = sourceData.signatures || [];
   const approvers = sourceData.approvals || [];
   const documents = sourceData.documents || [];
+
+  // Словарь для поиска автора версии в панели. Безопасно вызывать даже если данные пустые.
+  const userMap = useMemo(() => {
+    const map = new Map();
+
+    if (documentCreator) {
+      map.set(String(documentCreator.id), documentCreator);
+    }
+
+    signers.forEach((s: any) => {
+      if (s.user) map.set(String(s.user.id), s.user);
+    });
+    approvers.forEach((a: any) => {
+      if (a.user) map.set(String(a.user.id), a.user);
+    });
+    return map;
+  }, [signers, approvers, documentCreator]);
+
+  // --- ТЕПЕРЬ МОЖНО ДЕЛАТЬ РАННИЙ ВОЗВРАТ ПОСЛЕ ВСЕХ ХУКОВ ---
+  if (!workflowData) return null;
+
+  const visibleVersions = isCollapsed
+    ? []
+    : versions.slice(0, MAX_VISIBLE_VERSIONS);
+
+  const hiddenVersionsCount = versions.length - visibleVersions.length;
 
   const visibleDocuments = isCollapsed
     ? []
@@ -418,8 +645,6 @@ export const WorkflowParticipantsPanel = ({
     const status = item.status || "Ожидание";
     const meta = getStatusMeta(status);
 
-    console.log(meta);
-
     const isCurrentUser = String(user.id) === String(currentUserId);
     const isPending = status === "pending";
 
@@ -438,7 +663,6 @@ export const WorkflowParticipantsPanel = ({
               src={user.photo_path}
               icon={<UserOutlined />}
               size="small"
-              // Изменено на bg-gray-200! для консистентности (suffix syntax)
               className="bg-gray-200!"
             />
             <div
@@ -460,10 +684,8 @@ export const WorkflowParticipantsPanel = ({
           <Avatar
             src={user.photo_path}
             icon={<UserOutlined />}
-            // Добавил ! к классам opacity и grayscale для перебития стилей Antd
             className={`transition-colors! ${status === "pending" ? "grayscale-[0.5]! opacity-70!" : ""}`}
           />
-          {/* Статус */}
           <div
             className={`absolute -top-1 -right-1 rounded-full border border-white leading-[0] ${meta.bg}`}
           >
@@ -501,7 +723,6 @@ export const WorkflowParticipantsPanel = ({
             {position}
           </div>
 
-          {/* --- КНОПКИ ДЛЯ ПАНЕЛИ --- */}
           <div className="mt-2">
             {role === "signer" && isCurrentUser && isPending && (
               <Button
@@ -533,7 +754,6 @@ export const WorkflowParticipantsPanel = ({
     );
   };
 
-  // Кнопка "Показать остальных" (Исправленный hover)
   const renderShowMoreParticipants = (count: number) => (
     <div
       onClick={() => openModal("participants")}
@@ -637,6 +857,88 @@ export const WorkflowParticipantsPanel = ({
             </div>
           )}
 
+          {versions.length > 0 && (
+            <div className="mb-4">
+              {!isCollapsed ? (
+                <>
+                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <HistoryOutlined /> Версии редактора
+                    </span>
+                    <span className="bg-gray-100 px-1.5 rounded text-gray-600 text-[10px]">
+                      {versions.length}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    {visibleVersions.map((v: any, index: number) => {
+                      const author = userMap.get(String(v.authorId)) || {};
+
+                      return (
+                        <div
+                          key={v.id}
+                          onClick={() =>
+                            onSelectVersion && onSelectVersion(v.content)
+                          }
+                          className="flex items-start gap-3 p-2 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:border-blue-300 transition-all cursor-pointer group"
+                        >
+                          <Avatar
+                            src={author.photo_path}
+                            icon={<UserOutlined />}
+                            size="small"
+                            className="mt-0.5 shrink-0 bg-gray-200!"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
+                              Версия {versions.length - index}
+                            </div>
+                            <div
+                              className="text-[10px] font-medium text-gray-500 truncate mt-0.5"
+                              title={author.full_name}
+                            >
+                              {author.full_name || "Неизвестный автор"}
+                            </div>
+                            <div className="text-[9px] text-gray-400 mt-0.5">
+                              {new Date(v.date).toLocaleString("ru-RU")}
+                            </div>
+                          </div>
+                          <div className="text-gray-400 group-hover:text-blue-500 flex items-center mt-2 shrink-0">
+                            <EyeOutlined />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {hiddenVersionsCount > 0 && (
+                    <div
+                      onClick={() => openModal("versions")}
+                      className="mt-2 w-full py-2 px-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg cursor-pointer transition-colors flex items-center justify-center gap-2 group"
+                    >
+                      <span className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+                        Показать все версии: {versions.length}
+                      </span>
+                    </div>
+                  )}
+
+                  <Divider className="my-4! border-gray-100!" />
+                </>
+              ) : (
+                <Tooltip
+                  title={`Версии: ${versions.length} шт.`}
+                  placement="left"
+                >
+                  <div
+                    className="mb-4 w-8 h-8 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => openModal("versions")}
+                  >
+                    <HistoryOutlined />
+                  </div>
+                </Tooltip>
+              )}
+            </div>
+          )}
+
           {signers.length > 0 && (
             <div>
               {!isCollapsed && (
@@ -708,6 +1010,9 @@ export const WorkflowParticipantsPanel = ({
         onShowSignature={openSignatureModal}
         onApprove={onApprove}
         isReadOnly={isReadOnly}
+        versions={versions}
+        onSelectVersion={onSelectVersion}
+        documentCreator={documentCreator}
       />
       <SignatureDetailsModal
         isOpen={signatureModal.isOpen}
