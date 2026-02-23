@@ -39,8 +39,12 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        // Убираем агрессивный manualChunks, оставляем стандартное разбиение Vite
-        manualChunks: undefined,
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "antd-vendor": ["antd", "@ant-design/icons"],
+          "pdf-vendor": ["pdfjs-dist", "react-pdf"],
+          "ckeditor-vendor": ["@ckeditor/ckeditor5-react", "ckeditor5", "ckeditor5-premium-features"],
+        },
       },
     },
     chunkSizeWarningLimit: 2000,
