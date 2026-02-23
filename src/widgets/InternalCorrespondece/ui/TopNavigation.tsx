@@ -243,12 +243,12 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
 
         {/* Right - Actions */}
         <div className="flex items-center gap-2">
-          <button
+          {/* <button
             onClick={() => setShowColorPicker(!showColorPicker)}
             className={`p-2 rounded-lg transition-all cursor-pointer ${textSecondary} hover:bg-black/5 dark:hover:bg-white/5`}
           >
             <BgColorsOutlined className="text-[20px]" />
-          </button>
+          </button> */}
 
           <button
             onClick={toggleDarkMode}
