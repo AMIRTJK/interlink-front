@@ -34,7 +34,8 @@ import {
   Select,
   theme,
 } from "antd";
-import { Breadcrumbs, IBreadcrumbItem, Count, If } from "@shared/ui";
+import { Breadcrumbs, IBreadcrumbItem, Count, If, EmptyState } from "@shared/ui";
+
 import { useLocation } from "react-router";
 import { tokenControl } from "@shared/lib";
 
@@ -343,7 +344,7 @@ export const RegistryLayout = ({
                 }
               >
                 {documents && documents.length > 0 ? (
-                  documents.map((doc: any, idx: number) => {
+                  documents?.map((doc: any, idx: number) => {
                     const statusData =
                       statusConfig[doc.status] || statusConfig.default;
                     const props = {
@@ -353,7 +354,7 @@ export const RegistryLayout = ({
                       index: idx,
                       onClick: () => onCardClick(doc.id),
                       activeStatusData: activeTab,
-                      fieldConfig, // !!! ВАЖНО: Передаем конфиг внутрь
+                      fieldConfig, 
                     };
                     return viewMode === "block" ? (
                       <DocumentCard {...props} />
@@ -362,10 +363,9 @@ export const RegistryLayout = ({
                     );
                   })
                 ) : (
-                  <div className="col-span-full flex flex-col items-center justify-center h-40 text-gray-400">
-                    <p>Нет документов</p>
-                  </div>
+                  <EmptyState className="col-span-full" />
                 )}
+
               </motion.div>
             </AnimatePresence>
           </div>

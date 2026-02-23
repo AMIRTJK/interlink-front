@@ -1,0 +1,56 @@
+.empty {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 3rem 2rem !important;
+  width: 100% !important;
+  min-height: 300px !important;
+  border-radius: 24px !important;
+}
+
+.empty__content {
+  margin-top: 1rem;
+}
+
+.empty__title {
+  color: #1e293b !important; /* slate-800 */
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.empty__description {
+  color: #64748b !important; /* slate-500 */
+  font-size: 0.9375rem !important;
+  max-width: 400px;
+  margin: 0 auto !important;
+  line-height: 1.5 !important;
+}
+
+.empty__action-btn {
+  margin-top: 1.5rem !important;
+  height: auto !important;
+  padding: 10px 24px !important;
+  border-radius: 12px !important;
+  font-weight: 500 !important;
+  background: #0037af !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.empty__action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 55, 175, 0.2) !important;
+  opacity: 0.9;
+}
+
+/* Анимация для иконки Ant Design Empty */
+.empty .ant-empty-image {
+  margin-bottom: 24px !important;
+  transition: transform 0.3s ease-in-out;
+}
+
+.empty:hover .ant-empty-image {
+  transform: scale(1.05);
+}
