@@ -13,6 +13,10 @@ export default defineConfig({
       algorithm: "gzip",
       ext: ".gz",
     }),
+    compression({
+      algorithm: "brotliCompress",
+      ext: ".br",
+    }),
   ],
 
   resolve: {
@@ -40,10 +44,14 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "react-vendor": ["react", "react-dom", "react-router-dom", "react-router"],
           "antd-vendor": ["antd", "@ant-design/icons"],
           "pdf-vendor": ["pdfjs-dist", "react-pdf"],
           "ckeditor-vendor": ["@ckeditor/ckeditor5-react", "ckeditor5", "ckeditor5-premium-features"],
+          "charts-vendor": ["recharts"],
+          "core-vendor": ["axios", "@tanstack/react-query", "react-toastify"],
+          "doc-vendor": ["xlsx", "mammoth"],
+          "motion-vendor": ["framer-motion"],
         },
       },
     },
