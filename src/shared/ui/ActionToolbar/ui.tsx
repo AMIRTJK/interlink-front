@@ -23,6 +23,7 @@ interface IProps {
   isIncoming: boolean;
   isReadOnly: boolean;
   isSentStatusEnabled: boolean;
+  isDarkMode: boolean;
 }
 
 export const ActionToolbar: React.FC<IProps> = ({
@@ -37,6 +38,7 @@ export const ActionToolbar: React.FC<IProps> = ({
   isReadOnly,
   isSentStatusEnabled = false,
   handleInsertQR,
+  isDarkMode,
 }) => {
   return (
     <motion.div
@@ -44,7 +46,13 @@ export const ActionToolbar: React.FC<IProps> = ({
       animate={{ x: 0, opacity: 1 }}
       className="flex flex-col"
     >
-      <div className="flex flex-col flex-1 items-center justify-start gap-3 px-2 py-4 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.1)] backdrop-blur-xl bg-white/90 border border-gray-200">
+      <div
+        className={`flex flex-col flex-1 items-center justify-start gap-3 px-2 py-4 rounded-2xl backdrop-blur-xl border transition-colors duration-300 ${
+          isDarkMode
+            ? "bg-[#1f2937]/90 border-gray-700 shadow-[0_8px_30px_rgba(0,0,0,0.3)]"
+            : "bg-white/90 border-gray-200 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+        }`}
+      >
         <If is={!isIncoming}>
           <ActionButton
             icon={<SaveOutlined style={{ fontSize: "18px" }} />}

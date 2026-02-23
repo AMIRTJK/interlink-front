@@ -34,13 +34,17 @@ const softMaterialPresets = [
 
 // --- Helper Component ---
 // Antd иконки ведут себя как текст, поэтому используем text-[16px] для размера
-const NavButton = ({ icon, label, active, onClick }: any) => (
+const NavButton = ({ icon, label, active, onClick, isDarkMode }: any) => (
   <button
     onClick={onClick}
     className={`flex items-center cursor-pointer gap-2 px-3 py-2 rounded-lg transition-all text-sm font-medium ${
       active
-        ? "bg-black/5 dark:bg-white/5 text-gray-900 dark:text-gray-100"
-        : "text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5"
+        ? isDarkMode
+          ? "bg-white/10 text-gray-100"
+          : "bg-black/5 text-gray-900"
+        : isDarkMode
+          ? "text-gray-400 hover:bg-white/5"
+          : "text-gray-600 hover:bg-black/5"
     }`}
   >
     {/* Клонируем иконку, чтобы можно было передать стили, если нужно, или просто рендерим */}
@@ -165,8 +169,12 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
       <nav
         className="h-16 px-14 flex items-center justify-between backdrop-blur-xl border-b z-30 transition-all duration-300 sticky top-0"
         style={{
-          backgroundColor: "rgba(255, 255, 255, 0.7)",
-          borderColor: "rgba(229, 231, 235, 0.5)",
+          backgroundColor: isDarkMode
+            ? "rgba(31, 41, 55, 0.7)"
+            : "rgba(255, 255, 255, 0.7)",
+          borderColor: isDarkMode
+            ? "rgba(75, 85, 99, 0.5)"
+            : "rgba(229, 231, 235, 0.5)",
         }}
       >
         {/* Left - Navigation */}
@@ -180,20 +188,20 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
             className={`
                 group relative flex items-center justify-center w-8 h-8 rounded-full 
                 transition-colors duration-300 border backdrop-blur-md cursor-pointer overflow-hidden
-               border-black/5 bg-black/5 text-gray-600"
+                ${isDarkMode ? "border-white/10 bg-white/10" : "border-black/5 bg-black/5"} 
               `}
             title="Назад"
           >
             <ChevronLeft
               size={15}
               strokeWidth={3}
-              className="relative z-10 transition-colors text-[#555f6e]! duration-300"
+              className={`relative z-10 transition-colors duration-300 ${isDarkMode ? "text-gray-300" : "text-[#555f6e]"}`}
             />
           </motion.button>
 
           <div
             className={`h-6 w-[1px] rounded-full ml-3 ${
-              isDarkMode ? "bg-white/10" : "bg-black/10"
+              isDarkMode ? "bg-white/10!" : "bg-black/10!"
             }`}
           />
           <div className="flex items-center gap-1">
@@ -206,6 +214,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                   activeNavRegistry === "inbox" ? null : "inbox",
                 )
               }
+              isDarkMode={isDarkMode}
             />
             <NavButton
               icon={<SendOutlined />}
@@ -216,6 +225,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                   activeNavRegistry === "sent" ? null : "sent",
                 )
               }
+              isDarkMode={isDarkMode}
             />
             <NavButton
               icon={<FileTextOutlined />}
@@ -226,6 +236,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                   activeNavRegistry === "drafts" ? null : "drafts",
                 )
               }
+              isDarkMode={isDarkMode}
             />
           </div>
         </div>
@@ -328,8 +339,12 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                       <span
                         className="px-2 py-0.5 rounded-full text-xs font-medium"
                         style={{
-                          backgroundColor: currentPreset.accent,
-                          color: currentPreset.primary,
+                          backgroundColor: isDarkMode
+                            ? "rgba(255, 255, 255, 0.1)"
+                            : currentPreset.accent,
+                          color: isDarkMode
+                            ? "rgba(255, 255, 255, 0.8)"
+                            : currentPreset.primary,
                         }}
                       >
                         {item.status}

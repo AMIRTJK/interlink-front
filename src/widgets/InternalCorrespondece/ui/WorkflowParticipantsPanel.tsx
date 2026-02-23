@@ -25,6 +25,8 @@ import {
   Input,
   Tabs,
   Tag,
+  ConfigProvider,
+  theme,
 } from "antd";
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
@@ -51,6 +53,7 @@ const FullHistoryModal = ({
   versions = [],
   onSelectVersion,
   documentCreator,
+  isDarkMode,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -65,6 +68,7 @@ const FullHistoryModal = ({
   versions?: any[];
   onSelectVersion?: (content: string) => void;
   documentCreator?: any;
+  isDarkMode?: boolean;
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -200,18 +204,30 @@ const FullHistoryModal = ({
 
     return (
       <div key={item.id} className="mb-2">
-        <div className="flex items-start justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-white hover:shadow-sm transition-all relative z-10">
+        <div
+          className={`flex items-start justify-between p-3 rounded-lg border transition-all relative z-10 ${
+            isDarkMode
+              ? "bg-[#1f2937] border-gray-700 hover:bg-gray-800"
+              : "bg-gray-50 border-gray-100 hover:bg-white hover:shadow-sm"
+          }`}
+        >
           <div className="flex items-center gap-3">
             <Avatar src={item.user?.photo_path} icon={<UserOutlined />} />
             <div>
-              <div className="font-medium text-gray-800 flex items-center gap-2">
+              <div
+                className={`font-medium flex items-center gap-2 ${isDarkMode ? "text-gray-200" : "text-gray-800"}`}
+              >
                 {item.user?.full_name}
                 <If is={hasSignature}>
                   <Tooltip title="Показать данные ЭЦП">
                     <Button
                       type="text"
                       size="small"
-                      className="text-green-600! bg-green-50! h-[20px]! w-[20px]! flex items-center justify-center rounded-full"
+                      className={`h-[20px]! w-[20px]! flex items-center justify-center rounded-full ${
+                        isDarkMode
+                          ? "text-green-400! bg-green-900/30!"
+                          : "text-green-600! bg-green-50!"
+                      }`}
                       onClick={(e) => onShowSignature(e, item)}
                       icon={
                         <SafetyCertificateOutlined className="text-[12px]!" />
@@ -223,12 +239,19 @@ const FullHistoryModal = ({
                   <span className="text-gray-400 text-xs ml-1">(Вы)</span>
                 </If>
               </div>
-              <div className="text-xs text-gray-500">{item.user?.position}</div>
-
+              <div
+                className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
+              >
+                {item.user?.position}
+              </div>
               {/* --- КНОПКА РАСКРЫТИЯ ВЕРСИЙ --- */}
               <If is={userVersions.length > 0}>
                 <div
-                  className="mt-1 flex items-center gap-1 text-[11px] font-medium text-blue-500 hover:text-blue-600 cursor-pointer select-none transition-colors"
+                  className={`mt-1 flex items-center gap-1 text-[11px] font-medium cursor-pointer select-none transition-colors ${
+                    isDarkMode
+                      ? "text-blue-400 hover:text-blue-300"
+                      : "text-blue-500 hover:text-blue-600"
+                  }`}
                   onClick={() => toggleRow(item.id)}
                 >
                   <HistoryOutlined />
@@ -239,15 +262,14 @@ const FullHistoryModal = ({
                       ? "версии"
                       : "версий"}
                   {isExpanded ? (
-                    <UpOutlined className="text-[9px]! ml-0.5" />
+                    <UpOutlined className="text-[9px]! ml-0.5!" />
                   ) : (
-                    <DownOutlined className="text-[9px]! ml-0.5" />
+                    <DownOutlined className="text-[9px]! ml-0.5!" />
                   )}
                 </div>
               </If>
             </div>
           </div>
-
           <div className="flex flex-col items-end gap-2">
             <div>{renderStatusTag(item.status)}</div>
 
@@ -273,7 +295,7 @@ const FullHistoryModal = ({
                 onClick={onApprove}
                 loading={isSigning}
                 disabled={item.status !== "pending" || isReadOnly}
-                className="bg-green-600 hover:bg-green-500 border-green-600"
+                className="bg-green-600! hover:bg-green-500! border-green-600!"
               >
                 Согласовать
               </Button>
@@ -283,7 +305,13 @@ const FullHistoryModal = ({
 
         {/* --- СПИСОК ВЕРСИЙ УЧАСТНИКА --- */}
         {isExpanded && userVersions.length > 0 && (
-          <div className="pl-[52px] pr-2 py-2 flex flex-col gap-2 border-l-2 border-blue-100 ml-[22px] -mt-1 bg-white/50 rounded-b-lg">
+          <div
+            className={`pl-[52px] pr-2 py-2 flex flex-col gap-2 border-l-2 ml-[22px] -mt-1 rounded-b-lg ${
+              isDarkMode
+                ? "border-blue-900/50 bg-[#1f2937]/50"
+                : "border-blue-100 bg-white/50"
+            }`}
+          >
             {userVersions.map((v) => (
               <div
                 key={v.id}
@@ -293,19 +321,40 @@ const FullHistoryModal = ({
                     onClose();
                   }
                 }}
-                className="flex items-center justify-between p-2 bg-white rounded border border-gray-100 hover:border-blue-300 hover:shadow-sm cursor-pointer group transition-all"
+                className={`flex items-center justify-between p-2 rounded border cursor-pointer group transition-all ${
+                  isDarkMode
+                    ? "bg-gray-800 border-gray-700 hover:border-blue-500"
+                    : "bg-white border-gray-100 hover:border-blue-300 hover:shadow-sm"
+                }`}
               >
                 <div>
-                  <div className="text-xs font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
+                  <div
+                    className={`text-xs font-semibold transition-colors ${
+                      isDarkMode
+                        ? "text-gray-300 group-hover:text-blue-400"
+                        : "text-gray-700 group-hover:text-blue-600"
+                    }`}
+                  >
                     Версия {v.versionNumber}
                   </div>
-                  <div className="text-[10px] text-gray-400 mt-0.5">
+                  <div
+                    className={`text-[10px] mt-0.5 ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}
+                  >
                     {new Date(v.date).toLocaleString("ru-RU")}
                   </div>
                 </div>
-                <div className="text-gray-300 group-hover:text-blue-500">
+                <div
+                  className={`${isDarkMode ? "text-gray-500 group-hover:text-blue-400" : "text-gray-300 group-hover:text-blue-500"}`}
+                >
                   <Tooltip title="Восстановить в редакторе">
-                    <Button type="text" icon={<EyeOutlined />} size="small" />
+                    <Button
+                      type="text"
+                      icon={<EyeOutlined />}
+                      size="small"
+                      className={
+                        isDarkMode ? "text-gray-400! hover:text-blue-400!" : ""
+                      }
+                    />
                   </Tooltip>
                 </div>
               </div>
@@ -345,7 +394,9 @@ const FullHistoryModal = ({
           {filteredApprovers.length > 0 && (
             <div>
               {filteredSigners.length > 0 && (
-                <Divider className="my-4! border-gray-200!" />
+                <Divider
+                  className={`my-4! ${isDarkMode ? "border-gray-700!" : "border-gray-200!"}`}
+                />
               )}
               <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1">
                 Согласующие ({filteredApprovers.length})
@@ -372,25 +423,39 @@ const FullHistoryModal = ({
           {filteredDocs.map((doc: any) => (
             <div
               key={doc.id}
-              className="flex items-start gap-3 p-3 bg-blue-50/30 rounded-lg border border-blue-100 hover:bg-blue-50 transition-colors"
+              className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
+                isDarkMode
+                  ? "bg-blue-900/20 border-blue-800/50 hover:bg-blue-900/40"
+                  : "bg-blue-50/30 border-blue-100 hover:bg-blue-50"
+              }`}
             >
               <div className="mt-1 text-blue-500">
                 <FileTextOutlined />
               </div>
               <div className="flex-1">
                 <div className="flex justify-between">
-                  <span className="font-semibold text-blue-700">
+                  <span
+                    className={`font-semibold ${isDarkMode ? "text-blue-400" : "text-blue-700"}`}
+                  >
                     {doc.reg_number}
                   </span>
-                  <span className="text-xs text-gray-400">{doc.date}</span>
+                  <span
+                    className={`text-xs ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}
+                  >
+                    {doc.date}
+                  </span>
                 </div>
-                <div className="text-sm text-gray-700 mt-1">{doc.subject}</div>
+                <div
+                  className={`text-sm mt-1 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
+                >
+                  {doc.subject}
+                </div>
                 <div className="mt-2">
                   <a
                     href={`/modules/correspondence/internal/incoming/${doc.id}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                    className={`text-xs hover:underline flex items-center gap-1 ${isDarkMode ? "text-blue-400" : "text-blue-600"}`}
                   >
                     <EyeOutlined /> Открыть документ
                   </a>
@@ -423,30 +488,49 @@ const FullHistoryModal = ({
                     onClose();
                   }
                 }}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition-all cursor-pointer group mb-2"
+                className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer group mb-2 ${
+                  isDarkMode
+                    ? "bg-[#1f2937] border-gray-700 hover:bg-gray-800 hover:border-blue-500"
+                    : "bg-gray-50 border-gray-100 hover:bg-blue-50 hover:border-blue-200"
+                }`}
               >
                 <div className="flex items-start gap-3">
                   <Avatar
                     src={author.photo_path}
                     icon={<UserOutlined />}
-                    className="mt-1 shrink-0 bg-gray-200!"
+                    className={`mt-1! shrink-0! ${isDarkMode ? "bg-gray-700!" : "bg-gray-200!"}`}
                   />
                   <div>
-                    <div className="font-semibold text-gray-700 group-hover:text-blue-700 transition-colors">
+                    <div
+                      className={`font-semibold transition-colors ${isDarkMode ? "text-gray-200 group-hover:text-blue-400" : "text-gray-700 group-hover:text-blue-700"}`}
+                    >
                       Версия {v.versionNumber}
                     </div>
-                    <div className="text-xs text-gray-600 mt-1 font-medium">
+                    <div
+                      className={`text-xs mt-1 font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
+                    >
                       {author.full_name || "Неизвестный автор"}
                     </div>
-                    <div className="text-[10px] text-gray-400 mt-0.5">
+                    <div
+                      className={`text-[10px] mt-0.5 ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}
+                    >
                       {author.position ? `${author.position} • ` : ""}
                       {new Date(v.date).toLocaleString("ru-RU")}
                     </div>
                   </div>
                 </div>
-                <div className="text-gray-300 group-hover:text-blue-500 self-center">
+                <div
+                  className={`self-center ${isDarkMode ? "text-gray-500 group-hover:text-blue-400" : "text-gray-300 group-hover:text-blue-500"}`}
+                >
                   <Tooltip title="Восстановить в редакторе">
-                    <Button type="text" icon={<EyeOutlined />} size="small" />
+                    <Button
+                      type="text"
+                      icon={<EyeOutlined />}
+                      size="small"
+                      className={
+                        isDarkMode ? "text-gray-400! hover:text-blue-400!" : ""
+                      }
+                    />
                   </Tooltip>
                 </div>
               </div>
@@ -463,29 +547,35 @@ const FullHistoryModal = ({
   ];
 
   return (
-    <Modal
-      open={isOpen}
-      onCancel={onClose}
-      footer={null}
-      title="Полная история и документы"
-      width={700}
-      centered
-      destroyOnClose
+    <ConfigProvider
+      theme={{
+        algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
+      }}
     >
-      <Input
-        placeholder="Поиск по участникам, документам или версиям..."
-        prefix={<SearchOutlined className="text-gray-400!" />}
-        className="mb-4!"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <Tabs
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        items={items}
-        className="h-full!"
-      />
-    </Modal>
+      <Modal
+        open={isOpen}
+        onCancel={onClose}
+        footer={null}
+        title="Полная история и документы"
+        width={700}
+        centered
+        destroyOnClose
+      >
+        <Input
+          placeholder="Поиск по участникам, документам или версиям..."
+          prefix={<SearchOutlined className="text-gray-400!" />}
+          className="mb-4!"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={items}
+          className="h-full!"
+        />
+      </Modal>
+    </ConfigProvider>
   );
 };
 
@@ -504,6 +594,7 @@ export const WorkflowParticipantsPanel = ({
   versions = [],
   onSelectVersion,
   documentCreator,
+  isDarkMode,
 }: {
   workflowData: any;
   isCollapsed: boolean;
@@ -517,6 +608,7 @@ export const WorkflowParticipantsPanel = ({
   versions?: any[];
   onSelectVersion?: (content: string) => void;
   documentCreator?: any;
+  isDarkMode?: boolean;
 }) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -601,21 +693,21 @@ export const WorkflowParticipantsPanel = ({
       case "approved":
         return {
           color: "text-green-500",
-          bg: "bg-white",
-          bgList: "bg-[#00c95026]",
+          bg: isDarkMode ? "bg-[#111827]" : "bg-white",
+          bgList: isDarkMode ? "bg-[#00c9501a]" : "bg-[#00c95026]",
           icon: <CheckCircleFilled className="text-green-500!" />,
         };
       case "rejected":
         return {
           color: "text-red-500",
-          bg: "bg-white",
+          bg: isDarkMode ? "bg-[#111827]" : "bg-white",
           icon: <CloseCircleFilled className="text-red-500!" />,
         };
       default:
         return {
           color: "text-gray-400",
-          bg: "bg-white",
-          bgList: "bg-[#99a1af26]",
+          bg: isDarkMode ? "bg-[#111827]" : "bg-white",
+          bgList: isDarkMode ? "bg-gray-800/50" : "bg-[#99a1af26]",
           icon: <ClockCircleFilled className="text-gray-400!" />,
         };
     }
@@ -625,19 +717,33 @@ export const WorkflowParticipantsPanel = ({
     <Link
       to={`/modules/correspondence/internal/incoming/${doc.id}`}
       key={doc.id}
-      className="flex items-start gap-3 p-3 bg-blue-50/40 rounded-lg border border-blue-100 mb-2 hover:bg-blue-50 hover:shadow-sm hover:border-blue-200 transition-all cursor-pointer group no-underline"
+      className={`flex items-start gap-3 p-3 rounded-lg border mb-2 transition-all cursor-pointer group no-underline ${
+        isDarkMode
+          ? "bg-blue-900/20 border-blue-900/50 hover:bg-blue-900/40"
+          : "bg-blue-50/40 border-blue-100 hover:bg-blue-50 hover:shadow-sm hover:border-blue-200"
+      }`}
     >
-      <div className="mt-0.5 text-blue-500">
+      <div
+        className={`mt-0.5 ${isDarkMode ? "text-blue-400" : "text-blue-500"}`}
+      >
         <FileTextOutlined />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-xs font-semibold text-blue-700 truncate group-hover:text-blue-800 transition-colors">
+        <div
+          className={`text-xs font-semibold truncate transition-colors ${isDarkMode ? "text-blue-400 group-hover:text-blue-300" : "text-blue-700 group-hover:text-blue-800"}`}
+        >
           {doc.reg_number || "Без номера"}
         </div>
-        <div className="text-xs text-gray-600 line-clamp-2 leading-tight mt-0.5">
+        <div
+          className={`text-xs line-clamp-2 leading-tight mt-0.5 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
+        >
           {doc.subject}
         </div>
-        <div className="text-[10px] text-gray-400 mt-1">{doc.date}</div>
+        <div
+          className={`text-[10px] mt-1 ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}
+        >
+          {doc.date}
+        </div>
       </div>
     </Link>
   );
@@ -671,7 +777,7 @@ export const WorkflowParticipantsPanel = ({
               src={user.photo_path}
               icon={<UserOutlined />}
               size="small"
-              className="bg-gray-200!"
+              className={isDarkMode ? "bg-gray-700!" : "bg-gray-200!"}
             />
             <div
               className={`absolute -top-1 -right-1 rounded-full leading-[0] ${meta.bg} text-[10px]`}
@@ -695,7 +801,7 @@ export const WorkflowParticipantsPanel = ({
             className={`transition-colors! ${status === "pending" ? "grayscale-[0.5]! opacity-70!" : ""}`}
           />
           <div
-            className={`absolute -top-1 -right-1 rounded-full border border-white leading-[0] ${meta.bg}`}
+            className={`absolute -top-1 -right-1 rounded-full border leading-[0] ${meta.bg} ${isDarkMode ? "border-[#111827]" : "border-white"}`}
           >
             {meta.icon}
           </div>
@@ -704,7 +810,7 @@ export const WorkflowParticipantsPanel = ({
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start">
             <span
-              className={`text-sm font-medium truncate pr-2 ${status === "pending" ? "text-gray-500" : "text-gray-800"}`}
+              className={`text-sm font-medium truncate pr-2 ${status === "pending" ? (isDarkMode ? "text-gray-500" : "text-gray-500") : isDarkMode ? "text-gray-200" : "text-gray-800"}`}
             >
               {fullName}
               <If is={isCurrentUser}>
@@ -717,7 +823,7 @@ export const WorkflowParticipantsPanel = ({
               <Tooltip title="Показать ЭЦП">
                 <div
                   onClick={(e) => openSignatureModal(e, item)}
-                  className="text-green-600! cursor-pointer h-[20px]! w-[20px]! flex items-center justify-center rounded-full"
+                  className={`${isDarkMode ? "text-green-500!" : "text-green-600!"} cursor-pointer h-[20px]! w-[20px]! flex items-center justify-center rounded-full`}
                 >
                   <SafetyCertificateOutlined />
                 </div>
@@ -738,7 +844,7 @@ export const WorkflowParticipantsPanel = ({
                 size="small"
                 loading={isSigning}
                 disabled={status !== "pending"}
-                className={`${status !== "penging" || isReadOnly ? "bg-[#f0f1f3]" : "bg-blue-600! hover:bg-blue-500!"}`}
+                className={`${status !== "penging" || isReadOnly ? (isDarkMode ? "bg-gray-700 text-gray-500" : "bg-[#f0f1f3]") : "bg-blue-600! hover:bg-blue-500!"}`}
                 onClick={onSign}
               >
                 Подписать
@@ -751,7 +857,7 @@ export const WorkflowParticipantsPanel = ({
                 loading={isSigning}
                 type="primary"
                 size="small"
-                className={`${status !== "penging" || isReadOnly ? "bg-[#f0f1f3]" : "bg-blue-600! hover:bg-blue-500!"}`}
+                className={`${status !== "penging" || isReadOnly ? (isDarkMode ? "bg-gray-700 text-gray-500" : "bg-[#f0f1f3]") : "bg-blue-600! hover:bg-blue-500!"}`}
               >
                 Согласовать
               </Button>
@@ -765,18 +871,29 @@ export const WorkflowParticipantsPanel = ({
   const renderShowMoreParticipants = (count: number) => (
     <div
       onClick={() => openModal("participants")}
-      className="relative flex items-center gap-3 group cursor-pointer"
+      className="relative flex items-center gap-3 group cursor-pointer mb-3"
     >
-      <div className="absolute left-[15px] top-0 bottom-1/2 w-[2px] bg-gray-100 group-hover:bg-blue-100 transition-colors" />
-
+      <div
+        className={`absolute left-[15px] top-0 bottom-1/2 w-[2px] transition-colors ${isDarkMode ? "bg-gray-700 group-hover:bg-blue-900" : "bg-gray-100 group-hover:bg-blue-100"}`}
+      />
       <div className="relative z-10 w-[32px] flex justify-center">
-        <div className="w-6 h-6 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-400 group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-blue-500 transition-all text-[10px]">
+        <div
+          className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all text-[10px] ${
+            isDarkMode
+              ? "bg-gray-800 border-gray-700 text-gray-400 group-hover:bg-blue-900/50 group-hover:border-blue-800 group-hover:text-blue-400"
+              : "bg-gray-50 border-gray-200 text-gray-400 group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-blue-500"
+          }`}
+        >
           <EyeOutlined />
         </div>
       </div>
 
-      <div className="flex-1 py-2 border-b border-dashed border-gray-200 group-hover:border-blue-200 transition-colors">
-        <span className="text-xs text-gray-500 font-medium group-hover:text-blue-600 transition-colors">
+      <div
+        className={`flex-1 py-2 border-b border-dashed transition-colors ${isDarkMode ? "border-gray-700 group-hover:border-blue-800" : "border-gray-200 group-hover:border-blue-200"}`}
+      >
+        <span
+          className={`text-xs font-medium transition-colors ${isDarkMode ? "text-gray-400 group-hover:text-blue-400" : "text-gray-500 group-hover:text-blue-600"}`}
+        >
           Показать остальных ({count})
         </span>
       </div>
@@ -787,14 +904,18 @@ export const WorkflowParticipantsPanel = ({
     <>
       <div
         className={`
-        relative flex flex-col bg-white border-l border-gray-200 shadow-xl shadow-gray-200/50
-        transition-all duration-300 ease-in-out ${isReadPage ? "h-full" : "h-[calc(100vh-64px)]!"}  sticky top-0
+        relative flex flex-col border-l transition-all duration-300 ease-in-out ${isReadPage ? "h-full" : "h-[calc(100vh-64px)]!"}  sticky top-0
         ${isCollapsed ? "w-16 items-center py-4" : "w-80"}
+        ${isDarkMode ? "bg-[#111827] border-gray-800 shadow-gray-900/50 text-gray-200" : "bg-white border-gray-200 shadow-xl shadow-gray-200/50 text-gray-800"}
       `}
       >
         <button
           onClick={toggleCollapse}
-          className="absolute -left-3 top-6 bg-white border border-gray-200 rounded-full w-6 h-6 flex items-center justify-center shadow-sm hover:bg-gray-50 text-gray-500 z-20 transition-transform hover:scale-110 cursor-pointer"
+          className={`absolute -left-3 top-6 border rounded-full w-6 h-6 flex items-center justify-center shadow-sm z-20 transition-transform hover:scale-110 cursor-pointer ${
+            isDarkMode
+              ? "bg-gray-800 border-gray-700 hover:bg-gray-700 text-gray-400"
+              : "bg-white border-gray-200 hover:bg-gray-50 text-gray-500"
+          }`}
         >
           {isCollapsed ? (
             <LeftOutlined className="text-[10px]!" />
@@ -804,16 +925,26 @@ export const WorkflowParticipantsPanel = ({
         </button>
 
         {!isCollapsed && (
-          <div className="px-4 py-4 border-b border-gray-100 shrink-0 bg-white z-10 flex justify-between items-center">
-            <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2 m-0">
-              <InfoCircleOutlined className="text-gray-400!" />
+          <div
+            className={`px-4 py-4 border-b shrink-0 z-10 flex justify-between items-center ${isDarkMode ? "bg-[#111827] border-gray-800" : "bg-white border-gray-100"}`}
+          >
+            <h3
+              className={`text-sm font-bold flex items-center gap-2 m-0 ${isDarkMode ? "text-gray-200" : "text-gray-800"}`}
+            >
+              <InfoCircleOutlined
+                className={isDarkMode ? "text-gray-500!" : "text-gray-400!"}
+              />
               История
             </h3>
             <Tooltip title="Полная история">
               <Button
                 type="text"
                 size="small"
-                icon={<HistoryOutlined />}
+                icon={
+                  <HistoryOutlined
+                    className={isDarkMode ? "text-gray-400!" : ""}
+                  />
+                }
                 onClick={() => openModal("participants")}
               />
             </Tooltip>
@@ -831,23 +962,32 @@ export const WorkflowParticipantsPanel = ({
                     <span className="flex items-center gap-2">
                       <PaperClipOutlined /> Документы
                     </span>
-                    <span className="bg-gray-100 px-1.5 rounded text-gray-600 text-[10px]">
+                    <span
+                      className={`px-1.5 rounded text-[10px] ${isDarkMode ? "bg-gray-800 text-gray-400" : "bg-gray-100 text-gray-600"}`}
+                    >
                       {documents.length}
                     </span>
                   </div>
                   {visibleDocuments.map(renderDocumentRow)}
-
                   {hiddenDocsCount > 0 && (
                     <div
                       onClick={() => openModal("documents")}
-                      className="mt-2 w-full py-2 px-3 bg-blue-50 hover:bg-blue-100 border border-blue-100 rounded-lg cursor-pointer transition-colors flex items-center justify-center gap-2 group"
+                      className={`mt-2 w-full py-2 px-3 border rounded-lg cursor-pointer transition-colors flex items-center justify-center gap-2 group ${
+                        isDarkMode
+                          ? "bg-blue-900/20 hover:bg-blue-900/40 border-blue-900/50"
+                          : "bg-blue-50 hover:bg-blue-100 border-blue-100"
+                      }`}
                     >
-                      <span className="text-xs font-medium text-blue-600 group-hover:text-blue-700">
+                      <span
+                        className={`text-xs font-medium ${isDarkMode ? "text-blue-400 group-hover:text-blue-300" : "text-blue-600 group-hover:text-blue-700"}`}
+                      >
                         Показать все документы: {documents.length}
                       </span>
                     </div>
                   )}
-                  <Divider className="my-4! border-gray-100!" />
+                  <Divider
+                    className={`my-4! ${isDarkMode ? "border-gray-800!" : "border-gray-100!"}`}
+                  />
                 </>
               ) : (
                 <Tooltip
@@ -855,7 +995,11 @@ export const WorkflowParticipantsPanel = ({
                   placement="left"
                 >
                   <div
-                    className="mb-4 w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center border border-blue-100 cursor-pointer hover:bg-blue-100 transition-colors"
+                    className={`mb-4 w-8 h-8 rounded-full flex items-center justify-center border cursor-pointer transition-colors ${
+                      isDarkMode
+                        ? "bg-blue-900/30 text-blue-400 border-blue-800/50 hover:bg-blue-900/50"
+                        : "bg-blue-50 text-blue-500 border-blue-100 hover:bg-blue-100"
+                    }`}
                     onClick={() => openModal("documents")}
                   >
                     <PaperClipOutlined />
@@ -873,11 +1017,12 @@ export const WorkflowParticipantsPanel = ({
                     <span className="flex items-center gap-2">
                       <HistoryOutlined /> Версии редактора
                     </span>
-                    <span className="bg-gray-100 px-1.5 rounded text-gray-600 text-[10px]">
+                    <span
+                      className={`px-1.5 rounded text-[10px] ${isDarkMode ? "bg-gray-800 text-gray-400" : "bg-gray-100 text-gray-600"}`}
+                    >
                       {versions.length}
                     </span>
                   </div>
-
                   <div className="flex flex-col gap-2">
                     {visibleVersions.map((v: any, index: number) => {
                       const author = userMap.get(String(v.authorId)) || {};
@@ -888,20 +1033,26 @@ export const WorkflowParticipantsPanel = ({
                           onClick={() =>
                             onSelectVersion && onSelectVersion(v.content)
                           }
-                          className="flex items-start gap-3 p-2 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:border-blue-300 transition-all cursor-pointer group"
+                          className={`flex items-start gap-3 p-2 rounded-lg border transition-all cursor-pointer group ${
+                            isDarkMode
+                              ? "bg-[#1f2937] border-gray-700 hover:bg-gray-800 hover:border-blue-500"
+                              : "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-blue-300"
+                          }`}
                         >
                           <Avatar
                             src={author.photo_path}
                             icon={<UserOutlined />}
                             size="small"
-                            className="mt-0.5 shrink-0 bg-gray-200!"
+                            className={`mt-0.5 shrink-0 ${isDarkMode ? "bg-gray-600!" : "bg-gray-200!"}`}
                           />
                           <div className="flex-1 min-w-0">
-                            <div className="text-xs font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
+                            <div
+                              className={`text-xs font-semibold transition-colors ${isDarkMode ? "text-gray-200 group-hover:text-blue-400" : "text-gray-700 group-hover:text-blue-600"}`}
+                            >
                               Версия {versions.length - index}
                             </div>
                             <div
-                              className="text-[10px] font-medium text-gray-500 truncate mt-0.5"
+                              className={`text-[10px] font-medium truncate mt-0.5 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
                               title={author.full_name}
                             >
                               {author.full_name || "Неизвестный автор"}
@@ -910,26 +1061,34 @@ export const WorkflowParticipantsPanel = ({
                               {new Date(v.date).toLocaleString("ru-RU")}
                             </div>
                           </div>
-                          <div className="text-gray-400 group-hover:text-blue-500 flex items-center mt-2 shrink-0">
+                          <div
+                            className={`flex items-center mt-2 shrink-0 ${isDarkMode ? "text-gray-500 group-hover:text-blue-400" : "text-gray-400 group-hover:text-blue-500"}`}
+                          >
                             <EyeOutlined />
                           </div>
                         </div>
                       );
                     })}
                   </div>
-
                   {hiddenVersionsCount > 0 && (
                     <div
                       onClick={() => openModal("versions")}
-                      className="mt-2 w-full py-2 px-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg cursor-pointer transition-colors flex items-center justify-center gap-2 group"
+                      className={`mt-2 w-full py-2 px-3 border rounded-lg cursor-pointer transition-colors flex items-center justify-center gap-2 group ${
+                        isDarkMode
+                          ? "bg-gray-800 hover:bg-gray-700 border-gray-700"
+                          : "bg-gray-50 hover:bg-gray-100 border-gray-200"
+                      }`}
                     >
-                      <span className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+                      <span
+                        className={`text-xs font-medium ${isDarkMode ? "text-gray-400 group-hover:text-gray-200" : "text-gray-500 group-hover:text-gray-700"}`}
+                      >
                         Показать все версии: {versions.length}
                       </span>
                     </div>
                   )}
-
-                  <Divider className="my-4! border-gray-100!" />
+                  <Divider
+                    className={`my-4! ${isDarkMode ? "border-gray-800!" : "border-gray-100!"}`}
+                  />
                 </>
               ) : (
                 <Tooltip
@@ -937,7 +1096,11 @@ export const WorkflowParticipantsPanel = ({
                   placement="left"
                 >
                   <div
-                    className="mb-4 w-8 h-8 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors"
+                    className={`mb-4 w-8 h-8 rounded-full flex items-center justify-center border cursor-pointer transition-colors ${
+                      isDarkMode
+                        ? "bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700"
+                        : "bg-gray-50 text-gray-500 border-gray-100 hover:bg-gray-100"
+                    }`}
                     onClick={() => openModal("versions")}
                   >
                     <HistoryOutlined />
@@ -952,7 +1115,9 @@ export const WorkflowParticipantsPanel = ({
               {!isCollapsed && (
                 <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1 flex justify-between items-center">
                   <span>Подписывающие</span>
-                  <span className="bg-gray-100 text-gray-500 px-1.5 rounded text-[9px]">
+                  <span
+                    className={`px-1.5 rounded text-[9px] ${isDarkMode ? "bg-gray-800 text-gray-400" : "bg-gray-100 text-gray-500"}`}
+                  >
                     {signers.length}
                   </span>
                 </div>
@@ -983,7 +1148,9 @@ export const WorkflowParticipantsPanel = ({
                 <>
                   <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1 flex justify-between items-center">
                     <span>Согласующие</span>
-                    <span className="bg-gray-100 text-gray-500 px-1.5 rounded text-[9px]">
+                    <span
+                      className={`px-1.5 rounded text-[9px] ${isDarkMode ? "bg-gray-800 text-gray-400" : "bg-gray-100 text-gray-500"}`}
+                    >
                       {approvers.length}
                     </span>
                   </div>
@@ -1008,11 +1175,17 @@ export const WorkflowParticipantsPanel = ({
         </div>
 
         {!isCollapsed && (
-          <div className="p-4 border-t border-gray-100 shrink-0 bg-gray-50/50">
+          <div
+            className={`p-4 border-t shrink-0 ${isDarkMode ? "bg-[#111827] border-gray-800" : "bg-gray-50/50 border-gray-100"}`}
+          >
             <Button
               block
               onClick={() => openModal("participants")}
-              className="bg-white! border-gray-200! text-gray-600! hover:text-blue-600! hover:border-blue-200! shadow-sm! h-9! font-medium!"
+              className={`shadow-sm! h-9! font-medium! ${
+                isDarkMode
+                  ? "bg-[#1f2937]! border-gray-600! text-gray-300! hover:text-blue-400! hover:border-blue-500!"
+                  : "bg-white! border-gray-200! text-gray-600! hover:text-blue-600! hover:border-blue-200!"
+              }`}
             >
               Полная история
             </Button>
@@ -1034,11 +1207,13 @@ export const WorkflowParticipantsPanel = ({
         versions={versions}
         onSelectVersion={onSelectVersion}
         documentCreator={documentCreator}
+        isDarkMode={isDarkMode}
       />
       <SignatureDetailsModal
         isOpen={signatureModal.isOpen}
         onClose={() => setSignatureModal({ ...signatureModal, isOpen: false })}
         data={signatureModal.data}
+        isDarkMode={isDarkMode}
       />
     </>
   );

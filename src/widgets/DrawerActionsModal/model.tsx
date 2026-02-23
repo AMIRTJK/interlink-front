@@ -12,6 +12,7 @@ export interface IActionsModal {
   onRefresh?: () => void;
   isIncoming: boolean;
   isReadOnly: boolean;
+  isDarkMode: boolean;
 }
 
 export interface IActionItem {
