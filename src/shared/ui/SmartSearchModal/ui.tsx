@@ -16,6 +16,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
   onConfirm,
   multiple = true,
   mode = "attach",
+  isDarkMode,
 }) => {
   const [state, setState] = useState<ISelectionState>({
     selectedIds: [],
@@ -120,25 +121,38 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   return (
-    <div className="smart-search-content flex flex-col h-full bg-gray-50/30 rounded-3xl">
+    <div
+      className={`smart-search-content flex flex-col h-full rounded-3xl ${isDarkMode ? "transparent" : "bg-gray-50/30"}`}
+    >
       <div className="py-4 w-full transition-all duration-300 ease-out transform">
         <Input
           size="large"
           placeholder="Поиск..."
           prefix={
             <SearchOutlined
-              className={`text-lg mr-2 transition-colors duration-300 ${isSearchFocused ? "text-blue-600" : "text-gray-400"}`}
+              className={`text-lg! mr-2! transition-colors! duration-300! ${
+                isSearchFocused
+                  ? "text-blue-600!"
+                  : isDarkMode
+                    ? "text-gray-500!"
+                    : "text-gray-400!"
+              }`}
             />
           }
           onFocus={() => setIsSearchFocused(true)}
           onBlur={() => setIsSearchFocused(false)}
-          className={`w-full h-12 rounded-2xl border text-base shadow-sm transition-all duration-300 ${isSearchFocused ? "border-blue-500 shadow-lg shadow-blue-500/15" : "border-gray-200 hover:border-blue-300"}`}
+          className={`w-full! h-12! rounded-2xl! border! text-base! shadow-sm! transition-all! duration-300! ${
+            isSearchFocused
+              ? "border-blue-500! shadow-lg! shadow-blue-500/15!"
+              : isDarkMode
+                ? "bg-gray-800! border-gray-700! text-white! hover:border-gray-600!"
+                : "bg-white! border-gray-200! text-black! hover:border-blue-300!"
+          }`}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           allowClear
         />
       </div>
-
       <div className="flex min-h-0 gap-3 mb-6 overflow-hidden">
         <AnimatePresence mode="popLayout">
           {isExpanded && (
@@ -155,10 +169,13 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
                   icon={<CloseOutlined />}
                   type="text"
                   onClick={handleClosePreview}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400! hover:text-gray-600! transition-colors!"
                 />
               </div>
-              <SearchPreviewPanel item={state.activePreviewItem} />
+              <SearchPreviewPanel
+                item={state.activePreviewItem}
+                isDarkMode={isDarkMode}
+              />
             </motion.div>
           )}
         </AnimatePresence>
@@ -190,6 +207,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
                   isActive={state.activePreviewItem?.id === item.id}
                   isSelected={state.selectedIds.includes(item.id)}
                   onClick={handleItemClick}
+                  isDarkMode={isDarkMode}
                 />
               ))
             )}
@@ -210,6 +228,13 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
               const item = selectedItemsMap[id];
               if (!item) return null;
               const isActive = state.activePreviewItem?.id === id;
+
+              const activeClass =
+                "bg-[#8C52FF] text-white border-[#8C52FF] shadow-sm";
+              const inactiveClass = isDarkMode
+                ? "bg-gray-800 text-gray-300 border-gray-700 hover:border-gray-500"
+                : "bg-white text-gray-500 border-gray-100 hover:border-purple-200";
+
               return (
                 <button
                   key={id}
@@ -217,14 +242,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
                   onClick={() =>
                     setState((prev) => ({ ...prev, activePreviewItem: item }))
                   }
-                  className={`
-                                px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border outline-none
-                                ${
-                                  isActive
-                                    ? "bg-[#8C52FF] text-white border-[#8C52FF] shadow-sm"
-                                    : "bg-white text-gray-500 border-gray-100 hover:border-purple-200"
-                                }
-                            `}
+                  className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border outline-none ${isActive ? activeClass : inactiveClass}`}
                 >
                   {item.title || "Без названия"}
                 </button>

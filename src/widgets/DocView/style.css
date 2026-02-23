@@ -43,14 +43,14 @@
   left: 0;
   width: 100%;
   height: 100%;
-  backface-visibility: hidden; 
+  backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
 .face.front {
-  background-image: url("../../assets/images/cover.png"); 
+  background-image: url("../../assets/images/cover.png");
   background-size: cover;
-  background-color: #0037af; 
+  background-color: #0037af;
   z-index: 2;
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
@@ -58,7 +58,7 @@
 
 .face.back {
   background-color: white;
-  transform: rotateY(180deg) translateZ(1px); 
+  transform: rotateY(180deg) translateZ(1px);
   z-index: 1;
   display: flex;
   flex-direction: column;
@@ -73,7 +73,7 @@
 
 .cover p {
   position: relative;
-  z-index: 5; 
+  z-index: 5;
 
   transform: rotateY(180deg);
 
@@ -102,7 +102,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-color: white; 
+  background-color: white;
   transform: rotateY(180deg);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -204,4 +204,41 @@
 .action-btn {
   flex: 1;
   height: 40px;
+}
+
+/* === ТЕМНАЯ ТЕМА ДЛЯ DOC PREVIEW === */
+
+/* Главный контейнер */
+.docView__left.is-dark {
+  background: #1f2937; /* gray-800 */
+  border-color: #374151; /* gray-700 */
+}
+
+/* Шапка с названием документа */
+.docView__left.is-dark .docView__left-header {
+  background: #111827; /* gray-900 */
+  border-bottom: 1px solid #374151; /* gray-700 */
+}
+
+.docView__left.is-dark .docView__left-header h3 {
+  color: #e5e7eb; /* gray-200 */
+}
+
+/* Область, где лежит сам документ (фон "стола") */
+.docView__left.is-dark .docView__preview {
+  background: #1f2937; /* gray-800 */
+}
+
+/* Заглушка, если файл не выбран */
+.docView__left.is-dark .preview-stub {
+  color: #9ca3af; /* gray-400 */
+  background: #111827; /* gray-900 */
+  border: 1px dashed #4b5563; /* gray-600 */
+}
+
+/* Небольшая тень для самих страниц PDF, чтобы они выделялись на темном фоне */
+.docView__left.is-dark .react-pdf__Page {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.5),
+    0 2px 4px -1px rgba(0, 0, 0, 0.3) !important;
 }

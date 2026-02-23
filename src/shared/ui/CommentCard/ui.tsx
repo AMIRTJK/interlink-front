@@ -1,5 +1,5 @@
-import React from 'react';
-import './style.css';
+import React from "react";
+import "./style.css";
 
 interface CommentCardProps {
   author: string;
@@ -7,19 +7,21 @@ interface CommentCardProps {
   content: string;
   indicatorColor?: string;
   className?: string;
+  isDarkMode?: boolean;
 }
 
 export const CommentCard: React.FC<CommentCardProps> = ({
   author,
   date,
   content,
-  indicatorColor = '#8C52FF',
-  className = '',
+  indicatorColor = "#8C52FF",
+  className = "",
+  isDarkMode,
 }) => {
   return (
-    <div className={`comment-card ${className}`}>
-      <div 
-        className="comment-card__indicator" 
+    <div className={`comment-card ${isDarkMode ? "is-dark" : ""} ${className}`}>
+      <div
+        className="comment-card__indicator"
         style={{ backgroundColor: indicatorColor }}
       />
       <div className="comment-card__body">

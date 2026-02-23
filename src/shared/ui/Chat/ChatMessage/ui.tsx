@@ -1,6 +1,6 @@
-import React from 'react';
-import './style.css';
-import { If } from '../../If';
+import React from "react";
+import "./style.css";
+import { If } from "../../If";
 
 interface IReplyContext {
   author: string;
@@ -15,6 +15,7 @@ interface ChatMessageProps {
   replyTo?: IReplyContext;
   onReplyClick?: () => void;
   className?: string;
+  isDarkMode?: boolean;
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -24,11 +25,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   isMine = false,
   replyTo,
   onReplyClick,
-  className = '',
+  className = "",
+  isDarkMode,
 }) => {
   return (
-    <div 
-      className={`chat-msg ${isMine ? 'chat-msg--mine' : ''} ${className}`}
+    <div
+      className={`chat-msg ${isMine ? "chat-msg--mine" : ""} ${isDarkMode ? "is-dark" : ""} ${className}`}
       onClick={onReplyClick}
     >
       <div className="chat-msg__body">

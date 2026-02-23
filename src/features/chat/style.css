@@ -15,7 +15,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: #F9FAFB;
+  background: #f9fafb;
 }
 
 .chat-view__history::-webkit-scrollbar {
@@ -27,10 +27,28 @@
 }
 
 .chat-view__history::-webkit-scrollbar-thumb {
-  background: #E5E7EB;
+  background: #e5e7eb;
   border-radius: 10px;
 }
 
 .chat-view__history::-webkit-scrollbar-thumb:hover {
-  background: #D1D5DB;
+  background: #d1d5db;
+}
+
+/* === ТЕМНАЯ ТЕМА ДЛЯ CHAT VIEW === */
+.chat-view.is-dark {
+  background: #1f2937; /* gray-800 */
+}
+
+.chat-view.is-dark .chat-view__history {
+  background: #111827; /* gray-900 */
+}
+
+/* Скроллбар в темной теме */
+.chat-view.is-dark .chat-view__history::-webkit-scrollbar-thumb {
+  background: #374151; /* gray-700 */
+}
+
+.chat-view.is-dark .chat-view__history::-webkit-scrollbar-thumb:hover {
+  background: #4b5563; /* gray-600 */
 }

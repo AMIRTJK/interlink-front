@@ -27,10 +27,30 @@
 }
 
 @keyframes fadeInSlide {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .drawer__content--animate {
   animation: fadeInSlide 0.4s ease-out forwards;
+}
+
+.is-dark-modal .ant-modal-content {
+  background-color: #111827 !important; /* gray-900 */
+}
+.is-dark-modal .ant-modal-header {
+  background-color: #111827 !important;
+  border-bottom-color: #374151 !important; /* gray-700 */
+}
+.is-dark-modal .ant-modal-title {
+  color: #f3f4f6 !important; /* gray-100 */
+}
+.is-dark-modal .ant-modal-close-icon {
+  color: #9ca3af !important; /* gray-400 */
 }

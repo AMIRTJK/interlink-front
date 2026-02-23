@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { ChatMessage, ChatInput, Loader } from '@shared/ui';
-import { useGetQuery, useMutationQuery } from '@shared/lib/hooks';
-import { ApiRoutes } from '@shared/api';
-import './style.css';
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { ChatMessage, ChatInput, Loader } from "@shared/ui";
+import { useGetQuery, useMutationQuery } from "@shared/lib/hooks";
+import { ApiRoutes } from "@shared/api";
+import "./style.css";
 
 interface IMessage {
   id: string;
@@ -26,16 +26,24 @@ interface IApiResponse<T> {
 interface ChatViewProps {
   contextId?: string;
   className?: string;
+  isDarkMode?: boolean;
 }
 
-export const ChatView: React.FC<ChatViewProps> = ({ contextId = 'test-id', className = '' }) => {
+export const ChatView: React.FC<ChatViewProps> = ({
+  contextId = "test-id",
+  className = "",
+  isDarkMode,
+}) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeReply, setActiveReply] = useState<IMessage | null>(null);
 
   // Тестовый эндпоинт для получения сообщений
   const messagesUrl = `${ApiRoutes.GET_CORRESPONDENCES}/${contextId}/messages`;
 
-  const { data, isLoading, refetch } = useGetQuery<Record<string, unknown>, IApiResponse<IChatResponse>>({
+  const { data, isLoading, refetch } = useGetQuery<
+    Record<string, unknown>,
+    IApiResponse<IChatResponse>
+  >({
     url: messagesUrl,
     useToken: true,
     options: {
@@ -43,41 +51,44 @@ export const ChatView: React.FC<ChatViewProps> = ({ contextId = 'test-id', class
       // Тестовые данные для демонстрации функционала
       initialData: {
         success: true,
-        message: 'Success',
+        message: "Success",
         data: {
           messages: [
             {
-              id: '1',
-              author: 'Иванов И.И.',
-              text: 'Добрый день! Подготовил отчет по вашему запросу.',
-              time: '10:30',
+              id: "1",
+              author: "Иванов И.И.",
+              text: "Добрый день! Подготовил отчет по вашему запросу.",
+              time: "10:30",
               isMine: false,
             },
             {
-              id: '2',
-              author: 'Admin Super',
-              text: 'Принято, сейчас посмотрю.',
-              time: '10:35',
+              id: "2",
+              author: "Admin Super",
+              text: "Принято, сейчас посмотрю.",
+              time: "10:35",
               isMine: true,
             },
-          ]
-        }
-      }
-    }
+          ],
+        },
+      },
+    },
   });
 
   // Тестовая мутация для отправки сообщения
-  const { mutate: sendMessage, isLoading: isSending } = useMutationQuery<Record<string, unknown>, IChatResponse>({
+  const { mutate: sendMessage, isLoading: isSending } = useMutationQuery<
+    Record<string, unknown>,
+    IChatResponse
+  >({
     url: messagesUrl,
-    method: 'POST',
+    method: "POST",
     messages: {
-      success: 'Сообщение отправлено',
-      error: 'Ошибка при отправке',
+      success: "Сообщение отправлено",
+      error: "Ошибка при отправке",
       onSuccessCb: () => {
         setActiveReply(null);
         refetch(); // Обновляем список сообщений после успешной отправки
-      }
-    }
+      },
+    },
   });
 
   const messages = useMemo(() => data?.data?.messages || [], [data]);
@@ -94,7 +105,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ contextId = 'test-id', class
     sendMessage({
       text,
       reply_to_id: activeReply?.id,
-      context_id: contextId
+      context_id: contextId,
     });
   };
 
@@ -103,8 +114,11 @@ export const ChatView: React.FC<ChatViewProps> = ({ contextId = 'test-id', class
   };
 
   return (
-    <div className={`chat-view ${className}`}>
-      <div className="chat-view__history" ref={scrollRef}>
+    <div className={`chat-view ${className} ${isDarkMode ? "is-dark" : ""}`}>
+      <div
+        className={`chat-view__history custom-scrollbar ${isDarkMode ? "is-dark" : ""}`}
+        ref={scrollRef}
+      >
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
             <Loader />
@@ -119,16 +133,17 @@ export const ChatView: React.FC<ChatViewProps> = ({ contextId = 'test-id', class
               isMine={msg.isMine}
               replyTo={msg.replyTo}
               onReplyClick={() => handleReplyToMessage(msg)}
+              isDarkMode={isDarkMode}
             />
           ))
         )}
       </div>
-
       <ChatInput
         onSend={handleSendMessage}
         replyingTo={activeReply}
         onCancelReply={() => setActiveReply(null)}
         placeholder={isSending ? "Отправка..." : "Напишите сообщение..."}
+        isDarkMode={isDarkMode}
       />
     </div>
   );
