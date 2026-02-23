@@ -318,7 +318,15 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                 </h3>
               </div>
 
-              <div className="flex-1 overflow-auto p-3 space-y-2">
+              <div
+                className="flex-1 overflow-auto p-3 space-y-2"
+                style={{
+                  scrollbarWidth: "thin",
+                  scrollbarColor: isDarkMode
+                    ? "#4b5563 #111827"
+                    : "#dfdfdf transparent",
+                }}
+              >
                 {navRegistries[activeNavRegistry].items.map((item) => (
                   <div
                     key={item.id}
