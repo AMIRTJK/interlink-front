@@ -2,6 +2,7 @@ const TOKEN_KEY = "interlink/token";
 const USER_ID = "interlink/userId";
 const OUTGOING_LETTER_COUNT = "interlink/outgoingLetterCount";
 const VIEW_MODE_KEY = "interlink/viewMode";
+const DARK_MODE_KEY = "interlink/darkMode";
 interface IToken {
   token: string;
   userId?: number;
@@ -68,6 +69,18 @@ export const tokenControl = {
   },
   removeViewMode: () => {
     localStorage.removeItem(VIEW_MODE_KEY);
+  },
+
+  setDarkMode: (isDark: boolean) => {
+    localStorage.setItem(DARK_MODE_KEY, isDark.toString());
+  },
+
+  getDarkMode: (): boolean => {
+    return localStorage.getItem(DARK_MODE_KEY) === "true";
+  },
+
+  removeDarkMode: () => {
+    localStorage.removeItem(DARK_MODE_KEY);
   },
 };
 
