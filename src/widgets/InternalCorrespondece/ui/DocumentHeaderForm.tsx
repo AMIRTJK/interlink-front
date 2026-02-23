@@ -115,10 +115,11 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
     return { list: [], onRemove: () => {} };
   }, [activeViewerMode, selectedRecipients, selectedCC]);
 
-  const textSecondary = isDarkMode ? "text-gray-400" : "text-gray-500";
+  const textSecondary = isDarkMode ? "text-gray-400!" : "text-gray-500!";
+
   const chipClass = isDarkMode
-    ? "bg-[#1f2937] border-gray-700 text-gray-200 hover:border-gray-500"
-    : "bg-white border-gray-200 text-gray-700 hover:border-gray-300";
+    ? "bg-[#1f2937]! border-gray-700! text-gray-200! hover:border-gray-500!"
+    : "bg-white! border-gray-200! text-gray-700! hover:border-gray-300!";
 
   const renderSelectionArea = (
     list: Recipient[],
@@ -128,8 +129,10 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
     hasError: boolean = false,
   ) => {
     const errorColor = "#ff4d4f";
-    const errorClass = "text-red-500! dark:text-red-500!";
-    const normalClass = `${textSecondary} text-[#4a5565]! hover:text-gray-400! dark:hover:text-gray-300!`;
+    const errorClass = "text-red-500!";
+    const normalClass = isDarkMode
+      ? "text-gray-400! hover:text-gray-300!"
+      : "text-[#4a5565]! hover:text-gray-400!";
 
     if (list.length === 0) {
       return (
@@ -163,7 +166,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
             key={user.id}
             onClick={() => setActiveViewerMode(mode)}
             className={`
-              flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border cursor-pointer transition-all shadow-sm select-none
+              flex items-center gap-2 pl-1 pr-3 py-1 rounded-full! border! cursor-pointer transition-all shadow-sm select-none
               ${chipClass}
             `}
           >
@@ -199,7 +202,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
             onClick={() => setActiveSelectorMode(mode)}
             className={`
             min-w-[32px]! h-[32px]! w-[32px]! rounded-full! flex items-center justify-center p-0!
-            ${textSecondary} hover:bg-gray-100 dark:hover:bg-gray-800
+            ${textSecondary} ${isDarkMode ? "hover:bg-gray-800!" : "hover:bg-gray-100!"}
           `}
           />
         </If>
@@ -234,7 +237,11 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
             placeholder="Тема письма..."
             disabled={isIncoming || isReadOnly}
             variant="borderless"
-            className="p-0! h-12! text-2xl! font-bold! text-gray-900! placeholder:text-2xl! placeholder:text-gray-300! dark:placeholder:text-gray-600! bg-transparent! border-none! focus:outline-none! focus:ring-0! transition-all!"
+            className={`p-0! h-12! text-2xl! font-bold! bg-transparent! border-none! focus:outline-none! focus:ring-0! transition-all! ${
+              isDarkMode
+                ? "text-white! placeholder:text-gray-600!"
+                : "text-gray-900! placeholder:text-gray-300!"
+            }`}
             autoComplete="off"
             styles={{ input: { caretColor: "#A78BFA" } }}
           />
@@ -268,7 +275,11 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
                 variant="borderless"
                 allowClear={false}
                 suffixIcon={null}
-                className={`p-0! text-sm! max-w-[90px] ${textSecondary} text-[#4a5565]! px-0! hover:bg-transparent! hover:text-gray-400! dark:hover:text-gray-300! transition-colors!`}
+                className={`p-0! text-sm! max-w-[90px]! px-0! hover:bg-transparent! transition-colors! ${
+                  isDarkMode
+                    ? "text-gray-400! hover:text-gray-300!"
+                    : "text-[#4a5565]! hover:text-gray-400!"
+                }`}
                 style={{ color: "inherit" }}
                 inputReadOnly
                 disabled
@@ -287,10 +298,9 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
                 disabled
                 variant="borderless"
                 className={`
-                  px-0! py-0! h-auto! w-32! text-sm! ${textSecondary}
-                  placeholder:text-sm!
-                  rounded-none! border-b! border-gray-300! dark:border-gray-600!
-                  focus:border-gray-400! focus:shadow-none! hover:bg-transparent!
+                  px-0! py-0! h-auto! w-32! text-sm! placeholder:text-sm!
+                  rounded-none! border-b! focus:shadow-none! hover:bg-transparent! focus:border-gray-400!
+                  ${isDarkMode ? "border-gray-600! text-gray-300!" : "border-gray-300! text-[#4a5565]!"}
                 `}
                 style={{ backgroundColor: "transparent", lineHeight: "1.5" }}
                 styles={{ input: { caretColor: "#A78BFA" } }}
