@@ -1,11 +1,21 @@
 import "./style.css";
 import React, { useState, useEffect, useMemo } from "react";
-import { Input, DatePicker, Form, FormInstance, Avatar, Tooltip } from "antd";
+import {
+  Input,
+  DatePicker,
+  Form,
+  FormInstance,
+  Avatar,
+  Tooltip,
+  ConfigProvider,
+  theme,
+} from "antd";
 import {
   UserOutlined,
   ClockCircleOutlined,
   PlusOutlined,
   CopyOutlined,
+  DownOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
@@ -264,11 +274,13 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
               }}
             </Form.Item>
           </div>
-
-          <div className="hidden sm:block w-px h-5 bg-gray-200 dark:bg-gray-700"></div>
-
+          <div
+            className={`hidden sm:block w-px h-5 ${isDarkMode ? "bg-gray-700!" : "bg-gray-200!"}`}
+          ></div>
           <div className="flex items-center gap-2">
-            <ClockCircleOutlined style={{ fontSize: "14px" }} />
+            <ClockCircleOutlined
+              style={{ fontSize: "14px", color: isDarkMode ? "#ebe6e7" : "" }}
+            />
             <Form.Item name="date" noStyle>
               <DatePicker
                 format="DD.MM.YYYY"
@@ -277,8 +289,8 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
                 suffixIcon={null}
                 className={`p-0! text-sm! max-w-[90px]! px-0! hover:bg-transparent! transition-colors! ${
                   isDarkMode
-                    ? "text-gray-400! hover:text-gray-300!"
-                    : "text-[#4a5565]! hover:text-gray-400!"
+                    ? "text-gray-400! hover:text-gray-300! [&_input]:text-gray-400! [&_input]:[-webkit-text-fill-color:#9ca3af]!"
+                    : "text-[#4a5565]! hover:text-gray-400! [&_input]:text-[#4a5565]! [&_input]:[-webkit-text-fill-color:#4a5565]!"
                 }`}
                 style={{ color: "inherit" }}
                 inputReadOnly
@@ -286,11 +298,13 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
               />
             </Form.Item>
           </div>
-
-          <div className="hidden sm:block w-px h-5 bg-gray-200 dark:bg-gray-700"></div>
-
+          <div
+            className={`hidden sm:block w-px h-5 ${isDarkMode ? "bg-gray-700!" : "bg-gray-200!"}`}
+          ></div>
           <div className="flex items-center gap-2">
-            <span className="font-semibold! text-[#4a5565]! dark:text-gray-200 text-sm!">
+            <span
+              className={`text-sm! ${isDarkMode ? "text-gray-200! font-normal" : "text-[#4a5565] font-semibold"}`}
+            >
               №
             </span>
             <Form.Item name="number" noStyle>
@@ -307,24 +321,43 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
               />
             </Form.Item>
           </div>
+          <div
+            className={`hidden sm:block w-px h-5 ${isDarkMode ? "bg-gray-700!" : "bg-gray-200!"}`}
+          ></div>
 
-          <div className="hidden sm:block w-px h-5 bg-gray-200 dark:bg-gray-700"></div>
-          <span className="font-semibold! text-[#4a5565]! dark:text-gray-200 text-sm!">
+          <span
+            className={`text-sm! ${isDarkMode ? "text-gray-200! font-normal" : "text-[#4a5565] font-semibold"}`}
+          >
             Папки
           </span>
-          <SelectField
-            rules={[requiredRule]}
-            name="folder"
-            label=""
-            url={ApiRoutes.GET_INTERNAL_FOLDERS}
-            placeholder="Выберите папку"
-            allowClear
-            showSearch
-            transformResponse={(data) => transformResponse(data)}
-            className="mb-0!"
-            searchParamKey="search"
-            disabled={isIncoming || isReadOnly}
-          />
+          <ConfigProvider
+            theme={{
+              algorithm: isDarkMode
+                ? theme.darkAlgorithm
+                : theme.defaultAlgorithm,
+              token: isDarkMode
+                ? {
+                    colorBgContainer: "#1f2937", // Идеально ложится под Tailwind bg-gray-800
+                    colorBgElevated: "#1f2937", // Фон выпадающего списка
+                    colorBorder: "#4b5563", // Рамка (border-gray-600)
+                  }
+                : {},
+            }}
+          >
+            <SelectField
+              rules={[requiredRule]}
+              name="folder"
+              label=""
+              url={ApiRoutes.GET_INTERNAL_FOLDERS}
+              placeholder="Выберите папку"
+              allowClear
+              showSearch
+              transformResponse={(data) => transformResponse(data)}
+              className="mb-0!"
+              searchParamKey="search"
+              disabled={isIncoming || isReadOnly}
+            />
+          </ConfigProvider>
         </div>
 
         <div className="flex items-center gap-4 mt-1 min-h-[32px]">

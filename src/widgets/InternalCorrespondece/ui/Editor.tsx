@@ -116,6 +116,7 @@ interface EditorProps {
   isReadOnly?: boolean;
   isPreviewOpen?: boolean;
   isReadPage?: boolean;
+  isDarkMode: boolean;
 }
 
 export const Editor = forwardRef<EditorHandle, EditorProps>(
@@ -127,6 +128,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(
       isReadOnly,
       isPreviewOpen,
       isReadPage = false,
+      isDarkMode,
     },
     ref,
   ) => {
@@ -528,7 +530,9 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(
     }, [editorConfig]);
 
     return (
-      <div className="main-container">
+      <div
+        className={`main-container ${isDarkMode ? "is-dark ck-theme-dark" : ""}`}
+      >
         <div
           className={`editor-container editor-container_document-editor editor-container_include-pagination editor-container_include-fullscreen `}
           ref={editorContainerRef}

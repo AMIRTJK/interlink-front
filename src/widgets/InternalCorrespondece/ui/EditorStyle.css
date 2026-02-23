@@ -221,3 +221,115 @@
 .ck.ck-balloon-panel.ck-balloon-panel_position_border-side_left.ck-balloon-panel_visible.ck-evaluation-badge-balloon {
   display: none !important;
 }
+
+/*  ТЕМНАЯ ТЕМА  */
+
+.main-container.is-dark .editor-container_document-editor {
+  border-color: #374151; /* gray-700 */
+}
+
+/* Фон вокруг листа бумаги */
+.main-container.is-dark .editor-container__editor-wrapper,
+.main-container.is-dark .is-read-page,
+.main-container.is-dark .custom-editor-container__editor-wrapper {
+  background: #111827; /* gray-900 */
+}
+
+/* Сам лист бумаги (A4) */
+.main-container.is-dark
+  .editor-container_document-editor
+  .editor-container__editor
+  .ck.ck-editor__editable {
+  background: #1f2937; /* gray-800 */
+  border-color: #4b5563; /* gray-600 */
+  color: #e5e7eb; /* text-gray-200 */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+}
+
+.main-container.is-dark .ck-focused {
+  border-color: #4b5563 !important;
+}
+
+/*  ИСПРАВЛЕНИЕ ТУЛБАРА В ТЕМНОЙ ТЕМЕ  */
+.main-container.is-dark .editor-container__toolbar {
+  background-color: #1f2937; /* gray-800 */
+  border-bottom-color: #374151; /* gray-700 */
+  color: #e5e7eb;
+}
+
+/* Перекрашиваем все иконки и текст в тулбаре */
+.main-container.is-dark .editor-container__toolbar .ck.ck-button,
+.main-container.is-dark .editor-container__toolbar .ck.ck-dropdown__button {
+  color: #e5e7eb !important;
+}
+
+.main-container.is-dark .editor-container__toolbar .ck.ck-icon {
+  color: #e5e7eb !important;
+  fill: #e5e7eb !important;
+}
+
+/* Ховер эффекты кнопок */
+.main-container.is-dark .editor-container__toolbar .ck.ck-button:hover,
+.main-container.is-dark
+  .editor-container__toolbar
+  .ck.ck-dropdown__button:hover {
+  background-color: #374151 !important; /* gray-700 */
+}
+
+/* Активная кнопка (например, включенный жирный шрифт) */
+.main-container.is-dark .editor-container__toolbar .ck.ck-button.ck-on {
+  background-color: #4b5563 !important; /* gray-600 */
+  color: #60a5fa !important; /* blue-400 */
+}
+
+.main-container.is-dark
+  .editor-container__toolbar
+  .ck.ck-button.ck-on
+  .ck.ck-icon {
+  color: #60a5fa !important;
+  fill: #60a5fa !important;
+}
+
+/* Разделители между группами кнопок */
+.main-container.is-dark .editor-container__toolbar .ck.ck-toolbar__separator {
+  background: #4b5563 !important;
+}
+
+/*  ИСПРАВЛЕНИЕ ВЫПАДАЮЩИХ СПИСКОВ (Dropdown) В ТЕМНОЙ ТЕМЕ  */
+/* Поскольку панели могут рендериться в body, мы используем глобальный класс .ck-theme-dark (добавлен в Editor.tsx) */
+body .ck.ck-theme-dark .ck.ck-dropdown__panel {
+  background: #1f2937 !important;
+  border-color: #4b5563 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+}
+
+body .ck.ck-theme-dark .ck.ck-list__item > .ck-button {
+  color: #e5e7eb !important;
+}
+
+body .ck.ck-theme-dark .ck.ck-list__item > .ck-button:hover {
+  background: #374151 !important;
+}
+
+body .ck.ck-theme-dark .ck.ck-list__item > .ck-button.ck-on {
+  background: #4b5563 !important;
+  color: #60a5fa !important;
+}
+
+/*  КАСТОМНЫЙ СКРОЛЛБАР ДЛЯ ТЕМНОЙ ТЕМЫ
+
+/* 1. Стили для Firefox - Light Mode */
+.main-container .editor-container__editor-wrapper,
+.main-container .is-read-page,
+.main-container .custom-editor-container__editor-wrapper {
+  scrollbar-width: thin;
+  scrollbar-color: transparent; /* thumb color | track color */
+}
+
+/* 1. Стили для Firefox - Dark Mode */
+.main-container.is-dark .editor-container__editor-wrapper,
+.main-container.is-dark .is-read-page,
+.main-container.is-dark .custom-editor-container__editor-wrapper {
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #111827;
+}

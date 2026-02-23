@@ -414,7 +414,9 @@ export const InternalCorrespondece: React.FC<IProps> = ({
 
   return (
     <div
-      className={`relative min-h-screen bg-[#f9fafb] ${isOpen ? "max-h-[768px] overflow-hidden" : ""}`}
+      className={`relative min-h-screen transition-colors duration-300 ${
+        isDarkMode ? "bg-[#111827]!" : "bg-[#f9fafb]!"
+      } ${isOpen ? "max-h-[768px] overflow-hidden" : ""}`}
     >
       <TopNavigation
         isDarkMode={isDarkMode}
@@ -437,6 +439,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
 
             <div className="flex gap-3 items-stretch">
               <ActionToolbar
+                isDarkMode={isDarkMode}
                 setIsInspectorOpen={open}
                 setShowPreview={() => setIsPreviewOpen(true)}
                 handleSend={handleSendClick}
@@ -452,6 +455,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
 
               <div className="flex-1 min-w-0">
                 <Editor
+                  isDarkMode={isDarkMode}
                   ref={editorRef}
                   onChange={setEditorBody}
                   initialContent={initialEditorContent}
@@ -466,6 +470,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         <If is={isDraftCreated}>
           <div className="hidden lg:block shrink-0 z-10 h-[calc(100vh-64px)] sticky top-[64px]">
             <WorkflowParticipantsPanel
+              isDarkMode={isDarkMode}
               workflowData={workflowData}
               isCollapsed={isParticipantsPanelCollapsed}
               toggleCollapse={() =>
@@ -486,6 +491,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         </If>
       </div>
       <DrawerActionsModal
+        isDarkMode={isDarkMode}
         open={isOpen}
         onClose={close}
         docId={id}
@@ -507,6 +513,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       >
         <div className="flex justify-center">
           <Editor
+            isDarkMode={isDarkMode}
             onChange={setEditorBody}
             initialContent={initialEditorContent || editorBody}
             type={type}
