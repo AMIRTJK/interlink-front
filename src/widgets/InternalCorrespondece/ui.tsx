@@ -55,7 +55,9 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   const { open, close, isOpen } = useModalState();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() =>
+    tokenControl.getDarkMode(),
+  );
 
   const [isParticipantsPanelCollapsed, setIsParticipantsPanelCollapsed] =
     useState(false);
@@ -352,6 +354,14 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     }
   };
 
+  const handleToggleDarkMode = () => {
+    setIsDarkMode((prevMode) => {
+      const newMode = !prevMode;
+      tokenControl.setDarkMode(newMode);
+      return newMode;
+    });
+  };
+
   useEffect(() => {
     if (id) {
       setVersions(versionControl.getVersions(id));
@@ -420,7 +430,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     >
       <TopNavigation
         isDarkMode={isDarkMode}
-        toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+        toggleDarkMode={handleToggleDarkMode}
         type={type}
       />
 
