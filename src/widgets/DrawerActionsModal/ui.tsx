@@ -14,6 +14,7 @@ import {
   SmartSearchUI,
   ISmartSearchModalProps,
 } from "@shared/ui/SmartSearchModal";
+import { ConfigProvider, theme } from "antd";
 import { ApiRoutes } from "@shared/api";
 import { useModalState } from "@shared/lib/hooks";
 
@@ -243,24 +244,29 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 500, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-5 top-5 bottom-5 rounded-2xl! min-h-[920px]! overflow-y-auto z-1001 w-[440px] bg-white shadow-2xl flex flex-col overflow-hidden"
+              className={`fixed right-5 top-5 bottom-5 rounded-2xl! min-h-[920px]! overflow-y-auto z-1001 w-[440px] shadow-2xl flex flex-col overflow-hidden ${
+                isDarkMode ? "bg-gray-900" : "bg-white"
+              }`}
             >
               {/* Header */}
-              <div className=" flex flex-col border-gray-50 bg-white">
+              <div
+                className={`flex flex-col ${isDarkMode ? "border-gray-800 bg-gray-900" : "border-gray-50 bg-white"}`}
+              >
                 <div className="flex justify-between px-6 py-4">
-                  <span className="text-lg font-semibold text-gray-800">
+                  <span
+                    className={`text-lg font-semibold ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}
+                  >
                     Инспектор
                   </span>
                   <Icons.CloseOutlined
                     onClick={onClose}
                     style={{
                       fontSize: "18px",
-                      color: "#1F2937",
+                      color: isDarkMode ? "#e5e7eb" : "#1F2937",
                       cursor: "pointer",
                     }}
                   />
                 </div>
-
                 <div className="drawer-body">
                   <div>
                     <SmartTabs
@@ -269,20 +275,30 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                       onChange={(key) => {
                         setActiveTab(key as TTab);
                       }}
+                      isDarkMode={isDarkMode}
                     />
                   </div>
 
-                  <div className="drawer-content-scroll custom-scrollbar">
+                  <div
+                    className={`drawer-content-scroll custom-scrollbar ${isDarkMode ? "is-dark" : ""}`}
+                  >
                     <If is={activeTab === "actions"}>
                       {isIncoming === true ? (
                         <div className="flex flex-col gap-3 mt-5">
                           <Ui.Button
                             onClick={onReply}
                             size="large"
-                            className="w-full! h-14! px-4! py-3! bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm!"
+                            className={`w-full! h-14! px-4! py-3! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm! ${
+                              isDarkMode
+                                ? "bg-gray-800! border-gray-700! text-gray-200! hover:bg-gray-700! hover:border-[#8B5CF6]!"
+                                : "bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]!"
+                            }`}
                             icon={
                               <Icons.MailOutlined
-                                style={{ fontSize: "18px", color: "#6B7280" }}
+                                style={{
+                                  fontSize: "18px",
+                                  color: isDarkMode ? "#9CA3AF" : "#6B7280",
+                                }}
                               />
                             }
                           >
@@ -291,12 +307,16 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                           <Ui.Button
                             onClick={() => console.log("Переслать")}
                             size="large"
-                            className="w-full! h-14! px-4! py-3! bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm!"
+                            className={`w-full! h-14! px-4! py-3! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm! ${
+                              isDarkMode
+                                ? "bg-gray-800! border-gray-700! text-gray-200! hover:bg-gray-700! hover:border-[#8B5CF6]!"
+                                : "bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]!"
+                            }`}
                             icon={
                               <Icons.SendOutlined
                                 style={{
                                   fontSize: "18px",
-                                  color: "#6B7280",
+                                  color: isDarkMode ? "#9CA3AF" : "#6B7280",
                                   transform: "rotate(0deg)",
                                 }}
                               />
@@ -360,6 +380,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                                   icon={section.icon}
                                   label={section.label}
                                   onClick={() => handleOpenModal(section.id)}
+                                  isDarkMode={isDarkMode}
                                 />
 
                                 <If is={section.items.length > 0}>
@@ -372,6 +393,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                                         onRemove={() =>
                                           handleRemoveItem(item.id, section.id)
                                         }
+                                        isDarkMode={isDarkMode}
                                       />
                                     ))}
                                     <If is={hiddenCount > 0}>
@@ -379,7 +401,11 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                                         onClick={() =>
                                           setViewAllSection(section.id)
                                         }
-                                        className="py-2 px-3 text-center text-sm font-medium text-gray-500 bg-gray-50 hover:bg-gray-100 hover:text-gray-700 rounded-lg cursor-pointer transition-all border border-dashed border-gray-200"
+                                        className={`py-2 px-3 text-center text-sm font-medium rounded-lg cursor-pointer transition-all border border-dashed ${
+                                          isDarkMode
+                                            ? "text-gray-400 bg-gray-800/50 hover:bg-gray-800 hover:text-gray-200 border-gray-700"
+                                            : "text-gray-500 bg-gray-50 hover:bg-gray-100 hover:text-gray-700 border-gray-200"
+                                        }`}
                                       >
                                         Показать еще (+{hiddenCount})
                                       </div>
@@ -397,7 +423,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                             <Ui.Button
                               onClick={handleSave}
                               type="primary"
-                              className=" w-full! p-5! font-bold! bg-[#FF6B6B]! hover:bg-[#ff5252]! text-white rounded-xl! transition-colors duration-200 flex items-center justify-center gap-2"
+                              className=" w-full!  p-5! font-bold! bg-[#FF6B6B]! hover:bg-[#ff5252]! text-white rounded-xl! transition-colors duration-200 flex items-center justify-center gap-2"
                               disabled={isReadOnly}
                             >
                               Сохранить
@@ -406,7 +432,6 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                         </div>
                       )}
                     </If>
-
                     <If is={activeTab === "comments"}>
                       <div className="flex flex-col gap-3">
                         {/* Пример использования useGetQuery для получения комментариев */}
@@ -438,14 +463,14 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                             date={comment.date}
                             content={comment.content}
                             indicatorColor={comment.color}
+                            isDarkMode={isDarkMode}
                           />
                         ))}
                       </div>
                     </If>
-
                     <If is={activeTab === "chat"}>
                       <div className="h-full">
-                        <ChatView />
+                        <ChatView isDarkMode={isDarkMode} />
                       </div>
                     </If>
                   </div>
@@ -456,99 +481,130 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
         )}
       </AnimatePresence>
 
-      <Ui.Modal
-        open={isModalOpen}
-        onCancel={handleCloseModal}
-        footer={null}
-        title={
-          <div className="flex items-center gap-3 text-xl font-bold text-gray-800 py-3 px-1">
-            {activeModalType === "attach" && (
-              <div className="text-2xl text-gray-700">
-                <Icons.MailOutlined />
-              </div>
-            )}
-            {activeModalType === "signer" && (
-              <div className="text-2xl text-gray-700">
-                <Icons.UserOutlined />
-              </div>
-            )}
-            {activeModalType === "approvers" && (
-              <div className="text-2xl text-gray-700">
-                <Icons.TeamOutlined />
-              </div>
-            )}
-            <span>{modalConfig.title}</span>
-          </div>
-        }
-        width={modalConfig.mode === "attach" ? 1000 : 500}
-        centered
-        key={activeModalType}
-        zIndex={1100}
-        className="smart-search-modal"
-        transitionName=""
-        maskTransitionName="ant-fade"
-        modalRender={(modal) => (
-          <AnimatePresence mode="wait">
-            {isModalOpen && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              >
-                {modal}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        )}
-        styles={{
-          header: {
-            borderBottom: "1px solid #f0f0f0",
-            padding: "16px 24px",
-            marginBottom: 0,
-          },
-          body: {
-            padding: 0,
-            borderRadius: "0 0 24px 24px",
-            overflow: "hidden",
-          },
+      <ConfigProvider
+        theme={{
+          algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
         }}
-        closeIcon={<Icons.CloseOutlined style={{ fontSize: "18px" }} />}
       >
-        <div className="h-[600px]">
-          <SmartSearchUI {...modalConfig} onConfirm={handleConfirm} />
-        </div>
-      </Ui.Modal>
-      <Ui.Modal
-        open={!!viewAllSection}
-        onCancel={() => setViewAllSection(null)}
-        footer={null}
-        title="Выбранные элементы"
-        width={500}
-        centered
-        zIndex={1200}
-      >
-        <div className="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar p-1">
-          {viewAllItems.map((item) => (
-            <SelectedCard
-              key={item.id}
-              title={item.title}
-              subtitle={item.subtitle}
-              onRemove={() => {
-                if (viewAllSection) {
-                  handleRemoveItem(item.id, viewAllSection);
-                }
+        <Ui.Modal
+          open={isModalOpen}
+          onCancel={handleCloseModal}
+          footer={null}
+          title={
+            <div
+              className={`flex items-center gap-3 text-xl font-bold py-3 px-1 ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}
+            >
+              {activeModalType === "attach" && (
+                <div
+                  className={`text-2xl ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
+                >
+                  <Icons.MailOutlined />
+                </div>
+              )}
+              {activeModalType === "signer" && (
+                <div
+                  className={`text-2xl ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
+                >
+                  <Icons.UserOutlined />
+                </div>
+              )}
+              {activeModalType === "approvers" && (
+                <div
+                  className={`text-2xl ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
+                >
+                  <Icons.TeamOutlined />
+                </div>
+              )}
+              <span>{modalConfig.title}</span>
+            </div>
+          }
+          width={modalConfig.mode === "attach" ? 1000 : 500}
+          centered
+          key={activeModalType}
+          zIndex={1100}
+          className="smart-search-modal"
+          transitionName=""
+          maskTransitionName="ant-fade"
+          modalRender={(modal) => (
+            <AnimatePresence mode="wait">
+              {isModalOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                >
+                  {modal}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
+          styles={{
+            header: {
+              borderBottom: isDarkMode
+                ? "1px solid #374151"
+                : "1px solid #f0f0f0",
+              padding: "16px 24px",
+              marginBottom: 0,
+            },
+            body: {
+              padding: 0,
+              borderRadius: "0 0 24px 24px",
+              overflow: "hidden",
+            },
+          }}
+          closeIcon={
+            <Icons.CloseOutlined
+              style={{
+                fontSize: "18px",
+                color: isDarkMode ? "#9CA3AF" : undefined,
               }}
             />
-          ))}
-          {viewAllItems.length === 0 && (
-            <div className="text-center text-gray-400 py-5">Список пуст</div>
-          )}
-        </div>
-        <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
-          <Ui.Button onClick={() => setViewAllSection(null)}>Закрыть</Ui.Button>
-        </div>
-      </Ui.Modal>
+          }
+        >
+          <div className="h-[600px]">
+            <SmartSearchUI
+              {...modalConfig}
+              onConfirm={handleConfirm}
+              isDarkMode={isDarkMode}
+            />
+          </div>
+        </Ui.Modal>
+      </ConfigProvider>
+      <ConfigProvider
+        theme={{
+          algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
+        }}
+      >
+        <Ui.Modal
+          open={!!viewAllSection}
+          onCancel={() => setViewAllSection(null)}
+          footer={null}
+          title="Выбранные элементы"
+          width={500}
+          centered
+          zIndex={1200}
+        >
+          <div className="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar p-1">
+            {viewAllItems.map((item) => (
+              <SelectedCard
+                key={item.id}
+                title={item.title}
+                subtitle={item.subtitle}
+                onRemove={() => {
+                  if (viewAllSection) {
+                    handleRemoveItem(item.id, viewAllSection);
+                  }
+                }}
+                isDarkMode={isDarkMode}
+              />
+            ))}
+            {viewAllItems.length === 0 && (
+              <div className="text-center text-gray-400 py-5">Список пуст</div>
+            )}
+          </div>
+        </Ui.Modal>
+      </ConfigProvider>
     </>
   );
 };

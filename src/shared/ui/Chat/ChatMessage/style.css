@@ -15,14 +15,14 @@
   max-width: 85%;
   padding: 10px 14px;
   border-radius: 18px;
-  background: #F3F4F6;
+  background: #f3f4f6;
   position: relative;
   align-self: flex-start;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .chat-msg--mine .chat-msg__body {
-  background: #8C52FF;
+  background: #8c52ff;
   color: white;
   align-self: flex-end;
   border-bottom-right-radius: 4px;
@@ -35,7 +35,7 @@
 .chat-msg__author {
   font-size: 11px;
   font-weight: 700;
-  color: #6B7280;
+  color: #6b7280;
   margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -43,7 +43,7 @@
 
 .chat-msg__reply-context {
   background: rgba(0, 0, 0, 0.05);
-  border-left: 3px solid #8C52FF;
+  border-left: 3px solid #8c52ff;
   padding: 6px 10px;
   border-radius: 8px;
   margin-bottom: 8px;
@@ -82,4 +82,31 @@
 
 .chat-msg--mine .chat-msg__time {
   color: rgba(255, 255, 255, 0.8);
+}
+
+/* === ТЕМНАЯ ТЕМА ДЛЯ СООБЩЕНИЙ === */
+.chat-view.is-dark .chat-msg__body {
+  background: #374151; /* gray-700 - фон чужого сообщения */
+  color: #e5e7eb; /* gray-200 - текст чужого сообщения */
+}
+
+.chat-view.is-dark .chat-msg--mine .chat-msg__body {
+  background: #7a3eff; /* Чуть темнее фиолетовый для своих сообщений */
+  color: white;
+}
+
+.chat-view.is-dark .chat-msg__author {
+  color: #9ca3af; /* gray-400 */
+}
+
+.chat-view.is-dark .chat-msg__reply-context {
+  background: rgba(0, 0, 0, 0.2); /* Темнее фон цитаты для чужих сообщений */
+}
+
+.chat-view.is-dark .chat-msg--mine .chat-msg__reply-context {
+  background: rgba(255, 255, 255, 0.1); /* Фон цитаты для своих сообщений */
+}
+
+.chat-view.is-dark .chat-msg__time {
+  color: #9ca3af; /* gray-400 - время чужого сообщения */
 }

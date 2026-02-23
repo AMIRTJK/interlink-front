@@ -12,7 +12,7 @@ import { DrawerActionsModal } from "@widgets/DrawerActionsModal";
 import { TopNavigation } from "./ui/TopNavigation";
 import { useEffect, useMemo, useState } from "react";
 import { DocumentHeaderForm, Recipient } from "./ui/DocumentHeaderForm";
-import { Form, Modal } from "antd";
+import { ConfigProvider, theme, Form, Modal } from "antd";
 import { useNavigate, useParams } from "react-router";
 // import { DocumentEditor } from "./ui/DocumentEditor";
 import {
@@ -501,26 +501,32 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         isReadOnly={isReadOnly}
       />
 
-      <Modal
-        title="Предварительный просмотр"
-        open={isPreviewOpen}
-        onCancel={() => setIsPreviewOpen(false)}
-        footer={null}
-        centered
-        width="100%"
-        destroyOnClose
-        bodyStyle={{ height: "90vh", padding: 0, overflow: "hidden" }}
+      <ConfigProvider
+        theme={{
+          algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
+        }}
       >
-        <div className="flex justify-center">
-          <Editor
-            isDarkMode={isDarkMode}
-            onChange={setEditorBody}
-            initialContent={initialEditorContent || editorBody}
-            type={type}
-            isPreviewOpen={isPreviewOpen}
-          />
-        </div>
-      </Modal>
+        <Modal
+          title="Предварительный просмотр"
+          open={isPreviewOpen}
+          onCancel={() => setIsPreviewOpen(false)}
+          footer={null}
+          centered
+          width="100%"
+          destroyOnClose
+          bodyStyle={{ height: "90vh", padding: 0, overflow: "hidden" }}
+        >
+          <div className="flex justify-center">
+            <Editor
+              isDarkMode={isDarkMode}
+              onChange={setEditorBody}
+              initialContent={initialEditorContent || editorBody}
+              type={type}
+              isPreviewOpen={isPreviewOpen}
+            />
+          </div>
+        </Modal>
+      </ConfigProvider>
     </div>
   );
 };

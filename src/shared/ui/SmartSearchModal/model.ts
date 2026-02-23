@@ -25,6 +25,7 @@ export interface ISmartSearchModalProps {
   onSelect?: (item: ISearchItem) => void;
   onConfirm: (selectedIds: string[], items: ISearchItem[]) => void;
   multiple?: boolean;
+  isDarkMode?: boolean;
 }
 
 export interface ISelectionState {
