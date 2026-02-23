@@ -68,7 +68,7 @@ const FullHistoryModal = ({
   versions?: any[];
   onSelectVersion?: (content: string) => void;
   documentCreator?: any;
-  isDarkMode: boolean;
+  isDarkMode?: boolean;
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -608,7 +608,7 @@ export const WorkflowParticipantsPanel = ({
   versions?: any[];
   onSelectVersion?: (content: string) => void;
   documentCreator?: any;
-  isDarkMode: boolean;
+  isDarkMode?: boolean;
 }) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;

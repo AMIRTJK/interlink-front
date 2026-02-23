@@ -116,7 +116,7 @@ interface EditorProps {
   isReadOnly?: boolean;
   isPreviewOpen?: boolean;
   isReadPage?: boolean;
-  isDarkMode: boolean;
+  isDarkMode?: boolean;
 }
 
 export const Editor = forwardRef<EditorHandle, EditorProps>(

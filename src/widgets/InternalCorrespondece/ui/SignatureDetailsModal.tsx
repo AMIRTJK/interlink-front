@@ -26,7 +26,7 @@ export const SignatureDetailsModal = ({
   isOpen: boolean;
   onClose: () => void;
   data: any;
-  isDarkMode: boolean;
+  isDarkMode?: boolean;
 }) => {
   if (!data) return null;
 

@@ -1,4 +1,3 @@
-import "./style.css";
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Input,
@@ -15,7 +14,6 @@ import {
   ClockCircleOutlined,
   PlusOutlined,
   CopyOutlined,
-  DownOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
