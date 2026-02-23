@@ -16,6 +16,8 @@ import {
 } from "@shared/lib";
 import { transformFilterValues } from "./lib";
 import { UseSkeleton } from "../Skeleton/ui";
+import { EmptyState } from "../EmptyState";
+
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -262,7 +264,11 @@ export function UniversalTable<RecordType = any, ResponseType = any>(
         className={props.className}
         loading={isPending}
         dataSource={tableData}
+        locale={{
+          emptyText: <EmptyState />,
+        }}
         columns={columnsWithNumbers}
+
         rowKey={"id"}
         expandable={expandable}
         rowClassName={props.rowClassName}
