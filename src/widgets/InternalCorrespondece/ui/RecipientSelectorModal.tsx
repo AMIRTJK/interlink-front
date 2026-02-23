@@ -39,10 +39,8 @@ export const RecipientSelectorModal: React.FC<RecipientSelectorModalProps> = ({
   const textTertiary = isDarkMode ? "text-gray-500" : "text-gray-400";
 
   const searchParams = useMemo(() => {
-    return debouncedSearch ? { search: debouncedSearch, } : {};
+    return debouncedSearch ? { search: debouncedSearch } : {};
   }, [debouncedSearch]);
-
-    
 
   const { data: usersData, isLoading: loadingUsers } = useGetQuery({
     url: api,
@@ -100,14 +98,16 @@ export const RecipientSelectorModal: React.FC<RecipientSelectorModalProps> = ({
               key={recipient.id}
               onClick={() => toggleRecipient(recipient)}
               className={`
-                w-full p-4 rounded-2xl transition-all flex items-center gap-3 border text-left group
-                ${
-                  isSelected
-                    ? "border-violet-500 bg-violet-500/10"
-                    : isDarkMode
-                      ? "bg-gray-900/40 border-gray-700/30 hover:bg-gray-800"
-                      : "bg-gray-50/80 border-gray-200/50 hover:bg-gray-100"
-                }
+                w-full cursor-pointer p-4 rounded-2xl transition-all flex items-center gap-3 border text-left group
+         ${
+           isSelected
+             ? isDarkMode
+               ? "border-pink-500 bg-pink-500/10"
+               : "border-violet-500 bg-violet-500/10"
+             : isDarkMode
+               ? "bg-gray-900/40 border-gray-700/30 hover:bg-gray-800"
+               : "bg-gray-50/80 border-gray-200/50 hover:bg-gray-100"
+         }
               `}
             >
               <Avatar
@@ -126,7 +126,10 @@ export const RecipientSelectorModal: React.FC<RecipientSelectorModalProps> = ({
               </div>
               {isSelected && (
                 <CheckCircleFilled
-                  style={{ fontSize: "24px", color: primaryColor }}
+                  style={{
+                    fontSize: "24px",
+                    color: isDarkMode ? "#ec4899" : primaryColor,
+                  }}
                 />
               )}
             </button>
@@ -168,7 +171,7 @@ export const RecipientSelectorModal: React.FC<RecipientSelectorModalProps> = ({
               </h3>
               <button
                 onClick={onClose}
-                className={`p-2 rounded-lg transition-all flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 ${textTertiary}`}
+                className={`p-2 rounded-lg transition-all cursor-pointer flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 ${textTertiary}`}
               >
                 <CloseOutlined style={{ fontSize: "20px" }} />
               </button>
@@ -185,7 +188,23 @@ export const RecipientSelectorModal: React.FC<RecipientSelectorModalProps> = ({
                 }
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setIsSearchFocused(false)}
-                className={`w-full h-12 rounded-2xl border text-base shadow-sm transition-all duration-300 ${isSearchFocused ? "border-blue-500 shadow-lg shadow-blue-500/15" : "border-gray-200 hover:border-blue-300"} ${isDarkMode ? "bg-gray-700/50 border-gray-600 text-gray-100 placeholder:text-gray-500" : "bg-gray-50/50 text-gray-900"}`}
+                className={`
+                  w-full h-12 rounded-2xl! border! text-base! transition-all duration-300
+                  outline-none! ring-0! 
+                  [&.ant-input-affix-wrapper-focused]:shadow-none!
+                  [&_.ant-input]:bg-transparent! [&_.ant-input]:text-inherit!
+                  [&_.ant-input-clear-icon]:flex! [&_.ant-input-clear-icon]:items-center!
+                  ${
+                    isSearchFocused
+                      ? "border-blue-500! shadow-lg! shadow-blue-500/15!"
+                      : "shadow-sm!"
+                  }
+                  ${
+                    isDarkMode
+                      ? `bg-gray-700/50! text-gray-100! [&_.ant-input]::placeholder:text-gray-500! [&_.ant-input-clear-icon]:text-gray-500! [&_.ant-input-clear-icon:hover]:text-gray-300! ${!isSearchFocused ? "border-gray-600! hover:border-gray-500!" : ""}`
+                      : `bg-gray-50/50! text-gray-900! [&_.ant-input]::placeholder:text-gray-400! [&_.ant-input-clear-icon]:text-gray-400! [&_.ant-input-clear-icon:hover]:text-gray-600! ${!isSearchFocused ? "border-gray-200! hover:border-blue-300!" : ""}`
+                  }
+                `}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 allowClear
@@ -204,8 +223,12 @@ export const RecipientSelectorModal: React.FC<RecipientSelectorModalProps> = ({
               </p>
               <button
                 onClick={onClose}
-                className="px-6 py-2.5 rounded-xl text-white font-medium text-sm shadow-lg transition-all hover:shadow-xl hover:opacity-90 active:scale-95"
-                style={{ backgroundColor: primaryColor }}
+                className={`px-6 py-2.5 rounded-xl cursor-pointer text-white font-medium text-sm shadow-lg transition-all hover:shadow-xl hover:opacity-90 active:scale-95 ${
+                  isDarkMode ? "shadow-pink-500/20" : ""
+                }`}
+                style={{
+                  backgroundColor: isDarkMode ? "#ec4899" : primaryColor,
+                }}
               >
                 Готово
               </button>
