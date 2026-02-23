@@ -33,9 +33,9 @@ export const ActionButton: React.FC<IProps> = ({
             {icon}
           </span>
 
-          <span className="text-sm font-medium text-gray-500 group-hover:text-gray-900 transition-colors duration-300">
+          {/* <span className="text-sm font-medium text-gray-500 group-hover:text-gray-900 transition-colors duration-300">
             {label}
-          </span>
+          </span> */}
         </div>
       </Button>
     </Tooltip>
