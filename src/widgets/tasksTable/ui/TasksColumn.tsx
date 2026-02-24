@@ -62,6 +62,10 @@ export const TasksColumn = ({
     preloadConditional: ["tasks.create"],
   });
 
+  interface IArr{
+     [key:string]:string|number[]
+  }
+  const arr:IArr[]=['a','b','c']
   return (
     <div 
       className={`tasks-column ${isDragOver ? "drag-over" : ""}`}
