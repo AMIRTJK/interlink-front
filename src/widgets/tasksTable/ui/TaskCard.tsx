@@ -2,9 +2,9 @@ import { ITaskItem } from "../model";
 import { getTaskProgressColor, formatDate } from "../lib/utils";
 import { StatusIcon } from "./StatusIcon";
 
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, UserOutlined } from "@ant-design/icons";
 import { PopConfirm } from "@shared/ui";
-import { Button } from "antd";
+import { Button, Avatar, Tooltip } from "antd";
 import { useState } from "react";
 
 export const TaskCard = ({
@@ -48,9 +48,31 @@ export const TaskCard = ({
             <div className="task__text-content">
               <p className="task-title pr-6">{task.title}</p>
               <p className="task-desc">{task.description}</p>
-              <p className="task-datetime">{formatDate(task.created_at)}</p>
+              <div className="flex justify-between items-center mt-3">
+                <p className="task-datetime">{formatDate(task.created_at)}</p>
+                {task.assignees?.length > 0 && (
+                  <Avatar.Group
+                    max={{
+                      count: 2,
+                      style: { color: "#f56a00", backgroundColor: "#fde3cf", fontSize: "10px" },
+                    }}
+                  >
+                    {task.assignees.map((assignee) => (
+                      <Tooltip title={String(assignee.full_name || assignee.name || "")} key={assignee.id}>
+                        <Avatar
+                          src={String(assignee.photo_path || assignee.avatar || <UserOutlined />)}
+                          size={24}
+                          className="border-white!"
+                        >
+                          {String(assignee.full_name || assignee.name || "").charAt(0)}
+                        </Avatar>
+                      </Tooltip>
+                    ))}
+                  </Avatar.Group>
+                )}
+              </div>
             </div>
-            <div className="flex flex-col items-center gap-1" onClick={(e) => e.stopPropagation()}>
+            <div className="task-card-actions flex flex-col items-center gap-1" onClick={(e) => e.stopPropagation()}>
               <Button
                 type="text"
                 size="small"
