@@ -29,7 +29,6 @@ export const TaskCard = ({
   const handleDragEnd = () => {
     setIsDragging(false);
   };
-
   const borderColor = getTaskProgressColor(task.started_at, task.planned_at);
   return (
     <div

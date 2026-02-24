@@ -62,6 +62,7 @@ export const TasksColumn = ({
     preloadConditional: ["tasks.create"],
   });
 
+  const arr:string[]=['a','b','c']
   return (
     <div 
       className={`tasks-column ${isDragOver ? "drag-over" : ""}`}
