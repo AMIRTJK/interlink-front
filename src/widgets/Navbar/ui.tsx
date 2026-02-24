@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavbar } from "@shared/lib/hooks";
 import { IosVariant } from "./lib/IosVariant";
-import { NavbarHeader } from "./lib/renderJSX";
 import "./style.css";
 
 export const Navbar = () => {
@@ -10,7 +9,6 @@ export const Navbar = () => {
   if (variant === "ios") {
     return (
       <>
-        <NavbarHeader isModulesPage={true} />
         <IosVariant 
           menuItems={menuItems}
           subItems={subItems}
@@ -54,7 +52,6 @@ export const Navbar = () => {
 
   return (
     <>
-      <NavbarHeader isModulesPage={true} />
       <div className={`menu-container modern-mode`}>
         <div className={`custom-main-menu modern-style`}>
           {menuItems.map((item) => {

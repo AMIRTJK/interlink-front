@@ -16,15 +16,13 @@ export const MainLayout = () => {
   return (
     <div className={`bg-[#F2F5FF] min-h-screen flex flex-col`}>
       <If is={!shouldHideUI}>
+        <div>
+          <Header isModulesPage={isModulesPage} />
+        </div>
         {variant === "ios" ? (
           <Navbar />
         ) : (
-          <>
-            <div>
-              <Header isModulesPage={isModulesPage} />
-            </div>
-            <ModuleMenu variant="modern" />
-          </>
+          <ModuleMenu variant="modern" />
         )}
       </If>
       <div>
