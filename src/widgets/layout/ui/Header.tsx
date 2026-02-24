@@ -39,6 +39,8 @@ const mockNotifications = [
   },
 ];
 
+// TEST
+
 export const Header = ({ isModulesPage }: IProps) => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState(mockNotifications);
