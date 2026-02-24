@@ -15,7 +15,7 @@ export const ProfileLayout = () => {
       {variant === "ios" ? (
         <Navbar />
       ) : (
-        <div className="p-2">
+        <div className="px-3">
           <ModuleMenu variant="horizontal" />
         </div>
       )}
