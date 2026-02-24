@@ -137,8 +137,17 @@ body:not(.no-animations) .task-card-task.dragging {
 .task-card-content {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   flex: 1;
+}
+
+.task-card-actions {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.task-card-task:hover .task-card-actions {
+  opacity: 1;
 }
 
 .task-title {

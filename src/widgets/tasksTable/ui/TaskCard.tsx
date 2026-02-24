@@ -50,7 +50,7 @@ export const TaskCard = ({
               <p className="task-desc">{task.description}</p>
               <p className="task-datetime">{formatDate(task.created_at)}</p>
             </div>
-            <div className="flex flex-col items-center gap-1" onClick={(e) => e.stopPropagation()}>
+            <div className="task-card-actions flex flex-col items-center gap-1" onClick={(e) => e.stopPropagation()}>
               <Button
                 type="text"
                 size="small"
