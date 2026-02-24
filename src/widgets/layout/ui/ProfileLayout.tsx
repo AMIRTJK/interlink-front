@@ -19,7 +19,7 @@ export const ProfileLayout = () => {
           <ModuleMenu variant="horizontal" />
         </div>
       )}
-      <main>
+      <main className={variant === "ios" ? "pb-40" : ""}>
         <Outlet />
       </main>
     </div>

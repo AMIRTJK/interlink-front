@@ -53,15 +53,11 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
         <motion.div
           key={variant}
           className="flex-1 flex flex-row items-start gap-2 overflow-x-auto custom-scrollbar no-scrollbar py-1"
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
         >
           <LayoutGroup id="sidebar-items">
             {finalMenuItems.map((item, index) => (
               <motion.div
                 key={item.key}
-                variants={itemWrapperVariants}
                 className="shrink-0 min-w-[170px]"
               >
                 <SidebarItem

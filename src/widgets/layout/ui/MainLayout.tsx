@@ -25,7 +25,7 @@ export const MainLayout = () => {
           <ModuleMenu variant="modern" />
         )}
       </If>
-      <div>
+      <div className={variant === "ios" ? "pb-30" : ""}>
         <Outlet />
       </div>
     </div>
