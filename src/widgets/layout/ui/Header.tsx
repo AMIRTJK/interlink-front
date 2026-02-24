@@ -148,7 +148,7 @@ export const Header = ({ isModulesPage }: IProps) => {
       <Link
         to={AppRoutes.PROFILE}
         aria-label="На главную"
-        className="transition-transform duration-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500/30 rounded-lg"
+        className="transition-transform duration-200 hover:scale-[1.02] focus:outline-none   rounded-lg"
       >
         <img
           src={Logo}
@@ -166,7 +166,7 @@ export const Header = ({ isModulesPage }: IProps) => {
           <button
             onClick={toggleTheme}
             aria-label="Смена темы"
-            className="p-2.5 cursor-pointer text-gray-500 dark:text-gray-400 transition-all duration-200 bg-gray-50 dark:bg-gray-800 rounded-full hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            className="p-2.5 cursor-pointer text-gray-500 dark:text-gray-400 transition-all duration-200 bg-gray-50 dark:bg-gray-800 rounded-full hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 focus:outline-none"
           >
             {isDarkMode ? (
               <Sun size={20} strokeWidth={2.2} />
@@ -184,7 +184,7 @@ export const Header = ({ isModulesPage }: IProps) => {
         >
           <button
             aria-label="Уведомления"
-            className="relative p-2.5 cursor-pointer text-gray-500 dark:text-gray-400 transition-all duration-200 bg-gray-50 dark:bg-gray-800 rounded-full hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            className="relative p-2.5 cursor-pointer text-gray-500 dark:text-gray-400 transition-all duration-200 bg-gray-50 dark:bg-gray-800 rounded-full hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 focus:outline-none"
           >
             <Bell size={20} strokeWidth={2.2} />
             {unreadCount > 0 && (
@@ -213,7 +213,7 @@ export const Header = ({ isModulesPage }: IProps) => {
             <button
               onClick={handleLogout}
               aria-label="Выход"
-              className="p-2.5 text-gray-400 cursor-pointer transition-all duration-200 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/40"
+              className="p-2.5 text-gray-400 cursor-pointer transition-all duration-200 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 focus:outline-none"
             >
               <LogOut size={20} strokeWidth={2.2} />
             </button>
