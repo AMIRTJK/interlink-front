@@ -16,7 +16,6 @@ interface IProps {
   finalMenuItems: MenuItem[];
   activeKey: string;
   handleAddClick: (pId: number | null) => void;
-  isInternal: boolean;
 }
 
 export const ModuleSidebarHorizontal: React.FC<IProps> = ({
@@ -25,7 +24,6 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
   finalMenuItems,
   activeKey,
   handleAddClick,
-  isInternal,
 }) => {
   return (
     <div className="w-full border-none! bg-white/70 backdrop-blur-xl! transition-colors duration-500 rounded-b-2xl shadow-inner py-2.5 px-6">
@@ -53,17 +51,13 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
         </div>
 
         <motion.div
-          key={`${variant}-${isInternal ? "internal" : "external"}`}
+          key={variant}
           className="flex-1 flex flex-row items-start gap-2 overflow-x-auto custom-scrollbar no-scrollbar py-1"
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
         >
           <LayoutGroup id="sidebar-items">
             {finalMenuItems.map((item, index) => (
               <motion.div
                 key={item.key}
-                variants={itemWrapperVariants}
                 className="shrink-0 min-w-[170px]"
               >
                 <SidebarItem

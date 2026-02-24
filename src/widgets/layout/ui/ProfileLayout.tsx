@@ -9,19 +9,17 @@ export const ProfileLayout = () => {
 
   return (
     <div className="bg-[#e5e9f5] min-h-screen flex flex-col">
+      <div className="p-6 pb-0">
+        <Header />
+      </div>
       {variant === "ios" ? (
         <Navbar />
       ) : (
-        <>
-          <div className="p-6">
-            <Header />
-          </div>
-          <div className="p-2">
-            <ModuleMenu variant="horizontal" />
-          </div>
-        </>
+        <div className="p-2">
+          <ModuleMenu variant="horizontal" />
+        </div>
       )}
-      <main>
+      <main className={variant === "ios" ? "pb-40" : ""}>
         <Outlet />
       </main>
     </div>

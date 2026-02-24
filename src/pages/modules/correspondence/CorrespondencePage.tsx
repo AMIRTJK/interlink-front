@@ -36,10 +36,10 @@ export const CorrespondencePage = () => {
         </div>
       </If>
       {/* <main className="w-full min-w-0 m-4"> */}
-      <main
-        className={`w-full  mx-auto space-y-4 ${shouldHideUI ? "" : "p-6"}`}
-      >
-        <Outlet />
+      <main className="flex-1 min-w-0 h-full overflow-hidden">
+        <div className={cn("h-full w-full mx-auto space-y-4", !shouldHideUI && "p-6")}>
+          <Outlet />
+        </div>
       </main>
     </div>
   );
