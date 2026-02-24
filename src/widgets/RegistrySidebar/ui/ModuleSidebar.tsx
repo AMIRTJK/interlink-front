@@ -38,7 +38,6 @@ export const ModuleSidebar = ({
           finalMenuItems={finalMenuItems}
           activeKey={activeKey}
           handleAddClick={handleAddClick}
-          isInternal={isInternal}
         />
       ) : (
         <ModuleSidebarVertical

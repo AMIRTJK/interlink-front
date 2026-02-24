@@ -16,7 +16,6 @@ interface IProps {
   finalMenuItems: MenuItem[];
   activeKey: string;
   handleAddClick: (pId: number | null) => void;
-  isInternal: boolean;
 }
 
 export const ModuleSidebarHorizontal: React.FC<IProps> = ({
@@ -25,7 +24,6 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
   finalMenuItems,
   activeKey,
   handleAddClick,
-  isInternal,
 }) => {
   return (
     <div className="w-full border-none! bg-white/70 backdrop-blur-xl! transition-colors duration-500 rounded-b-2xl shadow-inner py-2.5 px-6">
