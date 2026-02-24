@@ -32,6 +32,7 @@ export const Header = ({ isModulesPage }: IProps) => {
         ${isModulesPage ? "rounded-none" : "rounded-[20px] mb-0!"}
       `}
     >
+      {/* 432423 */}
       <Link
         to={AppRoutes.PROFILE}
         aria-label="На главную"
