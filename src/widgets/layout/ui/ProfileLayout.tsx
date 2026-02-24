@@ -9,7 +9,7 @@ export const ProfileLayout = () => {
 
   return (
     <div className="bg-[#e5e9f5] min-h-screen flex flex-col">
-      <div className="p-6 pb-0">
+      <div className="p-6">
         <Header />
       </div>
       {variant === "ios" ? (
@@ -25,4 +25,3 @@ export const ProfileLayout = () => {
     </div>
   );
 };
-
