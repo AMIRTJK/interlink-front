@@ -43,8 +43,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
 
   const { id } = useParams<{ id: string }>();
 
-  const [versions, setVersions] = useState<IDocumentVersion[]>([]);
-
   const currentUserId = tokenControl.getUserId();
 
   const afterSentStatusButton = initialData?.item?.status === "sent";
@@ -86,6 +84,47 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     if (!rawWorkflowData) return null;
     return generateMockWorkflow(rawWorkflowData);
   }, [rawWorkflowData]);
+
+  // 1. Получаем версии через API
+  const { data: versionsResponse, refetch: refetchVersions } = useGetQuery({
+    url: id ? ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", id) : "",
+    useToken: true,
+    options: { enabled: !!id },
+  });
+
+  // Достаем массив версий из ответа (подставь правильный путь до массива, если он другой)
+  const versions = useMemo(() => {
+    // Достаем массив versions из объекта data
+    const rawVersions = versionsResponse?.data?.versions || [];
+
+    return rawVersions.map((v: any) => ({
+      id: v.id,
+      versionNumber: v.version, // Используем строковую версию от бэка ("1.0", "1.1")
+      content: v.body, // В UI ожидается content
+      date: v.created_at, // В UI ожидается date
+      authorId: v.author?.id, // ID автора для поиска в userMap
+      is_selected: v.is_selected, // Флаг для чекбокса
+    }));
+  }, [versionsResponse]);
+
+  const { mutate: selectVersionForSign, isPending: isSelectingVersion } =
+    useMutationQuery<{ versionId: string | number }, any>({
+      url: (requestData) =>
+        ApiRoutes.SELECT_INTERNAL_VERISION_FOR_SIGN.replace(
+          ":correspondenceId",
+          String(id || ""),
+        ).replace(":versionId", String(requestData.versionId)),
+      method: "POST",
+      messages: {
+        invalidate: [
+          ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
+        ],
+      },
+    });
+
+  const handleSetVersionForSign = (clickedVersionId: string | number) => {
+    selectVersionForSign({ versionId: clickedVersionId });
+  };
 
   const currentUserApprovalId = useMemo(() => {
     const approvals = workflowData?.data?.approvals || [];
@@ -264,10 +303,23 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       },
     });
 
-  const handleSelectVersion = (content: string) => {
+  const selectedVersion = versions.find((v: any) => v.is_selected === true);
+
+  const initialActiveVersion = selectedVersion
+    ? selectedVersion.id
+    : versions.length > 0
+      ? versions[versions.length - 1].id
+      : null;
+
+  const [activeVersionId, setActiveVersionId] = useState<
+    string | number | null
+  >(initialActiveVersion);
+
+  const handleSelectVersion = (content: string, versionId: string | number) => {
     if (editorRef.current) {
       editorRef.current.setContent(content);
       setEditorBody(content);
+      setActiveVersionId(versionId);
     }
   };
 
@@ -275,7 +327,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     console.log(form.validateFields());
 
     try {
-      // Валидируем форму
       const values = await form.validateFields();
 
       const requestPayload: any = {
@@ -287,17 +338,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         },
       };
 
-      const saveLocalVersion = (documentId: string) => {
-        const newVersion: IDocumentVersion = {
-          id: Date.now().toString(),
-          date: new Date().toISOString(),
-          authorId: currentUserId,
-          content: editorBody,
-        };
-        versionControl.saveVersion(documentId, newVersion);
-        setVersions(versionControl.getVersions(documentId));
-      };
-
       if (typeof values.folder === "number") {
         requestPayload.folder_id = values.folder;
       } else if (typeof values.folder === "string") {
@@ -305,19 +345,9 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       }
 
       if (id) {
-        // Если ID есть - обновляем
-        console.log("Обновление черновика:", id, requestPayload);
         updateDraft(requestPayload);
-        saveLocalVersion(id);
       } else {
-        // Если ID нет - создаем
-        console.log("Создание черновика:", requestPayload);
-        createDraft(requestPayload, {
-          onSuccess: (data: any) => {
-            const newId = data?.item?.id;
-            if (newId) saveLocalVersion(newId);
-          },
-        });
+        createDraft(requestPayload);
       }
     } catch (errorInfo) {
       console.log("Ошибка валидации:", errorInfo);
@@ -361,12 +391,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       return newMode;
     });
   };
-
-  useEffect(() => {
-    if (id) {
-      setVersions(versionControl.getVersions(id));
-    }
-  }, [id]);
 
   // ЭФФЕКТ: Заполнение данных при просмотре
   useEffect(() => {
@@ -421,6 +445,15 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       }
     }
   }, [initialData, form]);
+
+  useEffect(() => {
+    if (versions.length > 0 && !activeVersionId) {
+      const selected = versions.find((v: any) => v.is_selected === true);
+      setActiveVersionId(
+        selected ? selected.id : versions[versions.length - 1].id,
+      );
+    }
+  }, [versions]);
 
   return (
     <div
@@ -493,9 +526,12 @@ export const InternalCorrespondece: React.FC<IProps> = ({
               }
               currentUserId={currentUserId}
               isReadOnly={isReadOnly}
-              versions={versions}
               onSelectVersion={handleSelectVersion}
               documentCreator={creator}
+              versions={versions}
+              onSetVersionForSign={handleSetVersionForSign}
+              isSelectingVersion={isSelectingVersion}
+              activeVersionId={activeVersionId}
             />
           </div>
         </If>

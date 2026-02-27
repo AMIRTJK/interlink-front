@@ -27,6 +27,7 @@ import {
   Tag,
   ConfigProvider,
   theme,
+  Checkbox,
 } from "antd";
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
@@ -54,6 +55,9 @@ const FullHistoryModal = ({
   onSelectVersion,
   documentCreator,
   isDarkMode,
+  onSetVersionForSign,
+  isSelectingVersion,
+  activeVersionId,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -66,9 +70,12 @@ const FullHistoryModal = ({
   onShowSignature: (e: any, item: any) => void;
   isReadOnly: boolean;
   versions?: any[];
-  onSelectVersion?: (content: string) => void;
+  activeVersionId?: string | number | null;
+  onSelectVersion?: (content: string, versionId: string | number) => void;
   documentCreator?: any;
   isDarkMode?: boolean;
+  onSetVersionForSign?: (versionId: string | number) => void;
+  isSelectingVersion?: boolean;
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -107,7 +114,6 @@ const FullHistoryModal = ({
     return map;
   }, [signers, approvers, documentCreator]);
 
-  // Обогащаем версии их порядковым номером, чтобы он не ломался при фильтрации
   const versionsWithMeta = useMemo(() => {
     return versions.map((v, idx) => ({
       ...v,
@@ -147,8 +153,6 @@ const FullHistoryModal = ({
       (d.subject || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (d.reg_number || "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
-
-  console.log(userMap);
 
   const filteredVersions = versionsWithMeta.filter((v: any) => {
     const author = userMap.get(String(v.authorId));
@@ -317,14 +321,18 @@ const FullHistoryModal = ({
                 key={v.id}
                 onClick={() => {
                   if (onSelectVersion) {
-                    onSelectVersion(v.content);
+                    onSelectVersion(v.content, v.id);
                     onClose();
                   }
                 }}
                 className={`flex items-center justify-between p-2 rounded border cursor-pointer group transition-all ${
-                  isDarkMode
-                    ? "bg-gray-800 border-gray-700 hover:border-blue-500"
-                    : "bg-white border-gray-100 hover:border-blue-300 hover:shadow-sm"
+                  v.id === activeVersionId
+                    ? isDarkMode
+                      ? "bg-gray-800 border-blue-500 shadow-sm shadow-blue-900/30"
+                      : "bg-blue-50/50 border-blue-500 shadow-sm shadow-blue-100"
+                    : isDarkMode
+                      ? "bg-gray-800 border-gray-700 hover:border-blue-500"
+                      : "bg-white border-gray-100 hover:border-blue-300 hover:shadow-sm"
                 }`}
               >
                 <div>
@@ -343,19 +351,38 @@ const FullHistoryModal = ({
                     {new Date(v.date).toLocaleString("ru-RU")}
                   </div>
                 </div>
-                <div
-                  className={`${isDarkMode ? "text-gray-500 group-hover:text-blue-400" : "text-gray-300 group-hover:text-blue-500"}`}
-                >
-                  <Tooltip title="Восстановить в редакторе">
-                    <Button
-                      type="text"
-                      icon={<EyeOutlined />}
-                      size="small"
-                      className={
-                        isDarkMode ? "text-gray-400! hover:text-blue-400!" : ""
+                <div className="flex items-center gap-3">
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={v.is_selected}
+                      onChange={() =>
+                        onSetVersionForSign && onSetVersionForSign(v.id)
                       }
-                    />
-                  </Tooltip>
+                      disabled={isSelectingVersion || isSigning || isReadOnly}
+                    >
+                      <span
+                        className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
+                      >
+                        Для подписи
+                      </span>
+                    </Checkbox>
+                  </div>
+                  <div
+                    className={`${isDarkMode ? "text-gray-500 group-hover:text-blue-400" : "text-gray-300 group-hover:text-blue-500"}`}
+                  >
+                    <Tooltip title="Восстановить в редакторе">
+                      <Button
+                        type="text"
+                        icon={<EyeOutlined />}
+                        size="small"
+                        className={
+                          isDarkMode
+                            ? "text-gray-400! hover:text-blue-400!"
+                            : ""
+                        }
+                      />
+                    </Tooltip>
+                  </div>
                 </div>
               </div>
             ))}
@@ -484,14 +511,18 @@ const FullHistoryModal = ({
                 key={v.id}
                 onClick={() => {
                   if (onSelectVersion) {
-                    onSelectVersion(v.content);
+                    onSelectVersion(v.content, v.id);
                     onClose();
                   }
                 }}
                 className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer group mb-2 ${
-                  isDarkMode
-                    ? "bg-[#1f2937] border-gray-700 hover:bg-gray-800 hover:border-blue-500"
-                    : "bg-gray-50 border-gray-100 hover:bg-blue-50 hover:border-blue-200"
+                  v.id === activeVersionId
+                    ? isDarkMode
+                      ? "bg-[#1f2937] border-blue-500 shadow-sm"
+                      : "bg-blue-50/40 border-blue-500 shadow-sm"
+                    : isDarkMode
+                      ? "bg-[#1f2937] border-gray-700 hover:bg-gray-800 hover:border-blue-500"
+                      : "bg-gray-50 border-gray-100 hover:bg-blue-50 hover:border-blue-200"
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -519,19 +550,38 @@ const FullHistoryModal = ({
                     </div>
                   </div>
                 </div>
-                <div
-                  className={`self-center ${isDarkMode ? "text-gray-500 group-hover:text-blue-400" : "text-gray-300 group-hover:text-blue-500"}`}
-                >
-                  <Tooltip title="Восстановить в редакторе">
-                    <Button
-                      type="text"
-                      icon={<EyeOutlined />}
-                      size="small"
-                      className={
-                        isDarkMode ? "text-gray-400! hover:text-blue-400!" : ""
+                <div className="flex items-center gap-3">
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={v.is_selected}
+                      onChange={() =>
+                        onSetVersionForSign && onSetVersionForSign(v.id)
                       }
-                    />
-                  </Tooltip>
+                      disabled={isSelectingVersion || isSigning || isReadOnly}
+                    >
+                      <span
+                        className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
+                      >
+                        Для подписи
+                      </span>
+                    </Checkbox>
+                  </div>
+                  <div
+                    className={`self-center ${isDarkMode ? "text-gray-500 group-hover:text-blue-400" : "text-gray-300 group-hover:text-blue-500"}`}
+                  >
+                    <Tooltip title="Восстановить в редакторе">
+                      <Button
+                        type="text"
+                        icon={<EyeOutlined />}
+                        size="small"
+                        className={
+                          isDarkMode
+                            ? "text-gray-400! hover:text-blue-400!"
+                            : ""
+                        }
+                      />
+                    </Tooltip>
+                  </div>
                 </div>
               </div>
             );
@@ -592,9 +642,12 @@ export const WorkflowParticipantsPanel = ({
   isReadOnly,
   isReadPage = false,
   versions = [],
+  activeVersionId,
   onSelectVersion,
   documentCreator,
   isDarkMode,
+  onSetVersionForSign,
+  isSelectingVersion,
 }: {
   workflowData: any;
   isCollapsed: boolean;
@@ -606,9 +659,12 @@ export const WorkflowParticipantsPanel = ({
   isReadOnly: boolean;
   isReadPage?: boolean;
   versions?: any[];
-  onSelectVersion?: (content: string) => void;
+  activeVersionId?: string | number | null;
+  onSelectVersion?: (content: string, versionId: string | number) => void;
   documentCreator?: any;
   isDarkMode?: boolean;
+  onSetVersionForSign?: (versionId: string | number) => void;
+  isSelectingVersion?: boolean;
 }) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -1031,12 +1087,16 @@ export const WorkflowParticipantsPanel = ({
                         <div
                           key={v.id}
                           onClick={() =>
-                            onSelectVersion && onSelectVersion(v.content)
+                            onSelectVersion && onSelectVersion(v.content, v.id)
                           }
                           className={`flex items-start gap-3 p-2 rounded-lg border transition-all cursor-pointer group ${
-                            isDarkMode
-                              ? "bg-[#1f2937] border-gray-700 hover:bg-gray-800 hover:border-blue-500"
-                              : "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-blue-300"
+                            v.id === activeVersionId
+                              ? isDarkMode
+                                ? "bg-[#1f2937] border-blue-500 shadow-sm"
+                                : "bg-blue-50/40 border-blue-500 shadow-sm"
+                              : isDarkMode
+                                ? "bg-[#1f2937] border-gray-700 hover:bg-gray-800 hover:border-blue-500"
+                                : "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-blue-300"
                           }`}
                         >
                           <Avatar
@@ -1062,9 +1122,27 @@ export const WorkflowParticipantsPanel = ({
                             </div>
                           </div>
                           <div
-                            className={`flex items-center mt-2 shrink-0 ${isDarkMode ? "text-gray-500 group-hover:text-blue-400" : "text-gray-400 group-hover:text-blue-500"}`}
+                            className={`flex items-center mt-2 shrink-0 gap-2`}
                           >
-                            <EyeOutlined />
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <Checkbox
+                                checked={v.is_selected}
+                                onChange={() =>
+                                  onSetVersionForSign &&
+                                  onSetVersionForSign(v.id)
+                                }
+                                disabled={
+                                  isSelectingVersion || isSigning || isReadOnly
+                                }
+                              />
+                            </div>
+                            <div
+                              className={`${isDarkMode ? "text-gray-500 hover:text-blue-400" : "text-gray-400 hover:text-blue-500"}`}
+                            >
+                              <Tooltip title="Восстановить в редакторе">
+                                <EyeOutlined />
+                              </Tooltip>
+                            </div>
                           </div>
                         </div>
                       );
@@ -1208,6 +1286,9 @@ export const WorkflowParticipantsPanel = ({
         onSelectVersion={onSelectVersion}
         documentCreator={documentCreator}
         isDarkMode={isDarkMode}
+        onSetVersionForSign={onSetVersionForSign}
+        isSelectingVersion={isSelectingVersion}
+        activeVersionId={activeVersionId}
       />
       <SignatureDetailsModal
         isOpen={signatureModal.isOpen}

@@ -117,7 +117,11 @@ export const ApiRoutes = {
   GET_INTERNAL_FOLDER: "/api/v1/internal-mail-folders/:id",
   UPDATE_INTERNAL_FOLDER: "/api/v1/internal-mail-folders/:id",
   DELETE_INTERNAL_FOLDER: "/api/v1/internal-mail-folders/:id",
-  
+
+  // Version
+  GET_INTERNAL_VERSIONS: "/api/v1/internal-correspondences/:id/versions",
+  SELECT_INTERNAL_VERISION_FOR_SIGN:
+    "/api/v1/internal-correspondences/:correspondenceId/versions/:versionId/select",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];
