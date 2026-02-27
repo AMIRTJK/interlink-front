@@ -337,13 +337,18 @@ const FullHistoryModal = ({
               >
                 <div>
                   <div
-                    className={`text-xs font-semibold transition-colors ${
+                    className={`text-xs font-semibold transition-colors flex gap-1 ${
                       isDarkMode
                         ? "text-gray-300 group-hover:text-blue-400"
                         : "text-gray-700 group-hover:text-blue-600"
                     }`}
                   >
-                    Версия {v.versionNumber}
+                    <p>Версия {v.versionNumber}</p>
+                    {v.is_selected && (
+                      <Tooltip title="Выбрана для подписи">
+                        <CheckCircleFilled className="text-green-500! text-[12px]!" />
+                      </Tooltip>
+                    )}
                   </div>
                   <div
                     className={`text-[10px] mt-0.5 ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}
@@ -533,9 +538,14 @@ const FullHistoryModal = ({
                   />
                   <div>
                     <div
-                      className={`font-semibold transition-colors ${isDarkMode ? "text-gray-200 group-hover:text-blue-400" : "text-gray-700 group-hover:text-blue-700"}`}
+                      className={`font-semibold transition-colors flex gap-1 ${isDarkMode ? "text-gray-200 group-hover:text-blue-400" : "text-gray-700 group-hover:text-blue-700"}`}
                     >
-                      Версия {v.versionNumber}
+                      <p>Версия {v.versionNumber}</p>
+                      {v.is_selected && (
+                        <Tooltip title="Выбрана для подписи">
+                          <CheckCircleFilled className="text-green-500! text-[12px]!" />
+                        </Tooltip>
+                      )}
                     </div>
                     <div
                       className={`text-xs mt-1 font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
@@ -1107,9 +1117,14 @@ export const WorkflowParticipantsPanel = ({
                           />
                           <div className="flex-1 min-w-0">
                             <div
-                              className={`text-xs font-semibold transition-colors ${isDarkMode ? "text-gray-200 group-hover:text-blue-400" : "text-gray-700 group-hover:text-blue-600"}`}
+                              className={`text-xs font-semibold flex gap-1 transition-colors ${isDarkMode ? "text-gray-200 group-hover:text-blue-400" : "text-gray-700 group-hover:text-blue-600"}`}
                             >
-                              Версия {versions.length - index}
+                              <p>Версия {versions.length - index}</p>
+                              {v.is_selected && (
+                                <Tooltip title="Выбрана для подписи">
+                                  <CheckCircleFilled className="text-green-500! text-[12px]!" />
+                                </Tooltip>
+                              )}
                             </div>
                             <div
                               className={`text-[10px] font-medium truncate mt-0.5 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
