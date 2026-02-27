@@ -17,6 +17,7 @@ export const Tasks = () => {
 
   const handleTaskClick = (task: ITaskItem) => {
     setEditingTask(task);
+    setTaskStatus(task.status);
     setIsModalOpen(true);
   };
 

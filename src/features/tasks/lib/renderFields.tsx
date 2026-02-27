@@ -10,6 +10,7 @@ import DescriptionIcon from '../../../assets/icons/description-icon.svg'
 export const RenderFields = ({
   isEvent,
   isEdit,
+  currentTaskStatus,
   isSelectOpen,
   setIsSelectOpen,
   handleChangeStatusSelectOption,
@@ -139,7 +140,12 @@ export const RenderFields = ({
             <Select
               placeholder="Выберите статус задачи"
               style={{ width: "100%" }}
-              options={TASK_STATUS_OPTIONS}
+              disabled={!!currentTaskStatus}
+              options={
+                currentTaskStatus
+                  ? TASK_STATUS_OPTIONS.filter((opt) => opt.value === currentTaskStatus)
+                  : TASK_STATUS_OPTIONS
+              }
             />
           </Form.Item>
         </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import dayjs from "dayjs";
 import { Form } from "antd";
 import {
@@ -35,17 +35,15 @@ export const AddTaskForm = ({
 }: IProps) => {
   const [form] = Form.useForm<ITaskFormValues>();
 
-  const combinedInitialValues: Partial<ITaskFormValues> = {
+  const combinedInitialValues: Partial<ITaskFormValues> = useMemo(() => ({
     ...initialValues,
     status:
       !isEvent && currentTaskStatus ? currentTaskStatus : initialValues?.status,
-  };
+  }), [initialValues, isEvent, currentTaskStatus]);
 
   useEffect(() => {
-    if (initialValues) {
-      form.setFieldsValue(initialValues);
-    }
-  }, [initialValues, form]);
+    form.setFieldsValue(combinedInitialValues);
+  }, [combinedInitialValues, form]);
 
   const { mutate: addTaskMutate } = useMutationQuery({
     method: mode === 'edit' ? 'PUT' : 'POST',
@@ -142,6 +140,7 @@ export const AddTaskForm = ({
       <RenderFields
         isEvent={isEvent}
         isEdit={mode === 'edit'}
+        currentTaskStatus={currentTaskStatus}
         isSelectOpen={isSelectOpen}
         setIsSelectOpen={setIsSelectOpen}
         handleChangeStatusSelectOption={handleChangeStatusSelectOption}
