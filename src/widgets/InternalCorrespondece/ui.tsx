@@ -62,7 +62,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
 
   const [initialRecipients, setInitialRecipients] = useState<any[]>([]);
   const [initialCC, setInitialCC] = useState<any[]>([]);
-  // Состояние для начального контента редактора
   const [initialEditorContent, setInitialEditorContent] = useState<string>("");
 
   const [form] = Form.useForm();
@@ -85,25 +84,22 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     return generateMockWorkflow(rawWorkflowData);
   }, [rawWorkflowData]);
 
-  // 1. Получаем версии через API
   const { data: versionsResponse, refetch: refetchVersions } = useGetQuery({
     url: id ? ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", id) : "",
     useToken: true,
     options: { enabled: !!id },
   });
 
-  // Достаем массив версий из ответа (подставь правильный путь до массива, если он другой)
   const versions = useMemo(() => {
-    // Достаем массив versions из объекта data
     const rawVersions = versionsResponse?.data?.versions || [];
 
     return rawVersions.map((v: any) => ({
       id: v.id,
-      versionNumber: v.version, // Используем строковую версию от бэка ("1.0", "1.1")
-      content: v.body, // В UI ожидается content
-      date: v.created_at, // В UI ожидается date
-      authorId: v.author?.id, // ID автора для поиска в userMap
-      is_selected: v.is_selected, // Флаг для чекбокса
+      versionNumber: v.version, 
+      content: v.body,
+      date: v.created_at, 
+      authorId: v.author?.id, 
+      is_selected: v.is_selected, 
     }));
   }, [versionsResponse]);
 
@@ -155,7 +151,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     return preloadData.some((p: any) => p.name === "signatures.payload");
   }, [preloadData]);
 
-  // Мутация подтверждения подписи
   const { mutate: signaturesConfirm, isPending: isConfirming } =
     useMutationQuery<any>({
       url: ApiRoutes.INTERNAL_SIGNATURES_CONFIRM.replace(
@@ -315,6 +310,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     string | number | null
   >(initialActiveVersion);
 
+  const isVersionContentInit = useRef(false);
+
   const handleSelectVersion = (content: string, versionId: string | number) => {
     if (editorRef.current) {
       editorRef.current.setContent(content);
@@ -356,13 +353,10 @@ export const InternalCorrespondece: React.FC<IProps> = ({
 
   const handleInsertQR = async () => {
     try {
-      // Генерируем ссылку на страницу чтения
-      // window.location.origin вернет "http://localhost:3000" или ваш домен
       const readUrl = `${window.location.origin}/modules/correspondence/internal/read/${id}`;
 
       console.log("Generating QR for URL:", readUrl);
 
-      // Генерация Data URL (картинка в base64)
       const qrDataUrl = await QRCode.toDataURL(readUrl, {
         width: 150,
         margin: 1,
@@ -372,10 +366,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         },
       });
 
-      // Формируем HTML для вставки.
       const imgHtml = `<img src="${qrDataUrl}" alt="Scan to read" />`;
 
-      // Вызываем метод редактора через Ref
       if (editorRef.current) {
         editorRef.current.insertHtml(imgHtml);
       }
@@ -392,7 +384,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     });
   };
 
-  // ЭФФЕКТ: Заполнение данных при просмотре
   useEffect(() => {
     if (initialData) {
       const item = initialData.item || [];
@@ -403,7 +394,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         dateValue = dayjsLib(dateString);
       }
 
-      // 2. Получатели
       const rawRecipients = item.recipients || [];
 
       const toRecipients: Recipient[] = rawRecipients
@@ -424,7 +414,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
           position: r.user.position || "",
         }));
 
-      // 3. Сеттим в форму
       form.setFieldsValue({
         subject: item.subject,
         number: item.reg_number || "Не указано",
@@ -434,11 +423,9 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         folder: initialData.my_folder,
       });
 
-      // 4. Стейты для UI
       setInitialRecipients(toRecipients);
       setInitialCC(ccRecipients);
 
-      // 5. Редактор
       if (item.body) {
         setInitialEditorContent(item.body);
         setEditorBody(item.body);
@@ -447,11 +434,20 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   }, [initialData, form]);
 
   useEffect(() => {
-    if (versions.length > 0 && !activeVersionId) {
+    if (versions.length > 0 && !isVersionContentInit.current) {
       const selected = versions.find((v: any) => v.is_selected === true);
-      setActiveVersionId(
-        selected ? selected.id : versions[versions.length - 1].id,
-      );
+      const targetVersion = selected || versions[versions.length - 1];
+
+      setActiveVersionId(targetVersion.id);
+
+      if (editorRef.current && targetVersion.content) {
+        editorRef.current.setContent(targetVersion.content);
+      }
+
+      setEditorBody(targetVersion.content || "");
+      setInitialEditorContent(targetVersion.content || "");
+
+      isVersionContentInit.current = true;
     }
   }, [versions]);
 
