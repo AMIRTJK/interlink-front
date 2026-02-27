@@ -97,6 +97,7 @@ export interface ITaskFormValues {
   export interface IRenderFields {
   isEvent?: boolean;
   isEdit?: boolean;
+  currentTaskStatus?: string;
   isSelectOpen: boolean;
   setIsSelectOpen: (open: boolean) => void;
   handleChangeStatusSelectOption: (e: React.MouseEvent<HTMLDivElement>) => void;

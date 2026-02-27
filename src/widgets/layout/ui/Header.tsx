@@ -72,8 +72,8 @@ export const Header = ({ isModulesPage }: IProps) => {
 
   const notificationContent = (
     <div className="w-80 -m-3 p-3">
-      <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-100 dark:border-gray-700">
-        <span className="font-semibold text-gray-800 dark:text-gray-200">
+      <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
+        <span className="font-semibold text-gray-800">
           Уведомления
         </span>
         {unreadCount > 0 && (
@@ -93,12 +93,12 @@ export const Header = ({ isModulesPage }: IProps) => {
               key={note.id}
               className={`p-3 rounded-xl flex gap-3 transition-colors ${
                 note.isRead
-                  ? "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  : "bg-blue-50/50 dark:bg-blue-900/20 hover:bg-blue-50 dark:hover:bg-blue-900/40"
+                  ? "bg-white hover:bg-gray-50"
+                  : "bg-blue-50/50 hover:bg-blue-50"
               }`}
             >
               <div className="mt-0.5">
-                <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
+                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
                   {note.icon}
                 </div>
               </div>
@@ -107,8 +107,8 @@ export const Header = ({ isModulesPage }: IProps) => {
                   <h4
                     className={`text-sm m-0 ${
                       note.isRead
-                        ? "text-gray-700 dark:text-gray-300 font-medium"
-                        : "text-gray-900 dark:text-white font-semibold"
+                        ? "text-gray-700 font-medium"
+                        : "text-gray-900 font-semibold"
                     }`}
                   >
                     {note.title}
@@ -117,10 +117,10 @@ export const Header = ({ isModulesPage }: IProps) => {
                     <span className="w-2 h-2 bg-blue-500 rounded-full mt-1"></span>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-1 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-gray-500 mt-1 mb-1 line-clamp-2 leading-relaxed">
                   {note.message}
                 </p>
-                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">
+                <span className="text-[10px] text-gray-400 font-medium">
                   {note.time}
                 </span>
               </div>
@@ -140,7 +140,7 @@ export const Header = ({ isModulesPage }: IProps) => {
       className={`
         sticky top-0 z-50 w-full mb-4 px-6 h-18
         flex justify-between items-center 
-        bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm border border-gray-100/50 dark:border-gray-800/50
+        bg-white/80 backdrop-blur-md shadow-sm border border-gray-100/50
         transition-all duration-300 ease-in-out
         ${isModulesPage ? "rounded-none" : "rounded-[20px] mb-0!"}
       `}
@@ -166,7 +166,7 @@ export const Header = ({ isModulesPage }: IProps) => {
           <button
             onClick={toggleTheme}
             aria-label="Смена темы"
-            className="p-2.5 cursor-pointer text-gray-500 dark:text-gray-400 transition-all duration-200 bg-gray-50 dark:bg-gray-800 rounded-full hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 focus:outline-none"
+            className="p-2.5 cursor-pointer text-gray-500 transition-all duration-200 bg-gray-50 rounded-full hover:bg-blue-50 hover:text-blue-600 focus:outline-none"
           >
             {isDarkMode ? (
               <Sun size={20} strokeWidth={2.2} />
@@ -184,17 +184,17 @@ export const Header = ({ isModulesPage }: IProps) => {
         >
           <button
             aria-label="Уведомления"
-            className="relative p-2.5 cursor-pointer text-gray-500 dark:text-gray-400 transition-all duration-200 bg-gray-50 dark:bg-gray-800 rounded-full hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 focus:outline-none"
+            className="relative p-2.5 cursor-pointer text-gray-500 transition-all duration-200 bg-gray-50 rounded-full hover:bg-blue-50 hover:text-blue-600 focus:outline-none"
           >
             <Bell size={20} strokeWidth={2.2} />
             {unreadCount > 0 && (
-              <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
+              <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 border-2 border-white rounded-full"></span>
             )}
           </button>
         </Popover>
 
         <div
-          className="w-px h-8 bg-gray-200 dark:bg-gray-700"
+          className="w-px h-8 bg-gray-200"
           aria-hidden="true"
         />
 
@@ -204,16 +204,16 @@ export const Header = ({ isModulesPage }: IProps) => {
               size={44}
               src={UserAvatar}
               alt="Аватар пользователя"
-              className="border-2 border-white dark:border-gray-800 shadow-sm"
+              className="border-2 border-white shadow-sm"
             />
-            <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
           </div>
 
           <Tooltip title="Выйти" placement="bottomRight">
             <button
               onClick={handleLogout}
               aria-label="Выход"
-              className="p-2.5 text-gray-400 cursor-pointer transition-all duration-200 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 focus:outline-none"
+              className="p-2.5 text-gray-400 cursor-pointer transition-all duration-200 rounded-full hover:bg-red-50 hover:text-red-500 focus:outline-none"
             >
               <LogOut size={20} strokeWidth={2.2} />
             </button>
@@ -223,3 +223,5 @@ export const Header = ({ isModulesPage }: IProps) => {
     </header>
   );
 };
+
+
