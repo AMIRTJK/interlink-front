@@ -366,7 +366,7 @@ const FullHistoryModal = ({
                       disabled={isSelectingVersion || isSigning || isReadOnly}
                     >
                       <span
-                        className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
+                        className={`text-xs select-none ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
                       >
                         Для подписи
                       </span>
@@ -570,7 +570,7 @@ const FullHistoryModal = ({
                       disabled={isSelectingVersion || isSigning || isReadOnly}
                     >
                       <span
-                        className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
+                        className={`text-xs select-none ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
                       >
                         Для подписи
                       </span>
@@ -1140,16 +1140,26 @@ export const WorkflowParticipantsPanel = ({
                             className={`flex items-center mt-2 shrink-0 gap-2`}
                           >
                             <div onClick={(e) => e.stopPropagation()}>
-                              <Checkbox
-                                checked={v.is_selected}
-                                onChange={() =>
-                                  onSetVersionForSign &&
-                                  onSetVersionForSign(v.id)
-                                }
-                                disabled={
-                                  isSelectingVersion || isSigning || isReadOnly
-                                }
-                              />
+                              <ConfigProvider
+                                theme={{
+                                  algorithm: isDarkMode
+                                    ? theme.darkAlgorithm
+                                    : theme.defaultAlgorithm,
+                                }}
+                              >
+                                <Checkbox
+                                  checked={v.is_selected}
+                                  onChange={() =>
+                                    onSetVersionForSign &&
+                                    onSetVersionForSign(v.id)
+                                  }
+                                  disabled={
+                                    isSelectingVersion ||
+                                    isSigning ||
+                                    isReadOnly
+                                  }
+                                />
+                              </ConfigProvider>
                             </div>
                             <div
                               className={`${isDarkMode ? "text-gray-500 hover:text-blue-400" : "text-gray-400 hover:text-blue-500"}`}
