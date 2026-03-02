@@ -1,7 +1,6 @@
 import { ITaskItem } from "../model";
 import { getTaskProgressColor, formatDate } from "../lib/utils";
 import { StatusIcon } from "./StatusIcon";
-
 import { DeleteOutlined, EditOutlined, UserOutlined } from "@ant-design/icons";
 import { PopConfirm } from "@shared/ui";
 import { Button, Avatar, Tooltip } from "antd";
@@ -29,6 +28,7 @@ export const TaskCard = ({
   const handleDragEnd = () => {
     setIsDragging(false);
   };
+
   const borderColor = getTaskProgressColor(task.started_at, task.planned_at);
   return (
     <div
