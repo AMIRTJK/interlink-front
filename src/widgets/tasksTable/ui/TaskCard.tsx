@@ -105,9 +105,9 @@ export const TaskCard = ({
                   }}
                   icon={
                     task.status === TASK_STATUS.COMPLETED ? (
-                      <ReloadOutlined className="text-orange-500! hover:text-orange-600!" />
+                      <ReloadOutlined className="text-gray-400! hover:text-orange-500! transition-all! duration-300!" />
                     ) : (
-                      <CheckCircleOutlined className="text-green-500! hover:text-green-600!" />
+                      <CheckCircleOutlined className="text-gray-300! hover:text-green-500! transition-all! duration-300!" />
                     )
                   }
                 />
@@ -116,7 +116,7 @@ export const TaskCard = ({
                 type="text"
                 size="small"
                 onClick={() => onEdit?.(task)}
-                icon={<EditOutlined className="text-[#0037AF]! hover:text-[#0099AF]!" />}
+                icon={<EditOutlined className="text-gray-300! hover:text-[#0037AF]! transition-all! duration-300!" />}
               />
               <PopConfirm
                 title="Удалить задачу?"
