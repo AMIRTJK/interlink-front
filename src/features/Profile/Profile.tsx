@@ -19,7 +19,12 @@ export const Profile = () => {
   const activeTab = useCurrentTab();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState<boolean>(tokenControl.getProfileExpanded());
+
+  const handleToggleExpanded = (val: boolean) => {
+    setIsExpanded(val);
+    tokenControl.setProfileExpanded(val);
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -67,7 +72,7 @@ export const Profile = () => {
         navbarVariant={variant}
         setNavbarVariant={setVariant}
         isExpanded={isExpanded}
-        setIsExpanded={setIsExpanded}
+        setIsExpanded={handleToggleExpanded}
       />
     </>
   );
