@@ -170,16 +170,17 @@
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.05) !important;
   transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
+  overflow: hidden !important; /* Обрезает размытие по форме блока */
+  -webkit-mask-image: -webkit-radial-gradient(white, black); /* Фикс квадратных углов в Chrome */
+  mask-image: radial-gradient(white, black);
 }
 
 /* Эффект легкого подъема */
 .hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  transition: transform 0.3s ease !important;
 }
 
-.hover-lift:hover {
-  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.1) !important;
-}
+/* hover-эффект убран */
 
 /* Подсветка полей при наведении */
 .field-highlight {
