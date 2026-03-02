@@ -1,11 +1,13 @@
 import { ITaskItem } from "../model";
 import { getTaskProgressColor, formatDate } from "../lib/utils";
 import { StatusIcon } from "./StatusIcon";
-
-import { DeleteOutlined, EditOutlined, UserOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, UserOutlined, CheckCircleOutlined, ReloadOutlined } from "@ant-design/icons";
 import { PopConfirm } from "@shared/ui";
 import { Button, Avatar, Tooltip } from "antd";
 import { useState } from "react";
+import { useMutationQuery } from "@shared/lib/hooks";
+import { ApiRoutes } from "@shared/api";
+import { TASK_STATUS } from "@features/tasks/model";
 
 export const TaskCard = ({
   task,
@@ -29,6 +31,16 @@ export const TaskCard = ({
   const handleDragEnd = () => {
     setIsDragging(false);
   };
+
+  const { mutate: updateStatus } = useMutationQuery<{ status: string }>({
+    url: `${ApiRoutes.UPDATE_TASK_STATUS}/${task.id}`,
+    method: "PUT",
+    messages: {
+      success: "Статус задачи обновлен",
+      invalidate: [ApiRoutes.GET_TASKS],
+    },
+  });
+
   const borderColor = getTaskProgressColor(task.started_at, task.planned_at);
   return (
     <div
@@ -82,22 +94,44 @@ export const TaskCard = ({
               </div>
             </div>
             <div className="task-card-actions flex flex-col items-center gap-1" onClick={(e) => e.stopPropagation()}>
-              <Button
-                type="text"
-                size="small"
-                onClick={() => onEdit?.(task)}
-                icon={<EditOutlined className="text-[#0037AF]! hover:text-[#0099AF]!" />}
-              />
+              <Tooltip title={task.status === TASK_STATUS.COMPLETED ? "Возобновить" : "Завершить"}>
+                <Button
+                  type="text"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const newStatus = task.status === TASK_STATUS.COMPLETED ? TASK_STATUS.PENDING : TASK_STATUS.COMPLETED;
+                    updateStatus({ status: newStatus });
+                  }}
+                  icon={
+                    task.status === TASK_STATUS.COMPLETED ? (
+                      <ReloadOutlined className="text-gray-400! hover:text-orange-500! transition-all! duration-300!" />
+                    ) : (
+                      <CheckCircleOutlined className="text-gray-300! hover:text-green-500! transition-all! duration-300!" />
+                    )
+                  }
+                />
+              </Tooltip>
+              <Tooltip title="Редактировать">
+                <Button
+                  type="text"
+                  size="small"
+                  onClick={() => onEdit?.(task)}
+                  icon={<EditOutlined className="text-gray-300! hover:text-[#0037AF]! transition-all! duration-300!" />}
+                />
+              </Tooltip>
               <PopConfirm
                 title="Удалить задачу?"
                 onConfirm={() => onDelete?.(task.id)}
                 placement="topRight"
               >
-                <Button
-                  type="text"
-                  size="small"
-                  icon={<DeleteOutlined className="task-card-delete-btn" />}
-                />
+                <Tooltip title="Удалить">
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<DeleteOutlined className="task-card-delete-btn" />}
+                  />
+                </Tooltip>
               </PopConfirm>
           </div>
           

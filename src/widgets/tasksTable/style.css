@@ -266,16 +266,12 @@ body:not(.no-animations) .task-card-task.dragging {
 }
 
 .task-card-delete-btn {
-  color: #9ca3af; 
-}
-
-/* No-animations */
-body:not(.no-animations) .task-card-delete-btn {
-  transition: color 0.2s ease;
+  color: #d1d5db !important;
+  transition: all 0.3s ease !important;
 }
 
 body:not(.no-animations) .task-card-delete-btn:hover {
-  color: #ef4444; 
+  color: #ef4444 !important; 
 }
 
 body.no-animations .task-card-delete-btn:hover {

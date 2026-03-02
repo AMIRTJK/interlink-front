@@ -1,6 +1,6 @@
 import { Avatar, Tooltip } from "antd";
 import { UserOutlined, SettingOutlined, CameraOutlined, LeftCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { IUser } from "@entities/login";
 import { Tabs } from "@shared/ui";
 import { profileRightNav } from "../model";
@@ -8,6 +8,9 @@ import userAvatar from "../../../assets/images/user-avatar.jpg";
 import { UseSkeleton } from "@shared/ui/Skeleton/ui";
 import { ProfileSettingsModal } from "../ui/ProfileSettingsModal";
 import { AnimatePresence, motion } from "framer-motion";
+import { useRef } from "react";
+import { useMutationQuery } from "@shared/lib/hooks";
+import { ApiRoutes } from "@shared/api";
 
 interface IProps {
   isPending: boolean;
@@ -56,7 +59,30 @@ export const RenderJSX = ({
   isExpanded,
   setIsExpanded,
 }: IProps) => {
-  const location = useLocation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { mutate: uploadAvatar, isPending: isUploading } = useMutationQuery<FormData>({
+    url: `${ApiRoutes.FETCH_USER_BY_ID}${userData?.id}/avatar`,
+    method: "POST",
+    messages: {
+      success: "Фото профиля обновлено",
+      error: "Ошибка при загрузке фото",
+      invalidate: [ApiRoutes.FETCH_USER_BY_ID],
+    },
+  });
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append("photo", file); // Часто поле называется photo или avatar
+      uploadAvatar(formData);
+    }
+  };
 
   if (isPending) return <UseSkeleton loading={true} variant="profile" />;
 
@@ -79,21 +105,31 @@ export const RenderJSX = ({
       <motion.aside
         animate={{ width: isExpanded ? 100 : "28%" }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
-        className="hidden lg:block premium-tracking overflow-hidden shrink-0"
+        className="hidden lg:block premium-tracking overflow-hidden shrink-0 group"
       >
         <div className={`subtle-glass hover-lift rounded-3xl! h-full transition-all duration-300 flex! flex-col! ${isExpanded ? 'p-4!' : 'p-6!'}`}>
           <div className="flex! flex-col!">
             {/* Аватар */}
             <div className={`flex! flex-col! items-center! transition-all duration-300 ${isExpanded ? 'mb-1! scale-[0.65]' : 'mb-5!'}`}>
-              <div className="profile-avatar-glow avatar-breath profile-avatar-container">
+              <div 
+                className={`profile-avatar-glow avatar-breath profile-avatar-container cursor-pointer ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                onClick={handleAvatarClick}
+              >
                 <Avatar
-                  src={userAvatar}
+                  src={userData?.photo_path || userAvatar}
                   className="profile-avatar-img"
                   icon={<UserOutlined />}
                 />
                 <div className="profile-avatar-overlay">
                   <CameraOutlined style={{ fontSize: 24, color: "#fff" }} />
                 </div>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  accept="image/*" 
+                  onChange={handleFileChange} 
+                />
               </div>
             </div>
 
@@ -140,32 +176,36 @@ export const RenderJSX = ({
             </AnimatePresence>
 
             {/* Иконки действий */}
-            <div className={`flex! items-center! ${isExpanded ? 'flex-col! gap-4! mt-4!' : 'justify-between! mb-4! order-first!'}`}>
+            <div className={`flex! items-center! ${isExpanded ? 'flex-col-reverse! gap-4! mt-4!' : 'justify-between! mb-4! order-first!'}`}>
               <Tooltip title={isExpanded ? "Развернуть" : "Свернуть"}>
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-gray-400 hover:text-blue-500 transition-colors p-1"
+                  className="text-gray-400 hover:text-blue-500 transition-all duration-300 p-1 opacity-0 group-hover:opacity-100"
                   style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                 >
                   {isExpanded ? <RightCircleOutlined style={{ fontSize: 20 }} /> : <LeftCircleOutlined style={{ fontSize: 20 }} />}
                 </button>
               </Tooltip>
               
-              <SettingOutlined
-                className="profile-settings-icon"
-                style={{ fontSize: 22 }}
-                onClick={() => setIsSettingsOpen(true)}
-              />
+              <Tooltip title="Настройки">
+                <SettingOutlined
+                  className="profile-settings-icon"
+                  style={{ fontSize: 22 }}
+                  onClick={() => setIsSettingsOpen(true)}
+                />
+              </Tooltip>
             </div>
           </div>
         </div>
       </motion.aside>
 
       {/* Левая часть профиля (Мобильная) */}
-      <aside className="block lg:hidden w-full! premium-tracking overflow-hidden">
+      <aside className="block lg:hidden w-full! premium-tracking overflow-hidden group">
         <div className="subtle-glass hover-lift p-4! rounded-3xl!">
             <div className="flex! justify-end!">
-              <SettingOutlined className="profile-settings-icon text-xl" style={{ fontSize: 20 }} onClick={() => setIsSettingsOpen(true)} />
+              <Tooltip title="Настройки">
+                <SettingOutlined className="profile-settings-icon text-xl" style={{ fontSize: 20 }} onClick={() => setIsSettingsOpen(true)} />
+              </Tooltip>
             </div>
             <div className="flex! flex-col! items-center! mb-5!">
               <div className="profile-avatar-glow avatar-breath profile-avatar-container">

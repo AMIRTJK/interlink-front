@@ -2,50 +2,41 @@
 import { useNavigate } from "react-router-dom";
 import { AppRoutes } from "@shared/config/AppRoutes";
 import { tokenControl } from "@shared/lib";
-import { ApiRoutes, _axios } from "@shared/api";
+import { ApiRoutes } from "@shared/api";
 import { IUser } from "@entities/login";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCurrentTab } from "./lib/lib";
 import { RenderJSX } from "./lib/RenderJSX";
-import { useNavbar } from "@shared/lib/hooks";
+import { useNavbar, useGetQuery } from "@shared/lib/hooks";
 import "./style.css";
 
 export const Profile = () => {
   const navigate = useNavigate();
   const { variant, setVariant } = useNavbar();
   const userId = tokenControl.getUserId();
-  const [userData, setUserData] = useState<IUser | null>(null);
-  const [loading, setLoading] = useState(true);
   const activeTab = useCurrentTab();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(tokenControl.getProfileExpanded());
 
+  const { data: userDataResponse, isLoading } = useGetQuery<{ data: IUser }>({
+    url: `${ApiRoutes.FETCH_USER_BY_ID}${userId}`,
+    options: {
+      enabled: !!userId,
+      onSuccess: (data) => {
+        if (data?.data) {
+          tokenControl.setUserData(data.data);
+        }
+      },
+    }
+  });
+
+  const userData = userDataResponse?.data || null;
+
   const handleToggleExpanded = (val: boolean) => {
     setIsExpanded(val);
     tokenControl.setProfileExpanded(val);
   };
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await _axios<{ data: IUser }>(
-          `${ApiRoutes.FETCH_USER_BY_ID}${userId} `,
-          {
-            method: "GET",
-          }
-        );
-        setUserData(response.data.data);
-        tokenControl.setUserData(response.data.data);
-      } catch (err) {
-        console.error("Ошибка при получении данных пользователя:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [userId]);
 
   const handleMenuClick = (e: { key: string }) => {
     const routes: Record<string, string> = {
@@ -63,7 +54,7 @@ export const Profile = () => {
   return (
     <>
       <RenderJSX
-        isPending={loading}
+        isPending={!!isLoading}
         isSettingsOpen={isSettingsOpen}
         setIsSettingsOpen={setIsSettingsOpen}
         userData={userData}

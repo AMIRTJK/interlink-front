@@ -86,7 +86,7 @@ const DepartmentCard: React.FC<DepartmentCardProps> = ({
         ${
           isSelected
             ? "bg-[#F4F8FF] border-blue-100/50 shadow-inner"
-            : "bg-white border-transparent hover:border-blue-200 hover:shadow-lg"
+            : "bg-white border-transparent hover:border-blue-200 hover:shadow-[0_12px_40px_rgba(31,38,135,0.1)]!"
         }
       `}
     >
@@ -136,7 +136,7 @@ const DepartmentSection: React.FC<DepartmentSectionProps> = ({
           ))}
         </div>
       </div>
-      <span className="absolute -bottom-3 right-8 bg-white px-3 text-xs md:text-sm text-indigo-300 font-medium">
+      <span className="absolute -bottom-3 right-8 bg-[#f8fafc] px-3 text-xs md:text-sm text-indigo-300 font-medium rounded-md">
         {title}
       </span>
     </div>
@@ -167,7 +167,7 @@ const UserCard: React.FC<UserCardProps> = ({
         ${
           isSelected
             ? "bg-[#F4F8FF] border-blue-100/50 shadow-inner"
-            : "bg-white border-transparent hover:border-blue-200 hover:shadow-lg"
+            : "bg-white border-transparent hover:border-blue-200 hover:shadow-[0_12px_40px_rgba(31,38,135,0.1)]!"
         }
       `}
     >
@@ -260,7 +260,7 @@ const UserSection: React.FC<UserSectionProps> = ({
           ))}
         </div>
       </div>
-      <span className="absolute -bottom-3 right-8 bg-white px-3 text-xs md:text-sm text-[#BCC5DF] font-medium">
+      <span className="absolute -bottom-3 right-8 bg-[#f8fafc] px-3 text-xs md:text-sm text-[#BCC5DF] font-medium rounded-md">
         {title}
       </span>
     </div>
