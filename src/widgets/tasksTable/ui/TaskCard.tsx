@@ -44,31 +44,41 @@ export const TaskCard = ({
       <div className="task-card-header relative">
         <StatusIcon status={task.status} className="mt-[3px]!" />
         <div className="task-card-content flex justify-between items-start">
-            <div className="task__text-content">
+            <div className="task__text-content flex-1">
               <p className="task-title pr-6">{task.title}</p>
               <p className="task-desc">{task.description}</p>
               <div className="flex justify-between items-center mt-3">
                 <p className="task-datetime">{formatDate(task.created_at)}</p>
-                {task.assignees?.length > 0 && (
+                <div className="flex-1 flex justify-end">
                   <Avatar.Group
                     max={{
                       count: 2,
                       style: { color: "#f56a00", backgroundColor: "#fde3cf", fontSize: "10px" },
                     }}
                   >
-                    {task.assignees.map((assignee) => (
-                      <Tooltip title={String(assignee.full_name || assignee.name || "")} key={assignee.id}>
+                    {task.assignees?.length > 0 ? (
+                      task.assignees.map((assignee) => (
+                        <Tooltip title={String(assignee.full_name || assignee.name || "")} key={assignee.id}>
+                          <Avatar
+                            src={String(assignee.photo_path || assignee.avatar || <UserOutlined />)}
+                            size={24}
+                            className="border-white!"
+                          >
+                            {String(assignee.full_name || assignee.name || "").charAt(0)}
+                          </Avatar>
+                        </Tooltip>
+                      ))
+                    ) : (
+                      <Tooltip title="Нет участников">
                         <Avatar
-                          src={String(assignee.photo_path || assignee.avatar || <UserOutlined />)}
                           size={24}
-                          className="border-white!"
-                        >
-                          {String(assignee.full_name || assignee.name || "").charAt(0)}
-                        </Avatar>
+                          icon={<UserOutlined />}
+                          className="bg-gray-100! border-gray-200! opacity-40!"
+                        />
                       </Tooltip>
-                    ))}
+                    )}
                   </Avatar.Group>
-                )}
+                </div>
               </div>
             </div>
             <div className="task-card-actions flex flex-col items-center gap-1" onClick={(e) => e.stopPropagation()}>

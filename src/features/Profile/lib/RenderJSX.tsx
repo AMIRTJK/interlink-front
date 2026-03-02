@@ -1,5 +1,5 @@
-import { Avatar } from "antd";
-import { UserOutlined, SettingOutlined, CameraOutlined } from "@ant-design/icons";
+import { Avatar, Tooltip } from "antd";
+import { UserOutlined, SettingOutlined, CameraOutlined, LeftCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
 import { Outlet, useLocation } from "react-router-dom";
 import { IUser } from "@entities/login";
 import { Tabs } from "@shared/ui";
@@ -18,6 +18,8 @@ interface IProps {
   onMenuClick: (e: { key: string }) => void;
   navbarVariant: "default" | "ios";
   setNavbarVariant: (v: "default" | "ios") => void;
+  isExpanded: boolean;
+  setIsExpanded: (v: boolean) => void;
 }
 
 /* Информационные поля профиля */
@@ -51,6 +53,8 @@ export const RenderJSX = ({
   onMenuClick,
   navbarVariant,
   setNavbarVariant,
+  isExpanded,
+  setIsExpanded,
 }: IProps) => {
   const location = useLocation();
 
@@ -61,7 +65,7 @@ export const RenderJSX = ({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="flex! flex-col! lg:flex-row! gap-6! p-3! sm:p-4! lg:p-6!"
+      className="flex! flex-col! lg:flex-row! lg:flex-nowrap! gap-6! p-3! sm:p-4! lg:p-6!"
     >
       {/* Модалка настроек */}
       <ProfileSettingsModal
@@ -71,67 +75,113 @@ export const RenderJSX = ({
         setNavbarVariant={setNavbarVariant}
       />
 
-      {/* Левая часть профиля */}
-      <aside className="w-full! lg:w-[28%]! premium-tracking">
-        <div className="subtle-glass hover-lift p-6! rounded-3xl!">
-          {/* Иконка настроек с анимацией вращения */}
-          <div className="flex! justify-end!">
-            <SettingOutlined
-              className="profile-settings-icon"
-              style={{ fontSize: 20 }}
-              onClick={() => setIsSettingsOpen(true)}
-            />
-          </div>
-
-          {/* Аватар с интерактивом */}
-          <div className="flex! flex-col! items-center! mb-5!">
-            <div className="profile-avatar-glow avatar-breath profile-avatar-container">
-              <Avatar
-                src={userAvatar}
-                className="profile-avatar-img"
-                icon={<UserOutlined />}
-              />
-              <div className="profile-avatar-overlay">
-                <CameraOutlined style={{ fontSize: 24, color: "#fff" }} />
+      {/* Левая часть профиля (Десктоп) */}
+      <motion.aside
+        animate={{ width: isExpanded ? 100 : "28%" }}
+        transition={{ duration: 0.4, ease: "easeInOut" }}
+        className="hidden lg:block premium-tracking overflow-hidden shrink-0"
+      >
+        <div className={`subtle-glass hover-lift rounded-3xl! h-full transition-all duration-300 flex! flex-col! ${isExpanded ? 'p-4!' : 'p-6!'}`}>
+          <div className="flex! flex-col!">
+            {/* Аватар */}
+            <div className={`flex! flex-col! items-center! transition-all duration-300 ${isExpanded ? 'mb-1! scale-[0.65]' : 'mb-5!'}`}>
+              <div className="profile-avatar-glow avatar-breath profile-avatar-container">
+                <Avatar
+                  src={userAvatar}
+                  className="profile-avatar-img"
+                  icon={<UserOutlined />}
+                />
+                <div className="profile-avatar-overlay">
+                  <CameraOutlined style={{ fontSize: 24, color: "#fff" }} />
+                </div>
               </div>
             </div>
+
+            {/* Скрываемый текстовый контент */}
+            <AnimatePresence>
+              {!isExpanded && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  {/* Имя пользователя */}
+                  <p className="text-center! text-slate-800! text-xl! font-semibold! mb-6! whitespace-nowrap">
+                    {userData?.full_name}
+                  </p>
+
+                  {/* Информационные поля */}
+                  <motion.div 
+                    initial="hidden"
+                    animate="visible"
+                    variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+                    className="flex! flex-col! gap-3! text-sm!"
+                  >
+                    {profileInfoFields.map(({ label, key }) => (
+                      <motion.div 
+                        key={key} 
+                        variants={{
+                          hidden: { opacity: 0, x: -10 },
+                          visible: { opacity: 1, x: 0 }
+                        }}
+                        className="flex! justify-between! items-baseline! gap-2! field-highlight"
+                      >
+                        <span className="text-gray-400! font-light! shrink-0!">{label}:</span>
+                        <span className="font-medium! text-slate-700! text-right! truncate! max-w-[60%]!" title={getFieldValue(userData, key)}>
+                          {getFieldValue(userData, key)}
+                        </span>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Иконки действий */}
+            <div className={`flex! items-center! ${isExpanded ? 'flex-col! gap-4! mt-4!' : 'justify-between! mb-4! order-first!'}`}>
+              <Tooltip title={isExpanded ? "Развернуть" : "Свернуть"}>
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="text-gray-400 hover:text-blue-500 transition-colors p-1"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                >
+                  {isExpanded ? <RightCircleOutlined style={{ fontSize: 20 }} /> : <LeftCircleOutlined style={{ fontSize: 20 }} />}
+                </button>
+              </Tooltip>
+              
+              <SettingOutlined
+                className="profile-settings-icon"
+                style={{ fontSize: 22 }}
+                onClick={() => setIsSettingsOpen(true)}
+              />
+            </div>
           </div>
+        </div>
+      </motion.aside>
 
-          {/* Имя пользователя */}
-          <p className="text-center! text-slate-800! text-xl! font-semibold! mb-6!">
-            {userData?.full_name}
-          </p>
-
-          {/* Информационные поля с последовательным появлением */}
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={{
-              visible: { transition: { staggerChildren: 0.1 } }
-            }}
-            className="flex! flex-col! gap-3! text-sm!"
-          >
-            {profileInfoFields.map(({ label, key }) => (
-              <motion.div 
-                key={key} 
-                variants={{
-                  hidden: { opacity: 0, x: -10 },
-                  visible: { opacity: 1, x: 0 }
-                }}
-                className="flex! justify-between! items-baseline! gap-2! field-highlight"
-              >
-                <span className="text-gray-400! font-light! shrink-0!">{label}:</span>
-                <span className="font-medium! text-slate-700! text-right! truncate! max-w-[60%]!" title={getFieldValue(userData, key)}>
-                  {getFieldValue(userData, key)}
-                </span>
-              </motion.div>
-            ))}
-          </motion.div>
+      {/* Левая часть профиля (Мобильная) */}
+      <aside className="block lg:hidden w-full! premium-tracking overflow-hidden">
+        <div className="subtle-glass hover-lift p-4! rounded-3xl!">
+            <div className="flex! justify-end!">
+              <SettingOutlined className="profile-settings-icon text-xl" style={{ fontSize: 20 }} onClick={() => setIsSettingsOpen(true)} />
+            </div>
+            <div className="flex! flex-col! items-center! mb-5!">
+              <div className="profile-avatar-glow avatar-breath profile-avatar-container">
+                <Avatar src={userAvatar} className="profile-avatar-img" icon={<UserOutlined />} />
+              </div>
+            </div>
+            <p className="text-center! text-slate-800! text-xl! font-semibold! mb-6! pr-4 pl-4">{userData?.full_name}</p>
         </div>
       </aside>
 
       {/* Правая часть — контент */}
-      <aside className="w-full! lg:w-[72%]!">
+      <motion.aside
+        animate={{ width: isExpanded ? "calc(100% - 100px - 1.5rem)" : "72%" }}
+        transition={{ duration: 0.4, ease: "easeInOut" }}
+        className="flex-1 min-w-0"
+      >
         <Tabs
           items={profileRightNav}
           activeKey={activeTab}
@@ -148,11 +198,11 @@ export const RenderJSX = ({
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <Outlet />
+                <Outlet />
             </motion.div>
           </AnimatePresence>
         </div>
-      </aside>
+      </motion.aside>
     </motion.div>
   );
 };
