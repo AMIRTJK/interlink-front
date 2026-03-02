@@ -1,10 +1,13 @@
 import { ITaskItem } from "../model";
 import { getTaskProgressColor, formatDate } from "../lib/utils";
 import { StatusIcon } from "./StatusIcon";
-import { DeleteOutlined, EditOutlined, UserOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, UserOutlined, CheckCircleOutlined, ReloadOutlined } from "@ant-design/icons";
 import { PopConfirm } from "@shared/ui";
 import { Button, Avatar, Tooltip } from "antd";
 import { useState } from "react";
+import { useMutationQuery } from "@shared/lib/hooks";
+import { ApiRoutes } from "@shared/api";
+import { TASK_STATUS } from "@features/tasks/model";
 
 export const TaskCard = ({
   task,
@@ -28,6 +31,15 @@ export const TaskCard = ({
   const handleDragEnd = () => {
     setIsDragging(false);
   };
+
+  const { mutate: updateStatus } = useMutationQuery<{ status: string }>({
+    url: `${ApiRoutes.UPDATE_TASK_STATUS}/${task.id}`,
+    method: "PUT",
+    messages: {
+      success: "Статус задачи обновлен",
+      invalidate: [ApiRoutes.GET_TASKS],
+    },
+  });
 
   const borderColor = getTaskProgressColor(task.started_at, task.planned_at);
   return (
@@ -82,6 +94,24 @@ export const TaskCard = ({
               </div>
             </div>
             <div className="task-card-actions flex flex-col items-center gap-1" onClick={(e) => e.stopPropagation()}>
+              <Tooltip title={task.status === TASK_STATUS.COMPLETED ? "Возобновить" : "Завершить"}>
+                <Button
+                  type="text"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const newStatus = task.status === TASK_STATUS.COMPLETED ? TASK_STATUS.PENDING : TASK_STATUS.COMPLETED;
+                    updateStatus({ status: newStatus });
+                  }}
+                  icon={
+                    task.status === TASK_STATUS.COMPLETED ? (
+                      <ReloadOutlined className="text-orange-500! hover:text-orange-600!" />
+                    ) : (
+                      <CheckCircleOutlined className="text-green-500! hover:text-green-600!" />
+                    )
+                  }
+                />
+              </Tooltip>
               <Button
                 type="text"
                 size="small"
