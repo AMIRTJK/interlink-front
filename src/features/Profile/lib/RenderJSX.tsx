@@ -105,7 +105,7 @@ export const RenderJSX = ({
       <motion.aside
         animate={{ width: isExpanded ? 100 : "28%" }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
-        className="hidden lg:block premium-tracking overflow-hidden shrink-0"
+        className="hidden lg:block premium-tracking overflow-hidden shrink-0 group"
       >
         <div className={`subtle-glass hover-lift rounded-3xl! h-full transition-all duration-300 flex! flex-col! ${isExpanded ? 'p-4!' : 'p-6!'}`}>
           <div className="flex! flex-col!">
@@ -176,32 +176,36 @@ export const RenderJSX = ({
             </AnimatePresence>
 
             {/* Иконки действий */}
-            <div className={`flex! items-center! ${isExpanded ? 'flex-col! gap-4! mt-4!' : 'justify-between! mb-4! order-first!'}`}>
+            <div className={`flex! items-center! ${isExpanded ? 'flex-col-reverse! gap-4! mt-4!' : 'justify-between! mb-4! order-first!'}`}>
               <Tooltip title={isExpanded ? "Развернуть" : "Свернуть"}>
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-gray-400 hover:text-blue-500 transition-colors p-1"
+                  className="text-gray-400 hover:text-blue-500 transition-all duration-300 p-1 opacity-0 group-hover:opacity-100"
                   style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                 >
                   {isExpanded ? <RightCircleOutlined style={{ fontSize: 20 }} /> : <LeftCircleOutlined style={{ fontSize: 20 }} />}
                 </button>
               </Tooltip>
               
-              <SettingOutlined
-                className="profile-settings-icon"
-                style={{ fontSize: 22 }}
-                onClick={() => setIsSettingsOpen(true)}
-              />
+              <Tooltip title="Настройки">
+                <SettingOutlined
+                  className="profile-settings-icon"
+                  style={{ fontSize: 22 }}
+                  onClick={() => setIsSettingsOpen(true)}
+                />
+              </Tooltip>
             </div>
           </div>
         </div>
       </motion.aside>
 
       {/* Левая часть профиля (Мобильная) */}
-      <aside className="block lg:hidden w-full! premium-tracking overflow-hidden">
+      <aside className="block lg:hidden w-full! premium-tracking overflow-hidden group">
         <div className="subtle-glass hover-lift p-4! rounded-3xl!">
             <div className="flex! justify-end!">
-              <SettingOutlined className="profile-settings-icon text-xl" style={{ fontSize: 20 }} onClick={() => setIsSettingsOpen(true)} />
+              <Tooltip title="Настройки">
+                <SettingOutlined className="profile-settings-icon text-xl" style={{ fontSize: 20 }} onClick={() => setIsSettingsOpen(true)} />
+              </Tooltip>
             </div>
             <div className="flex! flex-col! items-center! mb-5!">
               <div className="profile-avatar-glow avatar-breath profile-avatar-container">

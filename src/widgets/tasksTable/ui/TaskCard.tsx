@@ -112,22 +112,26 @@ export const TaskCard = ({
                   }
                 />
               </Tooltip>
-              <Button
-                type="text"
-                size="small"
-                onClick={() => onEdit?.(task)}
-                icon={<EditOutlined className="text-gray-300! hover:text-[#0037AF]! transition-all! duration-300!" />}
-              />
+              <Tooltip title="Редактировать">
+                <Button
+                  type="text"
+                  size="small"
+                  onClick={() => onEdit?.(task)}
+                  icon={<EditOutlined className="text-gray-300! hover:text-[#0037AF]! transition-all! duration-300!" />}
+                />
+              </Tooltip>
               <PopConfirm
                 title="Удалить задачу?"
                 onConfirm={() => onDelete?.(task.id)}
                 placement="topRight"
               >
-                <Button
-                  type="text"
-                  size="small"
-                  icon={<DeleteOutlined className="task-card-delete-btn" />}
-                />
+                <Tooltip title="Удалить">
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<DeleteOutlined className="task-card-delete-btn" />}
+                  />
+                </Tooltip>
               </PopConfirm>
           </div>
           
