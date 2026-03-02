@@ -11,4 +11,5 @@ export interface ITabsProps {
   onChange: (key: string) => void;
   className?: string;
   layoutId?: string;
+  extraContent?: ReactNode;
 }
