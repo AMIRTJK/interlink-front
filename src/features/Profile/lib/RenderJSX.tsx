@@ -105,7 +105,7 @@ export const RenderJSX = ({
       <motion.aside
         animate={{ width: isExpanded ? 100 : "28%" }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
-        className="hidden lg:block premium-tracking overflow-hidden shrink-0 sticky top-6! group"
+        className="hidden lg:block premium-tracking shrink-0 sticky top-6! group"
       >
         <div className={`subtle-glass hover-lift rounded-3xl! transition-all duration-300 flex! flex-col! ${isExpanded ? 'p-4! min-h-[450px] max-h-[451px] ' : 'p-6!'}`}>
           <div className="flex! flex-col!">
@@ -200,7 +200,7 @@ export const RenderJSX = ({
       </motion.aside>
 
       {/* Левая часть профиля (Мобильная) */}
-      <aside className="block lg:hidden w-full! premium-tracking overflow-hidden group">
+      <aside className="block lg:hidden w-full! premium-tracking group">
         <div className="subtle-glass hover-lift p-4! rounded-3xl!">
             <div className="flex! justify-end!">
               <Tooltip title="Настройки">
