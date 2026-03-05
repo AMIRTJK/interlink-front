@@ -32,7 +32,7 @@ export const TaskDetailsModal = ({ task, isOpen, onClose, onEdit }: IProps) => {
       closable={true}
       className="task-details-modal"
       centered
-      styles={{ body: { padding: 0 }, content: { borderRadius: 20, overflow: "hidden", padding: 0 } }}
+      styles={{ body: { padding: 0 } }}
       footer={null}
     >
       {/* Hero-шапка с цветом события */}
