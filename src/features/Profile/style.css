@@ -155,33 +155,21 @@
   border-top-left-radius: 0; 
   border-top-right-radius: 0; 
   padding: 32px;
-  min-height: 500px;
+  min-height: 408px;
   box-shadow: 0 4px 20px rgba(0, 55, 175, 0.04);
 }
 
 /* === Эффекты "Под стеклом" (Subtle Glass) === */
 .subtle-glass {
   position: relative !important;
-  z-index: 0 !important;
-  background: transparent !important;
+  background: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.05) !important;
   transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
-}
-
-.subtle-glass::before {
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: -1 !important;
-  background: rgba(255, 255, 255, 0.45) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border-radius: inherit !important;
-  /* Фикс квадратных углов размытия только для фона */
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
-  mask-image: radial-gradient(white, black);
-  pointer-events: none !important;
+  overflow: hidden !important;
+  transform: translateZ(0) !important;
 }
 
 /* Эффект легкого подъема и появление тени */

@@ -91,7 +91,7 @@ export const RenderJSX = ({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="flex! flex-col! lg:flex-row! lg:flex-nowrap! gap-6! p-3! sm:p-4! lg:p-6!"
+      className="flex! flex-col! lg:flex-row! lg:flex-nowrap! items-start! gap-6! p-3! sm:p-4! lg:p-6!"
     >
       {/* Модалка настроек */}
       <ProfileSettingsModal
@@ -105,9 +105,9 @@ export const RenderJSX = ({
       <motion.aside
         animate={{ width: isExpanded ? 100 : "28%" }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
-        className="hidden lg:block premium-tracking overflow-hidden shrink-0 group"
+        className="hidden lg:block premium-tracking shrink-0 sticky top-6! group"
       >
-        <div className={`subtle-glass hover-lift rounded-3xl! h-full transition-all duration-300 flex! flex-col! ${isExpanded ? 'p-4!' : 'p-6!'}`}>
+        <div className={`subtle-glass hover-lift rounded-3xl! transition-all duration-300 flex! flex-col! ${isExpanded ? 'p-4! min-h-[450px] max-h-[451px] ' : 'p-6!'}`}>
           <div className="flex! flex-col!">
             {/* Аватар */}
             <div className={`flex! flex-col! items-center! transition-all duration-300 ${isExpanded ? 'mb-1! scale-[0.65]' : 'mb-5!'}`}>
@@ -176,7 +176,7 @@ export const RenderJSX = ({
             </AnimatePresence>
 
             {/* Иконки действий */}
-            <div className={`flex! items-center! ${isExpanded ? 'flex-col-reverse! gap-4! mt-4!' : 'justify-between! mb-4! order-first!'}`}>
+            <div className={`flex! items-center! ${isExpanded ? 'flex-col-reverse! gap-4!' : 'justify-between! mb-4! order-first!'}`}>
               <Tooltip title={isExpanded ? "Развернуть" : "Свернуть"}>
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
@@ -200,7 +200,7 @@ export const RenderJSX = ({
       </motion.aside>
 
       {/* Левая часть профиля (Мобильная) */}
-      <aside className="block lg:hidden w-full! premium-tracking overflow-hidden group">
+      <aside className="block lg:hidden w-full! premium-tracking group">
         <div className="subtle-glass hover-lift p-4! rounded-3xl!">
             <div className="flex! justify-end!">
               <Tooltip title="Настройки">

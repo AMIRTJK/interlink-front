@@ -1,113 +1,142 @@
-.task-details-modal-view {
-  padding: 20px;
-}
-
-.task-details-modal .ant-modal-container {
-  padding: 27px 0 !important;
-}
-
+/* === Контейнер Modal === */
 .task-details-modal .ant-modal-content {
-  border-radius: 16px;
-  overflow: hidden;
-  padding: 0;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12) !important;
 }
 
 .task-details-modal .ant-modal-close {
-  top: 5px;
-  right: 10px;
+  top: 14px;
+  right: 14px;
+  color: #94a3b8;
+  transition: color 0.2s ease, background 0.2s ease;
+  border-radius: 50%;
 }
 
-.task-details__category-badge {
+.task-details-modal .ant-modal-close:hover {
+  color: #1e293b;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* === Hero-шапка === */
+.task-details__hero {
+  padding: 28px 28px 24px;
+}
+
+/* Бадж категории */
+.task-details__badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 12px;
+  padding: 3px 12px;
   border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 16px;
-  color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.task-details__title {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 45px;
-  color: #7d8fb3;
-  /* text-align: center; */
-}
-
-.task-details__meta-row {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 32px;
-  color: #595959;
-}
-
-.task-details__meta-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-}
-
-.task-details__meta-icon {
-  color: #8c8c8c;
-  font-size: 18px;
-}
-
-.task-details__section {
-  margin-bottom: 28px;
-}
-
-.task-details__label {
   font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  color: #8c8c8c;
-  margin: 0 0 12px 0;
-  font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 0.07em;
+  color: #fff;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
+/* Заголовок события */
+.task-details__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 18px 0;
+  line-height: 1.3;
+}
+
+/* Chip-плашки: дата / время */
+.task-details__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.task-details__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* === Основной контент === */
+.task-details__body {
+  padding: 20px 28px 4px;
+}
+
+/* Секция */
+.task-details__section {
+  margin-bottom: 20px;
+}
+
+.task-details__section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #94a3b8;
+  margin: 0 0 10px 0;
+}
+
+/* Описание */
 .task-details__description {
-  color: #262626;
-  line-height: 1.6;
-  font-size: 15px;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.65;
   white-space: pre-wrap;
-  background: #fafafa;
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px solid #f0f0f0;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 0;
 }
 
+/* Участники */
 .task-details__participants {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
 }
 
 .task-details__participant {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #ffffff;
-  padding: 6px 16px 6px 6px;
+  background: #fff;
+  padding: 6px 14px 6px 6px;
   border-radius: 24px;
-  border: 1px solid #f0f0f0;
-  transition: all 0.2s;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  cursor: default;
 }
 
 .task-details__participant:hover {
-  border-color: #d9d9d9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .task-details__participant-name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  color: #262626;
+  color: #374151;
+}
+
+/* === Футер === */
+.task-details__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 28px 20px;
+  background: #fff;
 }

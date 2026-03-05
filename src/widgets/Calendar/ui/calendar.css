@@ -489,3 +489,68 @@ body.no-animations .task-card:hover {
   filter: none !important;
   box-shadow: none !important;
 }
+
+/* === Кнопки навигации стрелками === */
+.weekly-calendar__nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid #f5f6f7;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.weekly-calendar__nav-btn:hover {
+  border-color: #e0e3f1;
+}
+
+.weekly-calendar__nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* === Pill-переключатель вида === */
+.weekly-calendar__view-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 16px;
+  color: #ADB8CC;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.25s ease;
+  z-index: 0;
+}
+
+.weekly-calendar__view-btn--active {
+  color: #6B7A99;
+  font-weight: 600;
+}
+
+/* Анимированный фон активного пункта */
+.weekly-calendar__view-indicator {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  z-index: -1;
+}
+
+.weekly-calendar__view-btn-label {
+  position: relative;
+  z-index: 1;
+}
