@@ -107,7 +107,7 @@ export const RenderJSX = ({
         transition={{ duration: 0.4, ease: "easeInOut" }}
         className="hidden lg:block premium-tracking overflow-hidden shrink-0 sticky top-6! group"
       >
-        <div className={`subtle-glass hover-lift rounded-3xl! transition-all duration-300 flex! flex-col! ${isExpanded ? 'p-4!' : 'p-6!'}`}>
+        <div className={`subtle-glass hover-lift rounded-3xl! transition-all duration-300 flex! flex-col! ${isExpanded ? 'p-4! min-h-[450px] max-h-[451px] ' : 'p-6!'}`}>
           <div className="flex! flex-col!">
             {/* Аватар */}
             <div className={`flex! flex-col! items-center! transition-all duration-300 ${isExpanded ? 'mb-1! scale-[0.65]' : 'mb-5!'}`}>
@@ -176,7 +176,7 @@ export const RenderJSX = ({
             </AnimatePresence>
 
             {/* Иконки действий */}
-            <div className={`flex! items-center! ${isExpanded ? 'flex-col-reverse! gap-4! mt-4!' : 'justify-between! mb-4! order-first!'}`}>
+            <div className={`flex! items-center! ${isExpanded ? 'flex-col-reverse! gap-4!' : 'justify-between! mb-4! order-first!'}`}>
               <Tooltip title={isExpanded ? "Развернуть" : "Свернуть"}>
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
