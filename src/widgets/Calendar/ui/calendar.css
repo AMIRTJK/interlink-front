@@ -77,15 +77,16 @@
   display: flex;
 }
 
+/* Глобальные настройки для сетки (без влияния на body) */
 .weekly-calendar__grid {
-  gap: 0;
+  display: flex;
+  flex-direction: row;
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(30, 41, 59, 0.05);
-  overflow: hidden;
 }
 
 .weekly-calendar__time-column {
@@ -96,9 +97,21 @@
 }
 
 .weekly-calendar__time-header,
-.weekly-calendar__time-slot,
 .weekly-calendar__day-header {
-  height: 72px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #fff; /* Явный белый фон для перекрытия */
+  backdrop-filter: blur(8px);
+}
+
+.weekly-calendar__time-slot {
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -124,35 +137,9 @@
   flex: 1;
   width: 0;
   min-width: 0;
-  overflow-x: auto;
   position: relative;
 }
 
-.weekly-calendar__days::-webkit-scrollbar,
-.weekly-calendar__popover-list::-webkit-scrollbar,
-.weekly-calendar__popover-timeline::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-
-.weekly-calendar__days::-webkit-scrollbar-track,
-.weekly-calendar__popover-list::-webkit-scrollbar-track,
-.weekly-calendar__popover-timeline::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.weekly-calendar__days::-webkit-scrollbar-thumb,
-.weekly-calendar__popover-list::-webkit-scrollbar-thumb,
-.weekly-calendar__popover-timeline::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 4px;
-}
-
-.weekly-calendar__days::-webkit-scrollbar-thumb:hover,
-.weekly-calendar__popover-list::-webkit-scrollbar-thumb:hover,
-.weekly-calendar__popover-timeline::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1;
-}
 
 .weekly-calendar__day-column {
   flex: 1;
@@ -220,7 +207,6 @@
   z-index: 1000;
   height: 80px; 
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .weekly-calendar__day-header-content {
@@ -267,7 +253,7 @@
 .weekly-calendar__hour-line {
   position: absolute;
   inset: auto 0;
-  height: 72px;
+  height: 60px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: background 0.2s ease;
@@ -586,3 +572,4 @@ body.no-animations .task-card:hover {
   position: relative;
   z-index: 1;
 }
+
