@@ -223,7 +223,6 @@ export const CalendarGrid = ({
                                   <div
                                     style={{
                                       height: "100%",
-                                      overflow: "hidden",
                                       position: "relative",
                                     }}
                                   >
