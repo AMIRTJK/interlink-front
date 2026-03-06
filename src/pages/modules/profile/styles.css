@@ -3,9 +3,9 @@
   background: transparent;
 }
 
-.profile-page {
+/* .profile-page {
   min-height: 400px;
-}
+} */
 
 .ant-menu-item-selected {
   transition: all 0.2s ease;
