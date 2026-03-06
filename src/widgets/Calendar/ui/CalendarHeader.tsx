@@ -69,12 +69,12 @@ export const CalendarHeader = ({
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
       <div className="weekly-calendar__header-left">
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+        <motion.div whileTap={{ scale: 0.98 }}>
           <Button
             onClick={onToday}
             text="Сегодня"
             type="default"
-            className="rounded-[12px]! h-[40px]! px-6! border-rgba(226, 232, 240, 0.8)! bg-white/60! backdrop-filter! blur-sm! hover:bg-white! transition-all!"
+            className="rounded-[12px]! h-[40px]! px-6! border-rgba(226, 232, 240, 0.8)! bg-white/60! backdrop-filter! backdrop-blur-sm! hover:bg-white! transition-all!"
           />
         </motion.div>
 
