@@ -28,9 +28,6 @@ interface CalendarHeaderProps {
 
 /**
  * Компонент CalendarHeader отвечает за верхнюю панель управления календарем.
- * Включает в себя кнопку "Сегодня", навигацию по датам (стрелки),
- * отображение текущего диапазона и переключатель видов (Неделя, Месяц, Год),
- * а также поле серверного поиска.
  */
 export const CalendarHeader = ({
   viewMode,
@@ -67,116 +64,103 @@ export const CalendarHeader = ({
   return (
     <motion.div
       className="weekly-calendar__header"
-      initial={{ opacity: 0, y: -12 }}
+      initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      {/* Левая часть: Today + навигация */}
       <div className="weekly-calendar__header-left">
-        <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }}>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Button
             onClick={onToday}
-            text="Сейчас"
+            text="Сегодня"
             type="default"
-            className="bg-transparent! border-2! border-[#F5F6F7]! px-5! text-[#6B7A99]! text-[12px]! font-medium! h-full rounded-[15px]! shadow-[0_4px_10px_#26334D0D]!"
+            className="rounded-[12px]! h-[40px]! px-6! border-rgba(226, 232, 240, 0.8)! bg-white/60! backdrop-filter! blur-sm! hover:bg-white! transition-all!"
           />
         </motion.div>
 
         <div className="weekly-calendar__nav">
-          {/* Кнопка «Назад» */}
           <motion.button
-            whileTap={{ scale: 0.88 }}
-            whileHover={{ scale: 1.08, backgroundColor: "rgba(108,99,255,0.08)" }}
-            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+            whileHover={{ x: -2, backgroundColor: "rgba(0,0,0,0.03)" }}
+            whileTap={{ scale: 0.9 }}
             onClick={onPrev}
-            aria-label="Предыдущий период"
-            className="weekly-calendar__nav-btn"
+            className="w-10 h-10 flex items-center justify-center rounded-xl transition-colors"
           >
-            <img className="h-7 w-7" src={LeftArrow} alt="Назад" />
+            <img className="h-5 w-5 opacity-60" src={LeftArrow} alt="Назад" />
           </motion.button>
 
-          {/* Анимированный диапазон дат */}
           <AnimatePresence mode="wait">
             <motion.p
               key={dateRange}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
               className="weekly-calendar__date-range"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.25 }}
             >
               {dateRange}
             </motion.p>
           </AnimatePresence>
 
-          {/* Кнопка «Вперёд» */}
           <motion.button
-            whileTap={{ scale: 0.88 }}
-            whileHover={{ scale: 1.08, backgroundColor: "rgba(108,99,255,0.08)" }}
-            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+            whileHover={{ x: 2, backgroundColor: "rgba(0,0,0,0.03)" }}
+            whileTap={{ scale: 0.9 }}
             onClick={onNext}
-            aria-label="Следующий период"
-            className="weekly-calendar__nav-btn"
+            className="w-10 h-10 flex items-center justify-center rounded-xl transition-colors"
           >
-            <img className="h-7 w-7" src={RightArrow} alt="Вперед" />
+            <img className="h-5 w-5 opacity-60" src={RightArrow} alt="Вперед" />
           </motion.button>
         </div>
 
         {/* Пагинация по дням (режим «Месяц») */}
         {viewMode === 'month' && onMonthPagePrev && onMonthPageNext && (
-          <div className="weekly-calendar__nav" style={{ marginLeft: '16px' }}>
+          <div className="weekly-calendar__nav ml-4">
             <motion.button
-              whileTap={{ scale: 0.88 }}
-              whileHover={{ scale: 1.08 }}
+              whileHover={{ x: -2, backgroundColor: "rgba(0,0,0,0.03)" }}
+              whileTap={{ scale: 0.9 }}
               onClick={onMonthPagePrev}
               disabled={!canGoMonthPagePrev}
-              aria-label="Предыдущая страница дней"
-              className="weekly-calendar__nav-btn"
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              <img className="h-7 w-7" src={LeftArrow} alt="Назад" />
+              <img className="h-4 w-4 opacity-50" src={LeftArrow} alt="Назад" />
             </motion.button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '100px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase' }}>Дни:</span>
-              <p className="weekly-calendar__date-range" style={{ minWidth: '50px', margin: 0 }}>
+            <div className="flex items-center gap-2 min-w-[80px] justify-center">
+              <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">Дни:</span>
+              <p className="text-[12px] font-semibold text-[#1e293b] m-0">
                 {monthPageOffset !== undefined && totalMonthPages !== undefined
-                  ? `${monthPageOffset + 1} / ${totalMonthPages}`
+                  ? `${monthPageOffset + 1}/${totalMonthPages}`
                   : ''}
               </p>
             </div>
             <motion.button
-              whileTap={{ scale: 0.88 }}
-              whileHover={{ scale: 1.08 }}
+              whileHover={{ x: 2, backgroundColor: "rgba(0,0,0,0.03)" }}
+              whileTap={{ scale: 0.9 }}
               onClick={onMonthPageNext}
               disabled={!canGoMonthPageNext}
-              aria-label="Следующая страница дней"
-              className="weekly-calendar__nav-btn"
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              <img className="h-7 w-7" src={RightArrow} alt="Вперед" />
+              <img className="h-4 w-4 opacity-50" src={RightArrow} alt="Вперед" />
             </motion.button>
           </div>
         )}
       </div>
 
-      {/* Правая часть: переключатель вида + поиск */}
       <div className="weekly-calendar__header-right">
-        {/* Pill-переключатель */}
         <div className="weekly-calendar__view-switcher">
           {VIEW_MODES.map(({ key, label }) => (
             <motion.button
               key={key}
               onClick={() => setViewMode(key)}
-              className={`weekly-calendar__view-btn ${viewMode === key ? 'weekly-calendar__view-btn--active' : ''}`}
-              whileTap={{ scale: 0.93 }}
-              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              className={`relative px-6 h-full text-[13px] font-semibold transition-colors ${
+                viewMode === key ? "text-[#6C63FF]" : "text-[#94A3B8] hover:text-[#64748b]"
+              }`}
             >
               {viewMode === key && (
-                <motion.span
-                  layoutId="view-indicator"
-                  className="weekly-calendar__view-indicator"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                <motion.div
+                  layoutId="switcher-pill"
+                  className="absolute inset-0 bg-white rounded-[18px] shadow-sm z-0"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
-              <span className="weekly-calendar__view-btn-label">{label}</span>
+              <span className="relative z-10">{label}</span>
             </motion.button>
           ))}
         </div>
@@ -184,7 +168,7 @@ export const CalendarHeader = ({
         <div className="weekly-calendar__search">
           <Input
             placeholder="Поиск событий..."
-            prefix={<SearchOutlined style={{ color: "#ADB8CC" }} />}
+            prefix={<SearchOutlined className="text-[#94A3B8]" />}
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
             className="weekly-calendar__search-input"

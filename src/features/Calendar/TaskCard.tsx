@@ -1,4 +1,4 @@
-// import { VideoCameraFilled } from "@ant-design/icons";
+import { motion } from "framer-motion";
 import type { Task } from "@features/tasks";
 import { Avatar } from "antd";
 
@@ -11,20 +11,20 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
   const color = task.color || "#6C63FF";
 
   return (
-    <div
+    <motion.div
       className="task-card"
       style={{ 
         borderLeft: `4px solid ${color}`,
-        backgroundColor: `${color}3A`, 
       }}
       onClick={onClick}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.98 }}
     >
       <div className="task-card__content">
-        <div className="task-card__time" style={{ color: '#000' }}>
+        <div className="task-card__time" style={{ color: color }}>
           {task.time}
-          {/* <VideoCameraFilled style={{ marginLeft: "6px", fontSize: "14px" }} /> */}
         </div>
-        <div className="task-card__title" style={{ color: '#000' }}>
+        <div className="task-card__title" style={{ color: '#1e293b' }}>
           {task.title}
         </div>
         {task.participants && task.participants.length > 0 && (
@@ -45,6 +45,6 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };

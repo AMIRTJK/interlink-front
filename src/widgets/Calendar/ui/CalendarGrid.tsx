@@ -2,6 +2,7 @@ import { Popover, Button } from "antd";
 import { CloseOutlined, HistoryOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
+import { motion, AnimatePresence } from "framer-motion";
 import type { Task } from "@features/tasks";
 import { TaskCard } from "@features/Calendar";
 import { ViewMode } from "../model";
@@ -65,6 +66,9 @@ export const CalendarGrid = ({
   const currentTimePosition = getCurrentTimePosition();
   const showTimeLine = daysToShow.some((day) => isToday(day));
 
+  /* Ключ для анимации перехода (первый и последний день в списке) */
+  const transitionKey = `${daysToShow[0].format("YYYYMMDD")}-${daysToShow[daysToShow.length - 1].format("YYYYMMDD")}`;
+
   return (
     <div className="weekly-calendar__grid">
       <div className="weekly-calendar__time-column">
@@ -86,150 +90,162 @@ export const CalendarGrid = ({
           </div>
         ))}
       </div>
+      
       <div className={`weekly-calendar__days ${viewMode}`}>
-          {daysToShow.map((day) => (
-            <div
-              key={day.format("YYYY-MM-DD")}
-              className={`weekly-calendar__day-column ${
-                isToday(day) ? "weekly-calendar__day-column--today" : ""
-              } ${
-                isPast(day) ? "weekly-calendar__day-column--past" : ""
-              } ${
-                isWeekend(day) ? "weekly-calendar__day-column--weekend" : ""
-              }`}
-            >
-              <div className="weekly-calendar__day-header">
-                <div className="weekly-calendar__day-header-content">
-                  <span className="weekly-calendar__day-name">
-                    {day.format("ddd")}
-                  </span>
-                  <span className="weekly-calendar__day-number">
-                    {day.format("DD")}
-                  </span>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={transitionKey}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            style={{ display: 'flex', flex: 1, width: '100%' }}
+          >
+            {daysToShow.map((day) => (
+              <div
+                key={day.format("YYYY-MM-DD")}
+                className={`weekly-calendar__day-column ${
+                  isToday(day) ? "weekly-calendar__day-column--today" : ""
+                } ${
+                  isPast(day) ? "weekly-calendar__day-column--past" : ""
+                } ${
+                  isWeekend(day) ? "weekly-calendar__day-column--weekend" : ""
+                }`}
+              >
+                <div className="weekly-calendar__day-header">
+                  <div className="weekly-calendar__day-header-content">
+                    <span className="weekly-calendar__day-name">
+                      {day.format("ddd")}
+                    </span>
+                    <span className="weekly-calendar__day-number">
+                      {day.format("DD")}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="weekly-calendar__day-content">
-                {Array.from({ length: 24 }, (_, i) => (
-                  <div
-                    key={i}
-                    className="weekly-calendar__hour-line"
-                    style={{ top: `${i * 72}px` }}
-                    onClick={() => handleTimeSlotClick(day, i)}
-                  />
-                ))}
-                {showTimeLine && isToday(day) && (
-                  <div
-                    className="weekly-calendar__current-time-line"
-                    style={{ top: `${currentTimePosition * 72}px` }}
-                  />
-                )}
-                {(() => {
-                  const dayTasks = getTasksForDay(day);
-                  const items = calculateDayLayout(dayTasks);
-                  return items.map((item, index) => {
-                    if (item.type === "single") {
-                      return (
-                        <div
-                          key={item.event.id}
-                          className="weekly-calendar__task-wrapper"
-                          style={{
-                            top: `${item.top}px`,
-                            height: `${item.height}px`,
-                            left: `${item.left}%`,
-                            width: `${item.width}%`,
-                          }}
-                        >
-                          <TaskCard
-                            task={item.event}
-                            onClick={() => onTaskClick?.(item.event)}
-                          />
-                        </div>
-                      );
-                    } else {
-                      const mainEvent = item.events[0];
-                      const count = item.events.length;
-                      const clusterId = `${day.format("YYYY-MM-DD")}-cluster-${index}`;
-
-                      return (
-                        <Popover
-                          key={clusterId}
-                          placement="right"
-                          title={null} 
-                          trigger="click"
-                          open={openClusterId === clusterId}
-                          onOpenChange={(visible) =>
-                            setOpenClusterId(visible ? clusterId : null)
-                          }
-                          overlayStyle={{ padding: 0 }}
-                          content={
-                            <div className="weekly-calendar__popover-content">
-                              <div className="weekly-calendar__popover-header">
-                                <span className="weekly-calendar__popover-title-text">
-                                  События ({item.events.length})
-                                </span>
-                                <Button
-                                  type="text"
-                                  size="small"
-                                  icon={<CloseOutlined />}
-                                  onClick={() => setOpenClusterId(null)}
-                                />
-                              </div>
-                              <div className="weekly-calendar__popover-timeline">
-                                {item.events.map((event) => (
-                                  <div
-                                    key={event.id}
-                                    className="weekly-calendar__popover-item"
-                                    onClick={() => onTaskClick?.(event)}
-                                  >
-                                    <div className="weekly-calendar__popover-time">
-                                      {event.time}
-                                    </div>
-                                    <div className="weekly-calendar__popover-card-preview">
-                                      <TaskCard task={event} />
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          }
-                        >
+                <div className="weekly-calendar__day-content">
+                  {Array.from({ length: 24 }, (_, i) => (
+                    <div
+                      key={i}
+                      className="weekly-calendar__hour-line"
+                      style={{ top: `${i * 72}px` }}
+                      onClick={() => handleTimeSlotClick(day, i)}
+                    />
+                  ))}
+                  {showTimeLine && isToday(day) && (
+                    <div
+                      className="weekly-calendar__current-time-line"
+                      style={{ top: `${currentTimePosition * 72}px` }}
+                    />
+                  )}
+                  {(() => {
+                    const dayTasks = getTasksForDay(day);
+                    const items = calculateDayLayout(dayTasks);
+                    return items.map((item, index) => {
+                      if (item.type === "single") {
+                        return (
                           <div
+                            key={item.event.id}
                             className="weekly-calendar__task-wrapper"
                             style={{
                               top: `${item.top}px`,
                               height: `${item.height}px`,
                               left: `${item.left}%`,
                               width: `${item.width}%`,
-                              zIndex: 30,
-                              cursor: "pointer",
                             }}
                           >
-                            <div className="weekly-calendar__cluster-wrapper">
-                              <div className="weekly-calendar__cluster-deck">
-                                <div
-                                  style={{
-                                    height: "100%",
-                                    overflow: "hidden",
-                                    position: "relative",
-                                  }}
-                                >
-                                  <TaskCard task={mainEvent} />
+                            <TaskCard
+                              task={item.event}
+                              onClick={() => onTaskClick?.(item.event)}
+                            />
+                          </div>
+                        );
+                      } else {
+                        const mainEvent = item.events[0];
+                        const count = item.events.length;
+                        const clusterId = `${day.format("YYYY-MM-DD")}-cluster-${index}`;
+
+                        return (
+                          <Popover
+                            key={clusterId}
+                            placement="right"
+                            title={null} 
+                            trigger="click"
+                            open={openClusterId === clusterId}
+                            onOpenChange={(visible) =>
+                              setOpenClusterId(visible ? clusterId : null)
+                            }
+                            overlayStyle={{ padding: 0 }}
+                            content={
+                              <div className="weekly-calendar__popover-content">
+                                <div className="weekly-calendar__popover-header">
+                                  <span className="weekly-calendar__popover-title-text">
+                                    События ({item.events.length})
+                                  </span>
+                                  <Button
+                                    type="text"
+                                    size="small"
+                                    icon={<CloseOutlined />}
+                                    onClick={() => setOpenClusterId(null)}
+                                  />
+                                </div>
+                                <div className="weekly-calendar__popover-timeline">
+                                  {item.events.map((event) => (
+                                    <div
+                                      key={event.id}
+                                      className="weekly-calendar__popover-item"
+                                      onClick={() => onTaskClick?.(event)}
+                                    >
+                                      <div className="weekly-calendar__popover-time">
+                                        {event.time}
+                                      </div>
+                                      <div className="weekly-calendar__popover-card-preview">
+                                        <TaskCard task={event} />
+                                      </div>
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
+                            }
+                          >
+                            <div
+                              className="weekly-calendar__task-wrapper"
+                              style={{
+                                top: `${item.top}px`,
+                                height: `${item.height}px`,
+                                left: `${item.left}%`,
+                                width: `${item.width}%`,
+                                zIndex: 30,
+                                cursor: "pointer",
+                              }}
+                            >
+                              <div className="weekly-calendar__cluster-wrapper">
+                                <div className="weekly-calendar__cluster-deck">
+                                  <div
+                                    style={{
+                                      height: "100%",
+                                      overflow: "hidden",
+                                      position: "relative",
+                                    }}
+                                  >
+                                    <TaskCard task={mainEvent} />
+                                  </div>
+                                </div>
 
-                              <div className="weekly-calendar__more-indicator">
-                                Еще {count - 1}...
+                                <div className="weekly-calendar__more-indicator">
+                                  Еще {count - 1}...
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </Popover>
-                      );
-                    }
-                  });
-                })()}
+                          </Popover>
+                        );
+                      }
+                    });
+                  })()}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
