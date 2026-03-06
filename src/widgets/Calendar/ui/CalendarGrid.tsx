@@ -1,6 +1,6 @@
 import { Popover, Button } from "antd";
 import { CloseOutlined, HistoryOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Task } from "@features/tasks";
@@ -31,6 +31,7 @@ export const CalendarGrid = ({
   isToday,
 }: IProps) => {
   const [openClusterId, setOpenClusterId] = useState<string | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const getTasksForDay = (day: Dayjs) => {
     const targetDate = day.format("YYYY-MM-DD");
@@ -38,6 +39,7 @@ export const CalendarGrid = ({
       return task.date === targetDate;
     });
   };
+
   const getCurrentTimePosition = () => {
     const now = dayjs();
     const hours = now.hour();
@@ -55,6 +57,7 @@ export const CalendarGrid = ({
       onTimeSlotClick(day, time);
     }
   };
+
   const isPast = (day: Dayjs) => {
     return day.isBefore(dayjs(), 'day');
   };
@@ -65,33 +68,34 @@ export const CalendarGrid = ({
 
   const currentTimePosition = getCurrentTimePosition();
   const showTimeLine = daysToShow.some((day) => isToday(day));
-
-  /* Ключ для анимации перехода (первый и последний день в списке) */
   const transitionKey = `${daysToShow[0].format("YYYYMMDD")}-${daysToShow[daysToShow.length - 1].format("YYYYMMDD")}`;
 
   return (
     <div className="weekly-calendar__grid">
-      <div className="weekly-calendar__time-column">
-        <div className="weekly-calendar__time-header">
-          {" "}
-          <Button
-            type="text"
-            shape="circle"
-            aria-label="История"
-            style={{ width: 40, height: 40, padding: 0 }}
-            icon={
-              <HistoryOutlined style={{ fontSize: 20, color: "#C3CAD9" }} />
-            }
-          />
-        </div>
-        {Array.from({ length: 24 }, (_, i) => (
-          <div key={i} className="weekly-calendar__time-slot">
-            {i.toString().padStart(2, "0")}
+      <div 
+        ref={scrollContainerRef}
+        className={`weekly-calendar__days ${viewMode}`}
+      >
+        <div className="weekly-calendar__time-column">
+          <div className="weekly-calendar__time-header">
+            {" "}
+            <Button
+              type="text"
+              shape="circle"
+              aria-label="История"
+              style={{ width: 40, height: 40, padding: 0 }}
+              icon={
+                <HistoryOutlined style={{ fontSize: 20, color: "#C3CAD9" }} />
+              }
+            />
           </div>
-        ))}
-      </div>
-      
-      <div className={`weekly-calendar__days ${viewMode}`}>
+          {Array.from({ length: 24 }, (_, i) => (
+            <div key={i} className="weekly-calendar__time-slot">
+              {i.toString().padStart(2, "0")}
+            </div>
+          ))}
+        </div>
+
         <AnimatePresence mode="wait">
           <motion.div
             key={transitionKey}
@@ -127,14 +131,14 @@ export const CalendarGrid = ({
                     <div
                       key={i}
                       className="weekly-calendar__hour-line"
-                      style={{ top: `${i * 72}px` }}
+                      style={{ top: `${i * 60}px` }}
                       onClick={() => handleTimeSlotClick(day, i)}
                     />
                   ))}
                   {showTimeLine && isToday(day) && (
                     <div
                       className="weekly-calendar__current-time-line"
-                      style={{ top: `${currentTimePosition * 72}px` }}
+                      style={{ top: `${currentTimePosition * 60}px` }}
                     />
                   )}
                   {(() => {

@@ -20,7 +20,7 @@ export interface ClusterLayout {
 
 export type CalendarItem = EventLayout | ClusterLayout;
 
-const PIXELS_PER_MINUTE = 1.2;
+const PIXELS_PER_MINUTE = 1.0;
 
 const getMinutes = (timeStr: string): number => {
   const [hours, minutes] = timeStr.split(':').map(Number);
