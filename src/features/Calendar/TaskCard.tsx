@@ -14,7 +14,7 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
       className="task-card"
       style={{ 
         borderLeft: `4px solid ${color}`,
-        background: `${color}59`, // 35% непрозрачности для еще лучшей видимости
+        background: `${color}59`, 
       }}
       onClick={onClick}
     >
