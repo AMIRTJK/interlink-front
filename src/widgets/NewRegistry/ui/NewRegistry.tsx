@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useGetQuery, useDynamicSearchParams } from "@shared/lib";
-import { ApiRoutes } from "@shared/api";
+import { ApiRoutes, _axios } from "@shared/api";
+import { useQueries } from "@tanstack/react-query";
 import {
   FileEdit,
   Loader,
@@ -250,6 +251,58 @@ export const NewRegistry = ({
   const meta = (responseData as any)?.data?.meta || (responseData as any)?.data || {};
   const counts = useMemo(() => (countersData as any)?.data || {}, [countersData]);
 
+  // Запрашиваем мета-данные для счетчиков проблемных вкладок (бэкенд может отдавать 0)
+  const tabsToFetch = useMemo(() => {
+    return activeStatusKeys.filter((key) => {
+      // Принудительно запрашиваем мета-данные для счетчиков проблемных вкладок
+      if (["to-approve", "to-sign", "sent", "analysis"].includes(key)) {
+        return true;
+      }
+      const existingCount =
+        counts[key] ??
+        counts[key.replace("-", "_")] ??
+        counts[`${key}_total`] ??
+        counts[`${key.replace("-", "_")}_total`] ??
+        counts[`${key}_count`];
+      return existingCount === undefined || existingCount === null;
+    });
+  }, [activeStatusKeys, counts]);
+
+  const fallbackQueries = useQueries({
+    queries: tabsToFetch.map((key) => {
+      const configUrl = STATUS_CONFIG[key]?.apiUrl || fetchUrl;
+      return {
+        queryKey: [configUrl, { status: key, ...extraParams, per_page: 1 }],
+        queryFn: async () => {
+          const res = await _axios.get(configUrl, {
+            params: { status: key, ...extraParams, per_page: 1 },
+          });
+          const serverData = res.data;
+          // Пытаемся достать total из различных вложенностей (Laravel Resource wrapper)
+          const fetchedMeta = 
+            serverData?.data?.meta || 
+            serverData?.meta || 
+            serverData?.data || 
+            serverData;
+            
+          return { key, total: fetchedMeta?.total ?? 0 };
+        },
+        staleTime: 5000,
+        keepPreviousData: true,
+      };
+    }),
+  });
+
+  const fallbackCounts = useMemo(() => {
+    const obj: Record<string, number> = {};
+    fallbackQueries.forEach((q) => {
+      if (q.data) {
+        obj[q.data.key] = q.data.total;
+      }
+    });
+    return obj;
+  }, [fallbackQueries]);
+
 
   const statusTabs = useMemo(() => {
     return activeStatusKeys
@@ -257,6 +310,7 @@ export const NewRegistry = ({
         const config = STATUS_CONFIG[key];
         if (!config) return null;
         let count = 
+          fallbackCounts[key] ??
           counts[key] ?? 
           counts[key.replace("-", "_")] ?? 
           counts[`${key}_total`] ?? 
@@ -277,7 +331,7 @@ export const NewRegistry = ({
         };
       })
       .filter(Boolean);
-  }, [counts, activeStatusKeys, currentTab, meta.total]);
+  }, [counts, activeStatusKeys, currentTab, meta.total, fallbackCounts]);
 
 
 

@@ -45,9 +45,10 @@ export const Count: React.FC<IProps> = ({
         className
       )}
     >
-      <AnimatedNumber value={count} />
+      {animate ? <AnimatedNumber value={count} /> : count}
     </span>
   );
+
   if (animate) {
     return (
       <motion.span
