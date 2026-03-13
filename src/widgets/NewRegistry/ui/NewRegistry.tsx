@@ -4,13 +4,13 @@ import { useGetQuery, useDynamicSearchParams } from "@shared/lib";
 import { ApiRoutes, _axios } from "@shared/api";
 import { useQueries } from "@tanstack/react-query";
 import {
-  FileEdit,
-  Loader,
   Handshake,
-  // Signature,
   CheckCheck,
   XCircle,
-  Eye,
+  Pencil,
+  Send,
+  Clock,
+  FileEdit,
 } from "lucide-react";
 import { RegistryLayout } from "./RegistryLayout";
 import { AppRoutes } from "@shared/config";
@@ -21,7 +21,7 @@ import { MoveToFolderModal } from "./MoveToFolderModal";
 const STATUS_CONFIG: Record<string, any> = {
   draft: {
     label: "Черновик",
-    icon: <FileEdit size={14} />,
+    icon: <Clock size={14} />,
     gradient: "from-blue-500 to-blue-600",
   },
   analysis: {
@@ -31,34 +31,34 @@ const STATUS_CONFIG: Record<string, any> = {
   },
   ["in-progress"]: {
     label: "В процессе исполнения",
-    icon: <FileEdit size={14} />,
+    icon: <Clock size={14} />,
     gradient: "from-amber-500 to-amber-600",
   },
   ["to-approve"]: {
     label: "Согласование",
-    icon: <Eye size={14} />,
+    icon: <Handshake size={14} />,
     gradient: "from-emerald-500 to-emerald-600",
     apiUrl: ApiRoutes.GET_INTERNAL_TO_APPROVE,
   },
   to_approve: {
     label: "Согласование",
-    icon: <Eye size={14} />,
+    icon: <Handshake size={14} />,
     gradient: "from-emerald-500 to-emerald-600",
   },
   ["to-sign"]: {
     label: "На подпись",
-    icon: <Loader size={14} />,
+    icon: <Pencil size={14} />,
     gradient: "from-rose-500 to-rose-600",
     apiUrl: ApiRoutes.GET_INTERNAL_TO_SIGN,
   },
   to_sign: {
     label: "На подпись",
-    icon: <Loader size={14} />,
+    icon: <Pencil size={14} />,
     gradient: "from-rose-500 to-rose-600",
   },
   sent: {
     label: "Отправлено",
-    icon: <Handshake size={14} />,
+    icon: <Send size={14} />,
     gradient: "from-indigo-500 to-indigo-600",
     apiUrl: ApiRoutes.GET_INTERNAL_OUTGOING,
   },
