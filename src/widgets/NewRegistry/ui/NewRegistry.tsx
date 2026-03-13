@@ -1,15 +1,16 @@
 import React, { useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useGetQuery, useDynamicSearchParams } from "@shared/lib";
-import { ApiRoutes } from "@shared/api";
+import { ApiRoutes, _axios } from "@shared/api";
+import { useQueries } from "@tanstack/react-query";
 import {
-  FileEdit,
-  Loader,
   Handshake,
-  // Signature,
   CheckCheck,
   XCircle,
-  Eye,
+  Pencil,
+  Send,
+  Clock,
+  FileEdit,
 } from "lucide-react";
 import { RegistryLayout } from "./RegistryLayout";
 import { AppRoutes } from "@shared/config";
@@ -20,7 +21,7 @@ import { MoveToFolderModal } from "./MoveToFolderModal";
 const STATUS_CONFIG: Record<string, any> = {
   draft: {
     label: "Черновик",
-    icon: <FileEdit size={14} />,
+    icon: <Clock size={14} />,
     gradient: "from-blue-500 to-blue-600",
   },
   analysis: {
@@ -30,34 +31,34 @@ const STATUS_CONFIG: Record<string, any> = {
   },
   ["in-progress"]: {
     label: "В процессе исполнения",
-    icon: <FileEdit size={14} />,
+    icon: <Clock size={14} />,
     gradient: "from-amber-500 to-amber-600",
   },
   ["to-approve"]: {
     label: "Согласование",
-    icon: <Eye size={14} />,
+    icon: <Handshake size={14} />,
     gradient: "from-emerald-500 to-emerald-600",
     apiUrl: ApiRoutes.GET_INTERNAL_TO_APPROVE,
   },
   to_approve: {
     label: "Согласование",
-    icon: <Eye size={14} />,
+    icon: <Handshake size={14} />,
     gradient: "from-emerald-500 to-emerald-600",
   },
   ["to-sign"]: {
     label: "На подпись",
-    icon: <Loader size={14} />,
+    icon: <Pencil size={14} />,
     gradient: "from-rose-500 to-rose-600",
     apiUrl: ApiRoutes.GET_INTERNAL_TO_SIGN,
   },
   to_sign: {
     label: "На подпись",
-    icon: <Loader size={14} />,
+    icon: <Pencil size={14} />,
     gradient: "from-rose-500 to-rose-600",
   },
   sent: {
     label: "Отправлено",
-    icon: <Handshake size={14} />,
+    icon: <Send size={14} />,
     gradient: "from-indigo-500 to-indigo-600",
     apiUrl: ApiRoutes.GET_INTERNAL_OUTGOING,
   },
@@ -141,6 +142,10 @@ export const NewRegistry = ({
       ? ApiRoutes.GET_INTERNAL_COUNTERS
       : ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
     params: extraParams?.kind ? { kind: extraParams.kind } : {},
+    options: {
+      keepPreviousData: true,
+      staleTime: 5000,
+    },
   });
 
   const { data: foldersData } = useGetQuery({
@@ -241,9 +246,62 @@ export const NewRegistry = ({
     return items;
   }, [type, searchParams.folder_id, folders, setParams]);
 
-  const documents = (responseData as any)?.data?.data || [];
-  const meta = (responseData as any)?.data || {};
+  const documents = (responseData as any)?.data?.data || (responseData as any)?.data || [];
+  // Laravel часто вкладывает мета-данные в объект meta
+  const meta = (responseData as any)?.data?.meta || (responseData as any)?.data || {};
   const counts = useMemo(() => (countersData as any)?.data || {}, [countersData]);
+
+  // Запрашиваем мета-данные для счетчиков проблемных вкладок (бэкенд может отдавать 0)
+  const tabsToFetch = useMemo(() => {
+    return activeStatusKeys.filter((key) => {
+      // Принудительно запрашиваем мета-данные для счетчиков проблемных вкладок
+      if (["to-approve", "to-sign", "sent", "analysis"].includes(key)) {
+        return true;
+      }
+      const existingCount =
+        counts[key] ??
+        counts[key.replace("-", "_")] ??
+        counts[`${key}_total`] ??
+        counts[`${key.replace("-", "_")}_total`] ??
+        counts[`${key}_count`];
+      return existingCount === undefined || existingCount === null;
+    });
+  }, [activeStatusKeys, counts]);
+
+  const fallbackQueries = useQueries({
+    queries: tabsToFetch.map((key) => {
+      const configUrl = STATUS_CONFIG[key]?.apiUrl || fetchUrl;
+      return {
+        queryKey: [configUrl, { status: key, ...extraParams, per_page: 1 }],
+        queryFn: async () => {
+          const res = await _axios.get(configUrl, {
+            params: { status: key, ...extraParams, per_page: 1 },
+          });
+          const serverData = res.data;
+          // Пытаемся достать total из различных вложенностей (Laravel Resource wrapper)
+          const fetchedMeta = 
+            serverData?.data?.meta || 
+            serverData?.meta || 
+            serverData?.data || 
+            serverData;
+            
+          return { key, total: fetchedMeta?.total ?? 0 };
+        },
+        staleTime: 5000,
+        keepPreviousData: true,
+      };
+    }),
+  });
+
+  const fallbackCounts = useMemo(() => {
+    const obj: Record<string, number> = {};
+    fallbackQueries.forEach((q) => {
+      if (q.data) {
+        obj[q.data.key] = q.data.total;
+      }
+    });
+    return obj;
+  }, [fallbackQueries]);
 
 
   const statusTabs = useMemo(() => {
@@ -251,7 +309,15 @@ export const NewRegistry = ({
       .map((key) => {
         const config = STATUS_CONFIG[key];
         if (!config) return null;
-        let count = counts[key] ?? counts[key.replace("-", "_")] ?? 0;
+        let count = 
+          fallbackCounts[key] ??
+          counts[key] ?? 
+          counts[key.replace("-", "_")] ?? 
+          counts[`${key}_total`] ?? 
+          counts[`${key.replace("-", "_")}_total`] ?? 
+          counts[`${key}_count`] ??
+          0;
+
         if (key === currentTab && meta.total !== undefined) {
           count = meta.total;
         }
@@ -265,7 +331,7 @@ export const NewRegistry = ({
         };
       })
       .filter(Boolean);
-  }, [counts, activeStatusKeys, currentTab, meta.total]);
+  }, [counts, activeStatusKeys, currentTab, meta.total, fallbackCounts]);
 
 
 

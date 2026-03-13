@@ -40,14 +40,15 @@ export const Count: React.FC<IProps> = ({
         variant === "red" && "bg-[#E30613] text-white border-transparent shadow-sm",
         // Стили для белого варианта (реестр)
         variant === "white" &&
-          "scale-0 opacity-0 bg-white text-gray-500 border-gray-200 group-data-[active=true]/tab:scale-100 group-data-[active=true]/tab:opacity-100 group-data-[active=true]/tab:text-blue-600 group-data-[active=true]/tab:border-blue-100",
+          "bg-white text-gray-400 border-gray-200 group-data-[active=true]/tab:text-blue-600 group-data-[active=true]/tab:border-blue-100",
 
         className
       )}
     >
-      <AnimatedNumber value={count} />
+      {animate ? <AnimatedNumber value={count} /> : count}
     </span>
   );
+
   if (animate) {
     return (
       <motion.span
