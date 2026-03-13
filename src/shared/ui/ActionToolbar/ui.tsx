@@ -76,7 +76,7 @@ export const ActionToolbar: React.FC<IProps> = ({
           label=""
           onClick={() => setIsInspectorOpen(true)}
           disabled={!isActionsEnabled}
-          tooltip="Инспектор"
+          tooltip="Действия"
         />
 
         <If is={!isIncoming}>

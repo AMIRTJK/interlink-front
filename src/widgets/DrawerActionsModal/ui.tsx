@@ -256,7 +256,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                   <span
                     className={`text-lg font-semibold ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}
                   >
-                    Инспектор
+                    Действия
                   </span>
                   <Icons.CloseOutlined
                     onClick={onClose}

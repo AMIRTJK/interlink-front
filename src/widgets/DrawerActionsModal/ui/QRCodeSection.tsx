@@ -1,5 +1,5 @@
 /**
- * Секция отображения и вставки QR-кода в инспекторе.
+ * Секция отображения и вставки QR-кода в Действиях.
  */
 import React from "react";
 import { Button, QRCode } from "antd";
