@@ -141,6 +141,10 @@ export const NewRegistry = ({
       ? ApiRoutes.GET_INTERNAL_COUNTERS
       : ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
     params: extraParams?.kind ? { kind: extraParams.kind } : {},
+    options: {
+      keepPreviousData: true,
+      staleTime: 5000,
+    },
   });
 
   const { data: foldersData } = useGetQuery({
@@ -241,8 +245,9 @@ export const NewRegistry = ({
     return items;
   }, [type, searchParams.folder_id, folders, setParams]);
 
-  const documents = (responseData as any)?.data?.data || [];
-  const meta = (responseData as any)?.data || {};
+  const documents = (responseData as any)?.data?.data || (responseData as any)?.data || [];
+  // Laravel часто вкладывает мета-данные в объект meta
+  const meta = (responseData as any)?.data?.meta || (responseData as any)?.data || {};
   const counts = useMemo(() => (countersData as any)?.data || {}, [countersData]);
 
 
@@ -251,7 +256,14 @@ export const NewRegistry = ({
       .map((key) => {
         const config = STATUS_CONFIG[key];
         if (!config) return null;
-        let count = counts[key] ?? counts[key.replace("-", "_")] ?? 0;
+        let count = 
+          counts[key] ?? 
+          counts[key.replace("-", "_")] ?? 
+          counts[`${key}_total`] ?? 
+          counts[`${key.replace("-", "_")}_total`] ?? 
+          counts[`${key}_count`] ??
+          0;
+
         if (key === currentTab && meta.total !== undefined) {
           count = meta.total;
         }
