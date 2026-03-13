@@ -147,20 +147,33 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
     },
   };
 
-  const handleNavigate = () => {
-    if (window.history.state && window.history.state.idx > 0) {
-      navigate(-1);
-    } else {
-      const pathSegments = location.pathname.split("/").filter(Boolean);
-      const internalIndex = pathSegments.indexOf("internal");
+  // const handleNavigate = () => {
+  //   if (window.history.state && window.history.state.idx > 0) {
+  //     navigate(-1);
+  //   } else {
+  //     const pathSegments = location.pathname.split("/").filter(Boolean);
+  //     const internalIndex = pathSegments.indexOf("internal");
 
-      if (internalIndex !== -1 && pathSegments[internalIndex + 1]) {
-        const registryPath =
-          "/" + pathSegments.slice(0, internalIndex + 2).join("/");
-        navigate(registryPath);
-      } else {
-        navigate("/modules/correspondence/internal/incoming");
-      }
+  //     if (internalIndex !== -1 && pathSegments[internalIndex + 1]) {
+  //       const registryPath =
+  //         "/" + pathSegments.slice(0, internalIndex + 2).join("/");
+  //       navigate(registryPath);
+  //     } else {
+  //       navigate("/modules/correspondence/internal/incoming");
+  //     }
+  //   }
+  // };
+
+  const handleNavigate = () => {
+    const pathSegments = location.pathname.split("/").filter(Boolean);
+    const internalIndex = pathSegments.indexOf("internal");
+
+    if (internalIndex !== -1 && pathSegments[internalIndex + 1]) {
+      const registryPath =
+        "/" + pathSegments.slice(0, internalIndex + 2).join("/");
+      navigate(registryPath);
+    } else {
+      navigate("/modules/correspondence/internal/incoming");
     }
   };
 
