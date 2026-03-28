@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { CloseOutlined, DownOutlined, UpOutlined, AppstoreOutlined } from "@ant-design/icons";
+import { CloseOutlined, AppstoreOutlined } from "@ant-design/icons";
+import { Tooltip } from "antd";
 import { useTabs, useNavbar } from "@shared/lib/hooks";
 import { useLocation } from "react-router-dom";
 import "../style.css";
@@ -23,7 +24,7 @@ export const TabNavigation = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 350, damping: 25 }}
-            className="tab-navigation-container flex items-center pr-2!" 
+            className="tab-navigation-container flex items-center" 
           >
             {/* Обертка для вкладок */}
             <div className="flex bg-transparent">
@@ -56,17 +57,21 @@ export const TabNavigation = () => {
                       )}
                       
                       {displayIcon && <div className="tab-icon">{displayIcon}</div>}
-                      <span className="tab-label" title={tab.label}>{tab.label}</span>
+                      <Tooltip title={tab.label} placement="top" mouseEnterDelay={0.5}>
+                        <span className="tab-label">{tab.label}</span>
+                      </Tooltip>
                       
-                      <button
-                        className="tab-close-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeTab(tab.key, { pathname });
-                        }}
-                      >
-                        <CloseOutlined style={{ fontSize: 10 }} />
-                      </button>
+                      <Tooltip title="Закрыть вкладку" placement="top" mouseEnterDelay={0.4}>
+                        <button
+                          className="tab-close-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeTab(tab.key, { pathname });
+                          }}
+                        >
+                          <CloseOutlined style={{ fontSize: 10 }} />
+                        </button>
+                      </Tooltip>
                     </motion.div>
                   );
                 })}
@@ -74,17 +79,18 @@ export const TabNavigation = () => {
             </div>
 
             {/* Кнопка скрыть */}
-            <div className="ml-2 pl-2 border-l border-white/10 flex items-center">
-               <motion.button
-                 onClick={() => setIsTabsCollapsed(true)}
-                 whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.15)" }}
-                 whileTap={{ scale: 0.9 }}
-                 className="flex items-center justify-center w-8 h-8 rounded-full text-white/70 hover:text-white transition-colors cursor-pointer"
-                 title="Свернуть вкладки"
-               >
-                 <DownOutlined style={{ fontSize: 13 }} />
-               </motion.button>
-            </div>
+            <Tooltip title="Скрыть панель" placement="topRight">
+              <div className="flex items-center ml-1 pr-1">
+                 <motion.button
+                   onClick={() => setIsTabsCollapsed(true)}
+                   whileHover={{ scale: 1.05, backgroundColor: "rgba(239, 68, 68, 0.1)" }}
+                   whileTap={{ scale: 0.95 }}
+                   className="flex items-center justify-center w-8 h-8 rounded-full text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+                 >
+                   <CloseOutlined style={{ fontSize: 13 }} />
+                 </motion.button>
+              </div>
+            </Tooltip>
           </motion.div>
         ) : (
           <motion.div
@@ -96,10 +102,12 @@ export const TabNavigation = () => {
             className="cursor-pointer pointer-events-auto"
             onClick={() => setIsTabsCollapsed(false)}
           >
-             <div className="subtle-glass bg-indigo-500/80! hover:bg-indigo-600/90! backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-2 shadow-lg shadow-indigo-900/30 transition-colors border border-indigo-400/30">
-                <AppstoreOutlined className="text-white text-lg" />
-                <span className="text-white font-medium text-sm">Вкладки ({tabs.length})</span>
-             </div>
+             <Tooltip title="Развернуть вкладки" placement="top" mouseEnterDelay={0.3}>
+               <div className="subtle-glass bg-indigo-500/80! hover:bg-indigo-600/90! backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-2 shadow-lg shadow-indigo-900/30 transition-colors border border-indigo-400/30">
+                  <AppstoreOutlined className="text-white text-lg" />
+                  <span className="text-white font-medium text-sm">Вкладки ({tabs.length})</span>
+               </div>
+             </Tooltip>
           </motion.div>
         )}
       </AnimatePresence>

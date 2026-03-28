@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from "react";
-import { toast } from "react-toastify";
 import { ITab, TTabMode } from "./model";
 import { useNavigate } from "react-router-dom";
 
@@ -86,7 +85,6 @@ export const useTabs = () => {
         }
 
         if (cleanedPrev.length >= 4) {
-          toast.warning("Достигнут лимит: максимум 4 открытых модуля!");
           return cleanedPrev;
         }
 
