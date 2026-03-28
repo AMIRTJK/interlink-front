@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MenuItem } from "../model";
 import { cn } from "@shared/lib/utils";
+import { useLocation } from "react-router-dom";
+import { useTabs } from "@shared/lib/hooks";
 
 import { Tooltip } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
@@ -49,6 +51,25 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   variant = "vertical",
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { addTab, tabMode } = useTabs();
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (isActive && tabMode === "on") {
+      const tabLabel = typeof item.folderName === "string" 
+        ? item.folderName 
+        : typeof item.label === "string" 
+          ? item.label 
+          : "Раздел";
+
+      addTab({
+        key: pathname,
+        path: pathname,
+        label: tabLabel,
+      });
+    }
+  }, [isActive, tabMode, pathname, item.folderName, item.label, addTab]);
+
   
   const toggleOpen = (e: React.MouseEvent) => {
     if (collapsed) return; 
