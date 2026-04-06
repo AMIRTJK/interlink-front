@@ -51,6 +51,7 @@ const FullHistoryModal = ({
   currentUserId,
   onShowSignature,
   isReadOnly,
+  isSignedDocument,
   versions = [],
   onSelectVersion,
   documentCreator,
@@ -69,6 +70,7 @@ const FullHistoryModal = ({
   currentUserId: string | number | null;
   onShowSignature: (e: any, item: any) => void;
   isReadOnly: boolean;
+  isSignedDocument?: boolean;
   versions?: any[];
   activeVersionId?: string | number | null;
   onSelectVersion?: (content: string, versionId: string | number) => void;
@@ -117,7 +119,7 @@ const FullHistoryModal = ({
   const versionsWithMeta = useMemo(() => {
     return versions.map((v, idx) => ({
       ...v,
-      versionNumber: versions.length - idx,
+      versionNumber: v.versionNumber || idx + 1,
     }));
   }, [versions]);
 
@@ -363,7 +365,9 @@ const FullHistoryModal = ({
                       onChange={() =>
                         onSetVersionForSign && onSetVersionForSign(v.id)
                       }
-                      disabled={isSelectingVersion || isSigning || isReadOnly}
+                      disabled={
+                        isSelectingVersion || isSigning || isSignedDocument
+                      }
                     >
                       <span
                         className={`text-xs select-none ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
@@ -546,6 +550,11 @@ const FullHistoryModal = ({
                           <CheckCircleFilled className="text-green-500! text-[12px]!" />
                         </Tooltip>
                       )}
+                      {v.is_current_signed && (
+                        <Tooltip title="Подписанная версия">
+                          <SafetyCertificateOutlined className="text-blue-500! text-[13px]!" />
+                        </Tooltip>
+                      )}
                     </div>
                     <div
                       className={`text-xs mt-1 font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
@@ -567,7 +576,9 @@ const FullHistoryModal = ({
                       onChange={() =>
                         onSetVersionForSign && onSetVersionForSign(v.id)
                       }
-                      disabled={isSelectingVersion || isSigning || isReadOnly}
+                      disabled={
+                        isSelectingVersion || isSigning || isSignedDocument
+                      }
                     >
                       <span
                         className={`text-xs select-none ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
@@ -650,7 +661,9 @@ export const WorkflowParticipantsPanel = ({
   isSigning,
   currentUserId,
   isReadOnly,
+  isSignedDocument,
   isReadPage = false,
+  hasQRInSelectedVersion,
   versions = [],
   activeVersionId,
   onSelectVersion,
@@ -668,6 +681,8 @@ export const WorkflowParticipantsPanel = ({
   currentUserId: string | number | null;
   isReadOnly: boolean;
   isReadPage?: boolean;
+  isSignedDocument?: boolean;
+  hasQRInSelectedVersion?: boolean;
   versions?: any[];
   activeVersionId?: string | number | null;
   onSelectVersion?: (content: string, versionId: string | number) => void;
@@ -727,12 +742,19 @@ export const WorkflowParticipantsPanel = ({
     return map;
   }, [signers, approvers, documentCreator]);
 
-  // --- ТЕПЕРЬ МОЖНО ДЕЛАТЬ РАННИЙ ВОЗВРАТ ПОСЛЕ ВСЕХ ХУКОВ ---
+  const versionsWithMeta = useMemo(() => {
+    return versions.map((v: any, idx: number) => ({
+      ...v,
+      displayVersion: v.versionNumber || idx + 1,
+    }));
+  }, [versions]);
+
+  // ВСЕ ХУКИ ВЫЗЫВАЕМ ДО RETURN
   if (!workflowData) return null;
 
   const visibleVersions = isCollapsed
     ? []
-    : versions.slice(0, MAX_VISIBLE_VERSIONS);
+    : versionsWithMeta.slice(-MAX_VISIBLE_VERSIONS);
 
   const hiddenVersionsCount = versions.length - visibleVersions.length;
 
@@ -905,16 +927,28 @@ export const WorkflowParticipantsPanel = ({
 
           <div className="mt-2">
             {role === "signer" && isCurrentUser && isPending && (
-              <Button
-                type="primary"
-                size="small"
-                loading={isSigning}
-                disabled={status !== "pending"}
-                className={`${status !== "penging" || isReadOnly ? (isDarkMode ? "bg-gray-700 text-gray-500" : "bg-[#f0f1f3]") : "bg-blue-600! hover:bg-blue-500!"}`}
-                onClick={onSign}
+              <Tooltip
+                title={
+                  !hasQRInSelectedVersion
+                    ? "Сначала добавьте QR-код в версию для подписи"
+                    : ""
+                }
+                placement="bottom"
               >
-                Подписать
-              </Button>
+                <div>
+                  <Button
+                    htmlType="button"
+                    onClick={onSign}
+                    loading={isSigning}
+                    disabled={status !== "pending" || !hasQRInSelectedVersion}
+                    type="primary"
+                    size="small"
+                    className={`${status !== "pending" || isReadOnly || !hasQRInSelectedVersion ? (isDarkMode ? "bg-gray-700 text-gray-500" : "bg-[#f0f1f3]") : "bg-blue-600! hover:bg-blue-500!"}`}
+                  >
+                    Подписать
+                  </Button>
+                </div>
+              </Tooltip>
             )}
             {role === "approver" && isCurrentUser && isPending && (
               <Button
@@ -1119,10 +1153,15 @@ export const WorkflowParticipantsPanel = ({
                             <div
                               className={`text-xs font-semibold flex gap-1 transition-colors ${isDarkMode ? "text-gray-200 group-hover:text-blue-400" : "text-gray-700 group-hover:text-blue-600"}`}
                             >
-                              <p>Версия {versions.length - index}</p>
+                              <p>Версия {v.displayVersion}</p>
                               {v.is_selected && (
                                 <Tooltip title="Выбрана для подписи">
                                   <CheckCircleFilled className="text-green-500! text-[12px]!" />
+                                </Tooltip>
+                              )}
+                              {v.is_current_signed && (
+                                <Tooltip title="Подписанная версия">
+                                  <SafetyCertificateOutlined className="text-blue-500! text-[13px]!" />
                                 </Tooltip>
                               )}
                             </div>
@@ -1156,7 +1195,7 @@ export const WorkflowParticipantsPanel = ({
                                   disabled={
                                     isSelectingVersion ||
                                     isSigning ||
-                                    isReadOnly
+                                    isSignedDocument
                                   }
                                 />
                               </ConfigProvider>
@@ -1307,6 +1346,7 @@ export const WorkflowParticipantsPanel = ({
         onShowSignature={openSignatureModal}
         onApprove={onApprove}
         isReadOnly={isReadOnly}
+        isSignedDocument={isSignedDocument}
         versions={versions}
         onSelectVersion={onSelectVersion}
         documentCreator={documentCreator}

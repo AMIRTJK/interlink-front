@@ -31,6 +31,7 @@ interface IProps {
   initialData?: any;
   isLoading?: boolean;
   type: string;
+  showHeader?: boolean;
 }
 
 export const InternalCorrespondece: React.FC<IProps> = ({
@@ -38,6 +39,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   initialData,
   isLoading,
   type,
+  showHeader,
 }) => {
   const editorRef = useRef<EditorHandle>(null);
 
@@ -100,6 +102,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       date: v.created_at,
       authorId: v.author?.id,
       is_selected: v.is_selected,
+      is_current_signed: v.is_current_signed,
     }));
   }, [versionsResponse]);
 
@@ -132,20 +135,6 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     return foundApproval ? String(foundApproval.id) : "";
   }, [workflowData, currentUserId]);
 
-  const isSigned = useMemo(() => {
-    const signatures = rawWorkflowData?.data?.signatures || [];
-    if (!signatures || !Array.isArray(signatures)) {
-      return false;
-    }
-    console.log(signatures);
-
-    return signatures.some((s: any) => s.status === "signed");
-  }, [rawWorkflowData]);
-
-  const isIncoming = type === "internal-incoming";
-
-  const isReadOnly = isSigned;
-
   const canSign = useMemo(() => {
     if (!preloadData || !Array.isArray(preloadData)) return false;
     return preloadData.some((p: any) => p.name === "signatures.payload");
@@ -161,6 +150,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       messages: {
         invalidate: [
           ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", String(id || "")),
+          ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
         ],
       },
       preload: true,
@@ -177,6 +167,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       messages: {
         invalidate: [
           ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", String(id || "")),
+          ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
         ],
       },
       preload: true,
@@ -295,25 +286,53 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       method: "PUT",
       messages: {
         invalidate: [
-          ApiRoutes.GET_INTERNAL_BY_ID,
-          ApiRoutes.GET_INTERNAL_VERSIONS,
+          ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
+          ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
         ],
+        onSuccessCb: () => {
+          isVersionContentInit.current = false;
+        },
       },
     });
 
-  const selectedVersion = versions.find((v: any) => v.is_selected === true);
-
-  const initialActiveVersion = selectedVersion
-    ? selectedVersion.id
-    : versions.length > 0
-      ? versions[versions.length - 1].id
-      : null;
+  const initialActiveVersion =
+    versions.length > 0 ? versions[versions.length - 1].id : null;
 
   const [activeVersionId, setActiveVersionId] = useState<
     string | number | null
   >(initialActiveVersion);
 
   const isVersionContentInit = useRef(false);
+
+  const isSigned = useMemo(() => {
+    const signatures = rawWorkflowData?.data?.signatures || [];
+    if (!signatures || !Array.isArray(signatures)) {
+      return false;
+    }
+    console.log(signatures);
+
+    return signatures.some((s: any) => s.status === "signed");
+  }, [rawWorkflowData]);
+
+  const latestVersionId =
+    versions.length > 0 ? versions[versions.length - 1].id : null;
+
+  const isOldVersionSelected =
+    activeVersionId !== null && activeVersionId !== latestVersionId;
+
+  const isIncoming = type === "internal-incoming";
+
+  const isReadOnly = isSigned || isOldVersionSelected;
+
+  const selectedVersionForSign = versions.find(
+    (v: any) => v.is_selected === true,
+  );
+
+  const hasQRInSelectedVersion = useMemo(() => {
+    if (!selectedVersionForSign || !selectedVersionForSign.content)
+      return false;
+    return selectedVersionForSign.content.includes('<img src="data:image');
+  }, [selectedVersionForSign]);
 
   const handleSelectVersion = (content: string, versionId: string | number) => {
     if (editorRef.current) {
@@ -438,8 +457,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
 
   useEffect(() => {
     if (versions.length > 0 && !isVersionContentInit.current) {
-      const selected = versions.find((v: any) => v.is_selected === true);
-      const targetVersion = selected || versions[versions.length - 1];
+      const targetVersion = versions[versions.length - 1];
 
       setActiveVersionId(targetVersion.id);
 
@@ -477,6 +495,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
               initialCC={initialCC}
               isIncoming={isIncoming}
               isReadOnly={isReadOnly}
+              creator={creator}
             />
 
             <div className="flex gap-3 items-stretch">
@@ -525,6 +544,8 @@ export const InternalCorrespondece: React.FC<IProps> = ({
               }
               currentUserId={currentUserId}
               isReadOnly={isReadOnly}
+              isSignedDocument={isSigned}
+              hasQRInSelectedVersion={hasQRInSelectedVersion}
               onSelectVersion={handleSelectVersion}
               documentCreator={creator}
               versions={versions}

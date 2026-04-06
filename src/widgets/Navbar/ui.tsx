@@ -4,12 +4,13 @@ import { IosVariant } from "./lib/IosVariant";
 import "./style.css";
 
 export const Navbar = () => {
-  const { variant, menuItems, subItems, activeKey, handleNavigate, pathname } = useNavbar();
+  const { variant, menuItems, subItems, activeKey, handleNavigate, pathname } =
+    useNavbar();
 
   if (variant === "ios") {
     return (
       <>
-        <IosVariant 
+        <IosVariant
           menuItems={menuItems}
           subItems={subItems}
           activeKey={activeKey}
@@ -21,7 +22,7 @@ export const Navbar = () => {
   }
 
   // Дефолтный вариант
-  
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -97,7 +98,8 @@ export const Navbar = () => {
                 if (!sub || !("key" in sub)) return null;
 
                 const subKey = String(sub.key);
-                const isActive = pathname === subKey || pathname.startsWith(subKey + "/");
+                const isActive =
+                  pathname === subKey || pathname.startsWith(subKey + "/");
 
                 return (
                   <motion.div
