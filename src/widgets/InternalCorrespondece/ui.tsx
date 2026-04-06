@@ -95,11 +95,11 @@ export const InternalCorrespondece: React.FC<IProps> = ({
 
     return rawVersions.map((v: any) => ({
       id: v.id,
-      versionNumber: v.version, 
+      versionNumber: v.version,
       content: v.body,
-      date: v.created_at, 
-      authorId: v.author?.id, 
-      is_selected: v.is_selected, 
+      date: v.created_at,
+      authorId: v.author?.id,
+      is_selected: v.is_selected,
     }));
   }, [versionsResponse]);
 
@@ -294,7 +294,10 @@ export const InternalCorrespondece: React.FC<IProps> = ({
       url: ApiRoutes.PUT_INTERNAL.replace(":id", String(id || "")),
       method: "PUT",
       messages: {
-        invalidate: [ApiRoutes.GET_INTERNAL_BY_ID],
+        invalidate: [
+          ApiRoutes.GET_INTERNAL_BY_ID,
+          ApiRoutes.GET_INTERNAL_VERSIONS,
+        ],
       },
     });
 
