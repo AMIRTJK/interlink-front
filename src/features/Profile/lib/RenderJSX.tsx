@@ -23,6 +23,8 @@ interface IProps {
   setNavbarVariant: (v: "default" | "ios") => void;
   isExpanded: boolean;
   setIsExpanded: (v: boolean) => void;
+  tabMode: "on" | "off";
+  setTabMode: (v: "on" | "off") => void;
 }
 
 /* Информационные поля профиля */
@@ -58,6 +60,8 @@ export const RenderJSX = ({
   setNavbarVariant,
   isExpanded,
   setIsExpanded,
+  tabMode,
+  setTabMode,
 }: IProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -99,6 +103,8 @@ export const RenderJSX = ({
         onClose={() => setIsSettingsOpen(false)}
         navbarVariant={navbarVariant}
         setNavbarVariant={setNavbarVariant}
+        tabMode={tabMode}
+        setTabMode={setTabMode}
       />
 
       {/* Левая часть профиля (Десктоп) */}

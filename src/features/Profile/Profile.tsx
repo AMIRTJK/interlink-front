@@ -7,13 +7,15 @@ import { IUser } from "@entities/login";
 import { useState } from "react";
 import { useCurrentTab } from "./lib/lib";
 import { RenderJSX } from "./lib/RenderJSX";
-import { useNavbar, useGetQuery } from "@shared/lib/hooks";
+import { useNavbar, useGetQuery, useTabs } from "@shared/lib/hooks";
 import "./style.css";
 
 export const Profile = () => {
   const navigate = useNavigate();
   const { variant, setVariant } = useNavbar();
+  const { tabMode, setTabMode } = useTabs();
   const userId = tokenControl.getUserId();
+
   const activeTab = useCurrentTab();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -64,7 +66,10 @@ export const Profile = () => {
         setNavbarVariant={setVariant}
         isExpanded={isExpanded}
         setIsExpanded={handleToggleExpanded}
+        tabMode={tabMode}
+        setTabMode={setTabMode}
       />
+
     </>
   );
 

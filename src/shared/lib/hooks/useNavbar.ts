@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useGetQuery, tokenControl } from "@shared/lib";
+import { useGetQuery, tokenControl, useTabs } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+
 import { AppRoutes } from "@shared/config";
 import { getModuleItems } from "../../config/menuItems";
 import { TMenuItem, TSubMenuItem, TNavbarVariant } from "./model";
@@ -156,6 +157,24 @@ export const useNavbar = () => {
     }
     return filteredItems;
   }, [logicVariant, filteredItems]);
+
+  const { addTab, tabMode } = useTabs();
+
+  useEffect(() => {
+    if (tabMode === "on" && pathname !== "/") {
+      const allItems = [...menuItems, ...(subItems || [])];
+      const currentItem = allItems.find((item) => String(item?.key) === pathname);
+
+      if (currentItem) {
+        addTab({
+          key: String(currentItem.key),
+          label: "label" in currentItem ? String(currentItem.label) : "",
+          icon: currentItem.icon,
+          path: pathname,
+        });
+      }
+    }
+  }, [pathname, tabMode, menuItems, subItems, addTab]);
 
   return {
     variant,

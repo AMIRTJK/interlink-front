@@ -17,6 +17,7 @@ export default defineConfig({
       algorithm: "brotliCompress",
       ext: ".br",
     }),
+
   ],
 
   resolve: {
@@ -31,27 +32,19 @@ export default defineConfig({
   },
 
   build: {
-    minify: "terser",
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-      format: {
-        comments: false,
-      },
-    },
+    minify: "esbuild", // Переходим на esbuild для скорости
+    target: "esnext",
     rollupOptions: {
       output: {
-        manualChunks: {
-          "react-vendor": ["react", "react-dom", "react-router-dom", "react-router"],
-          "antd-vendor": ["antd", "@ant-design/icons"],
-          "pdf-vendor": ["pdfjs-dist", "react-pdf"],
-          "ckeditor-vendor": ["@ckeditor/ckeditor5-react", "ckeditor5", "ckeditor5-premium-features"],
-          "charts-vendor": ["recharts"],
-          "core-vendor": ["axios", "@tanstack/react-query", "react-toastify"],
-          "doc-vendor": ["xlsx", "mammoth"],
-          "motion-vendor": ["framer-motion"],
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("antd") || id.includes("@ant-design")) return "antd-vendor";
+            if (id.includes("ckeditor5")) return "ckeditor-vendor";
+            if (id.includes("react-pdf") || id.includes("pdfjs-dist")) return "pdf-vendor";
+            if (id.includes("recharts")) return "charts-vendor";
+            if (id.includes("framer-motion")) return "motion-vendor";
+            return "vendor"; // Все остальное в один вендор-чанк
+          }
         },
       },
     },

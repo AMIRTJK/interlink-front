@@ -133,9 +133,12 @@ const trashedParams = {
   trashed: 1,
 };
 
+import { TabNavigation } from "@widgets/TabNavigation/ui/TabNavigation";
+
 export const AppRouter = () => {
   return (
     <BrowserRouter>
+      <TabNavigation />
       <Suspense fallback={<Loader />}>
         <Routes>
           {/* Редирект с корня */}
