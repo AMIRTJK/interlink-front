@@ -10,10 +10,14 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { motion, AnimatePresence } from "framer-motion";
-import { useGetQuery } from "@shared/lib";
+import { tokenControl, useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { useNavigate, useLocation } from "react-router";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, LogOut } from "lucide-react";
+import { Avatar, Tooltip } from "antd";
+import { toast } from "react-toastify";
+import { AppRoutes } from "@shared/config";
+import UserAvatar from "../../../assets/images/user-avatar.jpg";
 
 interface NavRegistry {
   label: string;
@@ -131,6 +135,14 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
       status: "Отправлено",
     }),
   );
+
+  const handleLogout = () => {
+    toast.info("Выход из системы!");
+    setTimeout(() => {
+      tokenControl.remove();
+      navigate(AppRoutes.LOGIN);
+    }, 1000);
+  };
 
   const navRegistries: Record<string, NavRegistry> = {
     inbox: {
@@ -255,7 +267,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
         </div>
 
         {/* Right - Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           {/* <button
             onClick={() => setShowColorPicker(!showColorPicker)}
             className={`p-2 rounded-lg transition-all cursor-pointer ${textSecondary} hover:bg-black/5 dark:hover:bg-white/5`}
@@ -273,6 +285,32 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
               <MoonOutlined className="text-[20px]" />
             )}
           </button>
+
+          <div
+            className={`p-1.5 flex items-center justify-center rounded-lg transition-all cursor-pointer hover:bg-black/5 dark:hover:bg-white/5`}
+          >
+            <div className="relative flex">
+              <Avatar
+                size={34}
+                src={UserAvatar}
+                alt="Аватар пользователя"
+                className={`border shadow-sm ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}
+              />
+              <span
+                className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 rounded-full ${isDarkMode ? "border-gray-800" : "border-white"}`}
+              ></span>
+            </div>
+          </div>
+
+          <Tooltip title="Выйти" placement="bottomRight">
+            <button
+              onClick={handleLogout}
+              aria-label="Выход"
+              className={`p-2 flex items-center justify-center rounded-lg transition-all cursor-pointer ${textSecondary} hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 dark:hover:text-red-400 focus:outline-none`}
+            >
+              <LogOut size={20} strokeWidth={2} />
+            </button>
+          </Tooltip>
 
           {/* <button
             className={`p-2 rounded-lg transition-all ${textSecondary} hover:bg-black/5 dark:hover:bg-white/5`}

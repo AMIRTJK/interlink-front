@@ -58,6 +58,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
         initialData={data}
         isLoading={isLoading}
         type={type}
+        showHeader={true}
       />
     );
   }

@@ -34,6 +34,7 @@ interface DocumentHeaderFormProps {
   initialCC?: Recipient[];
   isIncoming: boolean;
   isReadOnly: boolean;
+  creator?: any;
 }
 
 export interface Recipient {
@@ -52,6 +53,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
   initialCC = [],
   isIncoming,
   isReadOnly = false,
+  creator,
 }) => {
   const [selectedRecipients, setSelectedRecipients] =
     useState<Recipient[]>(initialRecipients);
@@ -259,18 +261,36 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           className={`flex flex-wrap items-center gap-y-2 gap-x-6 text-sm ${textSecondary}`}
         >
           <div className="flex items-center min-h-[32px]">
-            <Form.Item noStyle shouldUpdate>
-              {() => {
-                const hasError = form.getFieldError("recipients").length > 0;
-                return renderSelectionArea(
-                  selectedRecipients,
-                  "recipients",
-                  "Получатель",
-                  <UserOutlined style={{ fontSize: "14px" }} />,
-                  hasError,
-                );
-              }}
-            </Form.Item>
+            {isIncoming && creator ? (
+              <div className="flex items-center gap-2">
+                <span className={`text-sm ${textSecondary}`}>Отправитель:</span>
+                <div
+                  className={`flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border shadow-sm select-none ${chipClass}`}
+                >
+                  <Avatar
+                    src={creator.photo_path || null}
+                    size={24}
+                    icon={<UserOutlined />}
+                  />
+                  <span className="text-xs font-medium whitespace-nowrap">
+                    {creator.full_name}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <Form.Item noStyle shouldUpdate>
+                {() => {
+                  const hasError = form.getFieldError("recipients").length > 0;
+                  return renderSelectionArea(
+                    selectedRecipients,
+                    "recipients",
+                    "Получатель",
+                    <UserOutlined style={{ fontSize: "14px" }} />,
+                    hasError,
+                  );
+                }}
+              </Form.Item>
+            )}
           </div>
           <div
             className={`hidden sm:block w-px h-5 ${isDarkMode ? "bg-gray-700!" : "bg-gray-200!"}`}
@@ -319,43 +339,47 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
               />
             </Form.Item>
           </div>
-          <div
-            className={`hidden sm:block w-px h-5 ${isDarkMode ? "bg-gray-700!" : "bg-gray-200!"}`}
-          ></div>
+          {!isIncoming && (
+            <>
+              <div
+                className={`hidden sm:block w-px h-5 ${isDarkMode ? "bg-gray-700!" : "bg-gray-200!"}`}
+              ></div>
 
-          <span
-            className={`text-sm! ${isDarkMode ? "text-gray-200! font-normal" : "text-[#4a5565] font-semibold"}`}
-          >
-            Папки
-          </span>
-          <ConfigProvider
-            theme={{
-              algorithm: isDarkMode
-                ? theme.darkAlgorithm
-                : theme.defaultAlgorithm,
-              token: isDarkMode
-                ? {
-                    colorBgContainer: "#1f2937", // Идеально ложится под Tailwind bg-gray-800
-                    colorBgElevated: "#1f2937", // Фон выпадающего списка
-                    colorBorder: "#4b5563", // Рамка (border-gray-600)
-                  }
-                : {},
-            }}
-          >
-            <SelectField
-              rules={[requiredRule]}
-              name="folder"
-              label=""
-              url={ApiRoutes.GET_INTERNAL_FOLDERS}
-              placeholder="Выберите папку"
-              allowClear
-              showSearch
-              transformResponse={(data) => transformResponse(data)}
-              className="mb-0!"
-              searchParamKey="search"
-              disabled={isIncoming || isReadOnly}
-            />
-          </ConfigProvider>
+              <span
+                className={`text-sm! ${isDarkMode ? "text-gray-200! font-normal" : "text-[#4a5565] font-semibold"}`}
+              >
+                Папки
+              </span>
+              <ConfigProvider
+                theme={{
+                  algorithm: isDarkMode
+                    ? theme.darkAlgorithm
+                    : theme.defaultAlgorithm,
+                  token: isDarkMode
+                    ? {
+                        colorBgContainer: "#1f2937",
+                        colorBgElevated: "#1f2937",
+                        colorBorder: "#4b5563",
+                      }
+                    : {},
+                }}
+              >
+                <SelectField
+                  rules={[requiredRule]}
+                  name="folder"
+                  label=""
+                  url={ApiRoutes.GET_INTERNAL_FOLDERS}
+                  placeholder="Выберите папку"
+                  allowClear
+                  showSearch
+                  transformResponse={(data) => transformResponse(data)}
+                  className="mb-0!"
+                  searchParamKey="search"
+                  disabled={isReadOnly}
+                />
+              </ConfigProvider>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-4 mt-1 min-h-[32px]">
