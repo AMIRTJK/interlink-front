@@ -6,8 +6,7 @@ import { useLocation } from "react-router-dom";
 import { useTabs } from "@shared/lib/hooks";
 
 import { Tooltip } from "antd";
-import { EyeOutlined } from "@ant-design/icons";
-import { ExpandedFolderViewModal } from "./ExpandedFolderViewModal";
+import { RightOutlined, DownOutlined } from "@ant-design/icons";
 
 interface SidebarItemProps {
   item: MenuItem;
@@ -49,8 +48,22 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   depth = 0,
   collapsed = false,
   variant = "vertical",
+  activeKey,
 }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const checkActiveRecursive = (items?: MenuItem[], currentDepth = 0): boolean => {
+    if (!items || currentDepth > 10) return false;
+    return items.some(
+      (child) => child.key === activeKey || checkActiveRecursive(child.children, currentDepth + 1),
+    );
+  };
+
+  const [isExpanded, setIsExpanded] = useState(() => checkActiveRecursive(item.children));
+
+  useEffect(() => {
+    if (checkActiveRecursive(item.children)) {
+      setIsExpanded(true);
+    }
+  }, [activeKey, item.children]);
   const { addTab, tabMode } = useTabs();
   const { pathname } = useLocation();
 
@@ -75,7 +88,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
     if (collapsed) return; 
     if (item.children && item.children.length > 0) {
       e.stopPropagation();
-      setIsModalOpen(true);
+      setIsExpanded(!isExpanded);
     }
   };
   const hasChildren = item.children && item.children.length > 0;
@@ -98,13 +111,12 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           isSelected
             ? "text-indigo-700!"
             : "text-gray-600! hover:text-indigo-600! hover:shadow-sm hover:shadow-indigo-200/20 transition-all duration-300",
-          item.folderName === "Создать новую папку" && "crtChildrenFolderHidden",
-          variant === "horizontal" && "crtChildrenFolderHidden"
+          item.folderName === "Создать новую папку" && "opacity-80"
         )}
         onClick={(e) => {
              item.onTitleClick?.(e);
         }}
-        style={{ paddingLeft: (!isCollapsedMode && depth > 0) ? `8px` : undefined }}
+        style={{ paddingLeft: (!isCollapsedMode && depth > 0) ? `${depth * 16}px` : undefined }}
       >
         {isSelected && (
           <motion.div
@@ -162,14 +174,15 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
                variants={contentVariants}
                onClick={toggleOpen}
                className={cn(
-                 "transition-colors duration-200 cursor-pointer p-1 rounded-full hover:bg-black/5 ml-2 crtChildrenFolderHidden",
+                 "transition-colors duration-200 cursor-pointer p-1 rounded-full hover:bg-black/5 ml-2",
                  isSelected ? "text-purple-600!" : "text-gray-400"
                )}
              >
                 <motion.div
+                    animate={{ rotate: isExpanded ? 90 : 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                   <EyeOutlined className="w-4 h-4" />
+                   <RightOutlined className="w-3.5 h-3.5" />
                  </motion.div>
              </motion.div>
            )}
@@ -181,6 +194,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   return (
     <motion.div 
       variants={rowVariants}
+      initial="visible"
+      animate="visible"
       className="select-none"
     >
        {isCollapsedMode ? (
@@ -190,12 +205,32 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
        ) : (
            content
        )}
-       
-       <ExpandedFolderViewModal 
-         isOpen={isModalOpen}
-         onClose={() => setIsModalOpen(false)}
-         folder={item}
-       />
+
+        <motion.div
+         animate={{ 
+           height: isExpanded ? "auto" : 0,
+           opacity: isExpanded ? 1 : 0,
+         }}
+         initial={false}
+         transition={{ duration: 0.3, ease: "easeInOut" }}
+         className="overflow-hidden"
+       >
+         {isExpanded && item.children && (
+           <div className="flex flex-col gap-1 mt-1">
+             {item.children.map((child: MenuItem, idx: number) => (
+               <SidebarItem
+                 key={child.key || `sub-${idx}`}
+                 item={child}
+                 isActive={activeKey === child.key}
+                 depth={depth + 1}
+                 collapsed={collapsed}
+                 activeKey={activeKey}
+                 variant={variant}
+               />
+             ))}
+           </div>
+         )}
+       </motion.div>
     </motion.div>
   );
 };

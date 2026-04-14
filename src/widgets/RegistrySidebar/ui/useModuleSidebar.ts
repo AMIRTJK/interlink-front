@@ -7,6 +7,7 @@ import { AppRoutes } from "@shared/config";
 import { ApiRoutes } from "@shared/api";
 import { sideBarIcons } from "../lib/sidebarIcons";
 import { buildMenuTree } from "../lib/buildMenuTree";
+import { SYSTEM_FOLDERS } from "../lib/constants";
 
 export const useModuleSidebar = () => {
   const [collapsed, setCollapsed] = useState(() => {
@@ -22,7 +23,7 @@ export const useModuleSidebar = () => {
   const [form] = Form.useForm();
 
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
 
   const isInternal = pathname.includes("/internal");
 
@@ -35,13 +36,13 @@ export const useModuleSidebar = () => {
 
   const counts = useMemo(() => countersData?.data || {}, [countersData]);
 
-  const { data: foldersData, refetch: refetchFolders } = useGetQuery({
-    url: ApiRoutes.GET_FOLDERS,
+  const { data: foldersData, refetch: refetchFolders, isLoading: isFoldersLoading } = useGetQuery({
+    url: isInternal ? ApiRoutes.GET_INTERNAL_FOLDERS : ApiRoutes.GET_FOLDERS,
     params: {},
   });
 
   const { mutate: createFolder } = useMutationQuery({
-    url: ApiRoutes.CREATE_FOLDER,
+    url: isInternal ? ApiRoutes.CREATE_INTERNAL_FOLDER : ApiRoutes.CREATE_FOLDER,
     method: "POST",
     messages: {
       onSuccessCb: () => {
@@ -56,8 +57,12 @@ export const useModuleSidebar = () => {
     id: number;
     name: string;
   }>({
-    url: (data) => ApiRoutes.UPDATE_FOLDER.replace(":id", String(data.id)),
-    method: "PUT",
+    url: (data) =>
+      (isInternal ? ApiRoutes.UPDATE_INTERNAL_FOLDER : ApiRoutes.UPDATE_FOLDER).replace(
+        ":id",
+        String(data.id),
+      ),
+    method: "PATCH",
     messages: {
       onSuccessCb: () => {
         setIsModalOpen(false);
@@ -68,7 +73,11 @@ export const useModuleSidebar = () => {
   });
 
   const { mutate: deleteFolder } = useMutationQuery<{ id: number }>({
-    url: (data) => ApiRoutes.DELETE_FOLDER.replace(":id", String(data.id)),
+    url: (data) =>
+      (isInternal ? ApiRoutes.DELETE_INTERNAL_FOLDER : ApiRoutes.DELETE_FOLDER).replace(
+        ":id",
+        String(data.id),
+      ),
     method: "DELETE",
     messages: {
       onSuccessCb: () => {
@@ -98,28 +107,41 @@ export const useModuleSidebar = () => {
   );
 
   const onFinish = useCallback(
-    (values: { name: string }) => {
+    (values: { name: string; prefix?: string }) => {
       if (editingFolderId) {
         updateFolder({
           id: editingFolderId,
           name: values.name,
+          ...(isInternal && { prefix: values.prefix }),
         });
       } else {
         createFolder({
           name: values.name,
           parent_id: parentId,
           sort: 1,
+          ...(isInternal && { prefix: values.prefix }),
         });
       }
     },
-    [editingFolderId, parentId, updateFolder, createFolder],
+    [editingFolderId, parentId, updateFolder, createFolder, isInternal],
   );
 
-  const folders = useMemo(() => foldersData?.data || [], [foldersData]);
+  const folders = useMemo(() => {
+    const apiData = foldersData?.data;
+    if (apiData && typeof apiData === "object" && !Array.isArray(apiData)) {
+      return apiData.custom_flat || [];
+    }
+    return Array.isArray(apiData) ? apiData : [];
+  }, [foldersData]);
 
-  const definitions = useMemo(
-    () => ({
-      Входящие: {
+  const definitions = useMemo(() => {
+    // Дефолтные ключи на случай, если бэкенд ещё не прислал массив system
+    const defaultFolderKeys = ["inbox", "sent", "drafts", "trash", "archive", "pinned"];
+    const systemFoldersKeys = (foldersData?.data?.system as string[]) || defaultFolderKeys;
+
+    const baseMap: Record<string, any> = {
+      inbox: {
+        title: SYSTEM_FOLDERS.INCOMING,
         key: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING
           : AppRoutes.CORRESPONDENCE_EXTERNAL_INCOMING,
@@ -129,7 +151,8 @@ export const useModuleSidebar = () => {
           ? AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING
           : AppRoutes.CORRESPONDENCE_EXTERNAL_INCOMING,
       },
-      Исходящие: {
+      sent: {
+        title: SYSTEM_FOLDERS.OUTGOING,
         key: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_OUTGOING
           : AppRoutes.CORRESPONDENCE_EXTERNAL_OUTGOING,
@@ -139,17 +162,15 @@ export const useModuleSidebar = () => {
           ? AppRoutes.CORRESPONDENCE_INTERNAL_OUTGOING
           : AppRoutes.CORRESPONDENCE_EXTERNAL_OUTGOING,
       },
-      ...(isInternal
-        ? {
-            Черновики: {
-              key: AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS,
-              icon: sideBarIcons.draftIcon,
-              count: isInternal ? counts.drafts : counts.drafts_total || 0,
-              path: AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS,
-            },
-          }
-        : {}),
-      Архив: {
+      drafts: {
+        title: SYSTEM_FOLDERS.DRAFTS,
+        key: AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS,
+        icon: sideBarIcons.draftIcon,
+        count: isInternal ? counts.drafts : counts.drafts_total || 0,
+        path: AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS,
+      },
+      archive: {
+        title: SYSTEM_FOLDERS.ARCHIVE,
         key: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_ARCHIVE
           : AppRoutes.CORRESPONDENCE_ARCHIVE,
@@ -159,7 +180,8 @@ export const useModuleSidebar = () => {
           ? AppRoutes.CORRESPONDENCE_INTERNAL_ARCHIVE
           : AppRoutes.CORRESPONDENCE_ARCHIVE,
       },
-      Закреплённые: {
+      pinned: {
+        title: SYSTEM_FOLDERS.PINNED,
         key: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_PINNED
           : AppRoutes.CORRESPONDENCE_PINNED,
@@ -169,7 +191,8 @@ export const useModuleSidebar = () => {
           ? AppRoutes.CORRESPONDENCE_INTERNAL_PINNED
           : AppRoutes.CORRESPONDENCE_PINNED,
       },
-      Корзина: {
+      trash: {
+        title: SYSTEM_FOLDERS.TRASH,
         key: isInternal
           ? AppRoutes.CORRESPONDENCE_INTERNAL_TRASHED
           : AppRoutes.CORRESPONDENCE_TRASHED,
@@ -179,50 +202,28 @@ export const useModuleSidebar = () => {
           ? AppRoutes.CORRESPONDENCE_INTERNAL_TRASHED
           : AppRoutes.CORRESPONDENCE_TRASHED,
       },
-    }),
-    [counts, isInternal],
-  );
+    };
+
+    const finalDefinitions: Record<string, any> = {};
+
+    systemFoldersKeys.forEach((key) => {
+      const def = baseMap[key];
+      if (def) {
+        finalDefinitions[def.title] = {
+          key: def.key,
+          icon: def.icon,
+          count: def.count,
+          path: def.path,
+          slug: key, // Добавляем оригинальный ключ (inbox, sent и т.д.)
+        };
+      }
+    });
+
+    return finalDefinitions;
+  }, [counts, isInternal, foldersData]);
 
   const queryClient = useQueryClient();
 
-  const { mutate: moveItem } = useMutationQuery<{
-    id: number;
-    folder_id: number | null;
-  }>({
-    url: (data) => {
-      const route = isInternal ? ApiRoutes.INTERNAL_MOVE_FOLDER : ApiRoutes.MOVE_FOLDER;
-      return route.replace(isInternal ? ":id" : ":DOC_ID", String(data.id));
-    },
-    method: "PATCH",
-    messages: {
-      onSuccessCb: () => {
-        refetchFolders();
-        queryClient.invalidateQueries({
-          queryKey: [ApiRoutes.GET_CORRESPONDENCES],
-        });
-        window.dispatchEvent(new CustomEvent("correspondence-moved"));
-      },
-      success: "Перемещено",
-      onErrorCb: () => {
-        // Ошибка обрабатывается внутри useMutationQuery через toast
-      }
-    },
-  });
-
-  const handleDrop = useCallback(
-    (
-      targetFolderId: number | null,
-      draggedType: "folder" | "correspondence",
-      draggedId: number,
-    ) => {
-      if (draggedType === "folder" && targetFolderId === draggedId) return;
-      moveItem({
-        id: draggedId,
-        folder_id: targetFolderId,
-      });
-    },
-    [moveItem],
-  );
 
   const finalMenuItems = useMemo(
     () =>
@@ -234,7 +235,7 @@ export const useModuleSidebar = () => {
         deleteFolder,
         handleAddClick,
         onNavigate: (path: string) => navigate(path),
-        onDrop: handleDrop,
+        isInternal,
       }),
     [
       folders,
@@ -243,18 +244,18 @@ export const useModuleSidebar = () => {
       deleteFolder,
       navigate,
       handleAddClick,
-      handleDrop,
+      isInternal,
     ],
   );
 
   const activeKey = useMemo(() => {
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(search);
     const folderIdParam = urlParams.get("folder_id");
     if (folderIdParam) {
       return `folder-${folderIdParam}`;
     }
     return pathname;
-  }, [pathname]);
+  }, [pathname, search]);
 
   return {
     collapsed,
@@ -271,5 +272,6 @@ export const useModuleSidebar = () => {
     navigate,
     pathname,
     isInternal,
+    isFoldersLoading,
   };
 };

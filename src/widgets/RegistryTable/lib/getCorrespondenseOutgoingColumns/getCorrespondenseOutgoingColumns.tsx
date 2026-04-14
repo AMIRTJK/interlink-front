@@ -18,6 +18,7 @@ import { useMutationQuery } from "@shared/lib";
 
 export const useCorrespondenseOutgoingColumns = (
   type?: string,
+  onOpenFolderModal?: (id: number) => void,
 ): TableColumnsType => {
   const isInternal = type?.includes("internal");
 
@@ -80,27 +81,7 @@ export const useCorrespondenseOutgoingColumns = (
     },
   });
 
-  // Move to folder mutation
-  const { mutate: moveToFolder } = useMutationQuery<{
-    id: number;
-    folder_id: number;
-  }>({
-    url: (data) =>
-      ApiRoutes.FOLDER_CORRESPONDENCE.replace(":id", String(data.id)),
-    method: "PATCH",
-    messages: {
-      success: "Письмо перемещено в папку",
-      error: "Ошибка перемещения письма",
-      invalidate: [
-        ApiRoutes.GET_CORRESPONDENCES,
-        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
-        ApiRoutes.GET_INTERNAL_INCOMING,
-        ApiRoutes.GET_INTERNAL_OUTGOING,
-        ApiRoutes.GET_INTERNAL_COUNTERS,
-        ApiRoutes.GET_INTERNAL_TRASH,
-      ],
-    },
-  });
+
 
   // Delete mutation
   const { mutate: deleteCorrespondence } = useMutationQuery<{ id: number }>({
@@ -213,12 +194,9 @@ export const useCorrespondenseOutgoingColumns = (
             label: "В папку",
             icon: <img src={folderIcon} className="w-5 h-5" />,
             onClick: () => {
-              //cоздать модалку для выбора папки и отправки запроса с folder_id
-              console.log("Move to folder", record);
-              moveToFolder({
-                id: record.id,
-                folder_id: record.id,
-              });
+              if (onOpenFolderModal) {
+                onOpenFolderModal(record.id);
+              }
             },
           },
           {

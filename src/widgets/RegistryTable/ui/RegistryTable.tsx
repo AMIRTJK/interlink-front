@@ -9,8 +9,9 @@ import { ApiRoutes } from "@shared/api";
 import { StatusTabs } from "@features/StatusTabs";
 // import { DocView } from "@widgets/DocView";
 import wordIcon from "../../../assets/icons/word2.svg";
-import executionIcon from "../../../assets/icons/execution.svg";
 import { BookModal } from "@widgets/BookModal";
+import { MoveToFolderModal } from "@widgets/NewRegistry/ui/MoveToFolderModal";
+import executionIcon from "../../../assets/icons/execution.svg";
 import { AppRoutes } from "@shared/config";
 import {
   CorrespondenceResponse,
@@ -77,7 +78,10 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   const handleCreate = () => {
     navigate(`${location.pathname}/create`);
   };
-  const columns = useRegistryColumns(type);
+
+  const [folderModalRecordId, setFolderModalRecordId] = useState<number | null>(null);
+
+  const columns = useRegistryColumns(type, (id) => setFolderModalRecordId(id));
   const filters = getRegistryFilters(type);
 
   const { data: isAllowed, isPending } = useGetQuery({
@@ -94,6 +98,18 @@ export const RegistryTable = <T extends Record<string, unknown>>({
     () => (countersData as Record<string, any>)?.data || {},
     [countersData],
   );
+
+  const { data: foldersData } = useGetQuery({
+    url: type.includes("internal") ? ApiRoutes.GET_INTERNAL_FOLDERS : ApiRoutes.GET_FOLDERS,
+  });
+
+  const folders = useMemo(() => {
+    const apiData = (foldersData as any)?.data;
+    if (apiData && typeof apiData === "object" && !Array.isArray(apiData)) {
+      return apiData.custom_flat || [];
+    }
+    return Array.isArray(apiData) ? apiData : [];
+  }, [foldersData]);
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<readonly React.Key[]>(
     [],
@@ -290,24 +306,17 @@ export const RegistryTable = <T extends Record<string, unknown>>({
             scroll={{}}
             showSizeChanger={false}
             customPagination={true}
-            onRow={(record) => ({
-              draggable: true,
-              onDragStart: (e) => {
-                e.dataTransfer.setData("correspondenceId", String(record.id));
-                e.dataTransfer.effectAllowed = "move";
-                (e.currentTarget as HTMLElement).classList.add("dragging");
-              },
-              onDragEnd: (e) => {
-                (e.currentTarget as HTMLElement).classList.remove("dragging");
-              },
-              onClick: () => {
-                handleGetIdCorrespondence(record);
+            onRow={(record) => {
+              return {
+                onClick: () => {
+                  handleGetIdCorrespondence(record);
 
-                if (showExpandRow) {
-                  handleNavigateToLetter(record);
-                }
-              },
-            })}
+                  if (showExpandRow) {
+                    handleNavigateToLetter(record);
+                  }
+                },
+              };
+            }}
             expandable={
               !showExpandRow
                 ? {
@@ -333,6 +342,13 @@ export const RegistryTable = <T extends Record<string, unknown>>({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         toNavigate={() => handleNavigateToExecution(true)}
+      />
+      <MoveToFolderModal
+        isOpen={folderModalRecordId !== null}
+        onClose={() => setFolderModalRecordId(null)}
+        documentId={folderModalRecordId}
+        folders={folders}
+        isInternal={type.includes("internal")}
       />
     </>
   );

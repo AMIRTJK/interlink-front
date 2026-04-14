@@ -4,11 +4,14 @@ import { useCorrespondenseOutgoingColumns } from "./getCorrespondenseOutgoingCol
 
 export type RegistryType = "correspondence" | "crm" | "primary-documents";
 
-export const useRegistryColumns = (type: string): TableColumnsType<any> => {
+export const useRegistryColumns = (
+  type: string,
+  onOpenFolderModal?: (id: number) => void
+): TableColumnsType<any> => {
   // EXTERNAL
-  const mainExternalColumns = useCorrespondenseIncomingColumns(type);
-  const incomingColumns = useCorrespondenseIncomingColumns(type);
-  const outgoingColumns = useCorrespondenseOutgoingColumns(type);
+  const mainExternalColumns = useCorrespondenseIncomingColumns(type, onOpenFolderModal);
+  const incomingColumns = useCorrespondenseIncomingColumns(type, onOpenFolderModal);
+  const outgoingColumns = useCorrespondenseOutgoingColumns(type, onOpenFolderModal);
 
   switch (type) {
     case "external-incoming":

@@ -16,14 +16,13 @@ export const SystemFolderLabel: React.FC<IProps> = ({
   onNavigate,
   collapsed: _collapsed,
 }) => {
-
   return (
     <div className="flex items-center w-full">
       <div
         className="flex items-center flex-1 overflow-hidden cursor-pointer"
         onClick={() => {
-          if (definition.path) {
-            onNavigate(definition.path);
+          if (definition?.path) {
+            onNavigate(definition?.path);
           }
         }}
       >
@@ -31,7 +30,7 @@ export const SystemFolderLabel: React.FC<IProps> = ({
       </div>
 
       <div className="w-auto shrink-0 flex items-center justify-center ml-1">
-        <Count count={definition.count} />
+        <Count count={definition?.count} />
       </div>
 
       <div className="w-9" />

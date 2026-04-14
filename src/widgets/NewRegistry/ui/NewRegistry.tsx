@@ -149,11 +149,16 @@ export const NewRegistry = ({
   });
 
   const { data: foldersData } = useGetQuery({
-    url: ApiRoutes.GET_FOLDERS,
+    url: isInternal ? ApiRoutes.GET_INTERNAL_FOLDERS : ApiRoutes.GET_FOLDERS,
     params: {},
   });
 
-  const folders = useMemo(() => foldersData?.data || [], [foldersData]);
+  const folders = useMemo(() => {
+    if (isInternal) {
+      return foldersData?.data?.custom_flat || [];
+    }
+    return foldersData?.data || [];
+  }, [foldersData, isInternal]);
 
   const { data: responseData } = useGetQuery({
     url: fetchUrl,

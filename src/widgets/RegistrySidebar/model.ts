@@ -13,6 +13,7 @@ export interface IFolderDefinition {
   path: string;
   icon: React.ReactNode;
   count?: number;
+  slug?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -26,7 +27,7 @@ export interface IBuildMenuTreeParams {
   deleteFolder: (data: { id: number }) => void;
   handleAddClick: (parentId: number | null) => void;
   onNavigate: (path: string) => void;
-  onDrop: (targetFolderId: number | null, draggedType: "folder" | "correspondence", draggedId: number) => void;
+  isInternal: boolean;
 }
 
 export interface IFolderLabelProps {
@@ -36,11 +37,6 @@ export interface IFolderLabelProps {
   definition?: IFolderDefinition;
   menuActions: MenuProps["items"];
   onNavigate: (path: string) => void;
-  onDragStart: (e: React.DragEvent) => void;
-  onDragOver: (e: React.DragEvent) => void;
-  onDragLeave: (e: React.DragEvent) => void;
-  onDrop: (e: React.DragEvent) => void;
-  isDraggable: boolean;
 }
 
 

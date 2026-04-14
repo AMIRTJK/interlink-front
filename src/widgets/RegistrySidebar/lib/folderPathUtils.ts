@@ -38,6 +38,7 @@ export const buildFolderPath = (
   folders: IFolder[],
   definitions: Record<string, any>,
   definition?: { path: string },
+  isInternal?: boolean,
 ): string => {
   // Путь для системной папки
   if (definition?.path) {
@@ -54,7 +55,11 @@ export const buildFolderPath = (
     }
   }
 
-  return `${ROUTES.CORRESPONDENCE_BASE}?folder_id=${folder.id}`;
+  const baseRoute = isInternal
+    ? ROUTES.CORRESPONDENCE_INTERNAL_INCOMING
+    : ROUTES.CORRESPONDENCE_BASE;
+
+  return `${baseRoute}?folder_id=${folder.id}`;
 };
 
 export const canHaveSubfolders = (folderName: string): boolean => {

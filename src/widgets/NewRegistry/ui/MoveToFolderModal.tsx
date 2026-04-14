@@ -34,6 +34,10 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
         ? ApiRoutes.INTERNAL_MOVE_FOLDER.replace(":id", String(data.id))
         : ApiRoutes.FOLDER_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "PATCH",
+    transformBody: (data) => ({
+      folder: data.folder,
+      reg_seq: data.reg_seq,
+    }),
     messages: {
       success: "Документ успешно перемещен",
       invalidate: [
@@ -43,7 +47,11 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
         ApiRoutes.GET_INTERNAL_OUTGOING,
         ApiRoutes.GET_INTERNAL_DRAFTS
       ],
-      onSuccessCb: () => onClose(),
+      onSuccessCb: () => {
+        onClose();
+        setSelectedFolder(null);
+        setSearchQuery("");
+      },
     },
   });
 
