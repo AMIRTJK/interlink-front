@@ -20,22 +20,22 @@ export const getModuleItems = (
         <img src={ProfileIcon} alt="profile" />
       ) : null,
   },
-  {
-    key: "/modules/temp-organization",
-    label: "Организация",
-    icon:
-      variant === "horizontal" || variant === "full" || variant === "ios" ? (
-        <img src={OrganizationIcon} alt="organization" />
-      ) : null,
-  },
-  {
-    key: "/modules/temp-docs_main",
-    label: "Основные документы",
-    icon:
-      variant === "horizontal" || variant === "full" || variant === "ios" ? (
-        <img src={MainDocumentsIcon} alt="main documents" />
-      ) : null,
-  },
+  // {
+  //   key: "/modules/temp-organization",
+  //   label: "Организация",
+  //   icon:
+  //     variant === "horizontal" || variant === "full" || variant === "ios" ? (
+  //       <img src={OrganizationIcon} alt="organization" />
+  //     ) : null,
+  // },
+  // {
+  //   key: "/modules/temp-docs_main",
+  //   label: "Основные документы",
+  //   icon:
+  //     variant === "horizontal" || variant === "full" || variant === "ios" ? (
+  //       <img src={MainDocumentsIcon} alt="main documents" />
+  //     ) : null,
+  // },
   {
     key: AppRoutes.CORRESPONDENCE,
     label: "Корреспонденция",
@@ -57,43 +57,43 @@ export const getModuleItems = (
               <FileTextOutlined />
             ) : null,
         },
-        {
-          key: AppRoutes.CORRESPONDENCE_INCOMING,
-          label: "Внешняя корреспонденция",
-          requiredRole: ["correspondence.view"],
-          icon:
-            variant === "modern" || variant === "ios" ? (
-              <GlobalOutlined />
-            ) : null,
-        },
+        // {
+        //   key: AppRoutes.CORRESPONDENCE_INCOMING,
+        //   label: "Внешняя корреспонденция",
+        //   requiredRole: ["correspondence.view"],
+        //   icon:
+        //     variant === "modern" || variant === "ios" ? (
+        //       <GlobalOutlined />
+        //     ) : null,
+        // },
       ],
     }),
   },
-  {
-    key: "/modules/temp-docs_primary",
-    label: "Первичные документы",
-    requiredRole: ["primary_documents.view"],
-    icon:
-      variant === "horizontal" || variant === "full" || variant === "ios" ? (
-        <img src={PrimaryDocumentsIcon} alt="primary documents" />
-      ) : null,
-  },
-  {
-    key: "/modules/temp-apps",
-    label: "Заявки",
-    requiredRole: ["apps.view"],
-    icon:
-      variant === "horizontal" || variant === "full" || variant === "ios" ? (
-        <img src={ApplicationsIcon} alt="request" />
-      ) : null,
-  },
-  {
-    key: "/modules/temp-crm",
-    label: "CRM",
-    requiredRole: ["crm.view"],
-    icon:
-      variant === "horizontal" || variant === "full" || variant === "ios" ? (
-        <img src={CrmIcon} alt="crm" />
-      ) : null,
-  },
+  // {
+  //   key: "/modules/temp-docs_primary",
+  //   label: "Первичные документы",
+  //   requiredRole: ["primary_documents.view"],
+  //   icon:
+  //     variant === "horizontal" || variant === "full" || variant === "ios" ? (
+  //       <img src={PrimaryDocumentsIcon} alt="primary documents" />
+  //     ) : null,
+  // },
+  // {
+  //   key: "/modules/temp-apps",
+  //   label: "Заявки",
+  //   requiredRole: ["apps.view"],
+  //   icon:
+  //     variant === "horizontal" || variant === "full" || variant === "ios" ? (
+  //       <img src={ApplicationsIcon} alt="request" />
+  //     ) : null,
+  // },
+  // {
+  //   key: "/modules/temp-crm",
+  //   label: "CRM",
+  //   requiredRole: ["crm.view"],
+  //   icon:
+  //     variant === "horizontal" || variant === "full" || variant === "ios" ? (
+  //       <img src={CrmIcon} alt="crm" />
+  //     ) : null,
+  // },
 ];
