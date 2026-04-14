@@ -25,6 +25,7 @@ interface IProps {
   handleAddClick: (pId: number | null) => void;
   navigate: (p: string) => void;
   isInternal: boolean;
+  isLoading?: boolean;
 }
 
 export const ModuleSidebarVertical: React.FC<IProps> = ({

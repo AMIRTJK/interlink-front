@@ -16,6 +16,7 @@ interface IProps {
   finalMenuItems: MenuItem[];
   activeKey: string;
   handleAddClick: (pId: number | null) => void;
+  isLoading?: boolean;
 }
 
 export const ModuleSidebarHorizontal: React.FC<IProps> = ({

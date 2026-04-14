@@ -13,7 +13,6 @@ import {
   getRootFolders,
   sortMenuItems,
 } from "./folderTreeUtils";
-import { createDragHandlers } from "./dragHandlers";
 import { createFolderMenuActions } from "./menuActionBuilder";
 import { FolderLabel } from "./FolderLabel";
 import { SystemFolderLabel } from "./SystemFolderLabel";
@@ -28,10 +27,8 @@ export const buildMenuTree = ({
   deleteFolder,
   handleAddClick,
   onNavigate,
-  onDrop,
   isInternal,
 }: IBuildMenuTreeParams): MenuItem[] => {
-  const dragHandlers = createDragHandlers();
   const groupedFolders = groupFoldersByParent(folders);
   
   // Отладочный лог удален, но добавлена проверка типов
@@ -109,12 +106,6 @@ export const buildMenuTree = ({
         });
     }
 
-    const isDraggable = !isSystemFolder;
-    const handleDragStart = (e: React.DragEvent) =>
-      dragHandlers.handleDragStart(e, folder.id);
-    const handleDrop = (e: React.DragEvent) =>
-      dragHandlers.handleDrop(e, folder.id, onDrop);
-
     return {
       key: folderKey,
       folderName: folder.name,
@@ -136,11 +127,6 @@ export const buildMenuTree = ({
           definition={definition}
           menuActions={isSystemFolder ? [] : menuActions}
           onNavigate={onNavigate}
-          onDragStart={handleDragStart}
-          onDragOver={dragHandlers.handleDragOver}
-          onDragLeave={dragHandlers.handleDragLeave}
-          onDrop={handleDrop}
-          isDraggable={isDraggable}
         />
       ),
     };
@@ -158,8 +144,6 @@ export const buildMenuTree = ({
       )
     ) {
       const def = definitions[name];
-      const handleSystemDrop = (e: React.DragEvent) =>
-        dragHandlers.handleDrop(e, def.slug || name, onDrop);
 
       rootItems.push({
         key: def.key || name,
@@ -171,9 +155,6 @@ export const buildMenuTree = ({
             definition={def}
             collapsed={collapsed}
             onNavigate={onNavigate}
-            onDragOver={dragHandlers.handleDragOver}
-            onDragLeave={dragHandlers.handleDragLeave}
-            onDrop={handleSystemDrop}
           />
         ),
         path: def.path,

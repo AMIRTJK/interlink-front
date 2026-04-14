@@ -42,6 +42,7 @@ interface IUseMutationQueryOptions<TRequest = TBaseRequest, TData = any, TSecond
     onSuccessCb?: (data: any) => void;
     onErrorCb?: () => void;
   };
+  transformBody?: (data: TRequest) => any;
   queryParams?: Record<string, unknown>;
   queryOptions?: UseMutationOptions<any, AxiosError, TRequest, unknown>;
   secondQuery?: ISecondMutationQuery<TData, TSecondData>;
@@ -67,7 +68,8 @@ export const useMutationQuery = <
     skipAuth = false,
     preload,
     preloadConditional,
-    queryParams
+    queryParams,
+    transformBody
   } = options;
   
   const queryClient = useQueryClient();
@@ -117,7 +119,7 @@ export const useMutationQuery = <
       const firstResponse = await _axios<IApiResponse<TData>>({
         url: firstUrl,
         method,
-        data: requestData,
+        data: transformBody ? transformBody(requestData) : requestData,
         params: queryParams,
         suppressErrorToast: Boolean(messages?.error),
         skipAuth,

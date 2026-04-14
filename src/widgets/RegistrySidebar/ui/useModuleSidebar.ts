@@ -224,59 +224,6 @@ export const useModuleSidebar = () => {
 
   const queryClient = useQueryClient();
 
-  const { mutate: moveItem } = useMutationQuery<{
-    id: number;
-    folder: string;
-    reg_seq: number | null;
-  }>({
-    url: (data) => {
-      const route = isInternal ? ApiRoutes.INTERNAL_MOVE_FOLDER : ApiRoutes.FOLDER_CORRESPONDENCE;
-      return route.replace(":id", String(data.id));
-    },
-    method: "PATCH",
-    messages: {
-      onSuccessCb: () => {
-        refetchFolders();
-        queryClient.invalidateQueries({
-          queryKey: [
-            ApiRoutes.GET_CORRESPONDENCES,
-            ApiRoutes.GET_INTERNAL_INCOMING,
-            ApiRoutes.GET_INTERNAL_OUTGOING,
-            ApiRoutes.GET_INTERNAL_DRAFTS,
-          ],
-        });
-        window.dispatchEvent(new CustomEvent("correspondence-moved"));
-      },
-      success: "Перемещено",
-    },
-  });
-
-  const handleDrop = useCallback(
-    (
-      targetFolderIdOrKey: number | string | null,
-      draggedType: "folder" | "correspondence",
-      draggedId: number,
-    ) => {
-      if (draggedType === "folder") return; // Перемещение папок пока не поддерживаем
-
-      let targetFolderValue = String(targetFolderIdOrKey);
-
-      // Если это число (id кастомной папки), поищем её слаг
-      if (typeof targetFolderIdOrKey === "number") {
-        const targetFolder = folders.find((f: any) => f.id === targetFolderIdOrKey);
-        if (targetFolder?.slug) {
-          targetFolderValue = targetFolder.slug;
-        }
-      }
-
-      moveItem({
-        id: draggedId,
-        folder: targetFolderValue,
-        reg_seq: null, // Автоматическая нумерация
-      });
-    },
-    [moveItem, folders],
-  );
 
   const finalMenuItems = useMemo(
     () =>
@@ -288,7 +235,6 @@ export const useModuleSidebar = () => {
         deleteFolder,
         handleAddClick,
         onNavigate: (path: string) => navigate(path),
-        onDrop: handleDrop,
         isInternal,
       }),
     [
@@ -298,7 +244,6 @@ export const useModuleSidebar = () => {
       deleteFolder,
       navigate,
       handleAddClick,
-      handleDrop,
       isInternal,
     ],
   );

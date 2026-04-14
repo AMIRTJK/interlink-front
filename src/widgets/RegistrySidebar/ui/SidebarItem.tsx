@@ -217,7 +217,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
        >
          {isExpanded && item.children && (
            <div className="flex flex-col gap-1 mt-1">
-             {item.children.map((child, idx) => (
+             {item.children.map((child: MenuItem, idx: number) => (
                <SidebarItem
                  key={child.key || `sub-${idx}`}
                  item={child}
