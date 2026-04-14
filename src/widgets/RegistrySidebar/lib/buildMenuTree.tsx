@@ -29,9 +29,16 @@ export const buildMenuTree = ({
   handleAddClick,
   onNavigate,
   onDrop,
+  isInternal,
 }: IBuildMenuTreeParams): MenuItem[] => {
   const dragHandlers = createDragHandlers();
   const groupedFolders = groupFoldersByParent(folders);
+  
+  // Отладочный лог удален, но добавлена проверка типов
+  const getGrouped = (id: number | string | null | undefined) => {
+    if (!id) return [];
+    return groupedFolders.get(Number(id)) || [];
+  };
 
   const buildFullItem = (
     folder: IFolder,
@@ -45,9 +52,9 @@ export const buildMenuTree = ({
     const definition = definitions[folder.name];
     const isSystemFolder = !!definition;
     const folderKey = definition ? definition.key : `folder-${folder.id}`;
-    const folderPath = buildFolderPath(folder, folders, definitions, definition);
+    const folderPath = buildFolderPath(folder, folders, definitions, definition, isInternal);
 
-    const childFolders = groupedFolders.get(folder.id) || [];
+    const childFolders = getGrouped(folder.id);
     const nestedFolders = childFolders
       .map((f) => buildFullItem(f, new Set(visited), depth + 1))
       .filter(Boolean) as MenuItem[];
@@ -61,7 +68,7 @@ export const buildMenuTree = ({
         folderName: "Создать новую папку",
         icon: <PlusOutlined />,
         label: (
-          <div className="text-[#0037AF] hover:text-[#32063bcc] crtChildrenFolderHidden">
+          <div className="text-[#0037AF] hover:text-[#32063bcc]">
             Добавить
           </div>
         ),
@@ -151,8 +158,11 @@ export const buildMenuTree = ({
       )
     ) {
       const def = definitions[name];
+      const handleSystemDrop = (e: React.DragEvent) =>
+        dragHandlers.handleDrop(e, def.slug || name, onDrop);
+
       rootItems.push({
-        key: def.key,
+        key: def.key || name,
         folderName: name,
         icon: def.icon,
         label: (
@@ -161,6 +171,9 @@ export const buildMenuTree = ({
             definition={def}
             collapsed={collapsed}
             onNavigate={onNavigate}
+            onDragOver={dragHandlers.handleDragOver}
+            onDragLeave={dragHandlers.handleDragLeave}
+            onDrop={handleSystemDrop}
           />
         ),
         path: def.path,

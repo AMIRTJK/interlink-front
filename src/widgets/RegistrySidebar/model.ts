@@ -27,6 +27,7 @@ export interface IBuildMenuTreeParams {
   handleAddClick: (parentId: number | null) => void;
   onNavigate: (path: string) => void;
   onDrop: (targetFolderId: number | null, draggedType: "folder" | "correspondence", draggedId: number) => void;
+  isInternal: boolean;
 }
 
 export interface IFolderLabelProps {

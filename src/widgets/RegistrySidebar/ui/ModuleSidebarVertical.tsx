@@ -1,5 +1,5 @@
 import React from "react";
-import { motion, LayoutGroup } from "framer-motion";
+import { motion, LayoutGroup, AnimatePresence } from "framer-motion";
 import { Layout, Button, Tooltip } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { AppRoutes } from "@shared/config";
@@ -115,18 +115,26 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
           variants={containerVariants}
         >
           <LayoutGroup id="sidebar-items">
-            {finalMenuItems.map((item, index) => (
-              <motion.div key={item.key} variants={itemWrapperVariants}>
-                <SidebarItem
-                  item={item}
-                  isActive={[activeKey].includes(item.key as string)}
-                  collapsed={collapsed}
-                  activeKey={activeKey}
-                  index={index}
-                  variant={variant}
-                />
-              </motion.div>
-            ))}
+            <AnimatePresence>
+              {finalMenuItems.map((item, index) => (
+                <motion.div 
+                  key={item.key} 
+                  variants={itemWrapperVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                >
+                  <SidebarItem
+                    item={item}
+                    isActive={[activeKey].includes(item.key as string)}
+                    collapsed={collapsed}
+                    activeKey={activeKey}
+                    index={index}
+                    variant={variant}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </LayoutGroup>
         </motion.div>
 
