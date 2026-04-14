@@ -290,24 +290,30 @@ export const RegistryTable = <T extends Record<string, unknown>>({
             scroll={{}}
             showSizeChanger={false}
             customPagination={true}
-            onRow={(record) => ({
-              draggable: true,
-              onDragStart: (e) => {
-                e.dataTransfer.setData("correspondenceId", String(record.id));
-                e.dataTransfer.effectAllowed = "move";
-                (e.currentTarget as HTMLElement).classList.add("dragging");
-              },
-              onDragEnd: (e) => {
-                (e.currentTarget as HTMLElement).classList.remove("dragging");
-              },
-              onClick: () => {
-                handleGetIdCorrespondence(record);
+            onRow={(record) => {
+              const isDraggable = !type.includes("internal-incoming") && !type.includes("internal-outgoing");
 
-                if (showExpandRow) {
-                  handleNavigateToLetter(record);
-                }
-              },
-            })}
+              return {
+                draggable: isDraggable,
+                onDragStart: (e) => {
+                  if (!isDraggable) return;
+                  e.dataTransfer.setData("correspondenceId", String(record.id));
+                  e.dataTransfer.effectAllowed = "move";
+                  (e.currentTarget as HTMLElement).classList.add("dragging");
+                },
+                onDragEnd: (e) => {
+                  if (!isDraggable) return;
+                  (e.currentTarget as HTMLElement).classList.remove("dragging");
+                },
+                onClick: () => {
+                  handleGetIdCorrespondence(record);
+
+                  if (showExpandRow) {
+                    handleNavigateToLetter(record);
+                  }
+                },
+              };
+            }}
             expandable={
               !showExpandRow
                 ? {
