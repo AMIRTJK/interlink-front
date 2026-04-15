@@ -28,7 +28,7 @@ export type TTab = "actions" | "comments" | "chat";
 
 export const TABS_LIST: { key: TTab; label: string }[] = [
   { key: "actions", label: "Действия" },
-  { key: "comments", label: "Комментарии" },
+  // { key: "comments", label: "Комментарии" },
   { key: "chat", label: "Чат" },
 ];
 
