@@ -2,8 +2,6 @@ export const SYSTEM_FOLDERS = {
   INCOMING: "Входящие",
   OUTGOING: "Исходящие",
   DRAFTS: "Черновики",
-  ARCHIVE: "Архив",
-  PINNED: "Закреплённые",
   TRASH: "Корзина",
 } as const;
 
@@ -11,7 +9,7 @@ export const MAX_FOLDER_DEPTH = 5;
 
 export const FOLDER_ORDER = {
   TOP: [SYSTEM_FOLDERS.INCOMING, SYSTEM_FOLDERS.OUTGOING, SYSTEM_FOLDERS.DRAFTS],
-  BOTTOM: [SYSTEM_FOLDERS.ARCHIVE, SYSTEM_FOLDERS.PINNED, SYSTEM_FOLDERS.TRASH],
+  BOTTOM: [SYSTEM_FOLDERS.TRASH],
 } as const;
 
 export const ROUTES = {
