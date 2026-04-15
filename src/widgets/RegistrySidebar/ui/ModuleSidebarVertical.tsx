@@ -139,9 +139,9 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
           </LayoutGroup>
         </motion.div>
 
-        {!collapsed && (
+        {/* {!collapsed && (
           <div className="text-xs text-gray-400 text-center">AM | KM</div>
-        )}
+        )} */}
       </div>
     </Sider>
   );

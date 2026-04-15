@@ -14,8 +14,7 @@ export const getRootSystemFolder = (
 
     if (
       currentFolder.name === SYSTEM_FOLDERS.INCOMING ||
-      currentFolder.name === SYSTEM_FOLDERS.OUTGOING ||
-      currentFolder.name === SYSTEM_FOLDERS.ARCHIVE
+      currentFolder.name === SYSTEM_FOLDERS.OUTGOING
     ) {
       return currentFolder.name;
     }
@@ -65,7 +64,6 @@ export const buildFolderPath = (
 export const canHaveSubfolders = (folderName: string): boolean => {
   return (
     folderName === SYSTEM_FOLDERS.INCOMING ||
-    folderName === SYSTEM_FOLDERS.OUTGOING ||
-    folderName === SYSTEM_FOLDERS.ARCHIVE
+    folderName === SYSTEM_FOLDERS.OUTGOING
   );
 };

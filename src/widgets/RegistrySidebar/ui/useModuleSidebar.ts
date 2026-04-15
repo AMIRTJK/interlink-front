@@ -136,7 +136,7 @@ export const useModuleSidebar = () => {
 
   const definitions = useMemo(() => {
     // Дефолтные ключи на случай, если бэкенд ещё не прислал массив system
-    const defaultFolderKeys = ["inbox", "sent", "drafts", "trash", "archive", "pinned"];
+    const defaultFolderKeys = ["inbox", "sent", "drafts", "trash"];
     const systemFoldersKeys = (foldersData?.data?.system as string[]) || defaultFolderKeys;
 
     const baseMap: Record<string, any> = {
@@ -169,28 +169,7 @@ export const useModuleSidebar = () => {
         count: isInternal ? counts.drafts : counts.drafts_total || 0,
         path: AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS,
       },
-      archive: {
-        title: SYSTEM_FOLDERS.ARCHIVE,
-        key: isInternal
-          ? AppRoutes.CORRESPONDENCE_INTERNAL_ARCHIVE
-          : AppRoutes.CORRESPONDENCE_ARCHIVE,
-        icon: sideBarIcons.archiveIcon,
-        count: counts.archived_total,
-        path: isInternal
-          ? AppRoutes.CORRESPONDENCE_INTERNAL_ARCHIVE
-          : AppRoutes.CORRESPONDENCE_ARCHIVE,
-      },
-      pinned: {
-        title: SYSTEM_FOLDERS.PINNED,
-        key: isInternal
-          ? AppRoutes.CORRESPONDENCE_INTERNAL_PINNED
-          : AppRoutes.CORRESPONDENCE_PINNED,
-        icon: sideBarIcons.pinnedIcon,
-        count: counts.pinned_total,
-        path: isInternal
-          ? AppRoutes.CORRESPONDENCE_INTERNAL_PINNED
-          : AppRoutes.CORRESPONDENCE_PINNED,
-      },
+
       trash: {
         title: SYSTEM_FOLDERS.TRASH,
         key: isInternal
