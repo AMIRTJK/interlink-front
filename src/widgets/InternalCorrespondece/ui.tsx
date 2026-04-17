@@ -329,9 +329,11 @@ export const InternalCorrespondece: React.FC<IProps> = ({
   );
 
   const hasQRInSelectedVersion = useMemo(() => {
-    if (!selectedVersionForSign || !selectedVersionForSign.content)
+    if (!selectedVersionForSign || !selectedVersionForSign.content) {
       return false;
-    return selectedVersionForSign.content.includes('<img src="data:image');
+    }
+    const qrRegex = /<img[^>]+src=["']data:image\/[^"']+["']/i;
+    return qrRegex.test(selectedVersionForSign.content);
   }, [selectedVersionForSign]);
 
   const handleSelectVersion = (content: string, versionId: string | number) => {
