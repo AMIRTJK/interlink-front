@@ -23,7 +23,7 @@ export const SmartTabs: React.FC<IProps> = ({
 }) => {
   return (
     <div className="w-full overflow-x-auto no-scrollbar py-1 px-1">
-      <div className="flex justify-between items-center gap-2">
+      <div className="flex justify-between items-center gap-2 px-1 overflow-hidden">
         {items.map((tab) => {
           const isActive = activeKey === tab.key;
 
@@ -36,7 +36,7 @@ export const SmartTabs: React.FC<IProps> = ({
               key={tab.key}
               onClick={() => onChange(tab.key)}
               type="button"
-              className={`relative cursor-pointer px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ease-out whitespace-nowrap border border-transparent select-none ${
+              className={`w-1/2  relative cursor-pointer px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ease-out whitespace-nowrap border border-transparent select-none ${
                 isActive ? "bg-[#F87171] text-white scale-105" : inactiveClass
               }`}
             >
