@@ -34,22 +34,26 @@ const STATUS_CONFIG: Record<string, any> = {
     icon: <Clock size={14} />,
     gradient: "from-amber-500 to-amber-600",
   },
-  ["to-approve"]: {
+  approved: {
     label: "Согласование",
     icon: <Handshake size={14} />,
     gradient: "from-emerald-500 to-emerald-600",
-    apiUrl: ApiRoutes.GET_INTERNAL_TO_APPROVE,
+    apiUrl: ApiRoutes.GET_INTERNAL_PROCESSED,
+    paramKey: "type",
+    omitStatus: true,
   },
   to_approve: {
     label: "Согласование",
     icon: <Handshake size={14} />,
     gradient: "from-emerald-500 to-emerald-600",
   },
-  ["to-sign"]: {
+  signed: {
     label: "На подпись",
     icon: <Pencil size={14} />,
     gradient: "from-rose-500 to-rose-600",
-    apiUrl: ApiRoutes.GET_INTERNAL_TO_SIGN,
+    apiUrl: ApiRoutes.GET_INTERNAL_PROCESSED,
+    paramKey: "type",
+    omitStatus: true,
   },
   to_sign: {
     label: "На подпись",
@@ -81,7 +85,7 @@ const STATUS_CONFIG: Record<string, any> = {
 
 const REGISTRY_STATUS_MAP: Record<string, string[]> = {
   incoming: ["analysis", "completed"],
-  outgoing: ["to-approve", "to-sign", "sent"],
+  outgoing: ["approved", "signed", "sent"],
   default: ["draft", "in-progress", "completed"],
 };
 
@@ -125,12 +129,16 @@ export const NewRegistry = ({
     if (type === "internal-incoming") return "analysis";
     if (type === "internal-outgoing") return "sent";
     if (type === "internal-drafts") return "draft";
-    if (type === "internal-to-sign") return "to-sign";
-    if (type === "internal-to-approve") return "to-approve";
+    if (type === "internal-to-sign") return "signed";
+    if (type === "internal-to-approve") return "approved";
     return "";
   }, [type, searchParams.folder_id]);
 
-  const currentTab = searchParams.status || defaultStatus || activeStatusKeys[0];
+  const currentTab =
+    searchParams.type ||
+    searchParams.status ||
+    defaultStatus ||
+    activeStatusKeys[0];
 
   const fetchUrl = useMemo(() => {
     const configUrl = STATUS_CONFIG[currentTab]?.apiUrl;
@@ -160,15 +168,27 @@ export const NewRegistry = ({
     return foldersData?.data || [];
   }, [foldersData, isInternal]);
 
+  const currentConfig = STATUS_CONFIG[currentTab] || {};
+
+  const tableQueryParams: Record<string, any> = {
+    ...extraParams,
+    ...searchParams,
+    ...(currentConfig.apiParams || {}),
+    page: searchParams.page || 1,
+    per_page: searchParams.per_page || 9,
+  };
+
+  if (currentConfig.paramKey === "type") {
+    tableQueryParams.type = currentTab;
+    delete tableQueryParams.status;
+  } else if (!currentConfig.omitStatus) {
+    tableQueryParams.status = currentTab;
+    delete tableQueryParams.type;
+  }
+
   const { data: responseData } = useGetQuery({
     url: fetchUrl,
-    params: {
-      ...extraParams,
-      ...searchParams,
-      status: currentTab,
-      page: searchParams.page || 1,
-      per_page: searchParams.per_page || 9,
-    },
+    params: tableQueryParams,
   });
 
   const breadcrumbs = useMemo(() => {
@@ -204,7 +224,10 @@ export const NewRegistry = ({
         if (folder) {
           if (folder.name !== rootLabel) {
             const siblings = folders
-              .filter((f: any) => f.parent_id === folder.parent_id && f.id !== folder.id)
+              .filter(
+                (f: any) =>
+                  f.parent_id === folder.parent_id && f.id !== folder.id,
+              )
               .map((s: any) => ({
                 label: s.name,
                 onClick: () => setParams("folder_id", String(s.id)),
@@ -218,12 +241,12 @@ export const NewRegistry = ({
               }));
 
             const allOptions: any[] = [];
-            
+
             if (subfolders.length > 0) {
               allOptions.push({ label: "Вложенные папки", isHeader: true });
               allOptions.push(...subfolders);
             }
-            
+
             if (siblings.length > 0) {
               if (allOptions.length > 0) allOptions.push({ isDivider: true });
               allOptions.push({ label: "Другие папки", isHeader: true });
@@ -251,16 +274,21 @@ export const NewRegistry = ({
     return items;
   }, [type, searchParams.folder_id, folders, setParams]);
 
-  const documents = (responseData as any)?.data?.data || (responseData as any)?.data || [];
+  const documents =
+    (responseData as any)?.data?.data || (responseData as any)?.data || [];
   // Laravel часто вкладывает мета-данные в объект meta
-  const meta = (responseData as any)?.data?.meta || (responseData as any)?.data || {};
-  const counts = useMemo(() => (countersData as any)?.data || {}, [countersData]);
+  const meta =
+    (responseData as any)?.data?.meta || (responseData as any)?.data || {};
+  const counts = useMemo(
+    () => (countersData as any)?.data || {},
+    [countersData],
+  );
 
   // Запрашиваем мета-данные для счетчиков проблемных вкладок (бэкенд может отдавать 0)
   const tabsToFetch = useMemo(() => {
     return activeStatusKeys.filter((key) => {
       // Принудительно запрашиваем мета-данные для счетчиков проблемных вкладок
-      if (["to-approve", "to-sign", "sent", "analysis"].includes(key)) {
+      if (["approved", "signed", "sent", "analysis"].includes(key)) {
         return true;
       }
       const existingCount =
@@ -275,21 +303,35 @@ export const NewRegistry = ({
 
   const fallbackQueries = useQueries({
     queries: tabsToFetch.map((key) => {
-      const configUrl = STATUS_CONFIG[key]?.apiUrl || fetchUrl;
+      const config = STATUS_CONFIG[key] || {};
+      const configUrl = config.apiUrl || fetchUrl;
+      const configParams = config.apiParams || {};
+
+      const queryParams: Record<string, any> = {
+        ...extraParams,
+        ...configParams,
+        per_page: 1,
+      };
+
+      if (config.paramKey === "type") {
+        queryParams.type = key;
+      } else if (!config.omitStatus) {
+        queryParams.status = key;
+      }
+
       return {
-        queryKey: [configUrl, { status: key, ...extraParams, per_page: 1 }],
+        queryKey: [configUrl, queryParams],
         queryFn: async () => {
           const res = await _axios.get(configUrl, {
-            params: { status: key, ...extraParams, per_page: 1 },
+            params: queryParams,
           });
           const serverData = res.data;
-          // Пытаемся достать total из различных вложенностей (Laravel Resource wrapper)
-          const fetchedMeta = 
-            serverData?.data?.meta || 
-            serverData?.meta || 
-            serverData?.data || 
+          const fetchedMeta =
+            serverData?.data?.meta ||
+            serverData?.meta ||
+            serverData?.data ||
             serverData;
-            
+
           return { key, total: fetchedMeta?.total ?? 0 };
         },
         staleTime: 5000,
@@ -308,18 +350,17 @@ export const NewRegistry = ({
     return obj;
   }, [fallbackQueries]);
 
-
   const statusTabs = useMemo(() => {
     return activeStatusKeys
       .map((key) => {
         const config = STATUS_CONFIG[key];
         if (!config) return null;
-        let count = 
+        let count =
           fallbackCounts[key] ??
-          counts[key] ?? 
-          counts[key.replace("-", "_")] ?? 
-          counts[`${key}_total`] ?? 
-          counts[`${key.replace("-", "_")}_total`] ?? 
+          counts[key] ??
+          counts[key.replace("-", "_")] ??
+          counts[`${key}_total`] ??
+          counts[`${key.replace("-", "_")}_total`] ??
           counts[`${key}_count`] ??
           0;
 
@@ -338,10 +379,17 @@ export const NewRegistry = ({
       .filter(Boolean);
   }, [counts, activeStatusKeys, currentTab, meta.total, fallbackCounts]);
 
-
-
   const handleTabChange = (statusId: string) => {
-    setParams("status", statusId);
+    const config = STATUS_CONFIG[statusId] || {};
+
+    if (config.paramKey === "type") {
+      setParams("type", statusId);
+      setParams("status", undefined);
+    } else {
+      setParams("status", statusId);
+      setParams("type", undefined);
+    }
+
     setParams("page", 1);
   };
 
@@ -408,7 +456,8 @@ export const NewRegistry = ({
         statusConfig={STATUS_CONFIG}
         fieldConfig={{
           ...fieldConfig,
-          getActions: (record: any) => fieldConfig.getActions(record, handleOpenMoveModal),
+          getActions: (record: any) =>
+            fieldConfig.getActions(record, handleOpenMoveModal),
         }}
         breadcrumbs={breadcrumbs}
       />
