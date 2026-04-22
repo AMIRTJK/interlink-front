@@ -79,6 +79,7 @@ export const ApiRoutes = {
   GET_INTERNAL_DRAFTS: "/api/v1/internal-correspondences/drafts",
   GET_INTERNAL_TO_SIGN: "/api/v1/internal-correspondences/to-sign",
   GET_INTERNAL_TO_APPROVE: "/api/v1/internal-correspondences/to-approve",
+  GET_INTERNAL_PROCESSED: "/api/v1/internal-correspondences/processed",
   GET_INTERNAL_TRASH: "/api/v1/internal-correspondences/trash",
   CREATE_INTERNAL: "/api/v1/internal-correspondences",
   PUT_INTERNAL: "/api/v1/internal-correspondences/:id",

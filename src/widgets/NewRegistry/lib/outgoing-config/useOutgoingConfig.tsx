@@ -8,6 +8,7 @@ import {
   FolderInput,
   Pin,
   Archive,
+  UserCheck,
 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
@@ -89,6 +90,24 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
         icon: <CheckCheck size={10} />,
         color: "blue",
         render: (d) => d.reg_number || "Не присвоен",
+      },
+      {
+        label: "Мой статус",
+        icon: <UserCheck size={10} />,
+        color: "emerald",
+        render: (d) => {
+          const myStatus = d.my_status?.primary;
+          if (!myStatus) return "—";
+
+          const statusMap: Record<string, string> = {
+            approved: "Согласовано",
+            rejected: "Отклонено",
+            pending: "Ожидает",
+            signed: "Подписано",
+          };
+
+          return statusMap[myStatus] || myStatus;
+        },
       },
     ],
     getActions: (record, onMove) => {
