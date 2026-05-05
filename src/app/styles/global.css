@@ -18,6 +18,18 @@ body,
   --color-bg-card-task: #f2f5ff;
 }
 
+/* Сохраняем прозрачный фон при автозаполнении */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  transition:
+    background-color 9999s ease-in-out 0s,
+    color 9999s ease-in-out 0s !important;
+
+  -webkit-text-fill-color: white !important;
+}
+
 .ant-input::placeholder,
 .ant-input-password input::placeholder {
   font-size: 16px !important;
@@ -30,14 +42,14 @@ body,
 }
 
 .soft-shadow-ios {
-  box-shadow: 
+  box-shadow:
     0 2px 4px rgba(0, 0, 0, 0.02),
     0 10px 20px rgba(0, 0, 0, 0.04),
     0 20px 40px rgba(0, 0, 0, 0.04);
 }
 
 .active-pill-shadow {
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(79, 70, 229, 0.15),
     0 2px 4px rgba(79, 70, 229, 0.1);
 }
@@ -49,8 +61,6 @@ body,
 .big-icon .ant-input-password-icon {
   font-size: 24px !important;
 }
-
-
 
 body {
   background-color: var(--color-bg-primary);
@@ -106,8 +116,6 @@ body {
   border: 1px solid var(--color-border);
 }
 
-
-
 .text-primary {
   color: var(--color-text-primary);
 }
@@ -134,7 +142,6 @@ body {
 }
 
 /* No Animations Mode - REMOVED */
-
 
 /* Для скрытия дочерних папок и добавление папки  */
 /* .crtChildrenFolderHidden {
