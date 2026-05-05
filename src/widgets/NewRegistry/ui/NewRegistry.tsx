@@ -34,23 +34,18 @@ const STATUS_CONFIG: Record<string, any> = {
     icon: <Clock size={14} />,
     gradient: "from-amber-500 to-amber-600",
   },
-  approved: {
-    label: "Согласование",
+  to_approve: {
+    label: "На согласование",
     icon: <Handshake size={14} />,
     gradient: "from-emerald-500 to-emerald-600",
-    apiUrl: ApiRoutes.GET_INTERNAL_PROCESSED,
+    apiUrl: ApiRoutes.GET_INTERNAL_TO_APPROVE,
     paramKey: "type",
     omitStatus: true,
   },
-  to_approve: {
-    label: "Согласование",
+  approved: {
+    label: "Согласован",
     icon: <Handshake size={14} />,
     gradient: "from-emerald-500 to-emerald-600",
-  },
-  signed: {
-    label: "На подпись",
-    icon: <Pencil size={14} />,
-    gradient: "from-rose-500 to-rose-600",
     apiUrl: ApiRoutes.GET_INTERNAL_PROCESSED,
     paramKey: "type",
     omitStatus: true,
@@ -59,6 +54,17 @@ const STATUS_CONFIG: Record<string, any> = {
     label: "На подпись",
     icon: <Pencil size={14} />,
     gradient: "from-rose-500 to-rose-600",
+    apiUrl: ApiRoutes.GET_INTERNAL_TO_SIGN,
+    paramKey: "type",
+    omitStatus: true,
+  },
+  signed: {
+    label: "Подписан",
+    icon: <Pencil size={14} />,
+    gradient: "from-rose-500 to-rose-600",
+    apiUrl: ApiRoutes.GET_INTERNAL_PROCESSED,
+    paramKey: "type",
+    omitStatus: true,
   },
   sent: {
     label: "Отправлено",
@@ -85,7 +91,7 @@ const STATUS_CONFIG: Record<string, any> = {
 
 const REGISTRY_STATUS_MAP: Record<string, string[]> = {
   incoming: ["analysis", "completed"],
-  outgoing: ["approved", "signed", "sent"],
+  outgoing: ["to_approve", "approved", "to_sign", "signed", "sent"],
   default: ["draft", "in-progress", "completed"],
 };
 
