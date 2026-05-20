@@ -59,7 +59,9 @@ export const getOutgoingFilters = (): IFilterItem[] => [
     options: [
       { label: "Черновик", value: "draft" },
       { label: "На согласовании", value: "to_approve" },
+      { label: "Согласован", value: "approved" },
       { label: "На подписании", value: "to_sign" },
+      { label: "Подписан", value: "signed" },
       { label: "Отправлено", value: "sent" },
     ],
   },

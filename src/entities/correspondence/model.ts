@@ -13,6 +13,8 @@ export enum CorrespondenseStatus {
 export enum InternalCorrespondenceStatus {
   TO_APPROVE = "to_approve",
   TO_SIGN = "to_sign",
+  APPROVED = "approved",
+  SIGNED = "signed",
   SENT = "sent",
 }
 
