@@ -3301,9 +3301,11 @@ export const CreateInternalCorrespondence = ({
                               </div>
                             ) : (
                               <button
-                                onClick={() =>
-                                  applyApproverDS(approver.approvalRecordId)
-                                }
+                                onClick={() => {
+                                  if (approver.approvalRecordId) {
+                                    applyApproverDS(approver.approvalRecordId);
+                                  }
+                                }}
                                 disabled={approver.dsLoading}
                                 className={cn(
                                   "flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border",
