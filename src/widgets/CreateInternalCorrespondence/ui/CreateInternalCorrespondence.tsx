@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -185,6 +185,71 @@ export const CreateInternalCorrespondence = ({
     params: { query: incomingLetterSearch },
   });
 
+  const isVersionContentInit = useRef(false);
+
+  // Запрос списка версий документа
+  const { data: versionsResponse, refetch: refetchVersions } = useGetQuery({
+    url: id ? ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id)) : "",
+    useToken: true,
+    options: {
+      enabled: !!id,
+      refetchOnWindowFocus: false,
+    },
+  });
+
+  const versions = useMemo(() => {
+    const rawVersions = versionsResponse?.data?.versions || [];
+    return rawVersions.map((v: any) => ({
+      id: v.id,
+      versionNumber: v.version,
+      content: v.body,
+      date: v.created_at,
+      authorId: v.author?.id,
+      is_selected: v.is_selected,
+      is_current_signed: v.is_current_signed,
+    }));
+  }, [versionsResponse]);
+
+  const initialActiveVersion =
+    versions.length > 0 ? versions[versions.length - 1].id : null;
+  const [activeVersionId, setActiveVersionId] = useState<
+    string | number | null
+  >(initialActiveVersion);
+
+  const { mutate: selectVersionForSign, isPending: isSelectingVersion } =
+    useMutationQuery<{ versionId: string | number }, any>({
+      url: (requestData) =>
+        ApiRoutes.SELECT_INTERNAL_VERISION_FOR_SIGN.replace(
+          ":correspondenceId",
+          String(id || ""),
+        ).replace(":versionId", String(requestData.versionId)),
+      method: "POST",
+      messages: {
+        invalidate: [
+          ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
+        ],
+      },
+    });
+
+  const handleSetVersionForSign = (clickedVersionId: string | number) => {
+    selectVersionForSign({ versionId: clickedVersionId });
+  };
+
+  // Проверка: является ли выбранная версия старой
+  const latestVersionId =
+    versions.length > 0 ? versions[versions.length - 1].id : null;
+  const isOldVersionSelected =
+    activeVersionId !== null && activeVersionId !== latestVersionId;
+
+  // Выбор версии в панели и замена содержимого в редакторе
+  const handleSelectVersion = (content: string, versionId: string | number) => {
+    if (editorRef.current) {
+      editorRef.current.innerHTML = content; // Для native div contentEditable
+      // Если твой EditorHandle имеет метод setContent, используй: editorRef.current.setContent(content);
+      setActiveVersionId(versionId);
+    }
+  };
+
   const availableUsers: RecipientOption[] =
     usersData?.data?.data?.map((u: any) => ({
       id: String(u.id),
@@ -254,6 +319,9 @@ export const CreateInternalCorrespondence = ({
         ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
         ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
       ],
+      onSuccessCb: () => {
+        isVersionContentInit.current = false; // Позволяет подтянуть новую сохраненную версию
+      },
     },
   });
 
@@ -855,12 +923,27 @@ export const CreateInternalCorrespondence = ({
     (sig: any) => sig.status === "signed",
   );
 
+  // Если документ подписан ИЛИ выбрана старая версия — включаем режим "только чтение"
+  const isReadOnly = isSigned || isOldVersionSelected;
+
   const allSignaturesSigned =
     rawWorkflowData?.data?.signatures?.length > 0
       ? rawWorkflowData.data.signatures.every(
           (sig: any) => sig.status === "signed",
         )
       : false;
+
+  useEffect(() => {
+    if (versions.length > 0 && !isVersionContentInit.current) {
+      const targetVersion = versions[versions.length - 1];
+      setActiveVersionId(targetVersion.id);
+
+      if (editorRef.current && targetVersion.content) {
+        editorRef.current.innerHTML = targetVersion.content;
+      }
+      isVersionContentInit.current = true;
+    }
+  }, [versions]);
 
   if (sent) {
     return (
@@ -1005,11 +1088,19 @@ export const CreateInternalCorrespondence = ({
             <button
               onClick={onSaveClick}
               disabled={
-                !to.length || !subject.trim() || isCreating || isUpdating
+                !to.length ||
+                !subject.trim() ||
+                isCreating ||
+                isUpdating ||
+                isOldVersionSelected
               }
               className={cn(
-                "flex items-center gap-2 cursor-pointer px-4 py-2 rounded-xl text-sm font-semibold transition-all border",
-                to.length && subject.trim() && !isCreating && !isUpdating
+                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border",
+                to.length &&
+                  subject.trim() &&
+                  !isCreating &&
+                  !isUpdating &&
+                  !isOldVersionSelected
                   ? "bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
                   : "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed",
               )}
@@ -1613,7 +1704,7 @@ export const CreateInternalCorrespondence = ({
                   >
                     <div
                       ref={editorRef}
-                      contentEditable
+                      contentEditable={!isReadOnly}
                       suppressContentEditableWarning
                       data-placeholder="Начните вводить текст письма..."
                       onKeyDown={handleEditorKeyDown}
@@ -2401,6 +2492,85 @@ export const CreateInternalCorrespondence = ({
                   )}
                 </div>
               </div>
+
+              {versions.length > 0 && (
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="px-4 py-3.5 border-b border-slate-100 flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
+                      <Clock size={16} className="text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900">
+                        История версий
+                      </h3>
+                      <p className="text-[10px] text-slate-500">
+                        Всего сохраненных версий: {versions.length}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 space-y-2 max-h-60 overflow-y-auto">
+                    {versions.map((v) => {
+                      const isCurrentActive = v.id === activeVersionId;
+                      return (
+                        <div
+                          key={v.id}
+                          onClick={() => handleSelectVersion(v.content, v.id)}
+                          className={cn(
+                            "flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer group text-xs",
+                            isCurrentActive
+                              ? "bg-blue-50/50 border-blue-500 shadow-sm"
+                              : "bg-slate-50/40 border-slate-100 hover:bg-slate-50 hover:border-slate-200",
+                          )}
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className={cn(
+                                  "font-bold",
+                                  isCurrentActive
+                                    ? "text-blue-600"
+                                    : "text-slate-700",
+                                )}
+                              >
+                                Версия {v.versionNumber}
+                              </span>
+                              {v.is_selected && (
+                                <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 font-medium rounded text-[9px] border border-emerald-100">
+                                  Для подписи
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-1">
+                              {new Date(v.date).toLocaleString("ru-RU")}
+                            </p>
+                          </div>
+
+                          <div
+                            className="flex items-center gap-2 flex-shrink-0"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <input
+                              type="checkbox"
+                              id={`version-sign-${v.id}`}
+                              className="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+                              checked={v.is_selected}
+                              disabled={isSelectingVersion || isSigned}
+                              onChange={() => handleSetVersionForSign(v.id)}
+                            />
+                            <label
+                              htmlFor={`version-sign-${v.id}`}
+                              className="text-[10px] text-slate-500 select-none cursor-pointer"
+                            >
+                              Выбрать
+                            </label>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
