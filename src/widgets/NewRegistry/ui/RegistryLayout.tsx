@@ -301,7 +301,7 @@ export const RegistryLayout = ({
                   count={tab.count}
                   showZero
                   animate={false}
-                  variant="white"
+                  variant="red"
                   className="absolute -top-1.5 -right-1.5 shadow-xs transition-colors z-20"
                 />
               </motion.button>

@@ -12,7 +12,7 @@ import {
 	Send,
 	Clock,
 	FileEdit,
-	Loader2,
+	LoaderCircle,
 } from "lucide-react";
 import { RegistryLayout } from "./RegistryLayout";
 import { AppRoutes } from "@shared/config";
@@ -38,8 +38,8 @@ const STATUS_CONFIG: Record<string, any> = {
 	},
 	to_approve: {
 		label: "На согласование",
-		icon: <Loader2 size={14} />,
-		gradient: "from-emerald-500 to-emerald-600",
+		icon: <LoaderCircle size={14} />,
+		gradient: "from-orange-500 to-orange-600",
 		apiUrl: ApiRoutes.GET_INTERNAL_TO_APPROVE,
 		paramKey: "type",
 		omitStatus: true,
@@ -47,7 +47,7 @@ const STATUS_CONFIG: Record<string, any> = {
 	approved: {
 		label: "Согласован",
 		icon: <Handshake size={14} />,
-		gradient: "from-emerald-500 to-emerald-600",
+		gradient: "from-blue-500 to-blue-600",
 		apiUrl: ApiRoutes.GET_INTERNAL_PROCESSED,
 		paramKey: "type",
 		omitStatus: true,
@@ -55,7 +55,7 @@ const STATUS_CONFIG: Record<string, any> = {
 	to_sign: {
 		label: "На подпись",
 		icon: <Pencil size={14} />,
-		gradient: "from-rose-500 to-rose-600",
+		gradient: "from-yellow-400 to-yellow-500",
 		apiUrl: ApiRoutes.GET_INTERNAL_TO_SIGN,
 		paramKey: "type",
 		omitStatus: true,
@@ -63,7 +63,7 @@ const STATUS_CONFIG: Record<string, any> = {
 	signed: {
 		label: "Подписан",
 		icon: <PenLine size={14} />,
-		gradient: "from-rose-500 to-rose-600",
+		gradient: "from-purple-500 to-purple-600",
 		apiUrl: ApiRoutes.GET_INTERNAL_PROCESSED,
 		paramKey: "type",
 		omitStatus: true,
@@ -71,7 +71,7 @@ const STATUS_CONFIG: Record<string, any> = {
 	sent: {
 		label: "Отправлено",
 		icon: <Send size={14} />,
-		gradient: "from-indigo-500 to-indigo-600",
+		gradient: "from-green-500 to-green-600",
 		apiUrl: ApiRoutes.GET_INTERNAL_OUTGOING,
 	},
 	completed: {
