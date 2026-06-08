@@ -289,6 +289,24 @@ export const CreateInternalCorrespondence = ({
     queryOptions: { onSuccess: () => refetchWorkflow() },
   });
 
+  const { mutate: sendCorrespondence, isPending: isSending } =
+    useMutationQuery<any>({
+      url: ApiRoutes.SEND_INTERNAL.replace(":id", String(id || "")),
+      method: "POST",
+      messages: {
+        success: "Письмо успешно отправлено",
+        invalidate: [
+          ApiRoutes.INTERNAL_GET_WORKFLOW,
+          ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
+        ],
+      },
+      queryOptions: {
+        onSuccess: () => {
+          setSent(true); 
+        },
+      },
+    });
+
   const assignSelfAsSigner = () => {
     if (!docCreator) return;
     setFinalSigner({
@@ -990,21 +1008,25 @@ export const CreateInternalCorrespondence = ({
             </button>
 
             {!!id && (
-              <button
+<button
                 onClick={() => {
-                  if (!to.length || !subject.trim()) return;
-                  setSent(true);
+                  if (!to.length || !subject.trim() || isSending) return;
+                  sendCorrespondence({});
                 }}
-                disabled={!to.length || !subject.trim() || !allSignaturesSigned}
+                disabled={!to.length || !subject.trim() || !allSignaturesSigned || isSending}
                 className={cn(
                   "flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-md",
-                  to.length && subject.trim() && allSignaturesSigned
+                  to.length && subject.trim() && allSignaturesSigned && !isSending
                     ? "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100 active:scale-95"
                     : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none",
                 )}
               >
-                <Send size={16} />
-                <span>Отправить</span>
+                {isSending ? (
+                  <Clock size={16} className="animate-spin" />
+                ) : (
+                  <Send size={16} />
+                )}
+                <span>{isSending ? "Отправка..." : "Отправить"}</span>
               </button>
             )}
           </div>
