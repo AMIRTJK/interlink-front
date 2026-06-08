@@ -45,6 +45,7 @@ import {
   List,
   ListOrdered,
   Save,
+  Mail,
 } from "lucide-react";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
@@ -141,6 +142,9 @@ export const CreateInternalCorrespondence = ({
   });
   const [docCreator, setDocCreator] = useState<any>(null);
   const [folder, setFolder] = useState<string | number>("drafts");
+  const [attachedIncomingLetters, setAttachedIncomingLetters] = useState<any[]>([]);
+  const [showIncomingSearch, setShowIncomingSearch] = useState(false);
+  const [incomingLetterSearch, setIncomingLetterSearch] = useState("");
 
   const isDraggingStamp = useRef(false);
   const isResizingStamp = useRef(false);
@@ -172,6 +176,13 @@ export const CreateInternalCorrespondence = ({
     options: { enabled: !!id },
   });
 
+  const { data: incomingLettersData } = useGetQuery({
+    url: id ? ApiRoutes.GET_INTERNAL_INCOMING_PICKER : "",
+    useToken: true,
+    options: { enabled: !!id && showIncomingSearch },
+    params: { query: incomingLetterSearch },
+  });
+
   const availableUsers: RecipientOption[] =
     usersData?.data?.data?.map((u: any) => ({
       id: String(u.id),
@@ -193,6 +204,24 @@ export const CreateInternalCorrespondence = ({
           r.org.toLowerCase().includes(approverSearch.toLowerCase())),
     )
     .slice(0, 15);
+
+  const availableIncomingLetters =
+    incomingLettersData?.data?.data
+      ?.map((letter: any) => ({
+        id: String(letter.id),
+        subject: letter.subject || "Без темы",
+        regNumber: letter.reg_number || "Не указано",
+        date: letter.sent_at || letter.created_at,
+        sender: letter.creator?.full_name || "Не указано",
+      }))
+      .filter(
+        (letter: any) =>
+          (letter.subject.toLowerCase().includes(incomingLetterSearch.toLowerCase()) ||
+            letter.sender.toLowerCase().includes(incomingLetterSearch.toLowerCase()) ||
+            letter.regNumber.toLowerCase().includes(incomingLetterSearch.toLowerCase())) &&
+          !attachedIncomingLetters.some((l) => l.id === letter.id),
+      )
+      .slice(0, 15) || [];
 
   const { mutate: createDraft, isPending: isCreating } = useMutationQuery<any>({
     url: ApiRoutes.CREATE_INTERNAL,
@@ -247,6 +276,18 @@ export const CreateInternalCorrespondence = ({
       },
       queryOptions: { onSuccess: () => refetchWorkflow() },
     });
+
+  const { mutate: attachIncoming } = useMutationQuery<any>({
+    url: id ? ApiRoutes.ATTACH_INTERNAL_INCOMING?.replace(":id", String(id)) : "",
+    method: "POST",
+    messages: {
+      success: "Письмо прикреплено",
+      invalidate: [
+        ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+      ],
+    },
+    queryOptions: { onSuccess: () => refetchWorkflow() },
+  });
 
   const assignSelfAsSigner = () => {
     if (!docCreator) return;
@@ -674,6 +715,32 @@ export const CreateInternalCorrespondence = ({
     setApproverSearch("");
   };
 
+  const addIncomingLetter = (letter: any) => {
+    const alreadyAdded = attachedIncomingLetters.some(
+      (l: any) => l.id === letter.id,
+    );
+    if (!alreadyAdded) {
+      setAttachedIncomingLetters((prev) => [...prev, letter]);
+    }
+    setShowIncomingSearch(false);
+    setIncomingLetterSearch("");
+  };
+
+  const removeIncomingLetter = (letterId: string) => {
+    setAttachedIncomingLetters((prev) =>
+      prev.filter((l: any) => l.id !== letterId),
+    );
+  };
+
+  const handleAttachIncomingLetters = () => {
+    if (id && attachedIncomingLetters.length > 0) {
+      attachedIncomingLetters.forEach((letter) => {
+        attachIncoming({ incoming_id: letter.id });
+      });
+      setAttachedIncomingLetters([]);
+    }
+  };
+
   const handleInsertStamp = () => {
     setStampVisible(true);
     setStampPos({ x: 40, y: 40 });
@@ -753,6 +820,14 @@ export const CreateInternalCorrespondence = ({
   const selectedImportance = IMPORTANCE_OPTIONS.find(
     (o) => o.value === importance,
   )!;
+
+  const isSigned = rawWorkflowData?.data?.signatures?.some(
+    (sig: any) => sig.status === "signed",
+  );
+
+  const allSignaturesSigned = rawWorkflowData?.data?.signatures?.length > 0
+    ? rawWorkflowData.data.signatures.every((sig: any) => sig.status === "signed")
+    : false;
 
   if (sent) {
     return (
@@ -920,10 +995,10 @@ export const CreateInternalCorrespondence = ({
                   if (!to.length || !subject.trim()) return;
                   setSent(true);
                 }}
-                disabled={!to.length || !subject.trim()}
+                disabled={!to.length || !subject.trim() || !allSignaturesSigned}
                 className={cn(
                   "flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-md",
-                  to.length && subject.trim()
+                  to.length && subject.trim() && allSignaturesSigned
                     ? "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100 active:scale-95"
                     : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none",
                 )}
@@ -1894,7 +1969,13 @@ export const CreateInternalCorrespondence = ({
                       <button
                         onClick={assignSelfAsSigner}
                         title="Назначить себя"
-                        className="flex items-center justify-center w-7 h-7 bg-white border border-slate-200 text-slate-500 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
+                        disabled={isSigned}
+                        className={cn(
+                          "flex items-center justify-center w-7 h-7 rounded-lg transition-colors",
+                          isSigned
+                            ? "bg-slate-100 border border-slate-200 text-slate-300 cursor-not-allowed"
+                            : "bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                        )}
                       >
                         <User size={14} />
                       </button>
@@ -1902,7 +1983,13 @@ export const CreateInternalCorrespondence = ({
 
                     <button
                       onClick={() => setShowSignerDropdown((v) => !v)}
-                      className="flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold text-purple-600 bg-purple-50 border border-purple-100 rounded-lg hover:bg-purple-100 transition-colors"
+                      disabled={isSigned}
+                      className={cn(
+                        "flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold rounded-lg border transition-colors",
+                        isSigned
+                          ? "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed"
+                          : "text-purple-600 bg-purple-50 border-purple-100 hover:bg-purple-100"
+                      )}
                     >
                       <UserPlus size={12} />
                       <span>
@@ -2107,6 +2194,148 @@ export const CreateInternalCorrespondence = ({
                     <div className="py-4 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs">
                       <PenLine size={15} />
                       <span>Нажмите «Назначить»</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
+                <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0">
+                      <Mail size={16} className="text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-bold text-slate-900 truncate">
+                        Входящие письма
+                      </h3>
+                      <p className="text-[10px] text-slate-500 truncate">
+                        Прикрепленные письма
+                      </p>
+                    </div>
+                  </div>
+
+                  {!!id && (
+                    <div className="relative flex-shrink-0 flex items-center gap-1.5">
+                      {attachedIncomingLetters.length > 0 && (
+                        <button
+                          onClick={handleAttachIncomingLetters}
+                          className="flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-lg hover:bg-emerald-100 transition-colors"
+                        >
+                          <Check size={12} />
+                          <span>Сохранить</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setShowIncomingSearch(!showIncomingSearch)}
+                        className="flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
+                      >
+                        <Plus size={12} />
+                        <span>Добавить</span>
+                      </button>
+                      <AnimatePresence>
+                        {showIncomingSearch && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                            className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-72"
+                            onBlur={() =>
+                              setTimeout(() => setShowIncomingSearch(false), 150)
+                            }
+                          >
+                            <div className="p-2 border-b border-slate-100">
+                              <input
+                                type="text"
+                                placeholder="Поиск писем..."
+                                value={incomingLetterSearch}
+                                onChange={(e) => {
+                                  setIncomingLetterSearch(e.target.value);
+                                }}
+                                autoFocus
+                                className="w-full text-sm px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
+                              />
+                            </div>
+                            <div className="max-h-48 overflow-y-auto py-1">
+                              {availableIncomingLetters.length === 0 ? (
+                                <p className="text-xs text-slate-400 text-center py-4">
+                                  Нет доступных писем
+                                </p>
+                              ) : (
+                                availableIncomingLetters.map((letter) => (
+                                  <button
+                                    key={letter.id}
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
+                                      addIncomingLetter(letter);
+                                    }}
+                                    className="w-full flex items-start gap-3 px-3 py-2.5 hover:bg-blue-50 transition-colors text-left"
+                                  >
+                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-blue-100 text-blue-700">
+                                      <Mail size={12} />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="text-sm font-semibold text-slate-900 truncate">
+                                        {letter.subject}
+                                      </p>
+                                      <p className="text-xs text-slate-500 truncate">
+                                        {letter.sender}
+                                      </p>
+                                      <p className="text-xs text-slate-400 truncate">
+                                        №{letter.regNumber} • {letter.date}
+                                      </p>
+                                    </div>
+                                  </button>
+                                ))
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+                </div>
+
+                <div className="px-5 py-3">
+                  {attachedIncomingLetters.length === 0 ? (
+                    <div className="py-4 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs">
+                      <Mail size={15} />
+                      <span>Нет прикрепленных писем</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {attachedIncomingLetters.map((letter, idx) => (
+                        <div
+                          key={letter.id}
+                          className="rounded-xl border border-slate-100 bg-slate-50/40 p-3"
+                        >
+                          <div className="flex items-start gap-2.5">
+                            <span className="text-xs font-bold text-slate-300 w-4 flex-shrink-0">
+                              {idx + 1}
+                            </span>
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-blue-100 text-blue-700">
+                              <Mail size={14} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold text-slate-900 truncate">
+                                {letter.subject}
+                              </p>
+                              <p className="text-[10px] text-slate-500 truncate">
+                                {letter.sender}
+                              </p>
+                              <p className="text-[10px] text-slate-400 truncate">
+                                №{letter.regNumber} • {letter.date}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => removeIncomingLetter(letter.id)}
+                              className="text-slate-300 hover:text-rose-400 transition-colors flex-shrink-0"
+                            >
+                              <X size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
