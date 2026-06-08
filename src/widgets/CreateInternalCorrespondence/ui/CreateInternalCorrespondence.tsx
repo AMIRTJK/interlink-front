@@ -2200,30 +2200,27 @@ export const CreateInternalCorrespondence = ({
               </div>
 
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
-                <div className="px-4 py-3.5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <div className="w-8 h-8 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0">
                       <Mail size={16} className="text-white" />
                     </div>
-                    <div className="min-w-0 relative group">
-                      <h3 className="text-sm font-bold text-slate-900 truncate cursor-default">
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-bold text-slate-900 truncate">
                         Входящие письма
                       </h3>
                       <p className="text-[10px] text-slate-500 truncate">
                         Прикрепленные письма
                       </p>
-                      <div className="absolute left-0 top-full mt-1 px-2 py-1 bg-slate-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                        Входящие письма
-                      </div>
                     </div>
                   </div>
 
                   {!!id && (
-                    <div className="relative flex-shrink-0 flex items-center gap-1.5 flex-wrap justify-end">
+                    <div className="relative flex-shrink-0 flex items-center gap-1.5">
                       {attachedIncomingLetters.length > 0 && (
                         <button
                           onClick={handleAttachIncomingLetters}
-                          className="flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-lg hover:bg-emerald-100 transition-colors whitespace-nowrap"
+                          className="flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-lg hover:bg-emerald-100 transition-colors"
                         >
                           <Check size={12} />
                           <span>Сохранить</span>
@@ -2231,7 +2228,7 @@ export const CreateInternalCorrespondence = ({
                       )}
                       <button
                         onClick={() => setShowIncomingSearch(!showIncomingSearch)}
-                        className="flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors whitespace-nowrap"
+                        className="flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
                       >
                         <Plus size={12} />
                         <span>Добавить</span>
