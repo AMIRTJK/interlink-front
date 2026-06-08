@@ -8,6 +8,7 @@ import {
   CheckCheck,
   XCircle,
   Pencil,
+  PenLine,
   Send,
   Clock,
   FileEdit,
@@ -60,7 +61,7 @@ const STATUS_CONFIG: Record<string, any> = {
   },
   signed: {
     label: "Подписан",
-    icon: <Pencil size={14} />,
+    icon: <PenLine size={14} />,
     gradient: "from-rose-500 to-rose-600",
     apiUrl: ApiRoutes.GET_INTERNAL_PROCESSED,
     paramKey: "type",
