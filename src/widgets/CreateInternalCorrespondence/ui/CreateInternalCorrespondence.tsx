@@ -142,7 +142,9 @@ export const CreateInternalCorrespondence = ({
   });
   const [docCreator, setDocCreator] = useState<any>(null);
   const [folder, setFolder] = useState<string | number>("drafts");
-  const [attachedIncomingLetters, setAttachedIncomingLetters] = useState<any[]>([]);
+  const [attachedIncomingLetters, setAttachedIncomingLetters] = useState<any[]>(
+    [],
+  );
   const [showIncomingSearch, setShowIncomingSearch] = useState(false);
   const [incomingLetterSearch, setIncomingLetterSearch] = useState("");
 
@@ -216,9 +218,15 @@ export const CreateInternalCorrespondence = ({
       }))
       .filter(
         (letter: any) =>
-          (letter.subject.toLowerCase().includes(incomingLetterSearch.toLowerCase()) ||
-            letter.sender.toLowerCase().includes(incomingLetterSearch.toLowerCase()) ||
-            letter.regNumber.toLowerCase().includes(incomingLetterSearch.toLowerCase())) &&
+          (letter.subject
+            .toLowerCase()
+            .includes(incomingLetterSearch.toLowerCase()) ||
+            letter.sender
+              .toLowerCase()
+              .includes(incomingLetterSearch.toLowerCase()) ||
+            letter.regNumber
+              .toLowerCase()
+              .includes(incomingLetterSearch.toLowerCase())) &&
           !attachedIncomingLetters.some((l) => l.id === letter.id),
       )
       .slice(0, 15) || [];
@@ -278,7 +286,9 @@ export const CreateInternalCorrespondence = ({
     });
 
   const { mutate: attachIncoming } = useMutationQuery<any>({
-    url: id ? ApiRoutes.ATTACH_INTERNAL_INCOMING?.replace(":id", String(id)) : "",
+    url: id
+      ? ApiRoutes.ATTACH_INTERNAL_INCOMING?.replace(":id", String(id))
+      : "",
     method: "POST",
     messages: {
       success: "Письмо прикреплено",
@@ -302,10 +312,12 @@ export const CreateInternalCorrespondence = ({
       },
       queryOptions: {
         onSuccess: () => {
-          setSent(true); 
+          setSent(true);
         },
       },
     });
+
+  const isAlreadySent = initialData?.item?.status === "sent";
 
   const assignSelfAsSigner = () => {
     if (!docCreator) return;
@@ -843,9 +855,12 @@ export const CreateInternalCorrespondence = ({
     (sig: any) => sig.status === "signed",
   );
 
-  const allSignaturesSigned = rawWorkflowData?.data?.signatures?.length > 0
-    ? rawWorkflowData.data.signatures.every((sig: any) => sig.status === "signed")
-    : false;
+  const allSignaturesSigned =
+    rawWorkflowData?.data?.signatures?.length > 0
+      ? rawWorkflowData.data.signatures.every(
+          (sig: any) => sig.status === "signed",
+        )
+      : false;
 
   if (sent) {
     return (
@@ -969,7 +984,7 @@ export const CreateInternalCorrespondence = ({
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors group"
+              className="flex items-center gap-1.5 cursor-pointer text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors group"
             >
               <ArrowLeft
                 size={16}
@@ -981,7 +996,7 @@ export const CreateInternalCorrespondence = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowPreview(true)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700 transition-colors"
+              className="flex items-center cursor-pointer gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700 transition-colors"
             >
               <Eye size={15} className="text-slate-500" />
               <span className="hidden sm:inline">Предварительный просмотр</span>
@@ -993,7 +1008,7 @@ export const CreateInternalCorrespondence = ({
                 !to.length || !subject.trim() || isCreating || isUpdating
               }
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border",
+                "flex items-center gap-2 cursor-pointer px-4 py-2 rounded-xl text-sm font-semibold transition-all border",
                 to.length && subject.trim() && !isCreating && !isUpdating
                   ? "bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
                   : "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed",
@@ -1008,15 +1023,32 @@ export const CreateInternalCorrespondence = ({
             </button>
 
             {!!id && (
-<button
+              <button
                 onClick={() => {
-                  if (!to.length || !subject.trim() || isSending) return;
+                  // Добавили проверку isAlreadySent
+                  if (
+                    !to.length ||
+                    !subject.trim() ||
+                    isSending ||
+                    isAlreadySent
+                  )
+                    return;
                   sendCorrespondence({});
                 }}
-                disabled={!to.length || !subject.trim() || !allSignaturesSigned || isSending}
+                disabled={
+                  !to.length ||
+                  !subject.trim() ||
+                  !allSignaturesSigned ||
+                  isSending ||
+                  isAlreadySent 
+                }
                 className={cn(
-                  "flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-md",
-                  to.length && subject.trim() && allSignaturesSigned && !isSending
+                  "flex items-center gap-2 cursor-pointer px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-md",
+                  to.length &&
+                    subject.trim() &&
+                    allSignaturesSigned &&
+                    !isSending &&
+                    !isAlreadySent 
                     ? "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100 active:scale-95"
                     : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none",
                 )}
@@ -1026,7 +1058,13 @@ export const CreateInternalCorrespondence = ({
                 ) : (
                   <Send size={16} />
                 )}
-                <span>{isSending ? "Отправка..." : "Отправить"}</span>
+                <span>
+                  {isSending
+                    ? "Отправка..."
+                    : isAlreadySent
+                      ? "Отправлено"
+                      : "Отправить"}
+                </span>
               </button>
             )}
           </div>
@@ -1127,10 +1165,7 @@ export const CreateInternalCorrespondence = ({
                       type="button"
                       onClick={() => setShowImportanceDropdown((v) => !v)}
                       onBlur={() =>
-                        setTimeout(
-                          () => setShowImportanceDropdown(false),
-                          150,
-                        )
+                        setTimeout(() => setShowImportanceDropdown(false), 150)
                       }
                       className={cn(
                         "flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-medium transition-all",
@@ -1139,10 +1174,7 @@ export const CreateInternalCorrespondence = ({
                         selectedImportance.badgeText,
                       )}
                     >
-                      <Flag
-                        size={14}
-                        className={selectedImportance.flagFill}
-                      />
+                      <Flag size={14} className={selectedImportance.flagFill} />
                       <span>{selectedImportance.label}</span>
                       <ChevronDown
                         size={13}
@@ -1262,7 +1294,7 @@ export const CreateInternalCorrespondence = ({
                   </div>
                   <button
                     onClick={() => setShowCcField((v) => !v)}
-                    className="text-xs text-blue-600 font-semibold hover:text-blue-800 transition-colors pt-2 flex-shrink-0"
+                    className="text-xs text-blue-600 cursor-pointer font-semibold hover:text-blue-800 transition-colors pt-2 flex-shrink-0"
                   >
                     + Копия
                   </button>
@@ -1872,9 +1904,7 @@ export const CreateInternalCorrespondence = ({
                               <button
                                 onClick={() => {
                                   if (approver.approvalRecordId) {
-                                    applyApproverDS(
-                                      approver.approvalRecordId,
-                                    );
+                                    applyApproverDS(approver.approvalRecordId);
                                   }
                                 }}
                                 disabled={approver.dsLoading}
@@ -1957,9 +1987,7 @@ export const CreateInternalCorrespondence = ({
                             <DSStamp
                               name={approver.name}
                               certSerial={`SN-2026-${approver.initials}-${Math.abs(Number(approver.id) * 317 + 10000)}`}
-                              signedAt={new Date().toLocaleDateString(
-                                "ru-RU",
-                              )}
+                              signedAt={new Date().toLocaleDateString("ru-RU")}
                               validUntil="с 20.03.2025 до 20.03.2026"
                             />
                           </div>
@@ -1987,21 +2015,22 @@ export const CreateInternalCorrespondence = ({
                   </div>
 
                   <div className="relative flex-shrink-0 flex items-center gap-1.5">
-                    {docCreator && finalSigner?.id !== String(docCreator.id) && (
-                      <button
-                        onClick={assignSelfAsSigner}
-                        title="Назначить себя"
-                        disabled={isSigned}
-                        className={cn(
-                          "flex items-center justify-center w-7 h-7 rounded-lg transition-colors",
-                          isSigned
-                            ? "bg-slate-100 border border-slate-200 text-slate-300 cursor-not-allowed"
-                            : "bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-                        )}
-                      >
-                        <User size={14} />
-                      </button>
-                    )}
+                    {docCreator &&
+                      finalSigner?.id !== String(docCreator.id) && (
+                        <button
+                          onClick={assignSelfAsSigner}
+                          title="Назначить себя"
+                          disabled={isSigned}
+                          className={cn(
+                            "flex items-center justify-center w-7 h-7 rounded-lg transition-colors",
+                            isSigned
+                              ? "bg-slate-100 border border-slate-200 text-slate-300 cursor-not-allowed"
+                              : "bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800",
+                          )}
+                        >
+                          <User size={14} />
+                        </button>
+                      )}
 
                     <button
                       onClick={() => setShowSignerDropdown((v) => !v)}
@@ -2010,13 +2039,11 @@ export const CreateInternalCorrespondence = ({
                         "flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold rounded-lg border transition-colors",
                         isSigned
                           ? "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed"
-                          : "text-purple-600 bg-purple-50 border-purple-100 hover:bg-purple-100"
+                          : "text-purple-600 bg-purple-50 border-purple-100 hover:bg-purple-100",
                       )}
                     >
                       <UserPlus size={12} />
-                      <span>
-                        {finalSigner ? "Изменить" : "Назначить"}
-                      </span>
+                      <span>{finalSigner ? "Изменить" : "Назначить"}</span>
                     </button>
 
                     <AnimatePresence>
@@ -2136,10 +2163,7 @@ export const CreateInternalCorrespondence = ({
                             </button>
                           ) : finalSigner.dsApplied ? (
                             <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
-                              <Shield
-                                size={10}
-                                className="text-emerald-500"
-                              />
+                              <Shield size={10} className="text-emerald-500" />
                               <span className="text-[10px] font-semibold text-emerald-600">
                                 ЭЦП
                               </span>
@@ -2176,9 +2200,7 @@ export const CreateInternalCorrespondence = ({
                           <DSStamp
                             name={finalSigner.name}
                             certSerial={`SN-2026-${finalSigner.initials}-84201`}
-                            signedAt={new Date().toLocaleDateString(
-                              "ru-RU",
-                            )}
+                            signedAt={new Date().toLocaleDateString("ru-RU")}
                             validUntil="с 20.03.2025 до 20.03.2026"
                           />
                           <AnimatePresence>
@@ -2249,7 +2271,9 @@ export const CreateInternalCorrespondence = ({
                         </button>
                       )}
                       <button
-                        onClick={() => setShowIncomingSearch(!showIncomingSearch)}
+                        onClick={() =>
+                          setShowIncomingSearch(!showIncomingSearch)
+                        }
                         className="flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
                       >
                         <Plus size={12} />
@@ -2263,7 +2287,10 @@ export const CreateInternalCorrespondence = ({
                             exit={{ opacity: 0, y: -6, scale: 0.97 }}
                             className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-72"
                             onBlur={() =>
-                              setTimeout(() => setShowIncomingSearch(false), 150)
+                              setTimeout(
+                                () => setShowIncomingSearch(false),
+                                150,
+                              )
                             }
                           >
                             <div className="p-2 border-b border-slate-100">
