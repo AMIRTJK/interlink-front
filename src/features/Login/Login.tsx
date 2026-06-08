@@ -29,6 +29,26 @@ export const Login = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
 
+  const phoneLengths: Record<string, number> = {
+    "+992": 9,
+    "+7": 10,
+  };
+
+  const normalizePhoneNumber = (value: string, countryPrefix: string) => {
+    const digits = value.replace(/\D/g, "");
+    const maxLength = phoneLengths[countryPrefix] ?? 9;
+    return digits.slice(0, maxLength);
+  };
+
+  const handlePrefixChange = (value: string) => {
+    setPrefix(value);
+    setPhoneNumber((current) => normalizePhoneNumber(current, value));
+  };
+
+  const handlePhoneNumberChange = (value: string) => {
+    setPhoneNumber(normalizePhoneNumber(value, prefix));
+  };
+
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -135,7 +155,7 @@ export const Login = () => {
               <div className="flex gap-2 mt-1.5">
                 <Select
                   value={prefix}
-                  onChange={setPrefix}
+                  onChange={handlePrefixChange}
                   suffixIcon={
                     <ChevronDown className="w-4 h-4 text-slate-500" />
                   }
@@ -174,9 +194,12 @@ export const Login = () => {
                   name="phone"
                   autoComplete="tel"
                   required
-                  placeholder="00 000 0000"
+                  placeholder={
+                    prefix === "+7" ? "000 000 0000" : "00 000 0000"
+                  }
+                  maxLength={phoneLengths[prefix]}
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  onChange={(e) => handlePhoneNumberChange(e.target.value)}
                   prefix={<Phone className="w-5 h-5 text-slate-500 mr-2" />}
                   className="flex-1"
                 />
