@@ -1,4 +1,10 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -142,7 +148,9 @@ export const CreateInternalCorrespondence = ({
   });
   const [docCreator, setDocCreator] = useState<any>(null);
   const [folder, setFolder] = useState<string | number>("drafts");
-  const [attachedIncomingLetters, setAttachedIncomingLetters] = useState<any[]>([]);
+  const [attachedIncomingLetters, setAttachedIncomingLetters] = useState<any[]>(
+    [],
+  );
   const [showIncomingSearch, setShowIncomingSearch] = useState(false);
   const [incomingLetterSearch, setIncomingLetterSearch] = useState("");
 
@@ -183,6 +191,71 @@ export const CreateInternalCorrespondence = ({
     params: { query: incomingLetterSearch },
   });
 
+  const isVersionContentInit = useRef(false);
+
+  // Запрос списка версий документа
+  const { data: versionsResponse, refetch: refetchVersions } = useGetQuery({
+    url: id ? ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id)) : "",
+    useToken: true,
+    options: {
+      enabled: !!id,
+      refetchOnWindowFocus: false,
+    },
+  });
+
+  const versions = useMemo(() => {
+    const rawVersions = versionsResponse?.data?.versions || [];
+    return rawVersions.map((v: any) => ({
+      id: v.id,
+      versionNumber: v.version,
+      content: v.body,
+      date: v.created_at,
+      authorId: v.author?.id,
+      is_selected: v.is_selected,
+      is_current_signed: v.is_current_signed,
+    }));
+  }, [versionsResponse]);
+
+  const initialActiveVersion =
+    versions.length > 0 ? versions[versions.length - 1].id : null;
+  const [activeVersionId, setActiveVersionId] = useState<
+    string | number | null
+  >(initialActiveVersion);
+
+  const { mutate: selectVersionForSign, isPending: isSelectingVersion } =
+    useMutationQuery<{ versionId: string | number }, any>({
+      url: (requestData) =>
+        ApiRoutes.SELECT_INTERNAL_VERISION_FOR_SIGN.replace(
+          ":correspondenceId",
+          String(id || ""),
+        ).replace(":versionId", String(requestData.versionId)),
+      method: "POST",
+      messages: {
+        invalidate: [
+          ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
+        ],
+      },
+    });
+
+  const handleSetVersionForSign = (clickedVersionId: string | number) => {
+    selectVersionForSign({ versionId: clickedVersionId });
+  };
+
+  // Проверка: является ли выбранная версия старой
+  const latestVersionId =
+    versions.length > 0 ? versions[versions.length - 1].id : null;
+  const isOldVersionSelected =
+    activeVersionId !== null && activeVersionId !== latestVersionId;
+
+  // Выбор версии в панели и замена содержимого в редакторе
+  const handleSelectVersion = (content: string, versionId: string | number) => {
+    if (editorRef.current) {
+      editorRef.current.innerHTML = content; // Для native div contentEditable
+      // Если твой EditorHandle имеет метод setContent, используй: editorRef.current.setContent(content);
+      setActiveVersionId(versionId);
+    }
+  };
+
   const availableUsers: RecipientOption[] =
     usersData?.data?.data?.map((u: any) => ({
       id: String(u.id),
@@ -216,9 +289,15 @@ export const CreateInternalCorrespondence = ({
       }))
       .filter(
         (letter: any) =>
-          (letter.subject.toLowerCase().includes(incomingLetterSearch.toLowerCase()) ||
-            letter.sender.toLowerCase().includes(incomingLetterSearch.toLowerCase()) ||
-            letter.regNumber.toLowerCase().includes(incomingLetterSearch.toLowerCase())) &&
+          (letter.subject
+            .toLowerCase()
+            .includes(incomingLetterSearch.toLowerCase()) ||
+            letter.sender
+              .toLowerCase()
+              .includes(incomingLetterSearch.toLowerCase()) ||
+            letter.regNumber
+              .toLowerCase()
+              .includes(incomingLetterSearch.toLowerCase())) &&
           !attachedIncomingLetters.some((l) => l.id === letter.id),
       )
       .slice(0, 15) || [];
@@ -246,6 +325,9 @@ export const CreateInternalCorrespondence = ({
         ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
         ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
       ],
+      onSuccessCb: () => {
+        isVersionContentInit.current = false; // Позволяет подтянуть новую сохраненную версию
+      },
     },
   });
 
@@ -278,7 +360,9 @@ export const CreateInternalCorrespondence = ({
     });
 
   const { mutate: attachIncoming } = useMutationQuery<any>({
-    url: id ? ApiRoutes.ATTACH_INTERNAL_INCOMING?.replace(":id", String(id)) : "",
+    url: id
+      ? ApiRoutes.ATTACH_INTERNAL_INCOMING?.replace(":id", String(id))
+      : "",
     method: "POST",
     messages: {
       success: "Письмо прикреплено",
@@ -288,6 +372,26 @@ export const CreateInternalCorrespondence = ({
     },
     queryOptions: { onSuccess: () => refetchWorkflow() },
   });
+
+  const { mutate: sendCorrespondence, isPending: isSending } =
+    useMutationQuery<any>({
+      url: ApiRoutes.SEND_INTERNAL.replace(":id", String(id || "")),
+      method: "POST",
+      messages: {
+        success: "Письмо успешно отправлено",
+        invalidate: [
+          ApiRoutes.INTERNAL_GET_WORKFLOW,
+          ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
+        ],
+      },
+      queryOptions: {
+        onSuccess: () => {
+          setSent(true);
+        },
+      },
+    });
+
+  const isAlreadySent = initialData?.item?.status === "sent";
 
   const assignSelfAsSigner = () => {
     if (!docCreator) return;
@@ -825,9 +929,27 @@ export const CreateInternalCorrespondence = ({
     (sig: any) => sig.status === "signed",
   );
 
-  const allSignaturesSigned = rawWorkflowData?.data?.signatures?.length > 0
-    ? rawWorkflowData.data.signatures.every((sig: any) => sig.status === "signed")
-    : false;
+  // Если документ подписан ИЛИ выбрана старая версия — включаем режим "только чтение"
+  const isReadOnly = isSigned || isOldVersionSelected;
+
+  const allSignaturesSigned =
+    rawWorkflowData?.data?.signatures?.length > 0
+      ? rawWorkflowData.data.signatures.every(
+          (sig: any) => sig.status === "signed",
+        )
+      : false;
+
+  useEffect(() => {
+    if (versions.length > 0 && !isVersionContentInit.current) {
+      const targetVersion = versions[versions.length - 1];
+      setActiveVersionId(targetVersion.id);
+
+      if (editorRef.current && targetVersion.content) {
+        editorRef.current.innerHTML = targetVersion.content;
+      }
+      isVersionContentInit.current = true;
+    }
+  }, [versions]);
 
   if (sent) {
     return (
@@ -951,7 +1073,7 @@ export const CreateInternalCorrespondence = ({
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors group"
+              className="flex items-center gap-1.5 cursor-pointer text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors group"
             >
               <ArrowLeft
                 size={16}
@@ -963,7 +1085,7 @@ export const CreateInternalCorrespondence = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowPreview(true)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700 transition-colors"
+              className="flex items-center cursor-pointer gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700 transition-colors"
             >
               <Eye size={15} className="text-slate-500" />
               <span className="hidden sm:inline">Предварительный просмотр</span>
@@ -972,11 +1094,19 @@ export const CreateInternalCorrespondence = ({
             <button
               onClick={onSaveClick}
               disabled={
-                !to.length || !subject.trim() || isCreating || isUpdating
+                !to.length ||
+                !subject.trim() ||
+                isCreating ||
+                isUpdating ||
+                isOldVersionSelected
               }
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border",
-                to.length && subject.trim() && !isCreating && !isUpdating
+                to.length &&
+                  subject.trim() &&
+                  !isCreating &&
+                  !isUpdating &&
+                  !isOldVersionSelected
                   ? "bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
                   : "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed",
               )}
@@ -992,19 +1122,46 @@ export const CreateInternalCorrespondence = ({
             {!!id && (
               <button
                 onClick={() => {
-                  if (!to.length || !subject.trim()) return;
-                  setSent(true);
+                  // Добавили проверку isAlreadySent
+                  if (
+                    !to.length ||
+                    !subject.trim() ||
+                    isSending ||
+                    isAlreadySent
+                  )
+                    return;
+                  sendCorrespondence({});
                 }}
-                disabled={!to.length || !subject.trim() || !allSignaturesSigned}
+                disabled={
+                  !to.length ||
+                  !subject.trim() ||
+                  !allSignaturesSigned ||
+                  isSending ||
+                  isAlreadySent
+                }
                 className={cn(
-                  "flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-md",
-                  to.length && subject.trim() && allSignaturesSigned
+                  "flex items-center gap-2 cursor-pointer px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-md",
+                  to.length &&
+                    subject.trim() &&
+                    allSignaturesSigned &&
+                    !isSending &&
+                    !isAlreadySent
                     ? "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100 active:scale-95"
                     : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none",
                 )}
               >
-                <Send size={16} />
-                <span>Отправить</span>
+                {isSending ? (
+                  <Clock size={16} className="animate-spin" />
+                ) : (
+                  <Send size={16} />
+                )}
+                <span>
+                  {isSending
+                    ? "Отправка..."
+                    : isAlreadySent
+                      ? "Отправлено"
+                      : "Отправить"}
+                </span>
               </button>
             )}
           </div>
@@ -1105,10 +1262,7 @@ export const CreateInternalCorrespondence = ({
                       type="button"
                       onClick={() => setShowImportanceDropdown((v) => !v)}
                       onBlur={() =>
-                        setTimeout(
-                          () => setShowImportanceDropdown(false),
-                          150,
-                        )
+                        setTimeout(() => setShowImportanceDropdown(false), 150)
                       }
                       className={cn(
                         "flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-medium transition-all",
@@ -1117,10 +1271,7 @@ export const CreateInternalCorrespondence = ({
                         selectedImportance.badgeText,
                       )}
                     >
-                      <Flag
-                        size={14}
-                        className={selectedImportance.flagFill}
-                      />
+                      <Flag size={14} className={selectedImportance.flagFill} />
                       <span>{selectedImportance.label}</span>
                       <ChevronDown
                         size={13}
@@ -1240,7 +1391,7 @@ export const CreateInternalCorrespondence = ({
                   </div>
                   <button
                     onClick={() => setShowCcField((v) => !v)}
-                    className="text-xs text-blue-600 font-semibold hover:text-blue-800 transition-colors pt-2 flex-shrink-0"
+                    className="text-xs text-blue-600 cursor-pointer font-semibold hover:text-blue-800 transition-colors pt-2 flex-shrink-0"
                   >
                     + Копия
                   </button>
@@ -1559,7 +1710,7 @@ export const CreateInternalCorrespondence = ({
                   >
                     <div
                       ref={editorRef}
-                      contentEditable
+                      contentEditable={!isReadOnly}
                       suppressContentEditableWarning
                       data-placeholder="Начните вводить текст письма..."
                       onKeyDown={handleEditorKeyDown}
@@ -1712,6 +1863,13 @@ export const CreateInternalCorrespondence = ({
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -6, scale: 0.97 }}
                             className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-64"
+                            // Добавляем onBlur точно так же, как во входящих письмах
+                            onBlur={() =>
+                              setTimeout(() => {
+                                setShowApproverDropdown(false);
+                                setApproverSearch("");
+                              }, 150)
+                            }
                           >
                             <div className="p-2 border-b border-slate-100">
                               <input
@@ -1850,9 +2008,7 @@ export const CreateInternalCorrespondence = ({
                               <button
                                 onClick={() => {
                                   if (approver.approvalRecordId) {
-                                    applyApproverDS(
-                                      approver.approvalRecordId,
-                                    );
+                                    applyApproverDS(approver.approvalRecordId);
                                   }
                                 }}
                                 disabled={approver.dsLoading}
@@ -1935,9 +2091,7 @@ export const CreateInternalCorrespondence = ({
                             <DSStamp
                               name={approver.name}
                               certSerial={`SN-2026-${approver.initials}-${Math.abs(Number(approver.id) * 317 + 10000)}`}
-                              signedAt={new Date().toLocaleDateString(
-                                "ru-RU",
-                              )}
+                              signedAt={new Date().toLocaleDateString("ru-RU")}
                               validUntil="с 20.03.2025 до 20.03.2026"
                             />
                           </div>
@@ -1965,22 +2119,22 @@ export const CreateInternalCorrespondence = ({
                   </div>
 
                   <div className="relative flex-shrink-0 flex items-center gap-1.5">
-                    {docCreator && finalSigner?.id !== String(docCreator.id) && (
-                      <button
-                        onClick={assignSelfAsSigner}
-                        title="Назначить себя"
-                        disabled={isSigned}
-                        className={cn(
-                          "flex items-center justify-center w-7 h-7 rounded-lg transition-colors",
-                          isSigned
-                            ? "bg-slate-100 border border-slate-200 text-slate-300 cursor-not-allowed"
-                            : "bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-                        )}
-                      >
-                        <User size={14} />
-                      </button>
-                    )}
-
+                    {docCreator &&
+                      finalSigner?.id !== String(docCreator.id) && (
+                        <button
+                          onClick={assignSelfAsSigner}
+                          title="Назначить себя"
+                          disabled={isSigned}
+                          className={cn(
+                            "flex items-center justify-center w-7 h-7 rounded-lg transition-colors",
+                            isSigned
+                              ? "bg-slate-100 border border-slate-200 text-slate-300 cursor-not-allowed"
+                              : "bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800",
+                          )}
+                        >
+                          <User size={14} />
+                        </button>
+                      )}
                     <button
                       onClick={() => setShowSignerDropdown((v) => !v)}
                       disabled={isSigned}
@@ -1988,15 +2142,12 @@ export const CreateInternalCorrespondence = ({
                         "flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold rounded-lg border transition-colors",
                         isSigned
                           ? "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed"
-                          : "text-purple-600 bg-purple-50 border-purple-100 hover:bg-purple-100"
+                          : "text-purple-600 bg-purple-50 border-purple-100 hover:bg-purple-100",
                       )}
                     >
                       <UserPlus size={12} />
-                      <span>
-                        {finalSigner ? "Изменить" : "Назначить"}
-                      </span>
+                      <span>{finalSigner ? "Изменить" : "Назначить"}</span>
                     </button>
-
                     <AnimatePresence>
                       {showSignerDropdown && (
                         <motion.div
@@ -2004,6 +2155,13 @@ export const CreateInternalCorrespondence = ({
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -6, scale: 0.97 }}
                           className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-64"
+                          // Добавляем onBlur для автоматического закрытия
+                          onBlur={() =>
+                            setTimeout(() => {
+                              setShowSignerDropdown(false);
+                              setSignerSearch("");
+                            }, 150)
+                          }
                         >
                           <div className="p-2 border-b border-slate-100">
                             <input
@@ -2064,7 +2222,7 @@ export const CreateInternalCorrespondence = ({
                           </div>
                         </motion.div>
                       )}
-                    </AnimatePresence>
+                    </AnimatePresence>{" "}
                   </div>
                 </div>
 
@@ -2114,10 +2272,7 @@ export const CreateInternalCorrespondence = ({
                             </button>
                           ) : finalSigner.dsApplied ? (
                             <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
-                              <Shield
-                                size={10}
-                                className="text-emerald-500"
-                              />
+                              <Shield size={10} className="text-emerald-500" />
                               <span className="text-[10px] font-semibold text-emerald-600">
                                 ЭЦП
                               </span>
@@ -2154,9 +2309,7 @@ export const CreateInternalCorrespondence = ({
                           <DSStamp
                             name={finalSigner.name}
                             certSerial={`SN-2026-${finalSigner.initials}-84201`}
-                            signedAt={new Date().toLocaleDateString(
-                              "ru-RU",
-                            )}
+                            signedAt={new Date().toLocaleDateString("ru-RU")}
                             validUntil="с 20.03.2025 до 20.03.2026"
                           />
                           <AnimatePresence>
@@ -2227,7 +2380,9 @@ export const CreateInternalCorrespondence = ({
                         </button>
                       )}
                       <button
-                        onClick={() => setShowIncomingSearch(!showIncomingSearch)}
+                        onClick={() =>
+                          setShowIncomingSearch(!showIncomingSearch)
+                        }
                         className="flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
                       >
                         <Plus size={12} />
@@ -2241,7 +2396,10 @@ export const CreateInternalCorrespondence = ({
                             exit={{ opacity: 0, y: -6, scale: 0.97 }}
                             className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-72"
                             onBlur={() =>
-                              setTimeout(() => setShowIncomingSearch(false), 150)
+                              setTimeout(
+                                () => setShowIncomingSearch(false),
+                                150,
+                              )
                             }
                           >
                             <div className="p-2 border-b border-slate-100">
@@ -2262,7 +2420,7 @@ export const CreateInternalCorrespondence = ({
                                   Нет доступных писем
                                 </p>
                               ) : (
-                                availableIncomingLetters.map((letter) => (
+                                availableIncomingLetters.map((letter: any) => (
                                   <button
                                     key={letter.id}
                                     onMouseDown={(e) => {
@@ -2340,6 +2498,85 @@ export const CreateInternalCorrespondence = ({
                   )}
                 </div>
               </div>
+
+              {versions.length > 0 && (
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="px-4 py-3.5 border-b border-slate-100 flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
+                      <Clock size={16} className="text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900">
+                        История версий
+                      </h3>
+                      <p className="text-[10px] text-slate-500">
+                        Всего сохраненных версий: {versions.length}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 space-y-2 max-h-60 overflow-y-auto">
+                    {versions.map((v: any) => {
+                      const isCurrentActive = v.id === activeVersionId;
+                      return (
+                        <div
+                          key={v.id}
+                          onClick={() => handleSelectVersion(v.content, v.id)}
+                          className={cn(
+                            "flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer group text-xs",
+                            isCurrentActive
+                              ? "bg-blue-50/50 border-blue-500 shadow-sm"
+                              : "bg-slate-50/40 border-slate-100 hover:bg-slate-50 hover:border-slate-200",
+                          )}
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className={cn(
+                                  "font-bold",
+                                  isCurrentActive
+                                    ? "text-blue-600"
+                                    : "text-slate-700",
+                                )}
+                              >
+                                Версия {v.versionNumber}
+                              </span>
+                              {v.is_selected && (
+                                <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 font-medium rounded text-[9px] border border-emerald-100">
+                                  Для подписи
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-1">
+                              {new Date(v.date).toLocaleString("ru-RU")}
+                            </p>
+                          </div>
+
+                          <div
+                            className="flex items-center gap-2 flex-shrink-0"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <input
+                              type="checkbox"
+                              id={`version-sign-${v.id}`}
+                              className="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+                              checked={v.is_selected}
+                              disabled={isSelectingVersion || isSigned}
+                              onChange={() => handleSetVersionForSign(v.id)}
+                            />
+                            <label
+                              htmlFor={`version-sign-${v.id}`}
+                              className="text-[10px] text-slate-500 select-none cursor-pointer"
+                            >
+                              Выбрать
+                            </label>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
