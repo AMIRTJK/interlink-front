@@ -1,5 +1,6 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom"; // Добавлен импорт для навигации
 import {
   Send,
   Pin,
@@ -43,11 +44,13 @@ import {
   AlignJustify,
   List,
   ListOrdered,
+  Save, // Добавлена иконка Save
 } from "lucide-react";
 
 import { clsx, type ClassValue } from "clsx";
-import { twMerge } from 'tailwind-merge';
-
+import { twMerge } from "tailwind-merge";
+import { useGetQuery, useMutationQuery } from "@shared/lib";
+import { ApiRoutes } from "@shared/api";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -94,6 +97,8 @@ export interface AttachedFile {
 
 export interface Approver {
   id: string;
+  approvalRecordId?: string;
+  isInvited?: boolean;
   name: string;
   role: string;
   initials: string;
@@ -108,6 +113,7 @@ export interface Approver {
 
 export interface FinalSigner {
   id: string;
+  isInvited?: boolean;
   name: string;
   role: string;
   initials: string;
@@ -1033,7 +1039,7 @@ const PreviewModal = ({
 };
 
 // ── Экспорт 1: Модалка просмотра документа (Document Drawer) ──────────────────
-const DocumentDrawer = ({
+export const DocumentDrawer = ({
   item,
   isOutbox,
   onClose,
@@ -1595,17 +1601,23 @@ const DocumentDrawer = ({
 
 // ── Экспорт 2: Главный компонент создания (Create Internal Correspondence) ────
 export const CreateInternalCorrespondence = ({
+  id,
   onBack = () => {},
+  initialData,
 }: {
+  id?: string | number;
   onBack?: () => void;
+  initialData?: any;
 }) => {
+  const navigate = useNavigate();
   const [to, setTo] = useState<RecipientOption[]>([]);
   const [cc, setCc] = useState<RecipientOption[]>([]);
   const [subject, setSubject] = useState("");
   const [attachments, setAttachments] = useState<AttachedFile[]>([]);
   const [approvers, setApprovers] = useState<Approver[]>([]);
-  const [finalSigner, setFinalSigner] =
-    useState<FinalSigner>(INITIAL_FINAL_SIGNER);
+  const [finalSigner, setFinalSigner] = useState<FinalSigner | null>(null);
+  const [showSignerDropdown, setShowSignerDropdown] = useState(false);
+  const [signerSearch, setSignerSearch] = useState("");
   const [showToDropdown, setShowToDropdown] = useState(false);
   const [showCcDropdown, setShowCcDropdown] = useState(false);
   const [showApproverDropdown, setShowApproverDropdown] = useState(false);
@@ -1628,6 +1640,11 @@ export const CreateInternalCorrespondence = ({
     width: 320,
     height: "auto" as "auto" | number,
   });
+  const [docCreator, setDocCreator] = useState<any>(null);
+
+  // Состояние папки
+  const [folder, setFolder] = useState<string | number>("drafts");
+
   const isDraggingStamp = useRef(false);
   const isResizingStamp = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -1644,25 +1661,210 @@ export const CreateInternalCorrespondence = ({
   const PAGE_PAD_V = 72;
   const CONTENT_HEIGHT = PAGE_HEIGHT - PAGE_PAD_V * 2;
 
-  const filteredToOptions = RECIPIENT_OPTIONS.filter(
-    (r) =>
-      !to.find((t) => t.id === r.id) &&
-      (r.name.toLowerCase().includes(toSearch.toLowerCase()) ||
-        r.org.toLowerCase().includes(toSearch.toLowerCase())),
-  );
-  const filteredCcOptions = RECIPIENT_OPTIONS.filter(
-    (r) =>
-      !cc.find((c) => c.id === r.id) &&
-      (r.name.toLowerCase().includes(ccSearch.toLowerCase()) ||
-        r.org.toLowerCase().includes(ccSearch.toLowerCase())),
-  );
-  const availableApprovers = RECIPIENT_OPTIONS.filter(
-    (r) =>
-      !approvers.find((a) => a.id === `apr-${r.id}`) &&
-      finalSigner.id !== `sgn-${r.id}` &&
-      (r.name.toLowerCase().includes(approverSearch.toLowerCase()) ||
-        r.org.toLowerCase().includes(approverSearch.toLowerCase())),
-  );
+  // Добавим debounce или просто используем поисковый запрос
+  const [searchParams, setSearchParams] = useState({ query: "" });
+
+  const { data: usersData, isLoading: loadingUsers } = useGetQuery({
+    url: ApiRoutes.GET_INTERNAL_RECIPIENTS_USERS,
+    useToken: true,
+    params: searchParams,
+  });
+
+  // Получаем актуальные данные маршрута (workflow)
+  const { data: rawWorkflowData, refetch: refetchWorkflow } = useGetQuery({
+    url: id ? ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id)) : "",
+    useToken: true,
+    options: { enabled: !!id },
+  });
+
+  const availableUsers: RecipientOption[] =
+    usersData?.data?.data?.map((u: any) => ({
+      id: String(u.id),
+      name: u.full_name,
+      org: u.position || u.department,
+      initials: u.full_name
+        .split(" ")
+        .map((n: string) => n[0])
+        .join(""),
+      color: "bg-blue-100 text-blue-700", // Можно мапить цвет в зависимости от роли/департамента
+    })) || [];
+
+  const availableApprovers = availableUsers
+    .filter(
+      (r) =>
+        !approvers.find((a) => a.id === r.id) &&
+        finalSigner?.id !== r.id &&
+        (r.name.toLowerCase().includes(approverSearch.toLowerCase()) ||
+          r.org.toLowerCase().includes(approverSearch.toLowerCase())),
+    )
+    .slice(0, 15); // Тоже ограничиваем вывод, чтобы не было гигантского списка
+
+  // === ИНТЕГРАЦИЯ API И МУТАЦИИ ===
+  const { mutate: createDraft, isPending: isCreating } = useMutationQuery<any>({
+    url: ApiRoutes.CREATE_INTERNAL,
+    method: "POST",
+    messages: { invalidate: [ApiRoutes.GET_INTERNAL_DRAFTS] },
+    queryOptions: {
+      onSuccess: (data: any) => {
+        const newId = data?.item?.id;
+        if (newId)
+          navigate(`/modules/correspondence/internal/outgoing/${newId}`, {
+            replace: true,
+          });
+      },
+    },
+  });
+
+  const { mutate: updateDraft, isPending: isUpdating } = useMutationQuery<any>({
+    url: ApiRoutes.PUT_INTERNAL.replace(":id", String(id || "")),
+    method: "PUT",
+    messages: {
+      invalidate: [
+        ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
+        ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
+      ],
+    },
+  });
+
+  const { mutate: inviteSigner, isPending: isSignerInviting } =
+    useMutationQuery<any>({
+      url: (req) =>
+        ApiRoutes.INTERNAL_INVITE_SIGNER?.replace(":id", String(req.docId)),
+      method: "POST",
+      messages: {
+        success: "Подписывающий назначен",
+        invalidate: [
+          ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+        ],
+      },
+      queryOptions: { onSuccess: () => refetchWorkflow() },
+    });
+
+  const { mutate: inviteApprover, isPending: isApproverInviting } =
+    useMutationQuery<any>({
+      url: (req) =>
+        ApiRoutes.INTERNAL_INVITE_APPROVER?.replace(":id", String(req.docId)),
+      method: "POST",
+      messages: {
+        success: "Согласующий приглашен",
+        invalidate: [
+          ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+        ],
+      },
+      queryOptions: { onSuccess: () => refetchWorkflow() },
+    });
+
+  // Функция "Вернуть себя" как подписывающего
+  const assignSelfAsSigner = () => {
+    if (!docCreator) return;
+    setFinalSigner({
+      id: String(docCreator.id),
+      isInvited: false, // Мы возвращаем себя, но инвайт еще не отправляли
+      name: docCreator.full_name,
+      role: docCreator.position || "Автор документа",
+      initials: docCreator.full_name
+        .split(" ")
+        .map((n: string) => n[0])
+        .slice(0, 2)
+        .join(""),
+      color: "bg-purple-100 text-purple-700",
+      dsApplied: false,
+      dsLoading: false,
+    });
+  };
+
+  const { mutateAsync: signaturesPayloadAsync } = useMutationQuery<any>({
+    url: ApiRoutes.INTERNAL_SIGNATURES_PAYLOAD?.replace(
+      ":id",
+      String(id || ""),
+    ),
+    method: "POST",
+  });
+
+  // Подтверждение ЭЦП
+  const { mutate: signaturesConfirm } = useMutationQuery<any>({
+    url: ApiRoutes.INTERNAL_SIGNATURES_CONFIRM?.replace(
+      ":id",
+      String(id || ""),
+    ),
+    method: "POST",
+    messages: {
+      success: "Документ успешно подписан",
+      invalidate: [
+        ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+      ], // <-- ОБНОВЛЯЕМ WORKFLOW
+    },
+    queryOptions: {
+      onSuccess: () => {
+        setFinalSigner((prev) =>
+          prev ? { ...prev, dsApplied: true, dsLoading: false } : null,
+        );
+        setStampVisible(true);
+      },
+      onError: () =>
+        setFinalSigner((prev) => (prev ? { ...prev, dsLoading: false } : null)),
+    },
+  });
+
+  // Подтверждение Согласования
+  const { mutate: approvalsConfirm } = useMutationQuery<any, any>({
+    url: (req) =>
+      ApiRoutes.INTERNAL_APPROVALS_CONFIRM?.replace(
+        ":id",
+        String(req.approvalRecordId),
+      ),
+    method: "PATCH",
+    messages: {
+      success: "Документ согласован",
+      invalidate: [
+        ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+      ], // <-- ОБНОВЛЯЕМ WORKFLOW
+    },
+    queryOptions: {
+      onSuccess: (_, req) => {
+        setApprovers((prev) =>
+          prev.map((a) =>
+            a.approvalRecordId === req.approvalRecordId
+              ? { ...a, approved: true, dsApplied: true, dsLoading: false }
+              : a,
+          ),
+        );
+      },
+      onError: (_, req) => {
+        setApprovers((prev) =>
+          prev.map((a) =>
+            a.approvalRecordId === req.approvalRecordId
+              ? { ...a, dsLoading: false }
+              : a,
+          ),
+        );
+      },
+    },
+  });
+
+  const onSaveClick = async () => {
+    const editorBody = editorRef.current?.innerHTML || "<p></p>";
+    const requestPayload: any = {
+      subject,
+      body: editorBody,
+      recipients: {
+        to: to.map((r) => r.id),
+        cc: cc.map((r) => r.id),
+      },
+
+      // ДОБАВЛЕНЫ УЧАСТНИКИ
+      approvals: approvers.map((a) => a.id),
+      signatures: finalSigner ? [finalSigner.id] : [],
+
+      folder_id: typeof folder === "number" ? folder : undefined,
+      system_folder: typeof folder === "string" ? folder : undefined,
+      document_type: letterType,
+      priority: importance === "medium" ? "normal" : importance,
+    };
+
+    if (id) updateDraft(requestPayload);
+    else createDraft(requestPayload);
+  };
 
   const execCmd = useCallback((command: string, value?: string) => {
     editorRef.current?.focus();
@@ -1687,6 +1889,205 @@ export const CreateInternalCorrespondence = ({
     },
     [],
   );
+
+  // 1-й useEffect: Заполняем форму и УЧАСТНИКОВ из initialData
+  useEffect(() => {
+    if (initialData?.item) {
+      const item = initialData.item;
+
+      // Тема, редактор, приоритет, тип
+      if (item.subject) setSubject(item.subject);
+      if (
+        item.body &&
+        editorRef.current &&
+        editorRef.current.innerHTML !== item.body
+      ) {
+        editorRef.current.innerHTML = item.body;
+      }
+      if (item.priority) {
+        const priorityMap: Record<string, ImportanceLevel> = {
+          normal: "medium",
+          high: "high",
+          low: "low",
+        };
+        setImportance(priorityMap[item.priority] || "medium");
+      }
+      if (item.document_type) setLetterType(item.document_type);
+
+      // Получатели Кому/Копия
+      if (item.recipients && Array.isArray(item.recipients)) {
+        const toUsers: RecipientOption[] = [];
+        const ccUsers: RecipientOption[] = [];
+        item.recipients.forEach((r: any) => {
+          if (!r.user) return;
+          const mappedUser = {
+            id: String(r.user.id),
+            name: r.user.full_name,
+            org: r.user.position || r.user.department || "Сотрудник",
+            initials: r.user.full_name
+              .split(" ")
+              .map((n: string) => n[0])
+              .slice(0, 2)
+              .join(""),
+            color: "bg-blue-100 text-blue-700",
+          };
+          if (r.type === "to") toUsers.push(mappedUser);
+          if (r.type === "cc") ccUsers.push(mappedUser);
+        });
+        if (toUsers.length > 0) setTo(toUsers);
+        if (ccUsers.length > 0) {
+          setCc(ccUsers);
+          setShowCcField(true);
+        }
+      }
+
+      // СОГЛАСУЮЩИЕ ИЗ БД (Черновика)
+      if (item.approvals && Array.isArray(item.approvals)) {
+        setApprovers(
+          item.approvals.map((a: any) => {
+            // ДОБАВЛЕНА ПРОВЕРКА: берем либо approver, либо user
+            const userData = a.approver || a.user;
+
+            return {
+              id: String(userData?.id), // Приводим к строке для точного сравнения в будущем
+              approvalRecordId: String(a.id),
+              isInvited: true,
+              name: userData?.full_name || "Неизвестно",
+              role: userData?.position || "Сотрудник",
+              initials: userData?.full_name
+                ? userData.full_name
+                    .split(" ")
+                    .map((n: string) => n[0])
+                    .slice(0, 2)
+                    .join("")
+                : "",
+              color: "bg-slate-100 text-slate-700",
+              approved: a.status === "approved",
+              approving: false,
+              comment: "",
+              showCommentInput: false,
+              dsApplied: a.status === "approved",
+              dsLoading: false,
+            };
+          }),
+        );
+      }
+
+      // СОХРАНЯЕМ СОЗДАТЕЛЯ ДЛЯ КНОПКИ "ВЕРНУТЬ СЕБЯ"
+      if (item.creator) {
+        setDocCreator(item.creator); // <-- ВОТ ЗДЕСЬ СОХРАНЯЕТСЯ CREATOR
+      }
+
+      // ПОДПИСЫВАЮЩИЙ
+      if (item.signatures && item.signatures.length > 0) {
+        const s = item.signatures[0];
+        setFinalSigner({
+          id: String(s.user.id),
+          isInvited: true, // В БД уже есть, значит приглашен
+          name: s.user.full_name,
+          role: s.user.position || "Сотрудник",
+          initials: s.user.full_name
+            .split(" ")
+            .map((n: string) => n[0])
+            .slice(0, 2)
+            .join(""),
+          color: "bg-purple-100 text-purple-700",
+          dsApplied: s.status === "signed",
+          dsLoading: false,
+        });
+      } else if (item.creator) {
+        // Если подписей нет, ставим Создателя (СЕБЯ) по умолчанию
+        setFinalSigner({
+          id: String(item.creator.id),
+          isInvited: false, // Еще не приглашен!
+          name: item.creator.full_name,
+          role: item.creator.position || "Автор документа",
+          initials: item.creator.full_name
+            .split(" ")
+            .map((n: string) => n[0])
+            .slice(0, 2)
+            .join(""),
+          color: "bg-purple-100 text-purple-700",
+          dsApplied: false,
+          dsLoading: false,
+        });
+      }
+    }
+  }, [initialData]);
+
+  // 2-й useEffect: Синхронизация ID для согласования из WORKFLOW
+  useEffect(() => {
+    if (rawWorkflowData?.data) {
+      const wfApprovals = rawWorkflowData.data.approvals || [];
+      const wfSignatures = rawWorkflowData.data.signatures || [];
+
+      // Синхронизируем согласующих
+      if (wfApprovals.length > 0) {
+        setApprovers((prev) => {
+          const merged = [...prev];
+          wfApprovals.forEach((wfA: any) => {
+            const user = wfA.approver || wfA.user;
+            if (!user) return;
+            const existingIdx = merged.findIndex(
+              (a) => a.id === String(user.id),
+            );
+            if (existingIdx !== -1) {
+              merged[existingIdx] = {
+                ...merged[existingIdx],
+                approvalRecordId: String(wfA.id),
+                isInvited: true, // Появился в Workflow = приглашен!
+                approved: wfA.status === "approved",
+                dsApplied: wfA.status === "approved",
+              };
+            } else {
+              merged.push({
+                id: String(user.id),
+                approvalRecordId: String(wfA.id),
+                isInvited: true,
+                name: user.full_name,
+                role: user.position || "Сотрудник",
+                initials: user.full_name
+                  .split(" ")
+                  .map((n: string) => n[0])
+                  .slice(0, 2)
+                  .join(""),
+                color: "bg-slate-100 text-slate-700",
+                approved: wfA.status === "approved",
+                approving: false,
+                comment: "",
+                showCommentInput: false,
+                dsApplied: wfA.status === "approved",
+                dsLoading: false,
+              });
+            }
+          });
+          return merged;
+        });
+      }
+
+      // Синхронизируем подписывающего
+      if (wfSignatures.length > 0) {
+        const wfS = wfSignatures[0];
+        const user = wfS.user;
+        if (user) {
+          setFinalSigner({
+            id: String(user.id),
+            isInvited: true, // Появился в Workflow = приглашен!
+            name: user.full_name,
+            role: user.position || "Сотрудник",
+            initials: user.full_name
+              .split(" ")
+              .map((n: string) => n[0])
+              .slice(0, 2)
+              .join(""),
+            color: "bg-purple-100 text-purple-700",
+            dsApplied: wfS.status === "signed",
+            dsLoading: false,
+          });
+        }
+      }
+    }
+  }, [rawWorkflowData]);
 
   const handleFontSize = (size: string) => {
     setFontSize(size);
@@ -1724,32 +2125,42 @@ export const CreateInternalCorrespondence = ({
     e.target.value = "";
   };
 
-  const applyFinalDS = () => {
-    setFinalSigner((prev) => ({ ...prev, dsLoading: true }));
-    setTimeout(
-      () =>
-        setFinalSigner((prev) => ({
-          ...prev,
-          dsLoading: false,
-          dsApplied: true,
-        })),
-      1800,
-    );
+  // Логика подписания (ЭЦП)
+  const applyFinalDS = async () => {
+    if (!id || !finalSigner) return;
+
+    setFinalSigner((prev) => (prev ? { ...prev, dsLoading: true } : null));
+
+    try {
+      const payloadData = await signaturesPayloadAsync({ action: "sign" });
+      if (payloadData?.signature_id && payloadData?.nonce) {
+        signaturesConfirm({
+          signature_id: payloadData.signature_id,
+          nonce: payloadData.nonce,
+          method: "simple",
+        });
+      } else {
+        console.error("Отсутствуют signature_id или nonce в ответе");
+        setFinalSigner((prev) => (prev ? { ...prev, dsLoading: false } : null));
+      }
+    } catch (error) {
+      console.error("Ошибка при подписании:", error);
+      setFinalSigner((prev) => (prev ? { ...prev, dsLoading: false } : null));
+    }
   };
 
-  const applyApproverDS = (id: string) => {
+  // Логика согласования
+  const applyApproverDS = (recordId: string) => {
     setApprovers((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, dsLoading: true } : a)),
+      prev.map((a) =>
+        a.approvalRecordId === recordId ? { ...a, dsLoading: true } : a,
+      ),
     );
-    setTimeout(
-      () =>
-        setApprovers((prev) =>
-          prev.map((a) =>
-            a.id === id ? { ...a, dsLoading: false, dsApplied: true } : a,
-          ),
-        ),
-      1600,
-    );
+
+    approvalsConfirm({
+      approvalRecordId: recordId,
+      status: "approved",
+    });
   };
 
   const toggleApproverComment = (id: string) => {
@@ -1770,11 +2181,12 @@ export const CreateInternalCorrespondence = ({
     setApprovers((prev) => [
       ...prev,
       {
-        id: `apr-${r.id}`,
+        id: r.id, // ИСПОЛЬЗУЕМ НАСТОЯЩИЙ ID ПОЛЬЗОВАТЕЛЯ ИЗ БД
+        approvalRecordId: undefined, // Пока не сохраним, ID записи согласования нет
         name: r.name,
         role: r.org,
         initials: r.initials,
-        color: r.color,
+        color: "bg-slate-100 text-slate-700",
         approved: false,
         approving: false,
         comment: "",
@@ -1895,6 +2307,67 @@ export const CreateInternalCorrespondence = ({
     );
   }
 
+  const UserDropdown = ({
+    isOpen,
+    onSelect,
+    onClose,
+    search,
+  }: {
+    isOpen: boolean;
+    onSelect: (user: RecipientOption) => void;
+    onClose: () => void;
+    search: string;
+  }) => (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          // ДОБАВЛЕНО: overflow-y-auto и max-h-60 для скролла
+          className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-[999] overflow-y-auto max-h-60"
+        >
+          {loadingUsers ? (
+            <div className="p-4 text-sm text-center text-slate-400">
+              Загрузка...
+            </div>
+          ) : availableUsers.length > 0 ? (
+            // ДОБАВЛЕНО: slice(0, 15) чтобы не рендерить тысячу элементов разом
+            availableUsers.slice(0, 15).map((r) => (
+              <button
+                key={r.id}
+                onMouseDown={(e) => {
+                  e.preventDefault(); // ИСПРАВЛЕНИЕ БАГА: предотвращает конфликт onBlur у инпута
+                  onSelect(r);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50 transition-colors text-left"
+              >
+                <div
+                  className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0",
+                    r.color,
+                  )}
+                >
+                  {r.initials}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {r.name}
+                  </p>
+                  <p className="text-xs text-slate-500">{r.org}</p>
+                </div>
+              </button>
+            ))
+          ) : (
+            <div className="p-4 text-sm text-center text-slate-400">
+              Ничего не найдено
+            </div>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <div className="flex-1 overflow-y-auto bg-[#F8FAFC] h-screen w-full flex flex-col">
       {showPreview && (
@@ -1903,11 +2376,11 @@ export const CreateInternalCorrespondence = ({
           editorHtml={editorRef.current?.innerHTML ?? ""}
           orientation={orientation}
           onClose={() => setShowPreview(false)}
-          stampVisible={stampVisible && finalSigner.dsApplied}
+          stampVisible={stampVisible && !!finalSigner?.dsApplied}
           stampPos={stampPos}
           stampSize={stampSize}
-          stampSignerName={finalSigner.name}
-          stampCertSerial={`SN-2026-${finalSigner.initials}-84201`}
+          stampSignerName={finalSigner?.name || "Неизвестно"}
+          stampCertSerial={`SN-2026-${finalSigner?.initials}-84201`}
           stampSignedAt="03.02.2026"
           stampValidUntil="с 20.03.2025 до 20.03.2026"
         />
@@ -1945,24 +2418,49 @@ export const CreateInternalCorrespondence = ({
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700 transition-colors"
             >
               <Eye size={15} className="text-slate-500" />
-              <span>Предварительный просмотр</span>
+              <span className="hidden sm:inline">Предварительный просмотр</span>
             </button>
+
+            {/* Кнопка "Сохранить" */}
             <button
-              onClick={() => {
-                if (!to.length || !subject.trim()) return;
-                setSent(true);
-              }}
-              disabled={!to.length || !subject.trim()}
+              onClick={onSaveClick}
+              disabled={
+                !to.length || !subject.trim() || isCreating || isUpdating
+              }
               className={cn(
-                "flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-md",
-                to.length && subject.trim()
-                  ? "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100 active:scale-95"
-                  : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none",
+                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border",
+                to.length && subject.trim() && !isCreating && !isUpdating
+                  ? "bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
+                  : "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed",
               )}
             >
-              <Send size={16} />
-              <span>Отправить</span>
+              {isCreating || isUpdating ? (
+                <Clock size={15} className="animate-spin" />
+              ) : (
+                <Save size={15} />
+              )}
+              <span>Сохранить</span>
             </button>
+
+            {/* Кнопка "Отправить" - показываем только если есть ID */}
+            {!!id && (
+              <button
+                onClick={() => {
+                  if (!to.length || !subject.trim()) return;
+                  setSent(true); // Заглушка, тут будет логика sendCorrespondence
+                }}
+                disabled={!to.length || !subject.trim()}
+                className={cn(
+                  "flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-md",
+                  to.length && subject.trim()
+                    ? "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100 active:scale-95"
+                    : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none",
+                )}
+              >
+                <Send size={16} />
+                <span>Отправить</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -2134,12 +2632,12 @@ export const CreateInternalCorrespondence = ({
                 </div>
               </div>
 
-              <div className="px-6 pt-5 pb-4 border-b border-slate-100">
+              <div className="px-6 pt-5 pb-4 border-b border-slate-100 overflow-visible z-20">
                 <div className="flex items-start gap-3">
                   <label className="text-sm font-semibold text-slate-500 pt-2 w-20 flex-shrink-0">
                     Кому
                   </label>
-                  <div className="flex-1">
+                  <div className="flex-1 relative overflow-visible">
                     <div className="flex flex-wrap gap-2 mb-2">
                       {to.map((r) => (
                         <span
@@ -2162,61 +2660,31 @@ export const CreateInternalCorrespondence = ({
                         </span>
                       ))}
                     </div>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Добавить получателя..."
-                        className="w-full text-sm text-slate-700 placeholder-slate-400 bg-transparent border-0 outline-none focus:outline-none"
-                        value={toSearch}
-                        onChange={(e) => {
-                          setToSearch(e.target.value);
-                          setShowToDropdown(true);
-                        }}
-                        onFocus={() => setShowToDropdown(true)}
-                        onBlur={() =>
-                          setTimeout(() => setShowToDropdown(false), 150)
-                        }
-                      />
-                      <AnimatePresence>
-                        {showToDropdown && filteredToOptions.length > 0 && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -6 }}
-                            className="absolute left-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden"
-                          >
-                            {filteredToOptions.map((r) => (
-                              <button
-                                key={r.id}
-                                onMouseDown={() => {
-                                  setTo((prev) => [...prev, r]);
-                                  setToSearch("");
-                                  setShowToDropdown(false);
-                                }}
-                                className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 transition-colors text-left"
-                              >
-                                <div
-                                  className={cn(
-                                    "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0",
-                                    r.color,
-                                  )}
-                                >
-                                  {r.initials}
-                                </div>
-                                <div>
-                                  <p className="text-sm font-semibold text-slate-900">
-                                    {r.name}
-                                  </p>
-                                  <p className="text-xs text-slate-500">
-                                    {r.org}
-                                  </p>
-                                </div>
-                              </button>
-                            ))}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
+
+                    <input
+                      className="w-full text-sm text-slate-700 bg-transparent border-0 outline-none"
+                      placeholder="Поиск получателя..."
+                      value={toSearch}
+                      onChange={(e) => {
+                        setToSearch(e.target.value);
+                        setSearchParams({ query: e.target.value });
+                        setShowToDropdown(true);
+                      }}
+                      onFocus={() => setShowToDropdown(true)}
+                      onBlur={() =>
+                        setTimeout(() => setShowToDropdown(false), 150)
+                      }
+                    />
+                    <UserDropdown
+                      isOpen={showToDropdown}
+                      search={toSearch}
+                      onClose={() => setShowToDropdown(false)}
+                      onSelect={(u) => {
+                        setTo([...to, u]);
+                        setToSearch("");
+                        setShowToDropdown(false);
+                      }}
+                    />
                   </div>
                   <button
                     onClick={() => setShowCcField((v) => !v)}
@@ -2229,102 +2697,63 @@ export const CreateInternalCorrespondence = ({
 
               <AnimatePresence>
                 {showCcField && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="px-6 pb-4 border-b border-slate-100">
-                      <div className="flex items-start gap-3">
-                        <label className="text-sm font-semibold text-slate-500 pt-2 w-20 flex-shrink-0">
-                          Копия
-                        </label>
-                        <div className="flex-1">
-                          <div className="flex flex-wrap gap-2 mb-2">
-                            {cc.map((r) => (
-                              <span
-                                key={r.id}
-                                className={cn(
-                                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border",
-                                  r.color,
-                                )}
+                  <div className="px-6 pb-4 border-b border-slate-100 overflow-visible z-10">
+                    <div className="flex items-start gap-3">
+                      <label className="text-sm font-semibold text-slate-500 pt-2 w-20 flex-shrink-0">
+                        Копия
+                      </label>
+                      <div className="flex-1 relative overflow-visible">
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {cc.map((r) => (
+                            <span
+                              key={r.id}
+                              className={cn(
+                                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border",
+                                r.color,
+                              )}
+                            >
+                              <span>{r.initials}</span>
+                              <span>{r.name}</span>
+                              <button
+                                onClick={() =>
+                                  setCc((prev) =>
+                                    prev.filter((x) => x.id !== r.id),
+                                  )
+                                }
+                                className="opacity-60 hover:opacity-100 transition-opacity ml-0.5"
                               >
-                                <span>{r.initials}</span>
-                                <span>{r.name}</span>
-                                <button
-                                  onClick={() =>
-                                    setCc((prev) =>
-                                      prev.filter((x) => x.id !== r.id),
-                                    )
-                                  }
-                                  className="opacity-60 hover:opacity-100 transition-opacity ml-0.5"
-                                >
-                                  <X size={12} />
-                                </button>
-                              </span>
-                            ))}
-                          </div>
-                          <div className="relative">
-                            <input
-                              type="text"
-                              placeholder="Добавить получателя копии..."
-                              className="w-full text-sm text-slate-700 placeholder-slate-400 bg-transparent border-0 outline-none focus:outline-none"
-                              value={ccSearch}
-                              onChange={(e) => {
-                                setCcSearch(e.target.value);
-                                setShowCcDropdown(true);
-                              }}
-                              onFocus={() => setShowCcDropdown(true)}
-                              onBlur={() =>
-                                setTimeout(() => setShowCcDropdown(false), 150)
-                              }
-                            />
-                            <AnimatePresence>
-                              {showCcDropdown &&
-                                filteredCcOptions.length > 0 && (
-                                  <motion.div
-                                    initial={{ opacity: 0, y: -6 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -6 }}
-                                    className="absolute left-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden"
-                                  >
-                                    {filteredCcOptions.map((r) => (
-                                      <button
-                                        key={r.id}
-                                        onMouseDown={() => {
-                                          setCc((prev) => [...prev, r]);
-                                          setCcSearch("");
-                                          setShowCcDropdown(false);
-                                        }}
-                                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50 transition-colors text-left"
-                                      >
-                                        <div
-                                          className={cn(
-                                            "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0",
-                                            r.color,
-                                          )}
-                                        >
-                                          {r.initials}
-                                        </div>
-                                        <div>
-                                          <p className="text-sm font-semibold text-slate-900">
-                                            {r.name}
-                                          </p>
-                                          <p className="text-xs text-slate-500">
-                                            {r.org}
-                                          </p>
-                                        </div>
-                                      </button>
-                                    ))}
-                                  </motion.div>
-                                )}
-                            </AnimatePresence>
-                          </div>
+                                <X size={12} />
+                              </button>
+                            </span>
+                          ))}
                         </div>
+                        <input
+                          className="w-full text-sm text-slate-700 bg-transparent border-0 outline-none"
+                          placeholder="Поиск получателя копии..."
+                          value={ccSearch}
+                          onChange={(e) => {
+                            setCcSearch(e.target.value);
+                            setSearchParams({ query: e.target.value });
+                            setShowCcDropdown(true);
+                          }}
+                          onFocus={() => setShowCcDropdown(true)}
+                          onBlur={() =>
+                            setTimeout(() => setShowCcDropdown(false), 150)
+                          }
+                        />
+                        <UserDropdown
+                          isOpen={showCcDropdown}
+                          search={ccSearch}
+                          onClose={() => setShowCcDropdown(false)}
+                          onSelect={(u) => {
+                            setCc([...cc, u]);
+                            setCcSearch("");
+                            setShowCcDropdown(false);
+                          }}
+                        />
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
               </AnimatePresence>
 
@@ -2594,7 +3023,7 @@ export const CreateInternalCorrespondence = ({
                       }}
                       className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none"
                     />
-                    {stampVisible && finalSigner.dsApplied && (
+                    {stampVisible && finalSigner && finalSigner.dsApplied && (
                       <div
                         ref={stampRef}
                         onMouseDown={handleStampMouseDown}
@@ -2698,33 +3127,321 @@ export const CreateInternalCorrespondence = ({
             </div>
           </div>
 
-          <div className="w-[340px] flex-shrink-0 space-y-4">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
-              <div className="px-5 py-4 border-b border-slate-100">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0">
-                      <Users size={16} className="text-white" />
+          {/* Правая панель (показывается только после сохранения черновика, т.е. когда есть id) */}
+          {/* Правая панель (показывается только после сохранения черновика, т.е. когда есть id) */}
+          {!!id && (
+            <div className="w-[340px] flex-shrink-0 space-y-4">
+              {/* ======================================= */}
+              {/* БЛОК 1: СОГЛАСУЮЩИЕ                     */}
+              {/* ======================================= */}
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
+                <div className="px-5 py-4 border-b border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0">
+                        <Users size={16} className="text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900">
+                          Согласующие
+                        </h3>
+                        <p className="text-[11px] text-slate-500">
+                          Добавьте согласующих лиц
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-900">
-                        Согласующие
+                    <div className="relative flex-shrink-0">
+                      <button
+                        onClick={() => setShowApproverDropdown((v) => !v)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
+                      >
+                        <UserPlus size={13} />
+                        <span>Добавить</span>
+                      </button>
+                      <AnimatePresence>
+                        {showApproverDropdown && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                            className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-64"
+                          >
+                            <div className="p-2 border-b border-slate-100">
+                              <input
+                                type="text"
+                                placeholder="Поиск..."
+                                value={approverSearch}
+                                onChange={(e) => {
+                                  setApproverSearch(e.target.value);
+                                  setSearchParams({ query: e.target.value });
+                                }}
+                                autoFocus
+                                className="w-full text-sm px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
+                              />
+                            </div>
+                            <div className="max-h-48 overflow-y-auto py-1">
+                              {availableApprovers.length === 0 ? (
+                                <p className="text-xs text-slate-400 text-center py-4">
+                                  Нет доступных
+                                </p>
+                              ) : (
+                                availableApprovers.map((r) => (
+                                  <button
+                                    key={r.id}
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
+                                      addApprover(r);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 transition-colors text-left"
+                                  >
+                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-slate-100 text-slate-700">
+                                      {r.initials}
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="text-sm font-semibold text-slate-900 truncate">
+                                        {r.name}
+                                      </p>
+                                      <p className="text-xs text-slate-500 truncate">
+                                        {r.org}
+                                      </p>
+                                    </div>
+                                  </button>
+                                ))
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="px-5 py-3 space-y-2">
+                  {approvers.length === 0 ? (
+                    <div className="py-4 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs">
+                      <UserPlus size={15} />
+                      <span>Нажмите «Добавить»</span>
+                    </div>
+                  ) : (
+                    approvers.map((approver, idx) => (
+                      <div
+                        key={approver.id}
+                        className={cn(
+                          "rounded-xl border transition-all overflow-hidden",
+                          approver.approved
+                            ? "border-emerald-100 bg-emerald-50/40"
+                            : "border-slate-100 bg-slate-50/40",
+                        )}
+                      >
+                        <div className="flex items-center gap-2.5 px-3 py-2.5">
+                          <span className="text-xs font-bold text-slate-300 w-4 flex-shrink-0">
+                            {idx + 1}
+                          </span>
+                          <div
+                            className={cn(
+                              "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0",
+                              approver.color,
+                            )}
+                          >
+                            {approver.initials}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-slate-900 truncate">
+                              {approver.name}
+                            </p>
+                            <p className="text-[10px] text-slate-500 truncate">
+                              {approver.role}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            {/* Кнопка Комментария (если еще не согласовано) */}
+                            {!approver.approved && (
+                              <button
+                                onClick={() =>
+                                  toggleApproverComment(approver.id)
+                                }
+                                className={cn(
+                                  "p-1.5 rounded-lg text-xs transition-all border",
+                                  approver.showCommentInput || approver.comment
+                                    ? "bg-amber-50 border-amber-200 text-amber-600"
+                                    : "bg-white border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600",
+                                )}
+                              >
+                                <MessageSquarePlus size={12} />
+                              </button>
+                            )}
+
+                            {/* Логика Инвайт -> Согласовать -> ЭЦП (Успех) */}
+                            {!approver.isInvited ? (
+                              <button
+                                onClick={() =>
+                                  inviteApprover({
+                                    docId: id,
+                                    users: [Number(approver.id)],
+                                  })
+                                }
+                                disabled={isApproverInviting}
+                                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                              >
+                                <Send size={11} />
+                                <span>
+                                  {isApproverInviting ? "..." : "Пригласить"}
+                                </span>
+                              </button>
+                            ) : approver.dsApplied ? (
+                              <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
+                                <Shield
+                                  size={10}
+                                  className="text-emerald-500"
+                                />
+                                <span className="text-[10px] font-semibold text-emerald-600">
+                                  ЭЦП
+                                </span>
+                                <Check size={10} className="text-emerald-500" />
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() =>
+                                  applyApproverDS(approver.approvalRecordId)
+                                }
+                                disabled={approver.dsLoading}
+                                className={cn(
+                                  "flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border",
+                                  approver.dsLoading
+                                    ? "bg-slate-100 text-slate-400 border-slate-200 cursor-wait"
+                                    : "bg-white border-slate-200 text-slate-600 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-700 shadow-sm",
+                                )}
+                              >
+                                {approver.dsLoading ? (
+                                  <Clock size={11} className="animate-spin" />
+                                ) : (
+                                  <Check size={11} />
+                                )}
+                                <span>
+                                  {approver.dsLoading
+                                    ? "Согласую..."
+                                    : "Согласовать"}
+                                </span>
+                              </button>
+                            )}
+
+                            {/* Кнопка удаления (только для тех, кого еще не пригласили) */}
+                            {!approver.approved && !approver.isInvited && (
+                              <button
+                                onClick={() =>
+                                  setApprovers((prev) =>
+                                    prev.filter((a) => a.id !== approver.id),
+                                  )
+                                }
+                                className="text-slate-300 hover:text-rose-400 transition-colors ml-1"
+                              >
+                                <X size={13} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Поле комментария */}
+                        <AnimatePresence>
+                          {approver.showCommentInput && !approver.approved && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.18 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="px-3 pb-3 pt-1 border-t border-slate-100 bg-white/60">
+                                <div className="flex items-start gap-2">
+                                  <MessageSquare
+                                    size={12}
+                                    className="text-amber-500 mt-0.5 flex-shrink-0"
+                                  />
+                                  <textarea
+                                    placeholder="Комментарий к согласованию..."
+                                    className="flex-1 text-[11px] text-slate-700 placeholder-slate-400 bg-amber-50/60 border border-amber-100 rounded-lg px-2.5 py-2 resize-none outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-300 transition-all min-h-[54px] leading-relaxed"
+                                    value={approver.comment}
+                                    onChange={(e) =>
+                                      updateApproverComment(
+                                        approver.id,
+                                        e.target.value,
+                                      )
+                                    }
+                                  />
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+
+                        {/* Печать согласующего */}
+                        {approver.dsApplied && (
+                          <div
+                            className={cn(
+                              "px-3 py-2 border-t",
+                              approver.approved
+                                ? "border-emerald-100 bg-emerald-50/60"
+                                : "border-purple-100 bg-purple-50/40",
+                            )}
+                          >
+                            <DSStamp
+                              name={approver.name}
+                              certSerial={`SN-2026-${approver.initials}-${Math.abs(Number(approver.id) * 317 + 10000)}`}
+                              signedAt={new Date().toLocaleDateString("ru-RU")}
+                              validUntil="с 20.03.2025 до 20.03.2026"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* ======================================= */}
+              {/* БЛОК 2: ПОДПИСЫВАЮЩИЙ                   */}
+              {/* ======================================= */}
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
+                <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-purple-500 flex items-center justify-center flex-shrink-0">
+                      <PenLine size={16} className="text-white" />
+                    </div>
+                    {/* min-w-0 позволяет тексту обрезаться троеточием, если он не влезает */}
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-bold text-slate-900 truncate">
+                        Подписывающий
                       </h3>
-                      <p className="text-[11px] text-slate-500">
-                        Добавьте согласующих лиц
+                      <p className="text-[10px] text-slate-500 truncate">
+                        Подписывает с ЭЦП
                       </p>
                     </div>
                   </div>
-                  <div className="relative flex-shrink-0">
+
+                  <div className="relative flex-shrink-0 flex items-center gap-1.5">
+                    {/* КНОПКА "ВЕРНУТЬ СЕБЯ" */}
+                    {docCreator &&
+                      finalSigner?.id !== String(docCreator.id) && (
+                        <button
+                          onClick={assignSelfAsSigner}
+                          title="Назначить себя" // Текст появится при наведении мышки
+                          className="flex items-center justify-center w-7 h-7 bg-white border border-slate-200 text-slate-500 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
+                        >
+                          <User size={14} />
+                        </button>
+                      )}
+
+                    {/* КНОПКА "ИЗМЕНИТЬ" */}
                     <button
-                      onClick={() => setShowApproverDropdown((v) => !v)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
+                      onClick={() => setShowSignerDropdown((v) => !v)}
+                      className="flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold text-purple-600 bg-purple-50 border border-purple-100 rounded-lg hover:bg-purple-100 transition-colors"
                     >
-                      <UserPlus size={13} />
-                      <span>Добавить</span>
+                      <UserPlus size={12} />
+                      <span>{finalSigner ? "Изменить" : "Назначить"}</span>
                     </button>
+
                     <AnimatePresence>
-                      {showApproverDropdown && (
+                      {showSignerDropdown && (
                         <motion.div
                           initial={{ opacity: 0, y: -6, scale: 0.97 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -2734,33 +3451,45 @@ export const CreateInternalCorrespondence = ({
                           <div className="p-2 border-b border-slate-100">
                             <input
                               type="text"
-                              placeholder="Поиск..."
-                              value={approverSearch}
-                              onChange={(e) =>
-                                setApproverSearch(e.target.value)
-                              }
+                              placeholder="Поиск сотрудника..."
+                              value={signerSearch}
+                              onChange={(e) => {
+                                setSignerSearch(e.target.value);
+                                setSearchParams({ query: e.target.value });
+                              }}
                               autoFocus
-                              className="w-full text-sm px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
+                              className="w-full text-sm px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-purple-200 focus:border-purple-300"
                             />
                           </div>
                           <div className="max-h-48 overflow-y-auto py-1">
-                            {availableApprovers.length === 0 ? (
-                              <p className="text-xs text-slate-400 text-center py-4">
-                                Нет доступных
-                              </p>
-                            ) : (
-                              availableApprovers.map((r) => (
+                            {availableUsers
+                              .filter((u) =>
+                                u.name
+                                  .toLowerCase()
+                                  .includes(signerSearch.toLowerCase()),
+                              )
+                              .slice(0, 15)
+                              .map((r) => (
                                 <button
                                   key={r.id}
-                                  onMouseDown={() => addApprover(r)}
-                                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 transition-colors text-left"
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    setFinalSigner({
+                                      id: r.id,
+                                      name: r.name,
+                                      role: r.org,
+                                      initials: r.initials,
+                                      color: "bg-purple-100 text-purple-700",
+                                      dsApplied: false,
+                                      dsLoading: false,
+                                      isInvited: false,
+                                    });
+                                    setShowSignerDropdown(false);
+                                    setSignerSearch("");
+                                  }}
+                                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-purple-50 transition-colors text-left"
                                 >
-                                  <div
-                                    className={cn(
-                                      "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0",
-                                      r.color,
-                                    )}
-                                  >
+                                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-purple-100 text-purple-700">
                                     {r.initials}
                                   </div>
                                   <div className="min-w-0">
@@ -2772,67 +3501,60 @@ export const CreateInternalCorrespondence = ({
                                     </p>
                                   </div>
                                 </button>
-                              ))
-                            )}
+                              ))}
                           </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
                   </div>
                 </div>
-              </div>
-              <div className="px-5 py-3 space-y-2">
-                {approvers.length === 0 ? (
-                  <div className="py-4 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs">
-                    <UserPlus size={15} />
-                    <span>Нажмите «Добавить»</span>
-                  </div>
-                ) : (
-                  approvers.map((approver, idx) => (
+
+                <div className="px-5 py-3">
+                  {finalSigner ? (
                     <div
-                      key={approver.id}
                       className={cn(
-                        "rounded-xl border transition-all overflow-hidden",
-                        approver.approved
+                        "rounded-xl border transition-all",
+                        finalSigner.dsApplied
                           ? "border-emerald-100 bg-emerald-50/40"
                           : "border-slate-100 bg-slate-50/40",
                       )}
                     >
                       <div className="flex items-center gap-2.5 px-3 py-2.5">
-                        <span className="text-xs font-bold text-slate-300 w-4 flex-shrink-0">
-                          {idx + 1}
-                        </span>
                         <div
                           className={cn(
                             "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0",
-                            approver.color,
+                            finalSigner.color,
                           )}
                         >
-                          {approver.initials}
+                          {finalSigner.initials}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-semibold text-slate-900 truncate">
-                            {approver.name}
+                            {finalSigner.name}
                           </p>
                           <p className="text-[10px] text-slate-500 truncate">
-                            {approver.role}
+                            {finalSigner.role}
                           </p>
                         </div>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
-                          {!approver.approved && (
+                          {/* Логика Инвайт -> ЭЦП(кнопка) -> ЭЦП(Галочка) */}
+                          {!finalSigner.isInvited ? (
                             <button
-                              onClick={() => toggleApproverComment(approver.id)}
-                              className={cn(
-                                "p-1.5 rounded-lg text-xs transition-all border",
-                                approver.showCommentInput || approver.comment
-                                  ? "bg-amber-50 border-amber-200 text-amber-600"
-                                  : "bg-white border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600",
-                              )}
+                              onClick={() =>
+                                inviteSigner({
+                                  docId: id,
+                                  users: [Number(finalSigner.id)],
+                                })
+                              }
+                              disabled={isSignerInviting}
+                              className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
                             >
-                              <MessageSquarePlus size={12} />
+                              <Send size={11} />
+                              <span>
+                                {isSignerInviting ? "..." : "Пригласить"}
+                              </span>
                             </button>
-                          )}
-                          {approver.dsApplied ? (
+                          ) : finalSigner.dsApplied ? (
                             <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
                               <Shield size={10} className="text-emerald-500" />
                               <span className="text-[10px] font-semibold text-emerald-600">
@@ -2842,229 +3564,80 @@ export const CreateInternalCorrespondence = ({
                             </div>
                           ) : (
                             <button
-                              onClick={() => applyApproverDS(approver.id)}
-                              disabled={approver.dsLoading}
+                              onClick={applyFinalDS}
+                              disabled={finalSigner.dsLoading}
                               className={cn(
                                 "flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border",
-                                approver.dsLoading
+                                finalSigner.dsLoading
                                   ? "bg-slate-100 text-slate-400 border-slate-200 cursor-wait"
-                                  : "bg-white border-slate-200 text-slate-600 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-700 shadow-sm",
+                                  : "bg-white border-slate-200 text-slate-600 hover:bg-purple-50 hover:border-purple-200 hover:text-purple-700 shadow-sm",
                               )}
                             >
-                              {approver.dsLoading ? (
-                                <motion.div
-                                  animate={{ rotate: 360 }}
-                                  transition={{
-                                    duration: 1,
-                                    repeat: Infinity,
-                                    ease: "linear",
-                                  }}
-                                >
-                                  <Clock size={11} />
-                                </motion.div>
+                              {finalSigner.dsLoading ? (
+                                <Clock size={11} className="animate-spin" />
                               ) : (
-                                <Check size={11} />
+                                <PenLine size={11} />
                               )}
                               <span>
-                                {approver.dsLoading
+                                {finalSigner.dsLoading
                                   ? "Подписываю..."
-                                  : "Согласовать"}
+                                  : "ЭЦП"}
                               </span>
-                            </button>
-                          )}
-                          {!approver.approved && (
-                            <button
-                              onClick={() =>
-                                setApprovers((prev) =>
-                                  prev.filter((a) => a.id !== approver.id),
-                                )
-                              }
-                              className="text-slate-300 hover:text-rose-400 transition-colors"
-                            >
-                              <X size={13} />
                             </button>
                           )}
                         </div>
                       </div>
-                      <AnimatePresence>
-                        {approver.showCommentInput && !approver.approved && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.18 }}
-                            className="overflow-hidden"
-                          >
-                            <div className="px-3 pb-3 pt-1 border-t border-slate-100 bg-white/60">
-                              <div className="flex items-start gap-2">
-                                <MessageSquare
-                                  size={12}
-                                  className="text-amber-500 mt-0.5 flex-shrink-0"
-                                />
-                                <textarea
-                                  placeholder="Комментарий к согласованию..."
-                                  className="flex-1 text-[11px] text-slate-700 placeholder-slate-400 bg-amber-50/60 border border-amber-100 rounded-lg px-2.5 py-2 resize-none outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-300 transition-all min-h-[54px] leading-relaxed"
-                                  value={approver.comment}
-                                  onChange={(e) =>
-                                    updateApproverComment(
-                                      approver.id,
-                                      e.target.value,
-                                    )
-                                  }
-                                />
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                      {approver.dsApplied && (
-                        <div
-                          className={cn(
-                            "px-3 py-2 border-t",
-                            approver.approved
-                              ? "border-emerald-100 bg-emerald-50/60"
-                              : "border-purple-100 bg-purple-50/40",
-                          )}
-                        >
+
+                      {/* Печать подписывающего (и кнопки Вставить/Убрать) */}
+                      {finalSigner.dsApplied && (
+                        <div className="px-3 py-2.5 border-t border-emerald-100 bg-emerald-50/40 rounded-b-xl">
                           <DSStamp
-                            name={approver.name}
-                            certSerial={`SN-2026-${approver.initials}-${Math.abs(approver.id.charCodeAt(4) * 317 + 10000)}`}
-                            signedAt="03.02.2026"
+                            name={finalSigner.name}
+                            certSerial={`SN-2026-${finalSigner.initials}-84201`}
+                            signedAt={new Date().toLocaleDateString("ru-RU")}
                             validUntil="с 20.03.2025 до 20.03.2026"
                           />
+                          <AnimatePresence>
+                            {!stampVisible && (
+                              <motion.button
+                                key="insert-btn"
+                                initial={{ opacity: 0, y: 4 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -4 }}
+                                onClick={handleInsertStamp}
+                                className="mt-2.5 w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-semibold rounded-lg transition-colors shadow-sm"
+                              >
+                                <PenLine size={12} />
+                                <span>Вставить ЭЦП в письмо</span>
+                              </motion.button>
+                            )}
+                            {stampVisible && (
+                              <motion.button
+                                key="remove-btn"
+                                initial={{ opacity: 0, y: 4 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -4 }}
+                                onClick={() => setStampVisible(false)}
+                                className="mt-2.5 w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-500 text-[11px] font-semibold rounded-lg transition-colors border border-slate-200 hover:border-rose-200"
+                              >
+                                <X size={12} />
+                                <span>Убрать ЭЦП из письма</span>
+                              </motion.button>
+                            )}
+                          </AnimatePresence>
                         </div>
                       )}
                     </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
-              <div className="px-5 py-4 border-b border-slate-100">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-purple-500 flex items-center justify-center flex-shrink-0">
-                    <PenLine size={16} className="text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900">
-                      Подписывающий
-                    </h3>
-                    <p className="text-[11px] text-slate-500">
-                      Подписывает с ЭЦП
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="px-5 py-3">
-                <div
-                  className={cn(
-                    "rounded-xl border transition-all",
-                    finalSigner.dsApplied
-                      ? "border-emerald-100 bg-emerald-50/40"
-                      : "border-slate-100 bg-slate-50/40",
-                  )}
-                >
-                  <div className="flex items-center gap-2.5 px-3 py-2.5">
-                    <div
-                      className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0",
-                        finalSigner.color,
-                      )}
-                    >
-                      {finalSigner.initials}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-slate-900 truncate">
-                        {finalSigner.name}
-                      </p>
-                      <p className="text-[10px] text-slate-500 truncate">
-                        {finalSigner.role}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                      {finalSigner.dsApplied ? (
-                        <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
-                          <Shield size={10} className="text-emerald-500" />
-                          <span className="text-[10px] font-semibold text-emerald-600">
-                            ЭЦП
-                          </span>
-                          <Check size={10} className="text-emerald-500" />
-                        </div>
-                      ) : (
-                        <button
-                          onClick={applyFinalDS}
-                          disabled={finalSigner.dsLoading}
-                          className={cn(
-                            "flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border",
-                            finalSigner.dsLoading
-                              ? "bg-slate-100 text-slate-400 border-slate-200 cursor-wait"
-                              : "bg-white border-slate-200 text-slate-600 hover:bg-purple-50 hover:border-purple-200 hover:text-purple-700 shadow-sm",
-                          )}
-                        >
-                          {finalSigner.dsLoading ? (
-                            <motion.div
-                              animate={{ rotate: 360 }}
-                              transition={{
-                                duration: 1,
-                                repeat: Infinity,
-                                ease: "linear",
-                              }}
-                            >
-                              <FileBadge size={11} />
-                            </motion.div>
-                          ) : (
-                            <PenLine size={11} />
-                          )}
-                          <span>
-                            {finalSigner.dsLoading ? "Подписываю..." : "ЭЦП"}
-                          </span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  {finalSigner.dsApplied && (
-                    <div className="px-3 py-2.5 border-t border-emerald-100 bg-emerald-50/40 rounded-b-xl">
-                      <DSStamp
-                        name={finalSigner.name}
-                        certSerial={`SN-2026-${finalSigner.initials}-84201`}
-                        signedAt="03.02.2026"
-                        validUntil="с 20.03.2025 до 20.03.2026"
-                      />
-                      <AnimatePresence>
-                        {!stampVisible && (
-                          <motion.button
-                            key="insert-btn"
-                            initial={{ opacity: 0, y: 4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -4 }}
-                            onClick={handleInsertStamp}
-                            className="mt-2.5 w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-semibold rounded-lg transition-colors shadow-sm"
-                          >
-                            <PenLine size={12} />
-                            <span>Вставить ЭЦП в письмо</span>
-                          </motion.button>
-                        )}
-                        {stampVisible && (
-                          <motion.button
-                            key="remove-btn"
-                            initial={{ opacity: 0, y: 4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -4 }}
-                            onClick={() => setStampVisible(false)}
-                            className="mt-2.5 w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-500 text-[11px] font-semibold rounded-lg transition-colors border border-slate-200 hover:border-rose-200"
-                          >
-                            <X size={12} />
-                            <span>Убрать ЭЦП из письма</span>
-                          </motion.button>
-                        )}
-                      </AnimatePresence>
+                  ) : (
+                    <div className="py-4 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs">
+                      <PenLine size={15} />
+                      <span>Нажмите «Назначить»</span>
                     </div>
                   )}
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

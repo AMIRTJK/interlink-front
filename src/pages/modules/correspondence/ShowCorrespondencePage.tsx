@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import {
   CorrespondenceForm,
   CorrespondenceFormData,
@@ -8,6 +8,7 @@ import { Spin } from "antd";
 import { ApiRoutes } from "@shared/api";
 import { useCorrespondenceRoute, useGetQuery } from "@shared/lib";
 import { InternalCorrespondece } from "@widgets/InternalCorrespondece";
+import { CreateInternalCorrespondence } from "@widgets/CreateInternalCorrespondence";
 
 interface ShowCorrespondencePageProps {
   type?: string;
@@ -19,6 +20,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
   const { id } = useParams<{ id: string }>();
 
   const location = useLocation();
+  const navigate = useNavigate()
 
   const { shouldHideUI } = useCorrespondenceRoute();
 
@@ -53,12 +55,17 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
   if (isInternalView) {
     // show||create
     return (
-      <InternalCorrespondece
-        mode="show"
+      // <InternalCorrespondece
+      //   mode="show"
+      //   initialData={data}
+      //   isLoading={isLoading}
+      //   type={type}
+      //   showHeader={true}
+      // />
+      <CreateInternalCorrespondence
+        id={id}
         initialData={data}
-        isLoading={isLoading}
-        type={type}
-        showHeader={true}
+        onBack={() => navigate(-1)}
       />
     );
   }
