@@ -1,4 +1,10 @@
-import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -2414,7 +2420,7 @@ export const CreateInternalCorrespondence = ({
                                   Нет доступных писем
                                 </p>
                               ) : (
-                                availableIncomingLetters.map((letter) => (
+                                availableIncomingLetters.map((letter: any) => (
                                   <button
                                     key={letter.id}
                                     onMouseDown={(e) => {
@@ -2510,7 +2516,7 @@ export const CreateInternalCorrespondence = ({
                   </div>
 
                   <div className="p-4 space-y-2 max-h-60 overflow-y-auto">
-                    {versions.map((v) => {
+                    {versions.map((v: any) => {
                       const isCurrentActive = v.id === activeVersionId;
                       return (
                         <div
