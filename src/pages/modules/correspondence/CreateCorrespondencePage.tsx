@@ -4,7 +4,7 @@ import {
   CorrespondenceForm,
   CorrespondenceFormData,
 } from "@widgets/CorrespondenceForm";
-import { InternalCorrespondece } from "@widgets/InternalCorrespondece/ui";
+import { CreateInternalCorrespondence } from "@widgets/CreateInternalCorrespondence";
 
 export const CreateCorrespondencePage = ({ type }: { type: string }) => {
   const {
@@ -36,7 +36,8 @@ export const CreateCorrespondencePage = ({ type }: { type: string }) => {
 
   if (isInternal) {
     // show||create
-    return <InternalCorrespondece mode="create" type={type} />;
+    return <CreateInternalCorrespondence  />;
+    // return <InternalCorrespondece mode="create" type={type} />;
   }
 
   return (
