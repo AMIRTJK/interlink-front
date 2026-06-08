@@ -203,24 +203,79 @@ export const CreateInternalCorrespondence = ({
     },
   });
 
-  const versions = useMemo(() => {
+  // Массив всех версий с бэкенда
+  const allVersions = useMemo(() => {
     const rawVersions = versionsResponse?.data?.versions || [];
-    return rawVersions.map((v: any) => ({
+    return rawVersions.map((v: any, idx: number) => ({
       id: v.id,
-      versionNumber: v.version,
+      versionNumber: v.version || idx + 1,
       content: v.body,
       date: v.created_at,
-      authorId: v.author?.id,
+      author: v.author
+        ? {
+            id: String(v.author.id),
+            name: v.author.full_name || "Неизвестный автор",
+            position: v.author.position || "Сотрудник",
+            initials: (v.author.full_name || "НА")
+              .split(" ")
+              .map((n: string) => n[0])
+              .slice(0, 2)
+              .join(""),
+          }
+        : {
+            id: "unknown",
+            name: "Неизвестный автор",
+            position: "Сотрудник",
+            initials: "НА",
+          },
       is_selected: v.is_selected,
       is_current_signed: v.is_current_signed,
     }));
   }, [versionsResponse]);
 
+  // Список уникальных авторов для выпадающего фильтра (с подсчетом количества их версий)
+  const versionAuthors = useMemo(() => {
+    const authorsMap: Record<string, { name: string; count: number }> = {};
+
+    allVersions.forEach((v: any) => {
+      if (!authorsMap[v.author.id]) {
+        authorsMap[v.author.id] = { name: v.author.name, count: 0 };
+      }
+      authorsMap[v.author.id].count += 1;
+    });
+
+    return Object.entries(authorsMap).map(([id, meta]) => ({
+      id,
+      name: meta.name,
+      count: meta.count,
+    }));
+  }, [allVersions]);
+
+  // Стейт для фильтрации версий по автору (null — показать все)
+  const [selectedAuthorId, setSelectedAuthorId] = useState<
+    string | number | null
+  >(null);
+
+  const [showAuthorDropdown, setShowAuthorDropdown] = useState(false);
+
+  // Проверки для кнопок и readonly режима
   const initialActiveVersion =
-    versions.length > 0 ? versions[versions.length - 1].id : null;
+    allVersions.length > 0 ? allVersions[allVersions.length - 1].id : null;
+
   const [activeVersionId, setActiveVersionId] = useState<
     string | number | null
   >(initialActiveVersion);
+
+  // Отфильтрованный массив версий, который пойдет в UI
+  const filteredVersions = useMemo(() => {
+    if (!selectedAuthorId) return allVersions;
+    return allVersions.filter((v: any) => v.author.id === String(selectedAuthorId));
+  }, [allVersions, selectedAuthorId]);
+
+  const latestVersionId =
+    allVersions.length > 0 ? allVersions[allVersions.length - 1].id : null;
+  const isOldVersionSelected =
+    activeVersionId !== null && activeVersionId !== latestVersionId;
 
   const { mutate: selectVersionForSign, isPending: isSelectingVersion } =
     useMutationQuery<{ versionId: string | number }, any>({
@@ -240,12 +295,6 @@ export const CreateInternalCorrespondence = ({
   const handleSetVersionForSign = (clickedVersionId: string | number) => {
     selectVersionForSign({ versionId: clickedVersionId });
   };
-
-  // Проверка: является ли выбранная версия старой
-  const latestVersionId =
-    versions.length > 0 ? versions[versions.length - 1].id : null;
-  const isOldVersionSelected =
-    activeVersionId !== null && activeVersionId !== latestVersionId;
 
   // Выбор версии в панели и замена содержимого в редакторе
   const handleSelectVersion = (content: string, versionId: string | number) => {
@@ -940,8 +989,8 @@ export const CreateInternalCorrespondence = ({
       : false;
 
   useEffect(() => {
-    if (versions.length > 0 && !isVersionContentInit.current) {
-      const targetVersion = versions[versions.length - 1];
+    if (allVersions.length > 0 && !isVersionContentInit.current) {
+      const targetVersion = allVersions[allVersions.length - 1];
       setActiveVersionId(targetVersion.id);
 
       if (editorRef.current && targetVersion.content) {
@@ -949,7 +998,7 @@ export const CreateInternalCorrespondence = ({
       }
       isVersionContentInit.current = true;
     }
-  }, [versions]);
+  }, [allVersions]);
 
   if (sent) {
     return (
@@ -2499,81 +2548,230 @@ export const CreateInternalCorrespondence = ({
                 </div>
               </div>
 
-              {versions.length > 0 && (
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="px-4 py-3.5 border-b border-slate-100 flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
-                      <Clock size={16} className="text-white" />
+              {allVersions.length > 0 && (
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
+                  {/* === ШАПКА БЛОКА ИСТОРИИ ВЕРСИЙ С ФИКСИРОВАННЫМ СЕЛЕКТОМ === */}
+                  <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between gap-2.5 relative overflow-visible">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <div className="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
+                        <Clock size={16} className="text-white" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-bold text-slate-900 truncate">
+                          История версий
+                        </h3>
+                        <p className="text-[10px] text-slate-500 truncate">
+                          Всего версий: {allVersions.length}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-900">
-                        История версий
-                      </h3>
-                      <p className="text-[10px] text-slate-500">
-                        Всего сохраненных версий: {versions.length}
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="p-4 space-y-2 max-h-60 overflow-y-auto">
-                    {versions.map((v: any) => {
-                      const isCurrentActive = v.id === activeVersionId;
-                      return (
-                        <div
-                          key={v.id}
-                          onClick={() => handleSelectVersion(v.content, v.id)}
+                    {/* Кастомный выпадающий список с фиксированной шириной и тултипом */}
+                    {versionAuthors.length > 0 && (
+                      <div
+                        className="relative flex-shrink-0 z-30"
+                        onBlur={(e) => {
+                          if (
+                            !e.currentTarget.contains(e.relatedTarget as Node)
+                          ) {
+                            setTimeout(() => setShowAuthorDropdown(false), 150);
+                          }
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setShowAuthorDropdown((v) => !v)}
+                          // Добавили title для всплывающего тултипа при наведении
+                          title={
+                            selectedAuthorId
+                              ? versionAuthors.find(
+                                  (a) => a.id === String(selectedAuthorId),
+                                )?.name
+                              : "Все авторы"
+                          }
+                          // Зафиксировали ширину на w-40 (160px)
                           className={cn(
-                            "flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer group text-xs",
-                            isCurrentActive
-                              ? "bg-blue-50/50 border-blue-500 shadow-sm"
-                              : "bg-slate-50/40 border-slate-100 hover:bg-slate-50 hover:border-slate-200",
+                            "w-30 flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer text-left",
+                            selectedAuthorId
+                              ? "bg-amber-50 border-amber-200 text-amber-800"
+                              : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300",
                           )}
                         >
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1.5">
-                              <span
+                          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                            <Search
+                              size={12}
+                              className={cn(
+                                "flex-shrink-0",
+                                selectedAuthorId
+                                  ? "text-amber-500"
+                                  : "text-slate-400",
+                              )}
+                            />
+                            <span className="truncate block flex-1 pr-1">
+                              {selectedAuthorId
+                                ? versionAuthors.find(
+                                    (a) => a.id === String(selectedAuthorId),
+                                  )?.name
+                                : "Все авторы"}
+                            </span>
+                          </div>
+                          <ChevronDown
+                            size={12}
+                            className={cn(
+                              "transition-transform text-slate-400 flex-shrink-0",
+                              showAuthorDropdown && "rotate-180",
+                            )}
+                          />
+                        </button>
+
+                        <AnimatePresence>
+                          {showAuthorDropdown && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                              className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-56 py-1"
+                            >
+                              {/* Вариант сброса фильтра */}
+                              <button
+                                type="button"
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  setSelectedAuthorId(null);
+                                  setShowAuthorDropdown(false);
+                                }}
                                 className={cn(
-                                  "font-bold",
-                                  isCurrentActive
-                                    ? "text-blue-600"
+                                  "w-full flex items-center justify-between px-3 py-2 text-left text-xs transition-colors hover:bg-slate-50 font-medium",
+                                  !selectedAuthorId
+                                    ? "bg-slate-50 text-blue-600 font-bold"
                                     : "text-slate-700",
                                 )}
                               >
-                                Версия {v.versionNumber}
-                              </span>
-                              {v.is_selected && (
-                                <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 font-medium rounded text-[9px] border border-emerald-100">
-                                  Для подписи
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-[10px] text-slate-400 mt-1">
-                              {new Date(v.date).toLocaleString("ru-RU")}
-                            </p>
-                          </div>
+                                <span>Все авторы</span>
+                                {!selectedAuthorId && (
+                                  <Check size={12} className="text-blue-500" />
+                                )}
+                              </button>
 
+                              {/* Список авторов */}
+                              {versionAuthors.map((auth) => {
+                                const isSelected =
+                                  String(selectedAuthorId) === auth.id;
+                                return (
+                                  <button
+                                    type="button"
+                                    key={auth.id}
+                                    title={auth.name} // Тултип для длинных имён внутри самого выпадающего списка
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
+                                      setSelectedAuthorId(auth.id);
+                                      setShowAuthorDropdown(false);
+                                    }}
+                                    className={cn(
+                                      "w-full flex items-center justify-between px-3 py-2 text-left text-xs transition-colors hover:bg-slate-50",
+                                      isSelected
+                                        ? "bg-slate-50 text-blue-600 font-bold"
+                                        : "text-slate-600",
+                                    )}
+                                  >
+                                    <span className="truncate pr-2">
+                                      {auth.name}
+                                    </span>
+                                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                                      <span className="px-1.5 py-0.5 bg-slate-100 text-slate-500 text-[10px] rounded-md font-mono">
+                                        {auth.count}
+                                      </span>
+                                      {isSelected && (
+                                        <Check
+                                          size={12}
+                                          className="text-blue-500"
+                                        />
+                                      )}
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-4 space-y-2 max-h-72 overflow-y-auto">
+                    {filteredVersions.length === 0 ? (
+                      <p className="text-xs text-slate-400 text-center py-4">
+                        Нет версий от этого автора
+                      </p>
+                    ) : (
+                      filteredVersions.map((v: any) => {
+                        const isCurrentActive = v.id === activeVersionId;
+                        return (
                           <div
-                            className="flex items-center gap-2 flex-shrink-0"
-                            onClick={(e) => e.stopPropagation()}
+                            key={v.id}
+                            onClick={() => handleSelectVersion(v.content, v.id)}
+                            className={cn(
+                              "flex items-start justify-between p-3 rounded-xl border transition-all cursor-pointer group text-xs gap-3",
+                              isCurrentActive
+                                ? "bg-blue-50/50 border-blue-500 shadow-sm"
+                                : "bg-slate-50/40 border-slate-100 hover:bg-slate-50 hover:border-slate-200",
+                            )}
                           >
-                            <input
-                              type="checkbox"
-                              id={`version-sign-${v.id}`}
-                              className="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
-                              checked={v.is_selected}
-                              disabled={isSelectingVersion || isSigned}
-                              onChange={() => handleSetVersionForSign(v.id)}
-                            />
-                            <label
-                              htmlFor={`version-sign-${v.id}`}
-                              className="text-[10px] text-slate-500 select-none cursor-pointer"
+                            <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-600 font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5 border border-white shadow-sm">
+                              {v.author.initials}
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span
+                                  className={cn(
+                                    "font-bold",
+                                    isCurrentActive
+                                      ? "text-blue-600"
+                                      : "text-slate-700",
+                                  )}
+                                >
+                                  Версия {v.versionNumber}
+                                </span>
+                                {v.is_selected && (
+                                  <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 font-medium rounded text-[9px] border border-emerald-100">
+                                    Для подписи
+                                  </span>
+                                )}
+                              </div>
+
+                              <p className="text-[11px] text-slate-600 font-medium mt-0.5 truncate">
+                                {v.author.name}
+                              </p>
+                              <p className="text-[10px] text-slate-400 truncate">
+                                {v.author.position} •{" "}
+                                {new Date(v.date).toLocaleString("ru-RU")}
+                              </p>
+                            </div>
+
+                            <div
+                              className="flex items-center gap-1.5 flex-shrink-0 mt-0.5"
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              Выбрать
-                            </label>
+                              <input
+                                type="checkbox"
+                                id={`version-sign-${v.id}`}
+                                className="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+                                checked={v.is_selected}
+                                disabled={isSelectingVersion || isSigned}
+                                onChange={() => handleSetVersionForSign(v.id)}
+                              />
+                              <label
+                                htmlFor={`version-sign-${v.id}`}
+                                className="text-[10px] text-slate-400 select-none cursor-pointer group-hover:text-slate-500"
+                              >
+                                Выбрать
+                              </label>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               )}
