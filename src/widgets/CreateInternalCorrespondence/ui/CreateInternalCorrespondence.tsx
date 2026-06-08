@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom"; // Добавлен импорт для навигации
+import { useNavigate } from "react-router-dom";
 import {
   Send,
   Pin,
@@ -44,857 +44,37 @@ import {
   AlignJustify,
   List,
   ListOrdered,
-  Save, // Добавлена иконка Save
+  Save,
 } from "lucide-react";
-
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
-// ── Типы и Интерфейсы ──────────────────────────────────────────────────────────
-export type Status =
-  | "на резолюции"
-  | "на исполнении"
-  | "на согласовании"
-  | "на подпись"
-  | "завершено";
-export type LetterType = "Гузориш" | "Ариза" | "Дархост" | "Маълумотнома";
-export type ImportanceLevel = "high" | "medium" | "low";
-export type PageOrientation = "portrait" | "landscape";
-
-export interface RegistryItem {
-  id: string;
-  inboundNumber: string;
-  outboundNumber: string;
-  sender: string;
-  date: string;
-  subject: string;
-  executor?: string;
-  status: Status;
-  isPinned?: boolean;
-  isRead: boolean;
-}
-
-export interface RecipientOption {
-  id: string;
-  name: string;
-  org: string;
-  initials: string;
-  color: string;
-}
-
-export interface AttachedFile {
-  id: string;
-  name: string;
-  size: string;
-  type: string;
-}
-
-export interface Approver {
-  id: string;
-  approvalRecordId?: string;
-  isInvited?: boolean;
-  name: string;
-  role: string;
-  initials: string;
-  color: string;
-  approved: boolean;
-  approving: boolean;
-  comment: string;
-  showCommentInput: boolean;
-  dsApplied: boolean;
-  dsLoading: boolean;
-}
-
-export interface FinalSigner {
-  id: string;
-  isInvited?: boolean;
-  name: string;
-  role: string;
-  initials: string;
-  color: string;
-  dsApplied: boolean;
-  dsLoading: boolean;
-}
-
-export interface OrgStructureNode {
-  id: string;
-  name: string;
-  position: string;
-  initials: string;
-  color: string;
-  children?: OrgStructureNode[];
-}
-
-// ── Константы и Моки ──────────────────────────────────────────────────────────
-const ORG_STRUCTURE: OrgStructureNode = {
-  id: "org-root",
-  name: "Министерство Финансов",
-  position: "Руководство",
-  initials: "МФ",
-  color: "bg-blue-100 text-blue-700",
-  children: [
-    {
-      id: "dep-1",
-      name: "Отдел бюджетного планирования",
-      position: "Заместитель министра",
-      initials: "ОБП",
-      color: "bg-blue-100 text-blue-700",
-      children: [
-        {
-          id: "person-1",
-          name: "Беҳруз Насрдинов",
-          position: "Начальник отдела",
-          initials: "БН",
-          color: "bg-amber-100 text-amber-700",
-        },
-        {
-          id: "person-2",
-          name: "Шамсӣ Аҳмадбеков",
-          position: "Главный специалист",
-          initials: "ША",
-          color: "bg-rose-100 text-rose-700",
-        },
-      ],
-    },
-    {
-      id: "dep-2",
-      name: "Отдел контроля и аудита",
-      position: "Заместитель министра",
-      initials: "ОКА",
-      color: "bg-purple-100 text-purple-700",
-      children: [
-        {
-          id: "person-3",
-          name: "Ҷаҳонгир Додохонов",
-          position: "Начальник отдела",
-          initials: "ДД",
-          color: "bg-purple-100 text-purple-700",
-        },
-      ],
-    },
-    {
-      id: "dep-3",
-      name: "Агентии инноватсия",
-      position: "Генеральный директор",
-      initials: "АИ",
-      color: "bg-emerald-100 text-emerald-700",
-      children: [
-        {
-          id: "person-4",
-          name: "Александр В.",
-          position: "Директор цифровизации",
-          initials: "АВ",
-          color: "bg-blue-100 text-blue-700",
-        },
-      ],
-    },
-  ],
-};
-
-const LETTER_TYPE_OPTIONS: {
-  value: LetterType;
-  label: string;
-  desc: string;
-}[] = [
-  { value: "Гузориш", label: "Гузориш", desc: "Отчёт / Доклад" },
-  { value: "Ариза", label: "Ариза", desc: "Заявление" },
-  { value: "Дархост", label: "Дархост", desc: "Запрос / Обращение" },
-  { value: "Маълумотнома", label: "Маълумотнома", desc: "Справка" },
-];
-
-const IMPORTANCE_OPTIONS: {
-  value: ImportanceLevel;
-  label: string;
-  desc: string;
-  flagFill: string;
-  badgeBg: string;
-  badgeBorder: string;
-  badgeText: string;
-}[] = [
-  {
-    value: "high",
-    label: "Высокая важность",
-    desc: "Срочно, требует немедленного внимания",
-    flagFill: "fill-rose-500 text-rose-500",
-    badgeBg: "bg-rose-50",
-    badgeBorder: "border-rose-200",
-    badgeText: "text-rose-700",
-  },
-  {
-    value: "medium",
-    label: "Средняя важность",
-    desc: "Обычный приоритет",
-    flagFill: "fill-amber-400 text-amber-400",
-    badgeBg: "bg-amber-50",
-    badgeBorder: "border-amber-200",
-    badgeText: "text-amber-700",
-  },
-  {
-    value: "low",
-    label: "Низкая важность",
-    desc: "Не срочно, при возможности",
-    flagFill: "text-slate-300",
-    badgeBg: "bg-slate-50",
-    badgeBorder: "border-slate-200",
-    badgeText: "text-slate-500",
-  },
-];
-
-const IMPORTANCE_DOT: Record<ImportanceLevel, string> = {
-  high: "bg-rose-500",
-  medium: "bg-amber-400",
-  low: "bg-slate-300",
-};
-
-const RECIPIENT_OPTIONS: RecipientOption[] = [
-  {
-    id: "r1",
-    name: "Министерство Финансов",
-    org: "Отдел бюджетного планирования",
-    initials: "МФ",
-    color: "bg-blue-100 text-blue-700",
-  },
-  {
-    id: "r2",
-    name: "Агентии инноватсия",
-    org: "Отдел цифровизации",
-    initials: "АИ",
-    color: "bg-purple-100 text-purple-700",
-  },
-  {
-    id: "r3",
-    name: "Дастгоҳи иҷроияи ПТ",
-    org: "Канцелярия",
-    initials: "ДИ",
-    color: "bg-emerald-100 text-emerald-700",
-  },
-  {
-    id: "r4",
-    name: "Беҳруз Насрдинов",
-    org: "Министерство Финансов",
-    initials: "БН",
-    color: "bg-amber-100 text-amber-700",
-  },
-  {
-    id: "r5",
-    name: "Шамсӣ Аҳмадбеков",
-    org: "Агентии инноватсия",
-    initials: "ША",
-    color: "bg-rose-100 text-rose-700",
-  },
-];
-
-const INITIAL_FINAL_SIGNER: FinalSigner = {
-  id: "s1",
-  name: "Александр В.",
-  role: "Инициатор / Автор",
-  initials: "АВ",
-  color: "bg-blue-100 text-blue-700",
-  dsApplied: false,
-  dsLoading: false,
-};
-
-const FONT_SIZES = [
-  "10",
-  "11",
-  "12",
-  "13",
-  "14",
-  "16",
-  "18",
-  "20",
-  "24",
-  "28",
-  "36",
-];
-
-const INBOX_DOC_TYPES: Record<string, string> = {
-  "1": "Маълумотнома",
-  "2": "Дархост",
-  "3": "Гузориш",
-  "4": "Дархост",
-  "5": "Ариза",
-  "6": "Маълумотнома",
-  "7": "Гузориш",
-  "8": "Дархост",
-};
-
-const INBOX_DOC_TYPE_STYLE: Record<string, string> = {
-  Маълумотнома: "bg-indigo-50 text-indigo-700 border-indigo-100",
-  Дархост: "bg-purple-50 text-purple-700 border-purple-100",
-  Гузориш: "bg-teal-50 text-teal-700 border-teal-100",
-  Ариза: "bg-amber-50 text-amber-700 border-amber-100",
-};
-
-const MOCK_CONTENT_LINES = [
-  "Ҳурматли раҳбар!",
-  "",
-  "Вазорати Молия аз Шумо хоҳиш менамояд, ки мувофиқи буҷети тасдиқшуда маълумоти пурраро дар мӯҳлати муқаррарнамудашуда пешниҳод намоед.",
-  "",
-  "Мо интизорем, ки ҳамкории самаранок миёни идораҳои мо боиси иҷрои баландсифати вазифаҳои маъмурӣ гардад.",
-  "",
-  "Дар асоси санадҳои меъёрии ҳуқуқии амалкунанда лозим аст маълумоти зерин пешниҳод карда шавад:",
-  "",
-  "1. Ҳисоботи молиявии семоҳаи якум;",
-  "2. Нақшаи харҷҳои буҷетӣ барои давраи минбаъда;",
-  "3. Маълумот оид ба иҷрои супоришҳои пешин.",
-  "",
-  "Бо эҳтиром ва арзу эҳтиром,",
-];
-
-const OUTBOX_STATUS_LABEL: Record<Status, string> = {
-  "на резолюции": "Подготовка",
-  "на исполнении": "Подготовка",
-  "на согласовании": "Согласование",
-  "на подпись": "На подпись",
-  завершено: "Отправлено",
-};
-
-const OUTBOX_STATUS_STYLE: Record<Status, string> = {
-  "на резолюции": "bg-amber-50 text-amber-600 border-amber-100",
-  "на исполнении": "bg-amber-50 text-amber-600 border-amber-100",
-  "на согласовании": "bg-blue-50 text-blue-600 border-blue-100",
-  "на подпись": "bg-purple-50 text-purple-600 border-purple-100",
-  завершено: "bg-emerald-50 text-emerald-600 border-emerald-100",
-};
-
-// ── Вспомогательные функции (QR и ЭЦП) ───────────────────────────────────────
-function generateQRMatrix(seed: string, size: number = 21): boolean[][] {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
-  }
-  const matrix: boolean[][] = [];
-  for (let row = 0; row < size; row++) {
-    matrix[row] = [];
-    for (let col = 0; col < size; col++) {
-      const inTopLeft = row < 7 && col < 7,
-        inTopRight = row < 7 && col >= size - 7,
-        inBottomLeft = row >= size - 7 && col < 7;
-      if (inTopLeft || inTopRight || inBottomLeft) {
-        const r = inTopLeft ? row : inTopRight ? row : row - (size - 7),
-          c = inTopLeft ? col : inTopRight ? col - (size - 7) : col;
-        matrix[row][col] =
-          r === 0 ||
-          r === 6 ||
-          c === 0 ||
-          c === 6 ||
-          (r >= 2 && r <= 4 && c >= 2 && c <= 4);
-      } else {
-        matrix[row][col] =
-          (((hash * (row + 1) * 31 + col * 17 + row * col * 7) ^
-            (hash >> (row % 8))) &
-            1) ===
-          1;
-      }
-    }
-  }
-  return matrix;
-}
-
-const QRCodeSVG = ({ value, size = 48 }: { value: string; size?: number }) => {
-  const GRID = 21;
-  const matrix = generateQRMatrix(value, GRID);
-  const cellSize = size / GRID;
-  const cells: { x: number; y: number }[] = [];
-  for (let row = 0; row < GRID; row++) {
-    for (let col = 0; col < GRID; col++) {
-      if (matrix[row][col])
-        cells.push({ x: col * cellSize, y: row * cellSize });
-    }
-  }
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      style={{ display: "block", flexShrink: 0 }}
-      aria-label="QR-код электронной подписи"
-    >
-      <rect width={size} height={size} fill="white" />
-      {cells.map((cell, i) => (
-        <rect
-          key={i}
-          x={cell.x}
-          y={cell.y}
-          width={cellSize}
-          height={cellSize}
-          fill="#1e3a8a"
-        />
-      ))}
-    </svg>
-  );
-};
-
-const DSStamp = ({
-  name,
-  certSerial,
-  signedAt,
-  validUntil,
-}: {
-  name: string;
-  certSerial: string;
-  signedAt: string;
-  validUntil: string;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.93, y: 4 }}
-    animate={{ opacity: 1, scale: 1, y: 0 }}
-    transition={{ duration: 0.28, ease: "easeOut" }}
-    className="flex items-stretch rounded-md overflow-hidden shadow-sm"
-    style={{ border: "1.5px solid #3b82f6", background: "#fff", minWidth: 0 }}
-  >
-    <div className="flex flex-col flex-shrink-0" style={{ width: 7 }}>
-      <div style={{ flex: 1, background: "#CC0001" }} />
-      <div
-        style={{
-          flex: 1,
-          background: "#FFFFFF",
-          borderTop: "0.5px solid #e2e8f0",
-          borderBottom: "0.5px solid #e2e8f0",
-        }}
-      />
-      <div style={{ flex: 1, background: "#009A44" }} />
-    </div>
-    <div
-      className="flex-1 px-2.5 py-2 min-w-0"
-      style={{ background: "#eff6ff" }}
-    >
-      <p
-        style={{
-          fontFamily: "Times New Roman, serif",
-          fontWeight: 700,
-          fontSize: 11,
-          color: "#1e3a8a",
-          textAlign: "center",
-          lineHeight: 1.3,
-          marginBottom: 2,
-        }}
-      >
-        Имзои электронии раками
-      </p>
-      <div style={{ borderTop: "1px solid #93c5fd", marginBottom: 4 }} />
-      <p
-        style={{
-          fontFamily: "Times New Roman, serif",
-          fontWeight: 600,
-          fontSize: 9,
-          color: "#1d4ed8",
-          textAlign: "center",
-          lineHeight: 1.3,
-          marginBottom: 5,
-        }}
-      >
-        Маълумоти имзои электронии раками
-      </p>
-      <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            flex: 1,
-            minWidth: 0,
-          }}
-        >
-          {[
-            ["Сертификат:", certSerial],
-            ["Дорандаи имзо:", name],
-            ["Санаи имзо:", signedAt],
-            ["Санаи додод:", validUntil],
-          ].map(([label, val], i) => (
-            <div key={i} style={{ display: "flex", gap: 4 }}>
-              <span
-                style={{
-                  fontSize: 8.5,
-                  fontWeight: 700,
-                  color: "#1e40af",
-                  whiteSpace: "nowrap",
-                  minWidth: 60,
-                }}
-              >
-                {label}
-              </span>
-              <span
-                style={{
-                  fontSize: 8.5,
-                  color: "#1e293b",
-                  fontFamily: label === "Сертификат:" ? "monospace" : undefined,
-                  wordBreak: "break-all",
-                }}
-              >
-                {val}
-              </span>
-            </div>
-          ))}
-        </div>
-        <div
-          style={{
-            flexShrink: 0,
-            border: "1px solid #bfdbfe",
-            borderRadius: 3,
-            padding: 2,
-            background: "#fff",
-          }}
-        >
-          <QRCodeSVG value={`${certSerial}|${name}|${signedAt}`} size={52} />
-        </div>
-      </div>
-    </div>
-  </motion.div>
-);
-
-// ── Модалки и UI-Блоки ────────────────────────────────────────────────────────
-const OrgStructureNodeItem = ({
-  node,
-  depth = 0,
-  onSelect,
-}: {
-  node: OrgStructureNode;
-  depth?: number;
-  onSelect: (node: OrgStructureNode) => void;
-}) => {
-  const [isExpanded, setIsExpanded] = useState(true);
-  const hasChildren = !!(node.children && node.children.length > 0);
-  const isLeaf = !hasChildren;
-  return (
-    <div key={node.id}>
-      <motion.button
-        initial={{ opacity: 0, x: -8 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.2 }}
-        onClick={() => {
-          if (isLeaf) onSelect(node);
-          if (hasChildren) setIsExpanded(!isExpanded);
-        }}
-        className={cn(
-          "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all text-left",
-          isLeaf
-            ? "hover:bg-blue-50 cursor-pointer border border-slate-200"
-            : "hover:bg-slate-50",
-        )}
-        style={{ marginLeft: `${depth * 16}px` }}
-      >
-        {hasChildren && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsExpanded(!isExpanded);
-            }}
-            className="flex items-center justify-center w-5 h-5 flex-shrink-0"
-          >
-            <motion.div
-              animate={{ rotate: isExpanded ? 0 : -90 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChevronDown size={14} className="text-slate-400" />
-            </motion.div>
-          </button>
-        )}
-        {isLeaf && <div className="w-5 flex-shrink-0" />}
-        <div
-          className={cn(
-            "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0",
-            node.color,
-          )}
-        >
-          {node.initials}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-slate-900 truncate">
-            {node.name}
-          </p>
-          <p className="text-[11px] text-slate-500 truncate">{node.position}</p>
-        </div>
-      </motion.button>
-      <AnimatePresence>
-        {hasChildren && isExpanded && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="space-y-1">
-              {node.children!.map((child) => (
-                <OrgStructureNodeItem
-                  key={child.id}
-                  node={child}
-                  depth={depth + 1}
-                  onSelect={onSelect}
-                />
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-const OrgStructureModal = ({
-  onSelect,
-  onClose,
-}: {
-  onSelect: (node: OrgStructureNode) => void;
-  onClose: () => void;
-}) => (
-  <AnimatePresence>
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.18 }}
-      className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-[3px]"
-      onClick={onClose}
-    />
-    <motion.div
-      initial={{ opacity: 0, scale: 0.97, y: 16 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.97, y: 16 }}
-      transition={{ duration: 0.26, ease: [0.32, 0.72, 0, 1] }}
-      className="fixed inset-4 z-[101] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
-            <Users size={17} className="text-white" />
-          </div>
-          <div>
-            <p className="text-base font-bold text-slate-900 leading-tight">
-              Структура организации
-            </p>
-            <p className="text-xs text-slate-400 font-medium">
-              Выберите исполнителя
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={onClose}
-          className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-sm font-semibold"
-        >
-          <X size={14} />
-          <span>Закрыть</span>
-        </button>
-      </div>
-      <div className="flex-1 overflow-auto p-6">
-        <div className="space-y-1">
-          <OrgStructureNodeItem
-            node={ORG_STRUCTURE}
-            onSelect={(node) => {
-              onSelect(node);
-              onClose();
-            }}
-          />
-        </div>
-      </div>
-    </motion.div>
-  </AnimatePresence>
-);
-
-const DSStampAppendix = ({
-  signerName,
-  signerInitials,
-  signerColor,
-  certSerial,
-  signedAt,
-  validUntil,
-  onClose,
-}: {
-  signerName: string;
-  signerInitials: string;
-  signerColor: string;
-  certSerial: string;
-  signedAt: string;
-  validUntil: string;
-  onClose: () => void;
-}) => (
-  <AnimatePresence>
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.18 }}
-      className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-[3px]"
-      onClick={onClose}
-    />
-    <motion.div
-      initial={{ opacity: 0, scale: 0.97, y: 16 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.97, y: 16 }}
-      transition={{ duration: 0.26, ease: [0.32, 0.72, 0, 1] }}
-      className="fixed inset-4 z-[101] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
-            <Shield size={17} className="text-white" />
-          </div>
-          <div>
-            <p className="text-base font-bold text-slate-900 leading-tight">
-              Приложение №1
-            </p>
-            <p className="text-xs text-slate-400 font-medium">
-              Электронная подпись
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={onClose}
-          className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-sm font-semibold"
-        >
-          <X size={14} />
-          <span>Закрыть</span>
-        </button>
-      </div>
-      <div className="flex-1 overflow-auto p-6 flex items-center justify-center bg-[#F8FAFC]">
-        <motion.div
-          initial={{ opacity: 0, y: 12, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.24, ease: "easeOut" }}
-          className="w-full max-w-md"
-        >
-          <p className="text-sm font-semibold text-slate-600 mb-4 text-center">
-            Приложение № 1 к письму
-          </p>
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <div className="text-center mb-6">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
-                Электронная подпись
-              </p>
-              <div
-                className={cn(
-                  "w-16 h-16 rounded-full flex items-center justify-center text-lg font-bold mx-auto",
-                  signerColor,
-                )}
-              >
-                {signerInitials}
-              </div>
-            </div>
-            <div className="space-y-3 mb-6">
-              <div>
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">
-                  Подписано
-                </p>
-                <p className="text-sm font-semibold text-slate-900">
-                  {signerName}
-                </p>
-              </div>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">
-                    Дата подписи
-                  </p>
-                  <p className="text-sm font-semibold text-slate-900">
-                    {signedAt}
-                  </p>
-                </div>
-                <div className="flex-1">
-                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">
-                    Номер сертификата
-                  </p>
-                  <p className="text-xs font-mono text-slate-700">
-                    {certSerial}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">
-                  Действителен
-                </p>
-                <p className="text-sm text-slate-700">{validUntil}</p>
-              </div>
-            </div>
-            <div className="pt-4 border-t border-slate-100">
-              <DSStamp
-                name={signerName}
-                certSerial={certSerial}
-                signedAt={signedAt}
-                validUntil={validUntil}
-              />
-            </div>
-          </div>
-        </motion.div>
-      </div>
-    </motion.div>
-  </AnimatePresence>
-);
-
-const CollapsibleBlock = ({
-  title,
-  defaultOpen = true,
-  children,
-}: {
-  title: string;
-  defaultOpen?: boolean;
-  children: React.ReactNode;
-}) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-  return (
-    <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3.5 border-b border-slate-100 hover:bg-slate-50 transition-colors"
-      >
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-          {title}
-        </p>
-        <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <ChevronDown size={14} className="text-slate-400" />
-        </motion.div>
-      </button>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-const TBtn = ({
-  onMouseDown,
-  title,
-  children,
-  active,
-}: {
-  onMouseDown: (e: React.MouseEvent) => void;
-  title: string;
-  children: React.ReactNode;
-  active?: boolean;
-}) => (
-  <button
-    onMouseDown={onMouseDown}
-    title={title}
-    className={cn(
-      "p-1.5 rounded transition-colors flex-shrink-0",
-      active
-        ? "bg-blue-100 text-blue-700"
-        : "hover:bg-slate-100 text-slate-500 hover:text-slate-800",
-    )}
-  >
-    {children}
-  </button>
-);
+import type {
+  Status,
+  LetterType,
+  ImportanceLevel,
+  PageOrientation,
+  RegistryItem,
+  RecipientOption,
+  AttachedFile,
+  Approver,
+  FinalSigner,
+} from "../types";
+import {
+  LETTER_TYPE_OPTIONS,
+  IMPORTANCE_OPTIONS,
+  IMPORTANCE_DOT,
+  RECIPIENT_OPTIONS,
+  FONT_SIZES,
+  INBOX_DOC_TYPES,
+  INBOX_DOC_TYPE_STYLE,
+  MOCK_CONTENT_LINES,
+  OUTBOX_STATUS_LABEL,
+  OUTBOX_STATUS_STYLE,
+} from "../lib/constants";
+import { cn } from "../lib/utils";
+import { PreviewModal } from "./PreviewModal";
+import { TBtn } from "./TBtn";
+import { DSStamp } from "./DSStamp";
 
 function FileTextIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -919,687 +99,6 @@ function FileTextIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-const PreviewModal = ({
-  subject,
-  editorHtml,
-  orientation,
-  onClose,
-  stampVisible,
-  stampPos,
-  stampSize,
-  stampSignerName,
-  stampCertSerial,
-  stampSignedAt,
-  stampValidUntil,
-}: {
-  subject: string;
-  editorHtml: string;
-  orientation: PageOrientation;
-  onClose: () => void;
-  stampVisible: boolean;
-  stampPos: { x: number; y: number };
-  stampSize: { width: number; height: "auto" | number };
-  stampSignerName: string;
-  stampCertSerial: string;
-  stampSignedAt: string;
-  stampValidUntil: string;
-}) => {
-  const isLandscape = orientation === "landscape";
-  const pageWidth = isLandscape ? 1122 : 794;
-  const pageHeight = isLandscape ? 794 : 1122;
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] flex flex-col bg-slate-700/80 backdrop-blur-sm"
-        onClick={onClose}
-      >
-        <div
-          className="flex-shrink-0 flex items-center justify-between px-6 py-3 bg-slate-800 border-b border-slate-600"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-              <Eye size={16} className="text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-white">
-                Предварительный просмотр
-              </p>
-              <p className="text-xs text-slate-400">
-                {isLandscape ? "Альбомная ориентация" : "Книжная ориентация"} ·
-                A4
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white text-sm font-medium rounded-xl transition-colors"
-          >
-            <X size={15} />
-            <span>Закрыть</span>
-          </button>
-        </div>
-        <div
-          className="flex-1 overflow-auto flex items-start justify-center py-10 px-8"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ scale: 0.96, opacity: 0, y: 12 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            transition={{ duration: 0.24, ease: "easeOut" }}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white shadow-2xl"
-            style={{
-              width: pageWidth,
-              minHeight: pageHeight,
-              padding: "72px 80px",
-              fontFamily: "Times New Roman, serif",
-              fontSize: 14,
-              lineHeight: 2,
-              color: "#1e293b",
-              position: "relative",
-            }}
-          >
-            {editorHtml ? (
-              <div dangerouslySetInnerHTML={{ __html: editorHtml }} />
-            ) : (
-              <p style={{ color: "#94a3b8", fontStyle: "italic" }}>
-                Текст письма не введён...
-              </p>
-            )}
-            {stampVisible && (
-              <div
-                style={{
-                  position: "absolute",
-                  left: stampPos.x,
-                  top: stampPos.y,
-                  width: stampSize.width,
-                  height:
-                    stampSize.height === "auto" ? undefined : stampSize.height,
-                  overflow: "hidden",
-                  pointerEvents: "none",
-                }}
-              >
-                <DSStamp
-                  name={stampSignerName}
-                  certSerial={stampCertSerial}
-                  signedAt={stampSignedAt}
-                  validUntil={stampValidUntil}
-                />
-              </div>
-            )}
-          </motion.div>
-        </div>
-      </motion.div>
-    </AnimatePresence>
-  );
-};
-
-// ── Экспорт 1: Модалка просмотра документа (Document Drawer) ──────────────────
-export const DocumentDrawer = ({
-  item,
-  isOutbox,
-  onClose,
-}: {
-  item: RegistryItem;
-  isOutbox: boolean;
-  onClose: () => void;
-}) => {
-  const docType = INBOX_DOC_TYPES[item.id] ?? "Дархост";
-  const docTypeStyle =
-    INBOX_DOC_TYPE_STYLE[docType] ??
-    "bg-slate-50 text-slate-700 border-slate-200";
-  const inboxStatusStyle: Record<Status, string> = {
-    "на резолюции": "bg-emerald-50 text-emerald-700 border-emerald-200",
-    "на исполнении": "bg-amber-50 text-amber-700 border-amber-200",
-    "на согласовании": "bg-blue-50 text-blue-700 border-blue-200",
-    "на подпись": "bg-purple-50 text-purple-700 border-purple-200",
-    завершено: "bg-slate-100 text-slate-600 border-slate-200",
-  };
-  const statusStyle = isOutbox
-    ? OUTBOX_STATUS_STYLE[item.status]
-    : inboxStatusStyle[item.status];
-  const statusLabel = isOutbox ? OUTBOX_STATUS_LABEL[item.status] : item.status;
-  const [selectedExecutor, setSelectedExecutor] =
-    useState<RecipientOption | null>(
-      item.executor ? RECIPIENT_OPTIONS[0] : null,
-    );
-  const [taskTemplate, setTaskTemplate] = useState(
-    "Ознакомиться и утвердить документ",
-  );
-  const [customTask, setCustomTask] = useState("");
-  const [showTaskEditor, setShowTaskEditor] = useState(false);
-  const [dueDate, setDueDate] = useState("15.02.2026");
-  const [visaStatus, setVisaStatus] = useState("на рассмотрении");
-  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
-  const [ecpApplied, setEcpApplied] = useState(false);
-  const [ecpLoading, setEcpLoading] = useState(false);
-  const [showOrgStructure, setShowOrgStructure] = useState(false);
-  const [showDSStampAppendix, setShowDSStampAppendix] = useState(false);
-  const TASK_TEMPLATES = [
-    "Ознакомиться и утвердить документ",
-    "Согласовать содержание",
-    "Проверить и подписать",
-    "Рассмотреть предложения",
-  ];
-  const VISA_STATUSES = ["на рассмотрении", "согласовано", "требует доработки"];
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        key="drawer-backdrop"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      <motion.div
-        key="drawer-panel"
-        initial={{ opacity: 0, scale: 0.97, y: 16 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.97, y: 16 }}
-        transition={{ duration: 0.26, ease: [0.32, 0.72, 0, 1] }}
-        className="fixed inset-4 z-50 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
-              <Eye size={17} className="text-white" />
-            </div>
-            <div>
-              <p className="text-base font-bold text-slate-900 leading-tight">
-                Просмотр документа
-              </p>
-              <p className="text-xs text-slate-400 font-medium">
-                {item.inboundNumber} · {item.outboundNumber}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-sm font-semibold">
-              <Download size={14} />
-              <span>Скачать</span>
-            </button>
-            <button className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-colors text-sm font-semibold">
-              <Trash size={14} />
-              <span>Удалить</span>
-            </button>
-            <button
-              onClick={onClose}
-              className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-sm font-semibold"
-            >
-              <X size={14} />
-              <span>Закрыть</span>
-            </button>
-          </div>
-        </div>
-        <div className="flex flex-1 min-h-0 overflow-hidden">
-          <aside className="w-72 flex-shrink-0 border-r border-slate-100 overflow-y-auto bg-slate-50/60 flex flex-col">
-            <div className="p-5 space-y-3">
-              <CollapsibleBlock title="Детали письма" defaultOpen={true}>
-                <div className="px-4 py-3.5 border-b border-slate-50">
-                  <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                    От кого
-                  </p>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-700 flex-shrink-0">
-                      {item.sender
-                        .split(" ")
-                        .map((w: string) => w[0])
-                        .slice(0, 2)
-                        .join("")}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 leading-snug">
-                        {item.sender}
-                      </p>
-                      <p className="text-[10px] text-slate-400">Отправитель</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="px-4 py-3.5 border-b border-slate-50">
-                  <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                    Копия
-                  </p>
-                  <p className="text-sm text-slate-400 italic">Не указано</p>
-                </div>
-                <div className="px-4 py-3.5 border-b border-slate-50">
-                  <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                    Тема
-                  </p>
-                  <p className="text-sm font-semibold text-slate-800 leading-snug">
-                    {item.subject}
-                  </p>
-                </div>
-                <div className="px-4 py-3.5 border-b border-slate-50">
-                  <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                    Дата
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Calendar
-                      size={14}
-                      className="text-blue-500 flex-shrink-0"
-                    />
-                    <p className="text-sm font-semibold text-slate-800">
-                      {item.date}
-                    </p>
-                  </div>
-                </div>
-                <div className="px-4 py-3.5 border-b border-slate-50">
-                  <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                    Номер письма
-                  </p>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[9px] text-slate-400 font-medium">
-                        Входящий
-                      </span>
-                      <span className="text-sm font-bold text-slate-900 font-mono">
-                        {item.inboundNumber}
-                      </span>
-                    </div>
-                    <div className="w-px h-8 bg-slate-100 mx-1" />
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[9px] text-slate-400 font-medium">
-                        Исходящий
-                      </span>
-                      <span className="text-sm font-bold text-slate-900 font-mono">
-                        {item.outboundNumber}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="px-4 py-3.5 border-b border-slate-50">
-                  <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                    Тип документа
-                  </p>
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border",
-                      docTypeStyle,
-                    )}
-                  >
-                    <FileType size={12} />
-                    <span>{docType}</span>
-                  </span>
-                </div>
-                <div className="px-4 py-3.5">
-                  <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                    Статус документа
-                  </p>
-                  <span
-                    className={cn(
-                      "inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border capitalize",
-                      statusStyle,
-                    )}
-                  >
-                    {statusLabel}
-                  </span>
-                  {item.executor && (
-                    <div className="mt-3 flex items-center gap-2 pt-3 border-t border-slate-200">
-                      <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 border border-slate-200 flex-shrink-0">
-                        {item.executor.split(" ")[0][0]}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-slate-800 truncate">
-                          {item.executor}
-                        </p>
-                        <p className="text-[10px] text-slate-400">
-                          Исполнитель
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CollapsibleBlock>
-
-              <CollapsibleBlock title="Виза" defaultOpen={true}>
-                <div className="px-4 py-3.5 space-y-3">
-                  <div className="border-b border-slate-50 pb-3">
-                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                      Исполнитель
-                    </p>
-                    <button
-                      onClick={() => setShowOrgStructure(true)}
-                      className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors text-sm font-medium text-slate-700"
-                    >
-                      <span className="flex items-center gap-2">
-                        <User size={13} className="text-slate-400" />
-                        {selectedExecutor
-                          ? selectedExecutor.name
-                          : "Выбрать исполнителя"}
-                      </span>
-                      <ChevronRight size={13} className="text-slate-400" />
-                    </button>
-                  </div>
-                  <div className="border-b border-slate-50 pb-3">
-                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                      Поручение
-                    </p>
-                    {!showTaskEditor ? (
-                      <button
-                        onClick={() => setShowTaskEditor(true)}
-                        className="w-full flex items-start gap-2 px-3 py-2 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors text-left"
-                      >
-                        <MessageSquare
-                          size={13}
-                          className="text-blue-500 mt-0.5 flex-shrink-0"
-                        />
-                        <p className="text-[11px] font-medium text-blue-700">
-                          {customTask || taskTemplate}
-                        </p>
-                      </button>
-                    ) : (
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-2 gap-1.5">
-                          {TASK_TEMPLATES.map((template) => (
-                            <button
-                              key={template}
-                              onClick={() => {
-                                setTaskTemplate(template);
-                                setCustomTask("");
-                                setShowTaskEditor(false);
-                              }}
-                              className="text-[10px] px-2 py-1.5 bg-white border border-slate-200 rounded text-slate-700 hover:bg-slate-50 transition-colors font-medium"
-                            >
-                              {template}
-                            </button>
-                          ))}
-                        </div>
-                        <div>
-                          <label className="text-[9px] font-semibold text-slate-400 mb-1 block">
-                            Свой текст
-                          </label>
-                          <textarea
-                            value={customTask}
-                            onChange={(e) => setCustomTask(e.target.value)}
-                            placeholder="Введите поручение..."
-                            className="w-full text-[11px] text-slate-700 placeholder-slate-400 bg-amber-50/60 border border-amber-100 rounded-lg px-2.5 py-2 resize-none outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-300 transition-all"
-                            rows={2}
-                          />
-                        </div>
-                        <button
-                          onClick={() => setShowTaskEditor(false)}
-                          className="w-full text-[10px] px-2 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600 transition-colors font-semibold"
-                        >
-                          Готово
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <div className="border-b border-slate-50 pb-3">
-                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                      Срок
-                    </p>
-                    <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
-                      <Calendar
-                        size={13}
-                        className="text-blue-500 flex-shrink-0"
-                      />
-                      <input
-                        type="text"
-                        value={dueDate}
-                        onChange={(e) => setDueDate(e.target.value)}
-                        className="flex-1 bg-transparent text-sm font-medium text-slate-700 outline-none"
-                      />
-                    </div>
-                  </div>
-                  <div className="border-b border-slate-50 pb-3">
-                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                      Статус
-                    </p>
-                    <div className="relative">
-                      <button
-                        onClick={() =>
-                          setShowStatusDropdown(!showStatusDropdown)
-                        }
-                        className={cn(
-                          "w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition-colors text-sm font-medium border",
-                          visaStatus === "на рассмотрении"
-                            ? "bg-blue-50 border-blue-200 text-blue-700"
-                            : visaStatus === "согласовано"
-                              ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                              : "bg-amber-50 border-amber-200 text-amber-700",
-                        )}
-                      >
-                        <span>{visaStatus}</span>
-                        <ChevronDown
-                          size={13}
-                          className={cn(
-                            "transition-transform",
-                            showStatusDropdown && "rotate-180",
-                          )}
-                        />
-                      </button>
-                      <AnimatePresence>
-                        {showStatusDropdown && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -6 }}
-                            className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden py-1"
-                          >
-                            {VISA_STATUSES.map((s) => (
-                              <button
-                                key={s}
-                                onClick={() => {
-                                  setVisaStatus(s);
-                                  setShowStatusDropdown(false);
-                                }}
-                                className="w-full px-3 py-1.5 hover:bg-slate-50 transition-colors text-left border-b border-slate-50 last:border-b-0 text-sm font-medium text-slate-700"
-                              >
-                                {s}
-                              </button>
-                            ))}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-                  <div className="pt-2">
-                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                      Электронная подпись
-                    </p>
-                    {!ecpApplied ? (
-                      <button
-                        onClick={() => {
-                          setEcpLoading(true);
-                          setTimeout(() => {
-                            setEcpLoading(false);
-                            setEcpApplied(true);
-                          }, 1500);
-                        }}
-                        disabled={ecpLoading}
-                        className={cn(
-                          "w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs font-semibold transition-all border",
-                          ecpLoading
-                            ? "bg-slate-100 text-slate-400 border-slate-200 cursor-wait"
-                            : "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100",
-                        )}
-                      >
-                        {ecpLoading ? (
-                          <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{
-                              duration: 1,
-                              repeat: Infinity,
-                              ease: "linear",
-                            }}
-                          >
-                            <Clock size={12} />
-                          </motion.div>
-                        ) : (
-                          <Shield size={12} />
-                        )}
-                        <span>
-                          {ecpLoading ? "Применяю подпись..." : "Применить ЭЦП"}
-                        </span>
-                      </button>
-                    ) : (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg">
-                          <Check
-                            size={12}
-                            className="text-emerald-600 flex-shrink-0"
-                          />
-                          <span className="text-[11px] font-semibold text-emerald-700">
-                            ЭЦП применена
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => setShowDSStampAppendix(true)}
-                          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-lg text-[11px] font-semibold transition-colors"
-                        >
-                          <FileType size={12} />
-                          <span>Показать Приложение №1</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CollapsibleBlock>
-            </div>
-          </aside>
-
-          <div className="flex-1 overflow-auto bg-[#E8EAED] flex items-start justify-center py-8 px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 12, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.24, ease: "easeOut" }}
-              className="bg-white shadow-xl border border-slate-300/30 w-full max-w-[794px] min-h-[1000px]"
-              style={{
-                padding: "64px 72px 80px",
-                fontFamily: "Times New Roman, serif",
-                fontSize: 14,
-                lineHeight: 2,
-                color: "#1e293b",
-                position: "relative",
-              }}
-            >
-              <div className="mb-8">
-                <div
-                  className="text-right mb-6"
-                  style={{ fontFamily: "Times New Roman, serif", fontSize: 13 }}
-                >
-                  <p style={{ marginBottom: 2 }}>
-                    <strong>{item.sender}</strong>
-                  </p>
-                  <p style={{ color: "#64748b" }}>{item.date}</p>
-                  <p style={{ color: "#64748b" }}>№ {item.inboundNumber}</p>
-                </div>
-                <div className="text-center mb-8">
-                  <p
-                    className="font-bold text-lg"
-                    style={{
-                      fontFamily: "Times New Roman, serif",
-                      textDecoration: "underline",
-                      textUnderlineOffset: 4,
-                    }}
-                  >
-                    {item.subject}
-                  </p>
-                </div>
-              </div>
-              <div
-                style={{
-                  fontFamily: "Times New Roman, serif",
-                  fontSize: 14,
-                  lineHeight: 2,
-                }}
-              >
-                {MOCK_CONTENT_LINES.map((line, i) =>
-                  line === "" ? (
-                    <div key={`line-${i}`} style={{ height: "0.5em" }} />
-                  ) : (
-                    <p
-                      key={`line-${i}`}
-                      style={{
-                        textIndent:
-                          line.startsWith("Ҳурматли") ||
-                          line.startsWith("Мо") ||
-                          line.startsWith("Дар") ||
-                          line.startsWith("Бо") ||
-                          line.startsWith("Вазорати")
-                            ? "2em"
-                            : 0,
-                        marginBottom: 0,
-                      }}
-                    >
-                      {line}
-                    </p>
-                  ),
-                )}
-              </div>
-              <div
-                className="mt-12"
-                style={{ fontFamily: "Times New Roman, serif", fontSize: 14 }}
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-bold">Вазири молия</p>
-                    <p style={{ color: "#64748b", marginTop: 32 }}>
-                      _____________________
-                    </p>
-                    <p style={{ fontSize: 12, color: "#94a3b8" }}>
-                      подпись / мӯҳр
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold">{item.sender}</p>
-                    <p style={{ color: "#64748b", marginTop: 4 }}>
-                      {item.date}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div style={{ marginTop: 48 }}>
-                <DSStamp
-                  name={item.sender}
-                  certSerial={`SN-2026-${item.inboundNumber.replace(/[^A-Za-z0-9]/g, "")}-84201`}
-                  signedAt={item.date}
-                  validUntil="с 20.03.2025 до 20.03.2026"
-                />
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </motion.div>
-      {showOrgStructure && (
-        <OrgStructureModal
-          onSelect={(node) => {
-            setSelectedExecutor({
-              id: node.id,
-              name: node.name,
-              org: node.position,
-              initials: node.initials,
-              color: node.color,
-            });
-            setShowOrgStructure(false);
-          }}
-          onClose={() => setShowOrgStructure(false)}
-        />
-      )}
-      {showDSStampAppendix && (
-        <DSStampAppendix
-          signerName={selectedExecutor?.name ?? "Неизвестно"}
-          signerInitials={selectedExecutor?.initials ?? "?"}
-          signerColor={selectedExecutor?.color ?? "bg-slate-100 text-slate-700"}
-          certSerial={`SN-2026-${selectedExecutor?.initials ?? "??"}-84201`}
-          signedAt="03.02.2026"
-          validUntil="с 20.03.2025 до 20.03.2026"
-          onClose={() => setShowDSStampAppendix(false)}
-        />
-      )}
-    </AnimatePresence>
-  );
-};
-
-// ── Экспорт 2: Главный компонент создания (Create Internal Correspondence) ────
 export const CreateInternalCorrespondence = ({
   id,
   onBack = () => {},
@@ -1641,8 +140,6 @@ export const CreateInternalCorrespondence = ({
     height: "auto" as "auto" | number,
   });
   const [docCreator, setDocCreator] = useState<any>(null);
-
-  // Состояние папки
   const [folder, setFolder] = useState<string | number>("drafts");
 
   const isDraggingStamp = useRef(false);
@@ -1661,7 +158,6 @@ export const CreateInternalCorrespondence = ({
   const PAGE_PAD_V = 72;
   const CONTENT_HEIGHT = PAGE_HEIGHT - PAGE_PAD_V * 2;
 
-  // Добавим debounce или просто используем поисковый запрос
   const [searchParams, setSearchParams] = useState({ query: "" });
 
   const { data: usersData, isLoading: loadingUsers } = useGetQuery({
@@ -1670,7 +166,6 @@ export const CreateInternalCorrespondence = ({
     params: searchParams,
   });
 
-  // Получаем актуальные данные маршрута (workflow)
   const { data: rawWorkflowData, refetch: refetchWorkflow } = useGetQuery({
     url: id ? ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id)) : "",
     useToken: true,
@@ -1686,7 +181,7 @@ export const CreateInternalCorrespondence = ({
         .split(" ")
         .map((n: string) => n[0])
         .join(""),
-      color: "bg-blue-100 text-blue-700", // Можно мапить цвет в зависимости от роли/департамента
+      color: "bg-blue-100 text-blue-700",
     })) || [];
 
   const availableApprovers = availableUsers
@@ -1697,9 +192,8 @@ export const CreateInternalCorrespondence = ({
         (r.name.toLowerCase().includes(approverSearch.toLowerCase()) ||
           r.org.toLowerCase().includes(approverSearch.toLowerCase())),
     )
-    .slice(0, 15); // Тоже ограничиваем вывод, чтобы не было гигантского списка
+    .slice(0, 15);
 
-  // === ИНТЕГРАЦИЯ API И МУТАЦИИ ===
   const { mutate: createDraft, isPending: isCreating } = useMutationQuery<any>({
     url: ApiRoutes.CREATE_INTERNAL,
     method: "POST",
@@ -1754,12 +248,11 @@ export const CreateInternalCorrespondence = ({
       queryOptions: { onSuccess: () => refetchWorkflow() },
     });
 
-  // Функция "Вернуть себя" как подписывающего
   const assignSelfAsSigner = () => {
     if (!docCreator) return;
     setFinalSigner({
       id: String(docCreator.id),
-      isInvited: false, // Мы возвращаем себя, но инвайт еще не отправляли
+      isInvited: false,
       name: docCreator.full_name,
       role: docCreator.position || "Автор документа",
       initials: docCreator.full_name
@@ -1781,7 +274,6 @@ export const CreateInternalCorrespondence = ({
     method: "POST",
   });
 
-  // Подтверждение ЭЦП
   const { mutate: signaturesConfirm } = useMutationQuery<any>({
     url: ApiRoutes.INTERNAL_SIGNATURES_CONFIRM?.replace(
       ":id",
@@ -1792,7 +284,7 @@ export const CreateInternalCorrespondence = ({
       success: "Документ успешно подписан",
       invalidate: [
         ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
-      ], // <-- ОБНОВЛЯЕМ WORKFLOW
+      ],
     },
     queryOptions: {
       onSuccess: () => {
@@ -1806,7 +298,6 @@ export const CreateInternalCorrespondence = ({
     },
   });
 
-  // Подтверждение Согласования
   const { mutate: approvalsConfirm } = useMutationQuery<any, any>({
     url: (req) =>
       ApiRoutes.INTERNAL_APPROVALS_CONFIRM?.replace(
@@ -1818,7 +309,7 @@ export const CreateInternalCorrespondence = ({
       success: "Документ согласован",
       invalidate: [
         ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
-      ], // <-- ОБНОВЛЯЕМ WORKFLOW
+      ],
     },
     queryOptions: {
       onSuccess: (_, req) => {
@@ -1851,11 +342,8 @@ export const CreateInternalCorrespondence = ({
         to: to.map((r) => r.id),
         cc: cc.map((r) => r.id),
       },
-
-      // ДОБАВЛЕНЫ УЧАСТНИКИ
       approvals: approvers.map((a) => a.id),
       signatures: finalSigner ? [finalSigner.id] : [],
-
       folder_id: typeof folder === "number" ? folder : undefined,
       system_folder: typeof folder === "string" ? folder : undefined,
       document_type: letterType,
@@ -1890,12 +378,10 @@ export const CreateInternalCorrespondence = ({
     [],
   );
 
-  // 1-й useEffect: Заполняем форму и УЧАСТНИКОВ из initialData
   useEffect(() => {
     if (initialData?.item) {
       const item = initialData.item;
 
-      // Тема, редактор, приоритет, тип
       if (item.subject) setSubject(item.subject);
       if (
         item.body &&
@@ -1914,7 +400,6 @@ export const CreateInternalCorrespondence = ({
       }
       if (item.document_type) setLetterType(item.document_type);
 
-      // Получатели Кому/Копия
       if (item.recipients && Array.isArray(item.recipients)) {
         const toUsers: RecipientOption[] = [];
         const ccUsers: RecipientOption[] = [];
@@ -1941,15 +426,13 @@ export const CreateInternalCorrespondence = ({
         }
       }
 
-      // СОГЛАСУЮЩИЕ ИЗ БД (Черновика)
       if (item.approvals && Array.isArray(item.approvals)) {
         setApprovers(
           item.approvals.map((a: any) => {
-            // ДОБАВЛЕНА ПРОВЕРКА: берем либо approver, либо user
             const userData = a.approver || a.user;
 
             return {
-              id: String(userData?.id), // Приводим к строке для точного сравнения в будущем
+              id: String(userData?.id),
               approvalRecordId: String(a.id),
               isInvited: true,
               name: userData?.full_name || "Неизвестно",
@@ -1973,17 +456,15 @@ export const CreateInternalCorrespondence = ({
         );
       }
 
-      // СОХРАНЯЕМ СОЗДАТЕЛЯ ДЛЯ КНОПКИ "ВЕРНУТЬ СЕБЯ"
       if (item.creator) {
-        setDocCreator(item.creator); // <-- ВОТ ЗДЕСЬ СОХРАНЯЕТСЯ CREATOR
+        setDocCreator(item.creator);
       }
 
-      // ПОДПИСЫВАЮЩИЙ
       if (item.signatures && item.signatures.length > 0) {
         const s = item.signatures[0];
         setFinalSigner({
           id: String(s.user.id),
-          isInvited: true, // В БД уже есть, значит приглашен
+          isInvited: true,
           name: s.user.full_name,
           role: s.user.position || "Сотрудник",
           initials: s.user.full_name
@@ -1996,10 +477,9 @@ export const CreateInternalCorrespondence = ({
           dsLoading: false,
         });
       } else if (item.creator) {
-        // Если подписей нет, ставим Создателя (СЕБЯ) по умолчанию
         setFinalSigner({
           id: String(item.creator.id),
-          isInvited: false, // Еще не приглашен!
+          isInvited: false,
           name: item.creator.full_name,
           role: item.creator.position || "Автор документа",
           initials: item.creator.full_name
@@ -2015,13 +495,11 @@ export const CreateInternalCorrespondence = ({
     }
   }, [initialData]);
 
-  // 2-й useEffect: Синхронизация ID для согласования из WORKFLOW
   useEffect(() => {
     if (rawWorkflowData?.data) {
       const wfApprovals = rawWorkflowData.data.approvals || [];
       const wfSignatures = rawWorkflowData.data.signatures || [];
 
-      // Синхронизируем согласующих
       if (wfApprovals.length > 0) {
         setApprovers((prev) => {
           const merged = [...prev];
@@ -2035,7 +513,7 @@ export const CreateInternalCorrespondence = ({
               merged[existingIdx] = {
                 ...merged[existingIdx],
                 approvalRecordId: String(wfA.id),
-                isInvited: true, // Появился в Workflow = приглашен!
+                isInvited: true,
                 approved: wfA.status === "approved",
                 dsApplied: wfA.status === "approved",
               };
@@ -2065,14 +543,13 @@ export const CreateInternalCorrespondence = ({
         });
       }
 
-      // Синхронизируем подписывающего
       if (wfSignatures.length > 0) {
         const wfS = wfSignatures[0];
         const user = wfS.user;
         if (user) {
           setFinalSigner({
             id: String(user.id),
-            isInvited: true, // Появился в Workflow = приглашен!
+            isInvited: true,
             name: user.full_name,
             role: user.position || "Сотрудник",
             initials: user.full_name
@@ -2125,7 +602,6 @@ export const CreateInternalCorrespondence = ({
     e.target.value = "";
   };
 
-  // Логика подписания (ЭЦП)
   const applyFinalDS = async () => {
     if (!id || !finalSigner) return;
 
@@ -2149,7 +625,6 @@ export const CreateInternalCorrespondence = ({
     }
   };
 
-  // Логика согласования
   const applyApproverDS = (recordId: string) => {
     setApprovers((prev) =>
       prev.map((a) =>
@@ -2181,8 +656,8 @@ export const CreateInternalCorrespondence = ({
     setApprovers((prev) => [
       ...prev,
       {
-        id: r.id, // ИСПОЛЬЗУЕМ НАСТОЯЩИЙ ID ПОЛЬЗОВАТЕЛЯ ИЗ БД
-        approvalRecordId: undefined, // Пока не сохраним, ID записи согласования нет
+        id: r.id,
+        approvalRecordId: undefined,
         name: r.name,
         role: r.org,
         initials: r.initials,
@@ -2324,7 +799,6 @@ export const CreateInternalCorrespondence = ({
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
-          // ДОБАВЛЕНО: overflow-y-auto и max-h-60 для скролла
           className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-[999] overflow-y-auto max-h-60"
         >
           {loadingUsers ? (
@@ -2332,12 +806,11 @@ export const CreateInternalCorrespondence = ({
               Загрузка...
             </div>
           ) : availableUsers.length > 0 ? (
-            // ДОБАВЛЕНО: slice(0, 15) чтобы не рендерить тысячу элементов разом
             availableUsers.slice(0, 15).map((r) => (
               <button
                 key={r.id}
                 onMouseDown={(e) => {
-                  e.preventDefault(); // ИСПРАВЛЕНИЕ БАГА: предотвращает конфликт onBlur у инпута
+                  e.preventDefault();
                   onSelect(r);
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50 transition-colors text-left"
@@ -2421,7 +894,6 @@ export const CreateInternalCorrespondence = ({
               <span className="hidden sm:inline">Предварительный просмотр</span>
             </button>
 
-            {/* Кнопка "Сохранить" */}
             <button
               onClick={onSaveClick}
               disabled={
@@ -2442,12 +914,11 @@ export const CreateInternalCorrespondence = ({
               <span>Сохранить</span>
             </button>
 
-            {/* Кнопка "Отправить" - показываем только если есть ID */}
             {!!id && (
               <button
                 onClick={() => {
                   if (!to.length || !subject.trim()) return;
-                  setSent(true); // Заглушка, тут будет логика sendCorrespondence
+                  setSent(true);
                 }}
                 disabled={!to.length || !subject.trim()}
                 className={cn(
@@ -2559,7 +1030,10 @@ export const CreateInternalCorrespondence = ({
                       type="button"
                       onClick={() => setShowImportanceDropdown((v) => !v)}
                       onBlur={() =>
-                        setTimeout(() => setShowImportanceDropdown(false), 150)
+                        setTimeout(
+                          () => setShowImportanceDropdown(false),
+                          150,
+                        )
                       }
                       className={cn(
                         "flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-medium transition-all",
@@ -2568,7 +1042,10 @@ export const CreateInternalCorrespondence = ({
                         selectedImportance.badgeText,
                       )}
                     >
-                      <Flag size={14} className={selectedImportance.flagFill} />
+                      <Flag
+                        size={14}
+                        className={selectedImportance.flagFill}
+                      />
                       <span>{selectedImportance.label}</span>
                       <ChevronDown
                         size={13}
@@ -3127,13 +1604,8 @@ export const CreateInternalCorrespondence = ({
             </div>
           </div>
 
-          {/* Правая панель (показывается только после сохранения черновика, т.е. когда есть id) */}
-          {/* Правая панель (показывается только после сохранения черновика, т.е. когда есть id) */}
           {!!id && (
             <div className="w-[340px] flex-shrink-0 space-y-4">
-              {/* ======================================= */}
-              {/* БЛОК 1: СОГЛАСУЮЩИЕ                     */}
-              {/* ======================================= */}
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
                 <div className="px-5 py-4 border-b border-slate-100">
                   <div className="flex items-center justify-between">
@@ -3173,7 +1645,9 @@ export const CreateInternalCorrespondence = ({
                                 value={approverSearch}
                                 onChange={(e) => {
                                   setApproverSearch(e.target.value);
-                                  setSearchParams({ query: e.target.value });
+                                  setSearchParams({
+                                    query: e.target.value,
+                                  });
                                 }}
                                 autoFocus
                                 className="w-full text-sm px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
@@ -3254,7 +1728,6 @@ export const CreateInternalCorrespondence = ({
                             </p>
                           </div>
                           <div className="flex items-center gap-1.5 flex-shrink-0">
-                            {/* Кнопка Комментария (если еще не согласовано) */}
                             {!approver.approved && (
                               <button
                                 onClick={() =>
@@ -3271,7 +1744,6 @@ export const CreateInternalCorrespondence = ({
                               </button>
                             )}
 
-                            {/* Логика Инвайт -> Согласовать -> ЭЦП (Успех) */}
                             {!approver.isInvited ? (
                               <button
                                 onClick={() =>
@@ -3303,7 +1775,9 @@ export const CreateInternalCorrespondence = ({
                               <button
                                 onClick={() => {
                                   if (approver.approvalRecordId) {
-                                    applyApproverDS(approver.approvalRecordId);
+                                    applyApproverDS(
+                                      approver.approvalRecordId,
+                                    );
                                   }
                                 }}
                                 disabled={approver.dsLoading}
@@ -3327,7 +1801,6 @@ export const CreateInternalCorrespondence = ({
                               </button>
                             )}
 
-                            {/* Кнопка удаления (только для тех, кого еще не пригласили) */}
                             {!approver.approved && !approver.isInvited && (
                               <button
                                 onClick={() =>
@@ -3343,7 +1816,6 @@ export const CreateInternalCorrespondence = ({
                           </div>
                         </div>
 
-                        {/* Поле комментария */}
                         <AnimatePresence>
                           {approver.showCommentInput && !approver.approved && (
                             <motion.div
@@ -3376,7 +1848,6 @@ export const CreateInternalCorrespondence = ({
                           )}
                         </AnimatePresence>
 
-                        {/* Печать согласующего */}
                         {approver.dsApplied && (
                           <div
                             className={cn(
@@ -3389,7 +1860,9 @@ export const CreateInternalCorrespondence = ({
                             <DSStamp
                               name={approver.name}
                               certSerial={`SN-2026-${approver.initials}-${Math.abs(Number(approver.id) * 317 + 10000)}`}
-                              signedAt={new Date().toLocaleDateString("ru-RU")}
+                              signedAt={new Date().toLocaleDateString(
+                                "ru-RU",
+                              )}
                               validUntil="с 20.03.2025 до 20.03.2026"
                             />
                           </div>
@@ -3400,16 +1873,12 @@ export const CreateInternalCorrespondence = ({
                 </div>
               </div>
 
-              {/* ======================================= */}
-              {/* БЛОК 2: ПОДПИСЫВАЮЩИЙ                   */}
-              {/* ======================================= */}
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
                 <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="w-8 h-8 rounded-xl bg-purple-500 flex items-center justify-center flex-shrink-0">
                       <PenLine size={16} className="text-white" />
                     </div>
-                    {/* min-w-0 позволяет тексту обрезаться троеточием, если он не влезает */}
                     <div className="min-w-0">
                       <h3 className="text-sm font-bold text-slate-900 truncate">
                         Подписывающий
@@ -3421,25 +1890,24 @@ export const CreateInternalCorrespondence = ({
                   </div>
 
                   <div className="relative flex-shrink-0 flex items-center gap-1.5">
-                    {/* КНОПКА "ВЕРНУТЬ СЕБЯ" */}
-                    {docCreator &&
-                      finalSigner?.id !== String(docCreator.id) && (
-                        <button
-                          onClick={assignSelfAsSigner}
-                          title="Назначить себя" // Текст появится при наведении мышки
-                          className="flex items-center justify-center w-7 h-7 bg-white border border-slate-200 text-slate-500 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
-                        >
-                          <User size={14} />
-                        </button>
-                      )}
+                    {docCreator && finalSigner?.id !== String(docCreator.id) && (
+                      <button
+                        onClick={assignSelfAsSigner}
+                        title="Назначить себя"
+                        className="flex items-center justify-center w-7 h-7 bg-white border border-slate-200 text-slate-500 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
+                      >
+                        <User size={14} />
+                      </button>
+                    )}
 
-                    {/* КНОПКА "ИЗМЕНИТЬ" */}
                     <button
                       onClick={() => setShowSignerDropdown((v) => !v)}
                       className="flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold text-purple-600 bg-purple-50 border border-purple-100 rounded-lg hover:bg-purple-100 transition-colors"
                     >
                       <UserPlus size={12} />
-                      <span>{finalSigner ? "Изменить" : "Назначить"}</span>
+                      <span>
+                        {finalSigner ? "Изменить" : "Назначить"}
+                      </span>
                     </button>
 
                     <AnimatePresence>
@@ -3457,7 +1925,9 @@ export const CreateInternalCorrespondence = ({
                               value={signerSearch}
                               onChange={(e) => {
                                 setSignerSearch(e.target.value);
-                                setSearchParams({ query: e.target.value });
+                                setSearchParams({
+                                  query: e.target.value,
+                                });
                               }}
                               autoFocus
                               className="w-full text-sm px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-purple-200 focus:border-purple-300"
@@ -3539,7 +2009,6 @@ export const CreateInternalCorrespondence = ({
                           </p>
                         </div>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
-                          {/* Логика Инвайт -> ЭЦП(кнопка) -> ЭЦП(Галочка) */}
                           {!finalSigner.isInvited ? (
                             <button
                               onClick={() =>
@@ -3558,7 +2027,10 @@ export const CreateInternalCorrespondence = ({
                             </button>
                           ) : finalSigner.dsApplied ? (
                             <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
-                              <Shield size={10} className="text-emerald-500" />
+                              <Shield
+                                size={10}
+                                className="text-emerald-500"
+                              />
                               <span className="text-[10px] font-semibold text-emerald-600">
                                 ЭЦП
                               </span>
@@ -3590,13 +2062,14 @@ export const CreateInternalCorrespondence = ({
                         </div>
                       </div>
 
-                      {/* Печать подписывающего (и кнопки Вставить/Убрать) */}
                       {finalSigner.dsApplied && (
                         <div className="px-3 py-2.5 border-t border-emerald-100 bg-emerald-50/40 rounded-b-xl">
                           <DSStamp
                             name={finalSigner.name}
                             certSerial={`SN-2026-${finalSigner.initials}-84201`}
-                            signedAt={new Date().toLocaleDateString("ru-RU")}
+                            signedAt={new Date().toLocaleDateString(
+                              "ru-RU",
+                            )}
                             validUntil="с 20.03.2025 до 20.03.2026"
                           />
                           <AnimatePresence>
