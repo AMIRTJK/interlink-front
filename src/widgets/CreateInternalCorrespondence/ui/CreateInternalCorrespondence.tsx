@@ -1040,7 +1040,7 @@ export const CreateInternalCorrespondence = ({
                   !subject.trim() ||
                   !allSignaturesSigned ||
                   isSending ||
-                  isAlreadySent 
+                  isAlreadySent
                 }
                 className={cn(
                   "flex items-center gap-2 cursor-pointer px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-md",
@@ -1048,7 +1048,7 @@ export const CreateInternalCorrespondence = ({
                     subject.trim() &&
                     allSignaturesSigned &&
                     !isSending &&
-                    !isAlreadySent 
+                    !isAlreadySent
                     ? "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100 active:scale-95"
                     : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none",
                 )}
@@ -1766,6 +1766,13 @@ export const CreateInternalCorrespondence = ({
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -6, scale: 0.97 }}
                             className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-64"
+                            // Добавляем onBlur точно так же, как во входящих письмах
+                            onBlur={() =>
+                              setTimeout(() => {
+                                setShowApproverDropdown(false);
+                                setApproverSearch("");
+                              }, 150)
+                            }
                           >
                             <div className="p-2 border-b border-slate-100">
                               <input
@@ -2031,7 +2038,6 @@ export const CreateInternalCorrespondence = ({
                           <User size={14} />
                         </button>
                       )}
-
                     <button
                       onClick={() => setShowSignerDropdown((v) => !v)}
                       disabled={isSigned}
@@ -2045,7 +2051,6 @@ export const CreateInternalCorrespondence = ({
                       <UserPlus size={12} />
                       <span>{finalSigner ? "Изменить" : "Назначить"}</span>
                     </button>
-
                     <AnimatePresence>
                       {showSignerDropdown && (
                         <motion.div
@@ -2053,6 +2058,13 @@ export const CreateInternalCorrespondence = ({
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -6, scale: 0.97 }}
                           className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-64"
+                          // Добавляем onBlur для автоматического закрытия
+                          onBlur={() =>
+                            setTimeout(() => {
+                              setShowSignerDropdown(false);
+                              setSignerSearch("");
+                            }, 150)
+                          }
                         >
                           <div className="p-2 border-b border-slate-100">
                             <input
@@ -2113,7 +2125,7 @@ export const CreateInternalCorrespondence = ({
                           </div>
                         </motion.div>
                       )}
-                    </AnimatePresence>
+                    </AnimatePresence>{" "}
                   </div>
                 </div>
 
