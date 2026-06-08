@@ -12,6 +12,7 @@ import {
 	Send,
 	Clock,
 	FileEdit,
+	Loader2,
 } from "lucide-react";
 import { RegistryLayout } from "./RegistryLayout";
 import { AppRoutes } from "@shared/config";
@@ -37,7 +38,7 @@ const STATUS_CONFIG: Record<string, any> = {
 	},
 	to_approve: {
 		label: "На согласование",
-		icon: <Handshake size={14} />,
+		icon: <Loader2 size={14} />,
 		gradient: "from-emerald-500 to-emerald-600",
 		apiUrl: ApiRoutes.GET_INTERNAL_TO_APPROVE,
 		paramKey: "type",
