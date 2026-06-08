@@ -237,7 +237,7 @@ export const CreateInternalCorrespondence = ({
   const versionAuthors = useMemo(() => {
     const authorsMap: Record<string, { name: string; count: number }> = {};
 
-    allVersions.forEach((v) => {
+    allVersions.forEach((v: any) => {
       if (!authorsMap[v.author.id]) {
         authorsMap[v.author.id] = { name: v.author.name, count: 0 };
       }
@@ -269,7 +269,7 @@ export const CreateInternalCorrespondence = ({
   // Отфильтрованный массив версий, который пойдет в UI
   const filteredVersions = useMemo(() => {
     if (!selectedAuthorId) return allVersions;
-    return allVersions.filter((v) => v.author.id === String(selectedAuthorId));
+    return allVersions.filter((v: any) => v.author.id === String(selectedAuthorId));
   }, [allVersions, selectedAuthorId]);
 
   const latestVersionId =
@@ -2704,7 +2704,7 @@ export const CreateInternalCorrespondence = ({
                         Нет версий от этого автора
                       </p>
                     ) : (
-                      filteredVersions.map((v) => {
+                      filteredVersions.map((v: any) => {
                         const isCurrentActive = v.id === activeVersionId;
                         return (
                           <div
