@@ -9,15 +9,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   Send,
-  Pin,
+  // Pin,
   Search,
   Plus,
-  ChevronRight,
-  Calendar,
+  // ChevronRight,
+  // Calendar,
   User,
   Clock,
-  Download,
-  Trash,
+  // Download,
+  // Trash,
   X,
   Paperclip,
   Shield,
@@ -25,7 +25,7 @@ import {
   Check,
   PenLine,
   UserPlus,
-  FileBadge,
+  // FileBadge,
   ArrowLeft,
   ChevronDown,
   FileType,
@@ -56,11 +56,11 @@ import {
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import type {
-  Status,
+  // Status,
   LetterType,
   ImportanceLevel,
   PageOrientation,
-  RegistryItem,
+  // RegistryItem,
   RecipientOption,
   AttachedFile,
   Approver,
@@ -70,13 +70,13 @@ import {
   LETTER_TYPE_OPTIONS,
   IMPORTANCE_OPTIONS,
   IMPORTANCE_DOT,
-  RECIPIENT_OPTIONS,
+  // RECIPIENT_OPTIONS,
   FONT_SIZES,
-  INBOX_DOC_TYPES,
-  INBOX_DOC_TYPE_STYLE,
-  MOCK_CONTENT_LINES,
-  OUTBOX_STATUS_LABEL,
-  OUTBOX_STATUS_STYLE,
+  // INBOX_DOC_TYPES,
+  // INBOX_DOC_TYPE_STYLE,
+  // MOCK_CONTENT_LINES,
+  // OUTBOX_STATUS_LABEL,
+  // OUTBOX_STATUS_STYLE,
 } from "../lib/constants";
 import { cn } from "../lib/utils";
 import { PreviewModal } from "./PreviewModal";
