@@ -5,8 +5,11 @@ import {
   CorrespondenceFormData,
 } from "@widgets/CorrespondenceForm";
 import { CreateInternalCorrespondence } from "@widgets/CreateInternalCorrespondence";
+import { useNavigate } from "react-router";
 
 export const CreateCorrespondencePage = ({ type }: { type: string }) => {
+  const navigate = useNavigate();
+
   const {
     mutate: createLetterMutate,
     isPending: createLetterIsPending,
@@ -22,8 +25,6 @@ export const CreateCorrespondencePage = ({ type }: { type: string }) => {
     },
   });
 
-  // const handleBack = () => navigate(-1);
-
   const title = type.includes("incoming")
     ? "Новое входящее письмо"
     : "Новое исходящее письмо";
@@ -34,10 +35,12 @@ export const CreateCorrespondencePage = ({ type }: { type: string }) => {
 
   const isInternal = type.includes("internal");
 
-  if (isInternal) {
-    // show||create
-    return <CreateInternalCorrespondence  />;
-    // return <InternalCorrespondece mode="create" type={type} />;
+if (isInternal) {
+    return (
+      <CreateInternalCorrespondence 
+        onBack={() => navigate(-1)} 
+      />
+    );
   }
 
   return (

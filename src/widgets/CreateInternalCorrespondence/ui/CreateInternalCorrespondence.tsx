@@ -140,12 +140,15 @@ export const CreateInternalCorrespondence = ({
   const [showFontSizeDropdown, setShowFontSizeDropdown] = useState(false);
   const [orientation, setOrientation] = useState<PageOrientation>("portrait");
   const [showPreview, setShowPreview] = useState(false);
+
+  // Управление плавающим плейсхолдером ЭЦП ДО подписания
   const [stampVisible, setStampVisible] = useState(false);
   const [stampPos, setStampPos] = useState({ x: 40, y: 40 });
   const [stampSize, setStampSize] = useState({
     width: 320,
     height: "auto" as "auto" | number,
   });
+
   const [docCreator, setDocCreator] = useState<any>(null);
   const [folder, setFolder] = useState<string | number>("drafts");
   const [attachedIncomingLetters, setAttachedIncomingLetters] = useState<any[]>(
@@ -233,17 +236,15 @@ export const CreateInternalCorrespondence = ({
     }));
   }, [versionsResponse]);
 
-  // Список уникальных авторов для выпадающего фильтра (с подсчетом количества их версий)
+  // Список уникальных авторов для выпадающего фильтра
   const versionAuthors = useMemo(() => {
     const authorsMap: Record<string, { name: string; count: number }> = {};
-
     allVersions.forEach((v: any) => {
       if (!authorsMap[v.author.id]) {
         authorsMap[v.author.id] = { name: v.author.name, count: 0 };
       }
       authorsMap[v.author.id].count += 1;
     });
-
     return Object.entries(authorsMap).map(([id, meta]) => ({
       id,
       name: meta.name,
@@ -251,25 +252,22 @@ export const CreateInternalCorrespondence = ({
     }));
   }, [allVersions]);
 
-  // Стейт для фильтрации версий по автору (null — показать все)
   const [selectedAuthorId, setSelectedAuthorId] = useState<
     string | number | null
   >(null);
-
   const [showAuthorDropdown, setShowAuthorDropdown] = useState(false);
 
-  // Проверки для кнопок и readonly режима
   const initialActiveVersion =
     allVersions.length > 0 ? allVersions[allVersions.length - 1].id : null;
-
   const [activeVersionId, setActiveVersionId] = useState<
     string | number | null
   >(initialActiveVersion);
 
-  // Отфильтрованный массив версий, который пойдет в UI
   const filteredVersions = useMemo(() => {
     if (!selectedAuthorId) return allVersions;
-    return allVersions.filter((v: any) => v.author.id === String(selectedAuthorId));
+    return allVersions.filter(
+      (v: any) => v.author.id === String(selectedAuthorId),
+    );
   }, [allVersions, selectedAuthorId]);
 
   const latestVersionId =
@@ -296,11 +294,9 @@ export const CreateInternalCorrespondence = ({
     selectVersionForSign({ versionId: clickedVersionId });
   };
 
-  // Выбор версии в панели и замена содержимого в редакторе
   const handleSelectVersion = (content: string, versionId: string | number) => {
     if (editorRef.current) {
-      editorRef.current.innerHTML = content; // Для native div contentEditable
-      // Если твой EditorHandle имеет метод setContent, используй: editorRef.current.setContent(content);
+      editorRef.current.innerHTML = content;
       setActiveVersionId(versionId);
     }
   };
@@ -375,7 +371,7 @@ export const CreateInternalCorrespondence = ({
         ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
       ],
       onSuccessCb: () => {
-        isVersionContentInit.current = false; // Позволяет подтянуть новую сохраненную версию
+        isVersionContentInit.current = false;
       },
     },
   });
@@ -485,7 +481,100 @@ export const CreateInternalCorrespondence = ({
         setFinalSigner((prev) =>
           prev ? { ...prev, dsApplied: true, dsLoading: false } : null,
         );
-        setStampVisible(true);
+
+        if (editorRef.current && stampVisible) {
+          if (
+            !editorRef.current.innerHTML.includes('data-signature-stamp="true"')
+          ) {
+            const widthStr =
+              typeof stampSize.width === "number"
+                ? `${stampSize.width}px`
+                : stampSize.width;
+            const heightStr =
+              stampSize.height !== "auto" ? `${stampSize.height}px` : "auto";
+
+            const currentSignerName = finalSigner?.name || "Неизвестно";
+            const currentSignerInitials = finalSigner?.initials || "НА";
+            const currentDate = new Date().toLocaleDateString("ru-RU");
+            const certSerial = `SN-2026-${currentSignerInitials}-84201`;
+            const validUntil = "с 20.03.2025 до 20.03.2026";
+
+            const stampHTML = `
+              <div data-signature-stamp="true" contenteditable="false" style="position: absolute; left: ${stampPos.x}px; top: ${stampPos.y}px; width: ${widthStr}; height: ${heightStr}; z-index: 50; user-select: none; cursor: default;">
+                 <div style="display: flex; align-items: stretch; border: 1.5px solid #3b82f6; border-radius: 6px; background: #fff; width: 100%; height: 100%; box-sizing: border-box; overflow: hidden; font-family: 'Times New Roman', serif;">
+                    
+                    <!-- Флаг Таджикистана -->
+                    <div style="display: flex; flex-direction: column; flex-shrink: 0; width: 7px;">
+                       <div style="flex: 1; background: #CC0001;"></div>
+                       <div style="flex: 1; background: #FFFFFF; border-top: 0.5px solid #e2e8f0; border-bottom: 0.5px solid #e2e8f0;"></div>
+                       <div style="flex: 1; background: #009A44;"></div>
+                    </div>
+
+                    <!-- Основной контент -->
+                    <div style="flex: 1; padding: 8px 10px; background: #eff6ff; min-width: 0; display: flex; flex-direction: column;">
+                       <p style="margin: 0 0 2px 0; font-weight: 700; font-size: 11px; color: #1e3a8a; text-align: center; line-height: 1.3;">
+                          Имзои электронии раками
+                       </p>
+                       <div style="border-top: 1px solid #93c5fd; margin-bottom: 4px;"></div>
+                       <p style="margin: 0 0 5px 0; font-weight: 600; font-size: 9px; color: #1d4ed8; text-align: center; line-height: 1.3;">
+                          Маълумоти имзои электронии раками
+                       </p>
+                       
+                       <div style="display: flex; gap: 8px; align-items: flex-start;">
+                          <!-- Текстовые данные -->
+                          <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0;">
+                             <div style="display: flex; gap: 4px;">
+                                <span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap; min-width: 60px;">Сертификат:</span>
+                                <span style="font-size: 8.5px; color: #1e293b; font-family: monospace; word-break: break-all;">${certSerial}</span>
+                             </div>
+                             <div style="display: flex; gap: 4px;">
+                                <span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap; min-width: 60px;">Дорандаи имзо:</span>
+                                <span style="font-size: 8.5px; color: #1e293b; word-break: break-all;">${currentSignerName}</span>
+                             </div>
+                             <div style="display: flex; gap: 4px;">
+                                <span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap; min-width: 60px;">Санаи имзо:</span>
+                                <span style="font-size: 8.5px; color: #1e293b; word-break: break-all;">${currentDate}</span>
+                             </div>
+                             <div style="display: flex; gap: 4px;">
+                                <span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap; min-width: 60px;">Санаи додод:</span>
+                                <span style="font-size: 8.5px; color: #1e293b; word-break: break-all;">${validUntil}</span>
+                             </div>
+                          </div>
+
+                          <!-- Иконка QR-кода -->
+                          <div style="flex-shrink: 0; border: 1px solid #bfdbfe; border-radius: 3px; padding: 2px; background: #fff; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
+                             <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M0 0H14V14H0V0ZM4 4H10V10H4V4ZM34 0H48V14H34V0ZM38 4H44V10H38V4ZM0 34H14V48H0V34ZM4 38H10V44H4V38ZM18 0H30V6H18V0ZM18 8H26V14H18V8ZM28 8H30V14H28V8ZM18 18H24V24H18V18ZM26 18H36V24H26V18ZM38 18H48V24H38V18ZM0 18H14V24H0V18ZM0 26H8V32H0V26ZM10 26H14V32H10V26ZM18 26H30V32H18V26ZM34 26H48V32H34V26ZM18 34H24V40H18V34ZM26 34H36V40H26V34ZM18 42H30V48H18V42ZM34 34H48V48H34V34ZM38 38H44V44H38V38ZM34 18H36V24H34V18Z" fill="#1d4ed8"/>
+                             </svg>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+            `;
+
+            editorRef.current.innerHTML += stampHTML;
+          }
+        }
+
+        setStampVisible(false);
+
+        // ВАЖНО: Принудительно вызываем API сохранения, чтобы бэкенд получил новый body с картинкой
+        const editorBody = editorRef.current?.innerHTML || "<p></p>";
+        const requestPayload: any = {
+          subject,
+          body: editorBody,
+          recipients: {
+            to: to.map((r) => r.id),
+            cc: cc.map((r) => r.id),
+          },
+          approvals: approvers.map((a) => a.id),
+          signatures: finalSigner ? [finalSigner.id] : [],
+          document_type: letterType,
+          priority: importance === "medium" ? "normal" : importance,
+        };
+
+        if (id) updateDraft(requestPayload);
       },
       onError: () =>
         setFinalSigner((prev) => (prev ? { ...prev, dsLoading: false } : null)),
@@ -577,6 +666,8 @@ export const CreateInternalCorrespondence = ({
       const item = initialData.item;
 
       if (item.subject) setSubject(item.subject);
+
+      // Загрузка сохраненного body с бэкенда (который уже может содержать HTML печати)
       if (
         item.body &&
         editorRef.current &&
@@ -584,6 +675,7 @@ export const CreateInternalCorrespondence = ({
       ) {
         editorRef.current.innerHTML = item.body;
       }
+
       if (item.priority) {
         const priorityMap: Record<string, ImportanceLevel> = {
           normal: "medium",
@@ -656,6 +748,7 @@ export const CreateInternalCorrespondence = ({
 
       if (item.signatures && item.signatures.length > 0) {
         const s = item.signatures[0];
+        const isCurrentlySigned = s.status === "signed";
         setFinalSigner({
           id: String(s.user.id),
           isInvited: true,
@@ -667,9 +760,13 @@ export const CreateInternalCorrespondence = ({
             .slice(0, 2)
             .join(""),
           color: "bg-purple-100 text-purple-700",
-          dsApplied: s.status === "signed",
+          dsApplied: isCurrentlySigned,
           dsLoading: false,
         });
+        // Убираем ручное отображение плавающего React-компонента если подписано
+        if (isCurrentlySigned) {
+          setStampVisible(false);
+        }
       } else if (item.creator) {
         setFinalSigner({
           id: String(item.creator.id),
@@ -740,6 +837,7 @@ export const CreateInternalCorrespondence = ({
       if (wfSignatures.length > 0) {
         const wfS = wfSignatures[0];
         const user = wfS.user;
+        const isCurrentlySigned = wfS.status === "signed";
         if (user) {
           setFinalSigner({
             id: String(user.id),
@@ -752,9 +850,12 @@ export const CreateInternalCorrespondence = ({
               .slice(0, 2)
               .join(""),
             color: "bg-purple-100 text-purple-700",
-            dsApplied: wfS.status === "signed",
+            dsApplied: isCurrentlySigned,
             dsLoading: false,
           });
+          if (isCurrentlySigned) {
+            setStampVisible(false);
+          }
         }
       }
     }
@@ -798,6 +899,10 @@ export const CreateInternalCorrespondence = ({
 
   const applyFinalDS = async () => {
     if (!id || !finalSigner) return;
+
+    if (!stampVisible) {
+      setStampVisible(true);
+    }
 
     setFinalSigner((prev) => (prev ? { ...prev, dsLoading: true } : null));
 
@@ -901,6 +1006,8 @@ export const CreateInternalCorrespondence = ({
   };
 
   const handleStampMouseDown = (e: React.MouseEvent) => {
+    if (finalSigner?.dsApplied) return;
+
     e.preventDefault();
     e.stopPropagation();
     isDraggingStamp.current = true;
@@ -934,6 +1041,8 @@ export const CreateInternalCorrespondence = ({
   };
 
   const handleResizeMouseDown = (e: React.MouseEvent) => {
+    if (finalSigner?.dsApplied) return;
+
     e.preventDefault();
     e.stopPropagation();
     isResizingStamp.current = true;
@@ -978,7 +1087,6 @@ export const CreateInternalCorrespondence = ({
     (sig: any) => sig.status === "signed",
   );
 
-  // Если документ подписан ИЛИ выбрана старая версия — включаем режим "только чтение"
   const isReadOnly = isSigned || isOldVersionSelected;
 
   const allSignaturesSigned =
@@ -1171,7 +1279,6 @@ export const CreateInternalCorrespondence = ({
             {!!id && (
               <button
                 onClick={() => {
-                  // Добавили проверку isAlreadySent
                   if (
                     !to.length ||
                     !subject.trim() ||
@@ -1775,7 +1882,9 @@ export const CreateInternalCorrespondence = ({
                       }}
                       className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none"
                     />
-                    {stampVisible && finalSigner && finalSigner.dsApplied && (
+
+                    {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания */}
+                    {stampVisible && finalSigner && !finalSigner.dsApplied && (
                       <div
                         ref={stampRef}
                         onMouseDown={handleStampMouseDown}
@@ -1796,12 +1905,14 @@ export const CreateInternalCorrespondence = ({
                           overflow: "hidden",
                         }}
                       >
-                        <DSStamp
-                          name={finalSigner.name}
-                          certSerial={`SN-2026-${finalSigner.initials}-84201`}
-                          signedAt="03.02.2026"
-                          validUntil="с 20.03.2025 до 20.03.2026"
-                        />
+                        <div className="w-full h-full min-h-[100px] border-[2px] border-dashed border-blue-400 bg-blue-50/70 flex flex-col items-center justify-center rounded-lg text-blue-500 shadow-sm transition-colors hover:bg-blue-100/70">
+                          <Shield size={24} className="mb-2 opacity-50" />
+                          <span className="text-xs font-semibold opacity-70 text-center px-2">
+                            Место для ЭЦП
+                            <br />({finalSigner.initials})
+                          </span>
+                        </div>
+
                         <div
                           onMouseDown={handleResizeMouseDown}
                           style={{
@@ -1811,8 +1922,8 @@ export const CreateInternalCorrespondence = ({
                             width: 14,
                             height: 14,
                             cursor: "se-resize",
-                            background: "rgba(59,130,246,0.5)",
-                            borderRadius: "2px 0 2px 0",
+                            background: "rgba(59,130,246,0.6)",
+                            borderRadius: "4px 0 0 0",
                           }}
                         />
                       </div>
@@ -1912,7 +2023,6 @@ export const CreateInternalCorrespondence = ({
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -6, scale: 0.97 }}
                             className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-64"
-                            // Добавляем onBlur точно так же, как во входящих письмах
                             onBlur={() =>
                               setTimeout(() => {
                                 setShowApproverDropdown(false);
@@ -2204,7 +2314,6 @@ export const CreateInternalCorrespondence = ({
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -6, scale: 0.97 }}
                           className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-64"
-                          // Добавляем onBlur для автоматического закрытия
                           onBlur={() =>
                             setTimeout(() => {
                               setShowSignerDropdown(false);
@@ -2323,7 +2432,7 @@ export const CreateInternalCorrespondence = ({
                             <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
                               <Shield size={10} className="text-emerald-500" />
                               <span className="text-[10px] font-semibold text-emerald-600">
-                                ЭЦП
+                                Подписано
                               </span>
                               <Check size={10} className="text-emerald-500" />
                             </div>
@@ -2346,51 +2455,59 @@ export const CreateInternalCorrespondence = ({
                               <span>
                                 {finalSigner.dsLoading
                                   ? "Подписываю..."
-                                  : "ЭЦП"}
+                                  : "Подписать"}
                               </span>
                             </button>
                           )}
                         </div>
                       </div>
 
-                      {finalSigner.dsApplied && (
-                        <div className="px-3 py-2.5 border-t border-emerald-100 bg-emerald-50/40 rounded-b-xl">
-                          <DSStamp
-                            name={finalSigner.name}
-                            certSerial={`SN-2026-${finalSigner.initials}-84201`}
-                            signedAt={new Date().toLocaleDateString("ru-RU")}
-                            validUntil="с 20.03.2025 до 20.03.2026"
-                          />
-                          <AnimatePresence>
-                            {!stampVisible && (
-                              <motion.button
-                                key="insert-btn"
-                                initial={{ opacity: 0, y: 4 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -4 }}
-                                onClick={handleInsertStamp}
-                                className="mt-2.5 w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-semibold rounded-lg transition-colors shadow-sm"
-                              >
-                                <PenLine size={12} />
-                                <span>Вставить ЭЦП в письмо</span>
-                              </motion.button>
-                            )}
-                            {stampVisible && (
-                              <motion.button
-                                key="remove-btn"
-                                initial={{ opacity: 0, y: 4 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -4 }}
-                                onClick={() => setStampVisible(false)}
-                                className="mt-2.5 w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-500 text-[11px] font-semibold rounded-lg transition-colors border border-slate-200 hover:border-rose-200"
-                              >
-                                <X size={12} />
-                                <span>Убрать ЭЦП из письма</span>
-                              </motion.button>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      )}
+                      <div
+                        className={cn(
+                          "px-3 py-2.5 border-t rounded-b-xl",
+                          finalSigner.dsApplied
+                            ? "border-emerald-100 bg-emerald-50/40"
+                            : "border-slate-100 bg-slate-50/40",
+                        )}
+                      >
+                        <AnimatePresence>
+                          {!stampVisible && !finalSigner.dsApplied && (
+                            <motion.button
+                              key="insert-btn"
+                              initial={{ opacity: 0, y: 4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -4 }}
+                              onClick={handleInsertStamp}
+                              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-semibold rounded-lg transition-colors border border-blue-200 shadow-sm"
+                            >
+                              <Monitor size={12} />
+                              <span>Указать место для ЭЦП</span>
+                            </motion.button>
+                          )}
+                          {stampVisible && !finalSigner.dsApplied && (
+                            <motion.button
+                              key="remove-btn"
+                              initial={{ opacity: 0, y: 4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -4 }}
+                              onClick={() => setStampVisible(false)}
+                              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-500 text-[11px] font-semibold rounded-lg transition-colors border border-slate-200 hover:border-rose-200"
+                            >
+                              <X size={12} />
+                              <span>Убрать место для ЭЦП</span>
+                            </motion.button>
+                          )}
+
+                          {finalSigner.dsApplied && (
+                            <DSStamp
+                              name={finalSigner.name}
+                              certSerial={`SN-2026-${finalSigner.initials}-84201`}
+                              signedAt={new Date().toLocaleDateString("ru-RU")}
+                              validUntil="с 20.03.2025 до 20.03.2026"
+                            />
+                          )}
+                        </AnimatePresence>
+                      </div>
                     </div>
                   ) : (
                     <div className="py-4 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs">
@@ -2550,7 +2667,6 @@ export const CreateInternalCorrespondence = ({
 
               {allVersions.length > 0 && (
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
-                  {/* === ШАПКА БЛОКА ИСТОРИИ ВЕРСИЙ С ФИКСИРОВАННЫМ СЕЛЕКТОМ === */}
                   <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between gap-2.5 relative overflow-visible">
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <div className="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
@@ -2566,7 +2682,6 @@ export const CreateInternalCorrespondence = ({
                       </div>
                     </div>
 
-                    {/* Кастомный выпадающий список с фиксированной шириной и тултипом */}
                     {versionAuthors.length > 0 && (
                       <div
                         className="relative flex-shrink-0 z-30"
@@ -2581,7 +2696,6 @@ export const CreateInternalCorrespondence = ({
                         <button
                           type="button"
                           onClick={() => setShowAuthorDropdown((v) => !v)}
-                          // Добавили title для всплывающего тултипа при наведении
                           title={
                             selectedAuthorId
                               ? versionAuthors.find(
@@ -2589,7 +2703,6 @@ export const CreateInternalCorrespondence = ({
                                 )?.name
                               : "Все авторы"
                           }
-                          // Зафиксировали ширину на w-40 (160px)
                           className={cn(
                             "w-30 flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer text-left",
                             selectedAuthorId
@@ -2632,7 +2745,6 @@ export const CreateInternalCorrespondence = ({
                               exit={{ opacity: 0, y: -6, scale: 0.97 }}
                               className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-56 py-1"
                             >
-                              {/* Вариант сброса фильтра */}
                               <button
                                 type="button"
                                 onMouseDown={(e) => {
@@ -2653,7 +2765,6 @@ export const CreateInternalCorrespondence = ({
                                 )}
                               </button>
 
-                              {/* Список авторов */}
                               {versionAuthors.map((auth) => {
                                 const isSelected =
                                   String(selectedAuthorId) === auth.id;
@@ -2661,7 +2772,7 @@ export const CreateInternalCorrespondence = ({
                                   <button
                                     type="button"
                                     key={auth.id}
-                                    title={auth.name} // Тултип для длинных имён внутри самого выпадающего списка
+                                    title={auth.name}
                                     onMouseDown={(e) => {
                                       e.preventDefault();
                                       setSelectedAuthorId(auth.id);
