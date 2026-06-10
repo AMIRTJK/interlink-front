@@ -389,6 +389,9 @@ export const CreateInternalCorrespondence = ({
 	const handleSelectVersion = (content: string, versionId: string | number) => {
 		if (editorRef.current) {
 			editorRef.current.innerHTML = content;
+			// Синхронизируем editorContent, иначе постраничная разбивка не пересчитается
+			// и все страницы кроме первой "исчезнут".
+			setEditorContent(content);
 			setActiveVersionId(versionId);
 		}
 	};
@@ -643,7 +646,12 @@ export const CreateInternalCorrespondence = ({
                     </div>
                  </div>
               </div>
-            `;
+            `
+							// Убираем пробелы/переносы между тегами: редактор форсирует
+							// white-space: pre-wrap !important на всех вложенных элементах,
+							// и иначе отступы шаблона превращаются в пустые строки, ломая высоту печати.
+							.replace(/>\s+</g, "><")
+							.trim();
 
 						editorRef.current.innerHTML += stampHTML;
 					}
@@ -1059,6 +1067,15 @@ export const CreateInternalCorrespondence = ({
 				i++;
 				continue;
 			}
+			// Печать ЭЦП спозиционирована абсолютно (вне потока) — её нельзя
+			// переносить/резать (иначе textContent затрёт внутреннюю вёрстку).
+			if (
+				block.hasAttribute("data-signature-stamp") ||
+				getComputedStyle(block).position === "absolute"
+			) {
+				i++;
+				continue;
+			}
 			const top = block.offsetTop;
 			const h = block.offsetHeight;
 			const page = Math.floor(top / PAGE_STRIDE);
@@ -1385,8 +1402,12 @@ export const CreateInternalCorrespondence = ({
 		const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
 		dragOffset.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
 		const onMouseMove = (ev: MouseEvent) => {
-			if (!isDraggingStamp.current || !pageCanvasRef.current) return;
-			const cr = pageCanvasRef.current.getBoundingClientRect();
+			// Координаты считаем относительно редактора (а не холста страницы): печать
+			// ЭЦП при подписании вставляется ВНУТРЬ редактора, поэтому placeholder и
+			// итоговый рисунок должны жить в одной системе координат — иначе на «Подписать»
+			// рисунок прыгал бы на величину полей страницы.
+			if (!isDraggingStamp.current || !editorRef.current) return;
+			const cr = editorRef.current.getBoundingClientRect();
 			setStampPos({
 				x: Math.max(
 					0,
@@ -1435,6 +1456,9 @@ export const CreateInternalCorrespondence = ({
 
 			if (editorRef.current && targetVersion.content) {
 				editorRef.current.innerHTML = targetVersion.content;
+				// Синхронизируем editorContent, иначе постраничная разбивка не пересчитается
+				// после сохранения/перезагрузки и все страницы кроме первой "исчезнут".
+				setEditorContent(targetVersion.content);
 			}
 			isVersionContentInit.current = true;
 		}
@@ -2249,9 +2273,13 @@ export const CreateInternalCorrespondence = ({
 												title="Перетащите, чтобы выбрать место для ЭЦП"
 												style={{
 													position: "absolute",
-													left: stampPos.x,
-													top: stampPos.y,
+													// stampPos хранится в координатах редактора; placeholder —
+													// потомок холста страницы, поэтому добавляем поля страницы,
+													// чтобы он визуально совпал с местом будущей печати.
+													left: PAGE_PAD_H + stampPos.x,
+													top: PAGE_PAD_V + stampPos.y,
 													width: 320,
+													zIndex: 50,
 													cursor: "move",
 													userSelect: "none",
 													borderRadius: 8,
