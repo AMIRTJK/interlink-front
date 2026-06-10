@@ -694,19 +694,36 @@ export const CreateInternalCorrespondence = ({
 		},
 	});
 
-	// Печать документа: открываем чистый контент с разметкой A4 и вызываем печать
+	// Печать документа: используем скрытый iframe и @page margin:0, чтобы браузер
+	// НЕ добавлял свои колонтитулы (URL, дату, заголовок). Поля задаём через padding.
 	const handlePrint = () => {
 		const content = getCleanEditorHtml();
-		const win = window.open("", "_blank", "width=900,height=1000");
-		if (!win) return;
 		const isLand = orientation === "landscape";
-		win.document.write(`<!DOCTYPE html>
+
+		const iframe = document.createElement("iframe");
+		iframe.style.position = "fixed";
+		iframe.style.right = "0";
+		iframe.style.bottom = "0";
+		iframe.style.width = "0";
+		iframe.style.height = "0";
+		iframe.style.border = "0";
+		document.body.appendChild(iframe);
+
+		const win = iframe.contentWindow;
+		const doc = iframe.contentWindow?.document;
+		if (!win || !doc) {
+			iframe.remove();
+			return;
+		}
+
+		doc.open();
+		doc.write(`<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="utf-8" />
-<title>${(subject || "Документ").replace(/[<>&]/g, "")}</title>
+<title></title>
 <style>
-  @page { size: A4 ${isLand ? "landscape" : "portrait"}; margin: 20mm 20mm; }
+  @page { size: A4 ${isLand ? "landscape" : "portrait"}; margin: 0; }
   * { box-sizing: border-box; overflow-wrap: break-word; word-break: break-word; max-width: 100%; }
   html, body { margin: 0; padding: 0; }
   body {
@@ -715,6 +732,7 @@ export const CreateInternalCorrespondence = ({
     line-height: 2;
     color: #1e293b;
     white-space: pre-wrap;
+    padding: 20mm;
   }
   img { max-width: 100%; height: auto; }
   table { width: 100%; table-layout: fixed; border-collapse: collapse; }
@@ -724,14 +742,14 @@ export const CreateInternalCorrespondence = ({
 </head>
 <body>${content}</body>
 </html>`);
-		win.document.close();
-		win.focus();
+		doc.close();
+
 		const triggerPrint = () => {
+			win.focus();
 			win.print();
-			win.close();
+			setTimeout(() => iframe.remove(), 1000);
 		};
-		// Печатаем после полной загрузки (картинки/шрифты)
-		if (win.document.readyState === "complete") {
+		if (doc.readyState === "complete") {
 			setTimeout(triggerPrint, 300);
 		} else {
 			win.onload = () => setTimeout(triggerPrint, 300);

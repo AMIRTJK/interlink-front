@@ -4,8 +4,8 @@ import { X, Eye, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 import type { PageOrientation } from "../types";
 import { DSStamp } from "./DSStamp";
 
-const PAGE_PAD = 96; // поля A4 (~2.54см)
-const PAGE_GAP = 32; // отступ между листами
+const PAGE_PAD = 96; 
+const PAGE_GAP = 32; 
 const CONTENT_CLASS =
   "max-w-full [&_*]:max-w-full [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_pre]:whitespace-pre-wrap";
 
