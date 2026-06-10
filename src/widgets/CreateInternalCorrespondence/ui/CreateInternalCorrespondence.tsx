@@ -78,7 +78,7 @@ import {
   OUTBOX_STATUS_LABEL,
   OUTBOX_STATUS_STYLE,
 } from "../lib/constants";
-import { cn } from "../lib/utils";
+import { cn, generateQRMatrix } from "../lib/utils";
 import { PreviewModal } from "./PreviewModal";
 import { TBtn } from "./TBtn";
 import { DSStamp } from "./DSStamp";
@@ -104,6 +104,23 @@ function FileTextIcon(props: React.SVGProps<SVGSVGElement>) {
       <path d="M16 17H8" />
     </svg>
   );
+}
+
+// Генерация QR-кода в виде HTML-строки, идентичного компоненту <QRCodeSVG />,
+// чтобы печать ЭЦП в редакторе совпадала с блоком "Подписывающий".
+function buildStampQRSvg(value: string, size = 52) {
+  const GRID = 21;
+  const matrix = generateQRMatrix(value, GRID);
+  const cellSize = size / GRID;
+  let rects = "";
+  for (let row = 0; row < GRID; row++) {
+    for (let col = 0; col < GRID; col++) {
+      if (matrix[row][col]) {
+        rects += `<rect x="${col * cellSize}" y="${row * cellSize}" width="${cellSize}" height="${cellSize}" fill="#1e3a8a"/>`;
+      }
+    }
+  }
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display:block;flex-shrink:0;"><rect width="${size}" height="${size}" fill="white"/>${rects}</svg>`;
 }
 
 export const CreateInternalCorrespondence = ({
@@ -158,9 +175,7 @@ export const CreateInternalCorrespondence = ({
   const [incomingLetterSearch, setIncomingLetterSearch] = useState("");
 
   const isDraggingStamp = useRef(false);
-  const isResizingStamp = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
-  const resizeStart = useRef({ mouseX: 0, mouseY: 0, startW: 320, startH: 0 });
   const stampRef = useRef<HTMLDivElement>(null);
   const pageCanvasRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -490,18 +505,20 @@ export const CreateInternalCorrespondence = ({
               typeof stampSize.width === "number"
                 ? `${stampSize.width}px`
                 : stampSize.width;
-            const heightStr =
-              stampSize.height !== "auto" ? `${stampSize.height}px` : "auto";
 
             const currentSignerName = finalSigner?.name || "Неизвестно";
             const currentSignerInitials = finalSigner?.initials || "НА";
             const currentDate = new Date().toLocaleDateString("ru-RU");
             const certSerial = `SN-2026-${currentSignerInitials}-84201`;
             const validUntil = "с 20.03.2025 до 20.03.2026";
+            const qrSvg = buildStampQRSvg(
+              `${certSerial}|${currentSignerName}|${currentDate}`,
+              52,
+            );
 
             const stampHTML = `
-              <div data-signature-stamp="true" contenteditable="false" style="position: absolute; left: ${stampPos.x}px; top: ${stampPos.y}px; width: ${widthStr}; height: ${heightStr}; z-index: 50; user-select: none; cursor: default;">
-                 <div style="display: flex; align-items: stretch; border: 1.5px solid #3b82f6; border-radius: 6px; background: #fff; width: 100%; height: 100%; box-sizing: border-box; overflow: hidden; font-family: 'Times New Roman', serif;">
+              <div data-signature-stamp="true" contenteditable="false" style="position: absolute; left: ${stampPos.x}px; top: ${stampPos.y}px; width: ${widthStr}; height: auto; z-index: 50; user-select: none; cursor: default; white-space: normal;">
+                 <div style="display: flex; align-items: stretch; border: 1.5px solid #3b82f6; border-radius: 6px; background: #fff; width: 100%; box-sizing: border-box; overflow: hidden; font-family: 'Times New Roman', serif;">
                     
                     <!-- Флаг Таджикистана -->
                     <div style="display: flex; flex-direction: column; flex-shrink: 0; width: 7px;">
@@ -511,7 +528,7 @@ export const CreateInternalCorrespondence = ({
                     </div>
 
                     <!-- Основной контент -->
-                    <div style="flex: 1; padding: 8px 10px; background: #eff6ff; min-width: 0; display: flex; flex-direction: column;">
+                    <div style="flex: 1; padding: 8px 10px; background: #eff6ff; min-width: 0;">
                        <p style="margin: 0 0 2px 0; font-weight: 700; font-size: 11px; color: #1e3a8a; text-align: center; line-height: 1.3;">
                           Имзои электронии раками
                        </p>
@@ -541,11 +558,9 @@ export const CreateInternalCorrespondence = ({
                              </div>
                           </div>
 
-                          <!-- Иконка QR-кода -->
-                          <div style="flex-shrink: 0; border: 1px solid #bfdbfe; border-radius: 3px; padding: 2px; background: #fff; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
-                             <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M0 0H14V14H0V0ZM4 4H10V10H4V4ZM34 0H48V14H34V0ZM38 4H44V10H38V4ZM0 34H14V48H0V34ZM4 38H10V44H4V38ZM18 0H30V6H18V0ZM18 8H26V14H18V8ZM28 8H30V14H28V8ZM18 18H24V24H18V18ZM26 18H36V24H26V18ZM38 18H48V24H38V18ZM0 18H14V24H0V18ZM0 26H8V32H0V26ZM10 26H14V32H10V26ZM18 26H30V32H18V26ZM34 26H48V32H34V26ZM18 34H24V40H18V34ZM26 34H36V40H26V34ZM18 42H30V48H18V42ZM34 34H48V48H34V34ZM38 38H44V44H38V38ZM34 18H36V24H34V18Z" fill="#1d4ed8"/>
-                             </svg>
+                          <!-- QR-код (идентичен компоненту QRCodeSVG в блоке "Подписывающий") -->
+                          <div style="flex-shrink: 0; border: 1px solid #bfdbfe; border-radius: 3px; padding: 2px; background: #fff; box-sizing: border-box;">
+                             ${qrSvg}
                           </div>
                        </div>
                     </div>
@@ -1033,45 +1048,6 @@ export const CreateInternalCorrespondence = ({
     };
     const onMouseUp = () => {
       isDraggingStamp.current = false;
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-  };
-
-  const handleResizeMouseDown = (e: React.MouseEvent) => {
-    if (finalSigner?.dsApplied) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-    isResizingStamp.current = true;
-    resizeStart.current = {
-      mouseX: e.clientX,
-      mouseY: e.clientY,
-      startW: typeof stampSize.width === "number" ? stampSize.width : 320,
-      startH: stampRef.current ? stampRef.current.offsetHeight : 120,
-    };
-    const onMouseMove = (ev: MouseEvent) => {
-      if (!isResizingStamp.current) return;
-      setStampSize({
-        width: Math.max(
-          200,
-          Math.min(
-            resizeStart.current.startW +
-              ev.clientX -
-              resizeStart.current.mouseX,
-            600,
-          ),
-        ),
-        height: Math.max(
-          100,
-          resizeStart.current.startH + ev.clientY - resizeStart.current.mouseY,
-        ),
-      });
-    };
-    const onMouseUp = () => {
-      isResizingStamp.current = false;
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     };
@@ -1883,48 +1859,30 @@ export const CreateInternalCorrespondence = ({
                       className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none"
                     />
 
-                    {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания */}
+                    {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания.
+                        Показывает реальный рисунок ЭЦП фиксированного размера,
+                        который сохранится в документе при нажатии "Подписать". */}
                     {stampVisible && finalSigner && !finalSigner.dsApplied && (
                       <div
                         ref={stampRef}
                         onMouseDown={handleStampMouseDown}
+                        title="Перетащите, чтобы выбрать место для ЭЦП"
                         style={{
                           position: "absolute",
                           left: stampPos.x,
                           top: stampPos.y,
-                          width:
-                            typeof stampSize.width === "number"
-                              ? stampSize.width
-                              : 320,
-                          height:
-                            stampSize.height !== "auto"
-                              ? stampSize.height
-                              : undefined,
+                          width: 320,
                           cursor: "move",
                           userSelect: "none",
-                          overflow: "hidden",
+                          borderRadius: 8,
+                          boxShadow: "0 0 0 2px rgba(59,130,246,0.45)",
                         }}
                       >
-                        <div className="w-full h-full min-h-[100px] border-[2px] border-dashed border-blue-400 bg-blue-50/70 flex flex-col items-center justify-center rounded-lg text-blue-500 shadow-sm transition-colors hover:bg-blue-100/70">
-                          <Shield size={24} className="mb-2 opacity-50" />
-                          <span className="text-xs font-semibold opacity-70 text-center px-2">
-                            Место для ЭЦП
-                            <br />({finalSigner.initials})
-                          </span>
-                        </div>
-
-                        <div
-                          onMouseDown={handleResizeMouseDown}
-                          style={{
-                            position: "absolute",
-                            right: 0,
-                            bottom: 0,
-                            width: 14,
-                            height: 14,
-                            cursor: "se-resize",
-                            background: "rgba(59,130,246,0.6)",
-                            borderRadius: "4px 0 0 0",
-                          }}
+                        <DSStamp
+                          name={finalSigner.name}
+                          certSerial={`SN-2026-${finalSigner.initials}-84201`}
+                          signedAt={new Date().toLocaleDateString("ru-RU")}
+                          validUntil="с 20.03.2025 до 20.03.2026"
                         />
                       </div>
                     )}
@@ -2470,13 +2428,13 @@ export const CreateInternalCorrespondence = ({
                             : "border-slate-100 bg-slate-50/40",
                         )}
                       >
-                        <AnimatePresence>
+                        <AnimatePresence mode="wait">
                           {!stampVisible && !finalSigner.dsApplied && (
                             <motion.button
                               key="insert-btn"
-                              initial={{ opacity: 0, y: 4 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -4 }}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
                               onClick={handleInsertStamp}
                               className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-semibold rounded-lg transition-colors border border-blue-200 shadow-sm"
                             >
@@ -2487,9 +2445,9 @@ export const CreateInternalCorrespondence = ({
                           {stampVisible && !finalSigner.dsApplied && (
                             <motion.button
                               key="remove-btn"
-                              initial={{ opacity: 0, y: 4 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -4 }}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
                               onClick={() => setStampVisible(false)}
                               className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-500 text-[11px] font-semibold rounded-lg transition-colors border border-slate-200 hover:border-rose-200"
                             >
