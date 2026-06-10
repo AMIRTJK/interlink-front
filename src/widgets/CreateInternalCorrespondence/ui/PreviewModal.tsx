@@ -23,6 +23,13 @@ const CONTENT_STYLE: React.CSSProperties = {
 // Элементы, которые нельзя разрывать между страницами
 const ATOMIC = new Set(["TABLE", "IMG", "FIGURE", "SVG", "VIDEO", "CANVAS"]);
 
+// Блочные элементы — каждый считается отдельной единицей при разбивке
+const BLOCK_TAGS = new Set([
+  "DIV", "P", "H1", "H2", "H3", "H4", "H5", "H6", "UL", "OL", "LI",
+  "TABLE", "BLOCKQUOTE", "PRE", "FIGURE", "HR", "SECTION", "ARTICLE",
+  "HEADER", "FOOTER", "ASIDE", "NAV", "TR", "THEAD", "TBODY",
+]);
+
 export const PreviewModal = ({
   editorHtml,
   orientation,
@@ -69,13 +76,36 @@ export const PreviewModal = ({
 
     const source = document.createElement("div");
     source.innerHTML = editorHtml;
-    const nodes = Array.from(source.childNodes);
+
+    // 1. Нормализация: «голый» текст и инлайн-узлы заворачиваем в блок <div>,
+    //    чтобы каждый верхнеуровневый элемент можно было измерить и разбить.
+    const blocks: HTMLElement[] = [];
+    let inlineBuf: Node[] = [];
+    const flushInline = () => {
+      if (!inlineBuf.length) return;
+      const div = document.createElement("div");
+      inlineBuf.forEach((n) => div.appendChild(n));
+      if ((div.textContent || "").trim() || div.querySelector("img,br")) {
+        blocks.push(div);
+      }
+      inlineBuf = [];
+    };
+    Array.from(source.childNodes).forEach((node) => {
+      const isBlockEl =
+        node.nodeType === Node.ELEMENT_NODE &&
+        BLOCK_TAGS.has((node as HTMLElement).tagName);
+      if (isBlockEl) {
+        flushInline();
+        blocks.push(node as HTMLElement);
+      } else {
+        inlineBuf.push(node);
+      }
+    });
+    flushInline();
 
     const result: string[] = [];
     measurer.innerHTML = "";
-
     const fits = () => measurer.scrollHeight <= contentHeight;
-
     const flush = () => {
       if (measurer.innerHTML.trim()) {
         result.push(measurer.innerHTML);
@@ -83,29 +113,41 @@ export const PreviewModal = ({
       }
     };
 
-    // Разбивка одиночного блока, который сам по себе выше страницы,
-    // по словам (формат сохраняется на уровне тега-обёртки).
+    // Разбивка блока, который сам по себе выше страницы. Делим по позиции
+    // символов через бинарный поиск — работает и для текста без пробелов.
     const splitOversized = (el: HTMLElement) => {
-      const words = (el.textContent || "").split(/(\s+)/);
-      let chunk = el.cloneNode(false) as HTMLElement;
-      chunk.textContent = "";
-      measurer.appendChild(chunk);
+      const full = el.textContent || "";
+      const n = full.length;
+      let start = 0;
+      let guard = 0;
+      while (start < n && guard++ < 5000) {
+        measurer.innerHTML = "";
+        const chunk = el.cloneNode(false) as HTMLElement;
+        measurer.appendChild(chunk);
 
-      for (const word of words) {
-        const prev = chunk.textContent || "";
-        chunk.textContent = prev + word;
-        if (!fits() && prev.trim()) {
-          chunk.textContent = prev;
-          flush();
-          chunk = el.cloneNode(false) as HTMLElement;
-          chunk.textContent = word;
-          measurer.appendChild(chunk);
+        let lo = start + 1;
+        let hi = n;
+        let best = start + 1;
+        while (lo <= hi) {
+          const mid = (lo + hi) >> 1;
+          chunk.textContent = full.slice(start, mid);
+          if (fits()) {
+            best = mid;
+            lo = mid + 1;
+          } else {
+            hi = mid - 1;
+          }
         }
+        chunk.textContent = full.slice(start, best);
+        result.push(measurer.innerHTML);
+        measurer.innerHTML = "";
+        start = best;
       }
     };
 
-    for (const node of nodes) {
-      const clone = node.cloneNode(true);
+    // 2. Раскладка блоков по страницам
+    for (const block of blocks) {
+      const clone = block.cloneNode(true) as HTMLElement;
       measurer.appendChild(clone);
 
       if (fits()) continue;
@@ -119,13 +161,12 @@ export const PreviewModal = ({
       }
 
       // Блок один на странице и всё равно не влезает.
-      const isElement = clone.nodeType === Node.ELEMENT_NODE;
-      const tag = isElement ? (clone as HTMLElement).tagName : "";
-      if (isElement && !ATOMIC.has(tag) && (clone.textContent || "").trim()) {
+      const tag = clone.tagName;
+      if (!ATOMIC.has(tag) && (clone.textContent || "").trim()) {
         measurer.removeChild(clone);
-        splitOversized(clone as HTMLElement);
+        splitOversized(clone);
       }
-      // Атомарные элементы (таблицы/картинки) оставляем как есть — займут свою страницу.
+      // Атомарные элементы (таблицы/картинки) оставляем — займут свою страницу.
     }
 
     flush();

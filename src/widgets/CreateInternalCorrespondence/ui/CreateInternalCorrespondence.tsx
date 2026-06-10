@@ -107,6 +107,78 @@ function FileTextIcon(props: React.SVGProps<SVGSVGElement>) {
 	);
 }
 
+// ===== Постраничная разбивка редактора =====
+const SPACER_ATTR = "data-page-spacer"; // невидимая распорка на границе страниц
+const AUTOSPLIT_ATTR = "data-page-split"; // части одного блока, разрезанного по высоте
+
+const EDITOR_BLOCK_TAGS = new Set([
+	"DIV", "P", "H1", "H2", "H3", "H4", "H5", "H6", "UL", "OL", "LI",
+	"TABLE", "BLOCKQUOTE", "PRE", "FIGURE", "HR", "SECTION", "ARTICLE",
+]);
+const EDITOR_ATOMIC_TAGS = new Set(["TABLE", "IMG", "FIGURE", "SVG", "VIDEO", "CANVAS"]);
+
+let splitGroupSeq = 0;
+
+// Абсолютная позиция курсора в символах внутри редактора
+const getCaretCharOffset = (editor: HTMLElement): number | null => {
+	const sel = window.getSelection();
+	if (!sel || sel.rangeCount === 0 || !editor.contains(sel.anchorNode)) return null;
+	const range = sel.getRangeAt(0);
+	const pre = range.cloneRange();
+	pre.selectNodeContents(editor);
+	pre.setEnd(range.endContainer, range.endOffset);
+	return pre.toString().length;
+};
+
+// Восстановление курсора по абсолютной позиции в символах
+const restoreCaretCharOffset = (editor: HTMLElement, offset: number | null) => {
+	if (offset == null) return;
+	let remaining = offset;
+	const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null);
+	let node: Node | null;
+	while ((node = walker.nextNode())) {
+		const len = node.textContent?.length ?? 0;
+		if (remaining <= len) {
+			const range = document.createRange();
+			range.setStart(node, remaining);
+			range.collapse(true);
+			const sel = window.getSelection();
+			sel?.removeAllRanges();
+			sel?.addRange(range);
+			return;
+		}
+		remaining -= len;
+	}
+};
+
+// Очистка HTML от служебных распорок и сборка разрезанных блоков обратно в один
+const cleanEditorArtifacts = (html: string): string => {
+	const w = document.createElement("div");
+	w.innerHTML = html;
+	w.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => n.remove());
+	const groups = new Map<string, HTMLElement[]>();
+	w.querySelectorAll<HTMLElement>(`[${AUTOSPLIT_ATTR}]`).forEach((el) => {
+		const gid = el.getAttribute(AUTOSPLIT_ATTR) || "";
+		const arr = groups.get(gid) || [];
+		arr.push(el);
+		groups.set(gid, arr);
+	});
+	groups.forEach((pieces) => {
+		const first = pieces[0];
+		first.removeAttribute(AUTOSPLIT_ATTR);
+		for (let k = 1; k < pieces.length; k++) {
+			let child = pieces[k].firstChild;
+			while (child) {
+				first.appendChild(child);
+				child = pieces[k].firstChild;
+			}
+			pieces[k].remove();
+		}
+		first.normalize();
+	});
+	return w.innerHTML;
+};
+
 export const CreateInternalCorrespondence = ({
 	id,
 	onBack = () => {},
@@ -175,6 +247,8 @@ export const CreateInternalCorrespondence = ({
 	const PAGE_PAD_H = 80;
 	const PAGE_PAD_V = 72;
 	const CONTENT_HEIGHT = PAGE_HEIGHT - PAGE_PAD_V * 2;
+	const PAGE_GAP = 32; // визуальный отступ между листами
+	const PAGE_STRIDE = PAGE_HEIGHT + PAGE_GAP;
 
 	const [searchParams, setSearchParams] = useState({ query: "" });
 
@@ -563,7 +637,7 @@ export const CreateInternalCorrespondence = ({
 				setStampVisible(false);
 
 				// ВАЖНО: Принудительно вызываем API сохранения, чтобы бэкенд получил новый body с картинкой
-				const editorBody = editorRef.current?.innerHTML || "<p></p>";
+				const editorBody = getCleanEditorHtml();
 				const requestPayload: any = {
 					subject,
 					body: editorBody,
@@ -620,8 +694,7 @@ export const CreateInternalCorrespondence = ({
 	});
 
 	const onSaveClick = async () => {
-		const editorBody =
-			editorContent || editorRef.current?.innerHTML || "<p></p>";
+		const editorBody = editorContent || getCleanEditorHtml();
 		const requestPayload: any = {
 			subject,
 			body: editorBody,
@@ -887,24 +960,200 @@ export const CreateInternalCorrespondence = ({
 		document.execCommand("fontSize", false, sizeMap[size] ?? "3");
 	};
 
-	const handleEditorInput = useCallback(() => {
-		setEditorContent(editorRef.current?.innerHTML || "<p></p>");
+	// HTML без служебных артефактов (распорки/разрезы) — для сохранения и превью
+	const getCleanEditorHtml = useCallback(() => {
+		const el = editorRef.current;
+		if (!el) return "<p></p>";
+		return cleanEditorArtifacts(el.innerHTML) || "<p></p>";
 	}, []);
+
+	// Постраничная разбивка редактора. Блок, не помещающийся целиком, уезжает на
+	// следующий лист (распорка). Блок, который сам выше страницы (например, длинная
+	// строка без пробелов), режется по символам. Курсор сохраняется по смещению.
+	const paginateEditor = useCallback(() => {
+		const editor = editorRef.current;
+		if (!editor) return 1;
+
+		const caret = getCaretCharOffset(editor);
+		let textMutated = false;
+
+		// 1. Убираем старые распорки и собираем ранее разрезанные блоки обратно
+		editor.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => n.remove());
+		const groups = new Map<string, HTMLElement[]>();
+		editor
+			.querySelectorAll<HTMLElement>(`[${AUTOSPLIT_ATTR}]`)
+			.forEach((el) => {
+				const gid = el.getAttribute(AUTOSPLIT_ATTR) || "";
+				const arr = groups.get(gid) || [];
+				arr.push(el);
+				groups.set(gid, arr);
+			});
+		groups.forEach((pieces) => {
+			const first = pieces[0];
+			first.removeAttribute(AUTOSPLIT_ATTR);
+			for (let k = 1; k < pieces.length; k++) {
+				let child = pieces[k].firstChild;
+				while (child) {
+					first.appendChild(child);
+					child = pieces[k].firstChild;
+				}
+				pieces[k].remove();
+			}
+			first.normalize();
+			textMutated = true;
+		});
+
+		// 2. «Голый» текст и инлайн-узлы заворачиваем в блок <div>
+		let buf: Node[] = [];
+		const flushBuf = () => {
+			if (!buf.length) return;
+			const div = document.createElement("div");
+			buf[0].parentNode?.insertBefore(div, buf[0]);
+			buf.forEach((n) => div.appendChild(n));
+			buf = [];
+			textMutated = true;
+		};
+		Array.from(editor.childNodes).forEach((node) => {
+			const isBlock =
+				node.nodeType === Node.ELEMENT_NODE &&
+				EDITOR_BLOCK_TAGS.has((node as HTMLElement).tagName);
+			if (isBlock) flushBuf();
+			else buf.push(node);
+		});
+		flushBuf();
+
+		const makeSpacer = (h: number) => {
+			const s = document.createElement("div");
+			s.setAttribute(SPACER_ATTR, "1");
+			s.setAttribute("contenteditable", "false");
+			s.setAttribute("aria-hidden", "true");
+			s.style.height = `${Math.max(0, h)}px`;
+			s.style.width = "100%";
+			s.style.userSelect = "none";
+			s.style.pointerEvents = "none";
+			return s;
+		};
+
+		// 3. Раскладка по страницам
+		let i = 0;
+		let guard = 0;
+		while (i < editor.children.length && guard < 8000) {
+			guard++;
+			const block = editor.children[i] as HTMLElement;
+			if (block.hasAttribute(SPACER_ATTR)) {
+				i++;
+				continue;
+			}
+			const top = block.offsetTop;
+			const h = block.offsetHeight;
+			const page = Math.floor(top / PAGE_STRIDE);
+			const pageStart = page * PAGE_STRIDE;
+			const usableBottom = pageStart + CONTENT_HEIGHT;
+			const overflows = top >= usableBottom || top + h > usableBottom;
+
+			if (!overflows) {
+				i++;
+				continue;
+			}
+
+			const tag = block.tagName;
+			const splittable =
+				!EDITOR_ATOMIC_TAGS.has(tag) && (block.textContent || "").trim().length > 0;
+
+			// 3a. Блок помещается на лист целиком — переносим его на следующий
+			if (h <= CONTENT_HEIGHT && top > pageStart + 2) {
+				editor.insertBefore(makeSpacer((page + 1) * PAGE_STRIDE - top), block);
+				i++;
+				continue;
+			}
+
+			// 3b. Блок выше листа и его можно резать
+			if (h > CONTENT_HEIGHT && splittable) {
+				// Сначала поставим блок на начало листа, если он висит ниже
+				if (top > pageStart + 2) {
+					editor.insertBefore(
+						makeSpacer((page + 1) * PAGE_STRIDE - top),
+						block,
+					);
+					i++;
+					continue;
+				}
+				// Бинарным поиском оставляем в блоке столько символов, сколько влезает
+				textMutated = true;
+				const full = block.textContent || "";
+				let lo = 1;
+				let hi = full.length;
+				let best = 1;
+				while (lo <= hi) {
+					const mid = (lo + hi) >> 1;
+					block.textContent = full.slice(0, mid);
+					if (block.offsetHeight <= CONTENT_HEIGHT) {
+						best = mid;
+						lo = mid + 1;
+					} else {
+						hi = mid - 1;
+					}
+				}
+				block.textContent = full.slice(0, best);
+				const rest = full.slice(best);
+				if (rest) {
+					const gid =
+						block.getAttribute(AUTOSPLIT_ATTR) || `g${++splitGroupSeq}`;
+					block.setAttribute(AUTOSPLIT_ATTR, gid);
+					const next = document.createElement(tag);
+					next.setAttribute(AUTOSPLIT_ATTR, gid);
+					next.textContent = rest;
+					editor.insertBefore(next, block.nextSibling);
+					const blockBottom = block.offsetTop + block.offsetHeight;
+					editor.insertBefore(
+						makeSpacer((page + 1) * PAGE_STRIDE - blockBottom),
+						next,
+					);
+				}
+				i++;
+				continue;
+			}
+
+			// 3c. Неразрезаемый блок (таблица/картинка) — оставляем как есть
+			i++;
+		}
+
+		if (textMutated) restoreCaretCharOffset(editor, caret);
+
+		return Math.max(1, Math.ceil(editor.scrollHeight / PAGE_STRIDE));
+	}, [CONTENT_HEIGHT, PAGE_STRIDE]);
+
+	const handleEditorInput = useCallback(() => {
+		setEditorContent(getCleanEditorHtml());
+	}, [getCleanEditorHtml]);
 
 	// Очистка HTML при вставке из Word / PDF / других источников:
 	// убираем стили, мешающие переносу (nowrap, фиксированная ширина и т.п.),
 	// чтобы текст не выходил за границы редактора.
 	const handleEditorPaste = useCallback(
-		(e: React.ClipboardEvent<HTMLDivElement>) => {
+		(e: ClipboardEvent) => {
 			e.preventDefault();
+			e.stopPropagation();
+			const editor = editorRef.current;
+			if (!editor || !e.clipboardData) return;
+
 			const html = e.clipboardData.getData("text/html");
 			const text = e.clipboardData.getData("text/plain");
 
-			if (html) {
+			// Собираем очищенный фрагмент для вставки.
+			// Однострочный текст вставляем инлайн (рядом с курсором), а не блоком —
+			// иначе скопированное слово уезжало на новую строку вниз.
+			const fragment = document.createDocumentFragment();
+			const isMultiline = /\r?\n/.test(text.trim());
+
+			if (html && isMultiline) {
 				const wrapper = document.createElement("div");
 				wrapper.innerHTML = html;
+				// убираем служебные распорки и стили, ломающие перенос
+				wrapper
+					.querySelectorAll(`[${SPACER_ATTR}]`)
+					.forEach((n) => n.remove());
 				wrapper.querySelectorAll<HTMLElement>("*").forEach((el) => {
-					// Снимаем потенциально ломающие перенос инлайн-стили
 					el.style.removeProperty("white-space");
 					el.style.removeProperty("width");
 					el.style.removeProperty("min-width");
@@ -915,15 +1164,60 @@ export const CreateInternalCorrespondence = ({
 					el.style.wordBreak = "break-word";
 					el.style.maxWidth = "100%";
 				});
-				document.execCommand("insertHTML", false, wrapper.innerHTML);
+				while (wrapper.firstChild) fragment.appendChild(wrapper.firstChild);
 			} else if (text) {
-				document.execCommand("insertText", false, text);
+				// Инлайн-текст: переносы строк (если есть) — через <br>, без блоков
+				const lines = text.split(/\r?\n/);
+				lines.forEach((line, idx) => {
+					fragment.appendChild(document.createTextNode(line));
+					if (idx < lines.length - 1)
+						fragment.appendChild(document.createElement("br"));
+				});
+			} else {
+				return;
 			}
 
-			setEditorContent(editorRef.current?.innerHTML || "<p></p>");
+			// Вставляем ровно один раз в позицию курсора (или в конец, если фокуса нет)
+			const selection = window.getSelection();
+			let range: Range;
+			if (
+				selection &&
+				selection.rangeCount > 0 &&
+				editor.contains(selection.anchorNode)
+			) {
+				range = selection.getRangeAt(0);
+			} else {
+				range = document.createRange();
+				range.selectNodeContents(editor);
+				range.collapse(false);
+			}
+			range.deleteContents();
+
+			const lastNode = fragment.lastChild;
+			range.insertNode(fragment);
+
+			// Курсор после вставленного содержимого
+			if (lastNode) {
+				const after = document.createRange();
+				after.setStartAfter(lastNode);
+				after.collapse(true);
+				selection?.removeAllRanges();
+				selection?.addRange(after);
+			}
+
+			setEditorContent(getCleanEditorHtml());
 		},
-		[],
+		[getCleanEditorHtml],
 	);
+
+	// Нативный обработчик вставки: гарантированно отменяет стандартную вставку
+	// браузера (иначе контент дублировался — нативная + ручная вставка).
+	useEffect(() => {
+		const editor = editorRef.current;
+		if (!editor) return;
+		editor.addEventListener("paste", handleEditorPaste);
+		return () => editor.removeEventListener("paste", handleEditorPaste);
+	}, [handleEditorPaste]);
 
 	useEffect(() => {
 		document.execCommand("styleWithCSS", false, true);
@@ -934,18 +1228,14 @@ export const CreateInternalCorrespondence = ({
 		if (!editor) return;
 
 		const updatePageCount = () => {
-			const scrollHeight = editor.scrollHeight;
-			const nextPageCount = Math.max(
-				1,
-				Math.ceil(scrollHeight / CONTENT_HEIGHT),
-			);
+			const nextPageCount = paginateEditor();
 			if (nextPageCount !== pageCount) {
 				setPageCount(nextPageCount);
 			}
 		};
 
 		window.requestAnimationFrame(updatePageCount);
-	}, [editorContent, orientation, fontSize, CONTENT_HEIGHT, pageCount]);
+	}, [editorContent, orientation, fontSize, pageCount, paginateEditor]);
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const files = e.target.files;
@@ -1921,7 +2211,7 @@ export const CreateInternalCorrespondence = ({
 										className="relative"
 										style={{
 											width: PAGE_WIDTH,
-											height: pageCount * PAGE_HEIGHT,
+											height: pageCount * PAGE_STRIDE - PAGE_GAP,
 											padding: `${PAGE_PAD_V}px ${PAGE_PAD_H}px`,
 											fontFamily: "Times New Roman, serif",
 											fontSize: `${fontSize}px`,
@@ -1935,7 +2225,7 @@ export const CreateInternalCorrespondence = ({
 												key={index}
 												style={{
 													position: "absolute",
-													top: index * PAGE_HEIGHT,
+													top: index * PAGE_STRIDE,
 													left: 0,
 													width: "100%",
 													height: PAGE_HEIGHT,
@@ -1954,7 +2244,6 @@ export const CreateInternalCorrespondence = ({
 											data-placeholder="Начните вводить текст письма..."
 											onInput={handleEditorInput}
 											onKeyDown={handleEditorKeyDown}
-											onPaste={handleEditorPaste}
 											style={{
 												position: "relative",
 												zIndex: 1,
