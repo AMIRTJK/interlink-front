@@ -53,6 +53,7 @@ import {
 	ListOrdered,
 	Save,
 	Mail,
+	Printer,
 } from "lucide-react";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
@@ -165,6 +166,43 @@ const restoreCaretCharOffset = (editor: HTMLElement, offset: number | null) => {
 			return;
 		}
 		remaining -= len;
+	}
+};
+
+// Позиция (узел, смещение) для абсолютного символьного индекса внутри элемента
+const charPosAt = (
+	root: HTMLElement,
+	k: number,
+): { node: Node; offset: number } => {
+	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+	let acc = 0;
+	let node: Node | null;
+	while ((node = walker.nextNode())) {
+		const len = node.textContent?.length ?? 0;
+		if (acc + len >= k) return { node, offset: k - acc };
+		acc += len;
+	}
+	return { node: root, offset: root.childNodes.length };
+};
+
+// Обрезать клон до первых N символов, сохраняя структуру/форматирование
+const truncateToChars = (node: Node, budget: { left: number }) => {
+	const children = Array.from(node.childNodes);
+	for (const c of children) {
+		if (budget.left <= 0) {
+			node.removeChild(c);
+			continue;
+		}
+		if (c.nodeType === Node.TEXT_NODE) {
+			const len = c.textContent?.length ?? 0;
+			if (len <= budget.left) budget.left -= len;
+			else {
+				c.textContent = (c.textContent || "").slice(0, budget.left);
+				budget.left = 0;
+			}
+		} else {
+			truncateToChars(c, budget);
+		}
 	}
 };
 
@@ -716,6 +754,68 @@ export const CreateInternalCorrespondence = ({
 		},
 	});
 
+	// Печать документа: используем скрытый iframe и @page margin:0, чтобы браузер
+	// НЕ добавлял свои колонтитулы (URL, дату, заголовок). Поля задаём через padding.
+	const handlePrint = () => {
+		const content = getCleanEditorHtml();
+		const isLand = orientation === "landscape";
+
+		const iframe = document.createElement("iframe");
+		iframe.style.position = "fixed";
+		iframe.style.right = "0";
+		iframe.style.bottom = "0";
+		iframe.style.width = "0";
+		iframe.style.height = "0";
+		iframe.style.border = "0";
+		document.body.appendChild(iframe);
+
+		const win = iframe.contentWindow;
+		const doc = iframe.contentWindow?.document;
+		if (!win || !doc) {
+			iframe.remove();
+			return;
+		}
+
+		doc.open();
+		doc.write(`<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title></title>
+<style>
+  @page { size: A4 ${isLand ? "landscape" : "portrait"}; margin: 0; }
+  * { box-sizing: border-box; overflow-wrap: break-word; word-break: break-word; max-width: 100%; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Times New Roman", serif;
+    font-size: 14px;
+    line-height: 2;
+    color: #1e293b;
+    white-space: pre-wrap;
+    padding: 20mm;
+  }
+  img { max-width: 100%; height: auto; }
+  table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+  td, th { word-break: break-word; }
+  [data-page-spacer] { display: none !important; }
+</style>
+</head>
+<body>${content}</body>
+</html>`);
+		doc.close();
+
+		const triggerPrint = () => {
+			win.focus();
+			win.print();
+			setTimeout(() => iframe.remove(), 1000);
+		};
+		if (doc.readyState === "complete") {
+			setTimeout(triggerPrint, 300);
+		} else {
+			win.onload = () => setTimeout(triggerPrint, 300);
+		}
+	};
+
 	const onSaveClick = async () => {
 		const editorBody = editorContent || getCleanEditorHtml();
 		const requestPayload: any = {
@@ -1020,6 +1120,12 @@ export const CreateInternalCorrespondence = ({
 			first.normalize();
 			textMutated = true;
 		});
+
+		// Контент помещается на один лист — ничего не режем (бережём курсор/ввод)
+		if (editor.scrollHeight <= CONTENT_HEIGHT) {
+			if (textMutated) restoreCaretCharOffset(editor, caret);
+			return 1;
+		}
 
 		// 2. «Голый» текст и инлайн-узлы заворачиваем в блок <div>
 		let buf: Node[] = [];
@@ -1600,6 +1706,14 @@ export const CreateInternalCorrespondence = ({
 						>
 							<Eye size={15} className="text-slate-500" />
 							<span className="hidden sm:inline">Предварительный просмотр</span>
+						</button>
+
+						<button
+							onClick={handlePrint}
+							className="flex items-center cursor-pointer gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700 transition-colors"
+						>
+							<Printer size={15} className="text-slate-500" />
+							<span className="hidden sm:inline">Печать</span>
 						</button>
 
 						<button
@@ -2233,7 +2347,24 @@ export const CreateInternalCorrespondence = ({
 													borderRadius: 16,
 													boxSizing: "border-box",
 												}}
-											/>
+											>
+												<span
+													style={{
+														position: "absolute",
+														bottom: 24,
+														left: 0,
+														right: 0,
+														textAlign: "center",
+														fontSize: 11,
+														color: "#94a3b8",
+														fontFamily: "system-ui, sans-serif",
+														userSelect: "none",
+														pointerEvents: "none",
+													}}
+												>
+													Страница {index + 1} из {pageCount}
+												</span>
+											</div>
 										))}
 										<div
 											ref={editorRef}
