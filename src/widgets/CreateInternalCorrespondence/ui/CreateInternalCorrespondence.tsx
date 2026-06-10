@@ -53,6 +53,7 @@ import {
 	ListOrdered,
 	Save,
 	Mail,
+	Printer,
 } from "lucide-react";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
@@ -693,6 +694,50 @@ export const CreateInternalCorrespondence = ({
 		},
 	});
 
+	// Печать документа: открываем чистый контент с разметкой A4 и вызываем печать
+	const handlePrint = () => {
+		const content = getCleanEditorHtml();
+		const win = window.open("", "_blank", "width=900,height=1000");
+		if (!win) return;
+		const isLand = orientation === "landscape";
+		win.document.write(`<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>${(subject || "Документ").replace(/[<>&]/g, "")}</title>
+<style>
+  @page { size: A4 ${isLand ? "landscape" : "portrait"}; margin: 20mm 20mm; }
+  * { box-sizing: border-box; overflow-wrap: break-word; word-break: break-word; max-width: 100%; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Times New Roman", serif;
+    font-size: 14px;
+    line-height: 2;
+    color: #1e293b;
+    white-space: pre-wrap;
+  }
+  img { max-width: 100%; height: auto; }
+  table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+  td, th { word-break: break-word; }
+  [data-page-spacer] { display: none !important; }
+</style>
+</head>
+<body>${content}</body>
+</html>`);
+		win.document.close();
+		win.focus();
+		const triggerPrint = () => {
+			win.print();
+			win.close();
+		};
+		// Печатаем после полной загрузки (картинки/шрифты)
+		if (win.document.readyState === "complete") {
+			setTimeout(triggerPrint, 300);
+		} else {
+			win.onload = () => setTimeout(triggerPrint, 300);
+		}
+	};
+
 	const onSaveClick = async () => {
 		const editorBody = editorContent || getCleanEditorHtml();
 		const requestPayload: any = {
@@ -1002,6 +1047,12 @@ export const CreateInternalCorrespondence = ({
 			first.normalize();
 			textMutated = true;
 		});
+
+		// Контент помещается на один лист — ничего не режем (бережём курсор/ввод)
+		if (editor.scrollHeight <= CONTENT_HEIGHT) {
+			if (textMutated) restoreCaretCharOffset(editor, caret);
+			return 1;
+		}
 
 		// 2. «Голый» текст и инлайн-узлы заворачиваем в блок <div>
 		let buf: Node[] = [];
@@ -1602,6 +1653,14 @@ export const CreateInternalCorrespondence = ({
 						>
 							<Eye size={15} className="text-slate-500" />
 							<span className="hidden sm:inline">Предварительный просмотр</span>
+						</button>
+
+						<button
+							onClick={handlePrint}
+							className="flex items-center cursor-pointer gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700 transition-colors"
+						>
+							<Printer size={15} className="text-slate-500" />
+							<span className="hidden sm:inline">Печать</span>
 						</button>
 
 						<button
@@ -2235,7 +2294,24 @@ export const CreateInternalCorrespondence = ({
 													borderRadius: 16,
 													boxSizing: "border-box",
 												}}
-											/>
+											>
+												<span
+													style={{
+														position: "absolute",
+														bottom: 24,
+														left: 0,
+														right: 0,
+														textAlign: "center",
+														fontSize: 11,
+														color: "#94a3b8",
+														fontFamily: "system-ui, sans-serif",
+														userSelect: "none",
+														pointerEvents: "none",
+													}}
+												>
+													Страница {index + 1} из {pageCount}
+												</span>
+											</div>
 										))}
 										<div
 											ref={editorRef}
