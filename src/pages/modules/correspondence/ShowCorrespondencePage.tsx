@@ -9,6 +9,7 @@ import { ApiRoutes } from "@shared/api";
 import { useCorrespondenceRoute, useGetQuery } from "@shared/lib";
 import { InternalCorrespondece } from "@widgets/InternalCorrespondece";
 import { CreateInternalCorrespondence } from "@widgets/CreateInternalCorrespondence";
+import { InternalCorrespondenceIncomingView } from "@widgets/InternalCorrespondenceIncomingView";
 
 interface ShowCorrespondencePageProps {
   type?: string;
@@ -20,7 +21,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
   const { id } = useParams<{ id: string }>();
 
   const location = useLocation();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const { shouldHideUI } = useCorrespondenceRoute();
 
@@ -53,15 +54,29 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
     ?.openExecution;
 
   if (isInternalView) {
-    // show||create
+    // Если это именно ВХОДЯЩЕЕ внутреннее письмо — показываем твою новую страницу просмотра
+    if (type === "internal-incoming") {
+      return (
+        <InternalCorrespondenceIncomingView
+          item={
+            data?.item ||
+            data || {
+              id,
+              subject: "",
+              sender: "",
+              date: "",
+              inboundNumber: "",
+              outboundNumber: "",
+              status: "на резолюции",
+            }
+          }
+          onBack={() => navigate(-1)}
+        />
+      );
+    }
+
+    // Во всех остальных внутренних случаях (исходящие/черновики) рендерим форму редактора
     return (
-      // <InternalCorrespondece
-      //   mode="show"
-      //   initialData={data}
-      //   isLoading={isLoading}
-      //   type={type}
-      //   showHeader={true}
-      // />
       <CreateInternalCorrespondence
         id={id}
         initialData={data}
