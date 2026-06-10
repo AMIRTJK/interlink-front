@@ -1,11 +1,29 @@
-import React from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Eye } from "lucide-react";
+import { X, Eye, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 import type { PageOrientation } from "../types";
 import { DSStamp } from "./DSStamp";
 
+const PAGE_PAD = 96; // поля A4 (~2.54см)
+const PAGE_GAP = 32; // отступ между листами
+const CONTENT_CLASS =
+  "max-w-full [&_*]:max-w-full [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_pre]:whitespace-pre-wrap";
+
+const CONTENT_STYLE: React.CSSProperties = {
+  fontFamily: "Times New Roman, serif",
+  fontSize: 14,
+  lineHeight: 2,
+  color: "#1e293b",
+  maxWidth: "100%",
+  overflowWrap: "break-word",
+  wordBreak: "break-word",
+  whiteSpace: "pre-wrap",
+};
+
+// Элементы, которые нельзя разрывать между страницами
+const ATOMIC = new Set(["TABLE", "IMG", "FIGURE", "SVG", "VIDEO", "CANVAS"]);
+
 export const PreviewModal = ({
-  subject,
   editorHtml,
   orientation,
   onClose,
@@ -32,6 +50,129 @@ export const PreviewModal = ({
   const isLandscape = orientation === "landscape";
   const pageWidth = isLandscape ? 1122 : 794;
   const pageHeight = isLandscape ? 794 : 1122;
+  const contentWidth = pageWidth - PAGE_PAD * 2;
+  const contentHeight = pageHeight - PAGE_PAD * 2;
+
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [pages, setPages] = useState<string[]>([]);
+  const [zoom, setZoom] = useState(1);
+
+  // Разбиение HTML на страницы A4 с измерением реальной высоты блоков
+  useLayoutEffect(() => {
+    const measurer = measureRef.current;
+    if (!measurer) return;
+
+    if (!editorHtml || !editorHtml.replace(/<[^>]*>/g, "").trim()) {
+      setPages([]);
+      return;
+    }
+
+    const source = document.createElement("div");
+    source.innerHTML = editorHtml;
+    const nodes = Array.from(source.childNodes);
+
+    const result: string[] = [];
+    measurer.innerHTML = "";
+
+    const fits = () => measurer.scrollHeight <= contentHeight;
+
+    const flush = () => {
+      if (measurer.innerHTML.trim()) {
+        result.push(measurer.innerHTML);
+        measurer.innerHTML = "";
+      }
+    };
+
+    // Разбивка одиночного блока, который сам по себе выше страницы,
+    // по словам (формат сохраняется на уровне тега-обёртки).
+    const splitOversized = (el: HTMLElement) => {
+      const words = (el.textContent || "").split(/(\s+)/);
+      let chunk = el.cloneNode(false) as HTMLElement;
+      chunk.textContent = "";
+      measurer.appendChild(chunk);
+
+      for (const word of words) {
+        const prev = chunk.textContent || "";
+        chunk.textContent = prev + word;
+        if (!fits() && prev.trim()) {
+          chunk.textContent = prev;
+          flush();
+          chunk = el.cloneNode(false) as HTMLElement;
+          chunk.textContent = word;
+          measurer.appendChild(chunk);
+        }
+      }
+    };
+
+    for (const node of nodes) {
+      const clone = node.cloneNode(true);
+      measurer.appendChild(clone);
+
+      if (fits()) continue;
+
+      // Не помещается. Если на странице уже что-то есть — переносим блок целиком.
+      if (measurer.childNodes.length > 1) {
+        measurer.removeChild(clone);
+        flush();
+        measurer.appendChild(clone);
+        if (fits()) continue;
+      }
+
+      // Блок один на странице и всё равно не влезает.
+      const isElement = clone.nodeType === Node.ELEMENT_NODE;
+      const tag = isElement ? (clone as HTMLElement).tagName : "";
+      if (isElement && !ATOMIC.has(tag) && (clone.textContent || "").trim()) {
+        measurer.removeChild(clone);
+        splitOversized(clone as HTMLElement);
+      }
+      // Атомарные элементы (таблицы/картинки) оставляем как есть — займут свою страницу.
+    }
+
+    flush();
+    setPages(result.length ? result : [editorHtml]);
+  }, [editorHtml, contentHeight, contentWidth, orientation]);
+
+  const zoomIn = () => setZoom((z) => Math.min(2, +(z + 0.1).toFixed(2)));
+  const zoomOut = () => setZoom((z) => Math.max(0.4, +(z - 0.1).toFixed(2)));
+  const zoomReset = () => setZoom(1);
+
+  // Esc для закрытия
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const stampPageIndex = Math.max(0, Math.floor(stampPos.y / pageHeight));
+  const stampLocalY = stampPos.y - stampPageIndex * pageHeight;
+
+  const renderStamp = (pageIndex: number) =>
+    stampVisible && pageIndex === stampPageIndex ? (
+      <div
+        style={{
+          position: "absolute",
+          left: stampPos.x,
+          top: stampLocalY,
+          width: stampSize.width,
+          height: stampSize.height === "auto" ? undefined : stampSize.height,
+          overflow: "hidden",
+          pointerEvents: "none",
+          zIndex: 2,
+        }}
+      >
+        <DSStamp
+          name={stampSignerName}
+          certSerial={stampCertSerial}
+          signedAt={stampSignedAt}
+          validUntil={stampValidUntil}
+        />
+      </div>
+    ) : null;
+
+  const sheets = pages.length ? pages : [""];
+
   return (
     <AnimatePresence>
       <motion.div
@@ -41,83 +182,148 @@ export const PreviewModal = ({
         className="fixed inset-0 z-[9999] flex flex-col bg-slate-700/80 backdrop-blur-sm"
         onClick={onClose}
       >
+        {/* Хедер */}
         <div
-          className="flex-shrink-0 flex items-center justify-between px-6 py-3 bg-slate-800 border-b border-slate-600"
+          className="flex-shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-slate-800 border-b border-slate-600"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
               <Eye size={16} className="text-white" />
             </div>
-            <div>
-              <p className="text-sm font-bold text-white">
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-white truncate">
                 Предварительный просмотр
               </p>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 truncate">
                 {isLandscape ? "Альбомная ориентация" : "Книжная ориентация"} ·
-                A4
+                A4 · {sheets.length}{" "}
+                {sheets.length === 1
+                  ? "страница"
+                  : sheets.length < 5
+                    ? "страницы"
+                    : "страниц"}
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white text-sm font-medium rounded-xl transition-colors"
-          >
-            <X size={15} />
-            <span>Закрыть</span>
-          </button>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Зум */}
+            <div className="hidden sm:flex items-center gap-1 bg-slate-700 border border-slate-600 rounded-xl px-1 py-1">
+              <button
+                onClick={zoomOut}
+                className="p-1.5 rounded-lg text-slate-200 hover:bg-slate-600 transition-colors"
+                title="Уменьшить"
+              >
+                <ZoomOut size={15} />
+              </button>
+              <button
+                onClick={zoomReset}
+                className="px-2 text-xs font-semibold text-slate-200 hover:text-white tabular-nums min-w-[44px]"
+                title="Сбросить масштаб"
+              >
+                {Math.round(zoom * 100)}%
+              </button>
+              <button
+                onClick={zoomIn}
+                className="p-1.5 rounded-lg text-slate-200 hover:bg-slate-600 transition-colors"
+                title="Увеличить"
+              >
+                <ZoomIn size={15} />
+              </button>
+              <button
+                onClick={zoomReset}
+                className="p-1.5 rounded-lg text-slate-200 hover:bg-slate-600 transition-colors"
+                title="По размеру"
+              >
+                <Maximize2 size={14} />
+              </button>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white text-sm font-medium rounded-xl transition-colors"
+            >
+              <X size={15} />
+              <span className="hidden sm:inline">Закрыть</span>
+            </button>
+          </div>
         </div>
+
+        {/* Лента страниц */}
         <div
-          className="flex-1 overflow-auto flex items-start justify-center py-10 px-8"
+          className="flex-1 overflow-auto py-10 px-4 sm:px-8"
           onClick={onClose}
         >
-          <motion.div
-            initial={{ scale: 0.96, opacity: 0, y: 12 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            transition={{ duration: 0.24, ease: "easeOut" }}
+          <div
+            className="flex flex-col items-center"
+            style={{ gap: PAGE_GAP, zoom }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white shadow-2xl"
-            style={{
-              width: pageWidth,
-              minHeight: pageHeight,
-              padding: "72px 80px",
-              fontFamily: "Times New Roman, serif",
-              fontSize: 14,
-              lineHeight: 2,
-              color: "#1e293b",
-              position: "relative",
-            }}
           >
-            {editorHtml ? (
-              <div dangerouslySetInnerHTML={{ __html: editorHtml }} />
-            ) : (
-              <p style={{ color: "#94a3b8", fontStyle: "italic" }}>
-                Текст письма не введён...
-              </p>
-            )}
-            {stampVisible && (
-              <div
+            {sheets.map((html, index) => (
+              <motion.div
+                key={index}
+                initial={{ scale: 0.97, opacity: 0, y: 12 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                transition={{ duration: 0.22, ease: "easeOut", delay: index * 0.03 }}
+                className="bg-white shadow-2xl border border-slate-300 flex-shrink-0"
                 style={{
-                  position: "absolute",
-                  left: stampPos.x,
-                  top: stampPos.y,
-                  width: stampSize.width,
-                  height:
-                    stampSize.height === "auto" ? undefined : stampSize.height,
+                  width: pageWidth,
+                  height: pageHeight,
+                  padding: PAGE_PAD,
+                  position: "relative",
+                  boxSizing: "border-box",
                   overflow: "hidden",
-                  pointerEvents: "none",
                 }}
               >
-                <DSStamp
-                  name={stampSignerName}
-                  certSerial={stampCertSerial}
-                  signedAt={stampSignedAt}
-                  validUntil={stampValidUntil}
-                />
-              </div>
-            )}
-          </motion.div>
+                {/* Номер страницы */}
+                <span
+                  style={{
+                    position: "absolute",
+                    bottom: 24,
+                    right: PAGE_PAD,
+                    fontSize: 11,
+                    color: "#94a3b8",
+                    fontFamily: "system-ui, sans-serif",
+                  }}
+                >
+                  {index + 1} / {sheets.length}
+                </span>
+
+                {html ? (
+                  <div
+                    className={CONTENT_CLASS}
+                    style={{ ...CONTENT_STYLE, height: "100%" }}
+                    dangerouslySetInnerHTML={{ __html: html }}
+                  />
+                ) : (
+                  <p style={{ ...CONTENT_STYLE, color: "#94a3b8", fontStyle: "italic" }}>
+                    Текст письма не введён...
+                  </p>
+                )}
+
+                {renderStamp(index)}
+              </motion.div>
+            ))}
+          </div>
         </div>
+
+        {/* Скрытый измеритель для пагинации */}
+        <div
+          ref={measureRef}
+          aria-hidden
+          className={CONTENT_CLASS}
+          style={{
+            ...CONTENT_STYLE,
+            position: "absolute",
+            top: 0,
+            left: -99999,
+            width: contentWidth,
+            visibility: "hidden",
+            pointerEvents: "none",
+            zIndex: -1,
+          }}
+        />
       </motion.div>
     </AnimatePresence>
   );

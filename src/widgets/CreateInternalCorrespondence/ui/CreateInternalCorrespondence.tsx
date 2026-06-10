@@ -891,6 +891,40 @@ export const CreateInternalCorrespondence = ({
 		setEditorContent(editorRef.current?.innerHTML || "<p></p>");
 	}, []);
 
+	// Очистка HTML при вставке из Word / PDF / других источников:
+	// убираем стили, мешающие переносу (nowrap, фиксированная ширина и т.п.),
+	// чтобы текст не выходил за границы редактора.
+	const handleEditorPaste = useCallback(
+		(e: React.ClipboardEvent<HTMLDivElement>) => {
+			e.preventDefault();
+			const html = e.clipboardData.getData("text/html");
+			const text = e.clipboardData.getData("text/plain");
+
+			if (html) {
+				const wrapper = document.createElement("div");
+				wrapper.innerHTML = html;
+				wrapper.querySelectorAll<HTMLElement>("*").forEach((el) => {
+					// Снимаем потенциально ломающие перенос инлайн-стили
+					el.style.removeProperty("white-space");
+					el.style.removeProperty("width");
+					el.style.removeProperty("min-width");
+					el.style.removeProperty("max-width");
+					el.style.removeProperty("overflow");
+					el.style.whiteSpace = "pre-wrap";
+					el.style.overflowWrap = "break-word";
+					el.style.wordBreak = "break-word";
+					el.style.maxWidth = "100%";
+				});
+				document.execCommand("insertHTML", false, wrapper.innerHTML);
+			} else if (text) {
+				document.execCommand("insertText", false, text);
+			}
+
+			setEditorContent(editorRef.current?.innerHTML || "<p></p>");
+		},
+		[],
+	);
+
 	useEffect(() => {
 		document.execCommand("styleWithCSS", false, true);
 	}, []);
@@ -1920,21 +1954,24 @@ export const CreateInternalCorrespondence = ({
 											data-placeholder="Начните вводить текст письма..."
 											onInput={handleEditorInput}
 											onKeyDown={handleEditorKeyDown}
+											onPaste={handleEditorPaste}
 											style={{
 												position: "relative",
 												zIndex: 1,
 												outline: "none",
 												width: "100%",
+												maxWidth: "100%",
 												minHeight: CONTENT_HEIGHT,
 												fontFamily: "Times New Roman, serif",
 												fontSize: `${fontSize}px`,
 												lineHeight: 1.8,
 												color: "#1e293b",
-												whiteSpace: "normal",
-												overflowWrap: "anywhere",
-												wordBreak: "break-all",
+												whiteSpace: "pre-wrap",
+												overflowWrap: "break-word",
+												wordBreak: "break-word",
+												overflowX: "hidden",
 											}}
-											className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none"
+											className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_pre]:whitespace-pre-wrap"
 										/>
 
 										{/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания */}
