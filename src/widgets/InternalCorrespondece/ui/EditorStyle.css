@@ -1,103 +1,103 @@
 @import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
 .ck-content p {
-  margin-bottom: 0.5em !important;
-  line-height: 1.5;
+	margin-bottom: 0.5em !important;
+	line-height: 1.5;
 }
 
 .ck-content h1,
 .ck-content h2,
 .ck-content h3 {
-  margin-top: 1.2em;
-  margin-bottom: 0.6em;
-  font-weight: bold;
+	margin-top: 1.2em;
+	margin-bottom: 0.6em;
+	font-weight: bold;
 }
 
 .ck-content ul {
-  list-style: disc;
-  padding-left: 20px;
-  margin-bottom: 1em;
+	list-style: disc;
+	padding-left: 20px;
+	margin-bottom: 1em;
 }
 
 .ck-content ol {
-  list-style: decimal;
-  padding-left: 20px;
-  margin-bottom: 1em;
+	list-style: decimal;
+	padding-left: 20px;
+	margin-bottom: 1em;
 }
 
 @media print {
-  body {
-    margin: 0 !important;
-  }
+	body {
+		margin: 0 !important;
+	}
 }
 
 :root {
-  --ck-content-font-family: "Lato";
-  --ck-sidebar-width: 270px;
-  --ck-editor-height: 650px;
+	--ck-content-font-family: "Lato";
+	--ck-sidebar-width: 270px;
+	--ck-editor-height: 650px;
 }
 
 .main-container {
-  font-family: var(--ck-content-font-family);
-  width: fit-content;
-  margin-left: 0;
-  margin-right: 0;
+	font-family: var(--ck-content-font-family);
+	width: fit-content;
+	margin-left: 0;
+	margin-right: 0;
 }
 
 .editor-container__editor-wrapper {
-  display: flex;
-  width: fit-content;
+	display: flex;
+	width: fit-content;
 }
 
 .editor-container_document-editor {
-  border-width: 1px;
-  border-color: rgba(229, 231, 235, 0.5);
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 8px 10px -6px rgba(0, 0, 0, 0.1);
+	border-width: 1px;
+	border-color: rgba(229, 231, 235, 0.5);
+	border-radius: 24px;
+	overflow: hidden;
+	box-shadow:
+		0 20px 25px -5px rgba(0, 0, 0, 0.1),
+		0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
 /* App.css */
 
 /* 1. Убедимся, что главный контейнер является "опорной точкой" для позиционирования */
 .editor-container {
-  position: relative;
-  /* Убираем overflow: hidden, если он был, чтобы тени не обрезались, 
+	position: relative;
+	/* Убираем overflow: hidden, если он был, чтобы тени не обрезались, 
       но если нужно обрезать контент - оставьте. */
 }
 
 /* 2. Стилизация контейнера тулбара (белый, круглый, плавающий) */
 .editor-container__toolbar {
-  /* Делаем блок обычным (не плавающим) */
-  position: relative;
-  top: 0;
-  left: 0;
-  transform: none;
+	/* Делаем блок обычным (не плавающим) */
+	position: relative;
+	top: 0;
+	left: 0;
+	transform: none;
 
-  /* Растягиваем на всю ширину */
-  width: 100%;
+	/* Растягиваем на всю ширину */
+	width: 100%;
 
-  /* Стилизация фона и границ */
-  background-color: #f8f9fa; /* Светло-серый фон, как у стандартных редакторов */
-  border-bottom: 1px solid #c4c4c4; /* Линия разделителя снизу */
-  border-radius: 24px 24px 0 0; /* Скругление только сверху, чтобы совпадало с контейнером */
+	/* Стилизация фона и границ */
+	background-color: #f8f9fa; /* Светло-серый фон, как у стандартных редакторов */
+	border-bottom: 1px solid #c4c4c4; /* Линия разделителя снизу */
+	border-radius: 24px 24px 0 0; /* Скругление только сверху, чтобы совпадало с контейнером */
 
-  /* Отступы и выравнивание */
-  padding: 8px 16px;
-  display: flex;
-  flex-wrap: wrap; /* Чтобы иконки переносились на новую строку, если их много */
-  align-items: center;
-  justify-content: flex-start; /* Выравнивание по левому краю */
+	/* Отступы и выравнивание */
+	padding: 8px 16px;
+	display: flex;
+	flex-wrap: wrap; /* Чтобы иконки переносились на новую строку, если их много */
+	align-items: center;
+	justify-content: flex-start; /* Выравнивание по левому краю */
 
-  /* Видимость (всегда видим) */
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  z-index: 10;
+	/* Видимость (всегда видим) */
+	opacity: 1;
+	visibility: visible;
+	pointer-events: auto;
+	z-index: 10;
 
-  box-shadow: none; /* Убираем тень от "пузыря" */
+	box-shadow: none; /* Убираем тень от "пузыря" */
 }
 
 /* 3. Состояние при наведении на редактор */
@@ -110,210 +110,210 @@
 
 /* 4. Небольшая чистка внутренних стилей CKEditor, чтобы они не перекрывали нашу капсулу */
 .editor-container__toolbar .ck.ck-toolbar {
-  border: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
+	border: none !important;
+	background: transparent !important;
+	box-shadow: none !important;
 }
 
 .editor-container_document-editor
-  .editor-container__menu-bar
-  > .ck.ck-menu-bar {
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-  border-top: 0;
-  border-left: 0;
-  border-right: 0;
+	.editor-container__menu-bar
+	> .ck.ck-menu-bar {
+	border-bottom-right-radius: 0;
+	border-bottom-left-radius: 0;
+	border-top: 0;
+	border-left: 0;
+	border-right: 0;
 }
 
 .editor-container_document-editor .editor-container__editor-wrapper {
-  max-height: var(--ck-editor-height);
-  min-height: var(--ck-editor-height);
-  overflow-y: scroll;
-  background: var(--ck-color-base-foreground);
+	max-height: var(--ck-editor-height);
+	min-height: var(--ck-editor-height);
+	overflow-y: scroll;
+	background: var(--ck-color-base-foreground);
 }
 
 .is-read-page {
-  max-height: 830px;
-  min-height: 830px;
-  overflow-y: scroll;
-  background: var(--ck-color-base-foreground);
+	max-height: 830px;
+	min-height: 830px;
+	overflow-y: scroll;
+	background: var(--ck-color-base-foreground);
 }
 
 .custom-editor-container__editor-wrapper {
-  display: flex;
-  width: 100%;
-  overflow-y: scroll;
-  height: 100%;
-  max-height: 80vh;
-  background: var(--ck-color-base-foreground);
+	display: flex;
+	width: 100%;
+	overflow-y: scroll;
+	height: 100%;
+	max-height: 80vh;
+	background: var(--ck-color-base-foreground);
 }
 
 .editor-container_document-editor .editor-container__editor {
-  margin-top: 28px;
-  margin-bottom: 28px;
-  height: 100%;
+	margin-top: 28px;
+	margin-bottom: 28px;
+	height: 100%;
 }
 
 .editor-container_document-editor
-  .editor-container__editor
-  .ck.ck-editor__editable {
-  min-height: 297mm;
+	.editor-container__editor
+	.ck.ck-editor__editable {
+	min-height: 297mm;
 }
 
 .editor-container_document-editor
-  .editor-container__editor
-  .ck.ck-editor__editable {
-  box-sizing: border-box;
-  min-width: calc(210mm + 2px);
-  max-width: calc(210mm + 2px);
-  min-height: 297mm;
-  height: fit-content;
-  padding: 20mm 15mm 20mm 30mm !important;
-  border: 1px hsl(0, 0%, 82.7%) solid;
-  background: hsl(0, 0%, 100%);
-  box-shadow: 0 2px 3px hsla(0, 0%, 0%, 0.078);
-  flex: 1 1 auto;
-  margin-left: 72px;
-  margin-right: 72px;
-  font-size: 14pt !important;
-  font-family: "Times New Roman", serif;
-  line-height: 1.5;
+	.editor-container__editor
+	.ck.ck-editor__editable {
+	box-sizing: border-box;
+	min-width: calc(210mm + 2px);
+	max-width: calc(210mm + 2px);
+	min-height: 297mm;
+	height: fit-content;
+	padding: 20mm 15mm 20mm 30mm !important;
+	border: 1px hsl(0, 0%, 82.7%) solid;
+	background: hsl(0, 0%, 100%);
+	box-shadow: 0 2px 3px hsla(0, 0%, 0%, 0.078);
+	flex: 1 1 auto;
+	margin-left: 72px;
+	margin-right: 72px;
+	font-size: 14pt !important;
+	font-family: "Times New Roman", serif;
+	line-height: 1.5;
 }
 
 .editor-container_include-outline
-  .editor-container__editor
-  .ck.ck-editor__editable {
-  margin-left: 0;
+	.editor-container__editor
+	.ck.ck-editor__editable {
+	margin-left: 0;
 }
 
 .ck-focused {
-  border-color: hsl(0, 0%, 82.7%) !important;
-  box-shadow: none !important;
+	border-color: hsl(0, 0%, 82.7%) !important;
+	box-shadow: none !important;
 }
 
 .editor-container_include-outline.editor-container_include-fullscreen
-  .ck-fullscreen__document-outline-header {
-  display: none;
+	.ck-fullscreen__document-outline-header {
+	display: none;
 }
 
 .editor-container__sidebar {
-  min-width: var(--ck-sidebar-width);
-  max-width: var(--ck-sidebar-width);
-  margin-top: 28px;
-  margin-left: 10px;
-  margin-right: 10px;
+	min-width: var(--ck-sidebar-width);
+	max-width: var(--ck-sidebar-width);
+	margin-top: 28px;
+	margin-left: 10px;
+	margin-right: 10px;
 }
 
 .editor-container__sidebar_ckeditor-ai:has(.ck-tabs.ck-hidden) {
-  max-width: 0;
-  min-width: 0;
+	max-width: 0;
+	min-width: 0;
 }
 
 .ck-content .table thead {
-  display: table-row-group;
+	display: table-row-group;
 }
 
 .ck-content .table tr {
-  break-inside: avoid;
-  break-after: auto;
+	break-inside: avoid;
+	break-after: auto;
 }
 
 .ck.ck-balloon-panel.ck-balloon-panel_position_border-side_left.ck-balloon-panel_visible.ck-evaluation-badge-balloon {
-  display: none !important;
+	display: none !important;
 }
 
 /*  ТЕМНАЯ ТЕМА  */
 
 .main-container.is-dark .editor-container_document-editor {
-  border-color: #374151; /* gray-700 */
+	border-color: #374151; /* gray-700 */
 }
 
 /* Фон вокруг листа бумаги */
 .main-container.is-dark .editor-container__editor-wrapper,
 .main-container.is-dark .is-read-page,
 .main-container.is-dark .custom-editor-container__editor-wrapper {
-  background: #111827; /* gray-900 */
+	background: #111827; /* gray-900 */
 }
 
 /* Сам лист бумаги (A4) */
 .main-container.is-dark
-  .editor-container_document-editor
-  .editor-container__editor
-  .ck.ck-editor__editable {
-  background: #1f2937; /* gray-800 */
-  border-color: #4b5563; /* gray-600 */
-  color: #e5e7eb; /* text-gray-200 */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+	.editor-container_document-editor
+	.editor-container__editor
+	.ck.ck-editor__editable {
+	background: #1f2937; /* gray-800 */
+	border-color: #4b5563; /* gray-600 */
+	color: #e5e7eb; /* text-gray-200 */
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
 }
 
 .main-container.is-dark .ck-focused {
-  border-color: #4b5563 !important;
+	border-color: #4b5563 !important;
 }
 
 /*  ИСПРАВЛЕНИЕ ТУЛБАРА В ТЕМНОЙ ТЕМЕ  */
 .main-container.is-dark .editor-container__toolbar {
-  background-color: #1f2937; /* gray-800 */
-  border-bottom-color: #374151; /* gray-700 */
-  color: #e5e7eb;
+	background-color: #1f2937; /* gray-800 */
+	border-bottom-color: #374151; /* gray-700 */
+	color: #e5e7eb;
 }
 
 /* Перекрашиваем все иконки и текст в тулбаре */
 .main-container.is-dark .editor-container__toolbar .ck.ck-button,
 .main-container.is-dark .editor-container__toolbar .ck.ck-dropdown__button {
-  color: #e5e7eb !important;
+	color: #e5e7eb !important;
 }
 
 .main-container.is-dark .editor-container__toolbar .ck.ck-icon {
-  color: #e5e7eb !important;
-  fill: #e5e7eb !important;
+	color: #e5e7eb !important;
+	fill: #e5e7eb !important;
 }
 
 /* Ховер эффекты кнопок */
 .main-container.is-dark .editor-container__toolbar .ck.ck-button:hover,
 .main-container.is-dark
-  .editor-container__toolbar
-  .ck.ck-dropdown__button:hover {
-  background-color: #374151 !important; /* gray-700 */
+	.editor-container__toolbar
+	.ck.ck-dropdown__button:hover {
+	background-color: #374151 !important; /* gray-700 */
 }
 
 /* Активная кнопка (например, включенный жирный шрифт) */
 .main-container.is-dark .editor-container__toolbar .ck.ck-button.ck-on {
-  background-color: #4b5563 !important; /* gray-600 */
-  color: #60a5fa !important; /* blue-400 */
+	background-color: #4b5563 !important; /* gray-600 */
+	color: #60a5fa !important; /* blue-400 */
 }
 
 .main-container.is-dark
-  .editor-container__toolbar
-  .ck.ck-button.ck-on
-  .ck.ck-icon {
-  color: #60a5fa !important;
-  fill: #60a5fa !important;
+	.editor-container__toolbar
+	.ck.ck-button.ck-on
+	.ck.ck-icon {
+	color: #60a5fa !important;
+	fill: #60a5fa !important;
 }
 
 /* Разделители между группами кнопок */
 .main-container.is-dark .editor-container__toolbar .ck.ck-toolbar__separator {
-  background: #4b5563 !important;
+	background: #4b5563 !important;
 }
 
 /*  ИСПРАВЛЕНИЕ ВЫПАДАЮЩИХ СПИСКОВ (Dropdown) В ТЕМНОЙ ТЕМЕ  */
 /* Поскольку панели могут рендериться в body, мы используем глобальный класс .ck-theme-dark (добавлен в Editor.tsx) */
 body .ck.ck-theme-dark .ck.ck-dropdown__panel {
-  background: #1f2937 !important;
-  border-color: #4b5563 !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+	background: #1f2937 !important;
+	border-color: #4b5563 !important;
+	box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
 }
 
 body .ck.ck-theme-dark .ck.ck-list__item > .ck-button {
-  color: #e5e7eb !important;
+	color: #e5e7eb !important;
 }
 
 body .ck.ck-theme-dark .ck.ck-list__item > .ck-button:hover {
-  background: #374151 !important;
+	background: #374151 !important;
 }
 
 body .ck.ck-theme-dark .ck.ck-list__item > .ck-button.ck-on {
-  background: #4b5563 !important;
-  color: #60a5fa !important;
+	background: #4b5563 !important;
+	color: #60a5fa !important;
 }
 
 /*  КАСТОМНЫЙ СКРОЛЛБАР ДЛЯ ТЕМНОЙ ТЕМЫ
@@ -322,14 +322,14 @@ body .ck.ck-theme-dark .ck.ck-list__item > .ck-button.ck-on {
 .main-container .editor-container__editor-wrapper,
 .main-container .is-read-page,
 .main-container .custom-editor-container__editor-wrapper {
-  scrollbar-width: thin;
-  scrollbar-color: transparent; /* thumb color | track color */
+	scrollbar-width: thin;
+	scrollbar-color: transparent; /* thumb color | track color */
 }
 
 /* 1. Стили для Firefox - Dark Mode */
 .main-container.is-dark .editor-container__editor-wrapper,
 .main-container.is-dark .is-read-page,
 .main-container.is-dark .custom-editor-container__editor-wrapper {
-  scrollbar-width: thin;
-  scrollbar-color: #4b5563 #111827;
+	scrollbar-width: thin;
+	scrollbar-color: #4b5563 #111827;
 }
