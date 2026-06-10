@@ -286,7 +286,10 @@ export const CreateInternalCorrespondence = ({
 		params: { query: incomingLetterSearch },
 	});
 
-	const isVersionContentInit = useRef(false);
+	// id последней версии, которую мы автоматически подгрузили в редактор.
+	// Позволяет переключаться на новую версию после сохранения/подписания,
+	// но не сбрасывать выбранную вручную старую версию при обычном рефетче.
+	const autoLoadedLatestRef = useRef<string | number | null>(null);
 
 	// Запрос списка версий документа
 	const { data: versionsResponse, refetch: refetchVersions } = useGetQuery({
@@ -465,9 +468,6 @@ export const CreateInternalCorrespondence = ({
 				ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
 				ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
 			],
-			onSuccessCb: () => {
-				isVersionContentInit.current = false;
-			},
 		},
 	});
 
@@ -608,7 +608,7 @@ export const CreateInternalCorrespondence = ({
                     </div>
 
                     <!-- Основной контент -->
-                    <div style="flex: 1; padding: 8px 10px; background: #eff6ff; min-width: 0;">
+                    <div style="flex: 1; padding: 8px 10px; background: #eff6ff; min-width: 0; line-height: 1.35;">
                        <p style="margin: 0 0 2px 0; font-weight: 700; font-size: 11px; color: #1e3a8a; text-align: center; line-height: 1.3;">
                           Имзои электронии раками
                        </p>
@@ -621,19 +621,19 @@ export const CreateInternalCorrespondence = ({
                           <!-- Текстовые данные -->
                           <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0;">
                              <div style="display: flex; gap: 4px;">
-                                <span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap; min-width: 60px;">Сертификат:</span>
+                                <span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap !important; min-width: 60px;">Сертификат:</span>
                                 <span style="font-size: 8.5px; color: #1e293b; font-family: monospace; word-break: break-all;">${certSerial}</span>
                              </div>
                              <div style="display: flex; gap: 4px;">
-                                <span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap; min-width: 60px;">Дорандаи имзо:</span>
+                                <span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap !important; min-width: 60px;">Дорандаи имзо:</span>
                                 <span style="font-size: 8.5px; color: #1e293b; word-break: break-all;">${currentSignerName}</span>
                              </div>
                              <div style="display: flex; gap: 4px;">
-                                <span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap; min-width: 60px;">Санаи имзо:</span>
+                                <span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap !important; min-width: 60px;">Санаи имзо:</span>
                                 <span style="font-size: 8.5px; color: #1e293b; word-break: break-all;">${currentDate}</span>
                              </div>
                              <div style="display: flex; gap: 4px;">
-                                <span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap; min-width: 60px;">Санаи додод:</span>
+                                <span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap !important; min-width: 60px;">Санаи додод:</span>
                                 <span style="font-size: 8.5px; color: #1e293b; word-break: break-all;">${validUntil}</span>
                              </div>
                           </div>
@@ -767,15 +767,10 @@ export const CreateInternalCorrespondence = ({
 
 			if (item.subject) setSubject(item.subject);
 
-			// Загрузка сохраненного body с бэкенда (который уже может содержать HTML печати)
-			if (
-				item.body &&
-				editorRef.current &&
-				editorRef.current.innerHTML !== item.body
-			) {
-				editorRef.current.innerHTML = item.body;
-				setEditorContent(item.body);
-			}
+			// ВАЖНО: тело письма в редактор грузит ТОЛЬКО эффект истории версий
+			// (по allVersions). Если дублировать загрузку здесь, этот эффект
+			// срабатывает после пагинации и перезаписывает innerHTML, стирая
+			// распорки между страницами — текст «сползает» в зазор после обновления.
 
 			if (item.priority) {
 				const priorityMap: Record<string, ImportanceLevel> = {
@@ -1450,17 +1445,20 @@ export const CreateInternalCorrespondence = ({
 			: false;
 
 	useEffect(() => {
-		if (allVersions.length > 0 && !isVersionContentInit.current) {
-			const targetVersion = allVersions[allVersions.length - 1];
-			setActiveVersionId(targetVersion.id);
+		if (allVersions.length === 0) return;
+		const targetVersion = allVersions[allVersions.length - 1];
+		// Переключаемся на последнюю версию только когда появилась НОВАЯ последняя
+		// версия (первая загрузка, сохранение, подписание). Если id не изменился —
+		// не трогаем выбранную вручную версию из истории.
+		if (autoLoadedLatestRef.current === targetVersion.id) return;
+		autoLoadedLatestRef.current = targetVersion.id;
+		setActiveVersionId(targetVersion.id);
 
-			if (editorRef.current && targetVersion.content) {
-				editorRef.current.innerHTML = targetVersion.content;
-				// Синхронизируем editorContent, иначе постраничная разбивка не пересчитается
-				// после сохранения/перезагрузки и все страницы кроме первой "исчезнут".
-				setEditorContent(targetVersion.content);
-			}
-			isVersionContentInit.current = true;
+		if (editorRef.current && targetVersion.content) {
+			editorRef.current.innerHTML = targetVersion.content;
+			// Синхронизируем editorContent, иначе постраничная разбивка не пересчитается
+			// после сохранения/перезагрузки и все страницы кроме первой "исчезнут".
+			setEditorContent(targetVersion.content);
 		}
 	}, [allVersions]);
 
@@ -3183,19 +3181,33 @@ export const CreateInternalCorrespondence = ({
 										) : (
 											filteredVersions.map((v: any) => {
 												const isCurrentActive = v.id === activeVersionId;
+												const isSignedVersion = v.is_current_signed;
 												return (
 													<div
 														key={v.id}
 														onClick={() => handleSelectVersion(v.content, v.id)}
 														className={cn(
 															"flex items-start justify-between p-3 rounded-xl border transition-all cursor-pointer group text-xs gap-3",
-															isCurrentActive
-																? "bg-blue-50/50 border-blue-500 shadow-sm"
-																: "bg-slate-50/40 border-slate-100 hover:bg-slate-50 hover:border-slate-200",
+															isSignedVersion
+																? "bg-emerald-50/60 border-emerald-400 shadow-sm ring-1 ring-emerald-200"
+																: isCurrentActive
+																	? "bg-blue-50/50 border-blue-500 shadow-sm"
+																	: "bg-slate-50/40 border-slate-100 hover:bg-slate-50 hover:border-slate-200",
 														)}
 													>
-														<div className="w-7 h-7 rounded-full bg-slate-200 text-slate-600 font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5 border border-white shadow-sm">
-															{v.author.initials}
+														<div
+															className={cn(
+																"w-7 h-7 rounded-full font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5 border border-white shadow-sm",
+																isSignedVersion
+																	? "bg-emerald-500 text-white"
+																	: "bg-slate-200 text-slate-600",
+															)}
+														>
+															{isSignedVersion ? (
+																<Check size={14} />
+															) : (
+																v.author.initials
+															)}
 														</div>
 
 														<div className="min-w-0 flex-1">
@@ -3203,17 +3215,26 @@ export const CreateInternalCorrespondence = ({
 																<span
 																	className={cn(
 																		"font-bold",
-																		isCurrentActive
-																			? "text-blue-600"
-																			: "text-slate-700",
+																		isSignedVersion
+																			? "text-emerald-700"
+																			: isCurrentActive
+																				? "text-blue-600"
+																				: "text-slate-700",
 																	)}
 																>
 																	Версия {v.versionNumber}
 																</span>
-																{v.is_selected && (
-																	<span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 font-medium rounded text-[9px] border border-emerald-100">
-																		Для подписи
+																{isSignedVersion ? (
+																	<span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-500 text-white font-semibold rounded text-[9px]">
+																		<Shield size={9} />
+																		Подписано
 																	</span>
+																) : (
+																	v.is_selected && (
+																		<span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 font-medium rounded text-[9px] border border-emerald-100">
+																			Для подписи
+																		</span>
+																	)
 																)}
 															</div>
 
@@ -3230,20 +3251,29 @@ export const CreateInternalCorrespondence = ({
 															className="flex items-center gap-1.5 flex-shrink-0 mt-0.5"
 															onClick={(e) => e.stopPropagation()}
 														>
-															<input
-																type="checkbox"
-																id={`version-sign-${v.id}`}
-																className="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
-																checked={v.is_selected}
-																disabled={isSelectingVersion || isSigned}
-																onChange={() => handleSetVersionForSign(v.id)}
-															/>
-															<label
-																htmlFor={`version-sign-${v.id}`}
-																className="text-[10px] text-slate-400 select-none cursor-pointer group-hover:text-slate-500"
-															>
-																Выбрать
-															</label>
+															{isSignedVersion ? (
+																<span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 select-none">
+																	<Check size={13} className="text-emerald-500" />
+																	Подписано
+																</span>
+															) : (
+																<>
+																	<input
+																		type="checkbox"
+																		id={`version-sign-${v.id}`}
+																		className="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+																		checked={v.is_selected}
+																		disabled={isSelectingVersion || isSigned}
+																		onChange={() => handleSetVersionForSign(v.id)}
+																	/>
+																	<label
+																		htmlFor={`version-sign-${v.id}`}
+																		className="text-[10px] text-slate-400 select-none cursor-pointer group-hover:text-slate-500"
+																	>
+																		Выбрать
+																	</label>
+																</>
+															)}
 														</div>
 													</div>
 												);

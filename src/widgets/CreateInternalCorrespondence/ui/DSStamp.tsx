@@ -34,7 +34,7 @@ export const DSStamp = ({
     </div>
     <div
       className="flex-1 px-2.5 py-2 min-w-0"
-      style={{ background: "#eff6ff" }}
+      style={{ background: "#eff6ff", lineHeight: 1.35 }}
     >
       <p
         style={{
