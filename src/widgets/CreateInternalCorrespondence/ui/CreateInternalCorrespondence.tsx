@@ -3,6 +3,7 @@ import React, {
   useRef,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -140,6 +141,8 @@ export const CreateInternalCorrespondence = ({
   const [showFontSizeDropdown, setShowFontSizeDropdown] = useState(false);
   const [orientation, setOrientation] = useState<PageOrientation>("portrait");
   const [showPreview, setShowPreview] = useState(false);
+  const [editorContent, setEditorContent] = useState<string>("");
+  const [pageCount, setPageCount] = useState(1);
 
   // Управление плавающим плейсхолдером ЭЦП ДО подписания
   const [stampVisible, setStampVisible] = useState(false);
@@ -617,7 +620,7 @@ export const CreateInternalCorrespondence = ({
   });
 
   const onSaveClick = async () => {
-    const editorBody = editorRef.current?.innerHTML || "<p></p>";
+    const editorBody = editorContent || editorRef.current?.innerHTML || "<p></p>";
     const requestPayload: any = {
       subject,
       body: editorBody,
@@ -674,6 +677,7 @@ export const CreateInternalCorrespondence = ({
         editorRef.current.innerHTML !== item.body
       ) {
         editorRef.current.innerHTML = item.body;
+        setEditorContent(item.body);
       }
 
       if (item.priority) {
@@ -865,6 +869,7 @@ export const CreateInternalCorrespondence = ({
     setFontSize(size);
     setShowFontSizeDropdown(false);
     editorRef.current?.focus();
+    document.execCommand("styleWithCSS", false, true);
     const sizeMap: Record<string, string> = {
       "10": "1",
       "11": "1",
@@ -880,6 +885,29 @@ export const CreateInternalCorrespondence = ({
     };
     document.execCommand("fontSize", false, sizeMap[size] ?? "3");
   };
+
+  const handleEditorInput = useCallback(() => {
+    setEditorContent(editorRef.current?.innerHTML || "<p></p>");
+  }, []);
+
+  useEffect(() => {
+    document.execCommand("styleWithCSS", false, true);
+  }, []);
+
+  useLayoutEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const updatePageCount = () => {
+      const scrollHeight = editor.scrollHeight;
+      const nextPageCount = Math.max(1, Math.ceil(scrollHeight / CONTENT_HEIGHT));
+      if (nextPageCount !== pageCount) {
+        setPageCount(nextPageCount);
+      }
+    };
+
+    window.requestAnimationFrame(updatePageCount);
+  }, [editorContent, orientation, fontSize, CONTENT_HEIGHT, pageCount]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -1200,7 +1228,7 @@ export const CreateInternalCorrespondence = ({
       {showPreview && (
         <PreviewModal
           subject={subject}
-          editorHtml={editorRef.current?.innerHTML ?? ""}
+          editorHtml={editorContent}
           orientation={orientation}
           onClose={() => setShowPreview(false)}
           stampVisible={stampVisible && !!finalSigner?.dsApplied}
@@ -1852,10 +1880,10 @@ export const CreateInternalCorrespondence = ({
                 <div className="py-8 px-8 flex justify-center">
                   <div
                     ref={pageCanvasRef}
-                    className="bg-white shadow-xl border border-slate-300/30 relative"
+                    className="relative"
                     style={{
                       width: PAGE_WIDTH,
-                      minHeight: PAGE_HEIGHT,
+                      height: pageCount * PAGE_HEIGHT,
                       padding: `${PAGE_PAD_V}px ${PAGE_PAD_H}px`,
                       fontFamily: "Times New Roman, serif",
                       fontSize: `${fontSize}px`,
@@ -1864,21 +1892,44 @@ export const CreateInternalCorrespondence = ({
                       boxSizing: "border-box",
                     }}
                   >
+                    {Array.from({ length: pageCount }, (_, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          position: "absolute",
+                          top: index * PAGE_HEIGHT,
+                          left: 0,
+                          width: "100%",
+                          height: PAGE_HEIGHT,
+                          background: "#ffffff",
+                          border: "1px solid rgba(148, 163, 184, 0.35)",
+                          boxShadow:
+                            "0 18px 60px rgba(15, 23, 42, 0.08)",
+                          borderRadius: 16,
+                          boxSizing: "border-box",
+                        }}
+                      />
+                    ))}
                     <div
                       ref={editorRef}
                       contentEditable={!isReadOnly}
                       suppressContentEditableWarning
                       data-placeholder="Начните вводить текст письма..."
+                      onInput={handleEditorInput}
                       onKeyDown={handleEditorKeyDown}
                       style={{
+                        position: "relative",
+                        zIndex: 1,
                         outline: "none",
+                        width: "100%",
                         minHeight: CONTENT_HEIGHT,
                         fontFamily: "Times New Roman, serif",
                         fontSize: `${fontSize}px`,
                         lineHeight: 1.8,
                         color: "#1e293b",
-                        whiteSpace: "pre-wrap",
-                        wordBreak: "break-word",
+                        whiteSpace: "normal",
+                        overflowWrap: "anywhere",
+                        wordBreak: "break-all",
                       }}
                       className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none"
                     />
