@@ -8,8 +8,8 @@ export interface IHrTab {
   icon: ReactNode;
 }
 
-// Пропсы шапки HR (заголовок + счётчик)
+// Пропсы шапки HR (заголовок + счётчик). Без title — только таб-бар.
 export interface IHrHeaderProps {
-  title: string;
+  title?: string;
   subtitle?: ReactNode;
 }

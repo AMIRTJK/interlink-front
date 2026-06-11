@@ -77,7 +77,10 @@ export const EmployeesAnalyticsModal = ({ employees, onClose, onExport }: IProps
       className="fixed inset-0 z-[9998] bg-slate-900/40 backdrop-blur-sm flex items-start justify-center overflow-auto p-6"
       onClick={onClose}
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md my-4" onClick={(ev) => ev.stopPropagation()}>
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md my-4"
+        onClick={(ev) => ev.stopPropagation()}
+      >
         <div className="flex items-center justify-between p-4 border-b border-slate-100">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-indigo-500 flex items-center justify-center text-white">
