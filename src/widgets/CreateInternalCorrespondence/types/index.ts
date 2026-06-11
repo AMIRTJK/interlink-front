@@ -5,9 +5,18 @@ export type Status =
   | "на подпись"
   | "завершено";
 
-export type LetterType = "Гузориш" | "Ариза" | "Дархост" | "Маълумотнома";
+// Ключи document_type из бэкенда (/internal-correspondences/meta).
+// Подписи (Гузориш/Ариза/…) приходят из /meta, здесь — только ключи.
+export type LetterType = "guzorish" | "ariza" | "darkhost" | "malumotnoma";
 
-export type ImportanceLevel = "high" | "medium" | "low";
+// Ключи priority из бэкенда: low / normal / high (раньше было medium)
+export type ImportanceLevel = "high" | "normal" | "low";
+
+// Элемент справочника из /meta
+export interface MetaOption {
+  key: string;
+  label: string;
+}
 
 export type PageOrientation = "portrait" | "landscape";
 

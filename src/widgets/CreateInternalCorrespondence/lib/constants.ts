@@ -72,16 +72,27 @@ export const ORG_STRUCTURE: OrgStructureNode = {
   ],
 };
 
+// Фолбэк-список типов письма, если /meta ещё не загрузился.
+// value — ключ для бэкенда, label — подпись (дублирует /meta), desc — пояснение (только локально).
 export const LETTER_TYPE_OPTIONS: {
   value: LetterType;
   label: string;
   desc: string;
 }[] = [
-  { value: "Гузориш", label: "Гузориш", desc: "Отчёт / Доклад" },
-  { value: "Ариза", label: "Ариза", desc: "Заявление" },
-  { value: "Дархост", label: "Дархост", desc: "Запрос / Обращение" },
-  { value: "Маълумотнома", label: "Маълумотнома", desc: "Справка" },
+  { value: "guzorish", label: "Гузориш", desc: "Отчёт / Доклад" },
+  { value: "ariza", label: "Ариза", desc: "Заявление" },
+  { value: "darkhost", label: "Дархост", desc: "Запрос / Обращение" },
+  { value: "malumotnoma", label: "Маълумотнома", desc: "Справка" },
 ];
+
+// Локальные пояснения к типам письма по ключу — обогащаем подписи из /meta,
+// т.к. бэкенд присылает только key + label.
+export const LETTER_TYPE_DESC: Record<string, string> = {
+  guzorish: "Отчёт / Доклад",
+  ariza: "Заявление",
+  darkhost: "Запрос / Обращение",
+  malumotnoma: "Справка",
+};
 
 export const IMPORTANCE_OPTIONS: {
   value: ImportanceLevel;
@@ -102,7 +113,7 @@ export const IMPORTANCE_OPTIONS: {
     badgeText: "text-rose-700",
   },
   {
-    value: "medium",
+    value: "normal",
     label: "Средняя важность",
     desc: "Обычный приоритет",
     flagFill: "fill-amber-400 text-amber-400",
@@ -121,9 +132,9 @@ export const IMPORTANCE_OPTIONS: {
   },
 ];
 
-export const IMPORTANCE_DOT: Record<ImportanceLevel, string> = {
+export const IMPORTANCE_DOT: Record<string, string> = {
   high: "bg-rose-500",
-  medium: "bg-amber-400",
+  normal: "bg-amber-400",
   low: "bg-slate-300",
 };
 

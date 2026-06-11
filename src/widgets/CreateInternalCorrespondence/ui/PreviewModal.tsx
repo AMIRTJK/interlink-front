@@ -4,21 +4,24 @@ import { X, Eye, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 import type { PageOrientation } from "../types";
 import { DSStamp } from "./DSStamp";
 
-const PAGE_PAD = 96; 
-const PAGE_GAP = 32; 
+// Метрики страницы 1:1 с редактором (PAGE_PAD_H/PAGE_PAD_V, line-height 1.8) —
+// иначе разбивка по страницам в превью не совпадает с тем, что видит пользователь.
+const PAGE_PAD_H = 80;
+const PAGE_PAD_V = 72;
+const PAGE_GAP = 32;
 const CONTENT_CLASS =
-  "max-w-full [&_*]:max-w-full [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_pre]:whitespace-pre-wrap";
+  "max-w-full [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words";
 
-const CONTENT_STYLE: React.CSSProperties = {
+const contentStyle = (fontSize: number): React.CSSProperties => ({
   fontFamily: "Times New Roman, serif",
-  fontSize: 14,
-  lineHeight: 2,
+  fontSize,
+  lineHeight: 1.8,
   color: "#1e293b",
   maxWidth: "100%",
   overflowWrap: "break-word",
   wordBreak: "break-word",
   whiteSpace: "pre-wrap",
-};
+});
 
 // Элементы, которые нельзя разрывать между страницами
 const ATOMIC = new Set(["TABLE", "IMG", "FIGURE", "SVG", "VIDEO", "CANVAS"]);
@@ -33,6 +36,7 @@ const BLOCK_TAGS = new Set([
 export const PreviewModal = ({
   editorHtml,
   orientation,
+  fontSize = 14,
   onClose,
   stampVisible,
   stampPos,
@@ -45,6 +49,7 @@ export const PreviewModal = ({
   subject: string;
   editorHtml: string;
   orientation: PageOrientation;
+  fontSize?: number;
   onClose: () => void;
   stampVisible: boolean;
   stampPos: { x: number; y: number };
@@ -57,8 +62,9 @@ export const PreviewModal = ({
   const isLandscape = orientation === "landscape";
   const pageWidth = isLandscape ? 1122 : 794;
   const pageHeight = isLandscape ? 794 : 1122;
-  const contentWidth = pageWidth - PAGE_PAD * 2;
-  const contentHeight = pageHeight - PAGE_PAD * 2;
+  const contentWidth = pageWidth - PAGE_PAD_H * 2;
+  const contentHeight = pageHeight - PAGE_PAD_V * 2;
+  const CONTENT_STYLE = contentStyle(fontSize);
 
   const measureRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<string[]>([]);
@@ -76,6 +82,11 @@ export const PreviewModal = ({
 
     const source = document.createElement("div");
     source.innerHTML = editorHtml;
+    // Распорки пагинации редактора не должны попадать в превью
+    // (страховка для тел писем, сохранённых до появления очистки).
+    source
+      .querySelectorAll("[data-page-spacer]")
+      .forEach((n) => n.remove());
 
     // 1. Нормализация: «голый» текст и инлайн-узлы заворачиваем в блок <div>,
     //    чтобы каждый верхнеуровневый элемент можно было измерить и разбить.
@@ -147,6 +158,13 @@ export const PreviewModal = ({
 
     // 2. Раскладка блоков по страницам
     for (const block of blocks) {
+      // Ручной разрыв страницы (кнопка «Новая страница» в редакторе)
+      if (block.hasAttribute("data-page-break")) {
+        if (measurer.innerHTML.trim()) flush();
+        else result.push("<div><br></div>"); // разрыв на пустой странице — пустой лист
+        continue;
+      }
+
       const clone = block.cloneNode(true) as HTMLElement;
       measurer.appendChild(clone);
 
@@ -171,7 +189,7 @@ export const PreviewModal = ({
 
     flush();
     setPages(result.length ? result : [editorHtml]);
-  }, [editorHtml, contentHeight, contentWidth, orientation]);
+  }, [editorHtml, contentHeight, contentWidth, orientation, fontSize]);
 
   const zoomIn = () => setZoom((z) => Math.min(2, +(z + 0.1).toFixed(2)));
   const zoomOut = () => setZoom((z) => Math.max(0.4, +(z - 0.1).toFixed(2)));
@@ -311,7 +329,7 @@ export const PreviewModal = ({
                 style={{
                   width: pageWidth,
                   height: pageHeight,
-                  padding: PAGE_PAD,
+                  padding: `${PAGE_PAD_V}px ${PAGE_PAD_H}px`,
                   position: "relative",
                   boxSizing: "border-box",
                   overflow: "hidden",
@@ -322,7 +340,7 @@ export const PreviewModal = ({
                   style={{
                     position: "absolute",
                     bottom: 24,
-                    right: PAGE_PAD,
+                    right: PAGE_PAD_H,
                     fontSize: 11,
                     color: "#94a3b8",
                     fontFamily: "system-ui, sans-serif",
