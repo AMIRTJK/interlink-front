@@ -72,6 +72,8 @@ export const ApiRoutes = {
   DELETE_DEPARTMENT: "/api/v1/admin/departments/:id",
 
   // ==================== INTERNAL CORRESPONDENCE ====================
+  // Справочники для document_type / priority (подписи берём отсюда, не хардкодим)
+  GET_INTERNAL_META: "/api/v1/internal-correspondences/meta",
   GET_INTERNAL_COUNTERS: "/api/v1/internal-correspondences/counters",
   GET_INTERNAL_INCOMING: "/api/v1/internal-correspondences/inbox",
   GET_INTERNAL_INCOMING_PICKER: "/api/v1/internal-correspondences/picker/inbox",
