@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import type { IAdminUser } from "@entities/hr";
 import { ApiRoutes } from "@shared/api";
@@ -17,6 +18,7 @@ import { EmployeesToolbar } from "./EmployeesToolbar";
 import { EmployeesTable } from "./EmployeesTable";
 import { EmployeesCards } from "./EmployeesCards";
 import { EmployeesAnalyticsModal } from "./EmployeesAnalyticsModal";
+import { EmployeeProfileModal } from "./EmployeeProfileModal";
 
 const emptyFilters: IEmployeesFilters = {
   status: "all",
@@ -47,6 +49,7 @@ export const EmployeesWidget: React.FC = () => {
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<IAdminUser | null>(null);
+  const [viewing, setViewing] = useState<IEmployee | null>(null);
 
   const departments = useMemo(
     () => Array.from(new Set(employees.map((e) => e.department).filter((d) => d && d !== "—"))),
@@ -126,13 +129,19 @@ export const EmployeesWidget: React.FC = () => {
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center text-slate-400">Сотрудники не найдены</div>
       ) : view === "table" ? (
-        <EmployeesTable items={pageItems} onEdit={openEdit} onDelete={(id) => deleteM.mutate({ id })} />
+        <EmployeesTable
+          items={pageItems}
+          onEdit={openEdit}
+          onDelete={(id) => deleteM.mutate({ id })}
+          onRowClick={setViewing}
+        />
       ) : (
         <EmployeesCards
           items={pageItems}
           onEdit={openEdit}
           onDelete={(id) => deleteM.mutate({ id })}
           onDuplicate={openDuplicate}
+          onCardClick={setViewing}
         />
       )}
 
@@ -183,6 +192,27 @@ export const EmployeesWidget: React.FC = () => {
           onExport={handleExportExcel}
         />
       )}
+
+      <AnimatePresence>
+        {viewing && (
+          <EmployeeProfileModal
+            employee={viewing}
+            onClose={() => setViewing(null)}
+            onEdit={(e) => {
+              setViewing(null);
+              openEdit(e);
+            }}
+            onDelete={(id) => {
+              deleteM.mutate({ id });
+              setViewing(null);
+            }}
+            onDuplicate={(e) => {
+              setViewing(null);
+              openDuplicate(e);
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       <EmployeeFormModal open={modalOpen} onClose={() => setModalOpen(false)} employee={editing} />
     </div>

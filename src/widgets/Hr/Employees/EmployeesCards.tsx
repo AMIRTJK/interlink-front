@@ -8,14 +8,19 @@ interface IProps {
   onEdit: (e: IEmployee) => void;
   onDelete: (id: number) => void;
   onDuplicate: (e: IEmployee) => void;
+  onCardClick: (e: IEmployee) => void;
 }
 
 // Карточный вид списка сотрудников
-export const EmployeesCards = ({ items, onEdit, onDelete, onDuplicate }: IProps) => {
+export const EmployeesCards = ({ items, onEdit, onDelete, onDuplicate, onCardClick }: IProps) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {items.map((e) => (
-        <div key={e.id} className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col">
+        <div
+          key={e.id}
+          onClick={() => onCardClick(e)}
+          className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col cursor-pointer hover:border-slate-300 transition-colors"
+        >
           <div className="flex items-start gap-3">
             <Avatar e={e} size={44} />
             <div className="min-w-0 flex-1">
@@ -40,7 +45,10 @@ export const EmployeesCards = ({ items, onEdit, onDelete, onDuplicate }: IProps)
               <Wallet size={14} className="text-slate-400" /> {money(e.salary)}
             </p>
           </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-3">
+          <div
+            className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-3"
+            onClick={(ev) => ev.stopPropagation()}
+          >
             <button
               onClick={() => onEdit(e)}
               className="flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600"

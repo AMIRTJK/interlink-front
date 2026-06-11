@@ -7,10 +7,11 @@ interface IProps {
   items: IEmployee[];
   onEdit: (e: IEmployee) => void;
   onDelete: (id: number) => void;
+  onRowClick: (e: IEmployee) => void;
 }
 
 // Табличный вид списка сотрудников
-export const EmployeesTable = ({ items, onEdit, onDelete }: IProps) => {
+export const EmployeesTable = ({ items, onEdit, onDelete, onRowClick }: IProps) => {
   return (
     <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
       <table className="w-full text-sm">
@@ -29,7 +30,8 @@ export const EmployeesTable = ({ items, onEdit, onDelete }: IProps) => {
           {items.map((e) => (
             <tr
               key={e.id}
-              className="border-b border-slate-50 hover:bg-slate-50/60 transition-colors"
+              onClick={() => onRowClick(e)}
+              className="border-b border-slate-50 hover:bg-slate-50/60 transition-colors cursor-pointer"
             >
               <td className="px-4 py-3">
                 <div className="flex items-center gap-3">
@@ -47,7 +49,7 @@ export const EmployeesTable = ({ items, onEdit, onDelete }: IProps) => {
               <td className="px-4 py-3 text-slate-600">{e.email || "—"}</td>
               <td className="px-4 py-3 text-slate-600">{e.phone || "—"}</td>
               <td className="px-4 py-3 font-semibold text-slate-800">{money(e.salary)}</td>
-              <td className="px-4 py-3">
+              <td className="px-4 py-3" onClick={(ev) => ev.stopPropagation()}>
                 <div className="flex items-center justify-end gap-1">
                   <button
                     onClick={() => onEdit(e)}

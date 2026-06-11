@@ -69,4 +69,9 @@ export interface IAdminUser {
   department?: { id: number; name: string };
   departments?: { id: number; name: string }[];
   roles?: { id: number; name: string }[];
+  // Показатели для карточки просмотра (придут с бэка позже)
+  projects_count?: number;
+  tasks_count?: number;
+  awards_count?: number;
+  years?: number;
 }
