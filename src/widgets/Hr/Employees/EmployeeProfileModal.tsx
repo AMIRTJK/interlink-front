@@ -143,6 +143,7 @@ export const EmployeeProfileModal = ({ employee: e, onClose, onEdit, onDelete, o
           <Popconfirm
             title="Удалить сотрудника?" okText="Удалить" cancelText="Отмена"
             okButtonProps={{ danger: true }} onConfirm={() => onDelete(e.id)}
+            zIndex={10000}
           >
             <button className="p-2.5 rounded-xl text-rose-500 border border-rose-100 bg-rose-50 hover:bg-rose-100">
               <Trash2 size={16} />
