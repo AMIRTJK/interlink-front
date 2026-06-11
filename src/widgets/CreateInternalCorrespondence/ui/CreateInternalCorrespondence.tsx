@@ -823,64 +823,93 @@ export const CreateInternalCorrespondence = ({
           if (
             !editorRef.current.innerHTML.includes('data-signature-stamp="true"')
           ) {
+            // 1. Собираем переменные для штампа
             const widthStr =
               typeof stampSize.width === "number"
                 ? `${stampSize.width}px`
                 : stampSize.width;
-
             const currentSignerName = finalSigner?.name || "Неизвестно";
             const currentSignerInitials = finalSigner?.initials || "НА";
             const currentDate = new Date().toLocaleDateString("ru-RU");
             const certSerial = `SN-2026-${currentSignerInitials}-84201`;
             const validUntil = "с 20.03.2025 до 20.03.2026";
-            const qrSvg = buildStampQRSvg(
-              `${certSerial}|${currentSignerName}|${currentDate}`,
-              52,
-            );
 
-            const stampHTML = `
-<div data-signature-stamp="true" contenteditable="false" style="position: absolute; left: ${stampPos.x}px; top: ${stampPos.y}px; width: ${widthStr}; height: auto; z-index: 50; user-select: none; cursor: default; white-space: normal;">
-<div style="display: flex; align-items: stretch; border: 1.5px solid #3b82f6; border-radius: 6px; background: #fff; width: 100%; box-sizing: border-box; overflow: hidden; font-family: 'Times New Roman', serif; line-height: 1.2 !important;">
-<div style="display: flex; flex-direction: column; flex-shrink: 0; width: 7px;">
-<div style="flex: 1; background: #CC0001;"></div>
-<div style="flex: 1; background: #FFFFFF; border-top: 0.5px solid #e2e8f0; border-bottom: 0.5px solid #e2e8f0;"></div>
-<div style="flex: 1; background: #009A44;"></div>
-</div>
-<div style="flex: 1; padding: 8px 10px; background: #eff6ff; min-width: 0;">
-<p style="margin: 0 0 2px 0; font-weight: 700; font-size: 11px; color: #1e3a8a; text-align: center;">Имзои электронии раками</p>
-<div style="border-top: 1px solid #93c5fd; margin-bottom: 4px;"></div>
-<p style="margin: 0 0 5px 0; font-weight: 600; font-size: 9px; color: #1d4ed8; text-align: center;">Маълумоти имзои электронии раками</p>
-<div style="display: flex; gap: 8px; align-items: flex-start;">
-<div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0;">
-<div style="display: flex; gap: 4px; align-items: baseline;">
-<span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap !important; min-width: 60px; flex-shrink: 0;">Сертификат:</span>
-<span style="font-size: 8.5px; color: #1e293b; font-family: monospace; word-break: break-all;">${certSerial}</span>
-</div>
-<div style="display: flex; gap: 4px; align-items: baseline;">
-<span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap !important; min-width: 60px; flex-shrink: 0;">Дорандаи имзо:</span>
-<span style="font-size: 8.5px; color: #1e293b; word-break: break-all;">${currentSignerName}</span>
-</div>
-<div style="display: flex; gap: 4px; align-items: baseline;">
-<span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap !important; min-width: 60px; flex-shrink: 0;">Санаи имзо:</span>
-<span style="font-size: 8.5px; color: #1e293b; word-break: break-all;">${currentDate}</span>
-</div>
-<div style="display: flex; gap: 4px; align-items: baseline;">
-<span style="font-size: 8.5px; font-weight: 700; color: #1e40af; white-space: nowrap !important; min-width: 60px; flex-shrink: 0;">Санаи додод:</span>
-<span style="font-size: 8.5px; color: #1e293b; word-break: break-all;">${validUntil}</span>
-</div>
-</div>
-<div style="flex-shrink: 0; border: 1px solid #bfdbfe; border-radius: 3px; padding: 2px; background: #fff; box-sizing: border-box;">
-${qrSvg}
-</div>
-</div>
-</div>
-</div>
-</div>`
-              // Удаляем все переносы строк и табы внутри шаблона,
-              // чтобы они не превратились в пустые строки в редакторе.
+            // 2. Генерируем чистые rects для QR-кода, чтобы вставить их внутрь общего SVG
+            const GRID = 21;
+            const matrix = generateQRMatrix(
+              `${certSerial}|${currentSignerName}|${currentDate}`,
+              GRID,
+            );
+            const qrSize = 52;
+            const cellSize = qrSize / GRID;
+            let qrRects = "";
+            for (let row = 0; row < GRID; row++) {
+              for (let col = 0; col < GRID; col++) {
+                if (matrix[row][col]) {
+                  qrRects += `<rect x="${col * cellSize}" y="${row * cellSize}" width="${cellSize}" height="${cellSize}" fill="#1e3a8a"/>`;
+                }
+              }
+            }
+
+            // 3. Формируем единый SVG-код штампа ЭЦП со всеми текстами и QR-кодом
+            const fullStampSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="110" viewBox="0 0 320 110" fill="none">
+  <rect x="0.75" y="0.75" width="318.5" height="108.5" rx="5.25" fill="white" stroke="#3b82f6" stroke-width="1.5"/>
+  
+  <g clip-path="url(#clip0)">
+    <rect x="1.5" y="1.5" width="7" height="35.3" fill="#CC0001"/>
+    <rect x="1.5" y="36.8" width="7" height="36.4" fill="#FFFFFF"/>
+    <line x1="1.5" y1="36.8" x2="8.5" y2="36.8" stroke="#e2e8f0" stroke-width="0.5"/>
+    <line x1="1.5" y1="73.2" x2="8.5" y2="73.2" stroke="#e2e8f0" stroke-width="0.5"/>
+    <rect x="1.5" y="73.2" width="7" height="35.3" fill="#009A44"/>
+
+    <rect x="8.5" y="1.5" width="310" height="107" fill="#eff6ff"/>
+
+    <text x="163" y="16" font-family="Times New Roman, serif" font-size="11" font-weight="700" fill="#1e3a8a" text-anchor="middle">Имзои электронии рақамӣ</text>
+    <line x1="18.5" y1="21" x2="308.5" y2="21" stroke="#93c5fd" stroke-width="1"/>
+    <text x="163" y="32" font-family="Times New Roman, serif" font-size="9" font-weight="600" fill="#1d4ed8" text-anchor="middle">Маълумоти имзои электронии рақамӣ</text>
+
+    <text x="18" y="47" font-family="Times New Roman, serif" font-size="8.5" font-weight="700" fill="#1e40af">Сертификат:</text>
+    <text x="85" y="47" font-family="Courier New, monospace" font-size="8.5" fill="#1e293b">${certSerial}</text>
+
+    <text x="18" y="61" font-family="Times New Roman, serif" font-size="8.5" font-weight="700" fill="#1e40af">Дорандаи имзо:</text>
+    <text x="85" y="61" font-family="Times New Roman, serif" font-size="8.5" fill="#1e293b">${currentSignerName}</text>
+
+    <text x="18" y="75" font-family="Times New Roman, serif" font-size="8.5" font-weight="700" fill="#1e40af">Санаи имзо:</text>
+    <text x="85" y="75" font-family="Times New Roman, serif" font-size="8.5" fill="#1e293b">${currentDate}</text>
+
+    <text x="18" y="89" font-family="Times New Roman, serif" font-size="8.5" font-weight="700" fill="#1e40af">Санаи додод:</text>
+    <text x="85" y="89" font-family="Times New Roman, serif" font-size="8.5" fill="#1e293b">${validUntil}</text>
+
+    <rect x="254" y="43" width="52" height="52" rx="3" fill="white" stroke="#bfdbfe" stroke-width="1"/>
+    <g transform="translate(254, 43)">
+      ${qrRects}
+    </g>
+  </g>
+  <defs>
+    <clipPath id="clip0">
+      <rect x="1.5" y="1.5" width="317" height="107" rx="4.5" fill="white"/>
+    </clipPath>
+  </defs>
+</svg>
+`
               .replace(/[\n\t]/g, "")
               .trim();
 
+            // 4. Кодируем полученный SVG в Base64 для безопасного Data-URI
+            const encodedSvg = btoa(unescape(encodeURIComponent(fullStampSvg)));
+            const stampDataUri = `data:image/svg+xml;base64,${encodedSvg}`;
+
+            // 5. Генерируем финальный HTML-контейнер, где внутри лежит НЕ текст, а картинка <img>
+            const stampHTML = `
+<div data-signature-stamp="true" contenteditable="false" style="position: absolute; left: ${stampPos.x}px; top: ${stampPos.y}px; width: ${widthStr}; height: 110px; z-index: 50; user-select: none; -webkit-user-select: none; cursor: default;">
+  <img src="${stampDataUri}" alt="ЭЦП" style="display: block; width: 100%; height: 110px; pointer-events: none; -webkit-user-drag: none;" />
+</div>
+`
+              .replace(/[\n\t]/g, "")
+              .trim();
+
+            // 6. Засовываем готовый HTML в редактор
             editorRef.current.innerHTML += stampHTML;
           }
         }
@@ -2030,18 +2059,25 @@ ${qrSvg}
   useEffect(() => {
     if (allVersions.length === 0) return;
     const targetVersion = allVersions[allVersions.length - 1];
-    // Переключаемся на последнюю версию только когда появилась НОВАЯ последняя
-    // версия (первая загрузка, сохранение, подписание). Если id не изменился —
-    // не трогаем выбранную вручную версию из истории.
-    if (autoLoadedLatestRef.current === targetVersion.id) return;
+
+    // Проверяем, изменился ли действительно ID версии
+    const isNewVersionId = autoLoadedLatestRef.current !== targetVersion.id;
     autoLoadedLatestRef.current = targetVersion.id;
     setActiveVersionId(targetVersion.id);
 
     if (editorRef.current && targetVersion.content) {
-      editorRef.current.innerHTML = targetVersion.content;
-      // Синхронизируем editorContent, иначе постраничная разбивка не пересчитается
-      // после сохранения/перезагрузки и все страницы кроме первой "исчезнут".
-      setEditorContent(targetVersion.content);
+      // Сравниваем чистый контент из редактора с тем, что пришло от бэкенда
+      const currentCleanHtml = cleanEditorArtifacts(
+        editorRef.current.innerHTML,
+      );
+      const incomingCleanHtml = cleanEditorArtifacts(targetVersion.content);
+
+      // Перезаписываем innerHTML ТОЛЬКО если это действительно чужая/новая версия,
+      // и её текст физически отличается от того, что прямо сейчас горит на экране.
+      if (isNewVersionId && currentCleanHtml !== incomingCleanHtml) {
+        editorRef.current.innerHTML = targetVersion.content;
+        setEditorContent(targetVersion.content);
+      }
     }
   }, [allVersions]);
 
@@ -2978,7 +3014,7 @@ ${qrSvg}
                         wordBreak: "break-word",
                         overflowX: "hidden",
                       }}
-                      className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_pre]:whitespace-pre-wrap"
+                      className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_pre]:whitespace-pre-wrap [&_div]:min-h-[1.8em]"
                     />
 
                     {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания.
