@@ -18,7 +18,7 @@ import {
 	User,
 	Clock,
 	// Download,
-	// Trash,
+	Trash2,
 	X,
 	Paperclip,
 	Shield,
@@ -29,6 +29,7 @@ import {
 	// FileBadge,
 	ArrowLeft,
 	ChevronDown,
+	FilePlus2,
 	FileType,
 	MessageSquare,
 	MessageSquarePlus,
@@ -59,7 +60,6 @@ import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import type {
 	// Status,
-	LetterType,
 	ImportanceLevel,
 	PageOrientation,
 	// RegistryItem,
@@ -67,9 +67,11 @@ import type {
 	AttachedFile,
 	Approver,
 	FinalSigner,
+	MetaOption,
 } from "../types";
 import {
 	LETTER_TYPE_OPTIONS,
+	LETTER_TYPE_DESC,
 	IMPORTANCE_OPTIONS,
 	IMPORTANCE_DOT,
 	// RECIPIENT_OPTIONS,
@@ -128,45 +130,163 @@ function buildStampQRSvg(value: string, size = 52) {
 // ===== Постраничная разбивка редактора =====
 const SPACER_ATTR = "data-page-spacer"; // невидимая распорка на границе страниц
 const AUTOSPLIT_ATTR = "data-page-split"; // части одного блока, разрезанного по высоте
+const PAGE_BREAK_ATTR = "data-page-break"; // ручной разрыв страницы (кнопка «Новая страница»)
+const STAMP_ATTR = "data-signature-stamp"; // печать ЭЦП (вне потока, не трогаем)
 
 const EDITOR_BLOCK_TAGS = new Set([
 	"DIV", "P", "H1", "H2", "H3", "H4", "H5", "H6", "UL", "OL", "LI",
 	"TABLE", "BLOCKQUOTE", "PRE", "FIGURE", "HR", "SECTION", "ARTICLE",
 ]);
 const EDITOR_ATOMIC_TAGS = new Set(["TABLE", "IMG", "FIGURE", "SVG", "VIDEO", "CANVAS"]);
+// Блоки, которые можно делить на «до/после курсора» при ручном разрыве страницы
+const PAGE_SPLITTABLE_TAGS = new Set([
+	"DIV", "P", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "PRE",
+]);
 
 let splitGroupSeq = 0;
 
+const isSpacerNode = (n: Node | null): n is HTMLElement =>
+	!!n &&
+	n.nodeType === Node.ELEMENT_NODE &&
+	(n as HTMLElement).hasAttribute(SPACER_ATTR);
+
+const isPageBreakNode = (n: Node | null): n is HTMLElement =>
+	!!n &&
+	n.nodeType === Node.ELEMENT_NODE &&
+	(n as HTMLElement).hasAttribute(PAGE_BREAK_ATTR);
+
+const isStampNode = (n: Node | null): boolean =>
+	!!n &&
+	n.nodeType === Node.ELEMENT_NODE &&
+	(n as HTMLElement).hasAttribute(STAMP_ATTR);
+
+// Верхнеуровневый блок редактора, содержащий узел
+const topLevelBlockOf = (
+	editor: HTMLElement,
+	node: Node | null,
+): HTMLElement | null => {
+	let n: Node | null = node;
+	while (n && n.parentNode !== editor) n = n.parentNode;
+	return n && n.nodeType === Node.ELEMENT_NODE ? (n as HTMLElement) : null;
+};
+
+// Есть ли в диапазоне видимое содержимое (текст / br / атомарные элементы)
+const rangeHasContent = (r: Range): boolean => {
+	if (r.toString().length > 0) return true;
+	const frag = r.cloneContents();
+	return !!frag.querySelector("br, img, table, figure, video, canvas, svg");
+};
+
+// Каретка стоит в самом начале блока (перед ней нет видимого содержимого)
+const caretAtBlockStart = (block: HTMLElement, range: Range): boolean => {
+	const pre = range.cloneRange();
+	pre.selectNodeContents(block);
+	pre.setEnd(range.startContainer, range.startOffset);
+	return !rangeHasContent(pre);
+};
+
+// Каретка в конце блока: после неё нет содержимого, кроме <br>-плейсхолдера
+const caretAtBlockEnd = (block: HTMLElement, range: Range): boolean => {
+	const post = range.cloneRange();
+	post.selectNodeContents(block);
+	post.setStart(range.endContainer, range.endOffset);
+	if (post.toString().length > 0) return false;
+	const frag = post.cloneContents();
+	if (frag.querySelector("img, table, figure, video, canvas, svg")) return false;
+	return frag.querySelectorAll("br").length <= 1;
+};
+
+// Слияние первого блока следующей страницы с последним блоком предыдущей —
+// как при обычном Backspace внутри одной страницы.
+const mergePageBlocks = (target: HTMLElement, source: HTMLElement) => {
+	if (target.lastChild && target.lastChild.nodeName === "BR") {
+		target.removeChild(target.lastChild);
+	}
+	while (source.firstChild) target.appendChild(source.firstChild);
+	source.remove();
+	target.normalize();
+};
+
+// Слияние блоков через границу страницы с учётом списков и атомарных блоков.
+// Возвращает позицию для курсора (точку склейки) или null, если слияние невозможно.
+const mergeAcrossBoundary = (
+	target: HTMLElement,
+	source: HTMLElement,
+): { node: Node; offset: number } | null => {
+	// Куда вливаем: для списка — в его последний пункт
+	let t = target;
+	if ((t.tagName === "UL" || t.tagName === "OL") && t.lastElementChild) {
+		t = t.lastElementChild as HTMLElement;
+	}
+	if (EDITOR_ATOMIC_TAGS.has(t.tagName)) return null;
+
+	// Что вливаем: из списка — только первый пункт (остальное остаётся списком)
+	let s = source;
+	let sourceList: HTMLElement | null = null;
+	if (s.tagName === "UL" || s.tagName === "OL") {
+		const firstLi = s.firstElementChild as HTMLElement | null;
+		if (!firstLi) {
+			s.remove();
+			return { node: t, offset: t.childNodes.length };
+		}
+		sourceList = s;
+		s = firstLi;
+	} else if (EDITOR_ATOMIC_TAGS.has(s.tagName)) {
+		return null;
+	}
+
+	const junction = (t.textContent || "").length;
+	mergePageBlocks(t, s);
+	if (sourceList && !sourceList.firstElementChild) sourceList.remove();
+	return charPosAt(t, junction);
+};
+
+// Снимок позиции курсора: абсолютное смещение в символах + признак того,
+// что курсор стоял в начале своего текстового узла. На границе двух блоков
+// одно и то же смещение означает и «конец предыдущего», и «начало следующего» —
+// без признака курсор «перепрыгивал» в конец текста предыдущей страницы.
+type CaretSnapshot = { offset: number; preferNext: boolean } | null;
+
 // Абсолютная позиция курсора в символах внутри редактора
-const getCaretCharOffset = (editor: HTMLElement): number | null => {
+const getCaretCharOffset = (editor: HTMLElement): CaretSnapshot => {
 	const sel = window.getSelection();
 	if (!sel || sel.rangeCount === 0 || !editor.contains(sel.anchorNode)) return null;
 	const range = sel.getRangeAt(0);
 	const pre = range.cloneRange();
 	pre.selectNodeContents(editor);
 	pre.setEnd(range.endContainer, range.endOffset);
-	return pre.toString().length;
+	const preferNext =
+		range.endContainer.nodeType === Node.TEXT_NODE && range.endOffset === 0;
+	return { offset: pre.toString().length, preferNext };
 };
 
 // Восстановление курсора по абсолютной позиции в символах
-const restoreCaretCharOffset = (editor: HTMLElement, offset: number | null) => {
-	if (offset == null) return;
-	let remaining = offset;
+const restoreCaretCharOffset = (editor: HTMLElement, caret: CaretSnapshot) => {
+	if (caret == null) return;
+	let remaining = caret.offset;
 	const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null);
 	let node: Node | null;
+	let last: Node | null = null;
+	const place = (n: Node, off: number) => {
+		const range = document.createRange();
+		range.setStart(n, off);
+		range.collapse(true);
+		const sel = window.getSelection();
+		sel?.removeAllRanges();
+		sel?.addRange(range);
+	};
 	while ((node = walker.nextNode())) {
 		const len = node.textContent?.length ?? 0;
-		if (remaining <= len) {
-			const range = document.createRange();
-			range.setStart(node, remaining);
-			range.collapse(true);
-			const sel = window.getSelection();
-			sel?.removeAllRanges();
-			sel?.addRange(range);
+		if (remaining < len || (remaining === len && !caret.preferNext)) {
+			place(node, remaining);
 			return;
 		}
 		remaining -= len;
+		last = node;
 	}
+	// Точная позиция не найдена (preferNext в самом конце документа) —
+	// ставим курсор в конец последнего текстового узла.
+	if (last) place(last, last.textContent?.length ?? 0);
 };
 
 // Позиция (узел, смещение) для абсолютного символьного индекса внутри элемента
@@ -206,11 +326,26 @@ const truncateToChars = (node: Node, budget: { left: number }) => {
 	}
 };
 
+// Удаление распорки без потери содержимого: браузер при Backspace/Delete на
+// границе страниц может слить пользовательский текст внутрь распорки —
+// в этом случае возвращаем его в поток обычным блоком.
+// Возвращает true, если содержимое пришлось спасать.
+const removeSpacerSafely = (n: Element): boolean => {
+	if ((n.textContent || "").trim()) {
+		const div = document.createElement("div");
+		while (n.firstChild) div.appendChild(n.firstChild);
+		n.replaceWith(div);
+		return true;
+	}
+	n.remove();
+	return false;
+};
+
 // Очистка HTML от служебных распорок и сборка разрезанных блоков обратно в один
 const cleanEditorArtifacts = (html: string): string => {
 	const w = document.createElement("div");
 	w.innerHTML = html;
-	w.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => n.remove());
+	w.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => removeSpacerSafely(n));
 	const groups = new Map<string, HTMLElement[]>();
 	w.querySelectorAll<HTMLElement>(`[${AUTOSPLIT_ATTR}]`).forEach((el) => {
 		const gid = el.getAttribute(AUTOSPLIT_ATTR) || "";
@@ -260,9 +395,10 @@ export const CreateInternalCorrespondence = ({
 	const [approverSearch, setApproverSearch] = useState("");
 	const [showCcField, setShowCcField] = useState(false);
 	const [sent, setSent] = useState(false);
-	const [letterType, setLetterType] = useState<LetterType | null>(null);
+	// letterType хранит КЛЮЧ типа документа (guzorish/ariza/…), не подпись
+	const [letterType, setLetterType] = useState<string | null>(null);
 	const [showLetterTypeDropdown, setShowLetterTypeDropdown] = useState(false);
-	const [importance, setImportance] = useState<ImportanceLevel>("medium");
+	const [importance, setImportance] = useState<ImportanceLevel>("normal");
 	const [showImportanceDropdown, setShowImportanceDropdown] = useState(false);
 	const [fontSize, setFontSize] = useState("14");
 	const [showFontSizeDropdown, setShowFontSizeDropdown] = useState(false);
@@ -270,6 +406,8 @@ export const CreateInternalCorrespondence = ({
 	const [showPreview, setShowPreview] = useState(false);
 	const [editorContent, setEditorContent] = useState<string>("");
 	const [pageCount, setPageCount] = useState(1);
+	// Индекс страницы, для которой показываем подтверждение удаления
+	const [pageToDelete, setPageToDelete] = useState<number | null>(null);
 
 	// Управление плавающим плейсхолдером ЭЦП ДО подписания
 	const [stampVisible, setStampVisible] = useState(false);
@@ -310,6 +448,38 @@ export const CreateInternalCorrespondence = ({
 		useToken: true,
 		params: searchParams,
 	});
+
+	// Справочники типов документа и приоритетов: подписи берём отсюда, не хардкодим
+	const { data: metaData } = useGetQuery({
+		url: ApiRoutes.GET_INTERNAL_META,
+		useToken: true,
+	});
+
+	// Опции типа письма: ключ+подпись из /meta, описание дополняем локально.
+	// До загрузки /meta используем фолбэк-константу.
+	const letterTypeOptions = useMemo(() => {
+		const metaTypes: MetaOption[] = metaData?.data?.document_types || [];
+		if (!metaTypes.length) return LETTER_TYPE_OPTIONS;
+		return metaTypes.map((t) => ({
+			value: t.key,
+			label: t.label,
+			desc: LETTER_TYPE_DESC[t.key] ?? "",
+		}));
+	}, [metaData]);
+
+	// Опции важности: ключ+подпись из /meta, стили (цвета/флажок) берём локально по ключу.
+	const importanceStyleByKey = useMemo(
+		() => Object.fromEntries(IMPORTANCE_OPTIONS.map((o) => [o.value, o])),
+		[],
+	);
+	const importanceOptions = useMemo(() => {
+		const metaPriorities: MetaOption[] = metaData?.data?.priorities || [];
+		if (!metaPriorities.length) return IMPORTANCE_OPTIONS;
+		return metaPriorities.map((p) => {
+			const style = importanceStyleByKey[p.key] ?? IMPORTANCE_OPTIONS[1];
+			return { ...style, value: p.key as ImportanceLevel, label: p.label };
+		});
+	}, [metaData, importanceStyleByKey]);
 
 	const { data: rawWorkflowData, refetch: refetchWorkflow } = useGetQuery({
 		url: id ? ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id)) : "",
@@ -709,7 +879,7 @@ export const CreateInternalCorrespondence = ({
 					approvals: approvers.map((a) => a.id),
 					signatures: finalSigner ? [finalSigner.id] : [],
 					document_type: letterType,
-					priority: importance === "medium" ? "normal" : importance,
+					priority: importance,
 				};
 
 				if (id) updateDraft(requestPayload);
@@ -788,16 +958,18 @@ export const CreateInternalCorrespondence = ({
   html, body { margin: 0; padding: 0; }
   body {
     font-family: "Times New Roman", serif;
-    font-size: 14px;
-    line-height: 2;
+    font-size: ${fontSize}px;
+    line-height: 1.8; /* как в редакторе */
     color: #1e293b;
     white-space: pre-wrap;
-    padding: 20mm;
+    /* поля как в редакторе: 72px / 80px при 96dpi */
+    padding: 19.05mm 21.17mm;
   }
   img { max-width: 100%; height: auto; }
   table { width: 100%; table-layout: fixed; border-collapse: collapse; }
   td, th { word-break: break-word; }
   [data-page-spacer] { display: none !important; }
+  [data-page-break] { break-after: page; page-break-after: always; height: 0; overflow: hidden; }
 </style>
 </head>
 <body>${content}</body>
@@ -830,7 +1002,7 @@ export const CreateInternalCorrespondence = ({
 			folder_id: typeof folder === "number" ? folder : undefined,
 			system_folder: typeof folder === "string" ? folder : undefined,
 			document_type: letterType,
-			priority: importance === "medium" ? "normal" : importance,
+			priority: importance,
 		};
 
 		if (id) updateDraft(requestPayload);
@@ -841,25 +1013,6 @@ export const CreateInternalCorrespondence = ({
 		editorRef.current?.focus();
 		document.execCommand(command, false, value);
 	}, []);
-
-	const handleEditorKeyDown = useCallback(
-		(e: React.KeyboardEvent<HTMLDivElement>) => {
-			if (e.key === "Tab") {
-				e.preventDefault();
-				const selection = window.getSelection();
-				if (!selection || selection.rangeCount === 0) return;
-				const range = selection.getRangeAt(0);
-				range.deleteContents();
-				const tabNode = document.createTextNode("\u00a0\u00a0\u00a0\u00a0");
-				range.insertNode(tabNode);
-				range.setStartAfter(tabNode);
-				range.setEndAfter(tabNode);
-				selection.removeAllRanges();
-				selection.addRange(range);
-			}
-		},
-		[],
-	);
 
 	useEffect(() => {
 		if (initialData?.item) {
@@ -872,14 +1025,8 @@ export const CreateInternalCorrespondence = ({
 			// срабатывает после пагинации и перезаписывает innerHTML, стирая
 			// распорки между страницами — текст «сползает» в зазор после обновления.
 
-			if (item.priority) {
-				const priorityMap: Record<string, ImportanceLevel> = {
-					normal: "medium",
-					high: "high",
-					low: "low",
-				};
-				setImportance(priorityMap[item.priority] || "medium");
-			}
+			// priority и document_type приходят уже в ключах бэкенда — кладём как есть
+			if (item.priority) setImportance(item.priority);
 			if (item.document_type) setLetterType(item.document_type);
 
 			if (item.recipients && Array.isArray(item.recipients)) {
@@ -1096,7 +1243,9 @@ export const CreateInternalCorrespondence = ({
 		let textMutated = false;
 
 		// 1. Убираем старые распорки и собираем ранее разрезанные блоки обратно
-		editor.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => n.remove());
+		editor.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => {
+			if (removeSpacerSafely(n)) textMutated = true;
+		});
 		const groups = new Map<string, HTMLElement[]>();
 		editor
 			.querySelectorAll<HTMLElement>(`[${AUTOSPLIT_ATTR}]`)
@@ -1121,8 +1270,12 @@ export const CreateInternalCorrespondence = ({
 			textMutated = true;
 		});
 
-		// Контент помещается на один лист — ничего не режем (бережём курсор/ввод)
-		if (editor.scrollHeight <= CONTENT_HEIGHT) {
+		// Контент помещается на один лист и нет ручных разрывов —
+		// ничего не режем (бережём курсор/ввод)
+		if (
+			editor.scrollHeight <= CONTENT_HEIGHT &&
+			!editor.querySelector(`[${PAGE_BREAK_ATTR}]`)
+		) {
 			if (textMutated) restoreCaretCharOffset(editor, caret);
 			return 1;
 		}
@@ -1166,6 +1319,17 @@ export const CreateInternalCorrespondence = ({
 			const block = editor.children[i] as HTMLElement;
 			if (block.hasAttribute(SPACER_ATTR)) {
 				i++;
+				continue;
+			}
+			// Ручной разрыв страницы: всё, что после него, начинается со следующего листа
+			if (block.hasAttribute(PAGE_BREAK_ATTR)) {
+				const top = block.offsetTop;
+				const page = Math.floor(top / PAGE_STRIDE);
+				editor.insertBefore(
+					makeSpacer((page + 1) * PAGE_STRIDE - top),
+					block.nextSibling,
+				);
+				i += 2; // сам разрыв + вставленная распорка
 				continue;
 			}
 			// Печать ЭЦП спозиционирована абсолютно (вне потока) — её нельзя
@@ -1259,6 +1423,288 @@ export const CreateInternalCorrespondence = ({
 	const handleEditorInput = useCallback(() => {
 		setEditorContent(getCleanEditorHtml());
 	}, [getCleanEditorHtml]);
+
+	// После ручной правки DOM (слияние через границу, вставка разрыва) сразу
+	// перепагинируем синхронно — не дожидаясь rAF-эффекта — и синхронизируем стейт.
+	// Важно: setEditorContent может не измениться (clean-HTML тот же), поэтому
+	// одной подписки на editorContent здесь недостаточно.
+	const syncEditorAfterDomEdit = useCallback(() => {
+		setPageCount(paginateEditor());
+		setEditorContent(getCleanEditorHtml());
+	}, [paginateEditor, getCleanEditorHtml]);
+
+	// Tab — четыре неразрывных пробела. Backspace/Delete на границе страниц —
+	// управляемое слияние блоков: дефолтное поведение браузера рядом с
+	// contenteditable=false распоркой прыгает курсором и теряет текст.
+	const handleEditorKeyDown = useCallback(
+		(e: React.KeyboardEvent<HTMLDivElement>) => {
+			if (e.key === "Tab") {
+				e.preventDefault();
+				const selection = window.getSelection();
+				if (!selection || selection.rangeCount === 0) return;
+				const range = selection.getRangeAt(0);
+				range.deleteContents();
+				const tabNode = document.createTextNode("    ");
+				range.insertNode(tabNode);
+				range.setStartAfter(tabNode);
+				range.setEndAfter(tabNode);
+				selection.removeAllRanges();
+				selection.addRange(range);
+				return;
+			}
+
+			if (e.key !== "Backspace" && e.key !== "Delete") return;
+			const editor = editorRef.current;
+			if (!editor) return;
+			const sel = window.getSelection();
+			if (!sel || sel.rangeCount === 0 || !sel.isCollapsed) return;
+			const range = sel.getRangeAt(0);
+			if (!editor.contains(range.startContainer)) return;
+			const block = topLevelBlockOf(editor, range.startContainer);
+			if (!block) return;
+
+			const setCaret = (node: Node, offset: number) => {
+				const r = document.createRange();
+				r.setStart(node, offset);
+				r.collapse(true);
+				sel.removeAllRanges();
+				sel.addRange(r);
+			};
+
+			// Служебные узлы (распорки, печать ЭЦП, пустой текст) рядом с блоком
+			const collectBoundary = (
+				start: ChildNode | null,
+				dir: "prev" | "next",
+			) => {
+				const spacers: ChildNode[] = [];
+				let n = start;
+				while (
+					n &&
+					(isSpacerNode(n) ||
+						isStampNode(n) ||
+						(n.nodeType === Node.TEXT_NODE && !(n.textContent || "").trim()))
+				) {
+					if (isSpacerNode(n)) spacers.push(n);
+					n = dir === "prev" ? n.previousSibling : n.nextSibling;
+				}
+				return { spacers, stop: n };
+			};
+
+			if (e.key === "Backspace") {
+				if (!caretAtBlockStart(block, range)) return;
+				const { spacers, stop } = collectBoundary(
+					block.previousSibling,
+					"prev",
+				);
+
+				// Перед блоком ручной разрыв — Backspace удаляет его; контент
+				// возвращается на предыдущую страницу, блоки не сливаются (как в Word)
+				if (isPageBreakNode(stop)) {
+					e.preventDefault();
+					stop.remove();
+					spacers.forEach((s) => s.remove());
+					syncEditorAfterDomEdit();
+					return;
+				}
+
+				if (!spacers.length) return; // обычный Backspace внутри страницы
+
+				e.preventDefault();
+				spacers.forEach((s) => s.remove());
+				if (stop && stop.nodeType === Node.ELEMENT_NODE) {
+					const target = stop as HTMLElement;
+					if (target.tagName === "HR") {
+						target.remove();
+					} else {
+						const pos = mergeAcrossBoundary(target, block);
+						if (pos) setCaret(pos.node, pos.offset);
+					}
+				}
+				syncEditorAfterDomEdit();
+				return;
+			}
+
+			// Delete в конце блока перед границей страницы
+			if (!caretAtBlockEnd(block, range)) return;
+			const { spacers, stop } = collectBoundary(block.nextSibling, "next");
+
+			if (isPageBreakNode(stop)) {
+				e.preventDefault();
+				stop.remove();
+				spacers.forEach((s) => s.remove());
+				syncEditorAfterDomEdit();
+				return;
+			}
+
+			if (!spacers.length) return;
+
+			e.preventDefault();
+			spacers.forEach((s) => s.remove());
+			if (stop && stop.nodeType === Node.ELEMENT_NODE) {
+				const nextBlock = stop as HTMLElement;
+				if (nextBlock.tagName === "HR") {
+					nextBlock.remove();
+				} else {
+					const pos = mergeAcrossBoundary(block, nextBlock);
+					if (pos) setCaret(pos.node, pos.offset);
+				}
+			}
+			syncEditorAfterDomEdit();
+		},
+		[syncEditorAfterDomEdit],
+	);
+
+	// Ручной разрыв страницы: текст после курсора начинается с нового листа.
+	// Сам маркер невидим (нулевая высота), break-after — для печати/экспорта.
+	const insertPageBreak = useCallback(() => {
+		const editor = editorRef.current;
+		// contentEditable=false означает режим «только чтение» (подписано/старая версия)
+		if (!editor || !editor.isContentEditable) return;
+		editor.focus();
+
+		const breakEl = document.createElement("div");
+		breakEl.setAttribute(PAGE_BREAK_ATTR, "1");
+		breakEl.setAttribute("contenteditable", "false");
+		breakEl.setAttribute("aria-hidden", "true");
+		breakEl.style.cssText =
+			"height:0;line-height:0;font-size:0;break-after:page;page-break-after:always;";
+
+		const sel = window.getSelection();
+		const range =
+			sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)
+				? sel.getRangeAt(0)
+				: null;
+		const block = range ? topLevelBlockOf(editor, range.startContainer) : null;
+
+		const makeEmptyPara = () => {
+			const p = document.createElement("div");
+			p.appendChild(document.createElement("br"));
+			return p;
+		};
+
+		let caretNode: Node;
+
+		if (range && block && PAGE_SPLITTABLE_TAGS.has(block.tagName)) {
+			// Блок с курсором делим на «до/после»: хвост уезжает на новую страницу.
+			// Если блок был частью авторазреза — расформировываем группу, иначе
+			// очистка HTML склеит куски обратно поверх ручного разрыва.
+			const gid = block.getAttribute(AUTOSPLIT_ATTR);
+			if (gid) {
+				editor
+					.querySelectorAll(`[${AUTOSPLIT_ATTR}="${gid}"]`)
+					.forEach((el) => el.removeAttribute(AUTOSPLIT_ATTR));
+			}
+			const tail = document.createRange();
+			tail.setStart(range.endContainer, range.endOffset);
+			tail.setEnd(block, block.childNodes.length);
+			const frag = tail.extractContents();
+			const next = block.cloneNode(false) as HTMLElement;
+			next.removeAttribute(AUTOSPLIT_ATTR);
+			next.appendChild(frag);
+			if (!(next.textContent || "").length && !next.querySelector("br,img")) {
+				next.appendChild(document.createElement("br"));
+			}
+			if (!(block.textContent || "").length && !block.querySelector("br,img")) {
+				block.appendChild(document.createElement("br"));
+			}
+			block.after(breakEl, next);
+			caretNode = next;
+		} else if (block) {
+			// Списки/таблицы не делим — разрыв после всего блока + пустой абзац
+			const para = makeEmptyPara();
+			block.after(breakEl, para);
+			caretNode = para;
+		} else if (range) {
+			// «Голый» текст на верхнем уровне (до первого Enter) — делим текстовый узел
+			let topNode: Node | null = range.startContainer;
+			while (topNode && topNode.parentNode !== editor) topNode = topNode.parentNode;
+			if (topNode && topNode.nodeType === Node.TEXT_NODE) {
+				const textNode = topNode as Text;
+				const splitAt =
+					range.startContainer === textNode ? range.startOffset : textNode.length;
+				const tailText = textNode.splitText(splitAt);
+				textNode.after(breakEl);
+				if (tailText.length === 0) {
+					tailText.remove();
+					const para = makeEmptyPara();
+					breakEl.after(para);
+					caretNode = para;
+				} else {
+					caretNode = tailText;
+				}
+			} else {
+				const para = makeEmptyPara();
+				editor.append(breakEl, para);
+				caretNode = para;
+			}
+		} else {
+			const para = makeEmptyPara();
+			editor.append(breakEl, para);
+			caretNode = para;
+		}
+
+		const r = document.createRange();
+		r.setStart(caretNode, 0);
+		r.collapse(true);
+		sel?.removeAllRanges();
+		sel?.addRange(r);
+
+		syncEditorAfterDomEdit();
+	}, [syncEditorAfterDomEdit]);
+
+	// Удаление конкретной страницы: убираем верхнеуровневые блоки, визуально
+	// расположенные на ней, плюс ручной разрыв, который её породил. Так не нужно
+	// вручную стирать весь текст. Прямое редактирование DOM (как разрыв/слияние)
+	// в стек Undo браузера не пишется — потому и подтверждение перед удалением.
+	const deletePage = useCallback(
+		(pageIndex: number) => {
+			const editor = editorRef.current;
+			setPageToDelete(null);
+			if (!editor || !editor.isContentEditable) return;
+
+			const children = Array.from(editor.children);
+			const removals: Element[] = [];
+			let firstIdx = -1;
+
+			children.forEach((child, idx) => {
+				if (isSpacerNode(child)) return; // распорки пересоздаются при пагинации
+				// печать ЭЦП и прочие абсолютные элементы не трогаем
+				if (isStampNode(child) || getComputedStyle(child).position === "absolute")
+					return;
+				const el = child as HTMLElement;
+				const page = Math.floor((el.offsetTop + el.offsetHeight / 2) / PAGE_STRIDE);
+				if (page === pageIndex) {
+					removals.push(child);
+					if (firstIdx === -1) firstIdx = idx;
+				}
+			});
+
+			// Ручной разрыв, создавший эту страницу, удаляем вместе с её содержимым
+			if (firstIdx > 0) {
+				let j = firstIdx - 1;
+				while (j >= 0 && isSpacerNode(children[j])) j--;
+				if (j >= 0 && isPageBreakNode(children[j])) removals.push(children[j]);
+			}
+
+			if (!removals.length) return;
+			removals.forEach((n) => n.remove());
+
+			// Не оставляем редактор полностью пустым — иначе ломаются курсор/плейсхолдер
+			if (!editor.textContent?.trim() && !editor.querySelector("img,table,br")) {
+				editor.innerHTML = "<div><br></div>";
+			}
+
+			syncEditorAfterDomEdit();
+		},
+		[PAGE_STRIDE, syncEditorAfterDomEdit],
+	);
+
+	// Закрываем подтверждение удаления, если страниц стало меньше
+	useEffect(() => {
+		if (pageToDelete !== null && pageToDelete >= pageCount) {
+			setPageToDelete(null);
+		}
+	}, [pageCount, pageToDelete]);
 
 	// Очистка HTML при вставке из Word / PDF / других источников:
 	// убираем стили, мешающие переносу (nowrap, фиксированная ширина и т.п.),
@@ -1533,9 +1979,10 @@ export const CreateInternalCorrespondence = ({
 		window.addEventListener("mouseup", onMouseUp);
 	};
 
-	const selectedImportance = IMPORTANCE_OPTIONS.find(
-		(o) => o.value === importance,
-	)!;
+	const selectedImportance =
+		importanceOptions.find((o) => o.value === importance) ??
+		importanceOptions[0] ??
+		IMPORTANCE_OPTIONS[1];
 
 	const isSigned = rawWorkflowData?.data?.signatures?.some(
 		(sig: any) => sig.status === "signed",
@@ -1662,6 +2109,7 @@ export const CreateInternalCorrespondence = ({
 					subject={subject}
 					editorHtml={editorContent}
 					orientation={orientation}
+					fontSize={Number(fontSize) || 14}
 					onClose={() => setShowPreview(false)}
 					stampVisible={stampVisible && !!finalSigner?.dsApplied}
 					stampPos={stampPos}
@@ -1822,11 +2270,15 @@ export const CreateInternalCorrespondence = ({
 												/>
 												{letterType ? (
 													<span>
-														<span className="font-semibold">{letterType}</span>
+														<span className="font-semibold">
+															{letterTypeOptions.find(
+																(o) => o.value === letterType,
+															)?.label ?? letterType}
+														</span>
 														<span className="text-indigo-500 text-xs ml-2">
 															—{" "}
 															{
-																LETTER_TYPE_OPTIONS.find(
+																letterTypeOptions.find(
 																	(o) => o.value === letterType,
 																)?.desc
 															}
@@ -1852,7 +2304,7 @@ export const CreateInternalCorrespondence = ({
 													exit={{ opacity: 0, y: -6 }}
 													className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden py-1"
 												>
-													{LETTER_TYPE_OPTIONS.map((opt) => (
+													{letterTypeOptions.map((opt) => (
 														<button
 															key={opt.value}
 															onMouseDown={() => {
@@ -1913,7 +2365,7 @@ export const CreateInternalCorrespondence = ({
 													exit={{ opacity: 0, y: -6, scale: 0.97 }}
 													className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden py-1 min-w-[220px]"
 												>
-													{IMPORTANCE_OPTIONS.map((opt) => (
+													{importanceOptions.map((opt) => (
 														<button
 															key={opt.value}
 															onMouseDown={() => {
@@ -2096,6 +2548,60 @@ export const CreateInternalCorrespondence = ({
 										value={subject}
 										onChange={(e) => setSubject(e.target.value)}
 									/>
+								</div>
+							</div>
+
+							{/* Вложения — в шапке формы, чтобы не скроллить многостраничный редактор */}
+							<div className="px-6 py-4 border-b border-slate-100">
+								<div className="flex items-start gap-3">
+									<label className="text-sm font-semibold text-slate-500 pt-1.5 w-20 flex-shrink-0">
+										Вложения
+									</label>
+									<div className="flex-1 min-w-0 flex flex-wrap items-center gap-2">
+										{attachments.map((file) => (
+											<div
+												key={file.id}
+												className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+											>
+												<FileTextIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />
+												<div className="min-w-0">
+													<p className="font-semibold text-slate-800 truncate max-w-[140px]">
+														{file.name}
+													</p>
+													<p className="text-slate-400">{file.size}</p>
+												</div>
+												<button
+													onClick={() =>
+														setAttachments((prev) =>
+															prev.filter((f) => f.id !== file.id),
+														)
+													}
+													className="text-slate-300 hover:text-rose-400 transition-colors flex-shrink-0"
+												>
+													<X size={12} />
+												</button>
+											</div>
+										))}
+										<button
+											onClick={() => fileInputRef.current?.click()}
+											className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
+										>
+											<Paperclip size={12} />
+											<span>Прикрепить файл</span>
+											{attachments.length > 0 && (
+												<span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-blue-600 text-white">
+													{attachments.length}
+												</span>
+											)}
+										</button>
+										<input
+											ref={fileInputRef}
+											type="file"
+											multiple
+											className="hidden"
+											onChange={handleFileChange}
+										/>
+									</div>
 								</div>
 							</div>
 
@@ -2295,6 +2801,17 @@ export const CreateInternalCorrespondence = ({
 								<button
 									onMouseDown={(e) => {
 										e.preventDefault();
+										insertPageBreak();
+									}}
+									title="Разрыв страницы: текст после курсора начнётся с нового листа"
+									className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-colors border flex-shrink-0 bg-white border-slate-200 text-slate-600 hover:bg-slate-100"
+								>
+									<FilePlus2 size={14} />
+									<span>Новая страница</span>
+								</button>
+								<button
+									onMouseDown={(e) => {
+										e.preventDefault();
 										setOrientation((o) =>
 											o === "portrait" ? "landscape" : "portrait",
 										);
@@ -2314,7 +2831,7 @@ export const CreateInternalCorrespondence = ({
 							</div>
 
 							<div
-								className="bg-[#E8EAED] overflow-auto"
+								className="bg-[#E8EAED] overflow-auto rounded-b-2xl"
 								style={{ minHeight: 420 }}
 							>
 								<div className="py-8 px-8 flex justify-center">
@@ -2364,6 +2881,48 @@ export const CreateInternalCorrespondence = ({
 												>
 													Страница {index + 1} из {pageCount}
 												</span>
+
+												{/* Удаление страницы — без необходимости стирать весь текст вручную.
+													Видно только при нескольких страницах и в режиме редактирования. */}
+												{!isReadOnly && pageCount > 1 && (
+													<div
+														contentEditable={false}
+														className="absolute top-3 right-3 z-[45]"
+														style={{ fontFamily: "system-ui, sans-serif" }}
+														onMouseDown={(e) => e.stopPropagation()}
+													>
+														{pageToDelete === index ? (
+															<div className="flex items-center gap-1.5 bg-white border border-rose-200 rounded-xl px-2 py-1.5 shadow-lg">
+																<span className="text-xs text-slate-600 whitespace-nowrap">
+																	Удалить страницу {index + 1}?
+																</span>
+																<button
+																	type="button"
+																	onClick={() => deletePage(index)}
+																	className="px-2 py-1 text-xs font-semibold text-white bg-rose-500 rounded-lg hover:bg-rose-600 transition-colors"
+																>
+																	Удалить
+																</button>
+																<button
+																	type="button"
+																	onClick={() => setPageToDelete(null)}
+																	className="px-2 py-1 text-xs font-semibold text-slate-500 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+																>
+																	Отмена
+																</button>
+															</div>
+														) : (
+															<button
+																type="button"
+																title={`Удалить страницу ${index + 1}`}
+																onClick={() => setPageToDelete(index)}
+																className="flex items-center justify-center w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 shadow-sm transition-colors"
+															>
+																<Trash2 size={14} />
+															</button>
+														)}
+													</div>
+												)}
 											</div>
 										))}
 										<div
@@ -2427,61 +2986,6 @@ export const CreateInternalCorrespondence = ({
 								</div>
 							</div>
 
-							<div className="px-6 py-4 border-t border-slate-100 bg-white">
-								<div className="flex items-center justify-between mb-3">
-									<p className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-										<Paperclip size={12} />
-										<span>Вложения</span>
-										{attachments.length > 0 && (
-											<span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-blue-600 text-white">
-												{attachments.length}
-											</span>
-										)}
-									</p>
-									<button
-										onClick={() => fileInputRef.current?.click()}
-										className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
-									>
-										<Plus size={12} />
-										<span>Прикрепить файл</span>
-									</button>
-									<input
-										ref={fileInputRef}
-										type="file"
-										multiple
-										className="hidden"
-										onChange={handleFileChange}
-									/>
-								</div>
-								{attachments.length > 0 && (
-									<div className="flex flex-wrap gap-2">
-										{attachments.map((file) => (
-											<div
-												key={file.id}
-												className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-											>
-												<FileTextIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />
-												<div className="min-w-0">
-													<p className="font-semibold text-slate-800 truncate max-w-[120px]">
-														{file.name}
-													</p>
-													<p className="text-slate-400">{file.size}</p>
-												</div>
-												<button
-													onClick={() =>
-														setAttachments((prev) =>
-															prev.filter((f) => f.id !== file.id),
-														)
-													}
-													className="text-slate-300 hover:text-rose-400 transition-colors flex-shrink-0"
-												>
-													<X size={12} />
-												</button>
-											</div>
-										))}
-									</div>
-								)}
-							</div>
 						</div>
 					</div>
 
