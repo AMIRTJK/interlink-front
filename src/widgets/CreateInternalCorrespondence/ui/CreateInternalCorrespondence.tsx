@@ -1315,13 +1315,116 @@ export const CreateInternalCorrespondence = ({
     const editor = editorRef.current;
     if (!editor) return 1;
 
-    const caret = getCaretCharOffset(editor);
+    // --- Функция структурного сохранения курсора ---
+    const saveCaretStructure = () => {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0 || !editor.contains(sel.anchorNode))
+        return null;
+
+      const range = sel.getRangeAt(0);
+      const node = range.startContainer;
+      const offset = range.startOffset;
+
+      if (node === editor) {
+        return { blockIndex: 0, path: [], offset: 0 };
+      }
+
+      // Находим родительский блок верхнего уровня (прямой потомок editor)
+      let topBlock = node;
+      while (topBlock && topBlock.parentNode !== editor) {
+        topBlock = topBlock.parentNode!;
+      }
+      if (!topBlock) return null;
+
+      // Считаем индекс этого блока среди всех детей, игнорируя распорки spacer
+      const children = Array.from(editor.children);
+      let blockIndex = 0;
+      for (const child of children) {
+        if (child === topBlock) break;
+        if (!child.hasAttribute(SPACER_ATTR)) {
+          blockIndex++;
+        }
+      }
+
+      // Запоминаем путь от topBlock до целевого узла (node)
+      const path: number[] = [];
+      let current = node;
+      while (current !== topBlock) {
+        const parent = current.parentNode;
+        if (!parent) break;
+        const index = Array.from(parent.childNodes).indexOf(
+          current as ChildNode,
+        );
+        path.unshift(index);
+        current = parent;
+      }
+
+      return { blockIndex, path, offset };
+    };
+
+    // --- Функция структурного восстановления курсора ---
+    const restoreCaretStructure = (snapshot: any) => {
+      if (!snapshot) return;
+
+      const children = Array.from(editor.children);
+      let currentBlock: Element | null = null;
+      let nonSpacerCount = 0;
+
+      // Ищем блок по индексу, пропуская сервисные распорки spacers
+      for (const child of children) {
+        if (child.hasAttribute(SPACER_ATTR)) continue;
+        if (nonSpacerCount === snapshot.blockIndex) {
+          currentBlock = child;
+          break;
+        }
+        nonSpacerCount++;
+      }
+
+      if (!currentBlock) {
+        const validBlocks = children.filter(
+          (c) => !c.hasAttribute(SPACER_ATTR),
+        );
+        currentBlock = validBlocks[validBlocks.length - 1] || editor;
+      }
+
+      // Спускаемся по сохраненному пути дерева DOM к нужному узлу
+      let targetNode: Node = currentBlock;
+      for (const idx of snapshot.path) {
+        if (targetNode.childNodes[idx]) {
+          targetNode = targetNode.childNodes[idx];
+        } else {
+          targetNode = targetNode.lastChild || targetNode;
+          break;
+        }
+      }
+
+      try {
+        const range = document.createRange();
+        const maxOffset =
+          targetNode.nodeType === Node.TEXT_NODE
+            ? targetNode.textContent?.length || 0
+            : targetNode.childNodes.length;
+
+        range.setStart(targetNode, Math.min(snapshot.offset, maxOffset));
+        range.collapse(true);
+
+        const sel = window.getSelection();
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+      } catch (e) {
+        console.error("Ошибка восстановления каретки:", e);
+      }
+    };
+
+    // Сохраняем положение курсора через структуру
+    const caretSnapshot = saveCaretStructure();
     let textMutated = false;
 
     // 1. Убираем старые распорки и собираем ранее разрезанные блоки обратно
     editor.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => {
       if (removeSpacerSafely(n)) textMutated = true;
     });
+
     const groups = new Map<string, HTMLElement[]>();
     editor
       .querySelectorAll<HTMLElement>(`[${AUTOSPLIT_ATTR}]`)
@@ -1346,13 +1449,12 @@ export const CreateInternalCorrespondence = ({
       textMutated = true;
     });
 
-    // Контент помещается на один лист и нет ручных разрывов —
-    // ничего не режем (бережём курсор/ввод)
+    // Контент помещается на один лист и нет ручных разрывов
     if (
       editor.scrollHeight <= CONTENT_HEIGHT &&
       !editor.querySelector(`[${PAGE_BREAK_ATTR}]`)
     ) {
-      if (textMutated) restoreCaretCharOffset(editor, caret);
+      if (textMutated) restoreCaretStructure(caretSnapshot);
       return 1;
     }
 
@@ -1397,7 +1499,6 @@ export const CreateInternalCorrespondence = ({
         i++;
         continue;
       }
-      // Ручной разрыв страницы: всё, что после него, начинается со следующего листа
       if (block.hasAttribute(PAGE_BREAK_ATTR)) {
         const top = block.offsetTop;
         const page = Math.floor(top / PAGE_STRIDE);
@@ -1405,11 +1506,9 @@ export const CreateInternalCorrespondence = ({
           makeSpacer((page + 1) * PAGE_STRIDE - top),
           block.nextSibling,
         );
-        i += 2; // сам разрыв + вставленная распорка
+        i += 2;
         continue;
       }
-      // Печать ЭЦП спозиционирована абсолютно (вне потока) — её нельзя
-      // переносить/резать (иначе textContent затрёт внутреннюю вёрстку).
       if (
         block.hasAttribute("data-signature-stamp") ||
         getComputedStyle(block).position === "absolute"
@@ -1434,16 +1533,13 @@ export const CreateInternalCorrespondence = ({
         !EDITOR_ATOMIC_TAGS.has(tag) &&
         (block.textContent || "").trim().length > 0;
 
-      // 3a. Блок помещается на лист целиком — переносим его на следующий
       if (h <= CONTENT_HEIGHT && top > pageStart + 2) {
         editor.insertBefore(makeSpacer((page + 1) * PAGE_STRIDE - top), block);
         i++;
         continue;
       }
 
-      // 3b. Блок выше листа и его можно резать
       if (h > CONTENT_HEIGHT && splittable) {
-        // Сначала поставим блок на начало листа, если он висит ниже
         if (top > pageStart + 2) {
           editor.insertBefore(
             makeSpacer((page + 1) * PAGE_STRIDE - top),
@@ -1452,7 +1548,6 @@ export const CreateInternalCorrespondence = ({
           i++;
           continue;
         }
-        // Бинарным поиском оставляем в блоке столько символов, сколько влезает
         textMutated = true;
         const full = block.textContent || "";
         let lo = 1;
@@ -1488,15 +1583,16 @@ export const CreateInternalCorrespondence = ({
         continue;
       }
 
-      // 3c. Неразрезаемый блок (таблица/картинка) — оставляем как есть
       i++;
     }
 
-    if (textMutated) restoreCaretCharOffset(editor, caret);
+    // Восстанавливаем позицию курсора на основе структуры DOM-узлов
+    if (textMutated || caretSnapshot) {
+      restoreCaretStructure(caretSnapshot);
+    }
 
     return Math.max(1, Math.ceil(editor.scrollHeight / PAGE_STRIDE));
   }, [CONTENT_HEIGHT, PAGE_STRIDE]);
-
   const handleEditorInput = useCallback(() => {
     setEditorContent(getCleanEditorHtml());
   }, [getCleanEditorHtml]);
