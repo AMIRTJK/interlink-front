@@ -15,8 +15,11 @@ import { DSStamp } from "./DSStamp";
 const PAGE_PAD_H = 80;
 const PAGE_PAD_V = 72;
 const PAGE_GAP = 32;
+// ВАЖНО: должно совпадать с className холста редактора в
+// CreateInternalCorrespondence (таблицы, рамки, отступы), иначе предпросмотр
+// будет отличаться от того, что видно в редакторе.
 const CONTENT_CLASS =
-  "max-w-full [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_div]:min-h-[1.8em]";
+  "max-w-full [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_div:not([data-signature-stamp])]:min-h-[1.8em]";
 
 const contentStyle = (fontSize: number): React.CSSProperties => ({
   fontFamily: "Times New Roman, serif",
@@ -61,6 +64,8 @@ const BLOCK_TAGS = new Set([
 
 export const PreviewModal = ({
   editorHtml,
+  pages: providedPages,
+  stamp: providedStamp,
   orientation,
   fontSize = 14,
   onClose,
@@ -74,6 +79,17 @@ export const PreviewModal = ({
 }: {
   subject: string;
   editorHtml: string;
+  // Готовые страницы из разложенного редактора. Если переданы — используются
+  // напрямую (предпросмотр совпадает с холстом), иначе модалка считает сама.
+  pages?: string[];
+  // Штамп ЭЦП из той же live-DOM, что и pages (страница/координаты).
+  stamp?: {
+    pageIndex: number;
+    x: number;
+    y: number;
+    width: string;
+    html?: string;
+  } | null;
   orientation: PageOrientation;
   fontSize?: number;
   onClose: () => void;
@@ -97,12 +113,22 @@ export const PreviewModal = ({
   const [zoom, setZoom] = useState(1);
   const [currentPage, setCurrentPage] = useState(0);
 
+  // Стейт для унифицированного штампа ЭЦП (как для плейсхолдера, так и для вшитого)
+  const [activeStamp, setActiveStamp] = useState<{
+    pageIndex: number;
+    x: number;
+    y: number;
+    width: string;
+    html?: string;
+  } | null>(null);
+
   useLayoutEffect(() => {
     const measurer = measureRef.current;
     if (!measurer) return;
 
     if (!editorHtml || !editorHtml.replace(/<[^>]*>/g, "").trim()) {
       setPages([]);
+      setActiveStamp(null);
       return;
     }
 
@@ -110,6 +136,62 @@ export const PreviewModal = ({
     source.innerHTML = editorHtml;
     source.querySelectorAll("[data-page-spacer]").forEach((n) => n.remove());
 
+    const PAGE_STRIDE = pageHeight + PAGE_GAP;
+    let detectedStamp = null;
+
+    // 1. Ищем и изолируем встроенный в HTML штамп ЭЦП (если документ уже подписан)
+    const stampNode = source.querySelector<HTMLElement>(
+      "[data-signature-stamp='true']",
+    );
+    if (stampNode) {
+      const left = parseFloat(stampNode.style.left) || 0;
+      const top = parseFloat(stampNode.style.top) || 0;
+      const width = stampNode.style.width || "320px";
+
+      const pageIndex = Math.max(0, Math.floor(top / PAGE_STRIDE));
+      const localY = top - pageIndex * PAGE_STRIDE;
+
+      detectedStamp = {
+        pageIndex,
+        x: left,
+        y: localY,
+        width,
+        html: stampNode.innerHTML,
+      };
+      stampNode.remove(); // Вырезаем из потока текста, чтобы не ломать пагинацию страниц
+    }
+
+    // 2. Если вшитого штампа нет, но активен плавающий плейсхолдер ЭЦП до подписания
+    if (!detectedStamp && stampVisible) {
+      const pageIndex = Math.max(0, Math.floor(stampPos.y / PAGE_STRIDE));
+      const localY = stampPos.y - pageIndex * PAGE_STRIDE;
+
+      detectedStamp = {
+        pageIndex,
+        x: stampPos.x,
+        y: localY,
+        width:
+          typeof stampSize.width === "number"
+            ? `${stampSize.width}px`
+            : stampSize.width,
+      };
+    }
+
+    setActiveStamp(detectedStamp);
+
+    // Если страницы уже разложены редактором — используем их как есть, чтобы
+    // предпросмотр был визуально идентичен холсту. Собственную разбивку ниже
+    // оставляем как запасной вариант (когда pages не переданы).
+    if (providedPages && providedPages.length) {
+      // Штамп берём из того же источника, что и страницы — гарантированно
+      // совпадает с холстом (и виден на своей странице).
+      setActiveStamp(providedStamp ?? null);
+      setPages(providedPages);
+      setCurrentPage(0);
+      return;
+    }
+
+    // Разделение контента на страницы
     const blocks: HTMLElement[] = [];
     let inlineBuf: Node[] = [];
     const flushInline = () => {
@@ -201,14 +283,27 @@ export const PreviewModal = ({
     }
 
     flush();
-    setPages(result.length ? result : [editorHtml]);
+    setPages(result.length ? result : [source.innerHTML]);
     setCurrentPage(0);
-  }, [editorHtml, contentHeight, contentWidth, orientation, fontSize]);
+  }, [
+    editorHtml,
+    providedPages,
+    providedStamp,
+    contentHeight,
+    contentWidth,
+    orientation,
+    fontSize,
+    stampVisible,
+    stampPos,
+    stampSize,
+  ]);
 
   const sheets = pages.length ? pages : [""];
+  // Готовые страницы из редактора отрисовываем как есть (блоки спозиционированы
+  // абсолютно), без собственных полей/перетекания.
+  const usingProvidedPages = !!(providedPages && providedPages.length);
 
   const zoomToFit = () => {
-    // Высота контейнера за вычетом хедера и пагинации
     const availableHeight = window.innerHeight - 160;
     const fitZoom = availableHeight / pageHeight;
     setZoom(Math.max(0.4, Math.min(1.5, +fitZoom.toFixed(2))));
@@ -237,35 +332,8 @@ export const PreviewModal = ({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose, sheets.length]);
 
-  const stampPageIndex = Math.max(0, Math.floor(stampPos.y / pageHeight));
-  const stampLocalY = stampPos.y - stampPageIndex * pageHeight;
-
-  const renderStamp = (pageIndex: number) =>
-    stampVisible && pageIndex === stampPageIndex ? (
-      <div
-        style={{
-          position: "absolute",
-          left: stampPos.x,
-          top: stampLocalY,
-          width: stampSize.width,
-          height: stampSize.height === "auto" ? undefined : stampSize.height,
-          overflow: "hidden",
-          pointerEvents: "none",
-          zIndex: 2,
-        }}
-      >
-        <DSStamp
-          name={stampSignerName}
-          certSerial={stampCertSerial}
-          signedAt={stampSignedAt}
-          validUntil={stampValidUntil}
-        />
-      </div>
-    ) : null;
-
   return (
     <AnimatePresence>
-      {/* Главный контейнер модалки теперь СТРОГО overflow-hidden, чтобы убрать уродливый правый внешний скролл */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -273,7 +341,7 @@ export const PreviewModal = ({
         className="fixed inset-0 z-[9999] flex flex-col bg-slate-700/80 backdrop-blur-sm select-none overflow-hidden h-screen w-screen"
         onClick={onClose}
       >
-        {/* Хедер */}
+        {/* Хедер модального окна */}
         <div
           className="flex-shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-slate-800 border-b border-slate-600 h-16"
           onClick={(e) => e.stopPropagation()}
@@ -338,18 +406,15 @@ export const PreviewModal = ({
           </div>
         </div>
 
-        {/* Центральная рабочая область */}
+        {/* Рабочая область */}
         <div
           className="flex-1 flex flex-col justify-between items-center py-4 overflow-hidden bg-slate-900/10"
           onClick={onClose}
         >
-          {/* ОБЛАСТЬ СКРОЛЛА: При зуме >100% скроллбары будут появляться ТОЛЬКО внутри этого контейнера */}
           <div
             className="flex-1 w-full overflow-auto px-4 py-4 flex items-start justify-center"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Обертка для корректного расчета скроллбаров при transform: scale. 
-                Мы даем контейнеру физические размеры страницы, чтобы браузер знал, когда включать скролл */}
             <div
               style={{
                 width: pageWidth,
@@ -357,7 +422,6 @@ export const PreviewModal = ({
                 transform: `scale(${zoom})`,
                 transformOrigin: "top center",
                 transition: "transform 0.1s ease-out",
-                // Компенсируем маргины, чтобы при сильном зуме нижняя часть страницы не обрезалась
                 marginBottom: zoom > 1 ? `${pageHeight * (zoom - 1)}px` : 0,
                 marginRight: zoom > 1 ? `${(pageWidth * (zoom - 1)) / 2}px` : 0,
                 marginLeft: zoom > 1 ? `${(pageWidth * (zoom - 1)) / 2}px` : 0,
@@ -371,12 +435,29 @@ export const PreviewModal = ({
                 transition={{ duration: 0.15 }}
                 className="bg-white shadow-2xl border border-slate-300 w-full h-full"
                 style={{
-                  padding: `${PAGE_PAD_V}px ${PAGE_PAD_H}px`,
+                  // В режиме готовых страниц блоки спозиционированы абсолютно по
+                  // координатам холста — поля уже учтены, padding не нужен.
+                  padding: usingProvidedPages
+                    ? 0
+                    : `${PAGE_PAD_V}px ${PAGE_PAD_H}px`,
                   position: "relative",
                   boxSizing: "border-box",
+                  overflow: "hidden",
                 }}
               >
-                {sheets[currentPage] ? (
+                {usingProvidedPages ? (
+                  <div
+                    className={CONTENT_CLASS}
+                    style={{
+                      ...CONTENT_STYLE,
+                      position: "absolute",
+                      inset: 0,
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: sheets[currentPage] || "",
+                    }}
+                  />
+                ) : sheets[currentPage] ? (
                   <div
                     className={CONTENT_CLASS}
                     style={{ ...CONTENT_STYLE, height: "100%" }}
@@ -394,12 +475,39 @@ export const PreviewModal = ({
                   </p>
                 )}
 
-                {renderStamp(currentPage)}
+                {/* Единый рендеринг штампа ЭЦП на правильной странице предпросмотра */}
+                {activeStamp && activeStamp.pageIndex === currentPage && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: PAGE_PAD_H + activeStamp.x,
+                      top: PAGE_PAD_V + activeStamp.y,
+                      width: activeStamp.width,
+                      height: "auto",
+                      overflow: "hidden",
+                      pointerEvents: "none",
+                      zIndex: 50,
+                    }}
+                  >
+                    {activeStamp.html ? (
+                      <div
+                        dangerouslySetInnerHTML={{ __html: activeStamp.html }}
+                      />
+                    ) : (
+                      <DSStamp
+                        name={stampSignerName}
+                        certSerial={stampCertSerial}
+                        signedAt={stampSignedAt}
+                        validUntil={stampValidUntil}
+                      />
+                    )}
+                  </div>
+                )}
               </motion.div>
             </div>
           </div>
 
-          {/* Панель навигации (Пагинация) */}
+          {/* Пагинация */}
           <div
             className="flex-shrink-0 flex items-center gap-4 bg-slate-800 border border-slate-600 px-4 py-2 rounded-2xl shadow-xl z-10 my-2"
             onClick={(e) => e.stopPropagation()}
@@ -428,7 +536,7 @@ export const PreviewModal = ({
           </div>
         </div>
 
-        {/* Скрытый измеритель для пагинации */}
+        {/* Скрытый измеритель */}
         <div
           ref={measureRef}
           aria-hidden

@@ -82,7 +82,7 @@ import {
   // OUTBOX_STATUS_LABEL,
   // OUTBOX_STATUS_STYLE,
 } from "../lib/constants";
-import { cn, generateQRMatrix } from "../lib/utils";
+import { cn, generateQRMatrix, sanitizeWordHtml } from "../lib/utils";
 import { PreviewModal } from "./PreviewModal";
 import { TBtn } from "./TBtn";
 import { DSStamp } from "./DSStamp";
@@ -411,6 +411,170 @@ const cleanEditorArtifacts = (html: string): string => {
   return w.innerHTML;
 };
 
+// Маркер разрыва страницы редактора — тот же, что создаёт кнопка «Новая
+// страница». Используется при импорте Word, чтобы перенести разрывы из .docx.
+const makeImportPageBreak = (): HTMLElement => {
+  const div = document.createElement("div");
+  div.setAttribute(PAGE_BREAK_ATTR, "1");
+  div.setAttribute("contenteditable", "false");
+  div.setAttribute("aria-hidden", "true");
+  div.style.cssText =
+    "height:0;line-height:0;font-size:0;break-after:page;page-break-after:always;";
+  return div;
+};
+
+// Word-разрыв страницы из mammoth приходит ВНУТРИ абзаца (<p>…маркер…</p>),
+// а пагинатор видит только разрывы верхнего уровня. Поэтому «поднимаем» маркер:
+// делим родительский блок на «до/после» и вставляем настоящий разрыв между ними.
+const liftPageBreakMarker = (root: HTMLElement, marker: HTMLElement) => {
+  let top: HTMLElement = marker;
+  while (top.parentElement && top.parentElement !== root)
+    top = top.parentElement;
+
+  if (top === marker) {
+    marker.replaceWith(makeImportPageBreak());
+    return;
+  }
+
+  const range = document.createRange();
+  range.setStartAfter(marker);
+  range.setEndAfter(top);
+  const afterFrag = range.extractContents(); // хвост блока (с сохранением стилей)
+  marker.remove();
+  top.after(makeImportPageBreak(), afterFrag);
+};
+
+// Выравнивание и абзацный отступ в Word часто заданы НЕ напрямую, а в стиле
+// абзаца (по умолчанию «Обычный»/docDefaults). mammoth такие наследуемые
+// свойства в HTML не выводит, поэтому читаем их из styles.xml самого .docx и
+// применяем к абзацам без явного выравнивания. Возвращает выравнивание по
+// умолчанию и красную строку (в px при 96 DPI).
+const jcToAlign = (jc: string | null): string | null => {
+  switch (jc) {
+    case "center":
+      return "center";
+    case "right":
+    case "end":
+      return "right";
+    case "both":
+    case "distribute":
+      return "justify";
+    case "left":
+    case "start":
+      return "left";
+    default:
+      return null;
+  }
+};
+
+// 1 twip = 1/1440 дюйма; px при 96 DPI = twips / 15.
+const twipsToPx = (tw: string | null | undefined): number | null => {
+  if (tw == null) return null;
+  const n = parseInt(tw, 10);
+  return isNaN(n) ? null : Math.round(n / 15);
+};
+
+type DocxDefaults = {
+  align: string | null;
+  firstLinePx: number;
+  leftPx: number;
+};
+
+// Кодируем форматирование абзаца (выравнивание + красная строка + левый отступ)
+// в имя стиля/класса. mammoth не умеет выводить inline-стили, поэтому через
+// styleMap прокидываем класс, а его потом разбираем в mammothToEditorHtml.
+// Возвращает null, если форматирование тривиальное (слева, без отступов).
+const paragraphFmtKey = (
+  jcVal: string | null | undefined,
+  firstLineTwips: string | null | undefined,
+  leftTwips: string | null | undefined,
+  defaults: DocxDefaults,
+): string | null => {
+  const align = jcToAlign(jcVal ?? null) ?? defaults.align ?? "left";
+  const flDirect = twipsToPx(firstLineTwips);
+  const leftDirect = twipsToPx(leftTwips);
+  const flPx = Math.max(0, flDirect != null ? flDirect : defaults.firstLinePx);
+  const leftPx = Math.max(0, leftDirect != null ? leftDirect : defaults.leftPx);
+  if (align === "left" && flPx === 0 && leftPx === 0) return null;
+  return `pfmt_${align}_${flPx}_${leftPx}`;
+};
+
+// Читает .docx (styles.xml + document.xml) и возвращает форматирование по
+// умолчанию и НАБОР всех нужных ключей абзацев — чтобы заранее сгенерировать
+// styleMap-правила mammoth (имена стилей известны только после анализа).
+const analyzeDocxFormatting = async (
+  arrayBuffer: ArrayBuffer,
+): Promise<{ defaults: DocxDefaults; fmtKeys: string[] }> => {
+  const empty: DocxDefaults = { align: null, firstLinePx: 0, leftPx: 0 };
+  try {
+    const JSZip = (await import("jszip")).default;
+    const zip = await JSZip.loadAsync(arrayBuffer);
+    const stylesXml = await zip.file("word/styles.xml")?.async("string");
+    const docXml = await zip.file("word/document.xml")?.async("string");
+    const parser = new DOMParser();
+
+    // --- defaults из styles.xml ---
+    let defaults = empty;
+    if (stylesXml) {
+      const sdoc = parser.parseFromString(stylesXml, "application/xml");
+      const jcOf = (el: Element | null) =>
+        el?.getElementsByTagName("w:jc")[0]?.getAttribute("w:val") || null;
+      const indOf = (el: Element | null, attr: string) =>
+        el?.getElementsByTagName("w:ind")[0]?.getAttribute(attr) || null;
+
+      const docDefaultPPr =
+        sdoc
+          .getElementsByTagName("w:pPrDefault")[0]
+          ?.getElementsByTagName("w:pPr")[0] || null;
+      const defStyle = Array.from(sdoc.getElementsByTagName("w:style")).find(
+        (s) =>
+          s.getAttribute("w:type") === "paragraph" &&
+          s.getAttribute("w:default") === "1",
+      );
+      const defStylePPr = defStyle?.getElementsByTagName("w:pPr")[0] || null;
+
+      defaults = {
+        align: jcToAlign(jcOf(defStylePPr) || jcOf(docDefaultPPr)),
+        firstLinePx:
+          twipsToPx(
+            indOf(defStylePPr, "w:firstLine") ||
+              indOf(docDefaultPPr, "w:firstLine"),
+          ) || 0,
+        leftPx:
+          twipsToPx(
+            indOf(defStylePPr, "w:left") ||
+              indOf(defStylePPr, "w:start") ||
+              indOf(docDefaultPPr, "w:left") ||
+              indOf(docDefaultPPr, "w:start"),
+          ) || 0,
+      };
+    }
+
+    // --- набор ключей по всем абзацам document.xml ---
+    const keys = new Set<string>();
+    if (docXml) {
+      const ddoc = parser.parseFromString(docXml, "application/xml");
+      Array.from(ddoc.getElementsByTagName("w:p")).forEach((p) => {
+        const pPr = p.getElementsByTagName("w:pPr")[0] || null;
+        const jc =
+          pPr?.getElementsByTagName("w:jc")[0]?.getAttribute("w:val") || null;
+        const ind = pPr?.getElementsByTagName("w:ind")[0] || null;
+        const key = paragraphFmtKey(
+          jc,
+          ind?.getAttribute("w:firstLine"),
+          ind?.getAttribute("w:left") || ind?.getAttribute("w:start"),
+          defaults,
+        );
+        if (key) keys.add(key);
+      });
+    }
+
+    return { defaults, fmtKeys: Array.from(keys) };
+  } catch {
+    return { defaults: empty, fmtKeys: [] };
+  }
+};
+
 export const CreateInternalCorrespondence = ({
   id,
   onBack = () => {},
@@ -446,6 +610,16 @@ export const CreateInternalCorrespondence = ({
   const [showFontSizeDropdown, setShowFontSizeDropdown] = useState(false);
   const [orientation, setOrientation] = useState<PageOrientation>("portrait");
   const [showPreview, setShowPreview] = useState(false);
+  // Страницы для предпросмотра — берём из разложенного редактора в момент
+  // открытия, чтобы предпросмотр совпадал с холстом 1-в-1.
+  const [previewPages, setPreviewPages] = useState<string[]>([]);
+  const [previewStamp, setPreviewStamp] = useState<{
+    pageIndex: number;
+    x: number;
+    y: number;
+    width: string;
+    html?: string;
+  } | null>(null);
   const [editorContent, setEditorContent] = useState<string>("");
   const [pageCount, setPageCount] = useState(1);
   // Индекс страницы, для которой показываем подтверждение удаления
@@ -466,12 +640,17 @@ export const CreateInternalCorrespondence = ({
   );
   const [showIncomingSearch, setShowIncomingSearch] = useState(false);
   const [incomingLetterSearch, setIncomingLetterSearch] = useState("");
+  // Идёт конвертация загруженного .docx (mammoth) — блокируем кнопку импорта
+  const [importingWord, setImportingWord] = useState(false);
+  // Над редактором тащат файл — показываем подсказку-оверлей для импорта
+  const [isDraggingWord, setIsDraggingWord] = useState(false);
 
   const isDraggingStamp = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const stampRef = useRef<HTMLDivElement>(null);
   const pageCanvasRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const wordInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
 
   const isLandscape = orientation === "landscape";
@@ -1002,9 +1181,145 @@ export const CreateInternalCorrespondence = ({
 
   // Печать документа: используем скрытый iframe и @page margin:0, чтобы браузер
   // НЕ добавлял свои колонтитулы (URL, дату, заголовок). Поля задаём через padding.
+  // Единый источник постраничной разбивки: берём УЖЕ разложенный в редакторе DOM
+  // и группируем блоки по страницам по их offsetTop. Так и предпросмотр, и печать
+  // получают ровно то же содержимое на тех же страницах, что и холст редактора.
+  // Каждый блок позиционируем АБСОЛЮТНО по его реальному offsetTop в редакторе —
+  // так предпросмотр/печать не перетекают контент заново (без распорок), а
+  // повторяют холст пиксель-в-пиксель. Иначе блоки «сползали» и часть текста
+  // (например, нижний колонтитул) терялась при печати.
+  const getEditorPages = useCallback((): string[] => {
+    const editor = editorRef.current;
+    if (!editor) return [];
+    const contentWidth = PAGE_WIDTH - PAGE_PAD_H * 2;
+    const buckets: string[][] = [];
+    Array.from(editor.children).forEach((child) => {
+      const el = child as HTMLElement;
+      if (
+        el.hasAttribute(SPACER_ATTR) ||
+        el.hasAttribute(PAGE_BREAK_ATTR) ||
+        el.hasAttribute(STAMP_ATTR) ||
+        getComputedStyle(el).position === "absolute"
+      )
+        return;
+      const top = el.offsetTop;
+      const page = Math.max(0, Math.floor(top / PAGE_STRIDE));
+      // y внутри листа = поле сверху + смещение от начала страницы
+      const localTop = PAGE_PAD_V + (top - page * PAGE_STRIDE);
+      // вертикальные внешние отступы обнуляем — позицию задаёт top
+      const clone = el.cloneNode(true) as HTMLElement;
+      clone.style.marginTop = "0";
+      clone.style.marginBottom = "0";
+      (buckets[page] ||= []).push(
+        `<div style="position:absolute;left:${PAGE_PAD_H}px;top:${localTop}px;width:${contentWidth}px;box-sizing:border-box;">${clone.outerHTML}</div>`,
+      );
+    });
+    const pages: string[] = [];
+    for (let i = 0; i < buckets.length; i++)
+      pages.push((buckets[i] || []).join(""));
+    return pages.length ? pages : [""];
+  }, [PAGE_WIDTH, PAGE_PAD_H, PAGE_PAD_V, PAGE_STRIDE]);
+
+  // Позиция вшитого штампа ЭЦП относительно своей страницы (для печати).
+  const getEmbeddedStampInfo = useCallback(() => {
+    const editor = editorRef.current;
+    const stamp = editor?.querySelector<HTMLElement>(`[${STAMP_ATTR}]`);
+    if (!stamp) return null;
+    const x = parseFloat(stamp.style.left) || 0;
+    const top = parseFloat(stamp.style.top) || 0;
+    const pageIndex = Math.max(0, Math.floor(top / PAGE_STRIDE));
+    return {
+      pageIndex,
+      x,
+      y: top - pageIndex * PAGE_STRIDE,
+      width: stamp.style.width || "320px",
+      html: stamp.innerHTML,
+    };
+  }, [PAGE_STRIDE]);
+
+  // Штамп ЭЦП для предпросмотра: уже вшитый рисунок ИЛИ плавающий плейсхолдер до
+  // подписания. Считаем из той же live-DOM, что и страницы, — поэтому штамп в
+  // предпросмотре всегда совпадает со страницей холста.
+  const getPreviewStamp = useCallback(():
+    | { pageIndex: number; x: number; y: number; width: string; html?: string }
+    | null => {
+    const embedded = getEmbeddedStampInfo();
+    if (embedded) return embedded;
+    if (stampVisible && finalSigner?.dsApplied) {
+      const pageIndex = Math.max(0, Math.floor(stampPos.y / PAGE_STRIDE));
+      return {
+        pageIndex,
+        x: stampPos.x,
+        y: stampPos.y - pageIndex * PAGE_STRIDE,
+        width:
+          typeof stampSize.width === "number"
+            ? `${stampSize.width}px`
+            : stampSize.width,
+      };
+    }
+    return null;
+  }, [
+    getEmbeddedStampInfo,
+    stampVisible,
+    finalSigner,
+    stampPos,
+    stampSize,
+    PAGE_STRIDE,
+  ]);
+
+  // Дополняем массив страниц пустыми, чтобы страница со штампом существовала,
+  // даже если на ней нет текстовых блоков.
+  const padPagesForStamp = (
+    pages: string[],
+    stamp: { pageIndex: number } | null,
+  ) => {
+    if (stamp) while (pages.length <= stamp.pageIndex) pages.push("");
+    return pages;
+  };
+
+  // CSS, дублирующий оформление холста редактора (классы Tailwind редактора в
+  // iframe печати недоступны) — чтобы напечатанное совпадало с холстом 1-в-1.
+  const printPageCss = (isLand: boolean) => {
+    const pageW = isLand ? PAGE_HEIGHT : PAGE_WIDTH;
+    const pageH = isLand ? PAGE_WIDTH : PAGE_HEIGHT;
+    return `
+  @page { size: A4 ${isLand ? "landscape" : "portrait"}; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "Times New Roman", serif; font-size: ${fontSize}px; line-height: 1.8; color: #1e293b; }
+  /* Лист печати = холст редактора 1-в-1 (96 DPI). Блоки внутри спозиционированы
+     абсолютно по их реальным координатам из редактора. */
+  .page {
+    position: relative;
+    width: ${pageW}px; height: ${pageH}px;
+    overflow: hidden;
+    break-after: page; page-break-after: always;
+  }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+  .page * { max-width: 100%; white-space: pre-wrap; overflow-wrap: break-word; word-break: break-word; }
+  .page div[data-signature-stamp] * { white-space: normal; }
+  img { max-width: 100%; height: auto; }
+  table { width: 100%; table-layout: auto; border-collapse: collapse; }
+  td, th { border: 1px solid #cbd5e1; padding: 4px 8px; vertical-align: top; word-break: break-word; }
+  ul { list-style: disc; padding-left: 1.5em; }
+  ol { list-style: decimal; padding-left: 1.5em; }
+  [data-page-spacer] { display: none !important; }`;
+  };
+
   const handlePrint = () => {
-    const content = getCleanEditorHtml();
     const isLand = orientation === "landscape";
+    const stamp = getEmbeddedStampInfo();
+    const pages = padPagesForStamp(getEditorPages(), stamp);
+
+    const pagesHtml = pages
+      .map((html, idx) => {
+        const stampHtml =
+          stamp && stamp.pageIndex === idx
+            ? `<div style="position:absolute;left:${PAGE_PAD_H + stamp.x}px;top:${PAGE_PAD_V + stamp.y}px;width:${stamp.width};overflow:hidden;pointer-events:none;">${stamp.html}</div>`
+            : "";
+        return `<div class="page">${html}${stampHtml}</div>`;
+      })
+      .join("");
 
     const iframe = document.createElement("iframe");
     iframe.style.position = "fixed";
@@ -1028,27 +1343,9 @@ export const CreateInternalCorrespondence = ({
 <head>
 <meta charset="utf-8" />
 <title></title>
-<style>
-  @page { size: A4 ${isLand ? "landscape" : "portrait"}; margin: 0; }
-  * { box-sizing: border-box; overflow-wrap: break-word; word-break: break-word; max-width: 100%; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    font-family: "Times New Roman", serif;
-    font-size: ${fontSize}px;
-    line-height: 1.8; /* как в редакторе */
-    color: #1e293b;
-    white-space: pre-wrap;
-    /* поля как в редакторе: 72px / 80px при 96dpi */
-    padding: 19.05mm 21.17mm;
-  }
-  img { max-width: 100%; height: auto; }
-  table { width: 100%; table-layout: fixed; border-collapse: collapse; }
-  td, th { word-break: break-word; }
-  [data-page-spacer] { display: none !important; }
-  [data-page-break] { break-after: page; page-break-after: always; height: 0; overflow: hidden; }
-</style>
+<style>${printPageCss(isLand)}</style>
 </head>
-<body>${content}</body>
+<body>${pagesHtml}</body>
 </html>`);
     doc.close();
 
@@ -1489,6 +1786,72 @@ export const CreateInternalCorrespondence = ({
       return s;
     };
 
+    // Таблицы — атомарные блоки: их нельзя резать по символам, как абзац.
+    // Поэтому таблицу, не помещающуюся на лист, делим по СТРОКАМ: строки, что
+    // не влезают до конца страницы, переезжают в таблицу-продолжение (со всеми
+    // стилями исходной), между ними ставится распорка. Обе части помечаются
+    // AUTOSPLIT_ATTR — при сохранении cleanEditorArtifacts склеит их в одну
+    // таблицу. Без этого высокая таблица «перетекала» через границы листов.
+    const splitTableByRows = (
+      table: HTMLElement,
+      usableBottom: number,
+      page: number,
+      pageStart: number,
+    ): boolean => {
+      const rows = Array.from(table.querySelectorAll("tr")).filter(
+        (tr) => tr.closest("table") === table,
+      ) as HTMLElement[];
+      if (rows.length < 2) return false;
+
+      // offsetTop у <tr> в разных движках считается относительно <table>, а не
+      // редактора — полагаться на него нельзя. Меряем строки через rect и
+      // приводим к системе координат редактора (как у table.offsetTop).
+      const tableRectTop = table.getBoundingClientRect().top;
+      const tableOffsetTop = table.offsetTop;
+      const rowBottom = (tr: HTMLElement) => {
+        const r = tr.getBoundingClientRect();
+        return r.bottom - tableRectTop + tableOffsetTop;
+      };
+
+      const splitIdx = rows.findIndex((tr) => rowBottom(tr) > usableBottom + 1);
+      if (splitIdx === -1) return false;
+
+      // Даже первая строка не влезает в остаток листа — переносим таблицу
+      // целиком на следующую страницу (там доступна полная высота листа).
+      if (splitIdx === 0) {
+        if (table.offsetTop > pageStart + 2) {
+          editor.insertBefore(
+            makeSpacer((page + 1) * PAGE_STRIDE - table.offsetTop),
+            table,
+          );
+          return true;
+        }
+        return false; // одна строка выше целого листа — делить нечем
+      }
+
+      const gid = table.getAttribute(AUTOSPLIT_ATTR) || `g${++splitGroupSeq}`;
+      table.setAttribute(AUTOSPLIT_ATTR, gid);
+
+      const tail = document.createElement("table");
+      Array.from(table.attributes).forEach((a) =>
+        tail.setAttribute(a.name, a.value),
+      );
+      const tbody = document.createElement("tbody");
+      tail.appendChild(tbody);
+      for (let k = splitIdx; k < rows.length; k++) tbody.appendChild(rows[k]);
+
+      // Убираем опустевшие группы строк, чтобы они не копились при повторных
+      // слияниях/разрезаниях на каждой пагинации.
+      table.querySelectorAll("tbody, thead, tfoot").forEach((g) => {
+        if (g.closest("table") === table && !g.querySelector("tr")) g.remove();
+      });
+
+      editor.insertBefore(tail, table.nextSibling);
+      const blockBottom = table.offsetTop + table.offsetHeight;
+      editor.insertBefore(makeSpacer((page + 1) * PAGE_STRIDE - blockBottom), tail);
+      return true;
+    };
+
     // 3. Раскладка по страницам
     let i = 0;
     let guard = 0;
@@ -1532,6 +1895,25 @@ export const CreateInternalCorrespondence = ({
       const splittable =
         !EDITOR_ATOMIC_TAGS.has(tag) &&
         (block.textContent || "").trim().length > 0;
+
+      // Таблицы паджинируем по строкам (атомарны для посимвольного деления).
+      if (tag === "TABLE") {
+        // Влезает в лист целиком, но не до конца текущей страницы — переносим.
+        if (h <= CONTENT_HEIGHT && top > pageStart + 2) {
+          editor.insertBefore(
+            makeSpacer((page + 1) * PAGE_STRIDE - top),
+            block,
+          );
+          i++;
+          continue;
+        }
+        // Выше печатной области листа — режем по строкам.
+        if (splitTableByRows(block, usableBottom, page, pageStart)) {
+          textMutated = true;
+        }
+        i++;
+        continue;
+      }
 
       if (h <= CONTENT_HEIGHT && top > pageStart + 2) {
         editor.insertBefore(makeSpacer((page + 1) * PAGE_STRIDE - top), block);
@@ -1594,6 +1976,23 @@ export const CreateInternalCorrespondence = ({
     return Math.max(1, Math.ceil(editor.scrollHeight / PAGE_STRIDE));
   }, [CONTENT_HEIGHT, PAGE_STRIDE]);
   const handleEditorInput = useCallback(() => {
+    const editor = editorRef.current;
+    if (editor) {
+      // Документ очищен полностью: браузер оставляет пустые обёртки с прежним
+      // оформлением (<strong>, text-align и т.п.), из-за чего новый текст
+      // печатается жирным/со старым выравниванием. Сбрасываем к чистому блоку.
+      const isEmpty =
+        !editor.textContent?.trim() && !editor.querySelector("img,table,hr");
+      if (isEmpty && editor.innerHTML !== "<div><br></div>") {
+        editor.innerHTML = "<div><br></div>";
+        const sel = window.getSelection();
+        const range = document.createRange();
+        range.setStart(editor.firstChild as Node, 0);
+        range.collapse(true);
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+      }
+    }
     setEditorContent(getCleanEditorHtml());
   }, [getCleanEditorHtml]);
 
@@ -1890,55 +2289,15 @@ export const CreateInternalCorrespondence = ({
     }
   }, [pageCount, pageToDelete]);
 
-  // Очистка HTML при вставке из Word / PDF / других источников:
-  // убираем стили, мешающие переносу (nowrap, фиксированная ширина и т.п.),
-  // чтобы текст не выходил за границы редактора.
-  const handleEditorPaste = useCallback(
-    (e: ClipboardEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+  // Вставка готового DOM-фрагмента в позицию курсора (или в конец, если фокуса
+  // нет). Используется и при Ctrl+V, и при импорте Word-файла, чтобы вставка
+  // вела себя одинаково и корректно пересчитывала постраничную разбивку.
+  const insertFragmentAtCaret = useCallback(
+    (fragment: DocumentFragment) => {
       const editor = editorRef.current;
-      if (!editor || !e.clipboardData) return;
+      if (!editor) return;
+      editor.focus();
 
-      const html = e.clipboardData.getData("text/html");
-      const text = e.clipboardData.getData("text/plain");
-
-      // Собираем очищенный фрагмент для вставки.
-      // Однострочный текст вставляем инлайн (рядом с курсором), а не блоком —
-      // иначе скопированное слово уезжало на новую строку вниз.
-      const fragment = document.createDocumentFragment();
-      const isMultiline = /\r?\n/.test(text.trim());
-
-      if (html && isMultiline) {
-        const wrapper = document.createElement("div");
-        wrapper.innerHTML = html;
-        // убираем служебные распорки и стили, ломающие перенос
-        wrapper.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => n.remove());
-        wrapper.querySelectorAll<HTMLElement>("*").forEach((el) => {
-          el.style.removeProperty("white-space");
-          el.style.removeProperty("width");
-          el.style.removeProperty("min-width");
-          el.style.removeProperty("max-width");
-          el.style.removeProperty("overflow");
-          el.style.whiteSpace = "pre-wrap";
-          el.style.overflowWrap = "break-word";
-          el.style.wordBreak = "break-word";
-          el.style.maxWidth = "100%";
-        });
-        while (wrapper.firstChild) fragment.appendChild(wrapper.firstChild);
-      } else if (text) {
-        // Инлайн-текст: переносы строк (если есть) — через <br>, без блоков
-        const lines = text.split(/\r?\n/);
-        lines.forEach((line, idx) => {
-          fragment.appendChild(document.createTextNode(line));
-          if (idx < lines.length - 1)
-            fragment.appendChild(document.createElement("br"));
-        });
-      } else {
-        return;
-      }
-
-      // Вставляем ровно один раз в позицию курсора (или в конец, если фокуса нет)
       const selection = window.getSelection();
       let range: Range;
       if (
@@ -1969,6 +2328,212 @@ export const CreateInternalCorrespondence = ({
       setEditorContent(getCleanEditorHtml());
     },
     [getCleanEditorHtml],
+  );
+
+  // Превращает очищенный HTML из Word в фрагмент для вставки.
+  // Распорки страниц вырезаем — их редактор расставляет сам при пагинации.
+  const buildFragmentFromHtml = useCallback((html: string) => {
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = html;
+    wrapper.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => n.remove());
+    const fragment = document.createDocumentFragment();
+    while (wrapper.firstChild) fragment.appendChild(wrapper.firstChild);
+    return fragment;
+  }, []);
+
+  // Очистка HTML при вставке из Word / PDF / других источников: sanitizeWordHtml
+  // убирает служебную разметку Office, переводит размеры pt → px (тот же 96 DPI,
+  // что и у А4-холста) и нормализует пробелы — поэтому форматирование совпадает
+  // с исходным документом, а текст не выходит за границы листа.
+  const handleEditorPaste = useCallback(
+    (e: ClipboardEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const editor = editorRef.current;
+      if (!editor || !e.clipboardData) return;
+
+      const html = e.clipboardData.getData("text/html");
+      const text = e.clipboardData.getData("text/plain");
+      const isMultiline = /\r?\n/.test(text.trim());
+
+      let fragment: DocumentFragment;
+      if (html && isMultiline) {
+        // Многострочный форматированный контент (документ из Word) — сохраняем
+        // структуру и оформление как есть.
+        fragment = buildFragmentFromHtml(sanitizeWordHtml(html));
+      } else if (text) {
+        // Однострочный текст вставляем инлайн (рядом с курсором), а не блоком —
+        // иначе скопированное слово уезжало на новую строку вниз.
+        fragment = document.createDocumentFragment();
+        const lines = text.split(/\r?\n/);
+        lines.forEach((line, idx) => {
+          fragment.appendChild(document.createTextNode(line));
+          if (idx < lines.length - 1)
+            fragment.appendChild(document.createElement("br"));
+        });
+      } else {
+        return;
+      }
+
+      insertFragmentAtCaret(fragment);
+    },
+    [buildFragmentFromHtml, insertFragmentAtCaret],
+  );
+
+  // Переносит специфичную для импорта разметку mammoth в формат холста:
+  //  - класс pfmt_<align>_<firstLinePx>_<leftPx> (из styleMap) → inline-стили
+  //    (выравнивание, красная строка, левый отступ);
+  //  - пустым абзацам возвращаем высоту строки (<br>) — иначе теряются
+  //    пустые строки-отступы из Word;
+  //  - маркеры разрыва страницы Word → настоящие разрывы редактора.
+  const mammothToEditorHtml = useCallback((html: string) => {
+    const root = document.createElement("div");
+    root.innerHTML = html;
+
+    root.querySelectorAll<HTMLElement>("[class*='pfmt_']").forEach((el) => {
+      const cls = Array.from(el.classList).find((c) => c.startsWith("pfmt_"));
+      if (!cls) return;
+      const [, align, fl, left] = cls.split("_");
+      if (align && align !== "left") el.style.textAlign = align;
+      if (Number(fl) > 0) el.style.textIndent = `${fl}px`;
+      if (Number(left) > 0) el.style.marginLeft = `${left}px`;
+    });
+
+    // Пустые абзацы (mammoth их сохраняет при ignoreEmptyParagraphs:false)
+    // должны занимать строку, как в Word.
+    root.querySelectorAll<HTMLElement>("p").forEach((p) => {
+      if (!p.textContent?.trim() && !p.querySelector("img,br,table"))
+        p.appendChild(document.createElement("br"));
+    });
+
+    Array.from(root.querySelectorAll<HTMLElement>(".docx-page-break")).forEach(
+      (marker) => liftPageBreakMarker(root, marker),
+    );
+
+    return root.innerHTML;
+  }, []);
+
+  // Импорт .docx: mammoth конвертирует документ Word в семантический HTML
+  // (заголовки, списки, таблицы, картинки). transformDocument + styleMap
+  // дополнительно сохраняют выравнивание абзацев и разрывы страниц, затем
+  // mammothToEditorHtml/sanitizeWordHtml приводят всё к формату холста.
+  // Общее ядро импорта — используется и кнопкой, и перетаскиванием файла.
+  const importWordFile = useCallback(
+    async (file: File) => {
+      if (!/\.docx?$/i.test(file.name)) {
+        alert("Поддерживаются только файлы Word (.docx).");
+        return;
+      }
+      if (importingWord) return;
+
+      setImportingWord(true);
+      try {
+        const mod = await import("mammoth");
+        const mammoth = (mod as any).default ?? mod;
+        const arrayBuffer = await file.arrayBuffer();
+
+        // Анализируем .docx: форматирование по умолчанию + все нужные ключи
+        // абзацев (выравнивание/красная строка/левый отступ). По ним строим
+        // styleMap и помечаем абзацы в transformDocument тем же ключом.
+        const { defaults, fmtKeys } = await analyzeDocxFormatting(arrayBuffer);
+
+        const transformDocument = mammoth.transforms.paragraph((p: any) => {
+          if (/heading|заголов/i.test(`${p.styleName || ""} ${p.styleId || ""}`))
+            return p; // заголовки оставляем семантическими (<h1>…<h6>)
+          const key = paragraphFmtKey(
+            p.alignment,
+            p.indent?.firstLine,
+            p.indent?.start,
+            defaults,
+          );
+          if (!key) return p;
+          return { ...p, styleId: key, styleName: key };
+        });
+
+        const styleMap = [
+          ...fmtKeys.map((k) => `p[style-name='${k}'] => p.${k}:fresh`),
+          "br[type='page'] => hr.docx-page-break:fresh",
+        ];
+
+        const result = await mammoth.convertToHtml(
+          { arrayBuffer },
+          {
+            transformDocument,
+            styleMap,
+            // сохраняем пустые абзацы — это пустые строки-отступы из Word
+            ignoreEmptyParagraphs: false,
+          },
+        );
+
+        const html = sanitizeWordHtml(mammothToEditorHtml(result.value || ""));
+        if (!html.trim()) {
+          alert("Не удалось извлечь содержимое из документа.");
+          return;
+        }
+        insertFragmentAtCaret(buildFragmentFromHtml(html));
+      } catch (err) {
+        console.error("Ошибка импорта Word-файла:", err);
+        alert("Не удалось импортировать документ Word.");
+      } finally {
+        setImportingWord(false);
+      }
+    },
+    [
+      importingWord,
+      buildFragmentFromHtml,
+      insertFragmentAtCaret,
+      mammothToEditorHtml,
+    ],
+  );
+
+  // Выбор файла через кнопку «Импорт Word».
+  const handleImportWord = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      e.target.value = "";
+      if (file) importWordFile(file);
+    },
+    [importWordFile],
+  );
+
+  // Перетаскивание .docx прямо в редактор — альтернатива кнопке импорта.
+  // (обработчики навешиваются в JSX только в режиме редактирования)
+  const handleEditorDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      const files = Array.from(e.dataTransfer?.files || []);
+      if (!files.length) return; // перетаскивание текста — не мешаем
+      // Любой файл перехватываем, чтобы браузер не открыл/не вставил его сам.
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDraggingWord(false);
+      const file = files.find((f) => /\.docx?$/i.test(f.name));
+      if (file) importWordFile(file);
+      else alert("Поддерживаются только файлы Word (.docx).");
+    },
+    [importWordFile],
+  );
+
+  const handleEditorDragOver = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      const hasFiles = Array.from(e.dataTransfer?.types || []).includes(
+        "Files",
+      );
+      if (!hasFiles) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+      if (!isDraggingWord) setIsDraggingWord(true);
+    },
+    [isDraggingWord],
+  );
+
+  const handleEditorDragLeave = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      // Срабатывает только при выходе за пределы контейнера, а не при переходе
+      // между его дочерними элементами.
+      if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+      setIsDraggingWord(false);
+    },
+    [],
   );
 
   // Нативный обработчик вставки: гарантированно отменяет стандартную вставку
@@ -2311,6 +2876,8 @@ export const CreateInternalCorrespondence = ({
         <PreviewModal
           subject={subject}
           editorHtml={editorContent}
+          pages={previewPages}
+          stamp={previewStamp}
           orientation={orientation}
           fontSize={Number(fontSize) || 14}
           onClose={() => setShowPreview(false)}
@@ -2352,7 +2919,12 @@ export const CreateInternalCorrespondence = ({
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowPreview(true)}
+              onClick={() => {
+                const stamp = getPreviewStamp();
+                setPreviewPages(padPagesForStamp(getEditorPages(), stamp));
+                setPreviewStamp(stamp);
+                setShowPreview(true);
+              }}
               className="flex items-center cursor-pointer gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700 transition-colors"
             >
               <Eye size={15} className="text-slate-500" />
@@ -3031,12 +3603,56 @@ export const CreateInternalCorrespondence = ({
                     {orientation === "portrait" ? "Книжный" : "Альбомный"}
                   </span>
                 </button>
+                {!isReadOnly && (
+                  <>
+                    <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
+                    <button
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        if (!importingWord) wordInputRef.current?.click();
+                      }}
+                      disabled={importingWord}
+                      title="Импортировать документ Word (.docx) с сохранением форматирования"
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-colors border flex-shrink-0 bg-white border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      <FileType size={14} />
+                      <span>
+                        {importingWord ? "Импорт…" : "Импорт Word"}
+                      </span>
+                    </button>
+                    <input
+                      ref={wordInputRef}
+                      type="file"
+                      accept=".docx,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      className="hidden"
+                      onChange={handleImportWord}
+                    />
+                  </>
+                )}
               </div>
 
               <div
-                className="bg-[#E8EAED] overflow-auto rounded-b-2xl"
+                className="bg-[#E8EAED] overflow-auto rounded-b-2xl relative"
                 style={{ minHeight: 420 }}
+                {...(!isReadOnly
+                  ? {
+                      onDrop: handleEditorDrop,
+                      onDragOver: handleEditorDragOver,
+                      onDragLeave: handleEditorDragLeave,
+                    }
+                  : {})}
               >
+                {/* Подсказка при перетаскивании .docx в редактор */}
+                {isDraggingWord && !isReadOnly && (
+                  <div className="absolute inset-0 z-[60] m-3 rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50/80 backdrop-blur-[1px] flex items-center justify-center pointer-events-none">
+                    <div className="flex flex-col items-center gap-2 text-blue-700">
+                      <FileType size={32} />
+                      <span className="text-sm font-semibold">
+                        Отпустите, чтобы импортировать документ Word
+                      </span>
+                    </div>
+                  </div>
+                )}
                 <div className="py-8 px-8 flex justify-center">
                   <div
                     ref={pageCanvasRef}
@@ -3151,7 +3767,7 @@ export const CreateInternalCorrespondence = ({
                         wordBreak: "break-word",
                         overflow: "visible",
                       }}
-                      className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_pre]:whitespace-pre-wrap [&_div:not([data-signature-stamp])]:min-h-[1.8em]"
+                      className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_pre]:whitespace-pre-wrap [&_div:not([data-signature-stamp])]:min-h-[1.8em]"
                     />
 
                     {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания.
