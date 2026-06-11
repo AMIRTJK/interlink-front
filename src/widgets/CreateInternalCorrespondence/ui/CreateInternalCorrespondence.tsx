@@ -708,22 +708,32 @@ export const CreateInternalCorrespondence = ({
     messages: {
       invalidate: [
         ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
-        ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
+        // Убираем отсюда автоматический инвалейд версий, чтобы контролировать поток вручную
       ],
     },
     queryOptions: {
       onSuccess: () => {
-        // 1. Сначала запрашиваем актуальный список версий с бэкенда
+        // 1. Сначала стягиваем свежие версии, чтобы узнать ID только что созданной (1.6)
         refetchVersions().then((updatedResponse) => {
           const freshVersions = updatedResponse?.data?.data?.versions;
 
-          // 2. Берем самый последний элемент из تازه полученного массива
           if (Array.isArray(freshVersions) && freshVersions.length > 0) {
-            const latestVersionId = freshVersions[freshVersions.length - 1]?.id;
+            const latestVersion = freshVersions[freshVersions.length - 1];
 
-            if (latestVersionId) {
-              // 3. Автоматически выбираем её для подписания
-              selectVersionForSign({ versionId: latestVersionId });
+            if (latestVersion?.id) {
+              // 2. Мгновенно меняем активную версию в стейте фронтенда
+              setActiveVersionId(latestVersion.id);
+
+              // 3. Передаем в selectVersionForSign колбэк для повторного рефетча ПОСЛЕ успешного выбора
+              selectVersionForSign(
+                { versionId: latestVersion.id },
+                {
+                  onSuccess: () => {
+                    // 4. Перезапрашиваем версии еще раз, когда бэкенд точно проставил галочку в БД
+                    refetchVersions();
+                  },
+                },
+              );
             }
           }
         });
