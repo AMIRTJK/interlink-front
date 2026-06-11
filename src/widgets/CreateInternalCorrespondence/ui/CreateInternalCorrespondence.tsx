@@ -711,6 +711,24 @@ export const CreateInternalCorrespondence = ({
         ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
       ],
     },
+    queryOptions: {
+      onSuccess: () => {
+        // 1. Сначала запрашиваем актуальный список версий с бэкенда
+        refetchVersions().then((updatedResponse) => {
+          const freshVersions = updatedResponse?.data?.data?.versions;
+
+          // 2. Берем самый последний элемент из تازه полученного массива
+          if (Array.isArray(freshVersions) && freshVersions.length > 0) {
+            const latestVersionId = freshVersions[freshVersions.length - 1]?.id;
+
+            if (latestVersionId) {
+              // 3. Автоматически выбираем её для подписания
+              selectVersionForSign({ versionId: latestVersionId });
+            }
+          }
+        });
+      },
+    },
   });
 
   const { mutate: inviteSigner, isPending: isSignerInviting } =
@@ -2060,24 +2078,27 @@ export const CreateInternalCorrespondence = ({
     if (allVersions.length === 0) return;
     const targetVersion = allVersions[allVersions.length - 1];
 
-    // Проверяем, изменился ли действительно ID версии
     const isNewVersionId = autoLoadedLatestRef.current !== targetVersion.id;
     autoLoadedLatestRef.current = targetVersion.id;
     setActiveVersionId(targetVersion.id);
 
     if (editorRef.current && targetVersion.content) {
-      // Сравниваем чистый контент из редактора с тем, что пришло от бэкенда
       const currentCleanHtml = cleanEditorArtifacts(
         editorRef.current.innerHTML,
       );
       const incomingCleanHtml = cleanEditorArtifacts(targetVersion.content);
 
-      // Перезаписываем innerHTML ТОЛЬКО если это действительно чужая/новая версия,
-      // и её текст физически отличается от того, что прямо сейчас горит на экране.
       if (isNewVersionId && currentCleanHtml !== incomingCleanHtml) {
         editorRef.current.innerHTML = targetVersion.content;
         setEditorContent(targetVersion.content);
       }
+    }
+
+    // ХАК: Если документ только открыли и ни одна версия еще не выбрана для подписи
+    // (проверяем по ответу, например, если у всех элементов is_selected === false)
+    const hasSelected = allVersions.some((v: any) => v.is_selected);
+    if (!hasSelected && targetVersion.id) {
+      selectVersionForSign({ versionId: targetVersion.id });
     }
   }, [allVersions]);
 
