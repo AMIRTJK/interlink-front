@@ -2030,18 +2030,25 @@ ${qrSvg}
   useEffect(() => {
     if (allVersions.length === 0) return;
     const targetVersion = allVersions[allVersions.length - 1];
-    // Переключаемся на последнюю версию только когда появилась НОВАЯ последняя
-    // версия (первая загрузка, сохранение, подписание). Если id не изменился —
-    // не трогаем выбранную вручную версию из истории.
-    if (autoLoadedLatestRef.current === targetVersion.id) return;
+
+    // Проверяем, изменился ли действительно ID версии
+    const isNewVersionId = autoLoadedLatestRef.current !== targetVersion.id;
     autoLoadedLatestRef.current = targetVersion.id;
     setActiveVersionId(targetVersion.id);
 
     if (editorRef.current && targetVersion.content) {
-      editorRef.current.innerHTML = targetVersion.content;
-      // Синхронизируем editorContent, иначе постраничная разбивка не пересчитается
-      // после сохранения/перезагрузки и все страницы кроме первой "исчезнут".
-      setEditorContent(targetVersion.content);
+      // Сравниваем чистый контент из редактора с тем, что пришло от бэкенда
+      const currentCleanHtml = cleanEditorArtifacts(
+        editorRef.current.innerHTML,
+      );
+      const incomingCleanHtml = cleanEditorArtifacts(targetVersion.content);
+
+      // Перезаписываем innerHTML ТОЛЬКО если это действительно чужая/новая версия,
+      // и её текст физически отличается от того, что прямо сейчас горит на экране.
+      if (isNewVersionId && currentCleanHtml !== incomingCleanHtml) {
+        editorRef.current.innerHTML = targetVersion.content;
+        setEditorContent(targetVersion.content);
+      }
     }
   }, [allVersions]);
 
@@ -2978,7 +2985,7 @@ ${qrSvg}
                         wordBreak: "break-word",
                         overflowX: "hidden",
                       }}
-                      className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_pre]:whitespace-pre-wrap"
+                      className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_pre]:whitespace-pre-wrap [&_div]:min-h-[1.8em]"
                     />
 
                     {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания.
