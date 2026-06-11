@@ -15,8 +15,11 @@ import { DSStamp } from "./DSStamp";
 const PAGE_PAD_H = 80;
 const PAGE_PAD_V = 72;
 const PAGE_GAP = 32;
+// ВАЖНО: должно совпадать с className холста редактора в
+// CreateInternalCorrespondence (таблицы, рамки, отступы), иначе предпросмотр
+// будет отличаться от того, что видно в редакторе.
 const CONTENT_CLASS =
-  "max-w-full [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_div]:min-h-[1.8em]";
+  "max-w-full [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_div:not([data-signature-stamp])]:min-h-[1.8em]";
 
 const contentStyle = (fontSize: number): React.CSSProperties => ({
   fontFamily: "Times New Roman, serif",
@@ -61,6 +64,8 @@ const BLOCK_TAGS = new Set([
 
 export const PreviewModal = ({
   editorHtml,
+  pages: providedPages,
+  stamp: providedStamp,
   orientation,
   fontSize = 14,
   onClose,
@@ -74,6 +79,17 @@ export const PreviewModal = ({
 }: {
   subject: string;
   editorHtml: string;
+  // Готовые страницы из разложенного редактора. Если переданы — используются
+  // напрямую (предпросмотр совпадает с холстом), иначе модалка считает сама.
+  pages?: string[];
+  // Штамп ЭЦП из той же live-DOM, что и pages (страница/координаты).
+  stamp?: {
+    pageIndex: number;
+    x: number;
+    y: number;
+    width: string;
+    html?: string;
+  } | null;
   orientation: PageOrientation;
   fontSize?: number;
   onClose: () => void;
@@ -124,7 +140,9 @@ export const PreviewModal = ({
     let detectedStamp = null;
 
     // 1. Ищем и изолируем встроенный в HTML штамп ЭЦП (если документ уже подписан)
-    const stampNode = source.querySelector("[data-signature-stamp='true']");
+    const stampNode = source.querySelector<HTMLElement>(
+      "[data-signature-stamp='true']",
+    );
     if (stampNode) {
       const left = parseFloat(stampNode.style.left) || 0;
       const top = parseFloat(stampNode.style.top) || 0;
@@ -160,6 +178,18 @@ export const PreviewModal = ({
     }
 
     setActiveStamp(detectedStamp);
+
+    // Если страницы уже разложены редактором — используем их как есть, чтобы
+    // предпросмотр был визуально идентичен холсту. Собственную разбивку ниже
+    // оставляем как запасной вариант (когда pages не переданы).
+    if (providedPages && providedPages.length) {
+      // Штамп берём из того же источника, что и страницы — гарантированно
+      // совпадает с холстом (и виден на своей странице).
+      setActiveStamp(providedStamp ?? null);
+      setPages(providedPages);
+      setCurrentPage(0);
+      return;
+    }
 
     // Разделение контента на страницы
     const blocks: HTMLElement[] = [];
@@ -257,6 +287,8 @@ export const PreviewModal = ({
     setCurrentPage(0);
   }, [
     editorHtml,
+    providedPages,
+    providedStamp,
     contentHeight,
     contentWidth,
     orientation,
@@ -267,6 +299,9 @@ export const PreviewModal = ({
   ]);
 
   const sheets = pages.length ? pages : [""];
+  // Готовые страницы из редактора отрисовываем как есть (блоки спозиционированы
+  // абсолютно), без собственных полей/перетекания.
+  const usingProvidedPages = !!(providedPages && providedPages.length);
 
   const zoomToFit = () => {
     const availableHeight = window.innerHeight - 160;
@@ -400,12 +435,29 @@ export const PreviewModal = ({
                 transition={{ duration: 0.15 }}
                 className="bg-white shadow-2xl border border-slate-300 w-full h-full"
                 style={{
-                  padding: `${PAGE_PAD_V}px ${PAGE_PAD_H}px`,
+                  // В режиме готовых страниц блоки спозиционированы абсолютно по
+                  // координатам холста — поля уже учтены, padding не нужен.
+                  padding: usingProvidedPages
+                    ? 0
+                    : `${PAGE_PAD_V}px ${PAGE_PAD_H}px`,
                   position: "relative",
                   boxSizing: "border-box",
+                  overflow: "hidden",
                 }}
               >
-                {sheets[currentPage] ? (
+                {usingProvidedPages ? (
+                  <div
+                    className={CONTENT_CLASS}
+                    style={{
+                      ...CONTENT_STYLE,
+                      position: "absolute",
+                      inset: 0,
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: sheets[currentPage] || "",
+                    }}
+                  />
+                ) : sheets[currentPage] ? (
                   <div
                     className={CONTENT_CLASS}
                     style={{ ...CONTENT_STYLE, height: "100%" }}
