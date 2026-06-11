@@ -50,3 +50,23 @@ export interface CreateDepartmentDTO {
   name: string;
   code: string;
 }
+
+// Пользователь из админского списка (GET_USERS)
+export interface IAdminUser {
+  id: number;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
+  position?: string;
+  phone?: string;
+  email?: string;
+  personal_email?: string;
+  personal_phone?: string;
+  status?: string;
+  salary?: number;
+  photo_path?: string;
+  organization?: { id: number; name: string };
+  department?: { id: number; name: string };
+  departments?: { id: number; name: string }[];
+  roles?: { id: number; name: string }[];
+}

@@ -103,8 +103,33 @@ const NewCorrespondenceTableWrapper = lazy(() =>
   })),
 );
 
-const HrPage = lazy(() =>
-  import("@pages/modules/hr/Hr").then((m) => ({ default: m.HrPage })),
+const HrLayoutPage = lazy(() =>
+  import("@pages/modules/hr/Hr").then((m) => ({ default: m.HrLayoutPage })),
+);
+const HrEmployeesPage = lazy(() =>
+  import("@pages/modules/hr/EmployeesPage").then((m) => ({
+    default: m.HrEmployeesPage,
+  })),
+);
+const HrAccessPage = lazy(() =>
+  import("@pages/modules/hr/AccessPage").then((m) => ({
+    default: m.HrAccessPage,
+  })),
+);
+const HrOrdersPage = lazy(() =>
+  import("@pages/modules/hr/OrdersPage").then((m) => ({
+    default: m.HrOrdersPage,
+  })),
+);
+const HrTimesheetPage = lazy(() =>
+  import("@pages/modules/hr/TimesheetPage").then((m) => ({
+    default: m.HrTimesheetPage,
+  })),
+);
+const HrStaffingPage = lazy(() =>
+  import("@pages/modules/hr/StaffingPage").then((m) => ({
+    default: m.HrStaffingPage,
+  })),
 );
 
 // const InternalСorrespondencePage = lazy(() =>
@@ -174,7 +199,14 @@ export const AppRouter = () => {
 
             {/* Модули */}
             <Route path="/modules" element={<MainLayout />}>
-              <Route path="hr" element={<HrPage />} />
+              <Route path="hr" element={<HrLayoutPage />}>
+                <Route index element={<Navigate to="employees" replace />} />
+                <Route path="employees" element={<HrEmployeesPage />} />
+                <Route path="access" element={<HrAccessPage />} />
+                <Route path="orders" element={<HrOrdersPage />} />
+                <Route path="timesheet" element={<HrTimesheetPage />} />
+                <Route path="staffing" element={<HrStaffingPage />} />
+              </Route>
               <Route path="correspondence" element={<CorrespondencePage />}>
                 <Route index element={<Navigate to="external" replace />} />
 
