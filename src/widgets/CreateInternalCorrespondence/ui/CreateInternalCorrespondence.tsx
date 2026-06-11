@@ -375,20 +375,27 @@ const removeSpacerSafely = (n: Element): boolean => {
   return false;
 };
 
-// Очистка HTML от служебных распорок и сборка разрезанных блоков обратно в один
 const cleanEditorArtifacts = (html: string): string => {
   const w = document.createElement("div");
   w.innerHTML = html;
+
+  // Удаляем распорки
   w.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => removeSpacerSafely(n));
+
   const groups = new Map<string, HTMLElement[]>();
   w.querySelectorAll<HTMLElement>(`[${AUTOSPLIT_ATTR}]`).forEach((el) => {
+    // Если этот кусок принадлежит штампу ЭЦП, не трогаем его авторазбивки
+    if (el.hasAttribute(STAMP_ATTR) || el.closest(`[${STAMP_ATTR}]`)) return;
+
     const gid = el.getAttribute(AUTOSPLIT_ATTR) || "";
     const arr = groups.get(gid) || [];
     arr.push(el);
     groups.set(gid, arr);
   });
+
   groups.forEach((pieces) => {
     const first = pieces[0];
+    if (!first) return;
     first.removeAttribute(AUTOSPLIT_ATTR);
     for (let k = 1; k < pieces.length; k++) {
       let child = pieces[k].firstChild;
@@ -400,6 +407,7 @@ const cleanEditorArtifacts = (html: string): string => {
     }
     first.normalize();
   });
+
   return w.innerHTML;
 };
 
@@ -708,22 +716,32 @@ export const CreateInternalCorrespondence = ({
     messages: {
       invalidate: [
         ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
-        ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
+        // Убираем отсюда автоматический инвалейд версий, чтобы контролировать поток вручную
       ],
     },
     queryOptions: {
       onSuccess: () => {
-        // 1. Сначала запрашиваем актуальный список версий с бэкенда
+        // 1. Сначала стягиваем свежие версии, чтобы узнать ID только что созданной (1.6)
         refetchVersions().then((updatedResponse) => {
           const freshVersions = updatedResponse?.data?.data?.versions;
 
-          // 2. Берем самый последний элемент из تازه полученного массива
           if (Array.isArray(freshVersions) && freshVersions.length > 0) {
-            const latestVersionId = freshVersions[freshVersions.length - 1]?.id;
+            const latestVersion = freshVersions[freshVersions.length - 1];
 
-            if (latestVersionId) {
-              // 3. Автоматически выбираем её для подписания
-              selectVersionForSign({ versionId: latestVersionId });
+            if (latestVersion?.id) {
+              // 2. Мгновенно меняем активную версию в стейте фронтенда
+              setActiveVersionId(latestVersion.id);
+
+              // 3. Передаем в selectVersionForSign колбэк для повторного рефетча ПОСЛЕ успешного выбора
+              selectVersionForSign(
+                { versionId: latestVersion.id },
+                {
+                  onSuccess: () => {
+                    // 4. Перезапрашиваем версии еще раз, когда бэкенд точно проставил галочку в БД
+                    refetchVersions();
+                  },
+                },
+              );
             }
           }
         });
@@ -852,7 +870,7 @@ export const CreateInternalCorrespondence = ({
             const certSerial = `SN-2026-${currentSignerInitials}-84201`;
             const validUntil = "с 20.03.2025 до 20.03.2026";
 
-            // 2. Генерируем чистые rects для QR-кода, чтобы вставить их внутрь общего SVG
+            // 2. Генерируем чистые rects для QR-кода
             const GRID = 21;
             const matrix = generateQRMatrix(
               `${certSerial}|${currentSignerName}|${currentDate}`,
@@ -869,11 +887,10 @@ export const CreateInternalCorrespondence = ({
               }
             }
 
-            // 3. Формируем единый SVG-код штампа ЭЦП со всеми текстами и QR-кодом
+            // 3. Формируем единый SVG-код штампа ЭЦП
             const fullStampSvg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="320" height="110" viewBox="0 0 320 110" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="110" viewBox="0 0 320 110" fill="none" style="display:block;">
   <rect x="0.75" y="0.75" width="318.5" height="108.5" rx="5.25" fill="white" stroke="#3b82f6" stroke-width="1.5"/>
-  
   <g clip-path="url(#clip0)">
     <rect x="1.5" y="1.5" width="7" height="35.3" fill="#CC0001"/>
     <rect x="1.5" y="36.8" width="7" height="36.4" fill="#FFFFFF"/>
@@ -914,20 +931,12 @@ export const CreateInternalCorrespondence = ({
               .replace(/[\n\t]/g, "")
               .trim();
 
-            // 4. Кодируем полученный SVG в Base64 для безопасного Data-URI
             const encodedSvg = btoa(unescape(encodeURIComponent(fullStampSvg)));
             const stampDataUri = `data:image/svg+xml;base64,${encodedSvg}`;
 
-            // 5. Генерируем финальный HTML-контейнер, где внутри лежит НЕ текст, а картинка <img>
-            const stampHTML = `
-<div data-signature-stamp="true" contenteditable="false" style="position: absolute; left: ${stampPos.x}px; top: ${stampPos.y}px; width: ${widthStr}; height: 110px; z-index: 50; user-select: none; -webkit-user-select: none; cursor: default;">
-  <img src="${stampDataUri}" alt="ЭЦП" style="display: block; width: 100%; height: 110px; pointer-events: none; -webkit-user-drag: none;" />
-</div>
-`
-              .replace(/[\n\t]/g, "")
-              .trim();
+            // Использовать строго в одну строку без пробелов внутри тегов, чтобы редактор не вставил текстовые переносы
+            const stampHTML = `<div data-signature-stamp="true" contenteditable="false" style="position:absolute;left:${stampPos.x}px;top:${stampPos.y}px;width:${widthStr};height:110px;max-height:110px;z-index:99;user-select:none;-webkit-user-select:none;cursor:default;overflow:hidden!important;display:block!important;line-height:0!important;padding:0!important;margin:0!important;border:none!important;"><img src="${stampDataUri}" alt="ЭЦП" style="display:block!important;width:100%!important;height:110px!important;max-height:110px!important;pointer-events:none!important;-webkit-user-drag:none!important;padding:0!important;margin:0!important;border:none!important;outline:none!important;line-height:0!important;" /></div>`;
 
-            // 6. Засовываем готовый HTML в редактор
             editorRef.current.innerHTML += stampHTML;
           }
         }
@@ -1306,13 +1315,116 @@ export const CreateInternalCorrespondence = ({
     const editor = editorRef.current;
     if (!editor) return 1;
 
-    const caret = getCaretCharOffset(editor);
+    // --- Функция структурного сохранения курсора ---
+    const saveCaretStructure = () => {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0 || !editor.contains(sel.anchorNode))
+        return null;
+
+      const range = sel.getRangeAt(0);
+      const node = range.startContainer;
+      const offset = range.startOffset;
+
+      if (node === editor) {
+        return { blockIndex: 0, path: [], offset: 0 };
+      }
+
+      // Находим родительский блок верхнего уровня (прямой потомок editor)
+      let topBlock = node;
+      while (topBlock && topBlock.parentNode !== editor) {
+        topBlock = topBlock.parentNode!;
+      }
+      if (!topBlock) return null;
+
+      // Считаем индекс этого блока среди всех детей, игнорируя распорки spacer
+      const children = Array.from(editor.children);
+      let blockIndex = 0;
+      for (const child of children) {
+        if (child === topBlock) break;
+        if (!child.hasAttribute(SPACER_ATTR)) {
+          blockIndex++;
+        }
+      }
+
+      // Запоминаем путь от topBlock до целевого узла (node)
+      const path: number[] = [];
+      let current = node;
+      while (current !== topBlock) {
+        const parent = current.parentNode;
+        if (!parent) break;
+        const index = Array.from(parent.childNodes).indexOf(
+          current as ChildNode,
+        );
+        path.unshift(index);
+        current = parent;
+      }
+
+      return { blockIndex, path, offset };
+    };
+
+    // --- Функция структурного восстановления курсора ---
+    const restoreCaretStructure = (snapshot: any) => {
+      if (!snapshot) return;
+
+      const children = Array.from(editor.children);
+      let currentBlock: Element | null = null;
+      let nonSpacerCount = 0;
+
+      // Ищем блок по индексу, пропуская сервисные распорки spacers
+      for (const child of children) {
+        if (child.hasAttribute(SPACER_ATTR)) continue;
+        if (nonSpacerCount === snapshot.blockIndex) {
+          currentBlock = child;
+          break;
+        }
+        nonSpacerCount++;
+      }
+
+      if (!currentBlock) {
+        const validBlocks = children.filter(
+          (c) => !c.hasAttribute(SPACER_ATTR),
+        );
+        currentBlock = validBlocks[validBlocks.length - 1] || editor;
+      }
+
+      // Спускаемся по сохраненному пути дерева DOM к нужному узлу
+      let targetNode: Node = currentBlock;
+      for (const idx of snapshot.path) {
+        if (targetNode.childNodes[idx]) {
+          targetNode = targetNode.childNodes[idx];
+        } else {
+          targetNode = targetNode.lastChild || targetNode;
+          break;
+        }
+      }
+
+      try {
+        const range = document.createRange();
+        const maxOffset =
+          targetNode.nodeType === Node.TEXT_NODE
+            ? targetNode.textContent?.length || 0
+            : targetNode.childNodes.length;
+
+        range.setStart(targetNode, Math.min(snapshot.offset, maxOffset));
+        range.collapse(true);
+
+        const sel = window.getSelection();
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+      } catch (e) {
+        console.error("Ошибка восстановления каретки:", e);
+      }
+    };
+
+    // Сохраняем положение курсора через структуру
+    const caretSnapshot = saveCaretStructure();
     let textMutated = false;
 
     // 1. Убираем старые распорки и собираем ранее разрезанные блоки обратно
     editor.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => {
       if (removeSpacerSafely(n)) textMutated = true;
     });
+
     const groups = new Map<string, HTMLElement[]>();
     editor
       .querySelectorAll<HTMLElement>(`[${AUTOSPLIT_ATTR}]`)
@@ -1337,13 +1449,12 @@ export const CreateInternalCorrespondence = ({
       textMutated = true;
     });
 
-    // Контент помещается на один лист и нет ручных разрывов —
-    // ничего не режем (бережём курсор/ввод)
+    // Контент помещается на один лист и нет ручных разрывов
     if (
       editor.scrollHeight <= CONTENT_HEIGHT &&
       !editor.querySelector(`[${PAGE_BREAK_ATTR}]`)
     ) {
-      if (textMutated) restoreCaretCharOffset(editor, caret);
+      if (textMutated) restoreCaretStructure(caretSnapshot);
       return 1;
     }
 
@@ -1388,7 +1499,6 @@ export const CreateInternalCorrespondence = ({
         i++;
         continue;
       }
-      // Ручной разрыв страницы: всё, что после него, начинается со следующего листа
       if (block.hasAttribute(PAGE_BREAK_ATTR)) {
         const top = block.offsetTop;
         const page = Math.floor(top / PAGE_STRIDE);
@@ -1396,11 +1506,9 @@ export const CreateInternalCorrespondence = ({
           makeSpacer((page + 1) * PAGE_STRIDE - top),
           block.nextSibling,
         );
-        i += 2; // сам разрыв + вставленная распорка
+        i += 2;
         continue;
       }
-      // Печать ЭЦП спозиционирована абсолютно (вне потока) — её нельзя
-      // переносить/резать (иначе textContent затрёт внутреннюю вёрстку).
       if (
         block.hasAttribute("data-signature-stamp") ||
         getComputedStyle(block).position === "absolute"
@@ -1425,16 +1533,13 @@ export const CreateInternalCorrespondence = ({
         !EDITOR_ATOMIC_TAGS.has(tag) &&
         (block.textContent || "").trim().length > 0;
 
-      // 3a. Блок помещается на лист целиком — переносим его на следующий
       if (h <= CONTENT_HEIGHT && top > pageStart + 2) {
         editor.insertBefore(makeSpacer((page + 1) * PAGE_STRIDE - top), block);
         i++;
         continue;
       }
 
-      // 3b. Блок выше листа и его можно резать
       if (h > CONTENT_HEIGHT && splittable) {
-        // Сначала поставим блок на начало листа, если он висит ниже
         if (top > pageStart + 2) {
           editor.insertBefore(
             makeSpacer((page + 1) * PAGE_STRIDE - top),
@@ -1443,7 +1548,6 @@ export const CreateInternalCorrespondence = ({
           i++;
           continue;
         }
-        // Бинарным поиском оставляем в блоке столько символов, сколько влезает
         textMutated = true;
         const full = block.textContent || "";
         let lo = 1;
@@ -1479,15 +1583,16 @@ export const CreateInternalCorrespondence = ({
         continue;
       }
 
-      // 3c. Неразрезаемый блок (таблица/картинка) — оставляем как есть
       i++;
     }
 
-    if (textMutated) restoreCaretCharOffset(editor, caret);
+    // Восстанавливаем позицию курсора на основе структуры DOM-узлов
+    if (textMutated || caretSnapshot) {
+      restoreCaretStructure(caretSnapshot);
+    }
 
     return Math.max(1, Math.ceil(editor.scrollHeight / PAGE_STRIDE));
   }, [CONTENT_HEIGHT, PAGE_STRIDE]);
-
   const handleEditorInput = useCallback(() => {
     setEditorContent(getCleanEditorHtml());
   }, [getCleanEditorHtml]);
@@ -2025,33 +2130,44 @@ export const CreateInternalCorrespondence = ({
     isDraggingStamp.current = true;
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     dragOffset.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+
     const onMouseMove = (ev: MouseEvent) => {
-      // Координаты считаем относительно редактора (а не холста страницы): печать
-      // ЭЦП при подписании вставляется ВНУТРЬ редактора, поэтому placeholder и
-      // итоговый рисунок должны жить в одной системе координат — иначе на «Подписать»
-      // рисунок прыгал бы на величину полей страницы.
       if (!isDraggingStamp.current || !editorRef.current) return;
+
       const cr = editorRef.current.getBoundingClientRect();
+
+      // Вычисляем максимальную доступную высоту на основе сгенерированных страниц,
+      // а не высоты контента внутри editorRef.
+      // Вычитаем PAGE_PAD_V * 2, чтобы штамп оставался строго в границах печатной области.
+      const maxCanvasHeight =
+        pageCount * PAGE_STRIDE - PAGE_GAP - PAGE_PAD_V * 2;
+      const currentStampWidth =
+        typeof stampSize.width === "number" ? stampSize.width : 320;
+
       setStampPos({
         x: Math.max(
           0,
           Math.min(
             ev.clientX - cr.left - dragOffset.current.x,
-            cr.width -
-              (typeof stampSize.width === "number" ? stampSize.width : 320),
+            cr.width - currentStampWidth,
           ),
         ),
         y: Math.max(
           0,
-          Math.min(ev.clientY - cr.top - dragOffset.current.y, cr.height - 120),
+          Math.min(
+            ev.clientY - cr.top - dragOffset.current.y,
+            maxCanvasHeight - 110, // 110px — фиксированная высота штампа ЭЦП
+          ),
         ),
       });
     };
+
     const onMouseUp = () => {
       isDraggingStamp.current = false;
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     };
+
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
   };
@@ -3033,9 +3149,9 @@ export const CreateInternalCorrespondence = ({
                         whiteSpace: "pre-wrap",
                         overflowWrap: "break-word",
                         wordBreak: "break-word",
-                        overflowX: "hidden",
+                        overflow: "visible",
                       }}
-                      className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_pre]:whitespace-pre-wrap [&_div]:min-h-[1.8em]"
+                      className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_pre]:whitespace-pre-wrap [&_div:not([data-signature-stamp])]:min-h-[1.8em]"
                     />
 
                     {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания.
