@@ -1,10 +1,10 @@
-import { HrWidget } from "@widgets/Hr/ui";
+import { Outlet } from "react-router-dom";
 
-export const HrPage: React.FC = () => {
-    return (
-        <div>
-            <h1>HR PAGE</h1>
-            <HrWidget/>
-        </div>
-    );
+// Layout HR-модуля: контент вкладок рендерится через вложенные роуты
+export const HrLayoutPage: React.FC = () => {
+  return (
+    <div className="p-4 md:p-6">
+      <Outlet />
+    </div>
+  );
 };

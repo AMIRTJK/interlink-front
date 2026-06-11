@@ -13,10 +13,10 @@ export const CreateOrganization = () => {
     preloadConditional: ["organizations.create"]
   });
 
-  const onFinish = (values: any) => {
+  const onFinish = (values: Record<string, string>) => {
     const { meta_type, meta_note, ...rest } = values;
     const payload: CreateOrganizationDTO = {
-      ...rest,
+      ...(rest as unknown as Omit<CreateOrganizationDTO, "meta">),
       meta: { type: meta_type, note: meta_note }
     };
     mutate(payload, { onSuccess: () => form.resetFields() });
