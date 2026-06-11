@@ -76,7 +76,7 @@ export const getModuleItems = (
 	// HR module
 	{
 		key: AppRoutes.HR,
-		label: "Кадры",
+		label: "Человеский ресурс",
 		icon:
 			variant === "horizontal" || variant === "full" || variant === "ios" ? (
 				<img src={OrganizationIcon} alt="hr" />
