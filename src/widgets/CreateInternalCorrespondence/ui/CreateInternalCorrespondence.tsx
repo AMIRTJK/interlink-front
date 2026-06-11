@@ -375,20 +375,27 @@ const removeSpacerSafely = (n: Element): boolean => {
   return false;
 };
 
-// Очистка HTML от служебных распорок и сборка разрезанных блоков обратно в один
 const cleanEditorArtifacts = (html: string): string => {
   const w = document.createElement("div");
   w.innerHTML = html;
+
+  // Удаляем распорки
   w.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => removeSpacerSafely(n));
+
   const groups = new Map<string, HTMLElement[]>();
   w.querySelectorAll<HTMLElement>(`[${AUTOSPLIT_ATTR}]`).forEach((el) => {
+    // Если этот кусок принадлежит штампу ЭЦП, не трогаем его авторазбивки
+    if (el.hasAttribute(STAMP_ATTR) || el.closest(`[${STAMP_ATTR}]`)) return;
+
     const gid = el.getAttribute(AUTOSPLIT_ATTR) || "";
     const arr = groups.get(gid) || [];
     arr.push(el);
     groups.set(gid, arr);
   });
+
   groups.forEach((pieces) => {
     const first = pieces[0];
+    if (!first) return;
     first.removeAttribute(AUTOSPLIT_ATTR);
     for (let k = 1; k < pieces.length; k++) {
       let child = pieces[k].firstChild;
@@ -400,6 +407,7 @@ const cleanEditorArtifacts = (html: string): string => {
     }
     first.normalize();
   });
+
   return w.innerHTML;
 };
 
@@ -862,7 +870,7 @@ export const CreateInternalCorrespondence = ({
             const certSerial = `SN-2026-${currentSignerInitials}-84201`;
             const validUntil = "с 20.03.2025 до 20.03.2026";
 
-            // 2. Генерируем чистые rects для QR-кода, чтобы вставить их внутрь общего SVG
+            // 2. Генерируем чистые rects для QR-кода
             const GRID = 21;
             const matrix = generateQRMatrix(
               `${certSerial}|${currentSignerName}|${currentDate}`,
@@ -879,11 +887,10 @@ export const CreateInternalCorrespondence = ({
               }
             }
 
-            // 3. Формируем единый SVG-код штампа ЭЦП со всеми текстами и QR-кодом
+            // 3. Формируем единый SVG-код штампа ЭЦП
             const fullStampSvg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="320" height="110" viewBox="0 0 320 110" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="110" viewBox="0 0 320 110" fill="none" style="display:block;">
   <rect x="0.75" y="0.75" width="318.5" height="108.5" rx="5.25" fill="white" stroke="#3b82f6" stroke-width="1.5"/>
-  
   <g clip-path="url(#clip0)">
     <rect x="1.5" y="1.5" width="7" height="35.3" fill="#CC0001"/>
     <rect x="1.5" y="36.8" width="7" height="36.4" fill="#FFFFFF"/>
@@ -924,20 +931,12 @@ export const CreateInternalCorrespondence = ({
               .replace(/[\n\t]/g, "")
               .trim();
 
-            // 4. Кодируем полученный SVG в Base64 для безопасного Data-URI
             const encodedSvg = btoa(unescape(encodeURIComponent(fullStampSvg)));
             const stampDataUri = `data:image/svg+xml;base64,${encodedSvg}`;
 
-            // 5. Генерируем финальный HTML-контейнер, где внутри лежит НЕ текст, а картинка <img>
-            const stampHTML = `
-<div data-signature-stamp="true" contenteditable="false" style="position: absolute; left: ${stampPos.x}px; top: ${stampPos.y}px; width: ${widthStr}; height: 110px; z-index: 50; user-select: none; -webkit-user-select: none; cursor: default;">
-  <img src="${stampDataUri}" alt="ЭЦП" style="display: block; width: 100%; height: 110px; pointer-events: none; -webkit-user-drag: none;" />
-</div>
-`
-              .replace(/[\n\t]/g, "")
-              .trim();
+            // Использовать строго в одну строку без пробелов внутри тегов, чтобы редактор не вставил текстовые переносы
+            const stampHTML = `<div data-signature-stamp="true" contenteditable="false" style="position:absolute;left:${stampPos.x}px;top:${stampPos.y}px;width:${widthStr};height:110px;max-height:110px;z-index:99;user-select:none;-webkit-user-select:none;cursor:default;overflow:hidden!important;display:block!important;line-height:0!important;padding:0!important;margin:0!important;border:none!important;"><img src="${stampDataUri}" alt="ЭЦП" style="display:block!important;width:100%!important;height:110px!important;max-height:110px!important;pointer-events:none!important;-webkit-user-drag:none!important;padding:0!important;margin:0!important;border:none!important;outline:none!important;line-height:0!important;" /></div>`;
 
-            // 6. Засовываем готовый HTML в редактор
             editorRef.current.innerHTML += stampHTML;
           }
         }
@@ -2035,33 +2034,44 @@ export const CreateInternalCorrespondence = ({
     isDraggingStamp.current = true;
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     dragOffset.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+
     const onMouseMove = (ev: MouseEvent) => {
-      // Координаты считаем относительно редактора (а не холста страницы): печать
-      // ЭЦП при подписании вставляется ВНУТРЬ редактора, поэтому placeholder и
-      // итоговый рисунок должны жить в одной системе координат — иначе на «Подписать»
-      // рисунок прыгал бы на величину полей страницы.
       if (!isDraggingStamp.current || !editorRef.current) return;
+
       const cr = editorRef.current.getBoundingClientRect();
+
+      // Вычисляем максимальную доступную высоту на основе сгенерированных страниц,
+      // а не высоты контента внутри editorRef.
+      // Вычитаем PAGE_PAD_V * 2, чтобы штамп оставался строго в границах печатной области.
+      const maxCanvasHeight =
+        pageCount * PAGE_STRIDE - PAGE_GAP - PAGE_PAD_V * 2;
+      const currentStampWidth =
+        typeof stampSize.width === "number" ? stampSize.width : 320;
+
       setStampPos({
         x: Math.max(
           0,
           Math.min(
             ev.clientX - cr.left - dragOffset.current.x,
-            cr.width -
-              (typeof stampSize.width === "number" ? stampSize.width : 320),
+            cr.width - currentStampWidth,
           ),
         ),
         y: Math.max(
           0,
-          Math.min(ev.clientY - cr.top - dragOffset.current.y, cr.height - 120),
+          Math.min(
+            ev.clientY - cr.top - dragOffset.current.y,
+            maxCanvasHeight - 110, // 110px — фиксированная высота штампа ЭЦП
+          ),
         ),
       });
     };
+
     const onMouseUp = () => {
       isDraggingStamp.current = false;
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     };
+
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
   };
@@ -3043,9 +3053,9 @@ export const CreateInternalCorrespondence = ({
                         whiteSpace: "pre-wrap",
                         overflowWrap: "break-word",
                         wordBreak: "break-word",
-                        overflowX: "hidden",
+                        overflow: "visible",
                       }}
-                      className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_pre]:whitespace-pre-wrap [&_div]:min-h-[1.8em]"
+                      className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-fixed [&_td]:break-words [&_pre]:whitespace-pre-wrap [&_div:not([data-signature-stamp])]:min-h-[1.8em]"
                     />
 
                     {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания.
