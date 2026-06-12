@@ -109,6 +109,9 @@ export const PreviewModal = ({
   const CONTENT_STYLE = contentStyle(fontSize);
 
   const measureRef = useRef<HTMLDivElement>(null);
+  // Вьюпорт прокрутки — нужен, чтобы «По размеру» считал зум по реальной
+  // доступной области, а не по приблизительной window.innerHeight.
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<string[]>([]);
   const [zoom, setZoom] = useState(1);
   const [currentPage, setCurrentPage] = useState(0);
@@ -303,16 +306,25 @@ export const PreviewModal = ({
   // абсолютно), без собственных полей/перетекания.
   const usingProvidedPages = !!(providedPages && providedPages.length);
 
+  // «По размеру»: подгоняем лист так, чтобы он ЦЕЛИКОМ помещался в видимую
+  // область прокрутки (и по ширине, и по высоте). Считаем по реальным размерам
+  // вьюпорта за вычетом внутренних полей и округляем ВНИЗ — иначе лист на пару
+  // пикселей вылезает за край и появляется лишний скролл при полном размере.
   const zoomToFit = () => {
-    const availableHeight = window.innerHeight - 160;
-    const fitZoom = availableHeight / pageHeight;
-    setZoom(Math.max(0.4, Math.min(1.5, +fitZoom.toFixed(2))));
+    const vp = scrollRef.current;
+    const PAD = 40; // p-4 контейнера (16px×2) + небольшой запас по краям
+    const availW = (vp?.clientWidth ?? window.innerWidth) - PAD;
+    const availH = (vp?.clientHeight ?? window.innerHeight - 160) - PAD;
+    if (availW <= 0 || availH <= 0) return;
+    const fitZoom = Math.min(availW / pageWidth, availH / pageHeight);
+    setZoom(Math.max(0.3, Math.min(1.5, Math.floor(fitZoom * 100) / 100)));
   };
 
   useEffect(() => {
     if (sheets.length) {
       setTimeout(zoomToFit, 50);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sheets.length, orientation]);
 
   const zoomIn = () => setZoom((z) => Math.min(2, +(z + 0.1).toFixed(2)));
@@ -341,6 +353,22 @@ export const PreviewModal = ({
         className="fixed inset-0 z-[9999] flex flex-col bg-slate-700/80 backdrop-blur-sm select-none overflow-hidden h-screen w-screen"
         onClick={onClose}
       >
+        {/* Скроллбар рабочей области — в тон тёмной модалке: тонкий, скруглённый,
+            полупрозрачный, с подсветкой при наведении. */}
+        <style>{`
+          .preview-scroll { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,0.5) transparent; }
+          .preview-scroll::-webkit-scrollbar { width: 12px; height: 12px; }
+          .preview-scroll::-webkit-scrollbar-track { background: transparent; }
+          .preview-scroll::-webkit-scrollbar-thumb {
+            background-color: rgba(148,163,184,0.45);
+            border-radius: 9999px;
+            border: 3px solid transparent;
+            background-clip: content-box;
+          }
+          .preview-scroll::-webkit-scrollbar-thumb:hover { background-color: rgba(203,213,225,0.75); background-clip: content-box; }
+          .preview-scroll::-webkit-scrollbar-corner { background: transparent; }
+        `}</style>
+
         {/* Хедер модального окна */}
         <div
           className="flex-shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-slate-800 border-b border-slate-600 h-16"
@@ -412,22 +440,35 @@ export const PreviewModal = ({
           onClick={onClose}
         >
           <div
-            className="flex-1 w-full overflow-auto px-4 py-4 flex items-start justify-center"
+            ref={scrollRef}
+            className="preview-scroll flex-1 w-full overflow-auto p-4 flex"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Внешняя обёртка занимает РЕАЛЬНЫЙ (масштабированный) размер листа в
+                потоке — transform на размеры макета не влияет, поэтому раньше при
+                «По размеру» лист занимал полные 794×1122 и появлялся скролл. Теперь
+                габариты = pageW×zoom / pageH×zoom, а сам лист внутри масштабируется
+                трансформом. Скролл появляется только когда зум > вписанного.
+                margin:auto центрирует лист, но в отличие от justify-center не
+                «обрезает» верх/левый край при прокрутке увеличенного листа. */}
             <div
               style={{
-                width: pageWidth,
-                height: pageHeight,
-                transform: `scale(${zoom})`,
-                transformOrigin: "top center",
-                transition: "transform 0.1s ease-out",
-                marginBottom: zoom > 1 ? `${pageHeight * (zoom - 1)}px` : 0,
-                marginRight: zoom > 1 ? `${(pageWidth * (zoom - 1)) / 2}px` : 0,
-                marginLeft: zoom > 1 ? `${(pageWidth * (zoom - 1)) / 2}px` : 0,
+                width: pageWidth * zoom,
+                height: pageHeight * zoom,
+                margin: "auto",
+                flexShrink: 0,
+                transition: "width 0.1s ease-out, height 0.1s ease-out",
               }}
-              className="flex-shrink-0"
             >
+              <div
+                style={{
+                  width: pageWidth,
+                  height: pageHeight,
+                  transform: `scale(${zoom})`,
+                  transformOrigin: "top left",
+                  transition: "transform 0.1s ease-out",
+                }}
+              >
               <motion.div
                 key={currentPage}
                 initial={{ opacity: 0, y: 8 }}
@@ -504,6 +545,7 @@ export const PreviewModal = ({
                   </div>
                 )}
               </motion.div>
+              </div>
             </div>
           </div>
 

@@ -2313,8 +2313,38 @@ export const CreateInternalCorrespondence = ({
       }
       range.deleteContents();
 
+      // Блочный контент (импорт Word, вставка многостраничного документа) должен
+      // ложиться ВЕРХНЕУРОВНЕВЫМИ блоками редактора. После очистки (CTRL+A+Delete)
+      // редактор сбрасывается в пустой блок-плейсхолдер <div><br></div>, и каретка
+      // стоит ВНУТРИ него. Тогда range.insertNode вложил бы все абзацы документа
+      // в этот один <div>: постраничная разбивка считает его одним «гигантским»
+      // блоком, режет по тексту (теряя форматирование), а печать сваливает всё на
+      // первую страницу и обрезает не влезшее (пропадал нижний текст письма).
+      // Поэтому, если каретка в пустом плейсхолдере, поднимаем точку вставки на
+      // уровень редактора и убираем плейсхолдер.
+      const fragmentHasBlocks = Array.from(fragment.childNodes).some(
+        (n) =>
+          n.nodeType === Node.ELEMENT_NODE &&
+          EDITOR_BLOCK_TAGS.has((n as HTMLElement).tagName),
+      );
+      let placeholder: HTMLElement | null = null;
+      if (fragmentHasBlocks && range.startContainer !== editor) {
+        const topBlock = topLevelBlockOf(editor, range.startContainer);
+        if (
+          topBlock &&
+          !(topBlock.textContent || "").trim() &&
+          !topBlock.querySelector("img,table,hr")
+        ) {
+          placeholder = topBlock;
+          range = document.createRange();
+          range.setStartBefore(topBlock);
+          range.collapse(true);
+        }
+      }
+
       const lastNode = fragment.lastChild;
       range.insertNode(fragment);
+      placeholder?.remove();
 
       // Курсор после вставленного содержимого
       if (lastNode) {
@@ -2341,6 +2371,28 @@ export const CreateInternalCorrespondence = ({
     return fragment;
   }, []);
 
+  // Инлайновый фрагмент для вставки однострочного форматированного текста: блоки
+  // (p/div/h*/li/…) разворачиваем в их содержимое, чтобы вставка шла В СТРОКУ
+  // рядом с курсором, но сохраняла оформление (жирный/курсив/подчёркивание/цвет/
+  // размер через span style). Иначе одиночное скопированное слово либо уезжало
+  // на новую строку (как блок), либо теряло стили (как голый текст).
+  const buildInlineFragmentFromHtml = useCallback((html: string) => {
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = html;
+    wrapper.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => n.remove());
+    const BLOCK_SEL =
+      "p,div,h1,h2,h3,h4,h5,h6,li,ul,ol,table,thead,tbody,tr,td,th,blockquote,section,header,footer,pre,figure";
+    let guard = 0;
+    let block = wrapper.querySelector(BLOCK_SEL);
+    while (block && guard++ < 2000) {
+      block.replaceWith(...Array.from(block.childNodes));
+      block = wrapper.querySelector(BLOCK_SEL);
+    }
+    const fragment = document.createDocumentFragment();
+    while (wrapper.firstChild) fragment.appendChild(wrapper.firstChild);
+    return fragment;
+  }, []);
+
   // Очистка HTML при вставке из Word / PDF / других источников: sanitizeWordHtml
   // убирает служебную разметку Office, переводит размеры pt → px (тот же 96 DPI,
   // что и у А4-холста) и нормализует пробелы — поэтому форматирование совпадает
@@ -2356,14 +2408,20 @@ export const CreateInternalCorrespondence = ({
       const text = e.clipboardData.getData("text/plain");
       const isMultiline = /\r?\n/.test(text.trim());
 
+      const htmlHasText = !!html && !!html.replace(/<[^>]*>/g, "").trim();
+
       let fragment: DocumentFragment;
       if (html && isMultiline) {
         // Многострочный форматированный контент (документ из Word) — сохраняем
         // структуру и оформление как есть.
         fragment = buildFragmentFromHtml(sanitizeWordHtml(html));
+      } else if (htmlHasText) {
+        // Однострочный форматированный фрагмент: вставляем инлайн (рядом с
+        // курсором), но СОХРАНЯЕМ оформление — раньше такой текст уходил в
+        // ветку plain-text и терял жирный/курсив/подчёркивание/цвет.
+        fragment = buildInlineFragmentFromHtml(sanitizeWordHtml(html));
       } else if (text) {
-        // Однострочный текст вставляем инлайн (рядом с курсором), а не блоком —
-        // иначе скопированное слово уезжало на новую строку вниз.
+        // Совсем без разметки — вставляем как текст, перенос строки → <br>.
         fragment = document.createDocumentFragment();
         const lines = text.split(/\r?\n/);
         lines.forEach((line, idx) => {
@@ -2377,7 +2435,7 @@ export const CreateInternalCorrespondence = ({
 
       insertFragmentAtCaret(fragment);
     },
-    [buildFragmentFromHtml, insertFragmentAtCaret],
+    [buildFragmentFromHtml, buildInlineFragmentFromHtml, insertFragmentAtCaret],
   );
 
   // Переносит специфичную для импорта разметку mammoth в формат холста:
@@ -2453,6 +2511,11 @@ export const CreateInternalCorrespondence = ({
         const styleMap = [
           ...fmtKeys.map((k) => `p[style-name='${k}'] => p.${k}:fresh`),
           "br[type='page'] => hr.docx-page-break:fresh",
+          // mammoth по умолчанию сохраняет только жирный/курсив (=> strong/em),
+          // а подчёркивание и зачёркивание молча отбрасывает. Возвращаем их —
+          // иначе при импорте Word терялись эти начертания.
+          "u => u",
+          "strike => s",
         ];
 
         const result = await mammoth.convertToHtml(
