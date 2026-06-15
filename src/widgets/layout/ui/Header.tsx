@@ -1,11 +1,10 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Avatar, Tooltip, Popover } from "antd";
 import { Bell, LogOut, BookOpen, CheckCircle, Sun, Moon } from "lucide-react"; // Добавили Sun и Moon
 import Logo from "../../../assets/images/logo.svg";
 import UserAvatar from "../../../assets/images/user-avatar.jpg";
-import { tokenControl } from "@shared/lib";
+import { tokenControl, useLogout } from "@shared/lib";
 import { AppRoutes } from "@shared/config";
-import { toast } from "react-toastify";
 import { useState } from "react";
 
 interface IProps {
@@ -40,7 +39,7 @@ const mockNotifications = [
 ];
 
 export const Header = ({ isModulesPage }: IProps) => {
-  const navigate = useNavigate();
+  const handleLogout = useLogout();
   const [notifications, setNotifications] = useState(mockNotifications);
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() =>
@@ -48,14 +47,6 @@ export const Header = ({ isModulesPage }: IProps) => {
   );
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
-
-  const handleLogout = () => {
-    toast.info("Выход из системы!");
-    setTimeout(() => {
-      tokenControl.remove();
-      navigate(AppRoutes.LOGIN);
-    }, 1000);
-  };
 
   const markAllAsRead = () => {
     setNotifications(notifications.map((n) => ({ ...n, isRead: true })));

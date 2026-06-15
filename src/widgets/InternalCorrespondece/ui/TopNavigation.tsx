@@ -10,13 +10,11 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { motion, AnimatePresence } from "framer-motion";
-import { tokenControl, useGetQuery } from "@shared/lib";
+import { useGetQuery, useLogout } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { useNavigate, useLocation } from "react-router";
 import { ChevronLeft, LogOut } from "lucide-react";
 import { Avatar, Tooltip } from "antd";
-import { toast } from "react-toastify";
-import { AppRoutes } from "@shared/config";
 import UserAvatar from "../../../assets/images/user-avatar.jpg";
 
 interface NavRegistry {
@@ -136,13 +134,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
     }),
   );
 
-  const handleLogout = () => {
-    toast.info("Выход из системы!");
-    setTimeout(() => {
-      tokenControl.remove();
-      navigate(AppRoutes.LOGIN);
-    }, 1000);
-  };
+  const handleLogout = useLogout();
 
   const navRegistries: Record<string, NavRegistry> = {
     inbox: {
