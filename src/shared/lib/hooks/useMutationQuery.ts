@@ -37,6 +37,8 @@ interface IUseMutationQueryOptions<TRequest = TBaseRequest, TData = any, TSecond
   method: "POST" | "PUT" | "DELETE" | "GET" | "PATCH";
   messages?: {
     success?: string;
+    /** Не показывать success-тост (например, для промежуточных шагов) */
+    suppressSuccessToast?: boolean;
     error?: string;
     invalidate?: string[];
     onSuccessCb?: (data: any) => void;
@@ -170,9 +172,8 @@ export const useMutationQuery = <
     ...queryOptions,
 
     onSuccess: (finalData, variables, context) => {
-      const successMessage = messages?.success || "Операция успешно выполнена";
-      if (successMessage && method !== "GET") {
-        toast.success(successMessage);
+      if (!messages?.suppressSuccessToast && method !== "GET") {
+        toast.success(messages?.success || "Операция успешно выполнена");
       }
 
       messages?.onSuccessCb?.(finalData);

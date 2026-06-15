@@ -12,10 +12,17 @@ import {
 	Smartphone,
 } from "lucide-react";
 
+import { toast } from "react-toastify";
+
 import { AppRoutes } from "@shared/config";
 import { ApiRoutes } from "@shared/api";
 import { tokenControl, useMutationQuery } from "@shared/lib";
-import { ILoginRequest, ILoginResponse } from "@entities/login";
+import {
+	ILoginRequest,
+	ILoginResponse,
+	IMfaVerifyRequest,
+	IMfaVerifyResponse,
+} from "@entities/login";
 
 type AuthStep = "login" | "verification";
 
@@ -50,42 +57,76 @@ export const Login = () => {
 	};
 
 	const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+	const [mfaToken, setMfaToken] = useState("");
 	const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-	// Ваш старый хук для запроса на бекенд
-	const { mutate, isPending } = useMutationQuery<ILoginRequest, ILoginResponse>(
-		{
-			url: ApiRoutes.LOGIN,
-			method: "POST",
-			skipAuth: true,
-			messages: {
-				onSuccessCb: async (data) => {
-					const token = data.token;
-					tokenControl.set({ token });
-					tokenControl.setUserId(data?.user?.id);
-					navigate(AppRoutes.PROFILE_TASKS, { replace: true });
-				},
+	const resetOtp = () => {
+		setOtp(["", "", "", "", "", ""]);
+		otpRefs.current[0]?.focus();
+	};
+
+	const finishLogin = (token: string, userId?: number) => {
+		tokenControl.set({ token });
+		if (userId) tokenControl.setUserId(userId);
+		toast.success("Вход выполнен");
+		navigate(AppRoutes.PROFILE_TASKS, { replace: true });
+	};
+
+	// Шаг 1: вход по номеру телефона и паролю
+	const { mutate: login, isPending: isLoggingIn } = useMutationQuery<
+		ILoginRequest,
+		ILoginResponse
+	>({
+		url: ApiRoutes.LOGIN,
+		method: "POST",
+		skipAuth: true,
+		messages: {
+			suppressSuccessToast: true,
+			onSuccessCb: (data: ILoginResponse) => {
+				// Вариант A: MFA выключен — токен пришел сразу, вход завершен
+				if (data?.token) {
+					finishLogin(data.token, data.user?.id);
+					return;
+				}
+				// Вариант B: MFA включен — переходим на шаг ввода кода
+				if (data?.mfa_required && data?.mfa_token) {
+					setMfaToken(data.mfa_token);
+					resetOtp();
+					setStep("verification");
+				}
 			},
 		},
-	);
+	});
+
+	// Шаг 2: подтверждение 6-значного кода из приложения-аутентификатора
+	const { mutate: verifyMfa, isPending: isVerifying } = useMutationQuery<
+		IMfaVerifyRequest,
+		IMfaVerifyResponse
+	>({
+		url: ApiRoutes.MFA_VERIFY,
+		method: "POST",
+		skipAuth: true,
+		messages: {
+			suppressSuccessToast: true,
+			onSuccessCb: (data: IMfaVerifyResponse) => {
+				finishLogin(data.token, data.user?.id);
+			},
+			// Неверный/просроченный код — очищаем поле для повторного ввода
+			onErrorCb: resetOtp,
+		},
+	});
 
 	const handleLoginSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		// Переходим на шаг верификации перед отправкой запроса
-		setStep("verification");
+		const fullPhone = `${prefix}${phoneNumber}`;
+		login({ phone: fullPhone, password });
 	};
 
 	const handleVerifySubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		const code = otp.join("");
-
-		if (code.length === 6) {
-			// Собираем полный телефон, как в старом коде
-			const fullPhone = `${prefix}${phoneNumber}`;
-
-			// Отправляем запрос
-			// TODO: Если бекенд поддерживает OTP, добавьте code в запрос
-			mutate({ phone: fullPhone, password: password });
+		if (code.length === 6 && mfaToken) {
+			verifyMfa({ mfa_token: mfaToken, code });
 		}
 	};
 
@@ -267,11 +308,18 @@ export const Login = () => {
 
 						<button
 							type="submit"
-							className="w-full cursor-pointer relative group h-12 mt-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-70"
+							disabled={isLoggingIn}
+							className="w-full cursor-pointer relative group h-12 mt-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
 						>
 							<div className="flex items-center justify-center gap-2">
-								Продолжить
-								<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+								{isLoggingIn ? (
+									"Вход..."
+								) : (
+									<>
+										Продолжить
+										<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+									</>
+								)}
 							</div>
 						</button>
 
@@ -367,10 +415,10 @@ export const Login = () => {
 
 						<div>
 							<h3 className="text-2xl font-bold text-white">
-								Проверка безопасности
+								Двухфакторная аутентификация
 							</h3>
 							<p className="text-slate-400 text-sm mt-2">
-								Введите код, отправленный на ваш телефон.
+								Введите 6-значный код из приложения-аутентификатора.
 							</p>
 						</div>
 
@@ -395,22 +443,17 @@ export const Login = () => {
 
 							<button
 								type="submit"
-								disabled={otp.join("").length !== 6 || isPending}
+								disabled={otp.join("").length !== 6 || isVerifying}
 								className="w-full h-12 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold rounded-xl transition-all active:scale-[0.98]"
 							>
-								{isPending ? "Загрузка..." : "Подтвердить вход"}
+								{isVerifying ? "Проверка..." : "Подтвердить вход"}
 							</button>
 						</form>
 
 						<div className="pt-4 flex flex-col gap-4 items-center">
 							<p className="text-sm text-slate-500">
-								Не получили код?{" "}
-								<button
-									type="button"
-									className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
-								>
-									Отправить снова
-								</button>
+								Откройте приложение (Google Authenticator, Microsoft
+								Authenticator) и введите текущий код.
 							</p>
 
 							<button

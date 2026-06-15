@@ -1,27 +1,18 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Avatar, Button, Image } from "antd";
 import Logo from "../../../assets/images/logo.svg";
 import { BellOutlined } from "@ant-design/icons";
 import LogoutIcon from "../../../assets/images/logout.svg";
 import UserAvatar from "../../../assets/images/user-avatar.jpg";
-import { tokenControl } from "@shared/lib";
+import { useLogout } from "@shared/lib";
 import { AppRoutes } from "@shared/config";
-import { toast } from "react-toastify";
 
 interface INavbarHeaderProps {
   isModulesPage?: boolean;
 }
 
 export const NavbarHeader = ({ isModulesPage }: INavbarHeaderProps) => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    toast.info("Выход из системы!");
-    setTimeout(() => {
-      tokenControl.remove();
-      navigate(AppRoutes.LOGIN);
-    }, 1000);
-  };
+  const handleLogout = useLogout();
 
   return (
     <header

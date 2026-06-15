@@ -1,5 +1,16 @@
 export const ApiRoutes = {
   LOGIN: "/api/v1/auth/login",
+
+  // ==================== AUTH / MFA (2FA) ====================
+  AUTH_ME: "/api/v1/auth/me",
+  LOGOUT: "/api/v1/auth/logout",
+  // Подтверждение MFA при входе (второй шаг, без авторизации)
+  MFA_VERIFY: "/api/v1/auth/mfa/verify",
+  // Управление MFA для авторизованного пользователя
+  MFA_SETUP: "/api/v1/auth/mfa/setup",
+  MFA_CONFIRM: "/api/v1/auth/mfa/confirm",
+  MFA_DISABLE: "/api/v1/auth/mfa/disable",
+
   FETCH_USER_BY_ID: "/api/v1/admin/users/",
   FETCH_PERMISSIONS: "/api/v1/admin/permissions",
   ADD_TASK: "/api/v1/tasks",

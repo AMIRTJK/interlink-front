@@ -1,4 +1,5 @@
 import { Modal, Switch } from "antd";
+import { MfaSecurity } from "./MfaSecurity";
 
 interface IProps {
   isOpen: boolean;
@@ -49,6 +50,9 @@ export const ProfileSettingsModal = ({
             onChange={(checked) => setTabMode(checked ? "on" : "off")}
           />
         </div>
+
+        {/* Безопасность: двухфакторная аутентификация (MFA) */}
+        <MfaSecurity />
       </div>
 
     </Modal>
