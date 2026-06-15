@@ -553,7 +553,7 @@ export const DocumentDrawer = ({
                   name={item.sender}
                   certSerial={`SN-2026-${item.inboundNumber.replace(/[^A-Za-z0-9]/g, "")}-84201`}
                   signedAt={item.date}
-                  validUntil="с 20.03.2025 до 20.03.2026"
+                  validUntil="аз 20.03.2025 то 20.03.2026"
                 />
               </div>
             </motion.div>
@@ -582,7 +582,7 @@ export const DocumentDrawer = ({
           signerColor={selectedExecutor?.color ?? "bg-slate-100 text-slate-700"}
           certSerial={`SN-2026-${selectedExecutor?.initials ?? "??"}-84201`}
           signedAt="03.02.2026"
-          validUntil="с 20.03.2025 до 20.03.2026"
+          validUntil="аз 20.03.2025 то 20.03.2026"
           onClose={() => setShowDSStampAppendix(false)}
         />
       )}
