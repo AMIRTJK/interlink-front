@@ -189,6 +189,63 @@ export function sanitizeWordHtml(html: string): string {
   return root.innerHTML;
 }
 
+// Пятиконечная звезда: путь SVG с центром (cx, cy) и внешним радиусом r.
+function starPath(cx: number, cy: number, r: number): string {
+  const inner = r * 0.4;
+  let d = "";
+  for (let i = 0; i < 10; i++) {
+    const rad = i % 2 === 0 ? r : inner;
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const x = (cx + rad * Math.cos(a)).toFixed(2);
+    const y = (cy + rad * Math.sin(a)).toFixed(2);
+    d += `${i === 0 ? "M" : "L"}${x},${y} `;
+  }
+  return `${d}Z`;
+}
+
+// Государственный флаг Республики Таджикистан для штампа ЭЦП: внутренняя
+// разметка SVG во вьюбоксе 0 0 42 30 — три горизонтальные полосы (красная,
+// белая, зелёная в пропорции 2:3:2) и золотая корона с дугой из семи звёзд по
+// центру белой полосы. Единый источник правды и для React-компонента
+// <TajikFlag>, и для SVG-строки штампа, которая вшивается картинкой в тело
+// письма, — чтобы экранный и печатный штамп рисовались одинаково.
+export function tajikFlagInnerSvg(): string {
+  const W = 42;
+  const H = 30;
+  const red = (H * 2) / 7; // высота верхней красной полосы
+  const greenY = (H * 5) / 7; // начало нижней зелёной полосы
+  const gold = "#F8D80E";
+
+  // Дуга из семи звёзд («радугой») над короной.
+  const cx = 21;
+  const arcCy = 15;
+  const arcR = 4.8;
+  let stars = "";
+  for (let i = 0; i < 7; i++) {
+    const a = Math.PI * (1 - i / 6); // π → 0, слева направо
+    const sx = cx + arcR * Math.cos(a);
+    const sy = arcCy - arcR * Math.sin(a);
+    stars += `<path d="${starPath(sx, sy, 1.05)}" fill="${gold}"/>`;
+  }
+
+  // Стилизованная корона: перекладина-основание и три зубца с шариками.
+  const crown =
+    `<rect x="15" y="19.6" width="12" height="1.7" rx="0.7" fill="${gold}"/>` +
+    `<path d="M15.5,19.8 L16,16.8 L18.5,18.3 L21,15.5 L23.5,18.3 L26,16.8 L26.5,19.8 Z" fill="${gold}"/>` +
+    `<circle cx="16" cy="16.5" r="0.75" fill="${gold}"/>` +
+    `<circle cx="21" cy="15.1" r="0.85" fill="${gold}"/>` +
+    `<circle cx="26" cy="16.5" r="0.75" fill="${gold}"/>`;
+
+  return (
+    `<rect width="${W}" height="${H}" fill="#FFFFFF"/>` +
+    `<rect width="${W}" height="${red}" fill="#CE1126"/>` +
+    `<rect y="${greenY}" width="${W}" height="${H - greenY}" fill="#006B3F"/>` +
+    stars +
+    crown +
+    `<rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="1.5" fill="none" stroke="#94a3b8" stroke-width="0.7"/>`
+  );
+}
+
 export function generateQRMatrix(seed: string, size: number = 21): boolean[][] {
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {

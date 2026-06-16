@@ -1,6 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { QRCodeSVG } from "./QRCodeSVG";
+import { TajikFlag } from "./TajikFlag";
+import { TJK_EMBLEM_DATA_URI } from "../lib/tjkEmblem";
+
+const SANS = "'Arial', 'Helvetica', sans-serif";
 
 export const DSStamp = ({
   name,
@@ -12,110 +15,126 @@ export const DSStamp = ({
   certSerial: string;
   signedAt: string;
   validUntil: string;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.93, y: 4 }}
-    animate={{ opacity: 1, scale: 1, y: 0 }}
-    transition={{ duration: 0.28, ease: "easeOut" }}
-    className="flex items-stretch rounded-md overflow-hidden shadow-sm"
-    style={{ border: "1.5px solid #3b82f6", background: "#fff", minWidth: 0 }}
-  >
-    <div className="flex flex-col flex-shrink-0" style={{ width: 7 }}>
-      <div style={{ flex: 1, background: "#CC0001" }} />
+}) => {
+  const rows: [string, string][] = [
+    ["Сертификат:", certSerial],
+    ["Дорандаи имзо:", name],
+    ["Санаи имзо:", signedAt],
+    ["Эътибор дорад:", validUntil],
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.93, y: 4 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.28, ease: "easeOut" }}
+      className="overflow-hidden"
+      style={{
+        border: "2.5px solid #111111",
+        borderRadius: 12,
+        background: "#ffffff",
+        minWidth: 0,
+      }}
+    >
+      {/* Шапка: флаг · заголовок · герб */}
       <div
         style={{
-          flex: 1,
-          background: "#FFFFFF",
-          borderTop: "0.5px solid #e2e8f0",
-          borderBottom: "0.5px solid #e2e8f0",
-        }}
-      />
-      <div style={{ flex: 1, background: "#009A44" }} />
-    </div>
-    <div
-      className="flex-1 px-2.5 py-2 min-w-0"
-      style={{ background: "#eff6ff", lineHeight: 1.35 }}
-    >
-      <p
-        style={{
-          fontFamily: "Times New Roman, serif",
-          fontWeight: 700,
-          fontSize: 11,
-          color: "#1e3a8a",
-          textAlign: "center",
-          lineHeight: 1.3,
-          marginBottom: 2,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "8px 12px",
         }}
       >
-        Имзои электронии раками
-      </p>
-      <div style={{ borderTop: "1px solid #93c5fd", marginBottom: 4 }} />
-      <p
+        <TajikFlag width={44} height={30} />
+        <p
+          style={{
+            flex: 1,
+            minWidth: 0,
+            textAlign: "center",
+            fontFamily: SANS,
+            fontWeight: 800,
+            fontSize: 14,
+            letterSpacing: 0.2,
+            color: "#0f0f0f",
+            lineHeight: 1.1,
+            margin: 0,
+          }}
+        >
+          Имзои электронии рақамӣ
+        </p>
+        <img
+          src={TJK_EMBLEM_DATA_URI}
+          alt="Герб Республики Таджикистан"
+          style={{ width: 36, height: 36, flexShrink: 0, display: "block" }}
+        />
+      </div>
+
+      {/* Тёмная полоса подзаголовка */}
+      <div style={{ background: "#2b2b2b", padding: "5px 10px" }}>
+        <p
+          style={{
+            textAlign: "center",
+            fontFamily: SANS,
+            fontWeight: 500,
+            fontSize: 10.5,
+            letterSpacing: 0.2,
+            color: "#ffffff",
+            margin: 0,
+          }}
+        >
+          Маълумоти имзои электронии рақамӣ
+        </p>
+      </div>
+
+      {/* Реквизиты сертификата с водяным знаком-гербом */}
+      <div
         style={{
-          fontFamily: "Times New Roman, serif",
-          fontWeight: 600,
-          fontSize: 9,
-          color: "#1d4ed8",
-          textAlign: "center",
-          lineHeight: 1.3,
-          marginBottom: 5,
+          position: "relative",
+          padding: "9px 13px 11px",
+          overflow: "hidden",
         }}
       >
-        Маълумоти имзои электронии раками
-      </p>
-      <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+        <img
+          src={TJK_EMBLEM_DATA_URI}
+          alt=""
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 86,
+            height: 86,
+            opacity: 0.06,
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        />
         <div
           style={{
+            position: "relative",
             display: "flex",
             flexDirection: "column",
             gap: 2,
-            flex: 1,
-            minWidth: 0,
           }}
         >
-          {[
-            ["Сертификат:", certSerial],
-            ["Дорандаи имзо:", name],
-            ["Санаи имзо:", signedAt],
-            ["Санаи додод:", validUntil],
-          ].map(([label, val], i) => (
-            <div key={i} style={{ display: "flex", gap: 4 }}>
-              <span
-                style={{
-                  fontSize: 8.5,
-                  fontWeight: 700,
-                  color: "#1e40af",
-                  whiteSpace: "nowrap",
-                  minWidth: 60,
-                }}
-              >
-                {label}
-              </span>
-              <span
-                style={{
-                  fontSize: 8.5,
-                  color: "#1e293b",
-                  fontFamily: label === "Сертификат:" ? "monospace" : undefined,
-                  wordBreak: "break-all",
-                }}
-              >
-                {val}
-              </span>
-            </div>
+          {rows.map(([label, val], i) => (
+            <p
+              key={i}
+              style={{
+                margin: 0,
+                fontFamily: SANS,
+                fontSize: 10.5,
+                color: "#111111",
+                lineHeight: 1.45,
+              }}
+            >
+              <span style={{ whiteSpace: "nowrap" }}>{label}</span>{" "}
+              <span style={{ wordBreak: "break-all" }}>{val}</span>
+            </p>
           ))}
         </div>
-        <div
-          style={{
-            flexShrink: 0,
-            border: "1px solid #bfdbfe",
-            borderRadius: 3,
-            padding: 2,
-            background: "#fff",
-          }}
-        >
-          <QRCodeSVG value={`${certSerial}|${name}|${signedAt}`} size={52} />
-        </div>
       </div>
-    </div>
-  </motion.div>
-);
+    </motion.div>
+  );
+};

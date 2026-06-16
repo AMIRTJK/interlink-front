@@ -82,7 +82,13 @@ import {
   // OUTBOX_STATUS_LABEL,
   // OUTBOX_STATUS_STYLE,
 } from "../lib/constants";
-import { cn, generateQRMatrix, sanitizeWordHtml } from "../lib/utils";
+import {
+  cn,
+  generateQRMatrix,
+  sanitizeWordHtml,
+  tajikFlagInnerSvg,
+} from "../lib/utils";
+import { TJK_EMBLEM_DATA_URI } from "../lib/tjkEmblem";
 import { PreviewModal } from "./PreviewModal";
 import { TBtn } from "./TBtn";
 import { DSStamp } from "./DSStamp";
@@ -1047,64 +1053,33 @@ export const CreateInternalCorrespondence = ({
             const currentSignerInitials = finalSigner?.initials || "НА";
             const currentDate = new Date().toLocaleDateString("ru-RU");
             const certSerial = `SN-2026-${currentSignerInitials}-84201`;
-            const validUntil = "с 20.03.2025 до 20.03.2026";
+            const validUntil = "аз 20.03.2025 то 20.03.2026";
 
-            // 2. Генерируем чистые rects для QR-кода
-            const GRID = 21;
-            const matrix = generateQRMatrix(
-              `${certSerial}|${currentSignerName}|${currentDate}`,
-              GRID,
-            );
-            const qrSize = 52;
-            const cellSize = qrSize / GRID;
-            let qrRects = "";
-            for (let row = 0; row < GRID; row++) {
-              for (let col = 0; col < GRID; col++) {
-                if (matrix[row][col]) {
-                  qrRects += `<rect x="${col * cellSize}" y="${row * cellSize}" width="${cellSize}" height="${cellSize}" fill="#1e3a8a"/>`;
-                }
-              }
-            }
+            // 2. Государственный флаг для шапки штампа (общая геометрия с <DSStamp>).
+            const flagInner = tajikFlagInnerSvg();
 
-            // 3. Формируем единый SVG-код штампа ЭЦП
+            // 3. Формируем единый SVG-код штампа ЭЦП: белая карточка с тёмной
+            //    рамкой, шапка «флаг · заголовок · герб», тёмная полоса с
+            //    подзаголовком и реквизиты сертификата поверх водяного знака-герба.
             const fullStampSvg = `
 <svg xmlns="http://www.w3.org/2000/svg" width="320" height="110" viewBox="0 0 320 110" fill="none" style="display:block;">
-  <rect x="0.75" y="0.75" width="318.5" height="108.5" rx="5.25" fill="white" stroke="#3b82f6" stroke-width="1.5"/>
-  <g clip-path="url(#clip0)">
-    <rect x="1.5" y="1.5" width="7" height="35.3" fill="#CC0001"/>
-    <rect x="1.5" y="36.8" width="7" height="36.4" fill="#FFFFFF"/>
-    <line x1="1.5" y1="36.8" x2="8.5" y2="36.8" stroke="#e2e8f0" stroke-width="0.5"/>
-    <line x1="1.5" y1="73.2" x2="8.5" y2="73.2" stroke="#e2e8f0" stroke-width="0.5"/>
-    <rect x="1.5" y="73.2" width="7" height="35.3" fill="#009A44"/>
-
-    <rect x="8.5" y="1.5" width="310" height="107" fill="#eff6ff"/>
-
-    <text x="163" y="16" font-family="Times New Roman, serif" font-size="11" font-weight="700" fill="#1e3a8a" text-anchor="middle">Имзои электронии рақамӣ</text>
-    <line x1="18.5" y1="21" x2="308.5" y2="21" stroke="#93c5fd" stroke-width="1"/>
-    <text x="163" y="32" font-family="Times New Roman, serif" font-size="9" font-weight="600" fill="#1d4ed8" text-anchor="middle">Маълумоти имзои электронии рақамӣ</text>
-
-    <text x="18" y="47" font-family="Times New Roman, serif" font-size="8.5" font-weight="700" fill="#1e40af">Сертификат:</text>
-    <text x="85" y="47" font-family="Courier New, monospace" font-size="8.5" fill="#1e293b">${certSerial}</text>
-
-    <text x="18" y="61" font-family="Times New Roman, serif" font-size="8.5" font-weight="700" fill="#1e40af">Дорандаи имзо:</text>
-    <text x="85" y="61" font-family="Times New Roman, serif" font-size="8.5" fill="#1e293b">${currentSignerName}</text>
-
-    <text x="18" y="75" font-family="Times New Roman, serif" font-size="8.5" font-weight="700" fill="#1e40af">Санаи имзо:</text>
-    <text x="85" y="75" font-family="Times New Roman, serif" font-size="8.5" fill="#1e293b">${currentDate}</text>
-
-    <text x="18" y="89" font-family="Times New Roman, serif" font-size="8.5" font-weight="700" fill="#1e40af">Санаи додод:</text>
-    <text x="85" y="89" font-family="Times New Roman, serif" font-size="8.5" fill="#1e293b">${validUntil}</text>
-
-    <rect x="254" y="43" width="52" height="52" rx="3" fill="white" stroke="#bfdbfe" stroke-width="1"/>
-    <g transform="translate(254, 43)">
-      ${qrRects}
-    </g>
-  </g>
   <defs>
-    <clipPath id="clip0">
-      <rect x="1.5" y="1.5" width="317" height="107" rx="4.5" fill="white"/>
-    </clipPath>
+    <clipPath id="clip0"><rect x="1.25" y="1.25" width="317.5" height="107.5" rx="10" fill="white"/></clipPath>
+    <symbol id="tjkEmb" viewBox="0 0 170 170"><image href="${TJK_EMBLEM_DATA_URI}" x="0" y="0" width="170" height="170"/></symbol>
   </defs>
+  <rect x="1.25" y="1.25" width="317.5" height="107.5" rx="10" fill="#ffffff" stroke="#111111" stroke-width="2.5"/>
+  <g clip-path="url(#clip0)">
+    <use href="#tjkEmb" x="128" y="46" width="64" height="64" opacity="0.07"/>
+    <g transform="translate(12, 7) scale(0.82)">${flagInner}</g>
+    <text x="160" y="26" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#0f0f0f" text-anchor="middle">Имзои электронии рақамӣ</text>
+    <use href="#tjkEmb" x="272" y="5" width="34" height="34"/>
+    <rect x="0" y="40" width="320" height="16" fill="#2b2b2b"/>
+    <text x="160" y="51.5" font-family="Arial, sans-serif" font-size="9.5" font-weight="500" fill="#ffffff" text-anchor="middle">Маълумоти имзои электронии рақамӣ</text>
+    <text x="13" y="68" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Сертификат: ${certSerial}</text>
+    <text x="13" y="79" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Дорандаи имзо: ${currentSignerName}</text>
+    <text x="13" y="90" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Санаи имзо: ${currentDate}</text>
+    <text x="13" y="101" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Эътибор дорад: ${validUntil}</text>
+  </g>
 </svg>
 `
               .replace(/[\n\t]/g, "")
@@ -2950,7 +2925,7 @@ export const CreateInternalCorrespondence = ({
           stampSignerName={finalSigner?.name || "Неизвестно"}
           stampCertSerial={`SN-2026-${finalSigner?.initials}-84201`}
           stampSignedAt="03.02.2026"
-          stampValidUntil="с 20.03.2025 до 20.03.2026"
+          stampValidUntil="аз 20.03.2025 то 20.03.2026"
         />
       )}
       <header className="bg-white border-b border-slate-200 px-6 py-4 z-10 flex-shrink-0">
@@ -3860,7 +3835,7 @@ export const CreateInternalCorrespondence = ({
                           name={finalSigner.name}
                           certSerial={`SN-2026-${finalSigner.initials}-84201`}
                           signedAt={new Date().toLocaleDateString("ru-RU")}
-                          validUntil="с 20.03.2025 до 20.03.2026"
+                          validUntil="аз 20.03.2025 то 20.03.2026"
                         />
                       </div>
                     )}
@@ -4131,7 +4106,7 @@ export const CreateInternalCorrespondence = ({
                               name={approver.name}
                               certSerial={`SN-2026-${approver.initials}-${Math.abs(Number(approver.id) * 317 + 10000)}`}
                               signedAt={new Date().toLocaleDateString("ru-RU")}
-                              validUntil="с 20.03.2025 до 20.03.2026"
+                              validUntil="аз 20.03.2025 то 20.03.2026"
                             />
                           </div>
                         )}
@@ -4383,7 +4358,7 @@ export const CreateInternalCorrespondence = ({
                               name={finalSigner.name}
                               certSerial={`SN-2026-${finalSigner.initials}-84201`}
                               signedAt={new Date().toLocaleDateString("ru-RU")}
-                              validUntil="с 20.03.2025 до 20.03.2026"
+                              validUntil="аз 20.03.2025 то 20.03.2026"
                             />
                           )}
                         </AnimatePresence>
