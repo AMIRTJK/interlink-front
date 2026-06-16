@@ -86,9 +86,8 @@ import {
   cn,
   generateQRMatrix,
   sanitizeWordHtml,
-  tajikFlagInnerSvg,
+  buildDSStampSvg,
 } from "../lib/utils";
-import { TJK_EMBLEM_DATA_URI } from "../lib/tjkEmblem";
 import { PreviewModal } from "./PreviewModal";
 import { TBtn } from "./TBtn";
 import { DSStamp } from "./DSStamp";
@@ -381,6 +380,42 @@ const removeSpacerSafely = (n: Element): boolean => {
   return false;
 };
 
+// «Голый» текст и инлайн-узлы верхнего уровня заворачиваем в блочные <div>.
+// Постраничная разбивка (getEditorPages) и печать перебирают только element-
+// детей редактора, поэтому неупакованный текстовый узел (например, одиночная
+// цифра «3», набранная в пустой редактор) не попадал ни на одну страницу и
+// пропадал в предпросмотре и при печати. Пустые пробельные промежутки между
+// блоками не трогаем, чтобы не плодить лишние пустые строки. Возвращает true,
+// если структура была изменена.
+const wrapBareTopLevelNodes = (root: HTMLElement): boolean => {
+  let mutated = false;
+  let buf: Node[] = [];
+  const flush = () => {
+    if (!buf.length) return;
+    const nodes = buf;
+    buf = [];
+    const meaningful = nodes.some(
+      (n) =>
+        n.nodeType === Node.ELEMENT_NODE ||
+        (n.nodeType === Node.TEXT_NODE && (n.textContent || "").trim() !== ""),
+    );
+    if (!meaningful) return;
+    const div = document.createElement("div");
+    nodes[0].parentNode?.insertBefore(div, nodes[0]);
+    nodes.forEach((n) => div.appendChild(n));
+    mutated = true;
+  };
+  Array.from(root.childNodes).forEach((node) => {
+    const isBlock =
+      node.nodeType === Node.ELEMENT_NODE &&
+      EDITOR_BLOCK_TAGS.has((node as HTMLElement).tagName);
+    if (isBlock) flush();
+    else buf.push(node);
+  });
+  flush();
+  return mutated;
+};
+
 const cleanEditorArtifacts = (html: string): string => {
   const w = document.createElement("div");
   w.innerHTML = html;
@@ -413,6 +448,10 @@ const cleanEditorArtifacts = (html: string): string => {
     }
     first.normalize();
   });
+
+  // Заворачиваем «голый» текст верхнего уровня, чтобы сохранённое тело письма
+  // было корректно разложено на страницы при последующих просмотре/печати.
+  wrapBareTopLevelNodes(w);
 
   return w.innerHTML;
 };
@@ -1055,35 +1094,15 @@ export const CreateInternalCorrespondence = ({
             const certSerial = `SN-2026-${currentSignerInitials}-84201`;
             const validUntil = "аз 20.03.2025 то 20.03.2026";
 
-            // 2. Государственный флаг для шапки штампа (общая геометрия с <DSStamp>).
-            const flagInner = tajikFlagInnerSvg();
-
-            // 3. Формируем единый SVG-код штампа ЭЦП: белая карточка с тёмной
-            //    рамкой, шапка «флаг · заголовок · герб», тёмная полоса с
-            //    подзаголовком и реквизиты сертификата поверх водяного знака-герба.
-            const fullStampSvg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="320" height="110" viewBox="0 0 320 110" fill="none" style="display:block;">
-  <defs>
-    <clipPath id="clip0"><rect x="1.25" y="1.25" width="317.5" height="107.5" rx="10" fill="white"/></clipPath>
-    <symbol id="tjkEmb" viewBox="0 0 170 170"><image href="${TJK_EMBLEM_DATA_URI}" x="0" y="0" width="170" height="170"/></symbol>
-  </defs>
-  <rect x="1.25" y="1.25" width="317.5" height="107.5" rx="10" fill="#ffffff" stroke="#111111" stroke-width="2.5"/>
-  <g clip-path="url(#clip0)">
-    <use href="#tjkEmb" x="128" y="46" width="64" height="64" opacity="0.07"/>
-    <g transform="translate(12, 7) scale(0.82)">${flagInner}</g>
-    <text x="160" y="26" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#0f0f0f" text-anchor="middle">Имзои электронии рақамӣ</text>
-    <use href="#tjkEmb" x="272" y="5" width="34" height="34"/>
-    <rect x="0" y="40" width="320" height="16" fill="#2b2b2b"/>
-    <text x="160" y="51.5" font-family="Arial, sans-serif" font-size="9.5" font-weight="500" fill="#ffffff" text-anchor="middle">Маълумоти имзои электронии рақамӣ</text>
-    <text x="13" y="68" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Сертификат: ${certSerial}</text>
-    <text x="13" y="79" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Дорандаи имзо: ${currentSignerName}</text>
-    <text x="13" y="90" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Санаи имзо: ${currentDate}</text>
-    <text x="13" y="101" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Эътибор дорад: ${validUntil}</text>
-  </g>
-</svg>
-`
-              .replace(/[\n\t]/g, "")
-              .trim();
+            // 2. Единый SVG-рисунок штампа ЭЦП (тот же, что рисует React-
+            //    компонент <DSStamp>) — вшиваем его картинкой в тело письма,
+            //    чтобы экранный, печатный и боковой штампы были идентичны.
+            const fullStampSvg = buildDSStampSvg({
+              name: currentSignerName,
+              certSerial,
+              signedAt: currentDate,
+              validUntil,
+            });
 
             const encodedSvg = btoa(unescape(encodeURIComponent(fullStampSvg)));
             const stampDataUri = `data:image/svg+xml;base64,${encodedSvg}`;
@@ -1166,6 +1185,10 @@ export const CreateInternalCorrespondence = ({
   const getEditorPages = useCallback((): string[] => {
     const editor = editorRef.current;
     if (!editor) return [];
+    // «Голый» текст верхнего уровня заворачиваем в блок, иначе он не попадёт ни
+    // на одну страницу (перебираем только element-детей) и пропадёт из
+    // предпросмотра/печати — как было с одиночной цифрой, набранной в редактор.
+    wrapBareTopLevelNodes(editor);
     const contentWidth = PAGE_WIDTH - PAGE_PAD_H * 2;
     const buckets: string[][] = [];
     Array.from(editor.children).forEach((child) => {

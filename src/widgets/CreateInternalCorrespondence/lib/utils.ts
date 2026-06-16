@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { TJK_EMBLEM_DATA_URI } from "./tjkEmblem";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -243,6 +244,65 @@ export function tajikFlagInnerSvg(): string {
     stars +
     crown +
     `<rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="1.5" fill="none" stroke="#94a3b8" stroke-width="0.7"/>`
+  );
+}
+
+// Экранирование пользовательского текста для безопасной вставки в SVG/XML.
+const escapeXml = (s: string): string =>
+  String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+export interface DSStampData {
+  name: string;
+  certSerial: string;
+  signedAt: string;
+  validUntil: string;
+}
+
+// Уникальные id для clipPath/symbol внутри одного документа: при нескольких
+// инлайновых штампах на странице (блоки «Подписывающий», «Согласующие») общие
+// id привели бы к конфликту ссылок url(#…) — поэтому делаем их разными.
+let dsStampSeq = 0;
+
+// Единый SVG-рисунок штампа ЭЦП во вьюбоксе 320×110 — ОДИН источник правды для:
+//  • React-компонента <DSStamp> (плейсхолдер до подписи, блоки «Подписывающий»/
+//    «Согласующие», приложение №1, предпросмотр);
+//  • картинки, вшиваемой в тело письма при подписании (редактор и печать).
+// Благодаря общему viewBox штамп везде одной формы и высоты. Сам SVG тянется на
+// 100% ширины контейнера с сохранением пропорций (aspect-ratio задаёт обёртка).
+export function buildDSStampSvg({
+  name,
+  certSerial,
+  signedAt,
+  validUntil,
+}: DSStampData): string {
+  const flagInner = tajikFlagInnerSvg();
+  const uid = `ds${(++dsStampSeq).toString(36)}`;
+  const clip = `${uid}c`;
+  const emb = `${uid}e`;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 110" preserveAspectRatio="xMidYMid meet" fill="none" style="display:block;width:100%;height:100%;">` +
+    `<defs>` +
+    `<clipPath id="${clip}"><rect x="1.25" y="1.25" width="317.5" height="107.5" rx="10"/></clipPath>` +
+    `<symbol id="${emb}" viewBox="0 0 170 170"><image href="${TJK_EMBLEM_DATA_URI}" x="0" y="0" width="170" height="170"/></symbol>` +
+    `</defs>` +
+    `<rect x="1.25" y="1.25" width="317.5" height="107.5" rx="10" fill="#ffffff" stroke="#111111" stroke-width="2.5"/>` +
+    `<g clip-path="url(#${clip})">` +
+    `<use href="#${emb}" x="128" y="46" width="64" height="64" opacity="0.07"/>` +
+    `<g transform="translate(12, 7) scale(0.82)">${flagInner}</g>` +
+    `<text x="160" y="26" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#0f0f0f" text-anchor="middle">Имзои электронии рақамӣ</text>` +
+    `<use href="#${emb}" x="272" y="5" width="34" height="34"/>` +
+    `<rect x="0" y="40" width="320" height="16" fill="#2b2b2b"/>` +
+    `<text x="160" y="51.5" font-family="Arial, sans-serif" font-size="9.5" font-weight="500" fill="#ffffff" text-anchor="middle">Маълумоти имзои электронии рақамӣ</text>` +
+    `<text x="13" y="68" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Сертификат: ${escapeXml(certSerial)}</text>` +
+    `<text x="13" y="79" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Дорандаи имзо: ${escapeXml(name)}</text>` +
+    `<text x="13" y="90" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Санаи имзо: ${escapeXml(signedAt)}</text>` +
+    `<text x="13" y="101" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Эътибор дорад: ${escapeXml(validUntil)}</text>` +
+    `</g>` +
+    `</svg>`
   );
 }
 
