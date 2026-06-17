@@ -856,6 +856,23 @@ export const CreateInternalCorrespondence = ({
   // когда открытая версия совпадает с выбранной для подписи.
   const isActiveVersionForSign = activeVersion ? !!activeVersion.is_selected : false;
 
+  // Версия, на которой реально стоит «Подписано».
+  // Бэкенд при подписании помечает is_current_signed на версии, которая была
+  // выбрана «Для подписи», но сам рисунок ЭЦП сохраняется отдельным сохранением
+  // тела письма уже в НОВОЙ версии. Чтобы «Подписано» в UI стояло там, где
+  // реально лежит штамп, считаем подписанной последнюю версию со штампом в теле,
+  // а если штампа нет ни в одной — используем флаг бэкенда.
+  const signedVersionId = useMemo(() => {
+    const stamped = allVersions.filter(
+      (v: any) =>
+        typeof v.content === "string" &&
+        v.content.includes(STAMP_ATTR),
+    );
+    if (stamped.length) return stamped[stamped.length - 1].id;
+    const backendSigned = allVersions.find((v: any) => v.is_current_signed);
+    return backendSigned ? backendSigned.id : null;
+  }, [allVersions]);
+
   const { mutate: selectVersionForSign, isPending: isSelectingVersion } =
     useMutationQuery<{ versionId: string | number }, any>({
       url: (requestData) =>
@@ -4745,7 +4762,10 @@ export const CreateInternalCorrespondence = ({
                     ) : (
                       filteredVersions.map((v: any) => {
                         const isCurrentActive = v.id === activeVersionId;
-                        const isSignedVersion = v.is_current_signed;
+                        // «Подписано» показываем на версии, где реально лежит
+                        // штамп ЭЦП (см. signedVersionId), а не на голом флаге
+                        // бэкенда — иначе бейдж стоял бы на версии без рисунка.
+                        const isSignedVersion = v.id === signedVersionId;
                         return (
                           <div
                             key={v.id}
