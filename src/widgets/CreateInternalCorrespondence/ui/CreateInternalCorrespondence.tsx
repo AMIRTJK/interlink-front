@@ -844,6 +844,35 @@ export const CreateInternalCorrespondence = ({
   const isOldVersionSelected =
     activeVersionId !== null && activeVersionId !== latestVersionId;
 
+  // Версия, открытая сейчас в редакторе.
+  const activeVersion = useMemo(
+    () => allVersions.find((v: any) => v.id === activeVersionId) || null,
+    [allVersions, activeVersionId],
+  );
+  // Помечена ли открытая версия как «Для подписи». ЭЦП ставится на ту версию,
+  // что выбрана для подписи на бэкенде (is_selected), а в редакторе можно
+  // открыть любую другую версию. Чтобы не подписать одну версию, поставив
+  // штамп на другую, разрешаем «Указать место для ЭЦП» и «Подписать» только
+  // когда открытая версия совпадает с выбранной для подписи.
+  const isActiveVersionForSign = activeVersion ? !!activeVersion.is_selected : false;
+
+  // Версия, на которой реально стоит «Подписано».
+  // Бэкенд при подписании помечает is_current_signed на версии, которая была
+  // выбрана «Для подписи», но сам рисунок ЭЦП сохраняется отдельным сохранением
+  // тела письма уже в НОВОЙ версии. Чтобы «Подписано» в UI стояло там, где
+  // реально лежит штамп, считаем подписанной последнюю версию со штампом в теле,
+  // а если штампа нет ни в одной — используем флаг бэкенда.
+  const signedVersionId = useMemo(() => {
+    const stamped = allVersions.filter(
+      (v: any) =>
+        typeof v.content === "string" &&
+        v.content.includes(STAMP_ATTR),
+    );
+    if (stamped.length) return stamped[stamped.length - 1].id;
+    const backendSigned = allVersions.find((v: any) => v.is_current_signed);
+    return backendSigned ? backendSigned.id : null;
+  }, [allVersions]);
+
   const { mutate: selectVersionForSign, isPending: isSelectingVersion } =
     useMutationQuery<{ versionId: string | number }, any>({
       url: (requestData) =>
@@ -870,6 +899,12 @@ export const CreateInternalCorrespondence = ({
       // и все страницы кроме первой "исчезнут".
       setEditorContent(content);
       setActiveVersionId(versionId);
+      // Если открываем версию, не выбранную «Для подписи», убираем плавающий
+      // плейсхолдер ЭЦП — иначе он остался бы висеть над чужой версией.
+      const target = allVersions.find((v: any) => v.id === versionId);
+      if (!target?.is_selected && !finalSigner?.dsApplied) {
+        setStampVisible(false);
+      }
     }
   };
 
@@ -2642,6 +2677,9 @@ export const CreateInternalCorrespondence = ({
 
   const applyFinalDS = async () => {
     if (!id || !finalSigner) return;
+    // Подписать можно только версию, выбранную «Для подписи». Иначе ЭЦП ушла бы
+    // на одну версию, а штамп остался бы на открытой в редакторе другой версии.
+    if (!isActiveVersionForSign) return;
 
     if (!stampVisible) {
       setStampVisible(true);
@@ -2743,6 +2781,8 @@ export const CreateInternalCorrespondence = ({
   };
 
   const handleInsertStamp = () => {
+    // Место для ЭЦП можно указывать только на версии, выбранной «Для подписи».
+    if (!isActiveVersionForSign) return;
     setStampVisible(true);
     setStampPos({ x: 40, y: 40 });
     setStampSize({ width: 320, height: "auto" });
@@ -4317,12 +4357,21 @@ export const CreateInternalCorrespondence = ({
                           ) : (
                             <button
                               onClick={applyFinalDS}
-                              disabled={finalSigner.dsLoading}
+                              disabled={
+                                finalSigner.dsLoading || !isActiveVersionForSign
+                              }
+                              title={
+                                !isActiveVersionForSign
+                                  ? "Открытая версия не выбрана «Для подписи». Откройте версию, отмеченную для подписи."
+                                  : undefined
+                              }
                               className={cn(
                                 "flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border",
                                 finalSigner.dsLoading
                                   ? "bg-slate-100 text-slate-400 border-slate-200 cursor-wait"
-                                  : "bg-white border-slate-200 text-slate-600 hover:bg-purple-50 hover:border-purple-200 hover:text-purple-700 shadow-sm",
+                                  : !isActiveVersionForSign
+                                    ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
+                                    : "bg-white border-slate-200 text-slate-600 hover:bg-purple-50 hover:border-purple-200 hover:text-purple-700 shadow-sm",
                               )}
                             >
                               {finalSigner.dsLoading ? (
@@ -4349,19 +4398,37 @@ export const CreateInternalCorrespondence = ({
                         )}
                       >
                         <AnimatePresence mode="wait">
-                          {!stampVisible && !finalSigner.dsApplied && (
-                            <motion.button
-                              key="insert-btn"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              onClick={handleInsertStamp}
-                              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-semibold rounded-lg transition-colors border border-blue-200 shadow-sm"
-                            >
-                              <Monitor size={12} />
-                              <span>Указать место для ЭЦП</span>
-                            </motion.button>
-                          )}
+                          {!stampVisible &&
+                            !finalSigner.dsApplied &&
+                            !isActiveVersionForSign && (
+                              <motion.div
+                                key="not-for-sign"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-50 text-slate-400 text-[11px] font-medium rounded-lg border border-dashed border-slate-200 text-center"
+                              >
+                                <Shield size={12} />
+                                <span>
+                                  Откройте версию, отмеченную «Для подписи»
+                                </span>
+                              </motion.div>
+                            )}
+                          {!stampVisible &&
+                            !finalSigner.dsApplied &&
+                            isActiveVersionForSign && (
+                              <motion.button
+                                key="insert-btn"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={handleInsertStamp}
+                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-semibold rounded-lg transition-colors border border-blue-200 shadow-sm"
+                              >
+                                <Monitor size={12} />
+                                <span>Указать место для ЭЦП</span>
+                              </motion.button>
+                            )}
                           {stampVisible && !finalSigner.dsApplied && (
                             <motion.button
                               key="remove-btn"
@@ -4695,7 +4762,10 @@ export const CreateInternalCorrespondence = ({
                     ) : (
                       filteredVersions.map((v: any) => {
                         const isCurrentActive = v.id === activeVersionId;
-                        const isSignedVersion = v.is_current_signed;
+                        // «Подписано» показываем на версии, где реально лежит
+                        // штамп ЭЦП (см. signedVersionId), а не на голом флаге
+                        // бэкенда — иначе бейдж стоял бы на версии без рисунка.
+                        const isSignedVersion = v.id === signedVersionId;
                         return (
                           <div
                             key={v.id}
