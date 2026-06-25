@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   Download,
+  Eye,
   Calendar,
   MessageSquare,
   Clock,
@@ -21,6 +22,9 @@ import {
 import { cn } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { useGetQuery } from "@shared/lib"; // Ваш кастомный хук запросов
+import { PreviewModal } from "@widgets/CreateInternalCorrespondence/ui/PreviewModal";
+import { DocumentCanvas } from "./DocumentCanvas";
+import { downloadDocumentPdf } from "./lib";
 
 const inboxStatusStyle: Record<string, string> = {
   "на резолюции": "bg-emerald-50 text-emerald-700 border-emerald-100",
@@ -130,6 +134,7 @@ export const InternalCorrespondenceIncomingView = ({
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [ecpApplied, setEcpApplied] = useState(false);
   const [ecpLoading, setEcpLoading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Состояния для Исполнителя и Модальных окон
   const [executorName, setExecutorName] = useState("");
@@ -151,7 +156,35 @@ export const InternalCorrespondenceIncomingView = ({
   const apiUsersList: UserFromApi[] = usersData?.data?.data && Array.isArray(usersData.data.data)
     ? usersData.data.data
     : (Array.isArray(usersData) ? usersData : []);
-        
+
+  // Тело письма с рисунком ЭЦП хранится в ВЕРСИИ документа. Эндпоинт одного
+  // письма (/internal-correspondences/:id) пока отдаёт в body устаревшую версию
+  // (напр. 1.0 без ЭЦП), поэтому, как и редактор исходящего письма, тянем версии
+  // и показываем САМУЮ СВЕЖУЮ — её содержимое содержит вшитый рисунок ЭЦП и
+  // совпадает с тем, что видит отправитель. item.body — только как крайний фолбэк.
+  const { data: versionsResponse, isLoading: loadingVersions } = useGetQuery({
+    url: item?.id
+      ? ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(item.id))
+      : "",
+    useToken: true,
+    options: { enabled: !!item?.id, refetchOnWindowFocus: false },
+  });
+
+  const documentBody = useMemo(() => {
+    const versions: any[] = versionsResponse?.data?.versions || [];
+    if (!versions.length) return item.body || "";
+    // «Последняя версия» = с наибольшим id (id монотонно растёт при сохранении).
+    // Не полагаемся на порядок элементов в массиве с бэкенда.
+    const latest = versions.reduce((a, b) =>
+      Number(b?.id) > Number(a?.id) ? b : a,
+    );
+    return latest?.body || item.body || "";
+  }, [versionsResponse, item.body]);
+
+  // Пока тянем версии — не показываем устаревший item.body, чтобы не мигнуть
+  // старой версией (1.0) перед подменой на свежую.
+  const isResolvingBody = !!item?.id && loadingVersions;
+
 
   // Вспомогательная функция для генерации инициалов
   const getInitials = (fullName: string) => {
@@ -176,6 +209,25 @@ export const InternalCorrespondenceIncomingView = ({
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-[#F8FAFC] overflow-hidden w-full">
+      {/* Предпросмотр: PreviewModal сам раскладывает тело на страницы и находит
+          встроенный рисунок ЭЦП (как в редакторе исходящего письма). */}
+      {showPreview && (
+        <PreviewModal
+          subject={item.subject || ""}
+          editorHtml={documentBody}
+          orientation="portrait"
+          fontSize={14}
+          onClose={() => setShowPreview(false)}
+          stampVisible={false}
+          stampPos={{ x: 0, y: 0 }}
+          stampSize={{ width: 320, height: "auto" }}
+          stampSignerName=""
+          stampCertSerial=""
+          stampSignedAt=""
+          stampValidUntil=""
+        />
+      )}
+
       {/* Шапка страницы */}
       <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white z-10">
         <div className="flex items-center gap-3">
@@ -192,7 +244,21 @@ export const InternalCorrespondenceIncomingView = ({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-sm font-semibold cursor-pointer">
+          <button
+            onClick={() => setShowPreview(true)}
+            disabled={isResolvingBody}
+            className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-sm font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Eye size={14} />
+            <span>Предварительный просмотр</span>
+          </button>
+          <button
+            onClick={() =>
+              downloadDocumentPdf(documentBody, 14, item.subject || "")
+            }
+            disabled={isResolvingBody}
+            className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-sm font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Download size={14} />
             <span>Скачать PDF</span>
           </button>
@@ -536,29 +602,17 @@ export const InternalCorrespondenceIncomingView = ({
           </CollapsibleBlock>
         </aside>
 
-        {/* Интерактивный холст основного бланка документа */}
+        {/* Холст основного бланка документа: постраничная разбивка (разделение
+            страниц A4) и рисунок ЭЦП — 1-в-1 как в редакторе исходящего письма */}
         <div className="flex-1 overflow-auto bg-[#E8EAED] flex items-start justify-center py-6 px-6">
-          <div
-            className="bg-white shadow-xl border border-slate-300/30 w-full max-w-[794px] min-h-[1050px]"
-            style={{
-              padding: "64px 72px 80px",
-              fontFamily: "Times New Roman, serif",
-              fontSize: 14,
-              lineHeight: 2,
-              color: "#1e293b",
-            }}
-          >
-            {item.body ? (
-              <div
-                className="document-body-content overflow-visible focus:outline-none"
-                dangerouslySetInnerHTML={{ __html: item.body }}
-              />
-            ) : (
-              <p className="text-slate-400 italic text-center py-10">
-                Контент документа отсутствует...
-              </p>
-            )}
-          </div>
+          {isResolvingBody ? (
+            <div className="flex flex-col items-center gap-2 text-slate-400 py-20">
+              <Loader2 size={22} className="animate-spin text-blue-500" />
+              <span className="text-xs font-semibold">Загрузка документа...</span>
+            </div>
+          ) : (
+            <DocumentCanvas html={documentBody} />
+          )}
         </div>
       </div>
 
