@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useParams } from "react-router-dom";
 import { useMemo } from "react";
 import { ApiRoutes } from "@shared/api";
 import { NewRegistry } from "./NewRegistry";
@@ -15,7 +15,9 @@ export const NewCorrespondenceTableWrapper = ({
   baseParams,
 }: IncomingTableWrapperProps) => {
   const [searchParams] = useSearchParams();
-  const folder_id = searchParams.get("folder_id");
+  const { id: pathId } = useParams<{ id: string }>();
+
+  const folder_id = pathId ?? searchParams.get("folder_id");
 
   const { params, url } = useMemo(() => {
     let currentParams = { ...baseParams };

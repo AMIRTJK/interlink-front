@@ -92,7 +92,7 @@ const STATUS_CONFIG: Record<string, any> = {
 };
 
 const REGISTRY_STATUS_MAP: Record<string, string[]> = {
-	incoming: ["analysis", "completed"],
+	incoming: [],
 	outgoing: ["to_approve", "approved", "to_sign", "signed", "sent"],
 	default: ["draft", "in-progress", "completed"],
 };

@@ -278,6 +278,14 @@ export const AppRouter = () => {
                     }
                   />
                   <Route index element={<Navigate to="incoming" replace />} />
+                  <Route path="folder/:id">
+                    <Route
+                      index
+                      element={
+                        <NewCorrespondenceTableWrapper type="internal-incoming" />
+                      }
+                    />
+                  </Route>
                   <Route path="incoming">
                     <Route
                       index
