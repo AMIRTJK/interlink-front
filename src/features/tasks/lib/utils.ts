@@ -19,7 +19,13 @@
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const transformAssigneesResponse = (data: any) => {
-  const items = Array.isArray(data?.data?.data) ? data.data.data : [];
+  const items = Array.isArray(data?.data?.data)
+    ? data.data.data
+    : Array.isArray(data?.data)
+    ? data.data
+    : Array.isArray(data)
+    ? data
+    : [];
 
   return items.map((user: {
     id: number;
