@@ -47,8 +47,6 @@ interface ISelectFieldProps {
 	useToken?: boolean;
 }
 
-const { Option } = Select;
-
 export const SelectField = ({
 	name,
 	label,
@@ -103,11 +101,12 @@ export const SelectField = ({
 	// Функция загрузки данных
 	const loadItems = useCallback(
 		(open: boolean) => {
-			if (open && !isFetched && url) {
+			if (open && url) {
 				setIsFetched(true);
+				refetch();
 			}
 		},
-		[isFetched, url],
+		[refetch, url],
 	);
 
 	const handleSearch = (value: string) => {
@@ -135,15 +134,10 @@ export const SelectField = ({
 					.toLowerCase()
 					.includes(input.toLowerCase());
 
-	// Отображаем опции в выпадающем списке
-	const renderOptions = (options ?? items).map((opt, index) => {
-		const o = opt as DefaultOptionType;
-		return (
-			<Option key={`${o.value}-${index}`} value={o.value} label={o.label}>
-				{o.label}
-			</Option>
-		);
-	});
+	const selectOptions = useMemo(
+		() => (options ?? items) as DefaultOptionType[],
+		[options, items],
+	);
 
 	useEffect(() => {
 		if (!data) return;
@@ -163,10 +157,6 @@ export const SelectField = ({
 
 		setItems(formatted);
 	}, [data, transformResponse, props.extraTransformParams]);
-
-	useEffect(() => {
-		if (isFetchAllowed) loadItems(true);
-	}, [isFetchAllowed, loadItems]);
 
 	useEffect(() => {
 		if (isFetched && url) {
@@ -203,9 +193,8 @@ export const SelectField = ({
 				{...props}
 				data-autocomplete="new-password"
 				suffixIcon={suffixIcon}
-			>
-				{renderOptions}
-			</Select>
+				options={selectOptions}
+			/>
 		</Form.Item>
 	);
 };
