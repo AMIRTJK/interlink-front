@@ -1,6 +1,7 @@
+import { useMemo } from "react";
 import { Button, DatePicker, Form, Select, TimePicker } from "antd";
-import { If, SelectField, TextField } from "@shared/ui";
-import { requiredRule } from "@shared/lib";
+import { If, TextField } from "@shared/ui";
+import { requiredRule, useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { IRenderFields, TASK_STATUS_OPTIONS } from "../model";
 import { transformAssigneesResponse } from "./utils";
@@ -17,6 +18,16 @@ export const RenderFields = ({
 	defaultColor,
 	colors,
 }: IRenderFields) => {
+	const { data: usersData, isFetching: isFetchingUsers } = useGetQuery<any>({
+		url: ApiRoutes.GET_USERS,
+		params: { per_page: 100 },
+		useToken: true,
+	});
+
+	const assigneesOptions = useMemo(() => {
+		if (!usersData) return [];
+		return transformAssigneesResponse(usersData);
+	}, [usersData]);
 	return (
 		<>
 			<div className="flex items-center w-full px-6 gap-2 mb-6">
@@ -116,21 +127,19 @@ export const RenderFields = ({
 				</div>
 			</If>
 			<div className="flex items-center w-full px-6 gap-2">
-				<SelectField
-					label={false}
-					name="assignees"
-					placeholder="Выберите исполнителей"
-					showSearch
-					allowClear
-					mode="multiple"
-					url={ApiRoutes.GET_USERS}
-					method="GET"
-					useToken
-					params={{ per_page: 100 }}
-					transformResponse={transformAssigneesResponse}
-					searchParamKey="full_name"
-					className="mb-5! flex-1"
-				/>
+				<Form.Item name="assignees" className="mb-5! flex-1" style={{ margin: 0 }}>
+					<Select
+						placeholder="Выберите исполнителей"
+						showSearch
+						allowClear
+						mode="multiple"
+						loading={isFetchingUsers}
+						options={assigneesOptions}
+						filterOption={(input, option) =>
+							(option?.label ?? "").toString().toLowerCase().includes(input.toLowerCase())
+						}
+					/>
+				</Form.Item>
 			</div>
 			<If is={!isEvent}>
 				<div className="flex items-center w-full px-6 gap-2">
