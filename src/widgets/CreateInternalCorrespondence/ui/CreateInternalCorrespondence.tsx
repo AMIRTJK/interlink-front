@@ -3047,7 +3047,9 @@ export const CreateInternalCorrespondence = ({
                 !subject.trim() ||
                 isCreating ||
                 isUpdating ||
-                isOldVersionSelected
+                isOldVersionSelected ||
+                isSigned ||
+                isAlreadySent
               }
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border",
@@ -3055,7 +3057,9 @@ export const CreateInternalCorrespondence = ({
                   subject.trim() &&
                   !isCreating &&
                   !isUpdating &&
-                  !isOldVersionSelected
+                  !isOldVersionSelected &&
+                  !isSigned &&
+                  !isAlreadySent
                   ? "bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
                   : "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed",
               )}
