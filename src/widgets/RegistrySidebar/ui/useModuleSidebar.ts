@@ -228,6 +228,10 @@ export const useModuleSidebar = () => {
   );
 
   const activeKey = useMemo(() => {
+    const folderPathMatch = pathname.match(/\/internal\/folder\/(\d+)/);
+    if (folderPathMatch) {
+      return `folder-${folderPathMatch[1]}`;
+    }
     const urlParams = new URLSearchParams(search);
     const folderIdParam = urlParams.get("folder_id");
     if (folderIdParam) {

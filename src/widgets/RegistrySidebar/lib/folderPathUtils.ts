@@ -39,12 +39,14 @@ export const buildFolderPath = (
   definition?: { path: string },
   isInternal?: boolean,
 ): string => {
-  // Путь для системной папки
   if (definition?.path) {
     return definition.path;
   }
 
-  // Путь для пользовательской папки
+  if (isInternal && folder.id) {
+    return `/modules/correspondence/internal/folder/${folder.id}`;
+  }
+
   if (folder.id) {
     const rootFolderName = getRootSystemFolder(folder.id, folders);
 

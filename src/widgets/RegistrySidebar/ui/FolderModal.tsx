@@ -88,7 +88,6 @@ export const FolderModal = ({
           <Button
             type="primary"
             htmlType="submit"
-            onClick={() => form.submit()}
             className="flex-1! h-[50px]! text-[15px]! font-semibold! bg-linear-to-r! from-[#7c3aed]! to-[#a855f7]! border-none! text-white! rounded-[25px]! hover:opacity-95! transition-all! shadow-lg! shadow-purple-400/40!"
           >
             {isEditing ? "Сохранить" : "Создать"}

@@ -33,14 +33,16 @@ export const useCorrespondenceRoute = (): CorrespondenceRouteState => {
     const isCreate = effectiveId === "create";
     const isShow = !!effectiveId && effectiveId !== "create";
 
-    const isDetailView = isCreate || isShow;
+    const isFolderRoute = internalDetailMatch?.params.type === "folder" || type === "folder";
+
+    const isDetailView = !isFolderRoute && (isCreate || isShow);
 
     const shouldHideUI = (() => {
-      if (internalDetailMatch && isShow) {
+      if (internalDetailMatch && isShow && internalDetailMatch.params.type !== "folder") {
         return true;
       }
 
-      if (match && scope === "internal") {
+      if (match && scope === "internal" && type !== "folder") {
         if (isShow) return true;
 
         if (effectiveType === "outgoing" && isCreate) {
