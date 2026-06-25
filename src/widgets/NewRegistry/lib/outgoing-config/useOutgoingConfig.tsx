@@ -117,7 +117,9 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
 
       const items: MenuProps["items"] = [];
 
-      if (!isArchived) {
+      // «В архив» и «Закрепить» нужны только во внешней корреспонденции —
+      // во внутренних реестрах эти действия убраны.
+      if (!isArchived && !isInternal) {
         items.push({
           key: "archive",
           label: "В архив",
@@ -127,7 +129,7 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
         });
       }
 
-      if (!isPinned) {
+      if (!isPinned && !isInternal) {
         items.push({
           key: "pin",
           label: "Закрепить",
