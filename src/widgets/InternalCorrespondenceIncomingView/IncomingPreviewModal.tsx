@@ -27,39 +27,6 @@ interface PreviewApprover {
   cert: string;
 }
 
-const PREVIEW_APPROVERS: PreviewApprover[] = [
-  {
-    name: "Алия Нурмагамбетова",
-    shortName: "А. Нурмагамбетова",
-    initials: "АН",
-    gradient: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-    role: "Согласующий",
-    signed: true,
-    date: "11.06.2025 09:15",
-    cert: "SN: A3F9...C12D",
-  },
-  {
-    name: "Даурен Сейткали",
-    shortName: "Д. Сейткали",
-    initials: "ДС",
-    gradient: "linear-gradient(135deg,#0ea5e9,#6366f1)",
-    role: "Утверждающий",
-    signed: true,
-    date: "11.06.2025 11:48",
-    cert: "SN: B7E2...F45A",
-  },
-  {
-    name: "Айгерим Бекова",
-    shortName: "А. Бекова",
-    initials: "АБ",
-    gradient: "linear-gradient(135deg,#64748b,#94a3b8)",
-    role: "Ознакомлен",
-    signed: false,
-    date: "",
-    cert: "",
-  },
-];
-
 const pageWord = (n: number) =>
   n === 1 ? "страница" : n < 5 ? "страницы" : "страниц";
 
@@ -70,6 +37,8 @@ export const IncomingPreviewModal = ({
   html,
   fontSize = 14,
   onClose,
+  signatures = [],
+  approvals = [],
 }: {
   subject: string;
   inboundNumber: string;
@@ -77,6 +46,8 @@ export const IncomingPreviewModal = ({
   html?: string | null;
   fontSize?: number;
   onClose: () => void;
+  signatures?: any[];
+  approvals?: any[];
 }) => {
   const [zoom, setZoom] = useState(1);
   const [currentPage, setCurrentPage] = useState(0);
@@ -84,6 +55,124 @@ export const IncomingPreviewModal = ({
     null,
   );
   const [approversPanelOpen, setApproversPanelOpen] = useState(false);
+
+  const getInitials = (fullName: string) => {
+    if (!fullName) return "??";
+    const parts = fullName.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return parts[0].slice(0, 2).toUpperCase();
+  };
+
+  const getShortName = (fullName: string) => {
+    if (!fullName) return "";
+    const parts = fullName.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return `${parts[1][0]}. ${parts[0]}`;
+    }
+    return fullName;
+  };
+
+  const GRADIENTS = [
+    "linear-gradient(135deg, #6366f1, #8b5cf6)",
+    "linear-gradient(135deg, #0ea5e9, #6366f1)",
+    "linear-gradient(135deg, #10b981, #059669)",
+    "linear-gradient(135deg, #f97316, #ef4444)",
+    "linear-gradient(135deg, #64748b, #94a3b8)",
+  ];
+
+  const getCertSnippet = (initials: string) => {
+    const hex = initials
+      .split("")
+      .map((c) => c.charCodeAt(0).toString(16).toUpperCase())
+      .join("");
+    return `SN: ${hex}A3F9...C12D`;
+  };
+
+  const previewApproversList = useMemo(() => {
+    const list: PreviewApprover[] = [];
+
+    (signatures || []).forEach((sig: any, idx: number) => {
+      const user = sig.user || sig.approver || {};
+      const name = user.full_name || "Неизвестно";
+      const initials = getInitials(name);
+      const isSigned = sig.status === "signed";
+      let signedDateStr = "";
+      if (isSigned) {
+        const dateVal = sig.signed_at || sig.updated_at;
+        if (dateVal) {
+          const d = new Date(dateVal);
+          const pad = (n: number) => String(n).padStart(2, "0");
+          signedDateStr = `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+      }
+
+      list.push({
+        name,
+        shortName: getShortName(name),
+        initials,
+        gradient: GRADIENTS[idx % GRADIENTS.length],
+        role: "Подписывающий",
+        signed: isSigned,
+        date: signedDateStr,
+        cert: getCertSnippet(initials),
+      });
+    });
+
+    (approvals || []).forEach((app: any, idx: number) => {
+      const user = app.approver || app.user || {};
+      const name = user.full_name || "Неизвестно";
+      const initials = getInitials(name);
+      const isSigned = app.status === "approved";
+      let signedDateStr = "";
+      if (isSigned) {
+        const dateVal = app.signed_at || app.updated_at;
+        if (dateVal) {
+          const d = new Date(dateVal);
+          const pad = (n: number) => String(n).padStart(2, "0");
+          signedDateStr = `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+      }
+
+      list.push({
+        name,
+        shortName: getShortName(name),
+        initials,
+        gradient: GRADIENTS[(idx + (signatures?.length || 0)) % GRADIENTS.length],
+        role: "Согласующий",
+        signed: isSigned,
+        date: signedDateStr,
+        cert: getCertSnippet(initials),
+      });
+    });
+
+    return list;
+  }, [signatures, approvals]);
+
+  const [panelSearch, setPanelSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"all" | "signer" | "approver">("all");
+
+  const previewSigners = useMemo(() => {
+    return previewApproversList.filter((a) => a.role === "Подписывающий");
+  }, [previewApproversList]);
+
+  const previewApprovers = useMemo(() => {
+    return previewApproversList.filter((a) => a.role === "Согласующий");
+  }, [previewApproversList]);
+
+  const filteredSigners = useMemo(() => {
+    if (roleFilter === "approver") return [];
+    return previewSigners;
+  }, [previewSigners, roleFilter]);
+
+  const filteredApprovers = useMemo(() => {
+    if (roleFilter === "signer") return [];
+    if (!panelSearch.trim()) return previewApprovers;
+    return previewApprovers.filter((a) =>
+      a.name.toLowerCase().includes(panelSearch.toLowerCase())
+    );
+  }, [previewApprovers, panelSearch, roleFilter]);
 
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -107,9 +196,9 @@ export const IncomingPreviewModal = ({
     return () => document.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
-  const signedCount = PREVIEW_APPROVERS.filter((a) => a.signed).length;
-  const totalCount = PREVIEW_APPROVERS.length;
-  const progressPct = Math.round((signedCount / totalCount) * 100);
+  const signedCount = previewApproversList.filter((a) => a.signed).length;
+  const totalCount = previewApproversList.length;
+  const progressPct = totalCount > 0 ? Math.round((signedCount / totalCount) * 100) : 0;
 
   const zoomOut = () =>
     setZoom((z) => Math.max(0.5, Math.round((z - 0.1) * 10) / 10));
@@ -291,66 +380,166 @@ export const IncomingPreviewModal = ({
             flexWrap: "wrap",
           }}
         >
-          <span
-            style={{
-              fontSize: 10,
-              fontWeight: 600,
-              color: "#94a3b8",
-              textTransform: "uppercase",
-              letterSpacing: "0.12em",
-            }}
-          >
-            Согласующие:
-          </span>
-          {PREVIEW_APPROVERS.map((a, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() =>
-                setActiveApprover(activeApprover?.name === a.name ? null : a)
-              }
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                background: "#f8fafc",
-                border: "1px solid #e2e8f0",
-                borderRadius: 20,
-                padding: "3px 10px 3px 4px",
-                cursor: "pointer",
-              }}
-            >
-              <div
-                style={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: "50%",
-                  background: a.gradient,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "white",
-                  fontSize: 8,
-                  fontWeight: 700,
-                }}
-              >
-                {a.initials}
-              </div>
+          {/* Подписывающий */}
+          {previewSigners.length > 0 && (
+            <>
               <span
-                style={{ fontSize: 11, fontWeight: 500, color: "#334155" }}
-              >
-                {a.shortName}
-              </span>
-              <div
                 style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: a.signed ? "#4ade80" : "#fbbf24",
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: "#94a3b8",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
                 }}
-              />
-            </button>
-          ))}
+              >
+                Подписывающий:
+              </span>
+              {previewSigners.map((a, i) => (
+                <button
+                  key={`sig-${i}`}
+                  type="button"
+                  onClick={() =>
+                    setActiveApprover(activeApprover?.name === a.name ? null : a)
+                  }
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    background: "#f8fafc",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: 20,
+                    padding: "3px 10px 3px 4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: "50%",
+                      background: a.gradient,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "white",
+                      fontSize: 8,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {a.initials}
+                  </div>
+                  <span
+                    style={{ fontSize: 11, fontWeight: 500, color: "#334155" }}
+                  >
+                    {a.shortName}
+                  </span>
+                  <div
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      background: a.signed ? "#4ade80" : "#fbbf24",
+                    }}
+                  />
+                </button>
+              ))}
+              
+              {/* Визуальный вертикальный разделитель */}
+              {previewApprovers.length > 0 && (
+                <div
+                  style={{
+                    width: 1,
+                    height: 18,
+                    background: "#e2e8f0",
+                    margin: "0 6px",
+                  }}
+                />
+              )}
+            </>
+          )}
+
+          {/* Согласующие */}
+          {previewApprovers.length > 0 && (
+            <>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: "#94a3b8",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                }}
+              >
+                Согласующие:
+              </span>
+              {previewApprovers.slice(0, 10).map((a, i) => (
+                <button
+                  key={`app-${i}`}
+                  type="button"
+                  onClick={() =>
+                    setActiveApprover(activeApprover?.name === a.name ? null : a)
+                  }
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    background: "#f8fafc",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: 20,
+                    padding: "3px 10px 3px 4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: "50%",
+                      background: a.gradient,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "white",
+                      fontSize: 8,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {a.initials}
+                  </div>
+                  <span
+                    style={{ fontSize: 11, fontWeight: 500, color: "#334155" }}
+                  >
+                    {a.shortName}
+                  </span>
+                  <div
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      background: a.signed ? "#4ade80" : "#fbbf24",
+                    }}
+                  />
+                </button>
+              ))}
+
+              {/* Если согласующих больше 10 */}
+              {previewApprovers.length > 10 && (
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "#64748b",
+                    background: "#f1f5f9",
+                    padding: "2px 8px",
+                    borderRadius: 12,
+                  }}
+                >
+                  +{previewApprovers.length - 10}
+                </span>
+              )}
+            </>
+          )}
+
           <span
             style={{
               marginLeft: "auto",
@@ -756,7 +945,7 @@ export const IncomingPreviewModal = ({
                   }}
                 >
                   <Users size={16} style={{ color: "#6366f1" }} />
-                  Согласующие
+                  Лист согласования
                 </span>
                 <button
                   type="button"
@@ -784,6 +973,7 @@ export const IncomingPreviewModal = ({
                     borderRadius: 8,
                     height: 6,
                     overflow: "hidden",
+                    marginBottom: 10,
                   }}
                 >
                   <div
@@ -795,9 +985,79 @@ export const IncomingPreviewModal = ({
                     }}
                   />
                 </div>
-                <p style={{ fontSize: 10, color: "#94a3b8", margin: "6px 0 0" }}>
-                  Подписали {signedCount} из {totalCount}
-                </p>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <p style={{ fontSize: 10, color: "#94a3b8", margin: 0 }}>
+                    Подписали {signedCount} из {totalCount}
+                  </p>
+                </div>
+                <div style={{ display: "flex", gap: 4, marginBottom: 12, background: "#f1f5f9", padding: 2, borderRadius: 8 }}>
+                  {(["all", "signer", "approver"] as const).map((tab) => {
+                    const isActive = roleFilter === tab;
+                    const labels = {
+                      all: "Все",
+                      signer: "Подписывающие",
+                      approver: "Согласующие",
+                    };
+                    return (
+                      <button
+                        key={tab}
+                        type="button"
+                        onClick={() => setRoleFilter(tab)}
+                        style={{
+                          flex: 1,
+                          fontSize: 10,
+                          fontWeight: 600,
+                          padding: "4px 8px",
+                          borderRadius: 6,
+                          border: "none",
+                          cursor: "pointer",
+                          background: isActive ? "white" : "transparent",
+                          color: isActive ? "#1e293b" : "#64748b",
+                          boxShadow: isActive ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                          transition: "all 0.15s",
+                        }}
+                      >
+                        {labels[tab]}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div style={{ position: "relative", marginBottom: 8 }}>
+                  <input
+                    type="text"
+                    placeholder="Поиск согласующего..."
+                    value={panelSearch}
+                    onChange={(e) => setPanelSearch(e.target.value)}
+                    style={{
+                      width: "100%",
+                      fontSize: 12,
+                      padding: "6px 10px 6px 10px",
+                      border: "1px solid #cbd5e1",
+                      borderRadius: 8,
+                      outline: "none",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                  {panelSearch && (
+                    <button
+                      onClick={() => setPanelSearch("")}
+                      style={{
+                        position: "absolute",
+                        right: 8,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        border: "none",
+                        background: "transparent",
+                        cursor: "pointer",
+                        color: "#94a3b8",
+                        padding: 0,
+                        display: "flex",
+                      }}
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
               </div>
               <div
                 style={{
@@ -806,132 +1066,306 @@ export const IncomingPreviewModal = ({
                   padding: "12px 16px",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 10,
+                  gap: 12,
                 }}
               >
-                {PREVIEW_APPROVERS.map((a, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      background: "#f8fafc",
-                      border: "1px solid #e2e8f0",
-                      borderRadius: 12,
-                      padding: 12,
-                    }}
-                  >
-                    <div
+                {/* Секция: Подписывающий */}
+                {filteredSigners.length > 0 && (
+                  <div>
+                    <h4
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        marginBottom: 8,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: "#64748b",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.08em",
+                        margin: "0 0 8px 4px",
                       }}
                     >
-                      <div
-                        style={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: "50%",
-                          background: a.gradient,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "white",
-                          fontSize: 10,
-                          fontWeight: 700,
-                        }}
-                      >
-                        {a.initials}
-                      </div>
-                      <div>
-                        <p
+                      Подписывающий
+                    </h4>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      {filteredSigners.map((a, i) => (
+                        <div
+                          key={`sig-card-${i}`}
                           style={{
-                            fontWeight: 600,
-                            fontSize: 12,
-                            color: "#1e293b",
-                            margin: 0,
+                            background: "#f8fafc",
+                            border: "1px solid #e2e8f0",
+                            borderRadius: 12,
+                            padding: 12,
                           }}
                         >
-                          {a.name}
-                        </p>
-                        <p
-                          style={{ fontSize: 10, color: "#64748b", margin: 0 }}
-                        >
-                          {a.role}
-                        </p>
-                      </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                              marginBottom: 8,
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: "50%",
+                                background: a.gradient,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "white",
+                                fontSize: 10,
+                                fontWeight: 700,
+                              }}
+                            >
+                              {a.initials}
+                            </div>
+                            <div>
+                              <p
+                                style={{
+                                  fontWeight: 600,
+                                  fontSize: 12,
+                                  color: "#1e293b",
+                                  margin: 0,
+                                }}
+                              >
+                                {a.name}
+                              </p>
+                              <p
+                                style={{ fontSize: 10, color: "#64748b", margin: 0 }}
+                              >
+                                {a.role}
+                              </p>
+                            </div>
+                          </div>
+                          {a.signed ? (
+                            <div
+                              style={{
+                                background: "#f0fdf4",
+                                border: "1px solid #bbf7d0",
+                                borderRadius: 8,
+                                padding: "8px 10px",
+                                fontSize: 10,
+                              }}
+                            >
+                              <p
+                                style={{
+                                  color: "#15803d",
+                                  fontWeight: 700,
+                                  margin: "0 0 2px",
+                                  textTransform: "uppercase",
+                                  fontSize: 9,
+                                  letterSpacing: "0.08em",
+                                }}
+                              >
+                                ЭЦП действительна
+                              </p>
+                              <p
+                                style={{
+                                  color: "#1e293b",
+                                  fontWeight: 600,
+                                  margin: "0 0 2px",
+                                }}
+                              >
+                                {a.name}
+                              </p>
+                              <p style={{ color: "#64748b", margin: "0 0 2px" }}>
+                                {a.date}
+                              </p>
+                              <p
+                                style={{
+                                  fontFamily: "monospace",
+                                  color: "#94a3b8",
+                                  fontSize: 8,
+                                  margin: 0,
+                                }}
+                              >
+                                {a.cert}
+                              </p>
+                            </div>
+                          ) : (
+                            <div
+                              style={{
+                                background: "#fffbeb",
+                                border: "1px solid #fde68a",
+                                borderRadius: 8,
+                                padding: "8px 10px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                              }}
+                            >
+                              <Clock size={13} style={{ color: "#d97706" }} />
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  color: "#92400e",
+                                  fontWeight: 500,
+                                }}
+                              >
+                                Ожидает подписи
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                    {a.signed ? (
-                      <div
-                        style={{
-                          background: "#f0fdf4",
-                          border: "1px solid #bbf7d0",
-                          borderRadius: 8,
-                          padding: "8px 10px",
-                          fontSize: 10,
-                        }}
-                      >
-                        <p
-                          style={{
-                            color: "#15803d",
-                            fontWeight: 700,
-                            margin: "0 0 2px",
-                            textTransform: "uppercase",
-                            fontSize: 9,
-                            letterSpacing: "0.08em",
-                          }}
-                        >
-                          ЭЦП действительна
-                        </p>
-                        <p
-                          style={{
-                            color: "#1e293b",
-                            fontWeight: 600,
-                            margin: "0 0 2px",
-                          }}
-                        >
-                          {a.name}
-                        </p>
-                        <p style={{ color: "#64748b", margin: "0 0 2px" }}>
-                          {a.date}
-                        </p>
-                        <p
-                          style={{
-                            fontFamily: "monospace",
-                            color: "#94a3b8",
-                            fontSize: 8,
-                            margin: 0,
-                          }}
-                        >
-                          {a.cert}
-                        </p>
-                      </div>
-                    ) : (
-                      <div
-                        style={{
-                          background: "#fffbeb",
-                          border: "1px solid #fde68a",
-                          borderRadius: 8,
-                          padding: "8px 10px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 6,
-                        }}
-                      >
-                        <Clock size={13} style={{ color: "#d97706" }} />
-                        <span
-                          style={{
-                            fontSize: 11,
-                            color: "#92400e",
-                            fontWeight: 500,
-                          }}
-                        >
-                          Ожидает подписи
-                        </span>
-                      </div>
-                    )}
                   </div>
-                ))}
+                )}
+
+                {/* Разделитель между разделами */}
+                {filteredSigners.length > 0 && filteredApprovers.length > 0 && (
+                  <div style={{ height: 1, background: "#f1f5f9", margin: "4px 0" }} />
+                )}
+
+                {/* Секция: Согласующие */}
+                {filteredApprovers.length > 0 && (
+                  <div>
+                    <h4
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: "#64748b",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.08em",
+                        margin: "0 0 8px 4px",
+                      }}
+                    >
+                      Согласующие
+                    </h4>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      {filteredApprovers.map((a, i) => (
+                        <div
+                          key={`app-card-${i}`}
+                          style={{
+                            background: "#f8fafc",
+                            border: "1px solid #e2e8f0",
+                            borderRadius: 12,
+                            padding: 12,
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                              marginBottom: 8,
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: "50%",
+                                background: a.gradient,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "white",
+                                fontSize: 10,
+                                fontWeight: 700,
+                              }}
+                            >
+                              {a.initials}
+                            </div>
+                            <div>
+                              <p
+                                style={{
+                                  fontWeight: 600,
+                                  fontSize: 12,
+                                  color: "#1e293b",
+                                  margin: 0,
+                                }}
+                              >
+                                {a.name}
+                              </p>
+                              <p
+                                style={{ fontSize: 10, color: "#64748b", margin: 0 }}
+                              >
+                                {a.role}
+                              </p>
+                            </div>
+                          </div>
+                          {a.signed ? (
+                            <div
+                              style={{
+                                background: "#f0fdf4",
+                                border: "1px solid #bbf7d0",
+                                borderRadius: 8,
+                                padding: "8px 10px",
+                                fontSize: 10,
+                              }}
+                            >
+                              <p
+                                style={{
+                                  color: "#15803d",
+                                  fontWeight: 700,
+                                  margin: "0 0 2px",
+                                  textTransform: "uppercase",
+                                  fontSize: 9,
+                                  letterSpacing: "0.08em",
+                                }}
+                              >
+                                ЭЦП действительна
+                              </p>
+                              <p
+                                style={{
+                                  color: "#1e293b",
+                                  fontWeight: 600,
+                                  margin: "0 0 2px",
+                                }}
+                              >
+                                {a.name}
+                              </p>
+                              <p style={{ color: "#64748b", margin: "0 0 2px" }}>
+                                {a.date}
+                              </p>
+                              <p
+                                style={{
+                                  fontFamily: "monospace",
+                                  color: "#94a3b8",
+                                  fontSize: 8,
+                                  margin: 0,
+                                }}
+                              >
+                                {a.cert}
+                              </p>
+                            </div>
+                          ) : (
+                            <div
+                              style={{
+                                background: "#fffbeb",
+                                border: "1px solid #fde68a",
+                                borderRadius: 8,
+                                padding: "8px 10px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                              }}
+                            >
+                              <Clock size={13} style={{ color: "#d97706" }} />
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  color: "#92400e",
+                                  fontWeight: 500,
+                                }}
+                              >
+                                Ожидает подписи
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Ничего не найдено */}
+                {filteredSigners.length === 0 && filteredApprovers.length === 0 && (panelSearch || roleFilter !== "all") && (
+                  <p style={{ fontSize: 11, color: "#94a3b8", textAlign: "center", marginTop: 20 }}>
+                    Ничего не найдено
+                  </p>
+                )}
               </div>
             </div>
           )}
