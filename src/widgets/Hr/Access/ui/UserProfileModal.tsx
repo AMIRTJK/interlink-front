@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, Check, ChevronDown } from "lucide-react";
-import { Dropdown, Modal, Select, Switch } from "antd";
+import { Dropdown, Modal, Switch } from "antd";
 import type { MenuProps } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
@@ -134,7 +134,9 @@ export const UserProfileModal = ({
 }: IProps) => {
 	const [tab, setTab] = useState<TTab>("profile");
 	const [selectedRoles, setSelectedRoles] = useState<string[]>(user.roles);
-	const [userPermissionsState, setUserPermissionsState] = useState<string[]>([]);
+	const [userPermissionsState, setUserPermissionsState] = useState<string[]>(
+		[],
+	);
 	const [isInitialized, setIsInitialized] = useState(false);
 
 	const { data: detailData } = useGetQuery({
@@ -148,7 +150,7 @@ export const UserProfileModal = ({
 		}
 		const rawRoles = detailData?.data?.roles || detailData?.roles;
 		if (Array.isArray(rawRoles)) {
-			setSelectedRoles(rawRoles.map((r: any) => r.name));
+			setSelectedRoles(rawRoles?.map((r: any) => r.name));
 		}
 		const rawPerms = detailData?.data?.permissions || detailData?.permissions;
 		const perms = new Set<string>();
@@ -184,11 +186,14 @@ export const UserProfileModal = ({
 	}, [detailData, isInitialized, rolesList]);
 
 	const updateRolesM = useMutationQuery({
-		url: ApiRoutes.SET_USER_ROLES.replace(":id", String(user.id)),
+		url: ApiRoutes.SET_USER_ROLES,
 		method: "POST",
 		messages: {
 			success: "Права доступа успешно сохранены",
-			invalidate: [ApiRoutes.GET_USERS, `${ApiRoutes.FETCH_USER_BY_ID}${user.id}`],
+			invalidate: [
+				ApiRoutes.GET_USERS,
+				`${ApiRoutes.FETCH_USER_BY_ID}${user.id}`,
+			],
 		},
 	});
 
@@ -283,7 +288,7 @@ export const UserProfileModal = ({
 
 	const handleSave = () => {
 		updateRolesM.mutate(
-			{ roles: selectedRoles },
+			{ user_id: user.id, roles: selectedRoles },
 			{
 				onSuccess: () => {
 					onClose();
@@ -336,8 +341,6 @@ export const UserProfileModal = ({
 			onClick: handleDeleteConfirm,
 		},
 	];
-
-
 
 	return (
 		<motion.div
@@ -519,7 +522,9 @@ export const UserProfileModal = ({
 												key={role}
 												className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-sm font-medium border ${style.border} ${style.bg} ${style.text}`}
 											>
-												<span className={`w-1.5 h-1.5 rounded-full ${ROLE_DOT_COLOR_MAP[role] || "bg-slate-400!"}`} />
+												<span
+													className={`w-1.5 h-1.5 rounded-full ${ROLE_DOT_COLOR_MAP[role] || "bg-slate-400!"}`}
+												/>
 												<span>{role}</span>
 											</div>
 										);
@@ -535,29 +540,38 @@ export const UserProfileModal = ({
 							</div>
 
 							<div className="space-y-5">
-								{Object.entries(groupedPermissions).map(([moduleName, actions]) => (
-									<div key={moduleName} className="space-y-2">
-										<h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-1">
-											{MODULE_TRANSLATIONS[moduleName] || moduleName}
-										</h4>
-										<div className="bg-slate-50/40! border border-slate-100! rounded-2xl! p-4! flex! flex-wrap! items-center! gap-x-8! gap-y-3!">
-											{actions.map((act) => {
-												const checked = userPermissionsState.includes(act.name);
-												return (
-													<div key={act.name} className="flex items-center gap-3">
-														<span className="text-sm font-medium text-slate-600">
-															{act.label}
-														</span>
-														<Switch
-															checked={checked}
-															onChange={() => handleTogglePermission(act.name)}
-														/>
-													</div>
-												);
-											})}
+								{Object.entries(groupedPermissions).map(
+									([moduleName, actions]) => (
+										<div key={moduleName} className="space-y-2">
+											<h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-1">
+												{MODULE_TRANSLATIONS[moduleName] || moduleName}
+											</h4>
+											<div className="bg-slate-50/40! border border-slate-100! rounded-2xl! p-4! flex! flex-wrap! items-center! gap-x-8! gap-y-3!">
+												{actions.map((act) => {
+													const checked = userPermissionsState.includes(
+														act.name,
+													);
+													return (
+														<div
+															key={act.name}
+															className="flex items-center gap-3"
+														>
+															<span className="text-sm font-medium text-slate-600">
+																{act.label}
+															</span>
+															<Switch
+																checked={checked}
+																onChange={() =>
+																	handleTogglePermission(act.name)
+																}
+															/>
+														</div>
+													);
+												})}
+											</div>
 										</div>
-									</div>
-								))}
+									),
+								)}
 							</div>
 						</div>
 					</If>
@@ -592,4 +606,3 @@ export const UserProfileModal = ({
 		</motion.div>
 	);
 };
-
