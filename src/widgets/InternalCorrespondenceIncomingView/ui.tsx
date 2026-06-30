@@ -233,6 +233,8 @@ export const InternalCorrespondenceIncomingView = ({
           html={documentBody}
           fontSize={14}
           onClose={() => setShowPreview(false)}
+          signatures={signatures}
+          approvals={approvals}
         />
       )}
 
