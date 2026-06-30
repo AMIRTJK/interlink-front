@@ -1,6 +1,18 @@
 /* @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"); */
 @import "tailwindcss";
 
+/* Orbitron (вариативный, latin-subset) самостоятельно хостим в /public/fonts —
+   нужен штампу ЭЦП (логотип INFRATECH, даты, футер). Без внешних CDN: работает
+   офлайн и при печати. Латиница/цифры рисуются Orbitron, кириллица падает на
+   системный sans (в Orbitron нет кириллицы) — ровно как в утверждённом макете. */
+@font-face {
+  font-family: "Orbitron";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("/fonts/Orbitron-Variable.woff2") format("woff2");
+}
+
 html,
 body,
 #root {
