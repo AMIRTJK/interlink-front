@@ -14,7 +14,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { cn, useGetQuery } from "@shared/lib";
+import { cn, useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { DocumentCanvas } from "./DocumentCanvas";
 import { downloadDocumentPdf, PAGE_WIDTH } from "./lib";
@@ -34,10 +34,11 @@ const inboxStatusStyle: Record<string, string> = {
 };
 
 const ACTION_MENU_ITEMS: {
-  id: "reply" | "forward" | "task";
+  id: "seen" | "reply" | "forward" | "task";
   label: string;
   icon: React.ElementType;
 }[] = [
+  { id: "seen", label: "Ознакомлен", icon: Eye },
   { id: "reply", label: "Ответить", icon: CornerUpLeft },
   { id: "forward", label: "Перенаправить", icon: Forward },
   { id: "task", label: "Поручение", icon: ClipboardList },
@@ -139,8 +140,26 @@ export const InternalCorrespondenceIncomingView = ({
     };
   }, [showActionMenu]);
 
-  const handleAction = (id: "reply" | "forward" | "task") => {
+  const { mutate: seenMutate } = useMutationQuery({
+    method: "POST",
+    url: item?.id
+      ? ApiRoutes.READ_INTERNAL.replace(":id", String(item.id))
+      : "",
+    messages: {
+      success: "Вы успешно ознакомились с документом",
+      error: "Не удалось отметить ознакомление",
+      invalidate: item?.id
+        ? [ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", String(item.id))]
+        : [],
+    },
+  });
+
+  const handleAction = (id: "seen" | "reply" | "forward" | "task") => {
     setShowActionMenu(false);
+    if (id === "seen") {
+      seenMutate({});
+      return;
+    }
     if (id === "task") {
       setShowTaskPanel(true);
       return;

@@ -88,6 +88,8 @@ import { PreviewModal } from "./PreviewModal";
 import { TBtn } from "./TBtn";
 import { DSStamp } from "./DSStamp";
 import { OriginalLetterPanel } from "./OriginalLetterPanel";
+import { OriginalLetterDetails } from "./OriginalLetterDetails";
+import { OriginalLetterBody } from "./OriginalLetterBody";
 import { ApproversPanel } from "./ApproversPanel";
 import { SignerPanel } from "./SignerPanel";
 import { IncomingLettersPanel } from "./IncomingLettersPanel";
@@ -742,6 +744,7 @@ export const CreateInternalCorrespondence = ({
   const [importingWord, setImportingWord] = useState(false);
   // Над редактором тащат файл — показываем подсказку-оверлей для импорта
   const [isDraggingWord, setIsDraggingWord] = useState(false);
+  const [showOriginalLetterSides, setShowOriginalLetterSides] = useState(false);
 
   const composeAppliedRef = useRef(false);
   const isDraggingStamp = useRef(false);
@@ -3163,7 +3166,7 @@ export const CreateInternalCorrespondence = ({
           </div>
         </div>
 
-        {composeMode && sourceLetter && (
+        {composeMode && sourceLetter && !showOriginalLetterSides && (
           <OriginalLetterPanel
             mode={composeMode}
             sender={
@@ -3839,6 +3842,20 @@ export const CreateInternalCorrespondence = ({
                     />
                   </>
                 )}
+                {composeMode && sourceLetter && (
+                  <>
+                    <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
+                      <input
+                        type="checkbox"
+                        checked={showOriginalLetterSides}
+                        onChange={(e) => setShowOriginalLetterSides(e.target.checked)}
+                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <span>Режим просмотра входящего письма</span>
+                    </label>
+                  </>
+                )}
               </div>
 
               <div
@@ -3863,7 +3880,22 @@ export const CreateInternalCorrespondence = ({
                     </div>
                   </div>
                 )}
-                <div className="py-8 px-8 flex justify-center">
+                <div className={cn(
+                  "py-8 px-8 flex justify-center items-start gap-12 w-full",
+                  showOriginalLetterSides && composeMode && sourceLetter && "min-w-[1500px]!"
+                )}>
+                  {showOriginalLetterSides && composeMode && sourceLetter && (
+                    <OriginalLetterDetails
+                      sender={
+                        sourceLetter.senderName || sourceLetter.creator?.full_name || "—"
+                      }
+                      date={sourceLetter.date || "—"}
+                      status={sourceLetter.status || ""}
+                      inboundNumber={sourceLetter.inboundNumber || "—"}
+                      subject={sourceLetter.subject || ""}
+                    />
+                  )}
+
                   <div
                     ref={pageCanvasRef}
                     className="relative"
@@ -4086,6 +4118,13 @@ export const CreateInternalCorrespondence = ({
                       </div>
                     )}
                   </div>
+
+                  {showOriginalLetterSides && composeMode && sourceLetter && (
+                    <OriginalLetterBody
+                      body={sourceLetter.body}
+                      sourceId={sourceLetter.id}
+                    />
+                  )}
                 </div>
               </div>
             </div>
