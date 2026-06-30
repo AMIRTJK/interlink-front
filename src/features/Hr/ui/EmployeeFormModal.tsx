@@ -1,51 +1,15 @@
 import { useEffect } from "react";
-import { Modal, Form, Input, Select } from "antd";
+import { Modal, Form } from "antd";
 import { CreateUserDTO, IAdminUser } from "@entities/hr";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
-import { SelectField } from "@shared/ui";
+import { EmployeeFormFields } from "./EmployeeFormFields";
 
 interface IProps {
   open: boolean;
   onClose: () => void;
   employee?: IAdminUser | null;
 }
-
-const transformOrgs = (res: unknown) => {
-  const data =
-    (res as { data: { data: { id: number; name: string }[] } })?.data?.data ||
-    [];
-  return data.map((o) => ({ value: String(o.id), label: o.name }));
-};
-const transformDeps = (res: unknown) => {
-  const data =
-    (res as { data: { data: { id: number; name: string }[] } })?.data?.data ||
-    [];
-  return data.map((d) => ({ value: String(d.id), label: d.name }));
-};
-const transformRoles = (res: unknown) => {
-  const raw = (
-    res as {
-      data:
-        | { data: { id: number; name: string }[] }
-        | { id: number; name: string }[];
-    }
-  )?.data;
-  const items =
-    (Array.isArray(raw)
-      ? raw
-      : (raw as { data: { id: number; name: string }[] })?.data) || [];
-  return items.map((r) => ({ value: r.name, label: r.name }));
-};
-
-// Оставляем только цифры, максимум 9 (номер после +992)
-const onlyDigits9 = (v: string) => (v || "").replace(/\D/g, "").slice(0, 9);
-
-const STATUS_OPTIONS = [
-  { value: "active", label: "Активен" },
-  { value: "vacation", label: "В отпуске" },
-  { value: "business_trip", label: "В командировке" },
-];
 
 export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
   const [form] = Form.useForm();
@@ -56,6 +20,7 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
     method: "POST",
     messages: { success: "Сотрудник создан", invalidate: [ApiRoutes.GET_USERS] },
   });
+
   const updateM = useMutationQuery<Partial<CreateUserDTO>>({
     url: () => ApiRoutes.UPDATE_USER.replace(":id", String(employee?.id)),
     method: "PUT",
@@ -93,7 +58,6 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
   }, [open, employee, form]);
 
   const onFinish = (values: Record<string, unknown>) => {
-    // Добавляем код страны к телефонам, если его нет
     const withCode = (v: unknown) => {
       const s = String(v || "");
       if (!s) return undefined;
@@ -145,137 +109,11 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
         onFinish={onFinish}
         className="pt-2"
       >
-        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">
-          Личные данные
-        </p>
-        <div className="grid grid-cols-2 gap-x-3">
-          <Form.Item
-            name="last_name"
-            label="Фамилия"
-            rules={[{ required: true, message: "Введите фамилию" }]}
-          >
-            <Input placeholder="Иванов" />
-          </Form.Item>
-          <Form.Item
-            name="first_name"
-            label="Имя"
-            rules={[{ required: true, message: "Введите имя" }]}
-          >
-            <Input placeholder="Александр" />
-          </Form.Item>
-        </div>
-
-        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2 mt-1">
-          Рабочие данные
-        </p>
-        <SelectField
-          name="organization_id"
-          label="Организация"
-          rules={[{ required: true, message: "Выберите организацию" }]}
-          url={ApiRoutes.GET_ORGANIZATIONS}
-          method="GET"
-          isFetchAllowed
-          transformResponse={transformOrgs}
-          placeholder="Выберите организацию"
-          onChange={(val) =>
-            form.setFieldsValue({
-              organization_id: val,
-              department_id: undefined,
-            })
-          }
+        <EmployeeFormFields
+          form={form}
+          organizationId={organizationId}
+          isEdit={isEdit}
         />
-        <SelectField
-          name="department_id"
-          label="Отдел"
-          rules={[{ required: true, message: "Выберите отдел" }]}
-          url={organizationId ? ApiRoutes.GET_DEPARTMENTS : undefined}
-          params={
-            organizationId ? { organization_id: organizationId } : undefined
-          }
-          method="GET"
-          isFetchAllowed={!!organizationId}
-          transformResponse={transformDeps}
-          placeholder={
-            organizationId ? "Выберите отдел" : "Сначала выберите организацию"
-          }
-          disabled={!organizationId}
-        />
-        <div className="grid grid-cols-2 gap-x-3">
-          <Form.Item
-            name="position"
-            label="Должность"
-            rules={[{ required: true, message: "Введите должность" }]}
-          >
-            <Input placeholder="Менеджер" />
-          </Form.Item>
-          <Form.Item name="status" label="Статус" initialValue="active">
-            <Select options={STATUS_OPTIONS} />
-          </Form.Item>
-        </div>
-        <SelectField
-          name="roles"
-          label="Роли"
-          rules={[{ required: true, message: "Выберите роли" }]}
-          url={ApiRoutes.GET_ROLES}
-          method="GET"
-          isFetchAllowed
-          transformResponse={transformRoles}
-          placeholder="Выберите роли"
-          mode="multiple"
-        />
-
-        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2 mt-1">
-          Контакты и финансы
-        </p>
-        <div className="grid grid-cols-2 gap-x-3">
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[{ type: "email", message: "Некорректный email" }]}
-          >
-            <Input placeholder="user@corp.ru" />
-          </Form.Item>
-          <Form.Item
-            name="phone"
-            label="Телефон"
-            normalize={onlyDigits9}
-            rules={[{ pattern: /^\d{9}$/, message: "Введите 9 цифр" }]}
-          >
-            <Input addonBefore="+992" placeholder="900000000" maxLength={9} />
-          </Form.Item>
-        </div>
-        <div className="grid grid-cols-2 gap-x-3">
-          <Form.Item
-            name="personal_email"
-            label="Персональный email"
-            rules={[{ type: "email", message: "Некорректный email" }]}
-          >
-            <Input placeholder="user@gmail.com" />
-          </Form.Item>
-          <Form.Item
-            name="personal_phone"
-            label="Персональный телефон"
-            normalize={onlyDigits9}
-            rules={[{ pattern: /^\d{9}$/, message: "Введите 9 цифр" }]}
-          >
-            <Input addonBefore="+992" placeholder="900000000" maxLength={9} />
-          </Form.Item>
-        </div>
-        <div className="grid grid-cols-2 gap-x-3">
-          <Form.Item name="salary" label="Оклад (₽)">
-            <Input type="number" placeholder="50000" />
-          </Form.Item>
-          {!isEdit && (
-            <Form.Item
-              name="password"
-              label="Пароль"
-              rules={[{ required: true, message: "Введите пароль" }]}
-            >
-              <Input.Password placeholder="••••••" />
-            </Form.Item>
-          )}
-        </div>
-
         <div className="flex items-center justify-end gap-2 pt-2">
           <button
             type="button"
