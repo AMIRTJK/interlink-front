@@ -142,6 +142,10 @@ export const UserProfileModal = ({
 	const { data: detailData } = useGetQuery({
 		url: `${ApiRoutes.FETCH_USER_BY_ID}${user.id}`,
 		useToken: true,
+		options: {
+			refetchOnWindowFocus: false,
+			staleTime: 5 * 60 * 1000,
+		},
 	});
 
 	useEffect(() => {
@@ -187,6 +191,18 @@ export const UserProfileModal = ({
 
 	const updateRolesM = useMutationQuery({
 		url: ApiRoutes.SET_USER_ROLES,
+		method: "POST",
+		messages: {
+			success: "Роли успешно сохранены",
+			invalidate: [
+				ApiRoutes.GET_USERS,
+				`${ApiRoutes.FETCH_USER_BY_ID}${user.id}`,
+			],
+		},
+	});
+
+	const updatePermissionsM = useMutationQuery({
+		url: ApiRoutes.ASSIGN_USER_PERMISSIONS,
 		method: "POST",
 		messages: {
 			success: "Права доступа успешно сохранены",
@@ -289,6 +305,17 @@ export const UserProfileModal = ({
 	const handleSave = () => {
 		updateRolesM.mutate(
 			{ user_id: user.id, roles: selectedRoles },
+			{
+				onSuccess: () => {
+					onClose();
+				},
+			},
+		);
+	};
+
+	const handleSavePermissions = () => {
+		updatePermissionsM.mutate(
+			{ user_id: user.id, permissions: userPermissionsState },
 			{
 				onSuccess: () => {
 					onClose();
@@ -593,14 +620,16 @@ export const UserProfileModal = ({
 							<ChevronDown size={16} className="text-slate-400" />
 						</button>
 					</Dropdown>
-					<button
-						onClick={handleSave}
-						disabled={updateRolesM.isPending}
-						className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60 transition-colors"
-					>
-						<Check size={16} />
-						<span>Сохранить изменения</span>
-					</button>
+					<If is={tab === "profile"}>
+						<button
+							onClick={handleSave}
+							disabled={updateRolesM.isPending}
+							className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60 transition-colors"
+						>
+							<Check size={16} />
+							<span>Сохранить изменения</span>
+						</button>
+					</If>
 				</div>
 			</motion.div>
 		</motion.div>

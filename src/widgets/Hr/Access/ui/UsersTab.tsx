@@ -88,17 +88,29 @@ export const UsersTab = () => {
     params: queryParams,
     options: {
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
     },
   });
 
   const { data: rolesData } = useGetQuery({
     url: ApiRoutes.GET_ROLES,
     useToken: true,
+    options: {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      staleTime: 30 * 60 * 1000,
+    },
   });
 
   const { data: deptsData } = useGetQuery({
     url: ApiRoutes.GET_DEPARTMENTS,
     useToken: true,
+    options: {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      staleTime: 30 * 60 * 1000,
+    },
   });
 
   const deleteUserM = useMutationQuery({

@@ -62,6 +62,7 @@ export const ApiRoutes = {
   UPDATE_USER: "/api/v1/admin/users/:id",
   DELETE_USER: "/api/v1/admin/users/:id",
   SET_USER_ROLES: "/api/v1/admin/users/assign-roles",
+  ASSIGN_USER_PERMISSIONS: "/api/v1/admin/users/assign-permissions",
   // Экспорт сотрудников в Excel (временный тестовый роут — заменю на боевой)
   EXPORT_USERS_EXCEL: "/test-users-excel-download",
 
