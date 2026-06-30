@@ -64,15 +64,28 @@ export const UsersTab = () => {
   const [editingUser, setEditingUser] = useState<IAdminUser | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
+  const queryParams = useMemo(() => {
+    const p: Record<string, string> = {};
+    if (filters.search) {
+      p.search = filters.search;
+    }
+    const activeRole = selectedQuickRole !== "all" ? selectedQuickRole : filters.role;
+    if (activeRole !== "all") {
+      p.role = activeRole;
+    }
+    if (filters.department !== "all") {
+      p.department = filters.department;
+    }
+    if (filters.status !== "all") {
+      p.status = filters.status;
+    }
+    return p;
+  }, [filters, selectedQuickRole]);
+
   const { data: usersData, isLoading: usersLoading } = useGetQuery({
     url: ApiRoutes.GET_USERS,
     useToken: true,
-    params: {
-      search: filters.search || undefined,
-      role: selectedQuickRole !== "all" ? selectedQuickRole : (filters.role !== "all" ? filters.role : undefined),
-      department: filters.department !== "all" ? filters.department : undefined,
-      status: filters.status !== "all" ? filters.status : undefined,
-    },
+    params: queryParams,
     options: {
       keepPreviousData: true,
     },
