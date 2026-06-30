@@ -1,12 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, Check, ChevronDown } from "lucide-react";
-import { Dropdown, Modal, Select } from "antd";
+import { Dropdown, Modal, Select, Switch } from "antd";
 import type { MenuProps } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { If } from "@shared/ui";
-import { IAccessUser, ACCESS_LEVELS_META } from "../model";
+import { IAccessUser } from "../model";
 import { getInitials } from "../lib";
 
 interface IProps {
@@ -68,6 +68,63 @@ const ROLE_CHIP_STYLE_MAP: Record<
 	},
 };
 
+const MODULE_TRANSLATIONS: Record<string, string> = {
+	profile: "Личный кабинет",
+	users: "Персонал",
+	roles: "Роли",
+	permissions: "Права доступа",
+	organizations: "Организации",
+	departments: "Отделы",
+	tasks: "Чат / Задачи",
+	events: "События",
+	correspondence: "Корреспонденция",
+	internal_correspondence: "Внутренняя корреспонденция",
+	signatures: "Подписи",
+};
+
+const ACTION_TRANSLATIONS: Record<string, string> = {
+	view: "Просмотр",
+	create: "Создание",
+	update: "Редактирование",
+	delete: "Удаление",
+	manage_ui: "Управление UI",
+	assign: "Назначение",
+	counters: "Счетчики",
+	restore: "Восстановление",
+	trash: "Корзина",
+	pin: "Закрепление",
+	archive: "Архив",
+	move: "Перемещение",
+	register: "Регистрация",
+	set_leader: "Назначение руководителя",
+	leader_candidates: "Кандидаты в руководители",
+	assignment_targets: "Цели назначения",
+	assign_all: "Назначить все",
+	payload: "Данные подписи",
+	confirm: "Подтверждение",
+	send: "Отправка",
+	invite_approvals: "Приглашение согласующих",
+	invite_signers: "Приглашение подписантов",
+	approve: "Согласование",
+	manage_participants: "Участники",
+	sign: "Подписание",
+	"assignment.update_status": "Обновление статуса назначения",
+	"assignment.update_any": "Изменение любого назначения",
+	"resolution.create": "Создание резолюции",
+	"resolution.update": "Изменение резолюции",
+	"resolution.close": "Закрытие резолюции",
+	"approval.view": "Просмотр согласования",
+	"approval.update_status": "Обновление статуса согласования",
+	"approval.update_any": "Изменение любого согласования",
+	"attachment.upload": "Загрузка вложений",
+	"attachment.upload_bulk": "Массовая загрузка вложений",
+	"attachment.delete": "Удаление вложений",
+	"folder.view": "Просмотр папок",
+	"folder.manage": "Управление папками",
+	view_all: "Просмотр всех",
+	update_all: "Обновление всех",
+};
+
 export const UserProfileModal = ({
 	user,
 	onClose,
@@ -77,15 +134,125 @@ export const UserProfileModal = ({
 }: IProps) => {
 	const [tab, setTab] = useState<TTab>("profile");
 	const [selectedRoles, setSelectedRoles] = useState<string[]>(user.roles);
+	const [userPermissionsState, setUserPermissionsState] = useState<string[]>([]);
+	const [isInitialized, setIsInitialized] = useState(false);
+
+	const { data: detailData } = useGetQuery({
+		url: `${ApiRoutes.FETCH_USER_BY_ID}${user.id}`,
+		useToken: true,
+	});
+
+	useEffect(() => {
+		if (isInitialized) {
+			return;
+		}
+		const rawRoles = detailData?.data?.roles || detailData?.roles;
+		if (Array.isArray(rawRoles)) {
+			setSelectedRoles(rawRoles.map((r: any) => r.name));
+		}
+		const rawPerms = detailData?.data?.permissions || detailData?.permissions;
+		const perms = new Set<string>();
+		if (Array.isArray(rawPerms)) {
+			rawPerms.forEach((p: any) => {
+				if (typeof p === "string") {
+					perms.add(p);
+				} else if (p && typeof p === "object" && p.name) {
+					perms.add(p.name);
+				}
+			});
+		}
+		if (Array.isArray(rawRoles)) {
+			rawRoles.forEach((r: any) => {
+				const matchedRoleObj = rolesList.find((item) => item.name === r.name);
+				if (matchedRoleObj && matchedRoleObj.permissions) {
+					if (Array.isArray(matchedRoleObj.permissions)) {
+						matchedRoleObj.permissions.forEach((p: any) => {
+							if (typeof p === "string") {
+								perms.add(p);
+							} else if (p && typeof p === "object" && p.name) {
+								perms.add(p.name);
+							}
+						});
+					}
+				}
+			});
+		}
+		if (rawRoles || rawPerms) {
+			setUserPermissionsState(Array.from(perms));
+			setIsInitialized(true);
+		}
+	}, [detailData, isInitialized, rolesList]);
 
 	const updateRolesM = useMutationQuery({
 		url: ApiRoutes.SET_USER_ROLES.replace(":id", String(user.id)),
 		method: "POST",
 		messages: {
 			success: "Права доступа успешно сохранены",
-			invalidate: [ApiRoutes.GET_USERS],
+			invalidate: [ApiRoutes.GET_USERS, `${ApiRoutes.FETCH_USER_BY_ID}${user.id}`],
 		},
 	});
+
+	const allSystemPermissions = useMemo(() => {
+		const perms = new Set<string>();
+		rolesList.forEach((role) => {
+			if (Array.isArray(role.permissions)) {
+				role.permissions.forEach((p) => {
+					if (typeof p === "string") {
+						perms.add(p);
+					} else if (p && typeof p === "object" && p.name) {
+						perms.add(p.name);
+					}
+				});
+			}
+		});
+		return Array.from(perms);
+	}, [rolesList]);
+
+	const groupedPermissions = useMemo(() => {
+		const groups: Record<string, { label: string; name: string }[]> = {};
+		allSystemPermissions.forEach((permName) => {
+			const parts = permName.split(".");
+			const moduleName = parts[0];
+			const actionName = parts.slice(1).join(".");
+			if (!groups[moduleName]) {
+				groups[moduleName] = [];
+			}
+			groups[moduleName].push({
+				label: ACTION_TRANSLATIONS[actionName] || actionName,
+				name: permName,
+			});
+		});
+		return groups;
+	}, [allSystemPermissions]);
+
+	const handleTogglePermission = (permissionName: string) => {
+		setUserPermissionsState((prev) => {
+			if (prev.includes(permissionName)) {
+				return prev.filter((p) => p !== permissionName);
+			} else {
+				return [...prev, permissionName];
+			}
+		});
+	};
+
+	const handleResetToStandard = () => {
+		const perms = new Set<string>();
+		selectedRoles.forEach((roleName) => {
+			const roleObj = rolesList.find((r) => r.name === roleName);
+			if (roleObj && roleObj.permissions) {
+				if (Array.isArray(roleObj.permissions)) {
+					roleObj.permissions.forEach((p) => {
+						if (typeof p === "string") {
+							perms.add(p);
+						} else if (p && typeof p === "object" && p.name) {
+							perms.add(p.name);
+						}
+					});
+				}
+			}
+		});
+		setUserPermissionsState(Array.from(perms));
+	};
 
 	const availableRolesToAdd = useMemo(() => {
 		return rolesList.filter((r) => !selectedRoles.includes(r.name));
@@ -105,25 +272,6 @@ export const UserProfileModal = ({
 			onClick: () => handleAddRole(r.name),
 		}));
 	}, [availableRolesToAdd]);
-
-	const userPermissions = useMemo(() => {
-		const perms = new Set<string>();
-		selectedRoles.forEach((roleName) => {
-			const roleObj = rolesList.find((r) => r.name === roleName);
-			if (roleObj && roleObj.permissions) {
-				if (Array.isArray(roleObj.permissions)) {
-					roleObj.permissions.forEach((p) => {
-						if (typeof p === "string") {
-							perms.add(p);
-						} else if (p && typeof p === "object" && p.name) {
-							perms.add(p.name);
-						}
-					});
-				}
-			}
-		});
-		return perms;
-	}, [selectedRoles, rolesList]);
 
 	const handleAddRole = (roleName: string) => {
 		setSelectedRoles((prev) => [...prev, roleName]);
@@ -189,9 +337,7 @@ export const UserProfileModal = ({
 		},
 	];
 
-	const levelsHalfIndex = Math.ceil(ACCESS_LEVELS_META.length / 2);
-	const leftLevels = ACCESS_LEVELS_META.slice(0, levelsHalfIndex);
-	const rightLevels = ACCESS_LEVELS_META.slice(levelsHalfIndex);
+
 
 	return (
 		<motion.div
@@ -356,65 +502,66 @@ export const UserProfileModal = ({
 									</Dropdown>
 								</div>
 							</div>
-
-							<div className="border border-slate-100 rounded-2xl p-5 space-y-4">
-								<h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-									Уровни доступа
-								</h4>
-								<div className="grid grid-cols-2 gap-x-8 gap-y-3">
-									<div className="space-y-3">
-										{leftLevels.map((level) => {
-											const hasPerm = userPermissions.has(level.permission);
-											return (
-												<div
-													key={level.key}
-													className="flex items-center justify-between text-sm py-1 border-b border-slate-50"
-												>
-													<span className="text-slate-600 font-medium">
-														{level.label}
-													</span>
-													<span
-														className={`px-2.5 py-0.5 rounded text-xs font-bold ${
-															hasPerm
-																? "bg-emerald-50! text-emerald-600!"
-																: "bg-slate-50! text-slate-400!"
-														}`}
-													>
-														{hasPerm ? "Да" : "Нет"}
-													</span>
-												</div>
-											);
-										})}
-									</div>
-									<div className="space-y-3">
-										{rightLevels.map((level) => {
-											const hasPerm = userPermissions.has(level.permission);
-											return (
-												<div
-													key={level.key}
-													className="flex items-center justify-between text-sm py-1 border-b border-slate-50"
-												>
-													<span className="text-slate-600 font-medium">
-														{level.label}
-													</span>
-													<span
-														className={`px-2.5 py-0.5 rounded text-xs font-bold ${
-															hasPerm
-																? "bg-emerald-50! text-emerald-600!"
-																: "bg-slate-50! text-slate-400!"
-														}`}
-													>
-														{hasPerm ? "Да" : "Нет"}
-													</span>
-												</div>
-											);
-										})}
-									</div>
+						</div>
+					</If>
+					<If is={tab === "permissions"}>
+						<div className="space-y-6">
+							<div className="flex items-center justify-between">
+								<div className="flex flex-wrap gap-2 items-center">
+									{selectedRoles.map((role) => {
+										const style = ROLE_CHIP_STYLE_MAP[role] || {
+											border: "border-blue-100!",
+											bg: "bg-blue-50/50!",
+											text: "text-blue-600!",
+										};
+										return (
+											<div
+												key={role}
+												className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-sm font-medium border ${style.border} ${style.bg} ${style.text}`}
+											>
+												<span className={`w-1.5 h-1.5 rounded-full ${ROLE_DOT_COLOR_MAP[role] || "bg-slate-400!"}`} />
+												<span>{role}</span>
+											</div>
+										);
+									})}
 								</div>
+								<button
+									type="button"
+									onClick={handleResetToStandard}
+									className="text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors border-b border-dashed border-slate-300 hover:border-slate-500 cursor-pointer"
+								>
+									Сбросить до стандарта
+								</button>
+							</div>
+
+							<div className="space-y-5">
+								{Object.entries(groupedPermissions).map(([moduleName, actions]) => (
+									<div key={moduleName} className="space-y-2">
+										<h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-1">
+											{MODULE_TRANSLATIONS[moduleName] || moduleName}
+										</h4>
+										<div className="bg-slate-50/40! border border-slate-100! rounded-2xl! p-4! flex! flex-wrap! items-center! gap-x-8! gap-y-3!">
+											{actions.map((act) => {
+												const checked = userPermissionsState.includes(act.name);
+												return (
+													<div key={act.name} className="flex items-center gap-3">
+														<span className="text-sm font-medium text-slate-600">
+															{act.label}
+														</span>
+														<Switch
+															checked={checked}
+															onChange={() => handleTogglePermission(act.name)}
+														/>
+													</div>
+												);
+											})}
+										</div>
+									</div>
+								))}
 							</div>
 						</div>
 					</If>
-					<If is={tab !== "profile"}>
+					<If is={tab !== "profile" && tab !== "permissions"}>
 						<div className="py-12 text-center text-slate-400 text-sm">
 							Раздел находится в разработке
 						</div>

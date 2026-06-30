@@ -52,11 +52,3 @@ export const ROLE_COLOR_MAP: Record<string, string> = {
   observer: "default",
 };
 
-export const ACCESS_LEVELS_META = [
-  { key: "profile.view", label: "Личный кабинет — Просмотр", permission: "profile.edit_own" },
-  { key: "employees.view", label: "Персонал — Просмотр", permission: "users.view" },
-  { key: "employees.edit", label: "Персонал — Редактирование", permission: "users.update" },
-  { key: "correspondence.create", label: "Корреспонденция — Создание", permission: "correspondence.create" },
-  { key: "chat.view", label: "Чат — Просмотр", permission: "tasks.view" },
-  { key: "users.manage", label: "Управление пользователями", permission: "roles.update" },
-];
