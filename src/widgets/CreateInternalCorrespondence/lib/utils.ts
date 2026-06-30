@@ -326,15 +326,15 @@ export function buildDSStampSvg({
     `<path d="M9 6.8a6 6 0 0 1 9 5.2v2" stroke="#ffb800" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
     `</g>` +
     `<g transform="translate(12, 7) scale(0.47)">${flagInner}</g>` +
-    `<text x="36" y="13.5" font-family="Orbitron, Arial, sans-serif" font-size="8" font-weight="700" fill="#ffffff" letter-spacing="0.96">INFRATECH</text>` +
-    `<text x="36" y="18" font-family="Orbitron, Arial, sans-serif" font-size="4" font-weight="400" fill="#ffb800" letter-spacing="0.6">ҲУВИЯТИ РАҚАМӢ</text>` +
-    `<text x="304" y="15" font-family="Orbitron, Arial, sans-serif" font-size="5" font-weight="700" fill="#ffffff" fill-opacity="0.45" text-anchor="middle">EN</text>` +
-    `<text x="320" y="15" font-family="Orbitron, Arial, sans-serif" font-size="5" font-weight="700" fill="#ffffff" fill-opacity="0.45" text-anchor="middle">RU</text>` +
+    `<text x="36" y="13.5" font-family="Arial, sans-serif" font-size="8" font-weight="700" fill="#ffffff" letter-spacing="0.96">INFRATECH</text>` +
+    `<text x="36" y="18" font-family="Arial, sans-serif" font-size="4" font-weight="400" fill="#ffb800" letter-spacing="0.6">ҲУВИЯТИ РАҚАМӢ</text>` +
+    `<text x="304" y="15" font-family="Arial, sans-serif" font-size="5" font-weight="700" fill="#ffffff" fill-opacity="0.45" text-anchor="middle">EN</text>` +
+    `<text x="320" y="15" font-family="Arial, sans-serif" font-size="5" font-weight="700" fill="#ffffff" fill-opacity="0.45" text-anchor="middle">RU</text>` +
     `<rect x="330" y="9" width="16" height="8" rx="4" fill="url(#${uid}hg)"/>` +
-    `<text x="338" y="15" font-family="Orbitron, Arial, sans-serif" font-size="5" font-weight="700" fill="#111111" text-anchor="middle">TJ</text>` +
-    `<text x="12" y="31" font-family="Orbitron, Arial, sans-serif" font-size="6" font-weight="500" fill="#ffb800" letter-spacing="1.32">СОҲИБИ СЕРТИФИКАТ</text>` +
-    `<text x="12" y="43" font-family="Orbitron, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" letter-spacing="-0.1">${escName}</text>` +
-    `<text x="12" y="51" font-family="Orbitron, Arial, sans-serif" font-size="6" fill="#ffffff" fill-opacity="0.3" letter-spacing="0.9">ИМЗОИ ЭЛЕКТРОНИИ РАҚАМӢ</text>` +
+    `<text x="338" y="15" font-family="Arial, sans-serif" font-size="5" font-weight="700" fill="#111111" text-anchor="middle">TJ</text>` +
+    `<text x="12" y="31" font-family="Arial, sans-serif" font-size="6" font-weight="500" fill="#ffb800" letter-spacing="1.32">СОҲИБИ СЕРТИФИКАТ</text>` +
+    `<text x="12" y="43" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" letter-spacing="-0.1">${escName}</text>` +
+    `<text x="12" y="51" font-family="Arial, sans-serif" font-size="6" fill="#ffffff" fill-opacity="0.3" letter-spacing="0.9">ИМЗОИ ЭЛЕКТРОНИИ РАҚАМӢ</text>` +
     `<rect x="0" y="55" width="377" height="1" fill="url(#${uid}hg)"/>` +
     `<text x="12" y="65" font-family="Arial, sans-serif" font-size="6" font-weight="600" fill="#ff6b00">РАҚАМИ СЕРТИФИКАТ</text>` +
     `<rect x="12" y="69" width="164" height="12" rx="2" fill="#ffffff" fill-opacity="0.04" stroke="#ff6b00" stroke-width="0.5" stroke-opacity="0.2"/>` +
@@ -345,14 +345,14 @@ export function buildDSStampSvg({
     `<rect width="18" height="18" x="3" y="4" rx="2" stroke="#ffd166" stroke-width="2" fill="none"/>` +
     `<path d="M3 10h18" stroke="#ffd166" stroke-width="2" fill="none"/>` +
     `</g>` +
-    `<text x="22" y="99.5" font-family="Orbitron, Arial, sans-serif" font-size="9" font-weight="700" fill="#ffffff" letter-spacing="0.36">${escSignedAt}</text>` +
+    `<text x="22" y="99.5" font-family="Arial, sans-serif" font-size="9" font-weight="700" fill="#ffffff" letter-spacing="0.36">${escSignedAt}</text>` +
     `<rect x="188" y="61" width="1" height="39" fill="url(#${uid}vg)"/>` +
     `<text x="200" y="65" font-family="Arial, sans-serif" font-size="6" font-weight="600" fill="#ff6b00">МӮҲЛАТИ ЭЪТИБОР</text>` +
     `<text x="200" y="73" font-family="Arial, sans-serif" font-size="6" fill="#ffffff" fill-opacity="0.4">аз</text>` +
-    `<text x="200" y="81.5" font-family="Orbitron, Arial, sans-serif" font-size="9" font-weight="700" fill="#ffffff" letter-spacing="0.36">${escFromDate}</text>` +
+    `<text x="200" y="81.5" font-family="Arial, sans-serif" font-size="9" font-weight="700" fill="#ffffff" letter-spacing="0.36">${escFromDate}</text>` +
     `<line x1="252" y1="78" x2="270" y2="78" stroke="#ff6b00" stroke-width="0.5" stroke-opacity="0.3"/>` +
     `<text x="277" y="73" font-family="Arial, sans-serif" font-size="6" fill="#ffffff" fill-opacity="0.4">то</text>` +
-    `<text x="277" y="81.5" font-family="Orbitron, Arial, sans-serif" font-size="9" font-weight="700" fill="#ffffff" letter-spacing="0.36">${escToDate}</text>` +
+    `<text x="277" y="81.5" font-family="Arial, sans-serif" font-size="9" font-weight="700" fill="#ffffff" letter-spacing="0.36">${escToDate}</text>` +
     `<g transform="translate(200, 88) scale(0.55)">` +
     `<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" stroke="#ff6b00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
     `<path d="m9 12 2 2 4-4" stroke="#ff6b00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
@@ -365,7 +365,7 @@ export function buildDSStampSvg({
     `<g transform="translate(12, 106.5) scale(0.2)">` +
     `<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" stroke="#ff6b00" stroke-width="2" fill="none"/>` +
     `</g>` +
-    `<text x="19.5" y="110" font-family="Orbitron, Arial, sans-serif" font-size="5" fill="#ffffff" fill-opacity="0.35">SECURED · ENCRYPTED · TAMPER-PROOF</text>` +
+    `<text x="19.5" y="110" font-family="Arial, sans-serif" font-size="5" fill="#ffffff" fill-opacity="0.35">SECURED · ENCRYPTED · TAMPER-PROOF</text>` +
     `<g transform="translate(344, 106.5) scale(0.18)">` +
     `<rect width="18" height="11" x="3" y="11" rx="2" ry="2" stroke="#ffffff" stroke-opacity="0.22" stroke-width="2" fill="none"/>` +
     `<path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#ffffff" stroke-opacity="0.22" stroke-width="2" fill="none"/>` +
