@@ -83,7 +83,14 @@ import {
   generateQRMatrix,
   sanitizeWordHtml,
   buildDSStampSvg,
+  dsStampHeightForWidth,
 } from "../lib/utils";
+
+// Ширина штампа ЭЦП на листе А4 по умолчанию (≈47% ширины полосы) и высота,
+// рассчитанная по пропорциям макета. Один источник правды для плейсхолдера,
+// вшитой картинки и границ перетаскивания.
+const DS_STAMP_DEFAULT_WIDTH = 377;
+const DS_STAMP_DEFAULT_HEIGHT = dsStampHeightForWidth(DS_STAMP_DEFAULT_WIDTH);
 import { PreviewModal } from "./PreviewModal";
 import { TBtn } from "./TBtn";
 import { DSStamp } from "./DSStamp";
@@ -729,8 +736,8 @@ export const CreateInternalCorrespondence = ({
   const [stampVisible, setStampVisible] = useState(false);
   const [stampPos, setStampPos] = useState({ x: 40, y: 40 });
   const [stampSize, setStampSize] = useState({
-    width: 377,
-    height: 112,
+    width: DS_STAMP_DEFAULT_WIDTH,
+    height: DS_STAMP_DEFAULT_HEIGHT,
   });
 
   const [docCreator, setDocCreator] = useState<any>(null);
@@ -1135,8 +1142,13 @@ export const CreateInternalCorrespondence = ({
             !editorRef.current.innerHTML.includes('data-signature-stamp="true"')
           ) {
             // 1. Собираем переменные для штампа
-            const stampWidthVal = typeof stampSize.width === "number" ? stampSize.width : 377;
-            const stampHeightVal = typeof stampSize.height === "number" ? stampSize.height : 112;
+            const stampWidthVal =
+              typeof stampSize.width === "number"
+                ? stampSize.width
+                : DS_STAMP_DEFAULT_WIDTH;
+            // Высоту всегда выводим из ширины по пропорциям макета, чтобы вшитая
+            // картинка не искажалась относительно SVG (viewBox 760×333).
+            const stampHeightVal = dsStampHeightForWidth(stampWidthVal);
             const widthStr = `${stampWidthVal}px`;
             const currentSignerName = finalSigner?.name || "Неизвестно";
             const currentSignerInitials = finalSigner?.initials || "НА";
@@ -2830,7 +2842,10 @@ export const CreateInternalCorrespondence = ({
     if (!isActiveVersionForSign) return;
     setStampVisible(true);
     setStampPos({ x: 40, y: 40 });
-    setStampSize({ width: 377, height: 112 });
+    setStampSize({
+      width: DS_STAMP_DEFAULT_WIDTH,
+      height: DS_STAMP_DEFAULT_HEIGHT,
+    });
   };
 
   const handleStampMouseDown = (e: React.MouseEvent) => {
@@ -2853,9 +2868,13 @@ export const CreateInternalCorrespondence = ({
       const maxCanvasHeight =
         pageCount * PAGE_STRIDE - PAGE_GAP - PAGE_PAD_V * 2;
       const currentStampWidth =
-        typeof stampSize.width === "number" ? stampSize.width : 377;
+        typeof stampSize.width === "number"
+          ? stampSize.width
+          : DS_STAMP_DEFAULT_WIDTH;
       const currentStampHeight =
-        typeof stampSize.height === "number" ? stampSize.height : 112;
+        typeof stampSize.height === "number"
+          ? stampSize.height
+          : DS_STAMP_DEFAULT_HEIGHT;
 
       setStampPos({
         x: Math.max(
