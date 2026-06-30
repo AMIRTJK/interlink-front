@@ -7,7 +7,7 @@ import React, {
   useMemo,
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Send,
   // Pin,
@@ -91,6 +91,7 @@ import {
 import { PreviewModal } from "./PreviewModal";
 import { TBtn } from "./TBtn";
 import { DSStamp } from "./DSStamp";
+import { OriginalLetterPanel } from "./OriginalLetterPanel";
 
 function FileTextIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -630,6 +631,30 @@ export const CreateInternalCorrespondence = ({
   initialData?: any;
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  // Контекст «Ответить»/«Перенаправить»: данные исходного входящего письма
+  // приходят через navigate state со страницы просмотра входящего.
+  const composeState = (location.state || null) as {
+    composeMode?: "reply" | "forward";
+    sourceLetter?: {
+      id?: string | number;
+      subject?: string;
+      creator?: {
+        id?: string | number;
+        full_name?: string;
+        position?: string;
+        department?: string;
+      };
+      senderName?: string;
+      date?: string;
+      status?: string;
+      inboundNumber?: string;
+      body?: string;
+    };
+  } | null;
+  const composeMode = composeState?.composeMode;
+  const sourceLetter = composeState?.sourceLetter;
+
   const [to, setTo] = useState<RecipientOption[]>([]);
   const [cc, setCc] = useState<RecipientOption[]>([]);
   const [subject, setSubject] = useState("");
@@ -690,6 +715,7 @@ export const CreateInternalCorrespondence = ({
   // Над редактором тащат файл — показываем подсказку-оверлей для импорта
   const [isDraggingWord, setIsDraggingWord] = useState(false);
 
+  const composeAppliedRef = useRef(false);
   const isDraggingStamp = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const stampRef = useRef<HTMLDivElement>(null);
@@ -1534,6 +1560,40 @@ export const CreateInternalCorrespondence = ({
       }
     }
   }, [initialData]);
+
+  // Предзаполнение при «Ответить»/«Перенаправить» (один раз при монтировании).
+  // Ответить → тема «Ответ: …», «Кому» = отправитель входящего письма.
+  // Перенаправить → тема «Перенаправление: …», «Кому» остаётся пустым.
+  useEffect(() => {
+    if (composeAppliedRef.current) return;
+    if (!composeMode || !sourceLetter) return;
+    composeAppliedRef.current = true;
+
+    setSubject(
+      `${composeMode === "reply" ? "Ответ" : "Перенаправление"}: ${
+        sourceLetter.subject || ""
+      }`,
+    );
+
+    if (composeMode === "reply" && sourceLetter.creator?.id != null) {
+      const c = sourceLetter.creator;
+      const initials = (c.full_name || "")
+        .split(/\s+/)
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase();
+      setTo([
+        {
+          id: String(c.id),
+          name: c.full_name || "",
+          org: c.position || c.department || "Сотрудник",
+          initials,
+          color: "bg-blue-100 text-blue-700",
+        },
+      ]);
+    }
+  }, [composeMode, sourceLetter]);
 
   useEffect(() => {
     if (rawWorkflowData?.data) {
@@ -3118,6 +3178,21 @@ export const CreateInternalCorrespondence = ({
             )}
           </div>
         </div>
+
+        {composeMode && sourceLetter && (
+          <OriginalLetterPanel
+            mode={composeMode}
+            sender={
+              sourceLetter.senderName || sourceLetter.creator?.full_name || "—"
+            }
+            date={sourceLetter.date || "—"}
+            status={sourceLetter.status || ""}
+            inboundNumber={sourceLetter.inboundNumber || "—"}
+            subject={sourceLetter.subject || ""}
+            body={sourceLetter.body}
+            sourceId={sourceLetter.id}
+          />
+        )}
 
         <div className="flex gap-5 items-start">
           <div className="flex-1 min-w-0">
