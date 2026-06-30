@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, Clock } from "lucide-react";
 import { cn } from "@shared/lib";
 
-interface DocApproverItem {
+interface DocSignerItem {
   id: string;
   name: string;
   position: string;
-  role: "Согласующий" | "Утверждающий" | "Ознакомлен";
+  role: "Подписывающий";
   initials: string;
   gradientFrom: string;
   gradientTo: string;
@@ -15,33 +15,10 @@ interface DocApproverItem {
   signedAt: string;
 }
 
-const ROLE_BADGE: Record<
-  DocApproverItem["role"],
-  { bg: string; text: string; border: string }
-> = {
-  Согласующий: {
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    border: "border-blue-200",
-  },
-  Утверждающий: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    border: "border-emerald-200",
-  },
-  Ознакомлен: {
-    bg: "bg-slate-100",
-    text: "text-slate-600",
-    border: "border-slate-200",
-  },
-};
-
 const GRADIENTS = [
-  { from: "#6366f1", to: "#8b5cf6" },
-  { from: "#10b981", to: "#059669" },
-  { from: "#ec4899", to: "#be185d" },
-  { from: "#f59e0b", to: "#d97706" },
+  { from: "#f97316", to: "#ef4444" },
   { from: "#3b82f6", to: "#1d4ed8" },
+  { from: "#10b981", to: "#059669" },
 ];
 
 function getCertSnippet(initials: string): string {
@@ -52,16 +29,16 @@ function getCertSnippet(initials: string): string {
   return `SN: ${hex}A3F9...C12D`;
 }
 
-export const ApproversPanel = ({
+export const SignersPanel = ({
   isOpen,
   onOpen,
   onClose,
-  approvals = [],
+  signatures = [],
 }: {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
-  approvals?: any[];
+  signatures?: any[];
 }) => {
   const [showHistory, setShowHistory] = useState(false);
 
@@ -74,15 +51,15 @@ export const ApproversPanel = ({
     return parts[0].slice(0, 2).toUpperCase();
   };
 
-  const items: DocApproverItem[] = approvals.map((app: any, idx: number) => {
-    const user = app.approver || app.user || {};
+  const items: DocSignerItem[] = signatures.map((sig: any, idx: number) => {
+    const user = sig.user || sig.approver || {};
     const initials = getInitials(user.full_name || "");
     const grad = GRADIENTS[idx % GRADIENTS.length];
-    const isSigned = app.status === "approved";
+    const isSigned = sig.status === "signed";
 
     let signedDateStr = "";
     if (isSigned) {
-      const dateVal = app.signed_at || app.updated_at;
+      const dateVal = sig.signed_at || sig.updated_at;
       if (dateVal) {
         const d = new Date(dateVal);
         const pad = (n: number) => String(n).padStart(2, "0");
@@ -91,10 +68,10 @@ export const ApproversPanel = ({
     }
 
     return {
-      id: String(app.id),
+      id: String(sig.id),
       name: user.full_name || "Неизвестно",
       position: user.position || "Сотрудник",
-      role: "Согласующий",
+      role: "Подписывающий",
       initials,
       gradientFrom: grad.from,
       gradientTo: grad.to,
@@ -103,11 +80,11 @@ export const ApproversPanel = ({
     };
   });
 
-  const historyEvents = approvals
-    .filter((app: any) => app.status === "approved")
-    .map((app: any) => {
-      const name = (app.approver || app.user)?.full_name || "Сотрудник";
-      const dateVal = app.signed_at || app.updated_at;
+  const historyEvents = signatures
+    .filter((sig: any) => sig.status === "signed")
+    .map((sig: any) => {
+      const name = (sig.user || sig.approver)?.full_name || "Сотрудник";
+      const dateVal = sig.signed_at || sig.updated_at;
       let dateStr = "";
       if (dateVal) {
         const d = new Date(dateVal);
@@ -115,7 +92,7 @@ export const ApproversPanel = ({
         dateStr = `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
       }
       return {
-        label: `${name} согласовал(а)`,
+        label: `${name} подписал(а)`,
         date: dateStr,
       };
     });
@@ -136,7 +113,7 @@ export const ApproversPanel = ({
     <>
       <div
         className="absolute z-20"
-        style={{ right: -36, top: 190 }}
+        style={{ right: -36, top: 10 }}
       >
         <motion.button
           onClick={isOpen ? onClose : onOpen}
@@ -146,11 +123,11 @@ export const ApproversPanel = ({
             "bg-white border border-slate-200 border-l-0 rounded-r-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
             isOpen ? "bg-slate-50" : "hover:bg-slate-50",
           )}
-          aria-label="Согласующие"
+          aria-label="Подписывающий"
         >
           <span
             className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-            style={{ backgroundColor: "oklch(0.828 0.189 84.429)" }}
+            style={{ backgroundColor: "oklch(0.6 0.25 250)" }}
           />
           <span
             style={{
@@ -162,7 +139,7 @@ export const ApproversPanel = ({
               letterSpacing: "0.08em",
             }}
           >
-            Согласующие
+            Подписывающий
           </span>
         </motion.button>
       </div>
@@ -181,7 +158,7 @@ export const ApproversPanel = ({
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center">
                 <span className="font-semibold text-sm text-slate-800">
-                  Согласующие
+                  Подписывающие
                 </span>
                 <span className="bg-slate-100 text-slate-600 text-xs rounded-full px-2 py-0.5 ml-2 font-medium">
                   {totalCount}
@@ -190,7 +167,7 @@ export const ApproversPanel = ({
               <button
                 onClick={onClose}
                 className="hover:bg-slate-100 rounded-lg p-1 transition-colors text-slate-400 hover:text-slate-700"
-                aria-label="Закрыть панель согласующих"
+                aria-label="Закрыть панель подписывающих"
               >
                 <X size={15} />
               </button>
@@ -212,11 +189,10 @@ export const ApproversPanel = ({
             </p>
 
             <div className="flex-1 overflow-y-auto px-4 py-2 flex flex-col gap-3 min-h-0">
-              {items.map((approver, idx) => {
-                const roleBadge = ROLE_BADGE[approver.role];
+              {items.map((signer, idx) => {
                 return (
                   <motion.div
-                    key={approver.id}
+                    key={signer.id}
                     initial={{ opacity: 0, x: 16 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{
@@ -230,33 +206,26 @@ export const ApproversPanel = ({
                       <div
                         className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
                         style={{
-                          background: `linear-gradient(135deg, ${approver.gradientFrom}, ${approver.gradientTo})`,
+                          background: `linear-gradient(135deg, ${signer.gradientFrom}, ${signer.gradientTo})`,
                         }}
                       >
-                        {approver.initials}
+                        {signer.initials}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-[13px] text-slate-800 leading-tight truncate">
-                          {approver.name}
+                          {signer.name}
                         </p>
                       </div>
-                      <span
-                        className={cn(
-                          "text-[10px] font-semibold px-2 py-0.5 rounded-full border flex-shrink-0",
-                          roleBadge.bg,
-                          roleBadge.text,
-                          roleBadge.border,
-                        )}
-                      >
-                        {approver.role}
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border flex-shrink-0 bg-purple-50 text-purple-700 border-purple-200">
+                        {signer.role}
                       </span>
                     </div>
 
                     <p className="text-[11px] text-slate-400 leading-tight">
-                      {approver.position}
+                      {signer.position}
                     </p>
 
-                    {approver.signed && (
+                    {signer.signed && (
                       <div className="bg-green-50 border border-green-100 rounded-lg px-2.5 py-1.5 flex items-center gap-2">
                         <svg
                           width="14"
@@ -278,16 +247,16 @@ export const ApproversPanel = ({
                             ЭЦП действительна
                           </p>
                           <p className="text-[9px] text-green-600 leading-tight">
-                            <span>{approver.signedAt}</span>
+                            <span>{signer.signedAt}</span>
                             <span className="font-mono text-slate-400 ml-1">
-                              {getCertSnippet(approver.initials)}
+                              {getCertSnippet(signer.initials)}
                             </span>
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {approver.signed ? (
+                    {signer.signed ? (
                       <div className="flex items-center gap-1.5">
                         <span className="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                           <Check size={9} className="text-green-600" />

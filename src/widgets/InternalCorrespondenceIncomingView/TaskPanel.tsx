@@ -109,11 +109,11 @@ export const TaskPanel = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <motion.div
-      initial={{ x: "100%" }}
+      initial={{ x: "-100%" }}
       animate={{ x: 0 }}
-      exit={{ x: "100%" }}
+      exit={{ x: "-100%" }}
       transition={{ type: "spring", stiffness: 260, damping: 24 }}
-      className="absolute right-0 top-0 bottom-0 w-80 bg-white shadow-2xl rounded-l-2xl border-l border-slate-100 flex flex-col z-40 overflow-hidden"
+      className="absolute left-0 top-0 bottom-0 w-80 bg-white shadow-2xl rounded-r-2xl border-r border-slate-100 flex flex-col z-40 overflow-hidden"
     >
       <div className="flex-shrink-0 flex items-center justify-between px-5 py-4 border-b border-slate-100">
         <div className="flex items-center gap-2">

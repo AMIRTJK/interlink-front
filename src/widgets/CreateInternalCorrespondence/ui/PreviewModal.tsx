@@ -149,7 +149,7 @@ export const PreviewModal = ({
     if (stampNode) {
       const left = parseFloat(stampNode.style.left) || 0;
       const top = parseFloat(stampNode.style.top) || 0;
-      const width = stampNode.style.width || "320px";
+      const width = stampNode.style.width || "377px";
 
       const pageIndex = Math.max(0, Math.floor(top / PAGE_STRIDE));
       const localY = top - pageIndex * PAGE_STRIDE;

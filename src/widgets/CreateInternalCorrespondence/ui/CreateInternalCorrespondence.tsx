@@ -671,7 +671,7 @@ export const CreateInternalCorrespondence = ({
   const [approverSearch, setApproverSearch] = useState("");
   const [showCcField, setShowCcField] = useState(false);
   const [sent, setSent] = useState(false);
-  // letterType хранит КЛЮЧ типа документа (guzorish/ariza/…), не подпись
+  const [formExpanded, setFormExpanded] = useState(true);
   const [letterType, setLetterType] = useState<string | null>(null);
   const [showLetterTypeDropdown, setShowLetterTypeDropdown] = useState(false);
   const [importance, setImportance] = useState<ImportanceLevel>("normal");
@@ -699,8 +699,8 @@ export const CreateInternalCorrespondence = ({
   const [stampVisible, setStampVisible] = useState(false);
   const [stampPos, setStampPos] = useState({ x: 40, y: 40 });
   const [stampSize, setStampSize] = useState({
-    width: 320,
-    height: "auto" as "auto" | number,
+    width: 377,
+    height: 112,
   });
 
   const [docCreator, setDocCreator] = useState<any>(null);
@@ -1145,10 +1145,9 @@ export const CreateInternalCorrespondence = ({
             !editorRef.current.innerHTML.includes('data-signature-stamp="true"')
           ) {
             // 1. Собираем переменные для штампа
-            const widthStr =
-              typeof stampSize.width === "number"
-                ? `${stampSize.width}px`
-                : stampSize.width;
+            const stampWidthVal = typeof stampSize.width === "number" ? stampSize.width : 377;
+            const stampHeightVal = typeof stampSize.height === "number" ? stampSize.height : 112;
+            const widthStr = `${stampWidthVal}px`;
             const currentSignerName = finalSigner?.name || "Неизвестно";
             const currentSignerInitials = finalSigner?.initials || "НА";
             const currentDate = new Date().toLocaleDateString("ru-RU");
@@ -1169,7 +1168,7 @@ export const CreateInternalCorrespondence = ({
             const stampDataUri = `data:image/svg+xml;base64,${encodedSvg}`;
 
             // Использовать строго в одну строку без пробелов внутри тегов, чтобы редактор не вставил текстовые переносы
-            const stampHTML = `<div data-signature-stamp="true" contenteditable="false" style="position:absolute;left:${stampPos.x}px;top:${stampPos.y}px;width:${widthStr};height:110px;max-height:110px;z-index:99;user-select:none;-webkit-user-select:none;cursor:default;overflow:hidden!important;display:block!important;line-height:0!important;padding:0!important;margin:0!important;border:none!important;"><img src="${stampDataUri}" alt="ЭЦП" style="display:block!important;width:100%!important;height:110px!important;max-height:110px!important;pointer-events:none!important;-webkit-user-drag:none!important;padding:0!important;margin:0!important;border:none!important;outline:none!important;line-height:0!important;" /></div>`;
+            const stampHTML = `<div data-signature-stamp="true" contenteditable="false" style="position:absolute;left:${stampPos.x}px;top:${stampPos.y}px;width:${widthStr};height:${stampHeightVal}px;max-height:${stampHeightVal}px;z-index:99;user-select:none;-webkit-user-select:none;cursor:default;overflow:hidden!important;display:block!important;line-height:0!important;padding:0!important;margin:0!important;border:none!important;"><img src="${stampDataUri}" alt="ЭЦП" style="display:block!important;width:100%!important;height:${stampHeightVal}px!important;max-height:${stampHeightVal}px!important;pointer-events:none!important;-webkit-user-drag:none!important;padding:0!important;margin:0!important;border:none!important;outline:none!important;line-height:0!important;" /></div>`;
 
             editorRef.current.innerHTML += stampHTML;
           }
@@ -1291,7 +1290,7 @@ export const CreateInternalCorrespondence = ({
       pageIndex,
       x,
       y: top - pageIndex * PAGE_STRIDE,
-      width: stamp.style.width || "320px",
+      width: stamp.style.width || "377px",
       html: stamp.innerHTML,
     };
   }, [PAGE_STRIDE]);
@@ -2845,7 +2844,7 @@ export const CreateInternalCorrespondence = ({
     if (!isActiveVersionForSign) return;
     setStampVisible(true);
     setStampPos({ x: 40, y: 40 });
-    setStampSize({ width: 320, height: "auto" });
+    setStampSize({ width: 377, height: 112 });
   };
 
   const handleStampMouseDown = (e: React.MouseEvent) => {
@@ -2868,7 +2867,9 @@ export const CreateInternalCorrespondence = ({
       const maxCanvasHeight =
         pageCount * PAGE_STRIDE - PAGE_GAP - PAGE_PAD_V * 2;
       const currentStampWidth =
-        typeof stampSize.width === "number" ? stampSize.width : 320;
+        typeof stampSize.width === "number" ? stampSize.width : 377;
+      const currentStampHeight =
+        typeof stampSize.height === "number" ? stampSize.height : 112;
 
       setStampPos({
         x: Math.max(
@@ -2882,7 +2883,7 @@ export const CreateInternalCorrespondence = ({
           0,
           Math.min(
             ev.clientY - cr.top - dragOffset.current.y,
-            maxCanvasHeight - 110, // 110px — фиксированная высота штампа ЭЦП
+            maxCanvasHeight - currentStampHeight,
           ),
         ),
       });
@@ -3197,7 +3198,52 @@ export const CreateInternalCorrespondence = ({
         <div className="flex gap-5 items-start">
           <div className="flex-1 min-w-0">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
-              <div className="px-6 pt-5 pb-4 border-b border-slate-100">
+              <div
+                onClick={() => setFormExpanded((v) => !v)}
+                className="px-6 py-3 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 select-none transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    Реквизиты документа
+                  </span>
+                  {!formExpanded && (
+                    <div className="flex items-center gap-1.5 ml-2">
+                      {letterType && (
+                        <span className="bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded border border-indigo-100">
+                          {letterTypeOptions.find((o) => o.value === letterType)?.label ?? letterType}
+                        </span>
+                      )}
+                      {subject && (
+                        <span className="text-slate-500 text-xs truncate max-w-[200px] font-medium">
+                          — {subject}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-400">
+                    {formExpanded ? "Свернуть" : "Развернуть"}
+                  </span>
+                  <ChevronDown
+                    size={14}
+                    className={cn(
+                      "text-slate-400 transition-transform duration-200",
+                      formExpanded && "rotate-180",
+                    )}
+                  />
+                </div>
+              </div>
+              <AnimatePresence>
+                {formExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.22 }}
+                    className="overflow-visible"
+                  >
+                    <div className="px-6 pt-5 pb-4 border-b border-slate-100">
                 <div className="flex items-start gap-3">
                   <label className="text-sm font-semibold text-slate-500 pt-2 w-20 flex-shrink-0">
                     Тип
@@ -3506,7 +3552,6 @@ export const CreateInternalCorrespondence = ({
                 </div>
               </div>
 
-              {/* Вложения — в шапке формы, чтобы не скроллить многостраничный редактор */}
               <div className="px-6 py-4 border-b border-slate-100">
                 <div className="flex items-start gap-3">
                   <label className="text-sm font-semibold text-slate-500 pt-1.5 w-20 flex-shrink-0">
@@ -3559,6 +3604,9 @@ export const CreateInternalCorrespondence = ({
                   </div>
                 </div>
               </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60 flex flex-wrap items-center gap-0.5">
                 <TBtn
@@ -3965,7 +4013,8 @@ export const CreateInternalCorrespondence = ({
                           // чтобы он визуально совпал с местом будущей печати.
                           left: PAGE_PAD_H + stampPos.x,
                           top: PAGE_PAD_V + stampPos.y,
-                          width: 320,
+                          width: stampSize.width,
+                          height: stampSize.height,
                           zIndex: 50,
                           cursor: "move",
                           userSelect: "none",

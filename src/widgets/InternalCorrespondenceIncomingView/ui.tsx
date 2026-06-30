@@ -19,6 +19,8 @@ import { ApiRoutes } from "@shared/api";
 import { DocumentCanvas } from "./DocumentCanvas";
 import { downloadDocumentPdf, PAGE_WIDTH } from "./lib";
 import { ApproversPanel } from "./ApproversPanel";
+import { SignersPanel } from "./SignersPanel";
+import { VersionsPanel } from "./VersionsPanel";
 import { IncomingPreviewModal } from "./IncomingPreviewModal";
 import { TaskPanel } from "./TaskPanel";
 
@@ -97,9 +99,23 @@ export const InternalCorrespondenceIncomingView = ({
   // Верхняя панель / новые блоки интерфейса
   const [showActionMenu, setShowActionMenu] = useState(false);
   const actionMenuRef = useRef<HTMLDivElement>(null);
-  const [showTaskPanel, setShowTaskPanel] = useState(false); // боковая панель «Поручение»
-  const [approversOpen, setApproversOpen] = useState(false); // popup «Согласующие»
-  const [detailsOpen, setDetailsOpen] = useState(false); // аккордеон «Детали письма»
+  const [showTaskPanel, setShowTaskPanel] = useState(false);
+  const [signersOpen, setSignersOpen] = useState(false);
+  const [approversOpen, setApproversOpen] = useState(false);
+  const [versionsOpen, setVersionsOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [activeVersionId, setActiveVersionId] = useState<number | string | null>(null);
+
+  const { data: workflowResponse } = useGetQuery({
+    url: item?.id
+      ? ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", String(item.id))
+      : "",
+    useToken: true,
+    options: { enabled: !!item?.id, refetchOnWindowFocus: false },
+  });
+
+  const signatures = workflowResponse?.data?.signatures || [];
+  const approvals = workflowResponse?.data?.approvals || [];
 
   // Закрытие выпадающего меню «Действие» по клику вне / Escape
   useEffect(() => {
@@ -167,13 +183,9 @@ export const InternalCorrespondenceIncomingView = ({
   // item.body — крайний фолбэк.
   const docVersions: { id?: number | string; body?: string }[] =
     versionsResponse?.data?.versions || [];
-  const documentBody =
-    docVersions.length === 0
-      ? item.body || ""
-      : docVersions.reduce((a, b) => (Number(b?.id) > Number(a?.id) ? b : a))
-          ?.body ||
-        item.body ||
-        "";
+  const activeVersion = docVersions.find(v => String(v.id) === String(activeVersionId)) 
+    || docVersions.reduce((a, b) => (Number(b?.id) > Number(a?.id) ? b : a), docVersions[0] || {});
+  const documentBody = activeVersion?.body || item.body || "";
 
   // Пока тянем версии — не показываем устаревший item.body, чтобы не мигнуть
   // старой версией (1.0) перед подменой на свежую.
@@ -454,21 +466,83 @@ export const InternalCorrespondenceIncomingView = ({
               </span>
             </div>
           ) : (
-            // Обёртка по ширине листа A4: к её правому краю крепится кнопка
-            // «Согласующие», поэтому панель оказывается вплотную к холсту.
             <div className="relative shrink-0" style={{ width: PAGE_WIDTH }}>
               <DocumentCanvas html={documentBody} />
+              <SignersPanel
+                isOpen={signersOpen}
+                onOpen={() => {
+                  setSignersOpen(true);
+                  setApproversOpen(false);
+                  setVersionsOpen(false);
+                  setShowTaskPanel(false);
+                }}
+                onClose={() => setSignersOpen(false)}
+                signatures={signatures}
+              />
               <ApproversPanel
                 isOpen={approversOpen}
-                onOpen={() => setApproversOpen(true)}
+                onOpen={() => {
+                  setApproversOpen(true);
+                  setSignersOpen(false);
+                  setVersionsOpen(false);
+                  setShowTaskPanel(false);
+                }}
                 onClose={() => setApproversOpen(false)}
+                approvals={approvals}
+              />
+              <div
+                className="absolute z-20"
+                style={{ left: -36, top: 10 }}
+              >
+                <motion.button
+                  onClick={() => {
+                    setShowTaskPanel((v) => !v);
+                    setSignersOpen(false);
+                    setApproversOpen(false);
+                    setVersionsOpen(false);
+                  }}
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                  className={cn(
+                    "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
+                    showTaskPanel ? "bg-slate-50" : "hover:bg-slate-50",
+                  )}
+                  aria-label="Поручение"
+                >
+                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
+                  <span
+                    style={{
+                      writingMode: "vertical-rl",
+                      textOrientation: "mixed",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: "#475569",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    Поручение
+                  </span>
+                </motion.button>
+              </div>
+              <VersionsPanel
+                isOpen={versionsOpen}
+                onOpen={() => {
+                  setVersionsOpen(true);
+                  setSignersOpen(false);
+                  setApproversOpen(false);
+                  setShowTaskPanel(false);
+                }}
+                onClose={() => setVersionsOpen(false)}
+                versions={docVersions}
+                activeVersionId={activeVersionId}
+                onSelectVersion={(versionId) => {
+                  setActiveVersionId(versionId);
+                }}
               />
             </div>
           )}
         </div>
 
-        {/* Боковая панель «Поручение» — 1-в-1 по дизайну; поле «Исполнитель»
-            подключено к реальному API, остальные поля пока только на фронте */}
         <AnimatePresence>
           {showTaskPanel && (
             <TaskPanel onClose={() => setShowTaskPanel(false)} />
