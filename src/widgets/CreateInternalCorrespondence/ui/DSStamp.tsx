@@ -232,10 +232,10 @@ export const DSStamp = ({
               </g>
             </svg>
             <div className="flex flex-col gap-0">
-              <span className="font-['Orbitron',sans-serif] font-bold text-[14px] tracking-[0.24em] text-white uppercase whitespace-nowrap leading-[1.2] ds-stamp-logo-text">
+              <span className="font-sans font-bold text-[14px] tracking-[0.24em] text-white uppercase whitespace-nowrap leading-[1.2] ds-stamp-logo-text">
                 INFRATECH
               </span>
-              <span className="font-['Orbitron',sans-serif] font-normal text-[7px] tracking-[0.3em] text-[#ffb800] uppercase whitespace-nowrap ds-stamp-logo-sub">
+              <span className="font-sans font-normal text-[7px] tracking-[0.3em] text-[#ffb800] uppercase whitespace-nowrap ds-stamp-logo-sub">
                 {lang === "TJ" ? "ҲУВИЯТИ РАҚАМӢ" : lang === "RU" ? "ЦИФРОВАЯ ЛИЧНОСТЬ" : "DIGITAL IDENTITY"}
               </span>
             </div>
@@ -244,7 +244,7 @@ export const DSStamp = ({
           <div className="flex gap-0.5 rounded-full p-0.5 bg-white/6 border border-[#ff6b00]/30">
             <button
               onClick={() => setLang("EN")}
-              className={`px-2.5 py-0.5 rounded-full transition-all duration-200 font-['Orbitron',sans-serif] text-[9px] font-bold tracking-[0.1em] ds-stamp-lang-btn ${
+              className={`px-2.5 py-0.5 rounded-full transition-all duration-200 font-sans text-[9px] font-bold tracking-[0.1em] ds-stamp-lang-btn ${
                 lang === "EN"
                   ? "bg-[linear-gradient(135deg,#ff6b00,#ffb800)] text-[#111111]"
                   : "bg-transparent text-white/45"
@@ -255,7 +255,7 @@ export const DSStamp = ({
             </button>
             <button
               onClick={() => setLang("RU")}
-              className={`px-2.5 py-0.5 rounded-full transition-all duration-200 font-['Orbitron',sans-serif] text-[9px] font-bold tracking-[0.1em] ds-stamp-lang-btn ${
+              className={`px-2.5 py-0.5 rounded-full transition-all duration-200 font-sans text-[9px] font-bold tracking-[0.1em] ds-stamp-lang-btn ${
                 lang === "RU"
                   ? "bg-[linear-gradient(135deg,#ff6b00,#ffb800)] text-[#111111]"
                   : "bg-transparent text-white/45"
@@ -266,7 +266,7 @@ export const DSStamp = ({
             </button>
             <button
               onClick={() => setLang("TJ")}
-              className={`px-2.5 py-0.5 rounded-full transition-all duration-200 font-['Orbitron',sans-serif] text-[9px] font-bold tracking-[0.1em] ds-stamp-lang-btn ${
+              className={`px-2.5 py-0.5 rounded-full transition-all duration-200 font-sans text-[9px] font-bold tracking-[0.1em] ds-stamp-lang-btn ${
                 lang === "TJ"
                   ? "bg-[linear-gradient(135deg,#ff6b00,#ffb800)] text-[#111111]"
                   : "bg-transparent text-white/45"
@@ -279,14 +279,14 @@ export const DSStamp = ({
         </div>
 
         <div className="mb-1">
-          <p className="text-[10px] uppercase tracking-[0.22em] mb-1 font-medium text-[#ffb800] font-['Orbitron',sans-serif] ds-stamp-owner-label">
+          <p className="text-[10px] uppercase tracking-[0.22em] mb-1 font-medium text-[#ffb800] font-sans ds-stamp-owner-label">
             <span>{t.ownerTitle}</span>
           </p>
-          <h1 className="font-bold leading-none tracking-tight text-[clamp(22px,4vw,30px)] text-white font-['Orbitron',sans-serif] tracking-[-0.01em] ds-stamp-owner-name">
+          <h1 className="font-bold leading-none tracking-tight text-[clamp(22px,4vw,30px)] text-white font-sans tracking-[-0.01em] ds-stamp-owner-name">
             {name}
           </h1>
         </div>
-        <p className="text-[10px] mt-2 tracking-[0.15em] uppercase text-white/30 font-['Orbitron',sans-serif] ds-stamp-sig-type">
+        <p className="text-[10px] mt-2 tracking-[0.15em] uppercase text-white/30 font-sans ds-stamp-sig-type">
           <span>{t.signatureText}</span>
         </p>
       </div>
@@ -328,7 +328,7 @@ export const DSStamp = ({
                 <rect width="18" height="18" x="3" y="4" rx="2" />
                 <path d="M3 10h18" />
               </svg>
-              <span className="text-[15px] font-semibold text-white font-['Orbitron',sans-serif] tracking-[0.04em] ds-stamp-date-text">
+              <span className="text-[15px] font-semibold text-white font-sans tracking-[0.04em] ds-stamp-date-text">
                 {signedAt}
               </span>
             </div>
@@ -349,7 +349,7 @@ export const DSStamp = ({
                 <span className="text-[8px] uppercase tracking-wider text-white/40 ds-stamp-valid-label">
                   <span>{t.fromText}</span>
                 </span>
-                <span className="text-[14px] font-semibold text-white font-['Orbitron',sans-serif] tracking-[0.04em] ds-stamp-valid-val">
+                <span className="text-[14px] font-semibold text-white font-sans tracking-[0.04em] ds-stamp-valid-val">
                   {fromDate}
                 </span>
               </div>
@@ -358,7 +358,7 @@ export const DSStamp = ({
                 <span className="text-[8px] uppercase tracking-wider text-white/40 ds-stamp-valid-label">
                   <span>{t.toText}</span>
                 </span>
-                <span className="text-[14px] font-semibold text-white font-['Orbitron',sans-serif] tracking-[0.04em] ds-stamp-valid-val">
+                <span className="text-[14px] font-semibold text-white font-sans tracking-[0.04em] ds-stamp-valid-val">
                   {toDate}
                 </span>
               </div>
@@ -415,7 +415,7 @@ export const DSStamp = ({
           >
             <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
           </svg>
-          <span className="text-[9px] uppercase tracking-[0.18em] text-white/35 font-['Orbitron',sans-serif] ds-stamp-footer-text">
+          <span className="text-[9px] uppercase tracking-[0.18em] text-white/35 font-sans ds-stamp-footer-text">
             <span>{t.footerText}</span>
           </span>
         </div>

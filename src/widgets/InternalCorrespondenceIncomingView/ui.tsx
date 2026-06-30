@@ -539,15 +539,14 @@ export const InternalCorrespondenceIncomingView = ({
                   setActiveVersionId(versionId);
                 }}
               />
+              <AnimatePresence>
+                {showTaskPanel && (
+                  <TaskPanel onClose={() => setShowTaskPanel(false)} />
+                )}
+              </AnimatePresence>
             </div>
           )}
         </div>
-
-        <AnimatePresence>
-          {showTaskPanel && (
-            <TaskPanel onClose={() => setShowTaskPanel(false)} />
-          )}
-        </AnimatePresence>
       </div>
     </div>
   );
