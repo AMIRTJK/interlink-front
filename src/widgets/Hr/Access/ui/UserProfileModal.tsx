@@ -415,49 +415,6 @@ export const UserProfileModal = ({
 		}));
 	}, [availableRolesToAdd]);
 
-	const actionItems: MenuProps["items"] = [
-		{
-			key: "edit",
-			label: "Редактировать сотруника",
-			onClick: () => {
-				onClose();
-				onEdit(user);
-			},
-		},
-		{
-			type: "divider",
-		},
-		{
-			key: "status_active",
-			label: "Активен",
-			onClick: () => handleUpdateStatus("active"),
-		},
-		{
-			key: "status_inactive",
-			label: "Неактивен",
-			onClick: () => handleUpdateStatus("inactive"),
-		},
-		{
-			key: "status_vacation",
-			label: "В отпуске",
-			onClick: () => handleUpdateStatus("vacation"),
-		},
-		{
-			key: "status_business_trip",
-			label: "В командировке",
-			onClick: () => handleUpdateStatus("business_trip"),
-		},
-		{
-			type: "divider",
-		},
-		{
-			key: "delete",
-			label: "Удалить сотруника",
-			danger: true,
-			onClick: handleDeleteConfirm,
-		},
-	];
-
 	const rawDetail = detailData?.data || detailData;
 
 	const currentStatus = rawDetail?.status || user.status;
@@ -475,6 +432,65 @@ export const UserProfileModal = ({
 		currentDepartment && currentDepartment !== "—" && currentDepartment,
 		formattedJoinedAt && `С ${formattedJoinedAt}`,
 	].filter(Boolean);
+
+	const renderStatusItem = (statusKey: string, labelText: string) => {
+		const meta = ACCESS_STATUS_META[statusKey] || { dotClass: "bg-slate-400!" };
+		const isActive = currentStatus === statusKey;
+		return (
+			<div className="flex items-center justify-between w-full min-w-[150px] py-0.5 select-none">
+				<div className="flex items-center gap-2">
+					<span className={`w-1.5 h-1.5 rounded-full ${meta.dotClass}`} />
+					<span className={isActive ? "font-bold text-slate-800" : "text-slate-600 font-medium"}>
+						{labelText}
+					</span>
+				</div>
+				{isActive && <Check size={14} className="text-blue-500! ml-4" />}
+			</div>
+		);
+	};
+
+	const actionItems: MenuProps["items"] = [
+		{
+			key: "edit",
+			label: <span className="font-semibold text-slate-700">Редактировать сотрудника</span>,
+			onClick: () => {
+				onClose();
+				onEdit(user);
+			},
+		},
+		{
+			type: "divider",
+		},
+		{
+			key: "status_active",
+			label: renderStatusItem("active", "Активен"),
+			onClick: () => handleUpdateStatus("active"),
+		},
+		{
+			key: "status_inactive",
+			label: renderStatusItem("inactive", "Неактивен"),
+			onClick: () => handleUpdateStatus("inactive"),
+		},
+		{
+			key: "status_vacation",
+			label: renderStatusItem("vacation", "В отпуске"),
+			onClick: () => handleUpdateStatus("vacation"),
+		},
+		{
+			key: "status_business_trip",
+			label: renderStatusItem("business_trip", "В командировке"),
+			onClick: () => handleUpdateStatus("business_trip"),
+		},
+		{
+			type: "divider",
+		},
+		{
+			key: "delete",
+			label: <span className="text-rose-600 font-semibold">Удалить сотрудника</span>,
+			danger: true,
+			onClick: handleDeleteConfirm,
+		},
+	];
 
 	return (
 		<motion.div
