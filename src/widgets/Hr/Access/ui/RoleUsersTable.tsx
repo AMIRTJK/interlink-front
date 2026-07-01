@@ -8,6 +8,10 @@ import { IAccessUser, ACCESS_STATUS_META, ROLE_COLOR_MAP } from "../model";
 interface IProps {
 	items: IAccessUser[];
 	loading: boolean;
+	total: number;
+	currentPage: number;
+	pageSize: number;
+	onPageChange: (page: number) => void;
 	onViewAccess: (user: IAccessUser) => void;
 	onEdit: (user: IAccessUser) => void;
 	onDelete: (id: number) => void;
@@ -16,6 +20,10 @@ interface IProps {
 export const RoleUsersTable = ({
 	items,
 	loading,
+	total,
+	currentPage,
+	pageSize,
+	onPageChange,
 	onViewAccess,
 	onEdit,
 	onDelete,
@@ -157,12 +165,15 @@ export const RoleUsersTable = ({
 			rowKey="id"
 			loading={loading}
 			pagination={{
-				pageSize: 10,
+				current: currentPage,
+				pageSize: pageSize,
+				total: total,
+				onChange: onPageChange,
 				showSizeChanger: false,
 				className: "px-4 py-3",
-				showTotal: (total, range) => (
+				showTotal: (totalVal, range) => (
 					<span className="text-xs text-slate-400 font-semibold">
-						{"\u041f\u043e\u043a\u0430\u0437\u0430\u043d\u043e"} {range[0]}&ndash;{range[1]} {"\u0438\u0437"} {total} {"\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u0435\u0439"}
+						{"\u041f\u043e\u043a\u0430\u0437\u0430\u043d\u043e"} {range[0]}&ndash;{range[1]} {"\u0438\u0437"} {totalVal} {"\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u0435\u0439"}
 					</span>
 				),
 			}}

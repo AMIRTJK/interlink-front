@@ -29,6 +29,7 @@ export const RolesTab = () => {
 	} | null>(null);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
+	const [currentPage, setCurrentPage] = useState(1);
 
 	const { data: rolesData } = useGetQuery({
 		url: ApiRoutes.GET_ROLES,
@@ -71,19 +72,25 @@ export const RolesTab = () => {
 		}
 	}, [rolesList]);
 
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [selectedRole, searchQuery]);
+
 	const { data: usersData, isLoading: usersLoading } = useGetQuery({
 		url: ApiRoutes.GET_USERS,
 		useToken: true,
 		params: useMemo(() => {
-			const p: Record<string, string> = {};
+			const p: Record<string, any> = {};
 			if (selectedRole) {
 				p.role = selectedRole.name;
 			}
 			if (searchQuery) {
 				p.search = searchQuery;
 			}
+			p.page = currentPage;
+			p.per_page = 15;
 			return p;
-		}, [selectedRole, searchQuery]),
+		}, [selectedRole, searchQuery, currentPage]),
 		options: {
 			enabled: !!selectedRole,
 			keepPreviousData: true,
@@ -161,6 +168,9 @@ export const RolesTab = () => {
 		});
 	};
 
+	const totalUsers = usersData?.data?.total || usersData?.total || normalizedUsers.length;
+	const perPage = usersData?.data?.per_page || usersData?.per_page || 15;
+
 	const selectedRoleDisplayName = selectedRole
 		? ROLE_DISPLAY_NAMES[selectedRole.name] || selectedRole.name
 		: "";
@@ -203,16 +213,16 @@ export const RolesTab = () => {
 				{selectedRole && (
 					<div className="space-y-4 pt-4 border-t border-slate-100">
 						<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-							<div className="flex items-center gap-3">
+							<div className="space-y-1">
 								<h3 className="text-[15px] font-bold text-slate-800 flex items-center gap-2 flex-wrap">
 									<span>{"\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u0438 \u0441 \u0440\u043e\u043b\u044c\u044e:"}</span>
 									<span className="text-blue-600">
 										{selectedRoleDisplayName}
 									</span>
 								</h3>
-								<span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500 whitespace-nowrap">
-									{"\u041d\u0430\u0439\u0434\u0435\u043d\u043e:"} {normalizedUsers.length}
-								</span>
+								<div className="text-xs text-slate-400 font-semibold pl-0.5">
+									{"\u041d\u0430\u0439\u0434\u0435\u043d\u043e:"} {totalUsers}
+								</div>
 							</div>
 
 							<Input
@@ -226,6 +236,10 @@ export const RolesTab = () => {
 						<RoleUsersTable
 							items={normalizedUsers}
 							loading={!!usersLoading}
+							total={totalUsers}
+							currentPage={currentPage}
+							pageSize={perPage}
+							onPageChange={setCurrentPage}
 							onViewAccess={() => {}}
 							onEdit={() => {}}
 							onDelete={() => {}}
