@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, Check, ChevronDown } from "lucide-react";
-import { Dropdown, Modal, Switch } from "antd";
+import { Dropdown, Modal, Switch, Pagination } from "antd";
 import type { MenuProps } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
@@ -144,6 +144,7 @@ export const UserProfileModal = ({
 		[],
 	);
 	const [isInitialized, setIsInitialized] = useState(false);
+	const [permissionsPage, setPermissionsPage] = useState(1);
 
 	const { data: detailData } = useGetQuery({
 		url: `${ApiRoutes.FETCH_USER_BY_ID}${user.id}`,
@@ -283,6 +284,14 @@ export const UserProfileModal = ({
 		});
 		return groups;
 	}, [allSystemPermissions]);
+
+	const PAGE_SIZE = 5;
+
+	const paginatedGroupEntries = useMemo(() => {
+		const entries = Object.entries(groupedPermissions);
+		const start = (permissionsPage - 1) * PAGE_SIZE;
+		return entries.slice(start, start + PAGE_SIZE);
+	}, [groupedPermissions, permissionsPage]);
 
 	const handleTogglePermission = (permissionName: string) => {
 		setUserPermissionsState((prev) => {
@@ -606,9 +615,9 @@ export const UserProfileModal = ({
 						</div>
 					</If>
 					<If is={tab === "permissions"}>
-						<div className="space-y-6">
+						<div className="space-y-4">
 							<div className="space-y-5">
-								{Object.entries(groupedPermissions).map(
+								{paginatedGroupEntries.map(
 									([moduleName, actions]) => (
 										<div key={moduleName} className="space-y-2">
 											<h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-1">
@@ -641,6 +650,18 @@ export const UserProfileModal = ({
 									),
 								)}
 							</div>
+							{Object.keys(groupedPermissions).length > PAGE_SIZE && (
+								<div className="flex justify-center pt-2">
+									<Pagination
+										current={permissionsPage}
+										pageSize={PAGE_SIZE}
+										total={Object.keys(groupedPermissions).length}
+										onChange={setPermissionsPage}
+										showSizeChanger={false}
+										showTotal={(total, range) => `${range[0]}–${range[1]} из ${total} модулей`}
+									/>
+								</div>
+							)}
 						</div>
 					</If>
 					<If is={tab !== "profile" && tab !== "permissions"}>
