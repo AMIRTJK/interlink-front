@@ -192,7 +192,7 @@ export const RolesTab = () => {
 						className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
 					>
 						<Plus size={14} />
-						<span>{"+ \u0421\u043e\u0437\u0434\u0430\u0442\u044c \u0440\u043e\u043b\u044c"}</span>
+						<span>{"\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u0440\u043e\u043b\u044c"}</span>
 					</button>
 				</div>
 
