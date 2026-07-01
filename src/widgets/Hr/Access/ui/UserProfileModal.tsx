@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, Check, ChevronDown } from "lucide-react";
-import { Dropdown, Modal, Switch, Pagination } from "antd";
+import { Dropdown, Modal, Switch } from "antd";
 import type { MenuProps } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
@@ -651,15 +651,27 @@ export const UserProfileModal = ({
 								)}
 							</div>
 							{Object.keys(groupedPermissions).length > PAGE_SIZE && (
-								<div className="flex justify-center pt-2">
-									<Pagination
-										current={permissionsPage}
-										pageSize={PAGE_SIZE}
-										total={Object.keys(groupedPermissions).length}
-										onChange={setPermissionsPage}
-										showSizeChanger={false}
-										showTotal={(total, range) => `${range[0]}–${range[1]} из ${total} модулей`}
-									/>
+								<div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
+									<span className="text-xs text-slate-400 font-medium mr-auto">
+										{(permissionsPage - 1) * PAGE_SIZE + 1}–{Math.min(permissionsPage * PAGE_SIZE, Object.keys(groupedPermissions).length)} из {Object.keys(groupedPermissions).length} модулей
+									</span>
+									<button
+										onClick={() => setPermissionsPage((p) => Math.max(1, p - 1))}
+										disabled={permissionsPage === 1}
+										className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+									>
+										<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+									</button>
+									<span className="text-xs font-bold text-slate-600 min-w-[32px] text-center">
+										{permissionsPage} / {Math.ceil(Object.keys(groupedPermissions).length / PAGE_SIZE)}
+									</span>
+									<button
+										onClick={() => setPermissionsPage((p) => Math.min(Math.ceil(Object.keys(groupedPermissions).length / PAGE_SIZE), p + 1))}
+										disabled={permissionsPage >= Math.ceil(Object.keys(groupedPermissions).length / PAGE_SIZE)}
+										className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+									>
+										<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+									</button>
 								</div>
 							)}
 						</div>
