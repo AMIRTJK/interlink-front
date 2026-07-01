@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Switch, Modal, Input, Pagination } from "antd";
 import { Check, Trash2, X, Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 
@@ -208,7 +209,16 @@ export const RolePermissionsSidebar = ({
 
 	return (
 		<div className="w-[320px] bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col h-[750px]! justify-between relative overflow-hidden">
-			<div className="p-5 border-b border-slate-50 flex items-start justify-between">
+			<AnimatePresence mode="wait">
+				<motion.div
+					key={role.id}
+					initial={{ opacity: 0, y: 6 }}
+					animate={{ opacity: 1, y: 0 }}
+					exit={{ opacity: 0, y: -6 }}
+					transition={{ duration: 0.15, ease: "easeOut" }}
+					className="flex flex-col h-full w-full justify-between"
+				>
+					<div className="p-5 border-b border-slate-50 flex items-start justify-between">
 				<div className="flex items-center gap-3">
 					<div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ${colors.bg}`}>
 						{initials || "РД"}
@@ -292,19 +302,74 @@ export const RolePermissionsSidebar = ({
 					)}
 				</div>
 
-				{totalSidebarPages > 1 && (
-					<div className="flex justify-center pt-2">
-						<Pagination
-							current={sidebarPage}
-							pageSize={3}
-							total={Object.keys(filteredGroups).length}
-							onChange={setSidebarPage}
-							showSizeChanger={false}
-							simple
-							size="small"
-						/>
-					</div>
-				)}
+				{totalSidebarPages > 1 && (() => {
+					const pagesList: number[] = [];
+					const pageLimit = 4;
+					let start = Math.max(1, sidebarPage - 1);
+					let end = Math.min(totalSidebarPages, start + pageLimit - 1);
+					if (end - start + 1 < pageLimit) {
+						start = Math.max(1, end - pageLimit + 1);
+					}
+					for (let i = start; i <= end; i++) {
+						pagesList.push(i);
+					}
+
+					return (
+						<div className="flex justify-center pt-2">
+							<div className="flex items-center gap-1">
+								<button
+									onClick={() => setSidebarPage(Math.max(1, sidebarPage - 1))}
+									disabled={sidebarPage === 1}
+									className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
+								>
+									<svg
+										width="12"
+										height="12"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2.5"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+									>
+										<path d="M15 18l-6-6 6-6" />
+									</svg>
+								</button>
+								{pagesList.map((p) => (
+									<button
+										key={p}
+										onClick={() => setSidebarPage(p)}
+										className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
+											sidebarPage === p
+												? "bg-blue-600 text-white border border-blue-600 shadow-sm"
+												: "bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+										}`}
+									>
+										{p}
+									</button>
+								))}
+								<button
+									onClick={() => setSidebarPage(Math.min(totalSidebarPages, sidebarPage + 1))}
+									disabled={sidebarPage === totalSidebarPages}
+									className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
+								>
+									<svg
+										width="12"
+										height="12"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2.5"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+									>
+										<path d="M9 18l6-6-6-6" />
+									</svg>
+								</button>
+							</div>
+						</div>
+					);
+				})()}
 			</div>
 
 			<div className="p-4 border-t border-slate-50 flex items-center justify-between gap-2.5 bg-slate-50/20">
@@ -324,6 +389,8 @@ export const RolePermissionsSidebar = ({
 					<Trash2 size={15} />
 				</button>
 			</div>
+				</motion.div>
+			</AnimatePresence>
 		</div>
 	);
 };

@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, LayoutGrid, List } from "lucide-react";
 import { Input, Modal, Pagination } from "antd";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { normalizeAccessUsers } from "../lib";
 import { RoleCard } from "./RoleCard";
+import { RoleListTable } from "./RoleListTable";
 import { RoleUsersTable } from "./RoleUsersTable";
 import { RolePermissionsSidebar } from "./RolePermissionsSidebar";
 import { CreateRoleModal } from "./CreateRoleModal";
@@ -24,6 +25,7 @@ export const RolesTab = () => {
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [rolesPage, setRolesPage] = useState(1);
+	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
 	const { data: rolesData } = useGetQuery({
 		url: ApiRoutes.GET_ROLES,
@@ -188,41 +190,149 @@ export const RolesTab = () => {
 							{"Управление ролями пользователей СЭД"}
 						</p>
 					</div>
-					<button
-						onClick={() => setIsCreateOpen(true)}
-						className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
-					>
-						<Plus size={14} />
-						<span>{"Создать роль"}</span>
-					</button>
-				</div>
-
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-					{paginatedRoles.map((r) => (
-						<RoleCard
-							key={r.id}
-							role={r}
-							userCount={10}
-							isSelected={selectedRole?.id === r.id}
-							onSelect={() => setSelectedRole(r)}
-							onEdit={() => setSelectedRole(r)}
-							onDelete={() => handleDeleteRole(r)}
-						/>
-					))}
-				</div>
-
-				{rolesList.length > 6 && (
-					<div className="flex justify-end pt-2">
-						<Pagination
-							current={rolesPage}
-							pageSize={6}
-							total={rolesList.length}
-							onChange={setRolesPage}
-							showSizeChanger={false}
-							size="small"
-						/>
+					<div className="flex items-center gap-3">
+						<div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+							<button
+								onClick={() => setViewMode("grid")}
+								className={`p-1.5 rounded-lg transition-colors cursor-pointer select-none outline-none! ${
+									viewMode === "grid"
+										? "bg-white text-slate-700 shadow-sm"
+										: "text-slate-400 hover:text-slate-600"
+								}`}
+							>
+								<LayoutGrid size={15} />
+							</button>
+							<button
+								onClick={() => setViewMode("list")}
+								className={`p-1.5 rounded-lg transition-colors cursor-pointer select-none outline-none! ${
+									viewMode === "list"
+										? "bg-white text-slate-700 shadow-sm"
+										: "text-slate-400 hover:text-slate-600"
+								}`}
+							>
+								<List size={15} />
+							</button>
+						</div>
+						<button
+							onClick={() => setIsCreateOpen(true)}
+							className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
+						>
+							<Plus size={14} />
+							<span>{"Создать роль"}</span>
+						</button>
 					</div>
-				)}
+				</div>
+
+				<AnimatePresence mode="wait">
+					{viewMode === "grid" ? (
+						<motion.div
+							key="grid"
+							initial={{ opacity: 0, y: 6 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -6 }}
+							transition={{ duration: 0.15 }}
+							className="grid grid-cols-1 md:grid-cols-3 gap-6"
+						>
+							{paginatedRoles.map((r) => (
+								<RoleCard
+									key={r.id}
+									role={r}
+									userCount={10}
+									isSelected={selectedRole?.id === r.id}
+									onSelect={() => setSelectedRole(r)}
+									onEdit={() => setSelectedRole(r)}
+									onDelete={() => handleDeleteRole(r)}
+								/>
+							))}
+						</motion.div>
+					) : (
+						<motion.div
+							key="list"
+							initial={{ opacity: 0, y: 6 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -6 }}
+							transition={{ duration: 0.15 }}
+						>
+							<RoleListTable
+								items={paginatedRoles}
+								selectedRoleId={selectedRole?.id}
+								onSelect={setSelectedRole}
+								onEdit={setSelectedRole}
+								onDelete={handleDeleteRole}
+							/>
+						</motion.div>
+					)}
+				</AnimatePresence>
+
+				{rolesList.length > 6 && (() => {
+					const totalPages = Math.ceil(rolesList.length / 6);
+					const pageLimit = 5;
+					const pagesList: number[] = [];
+					let start = Math.max(1, rolesPage - 2);
+					let end = Math.min(totalPages, start + pageLimit - 1);
+					if (end - start + 1 < pageLimit) {
+						start = Math.max(1, end - pageLimit + 1);
+					}
+					for (let i = start; i <= end; i++) {
+						pagesList.push(i);
+					}
+
+					return (
+						<div className="flex justify-end pt-2">
+							<div className="flex items-center gap-1.5">
+								<button
+									onClick={() => setRolesPage(Math.max(1, rolesPage - 1))}
+									disabled={rolesPage === 1}
+									className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
+								>
+									<svg
+										width="14"
+										height="14"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2.5"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+									>
+										<path d="M15 18l-6-6 6-6" />
+									</svg>
+								</button>
+								{pagesList.map((p) => (
+									<button
+										key={p}
+										onClick={() => setRolesPage(p)}
+										className={`w-8 h-8 flex items-center justify-center rounded-xl text-xs font-bold transition-all cursor-pointer ${
+											rolesPage === p
+												? "bg-blue-600 text-white border border-blue-600 shadow-sm"
+												: "bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+										}`}
+									>
+										{p}
+									</button>
+								))}
+								<button
+									onClick={() => setRolesPage(Math.min(totalPages, rolesPage + 1))}
+									disabled={rolesPage === totalPages}
+									className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
+								>
+									<svg
+										width="14"
+										height="14"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2.5"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+									>
+										<path d="M9 18l6-6-6-6" />
+									</svg>
+								</button>
+							</div>
+						</div>
+					);
+				})()}
 
 				{selectedRole && (
 					<div className="space-y-4 pt-4 border-t border-slate-100">
@@ -262,13 +372,13 @@ export const RolesTab = () => {
 				)}
 			</div>
 
-			<AnimatePresence>
+			<AnimatePresence initial={false}>
 				{selectedRole && (
 					<motion.div
 						initial={{ opacity: 0, width: 0 }}
 						animate={{ opacity: 1, width: 320 }}
 						exit={{ opacity: 0, width: 0 }}
-						transition={{ duration: 0.2, ease: "easeOut" }}
+						transition={{ type: "spring", stiffness: 350, damping: 32 }}
 						className="shrink-0! sticky top-6 overflow-hidden"
 					>
 						<div className="w-[320px] pb-4">
