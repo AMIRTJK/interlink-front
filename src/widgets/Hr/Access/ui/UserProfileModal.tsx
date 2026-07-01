@@ -7,7 +7,7 @@ import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { If } from "@shared/ui";
 import { IAccessUser, ACCESS_STATUS_META } from "../model";
-import { getInitials } from "../lib";
+import { getInitials, formatJoinedDate } from "../lib";
 
 interface IProps {
 	user: IAccessUser;
@@ -461,6 +461,18 @@ export const UserProfileModal = ({
 	const currentStatus = detailData?.data?.status || detailData?.status || user.status;
 	const statusMeta = ACCESS_STATUS_META[currentStatus] || ACCESS_STATUS_META.active;
 
+	const currentEmail = detailData?.data?.email || detailData?.email || user.email;
+	const rawDept = detailData?.data?.department || detailData?.department || detailData?.data?.departments?.[0] || detailData?.departments?.[0];
+	const currentDepartment = (typeof rawDept === "object" ? rawDept?.name : rawDept) || user.department;
+	const currentJoinedAt = detailData?.data?.created_at || detailData?.created_at || user.raw?.created_at;
+	const formattedJoinedAt = currentJoinedAt ? formatJoinedDate(currentJoinedAt) : user.joinedAt;
+
+	const subtitleParts = [
+		currentEmail && currentEmail !== "—" && currentEmail,
+		currentDepartment && currentDepartment !== "—" && currentDepartment,
+		formattedJoinedAt && `С ${formattedJoinedAt}`,
+	].filter(Boolean);
+
 	return (
 		<motion.div
 			initial={{ opacity: 0 }}
@@ -496,7 +508,7 @@ export const UserProfileModal = ({
 									{user.raw.position || "Сотрудник"}
 								</p>
 								<p className="text-xs text-slate-400 mt-1 font-normal">
-									{user.email} &bull; {user.department} &bull; С {user.joinedAt}
+									{subtitleParts.join(" • ")}
 								</p>
 							</div>
 						</div>

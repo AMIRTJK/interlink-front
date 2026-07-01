@@ -42,7 +42,7 @@ export const normalizeAccessUsers = (raw: IAdminUser[]): IAccessUser[] => {
 		roles: (u.roles || []).map((r) => r.name),
 		status: u.status || "active",
 		lastActive: formatActivity(u.id),
-		joinedAt: formatJoinedDate(u.photo_path),
+		joinedAt: formatJoinedDate(u.created_at),
 		raw: u,
 	}));
 };
