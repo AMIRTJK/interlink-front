@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Switch, Modal, Input, Pagination } from "antd";
 import { Check, Trash2, X, Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 
@@ -208,7 +209,16 @@ export const RolePermissionsSidebar = ({
 
 	return (
 		<div className="w-[320px] bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col h-[750px]! justify-between relative overflow-hidden">
-			<div className="p-5 border-b border-slate-50 flex items-start justify-between">
+			<AnimatePresence mode="wait">
+				<motion.div
+					key={role.id}
+					initial={{ opacity: 0, y: 6 }}
+					animate={{ opacity: 1, y: 0 }}
+					exit={{ opacity: 0, y: -6 }}
+					transition={{ duration: 0.15, ease: "easeOut" }}
+					className="flex flex-col h-full w-full justify-between"
+				>
+					<div className="p-5 border-b border-slate-50 flex items-start justify-between">
 				<div className="flex items-center gap-3">
 					<div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ${colors.bg}`}>
 						{initials || "РД"}
@@ -324,6 +334,8 @@ export const RolePermissionsSidebar = ({
 					<Trash2 size={15} />
 				</button>
 			</div>
+				</motion.div>
+			</AnimatePresence>
 		</div>
 	);
 };
