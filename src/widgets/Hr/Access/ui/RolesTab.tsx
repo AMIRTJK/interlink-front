@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Search, Plus } from "lucide-react";
-import { Input, Modal } from "antd";
+import { Input, Modal, Pagination } from "antd";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
@@ -23,6 +23,7 @@ export const RolesTab = () => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
+	const [rolesPage, setRolesPage] = useState(1);
 
 	const { data: rolesData } = useGetQuery({
 		url: ApiRoutes.GET_ROLES,
@@ -54,6 +55,15 @@ export const RolesTab = () => {
 		return Array.isArray(raw) ? raw : [];
 	}, [rolesData]);
 
+	const paginatedRoles = useMemo(() => {
+		const start = (rolesPage - 1) * 6;
+		return rolesList.slice(start, start + 6);
+	}, [rolesList, rolesPage]);
+
+	useEffect(() => {
+		setRolesPage(1);
+	}, [rolesList.length]);
+
 	useEffect(() => {
 		if (rolesList.length > 0 && !selectedRole) {
 			setSelectedRole(rolesList[0]);
@@ -67,7 +77,7 @@ export const RolesTab = () => {
 
 	useEffect(() => {
 		setCurrentPage(1);
-	}, [selectedRole, searchQuery]);
+	}, [selectedRole?.id, searchQuery]);
 
 	const { data: usersData, isLoading: usersLoading } = useGetQuery({
 		url: ApiRoutes.GET_USERS,
@@ -188,7 +198,7 @@ export const RolesTab = () => {
 				</div>
 
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-					{rolesList.map((r) => (
+					{paginatedRoles.map((r) => (
 						<RoleCard
 							key={r.id}
 							role={r}
@@ -200,6 +210,19 @@ export const RolesTab = () => {
 						/>
 					))}
 				</div>
+
+				{rolesList.length > 6 && (
+					<div className="flex justify-end pt-2">
+						<Pagination
+							current={rolesPage}
+							pageSize={6}
+							total={rolesList.length}
+							onChange={setRolesPage}
+							showSizeChanger={false}
+							size="small"
+						/>
+					</div>
+				)}
 
 				{selectedRole && (
 					<div className="space-y-4 pt-4 border-t border-slate-100">

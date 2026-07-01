@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { Switch, Modal } from "antd";
-import { Check, Trash2, X } from "lucide-react";
+import { Switch, Modal, Input, Pagination } from "antd";
+import { Check, Trash2, X, Search } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 
@@ -62,6 +62,12 @@ export const RolePermissionsSidebar = ({
 	const [rolePermissionsState, setRolePermissionsState] = useState<string[]>(
 		[],
 	);
+	const [searchQuery, setSearchQuery] = useState("");
+	const [sidebarPage, setSidebarPage] = useState(1);
+
+	useEffect(() => {
+		setSidebarPage(1);
+	}, [role, searchQuery]);
 
 	useEffect(() => {
 		const list: string[] = [];
@@ -96,22 +102,45 @@ export const RolePermissionsSidebar = ({
 		},
 	});
 
-	const groupedPermissions = useMemo(() => {
+	const filteredGroups = useMemo(() => {
 		const groups: Record<string, { label: string; name: string }[]> = {};
+		const query = searchQuery.toLowerCase();
+
 		allSystemPermissions.forEach((permName) => {
 			const parts = permName.split(".");
 			const moduleName = parts[0];
 			const actionName = parts.slice(1).join(".");
+			const label = ACTION_TRANSLATIONS[actionName] || actionName;
+
+			const moduleTitle = MODULE_TRANSLATIONS[moduleName] || moduleName;
+			const matchesModule = moduleTitle.toLowerCase().includes(query);
+			const matchesAction = label.toLowerCase().includes(query) || permName.toLowerCase().includes(query);
+
+			if (query && !matchesModule && !matchesAction) {
+				return;
+			}
+
 			if (!groups[moduleName]) {
 				groups[moduleName] = [];
 			}
 			groups[moduleName].push({
-				label: ACTION_TRANSLATIONS[actionName] || actionName,
+				label,
 				name: permName,
 			});
 		});
 		return groups;
-	}, [allSystemPermissions]);
+	}, [allSystemPermissions, searchQuery]);
+
+	const paginatedGroups = useMemo(() => {
+		const entries = Object.entries(filteredGroups);
+		const start = (sidebarPage - 1) * 3;
+		return entries.slice(start, start + 3);
+	}, [filteredGroups, sidebarPage]);
+
+	const totalSidebarPages = useMemo(() => {
+		const entries = Object.entries(filteredGroups);
+		return Math.ceil(entries.length / 3);
+	}, [filteredGroups]);
 
 	const handleTogglePermission = (permissionName: string) => {
 		setRolePermissionsState((prev) => {
@@ -201,12 +230,31 @@ export const RolePermissionsSidebar = ({
 				</button>
 			</div>
 
-			<div className="flex-1 overflow-y-auto p-5 space-y-5">
-				<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1 leading-none">
-					{"ПРАВА ДОСТУПА"}
-				</p>
+			<div className="px-5 pt-4">
+				<Input
+					placeholder="Поиск прав..."
+					prefix={<Search size={14} className="text-slate-400" />}
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+					allowClear
+					className="rounded-xl! border-slate-200!"
+				/>
+			</div>
+
+			<div className="flex-1 overflow-y-auto p-5 space-y-4 pt-2">
+				<div className="flex items-center justify-between pl-1">
+					<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+						{"ПРАВА ДОСТУПА"}
+					</p>
+					{Object.keys(filteredGroups).length > 0 && (
+						<span className="text-[10px] text-slate-400 font-bold bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100/60">
+							{sidebarPage} / {totalSidebarPages || 1}
+						</span>
+					)}
+				</div>
+
 				<div className="space-y-4">
-					{Object.entries(groupedPermissions).map(([moduleName, actions]) => (
+					{paginatedGroups.map(([moduleName, actions]) => (
 						<div
 							key={moduleName}
 							className="border border-slate-50 rounded-xl p-3 bg-slate-50/20 space-y-2.5"
@@ -236,7 +284,27 @@ export const RolePermissionsSidebar = ({
 							</div>
 						</div>
 					))}
+
+					{Object.keys(filteredGroups).length === 0 && (
+						<div className="text-center py-6 text-xs text-slate-400 font-medium">
+							Ничего не найдено
+						</div>
+					)}
 				</div>
+
+				{totalSidebarPages > 1 && (
+					<div className="flex justify-center pt-2">
+						<Pagination
+							current={sidebarPage}
+							pageSize={3}
+							total={Object.keys(filteredGroups).length}
+							onChange={setSidebarPage}
+							showSizeChanger={false}
+							simple
+							size="small"
+						/>
+					</div>
+				)}
 			</div>
 
 			<div className="p-4 border-t border-slate-50 flex items-center justify-between gap-2.5 bg-slate-50/20">
