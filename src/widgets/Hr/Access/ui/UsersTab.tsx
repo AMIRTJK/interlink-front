@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Search, Plus } from "lucide-react";
 import { Select } from "antd";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { If } from "@shared/ui";
@@ -360,16 +360,23 @@ export const UsersTab = () => {
 				/>
 			</div>
 
-			<div className="flex items-center gap-1.5 flex-wrap overflow-x-auto pb-1">
+			<div className="flex items-center gap-1.5 flex-wrap overflow-x-auto pb-1 relative z-1">
 				<button
 					onClick={() => handleQuickRoleChange("all")}
-					className={`px-3 py-1.5 border rounded-xl text-xs font-semibold transition-colors ${
+					className={`relative px-3 py-1.5 border rounded-xl text-xs font-semibold transition-colors duration-200 cursor-pointer select-none outline-none! ${
 						selectedQuickRole === "all"
-							? "border-blue-600 bg-blue-50/50 text-blue-600"
+							? "border-blue-600 text-blue-600"
 							: "border-slate-200 text-slate-500 hover:bg-slate-50"
 					}`}
 				>
-					Все
+					{selectedQuickRole === "all" && (
+						<motion.div
+							layoutId="activeQuickRolePill"
+							className="absolute inset-0 bg-blue-50/50 -z-10 rounded-xl"
+							transition={{ type: "spring", stiffness: 380, damping: 30 }}
+						/>
+					)}
+					<span className="relative z-10">Все</span>
 				</button>
 				{roles.map((role) => {
 					const isSelected = selectedQuickRole === role;
@@ -384,20 +391,27 @@ export const UsersTab = () => {
 						<button
 							key={role}
 							onClick={() => handleQuickRoleChange(role)}
-							className={`px-3 py-1.5 border rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+							className={`relative px-3 py-1.5 border rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors duration-200 cursor-pointer select-none outline-none! ${
 								isSelected
-									? `${activeStyle.border} ${activeStyle.bg} ${activeStyle.text}`
+									? `${activeStyle.border} ${activeStyle.text}`
 									: "border-slate-200 text-slate-500 hover:bg-slate-50"
 							}`}
 						>
+							{isSelected && (
+								<motion.div
+									layoutId="activeQuickRolePill"
+									className={`absolute inset-0 -z-10 rounded-xl ${activeStyle.bg}`}
+									transition={{ type: "spring", stiffness: 380, damping: 30 }}
+								/>
+							)}
 							<span
-								className={`w-1.5 h-1.5 rounded-full transition-all duration-150 ${
+								className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
 									isSelected
 										? `${activeStyle.dot} opacity-100 scale-100`
 										: "bg-slate-400 opacity-0 scale-50"
 								}`}
 							/>
-							<span>{role}</span>
+							<span className="relative z-10">{role}</span>
 						</button>
 					);
 				})}
