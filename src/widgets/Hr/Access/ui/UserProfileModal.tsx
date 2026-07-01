@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check, ChevronDown } from "lucide-react";
+import { X, Check, ChevronDown, Mail, Phone, Building2, Calendar } from "lucide-react";
 import { Dropdown, Modal, Switch } from "antd";
 import type { MenuProps } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
@@ -458,13 +458,16 @@ export const UserProfileModal = ({
 		},
 	];
 
-	const currentStatus = detailData?.data?.status || detailData?.status || user.status;
+	const rawDetail = detailData?.data || detailData;
+
+	const currentStatus = rawDetail?.status || user.status;
 	const statusMeta = ACCESS_STATUS_META[currentStatus] || ACCESS_STATUS_META.active;
 
-	const currentEmail = detailData?.data?.email || detailData?.email || user.email;
-	const rawDept = detailData?.data?.department || detailData?.department || detailData?.data?.departments?.[0] || detailData?.departments?.[0];
-	const currentDepartment = (typeof rawDept === "object" ? rawDept?.name : rawDept) || user.department;
-	const currentJoinedAt = detailData?.data?.created_at || detailData?.created_at || user.raw?.created_at;
+	const currentFullName = rawDetail?.full_name || rawDetail?.fullName || user.fullName;
+	const currentEmail = rawDetail?.email || rawDetail?.phone || user.email;
+	const currentDepartment = rawDetail?.departments?.[0]?.name || rawDetail?.department?.name || rawDetail?.organization?.name || user.department;
+	const currentPosition = rawDetail?.position || user.raw?.position || "Сотрудник";
+	const currentJoinedAt = rawDetail?.created_at || user.raw?.created_at;
 	const formattedJoinedAt = currentJoinedAt ? formatJoinedDate(currentJoinedAt) : user.joinedAt;
 
 	const subtitleParts = [
@@ -492,24 +495,45 @@ export const UserProfileModal = ({
 				<div className="px-6 pt-5 pb-4 border-b border-slate-100">
 					<div className="flex items-start justify-between">
 						<div className="flex items-center gap-4">
-							<div className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold bg-blue-600 text-white">
-								{getInitials(user.fullName)}
+							<div className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold bg-blue-600 text-white select-none">
+								{getInitials(currentFullName)}
 							</div>
 							<div>
 								<div className="flex items-center gap-2">
 									<h3 className="text-xl font-bold text-slate-800">
-										{user.fullName}
+										{currentFullName}
 									</h3>
 									<span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusMeta.chipClass}`}>
 										{statusMeta.label}
 									</span>
 								</div>
 								<p className="text-sm text-slate-500 font-medium">
-									{user.raw.position || "Сотрудник"}
+									{currentPosition}
 								</p>
-								<p className="text-xs text-slate-400 mt-1 font-normal">
-									{subtitleParts.join(" • ")}
-								</p>
+								<div className="space-y-1 mt-2">
+									{currentEmail && currentEmail !== "—" && (
+										<div className="flex items-center gap-2 text-xs text-slate-500">
+											{currentEmail.includes("@") ? (
+												<Mail size={13} className="text-slate-400 shrink-0" />
+											) : (
+												<Phone size={13} className="text-slate-400 shrink-0" />
+											)}
+											<span className="font-semibold">{currentEmail}</span>
+										</div>
+									)}
+									{currentDepartment && currentDepartment !== "—" && (
+										<div className="flex items-center gap-2 text-xs text-slate-500">
+											<Building2 size={13} className="text-slate-400 shrink-0" />
+											<span className="font-medium">{currentDepartment}</span>
+										</div>
+									)}
+									{formattedJoinedAt && (
+										<div className="flex items-center gap-2 text-xs text-slate-400">
+											<Calendar size={13} className="text-slate-400 shrink-0" />
+											<span>В системе с {formattedJoinedAt}</span>
+										</div>
+									)}
+								</div>
 							</div>
 						</div>
 						<button
