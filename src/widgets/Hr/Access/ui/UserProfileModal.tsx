@@ -6,7 +6,7 @@ import type { MenuProps } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { If } from "@shared/ui";
-import { IAccessUser } from "../model";
+import { IAccessUser, ACCESS_STATUS_META } from "../model";
 import { getInitials } from "../lib";
 
 interface IProps {
@@ -80,6 +80,9 @@ const MODULE_TRANSLATIONS: Record<string, string> = {
 	correspondence: "Корреспонденция",
 	internal_correspondence: "Внутренняя корреспонденция",
 	signatures: "Подписи",
+	analytics: "\u0410\u043d\u0430\u043b\u0438\u0442\u0438\u043a\u0430",
+	approvals: "\u0421\u043e\u0433\u043b\u0430\u0441\u043e\u0432\u0430\u043d\u0438\u044f",
+	system: "\u0421\u0438\u0441\u0442\u0435\u043c\u043d\u044b\u0435 \u0444\u0443\u043d\u043a\u0446\u0438\u0438",
 };
 
 const ACTION_TRANSLATIONS: Record<string, string> = {
@@ -123,6 +126,9 @@ const ACTION_TRANSLATIONS: Record<string, string> = {
 	"folder.manage": "Управление папками",
 	view_all: "Просмотр всех",
 	update_all: "Обновление всех",
+	reject: "\u041e\u0442\u043a\u043b\u043e\u043d\u0435\u043d\u0438\u0435",
+	export: "\u042d\u043a\u0441\u043f\u043e\u0440\u0442",
+	"logs.view": "\u041f\u0440\u043e\u0441\u043c\u043e\u0442\u0440 \u043b\u043e\u0433\u043e\u0432",
 };
 
 export const UserProfileModal = ({
@@ -148,13 +154,29 @@ export const UserProfileModal = ({
 		},
 	});
 
+	const { data: allPermsData } = useGetQuery({
+		url: ApiRoutes.FETCH_PERMISSIONS,
+		useToken: true,
+		options: {
+			refetchOnWindowFocus: false,
+			staleTime: 30 * 60 * 1000,
+		},
+	});
+
 	useEffect(() => {
-		if (isInitialized) {
+		if (isInitialized || !detailData || rolesList.length === 0) {
 			return;
 		}
 		const rawRoles = detailData?.data?.roles || detailData?.roles;
+		const roleNames: string[] = [];
 		if (Array.isArray(rawRoles)) {
-			setSelectedRoles(rawRoles?.map((r: any) => r.name));
+			rawRoles.forEach((r: any) => {
+				const name = typeof r === "string" ? r : r?.name;
+				if (name) {
+					roleNames.push(name);
+				}
+			});
+			setSelectedRoles(roleNames);
 		}
 		const rawPerms = detailData?.data?.permissions || detailData?.permissions;
 		const perms = new Set<string>();
@@ -167,26 +189,22 @@ export const UserProfileModal = ({
 				}
 			});
 		}
-		if (Array.isArray(rawRoles)) {
-			rawRoles.forEach((r: any) => {
-				const matchedRoleObj = rolesList.find((item) => item.name === r.name);
-				if (matchedRoleObj && matchedRoleObj.permissions) {
-					if (Array.isArray(matchedRoleObj.permissions)) {
-						matchedRoleObj.permissions.forEach((p: any) => {
-							if (typeof p === "string") {
-								perms.add(p);
-							} else if (p && typeof p === "object" && p.name) {
-								perms.add(p.name);
-							}
-						});
-					}
+		roleNames.forEach((roleName) => {
+			const matchedRoleObj = rolesList.find((item) => item.name === roleName);
+			if (matchedRoleObj && matchedRoleObj.permissions) {
+				if (Array.isArray(matchedRoleObj.permissions)) {
+					matchedRoleObj.permissions.forEach((p: any) => {
+						if (typeof p === "string") {
+							perms.add(p);
+						} else if (p && typeof p === "object" && p.name) {
+							perms.add(p.name);
+						}
+					});
 				}
-			});
-		}
-		if (rawRoles || rawPerms) {
-			setUserPermissionsState(Array.from(perms));
-			setIsInitialized(true);
-		}
+			}
+		});
+		setUserPermissionsState(Array.from(perms));
+		setIsInitialized(true);
 	}, [detailData, isInitialized, rolesList]);
 
 	const updateRolesM = useMutationQuery({
@@ -212,9 +230,29 @@ export const UserProfileModal = ({
 			],
 		},
 	});
+	const updateStatusM = useMutationQuery({
+		url: () => ApiRoutes.UPDATE_USER.replace(":id", String(user.id)),
+		method: "PUT",
+		messages: {
+			success: "\u0421\u0442\u0430\u0442\u0443\u0441 \u0441\u043e\u0442\u0440\u0443\u043d\u0438\u043a\u0430 \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d",
+			invalidate: [
+				ApiRoutes.GET_USERS,
+				`${ApiRoutes.FETCH_USER_BY_ID}${user.id}`,
+			],
+		},
+	});
 
 	const allSystemPermissions = useMemo(() => {
 		const perms = new Set<string>();
+		const rawSystem = allPermsData?.data || allPermsData;
+		if (Array.isArray(rawSystem)) {
+			rawSystem.forEach((p: any) => {
+				const name = typeof p === "string" ? p : p?.name;
+				if (name) {
+					perms.add(name);
+				}
+			});
+		}
 		rolesList.forEach((role) => {
 			if (Array.isArray(role.permissions)) {
 				role.permissions.forEach((p) => {
@@ -227,7 +265,7 @@ export const UserProfileModal = ({
 			}
 		});
 		return Array.from(perms);
-	}, [rolesList]);
+	}, [allPermsData, rolesList]);
 
 	const groupedPermissions = useMemo(() => {
 		const groups: Record<string, { label: string; name: string }[]> = {};
@@ -324,6 +362,10 @@ export const UserProfileModal = ({
 		);
 	};
 
+	const handleUpdateStatus = (status: string) => {
+		updateStatusM.mutate({ status });
+	};
+
 	const handleDeleteConfirm = () => {
 		Modal.confirm({
 			title: "Удалить сотрудника?",
@@ -355,19 +397,48 @@ export const UserProfileModal = ({
 	const actionItems: MenuProps["items"] = [
 		{
 			key: "edit",
-			label: "Редактировать сотрудника",
+			label: "\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0441\u043e\u0442\u0440\u0443\u043d\u0438\u043a\u0430",
 			onClick: () => {
 				onClose();
 				onEdit(user);
 			},
 		},
 		{
+			type: "divider",
+		},
+		{
+			key: "status_active",
+			label: "\u0410\u043a\u0442\u0438\u0432\u0435\u043d",
+			onClick: () => handleUpdateStatus("active"),
+		},
+		{
+			key: "status_inactive",
+			label: "\u041d\u0435\u0430\u043a\u0442\u0438\u0432\u0435\u043d",
+			onClick: () => handleUpdateStatus("inactive"),
+		},
+		{
+			key: "status_vacation",
+			label: "\u0412 \u043e\u0442\u043f\u0443\u0441\u043a\u0435",
+			onClick: () => handleUpdateStatus("vacation"),
+		},
+		{
+			key: "status_business_trip",
+			label: "\u0412 \u043a\u043e\u043c\u0430\u043d\u0434\u0438\u0440\u043e\u0432\u043a\u0435",
+			onClick: () => handleUpdateStatus("business_trip"),
+		},
+		{
+			type: "divider",
+		},
+		{
 			key: "delete",
-			label: "Удалить сотрудника",
+			label: "\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0441\u043e\u0442\u0440\u0443\u043d\u0438\u043a\u0430",
 			danger: true,
 			onClick: handleDeleteConfirm,
 		},
 	];
+
+	const currentStatus = detailData?.data?.status || detailData?.status || user.status;
+	const statusMeta = ACCESS_STATUS_META[currentStatus] || ACCESS_STATUS_META.active;
 
 	return (
 		<motion.div
@@ -396,8 +467,8 @@ export const UserProfileModal = ({
 									<h3 className="text-xl font-bold text-slate-800">
 										{user.fullName}
 									</h3>
-									<span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-600">
-										Активен
+									<span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusMeta.chipClass}`}>
+										{statusMeta.label}
 									</span>
 								</div>
 								<p className="text-sm text-slate-500 font-medium">
@@ -536,36 +607,6 @@ export const UserProfileModal = ({
 					</If>
 					<If is={tab === "permissions"}>
 						<div className="space-y-6">
-							<div className="flex items-center justify-between">
-								<div className="flex flex-wrap gap-2 items-center">
-									{selectedRoles.map((role) => {
-										const style = ROLE_CHIP_STYLE_MAP[role] || {
-											border: "border-blue-100!",
-											bg: "bg-blue-50/50!",
-											text: "text-blue-600!",
-										};
-										return (
-											<div
-												key={role}
-												className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-sm font-medium border ${style.border} ${style.bg} ${style.text}`}
-											>
-												<span
-													className={`w-1.5 h-1.5 rounded-full ${ROLE_DOT_COLOR_MAP[role] || "bg-slate-400!"}`}
-												/>
-												<span>{role}</span>
-											</div>
-										);
-									})}
-								</div>
-								<button
-									type="button"
-									onClick={handleResetToStandard}
-									className="text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors border-b border-dashed border-slate-300 hover:border-slate-500 cursor-pointer"
-								>
-									Сбросить до стандарта
-								</button>
-							</div>
-
 							<div className="space-y-5">
 								{Object.entries(groupedPermissions).map(
 									([moduleName, actions]) => (
@@ -614,6 +655,9 @@ export const UserProfileModal = ({
 						menu={{ items: actionItems }}
 						trigger={["click"]}
 						placement="topRight"
+						getPopupContainer={(triggerNode) =>
+							triggerNode.parentElement || document.body
+						}
 					>
 						<button className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-1.5">
 							<span>Действие</span>

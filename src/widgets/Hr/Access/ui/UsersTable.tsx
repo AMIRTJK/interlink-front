@@ -41,7 +41,16 @@ export const UsersTable = ({
       loading={loading}
       pagination={false}
       onRow={(record) => ({
-        onClick: () => onViewAccess(record),
+        onClick: (event) => {
+          const target = event.target as HTMLElement;
+          if (
+            target.closest(".ant-table-selection-column") ||
+            target.closest(".ant-checkbox-wrapper")
+          ) {
+            return;
+          }
+          onViewAccess(record);
+        },
         className: "cursor-pointer",
       })}
       className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm"
