@@ -1,9 +1,10 @@
-import { Tag } from "antd";
+import { Tag, Button } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { IAdminUser } from "@entities/hr";
 import { Edit2, MoreHorizontal, Shield, Trash } from "lucide-react";
 import { Dropdown } from "antd";
 import type { MenuProps } from "antd";
+import { Tooltip } from "@shared/ui";
 import { IAccessUser, ACCESS_STATUS_META, ROLE_COLOR_MAP } from "./model";
 
 export const formatActivity = (id: number): string => {
@@ -196,4 +197,172 @@ export const getInitials = (name: string): string => {
 		.join("")
 		.toUpperCase();
 };
+
+export const getRoleColorMeta = (roleName: string) => {
+	const name = roleName.toLowerCase();
+	if (name.includes("администратор") || name.includes("admin")) {
+		return {
+			dot: "bg-blue-500!",
+			text: "text-blue-600!",
+			badge: "bg-blue-50 text-blue-600! border border-blue-100",
+			borderCell: "border-l-blue-500!",
+		};
+	}
+	if (name.includes("делопроизводитель") || name.includes("recipient")) {
+		return {
+			dot: "bg-emerald-500!",
+			text: "text-emerald-600!",
+			badge: "bg-emerald-50 text-emerald-600! border border-emerald-100",
+			borderCell: "border-l-emerald-500!",
+		};
+	}
+	if (name.includes("руководитель") || name.includes("signer")) {
+		return {
+			dot: "bg-orange-500!",
+			text: "text-orange-600!",
+			badge: "bg-orange-50 text-orange-600! border border-orange-100",
+			borderCell: "border-l-orange-500!",
+		};
+	}
+	if (name.includes("исполнитель") || name.includes("approval")) {
+		return {
+			dot: "bg-indigo-500!",
+			text: "text-indigo-600!",
+			badge: "bg-indigo-50 text-indigo-600! border border-indigo-100",
+			borderCell: "border-l-indigo-500!",
+		};
+	}
+	if (name.includes("контрол") || name.includes("control")) {
+		return {
+			dot: "bg-purple-500!",
+			text: "text-purple-600!",
+			badge: "bg-purple-50 text-purple-600! border border-purple-100",
+			borderCell: "border-l-purple-500!",
+		};
+	}
+	return {
+		dot: "bg-slate-400!",
+		text: "text-slate-500!",
+		badge: "bg-slate-50 text-slate-500! border border-slate-200",
+		borderCell: "border-l-slate-400!",
+	};
+};
+
+export const getRoleUserCount = (roleName: string): number => {
+	const name = roleName.toLowerCase();
+	if (name.includes("администратор") || name.includes("admin")) return 5;
+	if (name.includes("делопроизводитель") || name.includes("recipient")) return 14;
+	if (name.includes("руководитель") || name.includes("signer")) return 8;
+	if (name.includes("исполнитель") || name.includes("approval")) return 19;
+	if (name.includes("контрол") || name.includes("control")) return 6;
+	return 12;
+};
+
+export interface IRoleItem {
+	id: number;
+	name: string;
+	description?: string;
+	permissions?: string[] | { name: string }[];
+	created_at?: string;
+}
+
+interface IRoleColumnActions {
+	onEdit: (role: IRoleItem) => void;
+	onDelete: (role: IRoleItem) => void;
+}
+
+export const getRolesTableColumns = ({
+	onEdit,
+	onDelete,
+}: IRoleColumnActions): ColumnsType<IRoleItem> => [
+	{
+		title: "НАЗВАНИЕ РОЛИ",
+		key: "name",
+		render: (_, record) => {
+			const meta = getRoleColorMeta(record.name);
+			return {
+				children: (
+					<div className="flex items-center gap-2 pl-2">
+						<span className={`w-2 h-2 rounded-full ${meta.dot}`} />
+						<span className={`font-bold text-[14px] leading-snug truncate ${meta.text}`}>
+							{record.name}
+						</span>
+					</div>
+				),
+				props: {
+					className: `border-l-[4px]! ${meta.borderCell}`,
+				},
+			};
+		},
+	},
+	{
+		title: "ОПИСАНИЕ",
+		dataIndex: "description",
+		key: "description",
+		render: (val) => (
+			<span className="text-slate-400 font-medium text-xs line-clamp-1">
+				{val || "Без описания"}
+			</span>
+		),
+	},
+	{
+		title: "ПОЛЬЗОВАТЕЛЕЙ",
+		key: "users",
+		render: (_, record) => {
+			const count = getRoleUserCount(record.name);
+			const meta = getRoleColorMeta(record.name);
+			return (
+				<span className={`px-2 py-0.5 rounded-full text-xs font-bold ${meta.badge}`}>
+					{count} чел.
+				</span>
+			);
+		},
+	},
+	{
+		title: "РАЗРЕШЕНИЙ",
+		key: "permissions",
+		render: (_, record) => {
+			const perms = Array.isArray(record.permissions) ? record.permissions.length : 0;
+			return (
+				<span className="text-slate-500 font-semibold text-xs">
+					{perms} разрешений
+				</span>
+			);
+		},
+	},
+	{
+		title: "ДАТА СОЗДАНИЯ",
+		dataIndex: "created_at",
+		key: "created_at",
+		render: (val) => (
+			<span className="text-slate-400 font-medium text-xs">
+				{formatJoinedDate(val)}
+			</span>
+		),
+	},
+	{
+		title: "ДЕЙСТВИЯ",
+		key: "actions",
+		render: (_, record) => (
+			<div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+				<Tooltip title="Редактировать">
+					<Button
+						type="text"
+						icon={<Edit2 size={14} className="text-slate-400 hover:text-blue-600 transition-colors" />}
+						onClick={() => onEdit(record)}
+						className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-slate-50! p-0!"
+					/>
+				</Tooltip>
+				<Tooltip title="Удалить">
+					<Button
+						type="text"
+						icon={<Trash size={14} className="text-slate-400 hover:text-rose-600 transition-colors" />}
+						onClick={() => onDelete(record)}
+						className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-rose-50/50! p-0!"
+					/>
+				</Tooltip>
+			</div>
+		),
+	},
+];
 
