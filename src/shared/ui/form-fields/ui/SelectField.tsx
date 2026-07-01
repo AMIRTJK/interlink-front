@@ -36,8 +36,8 @@ interface ISelectFieldProps {
 	extraTransformParams?: unknown;
 	searchParamKey?: string;
 	onChange?: (
-		value: number,
-		option?: ReactElement | ReactElement[] | undefined,
+		value: any,
+		option?: any,
 	) => void;
 	mode?: "multiple" | "tags";
 	autoComplete?: string;

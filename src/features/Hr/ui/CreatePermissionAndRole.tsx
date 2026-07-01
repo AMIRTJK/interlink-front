@@ -21,7 +21,7 @@ export const CreatePermissionAndRole = () => {
     const data = (response as { data: IProps[] })?.data || [];
     const serverItems = data.map((p) => ({
       value: p.name,
-      label: PERMISSION_TRANSLATIONS[p.name] || p.label || p.name // Перевод или фоллбэк
+      label: PERMISSION_TRANSLATIONS[p.name] || p.label || p.name
     }));
     return [...serverItems, ...SUPPLEMENTARY_PERMISSIONS];
   };

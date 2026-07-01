@@ -3,6 +3,7 @@ import { ApiRoutes } from '@shared/api';
 import { useMutationQuery } from '@shared/lib';
 import { SelectField } from '@shared/ui';
 import { Form, Input, Button, Card } from 'antd';
+import { transformOrgs, transformDeps, transformRoles } from '../lib';
 
 export const CreateUser = () => {
   const [form] = Form.useForm();
@@ -13,31 +14,6 @@ export const CreateUser = () => {
     preload: true,
     preloadConditional: ["users.create"]
   });
-
-  const transformOrgs = (res: unknown) => {
-    const data = (res as { data: { data: { id: number; name: string }[] } })?.data?.data || [];
-    return data.map((org) => ({
-      value: String(org.id),
-      label: org.name
-    }));
-  };
-
-  const transformDeps = (res: unknown) => {
-    const data = (res as { data: { data: { id: number; name: string }[] } })?.data?.data || [];
-    return data.map((dep) => ({
-      value: String(dep.id),
-      label: dep.name
-    }));
-  };
-
-  const transformRoles = (res: unknown) => {
-    const rawData = (res as { data: { data: { id: number; name: string }[] } | { id: number; name: string }[] })?.data;
-    const items = (Array.isArray(rawData) ? rawData : (rawData as { data: { id: number; name: string }[] })?.data) || [];
-    return items.map((role) => ({
-      value: role.name,
-      label: role.name
-    }));
-  };
 
   const organizationId = Form.useWatch('organization_id', form);
 

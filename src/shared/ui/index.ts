@@ -13,4 +13,6 @@ export * from './CommentCard'
 export * from './Chat'
 export * from './Count'
 export * from './EmptyState'
+export * from './Tooltip/ui'
+
 
