@@ -32,13 +32,58 @@ const ROLE_DESCRIPTIONS: Record<string, string> = {
 	observer: "\u0422\u043e\u043b\u044c\u043a\u043e \u043f\u0440\u043e\u0441\u043c\u043e\u0442\u0440 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u043e\u0432 \u0438 \u043c\u0430\u0442\u0435\u0440\u0438\u0430\u043b\u043e\u0432",
 };
 
-const ROLE_COLOR_CLASSES: Record<string, { border: string; dot: string; text: string; bg: string }> = {
-	super_admin: { border: "border-l-blue-500!", dot: "bg-blue-500!", text: "text-blue-600!", bg: "bg-blue-50/20!" },
-	recipient: { border: "border-l-emerald-500!", dot: "bg-emerald-500!", text: "text-emerald-600!", bg: "bg-emerald-50/20!" },
-	signer: { border: "border-l-orange-500!", dot: "bg-orange-500!", text: "text-orange-600!", bg: "bg-orange-50/20!" },
-	approvaler: { border: "border-l-indigo-500!", dot: "bg-indigo-500!", text: "text-indigo-600!", bg: "bg-indigo-50/20!" },
-	controller: { border: "border-l-purple-500!", dot: "bg-purple-500!", text: "text-purple-600!", bg: "bg-purple-50/20!" },
-	observer: { border: "border-l-slate-400!", dot: "bg-slate-400!", text: "text-slate-500!", bg: "bg-slate-50/20!" },
+const ROLE_COLOR_CLASSES: Record<
+	string,
+	{ border: string; dot: string; text: string; bg: string; selectBg: string; ring: string }
+> = {
+	super_admin: {
+		border: "border-l-blue-500!",
+		dot: "bg-blue-500!",
+		text: "text-blue-600!",
+		bg: "bg-blue-50/20!",
+		selectBg: "bg-blue-50/10!",
+		ring: "ring-blue-500/20!",
+	},
+	recipient: {
+		border: "border-l-emerald-500!",
+		dot: "bg-emerald-500!",
+		text: "text-emerald-600!",
+		bg: "bg-emerald-50/20!",
+		selectBg: "bg-emerald-50/10!",
+		ring: "ring-emerald-500/20!",
+	},
+	signer: {
+		border: "border-l-orange-500!",
+		dot: "bg-orange-500!",
+		text: "text-orange-600!",
+		bg: "bg-orange-50/20!",
+		selectBg: "bg-orange-50/10!",
+		ring: "ring-orange-500/20!",
+	},
+	approvaler: {
+		border: "border-l-indigo-500!",
+		dot: "bg-indigo-500!",
+		text: "text-indigo-600!",
+		bg: "bg-indigo-50/20!",
+		selectBg: "bg-indigo-50/10!",
+		ring: "ring-indigo-500/20!",
+	},
+	controller: {
+		border: "border-l-purple-500!",
+		dot: "bg-purple-500!",
+		text: "text-purple-600!",
+		bg: "bg-purple-50/20!",
+		selectBg: "bg-purple-50/10!",
+		ring: "ring-purple-500/20!",
+	},
+	observer: {
+		border: "border-l-slate-400!",
+		dot: "bg-slate-400!",
+		text: "text-slate-500!",
+		bg: "bg-slate-50/20!",
+		selectBg: "bg-slate-50/10!",
+		ring: "ring-slate-400/20!",
+	},
 };
 
 export const RoleCard = ({
@@ -60,6 +105,8 @@ export const RoleCard = ({
 				dot: "bg-slate-400!",
 				text: "text-slate-500!",
 				bg: "bg-slate-50/20!",
+				selectBg: "bg-slate-50/10!",
+				ring: "ring-slate-400/20!",
 			}
 		);
 	}, [role.name]);
@@ -90,7 +137,7 @@ export const RoleCard = ({
 		<div
 			onClick={onSelect}
 			className={`cursor-pointer bg-white border border-slate-100 rounded-2xl p-5 border-l-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-[180px]! ${colors.border} ${
-				isSelected ? "ring-2 ring-blue-600/20 bg-blue-50/5!" : ""
+				isSelected ? `ring-2 ${colors.ring} ${colors.selectBg}` : ""
 			}`}
 		>
 			<div className="space-y-1.5">
