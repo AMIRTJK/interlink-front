@@ -14,14 +14,7 @@ interface IProps {
 	onClose: () => void;
 }
 
-const ROLE_DISPLAY_NAMES: Record<string, string> = {
-	super_admin: "Администратор системы",
-	recipient: "Делопроизводитель",
-	signer: "Руководитель",
-	approvaler: "Исполнитель",
-	controller: "Контролёр",
-	observer: "Наблюдатель",
-};
+
 
 const MODULE_TRANSLATIONS: Record<string, string> = {
 	profile: "Личный кабинет",
@@ -165,7 +158,7 @@ export const RolePermissionsSidebar = ({
 
 	if (!role) return null;
 
-	const displayName = ROLE_DISPLAY_NAMES[role.name] || role.name;
+	const displayName = role.name;
 	const initials = displayName
 		.split(" ")
 		.map((n) => n[0])
@@ -174,11 +167,21 @@ export const RolePermissionsSidebar = ({
 		.join("")
 		.toUpperCase();
 
+	const colors = useMemo(() => {
+		const name = role.name.toLowerCase();
+		if (name.includes("администратор") || name.includes("admin")) return { bg: "bg-blue-50 text-blue-600" };
+		if (name.includes("делопроизводитель") || name.includes("recipient")) return { bg: "bg-emerald-50 text-emerald-600" };
+		if (name.includes("руководитель") || name.includes("signer")) return { bg: "bg-orange-50 text-orange-600" };
+		if (name.includes("исполнитель") || name.includes("approval")) return { bg: "bg-indigo-50 text-indigo-600" };
+		if (name.includes("контрол") || name.includes("control")) return { bg: "bg-purple-50 text-purple-600" };
+		return { bg: "bg-slate-50 text-slate-500" };
+	}, [role.name]);
+
 	return (
 		<div className="w-[320px] bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col h-[750px]! justify-between relative overflow-hidden">
 			<div className="p-5 border-b border-slate-50 flex items-start justify-between">
 				<div className="flex items-center gap-3">
-					<div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold bg-emerald-50 text-emerald-600">
+					<div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ${colors.bg}`}>
 						{initials || "РД"}
 					</div>
 					<div>

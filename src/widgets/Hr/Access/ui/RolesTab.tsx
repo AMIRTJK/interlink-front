@@ -12,14 +12,7 @@ import { CreateRoleModal } from "./CreateRoleModal";
 import { IAccessUser } from "../model";
 
 
-const ROLE_DISPLAY_NAMES: Record<string, string> = {
-	super_admin: "Администратор системы",
-	recipient: "Делопроизводитель",
-	signer: "Руководитель",
-	approvaler: "Исполнитель",
-	controller: "Контролёр",
-	observer: "Наблюдатель",
-};
+
 
 export const RolesTab = () => {
 	const [selectedRole, setSelectedRole] = useState<{
@@ -171,9 +164,7 @@ export const RolesTab = () => {
 	const totalUsers = usersData?.data?.total || usersData?.total || normalizedUsers.length;
 	const perPage = usersData?.data?.per_page || usersData?.per_page || 15;
 
-	const selectedRoleDisplayName = selectedRole
-		? ROLE_DISPLAY_NAMES[selectedRole.name] || selectedRole.name
-		: "";
+	const selectedRoleDisplayName = selectedRole ? selectedRole.name : "";
 
 	return (
 		<div className="flex flex-col lg:flex-row gap-6 items-start w-full!">

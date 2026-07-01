@@ -5,6 +5,7 @@ interface IProps {
 	role: {
 		id: number;
 		name: string;
+		description?: string;
 		permissions?: string[] | { name: string }[];
 	};
 	userCount: number;
@@ -13,24 +14,6 @@ interface IProps {
 	onEdit: () => void;
 	onDelete: () => void;
 }
-
-const ROLE_DISPLAY_NAMES: Record<string, string> = {
-	super_admin: "Администратор системы",
-	recipient: "Делопроизводитель",
-	signer: "Руководитель",
-	approvaler: "Исполнитель",
-	controller: "Контролёр",
-	observer: "Наблюдатель",
-};
-
-const ROLE_DESCRIPTIONS: Record<string, string> = {
-	super_admin: "Полный доступ ко всем модулям системы",
-	recipient: "Регистрация и обработка документов",
-	signer: "Просмотр, подписание и управление поручениями",
-	approvaler: "Исполнение поручений и работа с документом",
-	controller: "Мониторинг исполнения и контроль",
-	observer: "Только просмотр документов и материалов",
-};
 
 const ROLE_COLOR_CLASSES: Record<
 	string,
@@ -94,21 +77,17 @@ export const RoleCard = ({
 	onEdit,
 	onDelete,
 }: IProps) => {
-	const displayName = ROLE_DISPLAY_NAMES[role.name] || role.name;
-	const description = ROLE_DESCRIPTIONS[role.name] || "Без описания";
+	const displayName = role.name;
+	const description = role.description || "Без описания";
 
 	const colors = useMemo(() => {
-		const key = role.name.toLowerCase();
-		return (
-			ROLE_COLOR_CLASSES[key] || {
-				border: "border-l-slate-400!",
-				dot: "bg-slate-400!",
-				text: "text-slate-500!",
-				bg: "bg-slate-50/20!",
-				selectBg: "bg-slate-50/10!",
-				ring: "ring-slate-400/20!",
-			}
-		);
+		const name = role.name.toLowerCase();
+		if (name.includes("администратор") || name.includes("admin")) return ROLE_COLOR_CLASSES.super_admin;
+		if (name.includes("делопроизводитель") || name.includes("recipient")) return ROLE_COLOR_CLASSES.recipient;
+		if (name.includes("руководитель") || name.includes("signer")) return ROLE_COLOR_CLASSES.signer;
+		if (name.includes("исполнитель") || name.includes("approval")) return ROLE_COLOR_CLASSES.approvaler;
+		if (name.includes("контрол") || name.includes("control")) return ROLE_COLOR_CLASSES.controller;
+		return ROLE_COLOR_CLASSES.observer;
 	}, [role.name]);
 
 	const rolePermissions = useMemo(() => {
