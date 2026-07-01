@@ -80,9 +80,9 @@ const MODULE_TRANSLATIONS: Record<string, string> = {
 	correspondence: "Корреспонденция",
 	internal_correspondence: "Внутренняя корреспонденция",
 	signatures: "Подписи",
-	analytics: "\u0410\u043d\u0430\u043b\u0438\u0442\u0438\u043a\u0430",
-	approvals: "\u0421\u043e\u0433\u043b\u0430\u0441\u043e\u0432\u0430\u043d\u0438\u044f",
-	system: "\u0421\u0438\u0441\u0442\u0435\u043c\u043d\u044b\u0435 \u0444\u0443\u043d\u043a\u0446\u0438\u0438",
+	analytics: "Аналитика",
+	approvals: "Согласования",
+	system: "Системные функции",
 };
 
 const ACTION_TRANSLATIONS: Record<string, string> = {
@@ -126,9 +126,9 @@ const ACTION_TRANSLATIONS: Record<string, string> = {
 	"folder.manage": "Управление папками",
 	view_all: "Просмотр всех",
 	update_all: "Обновление всех",
-	reject: "\u041e\u0442\u043a\u043b\u043e\u043d\u0435\u043d\u0438\u0435",
-	export: "\u042d\u043a\u0441\u043f\u043e\u0440\u0442",
-	"logs.view": "\u041f\u0440\u043e\u0441\u043c\u043e\u0442\u0440 \u043b\u043e\u0433\u043e\u0432",
+	reject: "Отклонение",
+	export: "Экспорт",
+	"logs.view": "Просмотр логов",
 };
 
 export const UserProfileModal = ({
@@ -234,7 +234,7 @@ export const UserProfileModal = ({
 		url: () => ApiRoutes.UPDATE_USER.replace(":id", String(user.id)),
 		method: "PUT",
 		messages: {
-			success: "\u0421\u0442\u0430\u0442\u0443\u0441 \u0441\u043e\u0442\u0440\u0443\u043d\u0438\u043a\u0430 \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d",
+			success: "Статус сотруника обновлен",
 			invalidate: [
 				ApiRoutes.GET_USERS,
 				`${ApiRoutes.FETCH_USER_BY_ID}${user.id}`,
@@ -397,7 +397,7 @@ export const UserProfileModal = ({
 	const actionItems: MenuProps["items"] = [
 		{
 			key: "edit",
-			label: "\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0441\u043e\u0442\u0440\u0443\u043d\u0438\u043a\u0430",
+			label: "Редактировать сотруника",
 			onClick: () => {
 				onClose();
 				onEdit(user);
@@ -408,22 +408,22 @@ export const UserProfileModal = ({
 		},
 		{
 			key: "status_active",
-			label: "\u0410\u043a\u0442\u0438\u0432\u0435\u043d",
+			label: "Активен",
 			onClick: () => handleUpdateStatus("active"),
 		},
 		{
 			key: "status_inactive",
-			label: "\u041d\u0435\u0430\u043a\u0442\u0438\u0432\u0435\u043d",
+			label: "Неактивен",
 			onClick: () => handleUpdateStatus("inactive"),
 		},
 		{
 			key: "status_vacation",
-			label: "\u0412 \u043e\u0442\u043f\u0443\u0441\u043a\u0435",
+			label: "В отпуске",
 			onClick: () => handleUpdateStatus("vacation"),
 		},
 		{
 			key: "status_business_trip",
-			label: "\u0412 \u043a\u043e\u043c\u0430\u043d\u0434\u0438\u0440\u043e\u0432\u043a\u0435",
+			label: "В командировке",
 			onClick: () => handleUpdateStatus("business_trip"),
 		},
 		{
@@ -431,7 +431,7 @@ export const UserProfileModal = ({
 		},
 		{
 			key: "delete",
-			label: "\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0441\u043e\u0442\u0440\u0443\u043d\u0438\u043a\u0430",
+			label: "Удалить сотруника",
 			danger: true,
 			onClick: handleDeleteConfirm,
 		},

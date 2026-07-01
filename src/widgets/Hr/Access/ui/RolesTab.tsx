@@ -13,12 +13,12 @@ import { IAccessUser } from "../model";
 
 
 const ROLE_DISPLAY_NAMES: Record<string, string> = {
-	super_admin: "\u0410\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440 \u0441\u0438\u0441\u0442\u0435\u043c\u044b",
-	recipient: "\u0414\u0435\u043b\u043e\u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c",
-	signer: "\u0420\u0443\u043a\u043e\u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c",
-	approvaler: "\u0418\u0441\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c",
-	controller: "\u041a\u043e\u043d\u0442\u0440\u043e\u043b\u0451\u0440",
-	observer: "\u041d\u0430\u0431\u043b\u044e\u0434\u0430\u0442\u0435\u043b\u044c",
+	super_admin: "Администратор системы",
+	recipient: "Делопроизводитель",
+	signer: "Руководитель",
+	approvaler: "Исполнитель",
+	controller: "Контролёр",
+	observer: "Наблюдатель",
 };
 
 export const RolesTab = () => {
@@ -141,18 +141,18 @@ export const RolesTab = () => {
 			ApiRoutes.DELETE_ROLE.replace(":id", String(d.id)),
 		method: "DELETE",
 		messages: {
-			success: "\u0420\u043e\u043b\u044c \u0443\u0441\u043f\u0435\u0448\u043d\u043e \u0443\u0434\u0430\u043b\u0435\u043d\u0430",
+			success: "Роль успешно удалена",
 			invalidate: [ApiRoutes.GET_ROLES],
 		},
 	});
 
 	const handleDeleteRole = (roleItem: any) => {
 		Modal.confirm({
-			title: "\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0440\u043e\u043b\u044c?",
-			content: "\u042d\u0442\u043e \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043d\u0435\u043e\u0431\u0440\u0430\u0442\u0438\u043c\u043e.",
-			okText: "\u0423\u0434\u0430\u043b\u0438\u0442\u044c",
+			title: "Удалить роль?",
+			content: "Это действие необратимо.",
+			okText: "Удалить",
 			okType: "danger",
-			cancelText: "\u041e\u0442\u043c\u0435\u043d\u0430",
+			cancelText: "Отмена",
 			onOk: () => {
 				deleteRoleM.mutate(
 					{ id: roleItem.id },
@@ -181,10 +181,10 @@ export const RolesTab = () => {
 				<div className="flex justify-between items-start">
 					<div>
 						<h2 className="text-xl font-bold text-slate-800 leading-tight">
-							{"\u0420\u043e\u043b\u0438 \u0438 \u0434\u043e\u0441\u0442\u0443\u043f\u044b"}
+							{"Роли и доступы"}
 						</h2>
 						<p className="text-xs text-slate-400 mt-1">
-							{"\u0423\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u0440\u043e\u043b\u044f\u043c\u0438 \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u0435\u0439 \u0421\u042d\u0414"}
+							{"Управление ролями пользователей СЭД"}
 						</p>
 					</div>
 					<button
@@ -192,7 +192,7 @@ export const RolesTab = () => {
 						className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
 					>
 						<Plus size={14} />
-						<span>{"\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u0440\u043e\u043b\u044c"}</span>
+						<span>{"Создать роль"}</span>
 					</button>
 				</div>
 
@@ -215,18 +215,18 @@ export const RolesTab = () => {
 						<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
 							<div className="space-y-1">
 								<h3 className="text-[15px] font-bold text-slate-800 flex items-center gap-2 flex-wrap">
-									<span>{"\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u0438 \u0441 \u0440\u043e\u043b\u044c\u044e:"}</span>
+									<span>{"Пользователи с ролью:"}</span>
 									<span className="text-blue-600">
 										{selectedRoleDisplayName}
 									</span>
 								</h3>
 								<div className="text-xs text-slate-400 font-semibold pl-0.5">
-									{"\u041d\u0430\u0439\u0434\u0435\u043d\u043e:"} {totalUsers}
+									{"Найдено:"} {totalUsers}
 								</div>
 							</div>
 
 							<Input
-								placeholder={"\u041f\u043e\u0438\u0441\u043a \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f..."}
+								placeholder={"Поиск пользователя..."}
 								prefix={<Search size={14} className="text-slate-400" />}
 								onChange={(e) => setSearchQuery(e.target.value)}
 								className="w-72! rounded-xl! border-slate-200!"

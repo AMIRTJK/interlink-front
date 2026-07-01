@@ -37,7 +37,7 @@ export const RoleUsersTable = ({
 
 	const columns: ColumnsType<IAccessUser> = [
 		{
-			title: "\u0424\u0418\u041e / \u0414\u041e\u041b\u0416\u041d\u041e\u0421\u0422\u042c",
+			title: "ФИО / ДОЛЖНОСТЬ",
 			key: "employee",
 			render: (_, record) => {
 				const nameParts = record.fullName.split(" ");
@@ -65,7 +65,7 @@ export const RoleUsersTable = ({
 			},
 		},
 		{
-			title: "\u041e\u0422\u0414\u0415\u041b",
+			title: "ОТДЕЛ",
 			dataIndex: "department",
 			key: "department",
 			render: (dept) => (
@@ -73,7 +73,7 @@ export const RoleUsersTable = ({
 			),
 		},
 		{
-			title: "\u0420\u041e\u041b\u0418",
+			title: "РОЛИ",
 			dataIndex: "roles",
 			key: "roles",
 			render: (roles: string[]) => (
@@ -87,7 +87,7 @@ export const RoleUsersTable = ({
 			),
 		},
 		{
-			title: "\u0421\u0422\u0410\u0422\u0423\u0421",
+			title: "СТАТУС",
 			dataIndex: "status",
 			key: "status",
 			render: (status) => {
@@ -104,7 +104,7 @@ export const RoleUsersTable = ({
 			},
 		},
 		{
-			title: "\u0414\u0410\u0422\u0410 \u041d\u0410\u0417\u041d\u0410\u0427\u0415\u041d\u0418\u042f",
+			title: "ДАТА НАЗНАЧЕНИЯ",
 			dataIndex: "joinedAt",
 			key: "joinedAt",
 			render: (val) => (
@@ -118,19 +118,19 @@ export const RoleUsersTable = ({
 				const items: MenuProps["items"] = [
 					{
 						key: "view",
-						label: "\u0420\u043e\u043b\u0438 \u0438 \u043f\u0440\u0430\u0432\u0430",
+						label: "Роли и права",
 						icon: <Shield size={14} />,
 						onClick: () => onViewAccess(record),
 					},
 					{
 						key: "edit",
-						label: "\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c",
+						label: "Редактировать",
 						icon: <Edit2 size={14} />,
 						onClick: () => onEdit(record),
 					},
 					{
 						key: "delete",
-						label: "\u0423\u0434\u0430\u043b\u0438\u0442\u044c",
+						label: "Удалить",
 						icon: <Trash size={14} />,
 						danger: true,
 						onClick: () => onDelete(record.id),
@@ -173,7 +173,7 @@ export const RoleUsersTable = ({
 				className: "px-4 py-3",
 				showTotal: (totalVal, range) => (
 					<span className="text-xs text-slate-400 font-semibold">
-						{"\u041f\u043e\u043a\u0430\u0437\u0430\u043d\u043e"} {range[0]}&ndash;{range[1]} {"\u0438\u0437"} {totalVal} {"\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u0435\u0439"}
+						{"Показано"} {range[0]}&ndash;{range[1]} {"из"} {totalVal} {"пользователей"}
 					</span>
 				),
 			}}

@@ -15,21 +15,21 @@ interface IProps {
 }
 
 const ROLE_DISPLAY_NAMES: Record<string, string> = {
-	super_admin: "\u0410\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440 \u0441\u0438\u0441\u0442\u0435\u043c\u044b",
-	recipient: "\u0414\u0435\u043b\u043e\u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c",
-	signer: "\u0420\u0443\u043a\u043e\u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c",
-	approvaler: "\u0418\u0441\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c",
-	controller: "\u041a\u043e\u043d\u0442\u0440\u043e\u043b\u0451\u0440",
-	observer: "\u041d\u0430\u0431\u043b\u044e\u0434\u0430\u0442\u0435\u043b\u044c",
+	super_admin: "Администратор системы",
+	recipient: "Делопроизводитель",
+	signer: "Руководитель",
+	approvaler: "Исполнитель",
+	controller: "Контролёр",
+	observer: "Наблюдатель",
 };
 
 const ROLE_DESCRIPTIONS: Record<string, string> = {
-	super_admin: "\u041f\u043e\u043b\u043d\u044b\u0439 \u0434\u043e\u0441\u0442\u0443\u043f \u043a\u043e \u0432\u0441\u0435\u043c \u043c\u043e\u0434\u0443\u043b\u044f\u043c \u0441\u0438\u0441\u0442\u0435\u043c\u044b",
-	recipient: "\u0420\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u044f \u0438 \u043e\u0431\u0440\u0430\u0431\u043e\u0442\u043a\u0430 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u043e\u0432",
-	signer: "\u041f\u0440\u043e\u0441\u043c\u043e\u0442\u0440, \u043f\u043e\u0434\u043f\u0438\u0441\u0430\u043d\u0438\u0435 \u0438 \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u043f\u043e\u0440\u0443\u0447\u0435\u043d\u0438\u044f\u043c\u0438",
-	approvaler: "\u0418\u0441\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u0435 \u043f\u043e\u0440\u0443\u0447\u0435\u043d\u0438\u0439 \u0438 \u0440\u0430\u0431\u043e\u0442\u0430 \u0441 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u043e\u043c",
-	controller: "\u041c\u043e\u043d\u0438\u0442\u043e\u0440\u0438\u043d\u0433 \u0438\u0441\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u044f \u0438 \u043a\u043e\u043d\u0442\u0440\u043e\u043b\u044c",
-	observer: "\u0422\u043e\u043b\u044c\u043a\u043e \u043f\u0440\u043e\u0441\u043c\u043e\u0442\u0440 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u043e\u0432 \u0438 \u043c\u0430\u0442\u0435\u0440\u0438\u0430\u043b\u043e\u0432",
+	super_admin: "Полный доступ ко всем модулям системы",
+	recipient: "Регистрация и обработка документов",
+	signer: "Просмотр, подписание и управление поручениями",
+	approvaler: "Исполнение поручений и работа с документом",
+	controller: "Мониторинг исполнения и контроль",
+	observer: "Только просмотр документов и материалов",
 };
 
 const ROLE_COLOR_CLASSES: Record<
@@ -95,7 +95,7 @@ export const RoleCard = ({
 	onDelete,
 }: IProps) => {
 	const displayName = ROLE_DISPLAY_NAMES[role.name] || role.name;
-	const description = ROLE_DESCRIPTIONS[role.name] || "\u0411\u0435\u0437 \u043e\u043f\u0438\u0441\u0430\u043d\u0438\u044f";
+	const description = ROLE_DESCRIPTIONS[role.name] || "Без описания";
 
 	const colors = useMemo(() => {
 		const key = role.name.toLowerCase();
@@ -173,7 +173,7 @@ export const RoleCard = ({
 						</span>
 					)}
 					<span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border border-current/10 ${colors.bg} ${colors.text}`}>
-						{rolePermissions.length} {"\u0440\u0430\u0437\u0440."}
+						{rolePermissions.length} {"разр."}
 					</span>
 				</div>
 
@@ -185,7 +185,7 @@ export const RoleCard = ({
 						}}
 						className="text-blue-600 hover:text-blue-700 transition-colors"
 					>
-						{"\u0420\u0435\u0434."}
+						{"Ред."}
 					</button>
 					<button
 						onClick={(e) => {
@@ -194,7 +194,7 @@ export const RoleCard = ({
 						}}
 						className="text-rose-500 hover:text-rose-600 transition-colors"
 					>
-						{"\u0423\u0434."}
+						{"Уд."}
 					</button>
 				</div>
 			</div>

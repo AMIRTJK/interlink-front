@@ -14,11 +14,11 @@ export const AccessWidget = () => {
 	>("users");
 
 	const tabs = [
-		{ id: "users", label: "\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u0438", content: <UsersTab /> },
-		{ id: "roles", label: "\u0420\u043e\u043b\u0438 \u0438 \u0434\u043e\u0441\u0442\u0443\u043f\u044b", content: <RolesTab /> },
-		{ id: "orgs", label: "\u041e\u0440\u0433\u0430\u043d\u0438\u0437\u0430\u0446\u0438\u0438", content: <CreateOrganization /> },
-		{ id: "deps", label: "\u041e\u0442\u0434\u0435\u043b\u044b", content: <CreateDepartment /> },
-		{ id: "assign", label: "\u041d\u0430\u0437\u043d\u0430\u0447\u0438\u0442\u044c \u0440\u043e\u043b\u044c", content: <SetUserRole /> },
+		{ id: "users", label: "Пользователи", content: <UsersTab /> },
+		{ id: "roles", label: "Роли и доступы", content: <RolesTab /> },
+		{ id: "orgs", label: "Организации", content: <CreateOrganization /> },
+		{ id: "deps", label: "Отделы", content: <CreateDepartment /> },
+		{ id: "assign", label: "Назначить роль", content: <SetUserRole /> },
 	] as const;
 
 	return (
