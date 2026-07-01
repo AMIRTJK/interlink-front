@@ -178,7 +178,7 @@ export const RolesTab = () => {
 
 	return (
 		<div className="flex flex-col lg:flex-row gap-6 items-start w-full!">
-			<div className="flex-1 w-full! space-y-6">
+			<motion.div layout className="flex-1 w-full! space-y-6">
 				<div className="flex justify-between items-start">
 					<div>
 						<h2 className="text-xl font-bold text-slate-800 leading-tight">
@@ -260,16 +260,17 @@ export const RolesTab = () => {
 						/>
 					</div>
 				)}
-			</div>
+			</motion.div>
 
-			<AnimatePresence>
+			<AnimatePresence initial={false}>
 				{selectedRole && (
 					<motion.div
-						initial={{ opacity: 0, width: 0 }}
-						animate={{ opacity: 1, width: 320 }}
-						exit={{ opacity: 0, width: 0 }}
-						transition={{ duration: 0.2, ease: "easeOut" }}
-						className="shrink-0! sticky top-6 overflow-hidden"
+						layout
+						initial={{ opacity: 0, x: 40 }}
+						animate={{ opacity: 1, x: 0 }}
+						exit={{ opacity: 0, x: 40 }}
+						transition={{ type: "spring", stiffness: 300, damping: 30 }}
+						className="shrink-0! sticky top-6 w-[320px] overflow-hidden"
 					>
 						<div className="w-[320px] pb-4">
 							<RolePermissionsSidebar
