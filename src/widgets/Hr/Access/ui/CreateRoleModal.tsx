@@ -3,7 +3,10 @@ import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 import { SelectField } from "@shared/ui";
 import { CreatePermissionAndRoleDTO } from "@entities/hr";
-import { PERMISSION_TRANSLATIONS, SUPPLEMENTARY_PERMISSIONS } from "../../../../features/Hr/model";
+import {
+	PERMISSION_TRANSLATIONS,
+	SUPPLEMENTARY_PERMISSIONS,
+} from "../../../../features/Hr/model";
 
 interface IProps {
 	open: boolean;
@@ -48,14 +51,13 @@ export const CreateRoleModal = ({ open, onClose }: IProps) => {
 			destroyOnClose
 			title={
 				<div className="flex items-center gap-3">
-					<div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
-						+
-					</div>
 					<div>
 						<p className="text-base font-bold text-slate-800 leading-tight">
 							{"Создание новой роли"}
 						</p>
-						<p className="text-xs text-slate-400">{"Настройка имени и начальных прав"}</p>
+						<p className="text-xs text-slate-400">
+							{"Настройка имени и начальных прав"}
+						</p>
 					</div>
 				</div>
 			}
@@ -100,3 +102,4 @@ export const CreateRoleModal = ({ open, onClose }: IProps) => {
 		</Modal>
 	);
 };
+
