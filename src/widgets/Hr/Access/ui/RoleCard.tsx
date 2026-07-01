@@ -115,7 +115,7 @@ export const RoleCard = ({
 	return (
 		<div
 			onClick={onSelect}
-			className={`cursor-pointer bg-white border border-slate-100 rounded-2xl p-5 border-l-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-[180px]! ${colors.border} ${
+			className={`cursor-pointer bg-white border border-slate-100 rounded-2xl p-5 border-l-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-[180px]! w-full! max-w-[446px]! ${colors.border} ${
 				isSelected ? `ring-2 ${colors.ring} ${colors.selectBg}` : ""
 			}`}
 		>
