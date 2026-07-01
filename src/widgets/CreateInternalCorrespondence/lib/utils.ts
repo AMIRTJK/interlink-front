@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { TJK_EMBLEM_DATA_URI } from "./tjkEmblem";
+import { ORBITRON_WOFF2_BASE64 } from "./orbitronFont";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -255,6 +256,8 @@ const escapeXml = (s: string): string =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
+export type DSStampLang = "EN" | "RU" | "TJ";
+
 export interface DSStampData {
   name: string;
   certSerial: string;
@@ -262,46 +265,260 @@ export interface DSStampData {
   validUntil: string;
 }
 
-// Уникальные id для clipPath/symbol внутри одного документа: при нескольких
+// viewBox штампа. Соотношение сторон 760×333 в точности повторяет утверждённый
+// макет; любой физический размер на листе А4 получается простым масштабированием
+// с сохранением пропорций (preserveAspectRatio). Единый источник истины для
+// высоты/ширины — чтобы предпросмотр, документ и печать совпадали.
+export const DS_STAMP_VIEW_W = 760;
+export const DS_STAMP_VIEW_H = 333;
+
+// Высота штампа для заданной ширины, сохраняющая пропорции макета.
+export const dsStampHeightForWidth = (width: number): number =>
+  Math.round((width * DS_STAMP_VIEW_H) / DS_STAMP_VIEW_W);
+
+// Подписи штампа на трёх языках. Латиница/цифры рисуются шрифтом Orbitron,
+// кириллица — системным sans (в Orbitron нет кириллических глифов), ровно как
+// ведёт себя `font-family: Orbitron, sans-serif` в утверждённом макете.
+const DS_LOCALIZATION: Record<
+  DSStampLang,
+  {
+    subtitle: string;
+    ownerTitle: string;
+    signatureText: string;
+    certNumberTitle: string;
+    dateOfIssueTitle: string;
+    validityTitle: string;
+    fromText: string;
+    toText: string;
+    statusText: string;
+    authorityText: string;
+    footerText: string;
+  }
+> = {
+  TJ: {
+    subtitle: "ҲУВИЯТИ РАҚАМӢ",
+    ownerTitle: "Соҳиби сертификат",
+    signatureText: "Имзои электронии рақамӣ",
+    certNumberTitle: "Рақами сертификат",
+    dateOfIssueTitle: "Санаи додан",
+    validityTitle: "Мӯҳлати эътибор",
+    fromText: "аз",
+    toText: "то",
+    statusText: "ACTIVE & VERIFIED",
+    authorityText: "TJ-Root Certificate Authority",
+    footerText: "Secured · Encrypted · Tamper-Proof",
+  },
+  RU: {
+    subtitle: "ЦИФРОВАЯ ЛИЧНОСТЬ",
+    ownerTitle: "Владелец сертификата",
+    signatureText: "Электронная цифровая подпись",
+    certNumberTitle: "Номер сертификата",
+    dateOfIssueTitle: "Дата выдачи",
+    validityTitle: "Срок действия",
+    fromText: "с",
+    toText: "по",
+    statusText: "АКТИВЕН И ПОДТВЕРЖДЁН",
+    authorityText: "TJ-Root Certificate Authority",
+    footerText: "Защищено · Зашифровано · Безопасно",
+  },
+  EN: {
+    subtitle: "DIGITAL IDENTITY",
+    ownerTitle: "Certificate holder",
+    signatureText: "Electronic Digital Signature",
+    certNumberTitle: "Certificate number",
+    dateOfIssueTitle: "Date of issue",
+    validityTitle: "Validity period",
+    fromText: "from",
+    toText: "to",
+    statusText: "ACTIVE & VERIFIED",
+    authorityText: "TJ-Root Certificate Authority",
+    footerText: "Secured · Encrypted · Tamper-Proof",
+  },
+};
+
+// Уникальные id для clipPath/градиентов внутри одного документа: при нескольких
 // инлайновых штампах на странице (блоки «Подписывающий», «Согласующие») общие
 // id привели бы к конфликту ссылок url(#…) — поэтому делаем их разными.
 let dsStampSeq = 0;
 
-// Единый SVG-рисунок штампа ЭЦП во вьюбоксе 320×110 — ОДИН источник правды для:
+// Государственный флаг Республики Таджикистан в стилистике макета (три полосы и
+// золотая корона из семи точек) во вьюбоксе 1200×600.
+const DS_FLAG_INNER =
+  `<rect width="1200" height="600" fill="#fff"/>` +
+  `<rect width="1200" height="200" fill="#cc0000"/>` +
+  `<rect width="1200" height="200" y="400" fill="#006600"/>` +
+  `<g transform="translate(600,300)">` +
+  `<path d="M -100 60 A 110 110 0 0 1 100 60 L 70 60 L 70 40 L 40 40 L 40 10 L -40 10 L -40 40 L -70 40 L -70 60 Z" fill="#f8c400"/>` +
+  `<g fill="#f8c400">` +
+  `<circle cx="0" cy="-60" r="10"/>` +
+  `<circle cx="-50" cy="-45" r="10"/>` +
+  `<circle cx="50" cy="-45" r="10"/>` +
+  `<circle cx="-85" cy="-10" r="10"/>` +
+  `<circle cx="85" cy="-10" r="10"/>` +
+  `<circle cx="-100" cy="40" r="10"/>` +
+  `<circle cx="100" cy="40" r="10"/>` +
+  `</g></g>`;
+
+// Единый SVG-рисунок штампа ЭЦП во вьюбоксе 760×333 — ОДИН источник правды для:
 //  • React-компонента <DSStamp> (плейсхолдер до подписи, блоки «Подписывающий»/
 //    «Согласующие», приложение №1, предпросмотр);
-//  • картинки, вшиваемой в тело письма при подписании (редактор и печать).
-// Благодаря общему viewBox штамп везде одной формы и высоты. Сам SVG тянется на
-// 100% ширины контейнера с сохранением пропорций (aspect-ratio задаёт обёртка).
-export function buildDSStampSvg({
-  name,
-  certSerial,
-  signedAt,
-  validUntil,
-}: DSStampData): string {
-  const flagInner = tajikFlagInnerSvg();
+//  • картинки, вшиваемой в тело письма при подписании (редактор и печать/экспорт).
+// Благодаря общему viewBox и встроенному шрифту Orbitron штамп везде одной формы,
+// высоты и типографики. Сам SVG тянется на 100% контейнера с сохранением
+// пропорций. Шрифт Orbitron вшит прямо сюда (data-URI @font-face): картинка
+// <img src="data:image/svg+xml"> изолирована и не видит шрифты страницы.
+export function buildDSStampSvg(
+  { name, certSerial, signedAt, validUntil }: DSStampData,
+  lang: DSStampLang = "TJ",
+): string {
   const uid = `ds${(++dsStampSeq).toString(36)}`;
   const clip = `${uid}c`;
-  const emb = `${uid}e`;
+  const t = DS_LOCALIZATION[lang];
+
+  const match = validUntil.match(
+    /(?:аз|from|с)?\s*([\d.]+)\s*(?:то|to|по|-)\s*([\d.]+)/i,
+  );
+  const fromDate = match ? match[1] : "30.03.2026";
+  const toDate = match ? match[2] : "30.03.2027";
+
+  const escName = escapeXml(name);
+  const escSerial = escapeXml(certSerial);
+  const escSignedAt = escapeXml(signedAt);
+  const escFromDate = escapeXml(fromDate);
+  const escToDate = escapeXml(toDate);
+
+  // Шрифтовые стеки: латиница/цифры → Orbitron, кириллица падает на Arial/sans.
+  const FONT = "'Orbitron', Arial, sans-serif"; // элементы из макета на Orbitron
+  const SANS = "Arial, sans-serif"; // элементы без Orbitron в макете
+  const MONO = "'Courier New', monospace";
+  const bold700 = `style="font-variation-settings:'wght' 700"`;
+  const semi600 = `style="font-variation-settings:'wght' 600"`;
+
+  // Языковые «пилюли» EN/RU/TJ в правом верхнем углу. Активная — с градиентом.
+  const langOrder: DSStampLang[] = ["EN", "RU", "TJ"];
+  const pills = [
+    { label: "EN", x: 628, cx: 645 },
+    { label: "RU", x: 664, cx: 681 },
+    { label: "TJ", x: 700, cx: 717 },
+  ];
+  const langPills = pills
+    .map((p, i) => {
+      const active = langOrder[i] === lang;
+      return (
+        (active
+          ? `<rect x="${p.x}" y="28" width="34" height="15" rx="7.5" fill="url(#${uid}pg)"/>`
+          : "") +
+        `<text x="${p.cx}" y="39.5" font-family="${FONT}" font-size="9" font-weight="700" letter-spacing="0.9" text-anchor="middle" fill="${
+          active ? "#111111" : "rgba(255,255,255,0.45)"
+        }">${p.label}</text>`
+      );
+    })
+    .join("");
+
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 110" preserveAspectRatio="xMidYMid meet" fill="none" style="display:block;width:100%;height:100%;">` +
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 333" preserveAspectRatio="xMidYMid meet" fill="none" style="display:block;width:100%;height:100%;">` +
     `<defs>` +
-    `<clipPath id="${clip}"><rect x="1.25" y="1.25" width="317.5" height="107.5" rx="10"/></clipPath>` +
-    `<symbol id="${emb}" viewBox="0 0 170 170"><image href="${TJK_EMBLEM_DATA_URI}" x="0" y="0" width="170" height="170"/></symbol>` +
+    `<style>@font-face{font-family:'Orbitron';font-style:normal;font-weight:400 900;src:url(data:font/woff2;base64,${ORBITRON_WOFF2_BASE64}) format('woff2');}</style>` +
+    `<clipPath id="${clip}"><rect x="0.5" y="0.5" width="759" height="332" rx="16"/></clipPath>` +
+    `<linearGradient id="${uid}hg" x1="0" y1="0" x2="760" y2="0" gradientUnits="userSpaceOnUse">` +
+    `<stop offset="0%" stop-color="#ff6b00" stop-opacity="0"/>` +
+    `<stop offset="20%" stop-color="#ff6b00" stop-opacity="1"/>` +
+    `<stop offset="50%" stop-color="#ffb800" stop-opacity="1"/>` +
+    `<stop offset="80%" stop-color="#ff6b00" stop-opacity="1"/>` +
+    `<stop offset="100%" stop-color="#ff6b00" stop-opacity="0"/>` +
+    `</linearGradient>` +
+    `<linearGradient id="${uid}bg" x1="0" y1="0" x2="760" y2="333" gradientUnits="userSpaceOnUse">` +
+    `<stop offset="0%" stop-color="#2c2c2c"/>` +
+    `<stop offset="100%" stop-color="#222222"/>` +
+    `</linearGradient>` +
+    `<linearGradient id="${uid}vg" x1="0" y1="172" x2="0" y2="274" gradientUnits="userSpaceOnUse">` +
+    `<stop offset="0%" stop-color="#ff6b00" stop-opacity="0"/>` +
+    `<stop offset="35%" stop-color="#ff6b00" stop-opacity="1"/>` +
+    `<stop offset="65%" stop-color="#ffb800" stop-opacity="1"/>` +
+    `<stop offset="100%" stop-color="#ffb800" stop-opacity="0"/>` +
+    `</linearGradient>` +
+    `<linearGradient id="${uid}mg" x1="516" y1="0" x2="624" y2="0" gradientUnits="userSpaceOnUse">` +
+    `<stop offset="0%" stop-color="#ff6b00" stop-opacity="0.18"/>` +
+    `<stop offset="30%" stop-color="#ff6b00" stop-opacity="1"/>` +
+    `<stop offset="70%" stop-color="#ffb800" stop-opacity="1"/>` +
+    `<stop offset="100%" stop-color="#ff6b00" stop-opacity="0.18"/>` +
+    `</linearGradient>` +
+    `<linearGradient id="${uid}pg" x1="0" y1="0" x2="1" y2="1">` +
+    `<stop offset="0%" stop-color="#ff6b00"/>` +
+    `<stop offset="100%" stop-color="#ffb800"/>` +
+    `</linearGradient>` +
     `</defs>` +
-    `<rect x="1.25" y="1.25" width="317.5" height="107.5" rx="10" fill="#ffffff" stroke="#111111" stroke-width="2.5"/>` +
     `<g clip-path="url(#${clip})">` +
-    `<use href="#${emb}" x="128" y="46" width="64" height="64" opacity="0.07"/>` +
-    `<g transform="translate(12, 7) scale(0.82)">${flagInner}</g>` +
-    `<text x="160" y="26" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#0f0f0f" text-anchor="middle">Имзои электронии рақамӣ</text>` +
-    `<use href="#${emb}" x="272" y="5" width="34" height="34"/>` +
-    `<rect x="0" y="40" width="320" height="16" fill="#2b2b2b"/>` +
-    `<text x="160" y="51.5" font-family="Arial, sans-serif" font-size="9.5" font-weight="500" fill="#ffffff" text-anchor="middle">Маълумоти имзои электронии рақамӣ</text>` +
-    `<text x="13" y="68" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Сертификат: ${escapeXml(certSerial)}</text>` +
-    `<text x="13" y="79" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Дорандаи имзо: ${escapeXml(name)}</text>` +
-    `<text x="13" y="90" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Санаи имзо: ${escapeXml(signedAt)}</text>` +
-    `<text x="13" y="101" font-family="Arial, sans-serif" font-size="9.5" fill="#111111">Эътибор дорад: ${escapeXml(validUntil)}</text>` +
+    `<rect x="0" y="0" width="760" height="333" fill="#1a1a1a"/>` +
+    `<rect x="0" y="3" width="760" height="148" fill="url(#${uid}bg)"/>` +
+    `<rect x="0" y="152" width="760" height="142" fill="url(#${uid}bg)"/>` +
+    `<rect x="0" y="295" width="760" height="38" fill="#000000" fill-opacity="0.22"/>` +
+    `<rect x="0" y="0" width="760" height="3" fill="url(#${uid}hg)"/>` +
+    `<g transform="translate(460, 33) scale(15)" opacity="0.055">` +
+    `<path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" stroke="#ffb800" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+    `<path d="M14 13.12c0 2.38 0 6.38-1 8.88" stroke="#ffb800" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+    `<path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" stroke="#ffb800" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+    `<path d="M2 12a10 10 0 0 1 18-6" stroke="#ffb800" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+    `<path d="M2 16h.01" stroke="#ffb800" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+    `<path d="M21.8 16c.2-2 .131-5.354 0-6" stroke="#ffb800" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+    `<path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2" stroke="#ffb800" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+    `<path d="M8.65 22c.21-.66.45-1.32.57-2" stroke="#ffb800" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+    `<path d="M9 6.8a6 6 0 0 1 9 5.2v2" stroke="#ffb800" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
     `</g>` +
+    // === ШАПКА ===
+    `<g transform="translate(24, 25.5) scale(0.03333)">${DS_FLAG_INNER}</g>` +
+    `<text x="76" y="34" font-family="${FONT}" font-size="14" font-weight="700" ${bold700} fill="#ffffff" letter-spacing="3.36">INFRATECH</text>` +
+    `<text x="76" y="45" font-family="${FONT}" font-size="7" font-weight="400" fill="#ffb800" letter-spacing="2.1">${escapeXml(t.subtitle)}</text>` +
+    `<rect x="626" y="26" width="110" height="19" rx="9.5" fill="#ffffff" fill-opacity="0.06" stroke="#ff6b00" stroke-opacity="0.3" stroke-width="1"/>` +
+    langPills +
+    `<text x="24" y="72" font-family="${FONT}" font-size="10" font-weight="500" fill="#ffb800" letter-spacing="2.2">${escapeXml(t.ownerTitle.toUpperCase())}</text>` +
+    `<text x="24" y="104" font-family="${FONT}" font-size="30" font-weight="700" ${bold700} fill="#ffffff" letter-spacing="-0.3">${escName}</text>` +
+    `<text x="24" y="130" font-family="${FONT}" font-size="10" font-weight="400" fill="#ffffff" fill-opacity="0.3" letter-spacing="1.5">${escapeXml(t.signatureText.toUpperCase())}</text>` +
+    `<rect x="0" y="151" width="760" height="1" fill="url(#${uid}hg)"/>` +
+    // === ТЕЛО: левая колонка ===
+    `<text x="24" y="179" font-family="${SANS}" font-size="9" font-weight="600" fill="#ff6b00" letter-spacing="1.8">${escapeXml(t.certNumberTitle.toUpperCase())}</text>` +
+    `<rect x="24" y="189" width="331" height="31" rx="8" fill="#ffffff" fill-opacity="0.04" stroke="#ff6b00" stroke-opacity="0.2" stroke-width="1"/>` +
+    `<text x="36" y="208" font-family="${MONO}" font-size="11" fill="#ffffff" fill-opacity="0.6">${escSerial}</text>` +
+    `<text x="24" y="247" font-family="${SANS}" font-size="9" font-weight="600" fill="#ff6b00" letter-spacing="1.8">${escapeXml(t.dateOfIssueTitle.toUpperCase())}</text>` +
+    `<g transform="translate(24, 257) scale(0.5833)">` +
+    `<path d="M8 2v4" stroke="#ffd166" stroke-width="2" stroke-linecap="round" fill="none"/>` +
+    `<path d="M16 2v4" stroke="#ffd166" stroke-width="2" stroke-linecap="round" fill="none"/>` +
+    `<rect width="18" height="18" x="3" y="4" rx="2" stroke="#ffd166" stroke-width="2" fill="none"/>` +
+    `<path d="M3 10h18" stroke="#ffd166" stroke-width="2" fill="none"/>` +
+    `</g>` +
+    `<text x="46" y="269" font-family="${FONT}" font-size="15" font-weight="600" ${semi600} fill="#ffffff" letter-spacing="0.6">${escSignedAt}</text>` +
+    `<rect x="380" y="172" width="1" height="102" fill="url(#${uid}vg)"/>` +
+    // === ТЕЛО: правая колонка ===
+    `<text x="404" y="179" font-family="${SANS}" font-size="9" font-weight="600" fill="#ff6b00" letter-spacing="1.8">${escapeXml(t.validityTitle.toUpperCase())}</text>` +
+    `<text x="454" y="195" font-family="${SANS}" font-size="8" fill="#ffffff" fill-opacity="0.4" letter-spacing="0.6" text-anchor="middle">${escapeXml(t.fromText.toUpperCase())}</text>` +
+    `<text x="454" y="212" font-family="${FONT}" font-size="14" font-weight="600" ${semi600} fill="#ffffff" letter-spacing="0.56" text-anchor="middle">${escFromDate}</text>` +
+    `<rect x="516" y="203" width="108" height="1" fill="url(#${uid}mg)"/>` +
+    `<text x="686" y="195" font-family="${SANS}" font-size="8" fill="#ffffff" fill-opacity="0.4" letter-spacing="0.6" text-anchor="middle">${escapeXml(t.toText.toUpperCase())}</text>` +
+    `<text x="686" y="212" font-family="${FONT}" font-size="14" font-weight="600" ${semi600} fill="#ffffff" letter-spacing="0.56" text-anchor="middle">${escToDate}</text>` +
+    `<circle cx="422" cy="256" r="18" fill="#ff6b00" fill-opacity="0.18" stroke="#ff6b00" stroke-opacity="0.4" stroke-width="1"/>` +
+    `<g transform="translate(412, 246) scale(0.8333)">` +
+    `<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" stroke="#ff6b00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+    `<path d="m9 12 2 2 4-4" stroke="#ff6b00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+    `</g>` +
+    `<text x="452" y="253" font-family="${SANS}" font-size="11" font-weight="700" fill="#ffd166" letter-spacing="0.28">${escapeXml(t.statusText)}</text>` +
+    `<text x="452" y="265" font-family="${SANS}" font-size="9" fill="#ffffff" fill-opacity="0.35">${escapeXml(t.authorityText)}</text>` +
+    `</g>` +
+    `<rect x="0" y="294" width="760" height="1" fill="url(#${uid}hg)"/>` +
+    // === ФУТЕР ===
+    `<g transform="translate(24, 307) scale(0.5833)">` +
+    `<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" stroke="#ff6b00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+    `</g>` +
+    `<text x="46" y="317" font-family="${FONT}" font-size="9" font-weight="400" fill="#ffffff" fill-opacity="0.35" letter-spacing="1.62">${escapeXml(t.footerText.toUpperCase())}</text>` +
+    `<g transform="translate(702, 308) scale(0.5)">` +
+    `<rect width="18" height="11" x="3" y="11" rx="2" ry="2" stroke="#ffffff" stroke-opacity="0.22" stroke-width="2" fill="none"/>` +
+    `<path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#ffffff" stroke-opacity="0.22" stroke-width="2" fill="none"/>` +
+    `</g>` +
+    `<g transform="translate(722, 307) scale(0.5833)">` +
+    `<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" stroke="#ffb800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+    `<path d="M14 2v4a2 2 0 0 0 2 2h4" stroke="#ffb800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+    `<path d="m9 15 2 2 4-4" stroke="#ffb800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+    `</g>` +
+    `<rect x="0.5" y="0.5" width="759" height="332" rx="16" fill="none" stroke="#ff6b00" stroke-opacity="0.3" stroke-width="1"/>` +
     `</svg>`
   );
 }

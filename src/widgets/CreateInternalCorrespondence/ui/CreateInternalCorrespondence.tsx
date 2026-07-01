@@ -7,7 +7,7 @@ import React, {
   useMemo,
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Send,
   // Pin,
@@ -22,9 +22,7 @@ import {
   X,
   Paperclip,
   Shield,
-  Users,
   Check,
-  PenLine,
   UserPlus,
   // FileBadge,
   ArrowLeft,
@@ -32,7 +30,6 @@ import {
   FilePlus2,
   FileType,
   MessageSquare,
-  MessageSquarePlus,
   Undo,
   Redo,
   Heading1,
@@ -53,7 +50,6 @@ import {
   List,
   ListOrdered,
   Save,
-  Mail,
   Printer,
 } from "lucide-react";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
@@ -87,10 +83,24 @@ import {
   generateQRMatrix,
   sanitizeWordHtml,
   buildDSStampSvg,
+  dsStampHeightForWidth,
 } from "../lib/utils";
+
+// Ширина штампа ЭЦП на листе А4 по умолчанию (≈47% ширины полосы) и высота,
+// рассчитанная по пропорциям макета. Один источник правды для плейсхолдера,
+// вшитой картинки и границ перетаскивания.
+const DS_STAMP_DEFAULT_WIDTH = 377;
+const DS_STAMP_DEFAULT_HEIGHT = dsStampHeightForWidth(DS_STAMP_DEFAULT_WIDTH);
 import { PreviewModal } from "./PreviewModal";
 import { TBtn } from "./TBtn";
 import { DSStamp } from "./DSStamp";
+import { OriginalLetterPanel } from "./OriginalLetterPanel";
+import { OriginalLetterDetails } from "./OriginalLetterDetails";
+import { OriginalLetterBody } from "./OriginalLetterBody";
+import { ApproversPanel } from "./ApproversPanel";
+import { SignerPanel } from "./SignerPanel";
+import { IncomingLettersPanel } from "./IncomingLettersPanel";
+import { VersionsPanel } from "./VersionsPanel";
 
 function FileTextIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -630,23 +640,75 @@ export const CreateInternalCorrespondence = ({
   initialData?: any;
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  // Контекст «Ответить»/«Перенаправить»: данные исходного входящего письма
+  // приходят через navigate state со страницы просмотра входящего.
+  const composeState = (location.state || null) as {
+    composeMode?: "reply" | "forward";
+    sourceLetter?: {
+      id?: string | number;
+      subject?: string;
+      creator?: {
+        id?: string | number;
+        full_name?: string;
+        position?: string;
+        department?: string;
+      };
+      senderName?: string;
+      date?: string;
+      status?: string;
+      inboundNumber?: string;
+      body?: string;
+    };
+  } | null;
+  const composeMode = composeState?.composeMode;
+  const sourceLetter = composeState?.sourceLetter;
+
   const [to, setTo] = useState<RecipientOption[]>([]);
   const [cc, setCc] = useState<RecipientOption[]>([]);
   const [subject, setSubject] = useState("");
   const [attachments, setAttachments] = useState<AttachedFile[]>([]);
   const [approvers, setApprovers] = useState<Approver[]>([]);
   const [finalSigner, setFinalSigner] = useState<FinalSigner | null>(null);
-  const [showSignerDropdown, setShowSignerDropdown] = useState(false);
-  const [signerSearch, setSignerSearch] = useState("");
   const [showToDropdown, setShowToDropdown] = useState(false);
   const [showCcDropdown, setShowCcDropdown] = useState(false);
-  const [showApproverDropdown, setShowApproverDropdown] = useState(false);
   const [toSearch, setToSearch] = useState("");
   const [ccSearch, setCcSearch] = useState("");
-  const [approverSearch, setApproverSearch] = useState("");
+  const [approversOpen, setApproversOpen] = useState(false);
+  const [signerOpen, setSignerOpen] = useState(false);
+  const [incomingOpen, setIncomingOpen] = useState(false);
+  const [versionsOpen, setVersionsOpen] = useState(false);
+
+  const handleOpenApprovers = () => {
+    setApproversOpen(true);
+    setSignerOpen(false);
+    setIncomingOpen(false);
+    setVersionsOpen(false);
+  };
+
+  const handleOpenSigner = () => {
+    setSignerOpen(true);
+    setApproversOpen(false);
+    setIncomingOpen(false);
+    setVersionsOpen(false);
+  };
+
+  const handleOpenIncoming = () => {
+    setIncomingOpen(true);
+    setApproversOpen(false);
+    setSignerOpen(false);
+    setVersionsOpen(false);
+  };
+
+  const handleOpenVersions = () => {
+    setVersionsOpen(true);
+    setApproversOpen(false);
+    setSignerOpen(false);
+    setIncomingOpen(false);
+  };
   const [showCcField, setShowCcField] = useState(false);
   const [sent, setSent] = useState(false);
-  // letterType хранит КЛЮЧ типа документа (guzorish/ariza/…), не подпись
+  const [formExpanded, setFormExpanded] = useState(true);
   const [letterType, setLetterType] = useState<string | null>(null);
   const [showLetterTypeDropdown, setShowLetterTypeDropdown] = useState(false);
   const [importance, setImportance] = useState<ImportanceLevel>("normal");
@@ -674,8 +736,8 @@ export const CreateInternalCorrespondence = ({
   const [stampVisible, setStampVisible] = useState(false);
   const [stampPos, setStampPos] = useState({ x: 40, y: 40 });
   const [stampSize, setStampSize] = useState({
-    width: 320,
-    height: "auto" as "auto" | number,
+    width: DS_STAMP_DEFAULT_WIDTH,
+    height: DS_STAMP_DEFAULT_HEIGHT,
   });
 
   const [docCreator, setDocCreator] = useState<any>(null);
@@ -689,7 +751,9 @@ export const CreateInternalCorrespondence = ({
   const [importingWord, setImportingWord] = useState(false);
   // Над редактором тащат файл — показываем подсказку-оверлей для импорта
   const [isDraggingWord, setIsDraggingWord] = useState(false);
+  const [showOriginalLetterSides, setShowOriginalLetterSides] = useState(false);
 
+  const composeAppliedRef = useRef(false);
   const isDraggingStamp = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const stampRef = useRef<HTMLDivElement>(null);
@@ -751,13 +815,6 @@ export const CreateInternalCorrespondence = ({
     url: id ? ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id)) : "",
     useToken: true,
     options: { enabled: !!id },
-  });
-
-  const { data: incomingLettersData } = useGetQuery({
-    url: id ? ApiRoutes.GET_INTERNAL_INCOMING_PICKER : "",
-    useToken: true,
-    options: { enabled: !!id && showIncomingSearch },
-    params: { query: incomingLetterSearch },
   });
 
   // id последней версии, которую мы автоматически подгрузили в редактор.
@@ -919,40 +976,6 @@ export const CreateInternalCorrespondence = ({
         .join(""),
       color: "bg-blue-100 text-blue-700",
     })) || [];
-
-  const availableApprovers = availableUsers
-    .filter(
-      (r) =>
-        !approvers.find((a) => a.id === r.id) &&
-        finalSigner?.id !== r.id &&
-        (r.name.toLowerCase().includes(approverSearch.toLowerCase()) ||
-          r.org.toLowerCase().includes(approverSearch.toLowerCase())),
-    )
-    .slice(0, 15);
-
-  const availableIncomingLetters =
-    incomingLettersData?.data?.data
-      ?.map((letter: any) => ({
-        id: String(letter.id),
-        subject: letter.subject || "Без темы",
-        regNumber: letter.reg_number || "Не указано",
-        date: letter.sent_at || letter.created_at,
-        sender: letter.creator?.full_name || "Не указано",
-      }))
-      .filter(
-        (letter: any) =>
-          (letter.subject
-            .toLowerCase()
-            .includes(incomingLetterSearch.toLowerCase()) ||
-            letter.sender
-              .toLowerCase()
-              .includes(incomingLetterSearch.toLowerCase()) ||
-            letter.regNumber
-              .toLowerCase()
-              .includes(incomingLetterSearch.toLowerCase())) &&
-          !attachedIncomingLetters.some((l) => l.id === letter.id),
-      )
-      .slice(0, 15) || [];
 
   const { mutate: createDraft, isPending: isCreating } = useMutationQuery<any>({
     url: ApiRoutes.CREATE_INTERNAL,
@@ -1119,10 +1142,14 @@ export const CreateInternalCorrespondence = ({
             !editorRef.current.innerHTML.includes('data-signature-stamp="true"')
           ) {
             // 1. Собираем переменные для штампа
-            const widthStr =
+            const stampWidthVal =
               typeof stampSize.width === "number"
-                ? `${stampSize.width}px`
-                : stampSize.width;
+                ? stampSize.width
+                : DS_STAMP_DEFAULT_WIDTH;
+            // Высоту всегда выводим из ширины по пропорциям макета, чтобы вшитая
+            // картинка не искажалась относительно SVG (viewBox 760×333).
+            const stampHeightVal = dsStampHeightForWidth(stampWidthVal);
+            const widthStr = `${stampWidthVal}px`;
             const currentSignerName = finalSigner?.name || "Неизвестно";
             const currentSignerInitials = finalSigner?.initials || "НА";
             const currentDate = new Date().toLocaleDateString("ru-RU");
@@ -1143,7 +1170,7 @@ export const CreateInternalCorrespondence = ({
             const stampDataUri = `data:image/svg+xml;base64,${encodedSvg}`;
 
             // Использовать строго в одну строку без пробелов внутри тегов, чтобы редактор не вставил текстовые переносы
-            const stampHTML = `<div data-signature-stamp="true" contenteditable="false" style="position:absolute;left:${stampPos.x}px;top:${stampPos.y}px;width:${widthStr};height:110px;max-height:110px;z-index:99;user-select:none;-webkit-user-select:none;cursor:default;overflow:hidden!important;display:block!important;line-height:0!important;padding:0!important;margin:0!important;border:none!important;"><img src="${stampDataUri}" alt="ЭЦП" style="display:block!important;width:100%!important;height:110px!important;max-height:110px!important;pointer-events:none!important;-webkit-user-drag:none!important;padding:0!important;margin:0!important;border:none!important;outline:none!important;line-height:0!important;" /></div>`;
+            const stampHTML = `<div data-signature-stamp="true" contenteditable="false" style="position:absolute;left:${stampPos.x}px;top:${stampPos.y}px;width:${widthStr};height:${stampHeightVal}px;max-height:${stampHeightVal}px;z-index:99;user-select:none;-webkit-user-select:none;cursor:default;overflow:hidden!important;display:block!important;line-height:0!important;padding:0!important;margin:0!important;border:none!important;"><img src="${stampDataUri}" alt="ЭЦП" style="display:block!important;width:100%!important;height:${stampHeightVal}px!important;max-height:${stampHeightVal}px!important;pointer-events:none!important;-webkit-user-drag:none!important;padding:0!important;margin:0!important;border:none!important;outline:none!important;line-height:0!important;" /></div>`;
 
             editorRef.current.innerHTML += stampHTML;
           }
@@ -1265,7 +1292,7 @@ export const CreateInternalCorrespondence = ({
       pageIndex,
       x,
       y: top - pageIndex * PAGE_STRIDE,
-      width: stamp.style.width || "320px",
+      width: stamp.style.width || "377px",
       html: stamp.innerHTML,
     };
   }, [PAGE_STRIDE]);
@@ -1534,6 +1561,40 @@ export const CreateInternalCorrespondence = ({
       }
     }
   }, [initialData]);
+
+  // Предзаполнение при «Ответить»/«Перенаправить» (один раз при монтировании).
+  // Ответить → тема «Ответ: …», «Кому» = отправитель входящего письма.
+  // Перенаправить → тема «Перенаправление: …», «Кому» остаётся пустым.
+  useEffect(() => {
+    if (composeAppliedRef.current) return;
+    if (!composeMode || !sourceLetter) return;
+    composeAppliedRef.current = true;
+
+    setSubject(
+      `${composeMode === "reply" ? "Ответ" : "Перенаправление"}: ${
+        sourceLetter.subject || ""
+      }`,
+    );
+
+    if (composeMode === "reply" && sourceLetter.creator?.id != null) {
+      const c = sourceLetter.creator;
+      const initials = (c.full_name || "")
+        .split(/\s+/)
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase();
+      setTo([
+        {
+          id: String(c.id),
+          name: c.full_name || "",
+          org: c.position || c.department || "Сотрудник",
+          initials,
+          color: "bg-blue-100 text-blue-700",
+        },
+      ]);
+    }
+  }, [composeMode, sourceLetter]);
 
   useEffect(() => {
     if (rawWorkflowData?.data) {
@@ -2750,8 +2811,6 @@ export const CreateInternalCorrespondence = ({
         dsLoading: false,
       },
     ]);
-    setShowApproverDropdown(false);
-    setApproverSearch("");
   };
 
   const addIncomingLetter = (letter: any) => {
@@ -2761,11 +2820,9 @@ export const CreateInternalCorrespondence = ({
     if (!alreadyAdded) {
       setAttachedIncomingLetters((prev) => [...prev, letter]);
     }
-    setShowIncomingSearch(false);
-    setIncomingLetterSearch("");
   };
 
-  const removeIncomingLetter = (letterId: string) => {
+  const removeIncomingLetter = (letterId: string | number) => {
     setAttachedIncomingLetters((prev) =>
       prev.filter((l: any) => l.id !== letterId),
     );
@@ -2785,7 +2842,10 @@ export const CreateInternalCorrespondence = ({
     if (!isActiveVersionForSign) return;
     setStampVisible(true);
     setStampPos({ x: 40, y: 40 });
-    setStampSize({ width: 320, height: "auto" });
+    setStampSize({
+      width: DS_STAMP_DEFAULT_WIDTH,
+      height: DS_STAMP_DEFAULT_HEIGHT,
+    });
   };
 
   const handleStampMouseDown = (e: React.MouseEvent) => {
@@ -2808,7 +2868,13 @@ export const CreateInternalCorrespondence = ({
       const maxCanvasHeight =
         pageCount * PAGE_STRIDE - PAGE_GAP - PAGE_PAD_V * 2;
       const currentStampWidth =
-        typeof stampSize.width === "number" ? stampSize.width : 320;
+        typeof stampSize.width === "number"
+          ? stampSize.width
+          : DS_STAMP_DEFAULT_WIDTH;
+      const currentStampHeight =
+        typeof stampSize.height === "number"
+          ? stampSize.height
+          : DS_STAMP_DEFAULT_HEIGHT;
 
       setStampPos({
         x: Math.max(
@@ -2822,7 +2888,7 @@ export const CreateInternalCorrespondence = ({
           0,
           Math.min(
             ev.clientY - cr.top - dragOffset.current.y,
-            maxCanvasHeight - 110, // 110px — фиксированная высота штампа ЭЦП
+            maxCanvasHeight - currentStampHeight,
           ),
         ),
       });
@@ -3119,10 +3185,69 @@ export const CreateInternalCorrespondence = ({
           </div>
         </div>
 
-        <div className="flex gap-5 items-start">
-          <div className="flex-1 min-w-0">
+        {composeMode && sourceLetter && !showOriginalLetterSides && (
+          <OriginalLetterPanel
+            mode={composeMode}
+            sender={
+              sourceLetter.senderName || sourceLetter.creator?.full_name || "—"
+            }
+            date={sourceLetter.date || "—"}
+            status={sourceLetter.status || ""}
+            inboundNumber={sourceLetter.inboundNumber || "—"}
+            subject={sourceLetter.subject || ""}
+            body={sourceLetter.body}
+            sourceId={sourceLetter.id}
+          />
+        )}
+
+        <div className="w-full">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
-              <div className="px-6 pt-5 pb-4 border-b border-slate-100">
+              <div
+                onClick={() => setFormExpanded((v) => !v)}
+                className="px-6 py-3 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 select-none transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    Реквизиты документа
+                  </span>
+                  {!formExpanded && (
+                    <div className="flex items-center gap-1.5 ml-2">
+                      {letterType && (
+                        <span className="bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded border border-indigo-100">
+                          {letterTypeOptions.find((o) => o.value === letterType)?.label ?? letterType}
+                        </span>
+                      )}
+                      {subject && (
+                        <span className="text-slate-500 text-xs truncate max-w-[200px] font-medium">
+                          — {subject}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-400">
+                    {formExpanded ? "Свернуть" : "Развернуть"}
+                  </span>
+                  <ChevronDown
+                    size={14}
+                    className={cn(
+                      "text-slate-400 transition-transform duration-200",
+                      formExpanded && "rotate-180",
+                    )}
+                  />
+                </div>
+              </div>
+              <AnimatePresence>
+                {formExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.22 }}
+                    className="overflow-visible"
+                  >
+                    <div className="px-6 pt-5 pb-4 border-b border-slate-100">
                 <div className="flex items-start gap-3">
                   <label className="text-sm font-semibold text-slate-500 pt-2 w-20 flex-shrink-0">
                     Тип
@@ -3431,7 +3556,6 @@ export const CreateInternalCorrespondence = ({
                 </div>
               </div>
 
-              {/* Вложения — в шапке формы, чтобы не скроллить многостраничный редактор */}
               <div className="px-6 py-4 border-b border-slate-100">
                 <div className="flex items-start gap-3">
                   <label className="text-sm font-semibold text-slate-500 pt-1.5 w-20 flex-shrink-0">
@@ -3484,6 +3608,9 @@ export const CreateInternalCorrespondence = ({
                   </div>
                 </div>
               </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60 flex flex-wrap items-center gap-0.5">
                 <TBtn
@@ -3734,6 +3861,20 @@ export const CreateInternalCorrespondence = ({
                     />
                   </>
                 )}
+                {composeMode && sourceLetter && (
+                  <>
+                    <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
+                      <input
+                        type="checkbox"
+                        checked={showOriginalLetterSides}
+                        onChange={(e) => setShowOriginalLetterSides(e.target.checked)}
+                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <span>Режим просмотра входящего письма</span>
+                    </label>
+                  </>
+                )}
               </div>
 
               <div
@@ -3758,7 +3899,22 @@ export const CreateInternalCorrespondence = ({
                     </div>
                   </div>
                 )}
-                <div className="py-8 px-8 flex justify-center">
+                <div className={cn(
+                  "py-8 px-8 flex justify-center items-start gap-12 w-full",
+                  showOriginalLetterSides && composeMode && sourceLetter && "min-w-[1500px]!"
+                )}>
+                  {showOriginalLetterSides && composeMode && sourceLetter && (
+                    <OriginalLetterDetails
+                      sender={
+                        sourceLetter.senderName || sourceLetter.creator?.full_name || "—"
+                      }
+                      date={sourceLetter.date || "—"}
+                      status={sourceLetter.status || ""}
+                      inboundNumber={sourceLetter.inboundNumber || "—"}
+                      subject={sourceLetter.subject || ""}
+                    />
+                  )}
+
                   <div
                     ref={pageCanvasRef}
                     className="relative"
@@ -3890,7 +4046,8 @@ export const CreateInternalCorrespondence = ({
                           // чтобы он визуально совпал с местом будущей печати.
                           left: PAGE_PAD_H + stampPos.x,
                           top: PAGE_PAD_V + stampPos.y,
-                          width: 320,
+                          width: stampSize.width,
+                          height: stampSize.height,
                           zIndex: 50,
                           cursor: "move",
                           userSelect: "none",
@@ -3906,978 +4063,93 @@ export const CreateInternalCorrespondence = ({
                         />
                       </div>
                     )}
+                    {!!id && (
+                      <div className="font-sans!">
+                        <ApproversPanel
+                          isOpen={approversOpen}
+                          onOpen={handleOpenApprovers}
+                          onClose={() => setApproversOpen(false)}
+                          approvers={approvers}
+                          onAddApprover={addApprover}
+                          onRemoveApprover={(approverId) =>
+                            setApprovers((prev) => prev.filter((a) => a.id !== approverId))
+                          }
+                          availableUsers={availableUsers}
+                          inviteApprover={inviteApprover}
+                          isApproverInviting={isApproverInviting}
+                          applyApproverDS={applyApproverDS}
+                          toggleApproverComment={toggleApproverComment}
+                          updateApproverComment={updateApproverComment}
+                          docId={id}
+                        />
+                        <SignerPanel
+                          isOpen={signerOpen}
+                          onOpen={handleOpenSigner}
+                          onClose={() => setSignerOpen(false)}
+                          finalSigner={finalSigner}
+                          onAssignSigner={(r) =>
+                            setFinalSigner({
+                              id: r.id,
+                              name: r.name,
+                              role: r.org,
+                              initials: r.initials,
+                              color: "bg-purple-100 text-purple-700",
+                              dsApplied: false,
+                              dsLoading: false,
+                              isInvited: false,
+                            })
+                          }
+                          assignSelfAsSigner={assignSelfAsSigner}
+                          inviteSigner={inviteSigner}
+                          isSignerInviting={isSignerInviting}
+                          applyFinalDS={applyFinalDS}
+                          isActiveVersionForSign={isActiveVersionForSign}
+                          stampVisible={stampVisible}
+                          setStampVisible={setStampVisible}
+                          handleInsertStamp={handleInsertStamp}
+                          availableUsers={availableUsers}
+                          isSigned={isSigned}
+                          docCreator={docCreator}
+                          docId={id}
+                        />
+                        <IncomingLettersPanel
+                          isOpen={incomingOpen}
+                          onOpen={handleOpenIncoming}
+                          onClose={() => setIncomingOpen(false)}
+                          attachedLetters={attachedIncomingLetters}
+                          onAddLetter={addIncomingLetter}
+                          onRemoveLetter={removeIncomingLetter}
+                          onSaveLetters={handleAttachIncomingLetters}
+                          docId={id}
+                        />
+                        <VersionsPanel
+                          isOpen={versionsOpen}
+                          onOpen={handleOpenVersions}
+                          onClose={() => setVersionsOpen(false)}
+                          versions={allVersions}
+                          activeVersionId={activeVersionId}
+                          signedVersionId={signedVersionId}
+                          onSelectVersion={handleSelectVersion}
+                          onSetVersionForSign={handleSetVersionForSign}
+                          isSelectingVersion={isSelectingVersion}
+                          isSigned={isSigned}
+                        />
+                      </div>
+                    )}
                   </div>
+
+                  {showOriginalLetterSides && composeMode && sourceLetter && (
+                    <OriginalLetterBody
+                      body={sourceLetter.body}
+                      sourceId={sourceLetter.id}
+                    />
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
-          {!!id && (
-            <div className="w-[340px] flex-shrink-0 space-y-4">
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
-                <div className="px-5 py-4 border-b border-slate-100">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0">
-                        <Users size={16} className="text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-slate-900">
-                          Согласующие
-                        </h3>
-                        <p className="text-[11px] text-slate-500">
-                          Добавьте согласующих лиц
-                        </p>
-                      </div>
-                    </div>
-                    <div className="relative flex-shrink-0">
-                      <button
-                        onClick={() => setShowApproverDropdown((v) => !v)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
-                      >
-                        <UserPlus size={13} />
-                        <span>Добавить</span>
-                      </button>
-                      <AnimatePresence>
-                        {showApproverDropdown && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -6, scale: 0.97 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                            className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-64"
-                            onBlur={() =>
-                              setTimeout(() => {
-                                setShowApproverDropdown(false);
-                                setApproverSearch("");
-                              }, 150)
-                            }
-                          >
-                            <div className="p-2 border-b border-slate-100">
-                              <input
-                                type="text"
-                                placeholder="Поиск..."
-                                value={approverSearch}
-                                onChange={(e) => {
-                                  setApproverSearch(e.target.value);
-                                  setSearchParams({
-                                    query: e.target.value,
-                                  });
-                                }}
-                                autoFocus
-                                className="w-full text-sm px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
-                              />
-                            </div>
-                            <div className="max-h-48 overflow-y-auto py-1">
-                              {availableApprovers.length === 0 ? (
-                                <p className="text-xs text-slate-400 text-center py-4">
-                                  Нет доступных
-                                </p>
-                              ) : (
-                                availableApprovers.map((r) => (
-                                  <button
-                                    key={r.id}
-                                    onMouseDown={(e) => {
-                                      e.preventDefault();
-                                      addApprover(r);
-                                    }}
-                                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 transition-colors text-left"
-                                  >
-                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-slate-100 text-slate-700">
-                                      {r.initials}
-                                    </div>
-                                    <div className="min-w-0">
-                                      <p className="text-sm font-semibold text-slate-900 truncate">
-                                        {r.name}
-                                      </p>
-                                      <p className="text-xs text-slate-500 truncate">
-                                        {r.org}
-                                      </p>
-                                    </div>
-                                  </button>
-                                ))
-                              )}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="px-5 py-3 space-y-2">
-                  {approvers.length === 0 ? (
-                    <div className="py-4 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs">
-                      <UserPlus size={15} />
-                      <span>Нажмите «Добавить»</span>
-                    </div>
-                  ) : (
-                    approvers.map((approver, idx) => (
-                      <div
-                        key={approver.id}
-                        className={cn(
-                          "rounded-xl border transition-all overflow-hidden",
-                          approver.approved
-                            ? "border-emerald-100 bg-emerald-50/40"
-                            : "border-slate-100 bg-slate-50/40",
-                        )}
-                      >
-                        <div className="flex items-center gap-2.5 px-3 py-2.5">
-                          <span className="text-xs font-bold text-slate-300 w-4 flex-shrink-0">
-                            {idx + 1}
-                          </span>
-                          <div
-                            className={cn(
-                              "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0",
-                              approver.color,
-                            )}
-                          >
-                            {approver.initials}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-semibold text-slate-900 truncate">
-                              {approver.name}
-                            </p>
-                            <p className="text-[10px] text-slate-500 truncate">
-                              {approver.role}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1.5 flex-shrink-0">
-                            {!approver.approved && (
-                              <button
-                                onClick={() =>
-                                  toggleApproverComment(approver.id)
-                                }
-                                className={cn(
-                                  "p-1.5 rounded-lg text-xs transition-all border",
-                                  approver.showCommentInput || approver.comment
-                                    ? "bg-amber-50 border-amber-200 text-amber-600"
-                                    : "bg-white border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600",
-                                )}
-                              >
-                                <MessageSquarePlus size={12} />
-                              </button>
-                            )}
-
-                            {!approver.isInvited ? (
-                              <button
-                                onClick={() =>
-                                  inviteApprover({
-                                    docId: id,
-                                    users: [Number(approver.id)],
-                                  })
-                                }
-                                disabled={isApproverInviting}
-                                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-                              >
-                                <Send size={11} />
-                                <span>
-                                  {isApproverInviting ? "..." : "Пригласить"}
-                                </span>
-                              </button>
-                            ) : approver.dsApplied ? (
-                              <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
-                                <Shield
-                                  size={10}
-                                  className="text-emerald-500"
-                                />
-                                <span className="text-[10px] font-semibold text-emerald-600">
-                                  ЭЦП
-                                </span>
-                                <Check size={10} className="text-emerald-500" />
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => {
-                                  if (approver.approvalRecordId) {
-                                    applyApproverDS(approver.approvalRecordId);
-                                  }
-                                }}
-                                disabled={approver.dsLoading}
-                                className={cn(
-                                  "flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border",
-                                  approver.dsLoading
-                                    ? "bg-slate-100 text-slate-400 border-slate-200 cursor-wait"
-                                    : "bg-white border-slate-200 text-slate-600 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-700 shadow-sm",
-                                )}
-                              >
-                                {approver.dsLoading ? (
-                                  <Clock size={11} className="animate-spin" />
-                                ) : (
-                                  <Check size={11} />
-                                )}
-                                <span>
-                                  {approver.dsLoading
-                                    ? "Согласую..."
-                                    : "Согласовать"}
-                                </span>
-                              </button>
-                            )}
-
-                            {!approver.approved && !approver.isInvited && (
-                              <button
-                                onClick={() =>
-                                  setApprovers((prev) =>
-                                    prev.filter((a) => a.id !== approver.id),
-                                  )
-                                }
-                                className="text-slate-300 hover:text-rose-400 transition-colors ml-1"
-                              >
-                                <X size={13} />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
-                        <AnimatePresence>
-                          {approver.showCommentInput && !approver.approved && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.18 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="px-3 pb-3 pt-1 border-t border-slate-100 bg-white/60">
-                                <div className="flex items-start gap-2">
-                                  <MessageSquare
-                                    size={12}
-                                    className="text-amber-500 mt-0.5 flex-shrink-0"
-                                  />
-                                  <textarea
-                                    placeholder="Комментарий к согласованию..."
-                                    className="flex-1 text-[11px] text-slate-700 placeholder-slate-400 bg-amber-50/60 border border-amber-100 rounded-lg px-2.5 py-2 resize-none outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-300 transition-all min-h-[54px] leading-relaxed"
-                                    value={approver.comment}
-                                    onChange={(e) =>
-                                      updateApproverComment(
-                                        approver.id,
-                                        e.target.value,
-                                      )
-                                    }
-                                  />
-                                </div>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-
-                        {approver.dsApplied && (
-                          <div
-                            className={cn(
-                              "px-3 py-2 border-t",
-                              approver.approved
-                                ? "border-emerald-100 bg-emerald-50/60"
-                                : "border-purple-100 bg-purple-50/40",
-                            )}
-                          >
-                            <DSStamp
-                              name={approver.name}
-                              certSerial={`SN-2026-${approver.initials}-${Math.abs(Number(approver.id) * 317 + 10000)}`}
-                              signedAt={new Date().toLocaleDateString("ru-RU")}
-                              validUntil="аз 20.03.2025 то 20.03.2026"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
-                <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-purple-500 flex items-center justify-center flex-shrink-0">
-                      <PenLine size={16} className="text-white" />
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="text-sm font-bold text-slate-900 truncate">
-                        Подписывающий
-                      </h3>
-                      <p className="text-[10px] text-slate-500 truncate">
-                        Подписывает с ЭЦП
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="relative flex-shrink-0 flex items-center gap-1.5">
-                    {docCreator &&
-                      finalSigner?.id !== String(docCreator.id) && (
-                        <button
-                          onClick={assignSelfAsSigner}
-                          title="Назначить себя"
-                          disabled={isSigned}
-                          className={cn(
-                            "flex items-center justify-center w-7 h-7 rounded-lg transition-colors",
-                            isSigned
-                              ? "bg-slate-100 border border-slate-200 text-slate-300 cursor-not-allowed"
-                              : "bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800",
-                          )}
-                        >
-                          <User size={14} />
-                        </button>
-                      )}
-                    <button
-                      onClick={() => setShowSignerDropdown((v) => !v)}
-                      disabled={isSigned}
-                      className={cn(
-                        "flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold rounded-lg border transition-colors",
-                        isSigned
-                          ? "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed"
-                          : "text-purple-600 bg-purple-50 border-purple-100 hover:bg-purple-100",
-                      )}
-                    >
-                      <UserPlus size={12} />
-                      <span>{finalSigner ? "Изменить" : "Назначить"}</span>
-                    </button>
-                    <AnimatePresence>
-                      {showSignerDropdown && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -6, scale: 0.97 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                          className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-64"
-                          onBlur={() =>
-                            setTimeout(() => {
-                              setShowSignerDropdown(false);
-                              setSignerSearch("");
-                            }, 150)
-                          }
-                        >
-                          <div className="p-2 border-b border-slate-100">
-                            <input
-                              type="text"
-                              placeholder="Поиск сотрудника..."
-                              value={signerSearch}
-                              onChange={(e) => {
-                                setSignerSearch(e.target.value);
-                                setSearchParams({
-                                  query: e.target.value,
-                                });
-                              }}
-                              autoFocus
-                              className="w-full text-sm px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-purple-200 focus:border-purple-300"
-                            />
-                          </div>
-                          <div className="max-h-48 overflow-y-auto py-1">
-                            {availableUsers
-                              .filter((u) =>
-                                u.name
-                                  .toLowerCase()
-                                  .includes(signerSearch.toLowerCase()),
-                              )
-                              .slice(0, 15)
-                              .map((r) => (
-                                <button
-                                  key={r.id}
-                                  onMouseDown={(e) => {
-                                    e.preventDefault();
-                                    setFinalSigner({
-                                      id: r.id,
-                                      name: r.name,
-                                      role: r.org,
-                                      initials: r.initials,
-                                      color: "bg-purple-100 text-purple-700",
-                                      dsApplied: false,
-                                      dsLoading: false,
-                                      isInvited: false,
-                                    });
-                                    setShowSignerDropdown(false);
-                                    setSignerSearch("");
-                                  }}
-                                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-purple-50 transition-colors text-left"
-                                >
-                                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-purple-100 text-purple-700">
-                                    {r.initials}
-                                  </div>
-                                  <div className="min-w-0">
-                                    <p className="text-sm font-semibold text-slate-900 truncate">
-                                      {r.name}
-                                    </p>
-                                    <p className="text-xs text-slate-500 truncate">
-                                      {r.org}
-                                    </p>
-                                  </div>
-                                </button>
-                              ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>{" "}
-                  </div>
-                </div>
-
-                <div className="px-5 py-3">
-                  {finalSigner ? (
-                    <div
-                      className={cn(
-                        "rounded-xl border transition-all",
-                        finalSigner.dsApplied
-                          ? "border-emerald-100 bg-emerald-50/40"
-                          : "border-slate-100 bg-slate-50/40",
-                      )}
-                    >
-                      <div className="flex items-center gap-2.5 px-3 py-2.5">
-                        <div
-                          className={cn(
-                            "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0",
-                            finalSigner.color,
-                          )}
-                        >
-                          {finalSigner.initials}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-slate-900 truncate">
-                            {finalSigner.name}
-                          </p>
-                          <p className="text-[10px] text-slate-500 truncate">
-                            {finalSigner.role}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                          {!finalSigner.isInvited ? (
-                            <button
-                              onClick={() =>
-                                inviteSigner({
-                                  docId: id,
-                                  users: [Number(finalSigner.id)],
-                                })
-                              }
-                              disabled={isSignerInviting}
-                              className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-                            >
-                              <Send size={11} />
-                              <span>
-                                {isSignerInviting ? "..." : "Пригласить"}
-                              </span>
-                            </button>
-                          ) : finalSigner.dsApplied ? (
-                            <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
-                              <Shield size={10} className="text-emerald-500" />
-                              <span className="text-[10px] font-semibold text-emerald-600">
-                                Подписано
-                              </span>
-                              <Check size={10} className="text-emerald-500" />
-                            </div>
-                          ) : (
-                            <button
-                              onClick={applyFinalDS}
-                              disabled={
-                                finalSigner.dsLoading || !isActiveVersionForSign
-                              }
-                              title={
-                                !isActiveVersionForSign
-                                  ? "Открытая версия не выбрана «Для подписи». Откройте версию, отмеченную для подписи."
-                                  : undefined
-                              }
-                              className={cn(
-                                "flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border",
-                                finalSigner.dsLoading
-                                  ? "bg-slate-100 text-slate-400 border-slate-200 cursor-wait"
-                                  : !isActiveVersionForSign
-                                    ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
-                                    : "bg-white border-slate-200 text-slate-600 hover:bg-purple-50 hover:border-purple-200 hover:text-purple-700 shadow-sm",
-                              )}
-                            >
-                              {finalSigner.dsLoading ? (
-                                <Clock size={11} className="animate-spin" />
-                              ) : (
-                                <PenLine size={11} />
-                              )}
-                              <span>
-                                {finalSigner.dsLoading
-                                  ? "Подписываю..."
-                                  : "Подписать"}
-                              </span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      <div
-                        className={cn(
-                          "px-3 py-2.5 border-t rounded-b-xl",
-                          finalSigner.dsApplied
-                            ? "border-emerald-100 bg-emerald-50/40"
-                            : "border-slate-100 bg-slate-50/40",
-                        )}
-                      >
-                        <AnimatePresence mode="wait">
-                          {!stampVisible &&
-                            !finalSigner.dsApplied &&
-                            !isActiveVersionForSign && (
-                              <motion.div
-                                key="not-for-sign"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-50 text-slate-400 text-[11px] font-medium rounded-lg border border-dashed border-slate-200 text-center"
-                              >
-                                <Shield size={12} />
-                                <span>
-                                  Откройте версию, отмеченную «Для подписи»
-                                </span>
-                              </motion.div>
-                            )}
-                          {!stampVisible &&
-                            !finalSigner.dsApplied &&
-                            isActiveVersionForSign && (
-                              <motion.button
-                                key="insert-btn"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={handleInsertStamp}
-                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-semibold rounded-lg transition-colors border border-blue-200 shadow-sm"
-                              >
-                                <Monitor size={12} />
-                                <span>Указать место для ЭЦП</span>
-                              </motion.button>
-                            )}
-                          {stampVisible && !finalSigner.dsApplied && (
-                            <motion.button
-                              key="remove-btn"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              onClick={() => setStampVisible(false)}
-                              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-500 text-[11px] font-semibold rounded-lg transition-colors border border-slate-200 hover:border-rose-200"
-                            >
-                              <X size={12} />
-                              <span>Убрать место для ЭЦП</span>
-                            </motion.button>
-                          )}
-
-                          {finalSigner.dsApplied && (
-                            <DSStamp
-                              name={finalSigner.name}
-                              certSerial={`SN-2026-${finalSigner.initials}-84201`}
-                              signedAt={new Date().toLocaleDateString("ru-RU")}
-                              validUntil="аз 20.03.2025 то 20.03.2026"
-                            />
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="py-4 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs">
-                      <PenLine size={15} />
-                      <span>Нажмите «Назначить»</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
-                <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0">
-                      <Mail size={16} className="text-white" />
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="text-sm font-bold text-slate-900 truncate">
-                        Входящие письма
-                      </h3>
-                      <p className="text-[10px] text-slate-500 truncate">
-                        Прикрепленные письма
-                      </p>
-                    </div>
-                  </div>
-
-                  {!!id && (
-                    <div className="relative flex-shrink-0 flex items-center gap-1.5">
-                      {attachedIncomingLetters.length > 0 && (
-                        <button
-                          onClick={handleAttachIncomingLetters}
-                          className="flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-lg hover:bg-emerald-100 transition-colors"
-                        >
-                          <Check size={12} />
-                          <span>Сохранить</span>
-                        </button>
-                      )}
-                      <button
-                        onClick={() =>
-                          setShowIncomingSearch(!showIncomingSearch)
-                        }
-                        className="flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
-                      >
-                        <Plus size={12} />
-                        <span>Добавить</span>
-                      </button>
-                      <AnimatePresence>
-                        {showIncomingSearch && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -6, scale: 0.97 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                            className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-72"
-                            onBlur={() =>
-                              setTimeout(
-                                () => setShowIncomingSearch(false),
-                                150,
-                              )
-                            }
-                          >
-                            <div className="p-2 border-b border-slate-100">
-                              <input
-                                type="text"
-                                placeholder="Поиск писем..."
-                                value={incomingLetterSearch}
-                                onChange={(e) => {
-                                  setIncomingLetterSearch(e.target.value);
-                                }}
-                                autoFocus
-                                className="w-full text-sm px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
-                              />
-                            </div>
-                            <div className="max-h-48 overflow-y-auto py-1">
-                              {availableIncomingLetters.length === 0 ? (
-                                <p className="text-xs text-slate-400 text-center py-4">
-                                  Нет доступных писем
-                                </p>
-                              ) : (
-                                availableIncomingLetters.map((letter: any) => (
-                                  <button
-                                    key={letter.id}
-                                    onMouseDown={(e) => {
-                                      e.preventDefault();
-                                      addIncomingLetter(letter);
-                                    }}
-                                    className="w-full flex items-start gap-3 px-3 py-2.5 hover:bg-blue-50 transition-colors text-left"
-                                  >
-                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-blue-100 text-blue-700">
-                                      <Mail size={12} />
-                                    </div>
-                                    <div className="min-w-0">
-                                      <p className="text-sm font-semibold text-slate-900 truncate">
-                                        {letter.subject}
-                                      </p>
-                                      <p className="text-xs text-slate-500 truncate">
-                                        {letter.sender}
-                                      </p>
-                                      <p className="text-xs text-slate-400 truncate">
-                                        №{letter.regNumber} • {letter.date}
-                                      </p>
-                                    </div>
-                                  </button>
-                                ))
-                              )}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  )}
-                </div>
-
-                <div className="px-5 py-3">
-                  {attachedIncomingLetters.length === 0 ? (
-                    <div className="py-4 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs">
-                      <Mail size={15} />
-                      <span>Нет прикрепленных писем</span>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {attachedIncomingLetters.map((letter, idx) => (
-                        <div
-                          key={letter.id}
-                          className="rounded-xl border border-slate-100 bg-slate-50/40 p-3"
-                        >
-                          <div className="flex items-start gap-2.5">
-                            <span className="text-xs font-bold text-slate-300 w-4 flex-shrink-0">
-                              {idx + 1}
-                            </span>
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-blue-100 text-blue-700">
-                              <Mail size={14} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-semibold text-slate-900 truncate">
-                                {letter.subject}
-                              </p>
-                              <p className="text-[10px] text-slate-500 truncate">
-                                {letter.sender}
-                              </p>
-                              <p className="text-[10px] text-slate-400 truncate">
-                                №{letter.regNumber} • {letter.date}
-                              </p>
-                            </div>
-                            <button
-                              onClick={() => removeIncomingLetter(letter.id)}
-                              className="text-slate-300 hover:text-rose-400 transition-colors flex-shrink-0"
-                            >
-                              <X size={13} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {allVersions.length > 0 && (
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
-                  <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between gap-2.5 relative overflow-visible">
-                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                      <div className="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
-                        <Clock size={16} className="text-white" />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="text-sm font-bold text-slate-900 truncate">
-                          История версий
-                        </h3>
-                        <p className="text-[10px] text-slate-500 truncate">
-                          Всего версий: {allVersions.length}
-                        </p>
-                      </div>
-                    </div>
-
-                    {versionAuthors.length > 0 && (
-                      <div
-                        className="relative flex-shrink-0 z-30"
-                        onBlur={(e) => {
-                          if (
-                            !e.currentTarget.contains(e.relatedTarget as Node)
-                          ) {
-                            setTimeout(() => setShowAuthorDropdown(false), 150);
-                          }
-                        }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setShowAuthorDropdown((v) => !v)}
-                          title={
-                            selectedAuthorId
-                              ? versionAuthors.find(
-                                  (a) => a.id === String(selectedAuthorId),
-                                )?.name
-                              : "Все авторы"
-                          }
-                          className={cn(
-                            "w-30 flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer text-left",
-                            selectedAuthorId
-                              ? "bg-amber-50 border-amber-200 text-amber-800"
-                              : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300",
-                          )}
-                        >
-                          <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                            <Search
-                              size={12}
-                              className={cn(
-                                "flex-shrink-0",
-                                selectedAuthorId
-                                  ? "text-amber-500"
-                                  : "text-slate-400",
-                              )}
-                            />
-                            <span className="truncate block flex-1 pr-1">
-                              {selectedAuthorId
-                                ? versionAuthors.find(
-                                    (a) => a.id === String(selectedAuthorId),
-                                  )?.name
-                                : "Все авторы"}
-                            </span>
-                          </div>
-                          <ChevronDown
-                            size={12}
-                            className={cn(
-                              "transition-transform text-slate-400 flex-shrink-0",
-                              showAuthorDropdown && "rotate-180",
-                            )}
-                          />
-                        </button>
-
-                        <AnimatePresence>
-                          {showAuthorDropdown && (
-                            <motion.div
-                              initial={{ opacity: 0, y: -6, scale: 0.97 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                              className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-56 py-1"
-                            >
-                              <button
-                                type="button"
-                                onMouseDown={(e) => {
-                                  e.preventDefault();
-                                  setSelectedAuthorId(null);
-                                  setShowAuthorDropdown(false);
-                                }}
-                                className={cn(
-                                  "w-full flex items-center justify-between px-3 py-2 text-left text-xs transition-colors hover:bg-slate-50 font-medium",
-                                  !selectedAuthorId
-                                    ? "bg-slate-50 text-blue-600 font-bold"
-                                    : "text-slate-700",
-                                )}
-                              >
-                                <span>Все авторы</span>
-                                {!selectedAuthorId && (
-                                  <Check size={12} className="text-blue-500" />
-                                )}
-                              </button>
-
-                              {versionAuthors.map((auth) => {
-                                const isSelected =
-                                  String(selectedAuthorId) === auth.id;
-                                return (
-                                  <button
-                                    type="button"
-                                    key={auth.id}
-                                    title={auth.name}
-                                    onMouseDown={(e) => {
-                                      e.preventDefault();
-                                      setSelectedAuthorId(auth.id);
-                                      setShowAuthorDropdown(false);
-                                    }}
-                                    className={cn(
-                                      "w-full flex items-center justify-between px-3 py-2 text-left text-xs transition-colors hover:bg-slate-50",
-                                      isSelected
-                                        ? "bg-slate-50 text-blue-600 font-bold"
-                                        : "text-slate-600",
-                                    )}
-                                  >
-                                    <span className="truncate pr-2">
-                                      {auth.name}
-                                    </span>
-                                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                                      <span className="px-1.5 py-0.5 bg-slate-100 text-slate-500 text-[10px] rounded-md font-mono">
-                                        {auth.count}
-                                      </span>
-                                      {isSelected && (
-                                        <Check
-                                          size={12}
-                                          className="text-blue-500"
-                                        />
-                                      )}
-                                    </div>
-                                  </button>
-                                );
-                              })}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="p-4 space-y-2 max-h-72 overflow-y-auto">
-                    {filteredVersions.length === 0 ? (
-                      <p className="text-xs text-slate-400 text-center py-4">
-                        Нет версий от этого автора
-                      </p>
-                    ) : (
-                      filteredVersions.map((v: any) => {
-                        const isCurrentActive = v.id === activeVersionId;
-                        // «Подписано» показываем на версии, где реально лежит
-                        // штамп ЭЦП (см. signedVersionId), а не на голом флаге
-                        // бэкенда — иначе бейдж стоял бы на версии без рисунка.
-                        const isSignedVersion = v.id === signedVersionId;
-                        return (
-                          <div
-                            key={v.id}
-                            onClick={() => handleSelectVersion(v.content, v.id)}
-                            className={cn(
-                              "flex items-start justify-between p-3 rounded-xl border transition-all cursor-pointer group text-xs gap-3",
-                              isSignedVersion
-                                ? "bg-emerald-50/60 border-emerald-400 shadow-sm ring-1 ring-emerald-200"
-                                : isCurrentActive
-                                  ? "bg-blue-50/50 border-blue-500 shadow-sm"
-                                  : "bg-slate-50/40 border-slate-100 hover:bg-slate-50 hover:border-slate-200",
-                            )}
-                          >
-                            <div
-                              className={cn(
-                                "w-7 h-7 rounded-full font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5 border border-white shadow-sm",
-                                isSignedVersion
-                                  ? "bg-emerald-500 text-white"
-                                  : "bg-slate-200 text-slate-600",
-                              )}
-                            >
-                              {isSignedVersion ? (
-                                <Check size={14} />
-                              ) : (
-                                v.author.initials
-                              )}
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                              <div className="flex flex-wrap items-center gap-1.5">
-                                <span
-                                  className={cn(
-                                    "font-bold",
-                                    isSignedVersion
-                                      ? "text-emerald-700"
-                                      : isCurrentActive
-                                        ? "text-blue-600"
-                                        : "text-slate-700",
-                                  )}
-                                >
-                                  Версия {v.versionNumber}
-                                </span>
-                                {isSignedVersion ? (
-                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-500 text-white font-semibold rounded text-[9px]">
-                                    <Shield size={9} />
-                                    Подписано
-                                  </span>
-                                ) : (
-                                  v.is_selected && (
-                                    <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 font-medium rounded text-[9px] border border-emerald-100">
-                                      Для подписи
-                                    </span>
-                                  )
-                                )}
-                              </div>
-
-                              <p className="text-[11px] text-slate-600 font-medium mt-0.5 truncate">
-                                {v.author.name}
-                              </p>
-                              <p className="text-[10px] text-slate-400 truncate">
-                                {v.author.position} •{" "}
-                                {new Date(v.date).toLocaleString("ru-RU")}
-                              </p>
-                            </div>
-
-                            <div
-                              className="flex items-center gap-1.5 flex-shrink-0 mt-0.5"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {isSignedVersion ? (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 select-none">
-                                  <Check
-                                    size={13}
-                                    className="text-emerald-500"
-                                  />
-                                  Подписано
-                                </span>
-                              ) : (
-                                <>
-                                  <input
-                                    type="checkbox"
-                                    id={`version-sign-${v.id}`}
-                                    className="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
-                                    checked={v.is_selected}
-                                    disabled={isSelectingVersion || isSigned}
-                                    onChange={() =>
-                                      handleSetVersionForSign(v.id)
-                                    }
-                                  />
-                                  <label
-                                    htmlFor={`version-sign-${v.id}`}
-                                    className="text-[10px] text-slate-400 select-none cursor-pointer group-hover:text-slate-500"
-                                  >
-                                    Выбрать
-                                  </label>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+          
       </div>
     </div>
   );
