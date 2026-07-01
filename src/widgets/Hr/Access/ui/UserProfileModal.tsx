@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, ChevronDown } from "lucide-react";
 import { Dropdown, Modal, Switch } from "antd";
 import type { MenuProps } from "antd";
@@ -510,161 +510,220 @@ export const UserProfileModal = ({
 				</div>
 
 				<div className="px-6 pt-3 border-b border-slate-100">
-					<div className="flex items-center gap-4">
-						<button
-							onClick={() => setTab("profile")}
-							className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
-								tab === "profile"
-									? "border-blue-600 text-blue-600"
-									: "border-transparent text-slate-500 hover:text-slate-700"
-							}`}
-						>
-							Профиль
-						</button>
-						<button
-							onClick={() => setTab("permissions")}
-							className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
-								tab === "permissions"
-									? "border-blue-600 text-blue-600"
-									: "border-transparent text-slate-500 hover:text-slate-700"
-							}`}
-						>
-							Права доступа
-						</button>
-						<button
-							onClick={() => setTab("sessions")}
-							className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
-								tab === "sessions"
-									? "border-blue-600 text-blue-600"
-									: "border-transparent text-slate-500 hover:text-slate-700"
-							}`}
-						>
-							Сессии
-						</button>
-						<button
-							onClick={() => setTab("history")}
-							className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
-								tab === "history"
-									? "border-blue-600 text-blue-600"
-									: "border-transparent text-slate-500 hover:text-slate-700"
-							}`}
-						>
-							История
-						</button>
+					<div className="flex items-center gap-6">
+						{(["profile", "permissions", "sessions", "history"] as const).map((t) => {
+							const labels = {
+								profile: "Профиль",
+								permissions: "Права доступа",
+								sessions: "Сессии",
+								history: "История",
+							};
+							const isActive = tab === t;
+							return (
+								<button
+									key={t}
+									onClick={() => setTab(t)}
+									className={`relative pb-3 text-sm font-semibold transition-colors cursor-pointer select-none outline-none! focus:outline-none! border border-transparent ${
+										isActive ? "text-blue-600 font-bold" : "text-slate-500 hover:text-slate-700"
+									}`}
+								>
+									<span>{labels[t]}</span>
+									{isActive && (
+										<motion.div
+											layoutId="activeModalTabLine"
+											className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-600 rounded-full"
+											transition={{ type: "spring", stiffness: 380, damping: 30 }}
+										/>
+									)}
+								</button>
+							);
+						})}
 					</div>
 				</div>
 
-				<div className="px-6 py-6 overflow-y-auto flex-1">
-					<If is={tab === "profile"}>
-						<div className="space-y-6">
-							<div className="grid grid-cols-3 gap-4">
-								<div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center">
-									<div className="text-2xl font-bold text-slate-800">142</div>
-									<div className="text-xs text-slate-400 font-medium mt-1">
-										Документов
-									</div>
-								</div>
-								<div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center">
-									<div className="text-2xl font-bold text-slate-800">38</div>
-									<div className="text-xs text-slate-400 font-medium mt-1">
-										Поручений
-									</div>
-								</div>
-								<div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center">
-									<div className="text-2xl font-bold text-slate-800">3</div>
-									<div className="text-xs text-slate-400 font-medium mt-1">
-										Сессий
-									</div>
-								</div>
-							</div>
-
-							<div className="border border-slate-100 rounded-2xl p-5 space-y-3">
-								<h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-									Роли пользователя
-								</h4>
-								<div className="flex flex-wrap gap-2 items-center">
-									{selectedRoles.map((role) => {
-										const style = ROLE_CHIP_STYLE_MAP[role] || {
-											border: "border-blue-100!",
-											bg: "bg-blue-50/50!",
-											text: "text-blue-600!",
-										};
-										return (
-											<div
-												key={role}
-												className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-sm font-medium border ${style.border} ${style.bg} ${style.text}`}
-											>
-												<span>{role}</span>
-												<button
-													onClick={() => handleRemoveRole(role)}
-													className="opacity-75 hover:opacity-100 font-bold ml-1 text-xs transition-opacity"
-												>
-													&times;
-												</button>
+				<div className="px-6 py-6 overflow-y-auto flex-1 relative">
+					<AnimatePresence mode="wait">
+						<motion.div
+							key={tab}
+							initial={{ opacity: 0, y: 6 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -6 }}
+							transition={{ duration: 0.15, ease: "easeOut" }}
+						>
+							<If is={tab === "profile"}>
+								<div className="space-y-6">
+									<div className="grid grid-cols-3 gap-4">
+										<div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center">
+											<div className="text-2xl font-bold text-slate-800">142</div>
+											<div className="text-xs text-slate-400 font-medium mt-1">
+												Документов
 											</div>
-										);
-									})}
-								</div>
-								<div className="pt-1">
-									<Dropdown
-										menu={{ items: dropdownItems }}
-										trigger={["click"]}
-										disabled={availableRolesToAdd.length === 0}
-										getPopupContainer={(triggerNode) =>
-											triggerNode.parentElement || document.body
-										}
-									>
-										<button
-											type="button"
-											className="px-3 py-1 border border-dashed border-slate-300 hover:border-blue-500 hover:text-blue-600 rounded-xl text-sm text-slate-500 transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-50! disabled:cursor-not-allowed!"
-										>
-											<span>+ Добавить роль</span>
-											<ChevronDown size={14} className="text-slate-400" />
-										</button>
-									</Dropdown>
-								</div>
-							</div>
-
-							{userPermissionsState.length > 0 && (
-								<div className="border border-slate-100 rounded-2xl p-5 space-y-3">
-									<h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-										Уровни доступа
-									</h4>
-									<div className="grid grid-cols-2 gap-x-6 gap-y-1">
-										{paginatedAccessLevels.map((perm) => {
-											const parts = perm.split(".");
-											const mod = MODULE_TRANSLATIONS[parts[0]] || parts[0];
-											const action = ACTION_TRANSLATIONS[parts.slice(1).join(".")] || parts.slice(1).join(".");
-											return (
-												<div key={perm} className="flex items-center justify-between py-2 border-b border-slate-50/50">
-													<span className="text-xs text-slate-600 font-semibold">
-														{mod} — {action}
-													</span>
-													<span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 text-[10px] font-bold select-none">
-														Да
-													</span>
-												</div>
-											);
-										})}
+										</div>
+										<div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center">
+											<div className="text-2xl font-bold text-slate-800">38</div>
+											<div className="text-xs text-slate-400 font-medium mt-1">
+												Поручений
+											</div>
+										</div>
+										<div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center">
+											<div className="text-2xl font-bold text-slate-800">3</div>
+											<div className="text-xs text-slate-400 font-medium mt-1">
+												Сессий
+											</div>
+										</div>
 									</div>
-									{userPermissionsState.length > ACCESS_PAGE_SIZE && (
+
+									<div className="border border-slate-100 rounded-2xl p-5 space-y-3">
+										<h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+											Роли пользователя
+										</h4>
+										<div className="flex flex-wrap gap-2 items-center">
+											{selectedRoles.map((role) => {
+												const style = ROLE_CHIP_STYLE_MAP[role] || {
+													border: "border-blue-100!",
+													bg: "bg-blue-50/50!",
+													text: "text-blue-600!",
+												};
+												return (
+													<div
+														key={role}
+														className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-sm font-medium border ${style.border} ${style.bg} ${style.text}`}
+													>
+														<span>{role}</span>
+														<button
+															onClick={() => handleRemoveRole(role)}
+															className="opacity-75 hover:opacity-100 font-bold ml-1 text-xs transition-opacity"
+														>
+															&times;
+														</button>
+													</div>
+												);
+											})}
+										</div>
+										<div className="pt-1">
+											<Dropdown
+												menu={{ items: dropdownItems }}
+												trigger={["click"]}
+												disabled={availableRolesToAdd.length === 0}
+												getPopupContainer={(triggerNode) =>
+													triggerNode.parentElement || document.body
+												}
+											>
+												<button
+													type="button"
+													className="px-3 py-1 border border-dashed border-slate-300 hover:border-blue-500 hover:text-blue-600 rounded-xl text-sm text-slate-500 transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-50! disabled:cursor-not-allowed!"
+												>
+													<span>+ Добавить роль</span>
+													<ChevronDown size={14} className="text-slate-400" />
+												</button>
+											</Dropdown>
+										</div>
+									</div>
+
+									{userPermissionsState.length > 0 && (
+										<div className="border border-slate-100 rounded-2xl p-5 space-y-3">
+											<h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+												Уровни доступа
+											</h4>
+											<div className="grid grid-cols-2 gap-x-6 gap-y-1">
+												{paginatedAccessLevels.map((perm) => {
+													const parts = perm.split(".");
+													const mod = MODULE_TRANSLATIONS[parts[0]] || parts[0];
+													const action = ACTION_TRANSLATIONS[parts.slice(1).join(".")] || parts.slice(1).join(".");
+													return (
+														<div key={perm} className="flex items-center justify-between py-2 border-b border-slate-50/50">
+															<span className="text-xs text-slate-600 font-semibold">
+																{mod} — {action}
+															</span>
+															<span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 text-[10px] font-bold select-none">
+																Да
+															</span>
+														</div>
+													);
+												})}
+											</div>
+											{userPermissionsState.length > ACCESS_PAGE_SIZE && (
+												<div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
+													<span className="text-xs text-slate-400 font-medium mr-auto">
+														{(accessPage - 1) * ACCESS_PAGE_SIZE + 1}–{Math.min(accessPage * ACCESS_PAGE_SIZE, userPermissionsState.length)} из {userPermissionsState.length} прав
+													</span>
+													<button
+														onClick={() => setAccessPage((p) => Math.max(1, p - 1))}
+														disabled={accessPage === 1}
+														className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+													>
+														<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+													</button>
+													<span className="text-xs font-bold text-slate-600 min-w-[32px] text-center">
+														{accessPage} / {Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE)}
+													</span>
+													<button
+														onClick={() => setAccessPage((p) => Math.min(Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE), p + 1))}
+														disabled={accessPage >= Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE)}
+														className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+													>
+														<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+													</button>
+												</div>
+											)}
+										</div>
+									)}
+								</div>
+							</If>
+							<If is={tab === "permissions"}>
+								<div className="space-y-4">
+									<div className="space-y-5">
+										{paginatedGroupEntries.map(
+											([moduleName, actions]) => (
+												<div key={moduleName} className="space-y-2">
+													<h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-1">
+														{MODULE_TRANSLATIONS[moduleName] || moduleName}
+													</h4>
+													<div className="bg-slate-50/40! border border-slate-100! rounded-2xl! p-4! flex! flex-wrap! items-center! gap-x-8! gap-y-3!">
+														{actions.map((act) => {
+															const checked = userPermissionsState.includes(
+																act.name,
+															);
+															return (
+																<div
+																	key={act.name}
+																	className="flex items-center gap-3"
+																>
+																	<span className="text-sm font-medium text-slate-600">
+																		{act.label}
+																	</span>
+																	<Switch
+																		checked={checked}
+																		onChange={() =>
+																			handleTogglePermission(act.name)
+																		}
+																	/>
+																</div>
+															);
+														})}
+													</div>
+												</div>
+											),
+										)}
+									</div>
+									{Object.keys(groupedPermissions).length > PAGE_SIZE && (
 										<div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
 											<span className="text-xs text-slate-400 font-medium mr-auto">
-												{(accessPage - 1) * ACCESS_PAGE_SIZE + 1}–{Math.min(accessPage * ACCESS_PAGE_SIZE, userPermissionsState.length)} из {userPermissionsState.length} прав
+												{(permissionsPage - 1) * PAGE_SIZE + 1}–{Math.min(permissionsPage * PAGE_SIZE, Object.keys(groupedPermissions).length)} из {Object.keys(groupedPermissions).length} модулей
 											</span>
 											<button
-												onClick={() => setAccessPage((p) => Math.max(1, p - 1))}
-												disabled={accessPage === 1}
+												onClick={() => setPermissionsPage((p) => Math.max(1, p - 1))}
+												disabled={permissionsPage === 1}
 												className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
 											>
 												<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
 											</button>
 											<span className="text-xs font-bold text-slate-600 min-w-[32px] text-center">
-												{accessPage} / {Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE)}
+												{permissionsPage} / {Math.ceil(Object.keys(groupedPermissions).length / PAGE_SIZE)}
 											</span>
 											<button
-												onClick={() => setAccessPage((p) => Math.min(Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE), p + 1))}
-												disabled={accessPage >= Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE)}
+												onClick={() => setPermissionsPage((p) => Math.min(Math.ceil(Object.keys(groupedPermissions).length / PAGE_SIZE), p + 1))}
+												disabled={permissionsPage >= Math.ceil(Object.keys(groupedPermissions).length / PAGE_SIZE)}
 												className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
 											>
 												<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
@@ -672,76 +731,14 @@ export const UserProfileModal = ({
 										</div>
 									)}
 								</div>
-							)}
-						</div>
-					</If>
-					<If is={tab === "permissions"}>
-						<div className="space-y-4">
-							<div className="space-y-5">
-								{paginatedGroupEntries.map(
-									([moduleName, actions]) => (
-										<div key={moduleName} className="space-y-2">
-											<h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-1">
-												{MODULE_TRANSLATIONS[moduleName] || moduleName}
-											</h4>
-											<div className="bg-slate-50/40! border border-slate-100! rounded-2xl! p-4! flex! flex-wrap! items-center! gap-x-8! gap-y-3!">
-												{actions.map((act) => {
-													const checked = userPermissionsState.includes(
-														act.name,
-													);
-													return (
-														<div
-															key={act.name}
-															className="flex items-center gap-3"
-														>
-															<span className="text-sm font-medium text-slate-600">
-																{act.label}
-															</span>
-															<Switch
-																checked={checked}
-																onChange={() =>
-																	handleTogglePermission(act.name)
-																}
-															/>
-														</div>
-													);
-												})}
-											</div>
-										</div>
-									),
-								)}
-							</div>
-							{Object.keys(groupedPermissions).length > PAGE_SIZE && (
-								<div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
-									<span className="text-xs text-slate-400 font-medium mr-auto">
-										{(permissionsPage - 1) * PAGE_SIZE + 1}–{Math.min(permissionsPage * PAGE_SIZE, Object.keys(groupedPermissions).length)} из {Object.keys(groupedPermissions).length} модулей
-									</span>
-									<button
-										onClick={() => setPermissionsPage((p) => Math.max(1, p - 1))}
-										disabled={permissionsPage === 1}
-										className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-									>
-										<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-									</button>
-									<span className="text-xs font-bold text-slate-600 min-w-[32px] text-center">
-										{permissionsPage} / {Math.ceil(Object.keys(groupedPermissions).length / PAGE_SIZE)}
-									</span>
-									<button
-										onClick={() => setPermissionsPage((p) => Math.min(Math.ceil(Object.keys(groupedPermissions).length / PAGE_SIZE), p + 1))}
-										disabled={permissionsPage >= Math.ceil(Object.keys(groupedPermissions).length / PAGE_SIZE)}
-										className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-									>
-										<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-									</button>
+							</If>
+							<If is={tab !== "profile" && tab !== "permissions"}>
+								<div className="py-12 text-center text-slate-400 text-sm">
+									Раздел находится в разработке
 								</div>
-							)}
-						</div>
-					</If>
-					<If is={tab !== "profile" && tab !== "permissions"}>
-						<div className="py-12 text-center text-slate-400 text-sm">
-							Раздел находится в разработке
-						</div>
-					</If>
+							</If>
+						</motion.div>
+					</AnimatePresence>
 				</div>
 
 				<div className="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
