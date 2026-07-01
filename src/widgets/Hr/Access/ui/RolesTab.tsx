@@ -166,8 +166,8 @@ export const RolesTab = () => {
 		: "";
 
 	return (
-		<motion.div layout className="flex flex-col lg:flex-row gap-6 items-start w-full!">
-			<motion.div layout className="flex-1 w-full! space-y-6">
+		<div className="flex flex-col lg:flex-row gap-6 items-start w-full!">
+			<div className="flex-1 w-full! space-y-6">
 				<div className="flex justify-between items-start">
 					<div>
 						<h2 className="text-xl font-bold text-slate-800 leading-tight">
@@ -232,23 +232,24 @@ export const RolesTab = () => {
 						/>
 					</div>
 				)}
-			</motion.div>
+			</div>
 
 			<AnimatePresence>
 				{selectedRole && (
 					<motion.div
-						layout
-						initial={{ opacity: 0, x: 40 }}
-						animate={{ opacity: 1, x: 0 }}
-						exit={{ opacity: 0, x: 40 }}
-						transition={{ duration: 0.2 }}
-						className="w-full lg:w-[320px]! shrink-0! sticky top-6"
+						initial={{ opacity: 0, width: 0 }}
+						animate={{ opacity: 1, width: 320 }}
+						exit={{ opacity: 0, width: 0 }}
+						transition={{ duration: 0.2, ease: "easeOut" }}
+						className="shrink-0! sticky top-6 overflow-hidden"
 					>
-						<RolePermissionsSidebar
-							role={selectedRole}
-							allSystemPermissions={allSystemPermissions}
-							onClose={() => setSelectedRole(null)}
-						/>
+						<div className="w-[320px] pb-4">
+							<RolePermissionsSidebar
+								role={selectedRole}
+								allSystemPermissions={allSystemPermissions}
+								onClose={() => setSelectedRole(null)}
+							/>
+						</div>
 					</motion.div>
 				)}
 			</AnimatePresence>
@@ -257,6 +258,6 @@ export const RolesTab = () => {
 				open={isCreateOpen}
 				onClose={() => setIsCreateOpen(false)}
 			/>
-		</motion.div>
+		</div>
 	);
 };

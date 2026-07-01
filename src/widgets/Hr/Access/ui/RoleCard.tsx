@@ -97,7 +97,7 @@ export const RoleCard = ({
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<span className={`w-2 h-2 rounded-full ${colors.dot}`} />
-						<h4 className="font-bold text-slate-800 text-[15px] leading-snug">
+						<h4 className="font-bold text-slate-800 text-[15px] leading-snug truncate">
 							{displayName}
 						</h4>
 					</div>
@@ -111,7 +111,7 @@ export const RoleCard = ({
 			</div>
 
 			<div className="space-y-3 pt-2">
-				<div className="flex flex-wrap gap-1.5 items-center">
+				<div className="flex flex-wrap gap-1.5 items-center h-6! overflow-hidden!">
 					{renderedTags.visible.map((tag, idx) => (
 						<span
 							key={idx}
