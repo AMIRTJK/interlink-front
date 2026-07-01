@@ -63,6 +63,8 @@ export const UsersTab = () => {
   const [viewingUser, setViewingUser] = useState<IAccessUser | null>(null);
   const [editingUser, setEditingUser] = useState<IAdminUser | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const perPage = 10;
 
   const queryParams = useMemo(() => {
     const p: Record<string, string> = {};
@@ -79,8 +81,10 @@ export const UsersTab = () => {
     if (filters.status !== "all") {
       p.status = filters.status;
     }
+    p.page = String(currentPage);
+    p.per_page = String(perPage);
     return p;
-  }, [filters, selectedQuickRole]);
+  }, [filters, selectedQuickRole, currentPage]);
 
   const { data: usersData, isLoading: usersLoading } = useGetQuery({
     url: ApiRoutes.GET_USERS,
@@ -126,6 +130,10 @@ export const UsersTab = () => {
     const raw = (usersData?.data?.data || usersData?.data || usersData || []) as IAdminUser[];
     return raw;
   }, [usersData]);
+
+  const totalUsers = useMemo(() => {
+    return usersData?.data?.total ?? usersData?.total ?? rawUsers.length;
+  }, [usersData, rawUsers.length]);
 
   const allUsers = useMemo(() => {
     return normalizeAccessUsers(rawUsers);
@@ -184,6 +192,20 @@ export const UsersTab = () => {
       return true;
     });
   }, [allUsers, filters, selectedQuickRole]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleFilterChange = (key: keyof IUserAccessFilters, value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setCurrentPage(1);
+  };
+
+  const handleQuickRoleChange = (role: string) => {
+    setSelectedQuickRole(role);
+    setCurrentPage(1);
+  };
 
   const handleOpenCreate = () => {
     setEditingUser(null);
@@ -270,21 +292,21 @@ export const UsersTab = () => {
         </div>
         <Select
           value={filters.role}
-          onChange={(role) => setFilters((prev) => ({ ...prev, role }))}
+          onChange={(role) => handleFilterChange("role", role)}
           className="w-48 h-[38px] rounded-xl text-sm"
           placeholder="Все роли"
           options={[{ value: "all", label: "Все роли" }, ...roles.map((r) => ({ value: r, label: r }))]}
         />
         <Select
           value={filters.department}
-          onChange={(department) => setFilters((prev) => ({ ...prev, department }))}
+          onChange={(department) => handleFilterChange("department", department)}
           className="w-48 h-[38px] rounded-xl text-sm"
           placeholder="Все отделы"
           options={[{ value: "all", label: "Все отделы" }, ...departments.map((d) => ({ value: d, label: d }))]}
         />
         <Select
           value={filters.status}
-          onChange={(status) => setFilters((prev) => ({ ...prev, status }))}
+          onChange={(status) => handleFilterChange("status", status)}
           className="w-40 h-[38px] rounded-xl text-sm"
           placeholder="Статус"
           options={[
@@ -298,7 +320,7 @@ export const UsersTab = () => {
 
       <div className="flex items-center gap-1.5 flex-wrap overflow-x-auto pb-1">
         <button
-          onClick={() => setSelectedQuickRole("all")}
+          onClick={() => handleQuickRoleChange("all")}
           className={`px-3 py-1.5 border rounded-xl text-xs font-semibold transition-colors ${
             selectedQuickRole === "all"
               ? "border-blue-600 bg-blue-50/50 text-blue-600"
@@ -319,7 +341,7 @@ export const UsersTab = () => {
           return (
             <button
               key={role}
-              onClick={() => setSelectedQuickRole(role)}
+              onClick={() => handleQuickRoleChange(role)}
               className={`px-3 py-1.5 border rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${
                 isSelected
                   ? `${activeStyle.border} ${activeStyle.bg} ${activeStyle.text}`
@@ -344,6 +366,33 @@ export const UsersTab = () => {
         onEdit={handleOpenEdit}
         onDelete={handleDeleteUser}
       />
+
+      {totalUsers > perPage && (
+        <div className="flex items-center justify-between px-1 pt-2">
+          <span className="text-xs text-slate-400 font-medium">
+            Показано {(currentPage - 1) * perPage + 1}–{Math.min(currentPage * perPage, totalUsers)} из {totalUsers} сотрудников
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <span className="text-xs font-bold text-slate-600 min-w-[40px] text-center">
+              {currentPage} / {Math.ceil(totalUsers / perPage)}
+            </span>
+            <button
+              onClick={() => handlePageChange(Math.min(Math.ceil(totalUsers / perPage), currentPage + 1))}
+              disabled={currentPage >= Math.ceil(totalUsers / perPage)}
+              className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       <AnimatePresence>
         <If is={Boolean(viewingUser)}>
