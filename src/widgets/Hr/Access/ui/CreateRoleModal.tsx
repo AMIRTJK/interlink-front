@@ -82,18 +82,11 @@ export const CreateRoleModal = ({ open, onClose }: IProps) => {
 					mode="multiple"
 				/>
 				<div className="flex items-center justify-end gap-2 pt-4">
-					<button
-						type="button"
-						onClick={onClose}
-						className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
-					>
-						{"Отмена"}
-					</button>
 					<Button
 						type="primary"
 						htmlType="submit"
 						loading={isPending}
-						className="px-5 py-2 h-auto! rounded-lg! text-sm! font-semibold!"
+						className="px-5! py-2! h-auto! rounded-lg! text-sm! font-semibold!"
 					>
 						{"Создать"}
 					</Button>
