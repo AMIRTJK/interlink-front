@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { ModuleMenu } from "./ModuleMenu";
 import { Header } from "./Header";
 import { If } from "@shared/ui";
@@ -6,36 +6,26 @@ import { useCorrespondenceRoute } from "@shared/lib";
 import { Navbar } from "@widgets/Navbar";
 import { useNavbar, useTabs } from "@shared/lib/hooks";
 
-
-
 export const MainLayout = () => {
   const { shouldHideUI } = useCorrespondenceRoute();
-  const { pathname } = useLocation();
   const { variant } = useNavbar();
   const { tabMode } = useTabs();
 
-  const isModulesPage = pathname.includes("modules");
-
-
   return (
-    <div className={`bg-[#F2F5FF] min-h-screen flex flex-col`}>
+    <div className="bg-[#F2F5FF] min-h-screen flex flex-col">
       <If is={!shouldHideUI}>
         <div>
-          <Header isModulesPage={isModulesPage} />
+          <Header />
         </div>
-        
-        {/* Независимый UI вкладок теперь рендерится в AppRouter, чтобы быть видным везде (включая Профиль) */}
-
         {variant === "ios" ? (
           <Navbar />
         ) : (
-          <ModuleMenu variant="modern" />
+          <ModuleMenu variant="modern" hideTopLevel />
         )}
       </If>
       <div className={variant === "ios" || tabMode === "on" ? "pb-30" : ""}>
         <Outlet />
       </div>
-
     </div>
   );
 };

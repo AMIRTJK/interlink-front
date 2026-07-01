@@ -1,10 +1,12 @@
+import { useOutletContext } from "react-router-dom";
 import { Profile } from "@features/Profile";
+
 export const ProfilePage = () => {
+  const { currentTheme } = useOutletContext<{ currentTheme: string }>();
+
   return (
-    <div>
-      <div className="main-content-area bg-[#e5e9f5] mb-4">
-        <Profile />
-      </div>
+    <div className="mb-4">
+      <Profile currentTheme={currentTheme} />
     </div>
   );
 };

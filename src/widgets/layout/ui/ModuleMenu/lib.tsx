@@ -14,7 +14,7 @@ export type MenuItem = Required<MenuProps>["items"][number] & {
 };
 
 export const getModuleItems = (
-	variant: "horizontal" | "compact" | "modern" | "full" | "ios",
+	variant: "horizontal" | "compact" | "modern" | "full" | "ios" | "header",
 ): MenuItem[] => [
 	{
 		key: AppRoutes.PROFILE,
@@ -76,7 +76,7 @@ export const getModuleItems = (
 	// HR module
 	{
 		key: AppRoutes.HR,
-		label: "Человеский ресурс",
+		label: "Человеческий ресурс",
 		icon:
 			variant === "horizontal" || variant === "full" || variant === "ios" ? (
 				<img src={OrganizationIcon} alt="hr" />
