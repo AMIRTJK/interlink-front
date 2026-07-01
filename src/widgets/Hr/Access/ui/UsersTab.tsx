@@ -430,7 +430,7 @@ export const UsersTab = () => {
 				const pageLimit = 5;
 				const pagesList: number[] = [];
 				let start = Math.max(1, currentPage - 2);
-				let end = Math.min(totalPages, start + pageLimit - 1);
+				const end = Math.min(totalPages, start + pageLimit - 1);
 				if (end - start + 1 < pageLimit) {
 					start = Math.max(1, end - pageLimit + 1);
 				}
