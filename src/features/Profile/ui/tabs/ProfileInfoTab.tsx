@@ -17,17 +17,17 @@ import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib/hooks";
 import { Loader } from "@shared/ui";
 import userAvatar from "../../../../assets/images/user-avatar.jpg";
+import { THEMES } from "@widgets/layout/ui/designSettings";
 
 interface IProps {
   userData: IUser | null;
   isLoading: boolean;
-  /** Открыть модалку настроек профиля (безопасность / предпочтения). */
   onEdit: () => void;
+  currentTheme?: string;
 }
 
 const NOT_SET = "Не указано";
 
-/** Возвращает значение либо плейсхолдер, если оно пустое. */
 const orDash = (value?: string | null): string =>
   value && String(value).trim() ? String(value) : NOT_SET;
 
@@ -75,7 +75,7 @@ const Card = ({
   title: string;
   children: React.ReactNode;
 }) => (
-  <div className="bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl p-6 rounded-[2.5rem] border border-white/20 dark:border-zinc-700/30 shadow-sm">
+  <div className="bg-white/40 dark:bg-slate-800/90 backdrop-blur-3xl p-6 rounded-[2.5rem] border border-white/20 dark:border-slate-700/50 shadow-sm">
     <h3 className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-4">
       {title}
     </h3>
@@ -83,14 +83,10 @@ const Card = ({
   </div>
 );
 
-/**
- * Вкладка «Профиль» нового дизайна.
- * Полностью интегрирована с существующим API пользователя (IUser),
- * данные приходят из useGetQuery(FETCH_USER_BY_ID) в фиче Profile.
- * Сохранена интеграция загрузки аватара (useMutationQuery).
- */
-export const ProfileInfoTab = ({ userData, isLoading, onEdit }: IProps) => {
+export const ProfileInfoTab = ({ userData, isLoading, onEdit, currentTheme }: IProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const themeKey = currentTheme || localStorage.getItem("currentTheme") || "emerald";
+  const activeTheme = THEMES[themeKey] || THEMES.emerald;
 
   const { mutate: uploadAvatar, isPending: isUploading } =
     useMutationQuery<FormData>({
@@ -115,7 +111,6 @@ export const ProfileInfoTab = ({ userData, isLoading, onEdit }: IProps) => {
       formData.append("photo", file);
       uploadAvatar(formData);
     }
-    // сбрасываем, чтобы можно было выбрать тот же файл повторно
     e.target.value = "";
   };
 
@@ -133,15 +128,14 @@ export const ProfileInfoTab = ({ userData, isLoading, onEdit }: IProps) => {
       animate={{ opacity: 1, y: 0 }}
       className="grid grid-cols-1 lg:grid-cols-3 gap-6"
     >
-      {/* Левая карточка — аватар и основные данные */}
       <div className="lg:col-span-1">
-        <div className="bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl p-6 rounded-[2.5rem] border border-white/20 dark:border-zinc-700/30 shadow-sm flex flex-col items-center">
+        <div className="bg-white/40 dark:bg-slate-800/90 backdrop-blur-3xl p-6 rounded-[2.5rem] border border-white/20 dark:border-slate-700/50 shadow-sm flex flex-col items-center">
           <div className="relative mb-4">
             <button
               type="button"
               onClick={handleAvatarClick}
               aria-label="Изменить фото профиля"
-              className={`group relative block rounded-[2.5rem] overflow-hidden focus:outline-none focus:ring-2 focus:ring-emerald-500/40 ${
+              className={`group relative block rounded-[2.5rem] overflow-hidden focus:outline-none focus:ring-2 focus:ring-indigo-400/40 ${
                 isUploading ? "opacity-60 pointer-events-none" : "cursor-pointer"
               }`}
             >
@@ -169,23 +163,22 @@ export const ProfileInfoTab = ({ userData, isLoading, onEdit }: IProps) => {
           <h2 className="text-base font-bold text-zinc-900 dark:text-white text-center">
             {orDash(userData?.full_name)}
           </h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+          <p className="text-xs text-zinc-550 dark:text-zinc-400 mt-1">
             {orDash(userData?.position)}
           </p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs text-zinc-550 dark:text-zinc-400">
             {orDash(userData?.organization?.name)}
           </p>
           <button
             type="button"
             onClick={onEdit}
-            className="mt-5 w-full bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 hover:opacity-90 text-white py-2.5 rounded-[2.5rem] text-sm font-semibold transition-all shadow-md"
+            className={`mt-5 w-full bg-gradient-to-r ${activeTheme.gradient} hover:opacity-90 text-white py-2.5 rounded-[2.5rem] text-sm font-semibold transition-all shadow-md`}
           >
             Редактировать профиль
           </button>
         </div>
       </div>
 
-      {/* Правая часть — детальная информация */}
       <div className="lg:col-span-2 space-y-6">
         <Card title="Личная информация">
           <InfoRow

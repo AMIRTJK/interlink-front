@@ -12,6 +12,7 @@ import { IUser } from "@entities/login";
 import { ProfileInfoTab } from "./tabs/ProfileInfoTab";
 import { AnalyticsTab } from "./tabs/AnalyticsTab";
 import { DevelopmentStub } from "./tabs/DevelopmentStub";
+import { THEMES } from "@widgets/layout/ui/designSettings";
 
 type TabKey = "profile" | "tasks" | "calendar" | "analytics" | "files";
 
@@ -32,22 +33,19 @@ const TABS: ITab[] = [
 interface IProps {
   userData: IUser | null;
   isLoading: boolean;
-  /** Открыть модалку настроек профиля (сохранённая интеграция). */
   onOpenSettings: () => void;
+  currentTheme?: string;
 }
 
-/**
- * «Личный кабинет» — новый дизайн страницы профиля со вкладками.
- * Вкладки переключаются внутренним состоянием (как в исходном дизайне).
- * Профиль работает на реальном API, Аналитика — фронтенд-мок,
- * остальные вкладки — заглушки «в разработке».
- */
 export const PersonalCabinet = ({
   userData,
   isLoading,
   onOpenSettings,
+  currentTheme,
 }: IProps) => {
   const [activeTab, setActiveTab] = useState<TabKey>("profile");
+  const themeKey = currentTheme || localStorage.getItem("currentTheme") || "emerald";
+  const activeTheme = THEMES[themeKey] || THEMES.emerald;
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -57,6 +55,7 @@ export const PersonalCabinet = ({
             userData={userData}
             isLoading={isLoading}
             onEdit={onOpenSettings}
+            currentTheme={themeKey}
           />
         );
       case "analytics":
@@ -74,8 +73,7 @@ export const PersonalCabinet = ({
 
   return (
     <div className="space-y-6">
-      {/* Панель вкладок */}
-      <div className="bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl p-2 rounded-[2.5rem] border border-white/20 dark:border-zinc-700/30 shadow-sm flex flex-wrap items-center justify-between gap-2">
+      <div className="bg-white/40 dark:bg-slate-800/90 backdrop-blur-3xl p-2 rounded-[2.5rem] border border-white/20 dark:border-slate-700/50 shadow-sm flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           {TABS.map((tab) => (
             <button
@@ -90,7 +88,7 @@ export const PersonalCabinet = ({
               {activeTab === tab.key && (
                 <motion.div
                   layoutId="profileActiveTabBg"
-                  className="absolute inset-0 bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 rounded-[2.5rem] shadow-lg"
+                  className={`absolute inset-0 bg-gradient-to-r ${activeTheme.gradient} rounded-[2.5rem] shadow-lg`}
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
@@ -110,13 +108,12 @@ export const PersonalCabinet = ({
             <input
               type="text"
               placeholder="Поиск..."
-              className="bg-white/60 dark:bg-zinc-800/60 backdrop-blur-xl rounded-[2.5rem] pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 w-44 transition-all border border-white/20 dark:border-zinc-700/30"
+              className="bg-white/60 dark:bg-slate-700/80 backdrop-blur-xl rounded-[2.5rem] pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400/20 w-44 transition-all border border-white/20 dark:border-slate-600/50 dark:text-zinc-200 dark:placeholder-zinc-400"
             />
           </div>
         </div>
       </div>
 
-      {/* Контент активной вкладки */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}

@@ -1,16 +1,22 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Tooltip, Popover } from "antd";
-import { Bell, LogOut, BookOpen, CheckCircle, Sun, Moon, Layout } from "lucide-react";
+import { Bell, LogOut, BookOpen, CheckCircle, Sun, Moon, Layout, Palette, Layers, PanelTop, PanelLeft, PanelBottom, PanelRight } from "lucide-react";
 import { tokenControl, useLogout, useGetQuery } from "@shared/lib";
 import { AppRoutes } from "@shared/config";
 import { ApiRoutes } from "@shared/api";
 import { IUser } from "@entities/login";
 import { ModuleMenu } from "./ModuleMenu";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import userAvatar from "../../../assets/images/user-avatar.jpg";
+import { THEMES, BACKGROUNDS, LayoutMode } from "./designSettings";
 
 interface IProps {
-  isModulesPage?: boolean;
+  currentTheme?: string;
+  setCurrentTheme?: (theme: string) => void;
+  currentBg?: string;
+  setCurrentBg?: (bg: string) => void;
+  layoutMode?: LayoutMode;
+  setLayoutMode?: (layout: LayoutMode) => void;
 }
 
 const mockNotifications = [
@@ -40,14 +46,29 @@ const mockNotifications = [
   },
 ];
 
-export const Header = ({ isModulesPage }: IProps) => {
+export const Header = ({
+  currentTheme,
+  setCurrentTheme,
+  currentBg,
+  setCurrentBg,
+  layoutMode,
+  setLayoutMode,
+}: IProps) => {
   const handleLogout = useLogout();
+  const { pathname } = useLocation();
   const [notifications, setNotifications] = useState(mockNotifications);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() =>
     tokenControl.getDarkMode(),
   );
 
-  // Реальные данные пользователя (кэш общий с ModuleMenu/Profile по queryKey).
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDarkMode]);
+
   const userId = tokenControl.getUserId();
   const { data: userResponse } = useGetQuery<{ data: IUser }>({
     url: `${ApiRoutes.FETCH_USER_BY_ID}${userId}`,
@@ -74,9 +95,9 @@ export const Header = ({ isModulesPage }: IProps) => {
   };
 
   const notificationContent = (
-    <div className="w-80 -m-3 p-3">
-      <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
-        <span className="font-semibold text-gray-800">Уведомления</span>
+    <div className="w-80 p-5 bg-white dark:bg-zinc-800 rounded-[2.5rem]">
+      <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-100 dark:border-zinc-750">
+        <span className="font-semibold text-gray-800 dark:text-zinc-200">Уведомления</span>
         {unreadCount > 0 && (
           <button
             onClick={markAllAsRead}
@@ -136,33 +157,158 @@ export const Header = ({ isModulesPage }: IProps) => {
     </div>
   );
 
+  const isProfilePage = pathname.includes("profile");
+  const isVertical = layoutMode === "left" || layoutMode === "right";
+  const activeGradient = (currentTheme && THEMES[currentTheme]?.gradient) || THEMES.emerald.gradient;
+
+  const themeContent = (
+    <div className="w-[260px] p-5 bg-white dark:bg-zinc-800 rounded-[2.5rem]">
+      <p className="text-xs font-bold text-zinc-550 dark:text-zinc-400 uppercase tracking-wider mb-4 px-1">
+        Выберите тему
+      </p>
+      <div className="space-y-2">
+        {Object.entries(THEMES).map(([key, theme]) => (
+          <button
+            key={key}
+            onClick={() => {
+              if (setCurrentTheme) {
+                setCurrentTheme(key);
+                localStorage.setItem("currentTheme", key);
+              }
+            }}
+            className={`w-full flex items-center gap-3 p-2.5 rounded-[1.5rem] hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all cursor-pointer ${
+              currentTheme === key
+                ? "bg-zinc-100 dark:bg-zinc-700 ring-2 ring-indigo-400"
+                : ""
+            }`}
+          >
+            <div
+              className={`w-10 h-10 rounded-full bg-gradient-to-br ${
+                theme.swatch || theme.gradient
+              } shadow-lg flex-shrink-0`}
+            />
+            <span className="text-sm font-semibold capitalize text-zinc-700 dark:text-zinc-300">
+              {key}
+            </span>
+            {currentTheme === key && (
+              <CheckCircle size={18} className="ml-auto text-emerald-600" />
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const bgContent = (
+    <div className="w-[260px] p-5 bg-white dark:bg-zinc-800 rounded-[2.5rem]">
+      <p className="text-xs font-bold text-zinc-550 dark:text-zinc-400 uppercase tracking-wider mb-4 px-1">
+        Фон страницы
+      </p>
+      <div className="space-y-2">
+        {Object.entries(BACKGROUNDS).map(([key, bg]) => (
+          <button
+            key={key}
+            onClick={() => {
+              if (setCurrentBg) {
+                setCurrentBg(key);
+                localStorage.setItem("currentBg", key);
+              }
+            }}
+            className={`w-full flex items-center gap-3 p-2.5 rounded-[1.5rem] hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all cursor-pointer ${
+              currentBg === key
+                ? "bg-zinc-100 dark:bg-zinc-700 ring-2 ring-indigo-400"
+                : ""
+            }`}
+          >
+            <div
+              className={`w-10 h-10 rounded-full bg-gradient-to-br ${
+                isDarkMode ? bg.dark : bg.light
+              } border border-zinc-200 dark:border-zinc-700 flex-shrink-0 shadow-sm`}
+            />
+            <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+              {bg.name}
+            </span>
+            {currentBg === key && (
+              <CheckCircle size={18} className="ml-auto text-emerald-500" />
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const layoutModes: { mode: LayoutMode; icon: React.ReactNode; title: string }[] = [
+    { mode: "top", icon: <PanelTop size={16} />, title: "Верхнее меню" },
+    { mode: "left", icon: <PanelLeft size={16} />, title: "Левое меню" },
+    { mode: "bottom", icon: <PanelBottom size={16} />, title: "Нижнее меню" },
+    { mode: "right", icon: <PanelRight size={16} />, title: "Правое меню" }
+  ];
+
+  const layoutContent = (
+    <div className="w-[220px] p-5 bg-white dark:bg-zinc-800 rounded-[2.5rem]">
+      <p className="text-xs font-bold text-zinc-550 dark:text-zinc-400 uppercase tracking-wider mb-4 px-1">
+        Макет страницы
+      </p>
+      <div className="space-y-2">
+        {layoutModes.map((item) => (
+          <button
+            key={item.mode}
+            onClick={() => {
+              if (setLayoutMode) {
+                setLayoutMode(item.mode);
+                localStorage.setItem("layoutMode", item.mode);
+              }
+            }}
+            className={`w-full flex items-center gap-3 p-2.5 rounded-[1.5rem] hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all cursor-pointer text-sm font-semibold ${
+              layoutMode === item.mode
+                ? "bg-zinc-100 dark:bg-zinc-700 ring-2 ring-indigo-400"
+                : ""
+            }`}
+          >
+            <span className="text-zinc-600 dark:text-zinc-300 flex-shrink-0">
+              {item.icon}
+            </span>
+            <span className="text-zinc-700 dark:text-zinc-200">
+              {item.title}
+            </span>
+            {layoutMode === item.mode && (
+              <CheckCircle size={18} className="ml-auto text-emerald-500" />
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <header
-      className={`
-        sticky top-0 z-50 w-full
-        flex items-center justify-between gap-4 px-6 py-3
-        bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl
-        border border-white/20 dark:border-zinc-700/30 shadow-lg
-        transition-all duration-300 ease-in-out
-        ${isModulesPage ? "rounded-none" : "rounded-[2.5rem]"}
-      `}
+      className={`sticky z-50 bg-white/40 dark:bg-slate-900/95 backdrop-blur-3xl border border-white/20 dark:border-slate-700/50 shadow-lg transition-all duration-300 ease-in-out rounded-none ${
+        layoutMode === "bottom" ? "bottom-0" : "top-0"
+      } ${
+        isVertical
+          ? "h-screen w-60 flex flex-col! items-stretch! justify-start! gap-6! px-4! py-6!"
+          : "w-full flex items-center justify-between gap-4 px-6 py-3"
+      }`}
     >
-      {/* Левая часть: логотип + пользователь */}
-      <div className="flex items-center gap-4 min-w-0">
+      <div className={`flex items-center gap-4 min-w-0 ${isVertical ? "flex-col! items-center! text-center! w-full!" : ""}`}>
         <Link
           to={AppRoutes.PROFILE}
           aria-label="На главную"
-          className="flex items-center gap-3 transition-transform duration-200 hover:scale-[1.02] focus:outline-none rounded-lg shrink-0"
+          className={`flex items-center gap-3 transition-transform duration-200 hover:scale-[1.02] focus:outline-none rounded-lg shrink-0 ${
+            isVertical ? "flex-col! text-center!" : ""
+          }`}
         >
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-700 via-green-600 to-teal-700 rounded-[2.5rem] flex items-center justify-center shadow-lg">
+          <div className={`w-10 h-10 bg-gradient-to-br ${activeGradient} rounded-[2.5rem] flex items-center justify-center shadow-lg`}>
             <Layout className="text-white" size={20} />
           </div>
-          <span className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white hidden sm:inline">
+          <span className={`text-lg font-bold tracking-tight text-zinc-900 dark:text-white ${isVertical ? "block!" : "hidden sm:inline"}`}>
             INTERLINK
           </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-3 pl-4 border-l border-white/30 dark:border-zinc-700/40 min-w-0">
+        <div className={`hidden md:flex items-center gap-3 pl-4 border-l border-white/30 dark:border-zinc-700/40 min-w-0 ${
+          isVertical ? "flex flex-col! items-center! gap-2! pl-0! border-l-0! border-t! pt-4! w-full!" : ""
+        }`}>
           <div className="relative shrink-0">
             <img
               src={userData?.photo_path || userAvatar}
@@ -171,7 +317,7 @@ export const Header = ({ isModulesPage }: IProps) => {
             />
             <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white/60 dark:border-zinc-900/60 bg-emerald-500 shadow-lg" />
           </div>
-          <div className="leading-tight min-w-0">
+          <div className={`leading-tight min-w-0 ${isVertical ? "text-center!" : ""}`}>
             <h3 className="text-sm font-bold text-zinc-900 dark:text-white truncate max-w-[180px]">
               {userData?.full_name || "—"}
             </h3>
@@ -182,16 +328,15 @@ export const Header = ({ isModulesPage }: IProps) => {
         </div>
       </div>
 
-      {/* Центр: навигация по модулям (только существующие модули) */}
-      <ModuleMenu variant="header" />
+      <ModuleMenu variant="header" isVertical={isVertical} />
 
-      {/* Правая часть: действия */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className={`flex items-center gap-2 shrink-0 ${isVertical ? "flex-col! items-center! gap-3! mt-auto! w-full!" : ""}`}>
         <Popover
           content={notificationContent}
           trigger="click"
-          placement="bottomRight"
+          placement={isVertical ? "rightBottom" : "bottomRight"}
           arrow={false}
+          overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0 }}
         >
           <button
             aria-label="Уведомления"
@@ -207,13 +352,13 @@ export const Header = ({ isModulesPage }: IProps) => {
         </Popover>
 
         <div
-          className="w-px h-6 bg-white/30 dark:bg-zinc-700/40 mx-1"
+          className={`${isVertical ? "w-full! h-px!" : "w-px! h-6!"} bg-white/30 dark:bg-zinc-700/40 mx-1`}
           aria-hidden="true"
         />
 
         <Tooltip
           title={isDarkMode ? "Светлая тема" : "Темная тема"}
-          placement="bottom"
+          placement={isVertical ? "right" : "bottom"}
         >
           <button
             onClick={toggleTheme}
@@ -228,14 +373,66 @@ export const Header = ({ isModulesPage }: IProps) => {
           </button>
         </Tooltip>
 
-        <Tooltip title="Выйти" placement="bottomRight">
+        {isProfilePage && (
+          <>
+            <Popover
+              content={themeContent}
+              trigger="click"
+              placement={isVertical ? "rightBottom" : "bottomRight"}
+              arrow={false}
+              overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0 }}
+            >
+              <button
+                aria-label="Выбор темы"
+                className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+              >
+                <Palette size={18} strokeWidth={2.2} />
+              </button>
+            </Popover>
+
+            <Popover
+              content={bgContent}
+              trigger="click"
+              placement={isVertical ? "rightBottom" : "bottomRight"}
+              arrow={false}
+              overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0 }}
+            >
+              <button
+                aria-label="Фон страницы"
+                className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+              >
+                <Layers size={18} strokeWidth={2.2} />
+              </button>
+            </Popover>
+
+            <Popover
+              content={layoutContent}
+              trigger="click"
+              placement={isVertical ? "rightBottom" : "bottomRight"}
+              arrow={false}
+              overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0 }}
+            >
+              <button
+                aria-label="Макет страницы"
+                className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+              >
+                {layoutMode === "top" && <PanelTop size={18} strokeWidth={2.2} />}
+                {layoutMode === "left" && <PanelLeft size={18} strokeWidth={2.2} />}
+                {layoutMode === "bottom" && <PanelBottom size={18} strokeWidth={2.2} />}
+                {layoutMode === "right" && <PanelRight size={18} strokeWidth={2.2} />}
+              </button>
+            </Popover>
+          </>
+        )}
+
+        <Tooltip title="Выйти" placement={isVertical ? "right" : "bottomRight"}>
           <button
             onClick={handleLogout}
             aria-label="Выход"
             className="flex items-center gap-2 py-2 px-4 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl border border-white/20 dark:border-zinc-700/30 text-zinc-600 dark:text-zinc-300 font-semibold text-sm hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer focus:outline-none"
           >
             <LogOut size={16} strokeWidth={2.2} />
-            <span className="hidden sm:inline">Выход</span>
+            <span className={isVertical ? "hidden!" : "hidden sm:inline"}>Выход</span>
           </button>
         </Tooltip>
       </div>
