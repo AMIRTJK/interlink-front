@@ -8,12 +8,13 @@ import { ApiRoutes } from "@shared/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { IosVariant } from "./IosVariant";
 import { User, MailQuestion, Users, Layout } from "lucide-react";
+import { THEMES } from "../designSettings";
 import "./style.css";
 
 interface IProps {
 	variant: "horizontal" | "compact" | "modern" | "full" | "ios" | "header";
-	/** Скрыть верхний уровень модулей (когда он уже отрисован в Header). */
 	hideTopLevel?: boolean;
+	isVertical?: boolean;
 }
 type TSubMenuItem = {
 	key: string;
@@ -26,7 +27,7 @@ type TSubMenuItem = {
 const SHARED_ROUTES = ["archive", "pinned", "trashed"];
 const STORAGE_KEY = "correspondence_active_tab";
 
-export const ModuleMenu = ({ variant, hideTopLevel }: IProps) => {
+export const ModuleMenu = ({ variant, hideTopLevel, isVertical }: IProps) => {
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
 
@@ -236,15 +237,16 @@ export const ModuleMenu = ({ variant, hideTopLevel }: IProps) => {
 		visible: { y: 0, opacity: 1 },
 	};
 
-	// Вариант для нового Header: компактная навигация по модулям (иконки-кнопки)
 	if (variant === "header") {
+		const currentTheme = (typeof window !== "undefined" && localStorage.getItem("currentTheme")) || "emerald";
+		const activeGradient = THEMES[currentTheme]?.gradient || THEMES.emerald.gradient;
 		const headerIcon: Record<string, ReactNode> = {
 			[AppRoutes.PROFILE]: <User size={18} />,
 			[AppRoutes.CORRESPONDENCE]: <MailQuestion size={18} />,
 			[AppRoutes.HR]: <Users size={18} />,
 		};
 		return (
-			<nav className="flex items-center gap-1">
+			<nav className={`flex ${isVertical ? "flex-col items-stretch w-full" : "items-center"} gap-1`}>
 				{menuItems.map((item) => {
 					if (!item || !("key" in item)) return null;
 					const itemKey = String(item.key);
@@ -258,14 +260,14 @@ export const ModuleMenu = ({ variant, hideTopLevel }: IProps) => {
 							title={typeof label === "string" ? label : undefined}
 							className={`flex items-center gap-2 px-3.5 py-2.5 rounded-[2.5rem] text-sm font-semibold transition-all ${
 								isActive
-									? "bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 text-white shadow-md"
+									? `bg-gradient-to-r ${activeGradient} text-white shadow-md`
 									: "text-zinc-600 dark:text-zinc-400 hover:bg-white/40 dark:hover:bg-zinc-800/40"
 							}`}
 						>
 							<span className="flex-shrink-0">
 								{headerIcon[itemKey] ?? <Layout size={18} />}
 							</span>
-							<span className="hidden lg:inline whitespace-nowrap">
+							<span className={`${isVertical ? "" : "hidden lg:inline"} whitespace-nowrap`}>
 								{label}
 							</span>
 						</button>

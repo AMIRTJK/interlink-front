@@ -327,7 +327,7 @@ export const AnalyticsTab = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3, delay: index * 0.07 }}
-            className="rounded-2xl p-4 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm border border-white/40 dark:border-zinc-700/40 shadow-sm hover:shadow-md transition-all duration-200"
+            className="rounded-2xl p-4 bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm border border-white/40 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all duration-200"
           >
             <div className={`text-xs font-semibold mb-1 ${kpiColorMap[card.color]}`}>{card.label}</div>
             <div className={`text-3xl font-black leading-none ${kpiColorMap[card.color]}`}>{card.value}</div>
@@ -342,7 +342,7 @@ export const AnalyticsTab = () => {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="rounded-3xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm border border-white/40 dark:border-zinc-700/30 shadow-md p-5"
+          className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm border border-white/40 dark:border-slate-700/50 shadow-md p-5"
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200">Статус задач</h3>
@@ -370,7 +370,7 @@ export const AnalyticsTab = () => {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.08 }}
-          className="rounded-3xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm border border-white/40 dark:border-zinc-700/30 shadow-md p-5"
+          className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm border border-white/40 dark:border-slate-700/50 shadow-md p-5"
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200">Приоритет задач</h3>
@@ -400,7 +400,7 @@ export const AnalyticsTab = () => {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.16 }}
-        className="rounded-3xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm border border-white/40 dark:border-zinc-700/30 shadow-md p-5"
+        className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm border border-white/40 dark:border-slate-700/50 shadow-md p-5"
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200">Прогресс выполнения</h3>
@@ -420,7 +420,7 @@ export const AnalyticsTab = () => {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.32 }}
-        className="rounded-3xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm border border-white/40 dark:border-zinc-700/30 shadow-md p-5"
+        className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm border border-white/40 dark:border-slate-700/50 shadow-md p-5"
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200">События календаря</h3>

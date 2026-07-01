@@ -7,7 +7,11 @@ import { ProfileSettingsModal } from "./ui/ProfileSettingsModal";
 import { PersonalCabinet } from "./ui/PersonalCabinet";
 import "./style.css";
 
-export const Profile = () => {
+interface IProps {
+  currentTheme?: string;
+}
+
+export const Profile = ({ currentTheme }: IProps) => {
   const { variant, setVariant } = useNavbar();
   const { tabMode, setTabMode } = useTabs();
   const userId = tokenControl.getUserId();
@@ -45,6 +49,7 @@ export const Profile = () => {
         userData={userData}
         isLoading={!!isLoading}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        currentTheme={currentTheme}
       />
     </>
   );
