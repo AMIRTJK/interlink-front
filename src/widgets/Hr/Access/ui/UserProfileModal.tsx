@@ -145,6 +145,7 @@ export const UserProfileModal = ({
 	);
 	const [isInitialized, setIsInitialized] = useState(false);
 	const [permissionsPage, setPermissionsPage] = useState(1);
+	const [accessPage, setAccessPage] = useState(1);
 
 	const { data: detailData } = useGetQuery({
 		url: `${ApiRoutes.FETCH_USER_BY_ID}${user.id}`,
@@ -292,6 +293,17 @@ export const UserProfileModal = ({
 		const start = (permissionsPage - 1) * PAGE_SIZE;
 		return entries.slice(start, start + PAGE_SIZE);
 	}, [groupedPermissions, permissionsPage]);
+
+	const ACCESS_PAGE_SIZE = 6;
+
+	const paginatedAccessLevels = useMemo(() => {
+		const start = (accessPage - 1) * ACCESS_PAGE_SIZE;
+		return userPermissionsState.slice(start, start + ACCESS_PAGE_SIZE);
+	}, [userPermissionsState, accessPage]);
+
+	useEffect(() => {
+		setAccessPage(1);
+	}, [userPermissionsState]);
 
 	const handleTogglePermission = (permissionName: string) => {
 		setUserPermissionsState((prev) => {
@@ -612,6 +624,55 @@ export const UserProfileModal = ({
 									</Dropdown>
 								</div>
 							</div>
+
+							{userPermissionsState.length > 0 && (
+								<div className="border border-slate-100 rounded-2xl p-5 space-y-3">
+									<h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+										Уровни доступа
+									</h4>
+									<div className="grid grid-cols-2 gap-x-6 gap-y-1">
+										{paginatedAccessLevels.map((perm) => {
+											const parts = perm.split(".");
+											const mod = MODULE_TRANSLATIONS[parts[0]] || parts[0];
+											const action = ACTION_TRANSLATIONS[parts.slice(1).join(".")] || parts.slice(1).join(".");
+											return (
+												<div key={perm} className="flex items-center justify-between py-2 border-b border-slate-50/50">
+													<span className="text-xs text-slate-600 font-semibold">
+														{mod} — {action}
+													</span>
+													<span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 text-[10px] font-bold select-none">
+														Да
+													</span>
+												</div>
+											);
+										})}
+									</div>
+									{userPermissionsState.length > ACCESS_PAGE_SIZE && (
+										<div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
+											<span className="text-xs text-slate-400 font-medium mr-auto">
+												{(accessPage - 1) * ACCESS_PAGE_SIZE + 1}–{Math.min(accessPage * ACCESS_PAGE_SIZE, userPermissionsState.length)} из {userPermissionsState.length} прав
+											</span>
+											<button
+												onClick={() => setAccessPage((p) => Math.max(1, p - 1))}
+												disabled={accessPage === 1}
+												className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+											>
+												<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+											</button>
+											<span className="text-xs font-bold text-slate-600 min-w-[32px] text-center">
+												{accessPage} / {Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE)}
+											</span>
+											<button
+												onClick={() => setAccessPage((p) => Math.min(Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE), p + 1))}
+												disabled={accessPage >= Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE)}
+												className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+											>
+												<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+											</button>
+										</div>
+									)}
+								</div>
+							)}
 						</div>
 					</If>
 					<If is={tab === "permissions"}>
