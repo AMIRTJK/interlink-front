@@ -29,7 +29,7 @@ export const MainLayout = () => {
         {variant === "ios" ? (
           <Navbar />
         ) : (
-          <ModuleMenu variant="modern" />
+          <ModuleMenu variant="modern" hideTopLevel />
         )}
       </If>
       <div className={variant === "ios" || tabMode === "on" ? "pb-30" : ""}>

@@ -25,3 +25,5 @@ dist-ssr
 tsconfig.tsbuildinfo
 
 # GEMINI.md
+
+src/widgets/NewProfileDesign/
