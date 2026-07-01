@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { UsersTab } from "./ui/UsersTab";
 import { RolesTab } from "./ui/RolesTab";
 import {
@@ -20,6 +20,8 @@ export const AccessWidget = () => {
 		{ id: "deps", label: "Отделы", content: <CreateDepartment /> },
 		{ id: "assign", label: "Назначить роль", content: <SetUserRole /> },
 	] as const;
+
+	const activeContent = tabs.find((t) => t.id === activeTab)?.content;
 
 	return (
 		<div className="space-y-6">
@@ -47,15 +49,18 @@ export const AccessWidget = () => {
 				})}
 			</div>
 
-			<div className="pt-2">
-				{tabs.map((tab) => (
-					<div
-						key={tab.id}
-						className={activeTab === tab.id ? "block!" : "hidden!"}
+			<div className="pt-2 relative">
+				<AnimatePresence mode="wait">
+					<motion.div
+						key={activeTab}
+						initial={{ opacity: 0, y: 8 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: -8 }}
+						transition={{ duration: 0.18, ease: "easeOut" }}
 					>
-						{tab.content}
-					</div>
-				))}
+						{activeContent}
+					</motion.div>
+				</AnimatePresence>
 			</div>
 		</div>
 	);
