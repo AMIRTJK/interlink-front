@@ -12,6 +12,7 @@ import { IUser } from "@entities/login";
 import { ProfileInfoTab } from "./tabs/ProfileInfoTab";
 import { AnalyticsTab } from "./tabs/AnalyticsTab";
 import { DevelopmentStub } from "./tabs/DevelopmentStub";
+import { FilesTab } from "./tabs/FilesTab";
 import { THEMES } from "@widgets/layout/ui/designSettings";
 import { Calendar } from "@widgets/Calendar";
 
@@ -66,7 +67,7 @@ export const PersonalCabinet = ({
       case "calendar":
         return <Calendar />;
       case "files":
-        return <DevelopmentStub title="Мои файлы" />;
+        return <FilesTab />;
       default:
         return null;
     }

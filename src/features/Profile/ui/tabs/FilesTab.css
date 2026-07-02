@@ -1,0 +1,39 @@
+/* Custom backgrounds for file cover previews */
+.excel-grid-bg {
+  background: linear-gradient(135deg, #10b981! 0%, #059669! 100%);
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(135deg, #10b981 0%, #059669 100%)!important;
+  background-size: 16px 16px, 16px 16px, 100% 100%;
+}
+
+/* Custom upload button gradient matching the design */
+.upload-btn-gradient {
+  background: linear-gradient(135deg, #f97316 0%, #a855f7 100%)!important;
+  transition: opacity 0.2s ease-in-out;
+}
+.upload-btn-gradient:hover {
+  opacity: 0.9;
+}
+
+/* Custom progress bar gradient */
+.storage-progress-bar {
+  background: linear-gradient(90deg, #f97316 0%, #ec4899 50%, #a855f7 100%)!important;
+}
+
+/* Scrollbar styles for the files grid (optional) */
+.files-tab-container ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.files-tab-container ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.files-tab-container ::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 4px;
+}
+.files-tab-container ::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}

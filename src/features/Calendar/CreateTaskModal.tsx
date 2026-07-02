@@ -125,7 +125,7 @@ export const CreateTaskModal = ({
 		<ConfigProvider
 			theme={{
 				components: {
-					Modal: { contentPadding: 0 },
+					Modal: { padding: 0 },
 				},
 			}}
 		>
