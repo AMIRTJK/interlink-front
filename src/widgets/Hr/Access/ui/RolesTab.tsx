@@ -12,9 +12,6 @@ import { RolePermissionsSidebar } from "./RolePermissionsSidebar";
 import { CreateRoleModal } from "./CreateRoleModal";
 import { IAccessUser } from "../model";
 
-
-
-
 export const RolesTab = () => {
 	const [selectedRole, setSelectedRole] = useState<{
 		id: number;
@@ -173,7 +170,8 @@ export const RolesTab = () => {
 		});
 	};
 
-	const totalUsers = usersData?.data?.total || usersData?.total || normalizedUsers.length;
+	const totalUsers =
+		usersData?.data?.total || usersData?.total || normalizedUsers.length;
 	const perPage = usersData?.data?.per_page || usersData?.per_page || 15;
 
 	const selectedRoleDisplayName = selectedRole ? selectedRole.name : "";
@@ -231,7 +229,7 @@ export const RolesTab = () => {
 							animate={{ opacity: 1, y: 0 }}
 							exit={{ opacity: 0, y: -6 }}
 							transition={{ duration: 0.15 }}
-							className="grid grid-cols-1 md:grid-cols-3 gap-6"
+							className="grid grid-cols-1 md:grid-cols-3 gap-3"
 						>
 							{paginatedRoles.map((r) => (
 								<RoleCard
@@ -264,75 +262,78 @@ export const RolesTab = () => {
 					)}
 				</AnimatePresence>
 
-				{rolesList.length > 6 && (() => {
-					const totalPages = Math.ceil(rolesList.length / 6);
-					const pageLimit = 5;
-					const pagesList: number[] = [];
-					let start = Math.max(1, rolesPage - 2);
-					let end = Math.min(totalPages, start + pageLimit - 1);
-					if (end - start + 1 < pageLimit) {
-						start = Math.max(1, end - pageLimit + 1);
-					}
-					for (let i = start; i <= end; i++) {
-						pagesList.push(i);
-					}
+				{rolesList.length > 6 &&
+					(() => {
+						const totalPages = Math.ceil(rolesList.length / 6);
+						const pageLimit = 5;
+						const pagesList: number[] = [];
+						let start = Math.max(1, rolesPage - 2);
+						let end = Math.min(totalPages, start + pageLimit - 1);
+						if (end - start + 1 < pageLimit) {
+							start = Math.max(1, end - pageLimit + 1);
+						}
+						for (let i = start; i <= end; i++) {
+							pagesList.push(i);
+						}
 
-					return (
-						<div className="flex justify-end pt-2">
-							<div className="flex items-center gap-1.5">
-								<button
-									onClick={() => setRolesPage(Math.max(1, rolesPage - 1))}
-									disabled={rolesPage === 1}
-									className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
-								>
-									<svg
-										width="14"
-										height="14"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										strokeWidth="2.5"
-										strokeLinecap="round"
-										strokeLinejoin="round"
-									>
-										<path d="M15 18l-6-6 6-6" />
-									</svg>
-								</button>
-								{pagesList.map((p) => (
+						return (
+							<div className="flex justify-end pt-2">
+								<div className="flex items-center gap-1.5">
 									<button
-										key={p}
-										onClick={() => setRolesPage(p)}
-										className={`w-8 h-8 flex items-center justify-center rounded-xl text-xs font-bold transition-all cursor-pointer ${
-											rolesPage === p
-												? "bg-blue-600 text-white border border-blue-600 shadow-sm"
-												: "bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-										}`}
+										onClick={() => setRolesPage(Math.max(1, rolesPage - 1))}
+										disabled={rolesPage === 1}
+										className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
 									>
-										{p}
+										<svg
+											width="14"
+											height="14"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2.5"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+										>
+											<path d="M15 18l-6-6 6-6" />
+										</svg>
 									</button>
-								))}
-								<button
-									onClick={() => setRolesPage(Math.min(totalPages, rolesPage + 1))}
-									disabled={rolesPage === totalPages}
-									className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
-								>
-									<svg
-										width="14"
-										height="14"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										strokeWidth="2.5"
-										strokeLinecap="round"
-										strokeLinejoin="round"
+									{pagesList.map((p) => (
+										<button
+											key={p}
+											onClick={() => setRolesPage(p)}
+											className={`w-8 h-8 flex items-center justify-center rounded-xl text-xs font-bold transition-all cursor-pointer ${
+												rolesPage === p
+													? "bg-blue-600 text-white border border-blue-600 shadow-sm"
+													: "bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+											}`}
+										>
+											{p}
+										</button>
+									))}
+									<button
+										onClick={() =>
+											setRolesPage(Math.min(totalPages, rolesPage + 1))
+										}
+										disabled={rolesPage === totalPages}
+										className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
 									>
-										<path d="M9 18l6-6-6-6" />
-									</svg>
-								</button>
+										<svg
+											width="14"
+											height="14"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2.5"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+										>
+											<path d="M9 18l6-6-6-6" />
+										</svg>
+									</button>
+								</div>
 							</div>
-						</div>
-					);
-				})()}
+						);
+					})()}
 
 				{selectedRole && (
 					<div className="space-y-4 pt-4 border-t border-slate-100">
