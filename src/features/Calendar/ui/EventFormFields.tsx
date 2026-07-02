@@ -35,10 +35,11 @@ export const EventFormFields = ({
 				}
 				name="title"
 				rules={[{ required: true, message: "Введите название события" }]}
+				className="mb-3!"
 			>
 				<Input
 					placeholder="Например: Встреча с командой"
-					className="w-full! bg-zinc-100/70! hover:bg-zinc-200/50! focus:bg-white! border-none! rounded-[1.25rem]! h-11! px-4! transition-all! text-sm!"
+					className="w-full! bg-zinc-100! hover:bg-zinc-200/70! focus:bg-zinc-50! shadow-none! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! h-10! px-4! transition-all! duration-200! text-sm! text-zinc-700!"
 				/>
 			</Form.Item>
 
@@ -50,15 +51,16 @@ export const EventFormFields = ({
 				}
 				name="date"
 				rules={[{ required: true, message: "Выберите дату" }]}
+				className="mb-3!"
 			>
 				<DatePicker
 					format="DD.MM.YYYY"
 					placeholder="Выберите дату"
-					className="w-full! bg-zinc-100/70! hover:bg-zinc-200/50! focus:bg-white! border-none! rounded-[1.25rem]! h-11! px-4! transition-all! text-sm!"
+					className="w-full! bg-zinc-100! hover:bg-zinc-200/70! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! h-10! px-4! transition-all! duration-200! text-sm!"
 				/>
 			</Form.Item>
 
-			<div className="grid! grid-cols-2! gap-4!">
+			<div className="grid! grid-cols-2! gap-3! mb-3!">
 				<Form.Item
 					label={
 						<span className="text-[11px]! font-extrabold! text-zinc-400! uppercase! tracking-wider!">
@@ -67,11 +69,12 @@ export const EventFormFields = ({
 					}
 					name="time"
 					rules={[{ required: true, message: "Выберите время" }]}
+					className="mb-0!"
 				>
 					<TimePicker
 						format="HH:mm"
 						placeholder="10:00"
-						className="w-full! bg-zinc-100/70! hover:bg-zinc-200/50! focus:bg-white! border-none! rounded-[1.25rem]! h-11! px-4! transition-all! text-sm!"
+						className="w-full! bg-zinc-100! hover:bg-zinc-200/70! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! h-10! px-4! transition-all! duration-200! text-sm!"
 					/>
 				</Form.Item>
 
@@ -82,11 +85,12 @@ export const EventFormFields = ({
 						</span>
 					}
 					name="endTime"
+					className="mb-0!"
 				>
 					<TimePicker
 						format="HH:mm"
 						placeholder="11:00"
-						className="w-full! bg-zinc-100/70! hover:bg-zinc-200/50! focus:bg-white! border-none! rounded-[1.25rem]! h-11! px-4! transition-all! text-sm!"
+						className="w-full! bg-zinc-100! hover:bg-zinc-200/70! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! h-10! px-4! transition-all! duration-200! text-sm!"
 					/>
 				</Form.Item>
 			</div>
@@ -98,6 +102,7 @@ export const EventFormFields = ({
 					</span>
 				}
 				name="color"
+				className="mb-3!"
 			>
 				<div className="flex! items-center! gap-3!">
 					{colors.map((c) => {
@@ -107,7 +112,7 @@ export const EventFormFields = ({
 								key={c.value}
 								type="button"
 								onClick={() => form.setFieldValue("color", c.value)}
-								className="w-10! h-10! rounded-full! flex! items-center! justify-center! cursor-pointer! transition-all! border-none! outline-none! p-0!"
+								className="w-9! h-9! rounded-full! flex! items-center! justify-center! cursor-pointer! transition-all! duration-200! border-none! outline-none! p-0!"
 								style={{
 									backgroundColor: c.value,
 									boxShadow: active
@@ -117,7 +122,7 @@ export const EventFormFields = ({
 								}}
 							>
 								<If is={active}>
-									<CheckOutlined className="text-white! text-sm! font-bold!" />
+									<CheckOutlined className="text-white! text-xs! font-bold!" />
 								</If>
 							</button>
 						);
@@ -133,14 +138,15 @@ export const EventFormFields = ({
 					</span>
 				}
 				name="assignees"
+				className="mb-3!"
 			>
 				<Select
 					mode="multiple"
 					placeholder="Добавить участника..."
 					loading={isFetchingUsers}
 					options={assigneesOptions}
-					variant="borderless"
-					className="w-full! bg-zinc-100/70! hover:bg-zinc-200/50! rounded-[1.25rem]! min-h-[44px]! px-2! py-1! transition-all! text-sm!"
+					variant="outlined"
+					className="w-full! bg-zinc-100! hover:bg-zinc-200/70! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! min-h-[40px]! px-1! transition-all! duration-200! text-sm!"
 					filterOption={(input, option) =>
 						(option?.label ?? "")
 							.toString()
@@ -157,11 +163,12 @@ export const EventFormFields = ({
 					</span>
 				}
 				name="description"
+				className="mb-2!"
 			>
 				<Input.TextArea
 					placeholder="Детали события..."
 					autoSize={{ minRows: 3, maxRows: 6 }}
-					className="w-full! bg-zinc-100/70! hover:bg-zinc-200/50! focus:bg-white! border-none! rounded-[1.25rem]! transition-all! text-sm!"
+					className="w-full! bg-zinc-100! hover:bg-zinc-200/70! focus:bg-zinc-50! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! transition-all! duration-200! text-sm! text-zinc-700!"
 				/>
 			</Form.Item>
 		</>
