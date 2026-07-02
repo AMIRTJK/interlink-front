@@ -125,7 +125,10 @@ export const CreateTaskModal = ({
 		<ConfigProvider
 			theme={{
 				components: {
-					Modal: { padding: 0 },
+					Modal: {
+						paddingMD: 0,
+						paddingContentHorizontalLG: 0,
+					},
 				},
 			}}
 		>
@@ -136,7 +139,8 @@ export const CreateTaskModal = ({
 				width={480}
 				centered
 				closable={false}
-				style={{ borderRadius: 10, overflow: "hidden" }}
+				style={{ borderRadius: 20, overflow: "hidden" }}
+				styles={{ body: { padding: 0 } }}
 			>
 				<div
 					className={`bg-linear-to-r! ${activeTheme.gradient} px-6! py-4! flex! items-center! justify-between!`}
@@ -186,4 +190,3 @@ export const CreateTaskModal = ({
 		</ConfigProvider>
 	);
 };
-
