@@ -10,6 +10,7 @@ interface IProps {
   selectedFileIds: string[];
   onToggleSelectFile: (id: string) => void;
   onView: (file: IFileItem) => void;
+  onShare: (file: IFileItem) => void;
   onTogglePin: (id: string) => void;
   onDelete: (id: string) => void;
 }
@@ -20,6 +21,7 @@ export const FileGridList = ({
   selectedFileIds,
   onToggleSelectFile,
   onView,
+  onShare,
   onTogglePin,
   onDelete,
 }: IProps) => {
@@ -40,6 +42,7 @@ export const FileGridList = ({
           selectedFileIds={selectedFileIds}
           onToggleSelectFile={onToggleSelectFile}
           onView={onView}
+          onShare={onShare}
           onDelete={onDelete}
         />
       </If>

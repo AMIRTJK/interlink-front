@@ -7,6 +7,7 @@ import { FileGridList } from "./files/FileGridList";
 import { StorageUsage } from "./files/StorageUsage";
 import { AddCategoryModal } from "./files/AddCategoryModal";
 import { FilePreviewModal } from "./files/FilePreviewModal";
+import { ShareFileModal } from "./files/ShareFileModal";
 import "./FilesTab.css";
 
 export const FilesTab = () => {
@@ -19,6 +20,7 @@ export const FilesTab = () => {
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [previewFile, setPreviewFile] = useState<IFileItem | null>(null);
+  const [shareFile, setShareFile] = useState<IFileItem | null>(null);
 
   // Выбор файла в реестре (чекбокс)
   const handleToggleSelectFile = (id: string) => {
@@ -153,6 +155,7 @@ export const FilesTab = () => {
         selectedFileIds={selectedFileIds}
         onToggleSelectFile={handleToggleSelectFile}
         onView={setPreviewFile}
+        onShare={setShareFile}
         onTogglePin={handleTogglePin}
         onDelete={handleDeleteFile}
       />
@@ -171,6 +174,12 @@ export const FilesTab = () => {
       <FilePreviewModal
         file={previewFile}
         onClose={() => setPreviewFile(null)}
+      />
+
+      {/* Модалка "Поделиться" */}
+      <ShareFileModal
+        file={shareFile}
+        onClose={() => setShareFile(null)}
       />
     </div>
   );
