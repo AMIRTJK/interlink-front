@@ -28,3 +28,4 @@ tsconfig.tsbuildinfo
 
 src/widgets/NewProfileDesign/
 src/widgets/DesignTaskCode/
+src/widgets/NewDesignAccess/

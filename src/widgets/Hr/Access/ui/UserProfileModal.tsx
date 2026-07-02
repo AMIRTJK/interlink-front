@@ -720,7 +720,7 @@ export const UserProfileModal = ({
 													type="button"
 													className="px-3 py-1 border border-dashed border-slate-300 hover:border-blue-500 hover:text-blue-600 rounded-xl text-sm text-slate-500 transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-50! disabled:cursor-not-allowed!"
 												>
-													<span>+ Добавить роль</span>
+													<span>Добавить роль</span>
 													<ChevronDown size={14} className="text-slate-400" />
 												</button>
 											</Dropdown>

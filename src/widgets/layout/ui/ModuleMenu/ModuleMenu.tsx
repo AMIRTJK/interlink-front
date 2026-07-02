@@ -7,7 +7,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import { ApiRoutes } from "@shared/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { IosVariant } from "./IosVariant";
-import { User, MailQuestion, Users, Layout } from "lucide-react";
+import { User, MailQuestion, Users, Layout, ShieldCheck } from "lucide-react";
 import { THEMES } from "../designSettings";
 import "./style.css";
 
@@ -247,6 +247,7 @@ export const ModuleMenu = ({ variant, hideTopLevel, isVertical }: IProps) => {
 			[AppRoutes.PROFILE]: <User size={18} />,
 			[AppRoutes.CORRESPONDENCE]: <MailQuestion size={18} />,
 			[AppRoutes.HR]: <Users size={18} />,
+			[AppRoutes.ADMINISTRATION]: <ShieldCheck size={18} />,
 		};
 		return (
 			<nav
