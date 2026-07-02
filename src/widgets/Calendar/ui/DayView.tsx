@@ -1,7 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import { Popover, Avatar, Tooltip } from "antd";
-import { ClockCircleOutlined, CalendarOutlined, DeleteOutlined, UserOutlined } from "@ant-design/icons";
+import { Popover } from "antd";
+import { ClockCircleOutlined, CalendarOutlined, DeleteOutlined } from "@ant-design/icons";
 import { If } from "@shared/ui";
 import type { Task } from "@features/tasks";
 
@@ -12,37 +12,33 @@ interface IDayViewProps {
   onDayClick: (date: Dayjs) => void;
 }
 
-const getEventColorClasses = (color?: string) => {
-  const lowerColor = color?.toLowerCase();
-  if (lowerColor === "#29cc39" || lowerColor === "green" || lowerColor === "#166534") {
-    return "bg-emerald-50! border-emerald-200! text-emerald-700! dark:bg-emerald-950/20! dark:border-emerald-800/30!";
-  }
-  if (lowerColor === "#ffcb33" || lowerColor === "yellow") {
-    return "bg-yellow-50! border-yellow-200! text-yellow-700! dark:bg-yellow-950/20! dark:border-yellow-800/30!";
-  }
-  if (lowerColor === "#ff6633" || lowerColor === "orange") {
-    return "bg-orange-50! border-orange-200! text-orange-700! dark:bg-orange-950/20! dark:border-orange-800/30!";
-  }
-  if (lowerColor === "#cc7429" || lowerColor === "bronze") {
-    return "bg-amber-50! border-amber-200! text-amber-800! dark:bg-amber-950/20! dark:border-amber-800/30!";
-  }
-  if (lowerColor === "#8833ff" || lowerColor === "purple" || lowerColor === "#af52de") {
-    return "bg-indigo-50! border-indigo-200! text-indigo-700! dark:bg-indigo-950/20! dark:border-indigo-800/30!";
-  }
-  if (lowerColor === "#33bfff" || lowerColor === "blue") {
-    return "bg-sky-50! border-sky-200! text-sky-700! dark:bg-sky-950/20! dark:border-sky-800/30!";
-  }
-  if (lowerColor === "#e62e7b" || lowerColor === "pink" || lowerColor === "#f43f5e") {
-    return "bg-rose-50! border-rose-200! text-rose-700! dark:bg-rose-950/20! dark:border-rose-800/30!";
-  }
-  if (lowerColor === "#2ee6ca" || lowerColor === "tiffany" || lowerColor === "#10b981") {
-    return "bg-teal-50! border-teal-200! text-teal-700! dark:bg-teal-950/20! dark:border-teal-800/30!";
-  }
-  return "bg-emerald-50! border-emerald-200! text-emerald-700! dark:bg-emerald-950/20! dark:border-emerald-800/30!";
+const HOUR_HEIGHT = 64;
+const START_HOUR = 0;
+const END_HOUR = 24;
+const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
+
+const getEventBgStyle = (color?: string): React.CSSProperties => ({
+  backgroundColor: color ? `${color}22` : "#10B98122",
+  borderLeft: `3px solid ${color || "#10B981"}`,
+  color: color || "#10B981",
+});
+
+const getEventDotStyle = (color?: string) => ({
+  backgroundColor: color || "#10B981",
+});
+
+const timeToMinutes = (time?: string): number => {
+  if (!time) return 0;
+  const [h, m] = time.split(":").map(Number);
+  return h * 60 + (m || 0);
 };
 
-const getEventDotStyle = (color?: string) => {
-  return { backgroundColor: color || "#10B981" };
+const getEventPosition = (task: Task) => {
+  const startMin = timeToMinutes(task.time);
+  const endMin = task.endTime ? timeToMinutes(task.endTime) : startMin + 60;
+  const top = ((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT;
+  const height = Math.max(((endMin - startMin) / 60) * HOUR_HEIGHT, HOUR_HEIGHT * 0.5);
+  return { top, height };
 };
 
 export const DayView = ({
@@ -51,102 +47,138 @@ export const DayView = ({
   onDeleteEvent,
   onDayClick,
 }: IDayViewProps) => {
+  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+
   const dayTasks = useMemo(() => {
     const targetDate = currentDate.format("YYYY-MM-DD");
     return tasks.filter((task) => task.date === targetDate);
   }, [currentDate, tasks]);
 
-  const formattedDayName = useMemo(() => {
-    const formatted = currentDate.format("dddd");
-    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  const nowTop = useMemo(() => {
+    const now = dayjs();
+    const isToday = now.isSame(currentDate, "day");
+    if (!isToday) return null;
+    const min = now.hour() * 60 + now.minute();
+    return ((min - START_HOUR * 60) / 60) * HOUR_HEIGHT;
   }, [currentDate]);
 
+  const dayName = currentDate.format("dd").toUpperCase();
+  const monthYear = currentDate.format("MMMM YYYY");
+
   return (
-    <div
-      onClick={() => onDayClick(currentDate)}
-      className="w-full! bg-white/40! dark:bg-slate-800/40! rounded-3xl! p-6! border! border-white/20! dark:border-slate-700/30! shadow-sm! min-h-[400px]! cursor-pointer!"
-    >
-      <div className="flex! items-center! justify-between! mb-6! border-b! border-zinc-100! dark:border-slate-800! pb-4!">
-        <div>
-          <h2 className="text-xl! font-extrabold! text-zinc-800! dark:text-zinc-100! m-0!">
-            {currentDate.format("D MMMM YYYY")} г.
-          </h2>
-          <p className="text-sm! font-semibold! text-zinc-400! m-0! mt-0.5!">
-            {formattedDayName}
-          </p>
+    <div className="w-full! bg-white! rounded-2xl! overflow-hidden! border! border-zinc-100!">
+      <div className="flex!">
+        <div className="w-24! flex-shrink-0! border-r! border-zinc-100! p-4! flex! flex-col! gap-0.5!">
+          <span className="text-5xl! font-black! text-zinc-800! leading-none!">{currentDate.date()}</span>
+          <span className="text-sm! font-bold! text-zinc-500!">{dayName}</span>
+          <span className="text-xs! text-zinc-400!">{monthYear}</span>
         </div>
-        <span className="text-xs! font-bold! text-zinc-400! bg-zinc-100! dark:bg-slate-800! px-3! py-1.5! rounded-full!">
-          Событий: {dayTasks.length}
-        </span>
-      </div>
 
-      <div className="space-y-4!">
-        <If is={dayTasks.length === 0}>
-          <div className="flex! flex-col! items-center! justify-center! text-zinc-400! italic! py-20!">
-            <CalendarOutlined className="text-4xl! mb-3! opacity-35!" />
-            <span>Нет запланированных событий на этот день</span>
-            <span className="text-xs! mt-1! opacity-75!">Нажмите в любое место, чтобы создать событие</span>
-          </div>
-        </If>
-
-        {dayTasks.map((task) => (
-          <div
-            key={task.id}
-            onClick={(e) => e.stopPropagation()}
-            className={`flex! flex-col! md:flex-row! md:items-center! justify-between! p-4! rounded-2xl! border! shadow-sm! transition-all! hover:shadow-md! ${getEventColorClasses(
-              task.color
-            )}`}
-          >
-            <div className="flex! items-start! gap-4!">
+        <div className="flex-1! overflow-y-auto! max-h-[600px]! flex!">
+          <div className="w-16! flex-shrink-0! border-r! border-zinc-100! relative!">
+            {HOURS.map((h) => (
               <div
-                className="w-3! h-3! rounded-full! mt-1.5! flex-shrink-0!"
-                style={getEventDotStyle(task.color)}
-              />
-              <div className="space-y-1!">
-                <div className="flex! items-center! gap-2! flex-wrap!">
-                  <span className="font-bold! text-zinc-900! dark:text-zinc-100! text-base!">
-                    {task.title}
-                  </span>
-                  <div className="flex! items-center! gap-1! text-xs! font-bold! text-zinc-500! dark:text-zinc-400! bg-white/60! dark:bg-slate-900/60! px-2.5! py-1! rounded-full!">
-                    <ClockCircleOutlined />
-                    <span>
-                      {task.time}
-                      {task.endTime ? ` - ${task.endTime}` : ""}
-                    </span>
-                  </div>
-                </div>
-                <If is={task.description}>
-                  <p className="text-sm! text-zinc-600! dark:text-zinc-300! leading-relaxed! whitespace-pre-wrap! max-w-2xl!">
-                    {task.description}
-                  </p>
-                </If>
-
-                <If is={task.participants && task.participants.length > 0}>
-                  <div className="flex! items-center! gap-2! mt-2!">
-                    <span className="text-[10px]! font-bold! uppercase! text-zinc-400!">Участники:</span>
-                    <Avatar.Group size="small" maxCount={5}>
-                      {task.participants?.map((p) => (
-                        <Tooltip key={p.id} title={p.name}>
-                          <Avatar src={p.avatar} icon={<UserOutlined />} />
-                        </Tooltip>
-                      ))}
-                    </Avatar.Group>
-                  </div>
-                </If>
-              </div>
-            </div>
-
-            <div className="flex! items-center! gap-2! mt-4! md:mt-0! self-end! md:self-center!">
-              <button
-                onClick={() => onDeleteEvent(task.id)}
-                className="flex! items-center! gap-1.5! text-red-500! hover:text-red-600! font-semibold! text-xs! transition-colors! cursor-pointer! bg-transparent! border-none! p-0!"
+                key={h}
+                className="flex! items-start! justify-end! pr-3! text-[11px]! font-medium! text-zinc-400!"
+                style={{ height: HOUR_HEIGHT }}
               >
-                <DeleteOutlined />
-                <span>Удалить</span>
-              </button>
-            </div>
+                <span className="-translate-y-2!">{h === 0 ? "" : `${String(h).padStart(2, "0")}:00`}</span>
+              </div>
+            ))}
           </div>
-        ))}
+
+          <div
+            className="flex-1! relative! cursor-pointer!"
+            style={{ height: HOUR_HEIGHT * HOURS.length }}
+            onClick={() => onDayClick(currentDate)}
+          >
+            {HOURS.map((h) => (
+              <div
+                key={h}
+                className="w-full! border-b! border-zinc-100! absolute! left-0! right-0!"
+                style={{ top: (h - START_HOUR) * HOUR_HEIGHT, height: HOUR_HEIGHT }}
+              />
+            ))}
+
+            <If is={nowTop !== null}>
+              <div
+                className="absolute! left-0! right-0! z-20! flex! items-center! pointer-events-none!"
+                style={{ top: nowTop ?? 0 }}
+              >
+                <div className="w-2! h-2! rounded-full! bg-red-500! flex-shrink-0! -ml-1!" />
+                <div className="flex-1! h-px! bg-red-400!" />
+              </div>
+            </If>
+
+            {dayTasks.map((task) => {
+              const { top, height } = getEventPosition(task);
+              return (
+                <div
+                  key={task.id}
+                  className="absolute! left-2! right-2! z-10!"
+                  style={{ top, height }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Popover
+                    open={openPopoverId === task.id}
+                    onOpenChange={(v) => setOpenPopoverId(v ? task.id : null)}
+                    content={
+                      <div className="w-[240px]! bg-white! rounded-2xl! shadow-lg! overflow-hidden!">
+                        <div className="flex! items-start! gap-2.5! p-4! pb-2!">
+                          <span
+                            className="w-2.5! h-2.5! rounded-full! flex-shrink-0! mt-1!"
+                            style={getEventDotStyle(task.color)}
+                          />
+                          <h4 className="font-bold! text-zinc-900! text-sm! m-0! leading-snug!">
+                            {task.title}
+                          </h4>
+                        </div>
+                        <div className="px-4! pb-3! space-y-1.5! text-zinc-500! text-xs!">
+                          <div className="flex! items-center! gap-2!">
+                            <ClockCircleOutlined className="text-zinc-400! flex-shrink-0!" />
+                            <span>{task.time}{task.endTime ? ` – ${task.endTime}` : ""}</span>
+                          </div>
+                          <div className="flex! items-center! gap-2!">
+                            <CalendarOutlined className="text-zinc-400! flex-shrink-0!" />
+                            <span>{dayjs(task.date).format("YYYY-MM-DD")}</span>
+                          </div>
+                          <If is={!!task.description}>
+                            <p className="text-zinc-500! text-xs! mt-1! leading-relaxed! whitespace-pre-wrap! m-0!">
+                              {task.description}
+                            </p>
+                          </If>
+                        </div>
+                        <div className="border-t! border-zinc-100! px-4! py-2.5! flex! justify-end!">
+                          <button
+                            onClick={() => { onDeleteEvent(task.id); setOpenPopoverId(null); }}
+                            className="flex! items-center! gap-1.5! text-red-500! hover:text-red-600! font-semibold! text-xs! transition-colors! cursor-pointer! bg-transparent! border-none! p-0!"
+                          >
+                            <DeleteOutlined />
+                            <span>Удалить</span>
+                          </button>
+                        </div>
+                      </div>
+                    }
+                    trigger="click"
+                    placement="right"
+                    overlayClassName="calendar-event-popover"
+                    overlayInnerStyle={{ padding: 0, borderRadius: 16, boxShadow: "0 8px 32px rgba(0,0,0,0.12)" }}
+                  >
+                    <div
+                      className="h-full! w-full! rounded-lg! px-2! py-1! overflow-hidden! cursor-pointer! transition-opacity! hover:opacity-90! text-xs! font-medium!"
+                      style={getEventBgStyle(task.color)}
+                    >
+                      <div className="font-semibold! truncate!">{task.time} {task.title}</div>
+                      <If is={!!task.endTime}>
+                        <div className="opacity-70! truncate! text-[10px]!">{task.endTime}</div>
+                      </If>
+                    </div>
+                  </Popover>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
