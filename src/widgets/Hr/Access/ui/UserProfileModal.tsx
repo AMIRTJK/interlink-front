@@ -286,7 +286,7 @@ export const UserProfileModal = ({
 		return groups;
 	}, [allSystemPermissions]);
 
-	const PAGE_SIZE = 5;
+	const PAGE_SIZE = 4;
 
 	const paginatedGroupEntries = useMemo(() => {
 		const entries = Object.entries(groupedPermissions);

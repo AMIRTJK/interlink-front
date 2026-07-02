@@ -379,7 +379,7 @@ export const RolesTab = () => {
 						initial={{ opacity: 0, width: 0 }}
 						animate={{ opacity: 1, width: 320 }}
 						exit={{ opacity: 0, width: 0 }}
-						transition={{ type: "spring", stiffness: 350, damping: 32 }}
+						transition={{ duration: 0.2, ease: "easeOut" }}
 						className="shrink-0! sticky top-6 overflow-hidden"
 					>
 						<div className="w-[320px] pb-4">
