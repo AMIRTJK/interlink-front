@@ -296,14 +296,19 @@ export const UserProfileModal = ({
 
 	const ACCESS_PAGE_SIZE = 6;
 
+	const relevantPermissions = useMemo(() => {
+		const activeModules = new Set(userPermissionsState.map((p) => p.split(".")[0]));
+		return allSystemPermissions.filter((perm) => activeModules.has(perm.split(".")[0]));
+	}, [allSystemPermissions, userPermissionsState]);
+
 	const paginatedAccessLevels = useMemo(() => {
 		const start = (accessPage - 1) * ACCESS_PAGE_SIZE;
-		return userPermissionsState.slice(start, start + ACCESS_PAGE_SIZE);
-	}, [userPermissionsState, accessPage]);
+		return relevantPermissions.slice(start, start + ACCESS_PAGE_SIZE);
+	}, [relevantPermissions, accessPage]);
 
 	useEffect(() => {
 		setAccessPage(1);
-	}, [userPermissionsState]);
+	}, [relevantPermissions]);
 
 	const handleTogglePermission = (permissionName: string) => {
 		setUserPermissionsState((prev) => {
@@ -354,11 +359,40 @@ export const UserProfileModal = ({
 	}, [availableRolesToAdd]);
 
 	const handleAddRole = (roleName: string) => {
-		setSelectedRoles((prev) => [...prev, roleName]);
+		setSelectedRoles((prev) => {
+			const nextRoles = [...prev, roleName];
+			const roleObj = rolesList.find((r) => r.name === roleName);
+			if (roleObj && roleObj.permissions) {
+				const rolePerms = Array.isArray(roleObj.permissions)
+					? roleObj.permissions.map((p: any) => (typeof p === "string" ? p : p?.name)).filter(Boolean)
+					: [];
+				setUserPermissionsState((prevPerms) => Array.from(new Set([...prevPerms, ...rolePerms])));
+			}
+			return nextRoles;
+		});
 	};
 
 	const handleRemoveRole = (roleName: string) => {
-		setSelectedRoles((prev) => prev.filter((r) => r !== roleName));
+		setSelectedRoles((prev) => {
+			const nextRoles = prev.filter((r) => r !== roleName);
+			const perms = new Set<string>();
+			nextRoles.forEach((rName) => {
+				const roleObj = rolesList.find((r) => r.name === rName);
+				if (roleObj && roleObj.permissions) {
+					if (Array.isArray(roleObj.permissions)) {
+						roleObj.permissions.forEach((p: any) => {
+							if (typeof p === "string") {
+								perms.add(p);
+							} else if (p && typeof p === "object" && p.name) {
+								perms.add(p.name);
+							}
+						});
+					}
+				}
+			});
+			setUserPermissionsState(Array.from(perms));
+			return nextRoles;
+		});
 	};
 
 	const handleSave = () => {
@@ -617,7 +651,12 @@ export const UserProfileModal = ({
 										<h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
 											Роли пользователя
 										</h4>
-										<div className="flex flex-wrap gap-2 items-center">
+										<div className="flex flex-wrap gap-2.5 items-center">
+											{selectedRoles.length === 0 && (
+												<span className="text-slate-400 text-xs font-semibold italic mr-2 select-none">
+													Роли не назначены
+												</span>
+											)}
 											{selectedRoles.map((role) => {
 												const style = ROLE_CHIP_STYLE_MAP[role] || {
 													border: "border-blue-100!",
@@ -657,54 +696,68 @@ export const UserProfileModal = ({
 										</div>
 									</div>
 
-									{userPermissionsState.length > 0 && (
-										<div className="border border-slate-100 rounded-2xl p-5 space-y-3">
-											<h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-												Уровни доступа
-											</h4>
-											<div className="grid grid-cols-2 gap-x-6 gap-y-1">
-												{paginatedAccessLevels.map((perm) => {
-													const parts = perm.split(".");
-													const mod = MODULE_TRANSLATIONS[parts[0]] || parts[0];
-													const action = ACTION_TRANSLATIONS[parts.slice(1).join(".")] || parts.slice(1).join(".");
-													return (
-														<div key={perm} className="flex items-center justify-between py-2 border-b border-slate-50/50">
-															<span className="text-xs text-slate-600 font-semibold">
-																{mod} — {action}
-															</span>
-															<span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 text-[10px] font-bold select-none">
-																Да
-															</span>
-														</div>
-													);
-												})}
-											</div>
-											{userPermissionsState.length > ACCESS_PAGE_SIZE && (
-												<div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
-													<span className="text-xs text-slate-400 font-medium mr-auto">
-														{(accessPage - 1) * ACCESS_PAGE_SIZE + 1}–{Math.min(accessPage * ACCESS_PAGE_SIZE, userPermissionsState.length)} из {userPermissionsState.length} прав
-													</span>
-													<button
-														onClick={() => setAccessPage((p) => Math.max(1, p - 1))}
-														disabled={accessPage === 1}
-														className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-													>
-														<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-													</button>
-													<span className="text-xs font-bold text-slate-600 min-w-[32px] text-center">
-														{accessPage} / {Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE)}
-													</span>
-													<button
-														onClick={() => setAccessPage((p) => Math.min(Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE), p + 1))}
-														disabled={accessPage >= Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE)}
-														className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-													>
-														<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-													</button>
+									<div className="border border-slate-100 rounded-2xl p-5 space-y-3">
+										<h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+											Уровни доступа
+										</h4>
+										{relevantPermissions.length > 0 ? (
+											<>
+												<div className="grid grid-cols-2 gap-x-6 gap-y-1">
+													{paginatedAccessLevels.map((perm) => {
+														const parts = perm.split(".");
+														const mod = MODULE_TRANSLATIONS[parts[0]] || parts[0];
+														const action = ACTION_TRANSLATIONS[parts.slice(1).join(".")] || parts.slice(1).join(".");
+														const hasPermission = userPermissionsState.includes(perm);
+														return (
+															<div key={perm} className="flex items-center justify-between py-2 border-b border-slate-50/50">
+																<span className="text-xs text-slate-600 font-semibold">
+																	{mod} — {action}
+																</span>
+																{hasPermission ? (
+																	<span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 text-[10px] font-bold select-none">
+																		Да
+																	</span>
+																) : (
+																	<span className="px-2 py-0.5 rounded bg-slate-100 text-slate-400 text-[10px] font-bold select-none">
+																		Нет
+																	</span>
+																)}
+															</div>
+														);
+													})}
 												</div>
-											)}
-										</div>
-									)}
+												{relevantPermissions.length > ACCESS_PAGE_SIZE && (
+													<div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
+														<span className="text-xs text-slate-400 font-medium mr-auto">
+															{(accessPage - 1) * ACCESS_PAGE_SIZE + 1}–{Math.min(accessPage * ACCESS_PAGE_SIZE, relevantPermissions.length)} из {relevantPermissions.length} прав
+														</span>
+														<button
+															onClick={() => setAccessPage((p) => Math.max(1, p - 1))}
+															disabled={accessPage === 1}
+															className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+														>
+															<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+														</button>
+														<span className="text-xs font-bold text-slate-600 min-w-[32px] text-center">
+															{accessPage} / {Math.ceil(relevantPermissions.length / ACCESS_PAGE_SIZE)}
+														</span>
+														<button
+															onClick={() => setAccessPage((p) => Math.min(Math.ceil(relevantPermissions.length / ACCESS_PAGE_SIZE), p + 1))}
+															disabled={accessPage >= Math.ceil(relevantPermissions.length / ACCESS_PAGE_SIZE)}
+															className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+														>
+															<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+														</button>
+													</div>
+												)}
+											</>
+										) : (
+											<div className="py-8 flex flex-col items-center justify-center gap-1 text-slate-400 select-none">
+												<span className="text-xs font-semibold text-slate-550">Уровни доступа не назначены</span>
+												<span className="text-[10px] font-semibold opacity-75">Назначьте роль сотруднику для автоматической активации прав</span>
+											</div>
+										)}
+									</div>
 								</div>
 							</If>
 							<If is={tab === "permissions"}>

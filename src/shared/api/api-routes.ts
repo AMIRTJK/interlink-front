@@ -139,6 +139,13 @@ export const ApiRoutes = {
   GET_INTERNAL_VERSIONS: "/api/v1/internal-correspondences/:id/versions",
   SELECT_INTERNAL_VERISION_FOR_SIGN:
     "/api/v1/internal-correspondences/:correspondenceId/versions/:versionId/select",
+
+  // ==================== MY FILES (PERSONAL STORAGE) ====================
+  MY_FILES: "/api/v1/my-files",
+  MY_FILES_META: "/api/v1/my-files/meta",
+  MY_FILES_ID: "/api/v1/my-files/:id",
+  MY_FILE_FOLDERS: "/api/v1/my-file-folders",
+  MY_FILE_FOLDERS_ID: "/api/v1/my-file-folders/:id",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];
