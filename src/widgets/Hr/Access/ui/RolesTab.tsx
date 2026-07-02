@@ -1,9 +1,11 @@
 import { useState, useMemo, useEffect } from "react";
 import { Search, Plus, LayoutGrid, List, ShieldPlus } from "lucide-react";
 import { Input, Modal, Pagination } from "antd";
+import { AnimatePresence } from "framer-motion";
 
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { If } from "@shared/ui";
 import { normalizeAccessUsers, extractPermNames } from "../lib";
 import { RoleCard } from "./RoleCard";
 import { RoleListTable } from "./RoleListTable";
@@ -11,6 +13,7 @@ import { RoleUsersTable } from "./RoleUsersTable";
 import { RolePermissionsSidebar } from "./RolePermissionsSidebar";
 import { CreateRoleModal } from "./CreateRoleModal";
 import { CreateUiPermissionModal } from "./CreateUiPermissionModal";
+import { UserProfileModal } from "./UserProfileModal";
 import { IAccessUser } from "../model";
 
 export const RolesTab = () => {
@@ -25,6 +28,7 @@ export const RolesTab = () => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [rolesPage, setRolesPage] = useState(1);
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+	const [viewingUser, setViewingUser] = useState<IAccessUser | null>(null);
 
 	const { data: rolesData } = useGetQuery({
 		url: ApiRoutes.GET_ROLES,
@@ -387,7 +391,7 @@ export const RolesTab = () => {
 							currentPage={currentPage}
 							pageSize={perPage}
 							onPageChange={setCurrentPage}
-							onViewAccess={() => {}}
+							onViewAccess={setViewingUser}
 							onEdit={() => {}}
 							onDelete={() => {}}
 						/>
@@ -413,6 +417,20 @@ export const RolesTab = () => {
 				open={isCreateUiPermOpen}
 				onClose={() => setIsCreateUiPermOpen(false)}
 			/>
+
+			<AnimatePresence>
+				<If is={Boolean(viewingUser)}>
+					{viewingUser && (
+						<UserProfileModal
+							user={viewingUser}
+							onClose={() => setViewingUser(null)}
+							onEdit={() => {}}
+							onDelete={() => {}}
+							allRoles={rolesList}
+						/>
+					)}
+				</If>
+			</AnimatePresence>
 		</div>
 	);
 };
