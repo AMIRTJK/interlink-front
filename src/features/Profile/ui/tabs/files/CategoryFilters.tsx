@@ -1,12 +1,19 @@
 import React from "react";
-import { Plus } from "lucide-react";
-import { ICategoryItem } from "../mockData";
+import { Plus, Edit2, Trash2 } from "lucide-react";
+
+export interface ICategoryItem {
+  id: number | "all";
+  name: string;
+  icon: string;
+}
 
 interface IProps {
   categories: ICategoryItem[];
-  activeCategory: string;
-  onCategorySelect: (categoryName: string) => void;
+  activeCategory: number | "all";
+  onCategorySelect: (id: number | "all") => void;
   onAddCategoryClick: () => void;
+  onRenameCategory?: (cat: ICategoryItem) => void;
+  onDeleteCategory?: (id: number) => void;
 }
 
 export const CategoryFilters = ({
@@ -14,15 +21,17 @@ export const CategoryFilters = ({
   activeCategory,
   onCategorySelect,
   onAddCategoryClick,
+  onRenameCategory,
+  onDeleteCategory,
 }: IProps) => {
   return (
     <div className="flex flex-wrap items-center gap-2.5">
       {categories.map((cat) => {
-        const isActive = activeCategory === cat.name;
+        const isActive = activeCategory === cat.id;
         return (
           <button
-            key={cat.name}
-            onClick={() => onCategorySelect(cat.name)}
+            key={cat.id}
+            onClick={() => onCategorySelect(cat.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
               isActive
                 ? "bg-indigo-600! text-white! shadow-md shadow-indigo-600/10"
@@ -31,6 +40,26 @@ export const CategoryFilters = ({
           >
             <span className="text-sm leading-none">{cat.icon}</span>
             <span>{cat.name}</span>
+            {isActive && cat.id !== "all" && onRenameCategory && onDeleteCategory && (
+              <div className="flex items-center gap-1.5 ml-1.5 pl-1.5 border-l border-white/20">
+                <Edit2
+                  size={11}
+                  className="hover:text-amber-250 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRenameCategory(cat);
+                  }}
+                />
+                <Trash2
+                  size={11}
+                  className="hover:text-red-300 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteCategory(Number(cat.id));
+                  }}
+                />
+              </div>
+            )}
           </button>
         );
       })}

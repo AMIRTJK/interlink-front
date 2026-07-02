@@ -80,7 +80,7 @@ export const useFilesData = (params: IFilesParams) => {
 
   // 9. Upload File
   const uploadFile = useMutationQuery<FormData, IApiFile>({
-    url: ApiRoutes.MY_FILES,
+    url: ApiRoutes.MY_FILES_UPLOAD,
     method: "POST",
     messages: {
       success: "Файл успешно загружен",
@@ -88,12 +88,19 @@ export const useFilesData = (params: IFilesParams) => {
     },
   });
 
+  const getArrayData = (response: any): any[] => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (response.data && Array.isArray(response.data)) return response.data;
+    return [];
+  };
+
   return {
-    files: filesQuery.data?.data || [],
+    files: getArrayData(filesQuery.data?.data),
     isLoadingFiles: filesQuery.isLoading,
     refetchFiles: filesQuery.refetch,
 
-    folders: foldersQuery.data?.data || [],
+    folders: getArrayData(foldersQuery.data?.data),
     isLoadingFolders: foldersQuery.isLoading,
     refetchFolders: foldersQuery.refetch,
 

@@ -1,32 +1,21 @@
 import React from "react";
 import { HardDrive } from "lucide-react";
-import { IFileItem } from "../mockData";
+import { IApiFile, IDiskMeta, formatBytes, getFileType } from "./lib";
 
 interface IProps {
-  files: IFileItem[];
+  meta: IDiskMeta | null;
+  files: IApiFile[];
 }
 
-export const StorageUsage = ({ files }: IProps) => {
-  // Вычисляем размеры динамически для интерактивности
-  const totalCapacityBytes = 1024 * 1024 * 1024; // 1 GB
-  const usedBytes = files.reduce((acc, file) => acc + file.sizeBytes, 0);
-  
-  // Добавим фиксированную базовую часть бэкапов для соответствия скриншоту (~923 MB)
-  const baseFakeBytes = 30 * 1024 * 1024; // Для точной подгонки, если нужно
-  const totalUsedBytes = Math.min(usedBytes + baseFakeBytes, totalCapacityBytes);
+export const StorageUsage = ({ meta, files }: IProps) => {
+  const totalCapacityBytes = meta?.limit || (1024 * 1024 * 1024); // Fallback 1 GB
+  const totalUsedBytes = meta?.total_size || 0;
 
-  const formatSize = (bytes: number) => {
-    if (bytes >= 1024 * 1024 * 1024) {
-      return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
-    }
-    return `${(bytes / (1024 * 1024)).toFixed(0)} MB`;
-  };
+  const percentage = Math.min((totalUsedBytes / totalCapacityBytes) * 100, 100);
 
-  const percentage = (totalUsedBytes / totalCapacityBytes) * 100;
-
-  // Группировка файлов для легенды
+  // Group current folder/files for the legend
   const getCountByType = (type: string) => {
-    return files.filter((f) => f.type === type).length;
+    return files.filter((f) => getFileType(f.extension) === type).length;
   };
 
   const legendItems = [
@@ -35,7 +24,6 @@ export const StorageUsage = ({ files }: IProps) => {
     { label: "Таблицы", count: getCountByType("spreadsheet"), color: "bg-fuchsia-500!" },
     { label: "Изображения", count: getCountByType("image"), color: "bg-yellow-400!" },
     { label: "Архивы", count: getCountByType("archive"), color: "bg-zinc-400!" },
-    { label: "Другое", count: files.filter((f) => !["pdf", "document", "spreadsheet", "image", "archive"].includes(f.type)).length, color: "bg-zinc-600!" },
   ];
 
   return (
@@ -46,7 +34,7 @@ export const StorageUsage = ({ files }: IProps) => {
           <span>Хранилище</span>
         </div>
         <span className="text-xs text-slate-500 dark:text-zinc-400 font-bold">
-          {formatSize(totalUsedBytes)} / 1 GB
+          {formatBytes(totalUsedBytes)} / {formatBytes(totalCapacityBytes)}
         </span>
       </div>
 
@@ -59,7 +47,7 @@ export const StorageUsage = ({ files }: IProps) => {
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold">
+      <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold">
         {legendItems.map((item) => (
           <div key={item.label} className="flex items-center gap-1.5 text-slate-600 dark:text-zinc-400">
             <span className={`w-2 h-2 rounded-full ${item.color}`} />

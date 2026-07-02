@@ -5,7 +5,7 @@ import { Dropdown, Modal, Switch, ConfigProvider } from "antd";
 import type { MenuProps } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { If } from "@shared/ui";
+import { If, Loader } from "@shared/ui";
 import { IAccessUser, ACCESS_STATUS_META } from "../model";
 import { getInitials, formatJoinedDate } from "../lib";
 
@@ -147,7 +147,7 @@ export const UserProfileModal = ({
 	const [permissionsPage, setPermissionsPage] = useState(1);
 	const [accessPage, setAccessPage] = useState(1);
 
-	const { data: detailData } = useGetQuery({
+	const { data: detailData, isLoading: isDetailLoading } = useGetQuery({
 		url: `${ApiRoutes.FETCH_USER_BY_ID}${user.id}`,
 		useToken: true,
 		options: {
@@ -156,7 +156,7 @@ export const UserProfileModal = ({
 		},
 	});
 
-	const { data: allPermsData } = useGetQuery({
+	const { data: allPermsData, isLoading: isPermsLoading } = useGetQuery({
 		url: ApiRoutes.FETCH_PERMISSIONS,
 		useToken: true,
 		options: {
@@ -164,6 +164,8 @@ export const UserProfileModal = ({
 			staleTime: 30 * 60 * 1000,
 		},
 	});
+
+	const isDataLoading = isDetailLoading || isPermsLoading || !isInitialized;
 
 	useEffect(() => {
 		if (isInitialized || !detailData || rolesList.length === 0) {
@@ -624,7 +626,13 @@ export const UserProfileModal = ({
 				</div>
 
 				<div className="px-6 py-6 overflow-y-auto flex-1 relative">
-					<If is={tab === "profile"}>
+					<If is={isDataLoading}>
+						<div className="absolute inset-0 flex items-center justify-center bg-white/50">
+							<Loader />
+						</div>
+					</If>
+					<If is={!isDataLoading}>
+						<If is={tab === "profile"}>
 								<div className="space-y-6">
 									<div className="grid grid-cols-3 gap-4">
 										<div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center">
@@ -827,6 +835,7 @@ export const UserProfileModal = ({
 									Раздел находится в разработке
 								</div>
 							</If>
+						</If>
 				</div>
 
 				<div className="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
