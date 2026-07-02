@@ -6,7 +6,6 @@ import { PinnedFiles } from "./files/PinnedFiles";
 import { FileGridList } from "./files/FileGridList";
 import { StorageUsage } from "./files/StorageUsage";
 import { AddCategoryModal } from "./files/AddCategoryModal";
-import { Upload } from "lucide-react";
 import "./FilesTab.css";
 
 export const FilesTab = () => {
@@ -15,44 +14,52 @@ export const FilesTab = () => {
   const [activeCategory, setActiveCategory] = useState<string>("Все файлы");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortBy, setSortBy] = useState<"date" | "size" | "name">("date");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
 
-  // Симуляция загрузки файла
-  const handleSimulatedUpload = () => {
-    const randomExtensions = ["pdf", "xlsx", "docx", "zip", "png"] as const;
-    const ext = randomExtensions[Math.floor(Math.random() * randomExtensions.length)];
-    const sizes = ["1.5 MB", "4.8 MB", "120 KB", "18.2 MB", "950 KB"];
-    const size = sizes[Math.floor(Math.random() * sizes.length)];
+  // Загрузка реального файла пользователя
+  const handleRealUpload = (selectedFile: File) => {
+    const name = selectedFile.name;
+    const sizeBytes = selectedFile.size;
     
-    // Парсим размер в байты
-    let sizeBytes = 1024 * 1024;
-    const value = parseFloat(size);
-    if (size.includes("MB")) sizeBytes = value * 1024 * 1024;
-    else if (size.includes("KB")) sizeBytes = value * 1024;
+    // Форматирование размера
+    let size = "";
+    if (sizeBytes >= 1024 * 1024 * 1024) {
+      size = `${(sizeBytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+    } else if (sizeBytes >= 1024 * 1024) {
+      size = `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`;
+    } else if (sizeBytes >= 1024) {
+      size = `${(sizeBytes / 1024).toFixed(0)} KB`;
+    } else {
+      size = `${sizeBytes} B`;
+    }
 
-    const fileTypes: Record<string, "pdf" | "spreadsheet" | "document" | "archive" | "image"> = {
-      pdf: "pdf",
-      xlsx: "spreadsheet",
-      docx: "document",
-      zip: "archive",
-      png: "image",
-    };
+    // Определение типа файла
+    const ext = name.split(".").pop()?.toLowerCase() || "";
+    let type: "pdf" | "spreadsheet" | "document" | "archive" | "image" = "document";
+    if (ext === "pdf") {
+      type = "pdf";
+    } else if (["xlsx", "xls", "csv"].includes(ext)) {
+      type = "spreadsheet";
+    } else if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext)) {
+      type = "image";
+    } else if (["zip", "rar", "tar", "gz", "7z"].includes(ext)) {
+      type = "archive";
+    }
 
     const newFile: IFileItem = {
       id: String(Date.now()),
-      name: `Загруженный_файл_${Math.floor(Math.random() * 1000)}.${ext}`,
+      name,
       size,
       sizeBytes,
       date: "Сегодня",
       timestamp: Date.now(),
-      type: fileTypes[ext] || "document",
+      type,
       pinned: false,
       categories: activeCategory === "Все файлы" ? ["Все файлы", "Рабочие"] : ["Все файлы", activeCategory],
     };
 
-    if (ext === "png") {
-      newFile.previewUrl = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80";
+    if (type === "image") {
+      newFile.previewUrl = URL.createObjectURL(selectedFile);
     }
 
     setFiles((prev) => [newFile, ...prev]);
@@ -107,9 +114,7 @@ export const FilesTab = () => {
         onSearchChange={setSearchQuery}
         sortBy={sortBy}
         onSortChange={setSortBy}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        onUploadClick={handleSimulatedUpload}
+        onUpload={handleRealUpload}
         totalCount={filteredAndSortedFiles.length}
       />
 
@@ -127,24 +132,9 @@ export const FilesTab = () => {
         onUnpin={(id) => handleTogglePin(id)}
       />
 
-      {/* Drag and drop зона */}
-      <div
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-          handleSimulatedUpload();
-        }}
-        onClick={handleSimulatedUpload}
-        className="border border-dashed border-slate-300 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500 rounded-3xl py-7 flex flex-col items-center justify-center gap-1.5 cursor-pointer text-slate-400 dark:text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all bg-slate-50/20 dark:bg-slate-900/10"
-      >
-        <Upload size={18} />
-        <span className="text-xs font-semibold">Перетащите файлы или нажмите, чтобы загрузить</span>
-      </div>
-
-      {/* Сетка/Список файлов */}
+      {/* Сетка файлов */}
       <FileGridList
         files={filteredAndSortedFiles}
-        viewMode={viewMode}
         onTogglePin={handleTogglePin}
         onDelete={handleDeleteFile}
       />

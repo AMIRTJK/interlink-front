@@ -1,14 +1,12 @@
-import React from "react";
-import { Search, ChevronDown, LayoutGrid, List, Upload } from "lucide-react";
+import React, { useRef } from "react";
+import { Search, ChevronDown, Upload } from "lucide-react";
 
 interface IProps {
   searchQuery: string;
   onSearchChange: (val: string) => void;
   sortBy: "date" | "size" | "name";
   onSortChange: (val: "date" | "size" | "name") => void;
-  viewMode: "grid" | "list";
-  onViewModeChange: (val: "grid" | "list") => void;
-  onUploadClick: () => void;
+  onUpload: (file: File) => void;
   totalCount: number;
 }
 
@@ -17,15 +15,27 @@ export const FilesHeader = ({
   onSearchChange,
   sortBy,
   onSortChange,
-  viewMode,
-  onViewModeChange,
-  onUploadClick,
+  onUpload,
   totalCount,
 }: IProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const getSortLabel = () => {
     if (sortBy === "date") return "Дата";
     if (sortBy === "size") return "Размер";
     return "Имя";
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      onUpload(selectedFile);
+      e.target.value = ""; // Сбрасываем значение для повторного выбора
+    }
   };
 
   return (
@@ -40,6 +50,14 @@ export const FilesHeader = ({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
+        {/* Скрытый инпут для выбора файлов */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="hidden!"
+        />
+
         {/* Search Input */}
         <div className="relative w-full sm:w-64">
           <Search
@@ -79,33 +97,9 @@ export const FilesHeader = ({
           </div>
         </div>
 
-        {/* View Switchers */}
-        <div className="flex items-center bg-slate-50 dark:bg-slate-800/80 p-0.5 rounded-full border border-slate-200 dark:border-slate-700">
-          <button
-            onClick={() => onViewModeChange("grid")}
-            className={`p-1.5 rounded-full transition-all ${
-              viewMode === "grid"
-                ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm"
-                : "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
-            }`}
-          >
-            <LayoutGrid size={16} />
-          </button>
-          <button
-            onClick={() => onViewModeChange("list")}
-            className={`p-1.5 rounded-full transition-all ${
-              viewMode === "list"
-                ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm"
-                : "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
-            }`}
-          >
-            <List size={16} />
-          </button>
-        </div>
-
         {/* Upload Button */}
         <button
-          onClick={onUploadClick}
+          onClick={handleUploadClick}
           className="upload-btn-gradient flex items-center gap-2 px-5 py-2 text-white font-semibold rounded-full text-sm shadow-md cursor-pointer hover:shadow-lg transition-all"
         >
           <Upload size={16} />
