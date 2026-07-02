@@ -1,11 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { Search, Plus, LayoutGrid, List, ShieldPlus } from "lucide-react";
 import { Input, Modal, Pagination } from "antd";
-import { AnimatePresence } from "framer-motion";
 
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { If } from "@shared/ui";
 import { EmployeeFormModal } from "@features/Hr";
 import type { IAdminUser } from "@entities/hr";
 import { normalizeAccessUsers, extractPermNames } from "../lib";
@@ -13,9 +11,9 @@ import { RoleCard } from "./RoleCard";
 import { RoleListTable } from "./RoleListTable";
 import { RoleUsersTable } from "./RoleUsersTable";
 import { RolePermissionsSidebar } from "./RolePermissionsSidebar";
+import { UserPermissionsSidebar } from "./UserPermissionsSidebar";
 import { CreateRoleModal } from "./CreateRoleModal";
 import { CreateUiPermissionModal } from "./CreateUiPermissionModal";
-import { UserProfileModal } from "./UserProfileModal";
 import { IAccessUser } from "../model";
 
 export const RolesTab = () => {
@@ -292,8 +290,8 @@ export const RolesTab = () => {
 									role={r}
 									userCount={roleUserCounts[r.name] ?? 0}
 									isSelected={selectedRole?.id === r.id}
-									onSelect={() => setSelectedRole(r)}
-									onEdit={() => setSelectedRole(r)}
+									onSelect={() => { setSelectedRole(r); setViewingUser(null); }}
+									onEdit={() => { setSelectedRole(r); setViewingUser(null); }}
 									onDelete={() => handleDeleteRole(r)}
 								/>
 							))}
@@ -303,8 +301,8 @@ export const RolesTab = () => {
 							<RoleListTable
 								items={paginatedRoles}
 								selectedRoleId={selectedRole?.id}
-								onSelect={setSelectedRole}
-								onEdit={setSelectedRole}
+								onSelect={(r) => { setSelectedRole(r); setViewingUser(null); }}
+								onEdit={(r) => { setSelectedRole(r); setViewingUser(null); }}
 								onDelete={handleDeleteRole}
 								userCounts={roleUserCounts}
 							/>
@@ -422,14 +420,24 @@ export const RolesTab = () => {
 				)}
 			</div>
 
-			{selectedRole && (
+			{viewingUser ? (
 				<div className="shrink-0! sticky top-6 w-[320px] pb-4">
-					<RolePermissionsSidebar
-						role={selectedRole}
+					<UserPermissionsSidebar
+						user={viewingUser}
 						allSystemPermissions={allSystemPermissions}
-						onClose={() => setSelectedRole(null)}
+						onClose={() => setViewingUser(null)}
 					/>
 				</div>
+			) : (
+				selectedRole && (
+					<div className="shrink-0! sticky top-6 w-[320px] pb-4">
+						<RolePermissionsSidebar
+							role={selectedRole}
+							allSystemPermissions={allSystemPermissions}
+							onClose={() => setSelectedRole(null)}
+						/>
+					</div>
+				)
 			)}
 
 			<CreateRoleModal
@@ -440,20 +448,6 @@ export const RolesTab = () => {
 				open={isCreateUiPermOpen}
 				onClose={() => setIsCreateUiPermOpen(false)}
 			/>
-
-			<AnimatePresence>
-				<If is={Boolean(viewingUser)}>
-					{viewingUser && (
-						<UserProfileModal
-							user={viewingUser}
-							onClose={() => setViewingUser(null)}
-							onEdit={handleOpenEditUser}
-							onDelete={handleDeleteUser}
-							allRoles={rolesList}
-						/>
-					)}
-				</If>
-			</AnimatePresence>
 
 			<EmployeeFormModal
 				open={isFormOpen}
