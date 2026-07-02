@@ -105,35 +105,33 @@ export const FileHistoryModal = ({ file, onClose }: IProps) => {
         </div>
 
         {/* Timeline Body */}
-        <div className="p-6 max-h-[400px] overflow-y-auto space-y-4">
+        <div className="p-6 max-h-[400px] overflow-y-auto space-y-3">
           {MOCK_HISTORY.map((item, index) => (
-            <div key={item.id} className="flex items-start justify-between relative group">
-              {/* Left timeline dot and line */}
-              <div className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  <div className={`w-2.5 h-2.5 rounded-full ${item.dotColor} z-10`} />
-                  {index < MOCK_HISTORY.length - 1 && (
-                    <div className="w-0.5 bg-slate-100 dark:bg-slate-850 flex-grow my-1 min-h-[35px]" />
-                  )}
-                </div>
+            <div key={item.id} className="grid grid-cols-[auto_1fr_auto] gap-4 items-center relative py-1.5">
+              {/* Dot & vertical line */}
+              <div className="flex flex-col items-center justify-center w-6 h-full relative">
+                <div className={`w-2 h-2 rounded-full ${item.dotColor} z-10`} />
+                {index < MOCK_HISTORY.length - 1 && (
+                  <div className="w-[1.5px] bg-slate-100 dark:bg-slate-800 absolute top-4 bottom-[-16px]" />
+                )}
+              </div>
 
-                {/* Event info */}
-                <div className="-mt-1">
-                  <h4 className="text-xs font-bold text-slate-700 dark:text-zinc-200">
-                    {item.action}
-                  </h4>
-                  <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 mt-0.5">
-                    {item.date}
-                  </p>
-                </div>
+              {/* Event info */}
+              <div className="flex flex-col justify-center">
+                <h4 className="text-xs font-bold text-slate-700 dark:text-zinc-200">
+                  {item.action}
+                </h4>
+                <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 mt-0.5">
+                  {item.date}
+                </p>
               </div>
 
               {/* Right user info */}
-              <div className="flex items-center gap-2">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold ${item.avatarBg}`}>
+              <div className="flex items-center gap-2.5 w-32 flex-shrink-0 justify-start">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${item.avatarBg}`}>
                   {item.initials}
                 </div>
-                <span className="text-[10px] font-semibold text-slate-500 dark:text-zinc-450">
+                <span className="text-[10px] font-semibold text-slate-500 dark:text-zinc-450 truncate">
                   {item.userName}
                 </span>
               </div>
