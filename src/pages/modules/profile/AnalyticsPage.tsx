@@ -8,7 +8,7 @@ const Analytics = lazy(() =>
 
 export const AnalyticsPage = () => {
   return (
-    <Suspense fallback={<Loader />}>
+    <Suspense fallback={<Loader fullScreen />}>
       <Analytics />
     </Suspense>
   );

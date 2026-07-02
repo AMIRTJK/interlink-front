@@ -165,7 +165,7 @@ export const AppRouter = () => {
   return (
     <BrowserRouter>
       <TabNavigation />
-      <Suspense fallback={<Loader />}>
+      <Suspense fallback={<Loader fullScreen />}>
         <Routes>
           {/* Редирект с корня */}
           <Route
@@ -272,7 +272,7 @@ export const AppRouter = () => {
                   <Route
                     path="read/:id"
                     element={
-                      <Suspense fallback={<Loader />}>
+                      <Suspense fallback={<Loader fullScreen />}>
                         <InternalCorrespondenceReadPage />
                       </Suspense>
                     }
@@ -324,7 +324,7 @@ export const AppRouter = () => {
                     <Route
                       path="create"
                       element={
-                        <Suspense fallback={<Loader />}>
+                        <Suspense fallback={<Loader fullScreen />}>
                           <CreateCorrespondencePage type="internal-outgoing" />
                         </Suspense>
                       }
@@ -332,7 +332,7 @@ export const AppRouter = () => {
                     <Route
                       path=":id"
                       element={
-                        <Suspense fallback={<Loader />}>
+                        <Suspense fallback={<Loader fullScreen />}>
                           <ShowCorrespondencePage type="internal-outgoing" />
                         </Suspense>
                       }
