@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Search, Plus, LayoutGrid, List } from "lucide-react";
 import { Input, Modal, Pagination } from "antd";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { normalizeAccessUsers } from "../lib";
@@ -221,16 +221,8 @@ export const RolesTab = () => {
 					</div>
 				</div>
 
-				<AnimatePresence mode="wait">
 					{viewMode === "grid" ? (
-						<motion.div
-							key="grid"
-							initial={{ opacity: 0, y: 6 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -6 }}
-							transition={{ duration: 0.15 }}
-							className="grid grid-cols-1 md:grid-cols-3 gap-3"
-						>
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
 							{paginatedRoles.map((r) => (
 								<RoleCard
 									key={r.id}
@@ -242,15 +234,9 @@ export const RolesTab = () => {
 									onDelete={() => handleDeleteRole(r)}
 								/>
 							))}
-						</motion.div>
+						</div>
 					) : (
-						<motion.div
-							key="list"
-							initial={{ opacity: 0, y: 6 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -6 }}
-							transition={{ duration: 0.15 }}
-						>
+						<div>
 							<RoleListTable
 								items={paginatedRoles}
 								selectedRoleId={selectedRole?.id}
@@ -258,9 +244,8 @@ export const RolesTab = () => {
 								onEdit={setSelectedRole}
 								onDelete={handleDeleteRole}
 							/>
-						</motion.div>
+						</div>
 					)}
-				</AnimatePresence>
 
 				{rolesList.length > 6 &&
 					(() => {
@@ -373,25 +358,15 @@ export const RolesTab = () => {
 				)}
 			</div>
 
-			<AnimatePresence initial={false}>
-				{selectedRole && (
-					<motion.div
-						initial={{ opacity: 0, width: 0 }}
-						animate={{ opacity: 1, width: 320 }}
-						exit={{ opacity: 0, width: 0 }}
-						transition={{ duration: 0.2, ease: "easeOut" }}
-						className="shrink-0! sticky top-6 overflow-hidden"
-					>
-						<div className="w-[320px] pb-4">
-							<RolePermissionsSidebar
-								role={selectedRole}
-								allSystemPermissions={allSystemPermissions}
-								onClose={() => setSelectedRole(null)}
-							/>
-						</div>
-					</motion.div>
-				)}
-			</AnimatePresence>
+			{selectedRole && (
+				<div className="shrink-0! sticky top-6 w-[320px] pb-4">
+					<RolePermissionsSidebar
+						role={selectedRole}
+						allSystemPermissions={allSystemPermissions}
+						onClose={() => setSelectedRole(null)}
+					/>
+				</div>
+			)}
 
 			<CreateRoleModal
 				open={isCreateOpen}

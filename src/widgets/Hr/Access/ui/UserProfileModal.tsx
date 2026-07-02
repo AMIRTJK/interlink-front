@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { X, Check, ChevronDown, Mail, Phone, Building2, Calendar } from "lucide-react";
 import { Dropdown, Modal, Switch, ConfigProvider } from "antd";
 import type { MenuProps } from "antd";
@@ -495,21 +495,14 @@ export const UserProfileModal = ({
 
 	return (
 		<ConfigProvider theme={{ token: { zIndexPopupBase: 10000 } }}>
-			<motion.div
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				exit={{ opacity: 0 }}
+			<div
 				className="fixed inset-0! z-9998! bg-slate-900/40! backdrop-blur-sm! flex! items-center! justify-center! p-4!"
 				onClick={onClose}
 			>
-			<motion.div
-				initial={{ opacity: 0, scale: 0.95 }}
-				animate={{ opacity: 1, scale: 1 }}
-				exit={{ opacity: 0, scale: 0.95 }}
-				transition={{ duration: 0.2 }}
-				onClick={(ev) => ev.stopPropagation()}
-				className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col min-h-[800px]! max-h-[820px]!"
-			>
+				<div
+					onClick={(ev) => ev.stopPropagation()}
+					className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col min-h-[800px]! max-h-[820px]!"
+				>
 				<div className="px-6 pt-5 pb-4 border-b border-slate-100">
 					<div className="flex items-start justify-between">
 						<div className="flex items-center gap-4">
@@ -597,15 +590,7 @@ export const UserProfileModal = ({
 				</div>
 
 				<div className="px-6 py-6 overflow-y-auto flex-1 relative">
-					<AnimatePresence mode="wait">
-						<motion.div
-							key={tab}
-							initial={{ opacity: 0, y: 6 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -6 }}
-							transition={{ duration: 0.15, ease: "easeOut" }}
-						>
-							<If is={tab === "profile"}>
+					<If is={tab === "profile"}>
 								<div className="space-y-6">
 									<div className="grid grid-cols-3 gap-4">
 										<div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center">
@@ -789,8 +774,6 @@ export const UserProfileModal = ({
 									Раздел находится в разработке
 								</div>
 							</If>
-						</motion.div>
-					</AnimatePresence>
 				</div>
 
 				<div className="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
@@ -825,8 +808,8 @@ export const UserProfileModal = ({
 						</button>
 					</If>
 				</div>
-			</motion.div>
-		</motion.div>
+			</div>
+		</div>
 		</ConfigProvider>
 	);
 };
