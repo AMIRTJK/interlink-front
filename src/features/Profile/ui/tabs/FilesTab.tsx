@@ -8,6 +8,7 @@ import { StorageUsage } from "./files/StorageUsage";
 import { AddCategoryModal } from "./files/AddCategoryModal";
 import { FilePreviewModal } from "./files/FilePreviewModal";
 import { ShareFileModal } from "./files/ShareFileModal";
+import { FileHistoryModal } from "./files/FileHistoryModal";
 import "./FilesTab.css";
 
 export const FilesTab = () => {
@@ -21,6 +22,7 @@ export const FilesTab = () => {
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [previewFile, setPreviewFile] = useState<IFileItem | null>(null);
   const [shareFile, setShareFile] = useState<IFileItem | null>(null);
+  const [historyFile, setHistoryFile] = useState<IFileItem | null>(null);
 
   // Выбор файла в реестре (чекбокс)
   const handleToggleSelectFile = (id: string) => {
@@ -156,6 +158,7 @@ export const FilesTab = () => {
         onToggleSelectFile={handleToggleSelectFile}
         onView={setPreviewFile}
         onShare={setShareFile}
+        onHistory={setHistoryFile}
         onTogglePin={handleTogglePin}
         onDelete={handleDeleteFile}
       />
@@ -180,6 +183,12 @@ export const FilesTab = () => {
       <ShareFileModal
         file={shareFile}
         onClose={() => setShareFile(null)}
+      />
+
+      {/* Модалка истории изменений */}
+      <FileHistoryModal
+        file={historyFile}
+        onClose={() => setHistoryFile(null)}
       />
     </div>
   );

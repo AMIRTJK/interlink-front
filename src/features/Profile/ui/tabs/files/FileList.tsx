@@ -9,6 +9,7 @@ interface IProps {
   onToggleSelectFile: (id: string) => void;
   onView: (file: IFileItem) => void;
   onShare: (file: IFileItem) => void;
+  onHistory: (file: IFileItem) => void;
   onDelete: (id: string) => void;
 }
 
@@ -18,6 +19,7 @@ export const FileList = ({
   onToggleSelectFile,
   onView,
   onShare,
+  onHistory,
   onDelete,
 }: IProps) => {
   const getSmallIcon = (file: IFileItem) => {
@@ -153,7 +155,11 @@ export const FileList = ({
                     </Tooltip>
                     
                     <Tooltip title="История изменений">
-                      <button type="button" className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer">
+                      <button
+                        type="button"
+                        onClick={() => onHistory(file)}
+                        className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+                      >
                         <History size={15} />
                       </button>
                     </Tooltip>
