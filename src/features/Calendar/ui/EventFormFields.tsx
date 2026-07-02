@@ -168,7 +168,7 @@ export const EventFormFields = ({
 				<Input.TextArea
 					placeholder="Детали события..."
 					autoSize={{ minRows: 3, maxRows: 6 }}
-					className="w-full! bg-zinc-100! hover:bg-zinc-200/70! focus:bg-zinc-50! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! transition-all! duration-200! text-sm! text-zinc-700!"
+					className="w-full! bg-zinc-100! p-3! hover:bg-zinc-200/70! focus:bg-zinc-50! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! transition-all! duration-200! text-sm! text-zinc-700!"
 				/>
 			</Form.Item>
 		</>
