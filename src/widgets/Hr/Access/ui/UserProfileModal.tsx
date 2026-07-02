@@ -657,9 +657,6 @@ export const UserProfileModal = ({
 												menu={{ items: dropdownItems }}
 												trigger={["click"]}
 												disabled={availableRolesToAdd.length === 0}
-												getPopupContainer={(triggerNode) =>
-													triggerNode.parentElement || document.body
-												}
 											>
 												<button
 													type="button"
@@ -798,9 +795,6 @@ export const UserProfileModal = ({
 						menu={{ items: actionItems }}
 						trigger={["click"]}
 						placement="topRight"
-						getPopupContainer={(triggerNode) =>
-							triggerNode.parentElement || document.body
-						}
 					>
 						<button className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-1.5">
 							<span>Действие</span>
