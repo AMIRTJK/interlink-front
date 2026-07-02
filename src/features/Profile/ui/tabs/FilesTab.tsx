@@ -55,7 +55,7 @@ export const FilesTab = () => {
   // Upload handler
   const handleUpload = (file: File) => {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("files[]", file);
     if (typeof activeFolderId === "number") {
       formData.append("folder_id", String(activeFolderId));
     }
