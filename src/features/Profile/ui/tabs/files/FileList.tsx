@@ -7,6 +7,7 @@ interface IProps {
   files: IFileItem[];
   selectedFileIds: string[];
   onToggleSelectFile: (id: string) => void;
+  onView: (file: IFileItem) => void;
   onDelete: (id: string) => void;
 }
 
@@ -14,6 +15,7 @@ export const FileList = ({
   files,
   selectedFileIds,
   onToggleSelectFile,
+  onView,
   onDelete,
 }: IProps) => {
   const getSmallIcon = (file: IFileItem) => {
@@ -139,7 +141,11 @@ export const FileList = ({
                 <td className="py-3 px-4 text-right">
                   <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150">
                     <Tooltip title="Просмотр">
-                      <button type="button" className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer">
+                      <button
+                        type="button"
+                        onClick={() => onView(file)}
+                        className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+                      >
                         <Eye size={15} />
                       </button>
                     </Tooltip>

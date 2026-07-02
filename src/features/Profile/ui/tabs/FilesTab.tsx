@@ -6,6 +6,7 @@ import { PinnedFiles } from "./files/PinnedFiles";
 import { FileGridList } from "./files/FileGridList";
 import { StorageUsage } from "./files/StorageUsage";
 import { AddCategoryModal } from "./files/AddCategoryModal";
+import { FilePreviewModal } from "./files/FilePreviewModal";
 import "./FilesTab.css";
 
 export const FilesTab = () => {
@@ -17,6 +18,7 @@ export const FilesTab = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
+  const [previewFile, setPreviewFile] = useState<IFileItem | null>(null);
 
   // Выбор файла в реестре (чекбокс)
   const handleToggleSelectFile = (id: string) => {
@@ -150,6 +152,7 @@ export const FilesTab = () => {
         viewMode={viewMode}
         selectedFileIds={selectedFileIds}
         onToggleSelectFile={handleToggleSelectFile}
+        onView={setPreviewFile}
         onTogglePin={handleTogglePin}
         onDelete={handleDeleteFile}
       />
@@ -162,6 +165,12 @@ export const FilesTab = () => {
         isOpen={isAddCategoryOpen}
         onClose={() => setIsAddCategoryOpen(false)}
         onSubmit={handleAddCategory}
+      />
+
+      {/* Модалка предпросмотра файлов */}
+      <FilePreviewModal
+        file={previewFile}
+        onClose={() => setPreviewFile(null)}
       />
     </div>
   );

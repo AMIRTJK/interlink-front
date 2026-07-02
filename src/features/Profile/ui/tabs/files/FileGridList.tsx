@@ -9,6 +9,7 @@ interface IProps {
   viewMode: "grid" | "list";
   selectedFileIds: string[];
   onToggleSelectFile: (id: string) => void;
+  onView: (file: IFileItem) => void;
   onTogglePin: (id: string) => void;
   onDelete: (id: string) => void;
 }
@@ -18,6 +19,7 @@ export const FileGridList = ({
   viewMode,
   selectedFileIds,
   onToggleSelectFile,
+  onView,
   onTogglePin,
   onDelete,
 }: IProps) => {
@@ -28,6 +30,7 @@ export const FileGridList = ({
           files={files}
           onTogglePin={onTogglePin}
           onDelete={onDelete}
+          onView={onView}
         />
       </If>
 
@@ -36,6 +39,7 @@ export const FileGridList = ({
           files={files}
           selectedFileIds={selectedFileIds}
           onToggleSelectFile={onToggleSelectFile}
+          onView={onView}
           onDelete={onDelete}
         />
       </If>

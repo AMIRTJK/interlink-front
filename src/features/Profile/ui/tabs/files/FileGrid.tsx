@@ -6,9 +6,10 @@ interface IProps {
   files: IFileItem[];
   onTogglePin: (id: string) => void;
   onDelete: (id: string) => void;
+  onView: (file: IFileItem) => void;
 }
 
-export const FileGrid = ({ files, onTogglePin, onDelete }: IProps) => {
+export const FileGrid = ({ files, onTogglePin, onDelete, onView }: IProps) => {
   const getCoverContent = (file: IFileItem) => {
     if (file.type === "image" && file.previewUrl) {
       return (
@@ -61,12 +62,18 @@ export const FileGrid = ({ files, onTogglePin, onDelete }: IProps) => {
           className="group bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600 overflow-hidden transition-all duration-200"
         >
           {/* Cover Area */}
-          <div className="h-44 relative overflow-hidden bg-slate-100 dark:bg-slate-900">
+          <div
+            onClick={() => onView(file)}
+            className="h-44 relative overflow-hidden bg-slate-100 dark:bg-slate-900 cursor-pointer"
+          >
             {getCoverContent(file)}
 
             {/* Pin indicator / Toggle */}
             <button
-              onClick={() => onTogglePin(file.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onTogglePin(file.id);
+              }}
               className={`absolute top-3 right-3 p-1.5 rounded-full transition-all cursor-pointer ${
                 file.pinned
                   ? "bg-amber-500! text-white! scale-100"
@@ -78,7 +85,10 @@ export const FileGrid = ({ files, onTogglePin, onDelete }: IProps) => {
 
             {/* Delete button */}
             <button
-              onClick={() => onDelete(file.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(file.id);
+              }}
               className="absolute top-3 left-3 p-1.5 rounded-full bg-black/40 text-white/80 hover:bg-red-600! hover:text-white! scale-0 group-hover:scale-100 focus:scale-100 transition-all cursor-pointer"
             >
               <Trash2 size={14} />
@@ -87,7 +97,11 @@ export const FileGrid = ({ files, onTogglePin, onDelete }: IProps) => {
 
           {/* Meta Area */}
           <div className="p-5 space-y-1">
-            <h4 className="text-sm font-bold text-slate-800 dark:text-zinc-200 truncate" title={file.name}>
+            <h4
+              onClick={() => onView(file)}
+              className="text-sm font-bold text-slate-800 dark:text-zinc-200 truncate cursor-pointer hover:text-indigo-600 transition-colors"
+              title={file.name}
+            >
               {file.name}
             </h4>
             <p className="text-[11px] font-semibold text-slate-400 dark:text-zinc-400">
