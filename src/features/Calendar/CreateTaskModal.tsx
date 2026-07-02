@@ -6,6 +6,7 @@ import { transformAssigneesResponse } from "../tasks/lib/utils";
 import { THEMES } from "@widgets/layout/ui/designSettings";
 import { EventFormFields } from "./ui/EventFormFields";
 import dayjs, { Dayjs } from "dayjs";
+import "./create-event-modal.css";
 
 interface IProps {
 	isOpen: boolean;
@@ -139,6 +140,7 @@ export const CreateTaskModal = ({
 				width={480}
 				centered
 				closable={false}
+				className="create-event-modal"
 				style={{ borderRadius: 20, overflow: "hidden" }}
 				styles={{ body: { padding: 0 } }}
 			>
