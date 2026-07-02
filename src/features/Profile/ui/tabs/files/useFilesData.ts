@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { IApiFile, IApiFolder, IDiskMeta } from "./lib";
@@ -6,6 +7,7 @@ interface IFilesParams {
   search?: string;
   sort?: "name" | "date" | "size";
   dir?: "asc" | "desc";
+  activeFolderId?: number | "all";
 }
 
 export const useFilesData = (params: IFilesParams) => {
@@ -95,18 +97,119 @@ export const useFilesData = (params: IFilesParams) => {
     return [];
   };
 
+  const folders = getArrayData(foldersQuery.data?.data);
+  const files = getArrayData(filesQuery.data?.data);
+
+  const getFolderIcon = (name: string): string => {
+    const n = name.toLowerCase();
+    if (n.includes("рабоч")) return "💼";
+    if (n.includes("документ")) return "📄";
+    if (n.includes("договор")) return "📑";
+    if (n.includes("фото") || n.includes("изображ")) return "🖼️";
+    return "📁";
+  };
+
+  const categoriesList = useMemo(() => {
+    const list: { id: number | "all"; name: string; icon: string }[] = [];
+    list.push({ id: "all" as const, name: "Все файлы", icon: "📁" });
+    folders
+      .filter((f) => f.parent_id === null)
+      .forEach((f) => {
+        list.push({
+          id: f.id,
+          name: f.name,
+          icon: getFolderIcon(f.name),
+        });
+      });
+    return list;
+  }, [folders]);
+
+  const activeCategoryId = useMemo(() => {
+    const actId = params.activeFolderId;
+    if (actId === undefined || actId === "all") return "all";
+
+    let currentId: number | null = actId;
+    let rootId: number = actId;
+
+    while (currentId !== null) {
+      const folder = folders.find((f) => Number(f.id) === Number(currentId));
+      if (folder) {
+        rootId = folder.id;
+        currentId = folder.parent_id;
+      } else {
+        currentId = null;
+      }
+    }
+    return rootId;
+  }, [folders, params.activeFolderId]);
+
+  const pinnedFiles = useMemo(() => {
+    return files.filter((f) => f.is_starred);
+  }, [files]);
+
+  const currentFiles = useMemo(() => {
+    const actId = params.activeFolderId;
+    const parentId = actId === undefined || actId === "all" ? null : actId;
+    return files.filter((f) => (f.folder_id === null && parentId === null) || (f.folder_id !== null && parentId !== null && Number(f.folder_id) === Number(parentId)));
+  }, [files, params.activeFolderId]);
+
+  const currentFolders = useMemo(() => {
+    const actId = params.activeFolderId;
+    const parentId = actId === undefined || actId === "all" ? null : actId;
+    if (parentId === null) return [];
+    return folders.filter((f) => f.parent_id !== null && Number(f.parent_id) === Number(parentId));
+  }, [folders, params.activeFolderId]);
+
+  const breadcrumbs = useMemo(() => {
+    const actId = params.activeFolderId;
+    if (actId === undefined || actId === "all") return [];
+
+    const crumbs: { id: number; name: string }[] = [];
+    let currentId: number | null = actId;
+
+    while (currentId !== null) {
+      const folder = folders.find((f) => Number(f.id) === Number(currentId));
+      if (folder) {
+        crumbs.unshift({ id: folder.id, name: folder.name });
+        currentId = folder.parent_id;
+      } else {
+        currentId = null;
+      }
+    }
+    return crumbs;
+  }, [folders, params.activeFolderId]);
+
+  const showBreadcrumbs = useMemo(() => {
+    const actId = params.activeFolderId;
+    if (actId === undefined || actId === "all") return false;
+
+    const hasChildren = folders.some((f) => f.parent_id !== null && Number(f.parent_id) === Number(actId));
+    const currentFolder = folders.find((f) => Number(f.id) === Number(actId));
+    const isNested = currentFolder ? currentFolder.parent_id !== null : false;
+
+    return hasChildren || isNested;
+  }, [folders, params.activeFolderId]);
+
   return {
-    files: getArrayData(filesQuery.data?.data),
+    files,
     isLoadingFiles: filesQuery.isLoading,
     refetchFiles: filesQuery.refetch,
 
-    folders: getArrayData(foldersQuery.data?.data),
+    folders,
     isLoadingFolders: foldersQuery.isLoading,
     refetchFolders: foldersQuery.refetch,
 
     meta: metaQuery.data?.data || null,
     isLoadingMeta: metaQuery.isLoading,
     refetchMeta: metaQuery.refetch,
+
+    categoriesList,
+    activeCategoryId,
+    pinnedFiles,
+    currentFiles,
+    currentFolders,
+    breadcrumbs,
+    showBreadcrumbs,
 
     createFolder,
     updateFolder,

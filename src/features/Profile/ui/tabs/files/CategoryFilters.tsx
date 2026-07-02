@@ -1,5 +1,6 @@
 import React from "react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
+import { If } from "@shared/ui";
 
 export interface ICategoryItem {
   id: number | "all";
@@ -40,7 +41,7 @@ export const CategoryFilters = ({
           >
             <span className="text-sm leading-none">{cat.icon}</span>
             <span>{cat.name}</span>
-            {isActive && cat.id !== "all" && onRenameCategory && onDeleteCategory && (
+            <If is={!!(isActive && cat.id !== "all" && onRenameCategory && onDeleteCategory)}>
               <div className="flex items-center gap-1.5 ml-1.5 pl-1.5 border-l border-white/20">
                 <Edit2
                   size={11}
@@ -59,7 +60,7 @@ export const CategoryFilters = ({
                   }}
                 />
               </div>
-            )}
+            </If>
           </button>
         );
       })}

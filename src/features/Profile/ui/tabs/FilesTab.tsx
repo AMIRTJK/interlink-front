@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useFilesData } from "./files/useFilesData";
 import { FilesHeader } from "./files/FilesHeader";
 import { CategoryFilters } from "./files/CategoryFilters";
@@ -10,7 +10,8 @@ import { FolderActionsModal } from "./files/FolderActionsModal";
 import { MoveToFolderModal } from "./files/MoveToFolderModal";
 import { IApiFile, IApiFolder } from "./files/lib";
 import { Modal } from "antd";
-import { Upload } from "lucide-react";
+import { Upload, ChevronRight, Folder } from "lucide-react";
+import { If } from "@shared/ui";
 import "./FilesTab.css";
 
 export const FilesTab = () => {
@@ -37,13 +38,25 @@ export const FilesTab = () => {
 		folders,
 		meta,
 		isLoadingFiles,
+		categoriesList,
+		activeCategoryId,
+		pinnedFiles,
+		currentFiles,
+		currentFolders,
+		breadcrumbs,
+		showBreadcrumbs,
 		createFolder,
 		updateFolder,
 		deleteFolder,
 		updateFile,
 		deleteFile,
 		uploadFile,
-	} = useFilesData({ search: searchQuery, sort: sortBy, dir: sortDir });
+	} = useFilesData({
+		search: searchQuery,
+		sort: sortBy,
+		dir: sortDir,
+		activeFolderId,
+	});
 
 	// Toggle selection
 	const handleToggleSelectFile = (id: number) => {
@@ -74,12 +87,15 @@ export const FilesTab = () => {
 			});
 			setEditingFolder(null);
 		} else {
-			createFolder.mutate({ name, parent_id: null });
+			createFolder.mutate({
+				name,
+				parent_id: typeof activeFolderId === "number" ? activeFolderId : null,
+			});
 		}
 	};
 
 	const handleOpenRenameFolder = (folderName: string, id: number) => {
-		const folder = folders.find((f) => f.id === id);
+		const folder = folders.find((f) => Number(f.id) === Number(id));
 		if (folder) {
 			setEditingFolder(folder);
 			setFolderModalTitle("Переименовать папку");
@@ -131,37 +147,6 @@ export const FilesTab = () => {
 		}
 	};
 
-	// Helpers for category filters
-	const getFolderIcon = (name: string): string => {
-		const n = name.toLowerCase();
-		if (n.includes("рабоч")) return "💼";
-		if (n.includes("документ")) return "📄";
-		if (n.includes("договор")) return "📑";
-		if (n.includes("фото") || n.includes("изображ")) return "🖼️";
-		return "📁";
-	};
-
-	const categoriesList = useMemo(() => {
-		const list = [{ id: "all" as const, name: "Все файлы", icon: "📁" }];
-		folders.forEach((f) => {
-			list.push({
-				id: f.id,
-				name: f.name,
-				icon: getFolderIcon(f.name),
-			});
-		});
-		return list;
-	}, [folders]);
-
-	const pinnedFiles = useMemo(() => {
-		return files.filter((f) => f.is_starred);
-	}, [files]);
-
-	const currentFiles = useMemo(() => {
-		const parentId = activeFolderId === "all" ? null : activeFolderId;
-		return files.filter((f) => f.folder_id === parentId);
-	}, [files, activeFolderId]);
-
 	return (
 		<div className="files-tab-container space-y-6">
 			{/* Header */}
@@ -188,7 +173,7 @@ export const FilesTab = () => {
 			{/* Category/Folder Filters */}
 			<CategoryFilters
 				categories={categoriesList}
-				activeCategory={activeFolderId}
+				activeCategory={activeCategoryId}
 				onCategorySelect={(id) => setActiveFolderId(id)}
 				onAddCategoryClick={() => {
 					setEditingFolder(null);
@@ -200,6 +185,47 @@ export const FilesTab = () => {
 				}
 				onDeleteCategory={handleDeleteFolderConfirm}
 			/>
+
+			{/* Breadcrumbs */}
+			<If is={showBreadcrumbs}>
+				<div className="flex flex-wrap items-center text-xs font-semibold text-slate-500 dark:text-zinc-400 py-1.5 border-b border-slate-100/50 dark:border-slate-800/50">
+					{breadcrumbs.map((crumb, idx) => {
+						const isLast = idx === breadcrumbs.length - 1;
+						return (
+							<React.Fragment key={crumb.id}>
+								<If is={idx > 0}>
+									<span className="text-slate-300 dark:text-zinc-700 mx-1.5">/</span>
+								</If>
+								<span
+									onClick={() => !isLast && setActiveFolderId(crumb.id)}
+									className={`transition-all ${
+										isLast
+											? "text-slate-700 dark:text-zinc-200 font-bold"
+											: "cursor-pointer hover:text-indigo-650 hover:underline"
+									}`}
+								>
+									{crumb.name}
+								</span>
+							</React.Fragment>
+						);
+					})}
+
+					{/* If the active folder has children, render them next to it separated by slashes */}
+					<If is={currentFolders.length > 0}>
+						{currentFolders.map((child) => (
+							<React.Fragment key={child.id}>
+								<span className="text-slate-300 dark:text-zinc-700 mx-1.5">/</span>
+								<span
+									onClick={() => setActiveFolderId(child.id)}
+									className="cursor-pointer hover:text-indigo-655 hover:underline text-slate-500 dark:text-zinc-400 transition-all font-semibold"
+								>
+									{child.name}
+								</span>
+							</React.Fragment>
+						))}
+					</If>
+				</div>
+			</If>
 
 			{/* Starred/Pinned Files */}
 			<PinnedFiles pinnedFiles={pinnedFiles} onUnpin={handleTogglePin} />
@@ -221,7 +247,7 @@ export const FilesTab = () => {
 				className={`w-full py-6 border-2 border-dashed rounded-3xl flex items-center justify-center gap-2 cursor-pointer transition-all ${
 					isDragOver
 						? "border-indigo-600 bg-indigo-50/30 text-indigo-650"
-						: "border-slate-200 dark:border-slate-800 text-slate-400 hover:border-slate-350 dark:hover:border-slate-700"
+						: "border-slate-200 dark:border-slate-800 text-slate-400 hover:border-slate-355 dark:hover:border-slate-700"
 				}`}
 			>
 				<input
@@ -238,7 +264,7 @@ export const FilesTab = () => {
 				</span>
 			</div>
 
-			{/* Files Display */}
+			{/* Files & Subfolders Display */}
 			{isLoadingFiles ? (
 				<div className="py-20 text-center">
 					<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto"></div>
@@ -247,16 +273,18 @@ export const FilesTab = () => {
 					</p>
 				</div>
 			) : (
-				<FileGridList
-					files={currentFiles}
-					viewMode={viewMode}
-					selectedFileIds={selectedFileIds}
-					onToggleSelectFile={handleToggleSelectFile}
-					onView={setPreviewFile}
-					onTogglePin={handleTogglePin}
-					onDelete={handleDeleteFileConfirm}
-					onMove={setMovingFile}
-				/>
+				<div className="space-y-6">
+					<FileGridList
+						files={currentFiles}
+						viewMode={viewMode}
+						selectedFileIds={selectedFileIds}
+						onToggleSelectFile={handleToggleSelectFile}
+						onView={setPreviewFile}
+						onTogglePin={handleTogglePin}
+						onDelete={handleDeleteFileConfirm}
+						onMove={setMovingFile}
+					/>
+				</div>
 			)}
 
 			{/* Storage usage details */}
@@ -291,4 +319,3 @@ export const FilesTab = () => {
 	);
 };
 export default FilesTab;
-
