@@ -74,7 +74,7 @@ export const DayView = ({
           <span className="text-xs! text-zinc-400!">{monthYear}</span>
         </div>
 
-        <div className="flex-1! overflow-y-auto! max-h-[600px]! flex!">
+        <div className="flex-1! flex!">
           <div className="w-16! flex-shrink-0! border-r! border-zinc-100! relative!">
             {HOURS.map((h) => (
               <div

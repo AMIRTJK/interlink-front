@@ -88,7 +88,7 @@ export const WeekView = ({
         })}
       </div>
 
-      <div className="flex! overflow-y-auto! max-h-[600px]!">
+      <div className="flex!">
         <div className="w-16! flex-shrink-0! border-r! border-zinc-100! relative!">
           {HOURS.map((h) => (
             <div
