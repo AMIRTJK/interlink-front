@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
-import { Search, ChevronDown, Upload, LayoutGrid, List, ArrowUp, ArrowDown, FolderPlus } from "lucide-react";
+import React, { useRef, useState, useEffect } from "react";
+import { Search, ChevronDown, Upload, LayoutGrid, List, ArrowUp, ArrowDown, FolderPlus, X } from "lucide-react";
 
 interface IProps {
   searchQuery: string;
@@ -29,6 +29,21 @@ export const FilesHeader = ({
   onCreateFolderClick,
 }: IProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [localSearch, setLocalSearch] = useState(searchQuery);
+
+  useEffect(() => {
+    setLocalSearch(searchQuery);
+  }, [searchQuery]);
+
+  const handleSearchSubmit = () => {
+    onSearchChange(localSearch);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearchSubmit();
+    }
+  };
 
   const getSortLabel = () => {
     if (sortBy === "date") return "Дата";
@@ -70,17 +85,31 @@ export const FilesHeader = ({
 
         {/* Search Input */}
         <div className="relative w-full sm:w-64">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-          />
           <input
             type="text"
             placeholder="Поиск файлов..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-zinc-200 placeholder-slate-400 pl-9 pr-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="w-full bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-zinc-200 placeholder-slate-400 pl-4 pr-14 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
           />
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            {localSearch && (
+              <X
+                size={15}
+                className="text-slate-450 hover:text-red-550 transition-colors cursor-pointer"
+                onClick={() => {
+                  setLocalSearch("");
+                  onSearchChange("");
+                }}
+              />
+            )}
+            <Search
+              size={15}
+              className="text-slate-400 hover:text-indigo-650 transition-colors cursor-pointer"
+              onClick={handleSearchSubmit}
+            />
+          </div>
         </div>
 
         {/* Sort Selector */}

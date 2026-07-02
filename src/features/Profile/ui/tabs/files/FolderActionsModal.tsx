@@ -46,7 +46,7 @@ export const FolderActionsModal = ({
         className: "bg-indigo-600! hover:bg-indigo-700! text-white! rounded-full px-5",
       }}
       cancelButtonProps={{
-        className: "rounded-full px-5 border-slate-200 dark:border-slate-800",
+        style: { display: "none" },
       }}
       className="dark:bg-slate-900"
       destroyOnClose
