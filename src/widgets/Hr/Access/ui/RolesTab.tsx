@@ -4,7 +4,7 @@ import { Input, Modal, Pagination } from "antd";
 
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { normalizeAccessUsers } from "../lib";
+import { normalizeAccessUsers, extractPermNames } from "../lib";
 import { RoleCard } from "./RoleCard";
 import { RoleListTable } from "./RoleListTable";
 import { RoleUsersTable } from "./RoleUsersTable";
@@ -43,6 +43,33 @@ export const RolesTab = () => {
 			staleTime: 30 * 60 * 1000,
 		},
 	});
+
+	/** Для реального счётчика «пользователей на роль» на карточках/в таблице — без пагинации */
+	const { data: allUsersForCountsData } = useGetQuery({
+		url: ApiRoutes.GET_USERS,
+		useToken: true,
+		params: { per_page: 1000 },
+		options: {
+			refetchOnWindowFocus: false,
+			staleTime: 5 * 60 * 1000,
+		},
+	});
+
+	const roleUserCounts = useMemo(() => {
+		const raw = (allUsersForCountsData?.data?.data ||
+			allUsersForCountsData?.data ||
+			allUsersForCountsData ||
+			[]) as any[];
+		const counts: Record<string, number> = {};
+		if (Array.isArray(raw)) {
+			raw.forEach((u) => {
+				extractPermNames(u?.roles).forEach((roleName) => {
+					counts[roleName] = (counts[roleName] || 0) + 1;
+				});
+			});
+		}
+		return counts;
+	}, [allUsersForCountsData]);
 
 	const rolesList = useMemo(() => {
 		const raw = (rolesData?.data?.data ||
@@ -236,7 +263,7 @@ export const RolesTab = () => {
 								<RoleCard
 									key={r.id}
 									role={r}
-									userCount={10}
+									userCount={roleUserCounts[r.name] ?? 0}
 									isSelected={selectedRole?.id === r.id}
 									onSelect={() => setSelectedRole(r)}
 									onEdit={() => setSelectedRole(r)}
@@ -252,6 +279,7 @@ export const RolesTab = () => {
 								onSelect={setSelectedRole}
 								onEdit={setSelectedRole}
 								onDelete={handleDeleteRole}
+								userCounts={roleUserCounts}
 							/>
 						</div>
 					)}

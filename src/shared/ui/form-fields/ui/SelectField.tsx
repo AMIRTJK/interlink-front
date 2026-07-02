@@ -67,7 +67,6 @@ export const SelectField = ({
 	useToken,
 	...props
 }: ISelectFieldProps) => {
-	const [items, setItems] = useState<unknown[]>([]);
 	const [isFetched, setIsFetched] = useState(false);
 
 	const [searchTerm, setSearchTerm] = useState("");
@@ -134,41 +133,41 @@ export const SelectField = ({
 					.toLowerCase()
 					.includes(input.toLowerCase());
 
-	const selectOptions = useMemo(
-		() => (options ?? items) as DefaultOptionType[],
-		[options, items],
-	);
-
-	useEffect(() => {
-		if (!data) return;
-
-		let formatted: DefaultOptionType[] = [];
+	/**
+	 * Опции считаем напрямую из query-данных, а не через отдельный useState.
+	 * Раньше "заполнить items из data" и "сбросить items при смене url/params"
+	 * были двумя отдельными эффектами — при маунте (напр. переоткрытие модалки
+	 * с destroyOnClose, когда данные для этого url уже в кэше react-query)
+	 * оба эффекта срабатывали в одном проходе, и эффект сброса, идя вторым,
+	 * затирал только что подставленные данные пустым массивом.
+	 */
+	const dataOptions = useMemo<DefaultOptionType[]>(() => {
+		if (!data) return [];
 
 		if (transformResponse) {
-			formatted = transformResponse(data, props.extraTransformParams);
-		} else if (
+			return transformResponse(data, props.extraTransformParams);
+		}
+		if (
 			typeof data === "object" &&
 			data !== null &&
 			"items" in data &&
 			Array.isArray((data as { items: unknown }).items)
 		) {
-			formatted = (data as { items: DefaultOptionType[] }).items;
+			return (data as { items: DefaultOptionType[] }).items;
 		}
-
-		setItems(formatted);
+		return [];
 	}, [data, transformResponse, props.extraTransformParams]);
+
+	const selectOptions = useMemo(
+		() => (options ?? dataOptions) as DefaultOptionType[],
+		[options, dataOptions],
+	);
 
 	useEffect(() => {
 		if (isFetched && url) {
 			refetch();
 		}
 	}, [isFetched, url, queryParams, refetch]);
-
-	useEffect(() => {
-		// Сбрасываем items только при изменении URL или параметров запроса,
-		// но не при каждом рефреше, чтобы не стирать уже полученные опции.
-		if (url) setItems([]);
-	}, [url, queryParams]);
 
 	return (
 		<Form.Item

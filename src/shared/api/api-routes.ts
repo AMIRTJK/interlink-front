@@ -62,7 +62,6 @@ export const ApiRoutes = {
   UPDATE_USER: "/api/v1/admin/users/:id",
   DELETE_USER: "/api/v1/admin/users/:id",
   SET_USER_ROLES: "/api/v1/admin/users/assign-roles",
-  ASSIGN_USER_PERMISSIONS: "/api/v1/admin/users/assign-permissions",
   // Полная картина прав пользователя: roles/role_permissions/direct_permissions/denied_permissions/effective_permissions
   GET_USER_PERMISSIONS: "/api/v1/admin/users/:id/permissions",
   UPDATE_USER_DIRECT_PERMISSIONS: "/api/v1/admin/users/:id/permissions/direct",

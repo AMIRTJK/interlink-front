@@ -6,7 +6,7 @@ import { Form, Button, Card } from 'antd';
 
 export const SetUserRole = () => {
   const { mutate, isPending, isAllowed } = useMutationQuery<SetRoleDTO>({
-    url: (data) => ApiRoutes.SET_USER_ROLES.replace(":id", String(data.user_id)),
+    url: ApiRoutes.SET_USER_ROLES,
     method: "POST",
     messages: { success: "Роли обновлены" },
     preload: true,

@@ -5,7 +5,7 @@ import { Dropdown, Modal, Switch, ConfigProvider } from "antd";
 import type { MenuProps } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { If, Loader, Tooltip } from "@shared/ui";
+import { If, Loader } from "@shared/ui";
 import { IAccessUser, ACCESS_STATUS_META } from "../model";
 import { getInitials, formatJoinedDate, extractPermNames } from "../lib";
 
@@ -140,6 +140,10 @@ export const UserProfileModal = ({
 }: IProps) => {
 	const [tab, setTab] = useState<TTab>("profile");
 	const [selectedRoles, setSelectedRoles] = useState<string[]>(user.roles);
+	const [originalRoles, setOriginalRoles] = useState<string[]>(user.roles);
+	const [backendRolePermissions, setBackendRolePermissions] = useState<
+		string[]
+	>([]);
 	const [directPermissionsState, setDirectPermissionsState] = useState<
 		string[]
 	>([]);
@@ -193,9 +197,13 @@ export const UserProfileModal = ({
 		const roleNames: string[] = extractPermNames(rawRoles);
 		if (roleNames.length) {
 			setSelectedRoles(roleNames);
+			setOriginalRoles(roleNames);
 		}
 
 		const rawUserPerms = userPermsData?.data || userPermsData;
+		setBackendRolePermissions(
+			extractPermNames(rawUserPerms?.role_permissions),
+		);
 		setDirectPermissionsState(
 			extractPermNames(rawUserPerms?.direct_permissions),
 		);
@@ -306,15 +314,34 @@ export const UserProfileModal = ({
 
 	const ACCESS_PAGE_SIZE = 6;
 
-	/** Права, унаследованные от текущего набора выбранных ролей */
+	/** Роли ещё не тронуты в этой сессии редактирования — можно доверять backend-снимку прав */
+	const rolesUnchanged = useMemo(() => {
+		if (selectedRoles.length !== originalRoles.length) {
+			return false;
+		}
+		const a = [...selectedRoles].sort();
+		const b = [...originalRoles].sort();
+		return a.every((role, i) => role === b[i]);
+	}, [selectedRoles, originalRoles]);
+
+	/**
+	 * Права, унаследованные от текущего набора выбранных ролей.
+	 * Пока роли не менялись — берём авторитетный role_permissions из ответа
+	 * GET_USER_PERMISSIONS. Как только пользователь добавил/убрал роль в UI,
+	 * считаем права по локально закэшированному списку ролей (для этой
+	 * гипотетической комбинации backend ещё не спрашивали).
+	 */
 	const roleGrantedPermissions = useMemo(() => {
+		if (rolesUnchanged && backendRolePermissions.length) {
+			return backendRolePermissions;
+		}
 		const perms = new Set<string>();
 		selectedRoles.forEach((roleName) => {
 			const roleObj = rolesList.find((r) => r.name === roleName);
 			extractPermNames(roleObj?.permissions).forEach((p) => perms.add(p));
 		});
 		return Array.from(perms);
-	}, [selectedRoles, rolesList]);
+	}, [rolesUnchanged, backendRolePermissions, selectedRoles, rolesList]);
 
 	/** effective = роль + прямые - запрещённые (та же формула, что и на backend) */
 	const effectivePermissions = useMemo(() => {
@@ -807,8 +834,13 @@ export const UserProfileModal = ({
 																			{act.label}
 																		</span>
 																		{inRole && (
-																			<span className="shrink-0 px-1.5 py-0.5 rounded bg-blue-50 text-blue-500 text-[9px] font-bold uppercase tracking-wide select-none">
+																			<span className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide select-none ${isDenied ? "bg-rose-50 text-rose-500" : "bg-blue-50 text-blue-500"}`}>
 																				Роль
+																			</span>
+																		)}
+																		{!inRole && isDirect && (
+																			<span className="shrink-0 px-1.5 py-0.5 rounded bg-violet-50 text-violet-500 text-[9px] font-bold uppercase tracking-wide select-none">
+																				Выдано лично
 																			</span>
 																		)}
 																	</div>
@@ -823,23 +855,19 @@ export const UserProfileModal = ({
 																			{isEffective ? "Да" : "Нет"}
 																		</span>
 																		{inRole ? (
-																			<Tooltip title="Запретить это право лично этому пользователю">
-																				<Switch
-																					checked={isDenied}
-																					onChange={() =>
-																						handleToggleDenied(act.name)
-																					}
-																				/>
-																			</Tooltip>
+																			<Switch
+																				checked={!isDenied}
+																				onChange={() =>
+																					handleToggleDenied(act.name)
+																				}
+																			/>
 																		) : (
-																			<Tooltip title="Выдать это право лично этому пользователю">
-																				<Switch
-																					checked={isDirect}
-																					onChange={() =>
-																						handleToggleDirect(act.name)
-																					}
-																				/>
-																			</Tooltip>
+																			<Switch
+																				checked={isDirect}
+																				onChange={() =>
+																					handleToggleDirect(act.name)
+																				}
+																			/>
 																		)}
 																	</div>
 																</div>

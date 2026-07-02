@@ -8,6 +8,7 @@ interface IProps {
 	onEdit: (role: IRoleItem) => void;
 	onDelete: (role: IRoleItem) => void;
 	selectedRoleId?: number;
+	userCounts: Record<string, number>;
 }
 
 export const RoleListTable = ({
@@ -16,10 +17,12 @@ export const RoleListTable = ({
 	onEdit,
 	onDelete,
 	selectedRoleId,
+	userCounts,
 }: IProps) => {
 	const columns = getRolesTableColumns({
 		onEdit,
 		onDelete,
+		userCounts,
 	});
 
 	return (

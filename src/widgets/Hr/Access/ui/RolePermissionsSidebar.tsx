@@ -3,7 +3,7 @@ import { Switch, Modal, Input, Pagination } from "antd";
 import { Check, Trash2, X, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ApiRoutes } from "@shared/api";
-import { useMutationQuery } from "@shared/lib";
+import { useGetQuery, useMutationQuery } from "@shared/lib";
 
 interface IProps {
 	role: {
@@ -68,10 +68,23 @@ export const RolePermissionsSidebar = ({
 		setSidebarPage(1);
 	}, [role, searchQuery]);
 
+	/** Права роли берём только отсюда — GET_ROLE, а не из пропса (список GET_ROLES кэшируется на 30 минут) */
+	const { data: roleDetailData } = useGetQuery({
+		url: role ? ApiRoutes.GET_ROLE.replace(":id", String(role.id)) : undefined,
+		useToken: true,
+		options: {
+			enabled: !!role,
+			refetchOnWindowFocus: false,
+			staleTime: 0,
+		},
+	});
+
 	useEffect(() => {
+		const freshRole = roleDetailData?.data || roleDetailData;
+
 		const list: string[] = [];
-		if (role && Array.isArray(role.permissions)) {
-			role.permissions.forEach((p: any) => {
+		if (freshRole && Array.isArray(freshRole.permissions)) {
+			freshRole.permissions.forEach((p: any) => {
 				const name = typeof p === "string" ? p : p?.name;
 				if (name) {
 					list.push(name);
@@ -79,7 +92,7 @@ export const RolePermissionsSidebar = ({
 			});
 		}
 		setRolePermissionsState(list);
-	}, [role]);
+	}, [roleDetailData]);
 
 	const updateRoleM = useMutationQuery({
 		url: () =>
