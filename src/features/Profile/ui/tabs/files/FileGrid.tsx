@@ -1,15 +1,25 @@
 import React from "react";
-import { Pin, Trash2, Archive, FileText, FileSpreadsheet } from "lucide-react";
+import { Pin, Trash2, Archive, FileText, FileSpreadsheet, Eye, History, Share2, Download } from "lucide-react";
 import { IFileItem } from "../mockData";
+import { Tooltip } from "@shared/ui";
 
 interface IProps {
   files: IFileItem[];
   onTogglePin: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (file: IFileItem) => void;
+  onShare: (file: IFileItem) => void;
+  onHistory: (file: IFileItem) => void;
 }
 
-export const FileGrid = ({ files, onTogglePin, onDelete, onView }: IProps) => {
+export const FileGrid = ({
+  files,
+  onTogglePin,
+  onDelete,
+  onView,
+  onShare,
+  onHistory,
+}: IProps) => {
   const getCoverContent = (file: IFileItem) => {
     if (file.type === "image" && file.previewUrl) {
       return (
@@ -54,6 +64,17 @@ export const FileGrid = ({ files, onTogglePin, onDelete, onView }: IProps) => {
     }
   };
 
+  const handleDownload = (file: IFileItem) => {
+    if (file.previewUrl) {
+      const a = document.createElement("a");
+      a.href = file.previewUrl;
+      a.download = file.name;
+      a.click();
+    } else {
+      alert(`Симуляция скачивания файла: ${file.name}`);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {files.map((file) => (
@@ -82,17 +103,6 @@ export const FileGrid = ({ files, onTogglePin, onDelete, onView }: IProps) => {
             >
               <Pin size={14} className={file.pinned ? "fill-white!" : ""} />
             </button>
-
-            {/* Delete button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(file.id);
-              }}
-              className="absolute top-3 left-3 p-1.5 rounded-full bg-black/40 text-white/80 hover:bg-red-600! hover:text-white! scale-0 group-hover:scale-100 focus:scale-100 transition-all cursor-pointer"
-            >
-              <Trash2 size={14} />
-            </button>
           </div>
 
           {/* Meta Area */}
@@ -107,6 +117,74 @@ export const FileGrid = ({ files, onTogglePin, onDelete, onView }: IProps) => {
             <p className="text-[11px] font-semibold text-slate-400 dark:text-zinc-400">
               {file.size} <span className="mx-1">•</span> {file.date}
             </p>
+
+            {/* Action Buttons on Hover */}
+            <div className="flex items-center gap-3 pt-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+              <Tooltip title="Просмотр">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onView(file);
+                  }}
+                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded-lg transition-colors cursor-pointer"
+                >
+                  <Eye size={14} />
+                </button>
+              </Tooltip>
+
+              <Tooltip title="История изменений">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onHistory(file);
+                  }}
+                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded-lg transition-colors cursor-pointer"
+                >
+                  <History size={14} />
+                </button>
+              </Tooltip>
+
+              <Tooltip title="Поделиться">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onShare(file);
+                  }}
+                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded-lg transition-colors cursor-pointer"
+                >
+                  <Share2 size={14} />
+                </button>
+              </Tooltip>
+
+              <Tooltip title="Скачать">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload(file);
+                  }}
+                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded-lg transition-colors cursor-pointer"
+                >
+                  <Download size={14} />
+                </button>
+              </Tooltip>
+
+              <Tooltip title="Удалить">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(file.id);
+                  }}
+                  className="p-1 text-slate-400 hover:text-red-650! dark:hover:text-red-500! rounded-lg transition-colors cursor-pointer"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </Tooltip>
+            </div>
           </div>
         </div>
       ))}

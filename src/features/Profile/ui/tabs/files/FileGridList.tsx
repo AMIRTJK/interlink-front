@@ -35,6 +35,8 @@ export const FileGridList = ({
           onTogglePin={onTogglePin}
           onDelete={onDelete}
           onView={onView}
+          onShare={onShare}
+          onHistory={onHistory}
         />
       </If>
 
