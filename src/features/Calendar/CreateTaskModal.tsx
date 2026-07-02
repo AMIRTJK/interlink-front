@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { Modal, Form, ConfigProvider } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
@@ -26,14 +26,20 @@ export const CreateTaskModal = ({
 }: IProps) => {
 	const [form] = Form.useForm();
 	const activeColor = Form.useWatch("color", form);
-	const themeKey = useMemo(
+	const [themeKey, setThemeKey] = useState(
 		() => localStorage.getItem("currentTheme") || "emerald",
-		[],
 	);
-	const activeTheme = useMemo(
-		() => THEMES[themeKey] || THEMES.emerald,
-		[themeKey],
-	);
+	const activeTheme = THEMES[themeKey] || THEMES.emerald;
+
+	useEffect(() => {
+		const onStorage = (e: StorageEvent) => {
+			if (e.key === "currentTheme" && e.newValue) {
+				setThemeKey(e.newValue);
+			}
+		};
+		window.addEventListener("storage", onStorage);
+		return () => window.removeEventListener("storage", onStorage);
+	}, []);
 
 	const { data: usersData, isFetching: isFetchingUsers } = useGetQuery<any>({
 		url: ApiRoutes.GET_USERS,
