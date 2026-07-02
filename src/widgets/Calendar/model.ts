@@ -1,1 +1,2 @@
-export type ViewMode = 'week' | 'month' | 'year';
+export type ViewMode = 'day' | 'week' | 'month';
+

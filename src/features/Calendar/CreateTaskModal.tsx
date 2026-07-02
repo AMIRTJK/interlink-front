@@ -1,14 +1,19 @@
-import { Modal } from "antd";
-import { AddTaskForm } from "@features/tasks";
-import { Dayjs } from "dayjs";
-import "./task-details-modal.css";
+import React, { useMemo, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
+import { Form } from "antd";
+import { useGetQuery, useMutationQuery } from "@shared/lib";
+import { ApiRoutes } from "@shared/api";
+import { transformAssigneesResponse } from "../tasks/lib/utils";
+import { THEMES } from "@widgets/layout/ui/designSettings";
+import { EventFormFields } from "./ui/EventFormFields";
+import dayjs, { Dayjs } from "dayjs";
+
 interface IProps {
   isOpen: boolean;
   onClose: () => void;
   selectedDateTime?: { date: Dayjs; time: Dayjs } | null;
-  initialValues?: unknown; 
   onSuccess: () => void;
-  mode?: 'create' | 'edit';
+  mode?: "create" | "edit";
   eventId?: string;
 }
 
@@ -16,39 +21,147 @@ export const CreateTaskModal = ({
   isOpen,
   onClose,
   selectedDateTime,
-  initialValues,
   onSuccess,
-  mode = 'create',
+  mode = "create",
   eventId,
 }: IProps) => {
-  return (
-    <Modal
-      title={null}
-      open={isOpen}
-      onCancel={onClose}
-      footer={null}
-      width={376}
-      centered
-      className="task-details-modal"
-      maskClosable={true}
-      closable={true}
-    >
-      <div className="task-details">
-        <AddTaskForm
-          initialValues={
-            initialValues || (selectedDateTime
-              ? {
-                  date: selectedDateTime.date,
-                  time: selectedDateTime.time,
-                }
-              : undefined)
-          }
-          onSuccess={onSuccess}
-          isEvent={true}
-          mode={mode}
-          eventId={eventId}
-        />
+  const [form] = Form.useForm();
+  const activeColor = Form.useWatch("color", form);
+  const themeKey = useMemo(() => localStorage.getItem("currentTheme") || "emerald", []);
+  const activeTheme = useMemo(() => THEMES[themeKey] || THEMES.emerald, [themeKey]);
+
+  const { data: usersData, isFetching: isFetchingUsers } = useGetQuery<any>({
+    url: ApiRoutes.GET_USERS,
+    params: { per_page: 100 },
+    useToken: true,
+  });
+
+  const assigneesOptions = useMemo(() => {
+    if (!usersData) return [];
+    return transformAssigneesResponse(usersData);
+  }, [usersData]);
+
+  const { mutate: addEventMutate } = useMutationQuery({
+    method: mode === "edit" ? "PUT" : "POST",
+    url: mode === "edit" && eventId ? `${ApiRoutes.UPDATE_EVENT}/${eventId}` : ApiRoutes.ADD_EVENT,
+    messages: {
+      success: mode === "edit" ? "Событие обновлено!" : "Событие добавлено!",
+      error: mode === "edit" ? "Ошибка при обновлении события" : "Ошибка при добавлении события",
+      invalidate: [ApiRoutes.GET_EVENTS],
+      onSuccessCb: () => { onSuccess(); },
+    },
+  });
+
+  const onFinish = (values: any) => {
+    const dateStr = values.date?.format("YYYY-MM-DD");
+    const timeStr = values.time?.format("HH:mm");
+    const startDateTime = dayjs(`${dateStr} ${timeStr}`);
+
+    let endDateTime;
+    if (values.endTime) {
+      const endTimeStr = values.endTime.format("HH:mm");
+      endDateTime = dayjs(`${dateStr} ${endTimeStr}`);
+      if (endDateTime.isBefore(startDateTime) || endDateTime.isSame(startDateTime)) {
+        endDateTime = endDateTime.add(1, "day");
+      }
+    } else {
+      endDateTime = startDateTime.add(1, "hour");
+    }
+
+    addEventMutate({
+      title: values.title,
+      description: values.description || "",
+      start_at: startDateTime.format("YYYY-MM-DD HH:mm"),
+      end_at: endDateTime.format("YYYY-MM-DD HH:mm"),
+      color: String(values.color),
+      status: "pending",
+      participants: values.assignees || [],
+    });
+  };
+
+  const combinedInitialValues = useMemo(() => {
+    if (selectedDateTime) {
+      return {
+        date: selectedDateTime.date,
+        time: selectedDateTime.time,
+        endTime: selectedDateTime.time.add(1, "hour"),
+        color: "#33BFFF",
+      };
+    }
+    return { color: "#33BFFF" };
+  }, [selectedDateTime]);
+
+  useEffect(() => {
+    if (isOpen) {
+      form.setFieldsValue(combinedInitialValues);
+      document.body.style.overflow = "hidden";
+    } else {
+      form.resetFields();
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [combinedInitialValues, isOpen, form]);
+
+  const handleEsc = useCallback((e: KeyboardEvent) => {
+    if (e.key === "Escape") onClose();
+  }, [onClose]);
+
+  useEffect(() => {
+    if (isOpen) document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, [isOpen, handleEsc]);
+
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div className="fixed! inset-0! z-[1050]! flex! items-center! justify-center! p-4!">
+      <div className="absolute! inset-0! bg-black/50!" onClick={onClose} />
+
+      <div className="relative! w-[380px]! bg-white! rounded-[20px]! overflow-hidden! shadow-[0_24px_60px_rgba(0,0,0,0.18)]!">
+        <div className={`bg-gradient-to-r ${activeTheme.gradient} px-6! py-4! flex! items-center! justify-between!`}>
+          <h3 className="text-white! font-bold! text-base! m-0!">
+            {mode === "edit" ? "Редактирование события" : "Новое событие"}
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-white/80! hover:text-white! text-base! cursor-pointer! border-none! bg-transparent! flex! items-center! justify-center! transition-colors! leading-none! p-0!"
+          >
+            ✕
+          </button>
+        </div>
+
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onFinish}
+          className="px-5! pt-4! pb-2!"
+          requiredMark={false}
+        >
+          <EventFormFields
+            form={form}
+            activeColor={activeColor}
+            isFetchingUsers={isFetchingUsers}
+            assigneesOptions={assigneesOptions}
+          />
+
+          <div className="border-t! border-zinc-100! mt-2! pt-3! pb-2! flex! items-center! justify-end! gap-3!">
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-zinc-500! hover:text-zinc-800! font-medium! text-sm! cursor-pointer! border-none! bg-transparent! transition-colors! px-4! py-2!"
+            >
+              Отмена
+            </button>
+            <button
+              type="submit"
+              className={`bg-gradient-to-r! ${activeTheme.gradient} text-white! font-bold! text-sm! px-7! py-2! rounded-full! cursor-pointer! shadow-md! border-none! hover:opacity-90! transition-opacity!`}
+            >
+              {mode === "edit" ? "Сохранить" : "Создать"}
+            </button>
+          </div>
+        </Form>
       </div>
-    </Modal>
+    </div>,
+    document.body
   );
 };
