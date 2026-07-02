@@ -27,3 +27,4 @@ tsconfig.tsbuildinfo
 # GEMINI.md
 
 src/widgets/NewProfileDesign/
+src/widgets/DesignTaskCode/

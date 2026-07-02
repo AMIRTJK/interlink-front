@@ -24,6 +24,7 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	Calendar,
+	Activity,
 } from "lucide-react";
 
 import {
@@ -44,6 +45,10 @@ import {
 
 import { useLocation } from "react-router";
 import { tokenControl } from "@shared/lib";
+import { StructureView } from "./StructureView";
+import type { LetterDirection } from "../lib/structure";
+
+type ViewMode = "list" | "block" | "structure";
 
 dayjs.locale("ru");
 
@@ -121,9 +126,9 @@ export const RegistryLayout = ({
 	fieldConfig,
 	breadcrumbs,
 }: RegistryLayoutProps) => {
-	const [viewMode, setViewMode] = useState<"list" | "block">(() => {
+	const [viewMode, setViewMode] = useState<ViewMode>(() => {
 		const savedMode = tokenControl.getViewMode();
-		return (savedMode as "list" | "block") || "list";
+		return (savedMode as ViewMode) || "list";
 	});
 
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -132,6 +137,11 @@ export const RegistryLayout = ({
 
 	const isStatusNavActive =
 		pathname.includes("incoming") || pathname.includes("outgoing");
+
+	// Направление письма для реконструкции цепочки движения в режиме «Структура».
+	const direction: LetterDirection = pathname.includes("incoming")
+		? "incoming"
+		: "outgoing";
 
 	// --- ДАННЫЕ ИЗ API (META) ---
 	const currentPage = meta?.current_page || 1;
@@ -151,7 +161,7 @@ export const RegistryLayout = ({
 
 	const hasActiveFilters = Object.values(currentFilters).some((v) => !!v);
 
-	const handleViewModeChange = (mode: "list" | "block") => {
+	const handleViewModeChange = (mode: ViewMode) => {
 		setViewMode(mode);
 		tokenControl.setViewMode(mode);
 	};
@@ -247,6 +257,19 @@ export const RegistryLayout = ({
 								<LayoutGrid size={16} />
 								<span>Блоки</span>
 							</motion.button>
+							<motion.button
+								whileHover={{ scale: 1.05 }}
+								whileTap={{ scale: 0.95 }}
+								onClick={() => handleViewModeChange("structure")}
+								className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+									viewMode === "structure"
+										? "bg-white text-blue-600 shadow-sm"
+										: "text-gray-600 hover:text-gray-900"
+								}`}
+							>
+								<Activity size={16} />
+								<span>Структура</span>
+							</motion.button>
 						</div>
 
 						<motion.button
@@ -340,7 +363,7 @@ export const RegistryLayout = ({
 					<div className="flex-1 min-h-0 pr-1 m-0">
 						<AnimatePresence mode="wait">
 							<motion.div
-								key={activeTabId + currentPage}
+								key={viewMode + activeTabId + currentPage}
 								initial={{ opacity: 0, y: 10 }}
 								animate={{ opacity: 1, y: 0 }}
 								exit={{ opacity: 0, y: -10 }}
@@ -348,10 +371,18 @@ export const RegistryLayout = ({
 								className={
 									viewMode === "block"
 										? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4"
-										: "space-y-2"
+										: viewMode === "structure"
+											? ""
+											: "space-y-2"
 								}
 							>
-								{documents && documents.length > 0 ? (
+								{viewMode === "structure" ? (
+									<StructureView
+										documents={documents}
+										direction={direction}
+										onCardClick={onCardClick}
+									/>
+								) : documents && documents.length > 0 ? (
 									documents?.map((doc: any, idx: number) => {
 										const statusData =
 											statusConfig[doc.status] || statusConfig.default;
