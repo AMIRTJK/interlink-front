@@ -394,6 +394,7 @@ export const UserProfileModal = ({
 			okText: "Удалить",
 			okType: "danger",
 			cancelText: "Отмена",
+			zIndex: 10005,
 			onOk: () => {
 				onDelete(user.id);
 				onClose();
