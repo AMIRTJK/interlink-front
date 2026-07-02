@@ -63,6 +63,10 @@ export const ApiRoutes = {
   DELETE_USER: "/api/v1/admin/users/:id",
   SET_USER_ROLES: "/api/v1/admin/users/assign-roles",
   ASSIGN_USER_PERMISSIONS: "/api/v1/admin/users/assign-permissions",
+  // Полная картина прав пользователя: roles/role_permissions/direct_permissions/denied_permissions/effective_permissions
+  GET_USER_PERMISSIONS: "/api/v1/admin/users/:id/permissions",
+  UPDATE_USER_DIRECT_PERMISSIONS: "/api/v1/admin/users/:id/permissions/direct",
+  UPDATE_USER_DENIED_PERMISSIONS: "/api/v1/admin/users/:id/permissions/denied",
   // Экспорт сотрудников в Excel (временный тестовый роут — заменю на боевой)
   EXPORT_USERS_EXCEL: "/test-users-excel-download",
 

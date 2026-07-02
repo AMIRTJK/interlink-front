@@ -5,9 +5,9 @@ import { Dropdown, Modal, Switch, ConfigProvider } from "antd";
 import type { MenuProps } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { If, Loader } from "@shared/ui";
+import { If, Loader, Tooltip } from "@shared/ui";
 import { IAccessUser, ACCESS_STATUS_META } from "../model";
-import { getInitials, formatJoinedDate } from "../lib";
+import { getInitials, formatJoinedDate, extractPermNames } from "../lib";
 
 interface IProps {
 	user: IAccessUser;
@@ -140,9 +140,12 @@ export const UserProfileModal = ({
 }: IProps) => {
 	const [tab, setTab] = useState<TTab>("profile");
 	const [selectedRoles, setSelectedRoles] = useState<string[]>(user.roles);
-	const [userPermissionsState, setUserPermissionsState] = useState<string[]>(
-		[],
-	);
+	const [directPermissionsState, setDirectPermissionsState] = useState<
+		string[]
+	>([]);
+	const [deniedPermissionsState, setDeniedPermissionsState] = useState<
+		string[]
+	>([]);
 	const [isInitialized, setIsInitialized] = useState(false);
 	const [permissionsPage, setPermissionsPage] = useState(1);
 	const [accessPage, setAccessPage] = useState(1);
@@ -165,51 +168,42 @@ export const UserProfileModal = ({
 		},
 	});
 
-	const isDataLoading = isDetailLoading || isPermsLoading || !isInitialized;
+	const userPermsUrl = ApiRoutes.GET_USER_PERMISSIONS.replace(
+		":id",
+		String(user.id),
+	);
+
+	const { data: userPermsData, isLoading: isUserPermsLoading } = useGetQuery({
+		url: userPermsUrl,
+		useToken: true,
+		options: {
+			refetchOnWindowFocus: false,
+			staleTime: 0,
+		},
+	});
+
+	const isDataLoading =
+		isDetailLoading || isPermsLoading || isUserPermsLoading || !isInitialized;
 
 	useEffect(() => {
-		if (isInitialized || !detailData || rolesList.length === 0) {
+		if (isInitialized || !detailData || !userPermsData || rolesList.length === 0) {
 			return;
 		}
 		const rawRoles = detailData?.data?.roles || detailData?.roles;
-		const roleNames: string[] = [];
-		if (Array.isArray(rawRoles)) {
-			rawRoles.forEach((r: any) => {
-				const name = typeof r === "string" ? r : r?.name;
-				if (name) {
-					roleNames.push(name);
-				}
-			});
+		const roleNames: string[] = extractPermNames(rawRoles);
+		if (roleNames.length) {
 			setSelectedRoles(roleNames);
 		}
-		const rawPerms = detailData?.data?.permissions || detailData?.permissions;
-		const perms = new Set<string>();
-		if (Array.isArray(rawPerms)) {
-			rawPerms.forEach((p: any) => {
-				if (typeof p === "string") {
-					perms.add(p);
-				} else if (p && typeof p === "object" && p.name) {
-					perms.add(p.name);
-				}
-			});
-		}
-		roleNames.forEach((roleName) => {
-			const matchedRoleObj = rolesList.find((item) => item.name === roleName);
-			if (matchedRoleObj && matchedRoleObj.permissions) {
-				if (Array.isArray(matchedRoleObj.permissions)) {
-					matchedRoleObj.permissions.forEach((p: any) => {
-						if (typeof p === "string") {
-							perms.add(p);
-						} else if (p && typeof p === "object" && p.name) {
-							perms.add(p.name);
-						}
-					});
-				}
-			}
-		});
-		setUserPermissionsState(Array.from(perms));
+
+		const rawUserPerms = userPermsData?.data || userPermsData;
+		setDirectPermissionsState(
+			extractPermNames(rawUserPerms?.direct_permissions),
+		);
+		setDeniedPermissionsState(
+			extractPermNames(rawUserPerms?.denied_permissions),
+		);
 		setIsInitialized(true);
-	}, [detailData, isInitialized, rolesList]);
+	}, [detailData, userPermsData, isInitialized, rolesList]);
 
 	const updateRolesM = useMutationQuery({
 		url: ApiRoutes.SET_USER_ROLES,
@@ -223,13 +217,27 @@ export const UserProfileModal = ({
 		},
 	});
 
-	const updatePermissionsM = useMutationQuery({
-		url: ApiRoutes.ASSIGN_USER_PERMISSIONS,
-		method: "POST",
+	const updateDirectM = useMutationQuery({
+		url: () => ApiRoutes.UPDATE_USER_DIRECT_PERMISSIONS.replace(":id", String(user.id)),
+		method: "PUT",
 		messages: {
-			success: "Права доступа успешно сохранены",
+			success: "Прямые права сохранены",
 			invalidate: [
 				ApiRoutes.GET_USERS,
+				userPermsUrl,
+				`${ApiRoutes.FETCH_USER_BY_ID}${user.id}`,
+			],
+		},
+	});
+
+	const updateDeniedM = useMutationQuery({
+		url: () => ApiRoutes.UPDATE_USER_DENIED_PERMISSIONS.replace(":id", String(user.id)),
+		method: "PUT",
+		messages: {
+			success: "Персональные ограничения сохранены",
+			invalidate: [
+				ApiRoutes.GET_USERS,
+				userPermsUrl,
 				`${ApiRoutes.FETCH_USER_BY_ID}${user.id}`,
 			],
 		},
@@ -298,10 +306,28 @@ export const UserProfileModal = ({
 
 	const ACCESS_PAGE_SIZE = 6;
 
+	/** Права, унаследованные от текущего набора выбранных ролей */
+	const roleGrantedPermissions = useMemo(() => {
+		const perms = new Set<string>();
+		selectedRoles.forEach((roleName) => {
+			const roleObj = rolesList.find((r) => r.name === roleName);
+			extractPermNames(roleObj?.permissions).forEach((p) => perms.add(p));
+		});
+		return Array.from(perms);
+	}, [selectedRoles, rolesList]);
+
+	/** effective = роль + прямые - запрещённые (та же формула, что и на backend) */
+	const effectivePermissions = useMemo(() => {
+		const perms = new Set<string>(roleGrantedPermissions);
+		directPermissionsState.forEach((p) => perms.add(p));
+		deniedPermissionsState.forEach((p) => perms.delete(p));
+		return Array.from(perms);
+	}, [roleGrantedPermissions, directPermissionsState, deniedPermissionsState]);
+
 	const relevantPermissions = useMemo(() => {
-		const activeModules = new Set(userPermissionsState.map((p) => p.split(".")[0]));
+		const activeModules = new Set(effectivePermissions.map((p) => p.split(".")[0]));
 		return allSystemPermissions.filter((perm) => activeModules.has(perm.split(".")[0]));
-	}, [allSystemPermissions, userPermissionsState]);
+	}, [allSystemPermissions, effectivePermissions]);
 
 	const paginatedAccessLevels = useMemo(() => {
 		const start = (accessPage - 1) * ACCESS_PAGE_SIZE;
@@ -312,33 +338,25 @@ export const UserProfileModal = ({
 		setAccessPage(1);
 	}, [relevantPermissions]);
 
-	const handleTogglePermission = (permissionName: string) => {
-		setUserPermissionsState((prev) => {
-			if (prev.includes(permissionName)) {
-				return prev.filter((p) => p !== permissionName);
-			} else {
-				return [...prev, permissionName];
-			}
-		});
+	const handleToggleDirect = (permissionName: string) => {
+		setDirectPermissionsState((prev) =>
+			prev.includes(permissionName)
+				? prev.filter((p) => p !== permissionName)
+				: [...prev, permissionName],
+		);
+	};
+
+	const handleToggleDenied = (permissionName: string) => {
+		setDeniedPermissionsState((prev) =>
+			prev.includes(permissionName)
+				? prev.filter((p) => p !== permissionName)
+				: [...prev, permissionName],
+		);
 	};
 
 	const handleResetToStandard = () => {
-		const perms = new Set<string>();
-		selectedRoles.forEach((roleName) => {
-			const roleObj = rolesList.find((r) => r.name === roleName);
-			if (roleObj && roleObj.permissions) {
-				if (Array.isArray(roleObj.permissions)) {
-					roleObj.permissions.forEach((p) => {
-						if (typeof p === "string") {
-							perms.add(p);
-						} else if (p && typeof p === "object" && p.name) {
-							perms.add(p.name);
-						}
-					});
-				}
-			}
-		});
-		setUserPermissionsState(Array.from(perms));
+		setDirectPermissionsState([]);
+		setDeniedPermissionsState([]);
 	};
 
 	const availableRolesToAdd = useMemo(() => {
@@ -361,40 +379,11 @@ export const UserProfileModal = ({
 	}, [availableRolesToAdd]);
 
 	const handleAddRole = (roleName: string) => {
-		setSelectedRoles((prev) => {
-			const nextRoles = [...prev, roleName];
-			const roleObj = rolesList.find((r) => r.name === roleName);
-			if (roleObj && roleObj.permissions) {
-				const rolePerms = Array.isArray(roleObj.permissions)
-					? roleObj.permissions.map((p: any) => (typeof p === "string" ? p : p?.name)).filter(Boolean)
-					: [];
-				setUserPermissionsState((prevPerms) => Array.from(new Set([...prevPerms, ...rolePerms])));
-			}
-			return nextRoles;
-		});
+		setSelectedRoles((prev) => [...prev, roleName]);
 	};
 
 	const handleRemoveRole = (roleName: string) => {
-		setSelectedRoles((prev) => {
-			const nextRoles = prev.filter((r) => r !== roleName);
-			const perms = new Set<string>();
-			nextRoles.forEach((rName) => {
-				const roleObj = rolesList.find((r) => r.name === rName);
-				if (roleObj && roleObj.permissions) {
-					if (Array.isArray(roleObj.permissions)) {
-						roleObj.permissions.forEach((p: any) => {
-							if (typeof p === "string") {
-								perms.add(p);
-							} else if (p && typeof p === "object" && p.name) {
-								perms.add(p.name);
-							}
-						});
-					}
-				}
-			});
-			setUserPermissionsState(Array.from(perms));
-			return nextRoles;
-		});
+		setSelectedRoles((prev) => prev.filter((r) => r !== roleName));
 	};
 
 	const handleSave = () => {
@@ -409,11 +398,18 @@ export const UserProfileModal = ({
 	};
 
 	const handleSavePermissions = () => {
-		updatePermissionsM.mutate(
-			{ user_id: user.id, permissions: userPermissionsState },
+		updateDirectM.mutate(
+			{ permissions: directPermissionsState },
 			{
 				onSuccess: () => {
-					onClose();
+					updateDeniedM.mutate(
+						{ permissions: deniedPermissionsState },
+						{
+							onSuccess: () => {
+								onClose();
+							},
+						},
+					);
 				},
 			},
 		);
@@ -715,7 +711,7 @@ export const UserProfileModal = ({
 														const parts = perm.split(".");
 														const mod = MODULE_TRANSLATIONS[parts[0]] || parts[0];
 														const action = ACTION_TRANSLATIONS[parts.slice(1).join(".")] || parts.slice(1).join(".");
-														const hasPermission = userPermissionsState.includes(perm);
+														const hasPermission = effectivePermissions.includes(perm);
 														return (
 															<div key={perm} className="flex items-center justify-between py-2 border-b border-slate-50/50">
 																<span className="text-xs text-slate-600 font-semibold">
@@ -770,6 +766,18 @@ export const UserProfileModal = ({
 							</If>
 							<If is={tab === "permissions"}>
 								<div className="space-y-4">
+									<div className="flex items-center justify-between pl-1 gap-4">
+										<p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+											Права из роли отмечены меткой «Роль» — их можно только запретить лично
+											этому пользователю. Остальные права можно выдать напрямую.
+										</p>
+										<button
+											onClick={handleResetToStandard}
+											className="shrink-0 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+										>
+											Сбросить к стандартным
+										</button>
+									</div>
 									<div className="space-y-5">
 										{paginatedGroupEntries.map(
 											([moduleName, actions]) => (
@@ -777,25 +785,63 @@ export const UserProfileModal = ({
 													<h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-1">
 														{MODULE_TRANSLATIONS[moduleName] || moduleName}
 													</h4>
-													<div className="bg-slate-50/40! border border-slate-100! rounded-2xl! p-4! flex! flex-wrap! items-center! gap-x-8! gap-y-3!">
+													<div className="bg-slate-50/40! border border-slate-100! rounded-2xl! p-4! flex! flex-col! gap-2.5!">
 														{actions.map((act) => {
-															const checked = userPermissionsState.includes(
+															const inRole = roleGrantedPermissions.includes(
 																act.name,
 															);
+															const isDenied = deniedPermissionsState.includes(
+																act.name,
+															);
+															const isDirect = directPermissionsState.includes(
+																act.name,
+															);
+															const isEffective = inRole ? !isDenied : isDirect;
 															return (
 																<div
 																	key={act.name}
-																	className="flex items-center gap-3"
+																	className="flex items-center justify-between gap-3"
 																>
-																	<span className="text-sm font-medium text-slate-600">
-																		{act.label}
-																	</span>
-																	<Switch
-																		checked={checked}
-																		onChange={() =>
-																			handleTogglePermission(act.name)
-																		}
-																	/>
+																	<div className="flex items-center gap-2 min-w-0">
+																		<span className="text-sm font-medium text-slate-600 truncate">
+																			{act.label}
+																		</span>
+																		{inRole && (
+																			<span className="shrink-0 px-1.5 py-0.5 rounded bg-blue-50 text-blue-500 text-[9px] font-bold uppercase tracking-wide select-none">
+																				Роль
+																			</span>
+																		)}
+																	</div>
+																	<div className="flex items-center gap-3 shrink-0">
+																		<span
+																			className={`px-1.5 py-0.5 rounded text-[10px] font-bold select-none ${
+																				isEffective
+																					? "bg-emerald-50 text-emerald-600"
+																					: "bg-slate-100 text-slate-400"
+																			}`}
+																		>
+																			{isEffective ? "Да" : "Нет"}
+																		</span>
+																		{inRole ? (
+																			<Tooltip title="Запретить это право лично этому пользователю">
+																				<Switch
+																					checked={isDenied}
+																					onChange={() =>
+																						handleToggleDenied(act.name)
+																					}
+																				/>
+																			</Tooltip>
+																		) : (
+																			<Tooltip title="Выдать это право лично этому пользователю">
+																				<Switch
+																					checked={isDirect}
+																					onChange={() =>
+																						handleToggleDirect(act.name)
+																					}
+																				/>
+																			</Tooltip>
+																		)}
+																	</div>
 																</div>
 															);
 														})}
@@ -862,7 +908,7 @@ export const UserProfileModal = ({
 					<If is={tab === "permissions"}>
 						<button
 							onClick={handleSavePermissions}
-							disabled={updatePermissionsM.isPending}
+							disabled={updateDirectM.isPending || updateDeniedM.isPending}
 							className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60 transition-colors"
 						>
 							<Check size={16} />

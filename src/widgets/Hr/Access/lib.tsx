@@ -31,6 +31,17 @@ export const formatJoinedDate = (dateStr?: string): string => {
 	return `${day}.${month}.${year}`;
 };
 
+/** Приводит массив permissions (строки или {name}) к массиву строк-имён */
+export const extractPermNames = (raw: unknown): string[] => {
+	if (!Array.isArray(raw)) return [];
+	const names: string[] = [];
+	raw.forEach((p: any) => {
+		const name = typeof p === "string" ? p : p?.name;
+		if (name) names.push(name);
+	});
+	return names;
+};
+
 export const normalizeAccessUsers = (raw: IAdminUser[]): IAccessUser[] => {
 	return (Array.isArray(raw) ? raw : []).map((u) => ({
 		id: u.id,

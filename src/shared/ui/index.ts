@@ -14,5 +14,6 @@ export * from './Chat'
 export * from './Count'
 export * from './EmptyState'
 export * from './Tooltip/ui'
+export * from './Can'
 
 

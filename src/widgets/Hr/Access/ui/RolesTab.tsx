@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Search, Plus, LayoutGrid, List } from "lucide-react";
+import { Search, Plus, LayoutGrid, List, ShieldPlus } from "lucide-react";
 import { Input, Modal, Pagination } from "antd";
 
 import { useGetQuery, useMutationQuery } from "@shared/lib";
@@ -10,6 +10,7 @@ import { RoleListTable } from "./RoleListTable";
 import { RoleUsersTable } from "./RoleUsersTable";
 import { RolePermissionsSidebar } from "./RolePermissionsSidebar";
 import { CreateRoleModal } from "./CreateRoleModal";
+import { CreateUiPermissionModal } from "./CreateUiPermissionModal";
 import { IAccessUser } from "../model";
 
 export const RolesTab = () => {
@@ -20,6 +21,7 @@ export const RolesTab = () => {
 	} | null>(null);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
+	const [isCreateUiPermOpen, setIsCreateUiPermOpen] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [rolesPage, setRolesPage] = useState(1);
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -212,6 +214,13 @@ export const RolesTab = () => {
 							</button>
 						</div>
 						<button
+							onClick={() => setIsCreateUiPermOpen(true)}
+							className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+						>
+							<ShieldPlus size={14} />
+							<span>{"Создать UI-право"}</span>
+						</button>
+						<button
 							onClick={() => setIsCreateOpen(true)}
 							className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
 						>
@@ -371,6 +380,10 @@ export const RolesTab = () => {
 			<CreateRoleModal
 				open={isCreateOpen}
 				onClose={() => setIsCreateOpen(false)}
+			/>
+			<CreateUiPermissionModal
+				open={isCreateUiPermOpen}
+				onClose={() => setIsCreateUiPermOpen(false)}
 			/>
 		</div>
 	);
