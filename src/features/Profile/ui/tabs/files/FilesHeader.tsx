@@ -1,11 +1,13 @@
 import React, { useRef } from "react";
-import { Search, ChevronDown, Upload } from "lucide-react";
+import { Search, ChevronDown, Upload, LayoutGrid, List } from "lucide-react";
 
 interface IProps {
   searchQuery: string;
   onSearchChange: (val: string) => void;
   sortBy: "date" | "size" | "name";
   onSortChange: (val: "date" | "size" | "name") => void;
+  viewMode: "grid" | "list";
+  onViewModeChange: (val: "grid" | "list") => void;
   onUpload: (file: File) => void;
   totalCount: number;
 }
@@ -15,6 +17,8 @@ export const FilesHeader = ({
   onSearchChange,
   sortBy,
   onSortChange,
+  viewMode,
+  onViewModeChange,
   onUpload,
   totalCount,
 }: IProps) => {
@@ -95,6 +99,30 @@ export const FilesHeader = ({
               </button>
             ))}
           </div>
+        </div>
+
+        {/* View Switchers */}
+        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-full border border-slate-200/50 dark:border-slate-700/50">
+          <button
+            onClick={() => onViewModeChange("grid")}
+            className={`p-1.5 rounded-full transition-all cursor-pointer ${
+              viewMode === "grid"
+                ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                : "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
+            }`}
+          >
+            <LayoutGrid size={15} />
+          </button>
+          <button
+            onClick={() => onViewModeChange("list")}
+            className={`p-1.5 rounded-full transition-all cursor-pointer ${
+              viewMode === "list"
+                ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                : "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
+            }`}
+          >
+            <List size={15} />
+          </button>
         </div>
 
         {/* Upload Button */}

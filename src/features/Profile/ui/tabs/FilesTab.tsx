@@ -14,7 +14,16 @@ export const FilesTab = () => {
   const [activeCategory, setActiveCategory] = useState<string>("Все файлы");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortBy, setSortBy] = useState<"date" | "size" | "name">("date");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
+
+  // Выбор файла в реестре (чекбокс)
+  const handleToggleSelectFile = (id: string) => {
+    setSelectedFileIds((prev) =>
+      prev.includes(id) ? prev.filter((fileId) => fileId !== id) : [...prev, id]
+    );
+  };
 
   // Загрузка реального файла пользователя
   const handleRealUpload = (selectedFile: File) => {
@@ -75,6 +84,7 @@ export const FilesTab = () => {
   // Удаление файла
   const handleDeleteFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
+    setSelectedFileIds((prev) => prev.filter((fileId) => fileId !== id));
   };
 
   // Добавление новой категории
@@ -114,6 +124,8 @@ export const FilesTab = () => {
         onSearchChange={setSearchQuery}
         sortBy={sortBy}
         onSortChange={setSortBy}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
         onUpload={handleRealUpload}
         totalCount={filteredAndSortedFiles.length}
       />
@@ -132,9 +144,12 @@ export const FilesTab = () => {
         onUnpin={(id) => handleTogglePin(id)}
       />
 
-      {/* Сетка файлов */}
+      {/* Сетка/Реестр файлов */}
       <FileGridList
         files={filteredAndSortedFiles}
+        viewMode={viewMode}
+        selectedFileIds={selectedFileIds}
+        onToggleSelectFile={handleToggleSelectFile}
         onTogglePin={handleTogglePin}
         onDelete={handleDeleteFile}
       />
