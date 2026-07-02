@@ -11,10 +11,10 @@ import {
 import { IUser } from "@entities/login";
 import { ProfileInfoTab } from "./tabs/ProfileInfoTab";
 import { AnalyticsTab } from "./tabs/AnalyticsTab";
-import { DevelopmentStub } from "./tabs/DevelopmentStub";
 import { FilesTab } from "./tabs/FilesTab";
 import { THEMES } from "@widgets/layout/ui/designSettings";
 import { Calendar } from "@widgets/Calendar";
+import { TaskRegistry } from "@widgets/TaskRegistry";
 
 type TabKey = "profile" | "tasks" | "calendar" | "analytics" | "files";
 
@@ -63,7 +63,7 @@ export const PersonalCabinet = ({
       case "analytics":
         return <AnalyticsTab />;
       case "tasks":
-        return <DevelopmentStub title="Задачи" />;
+        return <TaskRegistry />;
       case "calendar":
         return <Calendar />;
       case "files":
