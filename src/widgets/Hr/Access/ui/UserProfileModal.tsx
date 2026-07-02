@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, ChevronDown, Mail, Phone, Building2, Calendar } from "lucide-react";
-import { Dropdown, Modal, Switch } from "antd";
+import { Dropdown, Modal, Switch, ConfigProvider } from "antd";
 import type { MenuProps } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
@@ -486,20 +486,21 @@ export const UserProfileModal = ({
 		},
 		{
 			key: "delete",
-			label: <span className="text-rose-600 font-semibold">Удалить сотрудника</span>,
+			label: <span className="font-semibold">Удалить сотрудника</span>,
 			danger: true,
 			onClick: handleDeleteConfirm,
 		},
 	];
 
 	return (
-		<motion.div
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
-			className="fixed inset-0! z-9998! bg-slate-900/40! backdrop-blur-sm! flex! items-center! justify-center! p-4!"
-			onClick={onClose}
-		>
+		<ConfigProvider theme={{ token: { zIndexPopupBase: 10000 } }}>
+			<motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				exit={{ opacity: 0 }}
+				className="fixed inset-0! z-9998! bg-slate-900/40! backdrop-blur-sm! flex! items-center! justify-center! p-4!"
+				onClick={onClose}
+			>
 			<motion.div
 				initial={{ opacity: 0, scale: 0.95 }}
 				animate={{ opacity: 1, scale: 1 }}
@@ -825,5 +826,6 @@ export const UserProfileModal = ({
 				</div>
 			</motion.div>
 		</motion.div>
+		</ConfigProvider>
 	);
 };
