@@ -6,6 +6,8 @@ import { AnimatePresence } from "framer-motion";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { If } from "@shared/ui";
+import { EmployeeFormModal } from "@features/Hr";
+import type { IAdminUser } from "@entities/hr";
 import { normalizeAccessUsers, extractPermNames } from "../lib";
 import { RoleCard } from "./RoleCard";
 import { RoleListTable } from "./RoleListTable";
@@ -29,6 +31,8 @@ export const RolesTab = () => {
 	const [rolesPage, setRolesPage] = useState(1);
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 	const [viewingUser, setViewingUser] = useState<IAccessUser | null>(null);
+	const [editingUser, setEditingUser] = useState<IAdminUser | null>(null);
+	const [isFormOpen, setIsFormOpen] = useState(false);
 
 	const { data: rolesData } = useGetQuery({
 		url: ApiRoutes.GET_ROLES,
@@ -180,6 +184,25 @@ export const RolesTab = () => {
 			invalidate: [ApiRoutes.GET_ROLES],
 		},
 	});
+
+	const deleteUserM = useMutationQuery({
+		url: (d: { id: number }) =>
+			ApiRoutes.DELETE_USER.replace(":id", String(d.id)),
+		method: "DELETE",
+		messages: {
+			success: "Пользователь успешно удален",
+			invalidate: [ApiRoutes.GET_USERS],
+		},
+	});
+
+	const handleOpenEditUser = (user: IAccessUser) => {
+		setEditingUser(user.raw);
+		setIsFormOpen(true);
+	};
+
+	const handleDeleteUser = (id: number) => {
+		deleteUserM.mutate({ id });
+	};
 
 	const handleDeleteRole = (roleItem: any) => {
 		Modal.confirm({
@@ -392,8 +415,8 @@ export const RolesTab = () => {
 							pageSize={perPage}
 							onPageChange={setCurrentPage}
 							onViewAccess={setViewingUser}
-							onEdit={() => {}}
-							onDelete={() => {}}
+							onEdit={handleOpenEditUser}
+							onDelete={handleDeleteUser}
 						/>
 					</div>
 				)}
@@ -424,13 +447,19 @@ export const RolesTab = () => {
 						<UserProfileModal
 							user={viewingUser}
 							onClose={() => setViewingUser(null)}
-							onEdit={() => {}}
-							onDelete={() => {}}
+							onEdit={handleOpenEditUser}
+							onDelete={handleDeleteUser}
 							allRoles={rolesList}
 						/>
 					)}
 				</If>
 			</AnimatePresence>
+
+			<EmployeeFormModal
+				open={isFormOpen}
+				onClose={() => setIsFormOpen(false)}
+				employee={editingUser}
+			/>
 		</div>
 	);
 };
