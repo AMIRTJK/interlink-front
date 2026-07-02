@@ -7,7 +7,11 @@ import CorrespondenceIcon from "../../../../assets/icons/correspondence-icon.svg
 import PrimaryDocumentsIcon from "../../../../assets/icons/primary documents-icon.svg";
 import ApplicationsIcon from "../../../../assets/icons/applications-icon.svg";
 import CrmIcon from "../../../../assets/icons/crm-icon.svg";
-import { FileTextOutlined, GlobalOutlined } from "@ant-design/icons";
+import {
+	FileTextOutlined,
+	GlobalOutlined,
+	SafetyCertificateOutlined,
+} from "@ant-design/icons";
 
 export type MenuItem = Required<MenuProps>["items"][number] & {
 	requiredRole?: string[];
@@ -115,6 +119,16 @@ export const getModuleItems = (
 				},
 			],
 		}),
+	},
+	// Administration module (подмодули «Пользователи» и «Роли и доступы»
+	// имеют собственный верхний таб-бар, поэтому children здесь не задаём)
+	{
+		key: AppRoutes.ADMINISTRATION,
+		label: "Администрирование",
+		icon:
+			variant === "horizontal" || variant === "full" || variant === "ios" ? (
+				<SafetyCertificateOutlined />
+			) : null,
 	},
 	// {
 	//   key: "/modules/temp-docs_primary",

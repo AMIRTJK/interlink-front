@@ -41,4 +41,9 @@ export const AppRoutes = {
 	HR_ORDERS: "/modules/hr/orders",
 	HR_TIMESHEET: "/modules/hr/timesheet",
 	HR_STAFFING: "/modules/hr/staffing",
+
+	// Administration module
+	ADMINISTRATION: "/modules/administration",
+	ADMINISTRATION_USERS: "/modules/administration/users",
+	ADMINISTRATION_ROLES: "/modules/administration/roles",
 } as const;

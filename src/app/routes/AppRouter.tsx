@@ -132,6 +132,33 @@ const HrStaffingPage = lazy(() =>
   })),
 );
 
+// Administration module
+const AdministrationLayoutPage = lazy(() =>
+  import("@pages/modules/administration/Administration").then((m) => ({
+    default: m.AdministrationLayoutPage,
+  })),
+);
+const AdministrationHomePage = lazy(() =>
+  import("@pages/modules/administration/AdministrationHomePage").then((m) => ({
+    default: m.AdministrationHomePage,
+  })),
+);
+const AdminUsersPage = lazy(() =>
+  import("@pages/modules/administration/AdminUsersPage").then((m) => ({
+    default: m.AdminUsersPage,
+  })),
+);
+const AdminRolesPage = lazy(() =>
+  import("@pages/modules/administration/AdminRolesPage").then((m) => ({
+    default: m.AdminRolesPage,
+  })),
+);
+const AdminTabsLayout = lazy(() =>
+  import("@widgets/Administration").then((m) => ({
+    default: m.AdminTabsLayout,
+  })),
+);
+
 // const InternalСorrespondencePage = lazy(() =>
 //   import("@pages/modules/correspondence/InternalСorrespondencePage").then(
 //     (m) => ({ default: m.InternalСorrespondencePage }),
@@ -206,6 +233,16 @@ export const AppRouter = () => {
                 <Route path="orders" element={<HrOrdersPage />} />
                 <Route path="timesheet" element={<HrTimesheetPage />} />
                 <Route path="staffing" element={<HrStaffingPage />} />
+              </Route>
+              <Route
+                path="administration"
+                element={<AdministrationLayoutPage />}
+              >
+                <Route index element={<AdministrationHomePage />} />
+                <Route element={<AdminTabsLayout />}>
+                  <Route path="users" element={<AdminUsersPage />} />
+                  <Route path="roles" element={<AdminRolesPage />} />
+                </Route>
               </Route>
               <Route path="correspondence" element={<CorrespondencePage />}>
                 <Route index element={<Navigate to="external" replace />} />

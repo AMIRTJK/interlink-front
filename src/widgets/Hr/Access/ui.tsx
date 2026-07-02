@@ -1,21 +1,20 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UsersTab } from "./ui/UsersTab";
-import { RolesTab } from "./ui/RolesTab";
 import {
 	CreateOrganization,
 	CreateDepartment,
 	SetUserRole,
 } from "@features/Hr";
 
+// Подмодули «Пользователи» и «Роли и доступы» вынесены в раздел
+// «Администрирование» (src/widgets/Administration). Здесь остаются только
+// организации, отделы и назначение ролей.
 export const AccessWidget = () => {
-	const [activeTab, setActiveTab] = useState<
-		"users" | "roles" | "orgs" | "deps" | "assign"
-	>("users");
+	const [activeTab, setActiveTab] = useState<"orgs" | "deps" | "assign">(
+		"orgs",
+	);
 
 	const tabs = [
-		{ id: "users", label: "Пользователи", content: <UsersTab /> },
-		{ id: "roles", label: "Роли и доступы", content: <RolesTab /> },
 		{ id: "orgs", label: "Организации", content: <CreateOrganization /> },
 		{ id: "deps", label: "Отделы", content: <CreateDepartment /> },
 		{ id: "assign", label: "Назначить роль", content: <SetUserRole /> },
