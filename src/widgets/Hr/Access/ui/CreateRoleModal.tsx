@@ -49,6 +49,8 @@ export const CreateRoleModal = ({ open, onClose }: IProps) => {
 			footer={null}
 			width={500}
 			destroyOnClose
+			transitionName=""
+			maskTransitionName=""
 			title={
 				<div className="flex items-center gap-3">
 					<div>
