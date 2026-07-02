@@ -582,8 +582,9 @@ export const UserProfileModal = ({
 									<span>{labels[t]}</span>
 									{isActive && (
 										<motion.div
-											layoutId="activeModalTabLine"
-											className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-600 rounded-full"
+											initial={{ scaleX: 0 }}
+											animate={{ scaleX: 1 }}
+											className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-600 rounded-full origin-left"
 											transition={{ type: "spring", stiffness: 380, damping: 30 }}
 										/>
 									)}
