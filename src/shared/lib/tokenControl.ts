@@ -62,7 +62,7 @@ export const tokenControl = {
     localStorage.removeItem("interlink/userData");
   },
 
-  setViewMode: (mode: "list" | "block") => {
+  setViewMode: (mode: "list" | "block" | "structure") => {
     localStorage.setItem(VIEW_MODE_KEY, mode);
   },
   getViewMode: () => {
