@@ -1,195 +1,321 @@
-import React, { useState, useMemo } from "react";
-import { INITIAL_FILES, INITIAL_CATEGORIES, IFileItem, ICategoryItem } from "./mockData";
+import React, { useState, useRef } from "react";
+import { useFilesData } from "./files/useFilesData";
 import { FilesHeader } from "./files/FilesHeader";
 import { CategoryFilters } from "./files/CategoryFilters";
 import { PinnedFiles } from "./files/PinnedFiles";
 import { FileGridList } from "./files/FileGridList";
 import { StorageUsage } from "./files/StorageUsage";
-import { AddCategoryModal } from "./files/AddCategoryModal";
 import { FilePreviewModal } from "./files/FilePreviewModal";
-import { ShareFileModal } from "./files/ShareFileModal";
-import { FileHistoryModal } from "./files/FileHistoryModal";
+import { FolderActionsModal } from "./files/FolderActionsModal";
+import { MoveToFolderModal } from "./files/MoveToFolderModal";
+import { IApiFile, IApiFolder } from "./files/lib";
+import { Modal } from "antd";
+import { Upload, ChevronRight, Folder } from "lucide-react";
+import { If } from "@shared/ui";
 import "./FilesTab.css";
 
 export const FilesTab = () => {
-  const [files, setFiles] = useState<IFileItem[]>(INITIAL_FILES);
-  const [categories, setCategories] = useState<ICategoryItem[]>(INITIAL_CATEGORIES);
-  const [activeCategory, setActiveCategory] = useState<string>("Все файлы");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [sortBy, setSortBy] = useState<"date" | "size" | "name">("date");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
-  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
-  const [previewFile, setPreviewFile] = useState<IFileItem | null>(null);
-  const [shareFile, setShareFile] = useState<IFileItem | null>(null);
-  const [historyFile, setHistoryFile] = useState<IFileItem | null>(null);
+	const [activeFolderId, setActiveFolderId] = useState<number | "all">("all");
+	const [searchQuery, setSearchQuery] = useState("");
+	const [sortBy, setSortBy] = useState<"date" | "size" | "name">("date");
+	const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+	const [selectedFileIds, setSelectedFileIds] = useState<number[]>([]);
+	const [isDragOver, setIsDragOver] = useState(false);
 
-  // Выбор файла в реестре (чекбокс)
-  const handleToggleSelectFile = (id: string) => {
-    setSelectedFileIds((prev) =>
-      prev.includes(id) ? prev.filter((fileId) => fileId !== id) : [...prev, id]
-    );
-  };
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Загрузка реального файла пользователя
-  const handleRealUpload = (selectedFile: File) => {
-    const name = selectedFile.name;
-    const sizeBytes = selectedFile.size;
-    
-    // Форматирование размера
-    let size = "";
-    if (sizeBytes >= 1024 * 1024 * 1024) {
-      size = `${(sizeBytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
-    } else if (sizeBytes >= 1024 * 1024) {
-      size = `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`;
-    } else if (sizeBytes >= 1024) {
-      size = `${(sizeBytes / 1024).toFixed(0)} KB`;
-    } else {
-      size = `${sizeBytes} B`;
-    }
+	// Modals state
+	const [previewFile, setPreviewFile] = useState<IApiFile | null>(null);
+	const [movingFile, setMovingFile] = useState<IApiFile | null>(null);
+	const [folderModalOpen, setFolderModalOpen] = useState(false);
+	const [folderModalTitle, setFolderModalTitle] = useState("");
+	const [editingFolder, setEditingFolder] = useState<IApiFolder | null>(null);
 
-    // Определение типа файла
-    const ext = name.split(".").pop()?.toLowerCase() || "";
-    let type: "pdf" | "spreadsheet" | "document" | "archive" | "image" = "document";
-    if (ext === "pdf") {
-      type = "pdf";
-    } else if (["xlsx", "xls", "csv"].includes(ext)) {
-      type = "spreadsheet";
-    } else if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext)) {
-      type = "image";
-    } else if (["zip", "rar", "tar", "gz", "7z"].includes(ext)) {
-      type = "archive";
-    }
+	// Queries & Mutations
+	const {
+		files,
+		folders,
+		meta,
+		isLoadingFiles,
+		categoriesList,
+		activeCategoryId,
+		pinnedFiles,
+		currentFiles,
+		currentFolders,
+		breadcrumbs,
+		showBreadcrumbs,
+		createFolder,
+		updateFolder,
+		deleteFolder,
+		updateFile,
+		deleteFile,
+		uploadFile,
+	} = useFilesData({
+		search: searchQuery,
+		sort: sortBy,
+		dir: sortDir,
+		activeFolderId,
+	});
 
-    const newFile: IFileItem = {
-      id: String(Date.now()),
-      name,
-      size,
-      sizeBytes,
-      date: "Сегодня",
-      timestamp: Date.now(),
-      type,
-      pinned: false,
-      categories: activeCategory === "Все файлы" ? ["Все файлы", "Рабочие"] : ["Все файлы", activeCategory],
-    };
+	// Toggle selection
+	const handleToggleSelectFile = (id: number) => {
+		setSelectedFileIds((prev) =>
+			prev.includes(id)
+				? prev.filter((fileId) => fileId !== id)
+				: [...prev, id],
+		);
+	};
 
-    if (type === "image") {
-      newFile.previewUrl = URL.createObjectURL(selectedFile);
-    }
+	// Upload handler
+	const handleUpload = (file: File) => {
+		const formData = new FormData();
+		formData.append("files[]", file);
+		if (typeof activeFolderId === "number") {
+			formData.append("folder_id", String(activeFolderId));
+		}
+		uploadFile.mutate(formData);
+	};
 
-    setFiles((prev) => [newFile, ...prev]);
-  };
+	// Folder Actions
+	const handleCreateFolderSubmit = (name: string) => {
+		if (editingFolder) {
+			updateFolder.mutate({
+				id: editingFolder.id,
+				name,
+				parent_id: editingFolder.parent_id,
+			});
+			setEditingFolder(null);
+		} else {
+			createFolder.mutate({
+				name,
+				parent_id: typeof activeFolderId === "number" ? activeFolderId : null,
+			});
+		}
+	};
 
-  // Переключение закрепа
-  const handleTogglePin = (id: string) => {
-    setFiles((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, pinned: !f.pinned } : f))
-    );
-  };
+	const handleOpenRenameFolder = (folderName: string, id: number) => {
+		const folder = folders.find((f) => Number(f.id) === Number(id));
+		if (folder) {
+			setEditingFolder(folder);
+			setFolderModalTitle("Переименовать папку");
+			setFolderModalOpen(true);
+		}
+	};
 
-  // Удаление файла
-  const handleDeleteFile = (id: string) => {
-    setFiles((prev) => prev.filter((f) => f.id !== id));
-    setSelectedFileIds((prev) => prev.filter((fileId) => fileId !== id));
-  };
+	const handleDeleteFolderConfirm = (id: number) => {
+		Modal.confirm({
+			title: "Удалить папку?",
+			content:
+				"Внимание! Все вложенные файлы и подпапки будут удалены безвозвратно. Вы действительно хотите удалить эту папку?",
+			okText: "Удалить",
+			okButtonProps: {
+				danger: true,
+				className: "bg-red-600! hover:bg-red-700!",
+			},
+			cancelText: "Отмена",
+			onOk: () => {
+				deleteFolder.mutate({ id });
+				setActiveFolderId("all");
+			},
+		});
+	};
 
-  // Добавление новой категории
-  const handleAddCategory = (newCat: ICategoryItem) => {
-    if (!categories.some((c) => c.name === newCat.name)) {
-      setCategories((prev) => [...prev, newCat]);
-    }
-  };
+	// File Actions
+	const handleTogglePin = (file: IApiFile) => {
+		updateFile.mutate({ id: file.id, is_starred: !file.is_starred });
+	};
 
-  // Фильтрация и сортировка файлов
-  const filteredAndSortedFiles = useMemo(() => {
-    let result = files.filter((file) => {
-      const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory =
-        activeCategory === "Все файлы" || file.categories.includes(activeCategory);
-      return matchesSearch && matchesCategory;
-    });
+	const handleDeleteFileConfirm = (id: number) => {
+		Modal.confirm({
+			title: "Удалить файл?",
+			content: "Вы действительно хотите удалить этот файл?",
+			okText: "Удалить",
+			okButtonProps: {
+				danger: true,
+				className: "bg-red-600! hover:bg-red-700!",
+			},
+			cancelText: "Отмена",
+			onOk: () => deleteFile.mutate({ id }),
+		});
+	};
 
-    result.sort((a, b) => {
-      if (sortBy === "date") return b.timestamp - a.timestamp;
-      if (sortBy === "size") return b.sizeBytes - a.sizeBytes;
-      return a.name.localeCompare(b.name);
-    });
+	const handleMoveFileConfirm = (targetFolderId: number | null) => {
+		if (movingFile) {
+			updateFile.mutate({ id: movingFile.id, folder_id: targetFolderId });
+			setMovingFile(null);
+		}
+	};
 
-    return result;
-  }, [files, searchQuery, activeCategory, sortBy]);
+	return (
+		<div className="files-tab-container space-y-6">
+			{/* Header */}
+			<FilesHeader
+				searchQuery={searchQuery}
+				onSearchChange={setSearchQuery}
+				sortBy={sortBy}
+				onSortChange={setSortBy}
+				sortDir={sortDir}
+				onSortDirToggle={() =>
+					setSortDir((prev) => (prev === "asc" ? "desc" : "asc"))
+				}
+				viewMode={viewMode}
+				onViewModeChange={setViewMode}
+				onUpload={handleUpload}
+				totalCount={files.length}
+				onCreateFolderClick={() => {
+					setEditingFolder(null);
+					setFolderModalTitle("Создать новую папку");
+					setFolderModalOpen(true);
+				}}
+			/>
 
-  const pinnedFiles = useMemo(() => {
-    return files.filter((f) => f.pinned);
-  }, [files]);
+			{/* Category/Folder Filters */}
+			<CategoryFilters
+				categories={categoriesList}
+				activeCategory={activeCategoryId}
+				onCategorySelect={(id) => setActiveFolderId(id)}
+				onAddCategoryClick={() => {
+					setEditingFolder(null);
+					setFolderModalTitle("Создать новую папку");
+					setFolderModalOpen(true);
+				}}
+				onRenameCategory={(cat) =>
+					handleOpenRenameFolder(cat.name, Number(cat.id))
+				}
+				onDeleteCategory={handleDeleteFolderConfirm}
+			/>
 
-  return (
-    <div className="files-tab-container space-y-6">
-      {/* Шапка */}
-      <FilesHeader
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        onUpload={handleRealUpload}
-        totalCount={filteredAndSortedFiles.length}
-      />
+			{/* Breadcrumbs */}
+			<If is={showBreadcrumbs}>
+				<div className="flex flex-wrap items-center text-xs font-semibold text-slate-500 dark:text-zinc-400 py-1.5 border-b border-slate-100/50 dark:border-slate-800/50">
+					{breadcrumbs.map((crumb, idx) => {
+						const isLast = idx === breadcrumbs.length - 1;
+						return (
+							<React.Fragment key={crumb.id}>
+								<If is={idx > 0}>
+									<span className="text-slate-300 dark:text-zinc-700 mx-1.5">/</span>
+								</If>
+								<span
+									onClick={() => !isLast && setActiveFolderId(crumb.id)}
+									className={`transition-all ${
+										isLast
+											? "text-slate-700 dark:text-zinc-200 font-bold"
+											: "cursor-pointer hover:text-indigo-650 hover:underline"
+									}`}
+								>
+									{crumb.name}
+								</span>
+							</React.Fragment>
+						);
+					})}
 
-      {/* Фильтры категорий */}
-      <CategoryFilters
-        categories={categories}
-        activeCategory={activeCategory}
-        onCategorySelect={setActiveCategory}
-        onAddCategoryClick={() => setIsAddCategoryOpen(true)}
-      />
+					{/* If the active folder has children, render them next to it separated by slashes */}
+					<If is={currentFolders.length > 0}>
+						{currentFolders.map((child) => (
+							<React.Fragment key={child.id}>
+								<span className="text-slate-300 dark:text-zinc-700 mx-1.5">/</span>
+								<span
+									onClick={() => setActiveFolderId(child.id)}
+									className="cursor-pointer hover:text-indigo-655 hover:underline text-slate-500 dark:text-zinc-400 transition-all font-semibold"
+								>
+									{child.name}
+								</span>
+							</React.Fragment>
+						))}
+					</If>
+				</div>
+			</If>
 
-      {/* Закрепленные файлы */}
-      <PinnedFiles
-        pinnedFiles={pinnedFiles}
-        onUnpin={(id) => handleTogglePin(id)}
-      />
+			{/* Starred/Pinned Files */}
+			<PinnedFiles pinnedFiles={pinnedFiles} onUnpin={handleTogglePin} />
 
-      {/* Сетка/Реестр файлов */}
-      <FileGridList
-        files={filteredAndSortedFiles}
-        viewMode={viewMode}
-        selectedFileIds={selectedFileIds}
-        onToggleSelectFile={handleToggleSelectFile}
-        onView={setPreviewFile}
-        onShare={setShareFile}
-        onHistory={setHistoryFile}
-        onTogglePin={handleTogglePin}
-        onDelete={handleDeleteFile}
-      />
+			{/* Drag & Drop Zone */}
+			<div
+				onDragOver={(e) => {
+					e.preventDefault();
+					setIsDragOver(true);
+				}}
+				onDragLeave={() => setIsDragOver(false)}
+				onDrop={(e) => {
+					e.preventDefault();
+					setIsDragOver(false);
+					const file = e.dataTransfer.files?.[0];
+					if (file) handleUpload(file);
+				}}
+				onClick={() => fileInputRef.current?.click()}
+				className={`w-full py-6 border-2 border-dashed rounded-3xl flex items-center justify-center gap-2 cursor-pointer transition-all ${
+					isDragOver
+						? "border-indigo-600 bg-indigo-50/30 text-indigo-650"
+						: "border-slate-200 dark:border-slate-800 text-slate-400 hover:border-slate-355 dark:hover:border-slate-700"
+				}`}
+			>
+				<input
+					type="file"
+					ref={fileInputRef}
+					onChange={(e) => {
+						const file = e.target.files?.[0];
+						if (file) handleUpload(file);
+					}}
+					className="hidden!"
+				/>
+				<span className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500">
+					↑ Перетащите файлы или нажмите, чтобы загрузить
+				</span>
+			</div>
 
-      {/* Шкала хранилища */}
-      <StorageUsage files={files} />
+			{/* Files & Subfolders Display */}
+			{isLoadingFiles ? (
+				<div className="py-20 text-center">
+					<div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto"></div>
+					<p className="mt-3 text-sm text-slate-400 dark:text-zinc-500">
+						Загрузка файлов...
+					</p>
+				</div>
+			) : (
+				<div className="space-y-6">
+					<FileGridList
+						files={currentFiles}
+						viewMode={viewMode}
+						selectedFileIds={selectedFileIds}
+						onToggleSelectFile={handleToggleSelectFile}
+						onView={setPreviewFile}
+						onTogglePin={handleTogglePin}
+						onDelete={handleDeleteFileConfirm}
+						onMove={setMovingFile}
+					/>
+				</div>
+			)}
 
-      {/* Модалка добавления категории */}
-      <AddCategoryModal
-        isOpen={isAddCategoryOpen}
-        onClose={() => setIsAddCategoryOpen(false)}
-        onSubmit={handleAddCategory}
-      />
+			{/* Storage usage details */}
+			<StorageUsage meta={meta} files={files} />
 
-      {/* Модалка предпросмотра файлов */}
-      <FilePreviewModal
-        file={previewFile}
-        onClose={() => setPreviewFile(null)}
-      />
+			{/* Modals */}
+			<FolderActionsModal
+				isOpen={folderModalOpen}
+				onClose={() => {
+					setFolderModalOpen(false);
+					setEditingFolder(null);
+				}}
+				onSubmit={handleCreateFolderSubmit}
+				initialName={editingFolder?.name || ""}
+				title={folderModalTitle}
+			/>
 
-      {/* Модалка "Поделиться" */}
-      <ShareFileModal
-        file={shareFile}
-        onClose={() => setShareFile(null)}
-      />
+			<MoveToFolderModal
+				isOpen={!!movingFile}
+				onClose={() => setMovingFile(null)}
+				folders={folders}
+				currentFolderId={movingFile?.folder_id || null}
+				onConfirm={handleMoveFileConfirm}
+				fileName={movingFile?.original_name || ""}
+			/>
 
-      {/* Модалка истории изменений */}
-      <FileHistoryModal
-        file={historyFile}
-        onClose={() => setHistoryFile(null)}
-      />
-    </div>
-  );
+			<FilePreviewModal
+				file={previewFile}
+				onClose={() => setPreviewFile(null)}
+			/>
+		</div>
+	);
 };
+export default FilesTab;

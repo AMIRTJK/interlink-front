@@ -1,19 +1,18 @@
 import React from "react";
-import { IFileItem } from "../mockData";
+import { IApiFile } from "./lib";
 import { If } from "@shared/ui";
 import { FileGrid } from "./FileGrid";
 import { FileList } from "./FileList";
 
 interface IProps {
-  files: IFileItem[];
+  files: IApiFile[];
   viewMode: "grid" | "list";
-  selectedFileIds: string[];
-  onToggleSelectFile: (id: string) => void;
-  onView: (file: IFileItem) => void;
-  onShare: (file: IFileItem) => void;
-  onHistory: (file: IFileItem) => void;
-  onTogglePin: (id: string) => void;
-  onDelete: (id: string) => void;
+  selectedFileIds: number[];
+  onToggleSelectFile: (id: number) => void;
+  onView: (file: IApiFile) => void;
+  onTogglePin: (file: IApiFile) => void;
+  onDelete: (id: number) => void;
+  onMove?: (file: IApiFile) => void;
 }
 
 export const FileGridList = ({
@@ -22,10 +21,9 @@ export const FileGridList = ({
   selectedFileIds,
   onToggleSelectFile,
   onView,
-  onShare,
-  onHistory,
   onTogglePin,
   onDelete,
+  onMove,
 }: IProps) => {
   return (
     <div>
@@ -35,8 +33,7 @@ export const FileGridList = ({
           onTogglePin={onTogglePin}
           onDelete={onDelete}
           onView={onView}
-          onShare={onShare}
-          onHistory={onHistory}
+          onMove={onMove}
         />
       </If>
 
@@ -46,9 +43,8 @@ export const FileGridList = ({
           selectedFileIds={selectedFileIds}
           onToggleSelectFile={onToggleSelectFile}
           onView={onView}
-          onShare={onShare}
-          onHistory={onHistory}
           onDelete={onDelete}
+          onMove={onMove}
         />
       </If>
     </div>

@@ -62,7 +62,7 @@ export const ModuleMenu = ({ variant, hideTopLevel, isVertical }: IProps) => {
 		return Array.isArray(roles) ? roles : [];
 	}, [data]);
 
-	console.log(userRolesArray);
+	// console.log(userRolesArray);
 
 	const userRoleNames = useMemo(() => {
 		const namesFromRoles = userRolesArray.map((item) => item.name);
@@ -238,15 +238,20 @@ export const ModuleMenu = ({ variant, hideTopLevel, isVertical }: IProps) => {
 	};
 
 	if (variant === "header") {
-		const currentTheme = (typeof window !== "undefined" && localStorage.getItem("currentTheme")) || "emerald";
-		const activeGradient = THEMES[currentTheme]?.gradient || THEMES.emerald.gradient;
+		const currentTheme =
+			(typeof window !== "undefined" && localStorage.getItem("currentTheme")) ||
+			"emerald";
+		const activeGradient =
+			THEMES[currentTheme]?.gradient || THEMES.emerald.gradient;
 		const headerIcon: Record<string, ReactNode> = {
 			[AppRoutes.PROFILE]: <User size={18} />,
 			[AppRoutes.CORRESPONDENCE]: <MailQuestion size={18} />,
 			[AppRoutes.HR]: <Users size={18} />,
 		};
 		return (
-			<nav className={`flex ${isVertical ? "flex-col items-stretch w-full" : "items-center"} gap-1`}>
+			<nav
+				className={`flex ${isVertical ? "flex-col items-stretch w-full" : "items-center"} gap-1`}
+			>
 				{menuItems.map((item) => {
 					if (!item || !("key" in item)) return null;
 					const itemKey = String(item.key);
@@ -267,7 +272,9 @@ export const ModuleMenu = ({ variant, hideTopLevel, isVertical }: IProps) => {
 							<span className="flex-shrink-0">
 								{headerIcon[itemKey] ?? <Layout size={18} />}
 							</span>
-							<span className={`${isVertical ? "" : "hidden lg:inline"} whitespace-nowrap`}>
+							<span
+								className={`${isVertical ? "" : "hidden lg:inline"} whitespace-nowrap`}
+							>
 								{label}
 							</span>
 						</button>

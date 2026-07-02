@@ -1,16 +1,15 @@
 import { useState, useEffect, useMemo } from "react";
-import { Switch, Modal, Input, Pagination } from "antd";
-import { Check, Trash2, X, Search } from "lucide-react";
+import { Switch, Input } from "antd";
+import { Check, X, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ApiRoutes } from "@shared/api";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
+import { ApiRoutes } from "@shared/api";
+import { If, Loader } from "@shared/ui";
+import { IAccessUser } from "../model";
+import { extractPermNames, getInitials } from "../lib";
 
 interface IProps {
-	role: {
-		id: number;
-		name: string;
-		permissions?: string[] | { name: string }[];
-	} | null;
+	user: IAccessUser | null;
 	allSystemPermissions: string[];
 	onClose: () => void;
 }
@@ -53,66 +52,109 @@ const ACTION_TRANSLATIONS: Record<string, string> = {
 	"logs.view": "Просмотр логов",
 };
 
-export const RolePermissionsSidebar = ({
-	role,
+export const UserPermissionsSidebar = ({
+	user,
 	allSystemPermissions,
 	onClose,
 }: IProps) => {
-	const [rolePermissionsState, setRolePermissionsState] = useState<string[]>(
-		[],
-	);
+	const [directPermissionsState, setDirectPermissionsState] = useState<
+		string[]
+	>([]);
+	const [deniedPermissionsState, setDeniedPermissionsState] = useState<
+		string[]
+	>([]);
+	const [roleGrantedPermissions, setRoleGrantedPermissions] = useState<
+		string[]
+	>([]);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [sidebarPage, setSidebarPage] = useState(1);
 
 	useEffect(() => {
 		setSidebarPage(1);
-	}, [role, searchQuery]);
+	}, [user, searchQuery]);
 
-	/** Права роли берём только отсюда — GET_ROLE, а не из пропса (список GET_ROLES кэшируется на 30 минут) */
-	const { data: roleDetailData } = useGetQuery({
-		url: role ? ApiRoutes.GET_ROLE.replace(":id", String(role.id)) : undefined,
+	const userPermsUrl = user
+		? ApiRoutes.GET_USER_PERMISSIONS.replace(":id", String(user.id))
+		: undefined;
+
+	const { data: userPermsData, isLoading: isUserPermsLoading } = useGetQuery({
+		url: userPermsUrl,
 		useToken: true,
 		options: {
-			enabled: !!role,
+			enabled: !!user,
 			refetchOnWindowFocus: false,
 			staleTime: 0,
 		},
 	});
 
+	const [isInitialized, setIsInitialized] = useState(false);
+
 	useEffect(() => {
-		const freshRole = roleDetailData?.data || roleDetailData;
+		setIsInitialized(false);
+	}, [user?.id]);
 
-		const list: string[] = [];
-		if (freshRole && Array.isArray(freshRole.permissions)) {
-			freshRole.permissions.forEach((p: any) => {
-				const name = typeof p === "string" ? p : p?.name;
-				if (name) {
-					list.push(name);
-				}
-			});
-		}
-		setRolePermissionsState(list);
-	}, [roleDetailData]);
+	useEffect(() => {
+		if (!userPermsData) return;
+		const rawUserPerms = userPermsData?.data || userPermsData;
+		setRoleGrantedPermissions(extractPermNames(rawUserPerms?.role_permissions));
+		setDirectPermissionsState(extractPermNames(rawUserPerms?.direct_permissions));
+		setDeniedPermissionsState(extractPermNames(rawUserPerms?.denied_permissions));
+		setIsInitialized(true);
+	}, [userPermsData]);
 
-	const updateRoleM = useMutationQuery({
+	const isDataLoading = isUserPermsLoading || !isInitialized;
+
+	const updateDirectM = useMutationQuery({
 		url: () =>
-			role ? ApiRoutes.UPDATE_ROLE.replace(":id", String(role.id)) : "",
+			user
+				? ApiRoutes.UPDATE_USER_DIRECT_PERMISSIONS.replace(":id", String(user.id))
+				: "",
 		method: "PUT",
 		messages: {
-			success: "Права роли успешно сохранены",
-			invalidate: [ApiRoutes.GET_ROLES],
+			success: "Прямые права сохранены",
+			suppressSuccessToast: true,
+			invalidate: [ApiRoutes.GET_USERS, userPermsUrl || ""],
 		},
 	});
 
-	const deleteRoleM = useMutationQuery({
+	const updateDeniedM = useMutationQuery({
 		url: () =>
-			role ? ApiRoutes.DELETE_ROLE.replace(":id", String(role.id)) : "",
-		method: "DELETE",
+			user
+				? ApiRoutes.UPDATE_USER_DENIED_PERMISSIONS.replace(":id", String(user.id))
+				: "",
+		method: "PUT",
 		messages: {
-			success: "Роль успешно удалена",
-			invalidate: [ApiRoutes.GET_ROLES],
+			success: "Права пользователя сохранены",
+			invalidate: [ApiRoutes.GET_USERS, userPermsUrl || ""],
 		},
 	});
+
+	const handleToggleDirect = (permissionName: string) => {
+		setDirectPermissionsState((prev) =>
+			prev.includes(permissionName)
+				? prev.filter((p) => p !== permissionName)
+				: [...prev, permissionName],
+		);
+	};
+
+	const handleToggleDenied = (permissionName: string) => {
+		setDeniedPermissionsState((prev) =>
+			prev.includes(permissionName)
+				? prev.filter((p) => p !== permissionName)
+				: [...prev, permissionName],
+		);
+	};
+
+	const handleSave = () => {
+		updateDirectM.mutate(
+			{ permissions: directPermissionsState },
+			{
+				onSuccess: () => {
+					updateDeniedM.mutate({ permissions: deniedPermissionsState });
+				},
+			},
+		);
+	};
 
 	const filteredGroups = useMemo(() => {
 		const groups: Record<string, { label: string; name: string }[]> = {};
@@ -156,80 +198,15 @@ export const RolePermissionsSidebar = ({
 		return Math.ceil(entries.length / 3);
 	}, [filteredGroups]);
 
-	const handleTogglePermission = (permissionName: string) => {
-		setRolePermissionsState((prev) => {
-			if (prev.includes(permissionName)) {
-				return prev.filter((p) => p !== permissionName);
-			} else {
-				return [...prev, permissionName];
-			}
-		});
-	};
+	if (!user) return null;
 
-	const handleSave = () => {
-		if (!role) return;
-		updateRoleM.mutate(
-			{ name: role.name, permissions: rolePermissionsState },
-			{
-				onSuccess: () => {
-					onClose();
-				},
-			},
-		);
-	};
-
-	const handleDelete = () => {
-		if (!role) return;
-		Modal.confirm({
-			title: "Удалить роль?",
-			content: "Это действие необратимо.",
-			okText: "Удалить",
-			okType: "danger",
-			cancelText: "Отмена",
-			onOk: () => {
-				deleteRoleM.mutate(
-					{},
-					{
-						onSuccess: () => {
-							onClose();
-						},
-					},
-				);
-			},
-		});
-	};
-
-	if (!role) return null;
-
-	const displayName = role.name;
-	const initials = displayName
-		.split(" ")
-		.map((n) => n[0])
-		.filter(Boolean)
-		.slice(0, 2)
-		.join("")
-		.toUpperCase();
-
-	const colors = useMemo(() => {
-		const name = role.name.toLowerCase();
-		if (name.includes("администратор") || name.includes("admin"))
-			return { bg: "bg-blue-50 text-blue-600" };
-		if (name.includes("делопроизводитель") || name.includes("recipient"))
-			return { bg: "bg-emerald-50 text-emerald-600" };
-		if (name.includes("руководитель") || name.includes("signer"))
-			return { bg: "bg-orange-50 text-orange-600" };
-		if (name.includes("исполнитель") || name.includes("approval"))
-			return { bg: "bg-indigo-50 text-indigo-600" };
-		if (name.includes("контрол") || name.includes("control"))
-			return { bg: "bg-purple-50 text-purple-600" };
-		return { bg: "bg-slate-50 text-slate-500" };
-	}, [role.name]);
+	const initials = getInitials(user.fullName);
 
 	return (
 		<div className="w-[320px] bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col h-[750px]! justify-between relative overflow-hidden">
 			<AnimatePresence mode="wait">
 				<motion.div
-					key={role.id}
+					key={user.id}
 					initial={{ opacity: 0, y: 6 }}
 					animate={{ opacity: 1, y: 0 }}
 					exit={{ opacity: 0, y: -6 }}
@@ -238,17 +215,15 @@ export const RolePermissionsSidebar = ({
 				>
 					<div className="p-5 border-b border-slate-50 flex items-start justify-between">
 						<div className="flex items-center gap-3">
-							<div
-								className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ${colors.bg}`}
-							>
-								{initials || "РД"}
+							<div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold bg-blue-50 text-blue-600">
+								{initials || "П"}
 							</div>
 							<div>
 								<h4 className="font-bold text-slate-800 text-sm leading-tight">
-									{displayName}
+									{user.fullName}
 								</h4>
 								<p className="text-[10px] text-slate-400 font-medium leading-none mt-0.5">
-									{role.name}
+									{user.roles.join(", ") || "Без роли"}
 								</p>
 							</div>
 						</div>
@@ -271,10 +246,15 @@ export const RolePermissionsSidebar = ({
 						/>
 					</div>
 
-					<div className="flex-1 overflow-y-auto p-5 space-y-4 pt-2">
+					<div className="flex-1 overflow-y-auto p-5 space-y-4 pt-2 relative">
+						<If is={isDataLoading}>
+							<div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60">
+								<Loader />
+							</div>
+						</If>
 						<div className="flex items-center justify-between pl-1">
 							<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-								{"ПРАВА ДОСТУПА"}
+								{"ПРАВА ПОЛЬЗОВАТЕЛЯ"}
 							</p>
 							{Object.keys(filteredGroups).length > 0 && (
 								<span className="text-[10px] text-slate-400 font-bold bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100/60">
@@ -294,7 +274,10 @@ export const RolePermissionsSidebar = ({
 									</h5>
 									<div className="space-y-2">
 										{actions?.map((act) => {
-											const checked = rolePermissionsState.includes(act.name);
+											const inRole = roleGrantedPermissions.includes(act.name);
+											const isDenied = deniedPermissionsState.includes(act.name);
+											const isDirect = directPermissionsState.includes(act.name);
+											const checked = inRole ? !isDenied : isDirect;
 											return (
 												<div
 													key={act.name}
@@ -306,7 +289,11 @@ export const RolePermissionsSidebar = ({
 													<Switch
 														size="small"
 														checked={checked}
-														onChange={() => handleTogglePermission(act.name)}
+														onChange={() =>
+															inRole
+																? handleToggleDenied(act.name)
+																: handleToggleDirect(act.name)
+														}
 													/>
 												</div>
 											);
@@ -399,21 +386,14 @@ export const RolePermissionsSidebar = ({
 							})()}
 					</div>
 
-					<div className="p-4 border-t border-slate-50 flex items-center justify-between gap-2.5 bg-slate-50/20">
+					<div className="p-4 border-t border-slate-50 bg-slate-50/20">
 						<button
 							onClick={handleSave}
-							disabled={updateRoleM.isPending}
-							className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60 transition-colors shadow-sm"
+							disabled={isDataLoading || updateDirectM.isPending || updateDeniedM.isPending}
+							className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60 transition-colors shadow-sm"
 						>
 							<Check size={14} />
 							<span>{"Сохранить"}</span>
-						</button>
-						<button
-							onClick={handleDelete}
-							disabled={deleteRoleM.isPending}
-							className="flex items-center justify-center p-2.5 rounded-xl text-rose-500 hover:text-rose-600 bg-rose-50 hover:bg-rose-100/60 disabled:opacity-60 transition-colors"
-						>
-							<Trash2 size={15} />
 						</button>
 					</div>
 				</motion.div>

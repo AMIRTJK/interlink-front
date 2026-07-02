@@ -1,13 +1,13 @@
 import { useState, useMemo, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { X, Check, ChevronDown, Mail, Phone, Building2, Calendar } from "lucide-react";
-import { Dropdown, Modal, Switch } from "antd";
+import { Dropdown, Modal, Switch, ConfigProvider } from "antd";
 import type { MenuProps } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { If } from "@shared/ui";
+import { If, Loader } from "@shared/ui";
 import { IAccessUser, ACCESS_STATUS_META } from "../model";
-import { getInitials, formatJoinedDate } from "../lib";
+import { getInitials, formatJoinedDate, extractPermNames } from "../lib";
 
 interface IProps {
 	user: IAccessUser;
@@ -140,14 +140,21 @@ export const UserProfileModal = ({
 }: IProps) => {
 	const [tab, setTab] = useState<TTab>("profile");
 	const [selectedRoles, setSelectedRoles] = useState<string[]>(user.roles);
-	const [userPermissionsState, setUserPermissionsState] = useState<string[]>(
-		[],
-	);
+	const [originalRoles, setOriginalRoles] = useState<string[]>(user.roles);
+	const [backendRolePermissions, setBackendRolePermissions] = useState<
+		string[]
+	>([]);
+	const [directPermissionsState, setDirectPermissionsState] = useState<
+		string[]
+	>([]);
+	const [deniedPermissionsState, setDeniedPermissionsState] = useState<
+		string[]
+	>([]);
 	const [isInitialized, setIsInitialized] = useState(false);
 	const [permissionsPage, setPermissionsPage] = useState(1);
 	const [accessPage, setAccessPage] = useState(1);
 
-	const { data: detailData } = useGetQuery({
+	const { data: detailData, isLoading: isDetailLoading } = useGetQuery({
 		url: `${ApiRoutes.FETCH_USER_BY_ID}${user.id}`,
 		useToken: true,
 		options: {
@@ -156,7 +163,7 @@ export const UserProfileModal = ({
 		},
 	});
 
-	const { data: allPermsData } = useGetQuery({
+	const { data: allPermsData, isLoading: isPermsLoading } = useGetQuery({
 		url: ApiRoutes.FETCH_PERMISSIONS,
 		useToken: true,
 		options: {
@@ -165,49 +172,46 @@ export const UserProfileModal = ({
 		},
 	});
 
+	const userPermsUrl = ApiRoutes.GET_USER_PERMISSIONS.replace(
+		":id",
+		String(user.id),
+	);
+
+	const { data: userPermsData, isLoading: isUserPermsLoading } = useGetQuery({
+		url: userPermsUrl,
+		useToken: true,
+		options: {
+			refetchOnWindowFocus: false,
+			staleTime: 0,
+		},
+	});
+
+	const isDataLoading =
+		isDetailLoading || isPermsLoading || isUserPermsLoading || !isInitialized;
+
 	useEffect(() => {
-		if (isInitialized || !detailData || rolesList.length === 0) {
+		if (isInitialized || !detailData || !userPermsData || rolesList.length === 0) {
 			return;
 		}
 		const rawRoles = detailData?.data?.roles || detailData?.roles;
-		const roleNames: string[] = [];
-		if (Array.isArray(rawRoles)) {
-			rawRoles.forEach((r: any) => {
-				const name = typeof r === "string" ? r : r?.name;
-				if (name) {
-					roleNames.push(name);
-				}
-			});
+		const roleNames: string[] = extractPermNames(rawRoles);
+		if (roleNames.length) {
 			setSelectedRoles(roleNames);
+			setOriginalRoles(roleNames);
 		}
-		const rawPerms = detailData?.data?.permissions || detailData?.permissions;
-		const perms = new Set<string>();
-		if (Array.isArray(rawPerms)) {
-			rawPerms.forEach((p: any) => {
-				if (typeof p === "string") {
-					perms.add(p);
-				} else if (p && typeof p === "object" && p.name) {
-					perms.add(p.name);
-				}
-			});
-		}
-		roleNames.forEach((roleName) => {
-			const matchedRoleObj = rolesList.find((item) => item.name === roleName);
-			if (matchedRoleObj && matchedRoleObj.permissions) {
-				if (Array.isArray(matchedRoleObj.permissions)) {
-					matchedRoleObj.permissions.forEach((p: any) => {
-						if (typeof p === "string") {
-							perms.add(p);
-						} else if (p && typeof p === "object" && p.name) {
-							perms.add(p.name);
-						}
-					});
-				}
-			}
-		});
-		setUserPermissionsState(Array.from(perms));
+
+		const rawUserPerms = userPermsData?.data || userPermsData;
+		setBackendRolePermissions(
+			extractPermNames(rawUserPerms?.role_permissions),
+		);
+		setDirectPermissionsState(
+			extractPermNames(rawUserPerms?.direct_permissions),
+		);
+		setDeniedPermissionsState(
+			extractPermNames(rawUserPerms?.denied_permissions),
+		);
 		setIsInitialized(true);
-	}, [detailData, isInitialized, rolesList]);
+	}, [detailData, userPermsData, isInitialized, rolesList]);
 
 	const updateRolesM = useMutationQuery({
 		url: ApiRoutes.SET_USER_ROLES,
@@ -221,13 +225,27 @@ export const UserProfileModal = ({
 		},
 	});
 
-	const updatePermissionsM = useMutationQuery({
-		url: ApiRoutes.ASSIGN_USER_PERMISSIONS,
-		method: "POST",
+	const updateDirectM = useMutationQuery({
+		url: () => ApiRoutes.UPDATE_USER_DIRECT_PERMISSIONS.replace(":id", String(user.id)),
+		method: "PUT",
 		messages: {
-			success: "Права доступа успешно сохранены",
+			success: "Прямые права сохранены",
 			invalidate: [
 				ApiRoutes.GET_USERS,
+				userPermsUrl,
+				`${ApiRoutes.FETCH_USER_BY_ID}${user.id}`,
+			],
+		},
+	});
+
+	const updateDeniedM = useMutationQuery({
+		url: () => ApiRoutes.UPDATE_USER_DENIED_PERMISSIONS.replace(":id", String(user.id)),
+		method: "PUT",
+		messages: {
+			success: "Персональные ограничения сохранены",
+			invalidate: [
+				ApiRoutes.GET_USERS,
+				userPermsUrl,
 				`${ApiRoutes.FETCH_USER_BY_ID}${user.id}`,
 			],
 		},
@@ -286,7 +304,7 @@ export const UserProfileModal = ({
 		return groups;
 	}, [allSystemPermissions]);
 
-	const PAGE_SIZE = 5;
+	const PAGE_SIZE = 4;
 
 	const paginatedGroupEntries = useMemo(() => {
 		const entries = Object.entries(groupedPermissions);
@@ -296,42 +314,76 @@ export const UserProfileModal = ({
 
 	const ACCESS_PAGE_SIZE = 6;
 
-	const paginatedAccessLevels = useMemo(() => {
-		const start = (accessPage - 1) * ACCESS_PAGE_SIZE;
-		return userPermissionsState.slice(start, start + ACCESS_PAGE_SIZE);
-	}, [userPermissionsState, accessPage]);
+	/** Роли ещё не тронуты в этой сессии редактирования — можно доверять backend-снимку прав */
+	const rolesUnchanged = useMemo(() => {
+		if (selectedRoles.length !== originalRoles.length) {
+			return false;
+		}
+		const a = [...selectedRoles].sort();
+		const b = [...originalRoles].sort();
+		return a.every((role, i) => role === b[i]);
+	}, [selectedRoles, originalRoles]);
 
-	useEffect(() => {
-		setAccessPage(1);
-	}, [userPermissionsState]);
-
-	const handleTogglePermission = (permissionName: string) => {
-		setUserPermissionsState((prev) => {
-			if (prev.includes(permissionName)) {
-				return prev.filter((p) => p !== permissionName);
-			} else {
-				return [...prev, permissionName];
-			}
-		});
-	};
-
-	const handleResetToStandard = () => {
+	/**
+	 * Права, унаследованные от текущего набора выбранных ролей.
+	 * Пока роли не менялись — берём авторитетный role_permissions из ответа
+	 * GET_USER_PERMISSIONS. Как только пользователь добавил/убрал роль в UI,
+	 * считаем права по локально закэшированному списку ролей (для этой
+	 * гипотетической комбинации backend ещё не спрашивали).
+	 */
+	const roleGrantedPermissions = useMemo(() => {
+		if (rolesUnchanged && backendRolePermissions.length) {
+			return backendRolePermissions;
+		}
 		const perms = new Set<string>();
 		selectedRoles.forEach((roleName) => {
 			const roleObj = rolesList.find((r) => r.name === roleName);
-			if (roleObj && roleObj.permissions) {
-				if (Array.isArray(roleObj.permissions)) {
-					roleObj.permissions.forEach((p) => {
-						if (typeof p === "string") {
-							perms.add(p);
-						} else if (p && typeof p === "object" && p.name) {
-							perms.add(p.name);
-						}
-					});
-				}
-			}
+			extractPermNames(roleObj?.permissions).forEach((p) => perms.add(p));
 		});
-		setUserPermissionsState(Array.from(perms));
+		return Array.from(perms);
+	}, [rolesUnchanged, backendRolePermissions, selectedRoles, rolesList]);
+
+	/** effective = роль + прямые - запрещённые (та же формула, что и на backend) */
+	const effectivePermissions = useMemo(() => {
+		const perms = new Set<string>(roleGrantedPermissions);
+		directPermissionsState.forEach((p) => perms.add(p));
+		deniedPermissionsState.forEach((p) => perms.delete(p));
+		return Array.from(perms);
+	}, [roleGrantedPermissions, directPermissionsState, deniedPermissionsState]);
+
+	const relevantPermissions = useMemo(() => {
+		const activeModules = new Set(effectivePermissions.map((p) => p.split(".")[0]));
+		return allSystemPermissions.filter((perm) => activeModules.has(perm.split(".")[0]));
+	}, [allSystemPermissions, effectivePermissions]);
+
+	const paginatedAccessLevels = useMemo(() => {
+		const start = (accessPage - 1) * ACCESS_PAGE_SIZE;
+		return relevantPermissions.slice(start, start + ACCESS_PAGE_SIZE);
+	}, [relevantPermissions, accessPage]);
+
+	useEffect(() => {
+		setAccessPage(1);
+	}, [relevantPermissions]);
+
+	const handleToggleDirect = (permissionName: string) => {
+		setDirectPermissionsState((prev) =>
+			prev.includes(permissionName)
+				? prev.filter((p) => p !== permissionName)
+				: [...prev, permissionName],
+		);
+	};
+
+	const handleToggleDenied = (permissionName: string) => {
+		setDeniedPermissionsState((prev) =>
+			prev.includes(permissionName)
+				? prev.filter((p) => p !== permissionName)
+				: [...prev, permissionName],
+		);
+	};
+
+	const handleResetToStandard = () => {
+		setDirectPermissionsState([]);
+		setDeniedPermissionsState([]);
 	};
 
 	const availableRolesToAdd = useMemo(() => {
@@ -373,11 +425,18 @@ export const UserProfileModal = ({
 	};
 
 	const handleSavePermissions = () => {
-		updatePermissionsM.mutate(
-			{ user_id: user.id, permissions: userPermissionsState },
+		updateDirectM.mutate(
+			{ permissions: directPermissionsState },
 			{
 				onSuccess: () => {
-					onClose();
+					updateDeniedM.mutate(
+						{ permissions: deniedPermissionsState },
+						{
+							onSuccess: () => {
+								onClose();
+							},
+						},
+					);
 				},
 			},
 		);
@@ -394,6 +453,7 @@ export const UserProfileModal = ({
 			okText: "Удалить",
 			okType: "danger",
 			cancelText: "Отмена",
+			zIndex: 10005,
 			onOk: () => {
 				onDelete(user.id);
 				onClose();
@@ -486,28 +546,22 @@ export const UserProfileModal = ({
 		},
 		{
 			key: "delete",
-			label: <span className="text-rose-600 font-semibold">Удалить сотрудника</span>,
+			label: <span className="font-semibold">Удалить сотрудника</span>,
 			danger: true,
 			onClick: handleDeleteConfirm,
 		},
 	];
 
 	return (
-		<motion.div
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
-			className="fixed inset-0! z-9998! bg-slate-900/40! backdrop-blur-sm! flex! items-center! justify-center! p-4!"
-			onClick={onClose}
-		>
-			<motion.div
-				initial={{ opacity: 0, scale: 0.95 }}
-				animate={{ opacity: 1, scale: 1 }}
-				exit={{ opacity: 0, scale: 0.95 }}
-				transition={{ duration: 0.2 }}
-				onClick={(ev) => ev.stopPropagation()}
-				className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col min-h-[800px]! max-h-[820px]!"
+		<ConfigProvider theme={{ token: { zIndexPopupBase: 10000 } }}>
+			<div
+				className="fixed inset-0! z-9998! bg-slate-900/40! backdrop-blur-sm! flex! items-center! justify-center! p-4!"
+				onClick={onClose}
 			>
+				<div
+					onClick={(ev) => ev.stopPropagation()}
+					className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col min-h-[800px]! max-h-[820px]!"
+				>
 				<div className="px-6 pt-5 pb-4 border-b border-slate-100">
 					<div className="flex items-start justify-between">
 						<div className="flex items-center gap-4">
@@ -582,8 +636,9 @@ export const UserProfileModal = ({
 									<span>{labels[t]}</span>
 									{isActive && (
 										<motion.div
-											layoutId="activeModalTabLine"
-											className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-600 rounded-full"
+											initial={{ scaleX: 0 }}
+											animate={{ scaleX: 1 }}
+											className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-600 rounded-full origin-left"
 											transition={{ type: "spring", stiffness: 380, damping: 30 }}
 										/>
 									)}
@@ -594,15 +649,13 @@ export const UserProfileModal = ({
 				</div>
 
 				<div className="px-6 py-6 overflow-y-auto flex-1 relative">
-					<AnimatePresence mode="wait">
-						<motion.div
-							key={tab}
-							initial={{ opacity: 0, y: 6 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -6 }}
-							transition={{ duration: 0.15, ease: "easeOut" }}
-						>
-							<If is={tab === "profile"}>
+					<If is={isDataLoading}>
+						<div className="absolute inset-0 flex items-center justify-center bg-white/50">
+							<Loader />
+						</div>
+					</If>
+					<If is={!isDataLoading}>
+						<If is={tab === "profile"}>
 								<div className="space-y-6">
 									<div className="grid grid-cols-3 gap-4">
 										<div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center">
@@ -629,7 +682,12 @@ export const UserProfileModal = ({
 										<h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
 											Роли пользователя
 										</h4>
-										<div className="flex flex-wrap gap-2 items-center">
+										<div className="flex flex-wrap gap-2.5 items-center">
+											{selectedRoles.length === 0 && (
+												<span className="text-slate-400 text-xs font-semibold italic mr-2 select-none">
+													Роли не назначены
+												</span>
+											)}
 											{selectedRoles.map((role) => {
 												const style = ROLE_CHIP_STYLE_MAP[role] || {
 													border: "border-blue-100!",
@@ -657,9 +715,6 @@ export const UserProfileModal = ({
 												menu={{ items: dropdownItems }}
 												trigger={["click"]}
 												disabled={availableRolesToAdd.length === 0}
-												getPopupContainer={(triggerNode) =>
-													triggerNode.parentElement || document.body
-												}
 											>
 												<button
 													type="button"
@@ -672,58 +727,84 @@ export const UserProfileModal = ({
 										</div>
 									</div>
 
-									{userPermissionsState.length > 0 && (
-										<div className="border border-slate-100 rounded-2xl p-5 space-y-3">
-											<h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-												Уровни доступа
-											</h4>
-											<div className="grid grid-cols-2 gap-x-6 gap-y-1">
-												{paginatedAccessLevels.map((perm) => {
-													const parts = perm.split(".");
-													const mod = MODULE_TRANSLATIONS[parts[0]] || parts[0];
-													const action = ACTION_TRANSLATIONS[parts.slice(1).join(".")] || parts.slice(1).join(".");
-													return (
-														<div key={perm} className="flex items-center justify-between py-2 border-b border-slate-50/50">
-															<span className="text-xs text-slate-600 font-semibold">
-																{mod} — {action}
-															</span>
-															<span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 text-[10px] font-bold select-none">
-																Да
-															</span>
-														</div>
-													);
-												})}
-											</div>
-											{userPermissionsState.length > ACCESS_PAGE_SIZE && (
-												<div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
-													<span className="text-xs text-slate-400 font-medium mr-auto">
-														{(accessPage - 1) * ACCESS_PAGE_SIZE + 1}–{Math.min(accessPage * ACCESS_PAGE_SIZE, userPermissionsState.length)} из {userPermissionsState.length} прав
-													</span>
-													<button
-														onClick={() => setAccessPage((p) => Math.max(1, p - 1))}
-														disabled={accessPage === 1}
-														className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-													>
-														<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-													</button>
-													<span className="text-xs font-bold text-slate-600 min-w-[32px] text-center">
-														{accessPage} / {Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE)}
-													</span>
-													<button
-														onClick={() => setAccessPage((p) => Math.min(Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE), p + 1))}
-														disabled={accessPage >= Math.ceil(userPermissionsState.length / ACCESS_PAGE_SIZE)}
-														className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-													>
-														<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-													</button>
+									<div className="border border-slate-100 rounded-2xl p-5 space-y-3">
+										<h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+											Уровни доступа
+										</h4>
+										{relevantPermissions.length > 0 ? (
+											<>
+												<div className="grid grid-cols-2 gap-x-6 gap-y-1">
+													{paginatedAccessLevels.map((perm) => {
+														const parts = perm.split(".");
+														const mod = MODULE_TRANSLATIONS[parts[0]] || parts[0];
+														const action = ACTION_TRANSLATIONS[parts.slice(1).join(".")] || parts.slice(1).join(".");
+														const hasPermission = effectivePermissions.includes(perm);
+														return (
+															<div key={perm} className="flex items-center justify-between py-2 border-b border-slate-50/50">
+																<span className="text-xs text-slate-600 font-semibold">
+																	{mod} — {action}
+																</span>
+																{hasPermission ? (
+																	<span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 text-[10px] font-bold select-none">
+																		Да
+																	</span>
+																) : (
+																	<span className="px-2 py-0.5 rounded bg-slate-100 text-slate-400 text-[10px] font-bold select-none">
+																		Нет
+																	</span>
+																)}
+															</div>
+														);
+													})}
 												</div>
-											)}
-										</div>
-									)}
+												{relevantPermissions.length > ACCESS_PAGE_SIZE && (
+													<div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
+														<span className="text-xs text-slate-400 font-medium mr-auto">
+															{(accessPage - 1) * ACCESS_PAGE_SIZE + 1}–{Math.min(accessPage * ACCESS_PAGE_SIZE, relevantPermissions.length)} из {relevantPermissions.length} прав
+														</span>
+														<button
+															onClick={() => setAccessPage((p) => Math.max(1, p - 1))}
+															disabled={accessPage === 1}
+															className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+														>
+															<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+														</button>
+														<span className="text-xs font-bold text-slate-600 min-w-[32px] text-center">
+															{accessPage} / {Math.ceil(relevantPermissions.length / ACCESS_PAGE_SIZE)}
+														</span>
+														<button
+															onClick={() => setAccessPage((p) => Math.min(Math.ceil(relevantPermissions.length / ACCESS_PAGE_SIZE), p + 1))}
+															disabled={accessPage >= Math.ceil(relevantPermissions.length / ACCESS_PAGE_SIZE)}
+															className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+														>
+															<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+														</button>
+													</div>
+												)}
+											</>
+										) : (
+											<div className="py-8 flex flex-col items-center justify-center gap-1 text-slate-400 select-none">
+												<span className="text-xs font-semibold text-slate-550">Уровни доступа не назначены</span>
+												<span className="text-[10px] font-semibold opacity-75">Назначьте роль сотруднику для автоматической активации прав</span>
+											</div>
+										)}
+									</div>
 								</div>
 							</If>
 							<If is={tab === "permissions"}>
 								<div className="space-y-4">
+									<div className="flex items-center justify-between pl-1 gap-4">
+										<p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+											Права из роли отмечены меткой «Роль» — их можно только запретить лично
+											этому пользователю. Остальные права можно выдать напрямую.
+										</p>
+										<button
+											onClick={handleResetToStandard}
+											className="shrink-0 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+										>
+											Сбросить к стандартным
+										</button>
+									</div>
 									<div className="space-y-5">
 										{paginatedGroupEntries.map(
 											([moduleName, actions]) => (
@@ -731,25 +812,64 @@ export const UserProfileModal = ({
 													<h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-1">
 														{MODULE_TRANSLATIONS[moduleName] || moduleName}
 													</h4>
-													<div className="bg-slate-50/40! border border-slate-100! rounded-2xl! p-4! flex! flex-wrap! items-center! gap-x-8! gap-y-3!">
+													<div className="bg-slate-50/40! border border-slate-100! rounded-2xl! p-4! flex! flex-col! gap-2.5!">
 														{actions.map((act) => {
-															const checked = userPermissionsState.includes(
+															const inRole = roleGrantedPermissions.includes(
 																act.name,
 															);
+															const isDenied = deniedPermissionsState.includes(
+																act.name,
+															);
+															const isDirect = directPermissionsState.includes(
+																act.name,
+															);
+															const isEffective = inRole ? !isDenied : isDirect;
 															return (
 																<div
 																	key={act.name}
-																	className="flex items-center gap-3"
+																	className="flex items-center justify-between gap-3"
 																>
-																	<span className="text-sm font-medium text-slate-600">
-																		{act.label}
-																	</span>
-																	<Switch
-																		checked={checked}
-																		onChange={() =>
-																			handleTogglePermission(act.name)
-																		}
-																	/>
+																	<div className="flex items-center gap-2 min-w-0">
+																		<span className="text-sm font-medium text-slate-600 truncate">
+																			{act.label}
+																		</span>
+																		{inRole && (
+																			<span className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide select-none ${isDenied ? "bg-rose-50 text-rose-500" : "bg-blue-50 text-blue-500"}`}>
+																				Роль
+																			</span>
+																		)}
+																		{!inRole && isDirect && (
+																			<span className="shrink-0 px-1.5 py-0.5 rounded bg-violet-50 text-violet-500 text-[9px] font-bold uppercase tracking-wide select-none">
+																				Выдано лично
+																			</span>
+																		)}
+																	</div>
+																	<div className="flex items-center gap-3 shrink-0">
+																		<span
+																			className={`px-1.5 py-0.5 rounded text-[10px] font-bold select-none ${
+																				isEffective
+																					? "bg-emerald-50 text-emerald-600"
+																					: "bg-slate-100 text-slate-400"
+																			}`}
+																		>
+																			{isEffective ? "Да" : "Нет"}
+																		</span>
+																		{inRole ? (
+																			<Switch
+																				checked={!isDenied}
+																				onChange={() =>
+																					handleToggleDenied(act.name)
+																				}
+																			/>
+																		) : (
+																			<Switch
+																				checked={isDirect}
+																				onChange={() =>
+																					handleToggleDirect(act.name)
+																				}
+																			/>
+																		)}
+																	</div>
 																</div>
 															);
 														})}
@@ -789,8 +909,7 @@ export const UserProfileModal = ({
 									Раздел находится в разработке
 								</div>
 							</If>
-						</motion.div>
-					</AnimatePresence>
+						</If>
 				</div>
 
 				<div className="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
@@ -798,9 +917,6 @@ export const UserProfileModal = ({
 						menu={{ items: actionItems }}
 						trigger={["click"]}
 						placement="topRight"
-						getPopupContainer={(triggerNode) =>
-							triggerNode.parentElement || document.body
-						}
 					>
 						<button className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-1.5">
 							<span>Действие</span>
@@ -820,7 +936,7 @@ export const UserProfileModal = ({
 					<If is={tab === "permissions"}>
 						<button
 							onClick={handleSavePermissions}
-							disabled={updatePermissionsM.isPending}
+							disabled={isDataLoading || updateDirectM.isPending || updateDeniedM.isPending}
 							className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60 transition-colors"
 						>
 							<Check size={16} />
@@ -828,7 +944,8 @@ export const UserProfileModal = ({
 						</button>
 					</If>
 				</div>
-			</motion.div>
-		</motion.div>
+			</div>
+		</div>
+		</ConfigProvider>
 	);
 };

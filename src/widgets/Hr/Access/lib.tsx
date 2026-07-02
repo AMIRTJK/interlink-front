@@ -31,6 +31,17 @@ export const formatJoinedDate = (dateStr?: string): string => {
 	return `${day}.${month}.${year}`;
 };
 
+/** Приводит массив permissions (строки или {name}) к массиву строк-имён */
+export const extractPermNames = (raw: unknown): string[] => {
+	if (!Array.isArray(raw)) return [];
+	const names: string[] = [];
+	raw.forEach((p: any) => {
+		const name = typeof p === "string" ? p : p?.name;
+		if (name) names.push(name);
+	});
+	return names;
+};
+
 export const normalizeAccessUsers = (raw: IAdminUser[]): IAccessUser[] => {
 	return (Array.isArray(raw) ? raw : []).map((u) => ({
 		id: u.id,
@@ -248,16 +259,6 @@ export const getRoleColorMeta = (roleName: string) => {
 	};
 };
 
-export const getRoleUserCount = (roleName: string): number => {
-	const name = roleName.toLowerCase();
-	if (name.includes("администратор") || name.includes("admin")) return 5;
-	if (name.includes("делопроизводитель") || name.includes("recipient")) return 14;
-	if (name.includes("руководитель") || name.includes("signer")) return 8;
-	if (name.includes("исполнитель") || name.includes("approval")) return 19;
-	if (name.includes("контрол") || name.includes("control")) return 6;
-	return 12;
-};
-
 export interface IRoleItem {
 	id: number;
 	name: string;
@@ -269,11 +270,13 @@ export interface IRoleItem {
 interface IRoleColumnActions {
 	onEdit: (role: IRoleItem) => void;
 	onDelete: (role: IRoleItem) => void;
+	userCounts: Record<string, number>;
 }
 
 export const getRolesTableColumns = ({
 	onEdit,
 	onDelete,
+	userCounts,
 }: IRoleColumnActions): ColumnsType<IRoleItem> => [
 	{
 		title: "НАЗВАНИЕ РОЛИ",
@@ -309,7 +312,7 @@ export const getRolesTableColumns = ({
 		title: "ПОЛЬЗОВАТЕЛЕЙ",
 		key: "users",
 		render: (_, record) => {
-			const count = getRoleUserCount(record.name);
+			const count = userCounts[record.name] ?? 0;
 			const meta = getRoleColorMeta(record.name);
 			return (
 				<span className={`px-2 py-0.5 rounded-full text-xs font-bold ${meta.badge}`}>

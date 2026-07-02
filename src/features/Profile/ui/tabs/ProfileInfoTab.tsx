@@ -230,7 +230,11 @@ export const ProfileInfoTab = ({ userData, isLoading, onEdit, currentTheme }: IP
           <InfoRow
             icon={<ShieldCheck size={16} />}
             label="Роли"
-            value={orDash(userData?.roles?.join(", "))}
+            value={orDash(
+              userData?.roles
+                ?.map((r: any) => (typeof r === "object" ? r.name : r))
+                ?.join(", ")
+            )}
           />
           <InfoRow
             icon={<CalendarIcon size={16} />}

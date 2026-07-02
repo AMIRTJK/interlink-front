@@ -20,6 +20,11 @@ export interface IUser {
   updated_at: string;
   full_name: string;
   roles: string[];
+  /** Права, выданные пользователю напрямую, в обход ролей */
+  direct_permissions?: string[];
+  /** Персональные исключения — права роли, отключённые лично этому пользователю */
+  denied_permissions?: string[];
+  /** Итоговый effective-список: role permissions + direct - denied (считает backend) */
   permissions: string[];
   organization: {
     id: number;

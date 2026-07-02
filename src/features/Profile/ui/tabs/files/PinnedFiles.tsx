@@ -1,11 +1,11 @@
 import React from "react";
 import { X, FileText, FileSpreadsheet, Image as ImageIcon, Archive, File } from "lucide-react";
-import { IFileItem } from "../mockData";
+import { IApiFile, getFileType } from "./lib";
 import { If } from "@shared/ui";
 
 interface IProps {
-  pinnedFiles: IFileItem[];
-  onUnpin: (id: string) => void;
+  pinnedFiles: IApiFile[];
+  onUnpin: (file: IApiFile) => void;
 }
 
 export const PinnedFiles = ({ pinnedFiles, onUnpin }: IProps) => {
@@ -31,21 +31,24 @@ export const PinnedFiles = ({ pinnedFiles, onUnpin }: IProps) => {
           ЗАКРЕПЛЁННЫЕ
         </div>
         <div className="flex flex-wrap gap-2">
-          {pinnedFiles.map((file) => (
-            <div
-              key={file.id}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 text-xs text-slate-700 dark:text-zinc-300 font-medium transition-all hover:bg-amber-100/50 dark:hover:bg-amber-900/30"
-            >
-              {getIcon(file.type)}
-              <span className="max-w-[150px] truncate">{file.name}</span>
-              <button
-                onClick={() => onUnpin(file.id)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors p-0.5 rounded-full cursor-pointer hover:bg-slate-200/50 dark:hover:bg-slate-800"
+          {pinnedFiles.map((file) => {
+            const fileType = getFileType(file.extension);
+            return (
+              <div
+                key={file.id}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 text-xs text-slate-700 dark:text-zinc-300 font-medium transition-all hover:bg-amber-100/50 dark:hover:bg-amber-900/30"
               >
-                <X size={12} />
-              </button>
-            </div>
-          ))}
+                {getIcon(fileType)}
+                <span className="max-w-[150px] truncate">{file.original_name}</span>
+                <button
+                  onClick={() => onUnpin(file)}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors p-0.5 rounded-full cursor-pointer hover:bg-slate-200/50 dark:hover:bg-slate-800"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
     </If>

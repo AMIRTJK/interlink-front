@@ -143,9 +143,6 @@ export const RoleUsersTable = ({
 							menu={{ items }}
 							trigger={["click"]}
 							placement="bottomRight"
-							getPopupContainer={(triggerNode) =>
-								triggerNode.parentElement || document.body
-							}
 						>
 							<button className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
 								<MoreHorizontal size={18} />

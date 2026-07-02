@@ -3,10 +3,6 @@ import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 import { SelectField } from "@shared/ui";
 import { CreatePermissionAndRoleDTO } from "@entities/hr";
-import {
-	PERMISSION_TRANSLATIONS,
-	SUPPLEMENTARY_PERMISSIONS,
-} from "../../../../features/Hr/model";
 
 interface IProps {
 	open: boolean;
@@ -26,11 +22,10 @@ export const CreateRoleModal = ({ open, onClose }: IProps) => {
 
 	const transformPermissions = (response: any) => {
 		const data = response?.data || response || [];
-		const serverItems = data.map((p: any) => ({
+		return data.map((p: any) => ({
 			value: p.name,
-			label: PERMISSION_TRANSLATIONS[p.name] || p.label || p.name,
+			label: p.label || p.name,
 		}));
-		return [...serverItems, ...SUPPLEMENTARY_PERMISSIONS];
 	};
 
 	const onFinish = (values: any) => {
@@ -49,6 +44,8 @@ export const CreateRoleModal = ({ open, onClose }: IProps) => {
 			footer={null}
 			width={500}
 			destroyOnClose
+			transitionName=""
+			maskTransitionName=""
 			title={
 				<div className="flex items-center gap-3">
 					<div>

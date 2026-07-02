@@ -143,6 +143,8 @@ export const CreateTaskModal = ({
 				className="create-event-modal"
 				style={{ borderRadius: 20, overflow: "hidden" }}
 				styles={{ body: { padding: 0 } }}
+				transitionName=""
+				maskTransitionName=""
 			>
 				<div
 					className={`bg-linear-to-r! ${activeTheme.gradient} px-6! py-4! flex! items-center! justify-between!`}

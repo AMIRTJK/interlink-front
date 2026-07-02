@@ -1,19 +1,20 @@
 import { useState, useMemo, useEffect } from "react";
-import { Search, Plus, LayoutGrid, List } from "lucide-react";
+import { Search, Plus, LayoutGrid, List, ShieldPlus } from "lucide-react";
 import { Input, Modal, Pagination } from "antd";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { useGetQuery, useMutationQuery } from "@shared/lib";
-import { ApiRoutes } from "@shared/api";
+import { ApiRoutes, _axios } from "@shared/api";
+import { EmployeeFormModal } from "@features/Hr";
+import type { IAdminUser } from "@entities/hr";
 import { normalizeAccessUsers } from "../lib";
 import { RoleCard } from "./RoleCard";
 import { RoleListTable } from "./RoleListTable";
 import { RoleUsersTable } from "./RoleUsersTable";
 import { RolePermissionsSidebar } from "./RolePermissionsSidebar";
+import { UserPermissionsSidebar } from "./UserPermissionsSidebar";
 import { CreateRoleModal } from "./CreateRoleModal";
+import { CreateUiPermissionModal } from "./CreateUiPermissionModal";
 import { IAccessUser } from "../model";
-
-
-
 
 export const RolesTab = () => {
 	const [selectedRole, setSelectedRole] = useState<{
@@ -23,9 +24,13 @@ export const RolesTab = () => {
 	} | null>(null);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
+	const [isCreateUiPermOpen, setIsCreateUiPermOpen] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [rolesPage, setRolesPage] = useState(1);
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+	const [viewingUser, setViewingUser] = useState<IAccessUser | null>(null);
+	const [editingUser, setEditingUser] = useState<IAdminUser | null>(null);
+	const [isFormOpen, setIsFormOpen] = useState(false);
 
 	const { data: rolesData } = useGetQuery({
 		url: ApiRoutes.GET_ROLES,
@@ -56,6 +61,41 @@ export const RolesTab = () => {
 		}[];
 		return Array.isArray(raw) ? raw : [];
 	}, [rolesData]);
+
+	/**
+	 * Реальный счётчик «пользователей на роль» — берём готовый total из
+	 * пагинации ответа GET /admin/users?role=X (бэкенд честно фильтрует и
+	 * считает сам), а не собираем вручную по всем пользователям: per_page=1000
+	 * не гарантирует, что бэкенд отдаст реально ВСЕХ пользователей за один
+	 * запрос — он может просто урезать per_page до дефолтного значения.
+	 */
+	const [roleUserCounts, setRoleUserCounts] = useState<Record<string, number>>({});
+
+	useEffect(() => {
+		if (rolesList.length === 0) return;
+		let cancelled = false;
+
+		Promise.all(
+			rolesList.map((r) =>
+				_axios
+					.get(ApiRoutes.GET_USERS, { params: { role: r.name, per_page: 1 } })
+					.then((res) => {
+						const body = res.data;
+						const total = body?.data?.total ?? body?.total ?? 0;
+						return [r.name, total] as const;
+					})
+					.catch(() => [r.name, 0] as const),
+			),
+		).then((results) => {
+			if (!cancelled) {
+				setRoleUserCounts(Object.fromEntries(results));
+			}
+		});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [rolesList]);
 
 	const paginatedRoles = useMemo(() => {
 		const start = (rolesPage - 1) * 6;
@@ -151,6 +191,25 @@ export const RolesTab = () => {
 		},
 	});
 
+	const deleteUserM = useMutationQuery({
+		url: (d: { id: number }) =>
+			ApiRoutes.DELETE_USER.replace(":id", String(d.id)),
+		method: "DELETE",
+		messages: {
+			success: "Пользователь успешно удален",
+			invalidate: [ApiRoutes.GET_USERS],
+		},
+	});
+
+	const handleOpenEditUser = (user: IAccessUser) => {
+		setEditingUser(user.raw);
+		setIsFormOpen(true);
+	};
+
+	const handleDeleteUser = (id: number) => {
+		deleteUserM.mutate({ id });
+	};
+
 	const handleDeleteRole = (roleItem: any) => {
 		Modal.confirm({
 			title: "Удалить роль?",
@@ -173,7 +232,8 @@ export const RolesTab = () => {
 		});
 	};
 
-	const totalUsers = usersData?.data?.total || usersData?.total || normalizedUsers.length;
+	const totalUsers =
+		usersData?.data?.total || usersData?.total || normalizedUsers.length;
 	const perPage = usersData?.data?.per_page || usersData?.per_page || 15;
 
 	const selectedRoleDisplayName = selectedRole ? selectedRole.name : "";
@@ -214,6 +274,13 @@ export const RolesTab = () => {
 							</button>
 						</div>
 						<button
+							onClick={() => setIsCreateUiPermOpen(true)}
+							className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+						>
+							<ShieldPlus size={14} />
+							<span>{"Создать UI-право"}</span>
+						</button>
+						<button
 							onClick={() => setIsCreateOpen(true)}
 							className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
 						>
@@ -223,116 +290,105 @@ export const RolesTab = () => {
 					</div>
 				</div>
 
-				<AnimatePresence mode="wait">
 					{viewMode === "grid" ? (
-						<motion.div
-							key="grid"
-							initial={{ opacity: 0, y: 6 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -6 }}
-							transition={{ duration: 0.15 }}
-							className="grid grid-cols-1 md:grid-cols-3 gap-6"
-						>
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
 							{paginatedRoles.map((r) => (
 								<RoleCard
 									key={r.id}
 									role={r}
-									userCount={10}
+									userCount={roleUserCounts[r.name] ?? 0}
 									isSelected={selectedRole?.id === r.id}
-									onSelect={() => setSelectedRole(r)}
-									onEdit={() => setSelectedRole(r)}
+									onSelect={() => { setSelectedRole(r); setViewingUser(null); }}
+									onEdit={() => { setSelectedRole(r); setViewingUser(null); }}
 									onDelete={() => handleDeleteRole(r)}
 								/>
 							))}
-						</motion.div>
+						</div>
 					) : (
-						<motion.div
-							key="list"
-							initial={{ opacity: 0, y: 6 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -6 }}
-							transition={{ duration: 0.15 }}
-						>
+						<div>
 							<RoleListTable
 								items={paginatedRoles}
 								selectedRoleId={selectedRole?.id}
-								onSelect={setSelectedRole}
-								onEdit={setSelectedRole}
+								onSelect={(r) => { setSelectedRole(r); setViewingUser(null); }}
+								onEdit={(r) => { setSelectedRole(r); setViewingUser(null); }}
 								onDelete={handleDeleteRole}
+								userCounts={roleUserCounts}
 							/>
-						</motion.div>
-					)}
-				</AnimatePresence>
-
-				{rolesList.length > 6 && (() => {
-					const totalPages = Math.ceil(rolesList.length / 6);
-					const pageLimit = 5;
-					const pagesList: number[] = [];
-					let start = Math.max(1, rolesPage - 2);
-					let end = Math.min(totalPages, start + pageLimit - 1);
-					if (end - start + 1 < pageLimit) {
-						start = Math.max(1, end - pageLimit + 1);
-					}
-					for (let i = start; i <= end; i++) {
-						pagesList.push(i);
-					}
-
-					return (
-						<div className="flex justify-end pt-2">
-							<div className="flex items-center gap-1.5">
-								<button
-									onClick={() => setRolesPage(Math.max(1, rolesPage - 1))}
-									disabled={rolesPage === 1}
-									className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
-								>
-									<svg
-										width="14"
-										height="14"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										strokeWidth="2.5"
-										strokeLinecap="round"
-										strokeLinejoin="round"
-									>
-										<path d="M15 18l-6-6 6-6" />
-									</svg>
-								</button>
-								{pagesList.map((p) => (
-									<button
-										key={p}
-										onClick={() => setRolesPage(p)}
-										className={`w-8 h-8 flex items-center justify-center rounded-xl text-xs font-bold transition-all cursor-pointer ${
-											rolesPage === p
-												? "bg-blue-600 text-white border border-blue-600 shadow-sm"
-												: "bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-										}`}
-									>
-										{p}
-									</button>
-								))}
-								<button
-									onClick={() => setRolesPage(Math.min(totalPages, rolesPage + 1))}
-									disabled={rolesPage === totalPages}
-									className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
-								>
-									<svg
-										width="14"
-										height="14"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										strokeWidth="2.5"
-										strokeLinecap="round"
-										strokeLinejoin="round"
-									>
-										<path d="M9 18l6-6-6-6" />
-									</svg>
-								</button>
-							</div>
 						</div>
-					);
-				})()}
+					)}
+
+				{rolesList.length > 6 &&
+					(() => {
+						const totalPages = Math.ceil(rolesList.length / 6);
+						const pageLimit = 5;
+						const pagesList: number[] = [];
+						let start = Math.max(1, rolesPage - 2);
+						let end = Math.min(totalPages, start + pageLimit - 1);
+						if (end - start + 1 < pageLimit) {
+							start = Math.max(1, end - pageLimit + 1);
+						}
+						for (let i = start; i <= end; i++) {
+							pagesList.push(i);
+						}
+
+						return (
+							<div className="flex justify-end pt-2">
+								<div className="flex items-center gap-1.5">
+									<button
+										onClick={() => setRolesPage(Math.max(1, rolesPage - 1))}
+										disabled={rolesPage === 1}
+										className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
+									>
+										<svg
+											width="14"
+											height="14"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2.5"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+										>
+											<path d="M15 18l-6-6 6-6" />
+										</svg>
+									</button>
+									{pagesList.map((p) => (
+										<button
+											key={p}
+											onClick={() => setRolesPage(p)}
+											className={`w-8 h-8 flex items-center justify-center rounded-xl text-xs font-bold transition-all cursor-pointer ${
+												rolesPage === p
+													? "bg-blue-600 text-white border border-blue-600 shadow-sm"
+													: "bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+											}`}
+										>
+											{p}
+										</button>
+									))}
+									<button
+										onClick={() =>
+											setRolesPage(Math.min(totalPages, rolesPage + 1))
+										}
+										disabled={rolesPage === totalPages}
+										className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
+									>
+										<svg
+											width="14"
+											height="14"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2.5"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+										>
+											<path d="M9 18l6-6-6-6" />
+										</svg>
+									</button>
+								</div>
+							</div>
+						);
+					})()}
 
 				{selectedRole && (
 					<div className="space-y-4 pt-4 border-t border-slate-100">
@@ -364,37 +420,47 @@ export const RolesTab = () => {
 							currentPage={currentPage}
 							pageSize={perPage}
 							onPageChange={setCurrentPage}
-							onViewAccess={() => {}}
-							onEdit={() => {}}
-							onDelete={() => {}}
+							onViewAccess={setViewingUser}
+							onEdit={handleOpenEditUser}
+							onDelete={handleDeleteUser}
 						/>
 					</div>
 				)}
 			</div>
 
-			<AnimatePresence initial={false}>
-				{selectedRole && (
-					<motion.div
-						initial={{ opacity: 0, width: 0 }}
-						animate={{ opacity: 1, width: 320 }}
-						exit={{ opacity: 0, width: 0 }}
-						transition={{ type: "spring", stiffness: 350, damping: 32 }}
-						className="shrink-0! sticky top-6 overflow-hidden"
-					>
-						<div className="w-[320px] pb-4">
-							<RolePermissionsSidebar
-								role={selectedRole}
-								allSystemPermissions={allSystemPermissions}
-								onClose={() => setSelectedRole(null)}
-							/>
-						</div>
-					</motion.div>
-				)}
-			</AnimatePresence>
+			{viewingUser ? (
+				<div className="shrink-0! sticky top-6 w-[320px] pb-4">
+					<UserPermissionsSidebar
+						user={viewingUser}
+						allSystemPermissions={allSystemPermissions}
+						onClose={() => setViewingUser(null)}
+					/>
+				</div>
+			) : (
+				selectedRole && (
+					<div className="shrink-0! sticky top-6 w-[320px] pb-4">
+						<RolePermissionsSidebar
+							role={selectedRole}
+							allSystemPermissions={allSystemPermissions}
+							onClose={() => setSelectedRole(null)}
+						/>
+					</div>
+				)
+			)}
 
 			<CreateRoleModal
 				open={isCreateOpen}
 				onClose={() => setIsCreateOpen(false)}
+			/>
+			<CreateUiPermissionModal
+				open={isCreateUiPermOpen}
+				onClose={() => setIsCreateUiPermOpen(false)}
+			/>
+
+			<EmployeeFormModal
+				open={isFormOpen}
+				onClose={() => setIsFormOpen(false)}
+				employee={editingUser}
 			/>
 		</div>
 	);

@@ -62,7 +62,10 @@ export const ApiRoutes = {
   UPDATE_USER: "/api/v1/admin/users/:id",
   DELETE_USER: "/api/v1/admin/users/:id",
   SET_USER_ROLES: "/api/v1/admin/users/assign-roles",
-  ASSIGN_USER_PERMISSIONS: "/api/v1/admin/users/assign-permissions",
+  // Полная картина прав пользователя: roles/role_permissions/direct_permissions/denied_permissions/effective_permissions
+  GET_USER_PERMISSIONS: "/api/v1/admin/users/:id/permissions",
+  UPDATE_USER_DIRECT_PERMISSIONS: "/api/v1/admin/users/:id/permissions/direct",
+  UPDATE_USER_DENIED_PERMISSIONS: "/api/v1/admin/users/:id/permissions/denied",
   // Экспорт сотрудников в Excel (временный тестовый роут — заменю на боевой)
   EXPORT_USERS_EXCEL: "/test-users-excel-download",
 
@@ -139,6 +142,14 @@ export const ApiRoutes = {
   GET_INTERNAL_VERSIONS: "/api/v1/internal-correspondences/:id/versions",
   SELECT_INTERNAL_VERISION_FOR_SIGN:
     "/api/v1/internal-correspondences/:correspondenceId/versions/:versionId/select",
+
+  // ==================== MY FILES (PERSONAL STORAGE) ====================
+  MY_FILES: "/api/v1/my-files",
+  MY_FILES_UPLOAD: "/api/v1/my-files/upload",
+  MY_FILES_META: "/api/v1/my-files/meta",
+  MY_FILES_ID: "/api/v1/my-files/:id",
+  MY_FILE_FOLDERS: "/api/v1/my-file-folders",
+  MY_FILE_FOLDERS_ID: "/api/v1/my-file-folders/:id",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];

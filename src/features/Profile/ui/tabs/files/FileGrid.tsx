@@ -1,15 +1,16 @@
 import React from "react";
-import { Pin, Trash2, Archive, FileText, FileSpreadsheet, Eye, History, Share2, Download } from "lucide-react";
-import { IFileItem } from "../mockData";
+import { Pin, Trash2, Archive, FileText, FileSpreadsheet, Eye, History, Share2, Download, Folder } from "lucide-react";
+import { IApiFile, getFileType, formatBytes } from "./lib";
 import { Tooltip } from "@shared/ui";
+import { _axios } from "@shared/api";
+import { toast } from "react-toastify";
 
 interface IProps {
-  files: IFileItem[];
-  onTogglePin: (id: string) => void;
-  onDelete: (id: string) => void;
-  onView: (file: IFileItem) => void;
-  onShare: (file: IFileItem) => void;
-  onHistory: (file: IFileItem) => void;
+  files: IApiFile[];
+  onTogglePin: (file: IApiFile) => void;
+  onDelete: (id: number) => void;
+  onView: (file: IApiFile) => void;
+  onMove?: (file: IApiFile) => void;
 }
 
 export const FileGrid = ({
@@ -17,21 +18,24 @@ export const FileGrid = ({
   onTogglePin,
   onDelete,
   onView,
-  onShare,
-  onHistory,
+  onMove,
 }: IProps) => {
-  const getCoverContent = (file: IFileItem) => {
-    if (file.type === "image" && file.previewUrl) {
+  const getCoverContent = (file: IApiFile) => {
+    const fileType = getFileType(file.extension);
+
+    if (fileType === "image") {
+      // In grid view we can't easily fetch authenticated image on the fly,
+      // but wait, we can just render the icon, or load preview.
+      // Rendering the image icon is simple and fits standard file managers,
+      // let's show a nice clean visual gradient + image icon!
       return (
-        <img
-          src={file.previewUrl}
-          alt={file.name}
-          className="w-full h-full object-cover"
-        />
+        <div className="w-full h-full bg-gradient-to-tr from-pink-500 to-rose-400 flex items-center justify-center">
+          <Eye size={42} className="text-white!" />
+        </div>
       );
     }
 
-    switch (file.type) {
+    switch (fileType) {
       case "archive":
         return (
           <div className="w-full h-full bg-gradient-to-tr from-amber-500 to-orange-400! flex items-center justify-center">
@@ -46,13 +50,13 @@ export const FileGrid = ({
         );
       case "pdf":
         return (
-          <div className="w-full h-full bg-gradient-to-tr from-red-600 to-rose-500! flex items-center justify-center">
+          <div className="w-full h-full bg-gradient-to-tr from-red-650 to-rose-550! flex items-center justify-center">
             <span className="text-white! font-black text-2xl tracking-wider">PDF</span>
           </div>
         );
       case "document":
       default:
-        const isMarkdown = file.name.endsWith(".md");
+        const isMarkdown = file.original_name.endsWith(".md");
         const gradient = isMarkdown 
           ? "from-slate-600 to-slate-500!" 
           : "from-blue-600 to-indigo-500!";
@@ -64,15 +68,30 @@ export const FileGrid = ({
     }
   };
 
-  const handleDownload = (file: IFileItem) => {
-    if (file.previewUrl) {
-      const a = document.createElement("a");
-      a.href = file.previewUrl;
-      a.download = file.name;
-      a.click();
-    } else {
-      alert(`Симуляция скачивания файла: ${file.name}`);
+  const handleDownload = async (file: IApiFile) => {
+    try {
+      const response = await _axios.get(file.download_url, {
+        responseType: "blob",
+      });
+      const blob = new Blob([response.data], { type: response.headers["content-type"] });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = file.original_name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed", error);
+      toast.error("Не удалось скачать файл");
     }
+  };
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" });
   };
 
   return (
@@ -80,7 +99,7 @@ export const FileGrid = ({
       {files.map((file) => (
         <div
           key={file.id}
-          className="group bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600 overflow-hidden transition-all duration-200"
+          className="group bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-650 overflow-hidden transition-all duration-200"
         >
           {/* Cover Area */}
           <div
@@ -89,19 +108,20 @@ export const FileGrid = ({
           >
             {getCoverContent(file)}
 
-            {/* Pin indicator / Toggle */}
+            {/* Pin / Star toggle */}
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onTogglePin(file.id);
+                onTogglePin(file);
               }}
               className={`absolute top-3 right-3 p-1.5 rounded-full transition-all cursor-pointer ${
-                file.pinned
+                file.is_starred
                   ? "bg-amber-500! text-white! scale-100"
                   : "bg-black/40 text-white/80 hover:bg-black/60 scale-0 group-hover:scale-100 focus:scale-100"
               }`}
             >
-              <Pin size={14} className={file.pinned ? "fill-white!" : ""} />
+              <Pin size={14} className={file.is_starred ? "fill-white!" : ""} />
             </button>
           </div>
 
@@ -109,13 +129,13 @@ export const FileGrid = ({
           <div className="p-5 space-y-1">
             <h4
               onClick={() => onView(file)}
-              className="text-sm font-bold text-slate-800 dark:text-zinc-200 truncate cursor-pointer hover:text-indigo-600 transition-colors"
-              title={file.name}
+              className="text-sm font-bold text-slate-800 dark:text-zinc-200 truncate cursor-pointer hover:text-indigo-650 transition-colors"
+              title={file.original_name}
             >
-              {file.name}
+              {file.original_name}
             </h4>
             <p className="text-[11px] font-semibold text-slate-400 dark:text-zinc-400">
-              {file.size} <span className="mx-1">•</span> {file.date}
+              {formatBytes(file.size)} <span className="mx-1">•</span> {formatDate(file.created_at)}
             </p>
 
             {/* Action Buttons on Hover */}
@@ -133,32 +153,6 @@ export const FileGrid = ({
                 </button>
               </Tooltip>
 
-              <Tooltip title="История изменений">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onHistory(file);
-                  }}
-                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded-lg transition-colors cursor-pointer"
-                >
-                  <History size={14} />
-                </button>
-              </Tooltip>
-
-              <Tooltip title="Поделиться">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onShare(file);
-                  }}
-                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded-lg transition-colors cursor-pointer"
-                >
-                  <Share2 size={14} />
-                </button>
-              </Tooltip>
-
               <Tooltip title="Скачать">
                 <button
                   type="button"
@@ -172,6 +166,21 @@ export const FileGrid = ({
                 </button>
               </Tooltip>
 
+              {onMove && (
+                <Tooltip title="Переместить">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMove(file);
+                    }}
+                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded-lg transition-colors cursor-pointer"
+                  >
+                    <Folder size={14} />
+                  </button>
+                </Tooltip>
+              )}
+
               <Tooltip title="Удалить">
                 <button
                   type="button"
@@ -179,7 +188,7 @@ export const FileGrid = ({
                     e.stopPropagation();
                     onDelete(file.id);
                   }}
-                  className="p-1 text-slate-400 hover:text-red-650! dark:hover:text-red-500! rounded-lg transition-colors cursor-pointer"
+                  className="p-1 text-slate-400 hover:text-red-600! dark:hover:text-red-500! rounded-lg transition-colors cursor-pointer"
                 >
                   <Trash2 size={14} />
                 </button>

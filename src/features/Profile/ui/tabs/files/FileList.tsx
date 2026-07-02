@@ -1,16 +1,17 @@
 import React from "react";
-import { Trash2, Archive, FileText, FileSpreadsheet, Image as ImageIcon, Eye, History, Share2, Download } from "lucide-react";
-import { IFileItem } from "../mockData";
+import { Trash2, Archive, FileText, FileSpreadsheet, Image as ImageIcon, Eye, Download, Folder } from "lucide-react";
+import { IApiFile, getFileType, formatBytes } from "./lib";
 import { Tooltip } from "@shared/ui";
+import { _axios } from "@shared/api";
+import { toast } from "react-toastify";
 
 interface IProps {
-  files: IFileItem[];
-  selectedFileIds: string[];
-  onToggleSelectFile: (id: string) => void;
-  onView: (file: IFileItem) => void;
-  onShare: (file: IFileItem) => void;
-  onHistory: (file: IFileItem) => void;
-  onDelete: (id: string) => void;
+  files: IApiFile[];
+  selectedFileIds: number[];
+  onToggleSelectFile: (id: number) => void;
+  onView: (file: IApiFile) => void;
+  onDelete: (id: number) => void;
+  onMove?: (file: IApiFile) => void;
 }
 
 export const FileList = ({
@@ -18,13 +19,14 @@ export const FileList = ({
   selectedFileIds,
   onToggleSelectFile,
   onView,
-  onShare,
-  onHistory,
   onDelete,
+  onMove,
 }: IProps) => {
-  const getSmallIcon = (file: IFileItem) => {
+  const getSmallIcon = (file: IApiFile) => {
+    const fileType = getFileType(file.extension);
     const baseClass = "w-7 h-7 rounded-lg flex items-center justify-center text-white! font-bold text-[10px]";
-    switch (file.type) {
+
+    switch (fileType) {
       case "pdf":
         return <div className={`${baseClass} bg-red-500!`}>PDF</div>;
       case "spreadsheet":
@@ -35,14 +37,16 @@ export const FileList = ({
         return <div className={`${baseClass} bg-amber-500!`}><Archive size={13} /></div>;
       case "document":
       default:
-        const isMarkdown = file.name.endsWith(".md");
+        const isMarkdown = file.original_name.endsWith(".md");
         const bg = isMarkdown ? "bg-slate-500!" : "bg-blue-500!";
         return <div className={`${baseClass} ${bg}`}><FileText size={13} /></div>;
     }
   };
 
-  const getTypeBadge = (file: IFileItem) => {
-    switch (file.type) {
+  const getTypeBadge = (file: IApiFile) => {
+    const fileType = getFileType(file.extension);
+
+    switch (fileType) {
       case "archive":
         return (
           <div className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-zinc-300">
@@ -73,7 +77,7 @@ export const FileList = ({
         );
       case "document":
       default:
-        const isMarkdown = file.name.endsWith(".md");
+        const isMarkdown = file.original_name.endsWith(".md");
         return (
           <div className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-zinc-300">
             <span className={`w-1.5 h-1.5 rounded-full ${isMarkdown ? "bg-slate-400!" : "bg-blue-500!"}`} />
@@ -83,14 +87,38 @@ export const FileList = ({
     }
   };
 
+  const handleDownload = async (file: IApiFile) => {
+    try {
+      const response = await _axios.get(file.download_url, {
+        responseType: "blob",
+      });
+      const blob = new Blob([response.data], { type: response.headers["content-type"] });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = file.original_name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed", error);
+      toast.error("Не удалось скачать файл");
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" });
+  };
+
   return (
     <div className="overflow-x-auto bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm p-4">
       <table className="w-full text-left border-collapse min-w-[700px]">
         <thead>
           <tr className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 tracking-wider uppercase border-b border-slate-100 dark:border-slate-800">
-            <th className="py-4 px-4 w-12 text-center">
-              {/* Checkbox header or empty */}
-            </th>
+            <th className="py-4 px-4 w-12 text-center"></th>
             <th className="py-4 px-4">НАЗВАНИЕ</th>
             <th className="py-4 px-4 w-36">ТИП</th>
             <th className="py-4 px-4 w-28">РАЗМЕР</th>
@@ -112,7 +140,7 @@ export const FileList = ({
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => onToggleSelectFile(file.id)}
-                    className="rounded border-slate-200 dark:border-slate-800 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
+                    className="rounded border-slate-200 dark:border-slate-800 text-indigo-650 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
                   />
                 </td>
 
@@ -120,8 +148,11 @@ export const FileList = ({
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-3">
                     {getSmallIcon(file)}
-                    <span className="text-sm font-bold text-slate-800 dark:text-zinc-200 hover:text-indigo-600 transition-colors cursor-pointer">
-                      {file.name}
+                    <span
+                      onClick={() => onView(file)}
+                      className="text-sm font-bold text-slate-800 dark:text-zinc-200 hover:text-indigo-650 transition-colors cursor-pointer"
+                    >
+                      {file.original_name}
                     </span>
                   </div>
                 </td>
@@ -133,12 +164,12 @@ export const FileList = ({
 
                 {/* Size */}
                 <td className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-zinc-400">
-                  {file.size}
+                  {formatBytes(file.size)}
                 </td>
 
                 {/* Date */}
                 <td className="py-3 px-4 text-xs font-semibold text-slate-400 dark:text-zinc-500">
-                  {file.date}
+                  {formatDate(file.created_at)}
                 </td>
 
                 {/* Actions */}
@@ -153,38 +184,34 @@ export const FileList = ({
                         <Eye size={15} />
                       </button>
                     </Tooltip>
-                    
-                    <Tooltip title="История изменений">
-                      <button
-                        type="button"
-                        onClick={() => onHistory(file)}
-                        className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
-                      >
-                        <History size={15} />
-                      </button>
-                    </Tooltip>
-
-                    <Tooltip title="Поделиться">
-                      <button
-                        type="button"
-                        onClick={() => onShare(file)}
-                        className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
-                      >
-                        <Share2 size={15} />
-                      </button>
-                    </Tooltip>
 
                     <Tooltip title="Скачать">
-                      <button type="button" className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer">
+                      <button
+                        type="button"
+                        onClick={() => handleDownload(file)}
+                        className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+                      >
                         <Download size={15} />
                       </button>
                     </Tooltip>
+
+                    {onMove && (
+                      <Tooltip title="Переместить">
+                        <button
+                          type="button"
+                          onClick={() => onMove(file)}
+                          className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+                        >
+                          <Folder size={15} />
+                        </button>
+                      </Tooltip>
+                    )}
 
                     <Tooltip title="Удалить">
                       <button
                         type="button"
                         onClick={() => onDelete(file.id)}
-                        className="p-1.5 text-slate-400 hover:text-red-600! hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all cursor-pointer"
+                        className="p-1.5 text-slate-400 hover:text-red-650! hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all cursor-pointer"
                       >
                         <Trash2 size={15} />
                       </button>
