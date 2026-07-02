@@ -139,7 +139,7 @@ export const DayView = ({
             <div className="flex! items-center! gap-2! mt-4! md:mt-0! self-end! md:self-center!">
               <button
                 onClick={() => onDeleteEvent(task.id)}
-                className="flex! items-center! gap-2! bg-red-500! hover:bg-red-600! text-white! px-4! py-2! rounded-xl! font-bold! text-xs! transition-all! cursor-pointer! shadow-sm!"
+                className="flex! items-center! gap-1.5! text-red-500! hover:text-red-600! font-semibold! text-xs! transition-colors! cursor-pointer! bg-transparent! border-none! p-0!"
               >
                 <DeleteOutlined />
                 <span>Удалить</span>

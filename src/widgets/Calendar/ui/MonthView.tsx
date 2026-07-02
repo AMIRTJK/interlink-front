@@ -129,38 +129,35 @@ export const MonthView = ({
                   <div key={task.id} onClick={(e) => e.stopPropagation()}>
                     <Popover
                       content={
-                        <div className="p-3! bg-white! dark:bg-slate-900! rounded-2xl! shadow-xl! max-w-[280px]! border! border-zinc-100! dark:border-slate-800!">
-                          <div className="flex! items-center! gap-2! mb-3!">
+                        <div className="w-[240px]! bg-white! rounded-2xl! shadow-lg! overflow-hidden!">
+                          <div className="flex! items-start! gap-2.5! p-4! pb-2!">
                             <span
-                              className="w-3! h-3! rounded-full! flex-shrink-0!"
+                              className="w-2.5! h-2.5! rounded-full! flex-shrink-0! mt-1!"
                               style={getEventDotStyle(task.color)}
                             />
-                            <h4 className="font-bold! text-zinc-900! dark:text-zinc-100! text-sm! m-0!">
+                            <h4 className="font-bold! text-zinc-900! text-sm! m-0! leading-snug!">
                               {task.title}
                             </h4>
                           </div>
-                          <div className="space-y-2! text-zinc-500! dark:text-zinc-400! text-xs! mb-4!">
+                          <div className="px-4! pb-3! space-y-1.5! text-zinc-500! text-xs!">
                             <div className="flex! items-center! gap-2!">
-                              <ClockCircleOutlined className="text-emerald-500!" />
-                              <span>
-                                {task.time}
-                                {task.endTime ? ` - ${task.endTime}` : ""}
-                              </span>
+                              <ClockCircleOutlined className="text-zinc-400! flex-shrink-0!" />
+                              <span>{task.time}{task.endTime ? ` – ${task.endTime}` : ""}</span>
                             </div>
                             <div className="flex! items-center! gap-2!">
-                              <CalendarOutlined className="text-emerald-500!" />
+                              <CalendarOutlined className="text-zinc-400! flex-shrink-0!" />
                               <span>{dayjs(task.date).format("YYYY-MM-DD")}</span>
                             </div>
-                            <If is={task.description}>
-                              <p className="text-zinc-600! dark:text-zinc-300! text-xs! mt-2! leading-relaxed! whitespace-pre-wrap!">
+                            <If is={!!task.description}>
+                              <p className="text-zinc-500! text-xs! mt-1! leading-relaxed! whitespace-pre-wrap! m-0!">
                                 {task.description}
                               </p>
                             </If>
                           </div>
-                          <div className="border-t! border-zinc-100! dark:border-slate-800! pt-2! flex! justify-end!">
+                          <div className="border-t! border-zinc-100! px-4! py-2.5! flex! justify-end!">
                             <button
                               onClick={() => onDeleteEvent(task.id)}
-                              className="flex! items-center! gap-1.5! text-red-500! hover:text-red-700! font-semibold! text-xs! transition-colors! cursor-pointer!"
+                              className="flex! items-center! gap-1.5! text-red-500! hover:text-red-600! font-semibold! text-xs! transition-colors! cursor-pointer! bg-transparent! border-none! p-0!"
                             >
                               <DeleteOutlined />
                               <span>Удалить</span>
