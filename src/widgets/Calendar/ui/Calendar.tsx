@@ -1,111 +1,128 @@
-import { useState } from "react";
-import { WeeklyCalendar } from "./WeeklyCalendar";
-import { TaskDetailsModal, CreateTaskModal } from "@features/Calendar";
+import React, { useState } from "react";
+import { CalendarHeader } from "./CalendarHeader";
+import { MonthView } from "./MonthView";
+import { WeekView } from "./WeekView";
+import { DayView } from "./DayView";
+import { CreateTaskModal } from "@features/Calendar";
 import { useCalendarEvents } from "@shared/lib/hooks/useCalendarEvents";
-import type { Task } from "@features/tasks";
+import { useCalendarView } from "@shared/lib/hooks/useCalendarView";
+import { useMutationQuery } from "@shared/lib";
+import { ApiRoutes } from "@shared/api";
 import dayjs, { Dayjs } from "dayjs";
 
-// import "@features/calendar/task-details-modal.css";
-
-/**
- * Компонент Calendar является корневым для функционала календаря.
- * Он управляет состоянием событий, модальными окнами создания/просмотра задач
- * и обеспечивает интеграцию между API и UI календаря.
- */
 export const Calendar = () => {
-  const { tasks, currentDate, setCurrentDate, fetchEvents, search, setSearch } =
-    useCalendarEvents();
+  const { tasks, currentDate, setCurrentDate, fetchEvents } = useCalendarEvents();
+
+  const {
+    viewMode,
+    setViewMode,
+    daysToShow,
+    goToPrev,
+    goToNext,
+    formatDateRange,
+  } = useCalendarView({ currentDate, onDateChange: setCurrentDate });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedDateTime, setSelectedDateTime] = useState<{
     date: Dayjs;
     time: Dayjs;
   } | null>(null);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [editEvent, setEditEvent] = useState<Task | null>(null);
 
-  const handleTaskClick = (task: Task) => {
-    setSelectedTask(task);
-    setIsViewModalOpen(true);
+  const { mutate: deleteEvent } = useMutationQuery<string>({
+    method: "DELETE",
+    url: (eventId) => `${ApiRoutes.GET_EVENTS}/${eventId}`,
+    messages: {
+      success: "Событие удалено!",
+      error: "Не удалось удалить событие",
+      invalidate: [ApiRoutes.GET_EVENTS],
+    },
+  });
+
+  const handleDeleteEvent = (eventId: string) => {
+    deleteEvent(eventId);
   };
 
-  const handleTimeSlotClick = (date: Dayjs, time: string) => {
-    const [hours, minutes] = time.split(":");
-    const timeObj = dayjs().hour(parseInt(hours)).minute(parseInt(minutes));
-
+  const handleDayClick = (date: Dayjs) => {
     setSelectedDateTime({
-      date: date,
-      time: timeObj,
+      date,
+      time: dayjs().hour(9).minute(0),
     });
-    setEditEvent(null);
+    setIsModalOpen(true);
+  };
+
+  const handleCreateClick = () => {
+    setSelectedDateTime({
+      date: currentDate,
+      time: dayjs().hour(9).minute(0),
+    });
     setIsModalOpen(true);
   };
 
   const handleCancelCreate = () => {
     setIsModalOpen(false);
     setSelectedDateTime(null);
-    setEditEvent(null);
   };
 
   const handleTaskCreated = () => {
     fetchEvents();
     setIsModalOpen(false);
     setSelectedDateTime(null);
-    setEditEvent(null);
   };
 
-  const handleEditTask = (task: Task) => {
-    setEditEvent(task);
-    setIsViewModalOpen(false);
-    setIsModalOpen(true);
-  };
-
-  const getInitialValues = () => {
-    if (editEvent) {
-      return {
-        title: editEvent.title,
-        description: editEvent.description,
-        date: dayjs(editEvent.date),
-        time: dayjs(`${editEvent.date} ${editEvent.time}`),
-        endTime: editEvent.endTime
-          ? dayjs(`${editEvent.date} ${editEvent.endTime}`)
-          : undefined,
-        color: editEvent.color,
-        assignees: editEvent.participants?.map((p) => Number(p.id)) || [],
-        status: "pending", // Default or fetched if available. Task type misses it currently.
-      };
+  const renderActiveView = () => {
+    if (viewMode === "month") {
+      return (
+        <MonthView
+          daysToShow={daysToShow}
+          tasks={tasks}
+          currentDate={currentDate}
+          onDeleteEvent={handleDeleteEvent}
+          onDayClick={handleDayClick}
+        />
+      );
     }
-    return undefined;
+    if (viewMode === "week") {
+      return (
+        <WeekView
+          daysToShow={daysToShow}
+          tasks={tasks}
+          onDeleteEvent={handleDeleteEvent}
+          onDayClick={handleDayClick}
+        />
+      );
+    }
+    return (
+      <DayView
+        currentDate={currentDate}
+        tasks={tasks}
+        onDeleteEvent={handleDeleteEvent}
+        onDayClick={handleDayClick}
+      />
+    );
   };
 
   return (
-    <div className="profile-page">
-      <WeeklyCalendar
-        tasks={tasks}
-        currentDate={currentDate}
-        onDateChange={setCurrentDate}
-        onTaskClick={handleTaskClick}
-        onTimeSlotClick={handleTimeSlotClick}
-        search={search}
-        onSearch={setSearch}
+    <div className="w-full! flex! flex-col! gap-4!">
+      <CalendarHeader
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        onPrev={goToPrev}
+        onNext={goToNext}
+        dateRange={formatDateRange()}
+        onToday={() => setCurrentDate(dayjs())}
+        onCreateEvent={handleCreateClick}
       />
+
+      <div className="w-full! transition-all! duration-300!">
+        {renderActiveView()}
+      </div>
 
       <CreateTaskModal
         isOpen={isModalOpen}
         onClose={handleCancelCreate}
         selectedDateTime={selectedDateTime}
-        initialValues={getInitialValues()}
         onSuccess={handleTaskCreated}
-        mode={editEvent ? "edit" : "create"}
-        eventId={editEvent?.id.toString()}
-      />
-
-      <TaskDetailsModal
-        task={selectedTask}
-        isOpen={isViewModalOpen}
-        onClose={() => setIsViewModalOpen(false)}
-        onEdit={handleEditTask}
+        mode="create"
       />
     </div>
   );

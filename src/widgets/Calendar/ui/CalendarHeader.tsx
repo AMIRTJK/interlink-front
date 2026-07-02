@@ -1,12 +1,6 @@
-import { Input } from "antd";
+import React, { useMemo } from "react";
+import { PlusOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import type { ViewMode } from "../model";
-import { Button } from "@shared/ui";
-import { SearchOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-
-import LeftArrow from "../../../assets/icons/left-arrow.svg";
-import RightArrow from "../../../assets/icons/right-arrow.svg";
 
 interface CalendarHeaderProps {
   viewMode: ViewMode;
@@ -15,20 +9,9 @@ interface CalendarHeaderProps {
   onNext: () => void;
   dateRange: string;
   onToday: () => void;
-  search?: string;
-  onSearch?: (value: string) => void;
-  // Month pagination
-  onMonthPagePrev?: () => void;
-  onMonthPageNext?: () => void;
-  canGoMonthPagePrev?: boolean;
-  canGoMonthPageNext?: boolean;
-  monthPageOffset?: number;
-  totalMonthPages?: number;
+  onCreateEvent: () => void;
 }
 
-/**
- * Компонент CalendarHeader отвечает за верхнюю панель управления календарем.
- */
 export const CalendarHeader = ({
   viewMode,
   setViewMode,
@@ -36,146 +19,159 @@ export const CalendarHeader = ({
   onNext,
   dateRange,
   onToday,
-  search = "",
-  onSearch,
-  onMonthPagePrev,
-  onMonthPageNext,
-  canGoMonthPagePrev,
-  canGoMonthPageNext,
-  monthPageOffset,
-  totalMonthPages,
+  onCreateEvent,
 }: CalendarHeaderProps) => {
-  const [localSearch, setLocalSearch] = useState(search);
+  const themeKey = useMemo(() => localStorage.getItem("currentTheme") || "emerald", []);
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      onSearch?.(localSearch);
-    }, 500);
+  const getThemeColors = (theme: string) => {
+    switch (theme) {
+      case "blue":
+        return {
+          bg: "bg-blue-600!",
+          hoverBg: "hover:bg-blue-700!",
+          text: "text-blue-600!",
+          shadow: "shadow-blue-500/20!",
+        };
+      case "sunset":
+        return {
+          bg: "bg-orange-500!",
+          hoverBg: "hover:bg-orange-600!",
+          text: "text-orange-600!",
+          shadow: "shadow-orange-500/20!",
+        };
+      case "ocean":
+        return {
+          bg: "bg-cyan-500!",
+          hoverBg: "hover:bg-cyan-600!",
+          text: "text-cyan-600!",
+          shadow: "shadow-cyan-500/20!",
+        };
+      case "purple":
+        return {
+          bg: "bg-purple-600!",
+          hoverBg: "hover:bg-purple-700!",
+          text: "text-purple-600!",
+          shadow: "shadow-purple-500/20!",
+        };
+      case "Aurora":
+        return {
+          bg: "bg-emerald-500!",
+          hoverBg: "hover:bg-emerald-600!",
+          text: "text-emerald-600!",
+          shadow: "shadow-emerald-500/20!",
+        };
+      case "fury":
+        return {
+          bg: "bg-rose-500!",
+          hoverBg: "hover:bg-rose-600!",
+          text: "text-rose-600!",
+          shadow: "shadow-rose-500/20!",
+        };
+      case "Lavender":
+        return {
+          bg: "bg-violet-500!",
+          hoverBg: "hover:bg-violet-600!",
+          text: "text-violet-600!",
+          shadow: "shadow-violet-500/20!",
+        };
+      case "coral":
+        return {
+          bg: "bg-blue-500!",
+          hoverBg: "hover:bg-blue-600!",
+          text: "text-blue-600!",
+          shadow: "shadow-blue-500/20!",
+        };
+      case "Peach":
+        return {
+          bg: "bg-pink-400!",
+          hoverBg: "hover:bg-pink-500!",
+          text: "text-pink-400!",
+          shadow: "shadow-pink-400/20!",
+        };
+      case "galaxy":
+        return {
+          bg: "bg-indigo-700!",
+          hoverBg: "hover:bg-indigo-800!",
+          text: "text-indigo-700!",
+          shadow: "shadow-indigo-700/20!",
+        };
+      case "emerald":
+      default:
+        return {
+          bg: "bg-emerald-700!",
+          hoverBg: "hover:bg-emerald-800!",
+          text: "text-emerald-700!",
+          shadow: "shadow-emerald-700/20!",
+        };
+    }
+  };
 
-    return () => clearTimeout(handler);
-  }, [localSearch, onSearch]);
+  const themeColors = getThemeColors(themeKey);
 
   const VIEW_MODES: { key: ViewMode; label: string }[] = [
+    { key: "day", label: "День" },
     { key: "week", label: "Неделя" },
     { key: "month", label: "Месяц" },
-    { key: "year", label: "Год" },
   ];
 
   return (
-    <motion.div
-      className="weekly-calendar__header"
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-    >
-      <div className="weekly-calendar__header-left">
-        <motion.div whileTap={{ scale: 0.98 }}>
-          <Button
-            onClick={onToday}
-            text="Сегодня"
-            type="default"
-            className="rounded-[12px]! h-[40px]! px-6! border-rgba(226, 232, 240, 0.8)! bg-white/60! backdrop-filter! backdrop-blur-sm! hover:bg-white! transition-all!"
-          />
-        </motion.div>
-
-        <div className="weekly-calendar__nav">
-          <motion.button
-            whileHover={{ x: -2, backgroundColor: "rgba(0,0,0,0.03)" }}
-            whileTap={{ scale: 0.9 }}
-            onClick={onPrev}
-            className="w-10 h-10 flex items-center justify-center rounded-xl transition-colors"
-          >
-            <img className="h-5 w-5 opacity-60" src={LeftArrow} alt="Назад" />
-          </motion.button>
-
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={dateRange}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.05 }}
-              className="weekly-calendar__date-range"
-            >
-              {dateRange}
-            </motion.p>
-          </AnimatePresence>
-
-          <motion.button
-            whileHover={{ x: 2, backgroundColor: "rgba(0,0,0,0.03)" }}
-            whileTap={{ scale: 0.9 }}
-            onClick={onNext}
-            className="w-10 h-10 flex items-center justify-center rounded-xl transition-colors"
-          >
-            <img className="h-5 w-5 opacity-60" src={RightArrow} alt="Вперед" />
-          </motion.button>
-        </div>
-
-        {/* Пагинация по дням (режим «Месяц») */}
-        {viewMode === 'month' && onMonthPagePrev && onMonthPageNext && (
-          <div className="weekly-calendar__nav ml-4">
-            <motion.button
-              whileHover={{ x: -2, backgroundColor: "rgba(0,0,0,0.03)" }}
-              whileTap={{ scale: 0.9 }}
-              onClick={onMonthPagePrev}
-              disabled={!canGoMonthPagePrev}
-              className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <img className="h-4 w-4 opacity-50" src={LeftArrow} alt="Назад" />
-            </motion.button>
-            <div className="flex items-center gap-2 min-w-[80px] justify-center">
-              <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">Дни:</span>
-              <p className="text-[12px] font-semibold text-[#1e293b] m-0">
-                {monthPageOffset !== undefined && totalMonthPages !== undefined
-                  ? `${monthPageOffset + 1}/${totalMonthPages}`
-                  : ''}
-              </p>
-            </div>
-            <motion.button
-              whileHover={{ x: 2, backgroundColor: "rgba(0,0,0,0.03)" }}
-              whileTap={{ scale: 0.9 }}
-              onClick={onMonthPageNext}
-              disabled={!canGoMonthPageNext}
-              className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <img className="h-4 w-4 opacity-50" src={RightArrow} alt="Вперед" />
-            </motion.button>
-          </div>
-        )}
-      </div>
-
-      <div className="weekly-calendar__header-right">
-        <div className="weekly-calendar__view-switcher">
-          {VIEW_MODES.map(({ key, label }) => (
-            <motion.button
+    <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4! mb-6! w-full!">
+      {/* Левая часть: Переключатель режимов */}
+      <div className="bg-white/50! dark:bg-slate-800/50! p-1.5! rounded-[1.5rem]! border! border-white/20! dark:border-slate-700/50! shadow-sm! flex! items-center! gap-1! self-start!">
+        {VIEW_MODES.map(({ key, label }) => {
+          const isActive = viewMode === key;
+          return (
+            <button
               key={key}
               onClick={() => setViewMode(key)}
-              className={`relative px-6 h-full text-[13px] font-semibold transition-colors ${
-                viewMode === key ? "text-[#6C63FF]" : "text-[#94A3B8] hover:text-[#64748b]"
+              className={`px-6! py-2! rounded-[1.25rem]! text-xs! font-bold! transition-all! cursor-pointer! ${
+                isActive
+                  ? `${themeColors.bg} text-white! shadow-md! ${themeColors.shadow}`
+                  : "text-zinc-500! hover:text-zinc-800! dark:text-zinc-400! dark:hover:text-zinc-200!"
               }`}
             >
-              {viewMode === key && (
-                <motion.div
-                  layoutId="switcher-pill"
-                  className="absolute inset-0 bg-white rounded-[18px] shadow-sm z-0"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              <span className="relative z-10">{label}</span>
-            </motion.button>
-          ))}
-        </div>
-
-        <div className="weekly-calendar__search">
-          <Input
-            placeholder="Поиск событий..."
-            prefix={<SearchOutlined className="text-[#94A3B8]" />}
-            value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
-            className="weekly-calendar__search-input"
-            allowClear
-          />
-        </div>
+              {label}
+            </button>
+          );
+        })}
       </div>
-    </motion.div>
+
+      {/* Центр: Навигация */}
+      <div className="flex! items-center! justify-center! gap-4! self-center!">
+        <button
+          onClick={onPrev}
+          className="w-9! h-9! flex! items-center! justify-center! bg-white/70! hover:bg-white! dark:bg-slate-800/70! dark:hover:bg-slate-800! border! border-zinc-100! dark:border-slate-700! rounded-full! transition-colors! cursor-pointer!"
+        >
+          <LeftOutlined className="text-xs! text-zinc-500! dark:text-zinc-300!" />
+        </button>
+
+        <h3 className="text-base! font-bold! text-zinc-800! dark:text-zinc-100! m-0! min-w-[140px]! text-center!">
+          {dateRange}
+        </h3>
+
+        <button
+          onClick={onNext}
+          className="w-9! h-9! flex! items-center! justify-center! bg-white/70! hover:bg-white! dark:bg-slate-800/70! dark:hover:bg-slate-800! border! border-zinc-100! dark:border-slate-700! rounded-full! transition-colors! cursor-pointer!"
+        >
+          <RightOutlined className="text-xs! text-zinc-500! dark:text-zinc-300!" />
+        </button>
+
+        <button
+          onClick={onToday}
+          className="px-4! py-2! bg-white/70! hover:bg-white! dark:bg-slate-800/70! dark:hover:bg-slate-800! border! border-zinc-100! dark:border-slate-700! text-xs! font-bold! text-zinc-600! dark:text-zinc-300! rounded-full! transition-colors! cursor-pointer!"
+        >
+          Сегодня
+        </button>
+      </div>
+
+      {/* Правая часть: Создать событие */}
+      <button
+        onClick={onCreateEvent}
+        className={`flex! items-center! gap-2! text-white! font-bold! text-xs! px-5! py-3! rounded-2xl! cursor-pointer! transition-all! shadow-md! self-end! sm:self-center! ${themeColors.bg} ${themeColors.hoverBg} ${themeColors.shadow}`}
+      >
+        <PlusOutlined className="text-xs!" />
+        <span>Создать событие</span>
+      </button>
+    </div>
   );
 };

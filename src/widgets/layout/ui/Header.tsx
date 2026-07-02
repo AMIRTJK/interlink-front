@@ -174,6 +174,7 @@ export const Header = ({
               if (setCurrentTheme) {
                 setCurrentTheme(key);
                 localStorage.setItem("currentTheme", key);
+                window.dispatchEvent(new StorageEvent("storage", { key: "currentTheme", newValue: key }));
               }
             }}
             className={`w-full flex items-center gap-3 p-2.5 rounded-[1.5rem] hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all cursor-pointer ${
