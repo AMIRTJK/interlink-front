@@ -4,6 +4,7 @@ import { Check, X, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { If, Loader } from "@shared/ui";
 import { IAccessUser } from "../model";
 import { extractPermNames, getInitials } from "../lib";
 
@@ -76,7 +77,7 @@ export const UserPermissionsSidebar = ({
 		? ApiRoutes.GET_USER_PERMISSIONS.replace(":id", String(user.id))
 		: undefined;
 
-	const { data: userPermsData } = useGetQuery({
+	const { data: userPermsData, isLoading: isUserPermsLoading } = useGetQuery({
 		url: userPermsUrl,
 		useToken: true,
 		options: {
@@ -86,12 +87,22 @@ export const UserPermissionsSidebar = ({
 		},
 	});
 
+	const [isInitialized, setIsInitialized] = useState(false);
+
 	useEffect(() => {
+		setIsInitialized(false);
+	}, [user?.id]);
+
+	useEffect(() => {
+		if (!userPermsData) return;
 		const rawUserPerms = userPermsData?.data || userPermsData;
 		setRoleGrantedPermissions(extractPermNames(rawUserPerms?.role_permissions));
 		setDirectPermissionsState(extractPermNames(rawUserPerms?.direct_permissions));
 		setDeniedPermissionsState(extractPermNames(rawUserPerms?.denied_permissions));
+		setIsInitialized(true);
 	}, [userPermsData]);
+
+	const isDataLoading = isUserPermsLoading || !isInitialized;
 
 	const updateDirectM = useMutationQuery({
 		url: () =>
@@ -235,7 +246,12 @@ export const UserPermissionsSidebar = ({
 						/>
 					</div>
 
-					<div className="flex-1 overflow-y-auto p-5 space-y-4 pt-2">
+					<div className="flex-1 overflow-y-auto p-5 space-y-4 pt-2 relative">
+						<If is={isDataLoading}>
+							<div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60">
+								<Loader />
+							</div>
+						</If>
 						<div className="flex items-center justify-between pl-1">
 							<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
 								{"ПРАВА ПОЛЬЗОВАТЕЛЯ"}
@@ -373,7 +389,7 @@ export const UserPermissionsSidebar = ({
 					<div className="p-4 border-t border-slate-50 bg-slate-50/20">
 						<button
 							onClick={handleSave}
-							disabled={updateDirectM.isPending || updateDeniedM.isPending}
+							disabled={isDataLoading || updateDirectM.isPending || updateDeniedM.isPending}
 							className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60 transition-colors shadow-sm"
 						>
 							<Check size={14} />

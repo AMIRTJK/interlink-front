@@ -936,7 +936,7 @@ export const UserProfileModal = ({
 					<If is={tab === "permissions"}>
 						<button
 							onClick={handleSavePermissions}
-							disabled={updateDirectM.isPending || updateDeniedM.isPending}
+							disabled={isDataLoading || updateDirectM.isPending || updateDeniedM.isPending}
 							className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60 transition-colors"
 						>
 							<Check size={16} />

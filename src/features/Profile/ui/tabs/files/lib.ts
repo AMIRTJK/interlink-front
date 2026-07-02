@@ -28,9 +28,24 @@ export interface ITreeNode extends IApiFolder {
   children: ITreeNode[];
 }
 
-export interface IDiskMeta {
+export interface ITypeBreakdownItem {
+  type: string;
+  count: number;
   total_size: number;
-  limit: number;
+}
+
+export interface IDiskMeta {
+  // New properties from backend
+  total_count?: number;
+  starred_count?: number;
+  storage_used_bytes?: number;
+  storage_limit_bytes?: number;
+  usage_pct?: number;
+  type_breakdown?: ITypeBreakdownItem[];
+
+  // Legacy/fallback properties
+  total_size?: number;
+  limit?: number;
 }
 
 export const formatBytes = (bytes: number): string => {

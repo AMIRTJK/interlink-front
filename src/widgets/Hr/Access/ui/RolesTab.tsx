@@ -3,10 +3,10 @@ import { Search, Plus, LayoutGrid, List, ShieldPlus } from "lucide-react";
 import { Input, Modal, Pagination } from "antd";
 
 import { useGetQuery, useMutationQuery } from "@shared/lib";
-import { ApiRoutes } from "@shared/api";
+import { ApiRoutes, _axios } from "@shared/api";
 import { EmployeeFormModal } from "@features/Hr";
 import type { IAdminUser } from "@entities/hr";
-import { normalizeAccessUsers, extractPermNames } from "../lib";
+import { normalizeAccessUsers } from "../lib";
 import { RoleCard } from "./RoleCard";
 import { RoleListTable } from "./RoleListTable";
 import { RoleUsersTable } from "./RoleUsersTable";
@@ -50,33 +50,6 @@ export const RolesTab = () => {
 		},
 	});
 
-	/** Для реального счётчика «пользователей на роль» на карточках/в таблице — без пагинации */
-	const { data: allUsersForCountsData } = useGetQuery({
-		url: ApiRoutes.GET_USERS,
-		useToken: true,
-		params: { per_page: 1000 },
-		options: {
-			refetchOnWindowFocus: false,
-			staleTime: 5 * 60 * 1000,
-		},
-	});
-
-	const roleUserCounts = useMemo(() => {
-		const raw = (allUsersForCountsData?.data?.data ||
-			allUsersForCountsData?.data ||
-			allUsersForCountsData ||
-			[]) as any[];
-		const counts: Record<string, number> = {};
-		if (Array.isArray(raw)) {
-			raw.forEach((u) => {
-				extractPermNames(u?.roles).forEach((roleName) => {
-					counts[roleName] = (counts[roleName] || 0) + 1;
-				});
-			});
-		}
-		return counts;
-	}, [allUsersForCountsData]);
-
 	const rolesList = useMemo(() => {
 		const raw = (rolesData?.data?.data ||
 			rolesData?.data ||
@@ -88,6 +61,41 @@ export const RolesTab = () => {
 		}[];
 		return Array.isArray(raw) ? raw : [];
 	}, [rolesData]);
+
+	/**
+	 * Реальный счётчик «пользователей на роль» — берём готовый total из
+	 * пагинации ответа GET /admin/users?role=X (бэкенд честно фильтрует и
+	 * считает сам), а не собираем вручную по всем пользователям: per_page=1000
+	 * не гарантирует, что бэкенд отдаст реально ВСЕХ пользователей за один
+	 * запрос — он может просто урезать per_page до дефолтного значения.
+	 */
+	const [roleUserCounts, setRoleUserCounts] = useState<Record<string, number>>({});
+
+	useEffect(() => {
+		if (rolesList.length === 0) return;
+		let cancelled = false;
+
+		Promise.all(
+			rolesList.map((r) =>
+				_axios
+					.get(ApiRoutes.GET_USERS, { params: { role: r.name, per_page: 1 } })
+					.then((res) => {
+						const body = res.data;
+						const total = body?.data?.total ?? body?.total ?? 0;
+						return [r.name, total] as const;
+					})
+					.catch(() => [r.name, 0] as const),
+			),
+		).then((results) => {
+			if (!cancelled) {
+				setRoleUserCounts(Object.fromEntries(results));
+			}
+		});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [rolesList]);
 
 	const paginatedRoles = useMemo(() => {
 		const start = (rolesPage - 1) * 6;
