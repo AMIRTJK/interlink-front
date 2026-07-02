@@ -11,7 +11,34 @@ export interface IFileItem {
   previewUrl?: string;
 }
 
-export const INITIAL_CATEGORIES = ["Все файлы", "Рабочие", "Документы"];
+export interface ICategoryItem {
+  name: string;
+  icon: string; // Эмодзи-иконка
+  allowedUsers?: string[]; // ID выбранных пользователей
+}
+
+export interface IMockUser {
+  id: string;
+  name: string;
+  role: string;
+  avatarColor: string; // Tailwind класс
+  initials: string;
+}
+
+export const INITIAL_CATEGORIES: ICategoryItem[] = [
+  { name: "Все файлы", icon: "📁" },
+  { name: "Рабочие", icon: "💼" },
+  { name: "Документы", icon: "📄" },
+];
+
+export const MOCK_USERS: IMockUser[] = [
+  { id: "u1", name: "Алишер Махмудов", role: "Разработчик", avatarColor: "bg-blue-500!", initials: "AM" },
+  { id: "u2", name: "Зарина Ибрагимова", role: "Дизайнер", avatarColor: "bg-rose-500!", initials: "ЗИ" },
+  { id: "u3", name: "Рустам Назаров", role: "DevOps инженер", avatarColor: "bg-emerald-500!", initials: "РН" },
+  { id: "u4", name: "Нилуфар Рахимова", role: "Аналитик", avatarColor: "bg-orange-500!", initials: "НР" },
+  { id: "u5", name: "Даврон Хасанов", role: "Backend разработчик", avatarColor: "bg-indigo-500!", initials: "ДХ" },
+  { id: "u6", name: "Мадина Юсупова", role: "QA инженер", avatarColor: "bg-teal-500!", initials: "МЮ" },
+];
 
 export const INITIAL_FILES: IFileItem[] = [
   {

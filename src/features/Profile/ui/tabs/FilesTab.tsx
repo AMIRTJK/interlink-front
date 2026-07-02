@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { INITIAL_FILES, INITIAL_CATEGORIES, IFileItem } from "./mockData";
+import { INITIAL_FILES, INITIAL_CATEGORIES, IFileItem, ICategoryItem } from "./mockData";
 import { FilesHeader } from "./files/FilesHeader";
 import { CategoryFilters } from "./files/CategoryFilters";
 import { PinnedFiles } from "./files/PinnedFiles";
@@ -11,7 +11,7 @@ import "./FilesTab.css";
 
 export const FilesTab = () => {
   const [files, setFiles] = useState<IFileItem[]>(INITIAL_FILES);
-  const [categories, setCategories] = useState<string[]>(INITIAL_CATEGORIES);
+  const [categories, setCategories] = useState<ICategoryItem[]>(INITIAL_CATEGORIES);
   const [activeCategory, setActiveCategory] = useState<string>("Все файлы");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortBy, setSortBy] = useState<"date" | "size" | "name">("date");
@@ -71,9 +71,9 @@ export const FilesTab = () => {
   };
 
   // Добавление новой категории
-  const handleAddCategory = (name: string) => {
-    if (!categories.includes(name)) {
-      setCategories((prev) => [...prev, name]);
+  const handleAddCategory = (newCat: ICategoryItem) => {
+    if (!categories.some((c) => c.name === newCat.name)) {
+      setCategories((prev) => [...prev, newCat]);
     }
   };
 
