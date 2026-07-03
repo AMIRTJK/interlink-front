@@ -150,6 +150,14 @@ export const ApiRoutes = {
   MY_FILES_ID: "/api/v1/my-files/:id",
   MY_FILE_FOLDERS: "/api/v1/my-file-folders",
   MY_FILE_FOLDERS_ID: "/api/v1/my-file-folders/:id",
+
+  // ==================== NOTIFICATIONS (личный кабинет) ====================
+  // Данные возвращаются только для текущего авторизованного пользователя
+  NOTIFICATIONS: "/api/v1/notifications",
+  NOTIFICATIONS_COUNTERS: "/api/v1/notifications/counters",
+  NOTIFICATIONS_READ_ALL: "/api/v1/notifications/read-all",
+  NOTIFICATION_READ: "/api/v1/notifications/:id/read",
+  NOTIFICATION_DELETE: "/api/v1/notifications/:id",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];

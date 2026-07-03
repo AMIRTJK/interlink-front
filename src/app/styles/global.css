@@ -27,10 +27,6 @@
   src: url("/fonts/Orbitron-Variable.woff2") format("woff2");
 }
 
-html {
-  scrollbar-gutter: stable;
-}
-
 html,
 body,
 #root {

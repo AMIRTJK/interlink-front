@@ -6,7 +6,6 @@ import {
   Calendar as CalendarIcon,
   BarChart2,
   FolderOpen,
-  Search,
 } from "lucide-react";
 import { IUser } from "@entities/login";
 import { ProfileInfoTab } from "./tabs/ProfileInfoTab";
@@ -100,19 +99,6 @@ export const PersonalCabinet = ({
               </span>
             </button>
           ))}
-        </div>
-        <div className="flex items-center gap-2 px-3">
-          <div className="relative">
-            <Search
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
-            />
-            <input
-              type="text"
-              placeholder="Поиск..."
-              className="bg-white/60 dark:bg-slate-700/80 backdrop-blur-xl rounded-[2.5rem] pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400/20 w-44 transition-all border border-white/20 dark:border-slate-600/50 dark:text-zinc-200 dark:placeholder-zinc-400"
-            />
-          </div>
         </div>
       </div>
 

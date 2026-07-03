@@ -666,10 +666,8 @@ const LayoutSwitcher = ({
   <div
     className="flex items-center gap-0.5 rounded-xl p-1"
     style={{
-      background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
-      border: isDark
-        ? "1px solid rgba(255,255,255,0.1)"
-        : "1px solid rgba(0,0,0,0.08)",
+      background: "rgba(255,255,255,0.08)",
+      border: "1px solid rgba(255,255,255,0.15)",
     }}
   >
     {LAYOUT_BUTTONS.map(({ pos, Icon, label }) => (
@@ -678,21 +676,21 @@ const LayoutSwitcher = ({
         onClick={() => onChange(pos)}
         aria-label={label}
         title={label}
-        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110"
+        className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 cursor-pointer"
         style={
           layout === pos
             ? {
                 background: "linear-gradient(135deg,#7c3aed,#06b6d4)",
                 color: "white",
-                boxShadow: "0 0 10px rgba(124,58,237,0.5)",
+                boxShadow: "0 0 10px rgba(255,255,255,0.25)",
               }
             : {
                 background: "transparent",
-                color: isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.45)",
+                color: "rgba(255,255,255,0.5)",
               }
         }
       >
-        <Icon className="w-3.5 h-3.5" />
+        <Icon className="w-4.5 h-4.5" />
       </button>
     ))}
   </div>
@@ -864,7 +862,7 @@ const ChatListPanel = ({
       }}
       className="flex-shrink-0 flex flex-col overflow-hidden"
       style={{
-        width: "240px",
+        width: "280px",
         background: isDark ? "rgba(15,5,40,0.6)" : "rgba(255,255,255,0.7)",
         borderRight:
           layout === "left"
@@ -912,14 +910,14 @@ const ChatListPanel = ({
           }}
         >
           <Search
-            className={`w-3.5 h-3.5 flex-shrink-0 ${isDark ? "text-white/35" : "text-gray-450"}`}
+            className={`w-3.5 h-3.5 flex-shrink-0 ${isDark ? "text-white/35" : "text-gray-400"}`}
           />
           <input
             type="text"
             placeholder="Search…"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className={`flex-1 bg-transparent outline-none text-xs ${isDark ? "placeholder-white/25 text-white" : "placeholder-gray-400 text-gray-800"}`}
+            className={`flex-1 bg-transparent outline-none text-sm ${isDark ? "placeholder-white/25 text-white" : "placeholder-gray-400 text-gray-800"}`}
           />
         </div>
       </div>
@@ -1006,7 +1004,7 @@ const ChatListPanel = ({
               <div className="flex-1 min-w-0 text-left">
                 <div className="flex items-center justify-between gap-1">
                   <p
-                    className={`text-xs font-semibold truncate transition-colors duration-200 ${isActive ? (isDark ? "text-white" : "text-gray-900") : isDark ? "text-white/75 group-hover:text-white" : "text-gray-600 group-hover:text-gray-900"}`}
+                    className={`text-sm font-semibold truncate transition-colors duration-200 ${isActive ? (isDark ? "text-white" : "text-gray-900") : isDark ? "text-white/75 group-hover:text-white" : "text-gray-600 group-hover:text-gray-900"}`}
                   >
                     {contact.name}
                   </p>
@@ -1022,7 +1020,7 @@ const ChatListPanel = ({
                   )}
                 </div>
                 <p
-                  className={`text-[10px] truncate mt-0.5 transition-colors duration-200 ${isDark ? "text-white/35 group-hover:text-white/50" : "text-gray-400 group-hover:text-gray-600"}`}
+                  className={`text-xs truncate mt-0.5 transition-colors duration-200 ${isDark ? "text-white/35 group-hover:text-white/50" : "text-gray-400 group-hover:text-gray-600"}`}
                 >
                   {contact.lastMessage}
                 </p>
@@ -1456,31 +1454,31 @@ const MessageActionMenu = ({
   }, [onClose]);
   const actions = [
     {
-      icon: <CornerUpLeft className="w-3.5 h-3.5" />,
+      icon: <CornerUpLeft className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-indigo-400 group-hover:text-indigo-300" : "text-indigo-500 group-hover:text-indigo-600"}`} strokeWidth={1.8} />,
       label: "Reply",
       fn: onReply,
       danger: false,
     },
     {
-      icon: <Forward className="w-3.5 h-3.5" />,
+      icon: <Forward className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-sky-400 group-hover:text-sky-300" : "text-sky-500 group-hover:text-sky-600"}`} strokeWidth={1.8} />,
       label: "Forward",
       fn: onForward,
       danger: false,
     },
     {
-      icon: <MessageSquare className="w-3.5 h-3.5" />,
+      icon: <MessageSquare className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-emerald-400 group-hover:text-emerald-300" : "text-emerald-500 group-hover:text-emerald-600"}`} strokeWidth={1.8} />,
       label: "Thread",
       fn: onThread,
       danger: false,
     },
     {
-      icon: <Pin className="w-3.5 h-3.5" />,
+      icon: <Pin className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-amber-400 group-hover:text-amber-300" : "text-amber-500 group-hover:text-amber-600"}`} strokeWidth={1.8} />,
       label: pinLabel,
       fn: onPin,
       danger: false,
     },
     {
-      icon: <Trash2 className="w-3.5 h-3.5" />,
+      icon: <Trash2 className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-red-400 group-hover:text-red-300" : "text-red-500 group-hover:text-red-600"}`} strokeWidth={1.8} />,
       label: "Delete",
       fn: onDelete,
       danger: true,
@@ -1507,7 +1505,7 @@ const MessageActionMenu = ({
       transition={{
         duration: 0.14,
       }}
-      className={`absolute top-8 ${isMe ? "right-0" : "left-0"} rounded-2xl shadow-2xl py-1.5 min-w-[130px] z-40 ${isDark ? "backdrop-blur-2xl bg-white/10 border border-white/20" : "backdrop-blur-2xl bg-white/85 border border-white/30"}`}
+      className={`absolute top-8 ${isMe ? "left-0" : "right-0"} rounded-2xl shadow-2xl py-1.5 min-w-[130px] z-40 ${isDark ? "backdrop-blur-2xl bg-white/10 border border-white/20" : "backdrop-blur-2xl bg-white/85 border border-white/30"}`}
       style={{
         boxShadow: isDark
           ? "0 8px 30px rgba(139,92,246,0.35)"
@@ -1521,7 +1519,7 @@ const MessageActionMenu = ({
             a.fn();
             onClose();
           }}
-          className={`w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium transition-all duration-200 ease-in-out ${a.danger ? (isDark ? "text-red-400 hover:bg-red-500/20" : "text-red-600 hover:bg-red-500/10") : isDark ? "text-white/80 hover:bg-white/15" : "text-gray-700 hover:bg-black/5 hover:text-gray-900"}`}
+          className={`group w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium transition-all duration-200 ease-in-out ${a.danger ? (isDark ? "text-red-400 hover:bg-red-500/20" : "text-red-600 hover:bg-red-500/10") : isDark ? "text-white/80 hover:bg-white/15" : "text-gray-700 hover:bg-black/5 hover:text-gray-900"}`}
         >
           {a.icon}
           <span>{a.label}</span>
@@ -1923,7 +1921,7 @@ const MessageSearchBar = ({
       placeholder={placeholder}
       value={query}
       onChange={(e) => onChange(e.target.value)}
-      className={`flex-1 bg-transparent outline-none text-sm ${isDark ? "placeholder-white/30 text-white" : "placeholder-gray-450 text-gray-800"}`}
+      className={`flex-1 bg-transparent outline-none text-sm ${isDark ? "placeholder-white/30 text-white" : "placeholder-gray-400 text-gray-800"}`}
     />
     {query && (
       <span
@@ -2288,7 +2286,7 @@ const DeleteConfirmModal = ({
                 <div className="text-left">
                   <p className="font-semibold">{deleteForMeLabel}</p>
                   <p
-                    className={`text-xs font-normal ${isDark ? "text-white/40" : "text-gray-450"}`}
+                    className={`text-xs font-normal ${isDark ? "text-white/40" : "text-gray-400"}`}
                   >
                     {deleteForMeDesc}
                   </p>
@@ -2859,7 +2857,7 @@ const ContactInfoDrawer = ({
                   </div>
                   <div className="min-w-0">
                     <p
-                      className={`text-[10px] uppercase tracking-wider ${isDark ? "text-white/35" : "text-gray-450"}`}
+                      className={`text-[10px] uppercase tracking-wider ${isDark ? "text-white/35" : "text-gray-400"}`}
                     >
                       {t.email}
                     </p>
@@ -2880,7 +2878,7 @@ const ContactInfoDrawer = ({
                   </div>
                   <div>
                     <p
-                      className={`text-[10px] uppercase tracking-wider ${isDark ? "text-white/35" : "text-gray-450"}`}
+                      className={`text-[10px] uppercase tracking-wider ${isDark ? "text-white/35" : "text-gray-400"}`}
                     >
                       {t.location}
                     </p>
@@ -2901,7 +2899,7 @@ const ContactInfoDrawer = ({
                   </div>
                   <div>
                     <p
-                      className={`text-[10px] uppercase tracking-wider ${isDark ? "text-white/35" : "text-gray-450"}`}
+                      className={`text-[10px] uppercase tracking-wider ${isDark ? "text-white/35" : "text-gray-400"}`}
                     >
                       {t.memberSince}
                     </p>
@@ -2920,7 +2918,7 @@ const ContactInfoDrawer = ({
             {contact.mutualGroups && contact.mutualGroups.length > 0 && (
               <div className="px-5 py-3">
                 <p
-                  className={`text-[10px] uppercase tracking-wider mb-2 ${isDark ? "text-white/35" : "text-gray-450"}`}
+                  className={`text-[10px] uppercase tracking-wider mb-2 ${isDark ? "text-white/35" : "text-gray-400"}`}
                 >
                   {t.mutualGroups}
                 </p>
@@ -2975,7 +2973,7 @@ const ContactInfoDrawer = ({
         {drawerTab === "media" && (
           <div className="p-4">
             <p
-              className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? "text-white/35" : "text-gray-450"}`}
+              className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? "text-white/35" : "text-gray-400"}`}
             >
               {t.sharedMedia} · {SAMPLE_MEDIA_IMAGES.length}
             </p>
@@ -2997,7 +2995,7 @@ const ContactInfoDrawer = ({
               className={`mt-4 border-t pt-4 ${isDark ? "border-white/10" : "border-black/5"}`}
             >
               <p
-                className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? "text-white/35" : "text-gray-450"}`}
+                className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? "text-white/35" : "text-gray-400"}`}
               >
                 {t.sharedFiles} · 3
               </p>
@@ -3114,7 +3112,7 @@ const ComposeModal = ({
           stiffness: 280,
           damping: 26,
         }}
-        className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? "bg-[#150e28]/95 border border-white/10 backdrop-blur-xl text-white" : "bg-white border border-gray-150 text-gray-800 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.15)]"}`}
+        className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? "bg-[#150e28]/95 border border-white/10 backdrop-blur-xl text-white" : "bg-white border border-gray-200 text-gray-800 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.15)]"}`}
         style={{
           boxShadow: isDark
             ? "0 20px 60px rgba(139,92,246,0.4)"
@@ -3154,7 +3152,7 @@ const ComposeModal = ({
               placeholder={searchPlaceholder}
               value={composeSearch}
               onChange={(e) => setComposeSearch(e.target.value)}
-              className={`flex-1 bg-transparent outline-none text-sm ${isDark ? "placeholder-white/30 text-white" : "placeholder-gray-450 text-gray-850"}`}
+              className={`flex-1 bg-transparent outline-none text-sm ${isDark ? "placeholder-white/30 text-white" : "placeholder-gray-400 text-gray-850"}`}
             />
           </div>
         </div>
@@ -3272,7 +3270,7 @@ const ThreadPanel = ({
       >
         <div className="flex items-center gap-2">
           <MessageSquare
-            className={`w-4 h-4 ${isDark ? "text-violet-300" : "text-violet-650"}`}
+            className={`w-4 h-4 ${isDark ? "text-violet-300" : "text-violet-500"}`}
           />
           <h3
             className={`font-semibold text-sm ${isDark ? "text-white" : "text-gray-900"}`}
@@ -4079,7 +4077,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
             }}
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${showMsgSearch ? "bg-violet-500/30 text-violet-300" : isDark ? "text-white/50 hover:bg-white/10" : "text-gray-500 hover:bg-black/6"}`}
           >
-            <Search className="w-4 h-4" />
+            <Search className="w-4.5 h-4.5" />
           </button>
           <button
             onClick={() =>
@@ -4089,25 +4087,25 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
             }
             className={`w-9 h-9 rounded-full flex items-center justify-center text-amber-500 transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "hover:bg-amber-500/15" : "hover:bg-amber-50"}`}
           >
-            <PhoneIncoming className="w-4 h-4" />
+            <PhoneIncoming className="w-4.5 h-4.5" />
           </button>
           <button
             onClick={() => setCallState("video")}
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "text-white/50 hover:bg-white/10" : "text-gray-500 hover:bg-black/6"}`}
           >
-            <Video className="w-4 h-4" />
+            <Video className="w-4.5 h-4.5" />
           </button>
           <button
             onClick={() => setCallState("audio")}
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "text-white/50 hover:bg-white/10" : "text-gray-500 hover:bg-black/6"}`}
           >
-            <Phone className="w-4 h-4" />
+            <Phone className="w-4.5 h-4.5" />
           </button>
           <button
             onClick={() => setShowContactDrawer((v) => !v)}
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${showContactDrawer ? "bg-violet-500/30 text-violet-500" : isDark ? "text-white/50 hover:bg-white/10" : "text-gray-500 hover:bg-black/6"}`}
           >
-            <UserCog className="w-4 h-4" />
+            <UserCog className="w-4.5 h-4.5" />
           </button>
           <div
             className={`w-px h-5 mx-1 ${isDark ? "bg-white/15" : "bg-black/10"}`}
@@ -4121,7 +4119,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                 : "0 0 12px rgba(124,58,237,0.35)",
             }}
           >
-            <MoreVertical className="w-4 h-4" />
+            <MoreVertical className="w-4.5 h-4.5" />
           </button>
         </div>
       </div>
@@ -4176,7 +4174,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
               ease: [0.25, 0.46, 0.45, 0.94],
             }}
             ref={scrollRef}
-            className="absolute inset-0 overflow-y-auto px-6 py-6 space-y-5"
+            className="absolute inset-0 overflow-y-auto px-6 pt-14 pb-6 space-y-5"
             style={{
               scrollbarWidth: "thin",
               scrollbarColor: isDark
@@ -4334,7 +4332,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                                   exit={{
                                     opacity: 0,
                                   }}
-                                  className={`absolute top-0 ${isMe ? "-left-8" : "-right-8"} flex items-center`}
+                                  className={`absolute -top-3.5 ${isMe ? "-left-8" : "-right-8"} flex items-center z-20`}
                                 >
                                   <button
                                     onClick={(e) => {
@@ -4448,6 +4446,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                                               "1.5px solid rgba(196,181,253,0.65)",
                                             boxShadow:
                                               "0 4px 20px rgba(124,58,237,0.35), inset 0 1px 0 rgba(255,255,255,0.15)",
+                                            backgroundClip: "padding-box",
                                           }
                                         : {
                                             background: "rgba(124,58,237,0.15)",
@@ -4455,6 +4454,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                                               "1.5px solid rgba(167,139,250,0.4)",
                                             boxShadow:
                                               "0 2px 12px rgba(124,58,237,0.15), inset 0 1px 0 rgba(255,255,255,0.08)",
+                                            backgroundClip: "padding-box",
                                           }
                                       : isMe
                                         ? {
@@ -4464,6 +4464,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                                               "1px solid rgba(167,139,250,0.4)",
                                             boxShadow:
                                               "0 4px 20px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.12)",
+                                            backgroundClip: "padding-box",
                                           }
                                         : {
                                             background: isDark
@@ -4475,6 +4476,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                                             boxShadow: isDark
                                               ? "0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)"
                                               : "0 2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)",
+                                            backgroundClip: "padding-box",
                                           }
                             }
                             onMouseEnter={(e) => {
@@ -4488,7 +4490,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                                     e.currentTarget as HTMLDivElement
                                   ).style.boxShadow = isDark
                                     ? "0 8px 32px rgba(124,58,237,0.45), inset 0 1px 0 rgba(255,255,255,0.15)"
-                                    : "0 8px 32px rgba(124,58,237,0.3), inset 0 1px 0 rgba(255,255,255,0.6)";
+                                    : "0 8px 32px rgba(124,58,237,0.3), inset 0 1px 0 rgba(255,255,255,0.15)";
                                   (
                                     e.currentTarget as HTMLDivElement
                                   ).style.filter = "brightness(1.08)";
@@ -4514,7 +4516,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                                     e.currentTarget as HTMLDivElement
                                   ).style.boxShadow = isDark
                                     ? "0 4px 20px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.12)"
-                                    : "0 4px 20px rgba(124,58,237,0.15), inset 0 1px 0 rgba(255,255,255,0.6)";
+                                    : "0 4px 20px rgba(124,58,237,0.15), inset 0 1px 0 rgba(255,255,255,0.12)";
                                 } else {
                                   (
                                     e.currentTarget as HTMLDivElement
@@ -4943,39 +4945,39 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
               <div className="w-px h-5 bg-white/15" />
               <button
                 onClick={cycleLang}
-                className="h-7 px-2.5 rounded-full text-white flex items-center gap-1.5 transition-all duration-200 ease-in-out hover:bg-white/20 hover:scale-105 text-xs font-bold"
+                className="h-8 px-3 rounded-full text-white flex items-center gap-1.5 transition-all duration-200 ease-in-out hover:bg-white/20 hover:scale-105 text-xs font-bold"
                 style={{
                   background: "rgba(255,255,255,0.1)",
                   border: "1px solid rgba(255,255,255,0.15)",
                 }}
               >
-                <Languages className="w-3.5 h-3.5" />
+                <Languages className="w-4.5 h-4.5" />
                 <span>{LANG_LABELS[lang]}</span>
               </button>
               <button
                 onClick={() => setShowComposeModal(true)}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:bg-white/25 hover:scale-110"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:bg-white/25 hover:scale-110"
                 style={{
                   background: "rgba(255,255,255,0.15)",
                   border: "1px solid rgba(255,255,255,0.2)",
                 }}
               >
-                <Edit3 className="w-3.5 h-3.5" />
+                <Edit3 className="w-4.5 h-4.5" />
               </button>
               <button
                 onClick={() => setShowComposeModal(true)}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:bg-white/18 hover:scale-110"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:bg-white/18 hover:scale-110"
                 style={{
                   background: "rgba(255,255,255,0.08)",
                 }}
               >
-                <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+                <Plus className="w-4.5 h-4.5" strokeWidth={2.5} />
               </button>
-              <button className="w-7 h-7 rounded-full transition-all duration-200 ease-in-out hover:bg-white/15 hover:scale-110 flex items-center justify-center text-white/70">
-                <UserPlus className="w-4 h-4" />
+              <button className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-white/15 hover:scale-110 flex items-center justify-center text-white/70">
+                <UserPlus className="w-4.5 h-4.5" />
               </button>
-              <button className="w-7 h-7 rounded-full transition-all duration-200 ease-in-out hover:bg-white/15 hover:scale-110 flex items-center justify-center text-white/70">
-                <MoreVertical className="w-4 h-4" />
+              <button className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-white/15 hover:scale-110 flex items-center justify-center text-white/70">
+                <MoreVertical className="w-4.5 h-4.5" />
               </button>
             </div>
           </div>
@@ -5296,7 +5298,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                 stiffness: 280,
                 damping: 26,
               }}
-              className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? "bg-[#150e28]/95 border border-white/10 backdrop-blur-xl text-white" : "bg-white border border-gray-150 text-gray-800 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.15)]"}`}
+              className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? "bg-[#150e28]/95 border border-white/10 backdrop-blur-xl text-white" : "bg-white border border-gray-200 text-gray-800 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.15)]"}`}
               style={{
                 boxShadow: isDark
                   ? "0 20px 60px rgba(139,92,246,0.4)"

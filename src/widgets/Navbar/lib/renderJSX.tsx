@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { Avatar, Button, Image } from "antd";
-import Logo from "../../../assets/images/logo.svg";
+import { Avatar, Button } from "antd";
+import { Logo } from "@shared/ui";
 import { BellOutlined } from "@ant-design/icons";
 import LogoutIcon from "../../../assets/images/logout.svg";
 import UserAvatar from "../../../assets/images/user-avatar.jpg";
@@ -19,13 +19,7 @@ export const NavbarHeader = ({ isModulesPage }: INavbarHeaderProps) => {
       className={`bg-white py-4 px-6 flex justify-between items-center mb-3! shadow-sm border border-gray-100 h-[61px] ${isModulesPage ? "rounded-none" : "rounded-[15px]"} `}
     >
       <Link to={AppRoutes.PROFILE} className="mt-2" aria-label="На главную">
-        <Image
-          src={Logo}
-          preview={false}
-          alt="Интерлинк Лого"
-          width={175}
-          height={35}
-        />
+        <Logo className="text-lg text-zinc-900" />
       </Link>
       <div className="flex items-center gap-2">
         <Button
