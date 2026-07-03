@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Tooltip, Popover } from "antd";
-import { Bell, LogOut, CheckCircle, Sun, Moon, Palette, Layers, MessageSquare, PanelTop, PanelLeft, PanelBottom, PanelRight } from "lucide-react";
+import { Bell, LogOut, CheckCircle, Sun, Moon, Palette, Layers, MessageSquare, PanelTop, PanelLeft, PanelBottom, PanelRight, Monitor } from "lucide-react";
 import { tokenControl, useLogout, useGetQuery } from "@shared/lib";
 import { AppRoutes } from "@shared/config";
 import { ApiRoutes } from "@shared/api";
@@ -9,10 +9,12 @@ import { NotificationsPopover, useNotificationCounters } from "@features/notific
 import { IUser } from "@entities/login";
 import { ModuleMenu } from "./ModuleMenu";
 import { useState, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
 import userAvatar from "../../../assets/images/user-avatar.jpg";
 import { THEMES, BACKGROUNDS, LayoutMode } from "./designSettings";
 import { useChat } from "@widgets/Chat";
 import { LogoutConfirmModal } from "./LogoutConfirmModal";
+import { DesktopMode } from "../../../features/Profile/ui/DesktopMode";
 
 interface IProps {
   currentTheme?: string;
@@ -34,6 +36,7 @@ export const Header = ({
   const handleLogout = useLogout();
   const { openChat } = useChat();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isDesktopActive, setIsDesktopActive] = useState(false);
   const { pathname } = useLocation();
   const [notifOpen, setNotifOpen] = useState(false);
   const { counters } = useNotificationCounters();
@@ -278,6 +281,16 @@ export const Header = ({
             </button>
           </Tooltip>
 
+          <Tooltip title="Рабочий стол" placement={isVertical ? "right" : "bottom"}>
+            <button
+              onClick={() => setIsDesktopActive(true)}
+              aria-label="Рабочий стол"
+              className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+            >
+              <Monitor size={18} strokeWidth={2.2} />
+            </button>
+          </Tooltip>
+
           <Tooltip
             title={isDarkMode ? "Светлая тема" : "Темная тема"}
             placement={isVertical ? "right" : "bottom"}
@@ -370,6 +383,16 @@ export const Header = ({
         onCancel={() => setShowLogoutConfirm(false)}
         onConfirm={handleLogout}
       />
+
+      <AnimatePresence>
+        {isDesktopActive && (
+          <DesktopMode
+            userData={userData}
+            onClose={() => setIsDesktopActive(false)}
+            isDark={isDarkMode}
+          />
+        )}
+      </AnimatePresence>
     </header>
   );
 };
