@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Tooltip, Popover } from "antd";
-import { Bell, LogOut, BookOpen, CheckCircle, Sun, Moon, Layout, Palette, Layers, PanelTop, PanelLeft, PanelBottom, PanelRight } from "lucide-react";
+import { Bell, LogOut, BookOpen, CheckCircle, Sun, Moon, Layout, Palette, Layers, MessageSquare, PanelTop, PanelLeft, PanelBottom, PanelRight } from "lucide-react";
 import { tokenControl, useLogout, useGetQuery } from "@shared/lib";
 import { AppRoutes } from "@shared/config";
 import { ApiRoutes } from "@shared/api";
@@ -9,6 +9,8 @@ import { ModuleMenu } from "./ModuleMenu";
 import { useState, useEffect } from "react";
 import userAvatar from "../../../assets/images/user-avatar.jpg";
 import { THEMES, BACKGROUNDS, LayoutMode } from "./designSettings";
+import { useChat } from "@widgets/Chat";
+import { LogoutConfirmModal } from "./LogoutConfirmModal";
 
 interface IProps {
   currentTheme?: string;
@@ -55,6 +57,8 @@ export const Header = ({
   setLayoutMode,
 }: IProps) => {
   const handleLogout = useLogout();
+  const { openChat } = useChat();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const { pathname } = useLocation();
   const [notifications, setNotifications] = useState(mockNotifications);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() =>
@@ -352,6 +356,16 @@ export const Header = ({
           </button>
         </Popover>
 
+        <Tooltip title="Чат" placement={isVertical ? "right" : "bottom"}>
+          <button
+            onClick={openChat}
+            aria-label="Открыть чат"
+            className="relative p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+          >
+            <MessageSquare size={18} strokeWidth={2.2} />
+          </button>
+        </Tooltip>
+
         <div
           className={`${isVertical ? "w-full! h-px!" : "w-px! h-6!"} bg-white/30 dark:bg-zinc-700/40 mx-1`}
           aria-hidden="true"
@@ -428,7 +442,7 @@ export const Header = ({
 
         <Tooltip title="Выйти" placement={isVertical ? "right" : "bottomRight"}>
           <button
-            onClick={handleLogout}
+            onClick={() => setShowLogoutConfirm(true)}
             aria-label="Выход"
             className="flex items-center gap-2 py-2 px-4 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl border border-white/20 dark:border-zinc-700/30 text-zinc-600 dark:text-zinc-300 font-semibold text-sm hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer focus:outline-none"
           >
@@ -437,6 +451,12 @@ export const Header = ({
           </button>
         </Tooltip>
       </div>
+
+      <LogoutConfirmModal
+        open={showLogoutConfirm}
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
+      />
     </header>
   );
 };

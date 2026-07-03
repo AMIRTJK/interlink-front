@@ -1,0 +1,2488 @@
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, UserPlus, Plus, MoreVertical, Video, Phone, UserCog, Send, Smile, Paperclip, Mic, MicOff, VideoOff, PhoneOff, X, Volume2, FileText, ImageIcon, Film, Music, PhoneIncoming, PhoneMissed, Mail, MapPin, Calendar, Shield, Bell, Star, ChevronRight, Pin, SearchIcon, ChevronDown, ChevronUp, Edit3, Grid3X3, Forward, Trash2, CornerUpLeft, Sparkles, Square, Loader2, MessageSquare, MoreHorizontal, Clock3, Trash, MessageCircleOff, AlertTriangle, Languages, PanelLeft, PanelRight, PanelBottom, PanelTop } from 'lucide-react';
+import { TRANSLATIONS, type Lang, type Translations } from '../lib/translations';
+import type {
+  Contact,
+  Message,
+  MessageAttachment,
+  ReplyPreview,
+  EmojiCategory,
+  DrawerTab,
+  PendingFile,
+  LayoutPosition,
+} from '../model/types';
+import { chatService } from '../api/chatService';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+// ─── Static Data ──────────────────────────────────────────────────────────────
+const EMOJI_CATEGORY_EMOJIS: string[][] = [['😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '😚', '😙', '🥲', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '😔', '😪', '🤤', '😴'], ['👋', '🤚', '🖐', '✋', '🖖', '👌', '🤌', '🤏', '✌', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '🫶', '👐', '🤲', '🙏', '✍', '💅', '🤳', '💪', '🦾'], ['❤', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❤‍🔥', '❤‍🩹', '❣', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '♥', '🫀'], ['🌸', '🌺', '🌻', '🌹', '🌷', '🌼', '💐', '🍀', '🌿', '☘', '🍃', '🌱', '🌲', '🌳', '🌴', '🌵', '🎋', '🎍', '🍄', '🌾', '🌊', '🌈', '⭐', '🌙', '☀', '⛅', '🌤', '🌦'], ['🍕', '🍔', '🍟', '🌭', '🥪', '🥙', '🧆', '🌮', '🌯', '🫔', '🍳', '🥘', '🫕', '🍲', '🥗', '🍿', '🍱', '🍘', '🍙', '🍚', '🍛', '🍜', '🍝', '🍞', '🥐', '🥖', '🫓', '🥨']];
+const EMOJI_CATEGORIES_KEYS = ['smileys', 'gestures', 'hearts', 'nature', 'food'] as const;
+const QUICK_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
+const SAMPLE_MEDIA_IMAGES = ['https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&q=80', 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=200&q=80', 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=200&q=80', 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=200&q=80', 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=200&q=80', 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=200&q=80', 'https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=200&q=80', 'https://images.unsplash.com/photo-1504700610630-ac6aba3536d3?w=200&q=80', 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=200&q=80'];
+const AI_SUGGESTIONS = ["Sure, that sounds great! Let me know when you are free.", "Thanks for sharing! I will review it and get back to you soon.", 'Interesting point! Could you elaborate a bit more on that?', 'Absolutely, I agree with you on this one.', "I will take care of it right away!", 'That makes sense. Let me think about it and respond shortly.'];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const formatTime = (d: Date) => {
+  const h = d.getHours();
+  const m = d.getMinutes();
+  const ampm = h >= 12 ? 'pm' : 'am';
+  const hh = h % 12 || 12;
+  return `${hh}:${m.toString().padStart(2, '0')} ${ampm}`;
+};
+const formatDuration = (s: number) => {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+};
+const getAttachmentIcon = (type: MessageAttachment['type']) => {
+  if (type === 'image') return <ImageIcon className="w-4 h-4" />;
+  if (type === 'video') return <Film className="w-4 h-4" />;
+  if (type === 'audio' || type === 'voice') return <Music className="w-4 h-4" />;
+  return <FileText className="w-4 h-4" />;
+};
+
+// ─── Glass Style Constants ────────────────────────────────────────────────────
+const GLASS_CARD = 'backdrop-blur-2xl bg-white/10 border border-white/20';
+
+// ─── Layout Switcher ──────────────────────────────────────────────────────────
+const LAYOUT_BUTTONS: {
+  pos: LayoutPosition;
+  Icon: React.ElementType;
+  label: string;
+}[] = [{
+  pos: 'left',
+  Icon: PanelLeft,
+  label: 'Chat list left'
+}, {
+  pos: 'right',
+  Icon: PanelRight,
+  label: 'Chat list right'
+}, {
+  pos: 'top',
+  Icon: PanelTop,
+  label: 'Chat list top'
+}, {
+  pos: 'bottom',
+  Icon: PanelBottom,
+  label: 'Chat list bottom'
+}];
+const LayoutSwitcher = ({
+  layout,
+  onChange
+}: {
+  layout: LayoutPosition;
+  onChange: (pos: LayoutPosition) => void;
+}) => <div className="flex items-center gap-0.5 rounded-xl p-1" style={{
+  background: 'rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.1)'
+}}>
+    {LAYOUT_BUTTONS.map(({
+    pos,
+    Icon,
+    label
+  }) => <button key={pos} onClick={() => onChange(pos)} aria-label={label} title={label} className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110" style={layout === pos ? {
+    background: 'linear-gradient(135deg,#7c3aed,#06b6d4)',
+    color: 'white',
+    boxShadow: '0 0 10px rgba(124,58,237,0.5)'
+  } : {
+    background: 'transparent',
+    color: 'rgba(255,255,255,0.45)'
+  }}>
+        <Icon className="w-3.5 h-3.5" />
+      </button>)}
+  </div>;
+
+// ─── Chat List Panel ──────────────────────────────────────────────────────────
+const ChatListPanel = ({
+  layout,
+  contacts: contactList,
+  activeContactId,
+  contactUnreads,
+  searchQuery,
+  onContactSwitch,
+  onComposeOpen,
+  onSearchChange
+}: {
+  layout: LayoutPosition;
+  contacts: Contact[];
+  activeContactId: string;
+  contactUnreads: Record<string, number>;
+  searchQuery: string;
+  onContactSwitch: (id: string) => void;
+  onComposeOpen: () => void;
+  onSearchChange: (v: string) => void;
+}) => {
+  const isHorizontal = layout === 'top' || layout === 'bottom';
+  const filteredContacts = contactList.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  if (isHorizontal) {
+    return <div className="flex-shrink-0 flex flex-col border-white/10 overflow-hidden" style={{
+      background: 'linear-gradient(135deg,rgba(76,29,149,0.55),rgba(124,58,237,0.4),rgba(6,182,212,0.25))',
+      borderTop: layout === 'bottom' ? '1px solid rgba(167,139,250,0.2)' : undefined,
+      borderBottom: layout === 'top' ? '1px solid rgba(167,139,250,0.2)' : undefined,
+      backdropFilter: 'blur(20px)',
+      height: '80px'
+    }}>
+        <div className="flex items-center gap-2 px-4 py-2 h-full overflow-x-auto" style={{
+        scrollbarWidth: 'none'
+      }}>
+          <button onClick={onComposeOpen} className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 hover:bg-white/20" style={{
+          background: 'rgba(255,255,255,0.08)',
+          border: '2px dashed rgba(255,255,255,0.25)'
+        }}>
+            <Plus className="w-4 h-4 text-white/50" />
+          </button>
+          <div className="w-px h-8 mx-1 flex-shrink-0" style={{
+          background: 'rgba(255,255,255,0.15)'
+        }} />
+          {filteredContacts.map(contact => {
+          const isActive = contact.id === activeContactId;
+          const unread = contactUnreads[contact.id] || 0;
+          return <button key={contact.id} onClick={() => onContactSwitch(contact.id)} className="relative flex-shrink-0 flex flex-col items-center gap-1 px-1 py-1 rounded-xl transition-all duration-200 ease-in-out hover:bg-white/10 group">
+                <div className={`relative rounded-full transition-all duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`} style={isActive ? {
+              filter: 'drop-shadow(0 0 8px rgba(167,139,250,0.8))'
+            } : {}}>
+                  {isActive && <div className="absolute inset-0 rounded-full" style={{
+                margin: '-3px',
+                background: 'linear-gradient(135deg,#a78bfa,#f0abfc,#67e8f9)',
+                borderRadius: '50%',
+                padding: '2px'
+              }} />}
+                  <img src={contact.avatar} alt={contact.name} className="w-10 h-10 rounded-full object-cover" style={isActive ? {
+                position: 'relative',
+                zIndex: 1,
+                margin: '2px'
+              } : {}} />
+                  {contact.online && <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-transparent rounded-full" style={{
+                boxShadow: '0 0 6px rgba(74,222,128,0.8)'
+              }} />}
+                  {unread > 0 && <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full text-white text-[9px] font-bold flex items-center justify-center px-0.5 shadow-md" style={{
+                background: 'linear-gradient(135deg,#ef4444,#f97316)'
+              }}>{unread > 9 ? '9+' : unread}</span>}
+                </div>
+              </button>;
+        })}
+        </div>
+      </div>;
+  }
+
+  // Vertical layout (left / right)
+  return <motion.div key={`chat-list-${layout}`} initial={{
+    opacity: 0,
+    x: layout === 'left' ? -20 : 20
+  }} animate={{
+    opacity: 1,
+    x: 0
+  }} transition={{
+    duration: 0.25,
+    ease: 'easeOut'
+  }} className="flex-shrink-0 flex flex-col overflow-hidden" style={{
+    width: '240px',
+    background: 'rgba(15,5,40,0.6)',
+    borderRight: layout === 'left' ? '1px solid rgba(167,139,250,0.15)' : undefined,
+    borderLeft: layout === 'right' ? '1px solid rgba(167,139,250,0.15)' : undefined,
+    backdropFilter: 'blur(24px)'
+  }}>
+      {/* Panel header */}
+      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/8">
+        <span className="text-xs font-bold text-white/70 uppercase tracking-widest">Chats</span>
+        <button onClick={onComposeOpen} className="w-7 h-7 rounded-full flex items-center justify-center text-white/60 transition-all duration-200 ease-in-out hover:bg-white/15 hover:text-white hover:scale-110" style={{
+        background: 'rgba(255,255,255,0.06)'
+      }}>
+          <Edit3 className="w-3.5 h-3.5" />
+        </button>
+      </div>
+      {/* Search */}
+      <div className="px-3 py-2 flex-shrink-0">
+        <div className="flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200" style={{
+        background: 'rgba(255,255,255,0.07)',
+        border: '1px solid rgba(255,255,255,0.1)'
+      }}>
+          <Search className="w-3.5 h-3.5 text-white/35 flex-shrink-0" />
+          <input type="text" placeholder="Search…" value={searchQuery} onChange={e => onSearchChange(e.target.value)} className="flex-1 bg-transparent outline-none text-xs placeholder-white/25 text-white" />
+        </div>
+      </div>
+      {/* Contact list */}
+      <div className="flex-1 overflow-y-auto py-1" style={{
+      scrollbarWidth: 'thin',
+      scrollbarColor: 'rgba(167,139,250,0.2) transparent'
+    }}>
+        {filteredContacts.map(contact => {
+        const isActive = contact.id === activeContactId;
+        const unread = contactUnreads[contact.id] || 0;
+        return <button key={contact.id} onClick={() => onContactSwitch(contact.id)} className="w-full flex items-center gap-3 px-3 py-2.5 transition-all duration-200 ease-in-out group" style={isActive ? {
+          background: 'linear-gradient(90deg,rgba(124,58,237,0.3),rgba(6,182,212,0.15))',
+          borderLeft: '2px solid rgba(167,139,250,0.8)',
+          paddingLeft: '10px'
+        } : {
+          borderLeft: '2px solid transparent'
+        }} onMouseEnter={e => {
+          if (!isActive) {
+            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)';
+            (e.currentTarget as HTMLButtonElement).style.borderLeft = '2px solid rgba(167,139,250,0.4)';
+            (e.currentTarget as HTMLButtonElement).style.transform = 'translateX(2px)';
+          }
+        }} onMouseLeave={e => {
+          if (!isActive) {
+            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+            (e.currentTarget as HTMLButtonElement).style.borderLeft = '2px solid transparent';
+            (e.currentTarget as HTMLButtonElement).style.transform = 'translateX(0)';
+          }
+        }}>
+              <div className="relative flex-shrink-0">
+                <img src={contact.avatar} alt={contact.name} className="w-9 h-9 rounded-full object-cover transition-transform duration-200 group-hover:scale-105" style={{
+              border: isActive ? '2px solid rgba(167,139,250,0.6)' : '2px solid rgba(255,255,255,0.1)'
+            }} />
+                {contact.online && <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-transparent rounded-full" style={{
+              boxShadow: '0 0 5px rgba(74,222,128,0.7)'
+            }} />}
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <div className="flex items-center justify-between gap-1">
+                  <p className={`text-xs font-semibold truncate transition-colors duration-200 ${isActive ? 'text-white' : 'text-white/75 group-hover:text-white'}`}>{contact.name}</p>
+                  {unread > 0 && <span className="min-w-[18px] h-[18px] rounded-full text-white text-[9px] font-bold flex items-center justify-center px-0.5 flex-shrink-0" style={{
+                background: 'linear-gradient(135deg,#ef4444,#f97316)'
+              }}>
+                      {unread > 9 ? '9+' : unread}
+                    </span>}
+                </div>
+                <p className="text-[10px] truncate mt-0.5 text-white/35 group-hover:text-white/50 transition-colors duration-200">{contact.lastMessage}</p>
+              </div>
+            </button>;
+      })}
+      </div>
+    </motion.div>;
+};
+
+// ─── Paper Shredder ───────────────────────────────────────────────────────────
+const SHRED_STRIP_COUNT = 12;
+const SHRED_ROTATIONS = Array.from({
+  length: SHRED_STRIP_COUNT
+}, (_, i) => (i % 2 === 0 ? 1 : -1) * (3 + i * 7 % 9));
+const SHRED_HEIGHTS = Array.from({
+  length: SHRED_STRIP_COUNT
+}, (_, i) => 32 + i * 13 % 24);
+const PaperShredder = ({
+  onComplete
+}: {
+  onComplete: () => void;
+  isDark: boolean;
+}) => {
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+  useEffect(() => {
+    const timer = setTimeout(() => onCompleteRef.current(), 1400);
+    return () => clearTimeout(timer);
+  }, []);
+  return <div className="flex flex-col items-center gap-2">
+    <div className="w-full h-5 rounded-t-lg flex items-center justify-center gap-px bg-white/20">
+      {Array.from({
+        length: SHRED_STRIP_COUNT
+      }, (_, i) => <div key={`tooth-${i}`} className="w-2 h-3 rounded-b-sm bg-white/30" />)}
+    </div>
+    <div className="flex items-start justify-center gap-px overflow-hidden" style={{
+      height: '48px',
+      width: '100%'
+    }}>
+      {Array.from({
+        length: SHRED_STRIP_COUNT
+      }, (_, i) => <motion.div key={`strip-${i}`} initial={{
+        y: -48,
+        scaleY: 0,
+        opacity: 1
+      }} animate={{
+        y: [0, 20, 60],
+        scaleY: [0.2, 1, 0.6],
+        opacity: [1, 1, 0],
+        rotate: SHRED_ROTATIONS[i]
+      }} transition={{
+        duration: 0.9,
+        delay: i * 0.05,
+        ease: [0.4, 0, 0.6, 1]
+      }} className="flex-1 rounded-b-sm bg-gradient-to-b from-violet-400/60 to-fuchsia-400/40" style={{
+        height: `${SHRED_HEIGHTS[i]}px`
+      }} />)}
+    </div>
+  </div>;
+};
+
+// ─── Story Viewer ─────────────────────────────────────────────────────────────
+const StoryViewer = ({
+  contact,
+  onClose,
+  hoursAgo
+}: {
+  contact: Contact;
+  onClose: () => void;
+  hoursAgo: string;
+}) => {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const iv = setInterval(() => setProgress(p => {
+      if (p >= 100) {
+        onClose();
+        return 100;
+      }
+      return p + 2;
+    }), 100);
+    return () => clearInterval(iv);
+  }, [onClose]);
+  return <motion.div initial={{
+    opacity: 0
+  }} animate={{
+    opacity: 1
+  }} exit={{
+    opacity: 0
+  }} className="fixed inset-0 z-50 flex items-center justify-center" style={{
+    background: 'rgba(0,0,0,0.92)',
+    backdropFilter: 'blur(20px)'
+  }}>
+    <motion.div initial={{
+      scale: 0.92,
+      opacity: 0
+    }} animate={{
+      scale: 1,
+      opacity: 1
+    }} exit={{
+      scale: 0.92,
+      opacity: 0
+    }} className="relative w-80 h-[540px] rounded-3xl overflow-hidden shadow-2xl">
+      <img src={contact.story || contact.avatar} alt={contact.name} className="w-full h-full object-cover" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60" />
+      <div className="absolute top-4 left-4 right-4 h-1 bg-white/20 rounded-full overflow-hidden">
+        <motion.div className="h-full rounded-full" style={{
+          width: `${progress}%`,
+          background: 'linear-gradient(90deg, #a78bfa, #f0abfc, #67e8f9)'
+        }} />
+      </div>
+      <div className="absolute top-8 left-4 right-4 flex items-center gap-2">
+        <img src={contact.avatar} alt={contact.name} className="w-8 h-8 rounded-full object-cover border-2 border-white/60" />
+        <span className="text-white font-semibold text-sm">{contact.name}</span>
+        <span className="text-white/60 text-xs ml-1">{hoursAgo}</span>
+        <button onClick={onClose} className="ml-auto w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:bg-white/30 hover:scale-110"><X className="w-3.5 h-3.5" /></button>
+      </div>
+    </motion.div>
+  </motion.div>;
+};
+
+// ─── Schedule Picker ──────────────────────────────────────────────────────────
+const SchedulePicker = ({
+  options,
+  title,
+  onSchedule,
+  onClose
+}: {
+  options: {
+    label: string;
+    offset: number;
+  }[];
+  title: string;
+  onSchedule: (label: string, offset: number) => void;
+  onClose: () => void;
+  isDark: boolean;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [onClose]);
+  return <motion.div ref={ref} initial={{
+    opacity: 0,
+    y: 10,
+    scale: 0.96
+  }} animate={{
+    opacity: 1,
+    y: 0,
+    scale: 1
+  }} exit={{
+    opacity: 0,
+    y: 10,
+    scale: 0.96
+  }} transition={{
+    duration: 0.16
+  }} className={`absolute bottom-full right-0 mb-3 w-56 rounded-2xl shadow-2xl overflow-hidden z-40 ${GLASS_CARD}`} style={{
+    boxShadow: '0 8px 40px rgba(139,92,246,0.3)'
+  }}>
+    <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2">
+      <Clock3 className="w-4 h-4 text-violet-300" />
+      <span className="text-xs font-semibold text-white/90">{title}</span>
+    </div>
+    <div className="py-1">
+      {options.map(opt => <button key={opt.label} onClick={() => {
+        onSchedule(opt.label, opt.offset);
+        onClose();
+      }} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-white/80 transition-all duration-200 ease-in-out hover:bg-white/10 hover:text-white">
+        <Clock3 className="w-3.5 h-3.5 text-violet-300" /><span>{opt.label}</span>
+      </button>)}
+    </div>
+  </motion.div>;
+};
+
+// ─── Emoji Picker ─────────────────────────────────────────────────────────────
+const EmojiPicker = ({
+  categories,
+  onSelect,
+  onClose
+}: {
+  categories: EmojiCategory[];
+  onSelect: (e: string) => void;
+  onClose: () => void;
+  isDark: boolean;
+}) => {
+  const [activeCategory, setActiveCategory] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [onClose]);
+  return <motion.div ref={ref} initial={{
+    opacity: 0,
+    y: 12,
+    scale: 0.96
+  }} animate={{
+    opacity: 1,
+    y: 0,
+    scale: 1
+  }} exit={{
+    opacity: 0,
+    y: 12,
+    scale: 0.96
+  }} transition={{
+    duration: 0.18
+  }} className={`absolute bottom-full left-0 mb-3 w-80 rounded-2xl shadow-2xl overflow-hidden z-40 ${GLASS_CARD}`} style={{
+    boxShadow: '0 8px 40px rgba(139,92,246,0.3)'
+  }}>
+    <div className="flex border-b border-white/10 px-2 pt-2 gap-1">
+      {categories.map((cat, i) => <button key={cat.label} onClick={() => setActiveCategory(i)} className={`flex-1 text-[10px] font-medium pb-2 border-b-2 transition-all duration-200 ease-in-out ${activeCategory === i ? 'border-violet-400 text-violet-300' : 'border-transparent text-white/40 hover:text-white/70'}`}>{cat.label}</button>)}
+    </div>
+    <div className="p-3 grid grid-cols-8 gap-1 max-h-52 overflow-y-auto">
+      {categories[activeCategory].emojis.map(emoji => <button key={emoji} onClick={() => onSelect(emoji)} className="w-8 h-8 flex items-center justify-center text-xl rounded-lg transition-all duration-150 ease-in-out hover:bg-white/15 hover:scale-125"><span>{emoji}</span></button>)}
+    </div>
+  </motion.div>;
+};
+
+// ─── Reaction Picker ──────────────────────────────────────────────────────────
+const ReactionPicker = ({
+  onSelect,
+  isMe
+}: {
+  onSelect: (emoji: string) => void;
+  isMe: boolean;
+}) => <motion.div initial={{
+  opacity: 0,
+  y: 6,
+  scale: 0.9
+}} animate={{
+  opacity: 1,
+  y: 0,
+  scale: 1
+}} exit={{
+  opacity: 0,
+  y: 6,
+  scale: 0.9
+}} transition={{
+  duration: 0.15
+}} className={`absolute -top-10 ${isMe ? 'right-0' : 'left-0'} flex items-center gap-0.5 rounded-full px-2 py-1 z-30 ${GLASS_CARD}`} style={{
+  boxShadow: '0 4px 20px rgba(139,92,246,0.4)'
+}}>
+  {QUICK_REACTIONS.map(emoji => <button key={emoji} onClick={() => onSelect(emoji)} className="w-8 h-8 flex items-center justify-center text-lg rounded-full transition-all duration-150 ease-in-out hover:bg-white/20 hover:scale-125"><span>{emoji}</span></button>)}
+</motion.div>;
+
+// ─── Message Action Menu ──────────────────────────────────────────────────────
+const MessageActionMenu = ({
+  isMe,
+  onReply,
+  onForward,
+  onDelete,
+  onThread,
+  onClose
+}: {
+  isMe: boolean;
+  onReply: () => void;
+  onForward: () => void;
+  onDelete: () => void;
+  onThread: () => void;
+  onClose: () => void;
+  isDark: boolean;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [onClose]);
+  const actions = [{
+    icon: <CornerUpLeft className="w-3.5 h-3.5" />,
+    label: 'Reply',
+    fn: onReply,
+    danger: false
+  }, {
+    icon: <Forward className="w-3.5 h-3.5" />,
+    label: 'Forward',
+    fn: onForward,
+    danger: false
+  }, {
+    icon: <MessageSquare className="w-3.5 h-3.5" />,
+    label: 'Thread',
+    fn: onThread,
+    danger: false
+  }, {
+    icon: <Trash2 className="w-3.5 h-3.5" />,
+    label: 'Delete',
+    fn: onDelete,
+    danger: true
+  }];
+  return <motion.div ref={ref} initial={{
+    opacity: 0,
+    scale: 0.88,
+    y: 4
+  }} animate={{
+    opacity: 1,
+    scale: 1,
+    y: 0
+  }} exit={{
+    opacity: 0,
+    scale: 0.88,
+    y: 4
+  }} transition={{
+    duration: 0.14
+  }} className={`absolute top-8 ${isMe ? 'right-0' : 'left-0'} rounded-2xl shadow-2xl py-1.5 min-w-[130px] z-40 ${GLASS_CARD}`} style={{
+    boxShadow: '0 8px 30px rgba(139,92,246,0.35)'
+  }}>
+    {actions.map(a => <button key={a.label} onClick={() => {
+      a.fn();
+      onClose();
+    }} className={`w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium transition-all duration-200 ease-in-out ${a.danger ? 'text-red-400 hover:bg-red-500/20' : 'text-white/80 hover:bg-white/15'}`}>
+      {a.icon}<span>{a.label}</span>
+    </button>)}
+  </motion.div>;
+};
+
+// ─── Attachment Preview Bar ───────────────────────────────────────────────────
+const AttachmentPreviewBar = ({
+  files,
+  onRemove,
+  onSend,
+  countLabel,
+  sendAllLabel
+}: {
+  files: PendingFile[];
+  onRemove: (name: string) => void;
+  onSend: () => void;
+  isDark: boolean;
+  countLabel: string;
+  sendAllLabel: string;
+}) => <motion.div initial={{
+  opacity: 0,
+  y: 10
+}} animate={{
+  opacity: 1,
+  y: 0
+}} exit={{
+  opacity: 0,
+  y: 10
+}} className="px-6 py-3 border-t border-white/10 bg-white/5 backdrop-blur-md">
+  <div className="flex items-center gap-2 mb-2">
+    <span className="text-xs font-semibold text-white/70"><span>{countLabel}</span></span>
+    <button onClick={onSend} className="ml-auto text-xs font-semibold text-white px-3 py-1 rounded-full transition-all duration-200 ease-in-out hover:scale-105 hover:brightness-110" style={{
+      background: 'linear-gradient(135deg,#7c3aed,#a855f7,#06b6d4)'
+    }}>{sendAllLabel}</button>
+  </div>
+  <div className="flex gap-2 overflow-x-auto pb-1">
+    {files.map(f => <div key={f.name} className="relative flex-shrink-0 group cursor-pointer">
+      {f.type === 'image' && f.preview ? <div className="w-20 h-20 rounded-xl overflow-hidden border border-white/20"><img src={f.preview} alt={f.name} className="w-full h-full object-cover" /></div> : <div className="w-20 h-20 rounded-xl border border-white/20 bg-white/10 flex flex-col items-center justify-center gap-1 px-1">
+        <div className="text-violet-300">{getAttachmentIcon(f.type)}</div>
+        <p className="text-[9px] text-center leading-tight break-all line-clamp-2 text-white/50">{f.name}</p>
+        <p className="text-[9px] text-white/35">{f.size}</p>
+      </div>}
+      <button onClick={() => onRemove(f.name)} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow hover:scale-110"><X className="w-3 h-3" /></button>
+    </div>)}
+  </div>
+</motion.div>;
+
+// ─── Voice Recorder ───────────────────────────────────────────────────────────
+const VoiceRecorder = ({
+  onSend,
+  onCancel
+}: {
+  onSend: (duration: number) => void;
+  onCancel: () => void;
+}) => {
+  const [seconds, setSeconds] = useState(0);
+  const [waveHeights] = useState(() => Array.from({
+    length: 24
+  }, () => Math.random() * 0.7 + 0.3));
+  useEffect(() => {
+    const iv = setInterval(() => setSeconds(s => s + 1), 1000);
+    return () => clearInterval(iv);
+  }, []);
+  return <motion.div initial={{
+    opacity: 0,
+    y: 8
+  }} animate={{
+    opacity: 1,
+    y: 0
+  }} exit={{
+    opacity: 0,
+    y: 8
+  }} className="flex items-center gap-3 rounded-full px-4 py-2 flex-1 border border-red-400/40 bg-red-500/10">
+    <motion.div animate={{
+      scale: [1, 1.3, 1],
+      opacity: [1, 0.6, 1]
+    }} transition={{
+      duration: 1,
+      repeat: Infinity
+    }} className="w-3 h-3 rounded-full bg-red-400 flex-shrink-0" />
+    <div className="flex items-center gap-0.5 flex-1">
+      {waveHeights.map((h, i) => <motion.div key={`wave-${i}`} animate={{
+        scaleY: [h, h * 0.4, h]
+      }} transition={{
+        duration: 0.6,
+        repeat: Infinity,
+        delay: i * 0.04
+      }} className="w-1 bg-red-400/70 rounded-full flex-shrink-0" style={{
+        height: '20px',
+        transformOrigin: 'center'
+      }} />)}
+    </div>
+    <span className="text-xs font-semibold text-red-300 flex-shrink-0">{formatDuration(seconds)}</span>
+    <button onClick={onCancel} className="w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-white/70 transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0"><X className="w-3.5 h-3.5" /></button>
+    <button onClick={() => onSend(seconds)} className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0" style={{
+      background: 'linear-gradient(135deg,#7c3aed,#06b6d4)'
+    }}><Send className="w-3 h-3" /></button>
+  </motion.div>;
+};
+
+// ─── AI Panel ─────────────────────────────────────────────────────────────────
+const AIPanel = ({
+  onSelect,
+  onClose,
+  lastMessage,
+  title,
+  loadingText
+}: {
+  onSelect: (text: string) => void;
+  onClose: () => void;
+  lastMessage: string;
+  isDark: boolean;
+  title: string;
+  loadingText: string;
+}) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      const shuffled = [...AI_SUGGESTIONS].sort(() => Math.random() - 0.5).slice(0, 3);
+      setSuggestions(shuffled);
+      setIsLoading(false);
+    }, 900);
+    return () => clearTimeout(timer);
+  }, [lastMessage]);
+  return <motion.div initial={{
+    opacity: 0,
+    y: 10
+  }} animate={{
+    opacity: 1,
+    y: 0
+  }} exit={{
+    opacity: 0,
+    y: 10
+  }} className="mx-6 mb-2 rounded-2xl p-4" style={{
+    background: 'linear-gradient(135deg,rgba(124,58,237,0.2),rgba(168,85,247,0.15),rgba(6,182,212,0.15))',
+    border: '1px solid rgba(167,139,250,0.3)',
+    boxShadow: '0 4px 24px rgba(139,92,246,0.2)'
+  }}>
+    <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center gap-2">
+        <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{
+          background: 'linear-gradient(135deg,#7c3aed,#06b6d4)'
+        }}><Sparkles className="w-3.5 h-3.5 text-white" /></div>
+        <span className="text-xs font-semibold text-violet-300">{title}</span>
+      </div>
+      <button onClick={onClose} className="w-5 h-5 rounded-full flex items-center justify-center text-white/40 transition-all duration-200 ease-in-out hover:bg-white/15 hover:text-white hover:scale-110"><X className="w-3 h-3" /></button>
+    </div>
+    {isLoading ? <div className="flex items-center gap-2 py-2"><Loader2 className="w-4 h-4 text-violet-300 animate-spin" /><span className="text-xs text-white/50">{loadingText}</span></div> : <div className="space-y-1.5">
+      {suggestions.map((s, i) => <button key={`ai-${i}`} onClick={() => {
+        onSelect(s);
+        onClose();
+      }} className="w-full text-left text-xs rounded-xl px-3 py-2 transition-all duration-200 ease-in-out leading-relaxed text-white/80 hover:bg-white/15 hover:text-white border border-white/10 hover:border-violet-400/40">{s}</button>)}
+    </div>}
+  </motion.div>;
+};
+
+// ─── Reply Bar ────────────────────────────────────────────────────────────────
+const ReplyBar = ({
+  reply,
+  onCancel
+}: {
+  reply: ReplyPreview;
+  onCancel: () => void;
+  isDark: boolean;
+}) => <motion.div initial={{
+  opacity: 0,
+  y: 6
+}} animate={{
+  opacity: 1,
+  y: 0
+}} exit={{
+  opacity: 0,
+  y: 6
+}} className="mx-6 mb-2 flex items-center gap-3 border-l-4 rounded-r-xl px-3 py-2 bg-violet-500/15 border-violet-400">
+  <CornerUpLeft className="w-3.5 h-3.5 text-violet-300 flex-shrink-0" />
+  <div className="flex-1 min-w-0">
+    <p className="text-[10px] font-semibold text-violet-300">{reply.senderName}</p>
+    <p className="text-xs truncate text-white/60">{reply.text}</p>
+  </div>
+  <button onClick={onCancel} className="w-5 h-5 rounded-full hover:bg-white/15 flex items-center justify-center text-white/40 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-3 h-3" /></button>
+</motion.div>;
+
+// ─── Message Search Bar ───────────────────────────────────────────────────────
+const MessageSearchBar = ({
+  query,
+  onChange,
+  onClose,
+  matchCount,
+  currentMatch,
+  onPrev,
+  onNext,
+  placeholder
+}: {
+  query: string;
+  onChange: (v: string) => void;
+  onClose: () => void;
+  matchCount: number;
+  currentMatch: number;
+  onPrev: () => void;
+  onNext: () => void;
+  isDark: boolean;
+  placeholder: string;
+}) => <motion.div initial={{
+  opacity: 0,
+  y: -10
+}} animate={{
+  opacity: 1,
+  y: 0
+}} exit={{
+  opacity: 0,
+  y: -10
+}} transition={{
+  duration: 0.2
+}} className="flex items-center gap-2 px-6 py-2.5 border-b border-white/10 bg-white/5 backdrop-blur-md">
+  <SearchIcon className="w-4 h-4 text-white/40 flex-shrink-0" />
+  <input autoFocus type="text" placeholder={placeholder} value={query} onChange={e => onChange(e.target.value)} className="flex-1 bg-transparent outline-none text-sm placeholder-white/30 text-white" />
+  {query && <span className="text-xs font-medium flex-shrink-0 text-white/50">{matchCount > 0 ? `${currentMatch + 1} / ${matchCount}` : '0'}</span>}
+  <button onClick={onPrev} disabled={matchCount === 0} className="w-6 h-6 rounded-full flex items-center justify-center disabled:opacity-30 hover:bg-white/15 text-white/60 transition-all duration-200 ease-in-out hover:scale-110"><ChevronUp className="w-3.5 h-3.5" /></button>
+  <button onClick={onNext} disabled={matchCount === 0} className="w-6 h-6 rounded-full flex items-center justify-center disabled:opacity-30 hover:bg-white/15 text-white/60 transition-all duration-200 ease-in-out hover:scale-110"><ChevronDown className="w-3.5 h-3.5" /></button>
+  <button onClick={onClose} className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/15 text-white/60 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-3.5 h-3.5" /></button>
+</motion.div>;
+
+// ─── Pinned Banner ────────────────────────────────────────────────────────────
+const PinnedBanner = ({
+  message,
+  onDismiss,
+  onJump,
+  label
+}: {
+  message: Message;
+  onDismiss: () => void;
+  onJump: () => void;
+  isDark: boolean;
+  label: string;
+}) => <motion.div initial={{
+  opacity: 0,
+  y: -8
+}} animate={{
+  opacity: 1,
+  y: 0
+}} exit={{
+  opacity: 0,
+  y: -8
+}} transition={{
+  duration: 0.2
+}} className="mx-6 mt-3 mb-0 flex items-center gap-3 rounded-xl px-4 py-2.5 cursor-pointer group transition-all duration-200 ease-in-out hover:bg-violet-500/20" style={{
+  background: 'rgba(124,58,237,0.15)',
+  border: '1px solid rgba(167,139,250,0.25)'
+}} onClick={onJump}>
+  <div className="w-0.5 h-8 rounded-full flex-shrink-0" style={{
+    background: 'linear-gradient(180deg,#a78bfa,#67e8f9)'
+  }} />
+  <Pin className="w-3.5 h-3.5 text-violet-300 flex-shrink-0" />
+  <div className="flex-1 min-w-0">
+    <p className="text-[10px] font-semibold text-violet-300 uppercase tracking-wider">{label}</p>
+    <p className="text-xs truncate text-white/60">{message.text}</p>
+  </div>
+  <button onClick={e => {
+    e.stopPropagation();
+    onDismiss();
+  }} className="w-5 h-5 rounded-full hover:bg-white/15 flex items-center justify-center text-white/40 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out"><X className="w-3 h-3" /></button>
+</motion.div>;
+
+// ─── Voice Bubble ─────────────────────────────────────────────────────────────
+const VoiceBubble = ({
+  duration,
+  isMe
+}: {
+  duration: number;
+  isMe: boolean;
+  isDark: boolean;
+}) => {
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const bars = Array.from({
+    length: 20
+  }, (_, i) => 0.3 + Math.sin(i * 0.8) * 0.4 + Math.random() * 0.3);
+  useEffect(() => {
+    if (!playing) return;
+    const iv = setInterval(() => setProgress(p => {
+      if (p >= 100) {
+        setPlaying(false);
+        return 0;
+      }
+      return p + 100 / (duration * 10);
+    }), 100);
+    return () => clearInterval(iv);
+  }, [playing, duration]);
+  return <div className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl min-w-[160px] transition-all duration-200 ease-in-out hover:brightness-110 ${isMe ? 'rounded-br-md' : 'rounded-bl-md'}`} style={{
+    background: isMe ? 'linear-gradient(135deg,rgba(124,58,237,0.5),rgba(168,85,247,0.4),rgba(6,182,212,0.35))' : 'rgba(255,255,255,0.1)',
+    border: isMe ? '1px solid rgba(167,139,250,0.4)' : '1px solid rgba(255,255,255,0.15)'
+  }}>
+    <button onClick={() => setPlaying(p => !p)} className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200 ease-in-out hover:scale-110 text-white" style={{
+      background: isMe ? 'linear-gradient(135deg,#7c3aed,#06b6d4)' : 'rgba(255,255,255,0.2)'
+    }}>
+      {playing ? <Square className="w-3 h-3 fill-current" /> : <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3"><path d="M8 5v14l11-7z" /></svg>}
+    </button>
+    <div className="flex items-center gap-0.5 flex-1">
+      {bars.map((h, i) => <div key={`vb-${i}`} className="w-1 rounded-full flex-shrink-0 transition-all" style={{
+        height: `${h * 20}px`,
+        background: i < Math.floor(bars.length * progress / 100) ? 'linear-gradient(180deg,#a78bfa,#67e8f9)' : 'rgba(255,255,255,0.25)'
+      }} />)}
+    </div>
+    <span className="text-[10px] flex-shrink-0 text-white/50">{formatDuration(duration)}</span>
+  </div>;
+};
+
+// ─── Delete Confirm Modal ─────────────────────────────────────────────────────
+const DeleteConfirmModal = ({
+  msgText,
+  isMe,
+  onDeleteForMe,
+  onDeleteForEveryone,
+  onCancel,
+  title,
+  subtitle,
+  deleteForMeLabel,
+  deleteForMeDesc,
+  deleteForEveryoneLabel,
+  deleteForEveryoneDesc,
+  cancelLabel,
+  deletingForMeLabel,
+  deletingForEveryoneLabel
+}: {
+  msgText: string;
+  isMe: boolean;
+  onDeleteForMe: () => void;
+  onDeleteForEveryone: () => void;
+  onCancel: () => void;
+  isDark: boolean;
+  title: string;
+  subtitle: string;
+  deleteForMeLabel: string;
+  deleteForMeDesc: string;
+  deleteForEveryoneLabel: string;
+  deleteForEveryoneDesc: string;
+  cancelLabel: string;
+  deletingForMeLabel: string;
+  deletingForEveryoneLabel: string;
+}) => {
+  const [phase, setPhase] = useState<'choice' | 'shredding'>('choice');
+  const [deleteMode, setDeleteMode] = useState<'me' | 'everyone' | null>(null);
+  const handleDelete = (mode: 'me' | 'everyone') => {
+    setDeleteMode(mode);
+    setPhase('shredding');
+  };
+  const handleShredComplete = () => {
+    if (deleteMode === 'me') onDeleteForMe();else if (deleteMode === 'everyone') onDeleteForEveryone();
+  };
+  return <motion.div initial={{
+    opacity: 0
+  }} animate={{
+    opacity: 1
+  }} exit={{
+    opacity: 0
+  }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{
+    background: 'rgba(0,0,0,0.7)',
+    backdropFilter: 'blur(20px)'
+  }}>
+    <motion.div initial={{
+      scale: 0.88,
+      opacity: 0,
+      y: 24
+    }} animate={{
+      scale: 1,
+      opacity: 1,
+      y: 0
+    }} exit={{
+      scale: 0.88,
+      opacity: 0,
+      y: 24
+    }} transition={{
+      type: 'spring',
+      stiffness: 300,
+      damping: 28
+    }} className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${GLASS_CARD}`} style={{
+      boxShadow: '0 20px 60px rgba(139,92,246,0.4)'
+    }}>
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10">
+        <div className="w-9 h-9 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0"><AlertTriangle className="w-4 h-4 text-red-400" /></div>
+        <div><h3 className="font-semibold text-sm text-white">{title}</h3><p className="text-xs mt-0.5 text-white/50">{subtitle}</p></div>
+        {phase === 'choice' && <button onClick={onCancel} className="ml-auto w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 text-white/50 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-4 h-4" /></button>}
+      </div>
+      <div className="px-5 py-5 space-y-4">
+        {phase === 'choice' && <div className="rounded-xl px-4 py-3 bg-white/8 border border-white/10"><p className="text-xs leading-relaxed line-clamp-3 text-white/60">{msgText || 'Voice message'}</p></div>}
+        {phase === 'shredding' && <div className="rounded-xl px-4 py-3 bg-white/8 border border-white/10"><PaperShredder onComplete={handleShredComplete} isDark={false} /></div>}
+        {phase === 'shredding' && <div className="flex items-center justify-center gap-2 text-white/50"><motion.div animate={{
+            rotate: 360
+          }} transition={{
+            duration: 0.6,
+            repeat: Infinity,
+            ease: 'linear'
+          }} className="w-4 h-4 rounded-full border-2 border-violet-400 border-t-transparent" /><span className="text-xs font-medium">{deleteMode === 'everyone' ? deletingForEveryoneLabel : deletingForMeLabel}</span></div>}
+        {phase === 'choice' && <div className="space-y-2">
+          <button onClick={() => handleDelete('me')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ease-in-out bg-white/8 hover:bg-white/15 text-white/80 border border-white/10 hover:border-white/20">
+            <MessageCircleOff className="w-4 h-4 text-white/40 flex-shrink-0" />
+            <div className="text-left"><p className="font-semibold">{deleteForMeLabel}</p><p className="text-xs font-normal text-white/40">{deleteForMeDesc}</p></div>
+          </button>
+          {isMe && <button onClick={() => handleDelete('everyone')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-red-500/15 hover:bg-red-500/25 text-red-300 transition-all duration-200 ease-in-out border border-red-500/30">
+            <Trash className="w-4 h-4 flex-shrink-0" />
+            <div className="text-left"><p className="font-semibold">{deleteForEveryoneLabel}</p><p className="text-xs font-normal text-red-400/70">{deleteForEveryoneDesc}</p></div>
+          </button>}
+          <button onClick={onCancel} className="w-full px-4 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:bg-white/8 transition-all duration-200 ease-in-out">{cancelLabel}</button>
+        </div>}
+      </div>
+    </motion.div>
+  </motion.div>;
+};
+
+// ─── Delete Conversation Modal ────────────────────────────────────────────────
+const DeleteConversationModal = ({
+  contactName,
+  onConfirm,
+  onCancel,
+  title,
+  descPrefix,
+  deleteAllLabel,
+  cancelLabel,
+  shreddingLabel
+}: {
+  contactName: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  isDark: boolean;
+  title: string;
+  descPrefix: string;
+  deleteAllLabel: string;
+  cancelLabel: string;
+  shreddingLabel: string;
+}) => {
+  const [shredding, setShredding] = useState(false);
+  const onConfirmRef = useRef(onConfirm);
+  onConfirmRef.current = onConfirm;
+  return <motion.div initial={{
+    opacity: 0
+  }} animate={{
+    opacity: 1
+  }} exit={{
+    opacity: 0
+  }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{
+    background: 'rgba(0,0,0,0.7)',
+    backdropFilter: 'blur(20px)'
+  }}>
+    <motion.div initial={{
+      scale: 0.88,
+      opacity: 0,
+      y: 24
+    }} animate={{
+      scale: 1,
+      opacity: 1,
+      y: 0
+    }} exit={{
+      scale: 0.88,
+      opacity: 0,
+      y: 24
+    }} transition={{
+      type: 'spring',
+      stiffness: 300,
+      damping: 28
+    }} className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${GLASS_CARD}`} style={{
+      boxShadow: '0 20px 60px rgba(139,92,246,0.4)'
+    }}>
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10">
+        <div className="w-9 h-9 rounded-full bg-red-500/20 flex items-center justify-center"><Trash className="w-4 h-4 text-red-400" /></div>
+        <div><h3 className="font-semibold text-sm text-white">{title}</h3><p className="text-xs text-white/50">{contactName}</p></div>
+        <button onClick={onCancel} className="ml-auto w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 text-white/50 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-4 h-4" /></button>
+      </div>
+      <div className="px-5 py-4">
+        {shredding ? <div className="space-y-3">
+          <div className="flex gap-0.5 overflow-hidden rounded-xl" style={{
+            height: '64px'
+          }}>
+            {Array.from({
+              length: 16
+            }, (_, i) => <motion.div key={`cs-${i}`} initial={{
+              y: 0
+            }} animate={{
+              y: 80,
+              rotate: (i % 2 === 0 ? 1 : -1) * ((i * 3 + 5) % 15)
+            }} transition={{
+              duration: 0.8,
+              delay: i * 0.03,
+              ease: [0.36, 0, 0.66, -0.56]
+            }} className="flex-1 rounded-b-sm bg-gradient-to-b from-violet-500/40 to-fuchsia-500/30" />)}
+          </div>
+          <div className="flex items-center justify-center gap-2 py-2">
+            <motion.div animate={{
+              rotate: 360
+            }} transition={{
+              duration: 0.5,
+              repeat: Infinity,
+              ease: 'linear'
+            }} className="w-4 h-4 rounded-full border-2 border-violet-400 border-t-transparent" onAnimationStart={() => setTimeout(() => onConfirmRef.current(), 900)} />
+            <span className="text-xs font-medium text-white/50">{shreddingLabel}</span>
+          </div>
+        </div> : <div className="space-y-3">
+          <p className="text-sm leading-relaxed text-white/70">{descPrefix} <strong className="text-white">{contactName}</strong>.</p>
+          <div className="flex gap-2 pt-1">
+            <button onClick={onCancel} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white/70 hover:bg-white/15 transition-all duration-200 ease-in-out">{cancelLabel}</button>
+            <button onClick={() => setShredding(true)} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium bg-red-500 hover:bg-red-600 text-white transition-all duration-200 ease-in-out">{deleteAllLabel}</button>
+          </div>
+        </div>}
+      </div>
+    </motion.div>
+  </motion.div>;
+};
+
+// ─── Incoming Call Screen ─────────────────────────────────────────────────────
+const IncomingCallScreen = ({
+  contact,
+  callType,
+  onAccept,
+  onDecline,
+  declineLabel,
+  acceptLabel,
+  incomingVideoLabel,
+  incomingVoiceLabel
+}: {
+  contact: Contact;
+  callType: 'audio' | 'video';
+  onAccept: () => void;
+  onDecline: () => void;
+  declineLabel: string;
+  acceptLabel: string;
+  incomingVideoLabel: string;
+  incomingVoiceLabel: string;
+}) => <motion.div initial={{
+  opacity: 0
+}} animate={{
+  opacity: 1
+}} exit={{
+  opacity: 0
+}} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{
+  background: 'rgba(0,0,0,0.8)',
+  backdropFilter: 'blur(24px)'
+}}>
+  <motion.div initial={{
+    scale: 0.85,
+    opacity: 0,
+    y: 30
+  }} animate={{
+    scale: 1,
+    opacity: 1,
+    y: 0
+  }} exit={{
+    scale: 0.85,
+    opacity: 0,
+    y: 30
+  }} transition={{
+    type: 'spring',
+    stiffness: 260,
+    damping: 22
+  }} className="w-80 rounded-3xl overflow-hidden shadow-2xl" style={{
+    background: 'linear-gradient(160deg,rgba(76,29,149,0.85) 0%,rgba(124,58,237,0.75) 50%,rgba(6,182,212,0.65) 100%)',
+    border: '1px solid rgba(167,139,250,0.4)',
+    backdropFilter: 'blur(24px)',
+    boxShadow: '0 30px 80px rgba(124,58,237,0.5)'
+  }}>
+    <div className="pt-12 pb-8 flex flex-col items-center">
+      <div className="relative mb-6">
+        <motion.div animate={{
+          scale: [1, 1.35, 1],
+          opacity: [0.3, 0, 0.3]
+        }} transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: 'easeInOut'
+        }} className="absolute inset-0 rounded-full" style={{
+          margin: '-18px',
+          background: 'radial-gradient(circle,rgba(167,139,250,0.4),transparent)'
+        }} />
+        <motion.div animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.4, 0, 0.4]
+        }} transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: 'easeInOut',
+          delay: 0.4
+        }} className="absolute inset-0 rounded-full" style={{
+          margin: '-8px',
+          background: 'radial-gradient(circle,rgba(103,232,249,0.3),transparent)'
+        }} />
+        <img src={contact.avatar} alt={contact.name} className="w-28 h-28 rounded-full object-cover border-4 shadow-xl" style={{
+          borderColor: 'rgba(167,139,250,0.5)'
+        }} />
+      </div>
+      <h2 className="text-white text-2xl font-bold tracking-tight">{contact.name}</h2>
+      <div className="flex items-center gap-1.5 mt-1.5">
+        {callType === 'video' ? <Video className="w-3.5 h-3.5 text-white/60" /> : <PhoneIncoming className="w-3.5 h-3.5 text-white/60" />}
+        <p className="text-white/60 text-sm"><span>{callType === 'video' ? incomingVideoLabel : incomingVoiceLabel}</span></p>
+      </div>
+    </div>
+    <div className="flex items-center justify-center gap-10 pb-10">
+      <div className="flex flex-col items-center gap-2">
+        <motion.button whileHover={{
+          scale: 1.08
+        }} whileTap={{
+          scale: 0.94
+        }} onClick={onDecline} className="w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-lg transition-all duration-200 ease-in-out"><PhoneMissed className="w-7 h-7" /></motion.button>
+        <span className="text-white/60 text-xs">{declineLabel}</span>
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <motion.button whileHover={{
+          scale: 1.08
+        }} whileTap={{
+          scale: 0.94
+        }} onClick={onAccept} className="w-16 h-16 rounded-full bg-white text-violet-700 flex items-center justify-center shadow-lg transition-all duration-200 ease-in-out">
+          {callType === 'video' ? <Video className="w-7 h-7" /> : <Phone className="w-7 h-7" />}
+        </motion.button>
+        <span className="text-white/60 text-xs">{acceptLabel}</span>
+      </div>
+    </div>
+  </motion.div>
+</motion.div>;
+
+// ─── Contact Info Drawer ──────────────────────────────────────────────────────
+const ContactInfoDrawer = ({
+  contact,
+  onClose,
+  onDeleteConversation,
+  t
+}: {
+  contact: Contact;
+  onClose: () => void;
+  onDeleteConversation: () => void;
+  isDark: boolean;
+  t: Translations;
+}) => {
+  const [drawerTab, setDrawerTab] = useState<DrawerTab>('info');
+  const sharedFiles = [{
+    name: 'Project_Brief.pdf',
+    size: '2.4 MB',
+    type: 'file' as const
+  }, {
+    name: 'Design_Assets.zip',
+    size: '18.7 MB',
+    type: 'file' as const
+  }, {
+    name: 'Meeting_Notes.docx',
+    size: '340 KB',
+    type: 'file' as const
+  }];
+  const quickActions = [{
+    icon: <Phone className="w-4 h-4" />,
+    label: t.call
+  }, {
+    icon: <Video className="w-4 h-4" />,
+    label: t.video
+  }, {
+    icon: <Bell className="w-4 h-4" />,
+    label: t.mute
+  }, {
+    icon: <Star className="w-4 h-4" />,
+    label: t.star
+  }];
+  return <motion.div initial={{
+    x: '100%',
+    opacity: 0
+  }} animate={{
+    x: 0,
+    opacity: 1
+  }} exit={{
+    x: '100%',
+    opacity: 0
+  }} transition={{
+    type: 'spring',
+    stiffness: 300,
+    damping: 30
+  }} className="w-72 flex-shrink-0 border-l border-white/10 flex flex-col overflow-hidden" style={{
+    background: 'rgba(15,5,40,0.65)',
+    backdropFilter: 'blur(24px)'
+  }}>
+    <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 flex-shrink-0">
+      <h3 className="font-semibold text-sm text-white">{t.contactInfo}</h3>
+      <button onClick={onClose} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 text-white/50 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-4 h-4" /></button>
+    </div>
+    <div className="flex border-b border-white/10 flex-shrink-0">
+      <button onClick={() => setDrawerTab('info')} className={`flex-1 py-2.5 text-xs font-semibold transition-all duration-200 ease-in-out border-b-2 ${drawerTab === 'info' ? 'border-violet-400 text-violet-300' : 'border-transparent text-white/40 hover:text-white/70'}`}>{t.info}</button>
+      <button onClick={() => setDrawerTab('media')} className={`flex-1 py-2.5 text-xs font-semibold transition-all duration-200 ease-in-out border-b-2 flex items-center justify-center gap-1.5 ${drawerTab === 'media' ? 'border-violet-400 text-violet-300' : 'border-transparent text-white/40 hover:text-white/70'}`}><Grid3X3 className="w-3 h-3" /><span>{t.media}</span></button>
+    </div>
+    <div className="flex-1 overflow-y-auto">
+      {drawerTab === 'info' && <div>
+        <div className="flex flex-col items-center px-5 pt-6 pb-4" style={{
+          background: 'linear-gradient(180deg,rgba(124,58,237,0.2),transparent)'
+        }}>
+          <div className="relative mb-3">
+            <img src={contact.avatar} alt={contact.name} className="w-20 h-20 rounded-full object-cover border-4 shadow-md" style={{
+              borderColor: 'rgba(167,139,250,0.5)'
+            }} />
+            {contact.online && <span className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-green-400 border-2 border-white/20 rounded-full" />}
+          </div>
+          <h2 className="font-bold text-lg leading-tight text-center text-white">{contact.name}</h2>
+          <p className="text-xs mt-0.5 text-white/50">{contact.online ? t.online : 'Offline'}</p>
+          {contact.bio && <p className="text-xs text-center mt-2 leading-relaxed px-2 text-white/50">{contact.bio}</p>}
+          <div className="flex gap-3 mt-4">
+            {quickActions.map(action => <button key={action.label} className="flex flex-col items-center gap-1 group">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-violet-300 group-hover:text-white transition-all duration-200 ease-in-out group-hover:scale-110" style={{
+                background: 'rgba(124,58,237,0.2)',
+                border: '1px solid rgba(167,139,250,0.25)'
+              }}>{action.icon}</div>
+              <span className="text-[10px] text-white/40">{action.label}</span>
+            </button>)}
+          </div>
+        </div>
+        <div className="px-5 py-3 space-y-3">
+          {contact.email && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-white/8 text-white/40"><Mail className="w-3.5 h-3.5" /></div><div className="min-w-0"><p className="text-[10px] uppercase tracking-wider text-white/35">{t.email}</p><p className="text-xs font-medium truncate text-white/75">{contact.email}</p></div></div>}
+          {contact.location && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-white/8 text-white/40"><MapPin className="w-3.5 h-3.5" /></div><div><p className="text-[10px] uppercase tracking-wider text-white/35">{t.location}</p><p className="text-xs font-medium text-white/75">{contact.location}</p></div></div>}
+          {contact.joined && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-white/8 text-white/40"><Calendar className="w-3.5 h-3.5" /></div><div><p className="text-[10px] uppercase tracking-wider text-white/35">{t.memberSince}</p><p className="text-xs font-medium text-white/75">{contact.joined}</p></div></div>}
+        </div>
+        <div className="mx-5 border-t border-white/10 my-1" />
+        {contact.mutualGroups && contact.mutualGroups.length > 0 && <div className="px-5 py-3">
+          <p className="text-[10px] uppercase tracking-wider mb-2 text-white/35">{t.mutualGroups}</p>
+          <div className="space-y-1">
+            {contact.mutualGroups.map(group => <button key={group} className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/8 transition-all duration-200 ease-in-out group">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-lg flex items-center justify-center text-violet-300 bg-violet-500/20"><Search className="w-3 h-3" /></div>
+                <span className="text-xs font-medium text-white/70">{group}</span>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 text-white/25 group-hover:text-white/50 transition-colors duration-200" />
+            </button>)}
+          </div>
+        </div>}
+        <div className="mx-5 border-t border-white/10 my-1" />
+        <div className="px-5 py-3 space-y-1">
+          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/8 text-white/50 transition-all duration-200 ease-in-out"><Shield className="w-4 h-4 text-white/35" /><span className="text-xs">{t.blockContact}</span></button>
+          <button onClick={onDeleteConversation} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-red-500/15 text-red-400 transition-all duration-200 ease-in-out"><Trash className="w-4 h-4" /><span className="text-xs font-medium">{t.deleteConversation}</span></button>
+        </div>
+      </div>}
+      {drawerTab === 'media' && <div className="p-4">
+        <p className="text-[10px] uppercase tracking-wider mb-3 text-white/35">{t.sharedMedia} · {SAMPLE_MEDIA_IMAGES.length}</p>
+        <div className="grid grid-cols-3 gap-1.5">
+          {SAMPLE_MEDIA_IMAGES.map((src, idx) => <div key={`media-${idx}`} className="aspect-square rounded-xl overflow-hidden bg-white/10 group cursor-pointer ring-1 ring-white/10"><img src={src} alt={`Shared media ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200 ease-in-out" /></div>)}
+        </div>
+        <div className="mt-4 border-t border-white/10 pt-4">
+          <p className="text-[10px] uppercase tracking-wider mb-3 text-white/35">{t.sharedFiles} · 3</p>
+          {sharedFiles.map(file => <div key={file.name} className="flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-white/8 transition-all duration-200 ease-in-out cursor-pointer group">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-violet-300 flex-shrink-0 bg-violet-500/20 group-hover:bg-violet-500/35 transition-colors duration-200"><FileText className="w-3.5 h-3.5" /></div>
+            <div className="min-w-0"><p className="text-xs font-medium truncate text-white/70">{file.name}</p><p className="text-[10px] text-white/35">{file.size}</p></div>
+          </div>)}
+        </div>
+      </div>}
+    </div>
+  </motion.div>;
+};
+
+// ─── Compose Modal ────────────────────────────────────────────────────────────
+const ComposeModal = ({
+  contacts,
+  onClose,
+  onSelectContact,
+  title,
+  searchPlaceholder,
+  noResultsLabel,
+  groupBadge
+}: {
+  contacts: Contact[];
+  onClose: () => void;
+  onSelectContact: (id: string) => void;
+  isDark: boolean;
+  title: string;
+  searchPlaceholder: string;
+  noResultsLabel: string;
+  groupBadge: string;
+}) => {
+  const [composeSearch, setComposeSearch] = useState('');
+  const filtered = contacts.filter(c => c.name.toLowerCase().includes(composeSearch.toLowerCase()));
+  return <motion.div initial={{
+    opacity: 0
+  }} animate={{
+    opacity: 1
+  }} exit={{
+    opacity: 0
+  }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{
+    background: 'rgba(0,0,0,0.7)',
+    backdropFilter: 'blur(20px)'
+  }}>
+    <motion.div initial={{
+      scale: 0.9,
+      opacity: 0,
+      y: 20
+    }} animate={{
+      scale: 1,
+      opacity: 1,
+      y: 0
+    }} exit={{
+      scale: 0.9,
+      opacity: 0,
+      y: 20
+    }} transition={{
+      type: 'spring',
+      stiffness: 280,
+      damping: 26
+    }} className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${GLASS_CARD}`} style={{
+      boxShadow: '0 20px 60px rgba(139,92,246,0.4)'
+    }}>
+      <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+        <div className="flex items-center gap-2"><Edit3 className="w-4 h-4 text-violet-300" /><h3 className="font-semibold text-sm text-white">{title}</h3></div>
+        <button onClick={onClose} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 text-white/50 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-4 h-4" /></button>
+      </div>
+      <div className="px-4 py-3 border-b border-white/10">
+        <div className="flex items-center gap-2 rounded-xl px-3 py-2 bg-white/10 border border-white/15">
+          <Search className="w-4 h-4 text-white/40 flex-shrink-0" />
+          <input autoFocus type="text" placeholder={searchPlaceholder} value={composeSearch} onChange={e => setComposeSearch(e.target.value)} className="flex-1 bg-transparent outline-none text-sm placeholder-white/30 text-white" />
+        </div>
+      </div>
+      <div className="max-h-72 overflow-y-auto py-2">
+        {filtered.length === 0 && <p className="text-center text-xs text-white/40 py-8">{noResultsLabel}</p>}
+        {filtered.map(contact => <button key={contact.id} onClick={() => {
+          onSelectContact(contact.id);
+          onClose();
+        }} className="w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 ease-in-out hover:bg-white/8 text-left group">
+          <div className="relative flex-shrink-0"><img src={contact.avatar} alt={contact.name} className="w-10 h-10 rounded-full object-cover transition-transform duration-200 group-hover:scale-105" />{contact.online && <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-white/20 rounded-full" />}</div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2"><p className="text-sm font-medium truncate text-white/90">{contact.name}</p>{contact.isGroup && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-orange-400 text-white">{groupBadge}</span>}</div>
+            <p className="text-xs truncate text-white/40">{contact.lastMessage}</p>
+          </div>
+          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${contact.online ? 'bg-green-400' : 'bg-white/20'}`} />
+        </button>)}
+      </div>
+    </motion.div>
+  </motion.div>;
+};
+
+// ─── Thread Panel ─────────────────────────────────────────────────────────────
+const ThreadPanel = ({
+  parentMsg,
+  activeContact,
+  onClose,
+  onSendThread,
+  threadLabel,
+  originalLabel,
+  replyPlaceholder
+}: {
+  parentMsg: Message;
+  activeContact: Contact;
+  onClose: () => void;
+  onSendThread: (msgId: string, text: string) => void;
+  isDark: boolean;
+  threadLabel: string;
+  originalLabel: string;
+  replyPlaceholder: string;
+}) => {
+  const [threadInput, setThreadInput] = useState('');
+  const threadScrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (threadScrollRef.current) threadScrollRef.current.scrollTop = threadScrollRef.current.scrollHeight;
+  }, [parentMsg.threadMessages]);
+  return <motion.div initial={{
+    x: '100%',
+    opacity: 0
+  }} animate={{
+    x: 0,
+    opacity: 1
+  }} exit={{
+    x: '100%',
+    opacity: 0
+  }} transition={{
+    type: 'spring',
+    stiffness: 300,
+    damping: 30
+  }} className="w-72 flex-shrink-0 border-l border-white/10 flex flex-col overflow-hidden" style={{
+    background: 'rgba(15,5,40,0.65)',
+    backdropFilter: 'blur(24px)'
+  }}>
+    <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 flex-shrink-0">
+      <div className="flex items-center gap-2"><MessageSquare className="w-4 h-4 text-violet-300" /><h3 className="font-semibold text-sm text-white">{threadLabel}</h3></div>
+      <button onClick={onClose} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 text-white/50 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-4 h-4" /></button>
+    </div>
+    <div className="px-4 py-3 border-b border-white/10 flex-shrink-0 bg-white/5">
+      <div className="border border-white/15 rounded-xl px-3 py-2.5 bg-white/8">
+        <p className="text-[10px] mb-1 text-white/35">{originalLabel}</p>
+        <p className="text-xs line-clamp-3 text-white/70">{parentMsg.text}</p>
+      </div>
+    </div>
+    <div ref={threadScrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+      {(parentMsg.threadMessages || []).map(tm => {
+        const isTMe = tm.senderId === 'me';
+        return <div key={tm.id} className={`flex items-end gap-2 ${isTMe ? 'justify-end' : 'justify-start'}`}>
+          {!isTMe && <img src={activeContact.avatar} alt={activeContact.name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />}
+          <div className={`px-3 py-2 text-xs rounded-2xl max-w-[80%] transition-all duration-200 ease-in-out hover:brightness-110 ${isTMe ? 'rounded-br-md text-white' : 'rounded-bl-md text-white/80'}`} style={{
+            background: isTMe ? 'linear-gradient(135deg,rgba(124,58,237,0.6),rgba(168,85,247,0.5),rgba(6,182,212,0.45))' : 'rgba(255,255,255,0.1)',
+            border: isTMe ? '1px solid rgba(167,139,250,0.35)' : '1px solid rgba(255,255,255,0.1)'
+          }}>{tm.text}</div>
+          {isTMe && <img src="https://i.pravatar.cc/150?img=5" alt="You" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />}
+        </div>;
+      })}
+    </div>
+    <div className="px-4 py-3 border-t border-white/10 flex-shrink-0">
+      <div className="flex items-center gap-2 rounded-full px-3 py-2 bg-white/8 border border-white/15">
+        <input type="text" placeholder={replyPlaceholder} value={threadInput} onChange={e => setThreadInput(e.target.value)} onKeyDown={e => {
+          if (e.key === 'Enter' && threadInput.trim()) {
+            onSendThread(parentMsg.id, threadInput.trim());
+            setThreadInput('');
+          }
+        }} className="flex-1 bg-transparent outline-none text-xs placeholder-white/30 text-white" />
+        <button onClick={() => {
+          if (threadInput.trim()) {
+            onSendThread(parentMsg.id, threadInput.trim());
+            setThreadInput('');
+          }
+        }} disabled={!threadInput.trim()} className="w-7 h-7 rounded-full disabled:opacity-40 flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:scale-110" style={{
+          background: 'linear-gradient(135deg,#7c3aed,#06b6d4)'
+        }}><Send className="w-3 h-3" /></button>
+      </div>
+    </div>
+  </motion.div>;
+};
+
+// ─── Animated Gradient Background ────────────────────────────────────────────
+const GradientBg = () => <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{
+  zIndex: 0
+}}>
+  <motion.div animate={{
+    rotate: [0, 360]
+  }} transition={{
+    duration: 30,
+    repeat: Infinity,
+    ease: 'linear'
+  }} className="absolute" style={{
+    width: '140%',
+    height: '140%',
+    top: '-20%',
+    left: '-20%',
+    background: 'conic-gradient(from 0deg at 50% 50%, #0f0524 0deg, #1e0a3c 60deg, #0a192f 120deg, #0d1b3e 180deg, #1a0535 240deg, #0f0524 360deg)'
+  }} />
+  <motion.div animate={{
+    scale: [1, 1.3, 1],
+    x: [0, 60, 0],
+    y: [0, -40, 0]
+  }} transition={{
+    duration: 18,
+    repeat: Infinity,
+    ease: 'easeInOut'
+  }} className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] rounded-full opacity-40" style={{
+    background: 'radial-gradient(circle, rgba(124,58,237,0.7) 0%, transparent 70%)',
+    filter: 'blur(60px)'
+  }} />
+  <motion.div animate={{
+    scale: [1, 1.2, 1],
+    x: [0, -40, 0],
+    y: [0, 60, 0]
+  }} transition={{
+    duration: 22,
+    repeat: Infinity,
+    ease: 'easeInOut',
+    delay: 4
+  }} className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full opacity-35" style={{
+    background: 'radial-gradient(circle, rgba(6,182,212,0.65) 0%, transparent 70%)',
+    filter: 'blur(60px)'
+  }} />
+  <motion.div animate={{
+    scale: [1, 1.4, 1],
+    x: [0, 30, -20, 0],
+    y: [0, -30, 40, 0]
+  }} transition={{
+    duration: 26,
+    repeat: Infinity,
+    ease: 'easeInOut',
+    delay: 8
+  }} className="absolute top-[40%] left-[30%] w-[50%] h-[50%] rounded-full opacity-25" style={{
+    background: 'radial-gradient(circle, rgba(240,171,252,0.5) 0%, transparent 70%)',
+    filter: 'blur(70px)'
+  }} />
+  <motion.div animate={{
+    scale: [1, 1.15, 1]
+  }} transition={{
+    duration: 14,
+    repeat: Infinity,
+    ease: 'easeInOut',
+    delay: 2
+  }} className="absolute top-[20%] right-[20%] w-[35%] h-[35%] rounded-full opacity-20" style={{
+    background: 'radial-gradient(circle, rgba(16,185,129,0.6) 0%, transparent 70%)',
+    filter: 'blur(50px)'
+  }} />
+</div>;
+
+// ─── Main ChatApp ─────────────────────────────────────────────────────────────
+export const ChatApp = () => {
+  const [isDark] = useState(true);
+  const [lang, setLang] = useState<Lang>('ru');
+  const [layout, setLayout] = useState<LayoutPosition>('left');
+  const t = TRANSLATIONS[lang];
+  const cycleLang = () => setLang(prev => prev === 'en' ? 'ru' : prev === 'ru' ? 'tg' : 'en');
+  const LANG_LABELS: Record<Lang, string> = {
+    en: 'EN',
+    ru: 'RU',
+    tg: 'TG'
+  };
+  const EMOJI_CATEGORIES_LOCALIZED: EmojiCategory[] = EMOJI_CATEGORY_EMOJIS.map((emojis, i) => ({
+    label: t[EMOJI_CATEGORIES_KEYS[i]],
+    emojis
+  }));
+  const SCHEDULE_OPTIONS_LOCALIZED = [{
+    label: t.in1Hour,
+    offset: 60
+  }, {
+    label: t.in3Hours,
+    offset: 180
+  }, {
+    label: t.tomorrow9am,
+    offset: 840
+  }, {
+    label: t.tomorrow6pm,
+    offset: 1080
+  }, {
+    label: t.monday9am,
+    offset: 2880
+  }];
+  const [activeContactId, setActiveContactId] = useState<string>('7');
+  const [prevContactId, setPrevContactId] = useState<string | null>(null);
+  const [switchDirection, setSwitchDirection] = useState<1 | -1>(1);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [allMessages, setAllMessages] = useState<Record<string, Message[]>>({});
+  const [input, setInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isTyping, setIsTyping] = useState(true);
+  const [callState, setCallState] = useState<'none' | 'audio' | 'video'>('none');
+  const [isMuted, setIsMuted] = useState(false);
+  const [isVideoOff, setIsVideoOff] = useState(false);
+  const [callDuration, setCallDuration] = useState(0);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
+  const [incomingCall, setIncomingCall] = useState<{
+    callType: 'audio' | 'video';
+  } | null>(null);
+  const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
+  const [showContactDrawer, setShowContactDrawer] = useState(false);
+  const [showMsgSearch, setShowMsgSearch] = useState(false);
+  const [msgSearchQuery, setMsgSearchQuery] = useState('');
+  const [searchMatchIndex, setSearchMatchIndex] = useState(0);
+  const [showPinnedBanner, setShowPinnedBanner] = useState(true);
+  const [showComposeModal, setShowComposeModal] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<ReplyPreview | null>(null);
+  const [forwardingMsg, setForwardingMsg] = useState<Message | null>(null);
+  const [activeActionMsgId, setActiveActionMsgId] = useState<string | null>(null);
+  const [showAIPanel, setShowAIPanel] = useState(false);
+  const [openThreadMsgId, setOpenThreadMsgId] = useState<string | null>(null);
+  const [showSchedulePicker, setShowSchedulePicker] = useState(false);
+  const [viewingStory, setViewingStory] = useState<Contact | null>(null);
+  const [deletingMsgId, setDeletingMsgId] = useState<string | null>(null);
+  const [showDeleteConversation, setShowDeleteConversation] = useState(false);
+  const [contactUnreads, setContactUnreads] = useState<Record<string, number>>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const activeContact = contacts.find(c => c.id === activeContactId) || contacts[0];
+  const currentMessages = allMessages[activeContactId] || [];
+  const pinnedMessage = currentMessages.find(m => m.pinned);
+  const searchMatches = msgSearchQuery.trim() ? currentMessages.filter(m => m.text.toLowerCase().includes(msgSearchQuery.toLowerCase())) : [];
+  const openThreadMsg = openThreadMsgId ? currentMessages.find(m => m.id === openThreadMsgId) || null : null;
+  const lastReceivedMessage = [...currentMessages].reverse().find(m => m.senderId !== 'me');
+  const deletingMsg = deletingMsgId ? currentMessages.find(m => m.id === deletingMsgId) || null : null;
+  const totalUnread = Object.values(contactUnreads).reduce((a, b) => a + b, 0);
+  // Загружаем данные чата через сервисный слой (сейчас mock, позже — реальный API).
+  useEffect(() => {
+    let alive = true;
+    Promise.all([chatService.getContacts(), chatService.getAllMessages()]).then(
+      ([loadedContacts, loadedMessages]) => {
+        if (!alive) return;
+        setContacts(loadedContacts);
+        setAllMessages(loadedMessages);
+        const unreadMap: Record<string, number> = {};
+        loadedContacts.forEach(c => {
+          if (c.unreadCount) unreadMap[c.id] = c.unreadCount;
+        });
+        setContactUnreads(unreadMap);
+      },
+    );
+    return () => {
+      alive = false;
+    };
+  }, []);
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [currentMessages, isTyping, activeContactId]);
+  useEffect(() => {
+    if (callState === 'none') {
+      setCallDuration(0);
+      return;
+    }
+    const iv = setInterval(() => setCallDuration(d => d + 1), 1000);
+    return () => clearInterval(iv);
+  }, [callState]);
+  useEffect(() => {
+    const t2 = setTimeout(() => setIncomingCall({
+      callType: 'video'
+    }), 6000);
+    return () => clearTimeout(t2);
+  }, []);
+  useEffect(() => {
+    setShowContactDrawer(false);
+    setOpenThreadMsgId(null);
+  }, [activeContactId]);
+  useEffect(() => {
+    if (searchMatches.length > 0 && searchMatchIndex < searchMatches.length) {
+      const el = messageRefs.current[searchMatches[searchMatchIndex].id];
+      if (el) el.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+  }, [searchMatchIndex, searchMatches.length]);
+  useEffect(() => {
+    setContactUnreads(prev => {
+      const n = {
+        ...prev
+      };
+      delete n[activeContactId];
+      return n;
+    });
+  }, [activeContactId]);
+  const handleContactSwitch = (newId: string) => {
+    if (newId === activeContactId) return;
+    const currentIdx = contacts.findIndex(c => c.id === activeContactId);
+    const newIdx = contacts.findIndex(c => c.id === newId);
+    setSwitchDirection(newIdx > currentIdx ? 1 : -1);
+    setPrevContactId(activeContactId);
+    setActiveContactId(newId);
+    setShowPinnedBanner(true);
+    setIsTyping(false);
+  };
+  const handleSearchPrev = () => setSearchMatchIndex(i => (i - 1 + searchMatches.length) % Math.max(searchMatches.length, 1));
+  const handleSearchNext = () => setSearchMatchIndex(i => (i + 1) % Math.max(searchMatches.length, 1));
+  const handleMsgSearchChange = (v: string) => {
+    setMsgSearchQuery(v);
+    setSearchMatchIndex(0);
+  };
+  const handleSend = useCallback(() => {
+    if (!input.trim() && pendingFiles.length === 0) return;
+    const newMessages = [...(allMessages[activeContactId] || [])];
+    if (pendingFiles.length > 0) {
+      pendingFiles.forEach(f => {
+        newMessages.push({
+          id: `m${Date.now()}-${f.name}`,
+          senderId: 'me',
+          text: input.trim() || '',
+          time: formatTime(new Date()),
+          status: 'sent',
+          attachment: {
+            name: f.name,
+            size: f.size,
+            type: f.type,
+            preview: f.preview
+          },
+          replyTo: replyingTo || undefined
+        });
+      });
+      setAllMessages(prev => ({
+        ...prev,
+        [activeContactId]: newMessages
+      }));
+      setPendingFiles([]);
+      setInput('');
+      setReplyingTo(null);
+      return;
+    }
+    const outgoing: Message = {
+      id: `m${Date.now()}`,
+      senderId: 'me',
+      text: input.trim(),
+      time: formatTime(new Date()),
+      status: 'sent',
+      replyTo: replyingTo || undefined
+    };
+    newMessages.push(outgoing);
+    setAllMessages(prev => ({
+      ...prev,
+      [activeContactId]: newMessages
+    }));
+    // Отправка через сервисный слой (mock; заменяется на реальный API без изменения UI).
+    void chatService.sendMessage(activeContactId, outgoing);
+    setInput('');
+    setReplyingTo(null);
+    setIsTyping(false);
+    const cid = activeContactId;
+    setTimeout(() => {
+      setIsTyping(true);
+      setTimeout(() => {
+        setAllMessages(prev => ({
+          ...prev,
+          [cid]: [...(prev[cid] || []), {
+            id: `m${Date.now() + 1}`,
+            senderId: cid,
+            text: "That's interesting! Tell me more about it.",
+            time: formatTime(new Date())
+          }]
+        }));
+        setIsTyping(false);
+      }, 1800);
+    }, 900);
+  }, [input, pendingFiles, replyingTo, activeContactId, allMessages]);
+  const handleSchedule = (label: string, _offset: number) => {
+    if (!input.trim()) return;
+    setAllMessages(prev => ({
+      ...prev,
+      [activeContactId]: [...(prev[activeContactId] || []), {
+        id: `m${Date.now()}-sched`,
+        senderId: 'me',
+        text: input.trim(),
+        time: formatTime(new Date()),
+        status: 'sent',
+        scheduled: true,
+        scheduledTime: label
+      }]
+    }));
+    setInput('');
+    setReplyingTo(null);
+  };
+  const handleSendVoice = (duration: number) => {
+    setAllMessages(prev => ({
+      ...prev,
+      [activeContactId]: [...(prev[activeContactId] || []), {
+        id: `m${Date.now()}-voice`,
+        senderId: 'me',
+        text: '',
+        time: formatTime(new Date()),
+        status: 'sent',
+        attachment: {
+          name: 'Voice message',
+          size: '',
+          type: 'voice',
+          duration
+        }
+      }]
+    }));
+    setIsRecording(false);
+  };
+  const handleForwardSend = (targetId: string) => {
+    if (!forwardingMsg) return;
+    if (targetId === activeContactId) {
+      setAllMessages(prev => ({
+        ...prev,
+        [activeContactId]: [...(prev[activeContactId] || []), {
+          id: `m${Date.now()}-fwd`,
+          senderId: 'me',
+          text: forwardingMsg.text,
+          time: formatTime(new Date()),
+          status: 'sent',
+          forwarded: true
+        }]
+      }));
+    }
+    setForwardingMsg(null);
+  };
+  const handleDeleteForMe = useCallback(() => {
+    const msgId = deletingMsgId;
+    if (!msgId) return;
+    setDeletingMsgId(null);
+    setAllMessages(prev => ({
+      ...prev,
+      [activeContactId]: (prev[activeContactId] || []).map(m => m.id === msgId ? {
+        ...m,
+        deletedForMe: true,
+        text: t.youDeletedThis
+      } : m)
+    }));
+  }, [deletingMsgId, t.youDeletedThis, activeContactId]);
+  const handleDeleteForEveryone = useCallback(() => {
+    const msgId = deletingMsgId;
+    if (!msgId) return;
+    setDeletingMsgId(null);
+    setAllMessages(prev => ({
+      ...prev,
+      [activeContactId]: (prev[activeContactId] || []).map(m => m.id === msgId ? {
+        ...m,
+        deleted: true,
+        text: t.messageDeleted
+      } : m)
+    }));
+  }, [deletingMsgId, t.messageDeleted, activeContactId]);
+  const handleDeleteConversation = () => {
+    setAllMessages(prev => ({
+      ...prev,
+      [activeContactId]: []
+    }));
+    setShowDeleteConversation(false);
+    setShowContactDrawer(false);
+  };
+  const handleSendThread = (msgId: string, text: string) => {
+    setAllMessages(prev => ({
+      ...prev,
+      [activeContactId]: (prev[activeContactId] || []).map(m => m.id === msgId ? {
+        ...m,
+        threadMessages: [...(m.threadMessages || []), {
+          id: `${msgId}-t${Date.now()}`,
+          senderId: 'me',
+          text,
+          time: formatTime(new Date()),
+          status: 'sent' as const
+        }],
+        threadCount: (m.threadCount || 0) + 1
+      } : m)
+    }));
+  };
+  const handleReaction = (msgId: string, emoji: string) => {
+    setAllMessages(prev => ({
+      ...prev,
+      [activeContactId]: (prev[activeContactId] || []).map(msg => {
+        if (msg.id !== msgId) return msg;
+        const existing = (msg.reactions || []).find(r => r.emoji === emoji);
+        if (existing) {
+          const updated = msg.reactions!.map(r => r.emoji === emoji ? {
+            ...r,
+            count: r.reactedByMe ? r.count - 1 : r.count + 1,
+            reactedByMe: !r.reactedByMe
+          } : r).filter(r => r.count > 0);
+          return {
+            ...msg,
+            reactions: updated
+          };
+        }
+        return {
+          ...msg,
+          reactions: [...(msg.reactions || []), {
+            emoji,
+            count: 1,
+            reactedByMe: true
+          }]
+        };
+      })
+    }));
+    setHoveredMessageId(null);
+  };
+  const handleEmojiSelect = (emoji: string) => setInput(prev => prev + emoji);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(e.target.files || []);
+    const mapped: PendingFile[] = selected.map(file => {
+      const sizeKb = file.size / 1024;
+      const sizeStr = sizeKb > 1024 ? `${(sizeKb / 1024).toFixed(1)} MB` : `${sizeKb.toFixed(0)} KB`;
+      let type: MessageAttachment['type'] = 'file';
+      if (file.type.startsWith('image/')) type = 'image';else if (file.type.startsWith('video/')) type = 'video';else if (file.type.startsWith('audio/')) type = 'audio';
+      const entry: PendingFile = {
+        name: file.name,
+        size: sizeStr,
+        type,
+        raw: file
+      };
+      if (type === 'image') entry.preview = URL.createObjectURL(file);
+      return entry;
+    });
+    setPendingFiles(prev => [...prev, ...mapped]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+  const removePendingFile = (name: string) => {
+    setPendingFiles(prev => {
+      const removed = prev.find(f => f.name === name);
+      if (removed?.preview) URL.revokeObjectURL(removed.preview);
+      return prev.filter(f => f.name !== name);
+    });
+  };
+  const handleJumpToPinned = () => {
+    if (pinnedMessage) {
+      const el = messageRefs.current[pinnedMessage.id];
+      if (el) el.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+  };
+  const handleAcceptCall = () => {
+    if (incomingCall) {
+      setCallState(incomingCall.callType);
+      setIncomingCall(null);
+    }
+  };
+  const handleDeclineCall = () => setIncomingCall(null);
+  const handleEndCall = () => {
+    setCallState('none');
+    setIsMuted(false);
+    setIsVideoOff(false);
+  };
+  const isHighlighted = (msgId: string) => msgSearchQuery.trim() && searchMatches.some(m => m.id === msgId);
+  const isCurrentMatch = (msgId: string) => searchMatches.length > 0 && searchMatches[searchMatchIndex]?.id === msgId;
+  const chatVariants = {
+    enter: (dir: number) => ({
+      opacity: 0,
+      x: dir * 32
+    }),
+    center: {
+      opacity: 1,
+      x: 0
+    },
+    exit: (dir: number) => ({
+      opacity: 0,
+      x: -dir * 32
+    })
+  };
+  void prevContactId;
+  void isDark;
+
+  // Пока контакты грузятся (contacts ещё пуст) — показываем экран загрузки,
+  // иначе ниже activeContact окажется undefined и обращение к его полям упадёт.
+  if (!activeContact) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center font-sans relative overflow-hidden">
+        <GradientBg />
+        <div className="relative z-10 flex flex-col items-center gap-3 text-white/80">
+          <Loader2 className="w-8 h-8 animate-spin" />
+          <span className="text-sm">Загрузка чата…</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Determine flex direction based on layout
+  const isHorizontalLayout = layout === 'top' || layout === 'bottom';
+  const mainAreaFlexDir = isHorizontalLayout ? 'flex-col' : 'flex-row';
+  const chatListFirst = layout === 'left' || layout === 'top';
+  const chatListPanel = <ChatListPanel layout={layout} contacts={contacts} activeContactId={activeContactId} contactUnreads={contactUnreads} searchQuery={searchQuery} onContactSwitch={handleContactSwitch} onComposeOpen={() => setShowComposeModal(true)} onSearchChange={setSearchQuery} />;
+  const chatWindow = <main className="flex-1 flex flex-col min-w-0 overflow-hidden" style={{
+    background: 'transparent'
+  }}>
+      {/* Chat sub-header */}
+      <div className="flex items-center justify-between px-6 py-3 border-b border-white/8 flex-shrink-0" style={{
+      background: 'rgba(255,255,255,0.04)',
+      backdropFilter: 'blur(10px)'
+    }}>
+        <motion.div key={`header-${activeContactId}`} initial={{
+        opacity: 0,
+        x: switchDirection * 20
+      }} animate={{
+        opacity: 1,
+        x: 0
+      }} transition={{
+        duration: 0.22,
+        ease: 'easeOut'
+      }} className="flex items-center gap-3">
+          <div className="relative">
+            <img src={activeContact.avatar} alt={activeContact.name} className="w-10 h-10 rounded-full object-cover" style={{
+            border: '2px solid rgba(167,139,250,0.4)'
+          }} />
+            {activeContact.online && <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-transparent rounded-full" style={{
+            boxShadow: '0 0 6px rgba(74,222,128,0.7)'
+          }} />}
+          </div>
+          <div>
+            <h2 className="font-semibold text-sm text-white">{activeContact.name}</h2>
+            <p className="text-xs text-white/50">{activeContact.online ? t.online : t.lastSeen}</p>
+          </div>
+        </motion.div>
+        <div className="flex items-center gap-1">
+          <button onClick={() => {
+          setShowMsgSearch(v => !v);
+          setMsgSearchQuery('');
+          setSearchMatchIndex(0);
+        }} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${showMsgSearch ? 'bg-violet-500/30 text-violet-300' : 'text-white/50 hover:bg-white/10'}`}><Search className="w-4 h-4" /></button>
+          <button onClick={() => setIncomingCall({
+          callType: 'audio'
+        })} className="w-9 h-9 rounded-full flex items-center justify-center text-amber-400/80 hover:bg-amber-500/15 transition-all duration-200 ease-in-out hover:scale-110"><PhoneIncoming className="w-4 h-4" /></button>
+          <button onClick={() => setCallState('video')} className="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:bg-white/10 transition-all duration-200 ease-in-out hover:scale-110"><Video className="w-4 h-4" /></button>
+          <button onClick={() => setCallState('audio')} className="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:bg-white/10 transition-all duration-200 ease-in-out hover:scale-110"><Phone className="w-4 h-4" /></button>
+          <button onClick={() => setShowContactDrawer(v => !v)} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${showContactDrawer ? 'bg-violet-500/30 text-violet-300' : 'text-white/50 hover:bg-white/10'}`}><UserCog className="w-4 h-4" /></button>
+          <div className="w-px h-5 mx-1 bg-white/15" />
+          <button className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:scale-110 hover:brightness-110" style={{
+          background: 'linear-gradient(135deg,#7c3aed,#06b6d4)',
+          boxShadow: '0 0 16px rgba(124,58,237,0.5)'
+        }}><MoreVertical className="w-4 h-4" /></button>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {showMsgSearch && <MessageSearchBar query={msgSearchQuery} onChange={handleMsgSearchChange} onClose={() => {
+        setShowMsgSearch(false);
+        setMsgSearchQuery('');
+      }} matchCount={searchMatches.length} currentMatch={searchMatchIndex} onPrev={handleSearchPrev} onNext={handleSearchNext} isDark={true} placeholder={t.searchMessagesPlaceholder} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {pinnedMessage && showPinnedBanner && <PinnedBanner message={pinnedMessage} onDismiss={() => setShowPinnedBanner(false)} onJump={handleJumpToPinned} isDark={true} label={t.pinnedMessage} />}
+      </AnimatePresence>
+
+      {/* Messages area */}
+      <div className="flex-1 relative overflow-hidden">
+        <AnimatePresence mode="wait" custom={switchDirection}>
+          <motion.div key={activeContactId} custom={switchDirection} variants={chatVariants} initial="enter" animate="center" exit="exit" transition={{
+          duration: 0.25,
+          ease: [0.25, 0.46, 0.45, 0.94]
+        }} ref={scrollRef} className="absolute inset-0 overflow-y-auto px-6 py-6 space-y-5" style={{
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(167,139,250,0.3) transparent'
+        }}>
+            {currentMessages.map(msg => {
+            const isMe = msg.senderId === 'me';
+            const highlighted = isHighlighted(msg.id);
+            const currentMatchMsg = isCurrentMatch(msg.id);
+            const isEffectivelyDeleted = msg.deleted || msg.deletedForMe;
+            return <motion.div key={msg.id} ref={el => {
+              messageRefs.current[msg.id] = el;
+            }} initial={{
+              opacity: 0,
+              y: 10
+            }} animate={{
+              opacity: 1,
+              y: 0
+            }} transition={{
+              duration: 0.25
+            }} className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`} onMouseEnter={() => setHoveredMessageId(msg.id)} onMouseLeave={() => setHoveredMessageId(null)}>
+                {!isMe && <img src={activeContact.avatar} alt={activeContact.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" style={{
+                border: '2px solid rgba(167,139,250,0.35)'
+              }} />}
+                <div className={`flex flex-col max-w-[65%] ${isMe ? 'items-end' : 'items-start'}`}>
+                  {msg.scheduled && !isEffectivelyDeleted && <div className={`flex items-center gap-1 mb-1 text-[10px] font-medium ${isMe ? 'self-end' : 'self-start'} text-amber-400`}><Clock3 className="w-3 h-3" /><span>{t.scheduled} · {msg.scheduledTime}</span></div>}
+                  {msg.replyTo && !isEffectivelyDeleted && <div className={`flex items-center gap-2 mb-1 px-3 py-1.5 rounded-xl border-l-4 border-violet-400 text-xs max-w-full ${isMe ? 'self-end' : 'self-start'} bg-violet-500/15`}>
+                    <CornerUpLeft className="w-3 h-3 text-violet-300 flex-shrink-0" />
+                    <div className="min-w-0"><span className="font-semibold text-violet-300 text-[10px]">{msg.replyTo.senderName}</span><p className="truncate max-w-[200px] text-white/60">{msg.replyTo.text}</p></div>
+                  </div>}
+                  {msg.forwarded && !isEffectivelyDeleted && <div className={`flex items-center gap-1 mb-1 text-[10px] text-white/40 ${isMe ? 'self-end' : 'self-start'}`}><Forward className="w-3 h-3" /><span>{t.forwarded}</span></div>}
+                  {msg.attachment?.type === 'voice' && !isEffectivelyDeleted && <VoiceBubble duration={msg.attachment.duration || 5} isMe={isMe} isDark={true} />}
+                  {msg.attachment && msg.attachment.type !== 'voice' && !isEffectivelyDeleted && <div className={`mb-1.5 rounded-2xl overflow-hidden transition-all duration-200 ease-in-out hover:brightness-110 ${isMe ? 'rounded-br-md' : 'rounded-bl-md'}`} style={{
+                  border: isMe ? '1px solid rgba(167,139,250,0.35)' : '1px solid rgba(255,255,255,0.12)'
+                }}>
+                    {msg.attachment.type === 'image' && msg.attachment.preview ? <img src={msg.attachment.preview} alt={msg.attachment.name} className="max-w-[220px] max-h-48 object-cover" /> : <div className="flex items-center gap-2 px-3 py-2.5 min-w-[180px] bg-white/8">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-violet-300 flex-shrink-0 bg-violet-500/20">{getAttachmentIcon(msg.attachment.type)}</div>
+                      <div className="min-w-0"><p className="text-xs font-medium truncate text-white/80">{msg.attachment.name}</p><p className="text-[10px] text-white/40">{msg.attachment.size}</p></div>
+                    </div>}
+                  </div>}
+                  {(msg.text || isEffectivelyDeleted) && <div className="relative">
+                    <AnimatePresence>{hoveredMessageId === msg.id && !isEffectivelyDeleted && <ReactionPicker isMe={isMe} onSelect={emoji => handleReaction(msg.id, emoji)} />}</AnimatePresence>
+                    <AnimatePresence>
+                      {hoveredMessageId === msg.id && !isEffectivelyDeleted && <motion.div initial={{
+                      opacity: 0
+                    }} animate={{
+                      opacity: 1
+                    }} exit={{
+                      opacity: 0
+                    }} className={`absolute top-0 ${isMe ? '-left-8' : '-right-8'} flex items-center`}>
+                        <button onClick={e => {
+                        e.stopPropagation();
+                        setActiveActionMsgId(prev => prev === msg.id ? null : msg.id);
+                      }} className="w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 ease-in-out text-white/60 hover:bg-white/20 hover:scale-110" style={{
+                        background: 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.15)'
+                      }}><MoreHorizontal className="w-3.5 h-3.5" /></button>
+                      </motion.div>}
+                    </AnimatePresence>
+                    <AnimatePresence>
+                      {activeActionMsgId === msg.id && <MessageActionMenu isMe={isMe} isDark={true} onReply={() => {
+                      setReplyingTo({
+                        id: msg.id,
+                        senderName: isMe ? 'You' : activeContact.name,
+                        text: msg.text
+                      });
+                      setActiveActionMsgId(null);
+                    }} onForward={() => {
+                      setForwardingMsg(msg);
+                      setActiveActionMsgId(null);
+                    }} onDelete={() => {
+                      setDeletingMsgId(msg.id);
+                      setActiveActionMsgId(null);
+                    }} onThread={() => {
+                      setOpenThreadMsgId(msg.id);
+                      setShowContactDrawer(false);
+                      setActiveActionMsgId(null);
+                    }} onClose={() => setActiveActionMsgId(null)} />}
+                    </AnimatePresence>
+                    <div className={`px-4 py-2.5 text-sm leading-relaxed transition-all duration-200 ease-in-out cursor-default ${isEffectivelyDeleted ? 'italic text-white/30 rounded-2xl border border-dashed border-white/15 bg-white/4' : currentMatchMsg ? 'rounded-2xl ring-2 ring-amber-400 text-amber-100' : highlighted ? 'rounded-2xl text-amber-200' : isMe ? `${isMe ? 'rounded-br-md' : ''} rounded-2xl text-white` : 'rounded-2xl rounded-bl-md text-white/90'}`} style={isEffectivelyDeleted ? {} : currentMatchMsg ? {
+                    background: 'rgba(251,191,36,0.25)',
+                    border: '1px solid rgba(251,191,36,0.4)'
+                  } : highlighted ? {
+                    background: 'rgba(251,191,36,0.15)',
+                    border: '1px solid rgba(251,191,36,0.3)'
+                  } : isMe ? {
+                    background: 'linear-gradient(135deg,rgba(124,58,237,0.65),rgba(168,85,247,0.55),rgba(6,182,212,0.5))',
+                    border: '1px solid rgba(167,139,250,0.4)',
+                    boxShadow: '0 4px 20px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.12)'
+                  } : {
+                    background: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)'
+                  }} onMouseEnter={e => {
+                    if (!isEffectivelyDeleted && !currentMatchMsg && !highlighted) {
+                      if (isMe) {
+                        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 32px rgba(124,58,237,0.45), inset 0 1px 0 rgba(255,255,255,0.15)';
+                        (e.currentTarget as HTMLDivElement).style.filter = 'brightness(1.08)';
+                      } else {
+                        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 6px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12)';
+                        (e.currentTarget as HTMLDivElement).style.filter = 'brightness(1.06)';
+                      }
+                    }
+                  }} onMouseLeave={e => {
+                    if (!isEffectivelyDeleted) {
+                      (e.currentTarget as HTMLDivElement).style.filter = '';
+                      if (isMe) {
+                        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 20px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.12)';
+                      } else {
+                        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)';
+                      }
+                    }
+                  }}>
+                      {msg.pinned && !isEffectivelyDeleted && <span className="inline-flex items-center gap-1 text-[10px] text-violet-300 font-semibold mb-1 mr-2"><Pin className="w-2.5 h-2.5" /><span>{t.pinned}</span></span>}
+                      {msg.text}
+                    </div>
+                  </div>}
+                  {msg.reactions && msg.reactions.length > 0 && !isEffectivelyDeleted && <div className={`flex gap-1 mt-1 ${isMe ? 'self-end' : 'self-start'}`}>
+                    {msg.reactions.map(r => <button key={r.emoji} onClick={() => handleReaction(msg.id, r.emoji)} className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs transition-all duration-200 ease-in-out hover:scale-110" style={{
+                    background: r.reactedByMe ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.08)',
+                    border: r.reactedByMe ? '1px solid rgba(167,139,250,0.5)' : '1px solid rgba(255,255,255,0.12)'
+                  }}>
+                      <span>{r.emoji}</span>
+                      <span className="text-[10px] font-medium text-white/60">{r.count}</span>
+                    </button>)}
+                  </div>}
+                </div>
+                {isMe && <img src="https://i.pravatar.cc/150?img=5" alt="You" className="w-8 h-8 rounded-full object-cover flex-shrink-0" style={{
+                border: '2px solid rgba(167,139,250,0.35)'
+              }} />}
+              </motion.div>;
+          })}
+
+            <AnimatePresence>
+              {isTyping && <motion.div initial={{
+              opacity: 0,
+              y: 5
+            }} animate={{
+              opacity: 1,
+              y: 0
+            }} exit={{
+              opacity: 0
+            }} className="flex items-end gap-2 justify-start">
+                <img src={activeContact.avatar} alt={activeContact.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" style={{
+                border: '2px solid rgba(167,139,250,0.35)'
+              }} />
+                <div className="flex items-center gap-1 px-4 py-2.5 rounded-2xl rounded-bl-md" style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.15)'
+              }}>
+                  <span className="text-xs mr-1 text-white/40">{t.typing}</span>
+                  <span className="flex gap-0.5">
+                    <motion.span className="w-1 h-1 rounded-full bg-violet-300" animate={{
+                    opacity: [0.3, 1, 0.3]
+                  }} transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    delay: 0
+                  }} />
+                    <motion.span className="w-1 h-1 rounded-full bg-violet-300" animate={{
+                    opacity: [0.3, 1, 0.3]
+                  }} transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    delay: 0.2
+                  }} />
+                    <motion.span className="w-1 h-1 rounded-full bg-violet-300" animate={{
+                    opacity: [0.3, 1, 0.3]
+                  }} transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    delay: 0.4
+                  }} />
+                  </span>
+                </div>
+              </motion.div>}
+            </AnimatePresence>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <AnimatePresence>{showAIPanel && lastReceivedMessage && <AIPanel lastMessage={lastReceivedMessage.text} onSelect={text => setInput(text)} onClose={() => setShowAIPanel(false)} isDark={true} title={t.aiSuggestions} loadingText={t.generatingSuggestions} />}</AnimatePresence>
+      <AnimatePresence>{replyingTo && <ReplyBar reply={replyingTo} onCancel={() => setReplyingTo(null)} isDark={true} />}</AnimatePresence>
+      <AnimatePresence>{pendingFiles.length > 0 && <AttachmentPreviewBar files={pendingFiles} onRemove={removePendingFile} onSend={handleSend} isDark={true} countLabel={`${pendingFiles.length} ${t.filesReadyToSend}`} sendAllLabel={t.sendAll} />}</AnimatePresence>
+
+      {/* Input Bar */}
+      <div className="px-6 py-4 border-t border-white/8 flex-shrink-0" style={{
+      background: 'rgba(255,255,255,0.04)',
+      backdropFilter: 'blur(16px)'
+    }}>
+        <div className="relative flex items-center gap-2 rounded-full px-4 py-2" style={{
+        background: 'rgba(255,255,255,0.08)',
+        border: '1px solid rgba(255,255,255,0.15)'
+      }}>
+          {isRecording ? <VoiceRecorder onSend={handleSendVoice} onCancel={() => setIsRecording(false)} /> : <div className="flex items-center gap-2 w-full">
+            <div className="relative">
+              <button onClick={() => setShowEmojiPicker(v => !v)} className={`transition-all duration-200 ease-in-out hover:scale-110 ${showEmojiPicker ? 'text-violet-300' : 'text-white/40 hover:text-white/70'}`}><Smile className="w-5 h-5" /></button>
+              <AnimatePresence>{showEmojiPicker && <EmojiPicker categories={EMOJI_CATEGORIES_LOCALIZED} onSelect={handleEmojiSelect} onClose={() => setShowEmojiPicker(false)} isDark={true} />}</AnimatePresence>
+            </div>
+            <button onClick={() => fileInputRef.current?.click()} className="transition-all duration-200 ease-in-out hover:scale-110 text-white/40 hover:text-white/70"><Paperclip className="w-5 h-5" /></button>
+            <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileChange} accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.zip" />
+            <button onClick={() => setShowAIPanel(v => !v)} className={`transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0 ${showAIPanel ? 'text-violet-300' : 'text-white/40 hover:text-violet-300'}`}><Sparkles className="w-5 h-5" /></button>
+            <input type="text" placeholder={t.typeMessage} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} className="flex-1 bg-transparent outline-none text-sm placeholder-white/25 px-2 text-white" />
+            <div className="relative">
+              <button onClick={() => setShowSchedulePicker(v => !v)} className={`transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0 ${showSchedulePicker ? 'text-violet-300' : 'text-white/40 hover:text-amber-400'}`}><Clock3 className="w-5 h-5" /></button>
+              <AnimatePresence>{showSchedulePicker && <SchedulePicker options={SCHEDULE_OPTIONS_LOCALIZED} title={t.scheduleMessage} onSchedule={handleSchedule} onClose={() => setShowSchedulePicker(false)} isDark={true} />}</AnimatePresence>
+            </div>
+            <button onClick={() => setIsRecording(true)} className="transition-all duration-200 ease-in-out hover:scale-110 text-white/40 hover:text-red-400"><Mic className="w-5 h-5" /></button>
+            <button onClick={handleSend} disabled={!input.trim() && pendingFiles.length === 0} className="w-9 h-9 rounded-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:scale-110 hover:brightness-110" style={{
+            background: 'linear-gradient(135deg,#7c3aed,#a855f7,#06b6d4)',
+            boxShadow: '0 0 16px rgba(124,58,237,0.5)'
+          }}><Send className="w-4 h-4" /></button>
+          </div>}
+        </div>
+      </div>
+    </main>;
+  return <div className="w-full h-screen flex items-center justify-center p-4 font-sans relative overflow-hidden">
+      <GradientBg />
+
+      <div className="w-full max-w-7xl h-full max-h-[900px] flex flex-col rounded-2xl overflow-hidden shadow-2xl relative" style={{
+      background: 'rgba(10,4,30,0.55)',
+      backdropFilter: 'blur(30px)',
+      border: '1px solid rgba(167,139,250,0.2)',
+      boxShadow: '0 30px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)'
+    }}>
+
+        {/* ── Top Header Bar ── */}
+        <header className="flex-shrink-0" style={{
+        background: 'linear-gradient(135deg,rgba(76,29,149,0.6),rgba(124,58,237,0.45),rgba(6,182,212,0.3))',
+        borderBottom: '1px solid rgba(167,139,250,0.2)',
+        backdropFilter: 'blur(20px)'
+      }}>
+          <div className="flex items-center justify-between px-5 py-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{
+              background: 'rgba(255,255,255,0.12)',
+              border: '1px solid rgba(255,255,255,0.2)'
+            }}>
+                <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-white"><path d="M12 2C7 2 3 5.5 3 10c0 2.5 1.3 4.7 3.3 6.2L5 21l4.5-2.3c.8.2 1.6.3 2.5.3 5 0 9-3.5 9-8s-4-9-9-9z" fill="currentColor" /></svg>
+              </div>
+              <span className="font-bold text-lg tracking-wider text-white" style={{
+              textShadow: '0 0 20px rgba(167,139,250,0.5)'
+            }}>TECH</span>
+              {totalUnread > 0 && <motion.span initial={{
+              scale: 0
+            }} animate={{
+              scale: 1
+            }} className="min-w-5 h-5 rounded-full text-white text-[10px] font-bold flex items-center justify-center px-1" style={{
+              background: 'linear-gradient(135deg,#ef4444,#f97316)'
+            }}>
+                {totalUnread > 99 ? '99+' : totalUnread}
+              </motion.span>}
+            </div>
+            <div className="flex items-center gap-2">
+              {/* Layout Switcher */}
+              <LayoutSwitcher layout={layout} onChange={setLayout} />
+              <div className="w-px h-5 bg-white/15" />
+              <button onClick={cycleLang} className="h-7 px-2.5 rounded-full text-white flex items-center gap-1.5 transition-all duration-200 ease-in-out hover:bg-white/20 hover:scale-105 text-xs font-bold" style={{
+              background: 'rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.15)'
+            }}>
+                <Languages className="w-3.5 h-3.5" /><span>{LANG_LABELS[lang]}</span>
+              </button>
+              <button onClick={() => setShowComposeModal(true)} className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:bg-white/25 hover:scale-110" style={{
+              background: 'rgba(255,255,255,0.15)',
+              border: '1px solid rgba(255,255,255,0.2)'
+            }}><Edit3 className="w-3.5 h-3.5" /></button>
+              <button onClick={() => setShowComposeModal(true)} className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:bg-white/18 hover:scale-110" style={{
+              background: 'rgba(255,255,255,0.08)'
+            }}><Plus className="w-3.5 h-3.5" strokeWidth={2.5} /></button>
+              <button className="w-7 h-7 rounded-full transition-all duration-200 ease-in-out hover:bg-white/15 hover:scale-110 flex items-center justify-center text-white/70"><UserPlus className="w-4 h-4" /></button>
+              <button className="w-7 h-7 rounded-full transition-all duration-200 ease-in-out hover:bg-white/15 hover:scale-110 flex items-center justify-center text-white/70"><MoreVertical className="w-4 h-4" /></button>
+            </div>
+          </div>
+        </header>
+
+        {/* ── Main content area with dynamic layout ── */}
+        <div className={`flex flex-1 min-h-0 overflow-hidden ${mainAreaFlexDir}`}>
+          {chatListFirst && chatListPanel}
+
+          <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
+            {chatWindow}
+
+            <AnimatePresence>
+              {showContactDrawer && !openThreadMsgId && <ContactInfoDrawer contact={activeContact} onClose={() => setShowContactDrawer(false)} onDeleteConversation={() => {
+              setShowDeleteConversation(true);
+              setShowContactDrawer(false);
+            }} isDark={true} t={t} />}
+            </AnimatePresence>
+            <AnimatePresence>
+              {openThreadMsg && <ThreadPanel parentMsg={openThreadMsg} activeContact={activeContact} onClose={() => setOpenThreadMsgId(null)} onSendThread={handleSendThread} isDark={true} threadLabel={t.thread} originalLabel={t.originalMessage} replyPlaceholder={t.replyInThread} />}
+            </AnimatePresence>
+          </div>
+
+          {!chatListFirst && chatListPanel}
+        </div>
+      </div>
+
+      {/* Story Viewer */}
+      <AnimatePresence>{viewingStory && <StoryViewer contact={viewingStory} onClose={() => setViewingStory(null)} hoursAgo={t.hoursAgo} />}</AnimatePresence>
+
+      {/* Incoming Call */}
+      <AnimatePresence>{incomingCall && <IncomingCallScreen contact={activeContact} callType={incomingCall.callType} onAccept={handleAcceptCall} onDecline={handleDeclineCall} declineLabel={t.decline} acceptLabel={t.accept} incomingVideoLabel={t.incomingVideo} incomingVoiceLabel={t.incomingVoice} />}</AnimatePresence>
+
+      {/* Active Call Modal */}
+      <AnimatePresence>
+        {callState !== 'none' && <motion.div initial={{
+        opacity: 0
+      }} animate={{
+        opacity: 1
+      }} exit={{
+        opacity: 0
+      }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{
+        background: 'rgba(0,0,0,0.7)',
+        backdropFilter: 'blur(20px)'
+      }}>
+          <motion.div initial={{
+          scale: 0.9,
+          opacity: 0
+        }} animate={{
+          scale: 1,
+          opacity: 1
+        }} exit={{
+          scale: 0.9,
+          opacity: 0
+        }} className="relative w-full max-w-2xl h-[560px] rounded-3xl overflow-hidden shadow-2xl" style={{
+          background: 'linear-gradient(135deg,rgba(76,29,149,0.8),rgba(124,58,237,0.7),rgba(6,182,212,0.6))',
+          border: '1px solid rgba(167,139,250,0.4)',
+          backdropFilter: 'blur(30px)',
+          boxShadow: '0 30px 80px rgba(124,58,237,0.5)'
+        }}>
+            {callState === 'video' && !isVideoOff ? <div className="w-full h-full"><img src={activeContact.avatar} alt={activeContact.name} className="w-full h-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" /></div> : <div className="absolute inset-0 flex items-center justify-center"><motion.div animate={{
+              scale: [1, 1.05, 1]
+            }} transition={{
+              duration: 2,
+              repeat: Infinity
+            }} className="relative"><div className="absolute inset-0 rounded-full opacity-40 animate-ping" style={{
+                background: 'radial-gradient(circle,rgba(167,139,250,0.6),transparent)'
+              }} /><img src={activeContact.avatar} alt={activeContact.name} className="relative w-40 h-40 rounded-full object-cover" style={{
+                border: '4px solid rgba(167,139,250,0.4)'
+              }} /></motion.div></div>}
+            {callState === 'video' && <div className="absolute top-5 right-5 w-32 h-44 rounded-2xl overflow-hidden shadow-lg" style={{
+            border: '2px solid rgba(255,255,255,0.2)',
+            background: 'rgba(0,0,0,0.5)'
+          }}>
+              {!isVideoOff ? <img src="https://i.pravatar.cc/150?img=5" alt="You" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><VideoOff className="w-8 h-8 text-white/50" /></div>}
+            </div>}
+            <div className="absolute top-0 left-0 right-0 p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-semibold drop-shadow">{activeContact.name}</h2>
+                  <p className="text-sm text-white/70 mt-1"><span>{callState === 'video' ? t.videoCallLabel : t.voiceCallLabel}</span><span> · {formatDuration(callDuration)}</span></p>
+                </div>
+                <button onClick={() => setCallState('none')} className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110" style={{
+                background: 'rgba(255,255,255,0.12)',
+                border: '1px solid rgba(255,255,255,0.2)'
+              }}><X className="w-5 h-5" /></button>
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-8">
+              <div className="flex items-center justify-center gap-4">
+                <button onClick={() => setIsMuted(m => !m)} className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 text-white" style={{
+                background: isMuted ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.25)',
+                color: isMuted ? '#7c3aed' : 'white'
+              }}>{isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}</button>
+                {callState === 'video' && <button onClick={() => setIsVideoOff(v => !v)} className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110" style={{
+                background: isVideoOff ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.25)',
+                color: isVideoOff ? '#7c3aed' : 'white'
+              }}>{isVideoOff ? <VideoOff className="w-6 h-6" /> : <Video className="w-6 h-6" />}</button>}
+                <button className="w-14 h-14 rounded-full text-white flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110" style={{
+                background: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.25)'
+              }}><Volume2 className="w-6 h-6" /></button>
+                <button onClick={handleEndCall} className="w-16 h-14 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-105 shadow-lg"><PhoneOff className="w-6 h-6" /></button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>}
+      </AnimatePresence>
+
+      {/* Compose Modal */}
+      <AnimatePresence>{showComposeModal && <ComposeModal contacts={contacts} onClose={() => setShowComposeModal(false)} onSelectContact={id => setActiveContactId(id)} isDark={true} title={t.newMessage} searchPlaceholder={t.searchContacts} noResultsLabel={t.noContactsFound} groupBadge={t.groupBadge} />}</AnimatePresence>
+
+      {/* Forward Modal */}
+      <AnimatePresence>
+        {forwardingMsg && <motion.div initial={{
+        opacity: 0
+      }} animate={{
+        opacity: 1
+      }} exit={{
+        opacity: 0
+      }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{
+        background: 'rgba(0,0,0,0.7)',
+        backdropFilter: 'blur(20px)'
+      }}>
+          <motion.div initial={{
+          scale: 0.9,
+          opacity: 0,
+          y: 20
+        }} animate={{
+          scale: 1,
+          opacity: 1,
+          y: 0
+        }} exit={{
+          scale: 0.9,
+          opacity: 0,
+          y: 20
+        }} transition={{
+          type: 'spring',
+          stiffness: 280,
+          damping: 26
+        }} className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${GLASS_CARD}`} style={{
+          boxShadow: '0 20px 60px rgba(139,92,246,0.4)'
+        }}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+              <div className="flex items-center gap-2"><Forward className="w-4 h-4 text-violet-300" /><h3 className="font-semibold text-sm text-white">{t.forwardMessage}</h3></div>
+              <button onClick={() => setForwardingMsg(null)} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 text-white/50 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="px-5 py-3 border-b border-white/10 bg-white/5">
+              <p className="text-xs line-clamp-2 italic text-white/50">"{forwardingMsg.text}"</p>
+            </div>
+            <div className="max-h-64 overflow-y-auto py-2">
+              {contacts.map(contact => <button key={contact.id} onClick={() => handleForwardSend(contact.id)} className="w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 ease-in-out hover:bg-white/8 text-left group">
+                <div className="relative flex-shrink-0"><img src={contact.avatar} alt={contact.name} className="w-10 h-10 rounded-full object-cover transition-transform duration-200 group-hover:scale-105" />{contact.online && <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-transparent rounded-full" />}</div>
+                <div className="flex-1 min-w-0"><p className="text-sm font-medium truncate text-white/90">{contact.name}</p><p className="text-xs truncate text-white/40">{contact.lastMessage}</p></div>
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${contact.online ? 'bg-green-400' : 'bg-white/20'}`} />
+              </button>)}
+            </div>
+          </motion.div>
+        </motion.div>}
+      </AnimatePresence>
+
+      {/* Delete Message Modal */}
+      <AnimatePresence>
+        {deletingMsg && <DeleteConfirmModal msgText={deletingMsg.text} isMe={deletingMsg.senderId === 'me'} onDeleteForMe={handleDeleteForMe} onDeleteForEveryone={handleDeleteForEveryone} onCancel={() => setDeletingMsgId(null)} isDark={true} title={t.deleteMessage} subtitle={t.cannotBeUndone} deleteForMeLabel={t.deleteForMe} deleteForMeDesc={t.deleteForMeDesc} deleteForEveryoneLabel={t.deleteForEveryone} deleteForEveryoneDesc={t.deleteForEveryoneDesc} cancelLabel={t.cancel} deletingForMeLabel={t.deletingForMe} deletingForEveryoneLabel={t.deletingForEveryone} />}
+      </AnimatePresence>
+
+      {/* Delete Conversation Modal */}
+      <AnimatePresence>
+        {showDeleteConversation && <DeleteConversationModal contactName={activeContact.name} onConfirm={handleDeleteConversation} onCancel={() => setShowDeleteConversation(false)} isDark={true} title={t.deleteConversationTitle} descPrefix={t.deleteConversationDesc} deleteAllLabel={t.deleteAll} cancelLabel={t.cancel} shreddingLabel={t.shreddingConversation} />}
+      </AnimatePresence>
+    </div>;
+};

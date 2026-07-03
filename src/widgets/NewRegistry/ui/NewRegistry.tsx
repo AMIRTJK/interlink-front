@@ -7,8 +7,7 @@ import {
 	Handshake,
 	CheckCheck,
 	XCircle,
-	Pencil,
-	PenLine,
+	Signature,
 	Send,
 	Clock,
 	FileEdit,
@@ -19,6 +18,37 @@ import { AppRoutes } from "@shared/config";
 import { useRegistryConfig } from "../lib";
 import { IBreadcrumbItem } from "@shared/ui";
 import { MoveToFolderModal } from "./MoveToFolderModal";
+
+// Иконка вкладки «Подписан»: документ с текстом и ручка, ставящая подпись.
+// Собрана в стиле lucide (24×24, stroke=currentColor), поэтому наследует
+// цвет и размер так же, как остальные иконки статусов.
+const FileSignatureIcon = ({
+	size = 24,
+	...props
+}: React.SVGProps<SVGSVGElement> & { size?: number }) => (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth={2}
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		{...props}
+	>
+		{/* Лист документа со скруглённым отогнутым уголком */}
+		<path d="m18.226 5.226-2.52-2.52A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-.351" />
+		{/* Строки текста */}
+		<path d="M8 8h4" />
+		<path d="M8 12h3" />
+		{/* Росчерк подписи */}
+		<path d="M7 17.5c1-1.3 2-1.3 3 0s2 1.3 3 0" />
+		{/* Ручка, ставящая подпись */}
+		<path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" />
+	</svg>
+);
 
 const STATUS_CONFIG: Record<string, any> = {
 	draft: {
@@ -54,7 +84,7 @@ const STATUS_CONFIG: Record<string, any> = {
 	},
 	to_sign: {
 		label: "На подпись",
-		icon: <Pencil size={14} />,
+		icon: <FileSignatureIcon size={14} />,
 		gradient: "from-yellow-400 to-yellow-500",
 		apiUrl: ApiRoutes.GET_INTERNAL_TO_SIGN,
 		paramKey: "type",
@@ -62,7 +92,7 @@ const STATUS_CONFIG: Record<string, any> = {
 	},
 	signed: {
 		label: "Подписан",
-		icon: <PenLine size={14} />,
+		icon: <Signature size={14} />,
 		gradient: "from-purple-500 to-purple-600",
 		apiUrl: ApiRoutes.GET_INTERNAL_PROCESSED,
 		paramKey: "type",
