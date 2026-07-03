@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { Loader } from "@shared/ui/Loader";
 import {
   T,
   getRoleColor,
@@ -601,6 +602,10 @@ export function UserProfileModal({
 
         {/* Body */}
         <div style={{ flex: 1, overflowY: "auto", background: T.bg }}>
+          {isUserPermsLoading ? (
+            <Loader minHeight="100%" />
+          ) : (
+            <>
           {activeTab === "profile" && (
             <div
               style={{
@@ -1245,6 +1250,8 @@ export function UserProfileModal({
                 ))}
               </div>
             </div>
+          )}
+            </>
           )}
         </div>
 
