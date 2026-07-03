@@ -4077,7 +4077,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
             }}
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${showMsgSearch ? "bg-violet-500/30 text-violet-300" : isDark ? "text-white/50 hover:bg-white/10" : "text-gray-500 hover:bg-black/6"}`}
           >
-            <Search className="w-4 h-4" />
+            <Search className="w-4.5 h-4.5" />
           </button>
           <button
             onClick={() =>
@@ -4087,25 +4087,25 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
             }
             className={`w-9 h-9 rounded-full flex items-center justify-center text-amber-500 transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "hover:bg-amber-500/15" : "hover:bg-amber-50"}`}
           >
-            <PhoneIncoming className="w-4 h-4" />
+            <PhoneIncoming className="w-4.5 h-4.5" />
           </button>
           <button
             onClick={() => setCallState("video")}
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "text-white/50 hover:bg-white/10" : "text-gray-500 hover:bg-black/6"}`}
           >
-            <Video className="w-4 h-4" />
+            <Video className="w-4.5 h-4.5" />
           </button>
           <button
             onClick={() => setCallState("audio")}
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "text-white/50 hover:bg-white/10" : "text-gray-500 hover:bg-black/6"}`}
           >
-            <Phone className="w-4 h-4" />
+            <Phone className="w-4.5 h-4.5" />
           </button>
           <button
             onClick={() => setShowContactDrawer((v) => !v)}
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${showContactDrawer ? "bg-violet-500/30 text-violet-500" : isDark ? "text-white/50 hover:bg-white/10" : "text-gray-500 hover:bg-black/6"}`}
           >
-            <UserCog className="w-4 h-4" />
+            <UserCog className="w-4.5 h-4.5" />
           </button>
           <div
             className={`w-px h-5 mx-1 ${isDark ? "bg-white/15" : "bg-black/10"}`}
@@ -4119,7 +4119,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                 : "0 0 12px rgba(124,58,237,0.35)",
             }}
           >
-            <MoreVertical className="w-4 h-4" />
+            <MoreVertical className="w-4.5 h-4.5" />
           </button>
         </div>
       </div>
