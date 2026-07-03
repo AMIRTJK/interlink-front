@@ -7,7 +7,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import { ApiRoutes } from "@shared/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { IosVariant } from "./IosVariant";
-import { User, MailQuestion, Users, Layout, ShieldCheck } from "lucide-react";
+import { User, Mail, Users, Layout, ShieldCheck } from "lucide-react";
 import { THEMES } from "../designSettings";
 import "./style.css";
 
@@ -236,7 +236,7 @@ export const ModuleMenu = ({ variant, hideTopLevel, isVertical }: IProps) => {
 			THEMES[currentTheme]?.gradient || THEMES.emerald.gradient;
 		const headerIcon: Record<string, ReactNode> = {
 			[AppRoutes.PROFILE]: <User size={18} />,
-			[AppRoutes.CORRESPONDENCE]: <MailQuestion size={18} />,
+			[AppRoutes.CORRESPONDENCE]: <Mail size={18} />,
 			[AppRoutes.HR]: <Users size={18} />,
 			[AppRoutes.ADMINISTRATION]: <ShieldCheck size={18} />,
 		};
