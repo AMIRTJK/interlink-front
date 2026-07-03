@@ -7,12 +7,12 @@ import {
   LayoutGrid,
   List,
   MoreHorizontal,
-  ChevronLeft,
-  ChevronRight,
   Pencil,
   Trash2,
   ShieldPlus,
 } from "lucide-react";
+import { Table } from "antd";
+import type { ColumnsType, TableRowSelection } from "antd/es/table/interface";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes, _axios } from "@shared/api";
 import type { IAdminUser } from "@entities/hr";
@@ -22,7 +22,6 @@ import {
   STATUS_CFG,
   thStyle,
   tdStyle,
-  paginBtnStyle,
 } from "../theme/tokens";
 import { ToastContainer } from "./components";
 import { useToasts } from "../lib/useToasts";
@@ -31,7 +30,7 @@ import { CreateRoleModal } from "./CreateRoleModal";
 import { CreateUiPermissionModal } from "./CreateUiPermissionModal";
 import { DeleteRoleModal } from "./DeleteRoleModal";
 import { UserDrawer } from "./UserDrawer";
-import type { RoleCard, PermModule, ExtUser } from "../model";
+import type { RoleCard, PermModule, ExtUser, TableUser } from "../model";
 import {
   adaptRoleCard,
   adaptTableUser,
@@ -212,17 +211,6 @@ export function RolesView() {
     [displayedUsers],
   );
 
-  const totalPages = Math.max(1, Math.ceil(totalUsers / PER_PAGE));
-  const pagesList = React.useMemo(() => {
-    const limit = 4;
-    let start = Math.max(1, currentPage - 2);
-    const end = Math.min(totalPages, start + limit - 1);
-    if (end - start + 1 < limit) start = Math.max(1, end - limit + 1);
-    const arr: number[] = [];
-    for (let i = start; i <= end; i++) arr.push(i);
-    return arr;
-  }, [currentPage, totalPages]);
-
   const switchView = (mode: "block" | "registry") => {
     if (mode === viewMode) return;
     setViewTransitioning(true);
@@ -255,14 +243,156 @@ export function RolesView() {
     setProfileUser(adaptExtUser(rawUser));
   };
 
-  const toggleCheck = (id: string) => {
-    setCheckedUsers((prev) => {
-      const n = new Set(prev);
-      if (n.has(id)) n.delete(id);
-      else n.add(id);
-      return n;
-    });
+  const rowSelection: TableRowSelection<TableUser> = {
+    selectedRowKeys: Array.from(checkedUsers),
+    onChange: (keys) => setCheckedUsers(new Set(keys.map(String))),
   };
+
+  const userColumns: ColumnsType<TableUser> = React.useMemo(
+    () => [
+      {
+        title: "ФИО / Должность",
+        key: "employee",
+        render: (_, user) => {
+          const roleCfg = getRoleColor(user.roles[0]);
+          return (
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  background: roleCfg.bg,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: roleCfg.text,
+                  flexShrink: 0,
+                }}
+              >
+                {user.avatarInitials}
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: T.textPrimary }}>
+                  {user.fio}
+                </div>
+                <div style={{ fontSize: 11, color: T.textSecondary, marginTop: 1 }}>
+                  {user.position}
+                </div>
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        title: "Отдел",
+        dataIndex: "department",
+        key: "department",
+        render: (val: string) => (
+          <span style={{ fontSize: 13, color: T.textPrimary }}>{val}</span>
+        ),
+      },
+      {
+        title: "Роли",
+        dataIndex: "roles",
+        key: "roles",
+        render: (roles: string[]) => (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+            {roles.slice(0, 2).map((role) => {
+              const cfg = getRoleColor(role);
+              return (
+                <span
+                  key={role}
+                  style={{
+                    background: cfg.bg,
+                    color: cfg.text,
+                    borderRadius: 6,
+                    padding: "2px 8px",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {role}
+                </span>
+              );
+            })}
+            {roles.length > 2 && (
+              <span
+                style={{
+                  background: T.hoverBg,
+                  color: T.textSecondary,
+                  borderRadius: 6,
+                  padding: "2px 8px",
+                  fontSize: 11,
+                  fontWeight: 600,
+                }}
+              >
+                +{roles.length - 2}
+              </span>
+            )}
+          </div>
+        ),
+      },
+      {
+        title: "Статус",
+        dataIndex: "status",
+        key: "status",
+        render: (status: string) => {
+          const statusCfg = STATUS_CFG[status] ?? STATUS_CFG["Активен"];
+          return (
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: statusCfg.dot,
+                  display: "inline-block",
+                  flexShrink: 0,
+                }}
+              />
+              <span style={{ fontSize: 13, color: T.textPrimary, fontWeight: 500 }}>
+                {status}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        title: "Дата назначения",
+        dataIndex: "assignedDate",
+        key: "assignedDate",
+        render: (val: string) => (
+          <span style={{ fontSize: 12, color: T.textSecondary }}>{val}</span>
+        ),
+      },
+      {
+        title: "",
+        key: "actions",
+        width: 36,
+        render: () => (
+          <button
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: T.textSecondary,
+              padding: 4,
+              borderRadius: 6,
+              display: "flex",
+            }}
+          >
+            <MoreHorizontal size={15} />
+          </button>
+        ),
+      },
+    ],
+    [],
+  );
 
   const showRoleDrawer = drawerOpen && selectedCard;
 
@@ -867,6 +997,12 @@ export function RolesView() {
             border: `1px solid ${T.border}`,
             overflow: "hidden",
             boxShadow: T.shadow,
+            // Держим минимальную высоту как у "полной" страницы (10 строк),
+            // иначе на пустом реестре карточка схлопывается и вся раскладка
+            // рядом с сайдбаром прав "прыгает".
+            minHeight: 700,
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           <div
@@ -932,279 +1068,33 @@ export function RolesView() {
               />
             </div>
           </div>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr>
-                <th style={thStyle}>
-                  <input
-                    type="checkbox"
-                    style={{ accentColor: T.accent, cursor: "pointer" }}
-                  />
-                </th>
-                <th style={{ ...thStyle, textAlign: "left", paddingLeft: 0 }}>
-                  ФИО / Должность
-                </th>
-                <th style={{ ...thStyle, textAlign: "left" }}>Отдел</th>
-                <th style={{ ...thStyle, textAlign: "left" }}>Роли</th>
-                <th style={{ ...thStyle, textAlign: "left" }}>Статус</th>
-                <th style={{ ...thStyle, textAlign: "left" }}>
-                  Дата назначения
-                </th>
-                <th style={thStyle}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayedUsers.map((user) => {
-                const primaryRole = user.roles[0];
-                const roleCfg = getRoleColor(primaryRole);
-                const statusCfg =
-                  STATUS_CFG[user.status] ?? STATUS_CFG["Активен"];
-                const isRowHighlighted =
+          <Table<TableUser>
+            rowKey="id"
+            columns={userColumns}
+            dataSource={displayedUsers}
+            rowSelection={rowSelection}
+            onRow={(user) => ({
+              onClick: () => handleRowClick(user.id),
+              style: {
+                cursor: "pointer",
+                background:
                   isRoleFiltered &&
                   !!selectedRoleName &&
-                  user.roles.includes(selectedRoleName);
-                return (
-                  <tr
-                    key={user.id}
-                    onClick={() => handleRowClick(user.id)}
-                    style={{
-                      background: isRowHighlighted ? "#EFF6FF" : "transparent",
-                      borderBottom: `1px solid ${T.bg}`,
-                      transition: "background 0.12s",
-                      cursor: "pointer",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isRowHighlighted)
-                        (e.currentTarget as HTMLTableRowElement).style.background =
-                          T.hoverBg;
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLTableRowElement).style.background =
-                        isRowHighlighted ? "#EFF6FF" : "transparent";
-                    }}
-                  >
-                    <td
-                      style={tdStyle}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleCheck(user.id);
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={checkedUsers.has(user.id)}
-                        onChange={() => toggleCheck(user.id)}
-                        onClick={(e) => e.stopPropagation()}
-                        style={{ accentColor: T.accent, cursor: "pointer" }}
-                      />
-                    </td>
-                    <td style={{ ...tdStyle, paddingLeft: 0 }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 10,
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: 8,
-                            background: roleCfg.bg,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: 11,
-                            fontWeight: 700,
-                            color: roleCfg.text,
-                            flexShrink: 0,
-                          }}
-                        >
-                          {user.avatarInitials}
-                        </div>
-                        <div>
-                          <div
-                            style={{
-                              fontSize: 13,
-                              fontWeight: 600,
-                              color: T.textPrimary,
-                            }}
-                          >
-                            {user.fio}
-                          </div>
-                          <div
-                            style={{
-                              fontSize: 11,
-                              color: T.textSecondary,
-                              marginTop: 1,
-                            }}
-                          >
-                            {user.position}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td style={tdStyle}>
-                      <span style={{ fontSize: 13, color: T.textPrimary }}>
-                        {user.department}
-                      </span>
-                    </td>
-                    <td style={tdStyle}>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: 4,
-                          justifyContent: "flex-start",
-                        }}
-                      >
-                        {user.roles.slice(0, 2).map((role) => {
-                          const cfg = getRoleColor(role);
-                          return (
-                            <span
-                              key={role}
-                              style={{
-                                background: cfg.bg,
-                                color: cfg.text,
-                                borderRadius: 6,
-                                padding: "2px 8px",
-                                fontSize: 11,
-                                fontWeight: 600,
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {role}
-                            </span>
-                          );
-                        })}
-                        {user.roles.length > 2 && (
-                          <span
-                            style={{
-                              background: T.hoverBg,
-                              color: T.textSecondary,
-                              borderRadius: 6,
-                              padding: "2px 8px",
-                              fontSize: 11,
-                              fontWeight: 600,
-                            }}
-                          >
-                            +{user.roles.length - 2}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td style={tdStyle}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 6,
-                        }}
-                      >
-                        <span
-                          style={{
-                            width: 7,
-                            height: 7,
-                            borderRadius: "50%",
-                            background: statusCfg.dot,
-                            display: "inline-block",
-                            flexShrink: 0,
-                          }}
-                        />
-                        <span
-                          style={{
-                            fontSize: 13,
-                            color: T.textPrimary,
-                            fontWeight: 500,
-                          }}
-                        >
-                          {user.status}
-                        </span>
-                      </div>
-                    </td>
-                    <td style={tdStyle}>
-                      <span style={{ fontSize: 12, color: T.textSecondary }}>
-                        {user.assignedDate}
-                      </span>
-                    </td>
-                    <td
-                      style={{ ...tdStyle, width: 36 }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button
-                        style={{
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          color: T.textSecondary,
-                          padding: 4,
-                          borderRadius: 6,
-                          display: "flex",
-                        }}
-                      >
-                        <MoreHorizontal size={15} />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          <div
-            style={{
-              padding: "10px 20px",
-              borderTop: `1px solid ${T.border}`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              background: T.bg,
+                  user.roles.includes(selectedRoleName)
+                    ? "#EFF6FF"
+                    : undefined,
+              },
+            })}
+            pagination={{
+              current: currentPage,
+              pageSize: PER_PAGE,
+              total: totalUsers,
+              onChange: (page) => setCurrentPage(page),
+              showTotal: (total, range) =>
+                `Показано ${range[0]}-${range[1]} из ${total} пользователей`,
             }}
-          >
-            <span style={{ fontSize: 13, color: T.textSecondary }}>
-              <span>Показано </span>
-              <strong style={{ color: T.textPrimary }}>
-                {displayedUsers.length}
-              </strong>
-              <span> из </span>
-              <strong style={{ color: T.textPrimary }}>{totalUsers}</strong>
-              <span> пользователей</span>
-            </span>
-            <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-              <button
-                style={paginBtnStyle}
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft size={13} />
-              </button>
-              {pagesList.map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  style={{
-                    ...paginBtnStyle,
-                    background: page === currentPage ? T.accent : "transparent",
-                    color: page === currentPage ? "#fff" : T.textSecondary,
-                    fontWeight: page === currentPage ? 700 : 400,
-                    border:
-                      page === currentPage ? "none" : `1px solid ${T.border}`,
-                  }}
-                >
-                  {page}
-                </button>
-              ))}
-              <button
-                style={paginBtnStyle}
-                onClick={() =>
-                  setCurrentPage(Math.min(totalPages, currentPage + 1))
-                }
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight size={13} />
-              </button>
-            </div>
-          </div>
+            locale={{ emptyText: "Пользователи не найдены" }}
+          />
         </div>
       </div>
 
