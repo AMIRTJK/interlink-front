@@ -4174,7 +4174,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
               ease: [0.25, 0.46, 0.45, 0.94],
             }}
             ref={scrollRef}
-            className="absolute inset-0 overflow-y-auto px-6 py-6 space-y-5"
+            className="absolute inset-0 overflow-y-auto px-6 pt-14 pb-6 space-y-5"
             style={{
               scrollbarWidth: "thin",
               scrollbarColor: isDark
