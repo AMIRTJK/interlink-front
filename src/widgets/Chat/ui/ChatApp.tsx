@@ -1505,7 +1505,7 @@ const MessageActionMenu = ({
       transition={{
         duration: 0.14,
       }}
-      className={`absolute top-8 ${isMe ? "right-0" : "left-0"} rounded-2xl shadow-2xl py-1.5 min-w-[130px] z-40 ${isDark ? "backdrop-blur-2xl bg-white/10 border border-white/20" : "backdrop-blur-2xl bg-white/85 border border-white/30"}`}
+      className={`absolute top-8 ${isMe ? "left-0" : "right-0"} rounded-2xl shadow-2xl py-1.5 min-w-[130px] z-40 ${isDark ? "backdrop-blur-2xl bg-white/10 border border-white/20" : "backdrop-blur-2xl bg-white/85 border border-white/30"}`}
       style={{
         boxShadow: isDark
           ? "0 8px 30px rgba(139,92,246,0.35)"
@@ -4332,7 +4332,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                                   exit={{
                                     opacity: 0,
                                   }}
-                                  className={`absolute top-0 ${isMe ? "-left-8" : "-right-8"} flex items-center`}
+                                  className={`absolute -top-3.5 ${isMe ? "-left-8" : "-right-8"} flex items-center z-20`}
                                 >
                                   <button
                                     onClick={(e) => {
