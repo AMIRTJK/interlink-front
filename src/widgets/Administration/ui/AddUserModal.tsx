@@ -228,7 +228,11 @@ export function AddUserModal({
       setUserRolesM.mutate(
         {
           user_id: Number(selectedEmployee.user.id),
-          roles: [formData.role],
+          // assign-roles — replace-эндпоинт: шлём текущие роли сотрудника + новую,
+          // а не только новую, иначе снесём все остальные его роли
+          roles: Array.from(
+            new Set([...selectedEmployee.user.roles, formData.role]),
+          ),
         },
         {
           onSuccess: () => {

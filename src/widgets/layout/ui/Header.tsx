@@ -76,7 +76,7 @@ export const Header = ({
   const userId = tokenControl.getUserId();
   const { data: userResponse } = useGetQuery<{ data: IUser }>({
     url: `${ApiRoutes.FETCH_USER_BY_ID}${userId}`,
-    options: { enabled: !!userId },
+    options: { enabled: !!userId, refetchOnWindowFocus: false, staleTime: Infinity },
   });
   const userData = (userResponse as { data?: IUser } | undefined)?.data ?? null;
   const userSubtitle =

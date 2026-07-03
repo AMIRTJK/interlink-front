@@ -32,17 +32,43 @@ export const ACTION_TRANSLATIONS: Record<string, string> = {
   manage_ui: "Управление UI",
   register: "Регистрация",
   assign: "Назначение",
-  "assignment.update_status": "Изменение статуса",
-  view_all: "Просмотр всех",
-  update_all: "Обновление всех",
-  "assignment.update_any": "Обновление любого",
   edit_own: "Собственное",
-  "folder.view": "Просмотр папок",
-  "folder.manage": "Управление папок",
+  counters: "Счетчики",
+  restore: "Восстановление",
+  trash: "Корзина",
+  pin: "Закрепление",
+  archive: "Архив",
+  move: "Перемещение",
+  set_leader: "Назначение руководителя",
+  leader_candidates: "Кандидаты в руководители",
+  assignment_targets: "Цели назначения",
+  assign_all: "Назначить все",
+  payload: "Данные подписи",
+  confirm: "Подтверждение",
+  send: "Отправка",
+  invite_approvals: "Приглашение согласующих",
+  invite_signers: "Приглашение подписантов",
+  approve: "Согласование",
+  manage_participants: "Участники",
   sign: "Подписание",
   reject: "Отклонение",
   export: "Экспорт",
+  view_all: "Просмотр всех",
+  update_all: "Обновление всех",
   "logs.view": "Просмотр логов",
+  "assignment.update_status": "Обновление статуса назначения",
+  "assignment.update_any": "Изменение любого назначения",
+  "resolution.create": "Создание резолюции",
+  "resolution.update": "Изменение резолюции",
+  "resolution.close": "Закрытие резолюции",
+  "approval.view": "Просмотр согласования",
+  "approval.update_status": "Обновление статуса согласования",
+  "approval.update_any": "Изменение любого согласования",
+  "attachment.upload": "Загрузка вложений",
+  "attachment.upload_bulk": "Массовая загрузка вложений",
+  "attachment.delete": "Удаление вложений",
+  "folder.view": "Просмотр папок",
+  "folder.manage": "Управление папками",
 };
 
 // Порядок модулей как в дизайне: сначала канонические, потом остальные
@@ -74,6 +100,15 @@ const STATUS_LABELS: Record<string, string> = {
 export function mapStatus(status?: string): string {
   if (!status) return "Активен";
   return STATUS_LABELS[status] ?? status;
+}
+
+const STATUS_CODES: Record<string, string> = Object.fromEntries(
+  Object.entries(STATUS_LABELS).map(([code, label]) => [label, code]),
+);
+
+/** Обратное к mapStatus — русская метка UI -> код backend для PUT /admin/users/:id */
+export function unmapStatus(label: string): string {
+  return STATUS_CODES[label] ?? label;
 }
 
 export function getInitials(name: string): string {
@@ -144,7 +179,7 @@ export function adaptExtUser(u: IAdminUser): ExtUser {
     email: u.email || "—",
     position: u.position || "—",
     department: department(u),
-    roles: (u.roles || []).map((r) => r.name),
+    roles: extractPermNames(u.roles),
     status: mapStatus(u.status),
     lastActivity: mockLastActivity(u.id), // MOCK: нет API last_activity
     avatarInitials: getInitials(fio) || "—",
@@ -159,7 +194,7 @@ export function adaptTableUser(u: IAdminUser): TableUser {
     fio,
     position: u.position || "—",
     department: department(u),
-    roles: (u.roles || []).map((r) => r.name),
+    roles: extractPermNames(u.roles),
     status: mapStatus(u.status),
     // MOCK: нет даты назначения роли — используем дату создания пользователя
     assignedDate: formatJoinedDate(u.created_at),
@@ -219,6 +254,36 @@ export function buildPermModules(
 }
 
 /** Собирает включённые сырые имена прав обратно из матрицы (для сохранения) */
+/** Накладывает на матрицу прав union(role_permissions) + direct - denied */
+export function applyEffectiveState(
+  basePerms: PermModule[],
+  unionRolePerms: Set<string>,
+  direct: string[],
+  denied: string[],
+): PermModule[] {
+  const directSet = new Set(direct);
+  const deniedSet = new Set(denied);
+  const applyToSubperms = (subperms?: { label: string; value: boolean; name?: string }[]) =>
+    subperms?.map((sp) => {
+      if (!sp.name) return sp;
+      let value = unionRolePerms.has(sp.name);
+      if (directSet.has(sp.name)) value = true;
+      if (deniedSet.has(sp.name)) value = false;
+      return { ...sp, value };
+    });
+  return basePerms.map((m) => ({
+    ...m,
+    perms: m.perms.map((p) => ({
+      ...p,
+      subperms: applyToSubperms(p.subperms) ?? p.subperms,
+      children: p.children?.map((ch) => ({
+        ...ch,
+        subperms: applyToSubperms(ch.subperms) ?? ch.subperms,
+      })),
+    })),
+  }));
+}
+
 export function collectEnabledPermNames(perms: PermModule[]): string[] {
   const names: string[] = [];
   perms.forEach((mod) =>

@@ -49,6 +49,7 @@ export const useNavbar = () => {
     url: `${ApiRoutes.FETCH_USER_BY_ID}${tokenControl.getUserId()}`,
     useToken: true,
     preload: true,
+    options: { refetchOnWindowFocus: false, staleTime: Infinity },
   });
 
   const userRoleNames = useMemo(() => {
