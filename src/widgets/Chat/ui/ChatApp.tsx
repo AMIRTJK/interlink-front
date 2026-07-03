@@ -3114,7 +3114,7 @@ const ComposeModal = ({
           stiffness: 280,
           damping: 26,
         }}
-        className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? "bg-[#150e28]/95 border border-white/10 backdrop-blur-xl text-white" : "bg-white border border-gray-150 text-gray-800 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.15)]"}`}
+        className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? "bg-[#150e28]/95 border border-white/10 backdrop-blur-xl text-white" : "bg-white border border-gray-200 text-gray-800 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.15)]"}`}
         style={{
           boxShadow: isDark
             ? "0 20px 60px rgba(139,92,246,0.4)"
@@ -5296,7 +5296,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                 stiffness: 280,
                 damping: 26,
               }}
-              className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? "bg-[#150e28]/95 border border-white/10 backdrop-blur-xl text-white" : "bg-white border border-gray-150 text-gray-800 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.15)]"}`}
+              className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? "bg-[#150e28]/95 border border-white/10 backdrop-blur-xl text-white" : "bg-white border border-gray-200 text-gray-800 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.15)]"}`}
               style={{
                 boxShadow: isDark
                   ? "0 20px 60px rgba(139,92,246,0.4)"
