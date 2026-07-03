@@ -253,7 +253,7 @@ export const Header = ({
             trigger="click"
             placement={isVertical ? "rightBottom" : "bottomRight"}
             arrow={false}
-            overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0 }}
+            overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
           >
             <button
               aria-label="Уведомления"
@@ -308,7 +308,7 @@ export const Header = ({
               trigger="click"
               placement={isVertical ? "rightBottom" : "bottomRight"}
               arrow={false}
-              overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0 }}
+              overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
             >
               <button
                 aria-label="Выбор темы"
@@ -323,7 +323,7 @@ export const Header = ({
               trigger="click"
               placement={isVertical ? "rightBottom" : "bottomRight"}
               arrow={false}
-              overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0 }}
+              overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
             >
               <button
                 aria-label="Фон страницы"
@@ -338,7 +338,7 @@ export const Header = ({
               trigger="click"
               placement={isVertical ? "rightBottom" : "bottomRight"}
               arrow={false}
-              overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0 }}
+              overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
             >
               <button
                 aria-label="Макет страницы"

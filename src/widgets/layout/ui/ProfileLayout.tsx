@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Header } from "./Header";
 import { THEMES, BACKGROUNDS, LayoutMode } from "./designSettings";
+import { tokenControl } from "@shared/lib";
 
 export const ProfileLayout = () => {
   const [currentTheme, setCurrentTheme] = useState(() => {
@@ -30,7 +31,7 @@ export const ProfileLayout = () => {
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== "undefined") {
-      return document.documentElement.classList.contains("dark");
+      return tokenControl.getDarkMode();
     }
     return false;
   });
