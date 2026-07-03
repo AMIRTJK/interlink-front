@@ -666,10 +666,8 @@ const LayoutSwitcher = ({
   <div
     className="flex items-center gap-0.5 rounded-xl p-1"
     style={{
-      background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
-      border: isDark
-        ? "1px solid rgba(255,255,255,0.1)"
-        : "1px solid rgba(0,0,0,0.08)",
+      background: "rgba(255,255,255,0.08)",
+      border: "1px solid rgba(255,255,255,0.15)",
     }}
   >
     {LAYOUT_BUTTONS.map(({ pos, Icon, label }) => (
@@ -678,17 +676,17 @@ const LayoutSwitcher = ({
         onClick={() => onChange(pos)}
         aria-label={label}
         title={label}
-        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110"
+        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 cursor-pointer"
         style={
           layout === pos
             ? {
                 background: "linear-gradient(135deg,#7c3aed,#06b6d4)",
                 color: "white",
-                boxShadow: "0 0 10px rgba(124,58,237,0.5)",
+                boxShadow: "0 0 10px rgba(255,255,255,0.25)",
               }
             : {
                 background: "transparent",
-                color: isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.45)",
+                color: "rgba(255,255,255,0.5)",
               }
         }
       >
@@ -864,7 +862,7 @@ const ChatListPanel = ({
       }}
       className="flex-shrink-0 flex flex-col overflow-hidden"
       style={{
-        width: "240px",
+        width: "280px",
         background: isDark ? "rgba(15,5,40,0.6)" : "rgba(255,255,255,0.7)",
         borderRight:
           layout === "left"
@@ -912,14 +910,14 @@ const ChatListPanel = ({
           }}
         >
           <Search
-            className={`w-3.5 h-3.5 flex-shrink-0 ${isDark ? "text-white/35" : "text-gray-450"}`}
+            className={`w-3.5 h-3.5 flex-shrink-0 ${isDark ? "text-white/35" : "text-gray-400"}`}
           />
           <input
             type="text"
             placeholder="Search…"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className={`flex-1 bg-transparent outline-none text-xs ${isDark ? "placeholder-white/25 text-white" : "placeholder-gray-400 text-gray-800"}`}
+            className={`flex-1 bg-transparent outline-none text-sm ${isDark ? "placeholder-white/25 text-white" : "placeholder-gray-400 text-gray-800"}`}
           />
         </div>
       </div>
@@ -1006,7 +1004,7 @@ const ChatListPanel = ({
               <div className="flex-1 min-w-0 text-left">
                 <div className="flex items-center justify-between gap-1">
                   <p
-                    className={`text-xs font-semibold truncate transition-colors duration-200 ${isActive ? (isDark ? "text-white" : "text-gray-900") : isDark ? "text-white/75 group-hover:text-white" : "text-gray-600 group-hover:text-gray-900"}`}
+                    className={`text-sm font-semibold truncate transition-colors duration-200 ${isActive ? (isDark ? "text-white" : "text-gray-900") : isDark ? "text-white/75 group-hover:text-white" : "text-gray-600 group-hover:text-gray-900"}`}
                   >
                     {contact.name}
                   </p>
@@ -1022,7 +1020,7 @@ const ChatListPanel = ({
                   )}
                 </div>
                 <p
-                  className={`text-[10px] truncate mt-0.5 transition-colors duration-200 ${isDark ? "text-white/35 group-hover:text-white/50" : "text-gray-400 group-hover:text-gray-600"}`}
+                  className={`text-xs truncate mt-0.5 transition-colors duration-200 ${isDark ? "text-white/35 group-hover:text-white/50" : "text-gray-400 group-hover:text-gray-600"}`}
                 >
                   {contact.lastMessage}
                 </p>
@@ -1923,7 +1921,7 @@ const MessageSearchBar = ({
       placeholder={placeholder}
       value={query}
       onChange={(e) => onChange(e.target.value)}
-      className={`flex-1 bg-transparent outline-none text-sm ${isDark ? "placeholder-white/30 text-white" : "placeholder-gray-450 text-gray-800"}`}
+      className={`flex-1 bg-transparent outline-none text-sm ${isDark ? "placeholder-white/30 text-white" : "placeholder-gray-400 text-gray-800"}`}
     />
     {query && (
       <span
@@ -2288,7 +2286,7 @@ const DeleteConfirmModal = ({
                 <div className="text-left">
                   <p className="font-semibold">{deleteForMeLabel}</p>
                   <p
-                    className={`text-xs font-normal ${isDark ? "text-white/40" : "text-gray-450"}`}
+                    className={`text-xs font-normal ${isDark ? "text-white/40" : "text-gray-400"}`}
                   >
                     {deleteForMeDesc}
                   </p>
@@ -2859,7 +2857,7 @@ const ContactInfoDrawer = ({
                   </div>
                   <div className="min-w-0">
                     <p
-                      className={`text-[10px] uppercase tracking-wider ${isDark ? "text-white/35" : "text-gray-450"}`}
+                      className={`text-[10px] uppercase tracking-wider ${isDark ? "text-white/35" : "text-gray-400"}`}
                     >
                       {t.email}
                     </p>
@@ -2880,7 +2878,7 @@ const ContactInfoDrawer = ({
                   </div>
                   <div>
                     <p
-                      className={`text-[10px] uppercase tracking-wider ${isDark ? "text-white/35" : "text-gray-450"}`}
+                      className={`text-[10px] uppercase tracking-wider ${isDark ? "text-white/35" : "text-gray-400"}`}
                     >
                       {t.location}
                     </p>
@@ -2901,7 +2899,7 @@ const ContactInfoDrawer = ({
                   </div>
                   <div>
                     <p
-                      className={`text-[10px] uppercase tracking-wider ${isDark ? "text-white/35" : "text-gray-450"}`}
+                      className={`text-[10px] uppercase tracking-wider ${isDark ? "text-white/35" : "text-gray-400"}`}
                     >
                       {t.memberSince}
                     </p>
@@ -2920,7 +2918,7 @@ const ContactInfoDrawer = ({
             {contact.mutualGroups && contact.mutualGroups.length > 0 && (
               <div className="px-5 py-3">
                 <p
-                  className={`text-[10px] uppercase tracking-wider mb-2 ${isDark ? "text-white/35" : "text-gray-450"}`}
+                  className={`text-[10px] uppercase tracking-wider mb-2 ${isDark ? "text-white/35" : "text-gray-400"}`}
                 >
                   {t.mutualGroups}
                 </p>
@@ -2975,7 +2973,7 @@ const ContactInfoDrawer = ({
         {drawerTab === "media" && (
           <div className="p-4">
             <p
-              className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? "text-white/35" : "text-gray-450"}`}
+              className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? "text-white/35" : "text-gray-400"}`}
             >
               {t.sharedMedia} · {SAMPLE_MEDIA_IMAGES.length}
             </p>
@@ -2997,7 +2995,7 @@ const ContactInfoDrawer = ({
               className={`mt-4 border-t pt-4 ${isDark ? "border-white/10" : "border-black/5"}`}
             >
               <p
-                className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? "text-white/35" : "text-gray-450"}`}
+                className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? "text-white/35" : "text-gray-400"}`}
               >
                 {t.sharedFiles} · 3
               </p>
@@ -3154,7 +3152,7 @@ const ComposeModal = ({
               placeholder={searchPlaceholder}
               value={composeSearch}
               onChange={(e) => setComposeSearch(e.target.value)}
-              className={`flex-1 bg-transparent outline-none text-sm ${isDark ? "placeholder-white/30 text-white" : "placeholder-gray-450 text-gray-850"}`}
+              className={`flex-1 bg-transparent outline-none text-sm ${isDark ? "placeholder-white/30 text-white" : "placeholder-gray-400 text-gray-850"}`}
             />
           </div>
         </div>
