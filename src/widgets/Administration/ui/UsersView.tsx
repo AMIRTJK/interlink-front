@@ -4,8 +4,6 @@ import * as React from "react";
 import {
   Search,
   Plus,
-  ChevronLeft,
-  ChevronRight,
   MoreHorizontal,
 } from "lucide-react";
 
@@ -18,7 +16,6 @@ import {
   EXT_STATUS_CFG,
   thStyle,
   tdStyle,
-  paginBtnStyle,
 } from "../theme/tokens";
 import { ToastContainer } from "./components";
 import { CustomDropdown } from "./CustomDropdown";
@@ -481,6 +478,24 @@ export function UsersView() {
             total: totalUsers,
             onChange: (page) => setCurrentPage(page),
             showSizeChanger: false,
+            style: {
+              padding: "10px 20px",
+              borderTop: `1px solid ${T.border}`,
+              background: T.bg,
+              margin: 0,
+              display: "flex",
+              alignItems: "center",
+              width: "100%",
+            },
+            showTotal: (total, range) => (
+              <span style={{ fontSize: 13, color: T.textSecondary, marginRight: "auto" }}>
+                <span>Показано </span>
+                <strong style={{ color: T.textPrimary }}>{range[1] - range[0] + 1}</strong>
+                <span> из </span>
+                <strong style={{ color: T.textPrimary }}>{total}</strong>
+                <span> сотрудников</span>
+              </span>
+            ),
           }}
           onRow={(record) => ({
             onClick: () => {
