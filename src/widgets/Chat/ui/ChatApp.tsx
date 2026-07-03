@@ -1867,7 +1867,11 @@ interface IProps {
 }
 
 export const ChatApp = ({ onComposeStateChange }: IProps) => {
-  const [isSystemDark, setIsSystemDark] = useState(() => document.documentElement.classList.contains('dark'));
+  const [isSystemDark, setIsSystemDark] = useState(() => {
+    const stored = localStorage.getItem('darkMode');
+    if (stored !== null) return stored === 'true';
+    return document.documentElement.classList.contains('dark');
+  });
   const isDark = isSystemDark;
 
   useEffect(() => {
@@ -1966,9 +1970,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
   const lastReceivedMessage = [...currentMessages].reverse().find(m => m.senderId !== 'me');
   const deletingMsg = deletingMsgId ? currentMessages.find(m => m.id === deletingMsgId) || null : null;
   const totalUnread = Object.values(contactUnreads).reduce((a, b) => a + b, 0);
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
+
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [currentMessages, isTyping, activeContactId]);
@@ -2312,8 +2314,8 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
     background: 'transparent'
   }}>
       {/* Chat sub-header */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-white/8 flex-shrink-0" style={{
-      background: 'rgba(255,255,255,0.04)',
+      <div className={`flex items-center justify-between px-6 py-3 border-b flex-shrink-0 ${isDark ? 'border-white/8' : 'border-black/6'}`} style={{
+      background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.6)',
       backdropFilter: 'blur(10px)'
     }}>
         <motion.div key={`header-${activeContactId}`} initial={{
@@ -2335,8 +2337,8 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
           }} />}
           </div>
           <div>
-            <h2 className="font-semibold text-sm text-white">{activeContact.name}</h2>
-            <p className="text-xs text-white/50">{activeContact.online ? t.online : t.lastSeen}</p>
+            <h2 className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{activeContact.name}</h2>
+            <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{activeContact.online ? t.online : t.lastSeen}</p>
           </div>
         </motion.div>
         <div className="flex items-center gap-1">
@@ -2344,17 +2346,17 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
           setShowMsgSearch(v => !v);
           setMsgSearchQuery('');
           setSearchMatchIndex(0);
-        }} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${showMsgSearch ? 'bg-violet-500/30 text-violet-300' : 'text-white/50 hover:bg-white/10'}`}><Search className="w-4 h-4" /></button>
+        }} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${showMsgSearch ? 'bg-violet-500/30 text-violet-300' : (isDark ? 'text-white/50 hover:bg-white/10' : 'text-gray-500 hover:bg-black/6')}`}><Search className="w-4 h-4" /></button>
           <button onClick={() => setIncomingCall({
           callType: 'audio'
-        })} className="w-9 h-9 rounded-full flex items-center justify-center text-amber-400/80 hover:bg-amber-500/15 transition-all duration-200 ease-in-out hover:scale-110"><PhoneIncoming className="w-4 h-4" /></button>
-          <button onClick={() => setCallState('video')} className="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:bg-white/10 transition-all duration-200 ease-in-out hover:scale-110"><Video className="w-4 h-4" /></button>
-          <button onClick={() => setCallState('audio')} className="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:bg-white/10 transition-all duration-200 ease-in-out hover:scale-110"><Phone className="w-4 h-4" /></button>
-          <button onClick={() => setShowContactDrawer(v => !v)} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${showContactDrawer ? 'bg-violet-500/30 text-violet-300' : 'text-white/50 hover:bg-white/10'}`}><UserCog className="w-4 h-4" /></button>
-          <div className="w-px h-5 mx-1 bg-white/15" />
+        })} className={`w-9 h-9 rounded-full flex items-center justify-center text-amber-500 transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-amber-500/15' : 'hover:bg-amber-50'}`}><PhoneIncoming className="w-4 h-4" /></button>
+          <button onClick={() => setCallState('video')} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'text-white/50 hover:bg-white/10' : 'text-gray-500 hover:bg-black/6'}`}><Video className="w-4 h-4" /></button>
+          <button onClick={() => setCallState('audio')} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'text-white/50 hover:bg-white/10' : 'text-gray-500 hover:bg-black/6'}`}><Phone className="w-4 h-4" /></button>
+          <button onClick={() => setShowContactDrawer(v => !v)} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${showContactDrawer ? 'bg-violet-500/30 text-violet-500' : (isDark ? 'text-white/50 hover:bg-white/10' : 'text-gray-500 hover:bg-black/6')}`}><UserCog className="w-4 h-4" /></button>
+          <div className={`w-px h-5 mx-1 ${isDark ? 'bg-white/15' : 'bg-black/10'}`} />
           <button className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:scale-110 hover:brightness-110" style={{
           background: 'linear-gradient(135deg,#7c3aed,#06b6d4)',
-          boxShadow: '0 0 16px rgba(124,58,237,0.5)'
+          boxShadow: isDark ? '0 0 16px rgba(124,58,237,0.5)' : '0 0 12px rgba(124,58,237,0.35)'
         }}><MoreVertical className="w-4 h-4" /></button>
         </div>
       </div>
@@ -2370,14 +2372,16 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
       </AnimatePresence>
 
       {/* Messages area */}
-      <div className="flex-1 relative overflow-hidden">
+      <div className="flex-1 relative overflow-hidden" style={{
+        background: isDark ? 'transparent' : 'rgba(248,247,255,0.5)'
+      }}>
         <AnimatePresence mode="wait" custom={switchDirection}>
           <motion.div key={activeContactId} custom={switchDirection} variants={chatVariants} initial="enter" animate="center" exit="exit" transition={{
           duration: 0.25,
           ease: [0.25, 0.46, 0.45, 0.94]
         }} ref={scrollRef} className="absolute inset-0 overflow-y-auto px-6 py-6 space-y-5" style={{
           scrollbarWidth: 'thin',
-          scrollbarColor: 'rgba(167,139,250,0.3) transparent'
+          scrollbarColor: isDark ? 'rgba(167,139,250,0.3) transparent' : 'rgba(167,139,250,0.25) transparent'
         }}>
             {currentMessages.map(msg => {
             const isMe = msg.senderId === 'me';
@@ -2399,12 +2403,12 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                 border: '2px solid rgba(167,139,250,0.35)'
               }} />}
                 <div className={`flex flex-col max-w-[65%] ${isMe ? 'items-end' : 'items-start'}`}>
-                  {msg.scheduled && !isEffectivelyDeleted && <div className={`flex items-center gap-1 mb-1 text-[10px] font-medium ${isMe ? 'self-end' : 'self-start'} text-amber-400`}><Clock3 className="w-3 h-3" /><span>{t.scheduled} · {msg.scheduledTime}</span></div>}
-                  {msg.replyTo && !isEffectivelyDeleted && <div className={`flex items-center gap-2 mb-1 px-3 py-1.5 rounded-xl border-l-4 border-violet-400 text-xs max-w-full ${isMe ? 'self-end' : 'self-start'} bg-violet-500/15`}>
-                    <CornerUpLeft className="w-3 h-3 text-violet-300 flex-shrink-0" />
-                    <div className="min-w-0"><span className="font-semibold text-violet-300 text-[10px]">{msg.replyTo.senderName}</span><p className="truncate max-w-[200px] text-white/60">{msg.replyTo.text}</p></div>
+                  {msg.scheduled && !isEffectivelyDeleted && <div className={`flex items-center gap-1 mb-1 text-[10px] font-medium ${isMe ? 'self-end' : 'self-start'} ${isDark ? 'text-amber-400' : 'text-amber-600'}`}><Clock3 className="w-3 h-3" /><span>{t.scheduled} · {msg.scheduledTime}</span></div>}
+                  {msg.replyTo && !isEffectivelyDeleted && <div className={`flex items-center gap-2 mb-1 px-3 py-1.5 rounded-xl border-l-4 border-violet-400 text-xs max-w-full ${isMe ? 'self-end' : 'self-start'} ${isDark ? 'bg-violet-500/15' : 'bg-violet-100/70'}`}>
+                    <CornerUpLeft className="w-3 h-3 text-violet-400 flex-shrink-0" />
+                    <div className="min-w-0"><span className={`font-semibold text-[10px] ${isDark ? 'text-violet-300' : 'text-violet-600'}`}>{msg.replyTo.senderName}</span><p className={`truncate max-w-[200px] ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{msg.replyTo.text}</p></div>
                   </div>}
-                  {msg.forwarded && !isEffectivelyDeleted && <div className={`flex items-center gap-1 mb-1 text-[10px] text-white/40 ${isMe ? 'self-end' : 'self-start'}`}><Forward className="w-3 h-3" /><span>{t.forwarded}</span></div>}
+                  {msg.forwarded && !isEffectivelyDeleted && <div className={`flex items-center gap-1 mb-1 text-[10px] ${isDark ? 'text-white/40' : 'text-gray-400'} ${isMe ? 'self-end' : 'self-start'}`}><Forward className="w-3 h-3" /><span>{t.forwarded}</span></div>}
                   {msg.attachment?.type === 'voice' && !isEffectivelyDeleted && <VoiceBubble duration={msg.attachment.duration || 5} isMe={isMe} isDark={isDark} />}
                   {msg.attachment && msg.attachment.type !== 'voice' && !isEffectivelyDeleted && <div className={`mb-1.5 rounded-2xl overflow-hidden transition-all duration-200 ease-in-out hover:brightness-110 ${isMe ? 'rounded-br-md' : 'rounded-bl-md'}`} style={{
                   border: isMe ? '1px solid rgba(167,139,250,0.35)' : '1px solid rgba(255,255,255,0.12)'
@@ -2643,23 +2647,25 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
       <GradientBg isDark={isDark} />
 
       <div className="w-full max-w-7xl h-full max-h-[900px] flex flex-col rounded-2xl overflow-hidden shadow-2xl relative" style={{
-      background: 'rgba(10,4,30,0.55)',
+      background: isDark ? 'rgba(10,4,30,0.55)' : 'rgba(255,255,255,0.72)',
       backdropFilter: 'blur(30px)',
-      border: '1px solid rgba(167,139,250,0.2)',
-      boxShadow: '0 30px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)'
+      border: isDark ? '1px solid rgba(167,139,250,0.2)' : '1px solid rgba(167,139,250,0.18)',
+      boxShadow: isDark ? '0 30px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)' : '0 30px 80px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.9)'
     }}>
 
         {/* ── Top Header Bar ── */}
         <header className="flex-shrink-0" style={{
-        background: 'linear-gradient(135deg,rgba(76,29,149,0.6),rgba(124,58,237,0.45),rgba(6,182,212,0.3))',
-        borderBottom: '1px solid rgba(167,139,250,0.2)',
+        background: isDark
+          ? 'linear-gradient(135deg,rgba(76,29,149,0.6),rgba(124,58,237,0.45),rgba(6,182,212,0.3))'
+          : 'linear-gradient(135deg,rgba(124,58,237,0.85),rgba(139,92,246,0.8),rgba(6,182,212,0.7))',
+        borderBottom: isDark ? '1px solid rgba(167,139,250,0.2)' : '1px solid rgba(124,58,237,0.25)',
         backdropFilter: 'blur(20px)'
       }}>
           <div className="flex items-center justify-between px-5 py-3">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{
-              background: 'rgba(255,255,255,0.12)',
-              border: '1px solid rgba(255,255,255,0.2)'
+              background: 'rgba(255,255,255,0.15)',
+              border: '1px solid rgba(255,255,255,0.25)'
             }}>
                 <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-white"><path d="M12 2C7 2 3 5.5 3 10c0 2.5 1.3 4.7 3.3 6.2L5 21l4.5-2.3c.8.2 1.6.3 2.5.3 5 0 9-3.5 9-8s-4-9-9-9z" fill="currentColor" /></svg>
               </div>

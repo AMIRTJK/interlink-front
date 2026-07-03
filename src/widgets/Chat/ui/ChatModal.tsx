@@ -19,17 +19,21 @@ type ChatModalProps = {
 
 export const ChatModal = ({ open, onClose }: ChatModalProps) => {
   const [isComposeOpen, setIsComposeOpen] = useState(false);
-  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
+  const [isDark, setIsDark] = useState(() => {
+    const stored = localStorage.getItem('darkMode');
+    if (stored !== null) return stored === 'true';
+    return document.documentElement.classList.contains('dark');
+  });
 
   useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains('dark'));
-    });
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-    return () => observer.disconnect();
+    const sync = () => {
+      const stored = localStorage.getItem('darkMode');
+      setIsDark(stored !== null ? stored === 'true' : document.documentElement.classList.contains('dark'));
+    };
+    const observer = new MutationObserver(sync);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    window.addEventListener('storage', sync);
+    return () => { observer.disconnect(); window.removeEventListener('storage', sync); };
   }, []);
 
   // Esc для закрытия + блокировка прокрутки основной страницы, пока чат открыт.

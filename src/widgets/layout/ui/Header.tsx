@@ -94,6 +94,11 @@ export const Header = ({
     setIsDarkMode((prevMode) => {
       const newMode = !prevMode;
       tokenControl.setDarkMode(newMode);
+      if (newMode) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
       return newMode;
     });
   };
