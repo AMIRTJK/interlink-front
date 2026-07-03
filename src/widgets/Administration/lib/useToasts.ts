@@ -1,22 +1,17 @@
-// Хук тостов раздела «Администрирование» (замена внутреннего механизма дизайна).
-// Вынесен из ui/components.tsx, чтобы файл компонентов экспортировал только
-// компоненты (правило react-refresh/only-export-components).
+// Тосты раздела «Администрирование» теперь используют общий инструмент
+// (@shared/lib/toast), который отображается глобальным <ToastContainer/> из @shared/ui.
+// Хук оставлен тонким адаптером, чтобы не менять проброс `addToast` по всему дереву
+// компонентов раздела. Локальный список тостов больше не нужен (пустой).
 import * as React from "react";
+import { toast } from "@shared/lib/toast";
 import type { ToastItem } from "../model";
 
+const EMPTY_TOASTS: ToastItem[] = [];
+
 export function useToasts() {
-  const [toasts, setToasts] = React.useState<ToastItem[]>([]);
   const addToast = React.useCallback((message: string) => {
-    const id = Math.random().toString(36).slice(2);
-    setToasts((prev) => [...prev, { id, message, type: "success" }]);
-    setTimeout(
-      () => setToasts((prev) => prev.filter((t) => t.id !== id)),
-      2500,
-    );
+    toast.success(message);
   }, []);
-  const removeToast = React.useCallback(
-    (id: string) => setToasts((prev) => prev.filter((t) => t.id !== id)),
-    [],
-  );
-  return { toasts, addToast, removeToast };
+  const removeToast = React.useCallback(() => {}, []);
+  return { toasts: EMPTY_TOASTS, addToast, removeToast };
 }

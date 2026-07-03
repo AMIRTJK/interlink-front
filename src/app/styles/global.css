@@ -3,6 +3,18 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Анимация появления общего <ToastContainer/> (@shared/ui) */
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Orbitron (вариативный, latin-subset) самостоятельно хостим в /public/fonts —
    нужен штампу ЭЦП (логотип INFRATECH, даты, футер). Без внешних CDN: работает
    офлайн и при печати. Латиница/цифры рисуются Orbitron, кириллица падает на

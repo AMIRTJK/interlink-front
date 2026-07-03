@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import dayjs from "dayjs";
 import { _axios, ApiRoutes } from "@shared/api";
-import { toast } from "react-toastify";
+import { toast } from "@shared/lib/toast";
 import type { Task, EventResponse } from "@features/tasks";
 
 const mapEventToTask = (event: EventResponse): Task => {

@@ -3,7 +3,7 @@ import { X, Download, FileText, FileSpreadsheet, Archive, Image as ImageIcon, Ey
 import { IApiFile, formatBytes, getFileType } from "./lib";
 import { If } from "@shared/ui";
 import { _axios } from "@shared/api";
-import { toast } from "react-toastify";
+import { toast } from "@shared/lib/toast";
 
 interface IProps {
   file: IApiFile | null;

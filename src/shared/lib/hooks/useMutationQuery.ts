@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { AxiosError, AxiosRequestConfig } from "axios";
 import { useCallback, useMemo } from "react";
-import { toast } from "react-toastify";
+import { toast } from "@shared/lib/toast";
 import { tokenControl } from "../tokenControl";
 
 /* ===================== TYPES ===================== */

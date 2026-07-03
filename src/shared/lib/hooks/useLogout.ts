@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast } from "@shared/lib/toast";
 
 import { _axios, ApiRoutes } from "@shared/api";
 import { AppRoutes } from "@shared/config";
