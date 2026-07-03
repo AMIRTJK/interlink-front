@@ -1454,31 +1454,31 @@ const MessageActionMenu = ({
   }, [onClose]);
   const actions = [
     {
-      icon: <CornerUpLeft className="w-3.5 h-3.5" />,
+      icon: <CornerUpLeft className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-white/60" : "text-gray-400 group-hover:text-gray-600"}`} strokeWidth={1.8} />,
       label: "Reply",
       fn: onReply,
       danger: false,
     },
     {
-      icon: <Forward className="w-3.5 h-3.5" />,
+      icon: <Forward className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-white/60" : "text-gray-400 group-hover:text-gray-600"}`} strokeWidth={1.8} />,
       label: "Forward",
       fn: onForward,
       danger: false,
     },
     {
-      icon: <MessageSquare className="w-3.5 h-3.5" />,
+      icon: <MessageSquare className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-white/60" : "text-gray-400 group-hover:text-gray-600"}`} strokeWidth={1.8} />,
       label: "Thread",
       fn: onThread,
       danger: false,
     },
     {
-      icon: <Pin className="w-3.5 h-3.5" />,
+      icon: <Pin className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-white/60" : "text-gray-400 group-hover:text-gray-600"}`} strokeWidth={1.8} />,
       label: pinLabel,
       fn: onPin,
       danger: false,
     },
     {
-      icon: <Trash2 className="w-3.5 h-3.5" />,
+      icon: <Trash2 className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-red-400/80" : "text-red-500 group-hover:text-red-600"}`} strokeWidth={1.8} />,
       label: "Delete",
       fn: onDelete,
       danger: true,
@@ -1519,7 +1519,7 @@ const MessageActionMenu = ({
             a.fn();
             onClose();
           }}
-          className={`w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium transition-all duration-200 ease-in-out ${a.danger ? (isDark ? "text-red-400 hover:bg-red-500/20" : "text-red-600 hover:bg-red-500/10") : isDark ? "text-white/80 hover:bg-white/15" : "text-gray-700 hover:bg-black/5 hover:text-gray-900"}`}
+          className={`group w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium transition-all duration-200 ease-in-out ${a.danger ? (isDark ? "text-red-400 hover:bg-red-500/20" : "text-red-600 hover:bg-red-500/10") : isDark ? "text-white/80 hover:bg-white/15" : "text-gray-700 hover:bg-black/5 hover:text-gray-900"}`}
         >
           {a.icon}
           <span>{a.label}</span>
@@ -3270,7 +3270,7 @@ const ThreadPanel = ({
       >
         <div className="flex items-center gap-2">
           <MessageSquare
-            className={`w-4 h-4 ${isDark ? "text-violet-300" : "text-violet-650"}`}
+            className={`w-4 h-4 ${isDark ? "text-violet-300" : "text-violet-500"}`}
           />
           <h3
             className={`font-semibold text-sm ${isDark ? "text-white" : "text-gray-900"}`}
