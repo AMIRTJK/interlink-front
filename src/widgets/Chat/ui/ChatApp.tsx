@@ -4446,6 +4446,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                                               "1.5px solid rgba(196,181,253,0.65)",
                                             boxShadow:
                                               "0 4px 20px rgba(124,58,237,0.35), inset 0 1px 0 rgba(255,255,255,0.15)",
+                                            backgroundClip: "padding-box",
                                           }
                                         : {
                                             background: "rgba(124,58,237,0.15)",
@@ -4453,6 +4454,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                                               "1.5px solid rgba(167,139,250,0.4)",
                                             boxShadow:
                                               "0 2px 12px rgba(124,58,237,0.15), inset 0 1px 0 rgba(255,255,255,0.08)",
+                                            backgroundClip: "padding-box",
                                           }
                                       : isMe
                                         ? {
@@ -4462,6 +4464,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                                               "1px solid rgba(167,139,250,0.4)",
                                             boxShadow:
                                               "0 4px 20px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.12)",
+                                            backgroundClip: "padding-box",
                                           }
                                         : {
                                             background: isDark
@@ -4473,6 +4476,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                                             boxShadow: isDark
                                               ? "0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)"
                                               : "0 2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)",
+                                            backgroundClip: "padding-box",
                                           }
                             }
                             onMouseEnter={(e) => {
@@ -4486,7 +4490,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                                     e.currentTarget as HTMLDivElement
                                   ).style.boxShadow = isDark
                                     ? "0 8px 32px rgba(124,58,237,0.45), inset 0 1px 0 rgba(255,255,255,0.15)"
-                                    : "0 8px 32px rgba(124,58,237,0.3), inset 0 1px 0 rgba(255,255,255,0.6)";
+                                    : "0 8px 32px rgba(124,58,237,0.3), inset 0 1px 0 rgba(255,255,255,0.15)";
                                   (
                                     e.currentTarget as HTMLDivElement
                                   ).style.filter = "brightness(1.08)";
@@ -4512,7 +4516,7 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
                                     e.currentTarget as HTMLDivElement
                                   ).style.boxShadow = isDark
                                     ? "0 4px 20px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.12)"
-                                    : "0 4px 20px rgba(124,58,237,0.15), inset 0 1px 0 rgba(255,255,255,0.6)";
+                                    : "0 4px 20px rgba(124,58,237,0.15), inset 0 1px 0 rgba(255,255,255,0.12)";
                                 } else {
                                   (
                                     e.currentTarget as HTMLDivElement
