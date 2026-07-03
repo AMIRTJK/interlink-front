@@ -88,8 +88,13 @@ export const ChatModal = ({ open, onClose }: ChatModalProps) => {
               transition={{ delay: 0.1 }}
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.94 }}
-              className={`fixed top-5 right-5 z-[1001] w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-xl border shadow-lg transition-colors cursor-pointer focus:outline-none ${isDark ? 'text-white/90 border-white/20 hover:text-white' : 'text-gray-800 border-black/10 hover:text-gray-900'}`}
-              style={{ background: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.06)" }}
+              className={`fixed top-5 right-5 z-[1001] w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-xl border shadow-lg transition-all cursor-pointer focus:outline-none ${isDark ? 'text-white/90 border-white/20 hover:text-white hover:border-white/40' : 'text-gray-600 border-violet-200 hover:text-gray-900 hover:border-violet-400'}`}
+              style={{
+                background: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.95)',
+                boxShadow: isDark
+                  ? '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)'
+                  : '0 8px 24px rgba(124,58,237,0.12), 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)'
+              }}
             >
               <X className="w-5 h-5" />
             </motion.button>
