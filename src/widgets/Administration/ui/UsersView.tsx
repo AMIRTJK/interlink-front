@@ -5,6 +5,8 @@ import {
   Search,
   Plus,
   MoreHorizontal,
+  X,
+  Check,
 } from "lucide-react";
 
 import { useGetQuery } from "@shared/lib";
@@ -19,7 +21,7 @@ import {
 } from "../theme/tokens";
 import { ToastContainer } from "./components";
 import { CustomDropdown } from "./CustomDropdown";
-import { Table } from "antd";
+import { Table, Select } from "antd";
 import { useToasts } from "../lib/useToasts";
 import { getUsersColumns } from "../lib/usersColumns";
 import { UserProfileModal } from "./UserProfileModal";
@@ -37,6 +39,7 @@ const PER_PAGE = 7;
 export function UsersView() {
   const { toasts, addToast, removeToast } = useToasts();
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchValue, setSearchValue] = React.useState("");
   const [chipFilter, setChipFilter] = React.useState<string | null>(null);
   const [departmentFilter, setDepartmentFilter] = React.useState<string | null>(null);
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null);
@@ -342,13 +345,15 @@ export function UsersView() {
             height: 36,
           }}
         >
-          <Search size={14} color={T.textSecondary} />
           <input
             type="text"
             className="admin__search-input"
             placeholder="Поиск сотрудника..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") setSearchQuery(searchValue);
+            }}
             style={{
               border: "none",
               outline: "none",
@@ -359,34 +364,64 @@ export function UsersView() {
               width: "100%",
             }}
           />
+          {searchValue && (
+            <>
+              <button
+                onClick={() => {
+                  setSearchValue("");
+                  setSearchQuery("");
+                }}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  padding: 0,
+                  color: T.textSecondary,
+                }}
+              >
+                <X size={14} />
+              </button>
+              <button
+                onClick={() => setSearchQuery(searchValue)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  padding: 0,
+                  color: T.accent,
+                }}
+              >
+                <Check size={14} />
+              </button>
+            </>
+          )}
         </div>
-        <CustomDropdown
-          value={chipFilter}
-          onChange={setChipFilter}
-          placeholder="Все роли"
-          width={180}
+        <Select
+          value={chipFilter || ""}
+          onChange={(v) => setChipFilter(v || null)}
+          style={{ width: 180, height: 36 }}
           options={[
             { value: "", label: "Все роли" },
             ...allRoleNames.map((role) => ({ value: role, label: role })),
           ]}
         />
 
-        <CustomDropdown
-          value={departmentFilter}
-          onChange={setDepartmentFilter}
-          placeholder="Все отделы"
-          width={200}
+        <Select
+          value={departmentFilter || ""}
+          onChange={(v) => setDepartmentFilter(v || null)}
+          style={{ width: 200, height: 36 }}
           options={[
             { value: "", label: "Все отделы" },
             ...departments.map((d) => ({ value: d.name, label: d.name })),
           ]}
         />
 
-        <CustomDropdown
-          value={statusFilter}
-          onChange={setStatusFilter}
-          placeholder="Статус"
-          width={160}
+        <Select
+          value={statusFilter || ""}
+          onChange={(v) => setStatusFilter(v || null)}
+          style={{ width: 160, height: 36 }}
           options={[
             { value: "", label: "Статус" },
             { value: "active", label: "Активен" },
