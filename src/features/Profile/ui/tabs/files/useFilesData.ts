@@ -124,7 +124,7 @@ export const useFilesData = (params: IFilesParams) => {
     return list;
   }, [folders]);
 
-  const activeCategoryId = useMemo(() => {
+  const activeCategoryId = useMemo((): number | 'all' => {
     const actId = params.activeFolderId;
     if (actId === undefined || actId === "all") return "all";
 
