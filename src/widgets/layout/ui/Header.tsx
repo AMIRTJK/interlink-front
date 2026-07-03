@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { Tooltip, Popover } from "antd";
-import { Bell, LogOut, BookOpen, CheckCircle, Sun, Moon, Layout, Palette, Layers, MessageSquare, PanelTop, PanelLeft, PanelBottom, PanelRight } from "lucide-react";
+import { Bell, LogOut, BookOpen, CheckCircle, Sun, Moon, Palette, Layers, MessageSquare, PanelTop, PanelLeft, PanelBottom, PanelRight } from "lucide-react";
 import { tokenControl, useLogout, useGetQuery } from "@shared/lib";
 import { AppRoutes } from "@shared/config";
 import { ApiRoutes } from "@shared/api";
+import { Logo } from "@shared/ui";
 import { IUser } from "@entities/login";
 import { ModuleMenu } from "./ModuleMenu";
 import { useState, useEffect } from "react";
@@ -168,7 +169,6 @@ export const Header = ({
 
   const isProfilePage = pathname.includes("profile");
   const isVertical = layoutMode === "left" || layoutMode === "right";
-  const activeGradient = (currentTheme && THEMES[currentTheme]?.gradient) || THEMES.emerald.gradient;
 
   const themeContent = (
     <div className="w-[260px] p-5 bg-white dark:bg-zinc-800 rounded-[2.5rem]">
@@ -304,19 +304,16 @@ export const Header = ({
         <Link
           to={AppRoutes.PROFILE}
           aria-label="На главную"
-          className={`flex items-center gap-3 transition-transform duration-200 hover:scale-[1.02] focus:outline-none rounded-lg shrink-0 ${
+          className={`flex items-center gap-3 focus:outline-none rounded-lg shrink-0 ${
             isVertical ? "flex-col! text-center!" : ""
           }`}
         >
-          <div className={`w-10 h-10 bg-gradient-to-br ${activeGradient} rounded-[2.5rem] flex items-center justify-center shadow-lg`}>
-            <Layout className="text-white" size={20} />
-          </div>
-          <span className={`text-lg font-bold tracking-tight text-zinc-900 dark:text-white ${isVertical ? "block!" : "hidden sm:inline"}`}>
-            INTERLINK
-          </span>
+          <Logo
+            className={`text-base sm:text-lg md:text-xl text-zinc-900 dark:text-white ${isVertical ? "block!" : ""}`}
+          />
         </Link>
 
-        <div className={`hidden md:flex items-center gap-3 pl-4 border-l border-white/30 dark:border-zinc-700/40 min-w-0 ${
+        <div className={`hidden md:flex items-center gap-3 pl-4 border-l border-zinc-900/10 dark:border-zinc-700/40 min-w-0 ${
           isVertical ? "flex flex-col! items-center! gap-2! pl-0! border-l-0! border-t! pt-4! w-full!" : ""
         }`}>
           <div className="relative shrink-0">

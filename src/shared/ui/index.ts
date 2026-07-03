@@ -15,6 +15,7 @@ export * from './Count'
 export * from './EmptyState'
 export * from './Tooltip/ui'
 export * from './Can'
+export * from './Logo'
 
 
 export * from "./ToastContainer";

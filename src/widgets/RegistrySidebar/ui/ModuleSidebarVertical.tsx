@@ -11,7 +11,7 @@ import {
   layoutHorizontalIcon,
 } from "../lib/constants";
 import { MenuItem } from "../model";
-import Logo from "../../../assets/images/logo.svg";
+import { Logo } from "@shared/ui";
 
 const { Sider } = Layout;
 
@@ -62,7 +62,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
               className="cursor-pointer"
               onClick={() => navigate(AppRoutes.PROFILE)}
             >
-              <img src={Logo} alt="logo" />
+              <Logo className="text-lg text-zinc-900 dark:text-white" />
             </div>
           )}
           <div className="flex items-center gap-2">
