@@ -676,7 +676,7 @@ const LayoutSwitcher = ({
         onClick={() => onChange(pos)}
         aria-label={label}
         title={label}
-        className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 cursor-pointer"
+        className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 cursor-pointer"
         style={
           layout === pos
             ? {
@@ -690,7 +690,7 @@ const LayoutSwitcher = ({
               }
         }
       >
-        <Icon className="w-3.5 h-3.5" />
+        <Icon className="w-4.5 h-4.5" />
       </button>
     ))}
   </div>
@@ -4945,39 +4945,39 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
               <div className="w-px h-5 bg-white/15" />
               <button
                 onClick={cycleLang}
-                className="h-7 px-2.5 rounded-full text-white flex items-center gap-1.5 transition-all duration-200 ease-in-out hover:bg-white/20 hover:scale-105 text-xs font-bold"
+                className="h-8 px-3 rounded-full text-white flex items-center gap-1.5 transition-all duration-200 ease-in-out hover:bg-white/20 hover:scale-105 text-xs font-bold"
                 style={{
                   background: "rgba(255,255,255,0.1)",
                   border: "1px solid rgba(255,255,255,0.15)",
                 }}
               >
-                <Languages className="w-3.5 h-3.5" />
+                <Languages className="w-4.5 h-4.5" />
                 <span>{LANG_LABELS[lang]}</span>
               </button>
               <button
                 onClick={() => setShowComposeModal(true)}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:bg-white/25 hover:scale-110"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:bg-white/25 hover:scale-110"
                 style={{
                   background: "rgba(255,255,255,0.15)",
                   border: "1px solid rgba(255,255,255,0.2)",
                 }}
               >
-                <Edit3 className="w-3.5 h-3.5" />
+                <Edit3 className="w-4.5 h-4.5" />
               </button>
               <button
                 onClick={() => setShowComposeModal(true)}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:bg-white/18 hover:scale-110"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:bg-white/18 hover:scale-110"
                 style={{
                   background: "rgba(255,255,255,0.08)",
                 }}
               >
-                <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+                <Plus className="w-4.5 h-4.5" strokeWidth={2.5} />
               </button>
-              <button className="w-7 h-7 rounded-full transition-all duration-200 ease-in-out hover:bg-white/15 hover:scale-110 flex items-center justify-center text-white/70">
-                <UserPlus className="w-4 h-4" />
+              <button className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-white/15 hover:scale-110 flex items-center justify-center text-white/70">
+                <UserPlus className="w-4.5 h-4.5" />
               </button>
-              <button className="w-7 h-7 rounded-full transition-all duration-200 ease-in-out hover:bg-white/15 hover:scale-110 flex items-center justify-center text-white/70">
-                <MoreVertical className="w-4 h-4" />
+              <button className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-white/15 hover:scale-110 flex items-center justify-center text-white/70">
+                <MoreVertical className="w-4.5 h-4.5" />
               </button>
             </div>
           </div>
