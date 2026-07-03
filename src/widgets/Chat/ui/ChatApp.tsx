@@ -1454,31 +1454,31 @@ const MessageActionMenu = ({
   }, [onClose]);
   const actions = [
     {
-      icon: <CornerUpLeft className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-white/60" : "text-gray-400 group-hover:text-gray-600"}`} strokeWidth={1.8} />,
+      icon: <CornerUpLeft className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-indigo-400 group-hover:text-indigo-300" : "text-indigo-500 group-hover:text-indigo-600"}`} strokeWidth={1.8} />,
       label: "Reply",
       fn: onReply,
       danger: false,
     },
     {
-      icon: <Forward className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-white/60" : "text-gray-400 group-hover:text-gray-600"}`} strokeWidth={1.8} />,
+      icon: <Forward className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-sky-400 group-hover:text-sky-300" : "text-sky-500 group-hover:text-sky-600"}`} strokeWidth={1.8} />,
       label: "Forward",
       fn: onForward,
       danger: false,
     },
     {
-      icon: <MessageSquare className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-white/60" : "text-gray-400 group-hover:text-gray-600"}`} strokeWidth={1.8} />,
+      icon: <MessageSquare className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-emerald-400 group-hover:text-emerald-300" : "text-emerald-500 group-hover:text-emerald-600"}`} strokeWidth={1.8} />,
       label: "Thread",
       fn: onThread,
       danger: false,
     },
     {
-      icon: <Pin className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-white/60" : "text-gray-400 group-hover:text-gray-600"}`} strokeWidth={1.8} />,
+      icon: <Pin className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-amber-400 group-hover:text-amber-300" : "text-amber-500 group-hover:text-amber-600"}`} strokeWidth={1.8} />,
       label: pinLabel,
       fn: onPin,
       danger: false,
     },
     {
-      icon: <Trash2 className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-red-400/80" : "text-red-500 group-hover:text-red-600"}`} strokeWidth={1.8} />,
+      icon: <Trash2 className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-red-400 group-hover:text-red-300" : "text-red-500 group-hover:text-red-600"}`} strokeWidth={1.8} />,
       label: "Delete",
       fn: onDelete,
       danger: true,
