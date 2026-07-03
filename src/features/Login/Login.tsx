@@ -12,7 +12,7 @@ import {
 	Smartphone,
 } from "lucide-react";
 
-import { toast } from "react-toastify";
+import { toast } from "@shared/lib/toast";
 
 import { AppRoutes } from "@shared/config";
 import { ApiRoutes } from "@shared/api";

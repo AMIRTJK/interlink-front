@@ -3,7 +3,7 @@ import { Pin, Trash2, Archive, FileText, FileSpreadsheet, Eye, History, Share2, 
 import { IApiFile, getFileType, formatBytes } from "./lib";
 import { Tooltip } from "@shared/ui";
 import { _axios } from "@shared/api";
-import { toast } from "react-toastify";
+import { toast } from "@shared/lib/toast";
 
 interface IProps {
   files: IApiFile[];

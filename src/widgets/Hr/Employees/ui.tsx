@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
-import { toast } from "react-toastify";
+import { toast } from "@shared/lib/toast";
 import type { IAdminUser } from "@entities/hr";
 import { ApiRoutes } from "@shared/api";
 import { useGetQuery, useMutationQuery } from "@shared/lib";

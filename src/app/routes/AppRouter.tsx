@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppRoutes } from "@shared/config/AppRoutes";
 import { ApiRoutes } from "@shared/api";
 import { tokenControl } from "@shared/lib";
-import { ToastContainer } from "react-toastify";
 import { Suspense, lazy } from "react";
 import { Loader } from "@shared/ui/Loader";
 import PrivateRoute from "./PrivateRoute";
@@ -477,18 +476,6 @@ export const AppRouter = () => {
         </Routes>
       </Suspense>
 
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
     </BrowserRouter>
   );
 };

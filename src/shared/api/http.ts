@@ -1,5 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
-import { toast } from "react-toastify";
+import { toast } from "@shared/lib/toast";
 import { AppRoutes, getEnvVar } from "@shared/config";
 import { tokenControl } from "@shared/lib";
 

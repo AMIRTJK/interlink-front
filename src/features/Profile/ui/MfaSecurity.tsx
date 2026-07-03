@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Modal, Button, Input, Spin, Tooltip } from "antd";
 import { ShieldCheck, ShieldAlert, Copy } from "lucide-react";
 import QRCode from "qrcode";
-import { toast } from "react-toastify";
+import { toast } from "@shared/lib/toast";
 
 import { ApiRoutes } from "@shared/api";
 import { useGetQuery, useMutationQuery } from "@shared/lib/hooks";
