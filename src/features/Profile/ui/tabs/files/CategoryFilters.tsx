@@ -48,7 +48,7 @@ export const CategoryFilters = ({
                   className="hover:text-amber-250 transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onRenameCategory(cat);
+                    onRenameCategory?.(cat);
                   }}
                 />
                 <Trash2
@@ -56,7 +56,7 @@ export const CategoryFilters = ({
                   className="hover:text-red-300 transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onDeleteCategory(Number(cat.id));
+                    onDeleteCategory?.(Number(cat.id));
                   }}
                 />
               </div>

@@ -336,57 +336,59 @@ export const Header = ({
       <ModuleMenu variant="header" isVertical={isVertical} />
 
       <div className={`flex items-center gap-2 shrink-0 ${isVertical ? "flex-col! items-center! gap-3! mt-auto! w-full!" : ""}`}>
-        <Popover
-          content={notificationContent}
-          trigger="click"
-          placement={isVertical ? "rightBottom" : "bottomRight"}
-          arrow={false}
-          overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0 }}
-        >
-          <button
-            aria-label="Уведомления"
-            className="relative p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+        <div className={`flex items-center gap-2 ${isVertical ? "flex-col! gap-3!" : ""}`}>
+          <Popover
+            content={notificationContent}
+            trigger="click"
+            placement={isVertical ? "rightBottom" : "bottomRight"}
+            arrow={false}
+            overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0 }}
           >
-            <Bell size={18} strokeWidth={2.2} />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-[9px] text-white flex items-center justify-center rounded-full font-bold shadow-lg">
-                {unreadCount}
-              </span>
-            )}
-          </button>
-        </Popover>
+            <button
+              aria-label="Уведомления"
+              className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+            >
+              <Bell size={18} strokeWidth={2.2} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-[9px] text-white flex items-center justify-center rounded-full font-bold shadow-lg">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          </Popover>
 
-        <Tooltip title="Чат" placement={isVertical ? "right" : "bottom"}>
-          <button
-            onClick={openChat}
-            aria-label="Открыть чат"
-            className="relative p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+          <Tooltip title="Чат" placement={isVertical ? "right" : "bottom"}>
+            <button
+              onClick={openChat}
+              aria-label="Открыть чат"
+              className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+            >
+              <MessageSquare size={18} strokeWidth={2.2} />
+            </button>
+          </Tooltip>
+
+          <Tooltip
+            title={isDarkMode ? "Светлая тема" : "Темная тема"}
+            placement={isVertical ? "right" : "bottom"}
           >
-            <MessageSquare size={18} strokeWidth={2.2} />
-          </button>
-        </Tooltip>
+            <button
+              onClick={toggleTheme}
+              aria-label="Смена темы"
+              className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+            >
+              {isDarkMode ? (
+                <Sun size={18} strokeWidth={2.2} />
+              ) : (
+                <Moon size={18} strokeWidth={2.2} />
+              )}
+            </button>
+          </Tooltip>
+        </div>
 
         <div
           className={`${isVertical ? "w-full! h-px!" : "w-px! h-6!"} bg-white/30 dark:bg-zinc-700/40 mx-1`}
           aria-hidden="true"
         />
-
-        <Tooltip
-          title={isDarkMode ? "Светлая тема" : "Темная тема"}
-          placement={isVertical ? "right" : "bottom"}
-        >
-          <button
-            onClick={toggleTheme}
-            aria-label="Смена темы"
-            className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            {isDarkMode ? (
-              <Sun size={18} strokeWidth={2.2} />
-            ) : (
-              <Moon size={18} strokeWidth={2.2} />
-            )}
-          </button>
-        </Tooltip>
 
         {isProfilePage && (
           <>

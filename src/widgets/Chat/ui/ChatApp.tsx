@@ -1,20 +1,74 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { If } from '@shared/ui';
 import { Search, UserPlus, Plus, MoreVertical, Video, Phone, UserCog, Send, Smile, Paperclip, Mic, MicOff, VideoOff, PhoneOff, X, Volume2, FileText, ImageIcon, Film, Music, PhoneIncoming, PhoneMissed, Mail, MapPin, Calendar, Shield, Bell, Star, ChevronRight, Pin, SearchIcon, ChevronDown, ChevronUp, Edit3, Grid3X3, Forward, Trash2, CornerUpLeft, Sparkles, Square, Loader2, MessageSquare, MoreHorizontal, Clock3, Trash, MessageCircleOff, AlertTriangle, Languages, PanelLeft, PanelRight, PanelBottom, PanelTop } from 'lucide-react';
 import { TRANSLATIONS, type Lang, type Translations } from '../lib/translations';
-import type {
-  Contact,
-  Message,
-  MessageAttachment,
-  ReplyPreview,
-  EmojiCategory,
-  DrawerTab,
-  PendingFile,
-  LayoutPosition,
-} from '../model/types';
-import { chatService } from '../api/chatService';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+type Contact = {
+  id: string;
+  name: string;
+  avatar: string;
+  lastMessage: string;
+  online: boolean;
+  isGroup?: boolean;
+  recent?: boolean;
+  unreadCount?: number;
+  email?: string;
+  location?: string;
+  joined?: string;
+  bio?: string;
+  mutualGroups?: string[];
+  story?: string;
+};
+type MessageAttachment = {
+  name: string;
+  size: string;
+  type: 'image' | 'video' | 'audio' | 'file' | 'voice';
+  preview?: string;
+  duration?: number;
+};
+type MessageReaction = {
+  emoji: string;
+  count: number;
+  reactedByMe: boolean;
+};
+type ReplyPreview = {
+  id: string;
+  senderName: string;
+  text: string;
+};
+type Message = {
+  id: string;
+  senderId: string;
+  text: string;
+  time: string;
+  status?: 'sent' | 'delivered' | 'read';
+  attachment?: MessageAttachment;
+  reactions?: MessageReaction[];
+  pinned?: boolean;
+  replyTo?: ReplyPreview;
+  forwarded?: boolean;
+  threadCount?: number;
+  threadMessages?: Message[];
+  deleted?: boolean;
+  deletedForMe?: boolean;
+  scheduled?: boolean;
+  scheduledTime?: string;
+};
+type EmojiCategory = {
+  label: string;
+  emojis: string[];
+};
+type DrawerTab = 'info' | 'media';
+type PendingFile = {
+  name: string;
+  size: string;
+  type: MessageAttachment['type'];
+  preview?: string;
+  raw: File;
+};
+type LayoutPosition = 'left' | 'right' | 'bottom' | 'top';
 
 // ─── Static Data ──────────────────────────────────────────────────────────────
 const EMOJI_CATEGORY_EMOJIS: string[][] = [['😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '😚', '😙', '🥲', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '😔', '😪', '🤤', '😴'], ['👋', '🤚', '🖐', '✋', '🖖', '👌', '🤌', '🤏', '✌', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '🫶', '👐', '🤲', '🙏', '✍', '💅', '🤳', '💪', '🦾'], ['❤', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❤‍🔥', '❤‍🩹', '❣', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '♥', '🫀'], ['🌸', '🌺', '🌻', '🌹', '🌷', '🌼', '💐', '🍀', '🌿', '☘', '🍃', '🌱', '🌲', '🌳', '🌴', '🌵', '🎋', '🎍', '🍄', '🌾', '🌊', '🌈', '⭐', '🌙', '☀', '⛅', '🌤', '🌦'], ['🍕', '🍔', '🍟', '🌭', '🥪', '🥙', '🧆', '🌮', '🌯', '🫔', '🍳', '🥘', '🫕', '🍲', '🥗', '🍿', '🍱', '🍘', '🍙', '🍚', '🍛', '🍜', '🍝', '🍞', '🥐', '🥖', '🫓', '🥨']];
@@ -22,6 +76,236 @@ const EMOJI_CATEGORIES_KEYS = ['smileys', 'gestures', 'hearts', 'nature', 'food'
 const QUICK_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
 const SAMPLE_MEDIA_IMAGES = ['https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&q=80', 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=200&q=80', 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=200&q=80', 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=200&q=80', 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=200&q=80', 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=200&q=80', 'https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=200&q=80', 'https://images.unsplash.com/photo-1504700610630-ac6aba3536d3?w=200&q=80', 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=200&q=80'];
 const AI_SUGGESTIONS = ["Sure, that sounds great! Let me know when you are free.", "Thanks for sharing! I will review it and get back to you soon.", 'Interesting point! Could you elaborate a bit more on that?', 'Absolutely, I agree with you on this one.', "I will take care of it right away!", 'That makes sense. Let me think about it and respond shortly.'];
+const STORY_IMAGES = ['https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80', 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&q=80', 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300&q=80', 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&q=80', 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=300&q=80', 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=300&q=80', 'https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=300&q=80'];
+const contacts: Contact[] = [{
+  id: '1',
+  name: 'Stephen Ramirez',
+  avatar: 'https://i.pravatar.cc/150?img=12',
+  lastMessage: 'Lorem ipsum is simply dummy..',
+  online: true,
+  unreadCount: 3,
+  email: 'stephen.r@example.com',
+  location: 'New York, USA',
+  joined: 'March 2021',
+  bio: 'Design enthusiast & coffee lover.',
+  mutualGroups: ['Design Team', 'Friday Lunch'],
+  story: STORY_IMAGES[0]
+}, {
+  id: '2',
+  name: 'Mildred Peterson',
+  avatar: 'https://i.pravatar.cc/150?img=47',
+  lastMessage: 'Lorem ipsum is simply dummy..',
+  online: true,
+  unreadCount: 1,
+  email: 'mildred.p@example.com',
+  location: 'London, UK',
+  joined: 'July 2020',
+  bio: 'Product manager by day, baker by night.',
+  mutualGroups: ['Product Squad'],
+  story: STORY_IMAGES[1]
+}, {
+  id: '3',
+  name: 'Patrick Gordon',
+  avatar: 'https://i.pravatar.cc/150?img=33',
+  lastMessage: 'Lorem ipsum is simply dummy..',
+  online: false,
+  email: 'patrick.g@example.com',
+  location: 'Toronto, Canada',
+  joined: 'January 2022',
+  bio: 'Full-stack developer & open source contributor.',
+  mutualGroups: ['Engineering', 'Hackathon 2023'],
+  story: STORY_IMAGES[2]
+}, {
+  id: '4',
+  name: 'Jerry Lawson',
+  avatar: 'https://i.pravatar.cc/150?img=15',
+  lastMessage: 'Lorem ipsum is simply dummy..',
+  online: true,
+  isGroup: true,
+  unreadCount: 7,
+  email: 'jerry.l@example.com',
+  location: 'Austin, TX',
+  joined: 'October 2019',
+  bio: 'Marketing wizard & podcast host.',
+  mutualGroups: ['Marketing', 'Friday Lunch'],
+  story: STORY_IMAGES[3]
+}, {
+  id: '5',
+  name: 'Jordan Day',
+  avatar: 'https://i.pravatar.cc/150?img=8',
+  lastMessage: 'Lorem ipsum is simply dummy..',
+  online: false,
+  recent: true,
+  email: 'jordan.d@example.com',
+  location: 'Seattle, WA',
+  joined: 'May 2023',
+  bio: 'UX researcher & illustrator.',
+  mutualGroups: ['Design Team'],
+  story: STORY_IMAGES[4]
+}, {
+  id: '6',
+  name: 'Hannah Banks',
+  avatar: 'https://i.pravatar.cc/150?img=45',
+  lastMessage: 'Lorem ipsum is simply dummy..',
+  online: true,
+  recent: true,
+  unreadCount: 2,
+  email: 'hannah.b@example.com',
+  location: 'Berlin, Germany',
+  joined: 'February 2022',
+  bio: 'Data scientist & yoga instructor.',
+  mutualGroups: ['Data Crew', 'Yoga Club'],
+  story: STORY_IMAGES[5]
+}, {
+  id: '7',
+  name: 'Rachel Hoffman',
+  avatar: 'https://i.pravatar.cc/150?img=48',
+  lastMessage: 'Where does it come from?',
+  online: true,
+  email: 'rachel.h@example.com',
+  location: 'San Francisco, CA',
+  joined: 'November 2020',
+  bio: 'Frontend engineer. React & animation geek.',
+  mutualGroups: ['Engineering', 'Design Team', 'Hackathon 2023'],
+  story: STORY_IMAGES[6]
+}];
+const initialMessages: Message[] = [{
+  id: 'm1',
+  senderId: '7',
+  text: 'What is Lorem Ipsum dummy text?',
+  time: '4:30 am'
+}, {
+  id: 'm2',
+  senderId: 'me',
+  text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown specimen book.",
+  time: '4:35 am',
+  status: 'read',
+  reactions: [{
+    emoji: '❤️',
+    count: 1,
+    reactedByMe: false
+  }],
+  pinned: true,
+  threadCount: 2,
+  threadMessages: [{
+    id: 'm2-t1',
+    senderId: '7',
+    text: 'Great explanation!',
+    time: '4:36 am'
+  }, {
+    id: 'm2-t2',
+    senderId: 'me',
+    text: 'Thanks! Glad it helped.',
+    time: '4:37 am',
+    status: 'read'
+  }]
+}, {
+  id: 'm3',
+  senderId: '7',
+  text: 'Where does it come from?',
+  time: '4:40 am'
+}, {
+  id: 'm4',
+  senderId: 'me',
+  text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown specimen book.",
+  time: '5:03 am',
+  status: 'read'
+}, {
+  id: 'm5',
+  senderId: '7',
+  text: 'Where does it come from?',
+  time: '5:10 am'
+}];
+const contactMessages: Record<string, Message[]> = {
+  '7': initialMessages,
+  '1': [{
+    id: 'c1-m1',
+    senderId: '1',
+    text: 'Hey! Saw your latest design work — absolutely stunning!',
+    time: '10:15 am'
+  }, {
+    id: 'c1-m2',
+    senderId: 'me',
+    text: 'Thank you so much! Been working hard on it.',
+    time: '10:17 am',
+    status: 'read'
+  }, {
+    id: 'c1-m3',
+    senderId: '1',
+    text: 'Could we sync up this week to discuss the new project?',
+    time: '10:20 am'
+  }],
+  '2': [{
+    id: 'c2-m1',
+    senderId: '2',
+    text: 'The product roadmap looks great. Just a few tweaks needed.',
+    time: '9:00 am'
+  }, {
+    id: 'c2-m2',
+    senderId: 'me',
+    text: 'Sure, let me know what you need changed.',
+    time: '9:05 am',
+    status: 'read'
+  }],
+  '3': [{
+    id: 'c3-m1',
+    senderId: '3',
+    text: 'Just pushed the new feature branch. Can you review?',
+    time: '11:30 am'
+  }, {
+    id: 'c3-m2',
+    senderId: 'me',
+    text: "On it! I'll check it out shortly.",
+    time: '11:32 am',
+    status: 'sent'
+  }, {
+    id: 'c3-m3',
+    senderId: '3',
+    text: 'Also fixed that nasty bug in the auth flow.',
+    time: '11:35 am'
+  }],
+  '4': [{
+    id: 'c4-m1',
+    senderId: '4',
+    text: 'Campaign launch is next Monday. Are we all set?',
+    time: '2:00 pm'
+  }, {
+    id: 'c4-m2',
+    senderId: 'me',
+    text: 'Yes, everything is ready on my end!',
+    time: '2:03 pm',
+    status: 'read'
+  }],
+  '5': [{
+    id: 'c5-m1',
+    senderId: '5',
+    text: 'Finished the user research report. Sending it over!',
+    time: '3:45 pm'
+  }, {
+    id: 'c5-m2',
+    senderId: 'me',
+    text: 'Perfect timing, thank you Jordan!',
+    time: '3:47 pm',
+    status: 'delivered'
+  }],
+  '6': [{
+    id: 'c6-m1',
+    senderId: '6',
+    text: 'The data pipeline is running smoothly now 🎉',
+    time: '8:30 am'
+  }, {
+    id: 'c6-m2',
+    senderId: 'me',
+    text: 'Great news! What was the issue in the end?',
+    time: '8:33 am',
+    status: 'read'
+  }, {
+    id: 'c6-m3',
+    senderId: '6',
+    text: 'A faulty transformation step. Fixed it this morning.',
+    time: '8:35 am'
+  }]
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const formatTime = (d: Date) => {
@@ -70,13 +354,15 @@ const LAYOUT_BUTTONS: {
 }];
 const LayoutSwitcher = ({
   layout,
-  onChange
+  onChange,
+  isDark
 }: {
   layout: LayoutPosition;
   onChange: (pos: LayoutPosition) => void;
+  isDark: boolean;
 }) => <div className="flex items-center gap-0.5 rounded-xl p-1" style={{
-  background: 'rgba(255,255,255,0.06)',
-  border: '1px solid rgba(255,255,255,0.1)'
+  background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+  border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)'
 }}>
     {LAYOUT_BUTTONS.map(({
     pos,
@@ -88,7 +374,7 @@ const LayoutSwitcher = ({
     boxShadow: '0 0 10px rgba(124,58,237,0.5)'
   } : {
     background: 'transparent',
-    color: 'rgba(255,255,255,0.45)'
+    color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)'
   }}>
         <Icon className="w-3.5 h-3.5" />
       </button>)}
@@ -103,7 +389,8 @@ const ChatListPanel = ({
   searchQuery,
   onContactSwitch,
   onComposeOpen,
-  onSearchChange
+  onSearchChange,
+  isDark
 }: {
   layout: LayoutPosition;
   contacts: Contact[];
@@ -113,33 +400,34 @@ const ChatListPanel = ({
   onContactSwitch: (id: string) => void;
   onComposeOpen: () => void;
   onSearchChange: (v: string) => void;
+  isDark: boolean;
 }) => {
   const isHorizontal = layout === 'top' || layout === 'bottom';
   const filteredContacts = contactList.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
   if (isHorizontal) {
     return <div className="flex-shrink-0 flex flex-col border-white/10 overflow-hidden" style={{
-      background: 'linear-gradient(135deg,rgba(76,29,149,0.55),rgba(124,58,237,0.4),rgba(6,182,212,0.25))',
-      borderTop: layout === 'bottom' ? '1px solid rgba(167,139,250,0.2)' : undefined,
-      borderBottom: layout === 'top' ? '1px solid rgba(167,139,250,0.2)' : undefined,
+      background: isDark ? 'linear-gradient(135deg,rgba(76,29,149,0.55),rgba(124,58,237,0.4),rgba(6,182,212,0.25))' : 'linear-gradient(135deg,rgba(237,233,254,0.65),rgba(243,244,246,0.65),rgba(207,250,254,0.65))',
+      borderTop: layout === 'bottom' ? (isDark ? '1px solid rgba(167,139,250,0.2)' : '1px solid rgba(124,58,237,0.15)') : undefined,
+      borderBottom: layout === 'top' ? (isDark ? '1px solid rgba(167,139,250,0.2)' : '1px solid rgba(124,58,237,0.15)') : undefined,
       backdropFilter: 'blur(20px)',
       height: '80px'
     }}>
         <div className="flex items-center gap-2 px-4 py-2 h-full overflow-x-auto" style={{
         scrollbarWidth: 'none'
       }}>
-          <button onClick={onComposeOpen} className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 hover:bg-white/20" style={{
-          background: 'rgba(255,255,255,0.08)',
-          border: '2px dashed rgba(255,255,255,0.25)'
+          <button onClick={onComposeOpen} className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-white/20' : 'hover:bg-black/5'}`} style={{
+          background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)',
+          border: isDark ? '2px dashed rgba(255,255,255,0.25)' : '2px dashed rgba(0,0,0,0.15)'
         }}>
             <Plus className="w-4 h-4 text-white/50" />
           </button>
           <div className="w-px h-8 mx-1 flex-shrink-0" style={{
-          background: 'rgba(255,255,255,0.15)'
+          background: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'
         }} />
           {filteredContacts.map(contact => {
           const isActive = contact.id === activeContactId;
           const unread = contactUnreads[contact.id] || 0;
-          return <button key={contact.id} onClick={() => onContactSwitch(contact.id)} className="relative flex-shrink-0 flex flex-col items-center gap-1 px-1 py-1 rounded-xl transition-all duration-200 ease-in-out hover:bg-white/10 group">
+          return <button key={contact.id} onClick={() => onContactSwitch(contact.id)} className={`relative flex-shrink-0 flex flex-col items-center gap-1 px-1 py-1 rounded-xl transition-all duration-200 ease-in-out group ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'}`}>
                 <div className={`relative rounded-full transition-all duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`} style={isActive ? {
               filter: 'drop-shadow(0 0 8px rgba(167,139,250,0.8))'
             } : {}}>
@@ -179,16 +467,16 @@ const ChatListPanel = ({
     ease: 'easeOut'
   }} className="flex-shrink-0 flex flex-col overflow-hidden" style={{
     width: '240px',
-    background: 'rgba(15,5,40,0.6)',
-    borderRight: layout === 'left' ? '1px solid rgba(167,139,250,0.15)' : undefined,
-    borderLeft: layout === 'right' ? '1px solid rgba(167,139,250,0.15)' : undefined,
+    background: isDark ? 'rgba(15,5,40,0.6)' : 'rgba(255,255,255,0.7)',
+    borderRight: layout === 'left' ? (isDark ? '1px solid rgba(167,139,250,0.15)' : '1px solid rgba(167,139,250,0.2)') : undefined,
+    borderLeft: layout === 'right' ? (isDark ? '1px solid rgba(167,139,250,0.15)' : '1px solid rgba(167,139,250,0.2)') : undefined,
     backdropFilter: 'blur(24px)'
   }}>
       {/* Panel header */}
-      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/8">
-        <span className="text-xs font-bold text-white/70 uppercase tracking-widest">Chats</span>
-        <button onClick={onComposeOpen} className="w-7 h-7 rounded-full flex items-center justify-center text-white/60 transition-all duration-200 ease-in-out hover:bg-white/15 hover:text-white hover:scale-110" style={{
-        background: 'rgba(255,255,255,0.06)'
+      <div className={`flex items-center justify-between px-4 py-3 flex-shrink-0 border-b ${isDark ? 'border-white/8' : 'border-black/5'}`}>
+        <span className={`text-xs font-bold uppercase tracking-widest ${isDark ? 'text-white/70' : 'text-gray-500'}`}>Chats</span>
+        <button onClick={onComposeOpen} className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'text-white/60 hover:bg-white/15 hover:text-white' : 'text-gray-500 hover:bg-black/5 hover:text-gray-800'}`} style={{
+        background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'
       }}>
           <Edit3 className="w-3.5 h-3.5" />
         </button>
@@ -196,31 +484,31 @@ const ChatListPanel = ({
       {/* Search */}
       <div className="px-3 py-2 flex-shrink-0">
         <div className="flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200" style={{
-        background: 'rgba(255,255,255,0.07)',
-        border: '1px solid rgba(255,255,255,0.1)'
+        background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.03)',
+        border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)'
       }}>
-          <Search className="w-3.5 h-3.5 text-white/35 flex-shrink-0" />
-          <input type="text" placeholder="Search…" value={searchQuery} onChange={e => onSearchChange(e.target.value)} className="flex-1 bg-transparent outline-none text-xs placeholder-white/25 text-white" />
+          <Search className={`w-3.5 h-3.5 flex-shrink-0 ${isDark ? 'text-white/35' : 'text-gray-450'}`} />
+          <input type="text" placeholder="Search…" value={searchQuery} onChange={e => onSearchChange(e.target.value)} className={`flex-1 bg-transparent outline-none text-xs ${isDark ? 'placeholder-white/25 text-white' : 'placeholder-gray-400 text-gray-800'}`} />
         </div>
       </div>
       {/* Contact list */}
-      <div className="flex-1 overflow-y-auto py-1" style={{
+      <div className="flex-1 overflow-y-auto overflow-x-hidden py-1" style={{
       scrollbarWidth: 'thin',
-      scrollbarColor: 'rgba(167,139,250,0.2) transparent'
+      scrollbarColor: isDark ? 'rgba(167,139,250,0.2) transparent' : 'rgba(124,58,237,0.2) transparent'
     }}>
         {filteredContacts.map(contact => {
         const isActive = contact.id === activeContactId;
         const unread = contactUnreads[contact.id] || 0;
         return <button key={contact.id} onClick={() => onContactSwitch(contact.id)} className="w-full flex items-center gap-3 px-3 py-2.5 transition-all duration-200 ease-in-out group" style={isActive ? {
-          background: 'linear-gradient(90deg,rgba(124,58,237,0.3),rgba(6,182,212,0.15))',
-          borderLeft: '2px solid rgba(167,139,250,0.8)',
+          background: isDark ? 'linear-gradient(90deg,rgba(124,58,237,0.3),rgba(6,182,212,0.15))' : 'linear-gradient(90deg,rgba(124,58,237,0.15),rgba(6,182,212,0.08))',
+          borderLeft: isDark ? '2px solid rgba(167,139,250,0.8)' : '2px solid rgba(124,58,237,0.8)',
           paddingLeft: '10px'
         } : {
           borderLeft: '2px solid transparent'
         }} onMouseEnter={e => {
           if (!isActive) {
-            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)';
-            (e.currentTarget as HTMLButtonElement).style.borderLeft = '2px solid rgba(167,139,250,0.4)';
+            (e.currentTarget as HTMLButtonElement).style.background = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
+            (e.currentTarget as HTMLButtonElement).style.borderLeft = isDark ? '2px solid rgba(167,139,250,0.4)' : '2px solid rgba(124,58,237,0.4)';
             (e.currentTarget as HTMLButtonElement).style.transform = 'translateX(2px)';
           }
         }} onMouseLeave={e => {
@@ -232,7 +520,7 @@ const ChatListPanel = ({
         }}>
               <div className="relative flex-shrink-0">
                 <img src={contact.avatar} alt={contact.name} className="w-9 h-9 rounded-full object-cover transition-transform duration-200 group-hover:scale-105" style={{
-              border: isActive ? '2px solid rgba(167,139,250,0.6)' : '2px solid rgba(255,255,255,0.1)'
+              border: isActive ? (isDark ? '2px solid rgba(167,139,250,0.6)' : '2px solid rgba(124,58,237,0.6)') : (isDark ? '2px solid rgba(255,255,255,0.1)' : '2px solid rgba(0,0,0,0.08)')
             }} />
                 {contact.online && <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-transparent rounded-full" style={{
               boxShadow: '0 0 5px rgba(74,222,128,0.7)'
@@ -240,14 +528,14 @@ const ChatListPanel = ({
               </div>
               <div className="flex-1 min-w-0 text-left">
                 <div className="flex items-center justify-between gap-1">
-                  <p className={`text-xs font-semibold truncate transition-colors duration-200 ${isActive ? 'text-white' : 'text-white/75 group-hover:text-white'}`}>{contact.name}</p>
+                  <p className={`text-xs font-semibold truncate transition-colors duration-200 ${isActive ? (isDark ? 'text-white' : 'text-gray-900') : (isDark ? 'text-white/75 group-hover:text-white' : 'text-gray-600 group-hover:text-gray-900')}`}>{contact.name}</p>
                   {unread > 0 && <span className="min-w-[18px] h-[18px] rounded-full text-white text-[9px] font-bold flex items-center justify-center px-0.5 flex-shrink-0" style={{
                 background: 'linear-gradient(135deg,#ef4444,#f97316)'
               }}>
                       {unread > 9 ? '9+' : unread}
                     </span>}
                 </div>
-                <p className="text-[10px] truncate mt-0.5 text-white/35 group-hover:text-white/50 transition-colors duration-200">{contact.lastMessage}</p>
+                <p className={`text-[10px] truncate mt-0.5 transition-colors duration-200 ${isDark ? 'text-white/35 group-hover:text-white/50' : 'text-gray-400 group-hover:text-gray-600'}`}>{contact.lastMessage}</p>
               </div>
             </button>;
       })}
@@ -264,7 +552,8 @@ const SHRED_HEIGHTS = Array.from({
   length: SHRED_STRIP_COUNT
 }, (_, i) => 32 + i * 13 % 24);
 const PaperShredder = ({
-  onComplete
+  onComplete,
+  isDark
 }: {
   onComplete: () => void;
   isDark: boolean;
@@ -371,7 +660,8 @@ const SchedulePicker = ({
   options,
   title,
   onSchedule,
-  onClose
+  onClose,
+  isDark
 }: {
   options: {
     label: string;
@@ -404,19 +694,19 @@ const SchedulePicker = ({
     scale: 0.96
   }} transition={{
     duration: 0.16
-  }} className={`absolute bottom-full right-0 mb-3 w-56 rounded-2xl shadow-2xl overflow-hidden z-40 ${GLASS_CARD}`} style={{
-    boxShadow: '0 8px 40px rgba(139,92,246,0.3)'
+  }} className={`absolute bottom-full right-0 mb-3 w-56 rounded-2xl shadow-2xl overflow-hidden z-40 ${isDark ? 'backdrop-blur-2xl bg-white/10 border border-white/20' : 'bg-white border border-black/8 shadow-xl'}`} style={{
+    boxShadow: isDark ? '0 8px 40px rgba(139,92,246,0.3)' : '0 8px 30px rgba(0,0,0,0.06)'
   }}>
-    <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2">
-      <Clock3 className="w-4 h-4 text-violet-300" />
-      <span className="text-xs font-semibold text-white/90">{title}</span>
+    <div className={`px-4 py-3 border-b flex items-center gap-2 ${isDark ? 'border-white/10' : 'border-black/5'}`}>
+      <Clock3 className={`w-4 h-4 ${isDark ? 'text-violet-300' : 'text-violet-650'}`} />
+      <span className={`text-xs font-semibold ${isDark ? 'text-white/90' : 'text-gray-800'}`}>{title}</span>
     </div>
     <div className="py-1">
       {options.map(opt => <button key={opt.label} onClick={() => {
         onSchedule(opt.label, opt.offset);
         onClose();
-      }} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-white/80 transition-all duration-200 ease-in-out hover:bg-white/10 hover:text-white">
-        <Clock3 className="w-3.5 h-3.5 text-violet-300" /><span>{opt.label}</span>
+      }} className={`w-full flex items-center gap-3 px-4 py-2.5 text-xs font-medium transition-all duration-200 ease-in-out ${isDark ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-gray-700 hover:bg-black/5 hover:text-gray-900'}`}>
+        <Clock3 className={`w-3.5 h-3.5 ${isDark ? 'text-violet-300' : 'text-violet-605'}`} /><span>{opt.label}</span>
       </button>)}
     </div>
   </motion.div>;
@@ -426,7 +716,8 @@ const SchedulePicker = ({
 const EmojiPicker = ({
   categories,
   onSelect,
-  onClose
+  onClose,
+  isDark
 }: {
   categories: EmojiCategory[];
   onSelect: (e: string) => void;
@@ -456,14 +747,14 @@ const EmojiPicker = ({
     scale: 0.96
   }} transition={{
     duration: 0.18
-  }} className={`absolute bottom-full left-0 mb-3 w-80 rounded-2xl shadow-2xl overflow-hidden z-40 ${GLASS_CARD}`} style={{
-    boxShadow: '0 8px 40px rgba(139,92,246,0.3)'
+  }} className={`absolute bottom-full left-0 mb-3 w-80 rounded-2xl shadow-2xl overflow-hidden z-40 ${isDark ? 'backdrop-blur-2xl bg-white/10 border border-white/20' : 'backdrop-blur-2xl bg-white/80 border border-white/30'}`} style={{
+    boxShadow: isDark ? '0 8px 40px rgba(139,92,246,0.3)' : '0 8px 40px rgba(124,58,237,0.08)'
   }}>
-    <div className="flex border-b border-white/10 px-2 pt-2 gap-1">
-      {categories.map((cat, i) => <button key={cat.label} onClick={() => setActiveCategory(i)} className={`flex-1 text-[10px] font-medium pb-2 border-b-2 transition-all duration-200 ease-in-out ${activeCategory === i ? 'border-violet-400 text-violet-300' : 'border-transparent text-white/40 hover:text-white/70'}`}>{cat.label}</button>)}
+    <div className={`flex px-2 pt-2 gap-1 border-b ${isDark ? 'border-white/10' : 'border-black/5'}`}>
+      {categories.map((cat, i) => <button key={cat.label} onClick={() => setActiveCategory(i)} className={`flex-1 text-[10px] font-medium pb-2 border-b-2 transition-all duration-200 ease-in-out ${activeCategory === i ? (isDark ? 'border-violet-400 text-violet-300' : 'border-violet-600 text-violet-600') : (isDark ? 'border-transparent text-white/40 hover:text-white/70' : 'border-transparent text-gray-400 hover:text-gray-650')}`}>{cat.label}</button>)}
     </div>
     <div className="p-3 grid grid-cols-8 gap-1 max-h-52 overflow-y-auto">
-      {categories[activeCategory].emojis.map(emoji => <button key={emoji} onClick={() => onSelect(emoji)} className="w-8 h-8 flex items-center justify-center text-xl rounded-lg transition-all duration-150 ease-in-out hover:bg-white/15 hover:scale-125"><span>{emoji}</span></button>)}
+      {categories[activeCategory].emojis.map(emoji => <button key={emoji} onClick={() => onSelect(emoji)} className={`w-8 h-8 flex items-center justify-center text-xl rounded-lg transition-all duration-150 ease-in-out hover:scale-125 ${isDark ? 'hover:bg-white/15' : 'hover:bg-black/5'}`}><span>{emoji}</span></button>)}
     </div>
   </motion.div>;
 };
@@ -471,10 +762,12 @@ const EmojiPicker = ({
 // ─── Reaction Picker ──────────────────────────────────────────────────────────
 const ReactionPicker = ({
   onSelect,
-  isMe
+  isMe,
+  isDark
 }: {
   onSelect: (emoji: string) => void;
   isMe: boolean;
+  isDark: boolean;
 }) => <motion.div initial={{
   opacity: 0,
   y: 6,
@@ -489,10 +782,10 @@ const ReactionPicker = ({
   scale: 0.9
 }} transition={{
   duration: 0.15
-}} className={`absolute -top-10 ${isMe ? 'right-0' : 'left-0'} flex items-center gap-0.5 rounded-full px-2 py-1 z-30 ${GLASS_CARD}`} style={{
-  boxShadow: '0 4px 20px rgba(139,92,246,0.4)'
+}} className={`absolute -top-10 ${isMe ? 'right-0' : 'left-0'} flex items-center gap-0.5 rounded-full px-2 py-1 z-30 ${isDark ? 'backdrop-blur-2xl bg-white/10 border border-white/20' : 'backdrop-blur-2xl bg-white/80 border border-white/30'}`} style={{
+  boxShadow: isDark ? '0 4px 20px rgba(139,92,246,0.4)' : '0 4px 20px rgba(124,58,237,0.08)'
 }}>
-  {QUICK_REACTIONS.map(emoji => <button key={emoji} onClick={() => onSelect(emoji)} className="w-8 h-8 flex items-center justify-center text-lg rounded-full transition-all duration-150 ease-in-out hover:bg-white/20 hover:scale-125"><span>{emoji}</span></button>)}
+  {QUICK_REACTIONS.map(emoji => <button key={emoji} onClick={() => onSelect(emoji)} className={`w-8 h-8 flex items-center justify-center text-lg rounded-full transition-all duration-150 ease-in-out hover:scale-125 ${isDark ? 'hover:bg-white/20' : 'hover:bg-black/5'}`}><span>{emoji}</span></button>)}
 </motion.div>;
 
 // ─── Message Action Menu ──────────────────────────────────────────────────────
@@ -502,13 +795,18 @@ const MessageActionMenu = ({
   onForward,
   onDelete,
   onThread,
-  onClose
+  onPin,
+  pinLabel,
+  onClose,
+  isDark
 }: {
   isMe: boolean;
   onReply: () => void;
   onForward: () => void;
   onDelete: () => void;
   onThread: () => void;
+  onPin: () => void;
+  pinLabel: string;
   onClose: () => void;
   isDark: boolean;
 }) => {
@@ -536,6 +834,11 @@ const MessageActionMenu = ({
     fn: onThread,
     danger: false
   }, {
+    icon: <Pin className="w-3.5 h-3.5" />,
+    label: pinLabel,
+    fn: onPin,
+    danger: false
+  }, {
     icon: <Trash2 className="w-3.5 h-3.5" />,
     label: 'Delete',
     fn: onDelete,
@@ -555,13 +858,13 @@ const MessageActionMenu = ({
     y: 4
   }} transition={{
     duration: 0.14
-  }} className={`absolute top-8 ${isMe ? 'right-0' : 'left-0'} rounded-2xl shadow-2xl py-1.5 min-w-[130px] z-40 ${GLASS_CARD}`} style={{
-    boxShadow: '0 8px 30px rgba(139,92,246,0.35)'
+  }} className={`absolute top-8 ${isMe ? 'right-0' : 'left-0'} rounded-2xl shadow-2xl py-1.5 min-w-[130px] z-40 ${isDark ? 'backdrop-blur-2xl bg-white/10 border border-white/20' : 'backdrop-blur-2xl bg-white/85 border border-white/30'}`} style={{
+    boxShadow: isDark ? '0 8px 30px rgba(139,92,246,0.35)' : '0 8px 30px rgba(124,58,237,0.08)'
   }}>
     {actions.map(a => <button key={a.label} onClick={() => {
       a.fn();
       onClose();
-    }} className={`w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium transition-all duration-200 ease-in-out ${a.danger ? 'text-red-400 hover:bg-red-500/20' : 'text-white/80 hover:bg-white/15'}`}>
+    }} className={`w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium transition-all duration-200 ease-in-out ${a.danger ? (isDark ? 'text-red-400 hover:bg-red-500/20' : 'text-red-600 hover:bg-red-500/10') : (isDark ? 'text-white/80 hover:bg-white/15' : 'text-gray-700 hover:bg-black/5 hover:text-gray-900')}`}>
       {a.icon}<span>{a.label}</span>
     </button>)}
   </motion.div>;
@@ -572,6 +875,7 @@ const AttachmentPreviewBar = ({
   files,
   onRemove,
   onSend,
+  isDark,
   countLabel,
   sendAllLabel
 }: {
@@ -590,19 +894,19 @@ const AttachmentPreviewBar = ({
 }} exit={{
   opacity: 0,
   y: 10
-}} className="px-6 py-3 border-t border-white/10 bg-white/5 backdrop-blur-md">
+}} className={`px-6 py-3 border-t backdrop-blur-md ${isDark ? 'border-white/10 bg-white/5' : 'border-black/5 bg-black/5'}`}>
   <div className="flex items-center gap-2 mb-2">
-    <span className="text-xs font-semibold text-white/70"><span>{countLabel}</span></span>
+    <span className={`text-xs font-semibold ${isDark ? 'text-white/70' : 'text-gray-655'}`}><span>{countLabel}</span></span>
     <button onClick={onSend} className="ml-auto text-xs font-semibold text-white px-3 py-1 rounded-full transition-all duration-200 ease-in-out hover:scale-105 hover:brightness-110" style={{
       background: 'linear-gradient(135deg,#7c3aed,#a855f7,#06b6d4)'
     }}>{sendAllLabel}</button>
   </div>
   <div className="flex gap-2 overflow-x-auto pb-1">
     {files.map(f => <div key={f.name} className="relative flex-shrink-0 group cursor-pointer">
-      {f.type === 'image' && f.preview ? <div className="w-20 h-20 rounded-xl overflow-hidden border border-white/20"><img src={f.preview} alt={f.name} className="w-full h-full object-cover" /></div> : <div className="w-20 h-20 rounded-xl border border-white/20 bg-white/10 flex flex-col items-center justify-center gap-1 px-1">
+      {f.type === 'image' && f.preview ? <div className={`w-20 h-20 rounded-xl overflow-hidden border ${isDark ? 'border-white/20' : 'border-black/10'}`}><img src={f.preview} alt={f.name} className="w-full h-full object-cover" /></div> : <div className={`w-20 h-20 rounded-xl border flex flex-col items-center justify-center gap-1 px-1 ${isDark ? 'border-white/20 bg-white/10' : 'border-black/10 bg-black/5'}`}>
         <div className="text-violet-300">{getAttachmentIcon(f.type)}</div>
-        <p className="text-[9px] text-center leading-tight break-all line-clamp-2 text-white/50">{f.name}</p>
-        <p className="text-[9px] text-white/35">{f.size}</p>
+        <p className={`text-[9px] text-center leading-tight break-all line-clamp-2 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{f.name}</p>
+        <p className={`text-[9px] ${isDark ? 'text-white/35' : 'text-gray-400'}`}>{f.size}</p>
       </div>}
       <button onClick={() => onRemove(f.name)} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow hover:scale-110"><X className="w-3 h-3" /></button>
     </div>)}
@@ -612,10 +916,12 @@ const AttachmentPreviewBar = ({
 // ─── Voice Recorder ───────────────────────────────────────────────────────────
 const VoiceRecorder = ({
   onSend,
-  onCancel
+  onCancel,
+  isDark
 }: {
   onSend: (duration: number) => void;
   onCancel: () => void;
+  isDark: boolean;
 }) => {
   const [seconds, setSeconds] = useState(0);
   const [waveHeights] = useState(() => Array.from({
@@ -634,7 +940,7 @@ const VoiceRecorder = ({
   }} exit={{
     opacity: 0,
     y: 8
-  }} className="flex items-center gap-3 rounded-full px-4 py-2 flex-1 border border-red-400/40 bg-red-500/10">
+  }} className={`flex items-center gap-3 rounded-full px-4 py-2 flex-1 border ${isDark ? 'border-red-400/40 bg-red-500/10' : 'border-red-400/30 bg-red-500/5'}`}>
     <motion.div animate={{
       scale: [1, 1.3, 1],
       opacity: [1, 0.6, 1]
@@ -654,8 +960,8 @@ const VoiceRecorder = ({
         transformOrigin: 'center'
       }} />)}
     </div>
-    <span className="text-xs font-semibold text-red-300 flex-shrink-0">{formatDuration(seconds)}</span>
-    <button onClick={onCancel} className="w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-white/70 transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0"><X className="w-3.5 h-3.5" /></button>
+    <span className={`text-xs font-semibold flex-shrink-0 ${isDark ? 'text-red-300' : 'text-red-600'}`}>{formatDuration(seconds)}</span>
+    <button onClick={onCancel} className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0 ${isDark ? 'bg-white/15 hover:bg-white/25 text-white/70' : 'bg-black/5 hover:bg-black/8 text-gray-655'}`}><X className="w-3.5 h-3.5" /></button>
     <button onClick={() => onSend(seconds)} className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0" style={{
       background: 'linear-gradient(135deg,#7c3aed,#06b6d4)'
     }}><Send className="w-3 h-3" /></button>
@@ -667,6 +973,7 @@ const AIPanel = ({
   onSelect,
   onClose,
   lastMessage,
+  isDark,
   title,
   loadingText
 }: {
@@ -698,24 +1005,24 @@ const AIPanel = ({
     opacity: 0,
     y: 10
   }} className="mx-6 mb-2 rounded-2xl p-4" style={{
-    background: 'linear-gradient(135deg,rgba(124,58,237,0.2),rgba(168,85,247,0.15),rgba(6,182,212,0.15))',
-    border: '1px solid rgba(167,139,250,0.3)',
-    boxShadow: '0 4px 24px rgba(139,92,246,0.2)'
+    background: isDark ? 'linear-gradient(135deg,rgba(124,58,237,0.2),rgba(168,85,247,0.15),rgba(6,182,212,0.15))' : 'linear-gradient(135deg,rgba(124,58,237,0.15),rgba(168,85,247,0.08),rgba(6,182,212,0.08))',
+    border: isDark ? '1px solid rgba(167,139,250,0.3)' : '1px solid rgba(124,58,237,0.25)',
+    boxShadow: isDark ? '0 4px 24px rgba(139,92,246,0.2)' : '0 4px 24px rgba(124,58,237,0.08)'
   }}>
     <div className="flex items-center justify-between mb-3">
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{
           background: 'linear-gradient(135deg,#7c3aed,#06b6d4)'
         }}><Sparkles className="w-3.5 h-3.5 text-white" /></div>
-        <span className="text-xs font-semibold text-violet-300">{title}</span>
+        <span className={`text-xs font-semibold ${isDark ? 'text-violet-300' : 'text-violet-700'}`}>{title}</span>
       </div>
-      <button onClick={onClose} className="w-5 h-5 rounded-full flex items-center justify-center text-white/40 transition-all duration-200 ease-in-out hover:bg-white/15 hover:text-white hover:scale-110"><X className="w-3 h-3" /></button>
+      <button onClick={onClose} className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'text-white/40 hover:bg-white/15 hover:text-white' : 'text-gray-400 hover:bg-black/5 hover:text-gray-600'}`}><X className="w-3 h-3" /></button>
     </div>
-    {isLoading ? <div className="flex items-center gap-2 py-2"><Loader2 className="w-4 h-4 text-violet-300 animate-spin" /><span className="text-xs text-white/50">{loadingText}</span></div> : <div className="space-y-1.5">
+    {isLoading ? <div className="flex items-center gap-2 py-2"><Loader2 className="w-4 h-4 text-violet-300 animate-spin" /><span className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{loadingText}</span></div> : <div className="space-y-1.5">
       {suggestions.map((s, i) => <button key={`ai-${i}`} onClick={() => {
         onSelect(s);
         onClose();
-      }} className="w-full text-left text-xs rounded-xl px-3 py-2 transition-all duration-200 ease-in-out leading-relaxed text-white/80 hover:bg-white/15 hover:text-white border border-white/10 hover:border-violet-400/40">{s}</button>)}
+      }} className={`w-full text-left text-xs rounded-xl px-3 py-2 transition-all duration-200 ease-in-out leading-relaxed ${isDark ? 'text-white/80 hover:bg-white/15 hover:text-white border border-white/10 hover:border-violet-400/40' : 'text-gray-700 hover:bg-black/5 hover:text-gray-900 border border-black/5 hover:border-violet-500/30'}`}>{s}</button>)}
     </div>}
   </motion.div>;
 };
@@ -723,7 +1030,8 @@ const AIPanel = ({
 // ─── Reply Bar ────────────────────────────────────────────────────────────────
 const ReplyBar = ({
   reply,
-  onCancel
+  onCancel,
+  isDark
 }: {
   reply: ReplyPreview;
   onCancel: () => void;
@@ -737,13 +1045,13 @@ const ReplyBar = ({
 }} exit={{
   opacity: 0,
   y: 6
-}} className="mx-6 mb-2 flex items-center gap-3 border-l-4 rounded-r-xl px-3 py-2 bg-violet-500/15 border-violet-400">
-  <CornerUpLeft className="w-3.5 h-3.5 text-violet-300 flex-shrink-0" />
+}} className={`mx-6 mb-2 flex items-center gap-3 border-l-4 rounded-r-xl px-3 py-2 ${isDark ? 'bg-violet-500/15 border-violet-400' : 'bg-violet-500/8 border-violet-500'}`}>
+  <CornerUpLeft className={`w-3.5 h-3.5 flex-shrink-0 ${isDark ? 'text-violet-300' : 'text-violet-650'}`} />
   <div className="flex-1 min-w-0">
-    <p className="text-[10px] font-semibold text-violet-300">{reply.senderName}</p>
-    <p className="text-xs truncate text-white/60">{reply.text}</p>
+    <p className={`text-[10px] font-semibold ${isDark ? 'text-violet-300' : 'text-violet-600'}`}>{reply.senderName}</p>
+    <p className={`text-xs truncate ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{reply.text}</p>
   </div>
-  <button onClick={onCancel} className="w-5 h-5 rounded-full hover:bg-white/15 flex items-center justify-center text-white/40 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-3 h-3" /></button>
+  <button onClick={onCancel} className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-white/15 text-white/40' : 'hover:bg-black/5 text-gray-500'}`}><X className="w-3 h-3" /></button>
 </motion.div>;
 
 // ─── Message Search Bar ───────────────────────────────────────────────────────
@@ -755,6 +1063,7 @@ const MessageSearchBar = ({
   currentMatch,
   onPrev,
   onNext,
+  isDark,
   placeholder
 }: {
   query: string;
@@ -777,13 +1086,13 @@ const MessageSearchBar = ({
   y: -10
 }} transition={{
   duration: 0.2
-}} className="flex items-center gap-2 px-6 py-2.5 border-b border-white/10 bg-white/5 backdrop-blur-md">
-  <SearchIcon className="w-4 h-4 text-white/40 flex-shrink-0" />
-  <input autoFocus type="text" placeholder={placeholder} value={query} onChange={e => onChange(e.target.value)} className="flex-1 bg-transparent outline-none text-sm placeholder-white/30 text-white" />
-  {query && <span className="text-xs font-medium flex-shrink-0 text-white/50">{matchCount > 0 ? `${currentMatch + 1} / ${matchCount}` : '0'}</span>}
-  <button onClick={onPrev} disabled={matchCount === 0} className="w-6 h-6 rounded-full flex items-center justify-center disabled:opacity-30 hover:bg-white/15 text-white/60 transition-all duration-200 ease-in-out hover:scale-110"><ChevronUp className="w-3.5 h-3.5" /></button>
-  <button onClick={onNext} disabled={matchCount === 0} className="w-6 h-6 rounded-full flex items-center justify-center disabled:opacity-30 hover:bg-white/15 text-white/60 transition-all duration-200 ease-in-out hover:scale-110"><ChevronDown className="w-3.5 h-3.5" /></button>
-  <button onClick={onClose} className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/15 text-white/60 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-3.5 h-3.5" /></button>
+}} className={`flex items-center gap-2 px-6 py-2.5 border-b backdrop-blur-md ${isDark ? 'border-white/10 bg-white/5' : 'border-black/5 bg-white/40'}`}>
+  <SearchIcon className={`w-4 h-4 flex-shrink-0 ${isDark ? 'text-white/40' : 'text-gray-400'}`} />
+  <input autoFocus type="text" placeholder={placeholder} value={query} onChange={e => onChange(e.target.value)} className={`flex-1 bg-transparent outline-none text-sm ${isDark ? 'placeholder-white/30 text-white' : 'placeholder-gray-450 text-gray-800'}`} />
+  {query && <span className={`text-xs font-medium flex-shrink-0 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{matchCount > 0 ? `${currentMatch + 1} / ${matchCount}` : '0'}</span>}
+  <button onClick={onPrev} disabled={matchCount === 0} className={`w-6 h-6 rounded-full flex items-center justify-center disabled:opacity-30 transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-white/15 text-white/60' : 'hover:bg-black/5 text-gray-500 hover:text-gray-700'}`}><ChevronUp className="w-3.5 h-3.5" /></button>
+  <button onClick={onNext} disabled={matchCount === 0} className={`w-6 h-6 rounded-full flex items-center justify-center disabled:opacity-30 transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-white/15 text-white/60' : 'hover:bg-black/5 text-gray-500 hover:text-gray-700'}`}><ChevronDown className="w-3.5 h-3.5" /></button>
+  <button onClick={onClose} className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-white/15 text-white/60' : 'hover:bg-black/5 text-gray-500 hover:text-gray-700'}`}><X className="w-3.5 h-3.5" /></button>
 </motion.div>;
 
 // ─── Pinned Banner ────────────────────────────────────────────────────────────
@@ -791,6 +1100,7 @@ const PinnedBanner = ({
   message,
   onDismiss,
   onJump,
+  isDark,
   label
 }: {
   message: Message;
@@ -809,28 +1119,29 @@ const PinnedBanner = ({
   y: -8
 }} transition={{
   duration: 0.2
-}} className="mx-6 mt-3 mb-0 flex items-center gap-3 rounded-xl px-4 py-2.5 cursor-pointer group transition-all duration-200 ease-in-out hover:bg-violet-500/20" style={{
-  background: 'rgba(124,58,237,0.15)',
-  border: '1px solid rgba(167,139,250,0.25)'
+}} className={`mx-6 mt-3 mb-0 flex items-center gap-3 rounded-xl px-4 py-2.5 cursor-pointer group transition-all duration-200 ease-in-out ${isDark ? 'hover:bg-violet-500/20' : 'hover:bg-violet-500/10'}`} style={{
+  background: isDark ? 'rgba(124,58,237,0.15)' : 'rgba(124,58,237,0.08)',
+  border: isDark ? '1px solid rgba(167,139,250,0.25)' : '1px solid rgba(124,58,237,0.2)'
 }} onClick={onJump}>
   <div className="w-0.5 h-8 rounded-full flex-shrink-0" style={{
     background: 'linear-gradient(180deg,#a78bfa,#67e8f9)'
   }} />
-  <Pin className="w-3.5 h-3.5 text-violet-300 flex-shrink-0" />
+  <Pin className={`w-3.5 h-3.5 flex-shrink-0 ${isDark ? 'text-violet-300' : 'text-violet-600'}`} />
   <div className="flex-1 min-w-0">
-    <p className="text-[10px] font-semibold text-violet-300 uppercase tracking-wider">{label}</p>
-    <p className="text-xs truncate text-white/60">{message.text}</p>
+    <p className={`text-[10px] font-semibold uppercase tracking-wider ${isDark ? 'text-violet-300' : 'text-violet-600'}`}>{label}</p>
+    <p className={`text-xs truncate ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{message.text}</p>
   </div>
   <button onClick={e => {
     e.stopPropagation();
     onDismiss();
-  }} className="w-5 h-5 rounded-full hover:bg-white/15 flex items-center justify-center text-white/40 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out"><X className="w-3 h-3" /></button>
+  }} className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out ${isDark ? 'hover:bg-white/15 text-white/40' : 'hover:bg-black/5 text-gray-500'}`}><X className="w-3 h-3" /></button>
 </motion.div>;
 
 // ─── Voice Bubble ─────────────────────────────────────────────────────────────
 const VoiceBubble = ({
   duration,
-  isMe
+  isMe,
+  isDark
 }: {
   duration: number;
   isMe: boolean;
@@ -853,21 +1164,21 @@ const VoiceBubble = ({
     return () => clearInterval(iv);
   }, [playing, duration]);
   return <div className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl min-w-[160px] transition-all duration-200 ease-in-out hover:brightness-110 ${isMe ? 'rounded-br-md' : 'rounded-bl-md'}`} style={{
-    background: isMe ? 'linear-gradient(135deg,rgba(124,58,237,0.5),rgba(168,85,247,0.4),rgba(6,182,212,0.35))' : 'rgba(255,255,255,0.1)',
-    border: isMe ? '1px solid rgba(167,139,250,0.4)' : '1px solid rgba(255,255,255,0.15)'
+    background: isMe ? 'linear-gradient(135deg,rgba(124,58,237,0.5),rgba(168,85,247,0.4),rgba(6,182,212,0.35))' : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.85)'),
+    border: isMe ? '1px solid rgba(167,139,250,0.4)' : (isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(0,0,0,0.08)')
   }}>
-    <button onClick={() => setPlaying(p => !p)} className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200 ease-in-out hover:scale-110 text-white" style={{
-      background: isMe ? 'linear-gradient(135deg,#7c3aed,#06b6d4)' : 'rgba(255,255,255,0.2)'
+    <button onClick={() => setPlaying(p => !p)} className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200 ease-in-out hover:scale-110 ${isDark || isMe ? 'text-white' : 'text-gray-500 hover:text-gray-800'}`} style={{
+      background: isMe ? 'linear-gradient(135deg,#7c3aed,#06b6d4)' : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.05)')
     }}>
       {playing ? <Square className="w-3 h-3 fill-current" /> : <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3"><path d="M8 5v14l11-7z" /></svg>}
     </button>
     <div className="flex items-center gap-0.5 flex-1">
       {bars.map((h, i) => <div key={`vb-${i}`} className="w-1 rounded-full flex-shrink-0 transition-all" style={{
         height: `${h * 20}px`,
-        background: i < Math.floor(bars.length * progress / 100) ? 'linear-gradient(180deg,#a78bfa,#67e8f9)' : 'rgba(255,255,255,0.25)'
+        background: i < Math.floor(bars.length * progress / 100) ? 'linear-gradient(180deg,#a78bfa,#67e8f9)' : (isDark || isMe ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.15)')
       }} />)}
     </div>
-    <span className="text-[10px] flex-shrink-0 text-white/50">{formatDuration(duration)}</span>
+    <span className={`text-[10px] flex-shrink-0 ${isDark || isMe ? 'text-white/50' : 'text-gray-400'}`}>{formatDuration(duration)}</span>
   </div>;
 };
 
@@ -878,6 +1189,7 @@ const DeleteConfirmModal = ({
   onDeleteForMe,
   onDeleteForEveryone,
   onCancel,
+  isDark,
   title,
   subtitle,
   deleteForMeLabel,
@@ -920,7 +1232,7 @@ const DeleteConfirmModal = ({
   }} exit={{
     opacity: 0
   }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{
-    background: 'rgba(0,0,0,0.7)',
+    background: isDark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.45)',
     backdropFilter: 'blur(20px)'
   }}>
     <motion.div initial={{
@@ -939,18 +1251,18 @@ const DeleteConfirmModal = ({
       type: 'spring',
       stiffness: 300,
       damping: 28
-    }} className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${GLASS_CARD}`} style={{
-      boxShadow: '0 20px 60px rgba(139,92,246,0.4)'
+    }} className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? 'backdrop-blur-2xl bg-white/10 border border-white/20' : 'backdrop-blur-2xl bg-white/80 border border-white/30'}`} style={{
+      boxShadow: isDark ? '0 20px 60px rgba(139,92,246,0.4)' : '0 20px 60px rgba(139,92,246,0.1)'
     }}>
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10">
+      <div className={`flex items-center gap-3 px-5 py-4 border-b ${isDark ? 'border-white/10' : 'border-black/5'}`}>
         <div className="w-9 h-9 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0"><AlertTriangle className="w-4 h-4 text-red-400" /></div>
-        <div><h3 className="font-semibold text-sm text-white">{title}</h3><p className="text-xs mt-0.5 text-white/50">{subtitle}</p></div>
-        {phase === 'choice' && <button onClick={onCancel} className="ml-auto w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 text-white/50 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-4 h-4" /></button>}
+        <div><h3 className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{title}</h3><p className={`text-xs mt-0.5 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{subtitle}</p></div>
+        {phase === 'choice' && <button onClick={onCancel} className={`ml-auto w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-white/15 text-white/50' : 'hover:bg-black/5 text-gray-500'}`}><X className="w-4 h-4" /></button>}
       </div>
       <div className="px-5 py-5 space-y-4">
-        {phase === 'choice' && <div className="rounded-xl px-4 py-3 bg-white/8 border border-white/10"><p className="text-xs leading-relaxed line-clamp-3 text-white/60">{msgText || 'Voice message'}</p></div>}
-        {phase === 'shredding' && <div className="rounded-xl px-4 py-3 bg-white/8 border border-white/10"><PaperShredder onComplete={handleShredComplete} isDark={false} /></div>}
-        {phase === 'shredding' && <div className="flex items-center justify-center gap-2 text-white/50"><motion.div animate={{
+        {phase === 'choice' && <div className={`rounded-xl px-4 py-3 border ${isDark ? 'bg-white/8 border-white/10' : 'bg-black/5 border-black/10'}`}><p className={`text-xs leading-relaxed line-clamp-3 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{msgText || 'Voice message'}</p></div>}
+        {phase === 'shredding' && <div className={`rounded-xl px-4 py-3 border ${isDark ? 'bg-white/8 border-white/10' : 'bg-black/5 border-black/10'}`}><PaperShredder onComplete={handleShredComplete} isDark={isDark} /></div>}
+        {phase === 'shredding' && <div className={`flex items-center justify-center gap-2 ${isDark ? 'text-white/50' : 'text-gray-500'}`}><motion.div animate={{
             rotate: 360
           }} transition={{
             duration: 0.6,
@@ -958,15 +1270,15 @@ const DeleteConfirmModal = ({
             ease: 'linear'
           }} className="w-4 h-4 rounded-full border-2 border-violet-400 border-t-transparent" /><span className="text-xs font-medium">{deleteMode === 'everyone' ? deletingForEveryoneLabel : deletingForMeLabel}</span></div>}
         {phase === 'choice' && <div className="space-y-2">
-          <button onClick={() => handleDelete('me')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ease-in-out bg-white/8 hover:bg-white/15 text-white/80 border border-white/10 hover:border-white/20">
-            <MessageCircleOff className="w-4 h-4 text-white/40 flex-shrink-0" />
-            <div className="text-left"><p className="font-semibold">{deleteForMeLabel}</p><p className="text-xs font-normal text-white/40">{deleteForMeDesc}</p></div>
+          <button onClick={() => handleDelete('me')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ease-in-out border ${isDark ? 'bg-white/8 hover:bg-white/15 text-white/80 border-white/10 hover:border-white/20' : 'bg-black/5 hover:bg-black/8 text-gray-700 border-black/10 hover:border-black/15'}`}>
+            <MessageCircleOff className="w-4 h-4 text-violet-500 flex-shrink-0" />
+            <div className="text-left"><p className="font-semibold">{deleteForMeLabel}</p><p className={`text-xs font-normal ${isDark ? 'text-white/40' : 'text-gray-450'}`}>{deleteForMeDesc}</p></div>
           </button>
-          {isMe && <button onClick={() => handleDelete('everyone')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-red-500/15 hover:bg-red-500/25 text-red-300 transition-all duration-200 ease-in-out border border-red-500/30">
+          {isMe && <button onClick={() => handleDelete('everyone')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-red-500/15 hover:bg-red-500/25 text-red-600 transition-all duration-200 ease-in-out border border-red-500/30">
             <Trash className="w-4 h-4 flex-shrink-0" />
-            <div className="text-left"><p className="font-semibold">{deleteForEveryoneLabel}</p><p className="text-xs font-normal text-red-400/70">{deleteForEveryoneDesc}</p></div>
+            <div className="text-left"><p className="font-semibold">{deleteForEveryoneLabel}</p><p className="text-xs font-normal text-red-500/70">{deleteForEveryoneDesc}</p></div>
           </button>}
-          <button onClick={onCancel} className="w-full px-4 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:bg-white/8 transition-all duration-200 ease-in-out">{cancelLabel}</button>
+          <button onClick={onCancel} className={`w-full px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ease-in-out ${isDark ? 'text-white/40 hover:bg-white/8' : 'text-gray-500 hover:bg-black/5'}`}>{cancelLabel}</button>
         </div>}
       </div>
     </motion.div>
@@ -978,6 +1290,7 @@ const DeleteConversationModal = ({
   contactName,
   onConfirm,
   onCancel,
+  isDark,
   title,
   descPrefix,
   deleteAllLabel,
@@ -1004,7 +1317,7 @@ const DeleteConversationModal = ({
   }} exit={{
     opacity: 0
   }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{
-    background: 'rgba(0,0,0,0.7)',
+    background: isDark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.45)',
     backdropFilter: 'blur(20px)'
   }}>
     <motion.div initial={{
@@ -1023,13 +1336,13 @@ const DeleteConversationModal = ({
       type: 'spring',
       stiffness: 300,
       damping: 28
-    }} className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${GLASS_CARD}`} style={{
-      boxShadow: '0 20px 60px rgba(139,92,246,0.4)'
+    }} className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? 'backdrop-blur-2xl bg-white/10 border border-white/20' : 'backdrop-blur-2xl bg-white/80 border border-white/30'}`} style={{
+      boxShadow: isDark ? '0 20px 60px rgba(139,92,246,0.4)' : '0 20px 60px rgba(139,92,246,0.1)'
     }}>
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10">
+      <div className={`flex items-center gap-3 px-5 py-4 border-b ${isDark ? 'border-white/10' : 'border-black/5'}`}>
         <div className="w-9 h-9 rounded-full bg-red-500/20 flex items-center justify-center"><Trash className="w-4 h-4 text-red-400" /></div>
-        <div><h3 className="font-semibold text-sm text-white">{title}</h3><p className="text-xs text-white/50">{contactName}</p></div>
-        <button onClick={onCancel} className="ml-auto w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 text-white/50 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-4 h-4" /></button>
+        <div><h3 className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{title}</h3><p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{contactName}</p></div>
+        <button onClick={onCancel} className={`ml-auto w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-white/15 text-white/50' : 'hover:bg-black/5 text-gray-500'}`}><X className="w-4 h-4" /></button>
       </div>
       <div className="px-5 py-4">
         {shredding ? <div className="space-y-3">
@@ -1057,12 +1370,12 @@ const DeleteConversationModal = ({
               repeat: Infinity,
               ease: 'linear'
             }} className="w-4 h-4 rounded-full border-2 border-violet-400 border-t-transparent" onAnimationStart={() => setTimeout(() => onConfirmRef.current(), 900)} />
-            <span className="text-xs font-medium text-white/50">{shreddingLabel}</span>
+            <span className={`text-xs font-medium ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{shreddingLabel}</span>
           </div>
         </div> : <div className="space-y-3">
-          <p className="text-sm leading-relaxed text-white/70">{descPrefix} <strong className="text-white">{contactName}</strong>.</p>
+          <p className={`text-sm leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{descPrefix} <strong className={isDark ? 'text-white' : 'text-gray-900'}>{contactName}</strong>.</p>
           <div className="flex gap-2 pt-1">
-            <button onClick={onCancel} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white/70 hover:bg-white/15 transition-all duration-200 ease-in-out">{cancelLabel}</button>
+            <button onClick={onCancel} className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ease-in-out ${isDark ? 'bg-white/10 text-white/70 hover:bg-white/15' : 'bg-black/5 text-gray-600 hover:bg-black/8'}`}>{cancelLabel}</button>
             <button onClick={() => setShredding(true)} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium bg-red-500 hover:bg-red-600 text-white transition-all duration-200 ease-in-out">{deleteAllLabel}</button>
           </div>
         </div>}
@@ -1185,6 +1498,7 @@ const ContactInfoDrawer = ({
   contact,
   onClose,
   onDeleteConversation,
+  isDark,
   t
 }: {
   contact: Contact;
@@ -1233,22 +1547,22 @@ const ContactInfoDrawer = ({
     type: 'spring',
     stiffness: 300,
     damping: 30
-  }} className="w-72 flex-shrink-0 border-l border-white/10 flex flex-col overflow-hidden" style={{
-    background: 'rgba(15,5,40,0.65)',
+  }} className={`w-72 flex-shrink-0 border-l flex flex-col overflow-hidden ${isDark ? 'border-white/10' : 'border-black/5'}`} style={{
+    background: isDark ? 'rgba(15,5,40,0.65)' : 'rgba(255,255,255,0.7)',
     backdropFilter: 'blur(24px)'
   }}>
-    <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 flex-shrink-0">
-      <h3 className="font-semibold text-sm text-white">{t.contactInfo}</h3>
-      <button onClick={onClose} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 text-white/50 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-4 h-4" /></button>
+    <div className={`flex items-center justify-between px-5 py-4 border-b flex-shrink-0 ${isDark ? 'border-white/10' : 'border-black/5'}`}>
+      <h3 className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{t.contactInfo}</h3>
+      <button onClick={onClose} className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-white/15 text-white/50' : 'hover:bg-black/5 text-gray-500'}`}><X className="w-4 h-4" /></button>
     </div>
-    <div className="flex border-b border-white/10 flex-shrink-0">
-      <button onClick={() => setDrawerTab('info')} className={`flex-1 py-2.5 text-xs font-semibold transition-all duration-200 ease-in-out border-b-2 ${drawerTab === 'info' ? 'border-violet-400 text-violet-300' : 'border-transparent text-white/40 hover:text-white/70'}`}>{t.info}</button>
-      <button onClick={() => setDrawerTab('media')} className={`flex-1 py-2.5 text-xs font-semibold transition-all duration-200 ease-in-out border-b-2 flex items-center justify-center gap-1.5 ${drawerTab === 'media' ? 'border-violet-400 text-violet-300' : 'border-transparent text-white/40 hover:text-white/70'}`}><Grid3X3 className="w-3 h-3" /><span>{t.media}</span></button>
+    <div className={`flex border-b flex-shrink-0 ${isDark ? 'border-white/10' : 'border-black/5'}`}>
+      <button onClick={() => setDrawerTab('info')} className={`flex-1 py-2.5 text-xs font-semibold transition-all duration-200 ease-in-out border-b-2 ${drawerTab === 'info' ? (isDark ? 'border-violet-400 text-violet-300' : 'border-violet-600 text-violet-600') : (isDark ? 'border-transparent text-white/40 hover:text-white/70' : 'border-transparent text-gray-400 hover:text-gray-650')}`}>{t.info}</button>
+      <button onClick={() => setDrawerTab('media')} className={`flex-1 py-2.5 text-xs font-semibold transition-all duration-200 ease-in-out border-b-2 flex items-center justify-center gap-1.5 ${drawerTab === 'media' ? (isDark ? 'border-violet-400 text-violet-300' : 'border-violet-600 text-violet-600') : (isDark ? 'border-transparent text-white/40 hover:text-white/70' : 'border-transparent text-gray-400 hover:text-gray-650')}`}><Grid3X3 className="w-3 h-3" /><span>{t.media}</span></button>
     </div>
     <div className="flex-1 overflow-y-auto">
       {drawerTab === 'info' && <div>
         <div className="flex flex-col items-center px-5 pt-6 pb-4" style={{
-          background: 'linear-gradient(180deg,rgba(124,58,237,0.2),transparent)'
+          background: isDark ? 'linear-gradient(180deg,rgba(124,58,237,0.2),transparent)' : 'linear-gradient(180deg,rgba(124,58,237,0.06),transparent)'
         }}>
           <div className="relative mb-3">
             <img src={contact.avatar} alt={contact.name} className="w-20 h-20 rounded-full object-cover border-4 shadow-md" style={{
@@ -1256,53 +1570,53 @@ const ContactInfoDrawer = ({
             }} />
             {contact.online && <span className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-green-400 border-2 border-white/20 rounded-full" />}
           </div>
-          <h2 className="font-bold text-lg leading-tight text-center text-white">{contact.name}</h2>
-          <p className="text-xs mt-0.5 text-white/50">{contact.online ? t.online : 'Offline'}</p>
-          {contact.bio && <p className="text-xs text-center mt-2 leading-relaxed px-2 text-white/50">{contact.bio}</p>}
+          <h2 className={`font-bold text-lg leading-tight text-center ${isDark ? 'text-white' : 'text-gray-900'}`}>{contact.name}</h2>
+          <p className={`text-xs mt-0.5 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{contact.online ? t.online : 'Offline'}</p>
+          {contact.bio && <p className={`text-xs text-center mt-2 leading-relaxed px-2 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{contact.bio}</p>}
           <div className="flex gap-3 mt-4">
             {quickActions.map(action => <button key={action.label} className="flex flex-col items-center gap-1 group">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-violet-300 group-hover:text-white transition-all duration-200 ease-in-out group-hover:scale-110" style={{
-                background: 'rgba(124,58,237,0.2)',
-                border: '1px solid rgba(167,139,250,0.25)'
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out group-hover:scale-110 ${isDark ? 'text-violet-300 group-hover:text-white' : 'text-violet-600 group-hover:text-violet-850'}`} style={{
+                background: isDark ? 'rgba(124,58,237,0.2)' : 'rgba(124,58,237,0.08)',
+                border: isDark ? '1px solid rgba(167,139,250,0.25)' : '1px solid rgba(124,58,237,0.2)'
               }}>{action.icon}</div>
-              <span className="text-[10px] text-white/40">{action.label}</span>
+              <span className={`text-[10px] ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{action.label}</span>
             </button>)}
           </div>
         </div>
         <div className="px-5 py-3 space-y-3">
-          {contact.email && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-white/8 text-white/40"><Mail className="w-3.5 h-3.5" /></div><div className="min-w-0"><p className="text-[10px] uppercase tracking-wider text-white/35">{t.email}</p><p className="text-xs font-medium truncate text-white/75">{contact.email}</p></div></div>}
-          {contact.location && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-white/8 text-white/40"><MapPin className="w-3.5 h-3.5" /></div><div><p className="text-[10px] uppercase tracking-wider text-white/35">{t.location}</p><p className="text-xs font-medium text-white/75">{contact.location}</p></div></div>}
-          {contact.joined && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-white/8 text-white/40"><Calendar className="w-3.5 h-3.5" /></div><div><p className="text-[10px] uppercase tracking-wider text-white/35">{t.memberSince}</p><p className="text-xs font-medium text-white/75">{contact.joined}</p></div></div>}
+          {contact.email && <div className="flex items-center gap-3"><div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isDark ? 'bg-white/8 text-white/40' : 'bg-black/5 text-gray-400'}`}><Mail className="w-3.5 h-3.5" /></div><div className="min-w-0"><p className={`text-[10px] uppercase tracking-wider ${isDark ? 'text-white/35' : 'text-gray-450'}`}>{t.email}</p><p className={`text-xs font-medium truncate ${isDark ? 'text-white/75' : 'text-gray-700'}`}>{contact.email}</p></div></div>}
+          {contact.location && <div className="flex items-center gap-3"><div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isDark ? 'bg-white/8 text-white/40' : 'bg-black/5 text-gray-400'}`}><MapPin className="w-3.5 h-3.5" /></div><div><p className={`text-[10px] uppercase tracking-wider ${isDark ? 'text-white/35' : 'text-gray-450'}`}>{t.location}</p><p className={`text-xs font-medium ${isDark ? 'text-white/75' : 'text-gray-700'}`}>{contact.location}</p></div></div>}
+          {contact.joined && <div className="flex items-center gap-3"><div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isDark ? 'bg-white/8 text-white/40' : 'bg-black/5 text-gray-400'}`}><Calendar className="w-3.5 h-3.5" /></div><div><p className={`text-[10px] uppercase tracking-wider ${isDark ? 'text-white/35' : 'text-gray-450'}`}>{t.memberSince}</p><p className={`text-xs font-medium ${isDark ? 'text-white/75' : 'text-gray-700'}`}>{contact.joined}</p></div></div>}
         </div>
-        <div className="mx-5 border-t border-white/10 my-1" />
+        <div className={`mx-5 border-t my-1 ${isDark ? 'border-white/10' : 'border-black/5'}`} />
         {contact.mutualGroups && contact.mutualGroups.length > 0 && <div className="px-5 py-3">
-          <p className="text-[10px] uppercase tracking-wider mb-2 text-white/35">{t.mutualGroups}</p>
+          <p className={`text-[10px] uppercase tracking-wider mb-2 ${isDark ? 'text-white/35' : 'text-gray-450'}`}>{t.mutualGroups}</p>
           <div className="space-y-1">
-            {contact.mutualGroups.map(group => <button key={group} className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/8 transition-all duration-200 ease-in-out group">
+            {contact.mutualGroups.map(group => <button key={group} className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all duration-200 ease-in-out group ${isDark ? 'hover:bg-white/8' : 'hover:bg-black/5'}`}>
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded-lg flex items-center justify-center text-violet-300 bg-violet-500/20"><Search className="w-3 h-3" /></div>
-                <span className="text-xs font-medium text-white/70">{group}</span>
+                <span className={`text-xs font-medium ${isDark ? 'text-white/70' : 'text-gray-655'}`}>{group}</span>
               </div>
-              <ChevronRight className="w-3.5 h-3.5 text-white/25 group-hover:text-white/50 transition-colors duration-200" />
+              <ChevronRight className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? 'text-white/25 group-hover:text-white/50' : 'text-gray-400 group-hover:text-violet-650'}`} />
             </button>)}
           </div>
         </div>}
-        <div className="mx-5 border-t border-white/10 my-1" />
+        <div className={`mx-5 border-t my-1 ${isDark ? 'border-white/10' : 'border-black/5'}`} />
         <div className="px-5 py-3 space-y-1">
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/8 text-white/50 transition-all duration-200 ease-in-out"><Shield className="w-4 h-4 text-white/35" /><span className="text-xs">{t.blockContact}</span></button>
+          <button className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 ease-in-out ${isDark ? 'hover:bg-white/8 text-white/50' : 'hover:bg-black/5 text-gray-500'}`}><Shield className={`w-4 h-4 ${isDark ? 'text-white/35' : 'text-gray-400'}`} /><span className="text-xs">{t.blockContact}</span></button>
           <button onClick={onDeleteConversation} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-red-500/15 text-red-400 transition-all duration-200 ease-in-out"><Trash className="w-4 h-4" /><span className="text-xs font-medium">{t.deleteConversation}</span></button>
         </div>
       </div>}
       {drawerTab === 'media' && <div className="p-4">
-        <p className="text-[10px] uppercase tracking-wider mb-3 text-white/35">{t.sharedMedia} · {SAMPLE_MEDIA_IMAGES.length}</p>
+        <p className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? 'text-white/35' : 'text-gray-450'}`}>{t.sharedMedia} · {SAMPLE_MEDIA_IMAGES.length}</p>
         <div className="grid grid-cols-3 gap-1.5">
-          {SAMPLE_MEDIA_IMAGES.map((src, idx) => <div key={`media-${idx}`} className="aspect-square rounded-xl overflow-hidden bg-white/10 group cursor-pointer ring-1 ring-white/10"><img src={src} alt={`Shared media ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200 ease-in-out" /></div>)}
+          {SAMPLE_MEDIA_IMAGES.map((src, idx) => <div key={`media-${idx}`} className={`aspect-square rounded-xl overflow-hidden group cursor-pointer border ${isDark ? 'bg-white/10 border-white/10 ring-1 ring-white/10' : 'bg-black/5 border-black/5'}`}><img src={src} alt={`Shared media ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200 ease-in-out" /></div>)}
         </div>
-        <div className="mt-4 border-t border-white/10 pt-4">
-          <p className="text-[10px] uppercase tracking-wider mb-3 text-white/35">{t.sharedFiles} · 3</p>
-          {sharedFiles.map(file => <div key={file.name} className="flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-white/8 transition-all duration-200 ease-in-out cursor-pointer group">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-violet-300 flex-shrink-0 bg-violet-500/20 group-hover:bg-violet-500/35 transition-colors duration-200"><FileText className="w-3.5 h-3.5" /></div>
-            <div className="min-w-0"><p className="text-xs font-medium truncate text-white/70">{file.name}</p><p className="text-[10px] text-white/35">{file.size}</p></div>
+        <div className={`mt-4 border-t pt-4 ${isDark ? 'border-white/10' : 'border-black/5'}`}>
+          <p className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? 'text-white/35' : 'text-gray-450'}`}>{t.sharedFiles} · 3</p>
+          {sharedFiles.map(file => <div key={file.name} className={`flex items-center gap-2.5 px-2 py-2 rounded-xl transition-all duration-200 ease-in-out cursor-pointer group ${isDark ? 'hover:bg-white/8' : 'hover:bg-black/5'}`}>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors duration-200 ${isDark ? 'text-violet-300 bg-violet-500/20 group-hover:bg-violet-500/35' : 'text-violet-650 bg-violet-500/10 group-hover:bg-violet-500/25'}`}><FileText className="w-3.5 h-3.5" /></div>
+            <div className="min-w-0"><p className={`text-xs font-medium truncate ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{file.name}</p><p className={`text-[10px] ${isDark ? 'text-white/35' : 'text-gray-400'}`}>{file.size}</p></div>
           </div>)}
         </div>
       </div>}
@@ -1312,15 +1626,14 @@ const ContactInfoDrawer = ({
 
 // ─── Compose Modal ────────────────────────────────────────────────────────────
 const ComposeModal = ({
-  contacts,
   onClose,
   onSelectContact,
+  isDark,
   title,
   searchPlaceholder,
   noResultsLabel,
   groupBadge
 }: {
-  contacts: Contact[];
   onClose: () => void;
   onSelectContact: (id: string) => void;
   isDark: boolean;
@@ -1331,17 +1644,36 @@ const ComposeModal = ({
 }) => {
   const [composeSearch, setComposeSearch] = useState('');
   const filtered = contacts.filter(c => c.name.toLowerCase().includes(composeSearch.toLowerCase()));
-  return <motion.div initial={{
+  return <motion.div onClick={onClose} initial={{
     opacity: 0
   }} animate={{
     opacity: 1
   }} exit={{
     opacity: 0
   }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{
-    background: 'rgba(0,0,0,0.7)',
+    background: isDark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.25)',
     backdropFilter: 'blur(20px)'
   }}>
-    <motion.div initial={{
+    <style>{`
+      .compose-modal-scroll::-webkit-scrollbar {
+        width: 6px;
+      }
+      .compose-modal-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .compose-modal-scroll::-webkit-scrollbar-thumb {
+        background: ${isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)'};
+        border-radius: 9999px;
+      }
+      .compose-modal-scroll::-webkit-scrollbar-thumb:hover {
+        background: ${isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)'};
+      }
+      .compose-modal-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: ${isDark ? 'rgba(255, 255, 255, 0.15) transparent' : 'rgba(0, 0, 0, 0.15) transparent'};
+      }
+    `}</style>
+    <motion.div onClick={e => e.stopPropagation()} initial={{
       scale: 0.9,
       opacity: 0,
       y: 20
@@ -1357,31 +1689,31 @@ const ComposeModal = ({
       type: 'spring',
       stiffness: 280,
       damping: 26
-    }} className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${GLASS_CARD}`} style={{
-      boxShadow: '0 20px 60px rgba(139,92,246,0.4)'
+    }} className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? 'bg-[#150e28]/95 border border-white/10 backdrop-blur-xl text-white' : 'bg-white border border-gray-150 text-gray-800 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.15)]'}`} style={{
+      boxShadow: isDark ? '0 20px 60px rgba(139,92,246,0.4)' : '0 15px 40px rgba(0,0,0,0.08)'
     }}>
-      <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-        <div className="flex items-center gap-2"><Edit3 className="w-4 h-4 text-violet-300" /><h3 className="font-semibold text-sm text-white">{title}</h3></div>
-        <button onClick={onClose} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 text-white/50 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-4 h-4" /></button>
+      <div className={`flex items-center justify-between px-5 py-4 border-b ${isDark ? 'border-white/10' : 'border-gray-100'}`}>
+        <div className="flex items-center gap-2"><Edit3 className="w-4 h-4 text-violet-300" /><h3 className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{title}</h3></div>
+        <button onClick={onClose} className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-white/15 text-white/50 hover:text-white' : 'hover:bg-black/5 text-gray-400 hover:text-gray-605'}`}><X className="w-4 h-4" /></button>
       </div>
-      <div className="px-4 py-3 border-b border-white/10">
-        <div className="flex items-center gap-2 rounded-xl px-3 py-2 bg-white/10 border border-white/15">
-          <Search className="w-4 h-4 text-white/40 flex-shrink-0" />
-          <input autoFocus type="text" placeholder={searchPlaceholder} value={composeSearch} onChange={e => setComposeSearch(e.target.value)} className="flex-1 bg-transparent outline-none text-sm placeholder-white/30 text-white" />
+      <div className={`px-4 py-3 border-b ${isDark ? 'border-white/10' : 'border-gray-100'}`}>
+        <div className={`flex items-center gap-2 rounded-xl px-3 py-2 ${isDark ? 'bg-white/10 border border-white/15' : 'bg-black/4 border border-black/5'}`}>
+          <Search className={`w-4 h-4 flex-shrink-0 ${isDark ? 'text-white/40' : 'text-gray-400'}`} />
+          <input autoFocus type="text" placeholder={searchPlaceholder} value={composeSearch} onChange={e => setComposeSearch(e.target.value)} className={`flex-1 bg-transparent outline-none text-sm ${isDark ? 'placeholder-white/30 text-white' : 'placeholder-gray-450 text-gray-850'}`} />
         </div>
       </div>
-      <div className="max-h-72 overflow-y-auto py-2">
-        {filtered.length === 0 && <p className="text-center text-xs text-white/40 py-8">{noResultsLabel}</p>}
+      <div className="max-h-72 overflow-y-auto py-2 compose-modal-scroll">
+        {filtered.length === 0 && <p className={`text-center text-xs py-8 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{noResultsLabel}</p>}
         {filtered.map(contact => <button key={contact.id} onClick={() => {
           onSelectContact(contact.id);
           onClose();
-        }} className="w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 ease-in-out hover:bg-white/8 text-left group">
-          <div className="relative flex-shrink-0"><img src={contact.avatar} alt={contact.name} className="w-10 h-10 rounded-full object-cover transition-transform duration-200 group-hover:scale-105" />{contact.online && <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-white/20 rounded-full" />}</div>
+        }} className={`w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 ease-in-out text-left group ${isDark ? 'hover:bg-white/8' : 'hover:bg-black/4'}`}>
+          <div className="relative flex-shrink-0"><img src={contact.avatar} alt={contact.name} className="w-10 h-10 rounded-full object-cover transition-transform duration-200 group-hover:scale-105" /><span className={`absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 rounded-full ${isDark ? 'border-[#150e28]' : 'border-white'}`} style={{ display: contact.online ? 'block' : 'none' }} /></div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2"><p className="text-sm font-medium truncate text-white/90">{contact.name}</p>{contact.isGroup && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-orange-400 text-white">{groupBadge}</span>}</div>
-            <p className="text-xs truncate text-white/40">{contact.lastMessage}</p>
+            <div className="flex items-center gap-2"><p className={`text-sm font-medium truncate ${isDark ? 'text-white/90' : 'text-gray-900'}`}>{contact.name}</p>{contact.isGroup && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-orange-400 text-white">{groupBadge}</span>}</div>
+            <p className={`text-xs truncate ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{contact.lastMessage}</p>
           </div>
-          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${contact.online ? 'bg-green-400' : 'bg-white/20'}`} />
+          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${contact.online ? 'bg-green-400' : (isDark ? 'bg-white/20' : 'bg-gray-300')}`} />
         </button>)}
       </div>
     </motion.div>
@@ -1394,6 +1726,7 @@ const ThreadPanel = ({
   activeContact,
   onClose,
   onSendThread,
+  isDark,
   threadLabel,
   originalLabel,
   replyPlaceholder
@@ -1425,18 +1758,18 @@ const ThreadPanel = ({
     type: 'spring',
     stiffness: 300,
     damping: 30
-  }} className="w-72 flex-shrink-0 border-l border-white/10 flex flex-col overflow-hidden" style={{
-    background: 'rgba(15,5,40,0.65)',
+  }} className={`w-72 flex-shrink-0 border-l flex flex-col overflow-hidden ${isDark ? 'border-white/10' : 'border-black/5'}`} style={{
+    background: isDark ? 'rgba(15,5,40,0.65)' : 'rgba(255,255,255,0.7)',
     backdropFilter: 'blur(24px)'
   }}>
-    <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 flex-shrink-0">
-      <div className="flex items-center gap-2"><MessageSquare className="w-4 h-4 text-violet-300" /><h3 className="font-semibold text-sm text-white">{threadLabel}</h3></div>
-      <button onClick={onClose} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 text-white/50 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-4 h-4" /></button>
+    <div className={`flex items-center justify-between px-5 py-4 border-b flex-shrink-0 ${isDark ? 'border-white/10' : 'border-black/5'}`}>
+      <div className="flex items-center gap-2"><MessageSquare className={`w-4 h-4 ${isDark ? 'text-violet-300' : 'text-violet-650'}`} /><h3 className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{threadLabel}</h3></div>
+      <button onClick={onClose} className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-white/15 text-white/50' : 'hover:bg-black/5 text-gray-500'}`}><X className="w-4 h-4" /></button>
     </div>
-    <div className="px-4 py-3 border-b border-white/10 flex-shrink-0 bg-white/5">
-      <div className="border border-white/15 rounded-xl px-3 py-2.5 bg-white/8">
-        <p className="text-[10px] mb-1 text-white/35">{originalLabel}</p>
-        <p className="text-xs line-clamp-3 text-white/70">{parentMsg.text}</p>
+    <div className={`px-4 py-3 border-b flex-shrink-0 ${isDark ? 'border-white/10 bg-white/5' : 'border-black/5 bg-black/4'}`}>
+      <div className={`border rounded-xl px-3 py-2.5 ${isDark ? 'border-white/15 bg-white/8' : 'border-black/5 bg-white/80'}`}>
+        <p className={`text-[10px] mb-1 ${isDark ? 'text-white/35' : 'text-gray-400'}`}>{originalLabel}</p>
+        <p className={`text-xs line-clamp-3 ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{parentMsg.text}</p>
       </div>
     </div>
     <div ref={threadScrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
@@ -1444,22 +1777,22 @@ const ThreadPanel = ({
         const isTMe = tm.senderId === 'me';
         return <div key={tm.id} className={`flex items-end gap-2 ${isTMe ? 'justify-end' : 'justify-start'}`}>
           {!isTMe && <img src={activeContact.avatar} alt={activeContact.name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />}
-          <div className={`px-3 py-2 text-xs rounded-2xl max-w-[80%] transition-all duration-200 ease-in-out hover:brightness-110 ${isTMe ? 'rounded-br-md text-white' : 'rounded-bl-md text-white/80'}`} style={{
-            background: isTMe ? 'linear-gradient(135deg,rgba(124,58,237,0.6),rgba(168,85,247,0.5),rgba(6,182,212,0.45))' : 'rgba(255,255,255,0.1)',
-            border: isTMe ? '1px solid rgba(167,139,250,0.35)' : '1px solid rgba(255,255,255,0.1)'
+          <div className={`px-3 py-2 text-xs rounded-2xl max-w-[80%] transition-all duration-200 ease-in-out hover:brightness-110 ${isTMe ? 'rounded-br-md text-white' : `rounded-bl-md ${isDark ? 'text-white/80' : 'text-gray-800'}`}`} style={{
+            background: isTMe ? 'linear-gradient(135deg,rgba(124,58,237,0.6),rgba(168,85,247,0.5),rgba(6,182,212,0.45))' : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.85)'),
+            border: isTMe ? '1px solid rgba(167,139,250,0.35)' : (isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)')
           }}>{tm.text}</div>
           {isTMe && <img src="https://i.pravatar.cc/150?img=5" alt="You" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />}
         </div>;
       })}
     </div>
-    <div className="px-4 py-3 border-t border-white/10 flex-shrink-0">
-      <div className="flex items-center gap-2 rounded-full px-3 py-2 bg-white/8 border border-white/15">
+    <div className={`px-4 py-3 border-t flex-shrink-0 ${isDark ? 'border-white/10' : 'border-black/5'}`}>
+      <div className={`flex items-center gap-2 px-3 py-2 ${isDark ? 'rounded-xl bg-white/10 border border-white/15' : 'rounded-full bg-black/5 border border-black/5'}`}>
         <input type="text" placeholder={replyPlaceholder} value={threadInput} onChange={e => setThreadInput(e.target.value)} onKeyDown={e => {
           if (e.key === 'Enter' && threadInput.trim()) {
             onSendThread(parentMsg.id, threadInput.trim());
             setThreadInput('');
           }
-        }} className="flex-1 bg-transparent outline-none text-xs placeholder-white/30 text-white" />
+        }} className={`flex-1 bg-transparent outline-none text-xs ${isDark ? 'placeholder-white/30 text-white' : 'placeholder-gray-400 text-gray-800'}`} />
         <button onClick={() => {
           if (threadInput.trim()) {
             onSendThread(parentMsg.id, threadInput.trim());
@@ -1473,81 +1806,85 @@ const ThreadPanel = ({
   </motion.div>;
 };
 
-// ─── Animated Gradient Background ────────────────────────────────────────────
-const GradientBg = () => <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{
+const GradientBg = ({ isDark }: { isDark: boolean }) => <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{
   zIndex: 0
 }}>
-  <motion.div animate={{
-    rotate: [0, 360]
-  }} transition={{
-    duration: 30,
-    repeat: Infinity,
-    ease: 'linear'
-  }} className="absolute" style={{
+  <div className="absolute transition-colors duration-300" style={{
     width: '140%',
     height: '140%',
     top: '-20%',
     left: '-20%',
-    background: 'conic-gradient(from 0deg at 50% 50%, #0f0524 0deg, #1e0a3c 60deg, #0a192f 120deg, #0d1b3e 180deg, #1a0535 240deg, #0f0524 360deg)'
+    background: isDark 
+      ? 'conic-gradient(from 0deg at 50% 50%, #0f0524 0deg, #1e0a3c 60deg, #0a192f 120deg, #0d1b3e 180deg, #1a0535 240deg, #0f0524 360deg)'
+      : 'conic-gradient(from 0deg at 50% 50%, #f3f4f6 0deg, #ede9fe 60deg, #f0fdfa 120deg, #eff6ff 180deg, #f5f3ff 240deg, #f3f4f6 360deg)'
   }} />
-  <motion.div animate={{
-    scale: [1, 1.3, 1],
-    x: [0, 60, 0],
-    y: [0, -40, 0]
-  }} transition={{
-    duration: 18,
-    repeat: Infinity,
-    ease: 'easeInOut'
-  }} className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] rounded-full opacity-40" style={{
-    background: 'radial-gradient(circle, rgba(124,58,237,0.7) 0%, transparent 70%)',
+  <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] rounded-full opacity-40 transition-all duration-300" style={{
+    background: isDark 
+      ? 'radial-gradient(circle, rgba(124,58,237,0.7) 0%, transparent 70%)'
+      : 'radial-gradient(circle, rgba(167,139,250,0.4) 0%, transparent 70%)',
     filter: 'blur(60px)'
   }} />
-  <motion.div animate={{
-    scale: [1, 1.2, 1],
-    x: [0, -40, 0],
-    y: [0, 60, 0]
-  }} transition={{
-    duration: 22,
-    repeat: Infinity,
-    ease: 'easeInOut',
-    delay: 4
-  }} className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full opacity-35" style={{
-    background: 'radial-gradient(circle, rgba(6,182,212,0.65) 0%, transparent 70%)',
+  <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full opacity-35 transition-all duration-300" style={{
+    background: isDark 
+      ? 'radial-gradient(circle, rgba(6,182,212,0.65) 0%, transparent 70%)'
+      : 'radial-gradient(circle, rgba(6,182,212,0.3) 0%, transparent 70%)',
     filter: 'blur(60px)'
   }} />
-  <motion.div animate={{
-    scale: [1, 1.4, 1],
-    x: [0, 30, -20, 0],
-    y: [0, -30, 40, 0]
-  }} transition={{
-    duration: 26,
-    repeat: Infinity,
-    ease: 'easeInOut',
-    delay: 8
-  }} className="absolute top-[40%] left-[30%] w-[50%] h-[50%] rounded-full opacity-25" style={{
-    background: 'radial-gradient(circle, rgba(240,171,252,0.5) 0%, transparent 70%)',
+  <div className="absolute top-[40%] left-[30%] w-[50%] h-[50%] rounded-full opacity-25 transition-all duration-300" style={{
+    background: isDark 
+      ? 'radial-gradient(circle, rgba(240,171,252,0.5) 0%, transparent 70%)'
+      : 'radial-gradient(circle, rgba(240,171,252,0.2) 0%, transparent 70%)',
     filter: 'blur(70px)'
   }} />
-  <motion.div animate={{
-    scale: [1, 1.15, 1]
-  }} transition={{
-    duration: 14,
-    repeat: Infinity,
-    ease: 'easeInOut',
-    delay: 2
-  }} className="absolute top-[20%] right-[20%] w-[35%] h-[35%] rounded-full opacity-20" style={{
-    background: 'radial-gradient(circle, rgba(16,185,129,0.6) 0%, transparent 70%)',
+  <div className="absolute top-[20%] right-[20%] w-[35%] h-[35%] rounded-full opacity-20 transition-all duration-300" style={{
+    background: isDark 
+      ? 'radial-gradient(circle, rgba(16,185,129,0.6) 0%, transparent 70%)'
+      : 'radial-gradient(circle, rgba(16,185,129,0.25) 0%, transparent 70%)',
     filter: 'blur(50px)'
   }} />
 </div>;
 
-// ─── Main ChatApp ─────────────────────────────────────────────────────────────
-export const ChatApp = () => {
-  const [isDark] = useState(true);
-  const [lang, setLang] = useState<Lang>('ru');
+const formatRepliesCount = (count: number, currentLang: Lang) => {
+  if (currentLang === 'ru') {
+    const mod10 = count % 10;
+    const mod100 = count % 100;
+    if (mod10 === 1 && mod100 !== 11) {
+      return `${count} ответ`;
+    }
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) {
+      return `${count} ответа`;
+    }
+    return `${count} ответов`;
+  }
+  if (currentLang === 'tg') {
+    return `${count} ҷавоб`;
+  }
+  return `${count} ${count === 1 ? 'reply' : 'replies'}`;
+};
+
+interface IProps {
+  onComposeStateChange?: (isOpen: boolean) => void;
+}
+
+export const ChatApp = ({ onComposeStateChange }: IProps) => {
+  const [isSystemDark, setIsSystemDark] = useState(() => document.documentElement.classList.contains('dark'));
+  const isDark = isSystemDark;
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsSystemDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  const [lang, setLang] = useState<Lang>('en');
   const [layout, setLayout] = useState<LayoutPosition>('left');
   const t = TRANSLATIONS[lang];
-  const cycleLang = () => setLang(prev => prev === 'en' ? 'ru' : prev === 'ru' ? 'tg' : 'en');
+  const cycleLang = () => setLang((prev: Lang) => prev === 'en' ? 'ru' : prev === 'ru' ? 'tg' : 'en');
   const LANG_LABELS: Record<Lang, string> = {
     en: 'EN',
     ru: 'RU',
@@ -1576,8 +1913,8 @@ export const ChatApp = () => {
   const [activeContactId, setActiveContactId] = useState<string>('7');
   const [prevContactId, setPrevContactId] = useState<string | null>(null);
   const [switchDirection, setSwitchDirection] = useState<1 | -1>(1);
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [allMessages, setAllMessages] = useState<Record<string, Message[]>>({});
+  const [messages] = useState<Message[]>(initialMessages);
+  const [allMessages, setAllMessages] = useState<Record<string, Message[]>>(contactMessages);
   const [input, setInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isTyping, setIsTyping] = useState(true);
@@ -1597,6 +1934,10 @@ export const ChatApp = () => {
   const [searchMatchIndex, setSearchMatchIndex] = useState(0);
   const [showPinnedBanner, setShowPinnedBanner] = useState(true);
   const [showComposeModal, setShowComposeModal] = useState(false);
+
+  useEffect(() => {
+    onComposeStateChange?.(showComposeModal);
+  }, [showComposeModal, onComposeStateChange]);
   const [isRecording, setIsRecording] = useState(false);
   const [replyingTo, setReplyingTo] = useState<ReplyPreview | null>(null);
   const [forwardingMsg, setForwardingMsg] = useState<Message | null>(null);
@@ -1607,11 +1948,17 @@ export const ChatApp = () => {
   const [viewingStory, setViewingStory] = useState<Contact | null>(null);
   const [deletingMsgId, setDeletingMsgId] = useState<string | null>(null);
   const [showDeleteConversation, setShowDeleteConversation] = useState(false);
-  const [contactUnreads, setContactUnreads] = useState<Record<string, number>>({});
+  const [contactUnreads, setContactUnreads] = useState<Record<string, number>>(() => {
+    const map: Record<string, number> = {};
+    contacts.forEach(c => {
+      if (c.unreadCount) map[c.id] = c.unreadCount;
+    });
+    return map;
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const activeContact = contacts.find(c => c.id === activeContactId) || contacts[0];
+  const activeContact = contacts.find(c => c.id === activeContactId) || contacts[6];
   const currentMessages = allMessages[activeContactId] || [];
   const pinnedMessage = currentMessages.find(m => m.pinned);
   const searchMatches = msgSearchQuery.trim() ? currentMessages.filter(m => m.text.toLowerCase().includes(msgSearchQuery.toLowerCase())) : [];
@@ -1619,24 +1966,8 @@ export const ChatApp = () => {
   const lastReceivedMessage = [...currentMessages].reverse().find(m => m.senderId !== 'me');
   const deletingMsg = deletingMsgId ? currentMessages.find(m => m.id === deletingMsgId) || null : null;
   const totalUnread = Object.values(contactUnreads).reduce((a, b) => a + b, 0);
-  // Загружаем данные чата через сервисный слой (сейчас mock, позже — реальный API).
   useEffect(() => {
-    let alive = true;
-    Promise.all([chatService.getContacts(), chatService.getAllMessages()]).then(
-      ([loadedContacts, loadedMessages]) => {
-        if (!alive) return;
-        setContacts(loadedContacts);
-        setAllMessages(loadedMessages);
-        const unreadMap: Record<string, number> = {};
-        loadedContacts.forEach(c => {
-          if (c.unreadCount) unreadMap[c.id] = c.unreadCount;
-        });
-        setContactUnreads(unreadMap);
-      },
-    );
-    return () => {
-      alive = false;
-    };
+    document.documentElement.classList.add('dark');
   }, []);
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -1649,12 +1980,7 @@ export const ChatApp = () => {
     const iv = setInterval(() => setCallDuration(d => d + 1), 1000);
     return () => clearInterval(iv);
   }, [callState]);
-  useEffect(() => {
-    const t2 = setTimeout(() => setIncomingCall({
-      callType: 'video'
-    }), 6000);
-    return () => clearTimeout(t2);
-  }, []);
+
   useEffect(() => {
     setShowContactDrawer(false);
     setOpenThreadMsgId(null);
@@ -1722,21 +2048,18 @@ export const ChatApp = () => {
       setReplyingTo(null);
       return;
     }
-    const outgoing: Message = {
+    newMessages.push({
       id: `m${Date.now()}`,
       senderId: 'me',
       text: input.trim(),
       time: formatTime(new Date()),
       status: 'sent',
       replyTo: replyingTo || undefined
-    };
-    newMessages.push(outgoing);
+    });
     setAllMessages(prev => ({
       ...prev,
       [activeContactId]: newMessages
     }));
-    // Отправка через сервисный слой (mock; заменяется на реальный API без изменения UI).
-    void chatService.sendMessage(activeContactId, outgoing);
     setInput('');
     setReplyingTo(null);
     setIsTyping(false);
@@ -1860,6 +2183,29 @@ export const ChatApp = () => {
       } : m)
     }));
   };
+  const handlePinMessage = (msgId: string) => {
+    setAllMessages(prev => {
+      const messages = prev[activeContactId] || [];
+      const targetMsg = messages.find(m => m.id === msgId);
+      const isAlreadyPinned = !!(targetMsg && targetMsg.pinned);
+      return {
+        ...prev,
+        [activeContactId]: messages.map(m => {
+          if (m.id === msgId) {
+            return {
+              ...m,
+              pinned: !isAlreadyPinned
+            };
+          }
+          return {
+            ...m,
+            pinned: false
+          };
+        })
+      };
+    });
+    setShowPinnedBanner(true);
+  };
   const handleReaction = (msgId: string, emoji: string) => {
     setAllMessages(prev => ({
       ...prev,
@@ -1953,28 +2299,15 @@ export const ChatApp = () => {
       x: -dir * 32
     })
   };
+  void messages;
   void prevContactId;
   void isDark;
-
-  // Пока контакты грузятся (contacts ещё пуст) — показываем экран загрузки,
-  // иначе ниже activeContact окажется undefined и обращение к его полям упадёт.
-  if (!activeContact) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center font-sans relative overflow-hidden">
-        <GradientBg />
-        <div className="relative z-10 flex flex-col items-center gap-3 text-white/80">
-          <Loader2 className="w-8 h-8 animate-spin" />
-          <span className="text-sm">Загрузка чата…</span>
-        </div>
-      </div>
-    );
-  }
 
   // Determine flex direction based on layout
   const isHorizontalLayout = layout === 'top' || layout === 'bottom';
   const mainAreaFlexDir = isHorizontalLayout ? 'flex-col' : 'flex-row';
   const chatListFirst = layout === 'left' || layout === 'top';
-  const chatListPanel = <ChatListPanel layout={layout} contacts={contacts} activeContactId={activeContactId} contactUnreads={contactUnreads} searchQuery={searchQuery} onContactSwitch={handleContactSwitch} onComposeOpen={() => setShowComposeModal(true)} onSearchChange={setSearchQuery} />;
+  const chatListPanel = <ChatListPanel layout={layout} contacts={contacts} activeContactId={activeContactId} contactUnreads={contactUnreads} searchQuery={searchQuery} onContactSwitch={handleContactSwitch} onComposeOpen={() => setShowComposeModal(true)} onSearchChange={setSearchQuery} isDark={isDark} />;
   const chatWindow = <main className="flex-1 flex flex-col min-w-0 overflow-hidden" style={{
     background: 'transparent'
   }}>
@@ -2030,10 +2363,10 @@ export const ChatApp = () => {
         {showMsgSearch && <MessageSearchBar query={msgSearchQuery} onChange={handleMsgSearchChange} onClose={() => {
         setShowMsgSearch(false);
         setMsgSearchQuery('');
-      }} matchCount={searchMatches.length} currentMatch={searchMatchIndex} onPrev={handleSearchPrev} onNext={handleSearchNext} isDark={true} placeholder={t.searchMessagesPlaceholder} />}
+      }} matchCount={searchMatches.length} currentMatch={searchMatchIndex} onPrev={handleSearchPrev} onNext={handleSearchNext} isDark={isDark} placeholder={t.searchMessagesPlaceholder} />}
       </AnimatePresence>
       <AnimatePresence>
-        {pinnedMessage && showPinnedBanner && <PinnedBanner message={pinnedMessage} onDismiss={() => setShowPinnedBanner(false)} onJump={handleJumpToPinned} isDark={true} label={t.pinnedMessage} />}
+        {pinnedMessage && showPinnedBanner && <PinnedBanner message={pinnedMessage} onDismiss={() => setShowPinnedBanner(false)} onJump={handleJumpToPinned} isDark={isDark} label={t.pinnedMessage} />}
       </AnimatePresence>
 
       {/* Messages area */}
@@ -2072,7 +2405,7 @@ export const ChatApp = () => {
                     <div className="min-w-0"><span className="font-semibold text-violet-300 text-[10px]">{msg.replyTo.senderName}</span><p className="truncate max-w-[200px] text-white/60">{msg.replyTo.text}</p></div>
                   </div>}
                   {msg.forwarded && !isEffectivelyDeleted && <div className={`flex items-center gap-1 mb-1 text-[10px] text-white/40 ${isMe ? 'self-end' : 'self-start'}`}><Forward className="w-3 h-3" /><span>{t.forwarded}</span></div>}
-                  {msg.attachment?.type === 'voice' && !isEffectivelyDeleted && <VoiceBubble duration={msg.attachment.duration || 5} isMe={isMe} isDark={true} />}
+                  {msg.attachment?.type === 'voice' && !isEffectivelyDeleted && <VoiceBubble duration={msg.attachment.duration || 5} isMe={isMe} isDark={isDark} />}
                   {msg.attachment && msg.attachment.type !== 'voice' && !isEffectivelyDeleted && <div className={`mb-1.5 rounded-2xl overflow-hidden transition-all duration-200 ease-in-out hover:brightness-110 ${isMe ? 'rounded-br-md' : 'rounded-bl-md'}`} style={{
                   border: isMe ? '1px solid rgba(167,139,250,0.35)' : '1px solid rgba(255,255,255,0.12)'
                 }}>
@@ -2082,7 +2415,7 @@ export const ChatApp = () => {
                     </div>}
                   </div>}
                   {(msg.text || isEffectivelyDeleted) && <div className="relative">
-                    <AnimatePresence>{hoveredMessageId === msg.id && !isEffectivelyDeleted && <ReactionPicker isMe={isMe} onSelect={emoji => handleReaction(msg.id, emoji)} />}</AnimatePresence>
+                    <AnimatePresence>{hoveredMessageId === msg.id && !isEffectivelyDeleted && <ReactionPicker isMe={isMe} onSelect={emoji => handleReaction(msg.id, emoji)} isDark={isDark} />}</AnimatePresence>
                     <AnimatePresence>
                       {hoveredMessageId === msg.id && !isEffectivelyDeleted && <motion.div initial={{
                       opacity: 0
@@ -2101,7 +2434,7 @@ export const ChatApp = () => {
                       </motion.div>}
                     </AnimatePresence>
                     <AnimatePresence>
-                      {activeActionMsgId === msg.id && <MessageActionMenu isMe={isMe} isDark={true} onReply={() => {
+                      {activeActionMsgId === msg.id && <MessageActionMenu isMe={isMe} isDark={isDark} onReply={() => {
                       setReplyingTo({
                         id: msg.id,
                         senderName: isMe ? 'You' : activeContact.name,
@@ -2118,55 +2451,104 @@ export const ChatApp = () => {
                       setOpenThreadMsgId(msg.id);
                       setShowContactDrawer(false);
                       setActiveActionMsgId(null);
-                    }} onClose={() => setActiveActionMsgId(null)} />}
+                    }} onPin={() => {
+                      handlePinMessage(msg.id);
+                      setActiveActionMsgId(null);
+                    }} pinLabel={msg.pinned ? (lang === 'ru' ? 'Открепить' : lang === 'tg' ? 'Ҷудо кардан' : 'Unpin') : (lang === 'ru' ? 'Закрепить' : lang === 'tg' ? 'Маҳкам кардан' : 'Pin')} onClose={() => setActiveActionMsgId(null)} />}
                     </AnimatePresence>
-                    <div className={`px-4 py-2.5 text-sm leading-relaxed transition-all duration-200 ease-in-out cursor-default ${isEffectivelyDeleted ? 'italic text-white/30 rounded-2xl border border-dashed border-white/15 bg-white/4' : currentMatchMsg ? 'rounded-2xl ring-2 ring-amber-400 text-amber-100' : highlighted ? 'rounded-2xl text-amber-200' : isMe ? `${isMe ? 'rounded-br-md' : ''} rounded-2xl text-white` : 'rounded-2xl rounded-bl-md text-white/90'}`} style={isEffectivelyDeleted ? {} : currentMatchMsg ? {
-                    background: 'rgba(251,191,36,0.25)',
-                    border: '1px solid rgba(251,191,36,0.4)'
-                  } : highlighted ? {
-                    background: 'rgba(251,191,36,0.15)',
-                    border: '1px solid rgba(251,191,36,0.3)'
-                  } : isMe ? {
-                    background: 'linear-gradient(135deg,rgba(124,58,237,0.65),rgba(168,85,247,0.55),rgba(6,182,212,0.5))',
-                    border: '1px solid rgba(167,139,250,0.4)',
-                    boxShadow: '0 4px 20px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.12)'
-                  } : {
-                    background: 'rgba(255,255,255,0.1)',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    boxShadow: '0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)'
-                  }} onMouseEnter={e => {
-                    if (!isEffectivelyDeleted && !currentMatchMsg && !highlighted) {
-                      if (isMe) {
-                        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 32px rgba(124,58,237,0.45), inset 0 1px 0 rgba(255,255,255,0.15)';
-                        (e.currentTarget as HTMLDivElement).style.filter = 'brightness(1.08)';
-                      } else {
-                        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 6px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12)';
-                        (e.currentTarget as HTMLDivElement).style.filter = 'brightness(1.06)';
+                    <div className={`px-4 py-2.5 text-sm leading-relaxed transition-all duration-200 ease-in-out cursor-default ${
+                      isEffectivelyDeleted ? (isDark ? 'italic text-white/30 rounded-2xl border border-dashed border-white/15 bg-white/4' : 'italic text-black/35 rounded-2xl border border-dashed border-black/10 bg-black/4') : 
+                      currentMatchMsg ? 'rounded-2xl ring-2 ring-amber-400 text-amber-100' : 
+                      highlighted ? 'rounded-2xl text-amber-200' : 
+                      msg.threadCount && msg.threadCount > 0 ? (
+                        isMe ? 'rounded-2xl rounded-br-md text-white ring-1 ring-violet-300/40 shadow-[0_0_15px_rgba(167,139,250,0.35)]' : `rounded-2xl rounded-bl-md ring-1 ring-violet-400/50 shadow-[0_0_15px_rgba(124,58,237,0.25)] ${isDark ? 'text-white/95' : 'text-violet-950 font-medium'}`
+                      ) :
+                      isMe ? 'rounded-2xl rounded-br-md text-white' : `rounded-2xl rounded-bl-md ${isDark ? 'text-white/90' : 'text-gray-800'}`
+                    }`} style={isEffectivelyDeleted ? {} : currentMatchMsg ? {
+                      background: 'rgba(251,191,36,0.25)',
+                      border: '1px solid rgba(251,191,36,0.4)'
+                    } : highlighted ? {
+                      background: 'rgba(251,191,36,0.15)',
+                      border: '1px solid rgba(251,191,36,0.3)'
+                    } : msg.threadCount && msg.threadCount > 0 ? (
+                      isMe ? {
+                        background: 'linear-gradient(135deg,rgba(124,58,237,0.75),rgba(168,85,247,0.65),rgba(6,182,212,0.6))',
+                        border: '1.5px solid rgba(196,181,253,0.65)',
+                        boxShadow: '0 4px 20px rgba(124,58,237,0.35), inset 0 1px 0 rgba(255,255,255,0.15)'
+                      } : {
+                        background: 'rgba(124,58,237,0.15)',
+                        border: '1.5px solid rgba(167,139,250,0.4)',
+                        boxShadow: '0 2px 12px rgba(124,58,237,0.15), inset 0 1px 0 rgba(255,255,255,0.08)'
                       }
-                    }
-                  }} onMouseLeave={e => {
-                    if (!isEffectivelyDeleted) {
-                      (e.currentTarget as HTMLDivElement).style.filter = '';
-                      if (isMe) {
-                        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 20px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.12)';
-                      } else {
-                        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)';
+                    ) : isMe ? {
+                      background: 'linear-gradient(135deg,rgba(124,58,237,0.65),rgba(168,85,247,0.55),rgba(6,182,212,0.5))',
+                      border: '1px solid rgba(167,139,250,0.4)',
+                      boxShadow: '0 4px 20px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.12)'
+                    } : {
+                      background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.85)',
+                      border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(0,0,0,0.08)',
+                      boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)' : '0 2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)'
+                    }} onMouseEnter={e => {
+                      if (!isEffectivelyDeleted && !currentMatchMsg && !highlighted) {
+                        if (isMe) {
+                          (e.currentTarget as HTMLDivElement).style.boxShadow = isDark ? '0 8px 32px rgba(124,58,237,0.45), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 8px 32px rgba(124,58,237,0.3), inset 0 1px 0 rgba(255,255,255,0.6)';
+                          (e.currentTarget as HTMLDivElement).style.filter = 'brightness(1.08)';
+                        } else {
+                          (e.currentTarget as HTMLDivElement).style.boxShadow = isDark ? '0 6px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12)' : '0 6px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)';
+                          (e.currentTarget as HTMLDivElement).style.filter = 'brightness(1.06)';
+                        }
                       }
-                    }
-                  }}>
-                      {msg.pinned && !isEffectivelyDeleted && <span className="inline-flex items-center gap-1 text-[10px] text-violet-300 font-semibold mb-1 mr-2"><Pin className="w-2.5 h-2.5" /><span>{t.pinned}</span></span>}
+                    }} onMouseLeave={e => {
+                      if (!isEffectivelyDeleted) {
+                        (e.currentTarget as HTMLDivElement).style.filter = '';
+                        if (isMe) {
+                          (e.currentTarget as HTMLDivElement).style.boxShadow = isDark ? '0 4px 20px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.12)' : '0 4px 20px rgba(124,58,237,0.15), inset 0 1px 0 rgba(255,255,255,0.6)';
+                        } else {
+                          (e.currentTarget as HTMLDivElement).style.boxShadow = isDark ? '0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)' : '0 2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)';
+                        }
+                      }
+                    }}>
+                      <If is={!!(msg.pinned && !isEffectivelyDeleted)}>
+                        <span className="inline-flex items-center gap-1 text-[10px] text-violet-300 font-semibold mb-1 mr-2">
+                          <Pin className="w-2.5 h-2.5" />
+                          <span>{t.pinned}</span>
+                        </span>
+                      </If>
                       {msg.text}
                     </div>
                   </div>}
-                  {msg.reactions && msg.reactions.length > 0 && !isEffectivelyDeleted && <div className={`flex gap-1 mt-1 ${isMe ? 'self-end' : 'self-start'}`}>
-                    {msg.reactions.map(r => <button key={r.emoji} onClick={() => handleReaction(msg.id, r.emoji)} className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs transition-all duration-200 ease-in-out hover:scale-110" style={{
-                    background: r.reactedByMe ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.08)',
-                    border: r.reactedByMe ? '1px solid rgba(167,139,250,0.5)' : '1px solid rgba(255,255,255,0.12)'
-                  }}>
-                      <span>{r.emoji}</span>
-                      <span className="text-[10px] font-medium text-white/60">{r.count}</span>
-                    </button>)}
-                  </div>}
+                  <If is={((msg.reactions && msg.reactions.length > 0) || (msg.threadCount && msg.threadCount > 0)) && !isEffectivelyDeleted}>
+                    <div className={`flex flex-wrap gap-1.5 mt-1 ${isMe ? 'self-end justify-end' : 'self-start justify-start'}`}>
+                      <If is={!!(msg.reactions && msg.reactions.length > 0)}>
+                        <>
+                          {msg.reactions?.map(r => <button key={r.emoji} onClick={() => handleReaction(msg.id, r.emoji)} className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs transition-all duration-200 ease-in-out hover:scale-110" style={{
+                            background: r.reactedByMe ? 'rgba(124,58,237,0.3)' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'),
+                            border: r.reactedByMe ? '1px solid rgba(167,139,250,0.5)' : (isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.08)')
+                          }}>
+                            <span>{r.emoji}</span>
+                            <span className={`text-[10px] font-medium ${isDark ? 'text-white/60' : 'text-gray-550'}`}>{r.count}</span>
+                          </button>)}
+                        </>
+                      </If>
+                      <If is={!!(msg.threadCount && msg.threadCount > 0)}>
+                        <button
+                          onClick={() => {
+                            setOpenThreadMsgId(msg.id);
+                            setShowContactDrawer(false);
+                          }}
+                          className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer ${isDark ? 'text-violet-200' : 'text-violet-750'}`}
+                          style={{
+                            background: isDark ? 'rgba(124,58,237,0.25)' : 'rgba(124,58,237,0.12)',
+                            border: isDark ? '1px solid rgba(167,139,250,0.4)' : '1px solid rgba(124,58,237,0.25)',
+                            boxShadow: isDark ? '0 2px 10px rgba(124,58,237,0.25)' : '0 2px 8px rgba(124,58,237,0.08)'
+                          }}
+                        >
+                          <MessageSquare className={`w-3 h-3 ${isDark ? 'text-violet-300' : 'text-violet-600'}`} />
+                          <span>{formatRepliesCount(msg.threadCount || 0, lang)}</span>
+                        </button>
+                      </If>
+                    </div>
+                  </If>
                 </div>
                 {isMe && <img src="https://i.pravatar.cc/150?img=5" alt="You" className="w-8 h-8 rounded-full object-cover flex-shrink-0" style={{
                 border: '2px solid rgba(167,139,250,0.35)'
@@ -2188,10 +2570,10 @@ export const ChatApp = () => {
                 border: '2px solid rgba(167,139,250,0.35)'
               }} />
                 <div className="flex items-center gap-1 px-4 py-2.5 rounded-2xl rounded-bl-md" style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.15)'
+                background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.85)',
+                border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(0,0,0,0.08)'
               }}>
-                  <span className="text-xs mr-1 text-white/40">{t.typing}</span>
+                  <span className={`text-xs mr-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t.typing}</span>
                   <span className="flex gap-0.5">
                     <motion.span className="w-1 h-1 rounded-full bg-violet-300" animate={{
                     opacity: [0.3, 1, 0.3]
@@ -2222,34 +2604,34 @@ export const ChatApp = () => {
         </AnimatePresence>
       </div>
 
-      <AnimatePresence>{showAIPanel && lastReceivedMessage && <AIPanel lastMessage={lastReceivedMessage.text} onSelect={text => setInput(text)} onClose={() => setShowAIPanel(false)} isDark={true} title={t.aiSuggestions} loadingText={t.generatingSuggestions} />}</AnimatePresence>
-      <AnimatePresence>{replyingTo && <ReplyBar reply={replyingTo} onCancel={() => setReplyingTo(null)} isDark={true} />}</AnimatePresence>
-      <AnimatePresence>{pendingFiles.length > 0 && <AttachmentPreviewBar files={pendingFiles} onRemove={removePendingFile} onSend={handleSend} isDark={true} countLabel={`${pendingFiles.length} ${t.filesReadyToSend}`} sendAllLabel={t.sendAll} />}</AnimatePresence>
+      <AnimatePresence>{showAIPanel && lastReceivedMessage && <AIPanel lastMessage={lastReceivedMessage.text} onSelect={text => setInput(text)} onClose={() => setShowAIPanel(false)} isDark={isDark} title={t.aiSuggestions} loadingText={t.generatingSuggestions} />}</AnimatePresence>
+      <AnimatePresence>{replyingTo && <ReplyBar reply={replyingTo} onCancel={() => setReplyingTo(null)} isDark={isDark} />}</AnimatePresence>
+      <AnimatePresence>{pendingFiles.length > 0 && <AttachmentPreviewBar files={pendingFiles} onRemove={removePendingFile} onSend={handleSend} isDark={isDark} countLabel={`${pendingFiles.length} ${t.filesReadyToSend}`} sendAllLabel={t.sendAll} />}</AnimatePresence>
 
       {/* Input Bar */}
-      <div className="px-6 py-4 border-t border-white/8 flex-shrink-0" style={{
-      background: 'rgba(255,255,255,0.04)',
+      <div className={`px-6 py-4 border-t flex-shrink-0 ${isDark ? 'border-white/8' : 'border-black/5'}`} style={{
+      background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.4)',
       backdropFilter: 'blur(16px)'
     }}>
         <div className="relative flex items-center gap-2 rounded-full px-4 py-2" style={{
-        background: 'rgba(255,255,255,0.08)',
-        border: '1px solid rgba(255,255,255,0.15)'
+        background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.95)',
+        border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(167,139,250,0.25)'
       }}>
-          {isRecording ? <VoiceRecorder onSend={handleSendVoice} onCancel={() => setIsRecording(false)} /> : <div className="flex items-center gap-2 w-full">
-            <div className="relative">
-              <button onClick={() => setShowEmojiPicker(v => !v)} className={`transition-all duration-200 ease-in-out hover:scale-110 ${showEmojiPicker ? 'text-violet-300' : 'text-white/40 hover:text-white/70'}`}><Smile className="w-5 h-5" /></button>
-              <AnimatePresence>{showEmojiPicker && <EmojiPicker categories={EMOJI_CATEGORIES_LOCALIZED} onSelect={handleEmojiSelect} onClose={() => setShowEmojiPicker(false)} isDark={true} />}</AnimatePresence>
+          {isRecording ? <VoiceRecorder onSend={handleSendVoice} onCancel={() => setIsRecording(false)} isDark={isDark} /> : <div className="flex items-center gap-2 w-full">
+            <div className="relative flex items-center">
+              <button onClick={() => setShowEmojiPicker(v => !v)} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-white/8' : 'hover:bg-black/5'} ${showEmojiPicker ? (isDark ? 'text-violet-300 bg-white/10' : 'text-violet-650 bg-violet-100') : (isDark ? 'text-white/40 hover:text-white/70' : 'text-gray-400 hover:text-gray-650')}`}><Smile className="w-5 h-5" /></button>
+              <AnimatePresence>{showEmojiPicker && <EmojiPicker categories={EMOJI_CATEGORIES_LOCALIZED} onSelect={handleEmojiSelect} onClose={() => setShowEmojiPicker(false)} isDark={isDark} />}</AnimatePresence>
             </div>
-            <button onClick={() => fileInputRef.current?.click()} className="transition-all duration-200 ease-in-out hover:scale-110 text-white/40 hover:text-white/70"><Paperclip className="w-5 h-5" /></button>
+            <button onClick={() => fileInputRef.current?.click()} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-white/8 text-white/40 hover:text-white/70' : 'hover:bg-black/5 text-gray-400 hover:text-gray-650'}`}><Paperclip className="w-5 h-5" /></button>
             <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileChange} accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.zip" />
-            <button onClick={() => setShowAIPanel(v => !v)} className={`transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0 ${showAIPanel ? 'text-violet-300' : 'text-white/40 hover:text-violet-300'}`}><Sparkles className="w-5 h-5" /></button>
-            <input type="text" placeholder={t.typeMessage} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} className="flex-1 bg-transparent outline-none text-sm placeholder-white/25 px-2 text-white" />
-            <div className="relative">
-              <button onClick={() => setShowSchedulePicker(v => !v)} className={`transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0 ${showSchedulePicker ? 'text-violet-300' : 'text-white/40 hover:text-amber-400'}`}><Clock3 className="w-5 h-5" /></button>
-              <AnimatePresence>{showSchedulePicker && <SchedulePicker options={SCHEDULE_OPTIONS_LOCALIZED} title={t.scheduleMessage} onSchedule={handleSchedule} onClose={() => setShowSchedulePicker(false)} isDark={true} />}</AnimatePresence>
+            <button onClick={() => setShowAIPanel(v => !v)} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0 ${isDark ? 'hover:bg-white/8' : 'hover:bg-black/5'} ${showAIPanel ? (isDark ? 'text-violet-300 bg-white/10' : 'text-violet-650 bg-violet-100') : (isDark ? 'text-white/40 hover:text-violet-300' : 'text-gray-400 hover:text-violet-600')}`}><Sparkles className="w-5 h-5" /></button>
+            <input type="text" placeholder={t.typeMessage} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} className={`flex-1 bg-transparent outline-none text-sm px-2 py-2 ${isDark ? 'placeholder-white/25 text-white' : 'placeholder-gray-400 text-gray-800'}`} />
+            <div className="relative flex items-center">
+              <button onClick={() => setShowSchedulePicker(v => !v)} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0 ${isDark ? 'hover:bg-white/8' : 'hover:bg-black/5'} ${showSchedulePicker ? (isDark ? 'text-violet-300 bg-white/10' : 'text-violet-650 bg-violet-100') : (isDark ? 'text-white/40 hover:text-amber-400' : 'text-gray-400 hover:text-amber-600')}`}><Clock3 className="w-5 h-5" /></button>
+              <AnimatePresence>{showSchedulePicker && <SchedulePicker options={SCHEDULE_OPTIONS_LOCALIZED} title={t.scheduleMessage} onSchedule={handleSchedule} onClose={() => setShowSchedulePicker(false)} isDark={isDark} />}</AnimatePresence>
             </div>
-            <button onClick={() => setIsRecording(true)} className="transition-all duration-200 ease-in-out hover:scale-110 text-white/40 hover:text-red-400"><Mic className="w-5 h-5" /></button>
-            <button onClick={handleSend} disabled={!input.trim() && pendingFiles.length === 0} className="w-9 h-9 rounded-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:scale-110 hover:brightness-110" style={{
+            <button onClick={() => setIsRecording(true)} className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-white/8 text-white/40 hover:text-red-400' : 'hover:bg-black/5 text-gray-400 hover:text-red-550'}`}><Mic className="w-5 h-5" /></button>
+            <button onClick={handleSend} disabled={!input.trim() && pendingFiles.length === 0} className="w-9 h-9 rounded-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:scale-110 hover:brightness-110 flex-shrink-0" style={{
             background: 'linear-gradient(135deg,#7c3aed,#a855f7,#06b6d4)',
             boxShadow: '0 0 16px rgba(124,58,237,0.5)'
           }}><Send className="w-4 h-4" /></button>
@@ -2258,7 +2640,7 @@ export const ChatApp = () => {
       </div>
     </main>;
   return <div className="w-full h-screen flex items-center justify-center p-4 font-sans relative overflow-hidden">
-      <GradientBg />
+      <GradientBg isDark={isDark} />
 
       <div className="w-full max-w-7xl h-full max-h-[900px] flex flex-col rounded-2xl overflow-hidden shadow-2xl relative" style={{
       background: 'rgba(10,4,30,0.55)',
@@ -2296,7 +2678,7 @@ export const ChatApp = () => {
             </div>
             <div className="flex items-center gap-2">
               {/* Layout Switcher */}
-              <LayoutSwitcher layout={layout} onChange={setLayout} />
+              <LayoutSwitcher layout={layout} onChange={setLayout} isDark={isDark} />
               <div className="w-px h-5 bg-white/15" />
               <button onClick={cycleLang} className="h-7 px-2.5 rounded-full text-white flex items-center gap-1.5 transition-all duration-200 ease-in-out hover:bg-white/20 hover:scale-105 text-xs font-bold" style={{
               background: 'rgba(255,255,255,0.1)',
@@ -2328,10 +2710,10 @@ export const ChatApp = () => {
               {showContactDrawer && !openThreadMsgId && <ContactInfoDrawer contact={activeContact} onClose={() => setShowContactDrawer(false)} onDeleteConversation={() => {
               setShowDeleteConversation(true);
               setShowContactDrawer(false);
-            }} isDark={true} t={t} />}
+            }} isDark={isDark} t={t} />}
             </AnimatePresence>
             <AnimatePresence>
-              {openThreadMsg && <ThreadPanel parentMsg={openThreadMsg} activeContact={activeContact} onClose={() => setOpenThreadMsgId(null)} onSendThread={handleSendThread} isDark={true} threadLabel={t.thread} originalLabel={t.originalMessage} replyPlaceholder={t.replyInThread} />}
+              {openThreadMsg && <ThreadPanel parentMsg={openThreadMsg} activeContact={activeContact} onClose={() => setOpenThreadMsgId(null)} onSendThread={handleSendThread} isDark={isDark} threadLabel={t.thread} originalLabel={t.originalMessage} replyPlaceholder={t.replyInThread} />}
             </AnimatePresence>
           </div>
 
@@ -2424,21 +2806,21 @@ export const ChatApp = () => {
       </AnimatePresence>
 
       {/* Compose Modal */}
-      <AnimatePresence>{showComposeModal && <ComposeModal contacts={contacts} onClose={() => setShowComposeModal(false)} onSelectContact={id => setActiveContactId(id)} isDark={true} title={t.newMessage} searchPlaceholder={t.searchContacts} noResultsLabel={t.noContactsFound} groupBadge={t.groupBadge} />}</AnimatePresence>
+      <AnimatePresence>{showComposeModal && <ComposeModal onClose={() => setShowComposeModal(false)} onSelectContact={id => setActiveContactId(id)} isDark={isDark} title={t.newMessage} searchPlaceholder={t.searchContacts} noResultsLabel={t.noContactsFound} groupBadge={t.groupBadge} />}</AnimatePresence>
 
       {/* Forward Modal */}
       <AnimatePresence>
-        {forwardingMsg && <motion.div initial={{
+        {forwardingMsg && <motion.div onClick={() => setForwardingMsg(null)} initial={{
         opacity: 0
       }} animate={{
         opacity: 1
       }} exit={{
         opacity: 0
       }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{
-        background: 'rgba(0,0,0,0.7)',
+        background: isDark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.25)',
         backdropFilter: 'blur(20px)'
       }}>
-          <motion.div initial={{
+          <motion.div onClick={e => e.stopPropagation()} initial={{
           scale: 0.9,
           opacity: 0,
           y: 20
@@ -2454,21 +2836,21 @@ export const ChatApp = () => {
           type: 'spring',
           stiffness: 280,
           damping: 26
-        }} className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${GLASS_CARD}`} style={{
-          boxShadow: '0 20px 60px rgba(139,92,246,0.4)'
+        }} className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? 'bg-[#150e28]/95 border border-white/10 backdrop-blur-xl text-white' : 'bg-white border border-gray-150 text-gray-800 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.15)]'}`} style={{
+          boxShadow: isDark ? '0 20px 60px rgba(139,92,246,0.4)' : '0 15px 40px rgba(0,0,0,0.08)'
         }}>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-              <div className="flex items-center gap-2"><Forward className="w-4 h-4 text-violet-300" /><h3 className="font-semibold text-sm text-white">{t.forwardMessage}</h3></div>
-              <button onClick={() => setForwardingMsg(null)} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 text-white/50 transition-all duration-200 ease-in-out hover:scale-110"><X className="w-4 h-4" /></button>
+            <div className={`flex items-center justify-between px-5 py-4 border-b ${isDark ? 'border-white/10' : 'border-gray-100'}`}>
+              <div className="flex items-center gap-2"><Forward className="w-4 h-4 text-violet-300" /><h3 className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{t.forwardMessage}</h3></div>
+              <button onClick={() => setForwardingMsg(null)} className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? 'hover:bg-white/15 text-white/50 hover:text-white' : 'hover:bg-black/5 text-gray-400 hover:text-gray-605'}`}><X className="w-4 h-4" /></button>
             </div>
-            <div className="px-5 py-3 border-b border-white/10 bg-white/5">
-              <p className="text-xs line-clamp-2 italic text-white/50">"{forwardingMsg.text}"</p>
+            <div className={`px-5 py-3 border-b ${isDark ? 'border-white/10 bg-white/5' : 'border-gray-100 bg-gray-50'}`}>
+              <p className={`text-xs line-clamp-2 italic ${isDark ? 'text-white/50' : 'text-gray-500'}`}>"{forwardingMsg.text}"</p>
             </div>
-            <div className="max-h-64 overflow-y-auto py-2">
-              {contacts.map(contact => <button key={contact.id} onClick={() => handleForwardSend(contact.id)} className="w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 ease-in-out hover:bg-white/8 text-left group">
-                <div className="relative flex-shrink-0"><img src={contact.avatar} alt={contact.name} className="w-10 h-10 rounded-full object-cover transition-transform duration-200 group-hover:scale-105" />{contact.online && <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-transparent rounded-full" />}</div>
-                <div className="flex-1 min-w-0"><p className="text-sm font-medium truncate text-white/90">{contact.name}</p><p className="text-xs truncate text-white/40">{contact.lastMessage}</p></div>
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${contact.online ? 'bg-green-400' : 'bg-white/20'}`} />
+            <div className="max-h-64 overflow-y-auto py-2 compose-modal-scroll">
+              {contacts.map(contact => <button key={contact.id} onClick={() => handleForwardSend(contact.id)} className={`w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 ease-in-out text-left group ${isDark ? 'hover:bg-white/8' : 'hover:bg-black/4'}`}>
+                <div className="relative flex-shrink-0"><img src={contact.avatar} alt={contact.name} className="w-10 h-10 rounded-full object-cover transition-transform duration-200 group-hover:scale-105" /><span className={`absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 rounded-full ${isDark ? 'border-[#150e28]' : 'border-white'}`} style={{ display: contact.online ? 'block' : 'none' }} /></div>
+                <div className="flex-1 min-w-0"><p className={`text-sm font-medium truncate ${isDark ? 'text-white/90' : 'text-gray-900'}`}>{contact.name}</p><p className={`text-xs truncate ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{contact.lastMessage}</p></div>
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${contact.online ? 'bg-green-400' : (isDark ? 'bg-white/20' : 'bg-gray-300')}`} />
               </button>)}
             </div>
           </motion.div>
@@ -2477,12 +2859,12 @@ export const ChatApp = () => {
 
       {/* Delete Message Modal */}
       <AnimatePresence>
-        {deletingMsg && <DeleteConfirmModal msgText={deletingMsg.text} isMe={deletingMsg.senderId === 'me'} onDeleteForMe={handleDeleteForMe} onDeleteForEveryone={handleDeleteForEveryone} onCancel={() => setDeletingMsgId(null)} isDark={true} title={t.deleteMessage} subtitle={t.cannotBeUndone} deleteForMeLabel={t.deleteForMe} deleteForMeDesc={t.deleteForMeDesc} deleteForEveryoneLabel={t.deleteForEveryone} deleteForEveryoneDesc={t.deleteForEveryoneDesc} cancelLabel={t.cancel} deletingForMeLabel={t.deletingForMe} deletingForEveryoneLabel={t.deletingForEveryone} />}
+        {deletingMsg && <DeleteConfirmModal msgText={deletingMsg.text} isMe={deletingMsg.senderId === 'me'} onDeleteForMe={handleDeleteForMe} onDeleteForEveryone={handleDeleteForEveryone} onCancel={() => setDeletingMsgId(null)} isDark={isDark} title={t.deleteMessage} subtitle={t.cannotBeUndone} deleteForMeLabel={t.deleteForMe} deleteForMeDesc={t.deleteForMeDesc} deleteForEveryoneLabel={t.deleteForEveryone} deleteForEveryoneDesc={t.deleteForEveryoneDesc} cancelLabel={t.cancel} deletingForMeLabel={t.deletingForMe} deletingForEveryoneLabel={t.deletingForEveryone} />}
       </AnimatePresence>
 
       {/* Delete Conversation Modal */}
       <AnimatePresence>
-        {showDeleteConversation && <DeleteConversationModal contactName={activeContact.name} onConfirm={handleDeleteConversation} onCancel={() => setShowDeleteConversation(false)} isDark={true} title={t.deleteConversationTitle} descPrefix={t.deleteConversationDesc} deleteAllLabel={t.deleteAll} cancelLabel={t.cancel} shreddingLabel={t.shreddingConversation} />}
+        {showDeleteConversation && <DeleteConversationModal contactName={activeContact.name} onConfirm={handleDeleteConversation} onCancel={() => setShowDeleteConversation(false)} isDark={isDark} title={t.deleteConversationTitle} descPrefix={t.deleteConversationDesc} deleteAllLabel={t.deleteAll} cancelLabel={t.cancel} shreddingLabel={t.shreddingConversation} />}
       </AnimatePresence>
     </div>;
 };
