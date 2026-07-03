@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { Tooltip, Popover } from "antd";
-import { Bell, LogOut, BookOpen, CheckCircle, Sun, Moon, Palette, Layers, MessageSquare, PanelTop, PanelLeft, PanelBottom, PanelRight } from "lucide-react";
+import { Bell, LogOut, CheckCircle, Sun, Moon, Palette, Layers, MessageSquare, PanelTop, PanelLeft, PanelBottom, PanelRight } from "lucide-react";
 import { tokenControl, useLogout, useGetQuery } from "@shared/lib";
 import { AppRoutes } from "@shared/config";
 import { ApiRoutes } from "@shared/api";
 import { Logo } from "@shared/ui";
+import { NotificationsPopover, useNotificationCounters } from "@features/notifications";
 import { IUser } from "@entities/login";
 import { ModuleMenu } from "./ModuleMenu";
 import { useState, useEffect } from "react";
@@ -22,33 +23,6 @@ interface IProps {
   setLayoutMode?: (layout: LayoutMode) => void;
 }
 
-const mockNotifications = [
-  {
-    id: 1,
-    title: "Модуль «Корреспонденция»",
-    message: "Вас пригласили для подписи",
-    isRead: false,
-    time: "10 мин назад",
-    icon: <BookOpen size={16} className="text-blue-500" />,
-  },
-  {
-    id: 2,
-    title: "Письмо №124/2 отправлено",
-    message: "Вы успешно подписали письмо",
-    isRead: false,
-    time: "2 часа назад",
-    icon: <CheckCircle size={16} className="text-green-500" />,
-  },
-  {
-    id: 3,
-    title: "Системное уведомление",
-    message: "Завтра планируются технические работы.",
-    isRead: true,
-    time: "Вчера",
-    icon: <Bell size={16} className="text-gray-500" />,
-  },
-];
-
 export const Header = ({
   currentTheme,
   setCurrentTheme,
@@ -61,7 +35,9 @@ export const Header = ({
   const { openChat } = useChat();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const { pathname } = useLocation();
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const { counters } = useNotificationCounters();
+  const unreadCount = counters.unread;
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() =>
     tokenControl.getDarkMode(),
   );
@@ -85,12 +61,6 @@ export const Header = ({
       .filter(Boolean)
       .join(" • ") || "—";
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
-
-  const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, isRead: true })));
-  };
-
   const toggleTheme = () => {
     setIsDarkMode((prevMode) => {
       const newMode = !prevMode;
@@ -103,69 +73,6 @@ export const Header = ({
       return newMode;
     });
   };
-
-  const notificationContent = (
-    <div className="w-80 p-5 bg-white dark:bg-zinc-800 rounded-[2.5rem]">
-      <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-100 dark:border-zinc-750">
-        <span className="font-semibold text-gray-800 dark:text-zinc-200">Уведомления</span>
-        {unreadCount > 0 && (
-          <button
-            onClick={markAllAsRead}
-            className="text-xs text-blue-500 hover:text-blue-700 transition-colors cursor-pointer"
-          >
-            Прочитать все
-          </button>
-        )}
-      </div>
-
-      <div className="max-h-80 overflow-y-auto pr-1 flex flex-col gap-2 custom-scrollbar">
-        {notifications.length > 0 ? (
-          notifications.map((note) => (
-            <div
-              key={note.id}
-              className={`p-3 rounded-xl flex gap-3 transition-colors ${
-                note.isRead
-                  ? "bg-white hover:bg-gray-50"
-                  : "bg-blue-50/50 hover:bg-blue-50"
-              }`}
-            >
-              <div className="mt-0.5">
-                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                  {note.icon}
-                </div>
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <h4
-                    className={`text-sm m-0 ${
-                      note.isRead
-                        ? "text-gray-700 font-medium"
-                        : "text-gray-900 font-semibold"
-                    }`}
-                  >
-                    {note.title}
-                  </h4>
-                  {!note.isRead && (
-                    <span className="w-2 h-2 bg-blue-500 rounded-full mt-1"></span>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 mt-1 mb-1 line-clamp-2 leading-relaxed">
-                  {note.message}
-                </p>
-                <span className="text-[10px] text-gray-400 font-medium">
-                  {note.time}
-                </span>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="text-center py-6 text-gray-400 text-sm">
-            Нет новых уведомлений
-          </div>
-        )}
-      </div>
-    </div>
-  );
 
   const isProfilePage = pathname.includes("profile");
   const isVertical = layoutMode === "left" || layoutMode === "right";
@@ -340,7 +247,9 @@ export const Header = ({
       <div className={`flex items-center gap-2 shrink-0 ${isVertical ? "flex-col! items-center! gap-3! mt-auto! w-full!" : ""}`}>
         <div className={`flex items-center gap-2 ${isVertical ? "flex-col! gap-3!" : ""}`}>
           <Popover
-            content={notificationContent}
+            content={<NotificationsPopover open={notifOpen} />}
+            open={notifOpen}
+            onOpenChange={setNotifOpen}
             trigger="click"
             placement={isVertical ? "rightBottom" : "bottomRight"}
             arrow={false}
@@ -352,8 +261,8 @@ export const Header = ({
             >
               <Bell size={18} strokeWidth={2.2} />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-[9px] text-white flex items-center justify-center rounded-full font-bold shadow-lg">
-                  {unreadCount}
+                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose-500 text-[9px] text-white flex items-center justify-center rounded-full font-bold shadow-lg">
+                  {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
             </button>
