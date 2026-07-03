@@ -33,8 +33,6 @@ export const ModuleMenu = ({ variant, hideTopLevel, isVertical }: IProps) => {
 
 	const items = useMemo(() => getModuleItems(variant), [variant]);
 
-	// On mount: ensure stored correspondence active tab belongs to correspondence module
-	// If it doesn't, remove it to avoid incorrect navigation later
 	useEffect(() => {
 		try {
 			const saved = sessionStorage.getItem(STORAGE_KEY);
@@ -42,7 +40,7 @@ export const ModuleMenu = ({ variant, hideTopLevel, isVertical }: IProps) => {
 				sessionStorage.removeItem(STORAGE_KEY);
 			}
 		} catch (e) {
-			// ignore storage errors
+			console.log(e);
 		}
 	}, []);
 
@@ -61,8 +59,6 @@ export const ModuleMenu = ({ variant, hideTopLevel, isVertical }: IProps) => {
 		)?.data;
 		return Array.isArray(roles) ? roles : [];
 	}, [data]);
-
-	// console.log(userRolesArray);
 
 	const userRoleNames = useMemo(() => {
 		const namesFromRoles = userRolesArray.map((item) => item.name);
@@ -132,8 +128,6 @@ export const ModuleMenu = ({ variant, hideTopLevel, isVertical }: IProps) => {
 		if (isSharedRoute) {
 			const lastContextKey = sessionStorage.getItem(STORAGE_KEY);
 			if (lastContextKey) {
-				// Ищем родителя, у которого есть ребенок с ключом lastContextKey
-				// Это связывает "Архив" с тем модулем, откуда мы в него пришли
 				const parent = filteredItems.find(
 					(item) =>
 						hasChildren(item) &&
@@ -145,7 +139,6 @@ export const ModuleMenu = ({ variant, hideTopLevel, isVertical }: IProps) => {
 			}
 		}
 
-		// 2. Стандартный поиск по URL (fallback)
 		return filteredItems.find((item) => {
 			if (!item || !("key" in item)) return false;
 			const itemKey = String(item.key);
@@ -158,10 +151,7 @@ export const ModuleMenu = ({ variant, hideTopLevel, isVertical }: IProps) => {
 			pathname.includes(route),
 		);
 
-		// Сохраняем ключ ТОЛЬКО если это НЕ общий роут.
-		// Это запоминает "последний нормальный раздел" (например, Входящие)
 		if (!isSharedRoute && activeItem && hasChildren(activeItem)) {
-			// Ищем, какой именно таб активен сейчас
 			const currentActiveChild = activeItem.children?.find((sub) =>
 				pathname.startsWith(String(sub.key)),
 			);
@@ -266,11 +256,11 @@ export const ModuleMenu = ({ variant, hideTopLevel, isVertical }: IProps) => {
 							title={typeof label === "string" ? label : undefined}
 							className={`flex items-center gap-2 px-3.5 py-2.5 rounded-[2.5rem] text-sm font-semibold transition-all ${
 								isActive
-									? `bg-gradient-to-r ${activeGradient} text-white shadow-md`
+									? `bg-linear-to-r ${activeGradient} text-white shadow-md`
 									: "text-zinc-600 dark:text-zinc-400 hover:bg-white/40 dark:hover:bg-zinc-800/40"
 							}`}
 						>
-							<span className="flex-shrink-0">
+							<span className="shrink-0">
 								{headerIcon[itemKey] ?? <Layout size={18} />}
 							</span>
 							<span
