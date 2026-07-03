@@ -67,7 +67,7 @@ export const ModuleMenu = ({ variant, hideTopLevel, isVertical }: IProps) => {
 		return [...new Set([...namesFromRoles, ...namesFromPreload])];
 	}, [userRolesArray, preloadData]);
 
-	console.log(userRoleNames);
+	// console.log(userRoleNames);
 
 	const userPosition = useMemo(() => {
 		return (data as { data: { position: string } } | undefined)?.data?.position;

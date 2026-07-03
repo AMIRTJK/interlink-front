@@ -31,7 +31,7 @@ import type {
   ExtUserStatus,
 } from "../model";
 import { mockSessions, mockHistory, mockProfileStats } from "../lib/mock";
-import { extractPermNames } from "../lib/adapters";
+import { extractPermNames, unmapStatus, applyEffectiveState } from "../lib/adapters";
 
 const EMPTY_PERMS: PermModule[] = [];
 
@@ -94,6 +94,9 @@ export function UserProfileModal({
   const [overrides, setOverrides] = React.useState<
     Record<string, PermModule[]>
   >({});
+  const [serverDirect, setServerDirect] = React.useState<string[]>([]);
+  const [serverDenied, setServerDenied] = React.useState<string[]>([]);
+  const [permsInitialized, setPermsInitialized] = React.useState(false);
   const actionDropdownRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -115,9 +118,10 @@ export function UserProfileModal({
     }
   }, [localRoles, selectedPermRole]);
 
-  // Реальные права пользователя (для «Уровни доступа»)
-  const { data: userPermsData } = useGetQuery({
-    url: ApiRoutes.GET_USER_PERMISSIONS.replace(":id", user.id),
+  // Реальные права пользователя (для «Уровни доступа» + direct/denied)
+  const userPermsUrl = ApiRoutes.GET_USER_PERMISSIONS.replace(":id", user.id);
+  const { data: userPermsData, isLoading: isUserPermsLoading } = useGetQuery({
+    url: userPermsUrl,
     useToken: true,
     options: { enabled: !!user.id, refetchOnWindowFocus: false, staleTime: 0 },
   });
@@ -129,9 +133,69 @@ export function UserProfileModal({
     return new Set(extractPermNames(raw?.effective_permissions));
   }, [userPermsData]);
 
+  React.useEffect(() => {
+    const raw = userPermsData?.data || userPermsData;
+    if (!raw) return;
+    setServerDirect(extractPermNames((raw as { direct_permissions?: unknown })?.direct_permissions));
+    setServerDenied(extractPermNames((raw as { denied_permissions?: unknown })?.denied_permissions));
+    // GET_USERS (список) не всегда отдаёт roles на строку — user.roles (использован
+    // как начальное состояние localRoles) может быть пустым/неполным. Поправляем на
+    // авторитетные данные из GET_USER_PERMISSIONS один раз при первой загрузке —
+    // дальше localRoles уже редактируется вручную и мы его не перетираем, чтобы не
+    // затереть несохранённые изменения админа.
+    if (!permsInitialized) {
+      const roles = extractPermNames((raw as { roles?: unknown })?.roles);
+      if (roles.length) {
+        setLocalRoles(roles);
+        setSelectedPermRole(roles[0]);
+      }
+    }
+    setPermsInitialized(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userPermsData]);
+
+  // Объединённый набор прав от ВСЕХ ролей пользователя (не только выбранной вкладки) —
+  // effective = union(role_permissions) + direct - denied, как в ТЗ.
+  const unionRolePermissionNames = React.useMemo(() => {
+    const set = new Set<string>();
+    localRoles.forEach((roleName) => {
+      const card = roleCards.find((c) => c.name === roleName);
+      card?.permissionNames.forEach((p) => set.add(p));
+    });
+    return set;
+  }, [localRoles, roleCards]);
+
   const setUserRolesM = useMutationQuery({
     url: () => ApiRoutes.SET_USER_ROLES,
     method: "POST",
+    messages: {
+      suppressSuccessToast: true,
+      invalidate: [ApiRoutes.GET_USERS],
+    },
+  });
+
+  const updateDirectM = useMutationQuery({
+    url: () => ApiRoutes.UPDATE_USER_DIRECT_PERMISSIONS.replace(":id", user.id),
+    method: "PUT",
+    messages: {
+      suppressSuccessToast: true,
+      // Инвалидация только на denied (вызывается вторым в паре) — иначе один клик
+      // "Сохранить" рефетчит users/permissions дважды, по разу на каждый PUT.
+    },
+  });
+
+  const updateDeniedM = useMutationQuery({
+    url: () => ApiRoutes.UPDATE_USER_DENIED_PERMISSIONS.replace(":id", user.id),
+    method: "PUT",
+    messages: {
+      suppressSuccessToast: true,
+      invalidate: [ApiRoutes.GET_USERS, userPermsUrl],
+    },
+  });
+
+  const updateStatusM = useMutationQuery({
+    url: () => ApiRoutes.UPDATE_USER.replace(":id", user.id),
+    method: "PUT",
     messages: {
       suppressSuccessToast: true,
       invalidate: [ApiRoutes.GET_USERS],
@@ -147,15 +211,39 @@ export function UserProfileModal({
   const defaultPermsForRole: PermModule[] = selectedRoleCard
     ? selectedRoleCard.perms
     : EMPTY_PERMS;
+
+  // То, что реально сохранено на backend прямо сейчас (роли + direct - denied)
+  const savedEffectivePerms = React.useMemo(
+    () =>
+      applyEffectiveState(
+        defaultPermsForRole,
+        unionRolePermissionNames,
+        serverDirect,
+        serverDenied,
+      ),
+    [defaultPermsForRole, unionRolePermissionNames, serverDirect, serverDenied],
+  );
+
+  // Пока не подгрузили GET_USER_PERMISSIONS — не подменяем overrides,
+  // чтобы не затирать реальные direct/denied пустым состоянием (см. баг с 422
+  // на пустом permissions[] — та же гонка загрузки/сохранения).
+  React.useEffect(() => {
+    if (!permsInitialized || !selectedRoleCard) return;
+    setOverrides((prev) =>
+      prev[selectedPermRole] ? prev : { ...prev, [selectedPermRole]: savedEffectivePerms },
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [permsInitialized, selectedPermRole, selectedRoleCard, savedEffectivePerms]);
+
   const currentOverridePerms: PermModule[] =
-    overrides[selectedPermRole] ?? defaultPermsForRole;
+    overrides[selectedPermRole] ?? savedEffectivePerms;
 
   const isDirty = React.useMemo(() => {
     const ov = overrides[selectedPermRole];
     if (!ov) return false;
     for (let mIdx = 0; mIdx < ov.length; mIdx++) {
       const oMod = ov[mIdx];
-      const dMod = defaultPermsForRole[mIdx];
+      const dMod = savedEffectivePerms[mIdx];
       if (!dMod) return true;
       for (let pIdx = 0; pIdx < oMod.perms.length; pIdx++) {
         const oPerm = oMod.perms[pIdx];
@@ -171,7 +259,7 @@ export function UserProfileModal({
       }
     }
     return false;
-  }, [overrides, selectedPermRole, defaultPermsForRole]);
+  }, [overrides, selectedPermRole, savedEffectivePerms]);
 
   const isSubpermCustomized = (
     mIdx: number,
@@ -186,7 +274,7 @@ export function UserProfileModal({
   };
 
   const handleToggleOverride = (mIdx: number, pIdx: number, spIdx: number) => {
-    const base = overrides[selectedPermRole] ?? clonePerms(defaultPermsForRole);
+    const base = overrides[selectedPermRole] ?? clonePerms(savedEffectivePerms);
     const updated = base.map((m, mi) =>
       mi !== mIdx
         ? m
@@ -215,6 +303,71 @@ export function UserProfileModal({
       delete n[roleName];
       return n;
     });
+  };
+
+  /**
+   * Пересчитывает флоские direct/denied для ВСЕХ прав (матрица покрывает
+   * allPermNames) на основе того, что видно на экране в текущей вкладке роли,
+   * и сохраняет через PUT .../permissions/direct + PUT .../permissions/denied.
+   * Примечание: у мультиролевого пользователя "roleHas" берётся от роли текущей
+   * вкладки — для одной роли (типовой случай) расчёт точный; для одновременного
+   * редактирования прав, общих с другой ролью пользователя, могут быть неточности.
+   */
+  const handleSaveOverrides = () => {
+    if (!selectedRoleCard || updateDirectM.isPending || updateDeniedM.isPending) {
+      return;
+    }
+
+    const roleBaseMap = new Map<string, boolean>();
+    defaultPermsForRole.forEach((m) =>
+      m.perms.forEach((p) =>
+        p.subperms?.forEach((sp) => {
+          if (sp.name) roleBaseMap.set(sp.name, sp.value);
+        }),
+      ),
+    );
+
+    const currentMap = new Map<string, boolean>();
+    currentOverridePerms.forEach((m) =>
+      m.perms.forEach((p) =>
+        p.subperms?.forEach((sp) => {
+          if (sp.name) currentMap.set(sp.name, sp.value);
+        }),
+      ),
+    );
+
+    const touched = new Set(roleBaseMap.keys());
+    const nextDirect = serverDirect.filter((p) => !touched.has(p));
+    const nextDenied = serverDenied.filter((p) => !touched.has(p));
+
+    touched.forEach((permName) => {
+      const roleHas = roleBaseMap.get(permName) ?? false;
+      const wantsActive = currentMap.get(permName) ?? roleHas;
+      if (wantsActive && !roleHas) {
+        nextDirect.push(permName);
+      } else if (!wantsActive && roleHas) {
+        nextDenied.push(permName);
+      }
+    });
+
+    updateDirectM.mutate(
+      { permissions: nextDirect },
+      {
+        onSuccess: () => {
+          updateDeniedM.mutate(
+            { permissions: nextDenied },
+            {
+              onSuccess: () => {
+                setServerDirect(nextDirect);
+                setServerDenied(nextDenied);
+                handleOverrideReset(selectedPermRole);
+                addToast(`Доступ обновлён · ${user.fio} · роль ${selectedPermRole}`);
+              },
+            },
+          );
+        },
+      },
+    );
   };
 
   const handleSaveRoles = () => {
@@ -900,34 +1053,6 @@ export function UserProfileModal({
                   </div>
                 ))}
               </div>
-              {isDirty && (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    marginTop: 4,
-                  }}
-                >
-                  {/* Сохранение переопределения прав на уровне пользователя.
-                      MOCK-поведение как в референсе: локально + тост.
-                      Точную семантику direct/denied подтвердит backend. */}
-                  <button
-                    onClick={() =>
-                      addToast(
-                        `Доступ обновлён (локально) · ${user.fio} · роль ${selectedPermRole}`,
-                      )
-                    }
-                    style={{
-                      ...primaryBtnStyle,
-                      background: T.accent,
-                      boxShadow: `0 2px 10px ${T.accent}35`,
-                    }}
-                  >
-                    <Check size={14} />
-                    <span>Сохранить изменения доступа</span>
-                  </button>
-                </div>
-              )}
             </div>
           )}
 
@@ -1137,19 +1262,47 @@ export function UserProfileModal({
             gap: 8,
           }}
         >
-          <button
-            onClick={handleSaveRoles}
-            disabled={setUserRolesM.isPending}
-            style={{
-              ...primaryBtnStyle,
-              background: T.accent,
-              boxShadow: `0 2px 8px ${T.accent}35`,
-              opacity: setUserRolesM.isPending ? 0.7 : 1,
-            }}
-          >
-            <Check size={14} />
-            <span>Сохранить изменения</span>
-          </button>
+          {activeTab === "profile" && (
+            <button
+              onClick={handleSaveRoles}
+              disabled={setUserRolesM.isPending}
+              style={{
+                ...primaryBtnStyle,
+                background: T.accent,
+                boxShadow: `0 2px 8px ${T.accent}35`,
+                opacity: setUserRolesM.isPending ? 0.7 : 1,
+              }}
+            >
+              <Check size={14} />
+              <span>Сохранить роли</span>
+            </button>
+          )}
+          {activeTab === "access" && (
+            <button
+              onClick={handleSaveOverrides}
+              disabled={
+                !permsInitialized ||
+                isUserPermsLoading ||
+                updateDirectM.isPending ||
+                updateDeniedM.isPending
+              }
+              style={{
+                ...primaryBtnStyle,
+                background: T.accent,
+                boxShadow: `0 2px 8px ${T.accent}35`,
+                opacity:
+                  !permsInitialized ||
+                  isUserPermsLoading ||
+                  updateDirectM.isPending ||
+                  updateDeniedM.isPending
+                    ? 0.7
+                    : 1,
+              }}
+            >
+              <Check size={14} />
+              <span>Сохранить права доступа</span>
+            </button>
+          )}
           <div ref={actionDropdownRef} style={{ position: "relative" }}>
             <button
               onClick={() => setActionDropdownOpen((p) => !p)}
@@ -1194,11 +1347,16 @@ export function UserProfileModal({
                     <button
                       key={opt.value}
                       onClick={() => {
-                        // MOCK-поведение как в референсе: локально + тост.
-                        // Персист статуса подтвердит backend (UPDATE_USER).
-                        setLocalStatus(opt.value);
-                        addToast(`Статус обновлён: ${opt.value}`);
                         setActionDropdownOpen(false);
+                        updateStatusM.mutate(
+                          { status: unmapStatus(opt.value) },
+                          {
+                            onSuccess: () => {
+                              setLocalStatus(opt.value);
+                              addToast(`Статус обновлён: ${opt.value}`);
+                            },
+                          },
+                        );
                       }}
                       style={{
                         display: "flex",

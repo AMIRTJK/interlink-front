@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Pencil,
   Trash2,
+  ShieldPlus,
 } from "lucide-react";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes, _axios } from "@shared/api";
@@ -27,11 +28,14 @@ import { ToastContainer } from "./components";
 import { useToasts } from "../lib/useToasts";
 import { RoleDrawer } from "./RoleDrawer";
 import { CreateRoleModal } from "./CreateRoleModal";
+import { CreateUiPermissionModal } from "./CreateUiPermissionModal";
 import { DeleteRoleModal } from "./DeleteRoleModal";
-import type { RoleCard, PermModule } from "../model";
+import { UserDrawer } from "./UserDrawer";
+import type { RoleCard, PermModule, ExtUser } from "../model";
 import {
   adaptRoleCard,
   adaptTableUser,
+  adaptExtUser,
   extractPermNames,
   unwrapList,
 } from "../lib/adapters";
@@ -71,7 +75,9 @@ export function RolesView() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [currentPage, setCurrentPage] = React.useState(1);
   const [showCreateRole, setShowCreateRole] = React.useState(false);
+  const [showCreateUiPerm, setShowCreateUiPerm] = React.useState(false);
   const [showDeleteRole, setShowDeleteRole] = React.useState(false);
+  const [profileUser, setProfileUser] = React.useState<ExtUser | null>(null);
 
   const { data: rolesData } = useGetQuery({
     url: ApiRoutes.GET_ROLES,
@@ -227,6 +233,7 @@ export function RolesView() {
   };
 
   const handleCardClick = (cardId: string) => {
+    setProfileUser(null);
     if (selectedRoleId === cardId && drawerOpen) {
       setDrawerOpen(false);
       setSelectedRoleId(null);
@@ -241,10 +248,11 @@ export function RolesView() {
     }
   };
 
-  const handleRowClick = (roleNames: string[]) => {
-    const card = roleCards.find((c) => roleNames.includes(c.name));
-    if (!card) return;
-    handleCardClick(card.id);
+  const handleRowClick = (userId: string) => {
+    const rawUser = rawUsers.find((u) => String(u.id) === userId);
+    if (!rawUser) return;
+    setIsFirstOpen(!profileUser);
+    setProfileUser(adaptExtUser(rawUser));
   };
 
   const toggleCheck = (id: string) => {
@@ -357,6 +365,36 @@ export function RolesView() {
                 <List size={15} />
               </button>
             </div>
+            <button
+              onClick={() => setShowCreateUiPerm(true)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "0 16px",
+                height: 36,
+                borderRadius: 8,
+                border: `1px solid ${T.border}`,
+                background: "#fff",
+                color: T.textSecondary,
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: T.font,
+                whiteSpace: "nowrap",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background =
+                  T.hoverBg;
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background =
+                  "#fff";
+              }}
+            >
+              <ShieldPlus size={14} />
+              <span>Создать UI-право</span>
+            </button>
             <button
               onClick={() => setShowCreateRole(true)}
               style={{
@@ -928,7 +966,7 @@ export function RolesView() {
                 return (
                   <tr
                     key={user.id}
-                    onClick={() => handleRowClick(user.roles)}
+                    onClick={() => handleRowClick(user.id)}
                     style={{
                       background: isRowHighlighted ? "#EFF6FF" : "transparent",
                       borderBottom: `1px solid ${T.bg}`,
@@ -1170,7 +1208,7 @@ export function RolesView() {
         </div>
       </div>
 
-      {showRoleDrawer && selectedCard && (
+      {profileUser ? (
         <div
           style={{
             position: "sticky",
@@ -1180,22 +1218,44 @@ export function RolesView() {
             flexShrink: 0,
           }}
         >
-          <RoleDrawer
-            key={selectedCard.id}
-            role={selectedCard}
+          <UserDrawer
+            key={profileUser.id}
+            user={profileUser}
             allPermNames={allPermNames}
-            userCount={selectedCard.userCount}
-            memberInitials={memberInitials}
-            onClose={() => {
-              setDrawerOpen(false);
-              setSelectedRoleId(null);
-            }}
+            onClose={() => setProfileUser(null)}
             isFirstOpen={isFirstOpen}
-            onSaved={() => {}}
-            onDeleteRequest={() => setShowDeleteRole(true)}
             addToast={addToast}
           />
         </div>
+      ) : (
+        showRoleDrawer &&
+        selectedCard && (
+          <div
+            style={{
+              position: "sticky",
+              top: 0,
+              alignSelf: "flex-start",
+              height: "100%",
+              flexShrink: 0,
+            }}
+          >
+            <RoleDrawer
+              key={selectedCard.id}
+              role={selectedCard}
+              allPermNames={allPermNames}
+              userCount={selectedCard.userCount}
+              memberInitials={memberInitials}
+              onClose={() => {
+                setDrawerOpen(false);
+                setSelectedRoleId(null);
+              }}
+              isFirstOpen={isFirstOpen}
+              onSaved={() => {}}
+              onDeleteRequest={() => setShowDeleteRole(true)}
+              addToast={addToast}
+            />
+          </div>
+        )
       )}
 
       {showCreateRole && (
@@ -1203,6 +1263,13 @@ export function RolesView() {
           allPermNames={allPermNames}
           roleCards={roleCards}
           onClose={() => setShowCreateRole(false)}
+          onCreated={() => {}}
+          addToast={addToast}
+        />
+      )}
+      {showCreateUiPerm && (
+        <CreateUiPermissionModal
+          onClose={() => setShowCreateUiPerm(false)}
           onCreated={() => {}}
           addToast={addToast}
         />
