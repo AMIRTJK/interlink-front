@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
-import { getCountdown } from "../lib/helpers";
+import { getCountdown, getFullCountdown } from "../lib/helpers";
 
 /** Компактный обратный отсчёт (обновление раз в минуту). */
 export const CountdownTimer = ({ dueDate }: { dueDate: string }) => {

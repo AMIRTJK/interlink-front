@@ -142,7 +142,7 @@ export const DesktopMode = ({ userData, onClose, isDark }: IProps) => {
           className={`mt-10 p-5 md:p-6 rounded-[2rem] backdrop-blur-2xl border flex flex-col items-center max-w-sm w-full transition-all duration-300 ${isDark ? "bg-white/6 border-white/12 shadow-[0_8px_32px_rgba(0,0,0,0.3)]" : "bg-white/45 border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.06)]"}`}
         >
           <img
-            src={userData?.avatar || userAvatar}
+            src={userData?.photo_path || userAvatar}
             alt=""
             className={`w-16 h-16 rounded-full object-cover border-2 shadow-md ${isDark ? "border-white/30" : "border-indigo-400/50"}`}
           />

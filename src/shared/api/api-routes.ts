@@ -151,6 +151,11 @@ export const ApiRoutes = {
   MY_FILE_FOLDERS: "/api/v1/my-file-folders",
   MY_FILE_FOLDERS_ID: "/api/v1/my-file-folders/:id",
 
+  // ==================== PERSONAL ANALYTICS (личный кабинет) ====================
+  // Аналитика только по личным задачам и встречам текущего авторизованного пользователя.
+  // Query-параметры: year (год календарной статистики), limit (кол-во задач в блоке прогресса).
+  PERSONAL_ANALYTICS: "/api/v1/personal-analytics",
+
   // ==================== NOTIFICATIONS (личный кабинет) ====================
   // Данные возвращаются только для текущего авторизованного пользователя
   NOTIFICATIONS: "/api/v1/notifications",

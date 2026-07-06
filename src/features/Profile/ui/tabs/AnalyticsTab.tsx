@@ -21,52 +21,20 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
+import { Loader, EmptyState } from "@shared/ui";
+import { usePersonalAnalytics } from "./analytics/usePersonalAnalytics";
+import type { ICategoricalDatum } from "./analytics/lib";
 
 /*
- * Вкладка «Аналитика» нового дизайна.
- * ВНИМАНИЕ: серверного API для аналитики пока нет — вкладка реализована
- * только на фронтенде на локальных моковых данных (как и требовалось).
- * Когда появится API, MOCK_TASKS / CAL_EVENTS_DATA можно заменить данными с бэка.
+ * Вкладка «Аналитика» личного кабинета.
+ * Данные приходят с GET /api/v1/personal-analytics (только личные задачи и
+ * встречи текущего авторизованного пользователя) через usePersonalAnalytics.
  */
 
-type Priority = "low" | "medium" | "high" | "critical";
-type TaskStatus = "new" | "in_progress" | "review" | "completed" | "overdue";
 type ChartType = "bar" | "line" | "area" | "pie";
 
-interface MockTask {
-  id: string;
-  title: string;
-  status: TaskStatus;
-  priority: Priority;
-  progress: number;
-}
-
-const MOCK_TASKS: MockTask[] = [
-  { id: "TSK-1042", title: "Разработка API авторизации", status: "in_progress", priority: "critical", progress: 75 },
-  { id: "TSK-1041", title: "Миграция базы данных", status: "completed", priority: "high", progress: 100 },
-  { id: "TSK-1040", title: "Настройка CI/CD пайплайна", status: "in_progress", priority: "high", progress: 60 },
-  { id: "TSK-1039", title: "Код-ревью аутентификации", status: "review", priority: "medium", progress: 90 },
-  { id: "TSK-1038", title: "Нагрузочное тестирование", status: "new", priority: "medium", progress: 0 },
-  { id: "TSK-1037", title: "Оптимизация запросов к БД", status: "overdue", priority: "high", progress: 30 },
-  { id: "TSK-1036", title: "Документация REST API", status: "in_progress", priority: "low", progress: 45 },
-  { id: "TSK-1035", title: "Рефакторинг Dashboard", status: "new", priority: "medium", progress: 0 },
-  { id: "TSK-1034", title: "Мониторинг Grafana", status: "completed", priority: "high", progress: 100 },
-  { id: "TSK-1033", title: "Система уведомлений", status: "in_progress", priority: "medium", progress: 55 },
-  { id: "TSK-1032", title: "Пентест инфраструктуры", status: "overdue", priority: "critical", progress: 20 },
-  { id: "TSK-1031", title: "Обновление SSL сертификатов", status: "completed", priority: "critical", progress: 100 },
-  { id: "TSK-1030", title: "Настройка Redis кэша", status: "in_progress", priority: "high", progress: 40 },
-  { id: "TSK-1029", title: "Ревью Terraform", status: "review", priority: "medium", progress: 80 },
-  { id: "TSK-1028", title: "Автоматизация бэкапов", status: "new", priority: "high", progress: 0 },
-];
-
-const CAL_EVENTS_DATA = [
-  { month: "Янв", count: 3 },
-  { month: "Фев", count: 5 },
-  { month: "Мар", count: 2 },
-  { month: "Апр", count: 7 },
-  { month: "Май", count: 4 },
-  { month: "Июн", count: 6 },
-];
+// Элемент, который recharts прокидывает третьим аргументом в formatter Tooltip.
+type ProgressTooltipItem = { payload?: { fullTitle?: string } };
 
 const tooltipStyle = {
   borderRadius: "12px",
@@ -113,21 +81,63 @@ export const AnalyticsTab = () => {
   const [progressChartType, setProgressChartType] = useState<ChartType>("area");
   const [calEventsChartType, setCalEventsChartType] = useState<ChartType>("area");
 
-  const totalTasks = MOCK_TASKS.length;
-  const completedTasks = MOCK_TASKS.filter((t) => t.status === "completed").length;
-  const overdueTasks = MOCK_TASKS.filter((t) => t.status === "overdue").length;
-  const inProgressTasks = MOCK_TASKS.filter((t) => t.status === "in_progress").length;
-  const completionPct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-  const avgProgress =
-    totalTasks > 0
-      ? Math.round(MOCK_TASKS.reduce((s, t) => s + t.progress, 0) / totalTasks)
-      : 0;
+  const {
+    summary,
+    statusData,
+    priorityData,
+    progressData,
+    calEventsData,
+    isLoading,
+    isError,
+    refetch,
+  } = usePersonalAnalytics();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[440px]">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (isError || !summary) {
+    return (
+      <div className="flex justify-center items-center min-h-[440px]">
+        <EmptyState
+          title="Не удалось загрузить аналитику"
+          description="Проверьте подключение и попробуйте обновить данные."
+          actionText="Повторить"
+          onAction={() => refetch()}
+        />
+      </div>
+    );
+  }
 
   const kpiCards = [
-    { label: "Выполнено", value: `${completionPct}%`, sub: `${completedTasks} из ${totalTasks}`, color: "emerald" },
-    { label: "Средний прогресс", value: `${avgProgress}%`, sub: "по всем задачам", color: "indigo" },
-    { label: "Просрочено", value: String(overdueTasks), sub: "задач", color: "red" },
-    { label: "В работе", value: String(inProgressTasks), sub: "активных", color: "blue" },
+    {
+      label: "Выполнено",
+      value: `${summary.completion_pct ?? 0}%`,
+      sub: `${summary.completed_tasks ?? 0} из ${summary.total_tasks ?? 0}`,
+      color: "emerald",
+    },
+    {
+      label: "Средний прогресс",
+      value: `${summary.avg_progress ?? 0}%`,
+      sub: "по всем задачам",
+      color: "indigo",
+    },
+    {
+      label: "Просрочено",
+      value: String(summary.overdue_tasks ?? 0),
+      sub: "задач",
+      color: "red",
+    },
+    {
+      label: "В работе",
+      value: String(summary.in_progress_tasks ?? 0),
+      sub: "активных",
+      color: "blue",
+    },
   ];
   const kpiColorMap: Record<string, string> = {
     emerald: "text-emerald-700 dark:text-emerald-400",
@@ -142,28 +152,9 @@ export const AnalyticsTab = () => {
     blue: "bg-blue-50 dark:bg-blue-900/20",
   };
 
-  const statusChartData = [
-    { name: "Новая", value: MOCK_TASKS.filter((t) => t.status === "new").length, fill: "#94a3b8" },
-    { name: "В работе", value: MOCK_TASKS.filter((t) => t.status === "in_progress").length, fill: "#3b82f6" },
-    { name: "На ревью", value: MOCK_TASKS.filter((t) => t.status === "review").length, fill: "#8b5cf6" },
-    { name: "Завершена", value: MOCK_TASKS.filter((t) => t.status === "completed").length, fill: "#10b981" },
-    { name: "Просрочена", value: MOCK_TASKS.filter((t) => t.status === "overdue").length, fill: "#ef4444" },
-  ];
-  const priorityChartData = [
-    { name: "Низкий", value: MOCK_TASKS.filter((t) => t.priority === "low").length, fill: "#94a3b8" },
-    { name: "Средний", value: MOCK_TASKS.filter((t) => t.priority === "medium").length, fill: "#3b82f6" },
-    { name: "Высокий", value: MOCK_TASKS.filter((t) => t.priority === "high").length, fill: "#f97316" },
-    { name: "Критичный", value: MOCK_TASKS.filter((t) => t.priority === "critical").length, fill: "#ef4444" },
-  ];
-  const progressChartData = MOCK_TASKS.map((t) => ({
-    name: t.title.slice(0, 14),
-    progress: t.progress,
-    fullTitle: t.title,
-  }));
-
   const renderCategoricalChart = (
     type: ChartType,
-    data: { name: string; value: number; fill: string }[],
+    data: ICategoricalDatum[],
     stroke: string,
     gradId: string,
   ): React.ReactElement => {
@@ -219,19 +210,19 @@ export const AnalyticsTab = () => {
   const renderProgressChart = (): React.ReactElement => {
     if (progressChartType === "line")
       return (
-        <LineChart data={progressChartData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
+        <LineChart data={progressData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
           <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#9ca3af" }} />
           <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#9ca3af" }} domain={[0, 100]} width={28} />
-          <Tooltip formatter={(v: number | undefined, _n: string | undefined, p: any) => [(v ?? 0) + "%", p?.payload?.fullTitle || "Прогресс"]} contentStyle={tooltipStyle} />
+          <Tooltip formatter={(v: number | undefined, _n: string | undefined, p: ProgressTooltipItem) => [(v ?? 0) + "%", p?.payload?.fullTitle || "Прогресс"]} contentStyle={tooltipStyle} />
           <Line type="monotone" dataKey="progress" stroke="#6366f1" strokeWidth={2} dot={{ r: 4, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }} />
         </LineChart>
       );
     if (progressChartType === "bar")
       return (
-        <BarChart data={progressChartData} barSize={28} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
+        <BarChart data={progressData} barSize={28} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
           <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#9ca3af" }} />
           <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#9ca3af" }} domain={[0, 100]} width={28} />
-          <Tooltip formatter={(v: number | undefined, _n: string | undefined, p: any) => [(v ?? 0) + "%", p?.payload?.fullTitle || "Прогресс"]} contentStyle={tooltipStyle} cursor={{ fill: "rgba(0,0,0,0.04)" }} />
+          <Tooltip formatter={(v: number | undefined, _n: string | undefined, p: ProgressTooltipItem) => [(v ?? 0) + "%", p?.payload?.fullTitle || "Прогресс"]} contentStyle={tooltipStyle} cursor={{ fill: "rgba(0,0,0,0.04)" }} />
           <Bar dataKey="progress" fill="#6366f1" radius={[6, 6, 0, 0]} />
         </BarChart>
       );
@@ -239,17 +230,17 @@ export const AnalyticsTab = () => {
       const pieColors = ["#6366f1", "#8b5cf6", "#a78bfa", "#c4b5fd", "#818cf8", "#4f46e5", "#7c3aed", "#6d28d9", "#4338ca", "#3730a3"];
       return (
         <PieChart>
-          <Pie data={progressChartData} cx="50%" cy="50%" innerRadius={55} outerRadius={95} paddingAngle={3} dataKey="progress">
-            {progressChartData.map((_e, i) => (
+          <Pie data={progressData} cx="50%" cy="50%" innerRadius={55} outerRadius={95} paddingAngle={3} dataKey="progress">
+            {progressData.map((_e, i) => (
               <Cell key={`pg-pie-${i}`} fill={pieColors[i % pieColors.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(v: number | undefined, _n: string | undefined, p: any) => [(v ?? 0) + "%", p?.payload?.fullTitle || "Прогресс"]} contentStyle={tooltipStyle} />
+          <Tooltip formatter={(v: number | undefined, _n: string | undefined, p: ProgressTooltipItem) => [(v ?? 0) + "%", p?.payload?.fullTitle || "Прогресс"]} contentStyle={tooltipStyle} />
         </PieChart>
       );
     }
     return (
-      <AreaChart data={progressChartData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
+      <AreaChart data={progressData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
         <defs>
           <linearGradient id="mainProgressGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
@@ -258,7 +249,7 @@ export const AnalyticsTab = () => {
         </defs>
         <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#9ca3af" }} />
         <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#9ca3af" }} domain={[0, 100]} width={28} />
-        <Tooltip formatter={(v: number | undefined, _n: string | undefined, p: any) => [(v ?? 0) + "%", p?.payload?.fullTitle || "Прогресс"]} contentStyle={tooltipStyle} />
+        <Tooltip formatter={(v: number | undefined, _n: string | undefined, p: ProgressTooltipItem) => [(v ?? 0) + "%", p?.payload?.fullTitle || "Прогресс"]} contentStyle={tooltipStyle} />
         <Area type="monotone" dataKey="progress" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#mainProgressGrad)" dot={{ r: 4, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6, fill: "#6366f1" }} />
       </AreaChart>
     );
@@ -268,7 +259,7 @@ export const AnalyticsTab = () => {
     const stroke = "#38bdf8";
     if (calEventsChartType === "line")
       return (
-        <LineChart data={CAL_EVENTS_DATA} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
+        <LineChart data={calEventsData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
           <XAxis dataKey="month" axisLine={false} tickLine={false} tick={axisTick} />
           <YAxis axisLine={false} tickLine={false} tick={axisTick} allowDecimals={false} width={24} />
           <Tooltip formatter={(v: number | undefined) => [(v ?? 0) + " событий", "Кол-во"]} contentStyle={tooltipStyle} />
@@ -277,7 +268,7 @@ export const AnalyticsTab = () => {
       );
     if (calEventsChartType === "bar")
       return (
-        <BarChart data={CAL_EVENTS_DATA} barSize={36} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
+        <BarChart data={calEventsData} barSize={36} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
           <XAxis dataKey="month" axisLine={false} tickLine={false} tick={axisTick} />
           <YAxis axisLine={false} tickLine={false} tick={axisTick} allowDecimals={false} width={24} />
           <Tooltip formatter={(v: number | undefined) => [(v ?? 0) + " событий", "Кол-во"]} contentStyle={tooltipStyle} cursor={{ fill: "rgba(0,0,0,0.04)" }} />
@@ -288,8 +279,8 @@ export const AnalyticsTab = () => {
       const pieColors = ["#38bdf8", "#0ea5e9", "#7dd3fc", "#0369a1", "#bae6fd", "#0284c7"];
       return (
         <PieChart>
-          <Pie data={CAL_EVENTS_DATA} cx="50%" cy="50%" innerRadius={55} outerRadius={95} paddingAngle={3} dataKey="count" nameKey="month">
-            {CAL_EVENTS_DATA.map((_e, i) => (
+          <Pie data={calEventsData} cx="50%" cy="50%" innerRadius={55} outerRadius={95} paddingAngle={3} dataKey="count" nameKey="month">
+            {calEventsData.map((_e, i) => (
               <Cell key={`cal-pie-${i}`} fill={pieColors[i % pieColors.length]} />
             ))}
           </Pie>
@@ -298,7 +289,7 @@ export const AnalyticsTab = () => {
       );
     }
     return (
-      <AreaChart data={CAL_EVENTS_DATA} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
+      <AreaChart data={calEventsData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
         <defs>
           <linearGradient id="calEventsAreaGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor={stroke} stopOpacity={0.35} />
@@ -351,12 +342,12 @@ export const AnalyticsTab = () => {
           <AnimatePresence mode="wait">
             <motion.div key={statusChartType} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.15 }}>
               <ResponsiveContainer width="100%" height={220}>
-                {renderCategoricalChart(statusChartType, statusChartData, "#6366f1", "mainStatusGrad")}
+                {renderCategoricalChart(statusChartType, statusData, "#6366f1", "mainStatusGrad")}
               </ResponsiveContainer>
             </motion.div>
           </AnimatePresence>
           <div className="flex flex-wrap gap-2 mt-2">
-            {statusChartData.map((d) => (
+            {statusData.map((d) => (
               <div key={d.name} className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: d.fill }} />
                 <span className="text-[10px] text-zinc-500 dark:text-zinc-400">{d.name}</span>
@@ -379,12 +370,12 @@ export const AnalyticsTab = () => {
           <AnimatePresence mode="wait">
             <motion.div key={priorityChartType} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.15 }}>
               <ResponsiveContainer width="100%" height={220}>
-                {renderCategoricalChart(priorityChartType, priorityChartData, "#f97316", "mainPriorityGrad")}
+                {renderCategoricalChart(priorityChartType, priorityData, "#f97316", "mainPriorityGrad")}
               </ResponsiveContainer>
             </motion.div>
           </AnimatePresence>
           <div className="flex flex-wrap gap-2 mt-2">
-            {priorityChartData.map((d) => (
+            {priorityData.map((d) => (
               <div key={d.name} className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: d.fill }} />
                 <span className="text-[10px] text-zinc-500 dark:text-zinc-400">{d.name}</span>
