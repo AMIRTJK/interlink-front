@@ -56,11 +56,11 @@ const ChartSwitcher = ({
     <button
       onClick={() => onChange(type)}
       title={title}
-      className={
+      className={`rounded-lg p-1.5 transition-all duration-200 cursor-pointer ${
         current === type
-          ? "rounded-lg bg-white dark:bg-zinc-700 shadow-sm p-1.5 text-indigo-600"
-          : "p-1.5 text-zinc-400 hover:text-zinc-600 transition-colors"
-      }
+          ? "bg-white dark:bg-zinc-700 shadow-sm text-indigo-600 dark:text-indigo-400"
+          : "bg-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-200/50 dark:hover:bg-zinc-700/50"
+      }`}
     >
       {icon}
     </button>
