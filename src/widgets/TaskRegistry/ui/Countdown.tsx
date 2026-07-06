@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
 import { cn } from "@shared/lib";
-import { getCountdown, getFullCountdown } from "../lib/helpers";
+import { If } from "@shared/ui";
+import { getCountdown } from "../lib/helpers";
 
 /** Компактный обратный отсчёт (обновление раз в минуту). */
 export const CountdownTimer = ({ dueDate }: { dueDate: string }) => {
@@ -14,17 +14,18 @@ export const CountdownTimer = ({ dueDate }: { dueDate: string }) => {
     return () => clearInterval(interval);
   }, [dueDate]);
 
-  if (timer.type === "overdue") {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-600 text-xs font-semibold animate-pulse border border-red-200 uppercase tracking-wider">
-        <X size={12} strokeWidth={3} /> {timer.text}
+  return (
+    <If is={timer.type !== "overdue"}>
+      <span
+        className={cn(
+          "font-medium text-sm",
+          timer.type === "urgent" ? "text-amber-600" : "text-emerald-600",
+        )}
+      >
+        {timer.text}
       </span>
-    );
-  }
-  if (timer.type === "urgent") {
-    return <span className="text-amber-600 font-medium text-sm">{timer.text}</span>;
-  }
-  return <span className="text-emerald-600 font-medium text-sm">{timer.text}</span>;
+    </If>
+  );
 };
 
 /** Живой обратный отсчёт с секундами (обновление раз в секунду). */

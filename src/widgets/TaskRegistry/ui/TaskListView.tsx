@@ -11,9 +11,10 @@ import {
   FileText,
 } from "lucide-react";
 import { cn } from "@shared/lib";
+import { If } from "@shared/ui";
 import type { FilterTabId, SortConfig, Task, TaskStats } from "../model/types";
 import { STAT_CARDS, FILTER_TABS, SORT_OPTIONS } from "../model/constants";
-import { formatDueDate, getPriorityMeta, getStatusMeta } from "../lib/helpers";
+import { formatDueDate, getPriorityMeta, getStatusMeta, getCountdown } from "../lib/helpers";
 import { Avatar } from "./Avatar";
 import { CountdownTimer, LiveCountdown } from "./Countdown";
 
@@ -475,7 +476,9 @@ export const TaskListView = ({ tasks, onOpenTask, onCreate }: TaskListViewProps)
                             <span className="text-xs font-bold text-slate-800 dark:text-slate-100">
                               {formatDueDate(task.dueDate)}
                             </span>
-                            <CountdownTimer dueDate={task.dueDate} />
+                            <If is={task.status !== "completed" && getCountdown(task.dueDate).type !== "overdue"}>
+                              <CountdownTimer dueDate={task.dueDate} />
+                            </If>
                           </div>
                         </td>
                         <td className="px-6 py-5">

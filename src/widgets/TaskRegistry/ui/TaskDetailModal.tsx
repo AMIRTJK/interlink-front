@@ -3,8 +3,9 @@ import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { X, FileIcon, Download, Paperclip, Calendar } from "lucide-react";
 import { cn } from "@shared/lib";
+import { If } from "@shared/ui";
 import type { Task } from "../model/types";
-import { formatDueDate, getPriorityMeta, getStatusMeta } from "../lib/helpers";
+import { formatDueDate, getPriorityMeta, getStatusMeta, getCountdown } from "../lib/helpers";
 import { Avatar } from "./Avatar";
 import { CountdownTimer } from "./Countdown";
 
@@ -204,9 +205,11 @@ export const TaskDetailModal = ({
                     {formatDueDate(task.dueDate)}
                   </span>
                 </div>
-                <div className="pt-1 mt-1 border-t border-slate-100 dark:border-white/10">
-                  <CountdownTimer dueDate={task.dueDate} />
-                </div>
+                <If is={task.status !== "completed" && getCountdown(task.dueDate).type !== "overdue"}>
+                  <div className="pt-1 mt-1 border-t border-slate-100 dark:border-white/10">
+                    <CountdownTimer dueDate={task.dueDate} />
+                  </div>
+                </If>
               </div>
             </div>
 
