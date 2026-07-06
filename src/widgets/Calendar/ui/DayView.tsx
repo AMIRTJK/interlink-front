@@ -66,20 +66,20 @@ export const DayView = ({
   const monthYear = currentDate.format("MMMM YYYY");
 
   return (
-    <div className="w-full! bg-white! rounded-2xl! overflow-hidden! border! border-zinc-100!">
+    <div className="w-full! bg-white! dark:bg-slate-800/40! rounded-2xl! overflow-hidden! border! border-zinc-100! dark:border-slate-700/30! shadow-sm!">
       <div className="flex!">
-        <div className="w-24! flex-shrink-0! border-r! border-zinc-100! p-4! flex! flex-col! gap-0.5!">
-          <span className="text-5xl! font-black! text-zinc-800! leading-none!">{currentDate.date()}</span>
-          <span className="text-sm! font-bold! text-zinc-500!">{dayName}</span>
-          <span className="text-xs! text-zinc-400!">{monthYear}</span>
+        <div className="w-24! flex-shrink-0! border-r! border-zinc-100! dark:border-slate-700/30! p-4! flex! flex-col! gap-0.5!">
+          <span className="text-5xl! font-black! text-zinc-800! dark:text-zinc-200! leading-none!">{currentDate.date()}</span>
+          <span className="text-sm! font-bold! text-zinc-500! dark:text-zinc-400!">{dayName}</span>
+          <span className="text-xs! text-zinc-400! dark:text-zinc-500!">{monthYear}</span>
         </div>
 
         <div className="flex-1! flex!">
-          <div className="w-16! flex-shrink-0! border-r! border-zinc-100! relative!">
+          <div className="w-16! flex-shrink-0! border-r! border-zinc-100! dark:border-slate-700/30! relative!">
             {HOURS.map((h) => (
               <div
                 key={h}
-                className="flex! items-start! justify-end! pr-3! text-[11px]! font-medium! text-zinc-400!"
+                className="flex! items-start! justify-end! pr-3! text-[11px]! font-medium! text-zinc-400! dark:text-zinc-500!"
                 style={{ height: HOUR_HEIGHT }}
               >
                 <span className="-translate-y-2!">{h === 0 ? "" : `${String(h).padStart(2, "0")}:00`}</span>
@@ -95,7 +95,7 @@ export const DayView = ({
             {HOURS.map((h) => (
               <div
                 key={h}
-                className="w-full! border-b! border-zinc-100! absolute! left-0! right-0!"
+                className="w-full! border-b! border-zinc-100! dark:border-slate-700/20! absolute! left-0! right-0!"
                 style={{ top: (h - START_HOUR) * HOUR_HEIGHT, height: HOUR_HEIGHT }}
               />
             ))}
@@ -123,32 +123,32 @@ export const DayView = ({
                     open={openPopoverId === task.id}
                     onOpenChange={(v) => setOpenPopoverId(v ? task.id : null)}
                     content={
-                      <div className="w-[240px]! bg-white! rounded-2xl! shadow-lg! overflow-hidden!">
+                      <div className="w-[240px]! bg-white! dark:bg-slate-800! rounded-2xl! shadow-lg! overflow-hidden! border! border-transparent! dark:border-slate-700/50!">
                         <div className="flex! items-start! gap-2.5! p-4! pb-2!">
                           <span
                             className="w-2.5! h-2.5! rounded-full! flex-shrink-0! mt-1!"
                             style={getEventDotStyle(task.color)}
                           />
-                          <h4 className="font-bold! text-zinc-900! text-sm! m-0! leading-snug!">
+                          <h4 className="font-bold! text-zinc-900! dark:text-zinc-100! text-sm! m-0! leading-snug!">
                             {task.title}
                           </h4>
                         </div>
-                        <div className="px-4! pb-3! space-y-1.5! text-zinc-500! text-xs!">
+                        <div className="px-4! pb-3! space-y-1.5! text-zinc-500! dark:text-zinc-400! text-xs!">
                           <div className="flex! items-center! gap-2!">
-                            <ClockCircleOutlined className="text-zinc-400! flex-shrink-0!" />
+                            <ClockCircleOutlined className="text-zinc-400! dark:text-zinc-500! flex-shrink-0!" />
                             <span>{task.time}{task.endTime ? ` – ${task.endTime}` : ""}</span>
                           </div>
                           <div className="flex! items-center! gap-2!">
-                            <CalendarOutlined className="text-zinc-400! flex-shrink-0!" />
+                            <CalendarOutlined className="text-zinc-400! dark:text-zinc-500! flex-shrink-0!" />
                             <span>{dayjs(task.date).format("YYYY-MM-DD")}</span>
                           </div>
                           <If is={!!task.description}>
-                            <p className="text-zinc-500! text-xs! mt-1! leading-relaxed! whitespace-pre-wrap! m-0!">
+                            <p className="text-zinc-500! dark:text-zinc-400! text-xs! mt-1! leading-relaxed! whitespace-pre-wrap! m-0!">
                               {task.description}
                             </p>
                           </If>
                         </div>
-                        <div className="border-t! border-zinc-100! px-4! py-2.5! flex! justify-end!">
+                        <div className="border-t! border-zinc-100! dark:border-slate-700/50! px-4! py-2.5! flex! justify-end!">
                           <button
                             onClick={() => { onDeleteEvent(task.id); setOpenPopoverId(null); }}
                             className="flex! items-center! gap-1.5! text-red-500! hover:text-red-600! font-semibold! text-xs! transition-colors! cursor-pointer! bg-transparent! border-none! p-0!"
