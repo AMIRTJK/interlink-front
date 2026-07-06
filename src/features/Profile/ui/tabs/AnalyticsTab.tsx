@@ -58,8 +58,8 @@ const ChartSwitcher = ({
       title={title}
       className={
         current === type
-          ? "rounded-lg bg-white dark:bg-zinc-700 shadow-sm p-1.5 text-indigo-600"
-          : "p-1.5 text-zinc-400 hover:text-zinc-600 transition-colors"
+          ? "rounded-lg bg-white dark:bg-zinc-700 shadow-sm p-1.5 text-indigo-600 dark:text-indigo-400"
+          : "p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
       }
     >
       {icon}
