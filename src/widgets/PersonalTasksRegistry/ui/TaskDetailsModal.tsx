@@ -11,6 +11,7 @@ interface IProps {
   task: IPersonalTask | null;
   userName: string;
   onEditClick: () => void;
+  activeTheme: any;
 }
 
 const PRIORITY_BADGES = {
@@ -28,7 +29,7 @@ const STATUS_BADGES = {
   overdue: { bg: "bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400", dot: "bg-rose-500", label: "Просрочена" },
 };
 
-export const TaskDetailsModal = ({ onClose, task, userName, onEditClick }: IProps) => {
+export const TaskDetailsModal = ({ onClose, task, userName, onEditClick, activeTheme }: IProps) => {
   if (!task) return null;
   const pBadge = PRIORITY_BADGES[task.priority] || PRIORITY_BADGES.medium;
   const sBadge = STATUS_BADGES[task.status] || STATUS_BADGES.new;
@@ -162,7 +163,7 @@ export const TaskDetailsModal = ({ onClose, task, userName, onEditClick }: IProp
           <button onClick={onClose} className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors border-0 bg-transparent cursor-pointer">
             Закрыть
           </button>
-          <button onClick={onEditClick} className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 hover:opacity-90 transition-all shadow-md border-0 cursor-pointer">
+          <button onClick={onEditClick} className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r ${activeTheme.gradient} hover:opacity-90 transition-all shadow-md border-0 cursor-pointer`}>
             <SquarePen size={16} /> Редактировать
           </button>
         </div>

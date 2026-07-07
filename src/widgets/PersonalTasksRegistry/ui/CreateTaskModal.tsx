@@ -11,6 +11,7 @@ interface IProps {
   userName: string;
   onSave: (values: { title: string; description: string; priority: TPriority; status: TTaskStatus; due_date: string; tags: string[]; progress: number }) => void;
   isSaving: boolean;
+  activeTheme: any;
 }
 
 const PRIORITY_OPTIONS: { value: TPriority; label: string; color: string }[] = [
@@ -24,7 +25,7 @@ const STATUS_OPTIONS: { value: TTaskStatus; label: string; color: string }[] = [
   { value: "overdue", label: "Просрочена", color: "bg-rose-500" }
 ];
 
-export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving }: IProps) => {
+export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving, activeTheme }: IProps) => {
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [priority, setPriority] = React.useState<TPriority>("medium");
@@ -81,7 +82,7 @@ export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving }: I
         className="relative w-full max-w-lg bg-white dark:bg-zinc-800 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden flex flex-col z-10"
       >
         <form onSubmit={handleSubmit} className="w-full flex flex-col">
-          <div className="px-6 py-5 bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 text-white flex items-center justify-between">
+          <div className={`px-6 py-5 bg-gradient-to-r ${activeTheme.gradient} text-white flex items-center justify-between`}>
             <h3 className="font-bold text-lg text-white m-0 leading-none">
               <If is={!!task}>Редактировать задачу</If>
               <If is={!task}>Новая задача</If>
@@ -179,7 +180,7 @@ export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving }: I
                           key={dateStr}
                           type="button"
                           onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setDueDate(dateStr); setDateOpen(false); }}
-                          className={`h-8 w-8 text-xs font-bold rounded-xl flex items-center justify-center border-0 cursor-pointer transition-all ${isSelected ? "bg-emerald-600 text-white shadow-sm shadow-emerald-950/20" : "hover:bg-zinc-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-200 bg-transparent"}`}
+                          className={`h-8 w-8 text-xs font-bold rounded-xl flex items-center justify-center border-0 cursor-pointer transition-all ${isSelected ? `bg-gradient-to-r ${activeTheme.gradient} text-white shadow-md` : "hover:bg-zinc-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-200 bg-transparent"}`}
                         >
                           {d.getDate()}
                         </button>
@@ -207,7 +208,7 @@ export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving }: I
 
           <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-700 flex justify-end gap-3 bg-white dark:bg-zinc-800">
             <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors border-0 bg-transparent cursor-pointer">Отмена</button>
-            <button type="submit" disabled={isSaving} className="px-5 py-2.5 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 hover:opacity-90 transition-all shadow-md border-0 cursor-pointer disabled:opacity-50">
+            <button type="submit" disabled={isSaving} className={`px-5 py-2.5 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r ${activeTheme.gradient} hover:opacity-90 transition-all shadow-md border-0 cursor-pointer disabled:opacity-50`}>
               <If is={isSaving}>
                 <If is={!!task}>Сохранение...</If>
                 <If is={!task}>Создание...</If>

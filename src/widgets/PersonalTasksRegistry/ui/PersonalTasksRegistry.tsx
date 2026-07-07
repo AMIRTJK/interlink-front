@@ -12,6 +12,7 @@ import { CreateTaskModal } from "./CreateTaskModal";
 import { TaskDetailsModal } from "./TaskDetailsModal";
 import type { IPersonalTask, TFilterTab, TSortField, ISortConfig } from "../model/types";
 import { getUserName, calculateStats, getFilteredTasks } from "./lib";
+import { THEMES } from "@widgets/layout/ui/designSettings";
 import "./style.css";
 
 export const PersonalTasksRegistry = () => {
@@ -22,6 +23,19 @@ export const PersonalTasksRegistry = () => {
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = React.useState(false);
   const [activeTask, setActiveTask] = React.useState<IPersonalTask | null>(null);
+  const [themeKey, setThemeKey] = React.useState(() => localStorage.getItem("currentTheme") || "emerald");
+
+  React.useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "currentTheme" && e.newValue) {
+        setThemeKey(e.newValue);
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  const activeTheme = THEMES[themeKey] || THEMES.emerald;
 
   const { data: rawTasks, refetch } = useGetQuery<any, any>({
     url: ApiRoutes.PERSONAL_TASKS,
@@ -116,8 +130,9 @@ export const PersonalTasksRegistry = () => {
                 setActiveTask(null);
                 setIsCreateOpen(true);
               }}
+              activeTheme={activeTheme}
             />
-            <FilterTabs activeTab={filterTab} onTabChange={setFilterTab} stats={stats} />
+            <FilterTabs activeTab={filterTab} onTabChange={setFilterTab} stats={stats} activeTheme={activeTheme} />
             <TasksTable
               tasks={filteredTasks}
               onOpen={(t) => {
@@ -158,6 +173,7 @@ export const PersonalTasksRegistry = () => {
             userName={userName}
             onSave={handleSaveTask}
             isSaving={false}
+            activeTheme={activeTheme}
           />
         )}
       </AnimatePresence>
@@ -175,6 +191,7 @@ export const PersonalTasksRegistry = () => {
               setIsDetailsOpen(false);
               setIsCreateOpen(true);
             }}
+            activeTheme={activeTheme}
           />
         )}
       </AnimatePresence>

@@ -10,6 +10,7 @@ interface IProps {
   sortConfig: ISortConfig;
   onSortChange: (field: TSortField) => void;
   onCreateClick: () => void;
+  activeTheme: any;
 }
 
 export const RegistryHeader = ({
@@ -19,6 +20,7 @@ export const RegistryHeader = ({
   sortConfig,
   onSortChange,
   onCreateClick,
+  activeTheme,
 }: IProps) => {
   const [sortOpen, setSortOpen] = React.useState(false);
   const sortLabels: Record<TSortField, string> = {
@@ -90,7 +92,7 @@ export const RegistryHeader = ({
 
       <button
         onClick={onCreateClick}
-        className="flex items-center gap-2 bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 text-white px-5 py-2.5 rounded-2xl text-sm font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 border-0 cursor-pointer"
+        className={`flex items-center gap-2 bg-gradient-to-r ${activeTheme.gradient} text-white px-5 py-2.5 rounded-2xl text-sm font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 border-0 cursor-pointer`}
       >
         <Plus size={16} />
         <span className="hidden sm:inline">Создать задачу</span>

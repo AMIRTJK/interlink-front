@@ -11,9 +11,10 @@ interface IProps {
   activeTab: TFilterTab;
   onTabChange: (tab: TFilterTab) => void;
   stats: IStats;
+  activeTheme: any;
 }
 
-export const FilterTabs = ({ activeTab, onTabChange, stats }: IProps) => {
+export const FilterTabs = ({ activeTab, onTabChange, stats, activeTheme }: IProps) => {
   const tabs = [
     { id: "all" as const, label: "Все", count: stats.total },
     { id: "active" as const, label: "Активные", count: stats.inProgress },
@@ -31,7 +32,7 @@ export const FilterTabs = ({ activeTab, onTabChange, stats }: IProps) => {
             onClick={() => onTabChange(tab.id)}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer flex items-center gap-1.5 border-0 ${
               isActive
-                ? "bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 text-white shadow-md scale-105"
+                ? `bg-gradient-to-r ${activeTheme.gradient} text-white shadow-md scale-105`
                 : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
             }`}
           >
