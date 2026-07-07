@@ -4,6 +4,8 @@ import { MonthView } from "./MonthView";
 import { WeekView } from "./WeekView";
 import { DayView } from "./DayView";
 import { CreateTaskModal } from "@features/Calendar";
+import { EventDetailsModal } from "./EventDetailsModal";
+import type { Task } from "@features/tasks";
 import { useCalendarEvents } from "@shared/lib/hooks/useCalendarEvents";
 import { useCalendarView } from "@shared/lib/hooks/useCalendarView";
 import { useMutationQuery } from "@shared/lib";
@@ -23,6 +25,7 @@ export const Calendar = () => {
   } = useCalendarView({ currentDate, onDateChange: setCurrentDate });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Task | null>(null);
   const [selectedDateTime, setSelectedDateTime] = useState<{
     date: Dayjs;
     time: Dayjs;
@@ -40,6 +43,14 @@ export const Calendar = () => {
 
   const handleDeleteEvent = (eventId: string) => {
     deleteEvent(eventId);
+  };
+
+  const handleEventClick = (task: Task) => {
+    setSelectedEvent(task);
+  };
+
+  const handleCloseEventDetails = () => {
+    setSelectedEvent(null);
   };
 
   const handleDayClick = (date: Dayjs, selectedHour?: number) => {
@@ -86,6 +97,7 @@ export const Calendar = () => {
           currentDate={currentDate}
           onDeleteEvent={handleDeleteEvent}
           onDayClick={handleDayClick}
+          onEventClick={handleEventClick}
         />
       );
     }
@@ -98,6 +110,7 @@ export const Calendar = () => {
           onDeleteEvent={handleDeleteEvent}
           onDayClick={handleDayClick}
           onHeaderClick={handleHeaderClick}
+          onEventClick={handleEventClick}
         />
       );
     }
@@ -107,6 +120,7 @@ export const Calendar = () => {
         tasks={tasks}
         onDeleteEvent={handleDeleteEvent}
         onDayClick={handleDayClick}
+        onEventClick={handleEventClick}
       />
     );
   };
@@ -133,6 +147,12 @@ export const Calendar = () => {
         selectedDateTime={selectedDateTime}
         onSuccess={handleTaskCreated}
         mode="create"
+      />
+
+      <EventDetailsModal
+        event={selectedEvent}
+        onClose={handleCloseEventDetails}
+        onDelete={handleDeleteEvent}
       />
     </div>
   );

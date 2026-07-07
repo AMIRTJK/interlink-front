@@ -1,8 +1,5 @@
 import React, { useMemo } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import { Popover } from "antd";
-import { ClockCircleOutlined, CalendarOutlined, DeleteOutlined } from "@ant-design/icons";
-import { If } from "@shared/ui";
 import type { Task } from "@features/tasks";
 
 interface IMonthViewProps {
@@ -11,6 +8,7 @@ interface IMonthViewProps {
   currentDate: Dayjs;
   onDeleteEvent: (id: string) => void;
   onDayClick: (date: Dayjs) => void;
+  onEventClick: (task: Task) => void;
 }
 
 const WEEKDAYS = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
@@ -44,16 +42,12 @@ const getEventColorClasses = (color?: string) => {
   return "bg-emerald-500! text-white! hover:bg-emerald-600!";
 };
 
-const getEventDotStyle = (color?: string) => {
-  return { backgroundColor: color || "#10B981" };
-};
-
 export const MonthView = ({
   daysToShow,
   tasks,
   currentDate,
-  onDeleteEvent,
   onDayClick,
+  onEventClick,
 }: IMonthViewProps) => {
   const themeKey = useMemo(() => localStorage.getItem("currentTheme") || "emerald", []);
 
@@ -126,57 +120,17 @@ export const MonthView = ({
 
               <div className="flex-1! space-y-1! overflow-y-auto! no-scrollbar!">
                 {dayTasks.map((task) => (
-                  <div key={task.id} onClick={(e) => e.stopPropagation()}>
-                    <Popover
-                      content={
-                        <div className="w-[240px]! bg-white! rounded-2xl! shadow-lg! overflow-hidden!">
-                          <div className="flex! items-start! gap-2.5! p-4! pb-2!">
-                            <span
-                              className="w-2.5! h-2.5! rounded-full! flex-shrink-0! mt-1!"
-                              style={getEventDotStyle(task.color)}
-                            />
-                            <h4 className="font-bold! text-zinc-900! text-sm! m-0! leading-snug!">
-                              {task.title}
-                            </h4>
-                          </div>
-                          <div className="px-4! pb-3! space-y-1.5! text-zinc-500! text-xs!">
-                            <div className="flex! items-center! gap-2!">
-                              <ClockCircleOutlined className="text-zinc-400! flex-shrink-0!" />
-                              <span>{task.time}{task.endTime ? ` – ${task.endTime}` : ""}</span>
-                            </div>
-                            <div className="flex! items-center! gap-2!">
-                              <CalendarOutlined className="text-zinc-400! flex-shrink-0!" />
-                              <span>{dayjs(task.date).format("YYYY-MM-DD")}</span>
-                            </div>
-                            <If is={!!task.description}>
-                              <p className="text-zinc-500! text-xs! mt-1! leading-relaxed! whitespace-pre-wrap! m-0!">
-                                {task.description}
-                              </p>
-                            </If>
-                          </div>
-                          <div className="border-t! border-zinc-100! px-4! py-2.5! flex! justify-end!">
-                            <button
-                              onClick={() => onDeleteEvent(task.id)}
-                              className="flex! items-center! gap-1.5! text-red-500! hover:text-red-600! font-semibold! text-xs! transition-colors! cursor-pointer! bg-transparent! border-none! p-0!"
-                            >
-                              <DeleteOutlined />
-                              <span>Удалить</span>
-                            </button>
-                          </div>
-                        </div>
-                      }
-                      trigger="click"
-                      placement="right"
-                      overlayClassName="calendar-event-popover"
-                    >
-                      <div
-                        className={`text-[10px]! font-medium! py-1! px-2! rounded-lg! truncate! transition-all! shadow-sm! ${getEventColorClasses(
-                          task.color
-                        )}`}
-                      >
-                        {task.time} {task.title}
-                      </div>
-                    </Popover>
+                  <div
+                    key={task.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEventClick(task);
+                    }}
+                    className={`text-[10px]! font-medium! py-1! px-2! rounded-lg! truncate! transition-all! shadow-sm! cursor-pointer! ${getEventColorClasses(
+                      task.color
+                    )}`}
+                  >
+                    {task.time} {task.title}
                   </div>
                 ))}
               </div>
