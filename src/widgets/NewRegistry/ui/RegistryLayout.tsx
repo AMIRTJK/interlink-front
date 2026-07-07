@@ -70,6 +70,29 @@ const getBadgeStyles = (color: string) => {
 	}
 };
 
+// Цвет бейджа «Статус письма» по статусу документа (в стиле остальных бейджей)
+const getStatusBadgeColor = (status: string) => {
+	switch (status) {
+		case "sent":
+		case "completed":
+			return "emerald";
+		case "signed":
+			return "purple";
+		case "in-progress":
+		case "to_approve":
+		case "to_sign":
+			return "amber";
+		case "canceled":
+			return "rose";
+		case "draft":
+		case "analysis":
+		case "approved":
+			return "blue";
+		default:
+			return "gray";
+	}
+};
+
 // Компонент эффекта волны (Ripple)
 const RippleEffect = ({ x, y }: { x: number; y: number }) => (
 	<motion.span
@@ -748,14 +771,19 @@ export const DocumentListItem = ({
 
 					{/* Right Side: Status + Actions */}
 					<div className="flex items-center gap-3 flex-shrink-0">
-						<div
-							className={`px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r text-white ${
-								activeStatusData?.gradient ||
-								statusData?.gradient ||
-								"from-gray-100 to-gray-200"
-							}`}
-						>
-							{statusData?.label}
+						{/* Статус письма — в стиле столбца «Мой статус» */}
+						<div className="min-w-[120px]">
+							<div className="flex items-center gap-1 mb-0.5">
+								<Activity size={12} className="text-gray-400" />
+								<span className="text-xs text-gray-500">Статус письма</span>
+							</div>
+							<div
+								className={`text-xs font-mono font-semibold px-2 py-1 rounded truncate ${getBadgeStyles(
+									getStatusBadgeColor(data.status),
+								)}`}
+							>
+								{statusData?.label}
+							</div>
 						</div>
 
 						{/* Action Menu List View */}
