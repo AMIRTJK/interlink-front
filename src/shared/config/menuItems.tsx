@@ -112,6 +112,14 @@ export const getModuleItems = (
 			],
 		}),
 	},
+	{
+		key: AppRoutes.TASKS,
+		label: "Задачи",
+		icon:
+			variant === "horizontal" || variant === "full" || variant === "ios" ? (
+				<img src={ApplicationsIcon} alt="tasks" />
+			) : null,
+	},
 	// {
 	//   key: "/modules/temp-docs_primary",
 	//   label: "Первичные документы",

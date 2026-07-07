@@ -36,6 +36,7 @@ export const AppRoutes = {
 	// CORRESPONDENCE_INTERNAL: "/modules/correspondence/internal",
 	// HR module
 	HR: "/modules/hr",
+	TASKS: "/modules/tasks",
 	HR_EMPLOYEES: "/modules/hr/employees",
 	HR_ACCESS: "/modules/hr/access",
 	HR_ORDERS: "/modules/hr/orders",

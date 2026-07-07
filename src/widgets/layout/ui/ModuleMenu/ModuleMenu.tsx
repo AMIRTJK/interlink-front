@@ -7,7 +7,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import { ApiRoutes } from "@shared/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { IosVariant } from "./IosVariant";
-import { User, Mail, Users, Layout, ShieldCheck } from "lucide-react";
+import { User, Mail, Users, Layout, ShieldCheck, ClipboardList } from "lucide-react";
 import { THEMES } from "../designSettings";
 import "./style.css";
 
@@ -251,6 +251,7 @@ export const ModuleMenu = ({
 			[AppRoutes.PROFILE]: <User size={18} />,
 			[AppRoutes.CORRESPONDENCE]: <Mail size={18} />,
 			[AppRoutes.HR]: <Users size={18} />,
+			[AppRoutes.TASKS]: <ClipboardList size={18} />,
 			[AppRoutes.ADMINISTRATION]: <ShieldCheck size={18} />,
 		};
 		const navClass =
