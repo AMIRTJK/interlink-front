@@ -79,7 +79,7 @@ export const ProfileLayout = () => {
         )}
 
         <div
-          className="flex-1 min-w-0 flex flex-col transition-all duration-300 ease-in-out"
+          className="flex-1 min-w-0 flex flex-col gap-6 transition-all duration-300 ease-in-out"
           style={layoutMode === "bottom" ? { paddingBottom: 56 } : undefined}
         >
           <Header
