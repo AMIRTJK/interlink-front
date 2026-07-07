@@ -117,13 +117,35 @@ export const TasksTable = ({ tasks, onOpen, onEdit, onDelete, userName }: IProps
         </div>
 
         <div className="flex items-center gap-2">
-          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={safePage === 1} className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-colors border border-transparent hover:border-slate-200 dark:hover:border-white/10 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"><ChevronUp className="-rotate-90" size={16} /></button>
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={safePage === 1}
+            className="p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors border-0 bg-transparent disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
+          >
+            <ChevronUp className="-rotate-90" size={16} />
+          </button>
           <div className="flex gap-1">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <button key={p} onClick={() => setPage(p)} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors border border-transparent cursor-pointer ${p === safePage ? "bg-slate-850 dark:bg-slate-700 text-white font-bold" : "text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-white/10"}`}>{p}</button>
+              <button
+                key={p}
+                onClick={() => setPage(p)}
+                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors border-0 cursor-pointer ${
+                  p === safePage
+                    ? "bg-zinc-800 dark:bg-zinc-200 text-white! dark:text-zinc-900! font-bold"
+                    : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                }`}
+              >
+                {p}
+              </button>
             ))}
           </div>
-          <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={safePage === totalPages} className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-colors border border-transparent hover:border-slate-200 dark:hover:border-white/10 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"><ChevronUp className="rotate-90" size={16} /></button>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={safePage === totalPages}
+            className="p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors border-0 bg-transparent disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
+          >
+            <ChevronUp className="rotate-90" size={16} />
+          </button>
         </div>
       </div>
     </div>

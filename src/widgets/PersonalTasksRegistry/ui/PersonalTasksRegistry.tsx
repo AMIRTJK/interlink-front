@@ -105,7 +105,7 @@ export const PersonalTasksRegistry = () => {
       <If is={subTab === "registry"}>
         <div className="flex flex-col gap-4">
           <StatsCards stats={stats} />
-          <div className="rounded-3xl bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-white/30 dark:border-zinc-700/30 shadow-xl flex flex-col overflow-hidden">
+          <div className="rounded-3xl bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-white/30 dark:border-zinc-700/30 shadow-none flex flex-col overflow-hidden">
             <RegistryHeader
               taskCount={filteredTasks.length}
               searchQuery={searchQuery}

@@ -16,18 +16,18 @@ interface IProps {
 }
 
 const PRIORITY_BADGES = {
-  critical: { bg: "bg-red-100 text-red-750", dot: "bg-red-500", label: "Критичный" },
-  high: { bg: "bg-orange-100 text-orange-755", dot: "bg-orange-500", label: "Высокий" },
-  medium: { bg: "bg-blue-100 text-blue-755", dot: "bg-blue-500", label: "Средний" },
-  low: { bg: "bg-green-100 text-green-755", dot: "bg-green-500", label: "Низкий" },
+  critical: { bg: "bg-red-100 dark:bg-red-950/30 text-red-750 dark:text-red-400", dot: "bg-red-500", label: "Критичный" },
+  high: { bg: "bg-orange-100 dark:bg-orange-950/30 text-orange-755 dark:text-orange-400", dot: "bg-orange-500", label: "Высокий" },
+  medium: { bg: "bg-blue-100 dark:bg-blue-950/30 text-blue-755 dark:text-blue-400", dot: "bg-blue-500", label: "Средний" },
+  low: { bg: "bg-green-100 dark:bg-green-950/30 text-green-755 dark:text-green-400", dot: "bg-green-500", label: "Низкий" },
 };
 
 const STATUS_BADGES = {
-  new: { bg: "bg-blue-100 text-blue-755", dot: "bg-blue-500", label: "Новая" },
-  in_progress: { bg: "bg-blue-100 text-blue-755", dot: "bg-blue-500", label: "В работе" },
-  review: { bg: "bg-violet-100 text-violet-755", dot: "bg-violet-500", label: "На ревью" },
-  completed: { bg: "bg-emerald-100 text-emerald-755", dot: "bg-emerald-500", label: "Завершена" },
-  overdue: { bg: "bg-red-100 text-red-755", dot: "bg-red-500", label: "Просрочена" },
+  new: { bg: "bg-blue-100 dark:bg-blue-950/30 text-blue-755 dark:text-blue-400", dot: "bg-blue-500", label: "Новая" },
+  in_progress: { bg: "bg-blue-100 dark:bg-blue-950/30 text-blue-755 dark:text-blue-400", dot: "bg-blue-500", label: "В работе" },
+  review: { bg: "bg-violet-100 dark:bg-violet-950/30 text-violet-755 dark:text-violet-400", dot: "bg-violet-500", label: "На ревью" },
+  completed: { bg: "bg-emerald-100 dark:bg-emerald-950/30 text-emerald-755 dark:text-emerald-400", dot: "bg-emerald-500", label: "Завершена" },
+  overdue: { bg: "bg-red-100 dark:bg-red-950/30 text-red-755 dark:text-red-400", dot: "bg-red-500", label: "Просрочена" },
 };
 
 export const TaskRow = ({ task, isSelected, onSelectToggle, onOpen, onEdit, onDelete, userName }: IProps) => {
@@ -110,13 +110,13 @@ export const TaskRow = ({ task, isSelected, onSelectToggle, onOpen, onEdit, onDe
 
       <td className="px-4 py-3.5 align-top min-w-[160px]">
         <If is={task.status === "completed"}>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400">
             <span>✓</span><span>Завершено</span>
           </span>
         </If>
         <If is={task.status !== "completed"}>
           <If is={countMeta.type === "overdue"}>
-            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[11px] font-bold bg-red-100 text-red-700">
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[11px] font-bold bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400">
               <span className="relative flex h-2 w-2 flex-shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
