@@ -7,6 +7,7 @@ import { FileGridList } from "./files/FileGridList";
 import { StorageUsage } from "./files/StorageUsage";
 import { FilePreviewModal } from "./files/FilePreviewModal";
 import { FolderActionsModal } from "./files/FolderActionsModal";
+import { AddCategoryModal } from "./files/AddCategoryModal";
 import { MoveToFolderModal } from "./files/MoveToFolderModal";
 import { IApiFile, IApiFolder } from "./files/lib";
 import { Modal } from "antd";
@@ -31,6 +32,7 @@ export const FilesTab = () => {
 	const [folderModalOpen, setFolderModalOpen] = useState(false);
 	const [folderModalTitle, setFolderModalTitle] = useState("");
 	const [editingFolder, setEditingFolder] = useState<IApiFolder | null>(null);
+	const [addCategoryOpen, setAddCategoryOpen] = useState(false);
 
 	// Queries & Mutations
 	const {
@@ -79,19 +81,21 @@ export const FilesTab = () => {
 
 	// Folder Actions
 	const handleCreateFolderSubmit = (name: string) => {
-		if (editingFolder) {
-			updateFolder.mutate({
-				id: editingFolder.id,
-				name,
-				parent_id: editingFolder.parent_id,
-			});
-			setEditingFolder(null);
-		} else {
-			createFolder.mutate({
-				name,
-				parent_id: typeof activeFolderId === "number" ? activeFolderId : null,
-			});
-		}
+		updateFolder.mutate({
+			id: editingFolder!.id,
+			name,
+			parent_id: editingFolder!.parent_id,
+		});
+		setEditingFolder(null);
+	};
+
+	const handleAddCategorySubmit = (payload: { name: string; icon?: string; allowed_user_ids?: number[] }) => {
+		createFolder.mutate({
+			name: payload.name,
+			parent_id: typeof activeFolderId === "number" ? activeFolderId : null,
+			...(payload.icon ? { icon: payload.icon } : {}),
+			...(payload.allowed_user_ids ? { allowed_user_ids: payload.allowed_user_ids } : {}),
+		} as any);
 	};
 
 	const handleOpenRenameFolder = (folderName: string, id: number) => {
@@ -163,11 +167,7 @@ export const FilesTab = () => {
 				onViewModeChange={setViewMode}
 				onUpload={handleUpload}
 				totalCount={files.length}
-				onCreateFolderClick={() => {
-					setEditingFolder(null);
-					setFolderModalTitle("Создать новую папку");
-					setFolderModalOpen(true);
-				}}
+				onCreateFolderClick={() => setAddCategoryOpen(true)}
 			/>
 
 			{/* Category/Folder Filters */}
@@ -175,11 +175,7 @@ export const FilesTab = () => {
 				categories={categoriesList}
 				activeCategory={activeCategoryId}
 				onCategorySelect={(id) => setActiveFolderId(id)}
-				onAddCategoryClick={() => {
-					setEditingFolder(null);
-					setFolderModalTitle("Создать новую папку");
-					setFolderModalOpen(true);
-				}}
+				onAddCategoryClick={() => setAddCategoryOpen(true)}
 				onRenameCategory={(cat) =>
 					handleOpenRenameFolder(cat.name, Number(cat.id))
 				}
@@ -291,6 +287,12 @@ export const FilesTab = () => {
 			<StorageUsage meta={meta} files={files} />
 
 			{/* Modals */}
+			<AddCategoryModal
+				isOpen={addCategoryOpen}
+				onClose={() => setAddCategoryOpen(false)}
+				onSubmit={handleAddCategorySubmit}
+			/>
+
 			<FolderActionsModal
 				isOpen={folderModalOpen}
 				onClose={() => {
