@@ -1,16 +1,14 @@
 import { useRef } from "react";
 import { motion } from "framer-motion";
 import {
-  User,
   Phone,
   FileText,
   Building2,
   Briefcase,
-  Users,
-  ShieldCheck,
   Calendar as CalendarIcon,
-  BadgeCheck,
   Camera,
+  Mail,
+  MapPin,
 } from "lucide-react";
 import { IUser } from "@entities/login";
 import { ApiRoutes } from "@shared/api";
@@ -182,9 +180,9 @@ export const ProfileInfoTab = ({ userData, isLoading, onEdit, currentTheme }: IP
       <div className="lg:col-span-2 space-y-6">
         <Card title="Личная информация">
           <InfoRow
-            icon={<User size={16} />}
-            label="ФИО"
-            value={orDash(userData?.full_name)}
+            icon={<Mail size={16} />}
+            label="Email"
+            value={orDash(userData?.email)}
           />
           <InfoRow
             icon={<Phone size={16} />}
@@ -192,14 +190,19 @@ export const ProfileInfoTab = ({ userData, isLoading, onEdit, currentTheme }: IP
             value={orDash(userData?.phone)}
           />
           <InfoRow
+            icon={<CalendarIcon size={16} />}
+            label="Дата рождения"
+            value={formatDate(userData?.birth_date || (userData as any)?.birthday)}
+          />
+          <InfoRow
+            icon={<MapPin size={16} />}
+            label="Адрес"
+            value={orDash(userData?.address)}
+          />
+          <InfoRow
             icon={<FileText size={16} />}
             label="ИНН"
             value={orDash(userData?.inn)}
-          />
-          <InfoRow
-            icon={<BadgeCheck size={16} />}
-            label="Телефон подтверждён"
-            value={userData?.phone_verified_at ? "Да" : "Нет"}
           />
         </Card>
 
@@ -210,37 +213,32 @@ export const ProfileInfoTab = ({ userData, isLoading, onEdit, currentTheme }: IP
             value={orDash(userData?.organization?.name)}
           />
           <InfoRow
-            icon={<Building2 size={16} />}
-            label="Краткое наименование"
-            value={orDash(userData?.organization?.short_name)}
-          />
-          <InfoRow
             icon={<Briefcase size={16} />}
             label="Должность"
             value={orDash(userData?.position)}
           />
           <InfoRow
-            icon={<Users size={16} />}
-            label="Отдел"
-            value={orDash(userData?.departments?.join(", "))}
+            icon={<Mail size={16} />}
+            label="Корпоративный Email"
+            value={orDash(userData?.work_email)}
+          />
+          <InfoRow
+            icon={<Phone size={16} />}
+            label="Корпоративный телефон"
+            value={orDash(userData?.work_phone)}
           />
         </Card>
 
-        <Card title="Роли и доступ">
-          <InfoRow
-            icon={<ShieldCheck size={16} />}
-            label="Роли"
-            value={orDash(
-              userData?.roles
-                ?.map((r: any) => (typeof r === "object" ? r.name : r))
-                ?.join(", ")
-            )}
-          />
-          <InfoRow
-            icon={<CalendarIcon size={16} />}
-            label="Дата регистрации"
-            value={formatDate(userData?.created_at)}
-          />
+        <Card title="Биография">
+          <div className="col-span-full">
+            <p className={`text-sm font-medium leading-relaxed whitespace-pre-line ${
+              !userData?.bio
+                ? "text-zinc-400 dark:text-zinc-500 italic"
+                : "text-zinc-800 dark:text-zinc-200"
+            }`}>
+              {userData?.bio ? userData.bio : "Не указано"}
+            </p>
+          </div>
         </Card>
       </div>
     </motion.div>

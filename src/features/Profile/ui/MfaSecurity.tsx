@@ -1,46 +1,26 @@
 import { useEffect, useState } from "react";
-import { Modal, Button, Input, Spin, Tooltip } from "antd";
-import { ShieldCheck, ShieldAlert, Copy } from "lucide-react";
+import { Button, Spin } from "antd";
+import { ShieldCheck, ShieldAlert } from "lucide-react";
 import QRCode from "qrcode";
 import { toast } from "@shared/lib/toast";
-
 import { ApiRoutes } from "@shared/api";
-import { useGetQuery, useMutationQuery } from "@shared/lib/hooks";
-import {
-  IMfaCodeRequest,
-  IMfaSetupResponse,
-  IMfaStatusResponse,
-} from "@entities/login";
+import { useMutationQuery } from "@shared/lib/hooks";
+import { IMfaCodeRequest, IMfaSetupResponse, IMfaStatusResponse } from "@entities/login";
+import { MfaModal } from "./MfaModal";
 
 type MfaMode = "idle" | "enable" | "disable";
 
-/** Ответ /auth/me — флаг mfa_enabled читаем устойчиво к форме обертки. */
-interface IMeResponse {
-  data?: {
-    user?: { mfa_enabled?: boolean };
-    mfa_enabled?: boolean;
-  };
+interface IProps {
+  mfaEnabled: boolean;
+  isStatusLoading: boolean;
+  onRefresh: () => void;
 }
 
-/**
- * Управление двухфакторной аутентификацией в профиле.
- * Самодостаточный блок: читает статус из /auth/me, ведет flow
- * подключения (setup → QR/secret → confirm) и отключения (code → disable).
- */
-export const MfaSecurity = () => {
-  const {
-    data: meResponse,
-    isLoading: isStatusLoading,
-    refetch: refetchStatus,
-  } = useGetQuery<unknown, IMeResponse>({
-    url: ApiRoutes.AUTH_ME,
-    useToken: true,
-  });
-
-  const mfaEnabled = !!(
-    meResponse?.data?.user?.mfa_enabled ?? meResponse?.data?.mfa_enabled
-  );
-
+export const MfaSecurity = ({
+  mfaEnabled,
+  isStatusLoading,
+  onRefresh,
+}: IProps) => {
   const [mode, setMode] = useState<MfaMode>("idle");
   const [code, setCode] = useState("");
   const [setupData, setSetupData] = useState<IMfaSetupResponse | null>(null);
@@ -53,7 +33,6 @@ export const MfaSecurity = () => {
     setQrDataUrl("");
   };
 
-  // Шаг 1 подключения: инициализация (secret + otpauth_url для QR)
   const { mutate: runSetup, isPending: isSettingUp } = useMutationQuery<
     void,
     IMfaSetupResponse
@@ -62,12 +41,11 @@ export const MfaSecurity = () => {
     method: "POST",
     messages: {
       suppressSuccessToast: true,
-      onSuccessCb: (data: IMfaSetupResponse) => setSetupData(data),
+      onSuccessCb: (data) => setSetupData(data),
       onErrorCb: closeModal,
     },
   });
 
-  // Шаг 2 подключения: подтверждение кодом из приложения
   const { mutate: runConfirm, isPending: isConfirming } = useMutationQuery<
     IMfaCodeRequest,
     IMfaStatusResponse
@@ -78,13 +56,12 @@ export const MfaSecurity = () => {
       success: "Двухфакторная аутентификация включена",
       onSuccessCb: () => {
         closeModal();
-        refetchStatus();
+        onRefresh();
       },
       onErrorCb: () => setCode(""),
     },
   });
 
-  // Отключение: тоже нужен актуальный код из приложения
   const { mutate: runDisable, isPending: isDisabling } = useMutationQuery<
     IMfaCodeRequest,
     IMfaStatusResponse
@@ -95,13 +72,12 @@ export const MfaSecurity = () => {
       success: "Двухфакторная аутентификация отключена",
       onSuccessCb: () => {
         closeModal();
-        refetchStatus();
+        onRefresh();
       },
       onErrorCb: () => setCode(""),
     },
   });
 
-  // Строим QR из otpauth_url, как только пришли данные setup
   useEffect(() => {
     const otpauthUrl = setupData?.otpauth_url;
     if (!otpauthUrl) return;
@@ -175,113 +151,20 @@ export const MfaSecurity = () => {
         </Button>
       )}
 
-      <Modal
-        open={mode !== "idle"}
-        onCancel={closeModal}
-        footer={null}
-        width={400}
-        centered
-        maskClosable={!isConfirming && !isDisabling}
-        title={
-          mode === "disable"
-            ? "Отключение двухфакторной аутентификации"
-            : "Подключение двухфакторной аутентификации"
-        }
-      >
-        {mode === "enable" && (
-          <div className="space-y-4">
-            {isSettingUp || !setupData ? (
-              <div className="flex justify-center py-8">
-                <Spin />
-              </div>
-            ) : (
-              <>
-                <p className="text-sm text-gray-500">
-                  Отсканируйте QR-код в приложении-аутентификаторе (Google
-                  Authenticator, Microsoft Authenticator или совместимом).
-                </p>
-
-                {qrDataUrl && (
-                  <div className="flex justify-center">
-                    <img
-                      src={qrDataUrl}
-                      alt="QR-код для настройки MFA"
-                      className="rounded-lg border border-gray-200"
-                      width={200}
-                      height={200}
-                    />
-                  </div>
-                )}
-
-                <div className="space-y-1">
-                  <p className="text-sm text-gray-500">
-                    Или введите ключ вручную:
-                  </p>
-                  <div className="flex items-center gap-2 rounded-lg bg-gray-50 border border-gray-200 px-3 py-2">
-                    <code className="flex-1 break-all text-sm font-mono">
-                      {setupData.secret}
-                    </code>
-                    <Tooltip title="Скопировать">
-                      <Button
-                        type="text"
-                        size="small"
-                        icon={<Copy className="w-4 h-4" />}
-                        onClick={handleCopySecret}
-                      />
-                    </Tooltip>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-500">
-                    Введите 6-значный код из приложения:
-                  </p>
-                  <Input.OTP
-                    length={6}
-                    value={code}
-                    onChange={setCode}
-                    formatter={(str) => str.replace(/\D/g, "")}
-                  />
-                </div>
-
-                <Button
-                  type="primary"
-                  block
-                  loading={isConfirming}
-                  disabled={code.length !== 6}
-                  onClick={handleSubmit}
-                >
-                  Подтвердить
-                </Button>
-              </>
-            )}
-          </div>
-        )}
-
-        {mode === "disable" && (
-          <div className="space-y-4">
-            <p className="text-sm text-gray-500">
-              Для отключения введите текущий 6-значный код из
-              приложения-аутентификатора.
-            </p>
-            <Input.OTP
-              length={6}
-              value={code}
-              onChange={setCode}
-              formatter={(str) => str.replace(/\D/g, "")}
-            />
-            <Button
-              danger
-              block
-              loading={isDisabling}
-              disabled={code.length !== 6}
-              onClick={handleSubmit}
-            >
-              Отключить
-            </Button>
-          </div>
-        )}
-      </Modal>
+      <MfaModal
+        isOpen={mode !== "idle"}
+        mode={mode}
+        onClose={closeModal}
+        isSettingUp={isSettingUp}
+        isConfirming={isConfirming}
+        isDisabling={isDisabling}
+        setupData={setupData}
+        qrDataUrl={qrDataUrl}
+        code={code}
+        setCode={setCode}
+        handleCopySecret={handleCopySecret}
+        handleSubmit={handleSubmit}
+      />
     </div>
   );
 };

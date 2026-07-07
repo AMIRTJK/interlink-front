@@ -5,11 +5,17 @@ import { ChangePassword } from "./ChangePassword";
 interface IProps {
   isOpen: boolean;
   onClose: () => void;
+  mfaEnabled: boolean;
+  isStatusLoading: boolean;
+  onRefresh: () => void;
 }
 
 export const ProfileSettingsModal = ({
   isOpen,
   onClose,
+  mfaEnabled,
+  isStatusLoading,
+  onRefresh,
 }: IProps) => {
   return (
     <Modal
@@ -25,7 +31,7 @@ export const ProfileSettingsModal = ({
       transitionName="ant-zoom"
     >
       <div className="space-y-2">
-        <MfaSecurity />
+        <MfaSecurity mfaEnabled={mfaEnabled} isStatusLoading={isStatusLoading} onRefresh={onRefresh} />
         <ChangePassword />
       </div>
     </Modal>
