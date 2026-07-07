@@ -69,6 +69,10 @@ export const Calendar = () => {
     setSelectedDateTime(null);
   };
 
+  const handleHeaderClick = (date: Dayjs) => {
+    setCurrentDate(date);
+  };
+
   const renderActiveView = () => {
     if (viewMode === "month") {
       return (
@@ -86,8 +90,10 @@ export const Calendar = () => {
         <WeekView
           daysToShow={daysToShow}
           tasks={tasks}
+          currentDate={currentDate}
           onDeleteEvent={handleDeleteEvent}
           onDayClick={handleDayClick}
+          onHeaderClick={handleHeaderClick}
         />
       );
     }
