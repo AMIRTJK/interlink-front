@@ -1,12 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { Tooltip, Popover } from "antd";
 import { Bell, LogOut, CheckCircle, Sun, Moon, Palette, Layers, MessageSquare, PanelTop, PanelLeft, PanelBottom, PanelRight, Monitor } from "lucide-react";
-import { tokenControl, useLogout, useGetQuery } from "@shared/lib";
+import { tokenControl, useLogout } from "@shared/lib";
 import { AppRoutes } from "@shared/config";
-import { ApiRoutes } from "@shared/api";
 import { Logo } from "@shared/ui";
 import { NotificationsPopover, useNotificationCounters } from "@features/notifications";
-import { IUser } from "@entities/login";
 import { ModuleMenu } from "./ModuleMenu";
 import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
@@ -15,6 +13,7 @@ import { THEMES, BACKGROUNDS, LayoutMode } from "./designSettings";
 import { useChat } from "@widgets/Chat";
 import { LogoutConfirmModal } from "./LogoutConfirmModal";
 import { DesktopMode } from "../../../features/Profile/ui/DesktopMode";
+import { useProfileUser } from "./useProfileUser";
 
 interface IProps {
   currentTheme?: string;
@@ -30,7 +29,7 @@ export const Header = ({
   setCurrentTheme,
   currentBg,
   setCurrentBg,
-  layoutMode,
+  layoutMode = "top",
   setLayoutMode,
 }: IProps) => {
   const handleLogout = useLogout();
@@ -53,16 +52,7 @@ export const Header = ({
     }
   }, [isDarkMode]);
 
-  const userId = tokenControl.getUserId();
-  const { data: userResponse } = useGetQuery<{ data: IUser }>({
-    url: `${ApiRoutes.FETCH_USER_BY_ID}${userId}`,
-    options: { enabled: !!userId, refetchOnWindowFocus: false, staleTime: Infinity },
-  });
-  const userData = (userResponse as { data?: IUser } | undefined)?.data ?? null;
-  const userSubtitle =
-    [userData?.position, userData?.organization?.name]
-      .filter(Boolean)
-      .join(" • ") || "—";
+  const { userData, userName, userSubtitle } = useProfileUser();
 
   const toggleTheme = () => {
     setIsDarkMode((prevMode) => {
@@ -78,7 +68,10 @@ export const Header = ({
   };
 
   const isProfilePage = pathname.includes("profile");
-  const isVertical = layoutMode === "left" || layoutMode === "right";
+  // Логотип показываем только в верхнем/нижнем меню — в боковом он живёт в самой панели.
+  const showLogo = layoutMode === "top" || layoutMode === "bottom";
+  // Навигация по модулям остаётся в хедере только для «Верхнего меню» (иконки + tooltip).
+  const showModuleNav = layoutMode === "top";
 
   const themeContent = (
     <div className="w-[260px] p-5 bg-white dark:bg-zinc-800 rounded-[2.5rem]">
@@ -201,31 +194,25 @@ export const Header = ({
   );
 
   return (
-    <header
-      className={`sticky z-50 bg-white/40 dark:bg-slate-900/95 backdrop-blur-3xl border border-white/20 dark:border-slate-700/50 shadow-lg transition-all duration-300 ease-in-out rounded-none ${
-        layoutMode === "bottom" ? "bottom-0" : "top-0"
-      } ${
-        isVertical
-          ? "h-screen w-60 flex flex-col! items-stretch! justify-start! gap-6! px-4! py-6!"
-          : "w-full flex items-center justify-between gap-4 px-6 py-3"
-      }`}
-    >
-      <div className={`flex items-center gap-4 min-w-0 ${isVertical ? "flex-col! items-center! text-center! w-full!" : ""}`}>
-        <Link
-          to={AppRoutes.PROFILE}
-          aria-label="На главную"
-          className={`flex items-center gap-3 focus:outline-none rounded-lg shrink-0 ${
-            isVertical ? "flex-col! text-center!" : ""
+    <header className="sticky top-0 z-50 w-full flex items-center justify-between gap-4 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl rounded-[2.5rem] px-6 py-4 border border-white/20 dark:border-zinc-700/30 shadow-lg mb-6 transition-all duration-300 ease-in-out">
+      <div className="flex items-center gap-6 min-w-0">
+        {showLogo && (
+          <Link
+            to={AppRoutes.PROFILE}
+            aria-label="На главную"
+            className="flex items-center gap-3 focus:outline-none rounded-lg shrink-0"
+          >
+            <Logo className="text-base sm:text-lg md:text-xl text-zinc-900 dark:text-white" />
+          </Link>
+        )}
+
+        <div
+          className={`hidden md:flex items-center gap-4 min-w-0 ${
+            showLogo
+              ? "pl-6 border-l border-zinc-900/10 dark:border-zinc-700/40"
+              : ""
           }`}
         >
-          <Logo
-            className={`text-base sm:text-lg md:text-xl text-zinc-900 dark:text-white ${isVertical ? "block!" : ""}`}
-          />
-        </Link>
-
-        <div className={`hidden md:flex items-center gap-3 pl-4 border-l border-zinc-900/10 dark:border-zinc-700/40 min-w-0 ${
-          isVertical ? "flex flex-col! items-center! gap-2! pl-0! border-l-0! border-t! pt-4! w-full!" : ""
-        }`}>
           <div className="relative shrink-0">
             <img
               src={userData?.photo_path || userAvatar}
@@ -234,9 +221,9 @@ export const Header = ({
             />
             <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white/60 dark:border-zinc-900/60 bg-emerald-500 shadow-lg" />
           </div>
-          <div className={`leading-tight min-w-0 ${isVertical ? "text-center!" : ""}`}>
+          <div className="leading-tight min-w-0">
             <h3 className="text-sm font-bold text-zinc-900 dark:text-white truncate max-w-[180px]">
-              {userData?.full_name || "—"}
+              {userName}
             </h3>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate max-w-[220px]">
               {userSubtitle}
@@ -245,16 +232,16 @@ export const Header = ({
         </div>
       </div>
 
-      <ModuleMenu variant="header" isVertical={isVertical} />
+      {showModuleNav && <ModuleMenu variant="header" navLayout="top" />}
 
-      <div className={`flex items-center gap-2 shrink-0 ${isVertical ? "flex-col! items-center! gap-3! mt-auto! w-full!" : ""}`}>
-        <div className={`flex items-center gap-2 ${isVertical ? "flex-col! gap-3!" : ""}`}>
+      <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2">
           <Popover
             content={<NotificationsPopover open={notifOpen} />}
             open={notifOpen}
             onOpenChange={setNotifOpen}
             trigger="click"
-            placement={isVertical ? "rightBottom" : "bottomRight"}
+            placement="bottomRight"
             arrow={false}
             overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
           >
@@ -271,7 +258,7 @@ export const Header = ({
             </button>
           </Popover>
 
-          <Tooltip title="Чат" placement={isVertical ? "right" : "bottom"}>
+          <Tooltip title="Чат" placement="bottom">
             <button
               onClick={openChat}
               aria-label="Открыть чат"
@@ -281,7 +268,7 @@ export const Header = ({
             </button>
           </Tooltip>
 
-          <Tooltip title="Рабочий стол" placement={isVertical ? "right" : "bottom"}>
+          <Tooltip title="Рабочий стол" placement="bottom">
             <button
               onClick={() => setIsDesktopActive(true)}
               aria-label="Рабочий стол"
@@ -293,7 +280,7 @@ export const Header = ({
 
           <Tooltip
             title={isDarkMode ? "Светлая тема" : "Темная тема"}
-            placement={isVertical ? "right" : "bottom"}
+            placement="bottom"
           >
             <button
               onClick={toggleTheme}
@@ -310,7 +297,7 @@ export const Header = ({
         </div>
 
         <div
-          className={`${isVertical ? "w-full! h-px!" : "w-px! h-6!"} bg-white/30 dark:bg-zinc-700/40 mx-1`}
+          className="w-px! h-6! bg-white/30 dark:bg-zinc-700/40 mx-1"
           aria-hidden="true"
         />
 
@@ -319,7 +306,7 @@ export const Header = ({
             <Popover
               content={themeContent}
               trigger="click"
-              placement={isVertical ? "rightBottom" : "bottomRight"}
+              placement="bottomRight"
               arrow={false}
               overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
             >
@@ -334,7 +321,7 @@ export const Header = ({
             <Popover
               content={bgContent}
               trigger="click"
-              placement={isVertical ? "rightBottom" : "bottomRight"}
+              placement="bottomRight"
               arrow={false}
               overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
             >
@@ -349,7 +336,7 @@ export const Header = ({
             <Popover
               content={layoutContent}
               trigger="click"
-              placement={isVertical ? "rightBottom" : "bottomRight"}
+              placement="bottomRight"
               arrow={false}
               overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
             >
@@ -366,14 +353,14 @@ export const Header = ({
           </>
         )}
 
-        <Tooltip title="Выйти" placement={isVertical ? "right" : "bottomRight"}>
+        <Tooltip title="Выйти" placement="bottomRight">
           <button
             onClick={() => setShowLogoutConfirm(true)}
             aria-label="Выход"
             className="flex items-center gap-2 py-2 px-4 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl border border-white/20 dark:border-zinc-700/30 text-zinc-600 dark:text-zinc-300 font-semibold text-sm hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer focus:outline-none"
           >
             <LogOut size={16} strokeWidth={2.2} />
-            <span className={isVertical ? "hidden!" : "hidden sm:inline"}>Выход</span>
+            <span className="hidden sm:inline">Выход</span>
           </button>
         </Tooltip>
       </div>
