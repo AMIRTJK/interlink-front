@@ -42,10 +42,14 @@ export const Calendar = () => {
     deleteEvent(eventId);
   };
 
-  const handleDayClick = (date: Dayjs) => {
+  const handleDayClick = (date: Dayjs, selectedHour?: number) => {
+    const finalTime = selectedHour !== undefined 
+      ? dayjs().hour(selectedHour).minute(0) 
+      : dayjs().hour(9).minute(0);
+
     setSelectedDateTime({
       date,
-      time: dayjs().hour(9).minute(0),
+      time: finalTime,
     });
     setIsModalOpen(true);
   };
@@ -69,6 +73,10 @@ export const Calendar = () => {
     setSelectedDateTime(null);
   };
 
+  const handleHeaderClick = (date: Dayjs) => {
+    setCurrentDate(date);
+  };
+
   const renderActiveView = () => {
     if (viewMode === "month") {
       return (
@@ -86,8 +94,10 @@ export const Calendar = () => {
         <WeekView
           daysToShow={daysToShow}
           tasks={tasks}
+          currentDate={currentDate}
           onDeleteEvent={handleDeleteEvent}
           onDayClick={handleDayClick}
+          onHeaderClick={handleHeaderClick}
         />
       );
     }

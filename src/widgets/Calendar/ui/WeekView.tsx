@@ -8,8 +8,10 @@ import type { Task } from "@features/tasks";
 interface IWeekViewProps {
   daysToShow: Dayjs[];
   tasks: Task[];
+  currentDate: Dayjs;
   onDeleteEvent: (id: string) => void;
-  onDayClick: (date: Dayjs) => void;
+  onDayClick: (date: Dayjs, selectedHour?: number) => void;
+  onHeaderClick?: (date: Dayjs) => void;
 }
 
 const HOUR_HEIGHT = 64;
@@ -45,12 +47,15 @@ const getEventPosition = (task: Task) => {
 export const WeekView = ({
   daysToShow,
   tasks,
+  currentDate,
   onDeleteEvent,
   onDayClick,
+  onHeaderClick,
 }: IWeekViewProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
 
   const isToday = (day: Dayjs) => day.isSame(dayjs(), "day");
+  const isSelected = (day: Dayjs) => day.isSame(currentDate, "day");
 
   const getTasksForDay = (day: Dayjs) => {
     const targetDate = day.format("YYYY-MM-DD");
@@ -70,17 +75,17 @@ export const WeekView = ({
       <div className="flex! sticky! top-0! z-10! bg-white! dark:bg-slate-900/90! backdrop-blur-sm! border-b! border-zinc-100! dark:border-slate-700/30!">
         <div className="w-16! flex-shrink-0! border-r! border-zinc-100! dark:border-slate-700/30!" />
         {daysToShow.map((day, i) => {
-          const today = isToday(day);
+          const selected = isSelected(day);
           return (
             <div
               key={day.format("YYYY-MM-DD")}
-              className={`flex-1! flex! flex-col! items-center! py-3! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! hover:bg-zinc-50! dark:hover:bg-slate-800/40! transition-colors! ${today ? "bg-violet-50! dark:bg-violet-950/20!" : ""}`}
-              onClick={() => onDayClick(day)}
+              className={`flex-1! flex! flex-col! items-center! py-3! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! hover:bg-zinc-50! dark:hover:bg-slate-800/40! transition-colors! ${selected ? "bg-violet-50! dark:bg-violet-950/20!" : ""}`}
+              onClick={() => onHeaderClick ? onHeaderClick(day) : onDayClick(day)}
             >
-              <span className={`text-[11px]! font-bold! uppercase! tracking-wider! mb-1! ${today ? "text-violet-500! dark:text-violet-400!" : "text-zinc-400! dark:text-zinc-500!"}`}>
+              <span className={`text-[11px]! font-bold! uppercase! tracking-wider! mb-1! ${selected ? "text-violet-500! dark:text-violet-400!" : "text-zinc-400! dark:text-zinc-500!"}`}>
                 {WEEKDAYS[i]}
               </span>
-              <span className={`text-lg! font-bold! w-9! h-9! flex! items-center! justify-center! rounded-full! ${today ? "bg-violet-500! text-white!" : "text-zinc-700! dark:text-zinc-300!"}`}>
+              <span className={`text-lg! font-bold! w-9! h-9! flex! items-center! justify-center! rounded-full! ${selected ? "bg-violet-500! text-white!" : "text-zinc-700! dark:text-zinc-300!"}`}>
                 {day.date()}
               </span>
             </div>
@@ -105,35 +110,26 @@ export const WeekView = ({
           {HOURS.map((h) => (
             <div
               key={h}
-              className="col-span-7! border-b! border-zinc-100! dark:border-slate-700/20! pointer-events-none!"
-              style={{ height: HOUR_HEIGHT, gridColumn: "1 / -1" }}
+              className="absolute! left-0! right-0! border-b! border-zinc-100! dark:border-slate-700/20! pointer-events-none!"
+              style={{ top: (h - START_HOUR) * HOUR_HEIGHT, height: HOUR_HEIGHT }}
             />
           ))}
 
-          <If is={todayIndex >= 0}>
-            <div
-              className="absolute! left-0! right-0! z-20! pointer-events-none!"
-              style={{
-                top: nowTop,
-                gridColumn: "1 / -1",
-              }}
-            >
-              <div className="flex! items-center! w-full!">
-                <div className="w-2! h-2! rounded-full! bg-red-500! flex-shrink-0!" style={{ marginLeft: `calc(${(todayIndex / daysToShow.length) * 100}% - 4px)` }} />
-                <div className="h-px! bg-red-400! flex-1!" style={{ marginLeft: `${(todayIndex / daysToShow.length) * 100}%`, width: `${(1 / daysToShow.length) * 100}%`, position: "absolute", left: 0, right: 0 }} />
-              </div>
-            </div>
-          </If>
-
           {daysToShow.map((day, colIdx) => {
             const dayTasks = getTasksForDay(day);
-            const today = isToday(day);
+            const selected = isSelected(day);
             return (
               <div
                 key={day.format("YYYY-MM-DD")}
-                className={`relative! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! transition-colors! hover:bg-zinc-50/50! dark:hover:bg-slate-900/20! ${today ? "bg-violet-50/30! dark:bg-violet-950/10!" : ""}`}
+                className={`relative! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! transition-colors! hover:bg-zinc-50/50! dark:hover:bg-slate-900/20! ${selected ? "bg-violet-50/30! dark:bg-violet-950/10!" : ""}`}
                 style={{ height: HOUR_HEIGHT * HOURS.length, gridColumn: colIdx + 1 }}
-                onClick={() => onDayClick(day)}
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const y = e.clientY - rect.top;
+                  // Shift the hit area up by 16px to account for clicking slightly above the border or on the label
+                  const clickedHour = START_HOUR + Math.floor((y + 16) / HOUR_HEIGHT);
+                  onDayClick(day, clickedHour);
+                }}
               >
                 {dayTasks.map((task) => {
                   const { top, height } = getEventPosition(task);

@@ -9,7 +9,7 @@ interface IDayViewProps {
   currentDate: Dayjs;
   tasks: Task[];
   onDeleteEvent: (id: string) => void;
-  onDayClick: (date: Dayjs) => void;
+  onDayClick: (date: Dayjs, selectedHour?: number) => void;
 }
 
 const HOUR_HEIGHT = 64;
@@ -90,7 +90,12 @@ export const DayView = ({
           <div
             className="flex-1! relative! cursor-pointer!"
             style={{ height: HOUR_HEIGHT * HOURS.length }}
-            onClick={() => onDayClick(currentDate)}
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const y = e.clientY - rect.top;
+              const clickedHour = START_HOUR + Math.floor(y / HOUR_HEIGHT);
+              onDayClick(currentDate, clickedHour);
+            }}
           >
             {HOURS.map((h) => (
               <div
@@ -100,15 +105,7 @@ export const DayView = ({
               />
             ))}
 
-            <If is={nowTop !== null}>
-              <div
-                className="absolute! left-0! right-0! z-20! flex! items-center! pointer-events-none!"
-                style={{ top: nowTop ?? 0 }}
-              >
-                <div className="w-2! h-2! rounded-full! bg-red-500! flex-shrink-0! -ml-1!" />
-                <div className="flex-1! h-px! bg-red-400!" />
-              </div>
-            </If>
+
 
             {dayTasks.map((task) => {
               const { top, height } = getEventPosition(task);
