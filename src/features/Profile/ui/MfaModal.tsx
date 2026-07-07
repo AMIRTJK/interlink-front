@@ -1,5 +1,11 @@
-import { Modal, Button, Input, Spin, Tooltip } from "antd";
-import { Copy } from "lucide-react";
+import { Copy, Loader2, ShieldCheck } from "lucide-react";
+import { SettingsModalShell } from "./settings/SettingsModalShell";
+import {
+  OtpInput,
+  PlainButton,
+  PrimaryButton,
+  useSettingsTheme,
+} from "./settings/settingsUi";
 
 interface IMfaModalProps {
   isOpen: boolean;
@@ -30,14 +36,17 @@ export const MfaModal = ({
   handleCopySecret,
   handleSubmit,
 }: IMfaModalProps) => {
+  const { gradient } = useSettingsTheme();
+  const busy = isConfirming || isDisabling;
+
   return (
-    <Modal
-      open={isOpen}
-      onCancel={onClose}
-      footer={null}
+    <SettingsModalShell
+      isOpen={isOpen}
+      onClose={onClose}
       width={400}
-      centered
-      maskClosable={!isConfirming && !isDisabling}
+      maskClosable={!busy}
+      closable={!busy}
+      icon={<ShieldCheck className="h-5 w-5" />}
       title={
         mode === "disable"
           ? "Отключение двухфакторной аутентификации"
@@ -47,68 +56,65 @@ export const MfaModal = ({
       {mode === "enable" && (
         <div className="space-y-4">
           {isSettingUp || !setupData ? (
-            <div className="flex justify-center py-8">
-              <Spin />
+            <div className="flex justify-center py-10">
+              <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
             </div>
           ) : (
             <>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
                 Отсканируйте QR-код в приложении-аутентификаторе (Google
                 Authenticator, Microsoft Authenticator или совместимом).
               </p>
 
               {qrDataUrl && (
                 <div className="flex justify-center">
-                  <img
-                    src={qrDataUrl}
-                    alt="QR-код для настройки MFA"
-                    className="rounded-lg border border-gray-200"
-                    width={200}
-                    height={200}
-                  />
+                  <div className="rounded-2xl border border-slate-200 bg-white p-2 dark:border-slate-700">
+                    <img
+                      src={qrDataUrl}
+                      alt="QR-код для настройки MFA"
+                      className="rounded-lg"
+                      width={200}
+                      height={200}
+                    />
+                  </div>
                 </div>
               )}
 
-              <div className="space-y-1">
-                <p className="text-sm text-gray-500">
+              <div className="space-y-1.5">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
                   Или введите ключ вручную:
                 </p>
-                <div className="flex items-center gap-2 rounded-lg bg-gray-50 border border-gray-200 px-3 py-2">
-                  <code className="flex-1 break-all text-sm font-mono">
+                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
+                  <code className="flex-1 break-all font-mono text-sm text-slate-700 dark:text-slate-200">
                     {setupData.secret}
                   </code>
-                  <Tooltip title="Скопировать">
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<Copy className="w-4 h-4" />}
-                      onClick={handleCopySecret}
-                    />
-                  </Tooltip>
+                  <button
+                    type="button"
+                    title="Скопировать"
+                    onClick={handleCopySecret}
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
                   Введите 6-значный код из приложения:
                 </p>
-                <Input.OTP
-                  length={6}
-                  value={code}
-                  onChange={setCode}
-                  formatter={(str) => str.replace(/\D/g, "")}
-                />
+                <OtpInput value={code} onChange={setCode} autoFocus />
               </div>
 
-              <Button
-                type="primary"
-                block
+              <PrimaryButton
+                gradient={gradient}
+                className="w-full"
                 loading={isConfirming}
                 disabled={code.length !== 6}
                 onClick={handleSubmit}
               >
                 Подтвердить
-              </Button>
+              </PrimaryButton>
             </>
           )}
         </div>
@@ -116,27 +122,22 @@ export const MfaModal = ({
 
       {mode === "disable" && (
         <div className="space-y-4">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             Для отключения введите текущий 6-значный код из
             приложения-аутентификатора.
           </p>
-          <Input.OTP
-            length={6}
-            value={code}
-            onChange={setCode}
-            formatter={(str) => str.replace(/\D/g, "")}
-          />
-          <Button
+          <OtpInput value={code} onChange={setCode} autoFocus />
+          <PlainButton
             danger
-            block
+            className="w-full"
             loading={isDisabling}
             disabled={code.length !== 6}
             onClick={handleSubmit}
           >
             Отключить
-          </Button>
+          </PlainButton>
         </div>
       )}
-    </Modal>
+    </SettingsModalShell>
   );
 };

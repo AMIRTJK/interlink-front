@@ -1,4 +1,5 @@
-import { Modal } from "antd";
+import { Settings } from "lucide-react";
+import { SettingsModalShell } from "./settings/SettingsModalShell";
 import { MfaSecurity } from "./MfaSecurity";
 import { ChangePassword } from "./ChangePassword";
 
@@ -18,22 +19,21 @@ export const ProfileSettingsModal = ({
   onRefresh,
 }: IProps) => {
   return (
-    <Modal
+    <SettingsModalShell
+      isOpen={isOpen}
+      onClose={onClose}
       title="Настройки"
-      open={isOpen}
-      onCancel={onClose}
-      footer={null}
-      width={300}
-      closable
-      maskClosable
-      centered
-      className="ios-settings-modal"
-      transitionName="ant-zoom"
+      icon={<Settings className="h-5 w-5" />}
+      width={420}
     >
-      <div className="space-y-2">
-        <MfaSecurity mfaEnabled={mfaEnabled} isStatusLoading={isStatusLoading} onRefresh={onRefresh} />
+      <div className="space-y-3">
+        <MfaSecurity
+          mfaEnabled={mfaEnabled}
+          isStatusLoading={isStatusLoading}
+          onRefresh={onRefresh}
+        />
         <ChangePassword />
       </div>
-    </Modal>
+    </SettingsModalShell>
   );
 };

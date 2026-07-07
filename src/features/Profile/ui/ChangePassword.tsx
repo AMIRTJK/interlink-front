@@ -1,96 +1,123 @@
 import { useState } from "react";
-import { Modal, Button, Input, Form } from "antd";
 import { KeyRound } from "lucide-react";
 import { toast } from "@shared/lib/toast";
+import { SettingsModalShell } from "./settings/SettingsModalShell";
+import {
+  PasswordField,
+  PlainButton,
+  PrimaryButton,
+  useSettingsTheme,
+} from "./settings/settingsUi";
+
+interface IForm {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+type IErrors = Partial<Record<keyof IForm, string>>;
+
+const EMPTY: IForm = {
+  currentPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+};
 
 export const ChangePassword = () => {
+  const { gradient } = useSettingsTheme();
   const [isOpen, setIsOpen] = useState(false);
-  const [form] = Form.useForm();
+  const [form, setForm] = useState<IForm>(EMPTY);
+  const [errors, setErrors] = useState<IErrors>({});
 
   const handleOpen = () => {
+    setForm(EMPTY);
+    setErrors({});
     setIsOpen(true);
-    form.resetFields();
   };
 
-  const handleClose = () => {
+  const handleClose = () => setIsOpen(false);
+
+  const setField = (key: keyof IForm) => (value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    setErrors((prev) => ({ ...prev, [key]: undefined }));
+  };
+
+  const validate = (): boolean => {
+    const next: IErrors = {};
+    if (!form.currentPassword) next.currentPassword = "Введите текущий пароль";
+    if (!form.newPassword) next.newPassword = "Введите новый пароль";
+    else if (form.newPassword.length < 6)
+      next.newPassword = "Пароль должен быть не менее 6 символов";
+    if (!form.confirmPassword) next.confirmPassword = "Подтвердите новый пароль";
+    else if (form.confirmPassword !== form.newPassword)
+      next.confirmPassword = "Пароли не совпадают";
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+    toast.success("Пароль успешно изменен");
     setIsOpen(false);
   };
 
-  const handleSubmit = () => {
-    form.validateFields().then(() => {
-      toast.success("Пароль успешно изменен");
-      setIsOpen(false);
-    });
-  };
-
   return (
-    <div className="sm:flex justify-between items-center gap-3 pt-4 border-t border-gray-100">
-      <span className="flex items-center gap-2 text-sm text-zinc-800 dark:text-zinc-200">
-        <KeyRound className="w-4 h-4 text-indigo-500" />
-        Пароль безопасности
-      </span>
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+      <div className="flex items-center gap-3">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-400">
+          <KeyRound className="h-5 w-5" />
+        </span>
+        <div>
+          <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+            Пароль безопасности
+          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Смена пароля от аккаунта
+          </p>
+        </div>
+      </div>
 
-      <Button size="small" onClick={handleOpen}>
-        Изменить
-      </Button>
+      <PlainButton onClick={handleOpen}>Изменить</PlainButton>
 
-      <Modal
-        open={isOpen}
-        onCancel={handleClose}
-        footer={null}
-        width={360}
-        centered
+      <SettingsModalShell
+        isOpen={isOpen}
+        onClose={handleClose}
+        width={380}
+        icon={<KeyRound className="h-5 w-5" />}
         title="Смена пароля"
       >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          className="mt-4"
-        >
-          <Form.Item
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <PasswordField
             label="Текущий пароль"
-            name="currentPassword"
-            rules={[{ required: true, message: "Введите текущий пароль" }]}
-          >
-            <Input.Password placeholder="Введите текущий пароль" />
-          </Form.Item>
-
-          <Form.Item
+            required
+            placeholder="Введите текущий пароль"
+            value={form.currentPassword}
+            onChange={setField("currentPassword")}
+            error={errors.currentPassword}
+          />
+          <PasswordField
             label="Новый пароль"
-            name="newPassword"
-            rules={[
-              { required: true, message: "Введите новый пароль" },
-              { min: 6, message: "Пароль должен быть не менее 6 символов" },
-            ]}
-          >
-            <Input.Password placeholder="Введите новый пароль" />
-          </Form.Item>
-
-          <Form.Item
+            required
+            placeholder="Введите новый пароль"
+            value={form.newPassword}
+            onChange={setField("newPassword")}
+            error={errors.newPassword}
+          />
+          <PasswordField
             label="Подтверждение нового пароля"
-            name="confirmPassword"
-            dependencies={["newPassword"]}
-            rules={[
-              { required: true, message: "Подтвердите новый пароль" },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("newPassword") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(new Error("Пароли не совпадают"));
-                },
-              }),
-            ]}
-          >
-            <Input.Password placeholder="Повторите новый пароль" />
-          </Form.Item>
+            required
+            placeholder="Повторите новый пароль"
+            value={form.confirmPassword}
+            onChange={setField("confirmPassword")}
+            error={errors.confirmPassword}
+          />
 
-          <Button type="primary" htmlType="submit" block className="mt-2">
+          <PrimaryButton gradient={gradient} type="submit" className="w-full">
             Сохранить
-          </Button>
-        </Form>
-      </Modal>
+          </PrimaryButton>
+        </form>
+      </SettingsModalShell>
     </div>
   );
 };
