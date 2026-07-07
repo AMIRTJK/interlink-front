@@ -1,8 +1,11 @@
 import type { IAdminUser } from "@entities/hr";
 import { _axios, ApiRoutes } from "@shared/api";
 
-// Сколько сотрудников на странице
-export const PAGE_SIZE = 8;
+// Сколько сотрудников на странице по умолчанию
+export const PAGE_SIZE = 10;
+
+// Доступные варианты количества строк на странице
+export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
 
 // Нормализованный сотрудник для отрисовки
 export interface IEmployee {
