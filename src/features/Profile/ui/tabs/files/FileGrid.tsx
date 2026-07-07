@@ -138,8 +138,8 @@ export const FileGrid = ({
               {formatBytes(file.size)} <span className="mx-1">•</span> {formatDate(file.created_at)}
             </p>
 
-            {/* Action Buttons on Hover */}
-            <div className="flex items-center gap-3 pt-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3 pt-2.5">
               <Tooltip title="Просмотр">
                 <button
                   type="button"

@@ -68,7 +68,7 @@ export const FilesHeader = ({
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div className="flex items-center gap-2">
         <h2 className="text-xl font-bold text-slate-800 dark:text-zinc-100">
-          Мои файлы
+          Файлы
         </h2>
         <span className="text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-zinc-400 rounded-full">
           {totalCount}

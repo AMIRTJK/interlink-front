@@ -28,7 +28,7 @@ const TABS: ITab[] = [
   { key: "tasks", label: "Задачи", icon: <ClipboardList size={16} /> },
   { key: "calendar", label: "Календарь", icon: <CalendarIcon size={16} /> },
   { key: "analytics", label: "Аналитика", icon: <BarChart2 size={16} /> },
-  { key: "files", label: "Мои файлы", icon: <FolderOpen size={16} /> },
+  { key: "files", label: "Файлы", icon: <FolderOpen size={16} /> },
 ];
 
 interface IProps {
