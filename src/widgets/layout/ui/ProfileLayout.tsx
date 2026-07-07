@@ -1,53 +1,16 @@
 import { Outlet } from "react-router-dom";
-import { useState, useEffect } from "react";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { BottomNav } from "./BottomNav";
-import { THEMES, BACKGROUNDS, LayoutMode } from "./designSettings";
-import { tokenControl } from "@shared/lib";
+import { THEMES, BACKGROUNDS } from "./designSettings";
+import { useLayoutMode } from "./useLayoutMode";
+import { useDesignSettings } from "./useDesignSettings";
 
 export const ProfileLayout = () => {
-  const [currentTheme, setCurrentTheme] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("currentTheme") || "emerald";
-    }
-    return "emerald";
-  });
+  const { currentTheme, setCurrentTheme, currentBg, setCurrentBg, isDarkMode } =
+    useDesignSettings();
 
-  const [currentBg, setCurrentBg] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("currentBg") || "arctic";
-    }
-    return "arctic";
-  });
-
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("layoutMode");
-      if (saved === "top" || saved === "left" || saved === "bottom" || saved === "right") {
-        return saved;
-      }
-    }
-    return "top";
-  });
-
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (typeof window !== "undefined") {
-      return tokenControl.getDarkMode();
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsDarkMode(document.documentElement.classList.contains("dark"));
-    });
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-    return () => observer.disconnect();
-  }, []);
+  const [layoutMode, setLayoutMode] = useLayoutMode();
 
   const activeTheme = THEMES[currentTheme] || THEMES.emerald;
   const activeBg = BACKGROUNDS[currentBg] || BACKGROUNDS.arctic;
