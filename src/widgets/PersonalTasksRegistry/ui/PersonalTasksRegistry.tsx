@@ -13,6 +13,7 @@ import { TaskDetailsModal } from "./TaskDetailsModal";
 import type { IPersonalTask, TFilterTab, TSortField, ISortConfig } from "../model/types";
 import { getUserName, calculateStats, getFilteredTasks } from "./lib";
 import { THEMES } from "@widgets/layout/ui/designSettings";
+import { PersonalAnalytics } from "./PersonalAnalytics";
 import "./style.css";
 
 export const PersonalTasksRegistry = () => {
@@ -151,15 +152,7 @@ export const PersonalTasksRegistry = () => {
       </If>
 
       <If is={subTab === "analytics"}>
-        <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-[2.5rem] p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
-          <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center mb-6">
-            <BarChart2 className="w-8 h-8 text-emerald-500 animate-pulse" />
-          </div>
-          <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Аналитика в процессе разработки</h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed m-0">
-            Этот раздел находится на стадии разработки. В ближайших обновлениях здесь появится расширенная статистика личных задач.
-          </p>
-        </div>
+        <PersonalAnalytics tasks={tasks} activeTheme={activeTheme} />
       </If>
 
       <AnimatePresence>
