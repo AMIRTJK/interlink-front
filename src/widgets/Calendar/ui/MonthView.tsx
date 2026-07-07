@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import type { Task } from "@features/tasks";
+import { useCalendarTheme } from "../lib/useCalendarTheme";
 
 interface IMonthViewProps {
   daysToShow: Dayjs[];
@@ -49,27 +50,7 @@ export const MonthView = ({
   onDayClick,
   onEventClick,
 }: IMonthViewProps) => {
-  const themeKey = useMemo(() => localStorage.getItem("currentTheme") || "emerald", []);
-
-  const getTodayBgClass = (theme: string) => {
-    switch (theme) {
-      case "blue": return "bg-blue-600! text-white!";
-      case "sunset": return "bg-orange-500! text-white!";
-      case "ocean": return "bg-cyan-500! text-white!";
-      case "purple": return "bg-purple-600! text-white!";
-      case "Aurora": return "bg-emerald-500! text-white!";
-      case "fury": return "bg-rose-500! text-white!";
-      case "Lavender": return "bg-violet-500! text-white!";
-      case "coral": return "bg-blue-500! text-white!";
-      case "Peach": return "bg-pink-400! text-white!";
-      case "galaxy": return "bg-indigo-700! text-white!";
-      case "emerald":
-      default:
-        return "bg-emerald-600! text-white!";
-    }
-  };
-
-  const todayClass = getTodayBgClass(themeKey);
+  const { theme } = useCalendarTheme();
 
   const getTasksForDay = (day: Dayjs) => {
     const targetDate = day.format("YYYY-MM-DD");
@@ -111,7 +92,7 @@ export const MonthView = ({
               <div className="flex! justify-end! mb-1!">
                 <div
                   className={`flex! items-center! justify-center! w-7! h-7! text-xs! font-bold! rounded-full! ${
-                    current ? todayClass : "text-zinc-500! dark:text-zinc-400!"
+                    current ? `bg-gradient-to-r! ${theme.gradient} text-white!` : "text-zinc-500! dark:text-zinc-400!"
                   }`}
                 >
                   {day.date()}

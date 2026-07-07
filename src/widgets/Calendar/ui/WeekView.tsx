@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { If } from "@shared/ui";
 import type { Task } from "@features/tasks";
+import { useCalendarTheme } from "../lib/useCalendarTheme";
 
 interface IWeekViewProps {
   daysToShow: Dayjs[];
@@ -47,6 +48,7 @@ export const WeekView = ({
   onHeaderClick,
   onEventClick,
 }: IWeekViewProps) => {
+  const { theme } = useCalendarTheme();
   const isToday = (day: Dayjs) => day.isSame(dayjs(), "day");
   const isSelected = (day: Dayjs) => day.isSame(currentDate, "day");
 
@@ -72,13 +74,18 @@ export const WeekView = ({
           return (
             <div
               key={day.format("YYYY-MM-DD")}
-              className={`flex-1! flex! flex-col! items-center! py-3! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! hover:bg-zinc-50! dark:hover:bg-slate-800/40! transition-colors! ${selected ? "bg-violet-50! dark:bg-violet-950/20!" : ""}`}
+              className={`flex-1! flex! flex-col! items-center! py-3! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! hover:bg-zinc-50! dark:hover:bg-slate-800/40! transition-colors!`}
               onClick={() => onHeaderClick ? onHeaderClick(day) : onDayClick(day)}
             >
-              <span className={`text-[11px]! font-bold! uppercase! tracking-wider! mb-1! ${selected ? "text-violet-500! dark:text-violet-400!" : "text-zinc-400! dark:text-zinc-500!"}`}>
+              <span className={`text-[11px]! font-bold! uppercase! tracking-wider! mb-1! ${selected ? "text-zinc-700! dark:text-zinc-200!" : "text-zinc-400! dark:text-zinc-500!"}`}>
                 {WEEKDAYS[i]}
               </span>
-              <span className={`text-lg! font-bold! w-9! h-9! flex! items-center! justify-center! rounded-full! ${selected ? "bg-violet-500! text-white!" : "text-zinc-700! dark:text-zinc-300!"}`}>
+              <span
+                className={`text-lg! font-bold! w-9! h-9! flex! items-center! justify-center! rounded-full! ${
+                  selected ? `bg-gradient-to-r! ${theme.gradient} text-white!` : "text-zinc-700! dark:text-zinc-300!"
+                }`}
+                style={selected ? { color: "white" } : undefined}
+              >
                 {day.date()}
               </span>
             </div>
@@ -110,16 +117,14 @@ export const WeekView = ({
 
           {daysToShow.map((day, colIdx) => {
             const dayTasks = getTasksForDay(day);
-            const selected = isSelected(day);
             return (
               <div
                 key={day.format("YYYY-MM-DD")}
-                className={`relative! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! transition-colors! hover:bg-zinc-50/50! dark:hover:bg-slate-900/20! ${selected ? "bg-violet-50/30! dark:bg-violet-950/10!" : ""}`}
+                className="relative! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! transition-colors! hover:bg-zinc-50/50! dark:hover:bg-slate-900/20!"
                 style={{ height: HOUR_HEIGHT * HOURS.length, gridColumn: colIdx + 1 }}
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const y = e.clientY - rect.top;
-                  // Shift the hit area up by 16px to account for clicking slightly above the border or on the label
                   const clickedHour = START_HOUR + Math.floor((y + 16) / HOUR_HEIGHT);
                   onDayClick(day, clickedHour);
                 }}

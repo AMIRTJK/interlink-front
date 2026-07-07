@@ -4,6 +4,7 @@ import { If } from "@shared/ui";
 import type { Task } from "@features/tasks";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
+import { useCalendarTheme } from "../lib/useCalendarTheme";
 
 dayjs.locale("ru");
 
@@ -19,6 +20,7 @@ const getAccentColor = (color?: string): string => color || "#10B981";
 
 export const EventDetailsModal = ({ event, onClose, onDelete }: IProps) => {
   const [rsvpStatus, setRsvpStatus] = useState<TRsvpStatus>(null);
+  const { theme } = useCalendarTheme();
 
   useEffect(() => {
     if (event) {
@@ -168,7 +170,7 @@ export const EventDetailsModal = ({ event, onClose, onDelete }: IProps) => {
                 onClick={handleAccept}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition-all cursor-pointer ${
                   rsvpStatus === "accepted"
-                    ? "bg-emerald-500! border-emerald-500! text-white!"
+                    ? `bg-gradient-to-r! ${theme.gradient} border-transparent! text-white!`
                     : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-zinc-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 hover:border-emerald-300 hover:text-emerald-600"
                 }`}
               >
