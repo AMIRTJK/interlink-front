@@ -10,7 +10,7 @@ interface IWeekViewProps {
   tasks: Task[];
   currentDate: Dayjs;
   onDeleteEvent: (id: string) => void;
-  onDayClick: (date: Dayjs) => void;
+  onDayClick: (date: Dayjs, selectedHour?: number) => void;
   onHeaderClick?: (date: Dayjs) => void;
 }
 
@@ -115,21 +115,6 @@ export const WeekView = ({
             />
           ))}
 
-          <If is={todayIndex >= 0}>
-            <div
-              className="absolute! left-0! right-0! z-20! pointer-events-none!"
-              style={{
-                top: nowTop,
-                gridColumn: "1 / -1",
-              }}
-            >
-              <div className="flex! items-center! w-full!">
-                <div className="w-2! h-2! rounded-full! bg-red-500! flex-shrink-0!" style={{ marginLeft: `calc(${(todayIndex / daysToShow.length) * 100}% - 4px)` }} />
-                <div className="h-px! bg-red-400! flex-1!" style={{ marginLeft: `${(todayIndex / daysToShow.length) * 100}%`, width: `${(1 / daysToShow.length) * 100}%`, position: "absolute", left: 0, right: 0 }} />
-              </div>
-            </div>
-          </If>
-
           {daysToShow.map((day, colIdx) => {
             const dayTasks = getTasksForDay(day);
             const selected = isSelected(day);
@@ -138,7 +123,13 @@ export const WeekView = ({
                 key={day.format("YYYY-MM-DD")}
                 className={`relative! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! transition-colors! hover:bg-zinc-50/50! dark:hover:bg-slate-900/20! ${selected ? "bg-violet-50/30! dark:bg-violet-950/10!" : ""}`}
                 style={{ height: HOUR_HEIGHT * HOURS.length, gridColumn: colIdx + 1 }}
-                onClick={() => onDayClick(day)}
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const y = e.clientY - rect.top;
+                  // Shift the hit area up by 16px to account for clicking slightly above the border or on the label
+                  const clickedHour = START_HOUR + Math.floor((y + 16) / HOUR_HEIGHT);
+                  onDayClick(day, clickedHour);
+                }}
               >
                 {dayTasks.map((task) => {
                   const { top, height } = getEventPosition(task);

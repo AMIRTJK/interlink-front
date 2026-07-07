@@ -42,10 +42,14 @@ export const Calendar = () => {
     deleteEvent(eventId);
   };
 
-  const handleDayClick = (date: Dayjs) => {
+  const handleDayClick = (date: Dayjs, selectedHour?: number) => {
+    const finalTime = selectedHour !== undefined 
+      ? dayjs().hour(selectedHour).minute(0) 
+      : dayjs().hour(9).minute(0);
+
     setSelectedDateTime({
       date,
-      time: dayjs().hour(9).minute(0),
+      time: finalTime,
     });
     setIsModalOpen(true);
   };
