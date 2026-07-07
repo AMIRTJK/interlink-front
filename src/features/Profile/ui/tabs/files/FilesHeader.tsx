@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Search, ChevronDown, Upload, LayoutGrid, List, ArrowUp, ArrowDown, FolderPlus, X } from "lucide-react";
 import { If } from "@shared/ui";
+import { THEMES } from "@widgets/layout/ui/designSettings";
+import { useDesignSettings } from "@widgets/layout/ui/useDesignSettings";
 
 interface IProps {
   searchQuery: string;
@@ -31,10 +33,28 @@ export const FilesHeader = ({
 }: IProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [localSearch, setLocalSearch] = useState(searchQuery);
+  const [sortOpen, setSortOpen] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  const { currentTheme, isDarkMode } = useDesignSettings();
+  const theme = THEMES[currentTheme] || THEMES.emerald;
+  const accent = isDarkMode ? theme.dark : theme.light;
 
   useEffect(() => {
     setLocalSearch(searchQuery);
   }, [searchQuery]);
+
+  // Закрываем меню сортировки при клике вне него.
+  useEffect(() => {
+    if (!sortOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setSortOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [sortOpen]);
 
   const handleSearchSubmit = () => {
     onSearchChange(localSearch);
@@ -115,27 +135,43 @@ export const FilesHeader = ({
 
         {/* Sort Selector */}
         <div className="flex items-center gap-1">
-          <div className="relative group">
-            <button className="flex items-center gap-1.5 px-4 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-zinc-300 rounded-full border border-slate-200 dark:border-slate-700 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-all font-medium cursor-pointer">
+          <div className="relative" ref={sortRef}>
+            <button
+              onClick={() => setSortOpen((prev) => !prev)}
+              className="flex items-center gap-1.5 px-4 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-zinc-300 rounded-full border border-slate-200 dark:border-slate-700 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-all font-medium cursor-pointer"
+            >
               <span>{getSortLabel()}</span>
-              <ChevronDown size={14} className="text-slate-400" />
+              <ChevronDown
+                size={14}
+                className={`text-slate-400 transition-transform ${sortOpen ? "rotate-180" : ""}`}
+              />
             </button>
-            
-            <div className="absolute right-0 mt-1.5 w-32 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-xl py-1 z-50 hidden group-hover:block hover:block">
-              {(["date", "size", "name"] as const).map((option) => (
-                <button
-                  key={option}
-                  onClick={() => onSortChange(option)}
-                  className={`w-full text-left px-4 py-2 text-sm transition-colors cursor-pointer ${
-                    sortBy === option
-                      ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-semibold"
-                      : "text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-slate-700"
-                  }`}
-                >
-                  {option === "date" ? "Дата" : option === "size" ? "Размер" : "Имя"}
-                </button>
-              ))}
-            </div>
+
+            <If is={sortOpen}>
+              <div className="absolute right-0 mt-1.5 w-32 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-xl py-1 z-50">
+                {(["date", "size", "name"] as const).map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => {
+                      onSortChange(option);
+                      setSortOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors cursor-pointer ${
+                      sortBy === option
+                        ? "bg-slate-100 dark:bg-slate-700/60 text-slate-800 dark:text-zinc-100 font-semibold"
+                        : "text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-slate-700"
+                    }`}
+                    style={
+                      sortBy === option
+                        ? { color: accent }
+                        : undefined
+                    }
+                  >
+                    {option === "date" ? "Дата" : option === "size" ? "Размер" : "Имя"}
+                  </button>
+                ))}
+              </div>
+            </If>
           </div>
 
           {/* Direction Toggle */}
@@ -152,9 +188,10 @@ export const FilesHeader = ({
         <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-full border border-slate-200/50 dark:border-slate-700/50">
           <button
             onClick={() => onViewModeChange("grid")}
+            style={viewMode === "grid" ? { color: accent } : undefined}
             className={`p-1.5 rounded-full transition-all cursor-pointer ${
               viewMode === "grid"
-                ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                ? "bg-white dark:bg-slate-700 shadow-sm"
                 : "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
             }`}
           >
@@ -162,9 +199,10 @@ export const FilesHeader = ({
           </button>
           <button
             onClick={() => onViewModeChange("list")}
+            style={viewMode === "list" ? { color: accent } : undefined}
             className={`p-1.5 rounded-full transition-all cursor-pointer ${
               viewMode === "list"
-                ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                ? "bg-white dark:bg-slate-700 shadow-sm"
                 : "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
             }`}
           >
@@ -184,7 +222,7 @@ export const FilesHeader = ({
         {/* Upload Button */}
         <button
           onClick={handleUploadClick}
-          className="upload-btn-gradient flex items-center gap-2 px-5 py-2 text-white font-semibold rounded-full text-sm shadow-md cursor-pointer hover:shadow-lg transition-all"
+          className={`bg-gradient-to-r ${theme.gradient} flex items-center gap-2 px-5 py-2 text-white font-semibold rounded-full text-sm shadow-md cursor-pointer hover:shadow-lg hover:brightness-105 transition-all`}
         >
           <Upload size={16} />
           <span>Загрузить</span>
