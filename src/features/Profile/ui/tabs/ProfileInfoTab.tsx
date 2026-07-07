@@ -174,7 +174,7 @@ export const ProfileInfoTab = ({ userData, isLoading, onEdit, currentTheme }: IP
             onClick={onEdit}
             className={`mt-5 w-full bg-gradient-to-r ${activeTheme.gradient} hover:opacity-90 text-white py-2.5 rounded-[2.5rem] text-sm font-semibold transition-all shadow-md`}
           >
-            Редактировать профиль
+            Настройки
           </button>
         </div>
       </div>

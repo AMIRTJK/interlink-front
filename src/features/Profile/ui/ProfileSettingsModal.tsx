@@ -1,5 +1,6 @@
 import { Modal } from "antd";
 import { MfaSecurity } from "./MfaSecurity";
+import { ChangePassword } from "./ChangePassword";
 
 interface IProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export const ProfileSettingsModal = ({
     >
       <div className="space-y-2">
         <MfaSecurity />
+        <ChangePassword />
       </div>
     </Modal>
   );
