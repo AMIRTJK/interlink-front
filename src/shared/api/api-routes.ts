@@ -163,6 +163,10 @@ export const ApiRoutes = {
   NOTIFICATIONS_READ_ALL: "/api/v1/notifications/read-all",
   NOTIFICATION_READ: "/api/v1/notifications/:id/read",
   NOTIFICATION_DELETE: "/api/v1/notifications/:id",
+  PERSONAL_TASKS: "/api/v1/personal-tasks",
+  PERSONAL_TASKS_BOARD: "/api/v1/personal-tasks/board",
+  PERSONAL_TASKS_BY_ID: "/api/v1/personal-tasks/:id",
+  PERSONAL_TASKS_STATUS: "/api/v1/personal-tasks/:id/status",
 } as const;
 
 type ApiRoutes = (typeof ApiRoutes)[keyof typeof ApiRoutes];

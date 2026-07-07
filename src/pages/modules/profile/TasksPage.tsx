@@ -1,5 +1,5 @@
-import { Tasks } from '@features/tasks';
+import { PersonalTasksRegistry } from "@widgets/PersonalTasksRegistry";
 
 export const TasksPage = () => {
-  return <Tasks />;
+  return <PersonalTasksRegistry />;
 };

@@ -222,9 +222,11 @@ export const AppRouter = () => {
                   index
                   element={<Navigate to={AppRoutes.PROFILE_TASKS} replace />}
                 />
+                <Route path="profile" element={<ProfilePage />} />
                 <Route path="tasks" element={<TasksPage />} />
                 <Route path="calendar" element={<CalendarPage />} />
                 <Route path="analytics" element={<AnalyticsPage />} />
+                <Route path="files" element={<ProfilePage />} />
               </Route>
             </Route>
 
