@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User,
@@ -13,7 +13,7 @@ import { AnalyticsTab } from "./tabs/AnalyticsTab";
 import { FilesTab } from "./tabs/FilesTab";
 import { THEMES } from "@widgets/layout/ui/designSettings";
 import { Calendar } from "@widgets/Calendar";
-import { TaskRegistry } from "@widgets/TaskRegistry";
+import { PersonalTasksRegistry } from "@widgets/PersonalTasksRegistry";
 
 type TabKey = "profile" | "tasks" | "calendar" | "analytics" | "files";
 
@@ -28,7 +28,7 @@ const TABS: ITab[] = [
   { key: "tasks", label: "Задачи", icon: <ClipboardList size={16} /> },
   { key: "calendar", label: "Календарь", icon: <CalendarIcon size={16} /> },
   { key: "analytics", label: "Аналитика", icon: <BarChart2 size={16} /> },
-  { key: "files", label: "Мои файлы", icon: <FolderOpen size={16} /> },
+  { key: "files", label: "Файлы", icon: <FolderOpen size={16} /> },
 ];
 
 interface IProps {
@@ -44,9 +44,28 @@ export const PersonalCabinet = ({
   onOpenSettings,
   currentTheme,
 }: IProps) => {
-  const [activeTab, setActiveTab] = useState<TabKey>("profile");
+  const location = useLocation();
+  const navigate = useNavigate();
   const themeKey = currentTheme || localStorage.getItem("currentTheme") || "emerald";
   const activeTheme = THEMES[themeKey] || THEMES.emerald;
+
+  const getTabFromPath = (pathname: string): TabKey => {
+    if (pathname.includes("/profile/tasks")) return "tasks";
+    if (pathname.includes("/profile/calendar")) return "calendar";
+    if (pathname.includes("/profile/analytics")) return "analytics";
+    if (pathname.includes("/profile/files")) return "files";
+    return "profile";
+  };
+
+  const activeTab = getTabFromPath(location.pathname);
+
+  const handleTabChange = (key: TabKey) => {
+    if (key === "profile") {
+      navigate("/profile/profile");
+    } else {
+      navigate(`/profile/${key}`);
+    }
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -62,7 +81,7 @@ export const PersonalCabinet = ({
       case "analytics":
         return <AnalyticsTab />;
       case "tasks":
-        return <TaskRegistry />;
+        return <PersonalTasksRegistry />;
       case "calendar":
         return <Calendar />;
       case "files":
@@ -79,7 +98,7 @@ export const PersonalCabinet = ({
           {TABS.map((tab) => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => handleTabChange(tab.key)}
               className={`relative flex items-center gap-2 px-5 py-2.5 rounded-[2.5rem] text-sm font-semibold transition-all ${
                 activeTab === tab.key
                   ? "text-white"

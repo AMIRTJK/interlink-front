@@ -1,7 +1,5 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import { Popover } from "antd";
-import { ClockCircleOutlined, CalendarOutlined, DeleteOutlined } from "@ant-design/icons";
 import { If } from "@shared/ui";
 import type { Task } from "@features/tasks";
 
@@ -10,6 +8,7 @@ interface IDayViewProps {
   tasks: Task[];
   onDeleteEvent: (id: string) => void;
   onDayClick: (date: Dayjs, selectedHour?: number) => void;
+  onEventClick: (task: Task) => void;
 }
 
 const HOUR_HEIGHT = 64;
@@ -21,10 +20,6 @@ const getEventBgStyle = (color?: string): React.CSSProperties => ({
   backgroundColor: color ? `${color}22` : "#10B98122",
   borderLeft: `3px solid ${color || "#10B981"}`,
   color: color || "#10B981",
-});
-
-const getEventDotStyle = (color?: string) => ({
-  backgroundColor: color || "#10B981",
 });
 
 const timeToMinutes = (time?: string): number => {
@@ -44,11 +39,9 @@ const getEventPosition = (task: Task) => {
 export const DayView = ({
   currentDate,
   tasks,
-  onDeleteEvent,
   onDayClick,
+  onEventClick,
 }: IDayViewProps) => {
-  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
-
   const dayTasks = useMemo(() => {
     const targetDate = currentDate.format("YYYY-MM-DD");
     return tasks.filter((task) => task.date === targetDate);
@@ -114,63 +107,20 @@ export const DayView = ({
                   key={task.id}
                   className="absolute! left-2! right-2! z-10!"
                   style={{ top, height }}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEventClick(task);
+                  }}
                 >
-                  <Popover
-                    open={openPopoverId === task.id}
-                    onOpenChange={(v) => setOpenPopoverId(v ? task.id : null)}
-                    content={
-                      <div className="w-[240px]! bg-white! dark:bg-slate-800! rounded-2xl! shadow-lg! overflow-hidden! border! border-transparent! dark:border-slate-700/50!">
-                        <div className="flex! items-start! gap-2.5! p-4! pb-2!">
-                          <span
-                            className="w-2.5! h-2.5! rounded-full! flex-shrink-0! mt-1!"
-                            style={getEventDotStyle(task.color)}
-                          />
-                          <h4 className="font-bold! text-zinc-900! dark:text-zinc-100! text-sm! m-0! leading-snug!">
-                            {task.title}
-                          </h4>
-                        </div>
-                        <div className="px-4! pb-3! space-y-1.5! text-zinc-500! dark:text-zinc-400! text-xs!">
-                          <div className="flex! items-center! gap-2!">
-                            <ClockCircleOutlined className="text-zinc-400! dark:text-zinc-500! flex-shrink-0!" />
-                            <span>{task.time}{task.endTime ? ` – ${task.endTime}` : ""}</span>
-                          </div>
-                          <div className="flex! items-center! gap-2!">
-                            <CalendarOutlined className="text-zinc-400! dark:text-zinc-500! flex-shrink-0!" />
-                            <span>{dayjs(task.date).format("YYYY-MM-DD")}</span>
-                          </div>
-                          <If is={!!task.description}>
-                            <p className="text-zinc-500! dark:text-zinc-400! text-xs! mt-1! leading-relaxed! whitespace-pre-wrap! m-0!">
-                              {task.description}
-                            </p>
-                          </If>
-                        </div>
-                        <div className="border-t! border-zinc-100! dark:border-slate-700/50! px-4! py-2.5! flex! justify-end!">
-                          <button
-                            onClick={() => { onDeleteEvent(task.id); setOpenPopoverId(null); }}
-                            className="flex! items-center! gap-1.5! text-red-500! hover:text-red-600! font-semibold! text-xs! transition-colors! cursor-pointer! bg-transparent! border-none! p-0!"
-                          >
-                            <DeleteOutlined />
-                            <span>Удалить</span>
-                          </button>
-                        </div>
-                      </div>
-                    }
-                    trigger="click"
-                    placement="right"
-                    overlayClassName="calendar-event-popover"
-                    overlayInnerStyle={{ padding: 0, borderRadius: 16, boxShadow: "0 8px 32px rgba(0,0,0,0.12)" }}
+                  <div
+                    className="h-full! w-full! rounded-lg! px-2! py-1! overflow-hidden! cursor-pointer! transition-opacity! hover:opacity-90! text-xs! font-medium!"
+                    style={getEventBgStyle(task.color)}
                   >
-                    <div
-                      className="h-full! w-full! rounded-lg! px-2! py-1! overflow-hidden! cursor-pointer! transition-opacity! hover:opacity-90! text-xs! font-medium!"
-                      style={getEventBgStyle(task.color)}
-                    >
-                      <div className="font-semibold! truncate!">{task.time} {task.title}</div>
-                      <If is={!!task.endTime}>
-                        <div className="opacity-70! truncate! text-[10px]!">{task.endTime}</div>
-                      </If>
-                    </div>
-                  </Popover>
+                    <div className="font-semibold! truncate!">{task.time} {task.title}</div>
+                    <If is={!!task.endTime}>
+                      <div className="opacity-70! truncate! text-[10px]!">{task.endTime}</div>
+                    </If>
+                  </div>
                 </div>
               );
             })}

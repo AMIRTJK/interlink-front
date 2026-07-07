@@ -1,60 +1,28 @@
 import { Outlet } from "react-router-dom";
-import { useState, useEffect } from "react";
 import { Header } from "./Header";
-import { THEMES, BACKGROUNDS, LayoutMode } from "./designSettings";
-import { tokenControl } from "@shared/lib";
+import { Sidebar } from "./Sidebar";
+import { BottomNav } from "./BottomNav";
+import { THEMES, BACKGROUNDS } from "./designSettings";
+import { useLayoutMode } from "./useLayoutMode";
+import { useDesignSettings } from "./useDesignSettings";
 
 export const ProfileLayout = () => {
-  const [currentTheme, setCurrentTheme] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("currentTheme") || "emerald";
-    }
-    return "emerald";
-  });
+  const { currentTheme, setCurrentTheme, currentBg, setCurrentBg, isDarkMode } =
+    useDesignSettings();
 
-  const [currentBg, setCurrentBg] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("currentBg") || "arctic";
-    }
-    return "arctic";
-  });
-
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("layoutMode");
-      if (saved === "top" || saved === "left" || saved === "bottom" || saved === "right") {
-        return saved;
-      }
-    }
-    return "top";
-  });
-
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (typeof window !== "undefined") {
-      return tokenControl.getDarkMode();
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsDarkMode(document.documentElement.classList.contains("dark"));
-    });
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-    return () => observer.disconnect();
-  }, []);
+  const [layoutMode, setLayoutMode] = useLayoutMode();
 
   const activeTheme = THEMES[currentTheme] || THEMES.emerald;
   const activeBg = BACKGROUNDS[currentBg] || BACKGROUNDS.arctic;
   const themeGradient = activeTheme.gradient;
   const bgClass = isDarkMode ? activeBg.dark : activeBg.light;
-  const isVertical = layoutMode === "left" || layoutMode === "right";
 
   return (
-    <div className={`relative min-h-screen bg-gradient-to-br ${bgClass} transition-all duration-300`}>
+    <div
+      className={`relative min-h-screen bg-gradient-to-br ${bgClass} ${
+        isDarkMode ? "text-white" : "text-zinc-900"
+      } transition-all duration-300`}
+    >
       <div
         aria-hidden="true"
         className="fixed inset-0 overflow-hidden pointer-events-none"
@@ -64,18 +32,19 @@ export const ProfileLayout = () => {
         <div className={`absolute bottom-0 left-1/3 w-[400px] h-[400px] bg-gradient-to-tr ${themeGradient} opacity-[0.05] blur-[110px] rounded-full`} />
       </div>
 
-      <div
-        className={`relative z-10 flex min-h-screen ${
-          layoutMode === "bottom"
-            ? "flex-col-reverse"
-            : layoutMode === "left"
-              ? "flex-row"
-              : layoutMode === "right"
-                ? "flex-row-reverse"
-                : "flex-col"
-        }`}
-      >
-        {isVertical ? (
+      <div className="relative z-10 flex gap-6 px-6 py-4 min-h-screen transition-all duration-300 ease-in-out">
+        {layoutMode === "left" && (
+          <Sidebar
+            side="left"
+            setLayoutMode={setLayoutMode}
+            themeGradient={themeGradient}
+          />
+        )}
+
+        <div
+          className="flex-1 min-w-0 flex flex-col gap-6 transition-all duration-300 ease-in-out"
+          style={layoutMode === "bottom" ? { paddingBottom: 56 } : undefined}
+        >
           <Header
             currentTheme={currentTheme}
             setCurrentTheme={setCurrentTheme}
@@ -84,24 +53,21 @@ export const ProfileLayout = () => {
             layoutMode={layoutMode}
             setLayoutMode={setLayoutMode}
           />
-        ) : (
-          <div>
-            <Header
-              currentTheme={currentTheme}
-              setCurrentTheme={setCurrentTheme}
-              currentBg={currentBg}
-              setCurrentBg={setCurrentBg}
-              layoutMode={layoutMode}
-              setLayoutMode={setLayoutMode}
-            />
-          </div>
-        )}
-        <main className="pb-10 flex-1 overflow-x-hidden">
-          <div className="w-full px-6 pt-6">
+          <main className="flex-1 pb-10 overflow-x-hidden">
             <Outlet context={{ currentTheme }} />
-          </div>
-        </main>
+          </main>
+        </div>
+
+        {layoutMode === "right" && (
+          <Sidebar
+            side="right"
+            setLayoutMode={setLayoutMode}
+            themeGradient={themeGradient}
+          />
+        )}
       </div>
+
+      {layoutMode === "bottom" && <BottomNav />}
     </div>
   );
 };

@@ -120,6 +120,14 @@ export const getModuleItems = (
 			],
 		}),
 	},
+	{
+		key: AppRoutes.TASKS,
+		label: "Задачи",
+		icon:
+			variant === "horizontal" || variant === "full" || variant === "ios" ? (
+				<img src={ApplicationsIcon} alt="tasks" />
+			) : null,
+	},
 	// Administration module (подмодули «Пользователи» и «Роли и доступы»
 	// имеют собственный верхний таб-бар, поэтому children здесь не задаём)
 	{

@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Form } from "antd";
 import { CreateUserDTO, IAdminUser } from "@entities/hr";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 import { EmployeeFormFields } from "./EmployeeFormFields";
+import { PassportUploadStep, IPassportFile } from "./PassportUploadStep";
 
 interface IProps {
   open: boolean;
@@ -14,6 +15,13 @@ interface IProps {
 export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
   const [form] = Form.useForm();
   const isEdit = !!employee?.id;
+
+  // Загруженный паспорт. Для нового сотрудника — обязательный первый шаг:
+  // пока паспорт не загружен, остальные поля формы не отображаются.
+  const [passport, setPassport] = useState<IPassportFile | null>(null);
+
+  // Поля показываются при редактировании или после загрузки паспорта.
+  const fieldsVisible = isEdit || !!passport;
 
   const createM = useMutationQuery<CreateUserDTO>({
     url: ApiRoutes.CREATE_USER,
@@ -31,6 +39,7 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
 
   useEffect(() => {
     if (!open) return;
+    setPassport(null);
     if (employee) {
       form.setFieldsValue({
         first_name: employee.first_name,
@@ -109,27 +118,38 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
         onFinish={onFinish}
         className="pt-2"
       >
-        <EmployeeFormFields
-          form={form}
-          organizationId={organizationId}
-          isEdit={isEdit}
-        />
-        <div className="flex items-center justify-end gap-2 pt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
-          >
-            Отмена
-          </button>
-          <button
-            type="submit"
-            disabled={isPending}
-            className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-colors"
-          >
-            {isEdit ? "Сохранить" : "Добавить сотрудника"}
-          </button>
-        </div>
+        {/* Обязательный первый шаг при создании — загрузка паспорта. */}
+        {!isEdit && (
+          <PassportUploadStep value={passport} onChange={setPassport} />
+        )}
+
+        {/* Остальные поля появляются только после загрузки паспорта. */}
+        {fieldsVisible && (
+          <EmployeeFormFields
+            form={form}
+            organizationId={organizationId}
+            isEdit={isEdit}
+          />
+        )}
+
+        {fieldsVisible && (
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
+            >
+              Отмена
+            </button>
+            <button
+              type="submit"
+              disabled={isPending}
+              className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-colors"
+            >
+              {isEdit ? "Сохранить" : "Добавить сотрудника"}
+            </button>
+          </div>
+        )}
       </Form>
     </Modal>
   );

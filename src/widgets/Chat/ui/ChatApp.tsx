@@ -3389,64 +3389,6 @@ const ThreadPanel = ({
   );
 };
 
-const GradientBg = ({ isDark }: { isDark: boolean }) => (
-  <div
-    className="fixed inset-0 overflow-hidden pointer-events-none"
-    style={{
-      zIndex: 0,
-    }}
-  >
-    <div
-      className="absolute transition-colors duration-300"
-      style={{
-        width: "140%",
-        height: "140%",
-        top: "-20%",
-        left: "-20%",
-        background: isDark
-          ? "conic-gradient(from 0deg at 50% 50%, #0f0524 0deg, #1e0a3c 60deg, #0a192f 120deg, #0d1b3e 180deg, #1a0535 240deg, #0f0524 360deg)"
-          : "conic-gradient(from 0deg at 50% 50%, #f3f4f6 0deg, #ede9fe 60deg, #f0fdfa 120deg, #eff6ff 180deg, #f5f3ff 240deg, #f3f4f6 360deg)",
-      }}
-    />
-    <div
-      className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] rounded-full opacity-40 transition-all duration-300"
-      style={{
-        background: isDark
-          ? "radial-gradient(circle, rgba(124,58,237,0.7) 0%, transparent 70%)"
-          : "radial-gradient(circle, rgba(167,139,250,0.4) 0%, transparent 70%)",
-        filter: "blur(60px)",
-      }}
-    />
-    <div
-      className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full opacity-35 transition-all duration-300"
-      style={{
-        background: isDark
-          ? "radial-gradient(circle, rgba(6,182,212,0.65) 0%, transparent 70%)"
-          : "radial-gradient(circle, rgba(6,182,212,0.3) 0%, transparent 70%)",
-        filter: "blur(60px)",
-      }}
-    />
-    <div
-      className="absolute top-[40%] left-[30%] w-[50%] h-[50%] rounded-full opacity-25 transition-all duration-300"
-      style={{
-        background: isDark
-          ? "radial-gradient(circle, rgba(240,171,252,0.5) 0%, transparent 70%)"
-          : "radial-gradient(circle, rgba(240,171,252,0.2) 0%, transparent 70%)",
-        filter: "blur(70px)",
-      }}
-    />
-    <div
-      className="absolute top-[20%] right-[20%] w-[35%] h-[35%] rounded-full opacity-20 transition-all duration-300"
-      style={{
-        background: isDark
-          ? "radial-gradient(circle, rgba(16,185,129,0.6) 0%, transparent 70%)"
-          : "radial-gradient(circle, rgba(16,185,129,0.25) 0%, transparent 70%)",
-        filter: "blur(50px)",
-      }}
-    />
-  </div>
-);
-
 const formatRepliesCount = (count: number, currentLang: Lang) => {
   if (currentLang === "ru") {
     const mod10 = count % 10;
@@ -3467,9 +3409,11 @@ const formatRepliesCount = (count: number, currentLang: Lang) => {
 
 interface IProps {
   onComposeStateChange?: (isOpen: boolean) => void;
+  /** Закрыть чат по клику на пустое пространство за окном чата. */
+  onRequestClose?: () => void;
 }
 
-export const ChatApp = ({ onComposeStateChange }: IProps) => {
+export const ChatApp = ({ onComposeStateChange, onRequestClose }: IProps) => {
   const [isSystemDark, setIsSystemDark] = useState(() => {
     const stored = localStorage.getItem("darkMode");
     if (stored !== null) return stored === "true";
@@ -4861,11 +4805,14 @@ export const ChatApp = ({ onComposeStateChange }: IProps) => {
     </main>
   );
   return (
-    <div className="w-full h-screen flex items-center justify-center p-4 font-sans relative overflow-hidden">
-      <GradientBg isDark={isDark} />
-
+    <div
+      className="w-full h-screen flex items-center justify-end py-4 pl-4 font-sans relative overflow-hidden"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onRequestClose?.();
+      }}
+    >
       <div
-        className="w-full max-w-7xl h-full max-h-[900px] flex flex-col rounded-2xl overflow-hidden shadow-2xl relative"
+        className="w-full max-w-7xl h-full max-h-[900px] flex flex-col rounded-l-2xl overflow-hidden shadow-2xl relative"
         style={{
           background: isDark ? "rgba(10,4,30,0.55)" : "rgba(255,255,255,0.72)",
           backdropFilter: "blur(30px)",

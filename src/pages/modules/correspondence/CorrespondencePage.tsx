@@ -27,7 +27,7 @@ export const CorrespondencePage = () => {
       )}
     >
       <If is={!shouldHideUI}>
-        <div className={variant === "vertical" ? "shrink-0 pl-6 py-6" : ""}>
+        <div className={variant === "vertical" ? "shrink-0 pr-6 pb-6" : ""}>
           <RegistrySidebar
             isDetailView={isDetailView}
             variant={variant}
@@ -35,9 +35,8 @@ export const CorrespondencePage = () => {
           />
         </div>
       </If>
-      {/* <main className="w-full min-w-0 m-4"> */}
       <main className="flex-1 min-w-0 h-full overflow-hidden">
-        <div className={cn("h-full w-full mx-auto space-y-4", !shouldHideUI && "p-6")}>
+        <div className={cn("h-full w-full mx-auto space-y-4", !shouldHideUI && "pb-6")}>
           <Outlet />
         </div>
       </main>

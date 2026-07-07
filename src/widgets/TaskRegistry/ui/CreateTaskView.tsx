@@ -222,7 +222,7 @@ export const CreateTaskView = ({ colleagues, onBack, onCreated }: CreateTaskView
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 60 }}
       transition={{ type: "spring", stiffness: 260, damping: 30 }}
-      className="w-full py-10 relative z-10 flex flex-col gap-8 min-h-screen"
+      className="w-full pb-10 relative z-10 flex flex-col gap-8 min-h-screen"
     >
       {/* Create Header */}
       <header className="flex flex-wrap items-center justify-between gap-4">

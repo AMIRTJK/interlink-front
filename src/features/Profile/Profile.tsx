@@ -2,7 +2,7 @@ import { tokenControl } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { IUser } from "@entities/login";
 import { useState } from "react";
-import { useNavbar, useGetQuery, useTabs } from "@shared/lib/hooks";
+import { useGetQuery } from "@shared/lib/hooks";
 import { ProfileSettingsModal } from "./ui/ProfileSettingsModal";
 import { PersonalCabinet } from "./ui/PersonalCabinet";
 import "./style.css";
@@ -12,37 +12,45 @@ interface IProps {
 }
 
 export const Profile = ({ currentTheme }: IProps) => {
-  const { variant, setVariant } = useNavbar();
-  const { tabMode, setTabMode } = useTabs();
-  const userId = tokenControl.getUserId();
-
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // Реальный API пользователя — сохранён без изменений.
-  const { data: userDataResponse, isLoading } = useGetQuery<{ data: IUser }>({
-    url: `${ApiRoutes.FETCH_USER_BY_ID}${userId}`,
+  const { data: rawUserData, isLoading, isFetching, refetch } = useGetQuery<any>({
+    url: ApiRoutes.AUTH_ME,
+    useToken: true,
     options: {
-      enabled: !!userId,
-      onSuccess: (data) => {
-        if (data?.data) {
-          tokenControl.setUserData(data.data);
+      enabled: !!tokenControl.get(),
+      onSuccess: (data: any) => {
+        const user = data?.data || data;
+        if (user) {
+          tokenControl.setUserData(user);
         }
       },
     },
   });
 
-  const userData = userDataResponse?.data || null;
+  const userData = (() => {
+    const rawUser = rawUserData?.data?.user || rawUserData?.user || rawUserData?.data || rawUserData;
+    if (!rawUser || typeof rawUser !== "object") return null;
+    const user = { ...rawUser } as IUser;
+    if (!user.full_name) {
+      user.full_name = [user.last_name, user.first_name, user.middle_name]
+        .filter(Boolean)
+        .join(" ");
+    }
+    if (!user.phone && (user as any).work_phone) {
+      user.phone = (user as any).work_phone;
+    }
+    return user;
+  })();
 
   return (
     <>
-      {/* Сохранённая интеграция: настройки профиля (iOS-навигация, режим вкладок, MFA) */}
       <ProfileSettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        navbarVariant={variant}
-        setNavbarVariant={setVariant}
-        tabMode={tabMode}
-        setTabMode={setTabMode}
+        mfaEnabled={!!userData?.mfa_enabled}
+        isStatusLoading={isFetching}
+        onRefresh={refetch}
       />
 
       <PersonalCabinet

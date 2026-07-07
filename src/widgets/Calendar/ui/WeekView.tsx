@@ -1,9 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import { Popover } from "antd";
-import { ClockCircleOutlined, CalendarOutlined, DeleteOutlined } from "@ant-design/icons";
 import { If } from "@shared/ui";
 import type { Task } from "@features/tasks";
+import { useCalendarTheme } from "../lib/useCalendarTheme";
 
 interface IWeekViewProps {
   daysToShow: Dayjs[];
@@ -12,6 +11,7 @@ interface IWeekViewProps {
   onDeleteEvent: (id: string) => void;
   onDayClick: (date: Dayjs, selectedHour?: number) => void;
   onHeaderClick?: (date: Dayjs) => void;
+  onEventClick: (task: Task) => void;
 }
 
 const HOUR_HEIGHT = 64;
@@ -24,10 +24,6 @@ const getEventBgStyle = (color?: string): React.CSSProperties => ({
   backgroundColor: color ? `${color}22` : "#10B98122",
   borderLeft: `3px solid ${color || "#10B981"}`,
   color: color || "#10B981",
-});
-
-const getEventDotStyle = (color?: string) => ({
-  backgroundColor: color || "#10B981",
 });
 
 const timeToMinutes = (time?: string): number => {
@@ -48,12 +44,11 @@ export const WeekView = ({
   daysToShow,
   tasks,
   currentDate,
-  onDeleteEvent,
   onDayClick,
   onHeaderClick,
+  onEventClick,
 }: IWeekViewProps) => {
-  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
-
+  const { theme } = useCalendarTheme();
   const isToday = (day: Dayjs) => day.isSame(dayjs(), "day");
   const isSelected = (day: Dayjs) => day.isSame(currentDate, "day");
 
@@ -79,13 +74,18 @@ export const WeekView = ({
           return (
             <div
               key={day.format("YYYY-MM-DD")}
-              className={`flex-1! flex! flex-col! items-center! py-3! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! hover:bg-zinc-50! dark:hover:bg-slate-800/40! transition-colors! ${selected ? "bg-violet-50! dark:bg-violet-950/20!" : ""}`}
+              className={`flex-1! flex! flex-col! items-center! py-3! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! hover:bg-zinc-50! dark:hover:bg-slate-800/40! transition-colors!`}
               onClick={() => onHeaderClick ? onHeaderClick(day) : onDayClick(day)}
             >
-              <span className={`text-[11px]! font-bold! uppercase! tracking-wider! mb-1! ${selected ? "text-violet-500! dark:text-violet-400!" : "text-zinc-400! dark:text-zinc-500!"}`}>
+              <span className={`text-[11px]! font-bold! uppercase! tracking-wider! mb-1! ${selected ? "text-zinc-700! dark:text-zinc-200!" : "text-zinc-400! dark:text-zinc-500!"}`}>
                 {WEEKDAYS[i]}
               </span>
-              <span className={`text-lg! font-bold! w-9! h-9! flex! items-center! justify-center! rounded-full! ${selected ? "bg-violet-500! text-white!" : "text-zinc-700! dark:text-zinc-300!"}`}>
+              <span
+                className={`text-lg! font-bold! w-9! h-9! flex! items-center! justify-center! rounded-full! ${
+                  selected ? `bg-gradient-to-r! ${theme.gradient} text-white!` : "text-zinc-700! dark:text-zinc-300!"
+                }`}
+                style={selected ? { color: "white" } : undefined}
+              >
                 {day.date()}
               </span>
             </div>
@@ -117,16 +117,14 @@ export const WeekView = ({
 
           {daysToShow.map((day, colIdx) => {
             const dayTasks = getTasksForDay(day);
-            const selected = isSelected(day);
             return (
               <div
                 key={day.format("YYYY-MM-DD")}
-                className={`relative! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! transition-colors! hover:bg-zinc-50/50! dark:hover:bg-slate-900/20! ${selected ? "bg-violet-50/30! dark:bg-violet-950/10!" : ""}`}
+                className="relative! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! transition-colors! hover:bg-zinc-50/50! dark:hover:bg-slate-900/20!"
                 style={{ height: HOUR_HEIGHT * HOURS.length, gridColumn: colIdx + 1 }}
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const y = e.clientY - rect.top;
-                  // Shift the hit area up by 16px to account for clicking slightly above the border or on the label
                   const clickedHour = START_HOUR + Math.floor((y + 16) / HOUR_HEIGHT);
                   onDayClick(day, clickedHour);
                 }}
@@ -138,63 +136,20 @@ export const WeekView = ({
                       key={task.id}
                       className="absolute! left-1! right-1! z-10!"
                       style={{ top, height }}
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEventClick(task);
+                      }}
                     >
-                      <Popover
-                        open={openPopoverId === task.id}
-                        onOpenChange={(v) => setOpenPopoverId(v ? task.id : null)}
-                        content={
-                          <div className="w-[240px]! bg-white! dark:bg-slate-800! rounded-2xl! shadow-lg! overflow-hidden! border! border-transparent! dark:border-slate-700/50!">
-                            <div className="flex! items-start! gap-2.5! p-4! pb-2!">
-                              <span
-                                className="w-2.5! h-2.5! rounded-full! flex-shrink-0! mt-1!"
-                                style={getEventDotStyle(task.color)}
-                              />
-                              <h4 className="font-bold! text-zinc-900! dark:text-zinc-100! text-sm! m-0! leading-snug!">
-                                {task.title}
-                              </h4>
-                            </div>
-                            <div className="px-4! pb-3! space-y-1.5! text-zinc-500! dark:text-zinc-400! text-xs!">
-                              <div className="flex! items-center! gap-2!">
-                                <ClockCircleOutlined className="text-zinc-400! dark:text-zinc-500! flex-shrink-0!" />
-                                <span>{task.time}{task.endTime ? ` – ${task.endTime}` : ""}</span>
-                              </div>
-                              <div className="flex! items-center! gap-2!">
-                                <CalendarOutlined className="text-zinc-400! dark:text-zinc-500! flex-shrink-0!" />
-                                <span>{dayjs(task.date).format("YYYY-MM-DD")}</span>
-                              </div>
-                              <If is={!!task.description}>
-                                <p className="text-zinc-500! dark:text-zinc-400! text-xs! mt-1! leading-relaxed! whitespace-pre-wrap! m-0!">
-                                  {task.description}
-                                </p>
-                              </If>
-                            </div>
-                            <div className="border-t! border-zinc-100! dark:border-slate-700/50! px-4! py-2.5! flex! justify-end!">
-                              <button
-                                onClick={() => { onDeleteEvent(task.id); setOpenPopoverId(null); }}
-                                className="flex! items-center! gap-1.5! text-red-500! hover:text-red-600! font-semibold! text-xs! transition-colors! cursor-pointer! bg-transparent! border-none! p-0!"
-                              >
-                                <DeleteOutlined />
-                                <span>Удалить</span>
-                              </button>
-                            </div>
-                          </div>
-                        }
-                        trigger="click"
-                        placement="right"
-                        overlayClassName="calendar-event-popover"
-                        overlayInnerStyle={{ padding: 0, borderRadius: 16, boxShadow: "0 8px 32px rgba(0,0,0,0.12)" }}
+                      <div
+                        className="h-full! w-full! rounded-lg! px-2! py-1! overflow-hidden! cursor-pointer! transition-opacity! hover:opacity-90! text-xs! font-medium!"
+                        style={getEventBgStyle(task.color)}
                       >
-                        <div
-                          className="h-full! w-full! rounded-lg! px-2! py-1! overflow-hidden! cursor-pointer! transition-opacity! hover:opacity-90! text-xs! font-medium!"
-                          style={getEventBgStyle(task.color)}
-                        >
-                          <div className="font-semibold! truncate!">{task.time} {task.title}</div>
-                          <If is={!!task.endTime}>
-                            <div className="opacity-70! truncate! text-[10px]!">{task.endTime}</div>
-                          </If>
-                        </div>
-                      </Popover>
+                        <div className="font-semibold! truncate!">{task.time} {task.title}</div>
+                        <If is={!!task.endTime}>
+                          <div className="opacity-70! truncate! text-[10px]!">{task.endTime}</div>
+                        </If>
+                      </div>
                     </div>
                   );
                 })}

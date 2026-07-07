@@ -1,60 +1,39 @@
-import { Modal, Switch } from "antd";
+import { Settings } from "lucide-react";
+import { SettingsModalShell } from "./settings/SettingsModalShell";
 import { MfaSecurity } from "./MfaSecurity";
+import { ChangePassword } from "./ChangePassword";
 
 interface IProps {
   isOpen: boolean;
   onClose: () => void;
-  navbarVariant: "default" | "ios";
-  setNavbarVariant: (v: "default" | "ios") => void;
-  tabMode: "on" | "off";
-  setTabMode: (v: "on" | "off") => void;
+  mfaEnabled: boolean;
+  isStatusLoading: boolean;
+  onRefresh: () => void;
 }
-
 
 export const ProfileSettingsModal = ({
   isOpen,
   onClose,
-  navbarVariant,
-  setNavbarVariant,
-  tabMode,
-  setTabMode,
+  mfaEnabled,
+  isStatusLoading,
+  onRefresh,
 }: IProps) => {
   return (
-    <Modal
+    <SettingsModalShell
+      isOpen={isOpen}
+      onClose={onClose}
       title="Настройки"
-      open={isOpen}
-      onCancel={onClose}
-      footer={null}
-      width={300}
-      closable
-      maskClosable
-      centered
-      className="ios-settings-modal"
-      transitionName="ant-zoom"
+      icon={<Settings className="h-5 w-5" />}
+      width={420}
     >
-      <div className="space-y-2">
-        {/* IOS навигация... */}
-        <div className="sm:flex justify-between items-center pt-4 border-t border-gray-100">
-          <span>Стиль iOS 📱</span>
-          <Switch
-            checked={navbarVariant === "ios"}
-            onChange={(checked) => setNavbarVariant(checked ? "ios" : "default")}
-          />
-        </div>
-
-        {/* Режим вкладок (независимый) */}
-        <div className="sm:flex justify-between items-center pt-4 border-t border-gray-100 transition-opacity">
-          <span>Режим вкладок 🧭</span>
-          <Switch
-            checked={tabMode === "on"}
-            onChange={(checked) => setTabMode(checked ? "on" : "off")}
-          />
-        </div>
-
-        {/* Безопасность: двухфакторная аутентификация (MFA) */}
-        <MfaSecurity />
+      <div className="space-y-3">
+        <MfaSecurity
+          mfaEnabled={mfaEnabled}
+          isStatusLoading={isStatusLoading}
+          onRefresh={onRefresh}
+        />
+        <ChangePassword />
       </div>
-
-    </Modal>
+    </SettingsModalShell>
   );
 };

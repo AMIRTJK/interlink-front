@@ -105,6 +105,11 @@ const NewCorrespondenceTableWrapper = lazy(() =>
 const HrLayoutPage = lazy(() =>
   import("@pages/modules/hr/Hr").then((m) => ({ default: m.HrLayoutPage })),
 );
+const TasksModulePage = lazy(() =>
+  import("@pages/modules/tasks/TasksModulePage").then((m) => ({
+    default: m.TasksModulePage,
+  })),
+);
 const HrEmployeesPage = lazy(() =>
   import("@pages/modules/hr/EmployeesPage").then((m) => ({
     default: m.HrEmployeesPage,
@@ -217,9 +222,11 @@ export const AppRouter = () => {
                   index
                   element={<Navigate to={AppRoutes.PROFILE_TASKS} replace />}
                 />
+                <Route path="profile" element={<ProfilePage />} />
                 <Route path="tasks" element={<TasksPage />} />
                 <Route path="calendar" element={<CalendarPage />} />
                 <Route path="analytics" element={<AnalyticsPage />} />
+                <Route path="files" element={<ProfilePage />} />
               </Route>
             </Route>
 
@@ -233,6 +240,7 @@ export const AppRouter = () => {
                 <Route path="timesheet" element={<HrTimesheetPage />} />
                 <Route path="staffing" element={<HrStaffingPage />} />
               </Route>
+              <Route path="tasks" element={<TasksModulePage />} />
               <Route
                 path="administration"
                 element={<AdministrationLayoutPage />}

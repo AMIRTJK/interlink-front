@@ -10,6 +10,7 @@ import {
   IEmployee,
   IEmployeesFilters,
   PAGE_SIZE,
+  PAGE_SIZE_OPTIONS,
   TEmployeesView,
   exportUsersExcel,
   normalizeUsers,
@@ -19,6 +20,7 @@ import { EmployeesTable } from "./EmployeesTable";
 import { EmployeesCards } from "./EmployeesCards";
 import { EmployeesAnalyticsModal } from "./EmployeesAnalyticsModal";
 import { EmployeeProfileModal } from "./EmployeeProfileModal";
+import { PageSizeSelect } from "./PageSizeSelect";
 
 const emptyFilters: IEmployeesFilters = {
   status: "all",
@@ -46,6 +48,7 @@ export const EmployeesWidget: React.FC = () => {
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<IEmployeesFilters>(emptyFilters);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(PAGE_SIZE);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<IAdminUser | null>(null);
@@ -71,9 +74,9 @@ export const EmployeesWidget: React.FC = () => {
     });
   }, [employees, search, filters]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const safePage = Math.min(page, totalPages);
-  const pageItems = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const pageItems = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   const openCreate = () => {
     setEditing(null);
@@ -147,10 +150,23 @@ export const EmployeesWidget: React.FC = () => {
 
       {filtered.length > 0 && (
         <div className="flex items-center justify-between text-sm text-slate-400">
-          <span>
-            Показано {(safePage - 1) * PAGE_SIZE + 1}–
-            {Math.min(safePage * PAGE_SIZE, filtered.length)} из {filtered.length}
-          </span>
+          <div className="flex items-center gap-3">
+            <span>
+              Показано {(safePage - 1) * pageSize + 1}–
+              {Math.min(safePage * pageSize, filtered.length)} из {filtered.length}
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="hidden sm:inline">Строк на странице:</span>
+              <PageSizeSelect
+                value={pageSize}
+                options={PAGE_SIZE_OPTIONS}
+                onChange={(size) => {
+                  setPageSize(size);
+                  setPage(1);
+                }}
+              />
+            </div>
+          </div>
           {totalPages > 1 && (
             <div className="flex items-center gap-1">
               <button
