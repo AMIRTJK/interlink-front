@@ -37,7 +37,7 @@ export interface IStaffingWidgetProps {
   dark?: boolean;
 }
 
-export const StaffingWidget = ({ employees, dark = false }: IStaffingWidgetProps) => {
+export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidgetProps) => {
   const [organizations, setOrganizations] = useState<ISubOrganization[]>([]);
   const [viewMode, setViewMode] = useState<TStaffingViewMode>('list');
   const [search, setSearch] = useState('');
@@ -732,7 +732,7 @@ export const StaffingWidget = ({ employees, dark = false }: IStaffingWidgetProps
       </AnimatePresence>
 
       <AnimatePresence>
-        <If is={addOrgOpen}>
+        <If key="if-add-org" is={addOrgOpen}>
           <AddOrgModal
             key="add-org"
             employees={employees}
@@ -742,7 +742,7 @@ export const StaffingWidget = ({ employees, dark = false }: IStaffingWidgetProps
             dark={dark}
           />
         </If>
-        <If is={addDeptOrgId !== null && !!addDeptOrg}>
+        <If key="if-add-dept" is={addDeptOrgId !== null && !!addDeptOrg}>
           <AddDeptModal
             key="add-dept"
             orgName={addDeptOrg?.name || ''}
@@ -755,33 +755,33 @@ export const StaffingWidget = ({ employees, dark = false }: IStaffingWidgetProps
             dark={dark}
           />
         </If>
-        <If is={addPositionTarget !== null && !!addPosDept}>
+        <If key="if-add-pos" is={addPositionTarget !== null && !!addPosDept}>
           <AddPositionModal
             key="add-pos"
             deptName={addPosDept?.name || ''}
             onClose={() => setAddPositionTarget(null)}
-            onSave={(pos) => handleAddPosition(addPositionTarget!.orgId, addPositionTarget!.deptId, pos)}
+            onSave={(pos) => handleAddPosition(addPositionTarget?.orgId ?? 0, addPositionTarget?.deptId ?? 0, pos)}
             dark={dark}
           />
         </If>
-        <If is={!!assignTarget}>
+        <If key="if-assign" is={!!assignTarget}>
           <AssignEmployeeModal
             key="assign"
             employees={employees}
             assignedIds={currentAssignedIds}
-            positionName={assignTarget?.posName || ''}
+            positionName={assignTarget?.posName ?? ''}
             slots={currentAssignSlots}
             onClose={() => setAssignTarget(null)}
             onAssign={(emp) =>
-              handleAssignEmployee(assignTarget!.orgId, assignTarget!.deptId, assignTarget!.posId, emp)
+              handleAssignEmployee(assignTarget?.orgId ?? 0, assignTarget?.deptId ?? 0, assignTarget?.posId ?? 0, emp)
             }
             onUnassign={(empId) =>
-              handleUnassignEmployee(assignTarget!.orgId, assignTarget!.deptId, assignTarget!.posId, empId)
+              handleUnassignEmployee(assignTarget?.orgId ?? 0, assignTarget?.deptId ?? 0, assignTarget?.posId ?? 0, empId)
             }
             dark={dark}
           />
         </If>
-        <If is={!!editOrgTarget}>
+        <If key="if-edit-org" is={!!editOrgTarget}>
           <EditOrgModal
             key="edit-org"
             org={editOrgTarget as any}
@@ -791,11 +791,11 @@ export const StaffingWidget = ({ employees, dark = false }: IStaffingWidgetProps
             onSave={handleSaveOrgFull}
           />
         </If>
-        <If is={!!editDeptTarget}>
+        <If key="if-edit-dept" is={!!editDeptTarget}>
           <EditDeptModal
             key="edit-dept"
             dept={editDeptTarget?.dept as any}
-            orgId={editDeptTarget?.orgId || 0}
+            orgId={editDeptTarget?.orgId ?? 0}
             existingDepts={organizations.find((o) => o.id === editDeptTarget?.orgId)?.departments ?? []}
             employees={employees}
             dark={dark}

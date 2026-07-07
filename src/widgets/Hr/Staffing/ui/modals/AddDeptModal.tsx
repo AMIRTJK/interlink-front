@@ -180,17 +180,17 @@ export const AddDeptModal = ({
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl border ${personSelectedCls}`}
               >
                 <MiniAvatar
-                  photo={selectedManagerEmp!.avatarPhoto}
-                  initials={selectedManagerEmp!.avatarInitials}
-                  color={selectedManagerEmp!.avatarColor}
+                  photo={selectedManagerEmp?.avatarPhoto}
+                  initials={selectedManagerEmp?.avatarInitials}
+                  color={selectedManagerEmp?.avatarColor}
                   size="md"
                 />
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-semibold truncate ${personNameCls}`}>
-                    {selectedManagerEmp!.lastName} {selectedManagerEmp!.firstName}
+                    {selectedManagerEmp?.lastName} {selectedManagerEmp?.firstName}
                   </p>
                   <p className={`text-xs truncate ${personSubCls}`}>
-                    {selectedManagerEmp!.position}
+                    {selectedManagerEmp?.position}
                   </p>
                 </div>
                 <button
@@ -244,17 +244,17 @@ export const AddDeptModal = ({
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl border ${personSelectedCls}`}
               >
                 <MiniAvatar
-                  photo={selectedCuratorEmp!.avatarPhoto}
-                  initials={selectedCuratorEmp!.avatarInitials}
-                  color={selectedCuratorEmp!.avatarColor}
+                  photo={selectedCuratorEmp?.avatarPhoto}
+                  initials={selectedCuratorEmp?.avatarInitials}
+                  color={selectedCuratorEmp?.avatarColor}
                   size="md"
                 />
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-semibold truncate ${personNameCls}`}>
-                    {selectedCuratorEmp!.lastName} {selectedCuratorEmp!.firstName}
+                    {selectedCuratorEmp?.lastName} {selectedCuratorEmp?.firstName}
                   </p>
                   <p className={`text-xs truncate ${personSubCls}`}>
-                    {selectedCuratorEmp!.position}
+                    {selectedCuratorEmp?.position}
                   </p>
                 </div>
                 <button

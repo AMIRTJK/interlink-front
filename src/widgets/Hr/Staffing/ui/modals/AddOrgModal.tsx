@@ -207,9 +207,9 @@ export const AddOrgModal = ({
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl border ${curatorSelectedCls}`}
               >
                 <MiniAvatar
-                  photo={selectedEmp!.avatarPhoto}
-                  initials={selectedEmp!.avatarInitials}
-                  color={selectedEmp!.avatarColor}
+                  photo={selectedEmp?.avatarPhoto}
+                  initials={selectedEmp?.avatarInitials}
+                  color={selectedEmp?.avatarColor}
                   size="md"
                 />
                 <div className="flex-1 min-w-0">
@@ -218,14 +218,14 @@ export const AddOrgModal = ({
                       dark ? 'text-indigo-300' : 'text-indigo-800'
                     }`}
                   >
-                    {selectedEmp!.lastName} {selectedEmp!.firstName}
+                    {selectedEmp?.lastName} {selectedEmp?.firstName}
                   </p>
                   <p
                     className={`text-xs truncate ${
                       dark ? 'text-indigo-400/70' : 'text-indigo-600/70'
                     }`}
                   >
-                    {selectedEmp!.position}
+                    {selectedEmp?.position}
                   </p>
                 </div>
                 <button
