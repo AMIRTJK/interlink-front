@@ -129,7 +129,7 @@ export const TaskListView = ({ tasks, onOpenTask, onCreate }: TaskListViewProps)
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="w-full py-10 relative z-10 flex flex-col gap-8"
+      className="w-full pb-10 relative z-10 flex flex-col gap-8"
     >
       {/* Statistics Cards */}
       <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -166,7 +166,7 @@ export const TaskListView = ({ tasks, onOpenTask, onCreate }: TaskListViewProps)
       </section>
 
       {/* Glass Container */}
-      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col min-h-[600px]">
+      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-[2.5rem] shadow-none overflow-hidden flex flex-col min-h-[600px]">
         {/* Toolbar */}
         <div className="p-8 border-b border-white/20 dark:border-white/10 flex flex-col gap-6">
           <div className="flex flex-wrap items-center justify-between gap-4">

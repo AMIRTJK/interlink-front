@@ -339,6 +339,15 @@ export const ModuleMenu = ({
 		);
 	}
 
+	const hasSubMenu =
+		(variant === "compact" || variant === "modern") &&
+		!!subItems &&
+		activeKey !== AppRoutes.HR;
+
+	if (hideTopLevel && !hasSubMenu) {
+		return null;
+	}
+
 	return (
 		<div className={`menu-container ${variant}-mode`}>
 			{hideTopLevel ? null : variant === "horizontal" || variant === "full" ? (

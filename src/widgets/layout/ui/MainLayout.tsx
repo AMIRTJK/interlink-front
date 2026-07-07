@@ -13,18 +13,18 @@ export const MainLayout = () => {
 
   return (
     <div className="bg-[#F2F5FF] min-h-screen flex flex-col">
-      <If is={!shouldHideUI}>
-        <div>
+      <div className={shouldHideUI ? "flex-grow flex flex-col min-w-0" : "relative z-10 flex flex-col flex-grow gap-6 px-6 py-4 transition-all duration-300 ease-in-out min-w-0"}>
+        <If is={!shouldHideUI}>
           <Header />
-        </div>
-        {variant === "ios" ? (
-          <Navbar />
-        ) : (
-          <ModuleMenu variant="modern" hideTopLevel />
-        )}
-      </If>
-      <div className={variant === "ios" || tabMode === "on" ? "pb-30" : ""}>
-        <Outlet />
+          {variant === "ios" ? (
+            <Navbar />
+          ) : (
+            <ModuleMenu variant="modern" hideTopLevel />
+          )}
+        </If>
+        <main className={`flex-grow min-w-0 ${variant === "ios" || tabMode === "on" ? "pb-30" : ""}`}>
+          <Outlet />
+        </main>
       </div>
     </div>
   );
