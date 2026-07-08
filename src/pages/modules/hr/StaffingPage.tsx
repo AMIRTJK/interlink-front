@@ -1,10 +1,9 @@
 import { HrHeader, StaffingWidget } from "@widgets/Hr";
 
-// Страница «Штатное расписание»
 export const HrStaffingPage: React.FC = () => {
   return (
     <div>
-      <HrHeader />
+      <HrHeader title="Штатное расписание" subtitle="Структура должностей и штатных единиц" />
       <StaffingWidget />
     </div>
   );

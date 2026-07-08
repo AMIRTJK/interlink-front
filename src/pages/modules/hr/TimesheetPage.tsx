@@ -1,10 +1,9 @@
 import { HrHeader, TimesheetWidget } from "@widgets/Hr";
 
-// Страница «Табель»
 export const HrTimesheetPage: React.FC = () => {
   return (
     <div>
-      <HrHeader title="Табель" />
+      <HrHeader title="Табель" subtitle="Учет рабочего времени сотрудников" />
       <TimesheetWidget />
     </div>
   );

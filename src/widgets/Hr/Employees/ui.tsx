@@ -1,131 +1,41 @@
-import { useMemo, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import React from "react";
+import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
-import { toast } from "@shared/lib/toast";
-import type { IAdminUser } from "@entities/hr";
-import { ApiRoutes } from "@shared/api";
-import { useGetQuery, useMutationQuery } from "@shared/lib";
+import { If } from "@shared/ui";
 import { EmployeeFormModal } from "@features/Hr";
-import {
-  IEmployee,
-  IEmployeesFilters,
-  PAGE_SIZE,
-  PAGE_SIZE_OPTIONS,
-  TEmployeesView,
-  exportUsersExcel,
-  normalizeUsers,
-} from "./model";
+import { PAGE_SIZE_OPTIONS } from "./model";
 import { EmployeesToolbar } from "./EmployeesToolbar";
 import { EmployeesTable } from "./EmployeesTable";
 import { EmployeesCards } from "./EmployeesCards";
 import { EmployeesAnalyticsModal } from "./EmployeesAnalyticsModal";
 import { EmployeeProfileModal } from "./EmployeeProfileModal";
 import { PageSizeSelect } from "./PageSizeSelect";
-
-const emptyFilters: IEmployeesFilters = {
-  status: "all",
-  department: "all",
-  salaryMin: "",
-  salaryMax: "",
-};
-
-const buildQueryParams = (
-  search: string,
-  filters: IEmployeesFilters
-): Record<string, unknown> => {
-  const params: Record<string, unknown> = {
-    with_departments: 1,
-    with_roles: 1,
-  };
-  if (search.trim()) params.search = search.trim();
-  if (filters.status !== "all") params.status = filters.status;
-  if (filters.department !== "all") params.department_id = filters.department;
-  if (filters.salaryMin) params.salary_min = Number(filters.salaryMin);
-  if (filters.salaryMax) params.salary_max = Number(filters.salaryMax);
-  return params;
-};
+import { useEmployeesLogic } from "./lib";
 
 export const EmployeesWidget: React.FC = () => {
-  const [view, setView] = useState<TEmployeesView>("table");
-  const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState<IEmployeesFilters>(emptyFilters);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<number>(PAGE_SIZE);
-  const [showAnalytics, setShowAnalytics] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<IAdminUser | null>(null);
-  const [viewing, setViewing] = useState<IEmployee | null>(null);
-
-  const queryParams = useMemo(
-    () => buildQueryParams(search, filters),
-    [search, filters]
-  );
-
-  const { data, isLoading } = useGetQuery({
-    url: ApiRoutes.GET_USERS,
-    params: queryParams,
-    useToken: true,
-  });
-
-  const deleteM = useMutationQuery({
-    url: (d: { id: number }) =>
-      ApiRoutes.DELETE_USER.replace(":id", String(d.id)),
-    method: "DELETE",
-    messages: { success: "Сотрудник удалён", invalidate: [ApiRoutes.GET_USERS] },
-  });
-
-  const employees = useMemo<IEmployee[]>(() => {
-    const raw = (data?.data?.data || data?.data || data || []) as IAdminUser[];
-    return normalizeUsers(raw);
-  }, [data]);
-
-  const departments = useMemo(() => {
-    const seen = new Set<number>();
-    const result: { id: number; name: string }[] = [];
-    employees.forEach((e) => {
-      if (e.departmentId && !seen.has(e.departmentId)) {
-        seen.add(e.departmentId);
-        result.push({ id: e.departmentId, name: e.department });
-      }
-    });
-    return result;
-  }, [employees]);
-
-  const totalPages = Math.max(1, Math.ceil(employees.length / pageSize));
-  const safePage = Math.min(page, totalPages);
-  const pageItems = employees.slice(
-    (safePage - 1) * pageSize,
-    safePage * pageSize
-  );
-
-  const openCreate = useCallback(() => {
-    setEditing(null);
-    setModalOpen(true);
-  }, []);
-
-  const openEdit = useCallback((e: IEmployee) => {
-    setEditing(e.raw);
-    setModalOpen(true);
-  }, []);
-
-  const openDuplicate = useCallback((e: IEmployee) => {
-    setEditing({ ...e.raw, id: undefined as unknown as number });
-    setModalOpen(true);
-  }, []);
-
-  const handleExportExcel = useCallback(async () => {
-    const params: Record<string, unknown> = {};
-    if (search.trim()) params.search = search.trim();
-    if (filters.status !== "all") params.status = filters.status;
-    if (filters.department !== "all") params.department = filters.department;
-    if (filters.salaryMin) params.salary_min = filters.salaryMin;
-    if (filters.salaryMax) params.salary_max = filters.salaryMax;
-    try {
-      await exportUsersExcel(params);
-    } catch {
-      toast.error("Не удалось скачать файл");
-    }
-  }, [search, filters]);
+  const {
+    view, setView,
+    search, setSearch,
+    filters, setFilters,
+    page, setPage,
+    pageSize, setPageSize,
+    showAnalytics, setShowAnalytics,
+    modalOpen, setModalOpen,
+    editing,
+    viewing, setViewing,
+    deletingId, setDeletingId,
+    isLoading,
+    employees,
+    departments,
+    totalPages,
+    safePage,
+    pageItems,
+    openCreate,
+    openEdit,
+    openDuplicate,
+    handleExportExcel,
+    handleDelete,
+  } = useEmployeesLogic();
 
   return (
     <div className="space-y-4">
@@ -155,22 +65,22 @@ export const EmployeesWidget: React.FC = () => {
         <EmployeesTable
           items={pageItems}
           onEdit={openEdit}
-          onDelete={(id) => deleteM.mutate({ id })}
+          onDelete={setDeletingId}
           onRowClick={setViewing}
         />
       ) : (
         <EmployeesCards
           items={pageItems}
           onEdit={openEdit}
-          onDelete={(id) => deleteM.mutate({ id })}
+          onDelete={setDeletingId}
           onDuplicate={openDuplicate}
           onCardClick={setViewing}
         />
       )}
 
       {employees.length > 0 && (
-        <div className="flex items-center justify-between text-sm text-slate-400">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between mt-8">
+          <div className="flex items-center gap-3 text-sm text-gray-500">
             <span>
               Показано {(safePage - 1) * pageSize + 1}–
               {Math.min(safePage * pageSize, employees.length)} из{" "}
@@ -193,7 +103,7 @@ export const EmployeesWidget: React.FC = () => {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={safePage === 1}
-                className="p-1.5 rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50"
+                className="p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 <ChevronLeft size={16} />
               </button>
@@ -201,10 +111,10 @@ export const EmployeesWidget: React.FC = () => {
                 <button
                   key={i}
                   onClick={() => setPage(i + 1)}
-                  className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                  className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
                     safePage === i + 1
-                      ? "bg-blue-600 text-white"
-                      : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/30"
+                      : "border border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
                   }`}
                 >
                   {i + 1}
@@ -213,7 +123,7 @@ export const EmployeesWidget: React.FC = () => {
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={safePage === totalPages}
-                className="p-1.5 rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50"
+                className="p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 <ChevronRight size={16} />
               </button>
@@ -240,8 +150,8 @@ export const EmployeesWidget: React.FC = () => {
               openEdit(e);
             }}
             onDelete={(id) => {
-              deleteM.mutate({ id });
               setViewing(null);
+              setDeletingId(id);
             }}
             onDuplicate={(e) => {
               setViewing(null);
@@ -249,6 +159,38 @@ export const EmployeesWidget: React.FC = () => {
             }}
           />
         )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        <If is={deletingId !== null}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl flex flex-col items-center text-center gap-4 animate-in fade-in zoom-in-95 duration-150">
+              <div className="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center text-rose-500">
+                <Trash2 size={24} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Удалить сотрудника?</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Это действие необратимо. Сотрудник потеряет доступ к системе, а его данные будут удалены.</p>
+              </div>
+              <div className="flex gap-3 w-full mt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeletingId(null)}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
+                >
+                  Отмена
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(deletingId!)}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium transition-colors cursor-pointer"
+                >
+                  Удалить
+                </button>
+              </div>
+            </div>
+          </div>
+        </If>
       </AnimatePresence>
 
       <EmployeeFormModal

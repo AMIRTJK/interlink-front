@@ -1,4 +1,9 @@
-import { TOrderStatus } from "./model";
+import { useState, useMemo } from "react";
+import { useGetQuery, useMutationQuery } from "@shared/lib";
+import { ApiRoutes } from "@shared/api";
+import type { IHrOrder } from "@entities/hr";
+import { TOrderStatus, IOrderRecord, normalizeOrders } from "./model";
+import { TMinisterFilter } from "./ui/OrderFilters";
 
 export const ORDER_STATUS_CONFIG: Record<
   TOrderStatus,
@@ -79,4 +84,142 @@ export const getExecutorInitials = (executorName: string) => {
     .join("")
     .slice(0, 2)
     .toUpperCase();
+};
+
+export const useOrdersLogic = () => {
+  const { data, isLoading } = useGetQuery({
+    url: ApiRoutes.GET_HR_ORDERS,
+    useToken: true,
+  });
+
+  const orders = useMemo<IOrderRecord[]>(() => {
+    const raw = (data?.data?.data || data?.data || data || []) as IHrOrder[];
+    return normalizeOrders(raw);
+  }, [data]);
+
+  const createM = useMutationQuery({
+    url: ApiRoutes.CREATE_HR_ORDER,
+    method: "POST",
+    messages: {
+      success: "Приказ создан",
+      invalidate: [ApiRoutes.GET_HR_ORDERS],
+    },
+  });
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<TOrderStatus | "Все">("Все");
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [executorQuery, setExecutorQuery] = useState("");
+  const [ministerFilter, setMinisterFilter] = useState<TMinisterFilter>("all");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const hasActiveFilters =
+    selectedTypes.length > 0 ||
+    !!dateFrom ||
+    !!dateTo ||
+    !!executorQuery ||
+    ministerFilter !== "all";
+
+  const statCards = useMemo(() => [
+    { label: "Всего", value: orders.length, color: "#1E3A5F" },
+    { label: "Утверждено", value: orders.filter((o) => o.status === "approved").length, color: "#3b82f6" },
+    { label: "Подписано", value: orders.filter((o) => o.status === "signed").length, color: "#10b981" },
+    { label: "На подписании", value: orders.filter((o) => o.status === "pending").length, color: "#f59e0b" },
+    { label: "Черновик", value: orders.filter((o) => o.status === "draft").length, color: "#94a3b8" },
+  ], [orders]);
+
+  const toISO = (d?: string) => {
+    if (!d) return "";
+    if (/^\d{4}-\d{2}-\d{2}/.test(d)) return d.slice(0, 10);
+    const m = d.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+    return "";
+  };
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter((o) => {
+      const q = searchQuery.toLowerCase();
+      const matchSearch =
+        !q ||
+        o.type.toLowerCase().includes(q) ||
+        o.number.toLowerCase().includes(q) ||
+        o.executorName.toLowerCase().includes(q);
+
+      const matchStatus = statusFilter === "Все" || o.status === statusFilter;
+      const matchType = selectedTypes.length === 0 || selectedTypes.includes(o.type);
+
+      const iso = toISO(o.date);
+      const matchFrom = !dateFrom || (!!iso && iso >= dateFrom);
+      const matchTo = !dateTo || (!!iso && iso <= dateTo);
+
+      const matchExecutor =
+        !executorQuery ||
+        o.executorName.toLowerCase().includes(executorQuery.toLowerCase());
+
+      const matchMinister =
+        ministerFilter === "all" ||
+        (ministerFilter === "signed" ? o.ministerSigned : !o.ministerSigned);
+
+      return (
+        matchSearch &&
+        matchStatus &&
+        matchType &&
+        matchFrom &&
+        matchTo &&
+        matchExecutor &&
+        matchMinister
+      );
+    });
+  }, [
+    orders,
+    searchQuery,
+    statusFilter,
+    selectedTypes,
+    dateFrom,
+    dateTo,
+    executorQuery,
+    ministerFilter,
+  ]);
+
+  const handleResetFilters = () => {
+    setSelectedTypes([]);
+    setDateFrom("");
+    setDateTo("");
+    setExecutorQuery("");
+    setMinisterFilter("all");
+  };
+
+  const handleTypeToggle = (type: string) => {
+    setSelectedTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
+  };
+
+  return {
+    orders,
+    isLoading,
+    createM,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    selectedTypes,
+    dateFrom,
+    setDateFrom,
+    dateTo,
+    setDateTo,
+    executorQuery,
+    setExecutorQuery,
+    ministerFilter,
+    setMinisterFilter,
+    filtersOpen,
+    setFiltersOpen,
+    hasActiveFilters,
+    statCards,
+    filteredOrders,
+    handleResetFilters,
+    handleTypeToggle,
+  };
 };

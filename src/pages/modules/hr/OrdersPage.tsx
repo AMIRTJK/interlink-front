@@ -1,10 +1,9 @@
 import { HrHeader, OrdersWidget } from "@widgets/Hr";
 
-// Страница «Приказы»
 export const HrOrdersPage: React.FC = () => {
   return (
     <div>
-      <HrHeader title="Приказы" />
+      <HrHeader title="Приказы" subtitle="Учет и ведение приказов" />
       <OrdersWidget />
     </div>
   );

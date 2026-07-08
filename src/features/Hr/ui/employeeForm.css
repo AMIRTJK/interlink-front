@@ -1,0 +1,17 @@
+.hr-create-form input[type="number"]::-webkit-outer-spin-button,
+.hr-create-form input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.hr-create-form input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.scrollbar-stable {
+  scrollbar-gutter: stable;
+}
+
+.hidden-input {
+  display: none !important;
+}

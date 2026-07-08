@@ -1,5 +1,4 @@
 import { Pencil, Trash2, Copy, Mail, Phone, Wallet, Building2 } from "lucide-react";
-import { Popconfirm } from "antd";
 import { IEmployee, money } from "./model";
 import { Avatar, StatusChip } from "./parts";
 
@@ -11,7 +10,6 @@ interface IProps {
   onCardClick: (e: IEmployee) => void;
 }
 
-// Карточный вид списка сотрудников
 export const EmployeesCards = ({ items, onEdit, onDelete, onDuplicate, onCardClick }: IProps) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -55,17 +53,12 @@ export const EmployeesCards = ({ items, onEdit, onDelete, onDuplicate, onCardCli
             >
               <Pencil size={14} /> Изменить
             </button>
-            <Popconfirm
-              title="Удалить сотрудника?"
-              okText="Удалить"
-              cancelText="Отмена"
-              okButtonProps={{ danger: true }}
-              onConfirm={() => onDelete(e.id)}
+            <button
+              onClick={() => onDelete(e.id)}
+              className="flex items-center gap-1 text-sm text-rose-500 hover:text-rose-600"
             >
-              <button className="flex items-center gap-1 text-sm text-rose-500 hover:text-rose-600">
-                <Trash2 size={14} /> Удалить
-              </button>
-            </Popconfirm>
+              <Trash2 size={14} /> Удалить
+            </button>
             <button
               onClick={() => onDuplicate(e)}
               className="ml-auto p-1 text-slate-400 hover:text-slate-600"
