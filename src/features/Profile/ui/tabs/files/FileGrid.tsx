@@ -1,7 +1,7 @@
 import React from "react";
 import { Pin, Trash2, Archive, FileText, FileSpreadsheet, Eye, History, Share2, Download, Folder } from "lucide-react";
 import { IApiFile, getFileType, formatBytes } from "./lib";
-import { Tooltip } from "@shared/ui";
+import { Tooltip, If } from "@shared/ui";
 import { _axios } from "@shared/api";
 import { toast } from "@shared/lib/toast";
 

@@ -223,12 +223,17 @@ export const FilesTab = () => {
 							</React.Fragment>
 						);
 					})}
-					{currentFolders.length > 0 && (
-						<>
+					{currentFolders.length > 0 && currentFolders.map((child) => (
+						<React.Fragment key={child.id}>
 							<span className="text-slate-300 dark:text-zinc-700 mx-1.5">/</span>
-							<span className="text-slate-400 dark:text-zinc-500 italic">...</span>
-						</>
-					)}
+							<span
+								onClick={() => setActiveFolderId(child.id)}
+								className="cursor-pointer hover:text-indigo-655 hover:underline text-slate-500 dark:text-zinc-400 transition-all font-semibold"
+							>
+								{child.name}
+							</span>
+						</React.Fragment>
+					))}
 				</div>
 			</If>
 
@@ -295,34 +300,6 @@ export const FilesTab = () => {
 				</div>
 			) : (
 				<div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-					{/* Subfolders Grid */}
-					<If is={currentFolders.length > 0}>
-						<div className="space-y-3">
-							<h3 className="text-xs font-bold text-slate-400 dark:text-zinc-500 tracking-widest uppercase ml-1">
-								Папки
-							</h3>
-							<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-								{currentFolders.map((folder) => (
-									<div
-										key={folder.id}
-										onClick={() => setActiveFolderId(folder.id)}
-										className="group bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3 hover:shadow-md hover:border-slate-200 dark:hover:border-slate-650 transition-all cursor-pointer"
-									>
-										<div className="text-2xl">{folder.emoji || "📁"}</div>
-										<div className="min-w-0 flex-1">
-											<h4 className="text-sm font-bold text-slate-800 dark:text-zinc-200 truncate group-hover:text-indigo-650 transition-colors">
-												{folder.name}
-											</h4>
-											<p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500">
-												{folder.files_count || 0} файлов
-											</p>
-										</div>
-									</div>
-								))}
-							</div>
-						</div>
-					</If>
-
 					{/* Files View */}
 					<FileGridList
 						files={currentFiles}
