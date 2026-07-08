@@ -196,7 +196,7 @@ export const FilesTab = () => {
 				categories={viewContext === "shared" ? sharedCategoriesList : categoriesList}
 				activeCategory={activeCategoryId}
 				onCategorySelect={(id) => setActiveFolderId(id)}
-				onAddCategoryClick={() => setAddCategoryOpen(true)}
+				onAddCategoryClick={viewContext === "personal" ? () => setAddCategoryOpen(true) : undefined}
 				onRenameCategory={viewContext === "personal" ? (cat) => handleOpenRenameFolder(cat.name, Number(cat.id)) : undefined}
 				onDeleteCategory={viewContext === "personal" ? handleDeleteFolderConfirm : undefined}
 				onShareCategory={viewContext === "personal" ? (cat) => {
