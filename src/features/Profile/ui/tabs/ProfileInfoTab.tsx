@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
 	Phone,
@@ -14,8 +14,20 @@ import { IUser } from "@entities/login";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib/hooks";
 import { Loader } from "@shared/ui";
+import { getEnvVar } from "@shared/config";
 import userAvatar from "../../../../assets/images/user-avatar.jpg";
 import { THEMES } from "@widgets/layout/ui/designSettings";
+
+const resolvePhotoUrl = (path?: string | null): string => {
+	if (!path) return "";
+	if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+		return path;
+	}
+	const apiHost = getEnvVar("VITE_API_URL") || "";
+	const host = apiHost.endsWith("/") ? apiHost.slice(0, -1) : apiHost;
+	const p = path.startsWith("/") ? path : `/${path}`;
+	return `${host}${p}`;
+};
 
 interface IProps {
 	userData: IUser | null;
@@ -88,6 +100,11 @@ export const ProfileInfoTab = ({
 	currentTheme,
 }: IProps) => {
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [avatarError, setAvatarError] = useState(false);
+
+	useEffect(() => {
+		setAvatarError(false);
+	}, [userData?.photo_path]);
 	const themeKey =
 		currentTheme || localStorage.getItem("currentTheme") || "emerald";
 	const activeTheme = THEMES[themeKey] || THEMES.emerald;
@@ -146,9 +163,10 @@ export const ProfileInfoTab = ({
 							}`}
 						>
 							<img
-								src={userData?.photo_path || userAvatar}
+								src={avatarError ? userAvatar : (resolvePhotoUrl(userData?.photo_path) || userAvatar)}
 								alt="Аватар"
 								className="w-64 h-64 rounded-[2.5rem] border-2 border-white/60 dark:border-zinc-900/60 object-cover shadow-lg"
+								onError={() => setAvatarError(true)}
 							/>
 							<span className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-1 text-white opacity-0 group-hover:opacity-100 transition-opacity">
 								<Camera size={26} />

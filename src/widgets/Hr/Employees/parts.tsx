@@ -1,19 +1,18 @@
+import { useState } from "react";
 import { IEmployee, initials, statusMeta } from "./model";
 
-// Аватар сотрудника (фото или инициалы)
+// Аватар сотрудника (фото или инициалы, с плавным переходом при ошибке 404)
 export const Avatar = ({ e, size = 40 }: { e: IEmployee; size?: number }) => {
-  if (e.photo) {
-    console.log(`[Avatar Debug] Resolved photo url for ${e.fullName}:`, e.photo);
-  }
-  
-  return e.photo ? (
+  const [hasError, setHasError] = useState(false);
+
+  return e.photo && !hasError ? (
     <img
       src={e.photo}
       alt={e.fullName}
       className="rounded-full object-cover flex-shrink-0"
       style={{ width: size, height: size }}
-      onError={(err) => {
-        console.error(`[Avatar Debug] Failed to load image:`, e.photo, err);
+      onError={() => {
+        setHasError(true);
       }}
     />
   ) : (
