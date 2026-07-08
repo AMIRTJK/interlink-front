@@ -16,6 +16,8 @@ interface IProps {
   onUpload: (file: File) => void;
   totalCount: number;
   onCreateFolderClick: () => void;
+  viewContext: "personal" | "shared";
+  onViewContextChange: (val: "personal" | "shared") => void;
 }
 
 export const FilesHeader = ({
@@ -30,6 +32,8 @@ export const FilesHeader = ({
   onUpload,
   totalCount,
   onCreateFolderClick,
+  viewContext,
+  onViewContextChange,
 }: IProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [localSearch, setLocalSearch] = useState(searchQuery);
@@ -86,13 +90,33 @@ export const FilesHeader = ({
 
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div className="flex items-center gap-2">
-        <h2 className="text-xl font-bold text-slate-800 dark:text-zinc-100">
-          Файлы
-        </h2>
-        <span className="text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-zinc-400 rounded-full">
-          {totalCount}
-        </span>
+      <div className="flex items-center gap-4 border-b border-slate-200 dark:border-slate-800 w-full md:w-auto">
+        <button
+          onClick={() => onViewContextChange("personal")}
+          className={`pb-2 px-1 font-bold text-base transition-colors cursor-pointer border-b-2 ${
+            viewContext === "personal"
+              ? "text-slate-800 dark:text-zinc-100 border-indigo-600"
+              : "text-slate-400 dark:text-zinc-500 border-transparent hover:text-slate-600 dark:hover:text-zinc-300"
+          }`}
+        >
+          Мои файлы
+          <span className="ml-2 text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-zinc-400 rounded-full">
+            {viewContext === "personal" ? totalCount : ""}
+          </span>
+        </button>
+        <button
+          onClick={() => onViewContextChange("shared")}
+          className={`pb-2 px-1 font-bold text-base transition-colors cursor-pointer border-b-2 ${
+            viewContext === "shared"
+              ? "text-slate-800 dark:text-zinc-100 border-indigo-600"
+              : "text-slate-400 dark:text-zinc-500 border-transparent hover:text-slate-600 dark:hover:text-zinc-300"
+          }`}
+        >
+          Доступные мне
+          <span className="ml-2 text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-zinc-400 rounded-full">
+            {viewContext === "shared" ? totalCount : ""}
+          </span>
+        </button>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -211,22 +235,26 @@ export const FilesHeader = ({
         </div>
 
         {/* Create Folder Button */}
-        <button
-          onClick={onCreateFolderClick}
-          className="flex items-center gap-2 px-5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-slate-700 font-semibold rounded-full text-sm shadow-sm cursor-pointer transition-all"
-        >
-          <FolderPlus size={16} className="text-slate-400 dark:text-zinc-400" />
-          <span>Создать папку</span>
-        </button>
+        <If is={viewContext === "personal"}>
+          <button
+            onClick={onCreateFolderClick}
+            className="flex items-center gap-2 px-5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-slate-700 font-semibold rounded-full text-sm shadow-sm cursor-pointer transition-all"
+          >
+            <FolderPlus size={16} className="text-slate-400 dark:text-zinc-400" />
+            <span>Создать папку</span>
+          </button>
+        </If>
 
         {/* Upload Button */}
-        <button
-          onClick={handleUploadClick}
-          className={`bg-gradient-to-r ${theme.gradient} flex items-center gap-2 px-5 py-2 text-white font-semibold rounded-full text-sm shadow-md cursor-pointer hover:shadow-lg hover:brightness-105 transition-all`}
-        >
-          <Upload size={16} />
-          <span>Загрузить</span>
-        </button>
+        <If is={viewContext === "personal"}>
+          <button
+            onClick={handleUploadClick}
+            className={`bg-gradient-to-r ${theme.gradient} flex items-center gap-2 px-5 py-2 text-white font-semibold rounded-full text-sm shadow-md cursor-pointer hover:shadow-lg hover:brightness-105 transition-all`}
+          >
+            <Upload size={16} />
+            <span>Загрузить</span>
+          </button>
+        </If>
       </div>
     </div>
   );

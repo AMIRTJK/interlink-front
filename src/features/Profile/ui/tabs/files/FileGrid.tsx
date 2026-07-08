@@ -1,16 +1,17 @@
 import React from "react";
 import { Pin, Trash2, Archive, FileText, FileSpreadsheet, Eye, History, Share2, Download, Folder } from "lucide-react";
 import { IApiFile, getFileType, formatBytes } from "./lib";
-import { Tooltip } from "@shared/ui";
+import { Tooltip, If } from "@shared/ui";
 import { _axios } from "@shared/api";
 import { toast } from "@shared/lib/toast";
 
 interface IProps {
   files: IApiFile[];
-  onTogglePin: (file: IApiFile) => void;
-  onDelete: (id: number) => void;
+  onTogglePin?: (file: IApiFile) => void;
+  onDelete?: (id: number) => void;
   onView: (file: IApiFile) => void;
   onMove?: (file: IApiFile) => void;
+  onShare?: (file: IApiFile) => void;
 }
 
 export const FileGrid = ({
@@ -19,6 +20,7 @@ export const FileGrid = ({
   onDelete,
   onView,
   onMove,
+  onShare,
 }: IProps) => {
   const getCoverContent = (file: IApiFile) => {
     const fileType = getFileType(file.extension);
@@ -109,20 +111,22 @@ export const FileGrid = ({
             {getCoverContent(file)}
 
             {/* Pin / Star toggle */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onTogglePin(file);
-              }}
-              className={`absolute top-3 right-3 p-1.5 rounded-full transition-all cursor-pointer ${
-                file.is_starred
-                  ? "bg-amber-500! text-white! scale-100"
-                  : "bg-black/40 text-white/80 hover:bg-black/60 scale-0 group-hover:scale-100 focus:scale-100"
-              }`}
-            >
-              <Pin size={14} className={file.is_starred ? "fill-white!" : ""} />
-            </button>
+            <If is={!!onTogglePin}>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTogglePin?.(file);
+                }}
+                className={`absolute top-3 right-3 p-1.5 rounded-full transition-all cursor-pointer ${
+                  file.is_starred
+                    ? "bg-amber-500! text-white! scale-100"
+                    : "bg-black/40 text-white/80 hover:bg-black/60 scale-0 group-hover:scale-100 focus:scale-100"
+                }`}
+              >
+                <Pin size={14} className={file.is_starred ? "fill-white!" : ""} />
+              </button>
+            </If>
           </div>
 
           {/* Meta Area */}
@@ -181,18 +185,35 @@ export const FileGrid = ({
                 </Tooltip>
               )}
 
-              <Tooltip title="Удалить">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(file.id);
-                  }}
-                  className="p-1 text-slate-400 hover:text-red-600! dark:hover:text-red-500! rounded-lg transition-colors cursor-pointer"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </Tooltip>
+              {onShare && (
+                <Tooltip title="Поделиться">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onShare(file);
+                    }}
+                    className="p-1 text-slate-400 hover:text-indigo-600! dark:hover:text-indigo-400! rounded-lg transition-colors cursor-pointer"
+                  >
+                    <Share2 size={14} />
+                  </button>
+                </Tooltip>
+              )}
+
+              {onDelete && (
+                <Tooltip title="Удалить">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(file.id);
+                    }}
+                    className="p-1 text-slate-400 hover:text-red-600! dark:hover:text-red-500! rounded-lg transition-colors cursor-pointer"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </Tooltip>
+              )}
             </div>
           </div>
         </div>

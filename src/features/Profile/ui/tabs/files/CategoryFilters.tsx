@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Share2 } from "lucide-react";
 import { If } from "@shared/ui";
 
 export interface ICategoryItem {
@@ -15,6 +15,7 @@ interface IProps {
   onAddCategoryClick: () => void;
   onRenameCategory?: (cat: ICategoryItem) => void;
   onDeleteCategory?: (id: number) => void;
+  onShareCategory?: (cat: ICategoryItem) => void;
 }
 
 export const CategoryFilters = ({
@@ -24,6 +25,7 @@ export const CategoryFilters = ({
   onAddCategoryClick,
   onRenameCategory,
   onDeleteCategory,
+  onShareCategory,
 }: IProps) => {
   return (
     <div className="flex flex-wrap items-center gap-2.5">
@@ -51,6 +53,16 @@ export const CategoryFilters = ({
                     onRenameCategory?.(cat);
                   }}
                 />
+                {onShareCategory && (
+                  <Share2
+                    size={11}
+                    className="hover:text-indigo-200 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onShareCategory(cat);
+                    }}
+                  />
+                )}
                 <Trash2
                   size={11}
                   className="hover:text-red-300 transition-colors"

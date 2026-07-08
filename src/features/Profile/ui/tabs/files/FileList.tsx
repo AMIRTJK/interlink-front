@@ -7,6 +7,7 @@ import {
 	Eye,
 	Download,
 	Folder,
+	Share2,
 } from "lucide-react";
 import { IApiFile, getFileType, formatBytes } from "./lib";
 import { Tooltip } from "@shared/ui";
@@ -18,8 +19,9 @@ interface IProps {
 	selectedFileIds: number[];
 	onToggleSelectFile: (id: number) => void;
 	onView: (file: IApiFile) => void;
-	onDelete: (id: number) => void;
+	onDelete?: (id: number) => void;
 	onMove?: (file: IApiFile) => void;
+	onShare?: (file: IApiFile) => void;
 }
 
 export const FileList = ({
@@ -29,6 +31,7 @@ export const FileList = ({
 	onView,
 	onDelete,
 	onMove,
+	onShare,
 }: IProps) => {
 	const getSmallIcon = (file: IApiFile) => {
 		const fileType = getFileType(file.extension);
@@ -238,15 +241,29 @@ export const FileList = ({
 											</Tooltip>
 										)}
 
-										<Tooltip title="Удалить">
-											<button
-												type="button"
-												onClick={() => onDelete(file.id)}
-												className="p-1.5 text-slate-400 hover:text-red-650! hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all cursor-pointer"
-											>
-												<Trash2 size={15} />
-											</button>
-										</Tooltip>
+										{onShare && (
+											<Tooltip title="Поделиться">
+												<button
+													type="button"
+													onClick={() => onShare(file)}
+													className="p-1.5 text-slate-400 hover:text-indigo-600! dark:hover:text-indigo-400! hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+												>
+													<Share2 size={15} />
+												</button>
+											</Tooltip>
+										)}
+
+										{onDelete && (
+											<Tooltip title="Удалить">
+												<button
+													type="button"
+													onClick={() => onDelete(file.id)}
+													className="p-1.5 text-slate-400 hover:text-red-650! hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all cursor-pointer"
+												>
+													<Trash2 size={15} />
+												</button>
+											</Tooltip>
+										)}
 									</div>
 								</td>
 							</tr>

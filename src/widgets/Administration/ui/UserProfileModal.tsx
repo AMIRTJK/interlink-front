@@ -56,12 +56,12 @@ function clonePerms(perms: PermModule[]): PermModule[] {
 
 // Ключевые уровни доступа → сырые имена прав (для колонки «Уровни доступа»)
 const ACCESS_LEVEL_ITEMS: { label: string; perm: string }[] = [
-  { label: "Личный кабинет — Просмотр", perm: "profile.view" },
+  { label: "Личный кабинет — Просмотр", perm: "users.view" },
   { label: "Персонал — Просмотр", perm: "users.view" },
   { label: "Персонал — Редактирование", perm: "users.update" },
   { label: "Корреспонденция — Создание", perm: "correspondence.create" },
   { label: "Чат — Просмотр", perm: "tasks.view" },
-  { label: "Управление пользователями", perm: "users.manage_ui" },
+  { label: "Управление пользователями", perm: "permissions.manage_ui" },
 ];
 
 export function UserProfileModal({

@@ -31,7 +31,7 @@ export const useFilesData = (params: IFilesParams) => {
   });
 
   // 4. Create Folder
-  const createFolder = useMutationQuery<{ name: string; parent_id: number | null; sort_order?: number }, IApiFolder>({
+  const createFolder = useMutationQuery<{ name: string; parent_id: number | null; sort_order?: number; emoji?: string | null; shared_user_ids?: number[] }, IApiFolder>({
     url: ApiRoutes.MY_FILE_FOLDERS,
     method: "POST",
     messages: {
@@ -41,7 +41,7 @@ export const useFilesData = (params: IFilesParams) => {
   });
 
   // 5. Update Folder (Rename / Move)
-  const updateFolder = useMutationQuery<{ id: number; name: string; parent_id: number | null; sort_order?: number }, IApiFolder>({
+  const updateFolder = useMutationQuery<{ id: number; name: string; parent_id: number | null; sort_order?: number; emoji?: string | null }, IApiFolder>({
     url: (data) => ApiRoutes.MY_FILE_FOLDERS_ID.replace(":id", String(data.id)),
     method: "PUT",
     messages: {
@@ -100,6 +100,58 @@ export const useFilesData = (params: IFilesParams) => {
   const folders = getArrayData(foldersQuery.data?.data);
   const files = getArrayData(filesQuery.data?.data);
 
+  // 10. Get shared files
+  const sharedFilesQuery = useGetQuery<IFilesParams, { success: boolean; data: { data: IApiFile[]; current_page?: number; total?: number } }>({
+    url: ApiRoutes.MY_FILES_SHARED_WITH_ME,
+    params,
+    useToken: true,
+  });
+
+  // 11. Get shared folders
+  const sharedFoldersQuery = useGetQuery<any, { success: boolean; data: IApiFolder[] }>({
+    url: ApiRoutes.MY_FILE_FOLDERS_SHARED_WITH_ME,
+    useToken: true,
+  });
+
+  // 12. Invite to file
+  const inviteToFile = useMutationQuery<{ id: number; user_id: number }, any>({
+    url: (data) => ApiRoutes.MY_FILES_INVITE.replace(":id", String(data.id)),
+    method: "POST",
+    messages: {
+      success: "Пользователь приглашен к файлу",
+    },
+  });
+
+  // 13. Remove share from file
+  const removeFileShare = useMutationQuery<{ id: number; shareId: number }, any>({
+    url: (data) => ApiRoutes.MY_FILES_SHARES_ID.replace(":id", String(data.id)).replace(":shareId", String(data.shareId)),
+    method: "DELETE",
+    messages: {
+      success: "Доступ к файлу закрыт",
+    },
+  });
+
+  // 14. Invite to folder
+  const inviteToFolder = useMutationQuery<{ id: number; user_id: number }, any>({
+    url: (data) => ApiRoutes.MY_FILE_FOLDERS_INVITE.replace(":id", String(data.id)),
+    method: "POST",
+    messages: {
+      success: "Пользователь приглашен в папку",
+    },
+  });
+
+  // 15. Remove share from folder
+  const removeFolderShare = useMutationQuery<{ id: number; shareId: number }, any>({
+    url: (data) => ApiRoutes.MY_FILE_FOLDERS_SHARES_ID.replace(":id", String(data.id)).replace(":shareId", String(data.shareId)),
+    method: "DELETE",
+    messages: {
+      success: "Доступ к папке закрыт",
+    },
+  });
+
+  const sharedFiles = getArrayData(sharedFilesQuery.data?.data);
+  const sharedFolders = getArrayData(sharedFoldersQuery.data?.data);
+
   const getFolderIcon = (name: string): string => {
     const n = name.toLowerCase();
     if (n.includes("рабоч")) return "💼";
@@ -118,11 +170,26 @@ export const useFilesData = (params: IFilesParams) => {
         list.push({
           id: f.id,
           name: f.name,
-          icon: getFolderIcon(f.name),
+          icon: f.emoji || getFolderIcon(f.name),
         });
       });
     return list;
   }, [folders]);
+
+  const sharedCategoriesList = useMemo(() => {
+    const list: { id: number | "all"; name: string; icon: string }[] = [];
+    list.push({ id: "all" as const, name: "Все общие файлы", icon: "🤝" });
+    sharedFolders
+      .filter((f) => f.parent_id === null)
+      .forEach((f) => {
+        list.push({
+          id: f.id,
+          name: f.name,
+          icon: f.emoji || getFolderIcon(f.name),
+        });
+      });
+    return list;
+  }, [sharedFolders]);
 
   const activeCategoryId = useMemo((): number | 'all' => {
     const actId = params.activeFolderId;
@@ -204,6 +271,7 @@ export const useFilesData = (params: IFilesParams) => {
     refetchMeta: metaQuery.refetch,
 
     categoriesList,
+    sharedCategoriesList,
     activeCategoryId,
     pinnedFiles,
     currentFiles,
@@ -211,11 +279,24 @@ export const useFilesData = (params: IFilesParams) => {
     breadcrumbs,
     showBreadcrumbs,
 
+    sharedFiles,
+    isLoadingSharedFiles: sharedFilesQuery.isLoading,
+    refetchSharedFiles: sharedFilesQuery.refetch,
+
+    sharedFolders,
+    isLoadingSharedFolders: sharedFoldersQuery.isLoading,
+    refetchSharedFolders: sharedFoldersQuery.refetch,
+
     createFolder,
     updateFolder,
     deleteFolder,
     updateFile,
     deleteFile,
     uploadFile,
+
+    inviteToFile,
+    removeFileShare,
+    inviteToFolder,
+    removeFolderShare,
   };
 };
