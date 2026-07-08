@@ -24,13 +24,13 @@ export const OrderList = ({ orders, onOrderClick }: IOrderListProps) => {
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="text-left text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 bg-white">
-              {cols.map((col) => (
-                <th key={col.label} className={`px-5 py-4 ${col.width}`}>
+            <tr className="text-left text-[10px] font-semibold uppercase tracking-wider bg-slate-50 text-slate-400 border-b border-slate-100">
+              {cols.map((col, i) => (
+                <th key={col.label || `col-${i}`} className={`px-4 py-3 font-semibold ${col.width}`}>
                   {col.label}
                 </th>
               ))}

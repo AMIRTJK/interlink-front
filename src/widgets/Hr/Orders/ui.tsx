@@ -6,7 +6,7 @@ import { ApiRoutes } from '@shared/api';
 import { useGetQuery, useMutationQuery } from '@shared/lib';
 import type { IHrOrder } from '@entities/hr';
 import { IOrderRecord, TOrderStatus, normalizeOrders, ORDER_STATUS_LABELS } from './model';
-import { OrderFilters } from './ui/OrderFilters';
+import { OrderFilters, TMinisterFilter } from './ui/OrderFilters';
 import { OrderList } from './ui/OrderList';
 import { OrderDetailModal } from './ui/OrderDetailModal';
 import { OrderForm } from './ui/OrderForm';
@@ -35,7 +35,18 @@ export const OrdersWidget = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<TOrderStatus | 'Все'>('Все');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [executorQuery, setExecutorQuery] = useState('');
+  const [ministerFilter, setMinisterFilter] = useState<TMinisterFilter>('all');
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const hasActiveFilters =
+    selectedTypes.length > 0 ||
+    !!dateFrom ||
+    !!dateTo ||
+    !!executorQuery ||
+    ministerFilter !== 'all';
 
   // Modals state
   const [selectedExtOrder, setSelectedExtOrder] = useState<IOrderRecord | null>(null);
@@ -51,6 +62,15 @@ export const OrdersWidget = () => {
     { label: 'Черновик', value: orders.filter((o) => o.status === 'draft').length, color: '#94a3b8' },
   ], [orders]);
 
+  // Приводим дату приказа к ISO (YYYY-MM-DD) для сравнения диапазона
+  const toISO = (d?: string) => {
+    if (!d) return '';
+    if (/^\d{4}-\d{2}-\d{2}/.test(d)) return d.slice(0, 10);
+    const m = d.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+    return '';
+  };
+
   // --- Filtering Logic ---
   const filteredOrders = useMemo(() => {
     return orders.filter((o) => {
@@ -64,9 +84,46 @@ export const OrdersWidget = () => {
       const matchStatus = statusFilter === 'Все' || o.status === statusFilter;
       const matchType = selectedTypes.length === 0 || selectedTypes.includes(o.type);
 
-      return matchSearch && matchStatus && matchType;
+      const iso = toISO(o.date);
+      const matchFrom = !dateFrom || (!!iso && iso >= dateFrom);
+      const matchTo = !dateTo || (!!iso && iso <= dateTo);
+
+      const matchExecutor =
+        !executorQuery ||
+        o.executorName.toLowerCase().includes(executorQuery.toLowerCase());
+
+      const matchMinister =
+        ministerFilter === 'all' ||
+        (ministerFilter === 'signed' ? o.ministerSigned : !o.ministerSigned);
+
+      return (
+        matchSearch &&
+        matchStatus &&
+        matchType &&
+        matchFrom &&
+        matchTo &&
+        matchExecutor &&
+        matchMinister
+      );
     });
-  }, [orders, searchQuery, statusFilter, selectedTypes]);
+  }, [
+    orders,
+    searchQuery,
+    statusFilter,
+    selectedTypes,
+    dateFrom,
+    dateTo,
+    executorQuery,
+    ministerFilter,
+  ]);
+
+  const handleResetFilters = () => {
+    setSelectedTypes([]);
+    setDateFrom('');
+    setDateTo('');
+    setExecutorQuery('');
+    setMinisterFilter('all');
+  };
 
   // --- Handlers ---
   const handleTypeToggle = (type: string) => {
@@ -86,13 +143,13 @@ export const OrdersWidget = () => {
 
   return (
     <div className="flex-1 overflow-auto bg-slate-50/50 p-6 min-h-0">
-      <div className="max-w-7xl mx-auto space-y-6">
-        
+      <div className="w-full space-y-5">
+
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">Приказы</h2>
-            <p className="text-sm mt-1 text-slate-500">
+            <h2 className="text-lg font-semibold text-slate-900">Приказы</h2>
+            <p className="text-sm mt-0.5 text-slate-500">
               Управление приказами организации
             </p>
           </div>
@@ -101,7 +158,7 @@ export const OrdersWidget = () => {
               setEditingOrder(null);
               setNewOrderOpen(true);
             }}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1E3A5F] text-white text-sm font-medium hover:bg-[#152a45] hover:shadow-md hover:shadow-[#1E3A5F]/20 transition-all active:scale-[0.98] shrink-0"
+            className="flex items-center gap-2 rounded-xl bg-[#1E3A5F] text-white px-5 py-2 text-[13px] font-medium shadow-sm hover:shadow-md hover:bg-[#2D4A7A] transition-all shrink-0"
           >
             <Plus size={16} />
             <span>Добавить</span>
@@ -109,27 +166,27 @@ export const OrdersWidget = () => {
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {statCards.map((card) => (
-            <div key={card.label} className="rounded-2xl px-5 py-4 bg-white border border-slate-100 shadow-sm">
+            <div key={card.label} className="rounded-2xl px-5 py-4 bg-white border border-slate-100">
               <p className="text-[28px] font-bold leading-none tabular-nums" style={{ color: card.color }}>
                 {card.value}
               </p>
-              <p className="text-[12px] mt-2 font-medium text-slate-500">{card.label}</p>
+              <p className="text-xs mt-2 text-slate-500">{card.label}</p>
             </div>
           ))}
         </div>
 
         {/* Filters and Search Container */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {/* Status Pills */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <button
               onClick={() => setStatusFilter('Все')}
-              className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border border-transparent ${
                 statusFilter === 'Все'
-                  ? 'bg-[#1E3A5F] text-white shadow-sm'
-                  : 'text-slate-500 hover:bg-slate-200/50 bg-slate-100/50'
+                  ? 'bg-[#1E3A5F] text-white'
+                  : 'text-slate-500 hover:bg-slate-100 hover:text-[#1E3A5F]'
               }`}
             >
               Все
@@ -138,10 +195,10 @@ export const OrdersWidget = () => {
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
-                className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border border-transparent ${
                   statusFilter === s
-                    ? 'bg-[#1E3A5F] text-white shadow-sm'
-                    : 'text-slate-500 hover:bg-slate-200/50 bg-slate-100/50'
+                    ? 'bg-[#1E3A5F] text-white'
+                    : 'text-slate-500 hover:bg-slate-100 hover:text-[#1E3A5F]'
                 }`}
               >
                 {ORDER_STATUS_LABELS[s]}
@@ -150,31 +207,31 @@ export const OrdersWidget = () => {
           </div>
 
           {/* Search Bar + Toggle Filters */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <div className="relative flex-1 min-w-[200px]">
               <Search
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                size={15}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
               />
               <input
                 type="text"
                 placeholder="Поиск по приказам..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-gray-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/10 focus:border-[#1E3A5F] transition-all bg-white shadow-sm"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm bg-white border-slate-200 text-gray-700 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/10 focus:border-[#1E3A5F] transition-all"
               />
             </div>
             <button
               onClick={() => setFiltersOpen(!filtersOpen)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-medium transition-all shadow-sm ${
-                filtersOpen || selectedTypes.length > 0
-                  ? 'bg-[#1E3A5F]/10 border-[#1E3A5F]/30 text-[#1E3A5F]'
+              className={`relative flex items-center gap-1.5 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                filtersOpen || hasActiveFilters
+                  ? 'bg-[#1E3A5F]/5 border-[#1E3A5F]/30 text-[#1E3A5F]'
                   : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
               }`}
             >
-              <SlidersHorizontal size={16} />
+              <SlidersHorizontal size={15} />
               <span>Фильтры</span>
-              <If is={selectedTypes.length > 0}>
+              <If is={hasActiveFilters}>
                 <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0 ml-1" />
               </If>
             </button>
@@ -190,13 +247,19 @@ export const OrdersWidget = () => {
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <div className="pt-2">
-                  <OrderFilters
-                    selectedTypes={selectedTypes}
-                    onTypeToggle={handleTypeToggle}
-                    onReset={() => setSelectedTypes([])}
-                  />
-                </div>
+                <OrderFilters
+                  selectedTypes={selectedTypes}
+                  onTypeToggle={handleTypeToggle}
+                  dateFrom={dateFrom}
+                  dateTo={dateTo}
+                  onDateFrom={setDateFrom}
+                  onDateTo={setDateTo}
+                  executorQuery={executorQuery}
+                  onExecutorQuery={setExecutorQuery}
+                  ministerFilter={ministerFilter}
+                  onMinisterFilter={setMinisterFilter}
+                  onReset={handleResetFilters}
+                />
               </motion.div>
             </If>
           </AnimatePresence>
