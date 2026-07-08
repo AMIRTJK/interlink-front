@@ -1,9 +1,8 @@
-
 import React, { useState } from "react";
-import { Modal, Tree, Input, Empty } from "antd";
+import { Modal, Tree, Input, Empty, ConfigProvider, theme } from "antd";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Folder, FolderOpen, ChevronRight } from "lucide-react";
-import { useMutationQuery } from "@shared/lib";
+import { useMutationQuery, useIsDarkMode } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { IFolder, IMoveToFolderModalProps } from "../model";
 import { useFolderTree, TFolderTreeNode } from "../lib/useFolderTree";
@@ -26,11 +25,16 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
   // --- Состояние ---
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFolder, setSelectedFolder] = useState<IFolder | null>(null);
+  const isDark = useIsDarkMode();
 
   // --- Логика сервера ---
   const { mutate: moveDocument, isPending } = useMutationQuery({
-    url: (data: { id: number | string; folder: string; reg_seq: number | null }) => 
-      isInternal 
+    url: (data: {
+      id: number | string;
+      folder: string;
+      reg_seq: number | null;
+    }) =>
+      isInternal
         ? ApiRoutes.INTERNAL_MOVE_FOLDER.replace(":id", String(data.id))
         : ApiRoutes.FOLDER_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "PATCH",
@@ -41,11 +45,11 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
     messages: {
       success: "Документ успешно перемещен",
       invalidate: [
-        ApiRoutes.GET_CORRESPONDENCES, 
-        ApiRoutes.GET_INTERNAL_COUNTERS, 
+        ApiRoutes.GET_CORRESPONDENCES,
+        ApiRoutes.GET_INTERNAL_COUNTERS,
         ApiRoutes.GET_INTERNAL_INCOMING,
         ApiRoutes.GET_INTERNAL_OUTGOING,
-        ApiRoutes.GET_INTERNAL_DRAFTS
+        ApiRoutes.GET_INTERNAL_DRAFTS,
       ],
       onSuccessCb: () => {
         onClose();
@@ -70,14 +74,17 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
   };
 
   // --- Динамический рендер иконок ---
-  const renderFolderIcon = (props: { key?: string | number; expanded?: boolean }) => {
+  const renderFolderIcon = (props: {
+    key?: string | number;
+    expanded?: boolean;
+  }) => {
     const isSelected = selectedFolder?.id === Number(props.key);
     const Icon = props.expanded ? FolderOpen : Folder;
-    
+
     return (
-      <Icon 
-        size={16} 
-        className={`${isSelected ? "text-blue-500" : "text-gray-400"} transition-colors duration-200`} 
+      <Icon
+        size={16}
+        className={`${isSelected ? "text-blue-500" : "text-gray-400 dark:text-slate-500"} transition-colors duration-200`}
       />
     );
   };
@@ -85,89 +92,114 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
   // --- Вспомогательные рендеры (правило 37) ---
   const renderHeader = () => (
     <div className="flex items-center gap-2 pb-2">
-      <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+      <div className="p-2 bg-blue-50 dark:bg-blue-950/40 rounded-lg text-blue-600 dark:text-blue-300">
         <Folder size={20} />
       </div>
       <div>
-        <h3 className="font-bold text-gray-900 leading-none text-base">Перемещение документа</h3>
-        <p className="text-[11px] text-gray-400 font-normal mt-1">Выберите целевую папку для перемещения документа</p>
+        <h3 className="font-bold text-gray-900 dark:text-slate-100 leading-none text-base">
+          Перемещение документа
+        </h3>
+        <p className="text-[11px] text-gray-400 dark:text-slate-500 font-normal mt-1">
+          Выберите целевую папку для перемещения документа
+        </p>
       </div>
     </div>
   );
 
   return (
-    <Modal
-      open={isOpen}
-      onCancel={onClose}
-      onOk={handleMove}
-      confirmLoading={isPending}
-      okButtonProps={{ 
-        disabled: !selectedFolder,
-        className: "premium-ok-button"
+    <ConfigProvider
+      theme={{
+        algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
       }}
-      cancelButtonProps={{
-        className: "premium-cancel-button"
-      }}
-      okText="Переместить документ"
-      cancelText="Отменить"
-      title={renderHeader()}
-      centered
-      width={520}
-      className="premium-modal"
-      modalRender={(modal) => (
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ type: "spring", damping: 25, stiffness: 400 }}
-            >
-              {modal}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      )}
     >
-      <div className="space-y-5 pt-3">
-        {/* Поиск и дерево папок */}
-        <div className="space-y-3">
-          <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={16} />
-            <Input
-              placeholder="Поиск целевой папки..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-10 bg-gray-50/50 border-gray-100 hover:border-blue-200 focus:border-blue-500 transition-all rounded-xl"
-              allowClear
-            />
-          </div>
-
-          <div className="max-h-[450px] overflow-y-auto pr-1 custom-scrollbar min-h-[150px] bg-gray-50/40 rounded-2xl p-3 border border-dashed border-gray-200/60 transition-all">
-            {treeData.length > 0 ? (
-              <Tree
-                showIcon
-                showLine={{ showLeafIcon: false }}
-                blockNode
-                defaultExpandAll
-                treeData={treeData}
-                icon={renderFolderIcon}
-                selectedKeys={selectedFolder ? [selectedFolder.id] : []}
-                onSelect={(_, info) => {
-                  const node = info.node as unknown as TFolderTreeNode;
-                  setSelectedFolder(info.selected ? node.folder : null);
-                }}
-                switcherIcon={<ChevronRight size={14} className="text-gray-400" />}
-                className="folder-tree-premium"
-              />
-            ) : (
-              <div className="py-8">
-                <Empty description={<span className="text-gray-400 text-xs">Папки не найдены</span>} image={Empty.PRESENTED_IMAGE_SIMPLE} />
-              </div>
+      <Modal
+        open={isOpen}
+        onCancel={onClose}
+        onOk={handleMove}
+        confirmLoading={isPending}
+        okButtonProps={{
+          disabled: !selectedFolder,
+          className: "premium-ok-button",
+        }}
+        cancelButtonProps={{
+          className: "premium-cancel-button",
+        }}
+        okText="Переместить документ"
+        cancelText="Отменить"
+        title={renderHeader()}
+        centered
+        width={520}
+        className="premium-modal"
+        modalRender={(modal) => (
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: "spring", damping: 25, stiffness: 400 }}
+              >
+                {modal}
+              </motion.div>
             )}
+          </AnimatePresence>
+        )}
+      >
+        <div className="space-y-5 pt-3">
+          {/* Поиск и дерево папок */}
+          <div className="space-y-3">
+            <div className="relative group">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 group-focus-within:text-blue-500 transition-colors"
+                size={16}
+              />
+              <Input
+                placeholder="Поиск целевой папки..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 h-10 bg-gray-50/50 dark:bg-slate-800/50 border-gray-100 dark:border-slate-600 hover:border-blue-200 focus:border-blue-500 transition-all rounded-xl"
+                allowClear
+              />
+            </div>
+
+            <div className="max-h-[450px] overflow-y-auto pr-1 custom-scrollbar min-h-[150px] bg-gray-50/40 dark:bg-slate-900/30 rounded-2xl p-3 border border-dashed border-gray-200/60 dark:border-slate-700 transition-all">
+              {treeData.length > 0 ? (
+                <Tree
+                  showIcon
+                  showLine={{ showLeafIcon: false }}
+                  blockNode
+                  defaultExpandAll
+                  treeData={treeData}
+                  icon={renderFolderIcon}
+                  selectedKeys={selectedFolder ? [selectedFolder.id] : []}
+                  onSelect={(_, info) => {
+                    const node = info.node as unknown as TFolderTreeNode;
+                    setSelectedFolder(info.selected ? node.folder : null);
+                  }}
+                  switcherIcon={
+                    <ChevronRight
+                      size={14}
+                      className="text-gray-400 dark:text-slate-500"
+                    />
+                  }
+                  className="folder-tree-premium"
+                />
+              ) : (
+                <div className="py-8">
+                  <Empty
+                    description={
+                      <span className="text-gray-400 dark:text-slate-500 text-xs">
+                        Папки не найдены
+                      </span>
+                    }
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </Modal>
+      </Modal>
+    </ConfigProvider>
   );
 };

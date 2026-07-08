@@ -542,3 +542,52 @@ body.no-animations
     bottom: calc(32px + env(safe-area-inset-bottom));
   }
 }
+
+/* ─── Тёмная тема (панель подмодуля) ─────────────────────────────
+   Меню рендерится как variant="modern" (см. MainLayout). Базовые стили
+   захардкожены под светлую тему, поэтому переопределяем их под классом
+   .dark (ставится на <html>). */
+.dark .modern-mode {
+  background: #1e293b; /* slate-800 */
+  border-color: #334155; /* slate-700 */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.dark .modern-mode .sub-menu-bar {
+  background: transparent;
+  border-top-color: rgba(51, 65, 85, 0.6);
+  color: #cbd5e1; /* slate-300 */
+}
+
+.dark .modern-mode .sub-menu-item {
+  color: #94a3b8; /* slate-400 */
+}
+
+.dark .modern-mode .sub-menu-item:hover,
+.dark .modern-mode .sub-menu-item.active {
+  color: #93c5fd; /* blue-300 */
+}
+
+.dark .modern-mode .active-border {
+  background-color: rgba(37, 99, 235, 0.18);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+/* Верхний ряд модулей — на случай, если hideTopLevel отключат. */
+.dark .modern-style .custom-menu-item {
+  color: #94a3b8; /* slate-400 */
+}
+
+.dark .modern-style .custom-menu-item.selected,
+.dark .modern-style .custom-menu-item:not(.selected):hover {
+  color: #93c5fd; /* blue-300 */
+}
+
+.dark .modern-style .custom-menu-item:not(.selected):hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .modern-style .main-active-indicator {
+  background-color: rgba(37, 99, 235, 0.2);
+  border-bottom-color: #3b82f6; /* blue-500 */
+}

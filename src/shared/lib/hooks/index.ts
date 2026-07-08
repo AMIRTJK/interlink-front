@@ -8,6 +8,7 @@ export * from "./useAnalytics";
 export * from "./useModalState";
 export * from "./useCorrespondenceRoute";
 export * from "./useTabs";
+export * from "./useIsDarkMode";
 
 export * from "./useNavbar";
 export * from "./useMenuLogic";
