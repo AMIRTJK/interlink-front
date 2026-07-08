@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Modal, Form, ConfigProvider, theme } from "antd";
+import { X } from "lucide-react";
 import { CreateUserDTO, IAdminUser } from "@entities/hr";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 import { EmployeeFormFields } from "./EmployeeFormFields";
 import { PassportUploadStep, IPassportFile } from "./PassportUploadStep";
+import "./employeeForm.css";
 
 interface IProps {
   open: boolean;
@@ -132,6 +134,16 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
 
   const isPending = isEdit ? updateM.isPending : createM.isPending;
 
+  const badge = isEdit
+    ? [employee?.last_name?.[0], employee?.first_name?.[0]]
+        .filter(Boolean)
+        .join("")
+        .toUpperCase() || "✎"
+    : "??";
+
+  // Заголовок прячем на шаге загрузки паспорта (когда полей ещё не видно)
+  const showTitle = isEdit || fieldsVisible;
+
   return (
     <ConfigProvider
       theme={{
@@ -142,29 +154,60 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
         open={open}
         onCancel={onClose}
         footer={null}
-        width={640}
+        width="min(860px, 94vw)"
+        centered
         destroyOnClose
-        title={
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
-              {isEdit ? "✎" : "+"}
-            </div>
-            <div>
-              <p className="text-base font-bold text-slate-800 leading-tight dark:text-slate-100">
-                {isEdit ? "Редактирование сотрудника" : "Новый сотрудник"}
-              </p>
-              <p className="text-xs text-slate-400 dark:text-slate-500">
-                Личные и рабочие данные
-              </p>
-            </div>
-          </div>
-        }
+        closable={false}
+        title={null}
+        className="hr-create-modal"
+        styles={{
+          body: {
+            padding: 0,
+            maxHeight: "88vh",
+            overflowY: "auto",
+            scrollbarGutter: "stable",
+          },
+        }}
       >
+        {/* Шапка. Во время загрузки паспорта заголовок скрыт — остаётся только крестик. */}
+        <div className="flex items-center justify-between pl-6 pr-7 pt-5 pb-3 border-b border-gray-100 sticky top-0 bg-white z-10">
+          {showTitle ? (
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-sm overflow-hidden"
+                style={{ backgroundColor: isEdit ? "#6366f1" : "#ef4444" }}
+              >
+                {badge}
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-gray-900">
+                  {isEdit ? "Редактирование сотрудника" : "Новый сотрудник"}
+                </h2>
+              </div>
+            </div>
+          ) : (
+            <span />
+          )}
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 rounded-xl transition-colors hover:bg-gray-100 text-gray-400"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
         <Form
           form={form}
           layout="vertical"
           onFinish={onFinish}
-          className="pt-2"
+          onValuesChange={(changed) => {
+            // При смене организации сбрасываем выбранные отделы
+            if (Object.prototype.hasOwnProperty.call(changed, "organization_id")) {
+              form.setFieldsValue({ department_ids: undefined });
+            }
+          }}
+          className="hr-create-form pl-6 pr-7 pt-4 pb-6 space-y-5"
         >
           {!isEdit && (
             <PassportUploadStep value={passport} onChange={setPassport} />
@@ -175,22 +218,23 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
               form={form}
               organizationId={organizationId}
               isEdit={isEdit}
+              initialPhoto={employee?.photo_path || undefined}
             />
           )}
 
           {fieldsVisible && (
-            <div className="flex items-center justify-end gap-2 pt-2">
+            <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors dark:text-slate-300 dark:bg-slate-800 dark:border-slate-600 dark:hover:bg-slate-700"
+                className="flex-1 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors border-gray-200 text-gray-600 hover:bg-gray-50"
               >
                 Отмена
               </button>
               <button
                 type="submit"
                 disabled={isPending}
-                className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-colors"
+                className="flex-1 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 transition-colors"
               >
                 {isEdit ? "Сохранить" : "Добавить сотрудника"}
               </button>
