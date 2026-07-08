@@ -31,7 +31,7 @@ export const useFilesData = (params: IFilesParams) => {
   });
 
   // 4. Create Folder
-  const createFolder = useMutationQuery<{ name: string; parent_id: number | null; sort_order?: number }, IApiFolder>({
+  const createFolder = useMutationQuery<{ name: string; parent_id: number | null; sort_order?: number; emoji?: string | null; shared_user_ids?: number[] }, IApiFolder>({
     url: ApiRoutes.MY_FILE_FOLDERS,
     method: "POST",
     messages: {
@@ -41,7 +41,7 @@ export const useFilesData = (params: IFilesParams) => {
   });
 
   // 5. Update Folder (Rename / Move)
-  const updateFolder = useMutationQuery<{ id: number; name: string; parent_id: number | null; sort_order?: number }, IApiFolder>({
+  const updateFolder = useMutationQuery<{ id: number; name: string; parent_id: number | null; sort_order?: number; emoji?: string | null }, IApiFolder>({
     url: (data) => ApiRoutes.MY_FILE_FOLDERS_ID.replace(":id", String(data.id)),
     method: "PUT",
     messages: {
@@ -118,7 +118,7 @@ export const useFilesData = (params: IFilesParams) => {
         list.push({
           id: f.id,
           name: f.name,
-          icon: getFolderIcon(f.name),
+          icon: f.emoji || getFolderIcon(f.name),
         });
       });
     return list;

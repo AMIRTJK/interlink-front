@@ -1,14 +1,30 @@
 export interface IApiFile {
   id: number;
+  user_id?: number;
   folder_id: number | null;
+  folder?: {
+    id: number;
+    name: string;
+    emoji: string | null;
+  };
+  owner?: {
+    id: number;
+    full_name: string;
+  };
   original_name: string;
   stored_name: string;
   extension: string;
   mime: string;
   type: string;
   size: number;
+  size_human?: string;
   is_starred: boolean;
   meta: Record<string, any> | null;
+  access?: {
+    is_owner: boolean;
+    can_view: boolean;
+    can_download: boolean;
+  };
   download_url: string;
   preview_url: string;
   created_at: string;
@@ -17,9 +33,16 @@ export interface IApiFile {
 
 export interface IApiFolder {
   id: number;
+  user_id?: number;
   name: string;
+  emoji?: string | null;
   parent_id: number | null;
   sort_order: number;
+  access?: {
+    is_owner: boolean;
+    can_view: boolean;
+    can_download: boolean;
+  };
   created_at: string;
   updated_at: string;
 }

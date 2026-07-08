@@ -6,8 +6,8 @@ import { UserAccessList } from "./UserAccessList";
 
 interface ICreateFolderPayload {
   name: string;
-  icon?: string;
-  allowed_user_ids?: number[];
+  emoji?: string | null;
+  shared_user_ids?: number[];
 }
 
 interface IProps {
@@ -43,8 +43,8 @@ export const AddCategoryModal = ({ isOpen, onClose, onSubmit }: IProps) => {
     if (!folderName.trim()) return;
 
     const payload: ICreateFolderPayload = { name: folderName.trim() };
-    if (selectedEmoji) payload.icon = selectedEmoji;
-    if (selectedUsers.length > 0) payload.allowed_user_ids = selectedUsers;
+    if (selectedEmoji) payload.emoji = selectedEmoji;
+    if (selectedUsers.length > 0) payload.shared_user_ids = selectedUsers;
 
     onSubmit(payload);
     setFolderName("");

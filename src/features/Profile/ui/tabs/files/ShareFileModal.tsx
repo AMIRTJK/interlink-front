@@ -1,15 +1,14 @@
 import React, { useState } from "react";
-import { X, Share2, UserPlus, Eye, Pencil, Link } from "lucide-react";
-import { IFileItem } from "../mockData";
+import { X, Share2, UserPlus, Link } from "lucide-react";
+import { IApiFile } from "./lib";
 import { If } from "@shared/ui";
 
 interface IProps {
-  file: IFileItem | null;
+  file: IApiFile | null;
   onClose: () => void;
 }
 
 export const ShareFileModal = ({ file, onClose }: IProps) => {
-  const [accessType, setAccessType] = useState<"view" | "edit">("view");
   const [userQuery, setUserQuery] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -23,7 +22,7 @@ export const ShareFileModal = ({ file, onClose }: IProps) => {
 
   const handleGrantAccess = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Доступ к файлу "${file.name}" успешно предоставлен!`);
+    alert(`Доступ к файлу "${file.original_name}" успешно предоставлен!`);
     onClose();
   };
 
@@ -42,7 +41,7 @@ export const ShareFileModal = ({ file, onClose }: IProps) => {
                 Поделиться файлом
               </h3>
               <p className="text-[10px] text-slate-400 dark:text-zinc-550 truncate max-w-[250px]">
-                {file.name}
+                {file.original_name}
               </p>
             </div>
           </div>
@@ -71,32 +70,9 @@ export const ShareFileModal = ({ file, onClose }: IProps) => {
             />
           </div>
 
-          {/* Access Switcher */}
-          <div className="grid grid-cols-2 p-1 bg-slate-100/80 dark:bg-slate-950 rounded-2xl gap-1">
-            <button
-              type="button"
-              onClick={() => setAccessType("view")}
-              className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                accessType === "view"
-                  ? "upload-btn-gradient text-white! shadow-md"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300"
-              }`}
-            >
-              <Eye size={14} />
-              <span>Просмотр</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setAccessType("edit")}
-              className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                accessType === "edit"
-                  ? "upload-btn-gradient text-white! shadow-md"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300"
-              }`}
-            >
-              <Pencil size={14} />
-              <span>Редактирование</span>
-            </button>
+          <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-zinc-400">
+            <span className="font-bold text-slate-700 dark:text-zinc-300 block mb-1">Доступ к файлу</span>
+            Приглашенный пользователь сможет только просматривать и скачивать файл. Редактирование не поддерживается.
           </div>
 
           {/* Copy Link Button */}

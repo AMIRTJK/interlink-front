@@ -80,11 +80,12 @@ export const FilesTab = () => {
 	};
 
 	// Folder Actions
-	const handleCreateFolderSubmit = (name: string) => {
+	const handleCreateFolderSubmit = (name: string, emoji: string | null) => {
 		updateFolder.mutate({
 			id: editingFolder!.id,
 			name,
 			parent_id: editingFolder!.parent_id,
+			...(emoji !== undefined ? { emoji } : {}),
 		});
 		setEditingFolder(null);
 	};
@@ -301,6 +302,7 @@ export const FilesTab = () => {
 				}}
 				onSubmit={handleCreateFolderSubmit}
 				initialName={editingFolder?.name || ""}
+				initialEmoji={editingFolder?.emoji || null}
 				title={folderModalTitle}
 			/>
 

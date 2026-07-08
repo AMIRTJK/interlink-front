@@ -145,11 +145,21 @@ export const ApiRoutes = {
 
   // ==================== MY FILES (PERSONAL STORAGE) ====================
   MY_FILES: "/api/v1/my-files",
+  MY_FILES_SHARED_WITH_ME: "/api/v1/my-files/shared-with-me",
   MY_FILES_UPLOAD: "/api/v1/my-files/upload",
   MY_FILES_META: "/api/v1/my-files/meta",
   MY_FILES_ID: "/api/v1/my-files/:id",
+  MY_FILES_DOWNLOAD: "/api/v1/my-files/:id/download",
+  MY_FILES_INVITE: "/api/v1/my-files/:id/invite",
+  MY_FILES_SHARES: "/api/v1/my-files/:id/shares",
+  MY_FILES_SHARES_ID: "/api/v1/my-files/:id/shares/:shareId",
+
   MY_FILE_FOLDERS: "/api/v1/my-file-folders",
+  MY_FILE_FOLDERS_SHARED_WITH_ME: "/api/v1/my-file-folders/shared-with-me",
   MY_FILE_FOLDERS_ID: "/api/v1/my-file-folders/:id",
+  MY_FILE_FOLDERS_INVITE: "/api/v1/my-file-folders/:id/invite",
+  MY_FILE_FOLDERS_SHARES: "/api/v1/my-file-folders/:id/shares",
+  MY_FILE_FOLDERS_SHARES_ID: "/api/v1/my-file-folders/:id/shares/:shareId",
 
   // ==================== PERSONAL ANALYTICS (личный кабинет) ====================
   // Аналитика только по личным задачам и встречам текущего авторизованного пользователя.
