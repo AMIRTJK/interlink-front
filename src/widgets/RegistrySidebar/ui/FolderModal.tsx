@@ -1,5 +1,14 @@
-import { Modal, Form, Input, FormInstance, Button } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  FormInstance,
+  Button,
+  ConfigProvider,
+  theme,
+} from "antd";
 import { CloseOutlined } from "@ant-design/icons";
+import { useIsDarkMode } from "@shared/lib";
 
 interface IProps {
   isOpen: boolean;
@@ -18,6 +27,7 @@ export const FolderModal = ({
   onCancel,
   onFinish,
 }: IProps) => {
+  const isDark = useIsDarkMode();
   const getTitle = () => {
     if (isEditing) return "Редактировать папку";
     if (parentId) return "Создать папку";
@@ -25,75 +35,85 @@ export const FolderModal = ({
   };
 
   return (
-    <Modal
-      title={<span className="text-[19px] font-semibold text-[#2d3748]">{getTitle()}</span>}
-      open={isOpen}
-      onCancel={onCancel}
-      footer={null}
-      centered
-      className="create__folder-content"
-      closeIcon={
-        <span className="text-gray-400 hover:text-gray-500 transition-all duration-300 hover:rotate-90 inline-flex items-center justify-center">
-          <CloseOutlined className="text-base" />
-        </span>
-      }
-      styles={{
-        mask: {
-          backdropFilter: "blur(3px)",
-          backgroundColor: "rgba(0, 0, 0, 0.25)",
-        },
-        body: {
-          padding: 0
-        }
+    <ConfigProvider
+      theme={{
+        algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
       }}
-      width={380}
-      zIndex={2000}
     >
-      <Form 
-        form={form} 
-        onFinish={onFinish} 
-        layout="vertical"
-        autoComplete="off"
-        className="pt-6"
+      <Modal
+        title={
+          <span className="text-[19px] font-semibold text-[#2d3748] dark:text-slate-100">
+            {getTitle()}
+          </span>
+        }
+        open={isOpen}
+        onCancel={onCancel}
+        footer={null}
+        centered
+        className="create__folder-content"
+        closeIcon={
+          <span className="text-gray-400 dark:text-slate-500 hover:text-gray-500 dark:hover:text-slate-300 transition-all duration-300 hover:rotate-90 inline-flex items-center justify-center">
+            <CloseOutlined className="text-base" />
+          </span>
+        }
+        styles={{
+          mask: {
+            backdropFilter: "blur(3px)",
+            backgroundColor: "rgba(0, 0, 0, 0.25)",
+          },
+          body: {
+            padding: 0,
+          },
+        }}
+        width={380}
+        zIndex={2000}
       >
-        <Form.Item
-          name="name"
-          rules={[{ required: true, message: "Введите название" }]}
-          className="mb-5"
+        <Form
+          form={form}
+          onFinish={onFinish}
+          layout="vertical"
+          autoComplete="off"
+          className="pt-6"
         >
-          <Input 
-            placeholder="Введите название" 
-            className="h-[46px]! px-4! text-[15px]! bg-white! border border-gray-200! rounded-[22px]! placeholder:text-gray-400! focus:border-indigo-400! focus:ring-1! focus:ring-indigo-200! transition-all!"
-          />
-        </Form.Item>
-        
-        <Form.Item
-          name="prefix"
-          rules={[{ required: false }]}
-          className="mb-8"
-        >
-          <Input 
-            placeholder="Введите префикс" 
-            className="h-[46px]! px-4! text-[15px]! bg-white! border border-gray-200! rounded-[22px]! placeholder:text-gray-400! focus:border-indigo-400! focus:ring-1! focus:ring-indigo-200! transition-all!"
-          />
-        </Form.Item>
+          <Form.Item
+            name="name"
+            rules={[{ required: true, message: "Введите название" }]}
+            className="mb-5"
+          >
+            <Input
+              placeholder="Введите название"
+              className="h-[46px]! px-4! text-[15px]! bg-white! dark:bg-slate-800! border border-gray-200! dark:border-slate-600! rounded-[22px]! placeholder:text-gray-400! dark:placeholder:text-slate-500! focus:border-indigo-400! focus:ring-1! focus:ring-indigo-200! transition-all!"
+            />
+          </Form.Item>
 
-        <div className="flex gap-3 pt-2">
-          <Button
-            onClick={onCancel}
-            className="flex-1! h-[50px]! text-[15px]! font-semibold! bg-white! border border-gray-200! text-[#4a5568]! rounded-[25px]! hover:bg-gray-50! transition-all! shadow-sm!"
+          <Form.Item
+            name="prefix"
+            rules={[{ required: false }]}
+            className="mb-8"
           >
-            Отмена
-          </Button>
-          <Button
-            type="primary"
-            htmlType="submit"
-            className="flex-1! h-[50px]! text-[15px]! font-semibold! bg-linear-to-r! from-[#7c3aed]! to-[#a855f7]! border-none! text-white! rounded-[25px]! hover:opacity-95! transition-all! shadow-lg! shadow-purple-400/40!"
-          >
-            {isEditing ? "Сохранить" : "Создать"}
-          </Button>
-        </div>
-      </Form>
-    </Modal>
+            <Input
+              placeholder="Введите префикс"
+              className="h-[46px]! px-4! text-[15px]! bg-white! dark:bg-slate-800! border border-gray-200! dark:border-slate-600! rounded-[22px]! placeholder:text-gray-400! dark:placeholder:text-slate-500! focus:border-indigo-400! focus:ring-1! focus:ring-indigo-200! transition-all!"
+            />
+          </Form.Item>
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              onClick={onCancel}
+              className="flex-1! h-[50px]! text-[15px]! font-semibold! bg-white! dark:bg-slate-800! border border-gray-200! dark:border-slate-600! text-[#4a5568]! dark:text-slate-300! rounded-[25px]! hover:bg-gray-50! dark:hover:bg-slate-700! transition-all! shadow-sm!"
+            >
+              Отмена
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="flex-1! h-[50px]! text-[15px]! font-semibold! bg-linear-to-r! from-[#7c3aed]! to-[#a855f7]! border-none! text-white! rounded-[25px]! hover:opacity-95! transition-all! shadow-lg! shadow-purple-400/40!"
+            >
+              {isEditing ? "Сохранить" : "Создать"}
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+    </ConfigProvider>
   );
 };

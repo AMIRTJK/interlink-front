@@ -13,11 +13,13 @@ import {
 	FileEdit,
 	LoaderCircle,
 } from "lucide-react";
+import { ConfigProvider, theme } from "antd";
 import { RegistryLayout } from "./RegistryLayout";
 import { AppRoutes } from "@shared/config";
 import { useRegistryConfig } from "../lib";
 import { IBreadcrumbItem } from "@shared/ui";
 import { MoveToFolderModal } from "./MoveToFolderModal";
+import { useIsDarkMode } from "@shared/lib";
 
 // Иконка вкладки «Подписан»: документ с текстом и ручка, ставящая подпись.
 // Собрана в стиле lucide (24×24, stroke=currentColor), поэтому наследует
@@ -142,6 +144,7 @@ export const NewRegistry = ({
 }: NewRegistryProps) => {
 	const navigate = useNavigate();
 	const location = useLocation();
+	const isDark = useIsDarkMode();
 
 	const fieldConfig = useRegistryConfig(type);
 	const { params: searchParams, setParams } = useDynamicSearchParams();
@@ -473,8 +476,11 @@ export const NewRegistry = ({
 	};
 
 	return (
-		<div className="relative">
-			<RegistryLayout
+		<ConfigProvider
+			theme={{ algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm }}
+		>
+			<div className="relative">
+				<RegistryLayout
 				documents={documents}
 				meta={meta}
 				tabs={statusTabs}
@@ -507,6 +513,7 @@ export const NewRegistry = ({
 				folders={folders}
 				isInternal={isInternal}
 			/>
-		</div>
+			</div>
+		</ConfigProvider>
 	);
 };

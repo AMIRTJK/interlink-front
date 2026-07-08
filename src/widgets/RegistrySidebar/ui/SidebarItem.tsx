@@ -109,8 +109,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           variant === "vertical" ? "w-full" : "max-w-[180px]",
           isCollapsedMode ? "justify-center px-0" : "gap-1",
           isSelected
-            ? "text-indigo-700!"
-            : "text-gray-600! hover:text-indigo-600! hover:shadow-sm hover:shadow-indigo-200/20 transition-all duration-300",
+            ? "text-indigo-700! dark:text-indigo-300!"
+            : "text-gray-600! dark:text-slate-300! hover:text-indigo-600! hover:shadow-sm hover:shadow-indigo-200/20 transition-all duration-300",
           item.folderName === "Создать новую папку" && "opacity-80"
         )}
         onClick={(e) => {
@@ -136,7 +136,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           variants={contentVariants}
           className={cn(
             "shrink-0! flex items-center justify-center w-8 h-8 transition-all duration-300 [&_svg_path]:stroke-current!",
-            isSelected && !isCollapsedMode && "bg-[#EEF2FF] rounded-xl",
+            isSelected && !isCollapsedMode && "bg-[#EEF2FF] dark:bg-indigo-950/50 rounded-xl",
             isSelected
               ? "text-indigo-600! shadow-indigo-200/40"
               : cn(
@@ -175,7 +175,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
                onClick={toggleOpen}
                className={cn(
                  "transition-colors duration-200 cursor-pointer p-1 rounded-full hover:bg-black/5 ml-2",
-                 isSelected ? "text-purple-600!" : "text-gray-400"
+                 isSelected ? "text-purple-600!" : "text-gray-400 dark:text-slate-500"
                )}
              >
                 <motion.div

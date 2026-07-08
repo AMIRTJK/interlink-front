@@ -56,17 +56,17 @@ dayjs.locale("ru");
 const getBadgeStyles = (color: string) => {
 	switch (color) {
 		case "blue":
-			return "bg-blue-50 text-blue-600";
+			return "bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300";
 		case "emerald":
-			return "bg-emerald-50 text-emerald-600";
+			return "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300";
 		case "purple":
-			return "bg-purple-50 text-purple-600";
+			return "bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300";
 		case "amber":
-			return "bg-amber-50 text-amber-600";
+			return "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300";
 		case "rose":
-			return "bg-rose-50 text-rose-600";
+			return "bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-300";
 		default:
-			return "bg-gray-50 text-gray-600";
+			return "bg-gray-50 text-gray-600 dark:bg-slate-700/50 dark:text-slate-300";
 	}
 };
 
@@ -209,7 +209,7 @@ export const RegistryLayout = ({
 		>
 			{/* --- HEADER BLOCK --- */}
 			<motion.div
-				className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 space-y-3 shrink-0 m-0"
+				className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-3 space-y-3 shrink-0 m-0"
 				initial={{ opacity: 0, y: -20 }}
 				animate={{ opacity: 1, y: 0 }}
 			>
@@ -245,23 +245,23 @@ export const RegistryLayout = ({
 					)}
 
 					<div className="flex items-center gap-2">
-						<div className="flex items-center gap-1.5 text-xs text-gray-600 px-3 py-1.5 bg-gray-50 rounded-full">
+						<div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-slate-300 px-3 py-1.5 bg-gray-50 dark:bg-slate-700/50 rounded-full">
 							<TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
 							<span className="font-medium">
 								Всего:{" "}
-								<span className="text-blue-600 font-bold">{totalRecords}</span>
+								<span className="text-blue-600 dark:text-blue-400 font-bold">{totalRecords}</span>
 							</span>
 						</div>
 
-						<div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+						<div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-700/50 rounded-lg p-1">
 							<motion.button
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.95 }}
 								onClick={() => handleViewModeChange("list")}
 								className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
 									viewMode === "list"
-										? "bg-white text-blue-600 shadow-sm"
-										: "text-gray-600 hover:text-gray-900"
+										? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm"
+										: "text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-100"
 								}`}
 							>
 								<List size={16} />
@@ -273,8 +273,8 @@ export const RegistryLayout = ({
 								onClick={() => handleViewModeChange("block")}
 								className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
 									viewMode === "block"
-										? "bg-white text-blue-600 shadow-sm"
-										: "text-gray-600 hover:text-gray-900"
+										? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm"
+										: "text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-100"
 								}`}
 							>
 								<LayoutGrid size={16} />
@@ -286,8 +286,8 @@ export const RegistryLayout = ({
 								onClick={() => handleViewModeChange("structure")}
 								className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
 									viewMode === "structure"
-										? "bg-white text-blue-600 shadow-sm"
-										: "text-gray-600 hover:text-gray-900"
+										? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm"
+										: "text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-100"
 								}`}
 							>
 								<Activity size={16} />
@@ -302,13 +302,13 @@ export const RegistryLayout = ({
 							className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all relative ${
 								hasActiveFilters
 									? "bg-blue-600 text-white shadow-md"
-									: "bg-gray-100 text-gray-700 hover:bg-gray-200"
+									: "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600"
 							}`}
 						>
 							<Filter size={16} />
 							<span>Фильтры</span>
 							{hasActiveFilters && (
-								<span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
+								<span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-800" />
 							)}
 						</motion.button>
 					</div>
@@ -329,7 +329,7 @@ export const RegistryLayout = ({
 								className={`relative group/tab cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap min-w-[108px] ${
 									activeTabId === tab.id
 										? "text-white"
-										: "bg-gray-100 text-gray-600 hover:bg-gray-200"
+										: "bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600"
 								}`}
 							>
 								<If is={activeTabId === tab.id}>
@@ -433,7 +433,7 @@ export const RegistryLayout = ({
 
 					{/* --- PAGINATION --- */}
 					{lastPage > 1 && (
-						<div className="shrink-0 bg-white rounded-xl shadow-sm border border-gray-100 p-2">
+						<div className="shrink-0 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-2">
 							<Pagination
 								currentPage={currentPage}
 								totalPages={lastPage}
@@ -471,7 +471,7 @@ export const SectionHeader = ({
 	breadcrumbs,
 }: any) => {
 	return (
-		<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 m-0 flex flex-col gap-2">
+		<div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-4 m-0 flex flex-col gap-2">
 			{breadcrumbs && breadcrumbs.length > 0 && (
 				<Breadcrumbs items={breadcrumbs} className="py-0 mb-1" />
 			)}
@@ -497,7 +497,7 @@ export const SectionHeader = ({
 						)}
 					</motion.div>
 					<div>
-						<h3 className="font-semibold text-gray-900">
+						<h3 className="font-semibold text-gray-900 dark:text-slate-100">
 							<span
 								className={`bg-gradient-to-r bg-clip-text text-transparent ${
 									activeStatusData?.gradient || "from-gray-700 to-gray-900"
@@ -506,7 +506,7 @@ export const SectionHeader = ({
 								{activeStatusData?.label || "Все документы"}
 							</span>
 						</h3>
-						<p className="text-sm text-gray-500">
+						<p className="text-sm text-gray-500 dark:text-slate-400">
 							{t?.total || "Всего"} {t?.documents || "документов"}:{" "}
 							{currentDocuments?.length || 0} | {t?.shown || "Показано"}:{" "}
 							{startIndex + 1}-{endIndex}
@@ -539,7 +539,7 @@ export const DocumentCard = ({
 			animate={{ opacity: 1, y: 0 }}
 			whileHover={{ y: -4, boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.15)" }}
 			onClick={onClick}
-			className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-blue-300 transition-all cursor-pointer group"
+			className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden hover:border-blue-300 dark:hover:border-blue-500 transition-all cursor-pointer group"
 		>
 			{/* Header */}
 			<div
@@ -588,13 +588,13 @@ export const DocumentCard = ({
 			{/* Body */}
 			<div className="p-4 space-y-3">
 				<div>
-					<div className="flex items-center gap-1.5 mb-1 text-gray-400">
+					<div className="flex items-center gap-1.5 mb-1 text-gray-400 dark:text-slate-500">
 						<FileType size={12} />
 						<span className="text-[10px] uppercase font-bold tracking-wider">
 							Тема
 						</span>
 					</div>
-					<p className="text-sm font-semibold text-gray-800 line-clamp-2 leading-tight">
+					<p className="text-sm font-semibold text-gray-800 dark:text-slate-100 line-clamp-2 leading-tight">
 						{data.subject}
 					</p>
 				</div>
@@ -603,12 +603,12 @@ export const DocumentCard = ({
 				<div className="grid grid-cols-2 gap-2 text-xs">
 					{fieldConfig?.primary && (
 						<div className="space-y-1">
-							<div className="flex items-center gap-1 text-gray-400">
+							<div className="flex items-center gap-1 text-gray-400 dark:text-slate-500">
 								{fieldConfig.primary.icon}
 								<span>{fieldConfig.primary.label}</span>
 							</div>
 							<div
-								className="font-medium text-gray-700 truncate"
+								className="font-medium text-gray-700 dark:text-slate-200 truncate"
 								title={String(fieldConfig.primary.render(data))}
 							>
 								{fieldConfig.primary.render(data)}
@@ -618,11 +618,11 @@ export const DocumentCard = ({
 
 					{fieldConfig?.secondary && (
 						<div className="space-y-1">
-							<div className="flex items-center gap-1 text-gray-400">
+							<div className="flex items-center gap-1 text-gray-400 dark:text-slate-500">
 								{fieldConfig.secondary.icon}
 								<span>{fieldConfig.secondary.label}</span>
 							</div>
-							<div className="font-medium text-gray-700 truncate">
+							<div className="font-medium text-gray-700 dark:text-slate-200 truncate">
 								{fieldConfig.secondary.render(data)}
 							</div>
 						</div>
@@ -631,7 +631,7 @@ export const DocumentCard = ({
 
 				{/* DYNAMIC BADGES */}
 				{fieldConfig?.badges && fieldConfig.badges.length > 0 && (
-					<div className="pt-3 border-t border-gray-100 flex gap-2">
+					<div className="pt-3 border-t border-gray-100 dark:border-slate-700 flex gap-2">
 						{fieldConfig.badges.map((badge: any, i: number) => {
 							const style = getBadgeStyles(badge.color);
 							return (
@@ -645,7 +645,7 @@ export const DocumentCard = ({
 										{badge.icon}
 										<span className="text-[10px]">{badge.label}</span>
 									</div>
-									<div className="text-xs font-mono font-semibold text-gray-700">
+									<div className="text-xs font-mono font-semibold text-gray-700 dark:text-slate-200">
 										{badge.render(data)}
 									</div>
 								</div>
@@ -683,7 +683,7 @@ export const DocumentListItem = ({
 			}}
 			whileHover={{ x: 4, boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.1)" }}
 			onClick={onClick}
-			className="bg-white rounded-lg border border-gray-200 transition-all duration-300 cursor-pointer mb-2"
+			className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 transition-all duration-300 cursor-pointer mb-2"
 		>
 			<div className="p-4">
 				<div className="flex items-center gap-4">
@@ -706,16 +706,16 @@ export const DocumentListItem = ({
 					<div className="flex-1 grid grid-cols-12 gap-4 items-center min-w-0">
 						{/* ID & Date */}
 						<div className="col-span-2">
-							<div className="text-xs text-gray-500 mb-0.5">№ {data.id}</div>
-							<div className="text-xs font-medium text-gray-700">
+							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">№ {data.id}</div>
+							<div className="text-xs font-medium text-gray-700 dark:text-slate-300">
 								{new Date(data.created_at).toLocaleDateString("ru-RU")}
 							</div>
 						</div>
 
 						{/* Subject */}
 						<div className="col-span-3 min-w-0">
-							<div className="text-xs text-gray-500 mb-0.5">Тема</div>
-							<div className="text-sm font-semibold text-gray-900 truncate">
+							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">Тема</div>
+							<div className="text-sm font-semibold text-gray-900 dark:text-slate-100 truncate">
 								{data.subject}
 							</div>
 						</div>
@@ -723,10 +723,10 @@ export const DocumentListItem = ({
 						{/* DYNAMIC PRIMARY */}
 						{fieldConfig?.primary && (
 							<div className="col-span-2 min-w-0">
-								<div className="text-xs text-gray-500 mb-0.5">
+								<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">
 									{fieldConfig.primary.label}
 								</div>
-								<div className="text-sm text-gray-900 font-medium truncate">
+								<div className="text-sm text-gray-900 dark:text-slate-100 font-medium truncate">
 									{fieldConfig.primary.render(data)}
 								</div>
 							</div>
@@ -735,10 +735,10 @@ export const DocumentListItem = ({
 						{/* DYNAMIC SECONDARY */}
 						{fieldConfig?.secondary && (
 							<div className="col-span-2 min-w-0">
-								<div className="text-xs text-gray-500 mb-0.5">
+								<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">
 									{fieldConfig.secondary.label}
 								</div>
-								<div className="text-sm text-gray-900 font-medium truncate">
+								<div className="text-sm text-gray-900 dark:text-slate-100 font-medium truncate">
 									{fieldConfig.secondary.render(data)}
 								</div>
 							</div>
@@ -754,7 +754,7 @@ export const DocumentListItem = ({
 									<div key={i} className="flex-1 min-w-0">
 										<div className="flex items-center gap-1 mb-0.5">
 											{badge.icon}
-											<span className="text-xs text-gray-500">
+											<span className="text-xs text-gray-500 dark:text-slate-400">
 												{badge.label}
 											</span>
 										</div>
@@ -774,8 +774,8 @@ export const DocumentListItem = ({
 						{/* Статус письма — в стиле столбца «Мой статус» */}
 						<div className="min-w-[120px]">
 							<div className="flex items-center gap-1 mb-0.5">
-								<Activity size={12} className="text-gray-400" />
-								<span className="text-xs text-gray-500">Статус письма</span>
+								<Activity size={12} className="text-gray-400 dark:text-slate-500" />
+								<span className="text-xs text-gray-500 dark:text-slate-400">Статус письма</span>
 							</div>
 							<div
 								className={`text-xs font-mono font-semibold px-2 py-1 rounded truncate ${getBadgeStyles(
@@ -795,7 +795,7 @@ export const DocumentListItem = ({
 									placement="bottomRight"
 									overlayClassName="custom-registry-dropdown"
 								>
-									<button className="p-1.5 hover:bg-gray-100 rounded-md text-gray-500 transition-colors">
+									<button className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md text-gray-500 dark:text-slate-400 transition-colors">
 										<MoreHorizontal size={16} />
 									</button>
 								</Dropdown>
@@ -1174,8 +1174,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange, t }: any) => {
 				disabled={current === 1}
 				className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
 					current === 1
-						? "bg-gray-100 text-gray-400 cursor-not-allowed"
-						: "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200 cursor-pointer"
+						? "bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-600 cursor-not-allowed"
+						: "bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 border border-gray-200 dark:border-slate-700 cursor-pointer"
 				}`}
 			>
 				<ChevronLeft className="w-4 h-4" />
@@ -1188,7 +1188,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, t }: any) => {
 						return (
 							<span
 								key={`ellipsis-${index}`}
-								className="px-3 py-2 text-gray-400"
+								className="px-3 py-2 text-gray-400 dark:text-slate-500"
 							>
 								...
 							</span>
@@ -1206,7 +1206,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, t }: any) => {
 							className={`min-w-[36px] h-9 px-3 rounded-lg text-sm font-medium transition-all cursor-pointer ${
 								isActive
 									? "bg-linear-to-r from-blue-600 to-blue-700 text-white shadow-md"
-									: "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+									: "bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700"
 							}`}
 						>
 							{pageNum}
@@ -1222,8 +1222,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange, t }: any) => {
 				disabled={current === totalPages}
 				className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
 					current === totalPages
-						? "bg-gray-100 text-gray-400 cursor-not-allowed"
-						: "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200 cursor-pointer"
+						? "bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-600 cursor-not-allowed"
+						: "bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 border border-gray-200 dark:border-slate-700 cursor-pointer"
 				}`}
 			>
 				<span className="hidden sm:inline">{texts.forward}</span>
