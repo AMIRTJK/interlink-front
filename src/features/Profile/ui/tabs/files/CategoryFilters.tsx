@@ -12,7 +12,7 @@ interface IProps {
   categories: ICategoryItem[];
   activeCategory: number | "all";
   onCategorySelect: (id: number | "all") => void;
-  onAddCategoryClick: () => void;
+  onAddCategoryClick?: () => void;
   onRenameCategory?: (cat: ICategoryItem) => void;
   onDeleteCategory?: (id: number) => void;
   onShareCategory?: (cat: ICategoryItem) => void;
@@ -77,13 +77,15 @@ export const CategoryFilters = ({
         );
       })}
 
-      <button
-        onClick={onAddCategoryClick}
-        className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 dark:text-zinc-400 hover:border-slate-400 dark:hover:border-zinc-500 hover:text-slate-700 dark:hover:text-zinc-200 text-xs font-semibold transition-all cursor-pointer"
-      >
-        <Plus size={14} />
-        <span>Новая</span>
-      </button>
+      <If is={!!onAddCategoryClick}>
+        <button
+          onClick={onAddCategoryClick}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 dark:text-zinc-400 hover:border-slate-400 dark:hover:border-zinc-500 hover:text-slate-700 dark:hover:text-zinc-200 text-xs font-semibold transition-all cursor-pointer"
+        >
+          <Plus size={14} />
+          <span>Новая</span>
+        </button>
+      </If>
     </div>
   );
 };
