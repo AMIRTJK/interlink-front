@@ -10,8 +10,8 @@ interface IProps {
   selectedFileIds: number[];
   onToggleSelectFile: (id: number) => void;
   onView: (file: IApiFile) => void;
-  onTogglePin: (file: IApiFile) => void;
-  onDelete: (id: number) => void;
+  onTogglePin?: (file: IApiFile) => void;
+  onDelete?: (id: number) => void;
   onMove?: (file: IApiFile) => void;
 }
 
