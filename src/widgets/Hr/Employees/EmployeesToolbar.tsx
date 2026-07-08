@@ -98,11 +98,11 @@ export const EmployeesToolbar = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="flex items-center bg-white border border-slate-200 rounded-xl p-0.5">
+        <div className="flex items-center bg-white border border-slate-200 rounded-xl p-0.5 h-11!">
           <button
             onClick={() => onView("table")}
-            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-              view === "table" ? "bg-blue-50 text-blue-600" : "text-slate-400 hover:text-slate-600"
+            className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors cursor-pointer ${
+              view === "table" ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400" : "text-slate-400 hover:text-slate-600"
             }`}
             title="Таблица"
           >
@@ -110,8 +110,8 @@ export const EmployeesToolbar = ({
           </button>
           <button
             onClick={() => onView("cards")}
-            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-              view === "cards" ? "bg-blue-50 text-blue-600" : "text-slate-400 hover:text-slate-600"
+            className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors cursor-pointer ${
+              view === "cards" ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400" : "text-slate-400 hover:text-slate-600"
             }`}
             title="Карточки"
           >
