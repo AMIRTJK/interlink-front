@@ -70,7 +70,7 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
         phone: (employee.phone || "").replace(/^\+992/, ""),
         personal_phone: (employee.personal_phone || "").replace(/^\+992/, ""),
         corporate_phone: (employee.corporate_phone || "").replace(/^\+992/, ""),
-        birth_date: employee.birth_date,
+        birth_date: employee.birth_date ? (employee.birth_date.includes("T") ? employee.birth_date.split("T")[0] : employee.birth_date.split(" ")[0]) : undefined,
         gender: employee.gender,
         passport_series: employee.passport_series,
         passport_number: employee.passport_number,
