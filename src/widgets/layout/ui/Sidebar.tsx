@@ -126,9 +126,10 @@ export const Sidebar = ({ side, setLayoutMode, themeGradient }: IProps) => {
           >
             <div className="relative shrink-0">
               <img
-                src={userData?.photo_path || userAvatar}
+                src={avatarError ? userAvatar : (resolvePhotoUrl(userData?.photo_path) || userAvatar)}
                 alt="Аватар пользователя"
                 className="w-10 h-10 rounded-[2.5rem] border-2 border-white/60 dark:border-zinc-900/60 object-cover shadow-lg"
+                onError={() => setAvatarError(true)}
               />
               <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white/60 dark:border-zinc-900/60 bg-emerald-500" />
             </div>
