@@ -47,9 +47,9 @@ const KIND_META: Record<
   },
   pending_approve: {
     icon: Clock,
-    ring: "bg-slate-100",
-    icon_color: "text-slate-400",
-    badge: "bg-slate-100 border-slate-200 text-slate-600",
+    ring: "bg-slate-100 dark:bg-slate-700",
+    icon_color: "text-slate-400 dark:text-slate-400",
+    badge: "bg-slate-100 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300",
   },
   approved: {
     icon: Check,
@@ -100,7 +100,7 @@ const STATUS_STYLE: Record<string, { label: string; className: string; dot: stri
   {
     draft: {
       label: "Черновик",
-      className: "bg-slate-50 border-slate-200 text-slate-600",
+      className: "bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300",
       dot: "bg-slate-400",
     },
     analysis: {
@@ -193,10 +193,10 @@ const EventRow = ({
             >
               {event.actor.initials}
             </div>
-            <span className="text-xs font-semibold text-slate-700 truncate">
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">
               {event.actor.fullName}
             </span>
-            <span className="text-xs text-slate-400">·</span>
+            <span className="text-xs text-slate-400 dark:text-slate-400">·</span>
             <span
               className={cn(
                 "text-[10px] font-semibold px-1.5 py-0.5 rounded-full border",
@@ -206,16 +206,16 @@ const EventRow = ({
               {event.statusLabel}
             </span>
           </div>
-          <span className="text-[10px] text-slate-400 flex-shrink-0 mt-0.5 font-medium">
+          <span className="text-[10px] text-slate-400 dark:text-slate-400 flex-shrink-0 mt-0.5 font-medium">
             {formatTime(event.at)}
           </span>
         </div>
-        <p className="text-xs text-slate-600 mt-0.5 leading-snug">
+        <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 leading-snug">
           {event.title}
         </p>
         {event.note && (
           <div className="mt-1.5 pl-3 border-l-2 border-amber-200">
-            <p className="text-[11px] text-slate-500 italic leading-relaxed">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 italic leading-relaxed">
               {event.note}
             </p>
           </div>
@@ -260,14 +260,14 @@ const LetterActivityCard = ({
       transition={{ delay: Math.min(index * 0.03, 0.3), duration: 0.25 }}
       className="group"
     >
-      <div className="rounded-xl border bg-white border-slate-200 shadow-sm transition-all hover:border-blue-200">
+      <div className="rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:border-blue-200">
         <div className="flex items-start gap-3 px-4 py-3.5">
           {/* Индикатор непрочитанного */}
           <span className="mt-1 w-5 h-5 flex items-center justify-center flex-shrink-0">
             {isUnread ? (
               <span className="w-2 h-2 rounded-full bg-blue-500" />
             ) : (
-              <span className="w-2 h-2 rounded-full border-2 border-slate-200 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="w-2 h-2 rounded-full border-2 border-slate-200 dark:border-slate-600 opacity-0 group-hover:opacity-100 transition-opacity" />
             )}
           </span>
 
@@ -287,8 +287,8 @@ const LetterActivityCard = ({
               <div className="flex items-center gap-2 flex-wrap">
                 <span
                   className={cn(
-                    "text-sm text-slate-900",
-                    isUnread ? "font-bold" : "font-semibold text-slate-700",
+                    "text-sm text-slate-900 dark:text-slate-100",
+                    isUnread ? "font-bold" : "font-semibold text-slate-700 dark:text-slate-200",
                   )}
                 >
                   {creatorName}
@@ -299,7 +299,7 @@ const LetterActivityCard = ({
                     className="text-blue-500 fill-blue-500 flex-shrink-0"
                   />
                 )}
-                <span className="font-mono text-[11px] text-slate-400 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded">
+                <span className="font-mono text-[11px] text-slate-400 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 px-1.5 py-0.5 rounded">
                   {item.reg_number || "Без номера"}
                 </span>
                 {status && (
@@ -324,7 +324,7 @@ const LetterActivityCard = ({
                   </span>
                 )}
               </div>
-              <span className="text-xs text-slate-400 flex-shrink-0">
+              <span className="text-xs text-slate-400 dark:text-slate-400 flex-shrink-0">
                 {formatDate(item.created_at)}
               </span>
             </div>
@@ -332,16 +332,16 @@ const LetterActivityCard = ({
               className={cn(
                 "text-sm leading-snug",
                 isUnread
-                  ? "font-medium text-slate-800"
-                  : "text-slate-600",
+                  ? "font-medium text-slate-800 dark:text-slate-200"
+                  : "text-slate-600 dark:text-slate-300",
               )}
             >
               {item.subject || "Без темы"}
             </p>
             {primaryRecipient && (
               <div className="flex items-center gap-1.5 mt-1.5">
-                <User size={11} className="text-slate-400" />
-                <span className="text-xs text-slate-500">
+                <User size={11} className="text-slate-400 dark:text-slate-400" />
+                <span className="text-xs text-slate-500 dark:text-slate-400">
                   {primaryRecipient}
                 </span>
               </div>
@@ -359,10 +359,10 @@ const LetterActivityCard = ({
             className={cn(
               "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex-shrink-0 mt-0.5 cursor-pointer",
               events.length === 0
-                ? "text-slate-300 cursor-default"
+                ? "text-slate-300 dark:text-slate-600 cursor-default"
                 : open
-                  ? "bg-slate-100 text-slate-700"
-                  : "text-slate-400 hover:bg-slate-50 hover:text-slate-600",
+                  ? "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200"
+                  : "text-slate-400 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-200",
             )}
             aria-label="Показать движение письма"
           >
@@ -385,9 +385,9 @@ const LetterActivityCard = ({
               transition={{ duration: 0.22, ease: "easeOut" }}
               className="overflow-hidden"
             >
-              <div className="mx-4 mb-3 border-t border-slate-100 pt-3">
+              <div className="mx-4 mb-3 border-t border-slate-100 dark:border-slate-700 pt-3">
                 <div className="relative pl-8">
-                  <div className="absolute left-[14px] top-0 bottom-4 w-px bg-slate-100" />
+                  <div className="absolute left-[14px] top-0 bottom-4 w-px bg-slate-100 dark:bg-slate-700" />
                   {events.map((event, i) => (
                     <EventRow
                       key={event.id}
@@ -430,15 +430,15 @@ export const StructureView = ({
         <div key={group.label}>
           <div className="flex items-center gap-3 mb-4">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.12em]">
+              <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-[0.12em]">
                 {group.label}
               </span>
-              <span className="text-[11px] font-semibold text-slate-300">·</span>
-              <span className="text-[11px] font-semibold text-slate-400">
+              <span className="text-[11px] font-semibold text-slate-300 dark:text-slate-600">·</span>
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-400">
                 {group.items.length} {pluralizeDocuments(group.items.length)}
               </span>
             </div>
-            <div className="flex-1 h-px bg-slate-100" />
+            <div className="flex-1 h-px bg-slate-100 dark:bg-slate-700" />
           </div>
 
           <div className="space-y-4">

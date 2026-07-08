@@ -47,7 +47,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
       trigger={null}
       width="325px"
       collapsedWidth="80px"
-      className={`min-h-[480px]! border-none! bg-white/60! backdrop-blur-3xl! rounded-3xl! soft-shadow-ios! ${collapsed ? "p-4!" : "p-6!"} ${
+      className={`min-h-[480px]! border-none! bg-white/60! dark:bg-slate-800/60! backdrop-blur-3xl! rounded-3xl! soft-shadow-ios! ${collapsed ? "p-4!" : "p-6!"} ${
         collapsed ? "w-[80px]! max-w-[80px]!" : "min-w-[301px]! max-w-[330px]!"
       } transition-all duration-500 ease-[0.23,1,0.32,1]`}
     >
@@ -71,7 +71,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
                 type="text"
                 icon={<PlusOutlined />}
                 onClick={() => handleAddClick(null)}
-                className="h-6! w-6! text-gray-500! hover:text-indigo-600 addFolderRootSideBar"
+                className="h-6! w-6! text-gray-500! dark:text-slate-400! hover:text-indigo-600 addFolderRootSideBar"
               />
             )}
 
@@ -80,8 +80,8 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
               onClick={() => setCollapsed(!collapsed)}
               className={
                 collapsed
-                  ? "mx-auto h-7! w-7! outline-none! focus:outline-none! text-gray-500! hover:text-indigo-600"
-                  : "ml-auto outline-none! focus:outline-none! text-gray-500! hover:text-indigo-600"
+                  ? "mx-auto h-7! w-7! outline-none! focus:outline-none! text-gray-500! dark:text-slate-400! hover:text-indigo-600"
+                  : "ml-auto outline-none! focus:outline-none! text-gray-500! dark:text-slate-400! hover:text-indigo-600"
               }
               icon={
                 <span
@@ -101,7 +101,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
                     />
                   }
                   onClick={() => onVariantChange?.("horizontal")}
-                  className="h-7! w-7! flex items-center justify-center hover:bg-black/5 rounded-lg group text-gray-500! hover:text-indigo-600"
+                  className="h-7! w-7! flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 rounded-lg group text-gray-500! dark:text-slate-400! hover:text-indigo-600"
                 />
               </Tooltip>
             )}
