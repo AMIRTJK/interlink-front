@@ -1,5 +1,17 @@
 import type { IAdminUser } from "@entities/hr";
 import { _axios, ApiRoutes } from "@shared/api";
+import { getEnvVar } from "@shared/config";
+
+export const resolvePhotoUrl = (path?: string | null): string => {
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+    return path;
+  }
+  const apiHost = getEnvVar("VITE_API_URL") || "";
+  const host = apiHost.endsWith("/") ? apiHost.slice(0, -1) : apiHost;
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${host}${p}`;
+};
 
 export const PAGE_SIZE = 10;
 
@@ -81,7 +93,7 @@ export const normalizeUsers = (raw: IAdminUser[]): IEmployee[] =>
     email: u.corporate_email || u.email || "",
     phone: u.corporate_phone || u.phone || "",
     salary: parseSalary(u.salary),
-    photo: u.photo_path,
+    photo: resolvePhotoUrl(u.photo_path),
     corporateEmail: u.corporate_email || "",
     personalEmail: u.personal_email || "",
     personalPhone: u.personal_phone || "",

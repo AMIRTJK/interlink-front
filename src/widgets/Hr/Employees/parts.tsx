@@ -1,13 +1,20 @@
 import { IEmployee, initials, statusMeta } from "./model";
 
 // Аватар сотрудника (фото или инициалы)
-export const Avatar = ({ e, size = 40 }: { e: IEmployee; size?: number }) =>
-  e.photo ? (
+export const Avatar = ({ e, size = 40 }: { e: IEmployee; size?: number }) => {
+  if (e.photo) {
+    console.log(`[Avatar Debug] Resolved photo url for ${e.fullName}:`, e.photo);
+  }
+  
+  return e.photo ? (
     <img
       src={e.photo}
       alt={e.fullName}
       className="rounded-full object-cover flex-shrink-0"
       style={{ width: size, height: size }}
+      onError={(err) => {
+        console.error(`[Avatar Debug] Failed to load image:`, e.photo, err);
+      }}
     />
   ) : (
     <div
@@ -17,6 +24,7 @@ export const Avatar = ({ e, size = 40 }: { e: IEmployee; size?: number }) =>
       {initials(e.fullName)}
     </div>
   );
+};
 
 // Чип статуса
 export const StatusChip = ({ status }: { status: string }) => {

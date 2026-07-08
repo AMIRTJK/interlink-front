@@ -114,7 +114,7 @@ export const EmployeeProfileModal = ({ employee: e, onClose, onEdit, onDelete, o
         </div>
 
         {/* Контент */}
-        <div className="px-5 py-4 overflow-auto">
+        <div className="px-5 py-4 overflow-auto h-[340px] min-h-[340px]">
           {tab === "info" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field icon={<Mail size={16} />} label="Email" value={r.personal_email || e.email} />

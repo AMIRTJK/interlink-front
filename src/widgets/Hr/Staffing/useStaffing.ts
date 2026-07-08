@@ -10,6 +10,7 @@ import {
   IAssignModalTarget,
   normalizeStaffingStructure,
   ORG_COLORS,
+  resolvePhotoUrl,
 } from "./model";
 
 export const useStaffing = () => {
@@ -44,7 +45,7 @@ export const useStaffing = () => {
       salary: u.salary ? Number(u.salary) : 0,
       avatarColor: ORG_COLORS[u.id % ORG_COLORS.length],
       avatarInitials: `${u.last_name?.[0] || ""}${u.first_name?.[0] || ""}`.toUpperCase() || "??",
-      avatarPhoto: u.photo_path || "",
+      avatarPhoto: resolvePhotoUrl(u.photo_path),
       rating: u.rating || 0,
     }));
   }, [usersData]);
