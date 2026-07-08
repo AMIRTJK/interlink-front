@@ -96,26 +96,18 @@ export const PassportUploadStep = ({ value, onChange }: IProps) => {
 
   return (
     <div className="mb-2">
-      {/* Информационный раздел с инструкцией */}
       <div className="overflow-hidden rounded-2xl border border-blue-100 bg-blue-50/60 dark:border-slate-700 dark:bg-slate-800/50">
-        <div className="flex items-start gap-2.5 p-3.5">
+        <div className="flex items-center gap-2.5 p-3.5">
           <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
             <ScanLine size={16} />
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
-              Как сфотографировать паспорт
-            </p>
-            <p className="mt-0.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              Фото используется для автоматического распознавания данных (OCR).
-              Откройте инструкцию, чтобы рассмотреть примеры правильной и
-              неправильной загрузки.
-            </p>
-          </div>
+          <p className="flex-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            Фото используется для автоматического распознавания данных (OCR).
+            Откройте инструкцию, чтобы рассмотреть примеры правильной и
+            неправильной загрузки.
+          </p>
         </div>
 
-        {/* Кликабельное превью инструкции. Открывает полноэкранный просмотр
-            (antd Image) с зумом (кнопки + колесо), перемещением и поворотом. */}
         <div className="px-3.5 pb-3.5">
           <div className="overflow-hidden rounded-xl ring-1 ring-slate-200 dark:ring-slate-700">
             <Image
@@ -167,9 +159,7 @@ export const PassportUploadStep = ({ value, onChange }: IProps) => {
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
               Загрузка паспорта…
             </p>
-            <p className="text-xs text-slate-400 dark:text-slate-500">
-              Обработка изображения
-            </p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">Обработка изображения</p>
           </>
         ) : (
           <>
@@ -177,14 +167,9 @@ export const PassportUploadStep = ({ value, onChange }: IProps) => {
               <UploadCloud size={22} />
             </div>
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-              Перетащите файл или{" "}
-              <span className="text-blue-600 dark:text-blue-400">
-                выберите на устройстве
-              </span>
+              Перетащите файл или <span className="text-blue-600 dark:text-blue-400">выберите на устройстве</span>
             </p>
-            <p className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
-              <FileText size={12} /> JPG, PNG или WEBP
-            </p>
+            <p className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500"><FileText size={12} /> JPG, PNG или WEBP</p>
           </>
         )}
       </button>
@@ -193,7 +178,7 @@ export const PassportUploadStep = ({ value, onChange }: IProps) => {
         ref={inputRef}
         type="file"
         accept={ACCEPT}
-        style={{ display: "none" }}
+        className="hidden-input"
         onChange={(e) => handleFile(e.target.files?.[0])}
       />
     </div>

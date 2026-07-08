@@ -1,51 +1,3 @@
-/* Оформление модалки создания/редактирования сотрудника под дизайн-код.
-   Все контролы (инпуты, селекты, множественный выбор) — нативные,
-   стилизованы Tailwind. Здесь остаётся только контейнер модалки,
-   стилизация меток Form.Item и подсветка ошибок валидации. */
-
-/* Контейнер модалки — скруглённые углы без внутренних отступов */
-.hr-create-modal .ant-modal-content {
-  border-radius: 16px;
-  padding: 0;
-  overflow: hidden;
-}
-
-/* Убираем стандартные отступы Form.Item — расстояния держит grid */
-.hr-create-form .ant-form-item {
-  margin-bottom: 0;
-}
-
-/* Метки полей */
-.hr-create-form .ant-form-item-label {
-  padding: 0 0 6px;
-}
-.hr-create-form .ant-form-item-label > label {
-  height: auto;
-  font-size: 12px;
-  font-weight: 500;
-  color: #4b5563;
-}
-.hr-create-form .ant-form-item-label > label::after {
-  display: none;
-}
-.hr-create-form .ant-form-item-label > label .ant-form-item-required::before {
-  color: #ef4444;
-}
-
-/* Подсказка об ошибке */
-.hr-create-form .ant-form-item-explain-error {
-  font-size: 11px;
-  margin-top: 4px;
-}
-
-/* Красная рамка нативных инпутов/селектов при ошибке валидации */
-.hr-create-form .ant-form-item-has-error input,
-.hr-create-form .ant-form-item-has-error select {
-  border-color: #f87171 !important;
-  background-color: #fef2f2 !important;
-}
-
-/* Убираем стрелки у числовых полей — под дизайн */
 .hr-create-form input[type="number"]::-webkit-outer-spin-button,
 .hr-create-form input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -54,4 +6,12 @@
 .hr-create-form input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield;
+}
+
+.scrollbar-stable {
+  scrollbar-gutter: stable;
+}
+
+.hidden-input {
+  display: none !important;
 }
