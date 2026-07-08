@@ -1,13 +1,19 @@
+import { useState } from "react";
 import { IEmployee, initials, statusMeta } from "./model";
 
-// Аватар сотрудника (фото или инициалы)
-export const Avatar = ({ e, size = 40 }: { e: IEmployee; size?: number }) =>
-  e.photo ? (
+// Аватар сотрудника (фото или инициалы, с плавным переходом при ошибке 404)
+export const Avatar = ({ e, size = 40 }: { e: IEmployee; size?: number }) => {
+  const [hasError, setHasError] = useState(false);
+
+  return e.photo && !hasError ? (
     <img
       src={e.photo}
       alt={e.fullName}
       className="rounded-full object-cover flex-shrink-0"
       style={{ width: size, height: size }}
+      onError={() => {
+        setHasError(true);
+      }}
     />
   ) : (
     <div
@@ -17,6 +23,7 @@ export const Avatar = ({ e, size = 40 }: { e: IEmployee; size?: number }) =>
       {initials(e.fullName)}
     </div>
   );
+};
 
 // Чип статуса
 export const StatusChip = ({ status }: { status: string }) => {

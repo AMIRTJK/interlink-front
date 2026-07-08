@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ArrowLeft, Check } from 'lucide-react';
+import { ApiRoutes } from '@shared/api';
+import { useGetQuery } from '@shared/lib';
 import { IOrderRecord } from '../model';
 import { useOrderForm } from './useOrderForm';
 import { renderOrderFields } from './renderOrderFields';
@@ -9,7 +11,7 @@ export interface IOrderFormProps {
   orderCounter: number;
   title?: string;
   onClose: () => void;
-  onSave: (order: IOrderRecord) => void;
+  onSave: (payload: any) => void;
 }
 
 export const OrderForm = ({
@@ -21,29 +23,54 @@ export const OrderForm = ({
 }: IOrderFormProps) => {
   const { state, methods } = useOrderForm(initialRecord, orderCounter);
 
+  const { data: usersData } = useGetQuery({
+    url: ApiRoutes.GET_USERS,
+    useToken: true,
+  });
+
+  const { data: orgsData } = useGetQuery({
+    url: ApiRoutes.GET_ORGANIZATIONS,
+    useToken: true,
+  });
+
+  const users = useMemo(() => {
+    const raw = (usersData?.data?.data || usersData?.data || usersData || []) as any[];
+    return raw.map((u: any) => ({
+      id: u.id,
+      name: `${u.last_name || ''} ${u.first_name || ''} ${u.middle_name || ''}`.trim() || 'Без имени',
+      orgId: u.organization_id || u.organization?.id,
+    }));
+  }, [usersData]);
+
+  const orgs = useMemo(() => {
+    const raw = (orgsData?.data?.data || orgsData?.data || orgsData || []) as any[];
+    return raw.map((o: any) => ({
+      id: o.id,
+      name: o.name,
+    }));
+  }, [orgsData]);
+
   const handleSave = () => {
     const finalNum = state.orderNum.trim() || state.orderNumber;
     
-    // Status logic: if minister signed and draft -> signed, else keep status
     let newStatus = state.orderStatus;
-    if (state.ministerSigned && state.orderStatus === 'Черновик') {
-      newStatus = 'Подписан';
+    if (state.ministerSigned && state.orderStatus === 'draft') {
+      newStatus = 'signed';
     }
 
     onSave({
-      id: initialRecord?.id ?? `ord-${Date.now()}`,
+      organization_id: state.organizationId,
+      employee_id: state.employeeId,
+      executor_id: state.executorId,
       type: state.orderType,
       number: finalNum,
-      date: state.orderDate,
-      executorName: state.executorName,
-      status: newStatus,
-      points: state.orderPoints.map((p) => p.value).filter((v) => v.trim() !== ''),
+      order_date: state.orderDate,
       basis: state.additionalBasis,
-      ministerName: state.ministerName,
-      ministerSigned: state.ministerSigned,
-      executorSigned: initialRecord?.executorSigned ?? false,
-      attachments: state.attachments.map((a) => a.name),
-      createdAt: initialRecord?.createdAt ?? new Date().toLocaleDateString('ru-RU'),
+      points: state.orderPoints.map((p: any) => p.value).filter((v: string) => v.trim() !== ''),
+      minister_name: state.ministerName,
+      minister_signed: state.ministerSigned,
+      executor_signed: initialRecord?.executorSigned ?? false,
+      status: newStatus,
     });
   };
 
@@ -75,7 +102,7 @@ export const OrderForm = ({
       {/* Form Content */}
       <div className="flex-1 max-w-5xl w-full mx-auto p-6 lg:p-8 shrink-0">
         <div className="flex flex-col lg:flex-row gap-8">
-          {renderOrderFields({ state, methods })}
+          {renderOrderFields({ state, methods, orgs, users })}
         </div>
       </div>
     </div>

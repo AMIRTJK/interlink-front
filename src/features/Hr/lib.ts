@@ -21,3 +21,8 @@ export const STATUS_OPTIONS = [
   { value: "vacation", label: "В отпуске" },
   { value: "business_trip", label: "В командировке" },
 ];
+
+export const GENDER_OPTIONS = [
+  { value: "male", label: "Мужской" },
+  { value: "female", label: "Женский" },
+];

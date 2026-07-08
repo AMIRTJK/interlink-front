@@ -10,7 +10,7 @@ interface IProps {
   onView: (v: TEmployeesView) => void;
   filters: IEmployeesFilters;
   onApplyFilters: (f: IEmployeesFilters) => void;
-  departments: string[];
+  departments: { id: number; name: string }[];
   onOpenAnalytics: () => void;
   onCreate: () => void;
 }

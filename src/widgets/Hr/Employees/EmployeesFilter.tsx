@@ -3,7 +3,7 @@ import { IEmployeesFilters } from "./model";
 interface IProps {
   draft: IEmployeesFilters;
   setDraft: (f: IEmployeesFilters) => void;
-  departments: string[];
+  departments: { id: number; name: string }[];
   onApply: () => void;
   onReset: () => void;
 }
@@ -22,7 +22,6 @@ const chipCls = (active: boolean) =>
       : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
   }`;
 
-// Поповер фильтров: статус, отдел, диапазон оклада
 export const EmployeesFilter = ({ draft, setDraft, departments, onApply, onReset }: IProps) => {
   return (
     <div className="absolute z-30 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 p-4">
@@ -51,11 +50,11 @@ export const EmployeesFilter = ({ draft, setDraft, departments, onApply, onReset
         </button>
         {departments.map((d) => (
           <button
-            key={d}
-            onClick={() => setDraft({ ...draft, department: d })}
-            className={chipCls(draft.department === d)}
+            key={d.id}
+            onClick={() => setDraft({ ...draft, department: String(d.id) })}
+            className={chipCls(draft.department === String(d.id))}
           >
-            {d}
+            {d.name}
           </button>
         ))}
       </div>

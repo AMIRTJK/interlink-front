@@ -93,7 +93,7 @@ export const SelectField = ({
 		params: queryParams,
 		useToken: !!useToken,
 		options: {
-			enabled: false,
+			enabled: !!isFetchAllowed,
 		},
 	});
 

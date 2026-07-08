@@ -3,7 +3,71 @@ export interface MetaData {
   note: string;
 }
 
-// createOrganization
+export interface IOrganizationShort {
+  id: number;
+  name: string;
+  short_name?: string;
+}
+
+export interface ISupervisorShort {
+  id: number;
+  first_name: string;
+  last_name: string;
+  middle_name?: string;
+  position?: string;
+}
+
+export interface IDepartmentShort {
+  id: number;
+  name: string;
+  code?: string;
+}
+
+export interface IRoleShort {
+  id: number;
+  name: string;
+  guard_name?: string;
+}
+
+export interface IAdminUser {
+  id: number;
+  first_name?: string;
+  last_name?: string;
+  middle_name?: string;
+  full_name?: string;
+  phone?: string;
+  email?: string;
+  personal_email?: string;
+  personal_phone?: string;
+  corporate_email?: string;
+  corporate_phone?: string;
+  position?: string;
+  hr_status?: string;
+  status?: string;
+  salary?: number | string;
+  birth_date?: string;
+  gender?: string;
+  passport_series?: string;
+  passport_number?: string;
+  inn?: string;
+  address?: string;
+  bank_account?: string;
+  rating?: number;
+  photo_path?: string | null;
+  organization_id?: number;
+  supervisor_id?: number;
+  organization?: IOrganizationShort;
+  supervisor?: ISupervisorShort | null;
+  department?: IDepartmentShort;
+  departments?: IDepartmentShort[];
+  roles?: IRoleShort[];
+  projects_count?: number;
+  tasks_count?: number;
+  awards_count?: number;
+  years?: number;
+  created_at?: string;
+}
+
 export interface CreateOrganizationDTO {
   name: string;
   short_name: string;
@@ -16,63 +80,206 @@ export interface CreateOrganizationDTO {
   meta: MetaData;
 }
 
-// createUser
 export interface CreateUserDTO {
   last_name: string;
   first_name: string;
+  middle_name?: string;
   phone: string;
   password?: string;
   position: string;
+  personal_email?: string;
+  personal_phone?: string;
+  corporate_email?: string;
+  corporate_phone?: string;
   organization_id: number;
-  department_id: number;
-  roles: string[];
+  supervisor_id?: number;
+  hr_status?: string;
+  salary?: number;
+  birth_date?: string;
+  gender?: string;
+  passport_series?: string;
+  passport_number?: string;
+  inn?: string;
+  address?: string;
+  bank_account?: string;
+  rating?: number;
+  roles?: string[];
+  department_ids?: number[];
 }
 
-// setRoleToUser
 export interface SetRoleDTO {
   user_id: number;
   roles: string[];
 }
 
-// createPermision
 export interface CreatePermissionDTO {
   name: string;
 }
 
-// createPermisionAndRoles
 export interface CreatePermissionAndRoleDTO {
   name: string;
   permissions: string[];
 }
 
-// createDepartment
 export interface CreateDepartmentDTO {
   name: string;
   code: string;
 }
 
-// Пользователь из админского списка (GET_USERS)
-export interface IAdminUser {
+export interface IHrDocumentEmployee {
   id: number;
-  first_name?: string;
-  last_name?: string;
-  full_name?: string;
-  position?: string;
-  phone?: string;
-  email?: string;
-  personal_email?: string;
-  personal_phone?: string;
-  status?: string;
-  salary?: number;
-  photo_path?: string;
-  organization?: { id: number; name: string };
-  department?: { id: number; name: string };
-  departments?: { id: number; name: string }[];
-  roles?: { id: number; name: string }[];
-  // Показатели для карточки просмотра (придут с бэка позже)
-  projects_count?: number;
-  tasks_count?: number;
-  awards_count?: number;
-  years?: number;
-  created_at?: string;
+  full_name: string;
+  position: string;
+}
+
+export interface IHrDocumentUploader {
+  id: number;
+  full_name: string;
+}
+
+export interface IHrDocument {
+  id: number;
+  organization_id: number;
+  employee_id: number;
+  uploaded_by: number;
+  type: string;
+  title: string;
+  status: string;
+  issued_at: string;
+  expires_at: string | null;
+  original_name: string;
+  stored_name: string;
+  extension: string;
+  mime: string;
+  size: number;
+  size_human: string;
+  download_url: string;
+  meta: unknown;
+  employee: IHrDocumentEmployee;
+  uploader: IHrDocumentUploader;
+}
+
+export interface IHrOrderAttachment {
+  id: number;
+  original_name: string;
+  extension: string;
+  mime: string;
+  size: number;
+  download_url: string;
+}
+
+export interface IHrOrderEmployee {
+  id: number;
+  full_name: string;
+  position: string;
+}
+
+export interface IHrOrder {
+  id: number;
+  organization_id: number;
+  employee_id: number;
+  executor_id: number;
+  type: string;
+  number: string;
+  date: string;
+  order_date: string;
+  basis: string;
+  points: string[];
+  minister_name: string;
+  minister_signed: boolean;
+  executor_signed: boolean;
+  status: string;
+  employee: IHrOrderEmployee;
+  executor: IHrOrderEmployee;
+  attachments: IHrOrderAttachment[];
+}
+
+export interface ICreateOrderDTO {
+  organization_id: number;
+  employee_id: number;
+  executor_id: number;
+  type: string;
+  number: string;
+  order_date: string;
+  basis: string;
+  points: string[];
+  minister_name: string;
+  minister_signed: boolean;
+  executor_signed: boolean;
+  status: string;
+}
+
+export interface IStaffingAssignedEmployee {
+  id: number;
+  name: string;
+  initials: string;
+  photo: string | null;
+}
+
+export interface IStaffingPositionApi {
+  id: number;
+  organization_id: number;
+  sub_organization_id: number;
+  department_id: number;
+  department_name: string;
+  sub_organization_name: string;
+  name: string;
+  slots: number;
+  occupied: number;
+  vacant: number;
+  salary: number;
+  assigned_employees: IStaffingAssignedEmployee[];
+}
+
+export interface IStaffingDeptApi {
+  id: number;
+  organization_id: number;
+  parent_id: number | null;
+  name: string;
+  code: string;
+  curator_user_id: number | null;
+  curator_name: string;
+  positions: IStaffingPositionApi[];
+}
+
+export interface IStaffingSubOrgApi {
+  id: number;
+  organization_id: number;
+  parent_id: number | null;
+  curator_user_id: number | null;
+  curator_name: string;
+  name: string;
+  short_name: string;
+  type: string;
+  color: string;
+  is_main: boolean;
+  sort_order: number;
+  positions: IStaffingPositionApi[];
+}
+
+export interface IStaffingStructureApi {
+  organization_id: number;
+  sub_organizations: IStaffingSubOrgApi[];
+  departments: IStaffingDeptApi[];
+}
+
+export interface ICreateSubOrgDTO {
+  organization_id: number;
+  name: string;
+  short_name: string;
+  type: string;
+  color: string;
+  is_main: boolean;
+  sort_order: number;
+  curator_user_id?: number;
+}
+
+export interface ICreatePositionDTO {
+  organization_id: number;
+  sub_organization_id: number;
+  department_id: number;
+  name: string;
+  slots: number;
+  salary: number;
+  sort_order?: number;
 }

@@ -16,9 +16,6 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
   const [form] = Form.useForm();
   const isEdit = !!employee?.id;
 
-  // Тёмная тема переключается классом `.dark` на <html>. Прокидываем её в antd
-  // через darkAlgorithm, чтобы модалка (фон, поля, инпуты) была тёмной, а не
-  // белым пятном поверх тёмного интерфейса.
   const [isDark, setIsDark] = useState(
     () =>
       typeof document !== "undefined" &&
@@ -33,11 +30,8 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
     return () => observer.disconnect();
   }, []);
 
-  // Загруженный паспорт. Для нового сотрудника — обязательный первый шаг:
-  // пока паспорт не загружен, остальные поля формы не отображаются.
   const [passport, setPassport] = useState<IPassportFile | null>(null);
 
-  // Поля показываются при редактировании или после загрузки паспорта.
   const fieldsVisible = isEdit || !!passport;
 
   const createM = useMutationQuery<CreateUserDTO>({
@@ -67,21 +61,32 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
       form.setFieldsValue({
         first_name: employee.first_name,
         last_name: employee.last_name,
+        middle_name: employee.middle_name,
         position: employee.position,
-        email: employee.email,
-        status: employee.status,
-        salary: employee.salary,
-        phone: (employee.phone || "").replace(/^\+992/, ""),
+        corporate_email: employee.corporate_email,
         personal_email: employee.personal_email,
+        hr_status: employee.hr_status || employee.status,
+        salary: employee.salary ? Number(employee.salary) : undefined,
+        phone: (employee.phone || "").replace(/^\+992/, ""),
         personal_phone: (employee.personal_phone || "").replace(/^\+992/, ""),
-        organization_id: employee.organization?.id
-          ? String(employee.organization.id)
+        corporate_phone: (employee.corporate_phone || "").replace(/^\+992/, ""),
+        birth_date: employee.birth_date ? (employee.birth_date.includes("T") ? employee.birth_date.split("T")[0] : employee.birth_date.split(" ")[0]) : undefined,
+        gender: employee.gender,
+        passport_series: employee.passport_series,
+        passport_number: employee.passport_number,
+        inn: employee.inn,
+        address: employee.address,
+        bank_account: employee.bank_account,
+        rating: employee.rating,
+        supervisor_id: employee.supervisor_id
+          ? String(employee.supervisor_id)
           : undefined,
-        department_id: employee.department?.id
-          ? String(employee.department.id)
-          : employee.departments?.[0]?.id
-            ? String(employee.departments[0].id)
+        organization_id: employee.organization_id
+          ? String(employee.organization_id)
+          : employee.organization?.id
+            ? String(employee.organization.id)
             : undefined,
+        department_ids: employee.departments?.map((d) => String(d.id)),
         roles: employee.roles?.map((r) => r.name),
       });
     } else {
@@ -95,15 +100,27 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
       if (!s) return undefined;
       return s.startsWith("+") ? s : `+992${s}`;
     };
+
+    const deptIds = Array.isArray(values.department_ids)
+      ? (values.department_ids as string[]).map(Number)
+      : undefined;
+
     const payload: Record<string, unknown> = {
       ...values,
       phone: withCode(values.phone),
       personal_phone: withCode(values.personal_phone),
+      corporate_phone: withCode(values.corporate_phone),
       organization_id: Number(values.organization_id),
-      department_id: Number(values.department_id),
+      supervisor_id: values.supervisor_id
+        ? Number(values.supervisor_id)
+        : undefined,
+      department_ids: deptIds,
       salary: values.salary ? Number(values.salary) : undefined,
+      rating: values.rating ? Number(values.rating) : undefined,
     };
+
     if (isEdit) delete payload.password;
+
     const onSuccess = () => {
       form.resetFields();
       onClose();
@@ -125,7 +142,7 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
         open={open}
         onCancel={onClose}
         footer={null}
-        width={560}
+        width={640}
         destroyOnClose
         title={
           <div className="flex items-center gap-3">
@@ -149,12 +166,10 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
           onFinish={onFinish}
           className="pt-2"
         >
-          {/* Обязательный первый шаг при создании — загрузка паспорта. */}
           {!isEdit && (
             <PassportUploadStep value={passport} onChange={setPassport} />
           )}
 
-          {/* Остальные поля появляются только после загрузки паспорта. */}
           {fieldsVisible && (
             <EmployeeFormFields
               form={form}

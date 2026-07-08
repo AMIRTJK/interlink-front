@@ -1,25 +1,11 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { List, LayoutGrid, GitBranch, Network, FileText, Download, X, Upload, Search, Plus, Eye, Trash2, Pencil } from 'lucide-react';
-
-import {
-  ISubOrganization,
-  IEmployee,
-  TStaffingViewMode,
-  IStaffingDepartment,
-  IStaffingPosition,
-  ORG_COLORS,
-} from './model';
-
+import { TStaffingViewMode, ORG_COLORS } from './model';
 import { SummaryBar } from './ui/SummaryBar';
 import { EmptyStateIllustration } from './ui/EmptyStateIllustration';
 import { OccupancyRing } from './ui/components/OccupancyRing';
-import {
-  ListView,
-  BubbleView,
-  OrgTreeChart,
-} from './ui/views';
-
+import { ListView, BubbleView, OrgTreeChart } from './ui/views';
 import {
   AddOrgModal,
   AddDeptModal,
@@ -28,313 +14,20 @@ import {
   EditOrgModal,
   EditDeptModal,
 } from './ui/modals';
-
 import { calcOrgTotals, getOccupancyColor } from './lib';
 import { If } from '@shared/ui/If';
+import { useStaffing } from './useStaffing';
 
 export interface IStaffingWidgetProps {
-  employees: IEmployee[];
   dark?: boolean;
 }
 
-export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidgetProps) => {
-  const [organizations, setOrganizations] = useState<ISubOrganization[]>([]);
-  const [viewMode, setViewMode] = useState<TStaffingViewMode>('list');
-  const [search, setSearch] = useState('');
-  const [addOrgOpen, setAddOrgOpen] = useState(false);
-  const [addDeptOrgId, setAddDeptOrgId] = useState<number | null>(null);
-  const [addPositionTarget, setAddPositionTarget] = useState<{ orgId: number; deptId: number } | null>(null);
-  
-  const [assignTarget, setAssignTarget] = useState<{
-    orgId: number;
-    deptId: number;
-    posId: number;
-    posName: string;
-    assignedIds: number[];
-    slots: number;
-  } | null>(null);
-  
-  const [editOrgTarget, setEditOrgTarget] = useState<ISubOrganization | null>(null);
-  const [editDeptTarget, setEditDeptTarget] = useState<{ orgId: number; dept: IStaffingDepartment } | null>(null);
-  
+export const StaffingWidget = ({ dark = false }: IStaffingWidgetProps) => {
+  const { state, methods } = useStaffing();
+
   const [pdfFile, setPdfFile] = useState<{ name: string; url: string; size: string } | null>(null);
   const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
   const pdfInputRef = useRef<HTMLInputElement>(null);
-
-  const allTotals = useMemo(() => {
-    let totalPositions = 0,
-      totalSlots = 0,
-      totalOccupied = 0,
-      totalVacant = 0,
-      totalFot = 0;
-
-    organizations.forEach((org) =>
-      org.departments.forEach((dept) =>
-        dept.positions.forEach((pos) => {
-          totalPositions++;
-          totalSlots += pos.slots;
-          totalOccupied += pos.occupied;
-          totalVacant += pos.vacant;
-          totalFot += pos.salary * pos.slots;
-        })
-      )
-    );
-
-    return { totalPositions, totalSlots, totalOccupied, totalVacant, totalFot };
-  }, [organizations]);
-
-  const filteredOrgs = useMemo(() => {
-    if (!search.trim()) return organizations;
-    const q = search.toLowerCase();
-    return organizations
-      .map((org) => ({
-        ...org,
-        departments: org.departments
-          .map((d) => ({
-            ...d,
-            positions: d.positions.filter((p) => p.name.toLowerCase().includes(q)),
-          }))
-          .filter((d) => d.name.toLowerCase().includes(q) || d.positions.length > 0),
-      }))
-      .filter((org) => org.name.toLowerCase().includes(q) || org.departments.length > 0);
-  }, [organizations, search]);
-
-  const currentAssignedIds = useMemo(() => {
-    if (!assignTarget) return [];
-    const org = organizations.find((o) => o.id === assignTarget.orgId);
-    const dept = org?.departments.find((d) => d.id === assignTarget.deptId);
-    const pos = dept?.positions.find((p) => p.id === assignTarget.posId);
-    return pos ? pos.assignedEmployees.map((ae) => ae.id) : [];
-  }, [assignTarget, organizations]);
-
-  const currentAssignSlots = useMemo(() => {
-    if (!assignTarget) return 1;
-    const org = organizations.find((o) => o.id === assignTarget.orgId);
-    const dept = org?.departments.find((d) => d.id === assignTarget.deptId);
-    const pos = dept?.positions.find((p) => p.id === assignTarget.posId);
-    return pos?.slots ?? 1;
-  }, [assignTarget, organizations]);
-
-  const handleAddOrg = useCallback(
-    (name: string, shortName: string, type: string, isMain: boolean, curatorName: string) => {
-      setOrganizations((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          name,
-          shortName,
-          type,
-          departments: [],
-          collapsed: false,
-          color: ORG_COLORS[prev.length % ORG_COLORS.length],
-          isMain,
-          curatorId: null,
-          curatorName,
-          parentOrgId: null,
-        },
-      ]);
-      setAddOrgOpen(false);
-    },
-    []
-  );
-
-  const handleDeleteOrg = useCallback((orgId: number) => {
-    setOrganizations((prev) => prev.filter((o) => o.id !== orgId));
-  }, []);
-
-  const handleSaveOrgFull = useCallback(
-    (orgId: number, name: string, shortName: string, type: string, isMain: boolean, curatorName: string) => {
-      setOrganizations((prev) =>
-        prev.map((o) => (o.id !== orgId ? o : { ...o, name, shortName, type, isMain, curatorName }))
-      );
-      setEditOrgTarget(null);
-    },
-    []
-  );
-
-  const handleAddDept = useCallback(
-    (
-      orgId: number,
-      name: string,
-      curatorName: string,
-      managerId: number | null,
-      managerName: string,
-      parentDeptId: number | null
-    ) => {
-      setOrganizations((prev) =>
-        prev.map((org) =>
-          org.id !== orgId
-            ? org
-            : {
-                ...org,
-                departments: [
-                  ...org.departments,
-                  {
-                    id: Date.now(),
-                    name,
-                    positions: [],
-                    collapsed: false,
-                    curatorId: null,
-                    curatorName,
-                    managerId,
-                    managerName,
-                    parentDeptId,
-                  },
-                ],
-              }
-        )
-      );
-      setAddDeptOrgId(null);
-    },
-    []
-  );
-
-  const handleDeleteDept = useCallback((orgId: number, deptId: number) => {
-    setOrganizations((prev) =>
-      prev.map((org) =>
-        org.id !== orgId
-          ? org
-          : { ...org, departments: org.departments.filter((d) => d.id !== deptId) }
-      )
-    );
-  }, []);
-
-  const handleSaveDeptFull = useCallback(
-    (
-      orgId: number,
-      deptId: number,
-      name: string,
-      curatorName: string,
-      managerId: number | null,
-      managerName: string,
-      parentDeptId: number | null
-    ) => {
-      setOrganizations((prev) =>
-        prev.map((org) =>
-          org.id !== orgId
-            ? org
-            : {
-                ...org,
-                departments: org.departments.map((d) =>
-                  d.id !== deptId
-                    ? d
-                    : { ...d, name, curatorName, managerId, managerName, parentDeptId }
-                ),
-              }
-        )
-      );
-      setEditDeptTarget(null);
-    },
-    []
-  );
-
-  const handleAddPosition = useCallback((orgId: number, deptId: number, pos: Omit<IStaffingPosition, 'id'>) => {
-    setOrganizations((prev) =>
-      prev.map((org) =>
-        org.id !== orgId
-          ? org
-          : {
-              ...org,
-              departments: org.departments.map((d) =>
-                d.id !== deptId ? d : { ...d, positions: [...d.positions, { ...pos, id: Date.now() }] }
-              ),
-            }
-      )
-    );
-    setAddPositionTarget(null);
-  }, []);
-
-  const handleDeletePosition = useCallback((orgId: number, deptId: number, posId: number) => {
-    setOrganizations((prev) =>
-      prev.map((org) =>
-        org.id !== orgId
-          ? org
-          : {
-              ...org,
-              departments: org.departments.map((d) =>
-                d.id !== deptId ? d : { ...d, positions: d.positions.filter((p) => p.id !== posId) }
-              ),
-            }
-      )
-    );
-  }, []);
-
-  const handleUpdatePosition = useCallback((orgId: number, deptId: number, posId: number, updated: Partial<IStaffingPosition>) => {
-    setOrganizations((prev) =>
-      prev.map((org) =>
-        org.id !== orgId
-          ? org
-          : {
-              ...org,
-              departments: org.departments.map((d) =>
-                d.id !== deptId
-                  ? d
-                  : { ...d, positions: d.positions.map((p) => (p.id !== posId ? p : { ...p, ...updated })) }
-              ),
-            }
-      )
-    );
-  }, []);
-
-  const handleAssignEmployee = useCallback((orgId: number, deptId: number, posId: number, emp: IEmployee) => {
-    setOrganizations((prev) =>
-      prev.map((org) =>
-        org.id !== orgId
-          ? org
-          : {
-              ...org,
-              departments: org.departments.map((d) =>
-                d.id !== deptId
-                  ? d
-                  : {
-                      ...d,
-                      positions: d.positions.map((p) => {
-                        if (p.id !== posId) return p;
-                        if (p.assignedEmployees.find((ae) => ae.id === emp.id)) return p;
-                        return {
-                          ...p,
-                          assignedEmployees: [
-                            ...p.assignedEmployees,
-                            {
-                              id: emp.id,
-                              name: `${emp.lastName} ${emp.firstName}`,
-                              initials: emp.avatarInitials,
-                              color: emp.avatarColor,
-                              photo: emp.avatarPhoto,
-                            },
-                          ],
-                        };
-                      }),
-                    }
-              ),
-            }
-      )
-    );
-  }, []);
-
-  const handleUnassignEmployee = useCallback((orgId: number, deptId: number, posId: number, empId: number) => {
-    setOrganizations((prev) =>
-      prev.map((org) =>
-        org.id !== orgId
-          ? org
-          : {
-              ...org,
-              departments: org.departments.map((d) =>
-                d.id !== deptId
-                  ? d
-                  : {
-                      ...d,
-                      positions: d.positions.map((p) =>
-                        p.id !== posId
-                          ? p
-                          : { ...p, assignedEmployees: p.assignedEmployees.filter((ae) => ae.id !== empId) }
-                      ),
-                    }
-              ),
-            }
-      )
-    );
-  }, []);
 
   const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -352,9 +45,9 @@ export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidget
     }
   };
 
-  const addDeptOrg = organizations.find((o) => o.id === addDeptOrgId) ?? null;
-  const addPosDept = addPositionTarget
-    ? organizations.find((o) => o.id === addPositionTarget.orgId)?.departments.find((d) => d.id === addPositionTarget.deptId) ?? null
+  const addDeptOrg = state.organizations.find((o) => o.id === state.addDeptOrgId) ?? null;
+  const addPosDept = state.addPositionTarget
+    ? state.organizations.find((o) => o.id === state.addPositionTarget.orgId)?.departments.find((d) => d.id === state.addPositionTarget.deptId) ?? null
     : null;
 
   const headerCardBg = dark ? 'bg-gray-800/80 border-gray-700/60' : 'bg-white border-gray-100';
@@ -366,7 +59,7 @@ export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidget
   const searchIcon = dark ? 'text-gray-500' : 'text-gray-400';
   const viewToggleBg = dark ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white';
   const viewToggleActive = (mode: TStaffingViewMode) =>
-    viewMode === mode
+    state.viewMode === mode
       ? 'bg-indigo-600 text-white shadow-sm'
       : dark
       ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-700'
@@ -381,7 +74,7 @@ export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidget
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-in fade-in duration-300">
       <div className={`rounded-2xl border shadow-sm overflow-hidden ${headerCardBg}`}>
         <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
@@ -430,9 +123,9 @@ export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidget
             </If>
           </div>
         </div>
-        <If is={organizations.length > 0}>
+        <If is={state.organizations.length > 0}>
           <div className="px-6 pb-5">
-            <SummaryBar organizations={organizations} {...allTotals} dark={dark} />
+            <SummaryBar organizations={state.organizations} {...state.allTotals} dark={dark} />
           </div>
         </If>
       </div>
@@ -443,8 +136,8 @@ export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidget
           <input
             type="text"
             placeholder="Поиск организаций, отделов..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={state.search}
+            onChange={(e) => state.setSearch(e.target.value)}
             className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all ${searchBg}`}
           />
         </div>
@@ -452,7 +145,7 @@ export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidget
           {viewModes.map(({ mode, Icon, label }) => (
             <button
               key={mode}
-              onClick={() => setViewMode(mode)}
+              onClick={() => state.setViewMode(mode)}
               title={label}
               className={`p-2 rounded-lg transition-all ${viewToggleActive(mode)}`}
             >
@@ -462,12 +155,12 @@ export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidget
         </div>
         <div className="ml-auto flex items-center gap-2">
           <span className={`text-xs hidden sm:block ${countText}`}>
-            {organizations.length} орг. · {allTotals.totalPositions} должн.
+            {state.organizations.length} орг. · {state.allTotals.totalPositions} должн.
           </span>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => setAddOrgOpen(true)}
+            onClick={() => state.setAddOrgOpen(true)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-all shadow-md ${
               dark ? 'shadow-indigo-900/30' : 'shadow-indigo-200'
             }`}
@@ -478,38 +171,42 @@ export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidget
         </div>
       </div>
 
-      <If is={filteredOrgs.length === 0}>
+      <If is={state.isLoading}>
+        <div className="py-20 text-center text-slate-400">Загрузка структуры...</div>
+      </If>
+
+      <If is={!state.isLoading && state.filteredOrgs.length === 0}>
         <EmptyStateIllustration
-          onAddOrg={() => setAddOrgOpen(true)}
+          onAddOrg={() => state.setAddOrgOpen(true)}
           dark={dark}
-          hasSearch={search.trim().length > 0}
-          search={search}
+          hasSearch={state.search.trim().length > 0}
+          search={state.search}
         />
       </If>
       
-      <If is={filteredOrgs.length > 0}>
+      <If is={!state.isLoading && state.filteredOrgs.length > 0}>
         <div>
-          <If is={viewMode === 'list'}>
+          <If is={state.viewMode === 'list'}>
             <ListView
-              filteredOrgs={filteredOrgs}
-              employees={employees}
+              filteredOrgs={state.filteredOrgs}
+              employees={state.employees}
               dark={dark}
-              setAddDeptOrgId={setAddDeptOrgId}
-              handleDeleteOrg={handleDeleteOrg}
-              setEditOrgTarget={setEditOrgTarget}
-              setAddPositionTarget={setAddPositionTarget}
-              handleDeleteDept={handleDeleteDept}
-              handleDeletePosition={handleDeletePosition}
-              handleUpdatePosition={handleUpdatePosition}
-              setAssignTarget={setAssignTarget}
-              handleUnassignEmployee={handleUnassignEmployee}
-              setEditDeptTarget={setEditDeptTarget}
+              setAddDeptOrgId={state.setAddDeptOrgId}
+              handleDeleteOrg={() => {}}
+              setEditOrgTarget={state.setEditOrgTarget}
+              setAddPositionTarget={state.setAddPositionTarget}
+              handleDeleteDept={() => {}}
+              handleDeletePosition={() => {}}
+              handleUpdatePosition={() => {}}
+              setAssignTarget={state.setAssignTarget}
+              handleUnassignEmployee={methods.handleUnassignEmployee}
+              setEditDeptTarget={state.setEditDeptTarget}
             />
           </If>
 
-          <If is={viewMode === 'grid'}>
+          <If is={state.viewMode === 'grid'}>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {filteredOrgs.map((org, oIdx) => {
+              {state.filteredOrgs.map((org, oIdx) => {
                 const totals = calcOrgTotals(org);
                 return (
                   <motion.div
@@ -600,10 +297,10 @@ export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidget
                     </div>
                     <div className="px-3 pb-3 flex items-center gap-2">
                       <button
-                        onClick={() => setAddDeptOrgId(org.id)}
+                        onClick={() => state.setAddDeptOrgId(org.id)}
                         className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-xs font-medium transition-all ${
                           dark
-                            ? 'border-indigo-700/50 text-indigo-400 hover:border-indigo-500 hover:bg-indigo-900/20'
+                             ? 'border-indigo-700/50 text-indigo-400 hover:border-indigo-500 hover:bg-indigo-900/20'
                             : 'border-indigo-200 text-indigo-500 hover:border-indigo-400 hover:bg-indigo-50/50'
                         }`}
                       >
@@ -611,7 +308,7 @@ export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidget
                         <span>Отдел</span>
                       </button>
                       <button
-                        onClick={() => setEditOrgTarget(org)}
+                        onClick={() => state.setEditOrgTarget(org)}
                         className={`p-2 rounded-xl border transition-all ${
                           dark
                             ? 'border-gray-700 text-gray-500 hover:text-indigo-400 hover:border-indigo-700/50'
@@ -621,7 +318,7 @@ export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidget
                         <Pencil size={12} />
                       </button>
                       <button
-                        onClick={() => handleDeleteOrg(org.id)}
+                        onClick={() => {}}
                         className={`p-2 rounded-xl border transition-all ${
                           dark
                             ? 'border-gray-700 text-gray-500 hover:text-red-400 hover:border-red-800/50'
@@ -637,22 +334,22 @@ export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidget
             </div>
           </If>
 
-          <If is={viewMode === 'tree'}>
+          <If is={state.viewMode === 'tree'}>
             <OrgTreeChart
-              organizations={filteredOrgs}
-              employees={employees}
+              organizations={state.filteredOrgs}
+              employees={state.employees}
               dark={dark}
-              onAddOrg={() => setAddOrgOpen(true)}
-              onEditOrg={setEditOrgTarget}
-              onAddDept={setAddDeptOrgId}
+              onAddOrg={() => state.setAddOrgOpen(true)}
+              onEditOrg={state.setEditOrgTarget}
+              onAddDept={state.setAddDeptOrgId}
             />
           </If>
-          <If is={viewMode === 'bubble'}>
+          <If is={state.viewMode === 'bubble'}>
             <BubbleView
-              organizations={filteredOrgs}
-              employees={employees}
+              organizations={state.filteredOrgs}
+              employees={state.employees}
               dark={dark}
-              onAddOrg={() => setAddOrgOpen(true)}
+              onAddOrg={() => state.setAddOrgOpen(true)}
             />
           </If>
         </div>
@@ -732,75 +429,73 @@ export const StaffingWidget = ({ employees = [], dark = false }: IStaffingWidget
       </AnimatePresence>
 
       <AnimatePresence>
-        <If key="if-add-org" is={addOrgOpen}>
+        <If key="if-add-org" is={state.addOrgOpen}>
           <AddOrgModal
             key="add-org"
-            employees={employees}
-            organizations={organizations}
-            onClose={() => setAddOrgOpen(false)}
-            onSave={handleAddOrg}
+            employees={state.employees}
+            organizations={state.organizations}
+            onClose={() => state.setAddOrgOpen(false)}
+            onSave={methods.handleAddOrg}
             dark={dark}
           />
         </If>
-        <If key="if-add-dept" is={addDeptOrgId !== null && !!addDeptOrg}>
+        <If key="if-add-dept" is={state.addDeptOrgId !== null && !!addDeptOrg}>
           <AddDeptModal
             key="add-dept"
             orgName={addDeptOrg?.name || ''}
             existingDepts={addDeptOrg?.departments || []}
-            employees={employees}
-            onClose={() => setAddDeptOrgId(null)}
-            onSave={(name, curatorName, managerId, managerName, parentDeptId) =>
-              handleAddDept(addDeptOrgId!, name, curatorName, managerId, managerName, parentDeptId)
-            }
+            employees={state.employees}
+            onClose={() => state.setAddDeptOrgId(null)}
+            onSave={() => {}}
             dark={dark}
           />
         </If>
-        <If key="if-add-pos" is={addPositionTarget !== null && !!addPosDept}>
+        <If key="if-add-pos" is={state.addPositionTarget !== null && !!addPosDept}>
           <AddPositionModal
             key="add-pos"
             deptName={addPosDept?.name || ''}
-            onClose={() => setAddPositionTarget(null)}
-            onSave={(pos) => handleAddPosition(addPositionTarget?.orgId ?? 0, addPositionTarget?.deptId ?? 0, pos)}
+            onClose={() => state.setAddPositionTarget(null)}
+            onSave={(pos) => methods.handleAddPosition(state.addPositionTarget?.orgId ?? 0, state.addPositionTarget?.deptId ?? 0, pos)}
             dark={dark}
           />
         </If>
-        <If key="if-assign" is={!!assignTarget}>
+        <If key="if-assign" is={!!state.assignTarget}>
           <AssignEmployeeModal
             key="assign"
-            employees={employees}
-            assignedIds={currentAssignedIds}
-            positionName={assignTarget?.posName ?? ''}
-            slots={currentAssignSlots}
-            onClose={() => setAssignTarget(null)}
+            employees={state.employees}
+            assignedIds={state.currentAssignedIds}
+            positionName={state.assignTarget?.posName ?? ''}
+            slots={state.currentAssignSlots}
+            onClose={() => state.setAssignTarget(null)}
             onAssign={(emp) =>
-              handleAssignEmployee(assignTarget?.orgId ?? 0, assignTarget?.deptId ?? 0, assignTarget?.posId ?? 0, emp)
+              methods.handleAssignEmployee(state.assignTarget?.orgId ?? 0, state.assignTarget?.deptId ?? 0, state.assignTarget?.posId ?? 0, emp)
             }
             onUnassign={(empId) =>
-              handleUnassignEmployee(assignTarget?.orgId ?? 0, assignTarget?.deptId ?? 0, assignTarget?.posId ?? 0, empId)
+              methods.handleUnassignEmployee(state.assignTarget?.orgId ?? 0, state.assignTarget?.deptId ?? 0, state.assignTarget?.posId ?? 0, empId)
             }
             dark={dark}
           />
         </If>
-        <If key="if-edit-org" is={!!editOrgTarget}>
+        <If key="if-edit-org" is={!!state.editOrgTarget}>
           <EditOrgModal
             key="edit-org"
-            org={editOrgTarget as any}
-            employees={employees}
+            org={state.editOrgTarget as any}
+            employees={state.employees}
             dark={dark}
-            onClose={() => setEditOrgTarget(null)}
-            onSave={handleSaveOrgFull}
+            onClose={() => state.setEditOrgTarget(null)}
+            onSave={() => {}}
           />
         </If>
-        <If key="if-edit-dept" is={!!editDeptTarget}>
+        <If key="if-edit-dept" is={!!state.editDeptTarget}>
           <EditDeptModal
             key="edit-dept"
-            dept={editDeptTarget?.dept as any}
-            orgId={editDeptTarget?.orgId ?? 0}
-            existingDepts={organizations.find((o) => o.id === editDeptTarget?.orgId)?.departments ?? []}
-            employees={employees}
+            dept={state.editDeptTarget?.dept as any}
+            orgId={state.editDeptTarget?.orgId ?? 0}
+            existingDepts={state.organizations.find((o) => o.id === state.editDeptTarget?.orgId)?.departments ?? []}
+            employees={state.employees}
+            onClose={() => state.setEditDeptTarget(null)}
+            onSave={() => {}}
             dark={dark}
-            onClose={() => setEditDeptTarget(null)}
-            onSave={handleSaveDeptFull}
           />
         </If>
       </AnimatePresence>

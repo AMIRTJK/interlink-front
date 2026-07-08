@@ -1,7 +1,7 @@
 import React from 'react';
 import { ShieldCheck, Shield, ChevronRight } from 'lucide-react';
-import { IOrderRecord } from '../model';
-import { ORDER_STATUS_CONFIG, getExecutorInitials } from '../lib';
+import { IOrderRecord, ORDER_STATUS_LABELS } from '../model';
+import { getStatusConfig, getExecutorInitials } from '../lib';
 
 export interface IOrderCardProps {
   order: IOrderRecord;
@@ -10,7 +10,7 @@ export interface IOrderCardProps {
 }
 
 export const OrderCard = ({ order, index, onClick }: IOrderCardProps) => {
-  const scfg = ORDER_STATUS_CONFIG[order.status];
+  const scfg = getStatusConfig(order.status);
   const execInitials = getExecutorInitials(order.executorName);
 
   return (
@@ -87,7 +87,7 @@ export const OrderCard = ({ order, index, onClick }: IOrderCardProps) => {
           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium border ${scfg.bg} ${scfg.text} border-transparent`}
         >
           <span className={`w-1.5 h-1.5 rounded-full ${scfg.dot}`} />
-          <span>{order.status}</span>
+          <span>{ORDER_STATUS_LABELS[order.status] || order.status}</span>
         </span>
       </td>
       {/* Действия */}
