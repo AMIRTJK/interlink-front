@@ -8,7 +8,14 @@ import { If } from '@shared/ui/If';
 
 export interface IAddOrgModalProps {
   onClose: () => void;
-  onSave: (name: string, shortName: string, type: string, isMain: boolean, curatorName: string) => void;
+  onSave: (
+    name: string,
+    shortName: string,
+    type: string,
+    isMain: boolean,
+    curatorName: string,
+    curatorId?: number | null
+  ) => void;
   employees: IEmployee[];
   organizations: ISubOrganization[];
   dark?: boolean;
@@ -287,7 +294,8 @@ export const AddOrgModal = ({
                   shortName.trim() || name.trim(),
                   type,
                   isMain,
-                  curatorName
+                  curatorName,
+                  curatorId
                 );
               }}
               className={`flex-1 py-3 rounded-2xl text-sm font-semibold transition-all shadow-lg ${

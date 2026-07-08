@@ -2,8 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Pencil, X, ShieldCheck, Shield, FileText } from 'lucide-react';
 import { If } from '@shared/ui/If';
-import { IOrderRecord } from '../model';
-import { ORDER_STATUS_CONFIG, parseDate, getExecutorInitials } from '../lib';
+import { IOrderRecord, ORDER_STATUS_LABELS } from '../model';
+import { getStatusConfig, parseDate, getExecutorInitials } from '../lib';
 
 export interface IOrderDetailModalProps {
   record: IOrderRecord;
@@ -16,9 +16,9 @@ export const OrderDetailModal = ({
   onClose,
   onEdit,
 }: IOrderDetailModalProps) => {
-  const statusCfg = ORDER_STATUS_CONFIG[record.status];
+  const statusCfg = getStatusConfig(record.status);
   const executorInitials = getExecutorInitials(record.executorName);
-  const { day, month, year } = parseDate(record.date);
+  const { day, month, year } = parseDate(record.date || record.orderDate || '');
 
   const sideCardCls = 'bg-white rounded-2xl shadow-sm p-4';
   const sideLabelCls =
@@ -53,7 +53,7 @@ export const OrderDetailModal = ({
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold shrink-0 ${statusCfg.bg} ${statusCfg.text}`}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot}`} />
-            <span>{record.status}</span>
+            <span>{ORDER_STATUS_LABELS[record.status] || record.status}</span>
           </span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -198,7 +198,7 @@ export const OrderDetailModal = ({
                 </div>
                 <div className="py-2.5">
                   <p className="text-[10px] text-slate-400 font-medium mb-0.5">Дата</p>
-                  <p className="text-sm text-slate-400">{record.date}</p>
+                  <p className="text-sm text-slate-400">{record.date || record.orderDate}</p>
                 </div>
                 <div className="py-2.5">
                   <p className="text-[10px] text-slate-400 font-medium mb-0.5">Статус</p>
@@ -206,12 +206,8 @@ export const OrderDetailModal = ({
                     className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold ${statusCfg.bg} ${statusCfg.text}`}
                   >
                     <span className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot}`} />
-                    <span>{record.status}</span>
+                    <span>{ORDER_STATUS_LABELS[record.status] || record.status}</span>
                   </span>
-                </div>
-                <div className="py-2.5">
-                  <p className="text-[10px] text-slate-400 font-medium mb-0.5">Создан</p>
-                  <p className="text-sm text-slate-400">{record.createdAt}</p>
                 </div>
               </div>
             </div>
@@ -255,16 +251,19 @@ export const OrderDetailModal = ({
               </If>
               <If is={record.attachments.length > 0}>
                 <div className="space-y-2">
-                  {record.attachments.map((filename, idx) => (
-                    <div
-                      key={`att-${idx}`}
-                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-slate-50"
+                  {record.attachments.map((att) => (
+                    <a
+                      key={`att-${att.id}`}
+                      href={att.download_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
                     >
                       <FileText size={13} className="text-slate-400 shrink-0" />
-                      <span className="text-xs text-slate-700 truncate">
-                        {filename}
+                      <span className="text-xs text-blue-600 truncate flex-1 hover:underline">
+                        {att.original_name}
                       </span>
-                    </div>
+                    </a>
                   ))}
                 </div>
               </If>

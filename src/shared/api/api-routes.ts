@@ -86,6 +86,26 @@ export const ApiRoutes = {
   UPDATE_DEPARTMENT: "/api/v1/admin/departments/:id",
   DELETE_DEPARTMENT: "/api/v1/admin/departments/:id",
 
+  // HR Documents
+  GET_HR_DOCUMENTS: "/api/v1/admin/hr/documents",
+  CREATE_HR_DOCUMENT: "/api/v1/admin/hr/documents",
+  DOWNLOAD_HR_DOCUMENT: "/api/v1/admin/hr/documents/:id/download",
+
+  // HR Orders
+  GET_HR_ORDERS: "/api/v1/admin/hr/orders",
+  CREATE_HR_ORDER: "/api/v1/admin/hr/orders",
+  DOWNLOAD_HR_ORDER_ATTACHMENT:
+    "/api/v1/admin/hr/orders/:orderId/attachments/:attachmentId/download",
+
+  // Staffing
+  GET_STAFFING_STRUCTURE: "/api/v1/admin/hr/staffing/structure",
+  CREATE_SUB_ORGANIZATION: "/api/v1/admin/hr/staffing/sub-organizations",
+  CREATE_STAFFING_POSITION: "/api/v1/admin/hr/staffing/positions",
+  ASSIGN_POSITION_EMPLOYEES: "/api/v1/admin/hr/staffing/positions/:id/employees",
+
+  // Timesheet
+  GET_TIMESHEET: "/api/v1/admin/hr/timesheet",
+
   // ==================== INTERNAL CORRESPONDENCE ====================
   // Справочники для document_type / priority (подписи берём отсюда, не хардкодим)
   GET_INTERNAL_META: "/api/v1/internal-correspondences/meta",

@@ -18,10 +18,24 @@ export const useOrderForm = (
   orderCounter: number
 ) => {
   const [orderType, setOrderType] = useState(initialRecord?.type ?? '');
-  const [orderNumber] = useState(initialRecord?.number ?? `ПР-2025-00${orderCounter}`);
-  const [orderDate, setOrderDate] = useState(initialRecord?.date ?? '');
-  const [executorName, setExecutorName] = useState(initialRecord?.executorName ?? '');
-  const [orderStatus] = useState<TOrderStatus>(initialRecord?.status ?? 'Черновик');
+  const [orderNumber] = useState(initialRecord?.number ?? `ПР-2026-00${orderCounter}`);
+  const [orderDate, setOrderDate] = useState(
+    initialRecord?.orderDate || initialRecord?.date || new Date().toISOString().split('T')[0]
+  );
+  
+  const [organizationId, setOrganizationId] = useState<number | null>(
+    initialRecord?.organizationId ?? null
+  );
+  const [employeeId, setEmployeeId] = useState<number | null>(
+    initialRecord?.employeeId ?? null
+  );
+  const [executorId, setExecutorId] = useState<number | null>(
+    initialRecord?.executorId ?? null
+  );
+  
+  const [orderStatus, setOrderStatus] = useState<TOrderStatus>(
+    initialRecord?.status ?? 'draft'
+  );
   
   const [orderPoints, setOrderPoints] = useState<IOrderPointItem[]>(() => {
     if (initialRecord && initialRecord.points.length > 0) {
@@ -38,7 +52,7 @@ export const useOrderForm = (
   const [orderNum, setOrderNum] = useState(initialRecord?.number ?? '');
   const [ministerName, setMinisterName] = useState(initialRecord?.ministerName ?? 'Ф.Қаҳҳорзода');
   const [ministerSigned, setMinisterSigned] = useState(
-    initialRecord?.status === 'Подписан' || initialRecord?.status === 'Утверждён'
+    initialRecord?.status === 'signed' || initialRecord?.status === 'approved'
   );
   const [attachments, setAttachments] = useState<IOrderAttachment[]>([]);
   const attachInputRef = useRef<HTMLInputElement>(null);
@@ -89,8 +103,10 @@ export const useOrderForm = (
       orderType, setOrderType,
       orderNumber,
       orderDate, setOrderDate,
-      executorName, setExecutorName,
-      orderStatus,
+      organizationId, setOrganizationId,
+      employeeId, setEmployeeId,
+      executorId, setExecutorId,
+      orderStatus, setOrderStatus,
       orderPoints, setOrderPoints,
       additionalBasis, setAdditionalBasis,
       orderNum, setOrderNum,

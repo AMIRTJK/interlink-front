@@ -1,16 +1,37 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, BookOpen, Search, SlidersHorizontal, ChevronRight, X } from 'lucide-react';
+import { Plus, Search, SlidersHorizontal } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { If } from '@shared/ui/If';
-import { IOrderRecord, ORDERS_DATA, TOrderStatus } from './model';
+import { ApiRoutes } from '@shared/api';
+import { useGetQuery, useMutationQuery } from '@shared/lib';
+import type { IHrOrder } from '@entities/hr';
+import { IOrderRecord, TOrderStatus, normalizeOrders, ORDER_STATUS_LABELS } from './model';
 import { OrderFilters } from './ui/OrderFilters';
 import { OrderList } from './ui/OrderList';
 import { OrderDetailModal } from './ui/OrderDetailModal';
 import { OrderForm } from './ui/OrderForm';
 
 export const OrdersWidget = () => {
+  const { data, isLoading } = useGetQuery({
+    url: ApiRoutes.GET_HR_ORDERS,
+    useToken: true,
+  });
+
+  const orders = useMemo<IOrderRecord[]>(() => {
+    const raw = (data?.data?.data || data?.data || data || []) as IHrOrder[];
+    return normalizeOrders(raw);
+  }, [data]);
+
+  const createM = useMutationQuery({
+    url: ApiRoutes.CREATE_HR_ORDER,
+    method: 'POST',
+    messages: {
+      success: 'Приказ создан',
+      invalidate: [ApiRoutes.GET_HR_ORDERS],
+    },
+  });
+
   // --- States ---
-  const [orders, setOrders] = useState<IOrderRecord[]>(ORDERS_DATA);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<TOrderStatus | 'Все'>('Все');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -22,13 +43,13 @@ export const OrdersWidget = () => {
   const [newOrderOpen, setNewOrderOpen] = useState(false);
 
   // --- Statistics ---
-  const statCards = [
+  const statCards = useMemo(() => [
     { label: 'Всего', value: orders.length, color: '#1E3A5F' },
-    { label: 'Утверждено', value: orders.filter((o) => o.status === 'Утверждён').length, color: '#3b82f6' },
-    { label: 'Подписано', value: orders.filter((o) => o.status === 'Подписан').length, color: '#10b981' },
-    { label: 'На подписании', value: orders.filter((o) => o.status === 'На подписании').length, color: '#f59e0b' },
-    { label: 'Черновик', value: orders.filter((o) => o.status === 'Черновик').length, color: '#94a3b8' },
-  ];
+    { label: 'Утверждено', value: orders.filter((o) => o.status === 'approved').length, color: '#3b82f6' },
+    { label: 'Подписано', value: orders.filter((o) => o.status === 'signed').length, color: '#10b981' },
+    { label: 'На подписании', value: orders.filter((o) => o.status === 'pending').length, color: '#f59e0b' },
+    { label: 'Черновик', value: orders.filter((o) => o.status === 'draft').length, color: '#94a3b8' },
+  ], [orders]);
 
   // --- Filtering Logic ---
   const filteredOrders = useMemo(() => {
@@ -54,14 +75,13 @@ export const OrdersWidget = () => {
     );
   };
 
-  const handleSaveOrder = (newOrder: IOrderRecord) => {
-    if (editingOrder) {
-      setOrders((prev) => prev.map((o) => (o.id === newOrder.id ? newOrder : o)));
-    } else {
-      setOrders((prev) => [newOrder, ...prev]);
-    }
-    setNewOrderOpen(false);
-    setEditingOrder(null);
+  const handleSaveOrder = (payload: any) => {
+    createM.mutate(payload, {
+      onSuccess: () => {
+        setNewOrderOpen(false);
+        setEditingOrder(null);
+      },
+    });
   };
 
   return (
@@ -104,7 +124,17 @@ export const OrdersWidget = () => {
         <div className="flex flex-col gap-3">
           {/* Status Pills */}
           <div className="flex items-center gap-2 flex-wrap">
-            {(['Все', 'Черновик', 'На подписании', 'Подписан', 'Утверждён'] as const).map((s) => (
+            <button
+              onClick={() => setStatusFilter('Все')}
+              className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition-all ${
+                statusFilter === 'Все'
+                  ? 'bg-[#1E3A5F] text-white shadow-sm'
+                  : 'text-slate-500 hover:bg-slate-200/50 bg-slate-100/50'
+              }`}
+            >
+              Все
+            </button>
+            {(['draft', 'pending', 'signed', 'approved'] as TOrderStatus[]).map((s) => (
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
@@ -114,7 +144,7 @@ export const OrdersWidget = () => {
                     : 'text-slate-500 hover:bg-slate-200/50 bg-slate-100/50'
                 }`}
               >
-                {s}
+                {ORDER_STATUS_LABELS[s]}
               </button>
             ))}
           </div>
@@ -173,10 +203,14 @@ export const OrdersWidget = () => {
         </div>
 
         {/* List */}
-        <OrderList
-          orders={filteredOrders}
-          onOrderClick={setSelectedExtOrder}
-        />
+        {isLoading ? (
+          <div className="py-20 text-center text-slate-400">Загрузка приказов...</div>
+        ) : (
+          <OrderList
+            orders={filteredOrders}
+            onOrderClick={setSelectedExtOrder}
+          />
+        )}
       </div>
 
       {/* Modals */}

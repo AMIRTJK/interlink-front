@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { toast } from "@shared/lib/toast";
@@ -29,21 +29,23 @@ const emptyFilters: IEmployeesFilters = {
   salaryMax: "",
 };
 
-// Виджет «Сотрудники»: список, поиск, фильтр, аналитика, CRUD
+const buildQueryParams = (
+  search: string,
+  filters: IEmployeesFilters
+): Record<string, unknown> => {
+  const params: Record<string, unknown> = {
+    with_departments: 1,
+    with_roles: 1,
+  };
+  if (search.trim()) params.search = search.trim();
+  if (filters.status !== "all") params.status = filters.status;
+  if (filters.department !== "all") params.department_id = filters.department;
+  if (filters.salaryMin) params.salary_min = Number(filters.salaryMin);
+  if (filters.salaryMax) params.salary_max = Number(filters.salaryMax);
+  return params;
+};
+
 export const EmployeesWidget: React.FC = () => {
-  const { data, isLoading } = useGetQuery({ url: ApiRoutes.GET_USERS, useToken: true });
-
-  const deleteM = useMutationQuery({
-    url: (d: { id: number }) => ApiRoutes.DELETE_USER.replace(":id", String(d.id)),
-    method: "DELETE",
-    messages: { success: "Сотрудник удалён", invalidate: [ApiRoutes.GET_USERS] },
-  });
-
-  const employees = useMemo<IEmployee[]>(() => {
-    const raw = (data?.data?.data || data?.data || data || []) as IAdminUser[];
-    return normalizeUsers(raw);
-  }, [data]);
-
   const [view, setView] = useState<TEmployeesView>("table");
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<IEmployeesFilters>(emptyFilters);
@@ -54,46 +56,64 @@ export const EmployeesWidget: React.FC = () => {
   const [editing, setEditing] = useState<IAdminUser | null>(null);
   const [viewing, setViewing] = useState<IEmployee | null>(null);
 
-  const departments = useMemo(
-    () => Array.from(new Set(employees.map((e) => e.department).filter((d) => d && d !== "—"))),
-    [employees],
+  const queryParams = useMemo(
+    () => buildQueryParams(search, filters),
+    [search, filters]
   );
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return employees.filter((e) => {
-      if (q) {
-        const hay = `${e.fullName} ${e.position} ${e.email} ${e.department}`.toLowerCase();
-        if (!hay.includes(q)) return false;
+  const { data, isLoading } = useGetQuery({
+    url: ApiRoutes.GET_USERS,
+    params: queryParams,
+    useToken: true,
+  });
+
+  const deleteM = useMutationQuery({
+    url: (d: { id: number }) =>
+      ApiRoutes.DELETE_USER.replace(":id", String(d.id)),
+    method: "DELETE",
+    messages: { success: "Сотрудник удалён", invalidate: [ApiRoutes.GET_USERS] },
+  });
+
+  const employees = useMemo<IEmployee[]>(() => {
+    const raw = (data?.data?.data || data?.data || data || []) as IAdminUser[];
+    return normalizeUsers(raw);
+  }, [data]);
+
+  const departments = useMemo(() => {
+    const seen = new Set<number>();
+    const result: { id: number; name: string }[] = [];
+    employees.forEach((e) => {
+      if (e.departmentId && !seen.has(e.departmentId)) {
+        seen.add(e.departmentId);
+        result.push({ id: e.departmentId, name: e.department });
       }
-      if (filters.status !== "all" && e.status !== filters.status) return false;
-      if (filters.department !== "all" && e.department !== filters.department) return false;
-      if (filters.salaryMin && (e.salary == null || e.salary < Number(filters.salaryMin))) return false;
-      if (filters.salaryMax && (e.salary == null || e.salary > Number(filters.salaryMax))) return false;
-      return true;
     });
-  }, [employees, search, filters]);
+    return result;
+  }, [employees]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(employees.length / pageSize));
   const safePage = Math.min(page, totalPages);
-  const pageItems = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
+  const pageItems = employees.slice(
+    (safePage - 1) * pageSize,
+    safePage * pageSize
+  );
 
-  const openCreate = () => {
+  const openCreate = useCallback(() => {
     setEditing(null);
     setModalOpen(true);
-  };
-  const openEdit = (e: IEmployee) => {
+  }, []);
+
+  const openEdit = useCallback((e: IEmployee) => {
     setEditing(e.raw);
     setModalOpen(true);
-  };
-  const openDuplicate = (e: IEmployee) => {
-    // Дубликат: предзаполняем, но без id (создание)
+  }, []);
+
+  const openDuplicate = useCallback((e: IEmployee) => {
     setEditing({ ...e.raw, id: undefined as unknown as number });
     setModalOpen(true);
-  };
+  }, []);
 
-  // Экспорт в Excel с бэка с учётом текущих поиска/фильтров
-  const handleExportExcel = async () => {
+  const handleExportExcel = useCallback(async () => {
     const params: Record<string, unknown> = {};
     if (search.trim()) params.search = search.trim();
     if (filters.status !== "all") params.status = filters.status;
@@ -105,7 +125,7 @@ export const EmployeesWidget: React.FC = () => {
     } catch {
       toast.error("Не удалось скачать файл");
     }
-  };
+  }, [search, filters]);
 
   return (
     <div className="space-y-4">
@@ -129,7 +149,7 @@ export const EmployeesWidget: React.FC = () => {
 
       {isLoading ? (
         <div className="py-20 text-center text-slate-400">Загрузка...</div>
-      ) : filtered.length === 0 ? (
+      ) : employees.length === 0 ? (
         <div className="py-20 text-center text-slate-400">Сотрудники не найдены</div>
       ) : view === "table" ? (
         <EmployeesTable
@@ -148,12 +168,13 @@ export const EmployeesWidget: React.FC = () => {
         />
       )}
 
-      {filtered.length > 0 && (
+      {employees.length > 0 && (
         <div className="flex items-center justify-between text-sm text-slate-400">
           <div className="flex items-center gap-3">
             <span>
               Показано {(safePage - 1) * pageSize + 1}–
-              {Math.min(safePage * pageSize, filtered.length)} из {filtered.length}
+              {Math.min(safePage * pageSize, employees.length)} из{" "}
+              {employees.length}
             </span>
             <div className="flex items-center gap-1.5">
               <span className="hidden sm:inline">Строк на странице:</span>
@@ -230,7 +251,11 @@ export const EmployeesWidget: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <EmployeeFormModal open={modalOpen} onClose={() => setModalOpen(false)} employee={editing} />
+      <EmployeeFormModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        employee={editing}
+      />
     </div>
   );
 };

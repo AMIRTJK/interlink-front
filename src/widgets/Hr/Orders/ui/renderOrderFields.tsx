@@ -1,8 +1,18 @@
 import React from 'react';
-import { Plus, X, UploadCloud, FileText, UserCircle2, ShieldCheck, Shield, Upload } from 'lucide-react';
+import { Plus, X, UploadCloud, FileText, UserCircle2, ShieldCheck } from 'lucide-react';
 import { ORDER_TYPES } from '../model';
 
-export const renderOrderFields = ({ state, methods }: { state: any; methods: any }) => {
+export const renderOrderFields = ({
+  state,
+  methods,
+  orgs = [],
+  users = [],
+}: {
+  state: any;
+  methods: any;
+  orgs: any[];
+  users: any[];
+}) => {
   const inputCls = "w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/10 focus:border-[#1E3A5F] focus:bg-white text-gray-800 transition-all";
   const labelCls = "block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5";
   const sectionTitle = (num: number, title: string) => (
@@ -13,27 +23,78 @@ export const renderOrderFields = ({ state, methods }: { state: any; methods: any
     </div>
   );
 
+  const filteredEmployees = state.organizationId
+    ? users.filter((u) => u.orgId === state.organizationId)
+    : users;
+
   return (
     <div className="flex flex-col gap-6 w-full">
       {/* 1. РЕКВИЗИТЫ ПРИКАЗА */}
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
         {sectionTitle(1, 'РЕКВИЗИТЫ ПРИКАЗА')}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div>
+            <label className={labelCls}>ОРГАНИЗАЦИЯ *</label>
+            <select
+              value={state.organizationId || ''}
+              onChange={(e) => {
+                state.setOrganizationId(Number(e.target.value));
+                state.setEmployeeId(null);
+              }}
+              className={inputCls}
+            >
+              <option value="" disabled>Выберите организацию</option>
+              {orgs.map((o) => (
+                <option key={o.id} value={o.id}>{o.name}</option>
+              ))}
+            </select>
+          </div>
           <div>
             <label className={labelCls}>ТИП ПРИКАЗА *</label>
-            <select value={state.orderType} onChange={(e) => state.setOrderType(e.target.value)} className={inputCls}>
+            <select
+              value={state.orderType}
+              onChange={(e) => state.setOrderType(e.target.value)}
+              className={inputCls}
+            >
               <option value="" disabled>Выберите тип приказа</option>
               {ORDER_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>
           <div>
             <label className={labelCls}>НОМЕР ПРИКАЗА *</label>
-            <input type="text" value={state.orderNum} onChange={(e) => state.setOrderNum(e.target.value)} placeholder="ПР-2025-007" className={inputCls} />
+            <input
+              type="text"
+              value={state.orderNum}
+              onChange={(e) => state.setOrderNum(e.target.value)}
+              placeholder="ПР-2026-001"
+              className={inputCls}
+            />
           </div>
           <div>
             <label className={labelCls}>ДАТА ПРИКАЗА *</label>
-            <input type="date" value={state.orderDate} onChange={(e) => state.setOrderDate(e.target.value)} className={inputCls} />
+            <input
+              type="date"
+              value={state.orderDate}
+              onChange={(e) => state.setOrderDate(e.target.value)}
+              className={inputCls}
+            />
           </div>
+        </div>
+        <div className="mt-4">
+          <label className={labelCls}>СОТРУДНИК (КОГО КАСАЕТСЯ) *</label>
+          <select
+            value={state.employeeId || ''}
+            onChange={(e) => state.setEmployeeId(Number(e.target.value))}
+            className={inputCls}
+            disabled={!state.organizationId}
+          >
+            <option value="" disabled>
+              {state.organizationId ? 'Выберите сотрудника' : 'Сначала выберите организацию'}
+            </option>
+            {filteredEmployees.map((u) => (
+              <option key={u.id} value={u.id}>{u.name}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -61,11 +122,22 @@ export const renderOrderFields = ({ state, methods }: { state: any; methods: any
             <div className="flex justify-between items-end border-b border-gray-200 pb-2 mb-6">
               <div className="flex items-center gap-2 text-[13px] text-gray-700">
                 <span>от</span>
-                <input type="date" value={state.orderDate} onChange={(e) => state.setOrderDate(e.target.value)} className="border-0 border-b border-gray-400 bg-transparent outline-none text-[13px] w-36 text-center cursor-pointer" />
+                <input
+                  type="date"
+                  value={state.orderDate}
+                  onChange={(e) => state.setOrderDate(e.target.value)}
+                  className="border-0 border-b border-gray-400 bg-transparent outline-none text-[13px] w-36 text-center cursor-pointer"
+                />
               </div>
               <div className="flex items-center gap-2 text-[13px] text-gray-700">
                 <span>№</span>
-                <input type="text" value={state.orderNum} onChange={(e) => state.setOrderNum(e.target.value)} placeholder="№ _______" className="border-0 border-b border-gray-400 bg-transparent outline-none text-[13px] w-32 text-center" />
+                <input
+                  type="text"
+                  value={state.orderNum}
+                  onChange={(e) => state.setOrderNum(e.target.value)}
+                  placeholder="№ _______"
+                  className="border-0 border-b border-gray-400 bg-transparent outline-none text-[13px] w-32 text-center"
+                />
               </div>
             </div>
 
@@ -78,7 +150,7 @@ export const renderOrderFields = ({ state, methods }: { state: any; methods: any
                   e.target.style.height = 'auto';
                   e.target.style.height = `${e.target.scrollHeight}px`;
                 }}
-                placeholder="В соответствии с постановлением..."
+                placeholder="На основании заявления кандидата..."
                 className="w-full text-[12px] text-gray-700 leading-relaxed bg-transparent border-0 outline-none focus:bg-slate-50 rounded p-2 resize-none min-h-[80px]"
                 rows={4}
               />
@@ -93,7 +165,7 @@ export const renderOrderFields = ({ state, methods }: { state: any; methods: any
                     type="text"
                     value={point.value}
                     onChange={(e) => methods.updatePoint(point.id, e.target.value)}
-                    placeholder="Текст пункта..."
+                    placeholder="Принять сотрудника на должность..."
                     className={inputCls}
                   />
                   {state.orderPoints.length > 1 && (
@@ -115,7 +187,7 @@ export const renderOrderFields = ({ state, methods }: { state: any; methods: any
                 <span className="text-sm font-medium text-gray-700">Министр финансов</span>
                 <button
                   onClick={() => state.setMinisterSigned(true)}
-                  className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-bold text-white transition-all ${state.ministerSigned ? 'bg-emerald-500 shadow-emerald-500/20 shadow-md' : 'bg-emerald-500 hover:bg-emerald-600'}`}
+                  className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-bold text-white transition-all ${state.ministerSigned ? 'bg-emerald-500 shadow-emerald-500/20 shadow-md' : 'bg-[#1E3A5F] hover:bg-[#1E3A5F]/90'}`}
                 >
                   {state.ministerSigned && <ShieldCheck size={14} />}
                   <span>Подписать ЭЦП</span>
@@ -135,11 +207,17 @@ export const renderOrderFields = ({ state, methods }: { state: any; methods: any
             {sectionTitle(3, 'ИСПОЛНИТЕЛЬ')}
             <div className="space-y-5">
               <div>
-                <label className={labelCls}>ФИО ИСПОЛНИТЕЛЯ</label>
-                <div className="relative">
-                  <UserCircle2 size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input type="text" value={state.executorName} onChange={(e) => state.setExecutorName(e.target.value)} placeholder="Фамилия Имя Отчество" className={`${inputCls} pl-9`} />
-                </div>
+                <label className={labelCls}>ВЫБРАТЬ ИСПОЛНИТЕЛЯ *</label>
+                <select
+                  value={state.executorId || ''}
+                  onChange={(e) => state.setExecutorId(Number(e.target.value))}
+                  className={inputCls}
+                >
+                  <option value="" disabled>Выберите исполнителя</option>
+                  {users.map((u) => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className={labelCls}>ЭЦП ИСПОЛНИТЕЛЯ</label>
