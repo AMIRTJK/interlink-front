@@ -169,8 +169,8 @@ export const EmployeesWidget: React.FC = () => {
       )}
 
       {employees.length > 0 && (
-        <div className="flex items-center justify-between text-sm text-slate-400">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between mt-8">
+          <div className="flex items-center gap-3 text-sm text-gray-500">
             <span>
               Показано {(safePage - 1) * pageSize + 1}–
               {Math.min(safePage * pageSize, employees.length)} из{" "}
@@ -193,7 +193,7 @@ export const EmployeesWidget: React.FC = () => {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={safePage === 1}
-                className="p-1.5 rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50"
+                className="p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 <ChevronLeft size={16} />
               </button>
@@ -201,10 +201,10 @@ export const EmployeesWidget: React.FC = () => {
                 <button
                   key={i}
                   onClick={() => setPage(i + 1)}
-                  className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                  className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
                     safePage === i + 1
-                      ? "bg-blue-600 text-white"
-                      : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/30"
+                      : "border border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
                   }`}
                 >
                   {i + 1}
@@ -213,7 +213,7 @@ export const EmployeesWidget: React.FC = () => {
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={safePage === totalPages}
-                className="p-1.5 rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50"
+                className="p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 <ChevronRight size={16} />
               </button>

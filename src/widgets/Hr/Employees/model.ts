@@ -21,6 +21,8 @@ export interface IEmployee {
   raw: IAdminUser;
   id: number;
   fullName: string;
+  nameMain: string;
+  middleName: string;
   position: string;
   department: string;
   departmentId: number | null;
@@ -75,6 +77,13 @@ const buildFullName = (u: IAdminUser): string =>
   [u.last_name, u.first_name, u.middle_name].filter(Boolean).join(" ") ||
   "Без имени";
 
+// Основная строка имени (Фамилия Имя) — без отчества
+const buildNameMain = (u: IAdminUser): string => {
+  const main = [u.last_name, u.first_name].filter(Boolean).join(" ");
+  if (main) return main;
+  return buildFullName(u);
+};
+
 const buildSupervisorName = (u: IAdminUser): string => {
   if (!u.supervisor) return "—";
   const s = u.supervisor;
@@ -86,6 +95,8 @@ export const normalizeUsers = (raw: IAdminUser[]): IEmployee[] =>
     raw: u,
     id: u.id,
     fullName: buildFullName(u),
+    nameMain: buildNameMain(u),
+    middleName: u.middle_name || "",
     position: u.position || "—",
     department: u.departments?.[0]?.name || u.department?.name || "—",
     departmentId: u.departments?.[0]?.id || u.department?.id || null,
