@@ -16,12 +16,19 @@ interface IProps {
 
 interface IShareData {
 	id: number;
-	user_id: number;
-	user?: {
+	shared_with_user_id?: number;
+	user_id?: number;
+	shared_with?: {
 		id: number;
+		full_name?: string;
 		first_name?: string;
 		last_name?: string;
+	};
+	user?: {
+		id: number;
 		full_name?: string;
+		first_name?: string;
+		last_name?: string;
 	};
 }
 
@@ -124,10 +131,11 @@ export const ShareFileModal = ({
 							</span>
 							<div className="bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800">
 								{activeShares.map((share) => {
-									const uName = share.user
-										? share.user.full_name ||
-											`${share.user.first_name} ${share.user.last_name}`
-										: `Пользователь #${share.user_id}`;
+									const targetUser = share.shared_with || share.user;
+									const uName = targetUser
+										? targetUser.full_name ||
+											`${targetUser.first_name || ""} ${targetUser.last_name || ""}`.trim()
+										: `Пользователь #${share.shared_with_user_id || share.user_id}`;
 									return (
 										<div
 											key={share.id}

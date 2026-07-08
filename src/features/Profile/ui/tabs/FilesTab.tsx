@@ -9,6 +9,7 @@ import { FilePreviewModal } from "./files/FilePreviewModal";
 import { FolderActionsModal } from "./files/FolderActionsModal";
 import { AddCategoryModal } from "./files/AddCategoryModal";
 import { MoveToFolderModal } from "./files/MoveToFolderModal";
+import { ShareFileModal } from "./files/ShareFileModal";
 import { IApiFile, IApiFolder } from "./files/lib";
 import { Modal } from "antd";
 import { Upload, ChevronRight, Folder } from "lucide-react";
@@ -198,6 +199,10 @@ export const FilesTab = () => {
 				onAddCategoryClick={() => setAddCategoryOpen(true)}
 				onRenameCategory={viewContext === "personal" ? (cat) => handleOpenRenameFolder(cat.name, Number(cat.id)) : undefined}
 				onDeleteCategory={viewContext === "personal" ? handleDeleteFolderConfirm : undefined}
+				onShareCategory={viewContext === "personal" ? (cat) => {
+					const folder = folders.find((f) => f.id === Number(cat.id));
+					if (folder) setShareItem({ item: folder, type: "folder" });
+				} : undefined}
 			/>
 
 			{/* Breadcrumbs */}
