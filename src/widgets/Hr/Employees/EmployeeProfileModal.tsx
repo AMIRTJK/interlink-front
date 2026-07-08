@@ -3,11 +3,11 @@ import { motion } from "framer-motion";
 import {
   X, Mail, Phone, Building2, Briefcase, Wallet, Pencil, Trash2, Copy,
   CircleUserRound, Activity, FolderOpen, Calendar, ScrollText, Hash,
-  CreditCard, Landmark, MapPin, Star, Users, Shield, User, Award,
+  CreditCard, Landmark, MapPin, Star, User, Award, Users, Shield,
 } from "lucide-react";
-import { Popconfirm } from "antd";
 import { IEmployee, money, statusMeta } from "./model";
-import { Avatar } from "./parts";
+import { Avatar, Field, Section, ActivityTab, DocsTab } from "./parts";
+import { If } from "@shared/ui";
 
 interface IProps {
   employee: IEmployee;
@@ -19,55 +19,11 @@ interface IProps {
 
 type TTab = "info" | "activity" | "docs";
 
-// Цвета чипа статуса в стиле дизайна
 const STATUS_STYLE: Record<string, { chip: string; dot: string }> = {
   active: { chip: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500" },
   vacation: { chip: "bg-red-100 text-red-700", dot: "bg-red-500" },
   business_trip: { chip: "bg-amber-100 text-amber-700", dot: "bg-amber-500" },
 };
-
-// Карточка поля в просмотре
-const Field = ({ icon, label, value, accent }: {
-  icon: React.ReactNode; label: string; value: React.ReactNode; accent?: boolean;
-}) => (
-  <div
-    className={`flex items-center gap-3 p-4 rounded-xl transition-colors ${
-      accent
-        ? "border bg-indigo-50 border-indigo-100"
-        : "bg-gray-50 hover:bg-indigo-50/60"
-    }`}
-  >
-    <div className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0">
-      <span className={accent ? "text-indigo-500" : "text-indigo-400"}>{icon}</span>
-    </div>
-    <div className="min-w-0">
-      <p
-        className={`text-[11px] font-medium uppercase tracking-wide ${
-          accent ? "text-indigo-400" : "text-gray-500"
-        }`}
-      >
-        {label}
-      </p>
-      <p
-        className={`text-sm mt-0.5 break-words ${
-          accent ? "font-bold text-indigo-700" : "font-semibold text-gray-800"
-        }`}
-      >
-        {value || "—"}
-      </p>
-    </div>
-  </div>
-);
-
-// Секция полей
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <div className="mb-4 pb-4 border-b border-gray-100 last:mb-0 last:pb-0 last:border-b-0">
-    <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-3">
-      {title}
-    </p>
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{children}</div>
-  </div>
-);
 
 const TABS: { key: TTab; label: string; icon: React.ReactNode }[] = [
   { key: "info", label: "Информация", icon: <CircleUserRound size={15} /> },
@@ -84,7 +40,6 @@ const formatDate = (s?: string) => {
 const genderLabel = (g?: string) =>
   g === "male" ? "Мужской" : g === "female" ? "Женский" : g || "—";
 
-// Просмотр сотрудника (bottom-sheet, выезжает снизу)
 export const EmployeeProfileModal = ({ employee: e, onClose, onEdit, onDelete, onDuplicate }: IProps) => {
   const [tab, setTab] = useState<TTab>("info");
   const r = e.raw;
@@ -107,21 +62,17 @@ export const EmployeeProfileModal = ({ employee: e, onClose, onEdit, onDelete, o
         onClick={(ev) => ev.stopPropagation()}
         className="relative w-full max-w-3xl bg-white border-t border-gray-100 shadow-2xl flex flex-col z-50 rounded-t-3xl max-h-[92vh]"
       >
-        {/* Ручка */}
         <div className="flex justify-center pt-3 pb-1 shrink-0">
           <div className="w-10 h-1 rounded-full bg-gray-300" />
         </div>
-        {/* Градиентная полоса */}
         <div
           className="h-[3px] w-full mt-2 shrink-0"
           style={{
-            background:
-              "linear-gradient(90deg, rgb(99, 102, 241), rgba(99, 102, 241, 0.533), transparent)",
+            background: "linear-gradient(90deg, rgb(99, 102, 241), rgba(99, 102, 241, 0.533), transparent)",
           }}
         />
 
         <div className="flex-1 overflow-y-auto">
-          {/* Шапка */}
           <div className="px-6 pt-5 pb-5 border-b border-gray-100">
             <div className="flex items-start justify-between mb-4">
               <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${st.chip}`}>
@@ -159,7 +110,6 @@ export const EmployeeProfileModal = ({ employee: e, onClose, onEdit, onDelete, o
             </div>
           </div>
 
-          {/* Табы */}
           <div className="px-6 pt-4 pb-2 border-b border-gray-100">
             <div className="flex gap-1 p-1 rounded-xl bg-gray-100 w-fit">
               {TABS.map((t) => (
@@ -167,9 +117,7 @@ export const EmployeeProfileModal = ({ employee: e, onClose, onEdit, onDelete, o
                   key={t.key}
                   onClick={() => setTab(t.key)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    tab === t.key
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
+                    tab === t.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
                   {t.icon}
@@ -179,41 +127,43 @@ export const EmployeeProfileModal = ({ employee: e, onClose, onEdit, onDelete, o
             </div>
           </div>
 
-          {/* Контент */}
           <div className="px-6 py-5">
-            {tab === "info" ? (
-              <>
-                <Section title="Персональные данные">
-                  <Field icon={<Calendar size={15} />} label="Дата рождения" value={formatDate(r.birth_date)} />
-                  <Field icon={<User size={15} />} label="Пол" value={genderLabel(r.gender)} />
-                  <Field icon={<ScrollText size={15} />} label="Номер паспорта" value={passport} />
-                  <Field icon={<Hash size={15} />} label="ИНН" value={r.inn} />
-                  <Field icon={<MapPin size={15} />} label="Адрес" value={r.address} />
-                  <Field icon={<CreditCard size={15} />} label="Банковский счёт" value={r.bank_account} />
-                  <Field icon={<Star size={15} />} label="Рейтинг" value={r.rating != null ? String(r.rating) : ""} />
-                </Section>
+            <If is={tab === "info"}>
+              <Section title="Персональные данные">
+                <Field icon={<Calendar size={15} />} label="Дата рождения" value={formatDate(r.birth_date)} />
+                <Field icon={<User size={15} />} label="Пол" value={genderLabel(r.gender)} />
+                <Field icon={<ScrollText size={15} />} label="Номер паспорта" value={passport} />
+                <Field icon={<Hash size={15} />} label="ИНН" value={r.inn} />
+                <Field icon={<MapPin size={15} />} label="Адрес" value={r.address} />
+                <Field icon={<CreditCard size={15} />} label="Банковский счёт" value={r.bank_account} />
+                <Field icon={<Star size={15} />} label="Рейтинг" value={r.rating != null ? String(r.rating) : ""} />
+              </Section>
 
-                <Section title="Рабочие данные">
-                  <Field icon={<Briefcase size={15} />} label="Должность" value={e.position} />
-                  <Field icon={<Building2 size={15} />} label="Отдел" value={e.department} />
-                  <Field icon={<Landmark size={15} />} label="Организация" value={organization} />
-                  <Field icon={<Users size={15} />} label="Руководитель" value={supervisor} />
-                  <Field icon={<Shield size={15} />} label="Роль" value={roles} />
-                  <Field icon={<Mail size={15} />} label="Персональный Email" value={e.personalEmail} />
-                  <Field icon={<Phone size={15} />} label="Персональный телефон" value={e.personalPhone} />
-                  <Field icon={<Mail size={15} />} label="Корпоративный Email" value={e.corporateEmail} />
-                  <Field icon={<Phone size={15} />} label="Корпоративный телефон" value={e.corporatePhone} />
-                  <Field icon={<Phone size={15} />} label="Телефон" value={r.phone} />
-                  <Field icon={<Wallet size={15} />} label="Заработная плата" value={money(e.salary)} accent />
-                </Section>
-              </>
-            ) : (
-              <div className="py-12 text-center text-sm text-gray-400">Раздел в разработке</div>
-            )}
+              <Section title="Рабочие данные">
+                <Field icon={<Briefcase size={15} />} label="Должность" value={e.position} />
+                <Field icon={<Building2 size={15} />} label="Отдел" value={e.department} />
+                <Field icon={<Landmark size={15} />} label="Организация" value={organization} />
+                <Field icon={<Users size={15} />} label="Руководитель" value={supervisor} />
+                <Field icon={<Shield size={15} />} label="Роль" value={roles} />
+                <Field icon={<Mail size={15} />} label="Персональный Email" value={e.personalEmail} />
+                <Field icon={<Phone size={15} />} label="Персональный телефон" value={e.personalPhone} />
+                <Field icon={<Mail size={15} />} label="Корпоративный Email" value={e.corporateEmail} />
+                <Field icon={<Phone size={15} />} label="Корпоративный телефон" value={e.corporatePhone} />
+                <Field icon={<Phone size={15} />} label="Телефон" value={r.phone} />
+                <Field icon={<Wallet size={15} />} label="Заработная плата" value={money(e.salary)} accent />
+              </Section>
+            </If>
+
+            <If is={tab === "activity"}>
+              <ActivityTab />
+            </If>
+
+            <If is={tab === "docs"}>
+              <DocsTab />
+            </If>
           </div>
         </div>
 
-        {/* Футер */}
         <div className="px-6 py-4 border-t border-gray-100 shrink-0">
           <div className="flex gap-2">
             <button
@@ -223,15 +173,12 @@ export const EmployeeProfileModal = ({ employee: e, onClose, onEdit, onDelete, o
               <Pencil size={15} />
               <span>Редактировать</span>
             </button>
-            <Popconfirm
-              title="Удалить сотрудника?" okText="Удалить" cancelText="Отмена"
-              okButtonProps={{ danger: true }} onConfirm={() => onDelete(e.id)}
-              zIndex={10000}
+            <button
+              onClick={() => onDelete(e.id)}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 text-sm font-semibold transition-colors"
             >
-              <button className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 text-sm font-semibold transition-colors">
-                <Trash2 size={15} />
-              </button>
-            </Popconfirm>
+              <Trash2 size={15} />
+            </button>
             <button
               onClick={() => onDuplicate(e)}
               className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 text-sm font-semibold transition-colors"

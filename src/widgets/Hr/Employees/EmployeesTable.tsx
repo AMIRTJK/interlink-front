@@ -1,5 +1,4 @@
 import { Pencil, Trash2 } from "lucide-react";
-import { Popconfirm } from "antd";
 import { IEmployee, money, statusMeta } from "./model";
 import { Avatar } from "./parts";
 
@@ -10,31 +9,22 @@ interface IProps {
   onRowClick: (e: IEmployee) => void;
 }
 
-// Цвета чипа статуса в стиле реестра
 const REGISTRY_STATUS_STYLE: Record<string, { chip: string; dot: string }> = {
   active: { chip: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500" },
   vacation: { chip: "bg-red-100 text-red-700", dot: "bg-red-500" },
   business_trip: { chip: "bg-amber-100 text-amber-700", dot: "bg-amber-500" },
 };
 
-// Чип статуса в стиле реестра
 const RegistryStatusChip = ({ status }: { status: string }) => {
-  const s =
-    REGISTRY_STATUS_STYLE[status] || {
-      chip: "bg-gray-100 text-gray-500",
-      dot: "bg-gray-400",
-    };
+  const s = REGISTRY_STATUS_STYLE[status] || { chip: "bg-gray-100 text-gray-500", dot: "bg-gray-400" };
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${s.chip}`}
-    >
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${s.chip}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
       {statusMeta(status).label}
     </span>
   );
 };
 
-// Табличный вид списка сотрудников
 export const EmployeesTable = ({ items, onEdit, onDelete, onRowClick }: IProps) => {
   return (
     <div className="rounded-2xl border overflow-hidden bg-white border-gray-200">
@@ -63,13 +53,9 @@ export const EmployeesTable = ({ items, onEdit, onDelete, onRowClick }: IProps) 
                   <div className="flex items-center gap-3">
                     <Avatar e={e} size={44} />
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">
-                        {e.nameMain}
-                      </p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">{e.nameMain}</p>
                       {e.middleName && (
-                        <p className="text-xs text-gray-500 mt-0.5 truncate">
-                          {e.middleName}
-                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5 truncate">{e.middleName}</p>
                       )}
                     </div>
                   </div>
@@ -101,20 +87,13 @@ export const EmployeesTable = ({ items, onEdit, onDelete, onRowClick }: IProps) 
                     >
                       <Pencil size={13} />
                     </button>
-                    <Popconfirm
-                      title="Удалить сотрудника?"
-                      okText="Удалить"
-                      cancelText="Отмена"
-                      okButtonProps={{ danger: true }}
-                      onConfirm={() => onDelete(e.id)}
+                    <button
+                      onClick={() => onDelete(e.id)}
+                      className="p-1.5 rounded-lg transition-colors text-red-500 hover:bg-red-50"
+                      title="Удалить"
                     >
-                      <button
-                        className="p-1.5 rounded-lg transition-colors text-red-500 hover:bg-red-50"
-                        title="Удалить"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </Popconfirm>
+                      <Trash2 size={13} />
+                    </button>
                   </div>
                 </td>
               </tr>
