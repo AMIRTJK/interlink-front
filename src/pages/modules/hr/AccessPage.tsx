@@ -1,6 +1,5 @@
 import { HrHeader, AccessWidget } from "@widgets/Hr";
 
-// Страница «Доступ»
 export const HrAccessPage: React.FC = () => {
   return (
     <div>
