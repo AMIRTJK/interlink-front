@@ -322,9 +322,15 @@ export const FilesTab = () => {
 
 			{/* Modals */}
 			<AddCategoryModal
-				open={addCategoryOpen}
+				isOpen={addCategoryOpen}
 				onClose={() => setAddCategoryOpen(false)}
-				onCreate={createFolder.mutateAsync}
+				onSubmit={(payload) => {
+					createFolder.mutateAsync({
+						...payload,
+						parent_id: activeFolderId === "all" ? null : activeFolderId,
+					});
+					setAddCategoryOpen(false);
+				}}
 			/>
 
 			<FolderActionsModal
