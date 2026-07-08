@@ -48,10 +48,10 @@ export const HrHeader = ({ title, subtitle }: IHrHeaderProps) => {
     <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
       <div>
         <If is={!!title}>
-          <h1 className="text-2xl font-bold text-slate-800">{title}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">{title}</h1>
         </If>
         <If is={subtitle != null}>
-          <p className="text-sm text-slate-400 mt-0.5">{subtitle}</p>
+          <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
         </If>
       </div>
 

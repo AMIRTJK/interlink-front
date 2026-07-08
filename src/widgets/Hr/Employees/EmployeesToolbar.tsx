@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Search, Filter, BarChart3, LayoutGrid, Table as TableIcon, Plus } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Search, SlidersHorizontal, BarChart3, LayoutGrid, Table as TableIcon, Plus } from "lucide-react";
+import { If } from "@shared/ui";
 import { EmployeesFilter } from "./EmployeesFilter";
 import { IEmployeesFilters, TEmployeesView } from "./model";
 
@@ -22,7 +23,6 @@ const emptyFilters: IEmployeesFilters = {
   salaryMax: "",
 };
 
-// Панель управления списком: поиск, фильтр, аналитика, вид, создание
 export const EmployeesToolbar = ({
   search,
   onSearch,
@@ -34,8 +34,19 @@ export const EmployeesToolbar = ({
   onOpenAnalytics,
   onCreate,
 }: IProps) => {
+  const ref = useRef<HTMLDivElement>(null);
   const [showFilter, setShowFilter] = useState(false);
   const [draft, setDraft] = useState<IEmployeesFilters>(filters);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setShowFilter(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const openFilter = () => {
     setDraft(filters);
@@ -46,23 +57,24 @@ export const EmployeesToolbar = ({
     <div className="flex items-center justify-between gap-2 flex-wrap">
       <div className="flex items-center gap-2 flex-wrap">
         <div className="relative">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             value={search}
             onChange={(e) => onSearch(e.target.value)}
             placeholder="Поиск..."
-            className="pl-9 pr-3 py-2 w-56 text-sm rounded-xl border border-slate-200 bg-white focus:outline-none focus:border-blue-400"
+            className="pl-9 pr-4 py-2.5 w-56 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-colors bg-white border-gray-200 text-gray-700 placeholder:text-gray-300 focus:border-indigo-400"
           />
         </div>
 
-        <div className="relative">
+        <div className="relative" ref={ref}>
           <button
             onClick={openFilter}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all duration-300 bg-white border-gray-200 text-gray-600 hover:bg-gray-50 cursor-pointer"
           >
-            <Filter size={15} /> Фильтр
+            <SlidersHorizontal size={15} />
+            <span>Фильтр</span>
           </button>
-          {showFilter && (
+          <If is={showFilter}>
             <EmployeesFilter
               draft={draft}
               setDraft={setDraft}
@@ -73,14 +85,15 @@ export const EmployeesToolbar = ({
               }}
               onReset={() => setDraft(emptyFilters)}
             />
-          )}
+          </If>
         </div>
 
         <button
           onClick={onOpenAnalytics}
-          className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold transition-colors shadow-md shadow-indigo-900/30 cursor-pointer"
         >
-          <BarChart3 size={15} /> Аналитика
+          <BarChart3 size={15} />
+          <span>Аналитика</span>
         </button>
       </div>
 
@@ -88,7 +101,7 @@ export const EmployeesToolbar = ({
         <div className="flex items-center bg-white border border-slate-200 rounded-xl p-0.5">
           <button
             onClick={() => onView("table")}
-            className={`p-1.5 rounded-lg transition-colors ${
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
               view === "table" ? "bg-blue-50 text-blue-600" : "text-slate-400 hover:text-slate-600"
             }`}
             title="Таблица"
@@ -97,7 +110,7 @@ export const EmployeesToolbar = ({
           </button>
           <button
             onClick={() => onView("cards")}
-            className={`p-1.5 rounded-lg transition-colors ${
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
               view === "cards" ? "bg-blue-50 text-blue-600" : "text-slate-400 hover:text-slate-600"
             }`}
             title="Карточки"
@@ -107,9 +120,10 @@ export const EmployeesToolbar = ({
         </div>
         <button
           onClick={onCreate}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold transition-colors shadow-lg shadow-indigo-900/30 cursor-pointer"
         >
-          <Plus size={16} /> Создать
+          <Plus size={16} />
+          <span>Создать</span>
         </button>
       </div>
     </div>
