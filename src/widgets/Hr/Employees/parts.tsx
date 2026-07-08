@@ -2,14 +2,22 @@ import { useState } from "react";
 import { IEmployee, initials, statusMeta } from "./model";
 
 // Аватар сотрудника (фото или инициалы, с плавным переходом при ошибке 404)
-export const Avatar = ({ e, size = 40 }: { e: IEmployee; size?: number }) => {
+export const Avatar = ({
+  e,
+  size = 40,
+  rounded = "rounded-full",
+}: {
+  e: IEmployee;
+  size?: number;
+  rounded?: string;
+}) => {
   const [hasError, setHasError] = useState(false);
 
   return e.photo && !hasError ? (
     <img
       src={e.photo}
       alt={e.fullName}
-      className="rounded-full object-cover flex-shrink-0"
+      className={`${rounded} object-cover flex-shrink-0`}
       style={{ width: size, height: size }}
       onError={() => {
         setHasError(true);
@@ -17,7 +25,7 @@ export const Avatar = ({ e, size = 40 }: { e: IEmployee; size?: number }) => {
     />
   ) : (
     <div
-      className="rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center flex-shrink-0 text-xs"
+      className={`${rounded} bg-blue-100 text-blue-700 font-bold flex items-center justify-center flex-shrink-0 text-xs`}
       style={{ width: size, height: size }}
     >
       {initials(e.fullName)}

@@ -2,11 +2,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   X, Mail, Phone, Building2, Briefcase, Wallet, Pencil, Trash2, Copy,
-  Info, Activity, FileText, TrendingUp, ClipboardList, Award, CalendarClock,
+  CircleUserRound, Activity, FolderOpen, Calendar, ScrollText, Hash,
+  CreditCard, Landmark, MapPin, Star, Users, Shield, User, Award,
 } from "lucide-react";
 import { Popconfirm } from "antd";
-import { IEmployee, money } from "./model";
-import { Avatar, StatusChip } from "./parts";
+import { IEmployee, money, statusMeta } from "./model";
+import { Avatar } from "./parts";
 
 interface IProps {
   employee: IEmployee;
@@ -18,44 +19,81 @@ interface IProps {
 
 type TTab = "info" | "activity" | "docs";
 
+// Цвета чипа статуса в стиле дизайна
+const STATUS_STYLE: Record<string, { chip: string; dot: string }> = {
+  active: { chip: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500" },
+  vacation: { chip: "bg-red-100 text-red-700", dot: "bg-red-500" },
+  business_trip: { chip: "bg-amber-100 text-amber-700", dot: "bg-amber-500" },
+};
+
 // Карточка поля в просмотре
 const Field = ({ icon, label, value, accent }: {
-  icon: React.ReactNode; label: string; value: string; accent?: boolean;
+  icon: React.ReactNode; label: string; value: React.ReactNode; accent?: boolean;
 }) => (
-  <div className={`rounded-xl border p-3 flex items-start gap-3 ${
-    accent ? "bg-indigo-50 border-indigo-100" : "border-slate-100"
-  }`}>
-    <div className="text-slate-400 mt-0.5">{icon}</div>
+  <div
+    className={`flex items-center gap-3 p-4 rounded-xl transition-colors ${
+      accent
+        ? "border bg-indigo-50 border-indigo-100"
+        : "bg-gray-50 hover:bg-indigo-50/60"
+    }`}
+  >
+    <div className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0">
+      <span className={accent ? "text-indigo-500" : "text-indigo-400"}>{icon}</span>
+    </div>
     <div className="min-w-0">
-      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
-      <p className={`text-sm font-medium truncate ${accent ? "text-indigo-600" : "text-slate-700"}`}>
+      <p
+        className={`text-[11px] font-medium uppercase tracking-wide ${
+          accent ? "text-indigo-400" : "text-gray-500"
+        }`}
+      >
+        {label}
+      </p>
+      <p
+        className={`text-sm mt-0.5 break-words ${
+          accent ? "font-bold text-indigo-700" : "font-semibold text-gray-800"
+        }`}
+      >
         {value || "—"}
       </p>
     </div>
   </div>
 );
 
-// Показатель в шапке
-const Stat = ({ icon, value, label, color }: {
-  icon: React.ReactNode; value: React.ReactNode; label: string; color: string;
-}) => (
-  <div className="text-center">
-    <div className={`w-9 h-9 mx-auto rounded-xl flex items-center justify-center mb-1 ${color}`}>{icon}</div>
-    <p className="text-lg font-bold text-slate-800 leading-none">{value}</p>
-    <p className="text-[11px] text-slate-400 mt-0.5">{label}</p>
+// Секция полей
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <div className="mb-4 pb-4 border-b border-gray-100 last:mb-0 last:pb-0 last:border-b-0">
+    <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-3">
+      {title}
+    </p>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{children}</div>
   </div>
 );
 
 const TABS: { key: TTab; label: string; icon: React.ReactNode }[] = [
-  { key: "info", label: "Информация", icon: <Info size={14} /> },
-  { key: "activity", label: "Активность", icon: <Activity size={14} /> },
-  { key: "docs", label: "Документы", icon: <FileText size={14} /> },
+  { key: "info", label: "Информация", icon: <CircleUserRound size={15} /> },
+  { key: "activity", label: "Активность", icon: <Activity size={15} /> },
+  { key: "docs", label: "Документы", icon: <FolderOpen size={15} /> },
 ];
+
+const formatDate = (s?: string) => {
+  if (!s) return "—";
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? s : d.toLocaleDateString("ru-RU");
+};
+
+const genderLabel = (g?: string) =>
+  g === "male" ? "Мужской" : g === "female" ? "Женский" : g || "—";
 
 // Просмотр сотрудника (bottom-sheet, выезжает снизу)
 export const EmployeeProfileModal = ({ employee: e, onClose, onEdit, onDelete, onDuplicate }: IProps) => {
   const [tab, setTab] = useState<TTab>("info");
   const r = e.raw;
+  const st = STATUS_STYLE[e.status] || { chip: "bg-gray-100 text-gray-500", dot: "bg-gray-400" };
+
+  const passport = [r.passport_series, r.passport_number].filter(Boolean).join(" ");
+  const roles = (r.roles || []).map((x) => x.name).join(", ");
+  const supervisor = r.supervisor?.full_name || e.supervisorName;
+  const organization = r.organization?.name || "—";
 
   return (
     <motion.div
@@ -67,95 +105,141 @@ export const EmployeeProfileModal = ({ employee: e, onClose, onEdit, onDelete, o
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", stiffness: 360, damping: 36 }}
         onClick={(ev) => ev.stopPropagation()}
-        className="bg-white w-full max-w-xl rounded-t-3xl shadow-2xl flex flex-col max-h-[92vh]"
+        className="relative w-full max-w-3xl bg-white border-t border-gray-100 shadow-2xl flex flex-col z-50 rounded-t-3xl max-h-[92vh]"
       >
-        <div className="mx-auto mt-2 mb-1 h-1.5 w-10 rounded-full bg-slate-200" />
-
-        {/* Шапка */}
-        <div className="px-5 pt-3 pb-4 border-b border-slate-100">
-          <div className="flex items-start justify-between">
-            <StatusChip status={e.status} />
-            <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600">
-              <X size={18} />
-            </button>
-          </div>
-          <div className="flex items-center justify-between gap-4 mt-2 flex-wrap">
-            <div className="flex items-center gap-3 min-w-0">
-              <Avatar e={e} size={64} />
-              <div className="min-w-0">
-                <p className="text-lg font-bold text-slate-800 truncate">{e.fullName}</p>
-                <p className="text-sm text-indigo-500 truncate">{e.position}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <Stat icon={<TrendingUp size={16} />} color="bg-blue-50 text-blue-600" value={r.projects_count ?? "—"} label="Проектов" />
-              <Stat icon={<ClipboardList size={16} />} color="bg-emerald-50 text-emerald-600" value={r.tasks_count ?? "—"} label="Задач" />
-              <Stat icon={<Award size={16} />} color="bg-amber-50 text-amber-600" value={r.awards_count ?? "—"} label="Наград" />
-              <Stat icon={<CalendarClock size={16} />} color="bg-violet-50 text-violet-600" value={r.years ?? "—"} label="Лет" />
-            </div>
-          </div>
+        {/* Ручка */}
+        <div className="flex justify-center pt-3 pb-1 shrink-0">
+          <div className="w-10 h-1 rounded-full bg-gray-300" />
         </div>
+        {/* Градиентная полоса */}
+        <div
+          className="h-[3px] w-full mt-2 shrink-0"
+          style={{
+            background:
+              "linear-gradient(90deg, rgb(99, 102, 241), rgba(99, 102, 241, 0.533), transparent)",
+          }}
+        />
 
-        {/* Табы */}
-        <div className="px-5 pt-3">
-          <div className="inline-flex items-center gap-1 bg-slate-100 rounded-xl p-1">
-            {TABS.map((t) => (
+        <div className="flex-1 overflow-y-auto">
+          {/* Шапка */}
+          <div className="px-6 pt-5 pb-5 border-b border-gray-100">
+            <div className="flex items-start justify-between mb-4">
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${st.chip}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} />
+                {statusMeta(e.status).label}
+              </span>
               <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  tab === t.key ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"
-                }`}
+                onClick={onClose}
+                className="p-1.5 rounded-xl transition-colors hover:bg-gray-100 text-gray-400"
               >
-                {t.icon} {t.label}
+                <X size={18} />
               </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Контент */}
-        <div className="px-5 py-4 overflow-auto h-[340px] min-h-[340px]">
-          {tab === "info" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Field icon={<Mail size={16} />} label="Email" value={r.personal_email || e.email} />
-              <Field icon={<Phone size={16} />} label="Телефон" value={r.personal_phone || e.phone} />
-              <Field icon={<Mail size={16} />} label="Корпоративный email" value={e.email} />
-              <Field icon={<Phone size={16} />} label="Корпоративный телефон" value={e.phone} />
-              <Field icon={<Building2 size={16} />} label="Отдел" value={e.department} />
-              <Field icon={<Briefcase size={16} />} label="Должность" value={e.position} />
-              <div className="sm:col-span-2">
-                <Field icon={<Wallet size={16} />} label="Заработная плата" value={money(e.salary)} accent />
-              </div>
             </div>
-          ) : (
-            <div className="py-12 text-center text-sm text-slate-400">Раздел в разработке</div>
-          )}
+            <div className="flex items-center gap-5">
+              <div
+                className="rounded-2xl overflow-hidden shrink-0"
+                style={{ boxShadow: "rgba(99, 102, 241, 0.333) 0px 8px 28px" }}
+              >
+                <Avatar e={e} size={80} rounded="rounded-2xl" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xl font-bold text-gray-900 leading-tight">{e.nameMain}</h2>
+                {e.middleName && <p className="text-sm text-gray-500 mt-0.5">{e.middleName}</p>}
+                <p className="text-sm font-semibold text-indigo-500 mt-1">{e.position}</p>
+              </div>
+              {r.rating != null && (
+                <div className="hidden sm:flex flex-col items-center gap-1.5 shrink-0">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-amber-600 bg-amber-50">
+                    <Award size={16} />
+                  </div>
+                  <span className="text-base font-bold tabular-nums text-gray-800">{r.rating}</span>
+                  <span className="text-[11px] text-center leading-tight text-gray-400">Рейтинг</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Табы */}
+          <div className="px-6 pt-4 pb-2 border-b border-gray-100">
+            <div className="flex gap-1 p-1 rounded-xl bg-gray-100 w-fit">
+              {TABS.map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    tab === t.key
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  {t.icon}
+                  <span>{t.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Контент */}
+          <div className="px-6 py-5">
+            {tab === "info" ? (
+              <>
+                <Section title="Персональные данные">
+                  <Field icon={<Calendar size={15} />} label="Дата рождения" value={formatDate(r.birth_date)} />
+                  <Field icon={<User size={15} />} label="Пол" value={genderLabel(r.gender)} />
+                  <Field icon={<ScrollText size={15} />} label="Номер паспорта" value={passport} />
+                  <Field icon={<Hash size={15} />} label="ИНН" value={r.inn} />
+                  <Field icon={<MapPin size={15} />} label="Адрес" value={r.address} />
+                  <Field icon={<CreditCard size={15} />} label="Банковский счёт" value={r.bank_account} />
+                  <Field icon={<Star size={15} />} label="Рейтинг" value={r.rating != null ? String(r.rating) : ""} />
+                </Section>
+
+                <Section title="Рабочие данные">
+                  <Field icon={<Briefcase size={15} />} label="Должность" value={e.position} />
+                  <Field icon={<Building2 size={15} />} label="Отдел" value={e.department} />
+                  <Field icon={<Landmark size={15} />} label="Организация" value={organization} />
+                  <Field icon={<Users size={15} />} label="Руководитель" value={supervisor} />
+                  <Field icon={<Shield size={15} />} label="Роль" value={roles} />
+                  <Field icon={<Mail size={15} />} label="Персональный Email" value={e.personalEmail} />
+                  <Field icon={<Phone size={15} />} label="Персональный телефон" value={e.personalPhone} />
+                  <Field icon={<Mail size={15} />} label="Корпоративный Email" value={e.corporateEmail} />
+                  <Field icon={<Phone size={15} />} label="Корпоративный телефон" value={e.corporatePhone} />
+                  <Field icon={<Phone size={15} />} label="Телефон" value={r.phone} />
+                  <Field icon={<Wallet size={15} />} label="Заработная плата" value={money(e.salary)} accent />
+                </Section>
+              </>
+            ) : (
+              <div className="py-12 text-center text-sm text-gray-400">Раздел в разработке</div>
+            )}
+          </div>
         </div>
 
         {/* Футер */}
-        <div className="px-5 py-3 border-t border-slate-100 flex items-center gap-2">
-          <button
-            onClick={() => onEdit(e)}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors"
-          >
-            <Pencil size={15} /> Редактировать
-          </button>
-          <Popconfirm
-            title="Удалить сотрудника?" okText="Удалить" cancelText="Отмена"
-            okButtonProps={{ danger: true }} onConfirm={() => onDelete(e.id)}
-            zIndex={10000}
-          >
-            <button className="p-2.5 rounded-xl text-rose-500 border border-rose-100 bg-rose-50 hover:bg-rose-100">
-              <Trash2 size={16} />
+        <div className="px-6 py-4 border-t border-gray-100 shrink-0">
+          <div className="flex gap-2">
+            <button
+              onClick={() => onEdit(e)}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-indigo-600 text-white text-sm font-semibold shadow-lg shadow-indigo-900/30 hover:bg-indigo-700 transition-colors"
+            >
+              <Pencil size={15} />
+              <span>Редактировать</span>
             </button>
-          </Popconfirm>
-          <button
-            onClick={() => onDuplicate(e)}
-            className="p-2.5 rounded-xl text-slate-500 border border-slate-200 hover:bg-slate-50"
-            title="Дублировать"
-          >
-            <Copy size={16} />
-          </button>
+            <Popconfirm
+              title="Удалить сотрудника?" okText="Удалить" cancelText="Отмена"
+              okButtonProps={{ danger: true }} onConfirm={() => onDelete(e.id)}
+              zIndex={10000}
+            >
+              <button className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 text-sm font-semibold transition-colors">
+                <Trash2 size={15} />
+              </button>
+            </Popconfirm>
+            <button
+              onClick={() => onDuplicate(e)}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 text-sm font-semibold transition-colors"
+              title="Дублировать"
+            >
+              <Copy size={15} />
+            </button>
+          </div>
         </div>
       </motion.div>
     </motion.div>
