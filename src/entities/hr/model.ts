@@ -55,6 +55,7 @@ export interface IAdminUser {
   bank_account?: string;
   rating?: number;
   photo_path?: string | null;
+  bio?: string | null;
   organization_id?: number;
   supervisor_id?: number;
   organization?: IOrganizationShort;
@@ -106,6 +107,7 @@ export interface CreateUserDTO {
   rating?: number;
   roles?: string[];
   department_ids?: number[];
+  bio?: string;
 }
 
 export interface SetRoleDTO {

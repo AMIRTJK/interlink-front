@@ -60,6 +60,7 @@ export const mapEmployeeToForm = (employee: IAdminUser) => {
         : undefined,
     department_ids: employee.departments?.map((d) => String(d.id)),
     roles: employee.roles?.map((r) => r.name),
+    bio: employee.bio || "",
   };
 };
 

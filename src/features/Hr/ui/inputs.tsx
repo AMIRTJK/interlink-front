@@ -146,3 +146,20 @@ export const SegmentControl = ({ value, onChange, options }: ISegmentControlProp
     </div>
   );
 };
+
+interface ITextAreaProps extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange"> {
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  hasError?: boolean;
+}
+
+export const TextArea = ({ value, onChange, hasError, ...rest }: ITextAreaProps) => {
+  return (
+    <textarea
+      {...rest}
+      value={value ?? ""}
+      onChange={onChange}
+      className={`${getInputClasses(hasError, rest.disabled)} py-2.5 px-3 min-h-20 resize-y`}
+    />
+  );
+};

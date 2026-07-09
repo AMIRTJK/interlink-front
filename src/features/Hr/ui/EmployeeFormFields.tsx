@@ -11,7 +11,7 @@ import {
   transformDeps,
   transformRoles,
 } from "../lib";
-import { FormItem, IconInput, PhoneInput, SegmentControl, SectionTitle } from "./inputs";
+import { FormItem, IconInput, PhoneInput, SegmentControl, SectionTitle, TextArea } from "./inputs";
 import { CustomSelect } from "./CustomSelect";
 import { CustomDatePicker } from "./CustomDatePicker";
 import { MultiSelect } from "./MultiSelect";
@@ -70,13 +70,12 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
   const organizations = useMemo<IOption[]>(() => transformOrgs(orgRes), [orgRes]);
   const roles = useMemo<IOption[]>(() => transformRoles(roleRes), [roleRes]);
   const departments = useMemo<IOption[]>(() => transformDeps(deptRes), [deptRes]);
-  const supervisors = useMemo<IOption[]>(() => {
-    const arr = (userRes as { data?: { data?: { id: number; last_name?: string; first_name?: string }[] } })?.data?.data || [];
-    return arr.map((u) => ({
+  const supervisors = useMemo<IOption[]>(() =>
+    ((userRes as any)?.data?.data || []).map((u: any) => ({
       value: String(u.id),
       label: [u.last_name, u.first_name].filter(Boolean).join(" "),
-    }));
-  }, [userRes]);
+    })), [userRes]
+  );
 
   return (
     <div className="space-y-4">
@@ -99,6 +98,9 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
           </FormItem>
           <FormItem label="Пол" error={errors.gender} className="sm:col-span-2">
             <SegmentControl options={GENDER_SEG} value={values.gender} onChange={(v) => handleChange("gender", v)} />
+          </FormItem>
+          <FormItem label="О себе (Био)" error={errors.bio} className="sm:col-span-3">
+            <TextArea placeholder="Краткая биография сотрудника..." value={values.bio} onChange={(e) => handleChange("bio", e.target.value)} hasError={!!errors.bio} />
           </FormItem>
         </div>
       </section>
