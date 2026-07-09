@@ -37,7 +37,7 @@ export const EmployeesTable = ({ items, onEdit, onDelete, onRowClick }: IProps) 
               <th className="px-4 py-3 font-semibold hidden md:table-cell">Отдел</th>
               <th className="px-4 py-3 font-semibold hidden sm:table-cell">Статус</th>
               <th className="px-4 py-3 font-semibold hidden lg:table-cell">Email</th>
-              <th className="px-4 py-3 font-semibold hidden lg:table-cell">Телефон</th>
+              <th className="px-4 py-3 font-semibold hidden lg:table-cell">Логин</th>
               <th className="px-4 py-3 font-semibold text-right">Оклад</th>
               <th className="px-4 py-3 font-semibold text-right">Действия</th>
             </tr>
