@@ -67,8 +67,13 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
   const [values, setValues] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [passport, setPassport] = useState<IPassportSides>(EMPTY_PASSPORT);
+  // «Как сфотографировать паспорт» и «Новый сотрудник» — два отдельных шага/окна.
+  // Пока showForm === false показываем только шаг с паспортом; после нажатия
+  // «Продолжить» показываем только форму сотрудника (без блока с паспортом).
+  const [showForm, setShowForm] = useState(false);
 
-  const fieldsVisible = isEdit || !!passport.front || !!passport.back;
+  const canProceed = !!passport.front || !!passport.back;
+  const formVisible = isEdit || showForm;
 
   const createM = useMutationQuery<CreateUserDTO>({
     url: ApiRoutes.CREATE_USER,
@@ -103,6 +108,7 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
   useEffect(() => {
     if (!open) return;
     setErrors({});
+    setShowForm(false);
     if (employee) {
       setPassport(EMPTY_PASSPORT);
       setValues(mapEmployeeToForm(employee));
@@ -159,6 +165,7 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
       setValues({});
       setErrors({});
       setPassport(EMPTY_PASSPORT);
+      setShowForm(false);
       onClose();
     };
 
@@ -173,7 +180,7 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
 
   const isPending = isEdit ? updateM.isPending : createM.isPending;
   const badge = isEdit ? [employee?.last_name?.[0], employee?.first_name?.[0]].filter(Boolean).join("").toUpperCase() || "✎" : "??";
-  const showTitle = isEdit || fieldsVisible;
+  const showTitle = formVisible;
   const organizationId = values.organization_id;
 
   return (
@@ -222,11 +229,49 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
           onSubmit={handleSubmit}
           className={`hr-create-form px-6 pb-6 space-y-5 overflow-y-auto flex-1 scrollbar-stable ${showTitle ? "pt-6" : "pt-0"}`}
         >
-          <If is={!isEdit}>
+          {/* Шаг 1 — отдельное окно «Как сфотографировать паспорт» */}
+          <If is={!isEdit && !showForm}>
             <PassportUploadStep value={passport} onChange={handlePassportChange} />
+            <div className="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors border-gray-200 dark:border-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                Отмена
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowForm(true)}
+                disabled={!canProceed}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              >
+                Продолжить
+              </button>
+            </div>
           </If>
 
-          <If is={fieldsVisible}>
+          {/* Шаг 2 — отдельное окно «Новый сотрудник» (форма без блока паспорта) */}
+          <If is={formVisible}>
+            <If is={!isEdit && canProceed}>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-800">
+                <span className="text-xs font-semibold text-gray-500 dark:text-slate-400 mr-1">Паспорт:</span>
+                <If is={!!passport.front}>
+                  <img src={passport.front?.previewUrl} alt="Лицевая" className="h-12 w-16 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-slate-700" />
+                </If>
+                <If is={!!passport.back}>
+                  <img src={passport.back?.previewUrl} alt="Обратная" className="h-12 w-16 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-slate-700" />
+                </If>
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="ml-auto text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                >
+                  Изменить
+                </button>
+              </div>
+            </If>
+
             <EmployeeFormFields
               values={values}
               errors={errors}
@@ -235,9 +280,7 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
               isEdit={isEdit}
               initialPhoto={employee?.photo_path || undefined}
             />
-          </If>
 
-          <If is={fieldsVisible}>
             <div className="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
               <button
                 type="button"
