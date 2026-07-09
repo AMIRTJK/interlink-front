@@ -15,6 +15,41 @@ interface IProps {
   employee?: IAdminUser | null;
 }
 
+// Черновик фото паспорта сохраняется в localStorage, чтобы случайное закрытие
+// модалки не приводило к потере уже загруженного файла — при повторном открытии
+// создания сотрудника паспорт (и, соответственно, поля формы) восстанавливаются.
+const PASSPORT_DRAFT_KEY = "hr_passport_draft";
+
+const fileToDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+const dataUrlToFile = (dataUrl: string, name: string, type: string): File => {
+  const [meta, base64] = dataUrl.split(",");
+  const mime = type || meta.match(/:(.*?);/)?.[1] || "image/png";
+  const bstr = atob(base64);
+  let n = bstr.length;
+  const u8 = new Uint8Array(n);
+  while (n--) u8[n] = bstr.charCodeAt(n);
+  return new File([u8], name, { type: mime });
+};
+
+const readPassportDraft = (): IPassportFile | null => {
+  try {
+    const raw = localStorage.getItem(PASSPORT_DRAFT_KEY);
+    if (!raw) return null;
+    const { name, type, dataUrl } = JSON.parse(raw);
+    if (!dataUrl) return null;
+    return { file: dataUrlToFile(dataUrl, name, type), previewUrl: dataUrl };
+  } catch {
+    return null;
+  }
+};
+
 export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
   const isEdit = !!employee?.id;
   const [values, setValues] = useState<Record<string, any>>({});
@@ -55,14 +90,34 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
 
   useEffect(() => {
     if (!open) return;
-    setPassport(null);
     setErrors({});
     if (employee) {
+      setPassport(null);
       setValues(mapEmployeeToForm(employee));
     } else {
       setValues({});
+      // Восстанавливаем ранее загруженный паспорт (если модалку случайно закрыли).
+      setPassport(readPassportDraft());
     }
   }, [open, employee]);
+
+  const handlePassportChange = async (val: IPassportFile | null) => {
+    setPassport(val);
+    if (isEdit) return;
+    if (!val) {
+      localStorage.removeItem(PASSPORT_DRAFT_KEY);
+      return;
+    }
+    try {
+      const dataUrl = await fileToDataUrl(val.file);
+      localStorage.setItem(
+        PASSPORT_DRAFT_KEY,
+        JSON.stringify({ name: val.file.name, type: val.file.type, dataUrl })
+      );
+    } catch {
+      // Файл слишком большой для localStorage — просто не сохраняем черновик.
+    }
+  };
 
   const handleChange = (name: string, value: any) => {
     setValues((prev) => {
@@ -91,8 +146,10 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
     if (isEdit) delete (payload as any).password;
 
     const onSuccess = () => {
+      localStorage.removeItem(PASSPORT_DRAFT_KEY);
       setValues({});
       setErrors({});
+      setPassport(null);
       onClose();
     };
 
@@ -155,7 +212,7 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
           className={`hr-create-form px-6 pb-6 space-y-5 overflow-y-auto flex-1 scrollbar-stable ${showTitle ? "pt-6" : "pt-0"}`}
         >
           <If is={!isEdit}>
-            <PassportUploadStep value={passport} onChange={(val) => setPassport(val)} />
+            <PassportUploadStep value={passport} onChange={handlePassportChange} />
           </If>
 
           <If is={fieldsVisible}>

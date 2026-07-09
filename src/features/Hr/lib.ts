@@ -98,6 +98,11 @@ export const validateEmployee = (values: Record<string, any>, isEdit: boolean) =
   if (!values.department_ids || values.department_ids.length === 0) errs.department_ids = "Выберите отдел";
   if (!values.position) errs.position = "Введите должность";
   if (!values.roles || values.roles.length === 0) errs.roles = "Выберите роли";
+  if (!values.birth_date) errs.birth_date = "Укажите дату рождения";
+  if (!values.gender) errs.gender = "Выберите пол";
+  if (!values.passport_series) errs.passport_series = "Введите серию паспорта";
+  if (!values.passport_number) errs.passport_number = "Введите номер паспорта";
+  if (!values.inn) errs.inn = "Введите ИНН";
 
   if (!isEdit) {
     if (!values.phone) errs.phone = "Введите телефон";

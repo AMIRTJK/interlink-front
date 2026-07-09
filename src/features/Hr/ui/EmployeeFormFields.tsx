@@ -93,10 +93,10 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
           <FormItem label="Отчество" error={errors.middle_name}>
             <IconInput placeholder="Сергеевич" value={values.middle_name} onChange={(e) => handleChange("middle_name", e.target.value)} hasError={!!errors.middle_name} />
           </FormItem>
-          <FormItem label="Дата рождения" error={errors.birth_date}>
+          <FormItem label="Дата рождения" error={errors.birth_date} required>
             <CustomDatePicker value={values.birth_date} onChange={(v) => handleChange("birth_date", v)} hasError={!!errors.birth_date} />
           </FormItem>
-          <FormItem label="Пол" error={errors.gender} className="sm:col-span-2">
+          <FormItem label="Пол" error={errors.gender} className="sm:col-span-2" required>
             <SegmentControl options={GENDER_SEG} value={values.gender} onChange={(v) => handleChange("gender", v)} />
           </FormItem>
           <FormItem label="О себе (Био)" error={errors.bio} className="sm:col-span-3">
@@ -108,13 +108,13 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
       <section>
         <SectionTitle icon={<ScrollText size={13} />}>Документы</SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-3 gap-y-3">
-          <FormItem label="Серия паспорта" error={errors.passport_series}>
+          <FormItem label="Серия паспорта" error={errors.passport_series} required>
             <IconInput placeholder="A" maxLength={5} icon={iconEl(ScrollText)} value={values.passport_series} onChange={(e) => handleChange("passport_series", e.target.value)} hasError={!!errors.passport_series} />
           </FormItem>
-          <FormItem label="Номер паспорта" error={errors.passport_number}>
+          <FormItem label="Номер паспорта" error={errors.passport_number} required>
             <IconInput placeholder="1234567" maxLength={10} value={values.passport_number} onChange={(e) => handleChange("passport_number", e.target.value)} hasError={!!errors.passport_number} />
           </FormItem>
-          <FormItem label="ИНН" error={errors.inn}>
+          <FormItem label="ИНН" error={errors.inn} required>
             <IconInput placeholder="040012345" maxLength={12} icon={iconEl(Hash)} value={values.inn} onChange={(e) => handleChange("inn", e.target.value)} hasError={!!errors.inn} />
           </FormItem>
           <FormItem label="Адрес" error={errors.address} className="sm:col-span-3">
