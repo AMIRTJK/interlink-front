@@ -205,42 +205,7 @@ export const FilesTab = () => {
 				} : undefined}
 			/>
 
-			{/* Breadcrumbs */}
-			<If is={showBreadcrumbs}>
-				<div className="flex flex-wrap items-center text-xs font-semibold text-slate-500 dark:text-zinc-400 py-1.5 border-b border-slate-100/50 dark:border-slate-800/50">
-					{breadcrumbs.map((crumb, idx) => {
-						const isLast = idx === breadcrumbs.length - 1;
-						return (
-							<React.Fragment key={crumb.id}>
-								<If is={idx > 0}>
-									<span className="text-slate-300 dark:text-zinc-700 mx-1.5">/</span>
-								</If>
-								<span
-									onClick={() => !isLast && setActiveFolderId(crumb.id)}
-									className={`transition-all ${
-										isLast
-											? "text-slate-700 dark:text-zinc-200 font-bold"
-											: "cursor-pointer hover:text-indigo-650 hover:underline"
-									}`}
-								>
-									{crumb.name}
-								</span>
-							</React.Fragment>
-						);
-					})}
-					{currentFolders.length > 0 && currentFolders.map((child) => (
-						<React.Fragment key={child.id}>
-							<span className="text-slate-300 dark:text-zinc-700 mx-1.5">/</span>
-							<span
-								onClick={() => setActiveFolderId(child.id)}
-								className="cursor-pointer hover:text-indigo-655 hover:underline text-slate-500 dark:text-zinc-400 transition-all font-semibold"
-							>
-								{child.name}
-							</span>
-						</React.Fragment>
-					))}
-				</div>
-			</If>
+
 
 			{/* Starred/Pinned Files */}
 			<If is={viewContext === "personal"}>

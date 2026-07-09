@@ -225,35 +225,7 @@ export const useFilesData = (params: IFilesParams) => {
     return folders.filter((f) => f.parent_id !== null && Number(f.parent_id) === Number(parentId));
   }, [folders, params.activeFolderId]);
 
-  const breadcrumbs = useMemo(() => {
-    const actId = params.activeFolderId;
-    if (actId === undefined || actId === "all") return [];
 
-    const crumbs: { id: number; name: string }[] = [];
-    let currentId: number | null = actId;
-
-    while (currentId !== null) {
-      const folder = folders.find((f) => Number(f.id) === Number(currentId));
-      if (folder) {
-        crumbs.unshift({ id: folder.id, name: folder.name });
-        currentId = folder.parent_id;
-      } else {
-        currentId = null;
-      }
-    }
-    return crumbs;
-  }, [folders, params.activeFolderId]);
-
-  const showBreadcrumbs = useMemo(() => {
-    const actId = params.activeFolderId;
-    if (actId === undefined || actId === "all") return false;
-
-    const hasChildren = folders.some((f) => f.parent_id !== null && Number(f.parent_id) === Number(actId));
-    const currentFolder = folders.find((f) => Number(f.id) === Number(actId));
-    const isNested = currentFolder ? currentFolder.parent_id !== null : false;
-
-    return hasChildren || isNested;
-  }, [folders, params.activeFolderId]);
 
   return {
     files,
@@ -274,8 +246,6 @@ export const useFilesData = (params: IFilesParams) => {
     pinnedFiles,
     currentFiles,
     currentFolders,
-    breadcrumbs,
-    showBreadcrumbs,
 
     sharedFiles,
     isLoadingSharedFiles: sharedFilesQuery.isLoading,
