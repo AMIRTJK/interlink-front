@@ -21,7 +21,7 @@ export const CreateUser = () => {
     const payload: CreateUserDTO = {
       ...values, phone: `+992${values.phone}`,
       organization_id: Number(values.organization_id),
-      department_id: Number(values.department_id)
+      department_ids: [Number(values.department_id)]
     };
     mutate(payload, { onSuccess: () => form.resetFields() });
   };

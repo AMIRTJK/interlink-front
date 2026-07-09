@@ -88,7 +88,7 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
     if (Object.keys(errs).length > 0) return;
 
     const payload = prepareEmployeePayload(values);
-    if (isEdit) delete payload.password;
+    if (isEdit) delete (payload as any).password;
 
     const onSuccess = () => {
       setValues({});
