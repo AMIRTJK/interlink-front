@@ -1,5 +1,7 @@
 import React from 'react';
 import { Plus, X, UploadCloud, FileText, UserCircle2, ShieldCheck } from 'lucide-react';
+import { Select, DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import { ORDER_TYPES } from '../model';
 
 export const renderOrderFields = ({
@@ -27,38 +29,39 @@ export const renderOrderFields = ({
     ? users.filter((u) => u.orgId === state.organizationId)
     : users;
 
+  const selectStyle = { width: '100%', height: 42 };
+
   return (
     <div className="flex flex-col gap-6 w-full">
-      {/* 1. РЕКВИЗИТЫ ПРИКАЗА */}
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
         {sectionTitle(1, 'РЕКВИЗИТЫ ПРИКАЗА')}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           <div>
             <label className={labelCls}>ОРГАНИЗАЦИЯ *</label>
-            <select
-              value={state.organizationId || ''}
-              onChange={(e) => {
-                state.setOrganizationId(Number(e.target.value));
+            <Select
+              value={state.organizationId || undefined}
+              onChange={(val) => {
+                state.setOrganizationId(val);
                 state.setEmployeeId(null);
               }}
-              className={inputCls}
-            >
-              <option value="" disabled>Выберите организацию</option>
-              {orgs.map((o) => (
-                <option key={o.id} value={o.id}>{o.name}</option>
-              ))}
-            </select>
+              placeholder="Выберите организацию"
+              style={selectStyle}
+              options={orgs.map((o) => ({ value: o.id, label: o.name }))}
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
+              }
+            />
           </div>
           <div>
             <label className={labelCls}>ТИП ПРИКАЗА *</label>
-            <select
-              value={state.orderType}
-              onChange={(e) => state.setOrderType(e.target.value)}
-              className={inputCls}
-            >
-              <option value="" disabled>Выберите тип приказа</option>
-              {ORDER_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
+            <Select
+              value={state.orderType || undefined}
+              onChange={(val) => state.setOrderType(val)}
+              placeholder="Выберите тип приказа"
+              style={selectStyle}
+              options={ORDER_TYPES.map((t) => ({ value: t, label: t }))}
+            />
           </div>
           <div>
             <label className={labelCls}>НОМЕР ПРИКАЗА *</label>
@@ -72,39 +75,38 @@ export const renderOrderFields = ({
           </div>
           <div>
             <label className={labelCls}>ДАТА ПРИКАЗА *</label>
-            <input
-              type="date"
-              value={state.orderDate}
-              onChange={(e) => state.setOrderDate(e.target.value)}
-              className={inputCls}
+            <DatePicker
+              value={state.orderDate ? dayjs(state.orderDate) : null}
+              onChange={(_date, dateString) => state.setOrderDate(dateString as string)}
+              format="DD.MM.YYYY"
+              placeholder="Выберите дату"
+              style={selectStyle}
+              className="w-full!"
             />
           </div>
         </div>
         <div className="mt-4">
           <label className={labelCls}>СОТРУДНИК (КОГО КАСАЕТСЯ) *</label>
-          <select
-            value={state.employeeId || ''}
-            onChange={(e) => state.setEmployeeId(Number(e.target.value))}
-            className={inputCls}
+          <Select
+            value={state.employeeId || undefined}
+            onChange={(val) => state.setEmployeeId(val)}
+            placeholder={state.organizationId ? 'Выберите сотрудника' : 'Сначала выберите организацию'}
             disabled={!state.organizationId}
-          >
-            <option value="" disabled>
-              {state.organizationId ? 'Выберите сотрудника' : 'Сначала выберите организацию'}
-            </option>
-            {filteredEmployees.map((u) => (
-              <option key={u.id} value={u.id}>{u.name}</option>
-            ))}
-          </select>
+            style={selectStyle}
+            options={filteredEmployees.map((u) => ({ value: u.id, label: u.name }))}
+            showSearch
+            filterOption={(input, option) =>
+              (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
+            }
+          />
         </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* 2. ПРИКАЗ (A4 Document) */}
         <div className="flex-1 bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col">
           {sectionTitle(2, 'ПРИКАЗ')}
           
           <div className="flex-1 border border-slate-100 shadow-inner rounded-xl bg-white p-8 max-w-[794px] w-full self-center">
-            {/* Header */}
             <div className="text-center mb-6">
               <div className="flex items-center justify-center mb-3">
                 <div className="w-16 h-16 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center bg-slate-50 text-slate-700 font-bold text-xl select-none">
@@ -118,15 +120,16 @@ export const renderOrderFields = ({
               <p className="text-[20px] font-bold text-gray-900 tracking-[0.2em] mb-1">П Р И К А З</p>
             </div>
 
-            {/* Number & Date inline */}
             <div className="flex justify-between items-end border-b border-gray-200 pb-2 mb-6">
               <div className="flex items-center gap-2 text-[13px] text-gray-700">
                 <span>от</span>
-                <input
-                  type="date"
-                  value={state.orderDate}
-                  onChange={(e) => state.setOrderDate(e.target.value)}
-                  className="border-0 border-b border-gray-400 bg-transparent outline-none text-[13px] w-36 text-center cursor-pointer"
+                <DatePicker
+                  value={state.orderDate ? dayjs(state.orderDate) : null}
+                  onChange={(_date, dateString) => state.setOrderDate(dateString as string)}
+                  format="DD.MM.YYYY"
+                  variant="borderless"
+                  style={{ width: 140, fontSize: 13 }}
+                  className="text-center!"
                 />
               </div>
               <div className="flex items-center gap-2 text-[13px] text-gray-700">
@@ -141,7 +144,6 @@ export const renderOrderFields = ({
               </div>
             </div>
 
-            {/* Body text */}
             <div className="mb-6">
               <textarea
                 value={state.additionalBasis}
@@ -156,7 +158,6 @@ export const renderOrderFields = ({
               />
             </div>
 
-            {/* Points */}
             <div className="space-y-3 mb-6">
               {state.orderPoints.map((point: any, idx: number) => (
                 <div key={point.id} className={`flex items-start gap-2 transition-all ${point.removing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
@@ -181,7 +182,6 @@ export const renderOrderFields = ({
               </button>
             </div>
 
-            {/* Signature */}
             <div className="flex items-end justify-between pt-6 border-t border-slate-100">
               <div className="flex flex-col gap-3">
                 <span className="text-sm font-medium text-gray-700">Министр финансов</span>
@@ -201,23 +201,23 @@ export const renderOrderFields = ({
           </div>
         </div>
 
-        {/* 3 & 4. ИСПОЛНИТЕЛЬ & ПРИЛОЖЕНИЕ (Sidebar) */}
         <div className="w-full lg:w-[320px] flex flex-col gap-6 shrink-0">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
             {sectionTitle(3, 'ИСПОЛНИТЕЛЬ')}
             <div className="space-y-5">
               <div>
                 <label className={labelCls}>ВЫБРАТЬ ИСПОЛНИТЕЛЯ *</label>
-                <select
-                  value={state.executorId || ''}
-                  onChange={(e) => state.setExecutorId(Number(e.target.value))}
-                  className={inputCls}
-                >
-                  <option value="" disabled>Выберите исполнителя</option>
-                  {users.map((u) => (
-                    <option key={u.id} value={u.id}>{u.name}</option>
-                  ))}
-                </select>
+                <Select
+                  value={state.executorId || undefined}
+                  onChange={(val) => state.setExecutorId(val)}
+                  placeholder="Выберите исполнителя"
+                  style={selectStyle}
+                  options={users.map((u) => ({ value: u.id, label: u.name }))}
+                  showSearch
+                  filterOption={(input, option) =>
+                    (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
+                  }
+                />
               </div>
               <div>
                 <label className={labelCls}>ЭЦП ИСПОЛНИТЕЛЯ</label>
