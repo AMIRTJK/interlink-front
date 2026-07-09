@@ -46,7 +46,7 @@ export const ProfileLayout = () => {
 
         <div
           className="flex-1 min-w-0 flex flex-col gap-6 transition-all duration-300 ease-in-out"
-          style={layoutMode === "bottom" ? { paddingBottom: 56 } : undefined}
+          style={layoutMode === "bottom" ? { paddingBottom: moveHeader ? 76 : 56 } : undefined}
         >
           <If is={!hideHeader}>
             <Header
