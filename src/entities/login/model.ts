@@ -21,6 +21,7 @@ export interface IUser {
 	full_name: string;
 	roles: string[];
 	personal_email: string | null;
+	bio?: string | null;
 	/** Права, выданные пользователю напрямую, в обход ролей */
 	direct_permissions?: string[];
 	/** Персональные исключения — права роли, отключённые лично этому пользователю */
