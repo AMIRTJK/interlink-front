@@ -38,9 +38,16 @@ export const AddOrgModal = ({
   const [error, setError] = useState('');
 
   React.useEffect(() => {
+    const currentCount = Number(document.body.getAttribute('data-modal-count') || 0);
+    document.body.setAttribute('data-modal-count', String(currentCount + 1));
     document.body.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = '';
+      const nextCount = Number(document.body.getAttribute('data-modal-count') || 1) - 1;
+      document.body.setAttribute('data-modal-count', String(nextCount));
+      if (nextCount <= 0) {
+        document.body.style.overflow = '';
+        document.body.removeAttribute('data-modal-count');
+      }
     };
   }, []);
 
