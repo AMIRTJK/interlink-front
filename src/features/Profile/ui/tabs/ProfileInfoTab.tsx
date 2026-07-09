@@ -20,7 +20,11 @@ import { THEMES } from "@widgets/layout/ui/designSettings";
 
 const resolvePhotoUrl = (path?: string | null): string => {
 	if (!path) return "";
-	if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+	if (
+		path.startsWith("http://") ||
+		path.startsWith("https://") ||
+		path.startsWith("data:")
+	) {
 		return path;
 	}
 	const apiHost = getEnvVar("VITE_API_URL") || "";
@@ -163,7 +167,11 @@ export const ProfileInfoTab = ({
 							}`}
 						>
 							<img
-								src={avatarError ? userAvatar : (resolvePhotoUrl(userData?.photo_path) || userAvatar)}
+								src={
+									avatarError
+										? userAvatar
+										: resolvePhotoUrl(userData?.photo_path) || userAvatar
+								}
 								alt="Аватар"
 								className="w-64 h-64 rounded-[2.5rem] border-2 border-white/60 dark:border-zinc-900/60 object-cover shadow-lg"
 								onError={() => setAvatarError(true)}
