@@ -108,7 +108,7 @@ export const FilesTab = () => {
 	const handleAddCategorySubmit = (payload: { name: string; icon?: string; allowed_user_ids?: number[] }) => {
 		createFolder.mutate({
 			name: payload.name,
-			parent_id: typeof activeFolderId === "number" ? activeFolderId : null,
+			parent_id: null,
 			...(payload.icon ? { icon: payload.icon } : {}),
 			...(payload.allowed_user_ids ? { allowed_user_ids: payload.allowed_user_ids } : {}),
 		} as any);
@@ -182,7 +182,7 @@ export const FilesTab = () => {
 				viewMode={viewMode}
 				onViewModeChange={setViewMode}
 				onUpload={handleUpload}
-				totalCount={currentFiles.length}
+				totalCount={viewContext === "shared" ? sharedFiles.length : files.length}
 				onCreateFolderClick={() => setAddCategoryOpen(true)}
 				viewContext={viewContext}
 				onViewContextChange={(ctx) => {
@@ -332,7 +332,7 @@ export const FilesTab = () => {
 				onSubmit={(payload) => {
 					createFolder.mutateAsync({
 						...payload,
-						parent_id: activeFolderId === "all" ? null : activeFolderId,
+						parent_id: null,
 					});
 					setAddCategoryOpen(false);
 				}}
@@ -353,7 +353,7 @@ export const FilesTab = () => {
 							id: editingFolder.id,
 							name,
 							emoji,
-							parent_id: editingFolder.parent_id,
+							parent_id: null,
 						});
 					}
 					setFolderModalOpen(false);

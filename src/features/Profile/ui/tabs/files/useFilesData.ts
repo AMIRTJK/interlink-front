@@ -165,7 +165,6 @@ export const useFilesData = (params: IFilesParams) => {
     const list: { id: number | "all"; name: string; icon: string }[] = [];
     list.push({ id: "all" as const, name: "Все файлы", icon: "📁" });
     folders
-      .filter((f) => f.parent_id === null)
       .forEach((f) => {
         list.push({
           id: f.id,
@@ -180,7 +179,6 @@ export const useFilesData = (params: IFilesParams) => {
     const list: { id: number | "all"; name: string; icon: string }[] = [];
     list.push({ id: "all" as const, name: "Все общие файлы", icon: "🤝" });
     sharedFolders
-      .filter((f) => f.parent_id === null)
       .forEach((f) => {
         list.push({
           id: f.id,
