@@ -16,8 +16,8 @@ interface IProps {
   onUpload: (file: File) => void;
   totalCount: number;
   onCreateFolderClick: () => void;
-  viewContext: "personal" | "shared";
-  onViewContextChange: (val: "personal" | "shared") => void;
+  viewContext: "personal" | "shared" | "analytics";
+  onViewContextChange: (val: "personal" | "shared" | "analytics") => void;
 }
 
 export const FilesHeader = ({
@@ -116,6 +116,16 @@ export const FilesHeader = ({
           <span className="ml-2 text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-zinc-400 rounded-full">
             {viewContext === "shared" ? totalCount : ""}
           </span>
+        </button>
+        <button
+          onClick={() => onViewContextChange("analytics")}
+          className={`pb-2 px-1 font-bold text-base transition-colors cursor-pointer border-b-2 ${
+            viewContext === "analytics"
+              ? "text-slate-800 dark:text-zinc-100 border-indigo-600"
+              : "text-slate-400 dark:text-zinc-500 border-transparent hover:text-slate-600 dark:hover:text-zinc-300"
+          }`}
+        >
+          Аналитика
         </button>
       </div>
 

@@ -10,6 +10,7 @@ import { FolderActionsModal } from "./files/FolderActionsModal";
 import { AddCategoryModal } from "./files/AddCategoryModal";
 import { MoveToFolderModal } from "./files/MoveToFolderModal";
 import { ShareFileModal } from "./files/ShareFileModal";
+import { FilesAnalytics } from "./files/FilesAnalytics";
 import { IApiFile, IApiFolder } from "./files/lib";
 import { Modal } from "antd";
 import { Upload, ChevronRight, Folder } from "lucide-react";
@@ -18,7 +19,7 @@ import "./FilesTab.css";
 
 export const FilesTab = () => {
 	const [activeFolderId, setActiveFolderId] = useState<number | "all">("all");
-	const [viewContext, setViewContext] = useState<"personal" | "shared">("personal");
+	const [viewContext, setViewContext] = useState<"personal" | "shared" | "analytics">("personal");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [sortBy, setSortBy] = useState<"date" | "size" | "name">("date");
 	const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -191,8 +192,15 @@ export const FilesTab = () => {
 				}}
 			/>
 
-			{/* Category/Folder Filters */}
-			<CategoryFilters
+			{/* Analytics View */}
+			<If is={viewContext === "analytics"}>
+				<FilesAnalytics />
+			</If>
+
+			<If is={viewContext !== "analytics"}>
+				<div className="space-y-6">
+					{/* Category/Folder Filters */}
+					<CategoryFilters
 				categories={viewContext === "shared" ? sharedCategoriesList : categoriesList}
 				activeCategory={activeCategoryId}
 				onCategorySelect={(id) => setActiveFolderId(id)}
@@ -288,6 +296,8 @@ export const FilesTab = () => {
 			{/* Storage usage details */}
 			<If is={viewContext === "personal"}>
 				<StorageUsage meta={meta} files={files} />
+			</If>
+				</div>
 			</If>
 
 			{/* Modals */}
