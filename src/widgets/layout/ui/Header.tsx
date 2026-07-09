@@ -241,7 +241,10 @@ export const Header = ({
               className="w-11 h-11 rounded-[2.5rem] border-2 border-white/60 dark:border-zinc-900/60 object-cover shadow-lg"
               onError={() => setAvatarError(true)}
             />
-            <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white/60 dark:border-zinc-900/60 bg-emerald-500 shadow-lg" />
+            <span className="absolute top-0 right-0 flex h-3 w-3">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
+              <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-white/60 dark:border-zinc-900/60 bg-emerald-500 shadow-lg animate-live-breathe" />
+            </span>
           </div>
           <div className="leading-tight min-w-0">
             <h3 className="text-sm font-bold text-zinc-900 dark:text-white truncate max-w-[180px]">
