@@ -25,6 +25,7 @@ const buildQueryParams = (
   const params: Record<string, unknown> = {
     with_departments: 1,
     with_roles: 1,
+    per_page: 100,
   };
   if (search.trim()) params.search = search.trim();
   if (filters.status !== "all") params.status = filters.status;
