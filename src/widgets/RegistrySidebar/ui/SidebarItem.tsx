@@ -5,7 +5,7 @@ import { cn } from "@shared/lib/utils";
 import { useLocation } from "react-router-dom";
 import { useTabs } from "@shared/lib/hooks";
 
-import { Tooltip } from "antd";
+import { Tooltip } from "@shared/ui";
 import { RightOutlined, DownOutlined } from "@ant-design/icons";
 
 interface SidebarItemProps {

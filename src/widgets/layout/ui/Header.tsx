@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { Tooltip, Popover } from "antd";
+import { Popover } from "antd";
 import { Bell, LogOut, CheckCircle, Sun, Moon, Palette, Layers, MessageSquare, PanelTop, PanelLeft, PanelBottom, PanelRight, Monitor } from "lucide-react";
 import { tokenControl, useLogout } from "@shared/lib";
 import { AppRoutes } from "@shared/config";
-import { Logo } from "@shared/ui";
+import { Logo, Tooltip } from "@shared/ui";
 import { NotificationsPopover, useNotificationCounters } from "@features/notifications";
 import { ModuleMenu } from "./ModuleMenu";
 import { useState, useEffect } from "react";
@@ -288,17 +288,19 @@ export const Header = ({
             arrow={false}
             overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
           >
-            <button
-              aria-label="Уведомления"
-              className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-            >
-              <Bell size={18} strokeWidth={2.2} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose-500 text-[9px] text-white flex items-center justify-center rounded-full font-bold shadow-lg">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </button>
+            <Tooltip title="Уведомления" placement="bottom">
+              <button
+                aria-label="Уведомления"
+                className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+              >
+                <Bell size={18} strokeWidth={2.2} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose-500 text-[9px] text-white flex items-center justify-center rounded-full font-bold shadow-lg">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </button>
+            </Tooltip>
           </Popover>
 
           <Tooltip title="Чат" placement="bottom">
@@ -351,12 +353,14 @@ export const Header = ({
           arrow={false}
           overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
         >
-          <button
-            aria-label="Выбор темы"
-            className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            <Palette size={18} strokeWidth={2.2} />
-          </button>
+          <Tooltip title="Выберите тему" placement="bottom">
+            <button
+              aria-label="Выбор темы"
+              className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+            >
+              <Palette size={18} strokeWidth={2.2} />
+            </button>
+          </Tooltip>
         </Popover>
 
         <Popover
@@ -366,12 +370,14 @@ export const Header = ({
           arrow={false}
           overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
         >
-          <button
-            aria-label="Фон страницы"
-            className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            <Layers size={18} strokeWidth={2.2} />
-          </button>
+          <Tooltip title="Фон страницы" placement="bottom">
+            <button
+              aria-label="Фон страницы"
+              className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+            >
+              <Layers size={18} strokeWidth={2.2} />
+            </button>
+          </Tooltip>
         </Popover>
 
         <Popover
@@ -381,15 +387,17 @@ export const Header = ({
           arrow={false}
           overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
         >
-          <button
-            aria-label="Макет страницы"
-            className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            {layoutMode === "top" && <PanelTop size={18} strokeWidth={2.2} />}
-            {layoutMode === "left" && <PanelLeft size={18} strokeWidth={2.2} />}
-            {layoutMode === "bottom" && <PanelBottom size={18} strokeWidth={2.2} />}
-            {layoutMode === "right" && <PanelRight size={18} strokeWidth={2.2} />}
-          </button>
+          <Tooltip title="Макет страницы" placement="bottom">
+            <button
+              aria-label="Макет страницы"
+              className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+            >
+              {layoutMode === "top" && <PanelTop size={18} strokeWidth={2.2} />}
+              {layoutMode === "left" && <PanelLeft size={18} strokeWidth={2.2} />}
+              {layoutMode === "bottom" && <PanelBottom size={18} strokeWidth={2.2} />}
+              {layoutMode === "right" && <PanelRight size={18} strokeWidth={2.2} />}
+            </button>
+          </Tooltip>
         </Popover>
 
         <Tooltip title="Выйти" placement="bottomRight">

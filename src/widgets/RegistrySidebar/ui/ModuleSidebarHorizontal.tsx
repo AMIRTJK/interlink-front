@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, LayoutGroup, AnimatePresence } from "framer-motion";
-import { Button, Tooltip } from "antd";
+import { Button } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { SidebarItem } from "./SidebarItem";
 import {
@@ -9,6 +9,7 @@ import {
   layoutVerticalIcon,
 } from "../lib/constants";
 import { MenuItem } from "../model";
+import { Tooltip } from "@shared/ui";
 
 interface IProps {
   variant: "horizontal";
