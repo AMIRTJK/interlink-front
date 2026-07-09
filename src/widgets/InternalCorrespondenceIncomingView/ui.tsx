@@ -56,6 +56,7 @@ interface Recipient {
 interface RegistryItem {
   id: string | number;
   reg_prefix?: string;
+  my_prefix?: string;
   reg_number?: string;
   sender_name?: string | null;
   sent_at?: string;
@@ -231,8 +232,8 @@ export const InternalCorrespondenceIncomingView = ({
   const senderInitials = item.creator?.full_name
     ? getInitials(item.creator.full_name)
     : "МФ";
-  const inboundNumber = item.reg_prefix
-    ? `${item.reg_prefix}-${item.reg_number}`
+  const inboundNumber = item.my_prefix
+    ? `${item.my_prefix}-${item.reg_number}`
     : item.reg_number || "—";
 
   const formattedSentDate = item.sent_at
