@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import {
   CircleUserRound, ScrollText, Briefcase, Phone, Landmark,
-  Mail, Wallet, CreditCard, Hash, MapPin,
+  Mail, Wallet, CreditCard, Hash, MapPin, KeyRound,
 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
 import { useGetQuery } from "@shared/lib";
@@ -93,10 +93,10 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
           <FormItem label="Отчество" error={errors.middle_name}>
             <IconInput placeholder="Сергеевич" value={values.middle_name} onChange={(e) => handleChange("middle_name", e.target.value)} hasError={!!errors.middle_name} />
           </FormItem>
-          <FormItem label="Дата рождения" error={errors.birth_date}>
+          <FormItem label="Дата рождения" error={errors.birth_date} required>
             <CustomDatePicker value={values.birth_date} onChange={(v) => handleChange("birth_date", v)} hasError={!!errors.birth_date} />
           </FormItem>
-          <FormItem label="Пол" error={errors.gender} className="sm:col-span-2">
+          <FormItem label="Пол" error={errors.gender} className="sm:col-span-2" required>
             <SegmentControl options={GENDER_SEG} value={values.gender} onChange={(v) => handleChange("gender", v)} />
           </FormItem>
           <FormItem label="О себе (Био)" error={errors.bio} className="sm:col-span-3">
@@ -108,13 +108,13 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
       <section>
         <SectionTitle icon={<ScrollText size={13} />}>Документы</SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-3 gap-y-3">
-          <FormItem label="Серия паспорта" error={errors.passport_series}>
+          <FormItem label="Серия паспорта" error={errors.passport_series} required>
             <IconInput placeholder="A" maxLength={5} icon={iconEl(ScrollText)} value={values.passport_series} onChange={(e) => handleChange("passport_series", e.target.value)} hasError={!!errors.passport_series} />
           </FormItem>
-          <FormItem label="Номер паспорта" error={errors.passport_number}>
+          <FormItem label="Номер паспорта" error={errors.passport_number} required>
             <IconInput placeholder="1234567" maxLength={10} value={values.passport_number} onChange={(e) => handleChange("passport_number", e.target.value)} hasError={!!errors.passport_number} />
           </FormItem>
-          <FormItem label="ИНН" error={errors.inn}>
+          <FormItem label="ИНН" error={errors.inn} required>
             <IconInput placeholder="040012345" maxLength={12} icon={iconEl(Hash)} value={values.inn} onChange={(e) => handleChange("inn", e.target.value)} hasError={!!errors.inn} />
           </FormItem>
           <FormItem label="Адрес" error={errors.address} className="sm:col-span-3">
@@ -157,26 +157,20 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
           <FormItem label="Корпоративный телефон" error={errors.corporate_phone}>
             <PhoneInput placeholder="900000000" value={values.corporate_phone} onChange={(v) => handleChange("corporate_phone", v)} hasError={!!errors.corporate_phone} />
           </FormItem>
-          <FormItem label="Телефон" error={errors.phone} required>
-            <PhoneInput placeholder="900000000" value={values.phone} onChange={(v) => handleChange("phone", v)} hasError={!!errors.phone} />
-          </FormItem>
           <FormItem label="Персональный email" error={errors.personal_email}>
             <IconInput placeholder="user@gmail.com" icon={iconEl(Mail)} value={values.personal_email} onChange={(e) => handleChange("personal_email", e.target.value)} hasError={!!errors.personal_email} />
           </FormItem>
           <FormItem label="Персональный телефон" error={errors.personal_phone}>
-            <PhoneInput placeholder="900000000" value={values.personal_phone} onChange={(v) => handleChange("personal_phone", v)} hasError={!!errors.personal_phone} />
+            <PhoneInput placeholder="900000000" value={values.personal_phone} onChange={(v) => { handleChange("personal_phone", v); handleChange("phone", v); }} hasError={!!errors.personal_phone} />
           </FormItem>
         </div>
       </section>
 
       <section>
         <SectionTitle icon={<Landmark size={13} />}>Финансы</SectionTitle>
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-3 gap-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-3 gap-y-3">
           <FormItem label="Оклад (₽)" error={errors.salary}>
             <IconInput type="number" min={0} placeholder="50000" icon={iconEl(Wallet)} value={values.salary} onChange={(e) => handleChange("salary", e.target.value)} hasError={!!errors.salary} />
-          </FormItem>
-          <FormItem label="Рейтинг" error={errors.rating}>
-            <IconInput type="number" min={0} max={100} placeholder="82" value={values.rating} onChange={(e) => handleChange("rating", e.target.value)} hasError={!!errors.rating} />
           </FormItem>
           <FormItem label="Зарплатный счёт" error={errors.bank_account} className="sm:col-span-2">
             <IconInput placeholder="40817810000000000000" maxLength={20} icon={iconEl(CreditCard)} value={values.bank_account} onChange={(e) => handleChange("bank_account", e.target.value)} hasError={!!errors.bank_account} />
@@ -184,15 +178,19 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
         </div>
       </section>
 
-      <If is={!isEdit}>
-        <section>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-3">
+      <section>
+        <SectionTitle icon={<KeyRound size={13} />}>Авторизация</SectionTitle>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-3">
+          <FormItem label="Логин" error={errors.phone} required>
+            <PhoneInput placeholder="Заполнится из перс. телефона" value={values.phone} readOnly hasError={!!errors.phone} />
+          </FormItem>
+          <If is={!isEdit}>
             <FormItem label="Пароль" error={errors.password} required>
               <IconInput type="password" placeholder="••••••" value={values.password} onChange={(e) => handleChange("password", e.target.value)} hasError={!!errors.password} />
             </FormItem>
-          </div>
-        </section>
-      </If>
+          </If>
+        </div>
+      </section>
     </div>
   );
 };
