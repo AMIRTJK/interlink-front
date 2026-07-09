@@ -73,7 +73,7 @@ export const EmployeesTable = ({ items, onEdit, onDelete, onRowClick }: IProps) 
                   <span className="truncate block">{e.email || "—"}</span>
                 </td>
                 <td className="px-4 py-3 hidden lg:table-cell text-xs text-gray-600">
-                  {e.phone || "—"}
+                  {e.raw.phone || "—"}
                 </td>
                 <td className="px-4 py-3 text-sm font-bold text-gray-800 text-right tabular-nums">
                   {money(e.salary)}
