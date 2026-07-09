@@ -78,9 +78,10 @@ interface IPhoneInputProps {
   id?: string;
   hasError?: boolean;
   disabled?: boolean;
+  readOnly?: boolean;
 }
 
-export const PhoneInput = ({ value, onChange, placeholder, id, hasError, disabled }: IPhoneInputProps) => {
+export const PhoneInput = ({ value, onChange, placeholder, id, hasError, disabled, readOnly }: IPhoneInputProps) => {
   const onlyDigits9 = (v: string) => (v || "").replace(/\D/g, "").slice(0, 9);
   return (
     <div className="flex items-stretch">
@@ -93,11 +94,14 @@ export const PhoneInput = ({ value, onChange, placeholder, id, hasError, disable
         inputMode="numeric"
         placeholder={placeholder}
         disabled={disabled}
+        readOnly={readOnly}
         value={value ?? ""}
         onChange={(e) => onChange?.(onlyDigits9(e.target.value))}
         className={`flex-1 min-w-0 h-11 px-3 rounded-r-xl border text-sm outline-none transition-colors ${
           disabled
             ? "border-gray-200 bg-gray-100 dark:border-slate-800 dark:bg-slate-900 text-gray-400 dark:text-slate-600 cursor-not-allowed"
+            : readOnly
+              ? "border-gray-200 bg-gray-100 dark:border-slate-800 dark:bg-slate-900 text-gray-500 dark:text-slate-400 cursor-default"
             : hasError
               ? "border-red-300 bg-red-50/30 dark:border-red-900/50 dark:bg-red-950/10 text-gray-800 dark:text-slate-200 focus:border-red-400 focus:ring-2 focus:ring-red-500/20"
               : "border-gray-200 bg-gray-50 dark:border-slate-800 dark:bg-slate-900/50 text-gray-800 dark:text-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"

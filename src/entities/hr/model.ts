@@ -104,7 +104,6 @@ export interface CreateUserDTO {
   inn?: string;
   address?: string;
   bank_account?: string;
-  rating?: number;
   roles?: string[];
   department_ids?: number[];
   bio?: string;
