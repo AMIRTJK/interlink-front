@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import {
   CircleUserRound, ScrollText, Briefcase, Phone, Landmark,
-  Mail, Wallet, CreditCard, Hash, MapPin,
+  Mail, Wallet, CreditCard, Hash, MapPin, KeyRound,
 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
 import { useGetQuery } from "@shared/lib";
@@ -157,14 +157,11 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
           <FormItem label="Корпоративный телефон" error={errors.corporate_phone}>
             <PhoneInput placeholder="900000000" value={values.corporate_phone} onChange={(v) => handleChange("corporate_phone", v)} hasError={!!errors.corporate_phone} />
           </FormItem>
-          <FormItem label="Телефон" error={errors.phone} required>
-            <PhoneInput placeholder="900000000" value={values.phone} onChange={(v) => handleChange("phone", v)} hasError={!!errors.phone} />
-          </FormItem>
           <FormItem label="Персональный email" error={errors.personal_email}>
             <IconInput placeholder="user@gmail.com" icon={iconEl(Mail)} value={values.personal_email} onChange={(e) => handleChange("personal_email", e.target.value)} hasError={!!errors.personal_email} />
           </FormItem>
           <FormItem label="Персональный телефон" error={errors.personal_phone}>
-            <PhoneInput placeholder="900000000" value={values.personal_phone} onChange={(v) => handleChange("personal_phone", v)} hasError={!!errors.personal_phone} />
+            <PhoneInput placeholder="900000000" value={values.personal_phone} onChange={(v) => { handleChange("personal_phone", v); handleChange("phone", v); }} hasError={!!errors.personal_phone} />
           </FormItem>
         </div>
       </section>
@@ -181,15 +178,19 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
         </div>
       </section>
 
-      <If is={!isEdit}>
-        <section>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-3">
+      <section>
+        <SectionTitle icon={<KeyRound size={13} />}>Авторизация</SectionTitle>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-3">
+          <FormItem label="Логин" error={errors.phone} required>
+            <PhoneInput placeholder="Заполнится из перс. телефона" value={values.phone} readOnly hasError={!!errors.phone} />
+          </FormItem>
+          <If is={!isEdit}>
             <FormItem label="Пароль" error={errors.password} required>
               <IconInput type="password" placeholder="••••••" value={values.password} onChange={(e) => handleChange("password", e.target.value)} hasError={!!errors.password} />
             </FormItem>
-          </div>
-        </section>
-      </If>
+          </If>
+        </div>
+      </section>
     </div>
   );
 };
