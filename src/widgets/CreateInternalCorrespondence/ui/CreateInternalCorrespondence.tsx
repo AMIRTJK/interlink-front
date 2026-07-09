@@ -761,6 +761,7 @@ export const CreateInternalCorrespondence = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const wordInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
+  const paginateEditorRef = useRef<(() => number) | null>(null);
 
   const isLandscape = orientation === "landscape";
   const PAGE_WIDTH = isLandscape ? 1122 : 794;
@@ -952,15 +953,15 @@ export const CreateInternalCorrespondence = ({
   const handleSelectVersion = (content: string, versionId: string | number) => {
     if (editorRef.current) {
       editorRef.current.innerHTML = content;
-      // Синхронизируем editorContent, иначе постраничная разбивка не пересчитается
-      // и все страницы кроме первой "исчезнут".
       setEditorContent(content);
       setActiveVersionId(versionId);
-      // Если открываем версию, не выбранную «Для подписи», убираем плавающий
-      // плейсхолдер ЭЦП — иначе он остался бы висеть над чужой версией.
       const target = allVersions.find((v: any) => v.id === versionId);
       if (!target?.is_selected && !finalSigner?.dsApplied) {
         setStampVisible(false);
+      }
+      if (paginateEditorRef.current) {
+        const nextPageCount = paginateEditorRef.current();
+        setPageCount(nextPageCount);
       }
     }
   };
@@ -2069,6 +2070,7 @@ export const CreateInternalCorrespondence = ({
 
     return Math.max(1, Math.ceil(editor.scrollHeight / PAGE_STRIDE));
   }, [CONTENT_HEIGHT, PAGE_STRIDE]);
+  paginateEditorRef.current = paginateEditor;
   const handleEditorInput = useCallback(() => {
     const editor = editorRef.current;
     if (editor) {
