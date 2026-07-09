@@ -279,14 +279,14 @@ export const ModuleMenu = ({
 								key={itemKey}
 								onClick={() => handleNavigate(itemKey)}
 								title={labelText}
-								className={`flex flex-col items-center justify-center gap-0.5 px-2 sm:px-3 py-1 rounded-2xl min-w-[56px] transition-all ${
+								className={`flex flex-col items-center justify-center gap-1.5 px-4 py-2 rounded-2xl min-w-[72px] transition-all ${
 									isActive
 										? `bg-linear-to-br ${activeGradient} text-white shadow-md`
-										: "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
+										: "text-zinc-550 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
 								}`}
 							>
 								<span className="shrink-0">{icon}</span>
-								<span className="text-[9px] font-semibold leading-none truncate max-w-[64px]">
+								<span className="text-[11px] font-bold leading-none truncate max-w-[72px]">
 									{label}
 								</span>
 							</button>

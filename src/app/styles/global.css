@@ -3,6 +3,20 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Индикатор «онлайн» на аватарке — вечная «дышащая» анимация (scale). */
+@keyframes liveBreathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+}
+.animate-live-breathe {
+  animation: liveBreathe 1.8s ease-in-out infinite;
+}
+
 /* Анимация появления общего <ToastContainer/> (@shared/ui) */
 @keyframes toastSlideIn {
   from {

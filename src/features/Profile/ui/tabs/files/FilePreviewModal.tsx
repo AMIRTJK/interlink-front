@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { X, Download, FileText, FileSpreadsheet, Archive, Image as ImageIcon, Eye } from "lucide-react";
+import {
+  X,
+  Download,
+  FileText,
+  FileSpreadsheet,
+  Archive,
+  Image as ImageIcon,
+  Eye,
+} from "lucide-react";
 import { IApiFile, formatBytes, getFileType } from "./lib";
 import { If } from "@shared/ui";
 import { _axios } from "@shared/api";
@@ -16,7 +24,9 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [htmlContent, setHtmlContent] = useState<string | null>(null);
   const [textContent, setTextContent] = useState<string | null>(null);
-  const [previewType, setPreviewType] = useState<"image" | "pdf" | "html-doc" | "html-xls" | "text" | "none">("none");
+  const [previewType, setPreviewType] = useState<
+    "image" | "pdf" | "html-doc" | "html-xls" | "text" | "none"
+  >("none");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -33,7 +43,16 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
     const isPdf = ext === "pdf";
     const isDocx = ext === "docx";
     const isXlsx = ["xlsx", "xls", "csv"].includes(ext);
-    const isText = ["txt", "json", "log", "md", "ts", "tsx", "js", "jsx"].includes(ext);
+    const isText = [
+      "txt",
+      "json",
+      "log",
+      "md",
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+    ].includes(ext);
 
     let activeUrl: string | null = null;
 
@@ -163,7 +182,9 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
       const response = await _axios.get(file.download_url, {
         responseType: "blob",
       });
-      const blob = new Blob([response.data], { type: response.headers["content-type"] });
+      const blob = new Blob([response.data], {
+        type: response.headers["content-type"],
+      });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -179,8 +200,14 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div
+      className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl w-full max-w-7xl overflow-hidden animate-in fade-in zoom-in duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
             <Eye size={18} className="text-indigo-600 dark:text-indigo-400" />
@@ -196,8 +223,10 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
           </button>
         </div>
 
-        <div className="p-8 flex flex-col items-center justify-center min-h-[300px] bg-slate-50/30 dark:bg-slate-900/30">
-          <style dangerouslySetInnerHTML={{ __html: `
+        <div className="p-8 flex flex-col items-center justify-center min-h-[420px] bg-slate-50/30 dark:bg-slate-900/30">
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
             .file-preview-paper {
               background: white;
               color: #000;
@@ -247,27 +276,31 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
               font-family: monospace;
               font-size: 13px;
             }
-          `}} />
+          `,
+            }}
+          />
 
           <If is={isLoading}>
             <div className="flex flex-col items-center justify-center space-y-2">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-              <span className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">Загрузка предпросмотра...</span>
+              <span className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">
+                Загрузка предпросмотра...
+              </span>
             </div>
           </If>
 
           <If is={!isLoading && previewType === "image" && !!blobUrl}>
-            <div className="w-full max-h-[350px] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-center bg-black/5 dark:bg-black/20">
+            <div className="w-full max-h-[70vh] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-center bg-black/5 dark:bg-black/20">
               <img
                 src={blobUrl || ""}
                 alt={file.original_name}
-                className="max-w-full max-h-[350px] object-contain rounded-2xl"
+                className="max-w-full max-h-[70vh] object-contain rounded-2xl"
               />
             </div>
           </If>
 
           <If is={!isLoading && previewType === "pdf" && !!blobUrl}>
-            <div className="w-full h-[350px] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white">
+            <div className="w-full h-[70vh] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white">
               <iframe
                 src={blobUrl || ""}
                 title={file.original_name}
@@ -277,20 +310,28 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
           </If>
 
           <If is={!isLoading && previewType === "html-doc" && !!htmlContent}>
-            <div className="w-full max-h-[350px] overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white text-left">
-              <div className="file-preview-paper doc-mode" dangerouslySetInnerHTML={{ __html: htmlContent || "" }} />
+            <div className="w-full max-h-[70vh] overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white text-left">
+              <div
+                className="file-preview-paper doc-mode"
+                dangerouslySetInnerHTML={{ __html: htmlContent || "" }}
+              />
             </div>
           </If>
 
           <If is={!isLoading && previewType === "html-xls" && !!htmlContent}>
-            <div className="w-full max-h-[350px] overflow-auto rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white text-left">
-              <div className="file-preview-paper xls-mode" dangerouslySetInnerHTML={{ __html: htmlContent || "" }} />
+            <div className="w-full max-h-[70vh] overflow-auto rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white text-left">
+              <div
+                className="file-preview-paper xls-mode"
+                dangerouslySetInnerHTML={{ __html: htmlContent || "" }}
+              />
             </div>
           </If>
 
           <If is={!isLoading && previewType === "text" && textContent !== null}>
-            <div className="w-full max-h-[350px] overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-slate-50 dark:bg-slate-900/50 text-left">
-              <pre className="file-preview-text text-slate-700 dark:text-zinc-300">{textContent}</pre>
+            <div className="w-full max-h-[70vh] overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-slate-50 dark:bg-slate-900/50 text-left">
+              <pre className="file-preview-text text-slate-700 dark:text-zinc-300">
+                {textContent}
+              </pre>
             </div>
           </If>
 
@@ -304,10 +345,12 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
                   {file.original_name}
                 </h4>
                 <p className="text-xs text-slate-400 dark:text-zinc-500">
-                  Формат: {file.extension.toUpperCase()} • Размер: {formatBytes(file.size)}
+                  Формат: {file.extension.toUpperCase()} • Размер:{" "}
+                  {formatBytes(file.size)}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-sm mx-auto pt-2">
-                  Этот тип файла не поддерживает предпросмотр в браузере. Вы можете скачать его на свой компьютер для работы.
+                  Этот тип файла не поддерживает предпросмотр в браузере. Вы
+                  можете скачать его на свой компьютер для работы.
                 </p>
               </div>
             </div>

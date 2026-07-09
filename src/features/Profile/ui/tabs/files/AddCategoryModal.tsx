@@ -62,8 +62,14 @@ export const AddCategoryModal = ({ isOpen, onClose, onSubmit }: IProps) => {
 
   return (
     <If is={isOpen}>
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-6">
-        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-6xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-6"
+        onClick={handleClose}
+      >
+        <div
+          className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-6xl overflow-hidden animate-in fade-in zoom-in duration-200"
+          onClick={(e) => e.stopPropagation()}
+        >
 
           <div className="flex items-center justify-between px-10 py-6 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-3">

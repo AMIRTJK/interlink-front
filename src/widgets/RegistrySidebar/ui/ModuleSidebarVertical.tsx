@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, LayoutGroup, AnimatePresence } from "framer-motion";
-import { Layout, Button, Tooltip } from "antd";
+import { Layout, Button } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { AppRoutes } from "@shared/config";
 import { SidebarItem } from "./SidebarItem";
@@ -11,7 +11,7 @@ import {
   layoutHorizontalIcon,
 } from "../lib/constants";
 import { MenuItem } from "../model";
-import { Logo } from "@shared/ui";
+import { Logo, Tooltip } from "@shared/ui";
 
 const { Sider } = Layout;
 
@@ -47,7 +47,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
       trigger={null}
       width="325px"
       collapsedWidth="80px"
-      className={`min-h-[480px]! border-none! bg-white/60! dark:bg-slate-800/60! backdrop-blur-3xl! rounded-3xl! soft-shadow-ios! ${collapsed ? "p-4!" : "p-6!"} ${
+      className={`min-h-[480px]! border border-gray-200/80! dark:border-slate-700/80! bg-white! dark:bg-slate-900! shadow-md! rounded-3xl! ${collapsed ? "p-4!" : "p-6!"} ${
         collapsed ? "w-[80px]! max-w-[80px]!" : "min-w-[301px]! max-w-[330px]!"
       } transition-all duration-500 ease-[0.23,1,0.32,1]`}
     >
@@ -67,29 +67,33 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
           )}
           <div className="flex items-center gap-2">
             {!collapsed && (
-              <Button
-                type="text"
-                icon={<PlusOutlined />}
-                onClick={() => handleAddClick(null)}
-                className="h-6! w-6! text-gray-500! dark:text-slate-400! hover:text-indigo-600 addFolderRootSideBar"
-              />
+              <Tooltip title="Создать папку" placement="right">
+                <Button
+                  type="text"
+                  icon={<PlusOutlined />}
+                  onClick={() => handleAddClick(null)}
+                  className="h-6! w-6! text-gray-500! dark:text-slate-400! hover:text-indigo-600 addFolderRootSideBar"
+                />
+              </Tooltip>
             )}
 
-            <Button
-              type="text"
-              onClick={() => setCollapsed(!collapsed)}
-              className={
-                collapsed
-                  ? "mx-auto h-7! w-7! outline-none! focus:outline-none! text-gray-500! dark:text-slate-400! hover:text-indigo-600"
-                  : "ml-auto outline-none! focus:outline-none! text-gray-500! dark:text-slate-400! hover:text-indigo-600"
-              }
-              icon={
-                <span
-                  dangerouslySetInnerHTML={{ __html: sideBarIcons.collapseIcon }}
-                  className="flex items-center justify-center w-full h-full"
-                />
-              }
-            />
+            <Tooltip title={collapsed ? "Развернуть" : "Свернуть"} placement="right">
+              <Button
+                type="text"
+                onClick={() => setCollapsed(!collapsed)}
+                className={
+                  collapsed
+                    ? "mx-auto h-7! w-7! outline-none! focus:outline-none! text-gray-500! dark:text-slate-400! hover:text-indigo-600"
+                    : "ml-auto outline-none! focus:outline-none! text-gray-500! dark:text-slate-400! hover:text-indigo-600"
+                }
+                icon={
+                  <span
+                    dangerouslySetInnerHTML={{ __html: sideBarIcons.collapseIcon }}
+                    className="flex items-center justify-center w-full h-full"
+                  />
+                }
+              />
+            </Tooltip>
             {!collapsed && (
               <Tooltip title="Горизонтальный вид" placement="right">
                 <Button

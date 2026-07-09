@@ -1,3 +1,14 @@
+import { getEnvVar } from "@shared/config";
+
+export interface IFileUser {
+  id: number;
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  position?: string;
+  photo_path?: string | null;
+}
+
 export interface IApiFile {
   id: number;
   user_id?: number;
@@ -7,10 +18,7 @@ export interface IApiFile {
     name: string;
     emoji: string | null;
   };
-  owner?: {
-    id: number;
-    full_name: string;
-  };
+  owner?: IFileUser;
   original_name: string;
   stored_name: string;
   extension: string;
@@ -70,6 +78,38 @@ export interface IDiskMeta {
   total_size?: number;
   limit?: number;
 }
+
+export const resolveFilePhotoUrl = (path?: string | null): string => {
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+    return path;
+  }
+  const apiHost = getEnvVar("VITE_API_URL") || "";
+  const host = apiHost.endsWith("/") ? apiHost.slice(0, -1) : apiHost;
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${host}${p}`;
+};
+
+export const getUserFullName = (user?: IFileUser | null): string => {
+  if (!user) return "—";
+  return (
+    user.full_name ||
+    [user.last_name, user.first_name].filter(Boolean).join(" ") ||
+    "—"
+  );
+};
+
+export const getUserInitials = (user?: IFileUser | null): string => {
+  const name = getUserFullName(user);
+  if (name === "—") return "?";
+  return name
+    .split(" ")
+    .map((p) => p[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+};
 
 export const formatBytes = (bytes: number): string => {
   if (bytes === 0) return "0 B";

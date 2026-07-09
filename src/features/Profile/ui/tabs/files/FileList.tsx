@@ -9,10 +9,12 @@ import {
 	Folder,
 	Share2,
 } from "lucide-react";
-import { IApiFile, getFileType, formatBytes } from "./lib";
-import { Tooltip } from "@shared/ui";
+import { IApiFile, getFileType, formatBytes, getUserFullName } from "./lib";
+import { Tooltip, If } from "@shared/ui";
 import { _axios } from "@shared/api";
 import { toast } from "@shared/lib/toast";
+import { UserAvatar } from "./UserAvatar";
+import { SharedAccessCell } from "./SharedAccessCell";
 
 interface IProps {
 	files: IApiFile[];
@@ -23,6 +25,7 @@ interface IProps {
 	onDelete?: (id: number) => void;
 	onMove?: (file: IApiFile) => void;
 	onShare?: (file: IApiFile) => void;
+	showSharedWith?: boolean;
 }
 
 export const FileList = ({
@@ -34,6 +37,7 @@ export const FileList = ({
 	onDelete,
 	onMove,
 	onShare,
+	showSharedWith,
 }: IProps) => {
 	const getSmallIcon = (file: IApiFile) => {
 		const fileType = getFileType(file.extension);
@@ -158,6 +162,10 @@ export const FileList = ({
 					<tr className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 tracking-wider uppercase border-b border-slate-100 dark:border-slate-800">
 						<th className="py-4 px-4 w-12 text-center"></th>
 						<th className="py-4 px-4">НАЗВАНИЕ</th>
+						<th className="py-4 px-4 w-56">ВЛАДЕЛЕЦ</th>
+						<If is={!!showSharedWith}>
+							<th className="py-4 px-4 w-32">ДОСТУП</th>
+						</If>
 						<th className="py-4 px-4 w-36">ТИП</th>
 						<th className="py-4 px-4 w-28">РАЗМЕР</th>
 						<th className="py-4 px-4 w-36">ДАТА</th>
@@ -194,6 +202,28 @@ export const FileList = ({
 										</span>
 									</div>
 								</td>
+
+								{/* Owner */}
+								<td className="py-3 px-4">
+									<div className="flex items-center gap-2.5">
+										<UserAvatar user={file.owner} size={32} />
+										<div className="min-w-0">
+											<div className="text-xs font-bold text-slate-700 dark:text-zinc-300 truncate max-w-[150px]">
+												{getUserFullName(file.owner)}
+											</div>
+											<div className="text-[11px] text-slate-400 dark:text-zinc-500 truncate max-w-[150px]">
+												{file.owner?.position || "—"}
+											</div>
+										</div>
+									</div>
+								</td>
+
+								{/* Shared access */}
+								<If is={!!showSharedWith}>
+									<td className="py-3 px-4">
+										<SharedAccessCell fileId={file.id} />
+									</td>
+								</If>
 
 								{/* Type */}
 								<td className="py-3 px-4">{getTypeBadge(file)}</td>

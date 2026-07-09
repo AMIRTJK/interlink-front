@@ -6,15 +6,17 @@ import { BottomNav } from "./BottomNav";
 import { useCorrespondenceRoute } from "@shared/lib";
 import { Navbar } from "@widgets/Navbar";
 import { useNavbar, useTabs } from "@shared/lib/hooks";
-import { useLayoutMode } from "./useLayoutMode";
+import { useLayoutMode, useMoveHeader } from "./useLayoutMode";
 import { useDesignSettings } from "./useDesignSettings";
 import { THEMES, BACKGROUNDS } from "./designSettings";
+import { If } from "@shared/ui";
 
 export const MainLayout = () => {
   const { shouldHideUI } = useCorrespondenceRoute();
   const { variant } = useNavbar();
   const { tabMode } = useTabs();
   const [layoutMode, setLayoutMode] = useLayoutMode();
+  const [moveHeader] = useMoveHeader();
   const { currentTheme, setCurrentTheme, currentBg, setCurrentBg, isDarkMode } =
     useDesignSettings();
 
@@ -42,6 +44,7 @@ export const MainLayout = () => {
 
   // iOS-навбар — самостоятельная раскладка, боковое/нижнее меню к нему не применяем.
   const effectiveLayout = variant === "ios" ? "top" : layoutMode;
+  const hideHeader = moveHeader && effectiveLayout !== "top";
 
   const showSidebarLeft = effectiveLayout === "left";
   const showSidebarRight = effectiveLayout === "right";
@@ -66,16 +69,18 @@ export const MainLayout = () => {
 
         <div
           className="flex-1 min-w-0 flex flex-col gap-6 transition-all duration-300 ease-in-out"
-          style={showBottomNav ? { paddingBottom: 56 } : undefined}
+          style={showBottomNav ? { paddingBottom: moveHeader ? 76 : 56 } : undefined}
         >
-          <Header
-            currentTheme={currentTheme}
-            setCurrentTheme={setCurrentTheme}
-            currentBg={currentBg}
-            setCurrentBg={setCurrentBg}
-            layoutMode={effectiveLayout}
-            setLayoutMode={setLayoutMode}
-          />
+          <If is={!hideHeader}>
+            <Header
+              currentTheme={currentTheme}
+              setCurrentTheme={setCurrentTheme}
+              currentBg={currentBg}
+              setCurrentBg={setCurrentBg}
+              layoutMode={effectiveLayout}
+              setLayoutMode={setLayoutMode}
+            />
+          </If>
           {variant === "ios" ? (
             <Navbar />
           ) : (

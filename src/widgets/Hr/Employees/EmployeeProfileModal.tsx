@@ -155,7 +155,7 @@ export const EmployeeProfileModal = ({ employee: e, onClose, onEdit, onDelete, o
                 <Field icon={<Phone size={15} />} label="Персональный телефон" value={e.personalPhone} />
                 <Field icon={<Mail size={15} />} label="Корпоративный Email" value={e.corporateEmail} />
                 <Field icon={<Phone size={15} />} label="Корпоративный телефон" value={e.corporatePhone} />
-                <Field icon={<Phone size={15} />} label="Телефон" value={r.phone} />
+                <Field icon={<Phone size={15} />} label="Логин" value={r.phone} />
                 <Field icon={<Wallet size={15} />} label="Заработная плата" value={money(e.salary)} accent />
               </Section>
             </If>

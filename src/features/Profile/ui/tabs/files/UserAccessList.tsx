@@ -44,8 +44,9 @@ const getAvatarColor = (id: number): string => AVATAR_COLORS[id % AVATAR_COLORS.
 export const UserAccessList = ({ selectedUsers, onToggleUser }: IProps) => {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data, isLoading } = useGetQuery<Record<string, never>, IApiUsersResponse>({
+  const { data, isLoading } = useGetQuery<{ per_page: number }, IApiUsersResponse>({
     url: ApiRoutes.GET_USERS,
+    params: { per_page: 100 },
     useToken: true,
   });
 

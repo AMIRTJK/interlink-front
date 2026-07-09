@@ -56,20 +56,23 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
   if (isInternalView) {
     // Если это именно ВХОДЯЩЕЕ внутреннее письмо — показываем твою новую страницу просмотра
     if (type === "internal-incoming") {
+      const letterItem = data?.item || data;
+      // Поля с префиксом my_ (my_prefix, my_folder) приходят в корне ответа,
+      // а не внутри item — прокидываем my_prefix в item для «Номер (ВХ)».
+      const incomingItem = letterItem
+        ? { ...letterItem, my_prefix: data?.my_prefix ?? letterItem.my_prefix }
+        : {
+            id,
+            subject: "",
+            sender: "",
+            date: "",
+            inboundNumber: "",
+            outboundNumber: "",
+            status: "на резолюции",
+          };
       return (
         <InternalCorrespondenceIncomingView
-          item={
-            data?.item ||
-            data || {
-              id,
-              subject: "",
-              sender: "",
-              date: "",
-              inboundNumber: "",
-              outboundNumber: "",
-              status: "на резолюции",
-            }
-          }
+          item={incomingItem}
           onBack={() => navigate(-1)}
         />
       );

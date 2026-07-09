@@ -3,14 +3,17 @@ import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { BottomNav } from "./BottomNav";
 import { THEMES, BACKGROUNDS } from "./designSettings";
-import { useLayoutMode } from "./useLayoutMode";
+import { useLayoutMode, useMoveHeader } from "./useLayoutMode";
 import { useDesignSettings } from "./useDesignSettings";
+import { If } from "@shared/ui";
 
 export const ProfileLayout = () => {
   const { currentTheme, setCurrentTheme, currentBg, setCurrentBg, isDarkMode } =
     useDesignSettings();
 
   const [layoutMode, setLayoutMode] = useLayoutMode();
+  const [moveHeader] = useMoveHeader();
+  const hideHeader = moveHeader && layoutMode !== "top";
 
   const activeTheme = THEMES[currentTheme] || THEMES.emerald;
   const activeBg = BACKGROUNDS[currentBg] || BACKGROUNDS.arctic;
@@ -43,16 +46,18 @@ export const ProfileLayout = () => {
 
         <div
           className="flex-1 min-w-0 flex flex-col gap-6 transition-all duration-300 ease-in-out"
-          style={layoutMode === "bottom" ? { paddingBottom: 56 } : undefined}
+          style={layoutMode === "bottom" ? { paddingBottom: moveHeader ? 76 : 56 } : undefined}
         >
-          <Header
-            currentTheme={currentTheme}
-            setCurrentTheme={setCurrentTheme}
-            currentBg={currentBg}
-            setCurrentBg={setCurrentBg}
-            layoutMode={layoutMode}
-            setLayoutMode={setLayoutMode}
-          />
+          <If is={!hideHeader}>
+            <Header
+              currentTheme={currentTheme}
+              setCurrentTheme={setCurrentTheme}
+              currentBg={currentBg}
+              setCurrentBg={setCurrentBg}
+              layoutMode={layoutMode}
+              setLayoutMode={setLayoutMode}
+            />
+          </If>
           <main className="flex-1 pb-10 overflow-x-hidden">
             <Outlet context={{ currentTheme }} />
           </main>

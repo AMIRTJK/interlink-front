@@ -27,7 +27,7 @@ export const CorrespondencePage = () => {
       )}
     >
       <If is={!shouldHideUI}>
-        <div className={variant === "vertical" ? "shrink-0 pr-6 pb-6" : ""}>
+        <div className={variant === "vertical" ? "shrink-0 pr-6 pb-6" : "pb-6"}>
           <RegistrySidebar
             isDetailView={isDetailView}
             variant={variant}
