@@ -50,8 +50,7 @@ export const FilesTab = () => {
 		pinnedFiles,
 		currentFiles: personalCurrentFiles,
 		currentFolders: personalCurrentFolders,
-		breadcrumbs,
-		showBreadcrumbs,
+
 		sharedFiles,
 		sharedFolders,
 		isLoadingSharedFiles,
