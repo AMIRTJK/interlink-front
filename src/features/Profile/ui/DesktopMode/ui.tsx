@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { IUser } from "@entities/login";
 import { Logo } from "@shared/ui";
+import { getEnvVar } from "@shared/config";
 import userAvatar from "../../../../assets/images/user-avatar.jpg";
 import { TDesktopScene, SCENES, STORAGE_SCENE_KEY } from "./model";
 import { SpaceBg } from "./Backgrounds/SpaceBg";
@@ -26,6 +27,21 @@ interface IProps {
   onClose: () => void;
   isDark: boolean;
 }
+
+const resolvePhotoUrl = (path?: string | null): string => {
+  if (!path) return "";
+  if (
+    path.startsWith("http://") ||
+    path.startsWith("https://") ||
+    path.startsWith("data:")
+  ) {
+    return path;
+  }
+  const apiHost = getEnvVar("VITE_API_URL") || "";
+  const host = apiHost.endsWith("/") ? apiHost.slice(0, -1) : apiHost;
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${host}${p}`;
+};
 
 const ICONS: Record<TDesktopScene, React.ComponentType<{ className?: string }>> = {
   space: Sparkles,
@@ -42,6 +58,7 @@ export const DesktopMode = ({ userData, onClose, isDark }: IProps) => {
   });
 
   const [time, setTime] = useState(new Date());
+  const [avatarError, setAvatarError] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -142,8 +159,9 @@ export const DesktopMode = ({ userData, onClose, isDark }: IProps) => {
           className={`mt-10 p-5 md:p-6 rounded-[2rem] backdrop-blur-2xl border flex flex-col items-center max-w-sm w-full transition-all duration-300 ${isDark ? "bg-white/6 border-white/12 shadow-[0_8px_32px_rgba(0,0,0,0.3)]" : "bg-white/45 border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.06)]"}`}
         >
           <img
-            src={userData?.photo_path || userAvatar}
+            src={avatarError ? userAvatar : (resolvePhotoUrl(userData?.photo_path) || userAvatar)}
             alt=""
+            onError={() => setAvatarError(true)}
             className={`w-16 h-16 rounded-full object-cover border-2 shadow-md ${isDark ? "border-white/30" : "border-indigo-400/50"}`}
           />
           <h2
