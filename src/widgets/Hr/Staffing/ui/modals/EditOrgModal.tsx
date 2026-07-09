@@ -37,6 +37,13 @@ export const EditOrgModal = ({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [error, setError] = useState('');
 
+  React.useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   const selectedEmp = employees.find((e) => e.id === curatorId) ?? null;
 
   const cardBg = dark ? 'bg-gray-900' : 'bg-white';
@@ -66,7 +73,7 @@ export const EditOrgModal = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/60"
         onClick={onClose}
       />
       <motion.div
