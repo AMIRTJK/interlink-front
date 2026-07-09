@@ -5,7 +5,7 @@ import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 import { If } from "@shared/ui";
 import { EmployeeFormFields } from "./EmployeeFormFields";
-import { PassportUploadStep, IPassportFile } from "./PassportUploadStep";
+import { PassportUploadStep, IPassportFile, IPassportSides } from "./PassportUploadStep";
 import { mapEmployeeToForm, prepareEmployeePayload, validateEmployee } from "../lib";
 import "./employeeForm.css";
 
@@ -38,15 +38,27 @@ const dataUrlToFile = (dataUrl: string, name: string, type: string): File => {
   return new File([u8], name, { type: mime });
 };
 
-const readPassportDraft = (): IPassportFile | null => {
+const EMPTY_PASSPORT: IPassportSides = { front: null, back: null };
+
+const sideToStored = (side: IPassportFile | null) =>
+  side ? fileToDataUrl(side.file).then((dataUrl) => ({ name: side.file.name, type: side.file.type, dataUrl })) : Promise.resolve(null);
+
+const storedToSide = (stored: { name: string; type: string; dataUrl: string } | null): IPassportFile | null => {
+  if (!stored?.dataUrl) return null;
+  return { file: dataUrlToFile(stored.dataUrl, stored.name, stored.type), previewUrl: stored.dataUrl };
+};
+
+const readPassportDraft = (): IPassportSides => {
   try {
     const raw = localStorage.getItem(PASSPORT_DRAFT_KEY);
-    if (!raw) return null;
-    const { name, type, dataUrl } = JSON.parse(raw);
-    if (!dataUrl) return null;
-    return { file: dataUrlToFile(dataUrl, name, type), previewUrl: dataUrl };
+    if (!raw) return EMPTY_PASSPORT;
+    const parsed = JSON.parse(raw);
+    return {
+      front: storedToSide(parsed.front),
+      back: storedToSide(parsed.back),
+    };
   } catch {
-    return null;
+    return EMPTY_PASSPORT;
   }
 };
 
@@ -54,9 +66,9 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
   const isEdit = !!employee?.id;
   const [values, setValues] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [passport, setPassport] = useState<IPassportFile | null>(null);
+  const [passport, setPassport] = useState<IPassportSides>(EMPTY_PASSPORT);
 
-  const fieldsVisible = isEdit || !!passport;
+  const fieldsVisible = isEdit || !!passport.front || !!passport.back;
 
   const createM = useMutationQuery<CreateUserDTO>({
     url: ApiRoutes.CREATE_USER,
@@ -92,7 +104,7 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
     if (!open) return;
     setErrors({});
     if (employee) {
-      setPassport(null);
+      setPassport(EMPTY_PASSPORT);
       setValues(mapEmployeeToForm(employee));
     } else {
       setValues({});
@@ -101,21 +113,18 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
     }
   }, [open, employee]);
 
-  const handlePassportChange = async (val: IPassportFile | null) => {
+  const handlePassportChange = async (val: IPassportSides) => {
     setPassport(val);
     if (isEdit) return;
-    if (!val) {
+    if (!val.front && !val.back) {
       localStorage.removeItem(PASSPORT_DRAFT_KEY);
       return;
     }
     try {
-      const dataUrl = await fileToDataUrl(val.file);
-      localStorage.setItem(
-        PASSPORT_DRAFT_KEY,
-        JSON.stringify({ name: val.file.name, type: val.file.type, dataUrl })
-      );
+      const [front, back] = await Promise.all([sideToStored(val.front), sideToStored(val.back)]);
+      localStorage.setItem(PASSPORT_DRAFT_KEY, JSON.stringify({ front, back }));
     } catch {
-      // Файл слишком большой для localStorage — просто не сохраняем черновик.
+      // Файлы слишком большие для localStorage — просто не сохраняем черновик.
     }
   };
 
@@ -149,7 +158,7 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
       localStorage.removeItem(PASSPORT_DRAFT_KEY);
       setValues({});
       setErrors({});
-      setPassport(null);
+      setPassport(EMPTY_PASSPORT);
       onClose();
     };
 
