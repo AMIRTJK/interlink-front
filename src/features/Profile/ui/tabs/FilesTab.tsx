@@ -290,6 +290,7 @@ export const FilesTab = () => {
 						onDelete={viewContext === "personal" ? handleDeleteFileConfirm : undefined}
 						onMove={viewContext === "personal" ? setMovingFile : undefined}
 						onShare={viewContext === "personal" ? (file) => setShareItem({ item: file, type: "file" }) : undefined}
+						showSharedWith={viewContext === "personal"}
 					/>
 				</div>
 			)}

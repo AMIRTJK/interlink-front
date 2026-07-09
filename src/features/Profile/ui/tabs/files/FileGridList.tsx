@@ -14,6 +14,7 @@ interface IProps {
   onDelete?: (id: number) => void;
   onMove?: (file: IApiFile) => void;
   onShare?: (file: IApiFile) => void;
+  showSharedWith?: boolean;
 }
 
 export const FileGridList = ({
@@ -26,6 +27,7 @@ export const FileGridList = ({
   onDelete,
   onMove,
   onShare,
+  showSharedWith,
 }: IProps) => {
   return (
     <div>
@@ -50,6 +52,7 @@ export const FileGridList = ({
           onView={onView}
           onMove={onMove}
           onShare={onShare}
+          showSharedWith={showSharedWith}
         />
       </If>
     </div>
