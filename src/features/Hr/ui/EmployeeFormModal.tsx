@@ -174,9 +174,11 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
         <If is={showTitle}>
           <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-900 z-10">
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-sm overflow-hidden ${isEdit ? "bg-indigo-500!" : "bg-red-500!"}`}>
-                {badge}
-              </div>
+              <If is={isEdit}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-sm overflow-hidden bg-indigo-500!">
+                  {badge}
+                </div>
+              </If>
               <div>
                 <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">
                   {isEdit ? "Редактирование сотрудника" : "Новый сотрудник"}
