@@ -63,8 +63,7 @@ export const EmployeePickerModal = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 16 }}
         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className={`relative ${cardBg} rounded-3xl shadow-2xl w-full max-w-md z-[71] flex flex-col overflow-hidden`}
-        style={{ maxHeight: '82vh' }}
+        className={`relative ${cardBg} rounded-3xl shadow-2xl w-full max-w-md z-[71] flex flex-col overflow-hidden h-[500px] max-h-[82vh]`}
       >
         <div className={`px-5 py-4 border-b ${headerBorder} shrink-0`}>
           <div className="flex items-center justify-between mb-3">
