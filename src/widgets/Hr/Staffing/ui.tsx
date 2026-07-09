@@ -74,7 +74,7 @@ export const StaffingWidget = ({ dark = false }: IStaffingWidgetProps) => {
   ];
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-300">
+    <div className="space-y-4 animate-in fade-in duration-300 h-full overflow-hidden">
       <div className={`rounded-2xl border shadow-sm overflow-hidden ${headerCardBg}`}>
         <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
@@ -429,7 +429,7 @@ export const StaffingWidget = ({ dark = false }: IStaffingWidgetProps) => {
       </AnimatePresence>
 
       <AnimatePresence>
-        <If key="if-add-org" is={state.addOrgOpen}>
+        <If key={state.addOrgOpen ? 'add-org-open' : 'add-org-closed'} is={state.addOrgOpen}>
           <AddOrgModal
             key="add-org"
             employees={state.employees}
@@ -439,7 +439,7 @@ export const StaffingWidget = ({ dark = false }: IStaffingWidgetProps) => {
             dark={dark}
           />
         </If>
-        <If key="if-add-dept" is={state.addDeptOrgId !== null && !!addDeptOrg}>
+        <If key={state.addDeptOrgId !== null && !!addDeptOrg ? 'add-dept-open' : 'add-dept-closed'} is={state.addDeptOrgId !== null && !!addDeptOrg}>
           <AddDeptModal
             key="add-dept"
             orgName={addDeptOrg?.name || ''}
@@ -450,7 +450,7 @@ export const StaffingWidget = ({ dark = false }: IStaffingWidgetProps) => {
             dark={dark}
           />
         </If>
-        <If key="if-add-pos" is={state.addPositionTarget !== null && !!addPosDept}>
+        <If key={state.addPositionTarget !== null && !!addPosDept ? 'add-pos-open' : 'add-pos-closed'} is={state.addPositionTarget !== null && !!addPosDept}>
           <AddPositionModal
             key="add-pos"
             deptName={addPosDept?.name || ''}
@@ -459,7 +459,7 @@ export const StaffingWidget = ({ dark = false }: IStaffingWidgetProps) => {
             dark={dark}
           />
         </If>
-        <If key="if-assign" is={!!state.assignTarget}>
+        <If key={state.assignTarget ? 'assign-open' : 'assign-closed'} is={!!state.assignTarget}>
           <AssignEmployeeModal
             key="assign"
             employees={state.employees}
@@ -476,7 +476,7 @@ export const StaffingWidget = ({ dark = false }: IStaffingWidgetProps) => {
             dark={dark}
           />
         </If>
-        <If key="if-edit-org" is={!!state.editOrgTarget}>
+        <If key={state.editOrgTarget ? 'edit-org-open' : 'edit-org-closed'} is={!!state.editOrgTarget}>
           <EditOrgModal
             key="edit-org"
             org={state.editOrgTarget as any}
@@ -486,7 +486,7 @@ export const StaffingWidget = ({ dark = false }: IStaffingWidgetProps) => {
             onSave={() => {}}
           />
         </If>
-        <If key="if-edit-dept" is={!!state.editDeptTarget}>
+        <If key={state.editDeptTarget ? 'edit-dept-open' : 'edit-dept-closed'} is={!!state.editDeptTarget}>
           <EditDeptModal
             key="edit-dept"
             dept={state.editDeptTarget?.dept as any}

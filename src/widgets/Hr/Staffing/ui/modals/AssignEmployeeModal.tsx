@@ -28,6 +28,20 @@ export const AssignEmployeeModal = ({
 }: IAssignEmployeeModalProps) => {
   const [search, setSearch] = useState('');
 
+  React.useEffect(() => {
+    const currentCount = Number(document.body.getAttribute('data-modal-count') || 0);
+    document.body.setAttribute('data-modal-count', String(currentCount + 1));
+    document.body.style.overflow = 'hidden';
+    return () => {
+      const nextCount = Number(document.body.getAttribute('data-modal-count') || 1) - 1;
+      document.body.setAttribute('data-modal-count', String(nextCount));
+      if (nextCount <= 0) {
+        document.body.style.overflow = '';
+        document.body.removeAttribute('data-modal-count');
+      }
+    };
+  }, []);
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return employees.filter(
@@ -60,7 +74,7 @@ export const AssignEmployeeModal = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/60"
         onClick={onClose}
       />
       <motion.div
