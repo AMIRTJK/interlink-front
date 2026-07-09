@@ -52,18 +52,19 @@ const STATUS_SEG: ISegOption[] = [
 const iconEl = (Icon: typeof Mail) => <Icon size={14} />;
 
 export const EmployeeFormFields = ({ values, errors, handleChange, organizationId, isEdit, initialPhoto }: IProps) => {
-  const { data: orgRes } = useGetQuery({ url: ApiRoutes.GET_ORGANIZATIONS, method: "GET" });
-  const { data: roleRes } = useGetQuery({ url: ApiRoutes.GET_ROLES, method: "GET" });
+  const { data: orgRes } = useGetQuery({ url: ApiRoutes.GET_ORGANIZATIONS, method: "GET", options: { staleTime: 300000 } });
+  const { data: roleRes } = useGetQuery({ url: ApiRoutes.GET_ROLES, method: "GET", options: { staleTime: 300000 } });
   const { data: userRes } = useGetQuery({
     url: ApiRoutes.GET_USERS,
     method: "GET",
     params: { with_departments: 1, per_page: 1000 },
+    options: { staleTime: 300000 },
   });
   const { data: deptRes } = useGetQuery({
     url: ApiRoutes.GET_DEPARTMENTS,
     method: "GET",
     params: { organization_id: organizationId },
-    options: { enabled: !!organizationId },
+    options: { enabled: !!organizationId, staleTime: 300000 },
   });
 
   const organizations = useMemo<IOption[]>(() => transformOrgs(orgRes), [orgRes]);
