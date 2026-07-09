@@ -1,12 +1,14 @@
 import React from 'react';
-import { X, Calendar, Search } from 'lucide-react';
+import { X, Search } from 'lucide-react';
+import { Select, DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import { ORDER_TYPES } from '../model';
 
 export type TMinisterFilter = 'all' | 'signed' | 'unsigned';
 
 export interface IOrderFiltersProps {
   selectedTypes: string[];
-  onTypeToggle: (type: string) => void;
+  onTypesChange: (types: string[]) => void;
   dateFrom: string;
   dateTo: string;
   onDateFrom: (v: string) => void;
@@ -30,7 +32,7 @@ const MINISTER_OPTIONS: { key: TMinisterFilter; label: string }[] = [
 
 export const OrderFilters = ({
   selectedTypes,
-  onTypeToggle,
+  onTypesChange,
   dateFrom,
   dateTo,
   onDateFrom,
@@ -43,60 +45,32 @@ export const OrderFilters = ({
 }: IOrderFiltersProps) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mt-2">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Тип приказа */}
         <div>
           <p className={labelCls}>Тип приказа</p>
-          <div className="flex flex-wrap gap-1.5">
-            {ORDER_TYPES.map((type) => {
-              const isActive = selectedTypes.includes(type);
-              return (
-                <button
-                  key={type}
-                  onClick={() => onTypeToggle(type)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
-                    isActive
-                      ? 'bg-[#1E3A5F] text-white border-[#1E3A5F]'
-                      : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-[#1E3A5F]/40 hover:text-[#1E3A5F]'
-                  }`}
-                >
-                  {type}
-                </button>
-              );
-            })}
-          </div>
+          <Select
+            mode="multiple"
+            value={selectedTypes}
+            onChange={onTypesChange}
+            placeholder="Выберите типы приказов"
+            options={ORDER_TYPES.map((type) => ({ value: type, label: type }))}
+            style={{ width: '100%', minHeight: 34 }}
+            className="text-xs"
+          />
         </div>
 
         {/* Период */}
         <div>
           <p className={labelCls}>Период</p>
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Calendar
-                size={13}
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-              />
-              <input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => onDateFrom(e.target.value)}
-                className={`${smallInputCls} pl-8`}
-              />
-            </div>
-            <span className="text-slate-400 text-xs shrink-0">—</span>
-            <div className="relative flex-1">
-              <Calendar
-                size={13}
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-              />
-              <input
-                type="date"
-                value={dateTo}
-                onChange={(e) => onDateTo(e.target.value)}
-                className={`${smallInputCls} pl-8`}
-              />
-            </div>
-          </div>
+          <DatePicker.RangePicker
+            value={[dateFrom ? dayjs(dateFrom) : null, dateTo ? dayjs(dateTo) : null]}
+            onChange={(_dates: any, dateStrings: [string, string]) => {
+              onDateFrom(dateStrings[0] || '');
+              onDateTo(dateStrings[1] || '');
+            }}
+            style={{ width: '100%', height: 34 }}
+          />
         </div>
 
         {/* Исполнитель */}
@@ -113,6 +87,7 @@ export const OrderFilters = ({
               value={executorQuery}
               onChange={(e) => onExecutorQuery(e.target.value)}
               className={`${smallInputCls} pl-8 pr-3`}
+              style={{ height: 34 }}
             />
           </div>
         </div>
@@ -120,24 +95,13 @@ export const OrderFilters = ({
         {/* Подпись министра */}
         <div>
           <p className={labelCls}>Подпись министра</p>
-          <div className="flex items-center gap-1.5">
-            {MINISTER_OPTIONS.map((opt) => {
-              const isActive = ministerFilter === opt.key;
-              return (
-                <button
-                  key={opt.key}
-                  onClick={() => onMinisterFilter(opt.key)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                    isActive
-                      ? 'bg-[#1E3A5F] text-white border-[#1E3A5F]'
-                      : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-[#1E3A5F]/40 hover:text-[#1E3A5F]'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
+          <Select
+            value={ministerFilter}
+            onChange={onMinisterFilter}
+            options={MINISTER_OPTIONS.map((opt) => ({ value: opt.key, label: opt.label }))}
+            style={{ width: '100%', height: 34 }}
+            className="text-xs"
+          />
         </div>
       </div>
 
@@ -145,7 +109,7 @@ export const OrderFilters = ({
       <div className="flex items-center justify-end mt-4 pt-3 border-t border-slate-100">
         <button
           onClick={onReset}
-          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 font-medium transition-colors"
+          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 font-medium transition-colors cursor-pointer"
         >
           <X size={12} />
           <span>Сбросить</span>
@@ -154,3 +118,4 @@ export const OrderFilters = ({
     </div>
   );
 };
+

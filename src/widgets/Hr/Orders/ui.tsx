@@ -33,7 +33,7 @@ export const OrdersWidget = () => {
     statCards,
     filteredOrders,
     handleResetFilters,
-    handleTypeToggle,
+    setSelectedTypes,
   } = useOrdersLogic();
 
   const [selectedExtOrder, setSelectedExtOrder] = useState<IOrderRecord | null>(null);
@@ -141,7 +141,7 @@ export const OrdersWidget = () => {
               >
                 <OrderFilters
                   selectedTypes={selectedTypes}
-                  onTypeToggle={handleTypeToggle}
+                  onTypesChange={setSelectedTypes}
                   dateFrom={dateFrom}
                   dateTo={dateTo}
                   onDateFrom={setDateFrom}

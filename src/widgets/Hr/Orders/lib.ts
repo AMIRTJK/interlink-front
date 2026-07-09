@@ -220,6 +220,6 @@ export const useOrdersLogic = () => {
     statCards,
     filteredOrders,
     handleResetFilters,
-    handleTypeToggle,
+    setSelectedTypes,
   };
 };
