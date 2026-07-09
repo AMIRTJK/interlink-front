@@ -26,6 +26,7 @@ import { useChat } from "@widgets/Chat";
 import { LogoutConfirmModal } from "./LogoutConfirmModal";
 import { DesktopMode } from "../../../features/Profile/ui/DesktopMode";
 import { useProfileUser } from "./useProfileUser";
+import { useMoveHeader } from "./useLayoutMode";
 
 interface IProps {
   currentTheme?: string;
@@ -44,6 +45,7 @@ export const Header = ({
   layoutMode = "top",
   setLayoutMode,
 }: IProps) => {
+  const [moveHeader, setMoveHeader] = useMoveHeader();
   const handleLogout = useLogout();
   const { openChat } = useChat();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -204,6 +206,22 @@ export const Header = ({
             )}
           </button>
         ))}
+      </div>
+      <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-700/60 px-1">
+        <label className="flex items-center justify-between cursor-pointer">
+          <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 select-none">
+            Переносить элементы Header
+          </span>
+          <div className="relative">
+            <input
+              type="checkbox"
+              checked={moveHeader}
+              onChange={(e) => setMoveHeader(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-8 h-4 bg-zinc-200 dark:bg-zinc-700 rounded-full peer peer-checked:bg-emerald-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4" />
+          </div>
+        </label>
       </div>
     </div>
   );

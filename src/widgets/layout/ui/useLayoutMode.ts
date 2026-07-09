@@ -41,3 +41,33 @@ export const useLayoutMode = (): [LayoutMode, (mode: LayoutMode) => void] => {
 
   return [layoutMode, setLayoutMode];
 };
+
+const MOVE_HEADER_KEY = "moveHeaderToLayout";
+const MOVE_HEADER_CHANGE_EVENT = "moveheaderchange";
+
+export const useMoveHeader = (): [boolean, (val: boolean) => void] => {
+  const [moveHeader, setMoveHeaderState] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem(MOVE_HEADER_KEY) === "true";
+  });
+
+  const setMoveHeader = useCallback((val: boolean) => {
+    localStorage.setItem(MOVE_HEADER_KEY, String(val));
+    setMoveHeaderState(val);
+    window.dispatchEvent(new Event(MOVE_HEADER_CHANGE_EVENT));
+  }, []);
+
+  useEffect(() => {
+    const sync = () => {
+      setMoveHeaderState(localStorage.getItem(MOVE_HEADER_KEY) === "true");
+    };
+    window.addEventListener(MOVE_HEADER_CHANGE_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(MOVE_HEADER_CHANGE_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+
+  return [moveHeader, setMoveHeader];
+};
