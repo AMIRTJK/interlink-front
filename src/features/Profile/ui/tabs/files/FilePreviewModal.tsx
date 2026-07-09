@@ -180,7 +180,7 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl w-full max-w-6xl overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
             <Eye size={18} className="text-indigo-600 dark:text-indigo-400" />
@@ -196,7 +196,7 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
           </button>
         </div>
 
-        <div className="p-8 flex flex-col items-center justify-center min-h-[300px] bg-slate-50/30 dark:bg-slate-900/30">
+        <div className="p-8 flex flex-col items-center justify-center min-h-[420px] bg-slate-50/30 dark:bg-slate-900/30">
           <style dangerouslySetInnerHTML={{ __html: `
             .file-preview-paper {
               background: white;
@@ -257,17 +257,17 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
           </If>
 
           <If is={!isLoading && previewType === "image" && !!blobUrl}>
-            <div className="w-full max-h-[350px] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-center bg-black/5 dark:bg-black/20">
+            <div className="w-full max-h-[70vh] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-center bg-black/5 dark:bg-black/20">
               <img
                 src={blobUrl || ""}
                 alt={file.original_name}
-                className="max-w-full max-h-[350px] object-contain rounded-2xl"
+                className="max-w-full max-h-[70vh] object-contain rounded-2xl"
               />
             </div>
           </If>
 
           <If is={!isLoading && previewType === "pdf" && !!blobUrl}>
-            <div className="w-full h-[350px] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white">
+            <div className="w-full h-[70vh] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white">
               <iframe
                 src={blobUrl || ""}
                 title={file.original_name}
@@ -277,19 +277,19 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
           </If>
 
           <If is={!isLoading && previewType === "html-doc" && !!htmlContent}>
-            <div className="w-full max-h-[350px] overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white text-left">
+            <div className="w-full max-h-[70vh] overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white text-left">
               <div className="file-preview-paper doc-mode" dangerouslySetInnerHTML={{ __html: htmlContent || "" }} />
             </div>
           </If>
 
           <If is={!isLoading && previewType === "html-xls" && !!htmlContent}>
-            <div className="w-full max-h-[350px] overflow-auto rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white text-left">
+            <div className="w-full max-h-[70vh] overflow-auto rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white text-left">
               <div className="file-preview-paper xls-mode" dangerouslySetInnerHTML={{ __html: htmlContent || "" }} />
             </div>
           </If>
 
           <If is={!isLoading && previewType === "text" && textContent !== null}>
-            <div className="w-full max-h-[350px] overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-slate-50 dark:bg-slate-900/50 text-left">
+            <div className="w-full max-h-[70vh] overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-slate-50 dark:bg-slate-900/50 text-left">
               <pre className="file-preview-text text-slate-700 dark:text-zinc-300">{textContent}</pre>
             </div>
           </If>

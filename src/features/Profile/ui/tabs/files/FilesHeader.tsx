@@ -14,7 +14,8 @@ interface IProps {
   viewMode: "grid" | "list";
   onViewModeChange: (val: "grid" | "list") => void;
   onUpload: (file: File) => void;
-  totalCount: number;
+  personalCount: number;
+  sharedCount: number;
   onCreateFolderClick: () => void;
   viewContext: "personal" | "shared" | "analytics";
   onViewContextChange: (val: "personal" | "shared" | "analytics") => void;
@@ -30,7 +31,8 @@ export const FilesHeader = ({
   viewMode,
   onViewModeChange,
   onUpload,
-  totalCount,
+  personalCount,
+  sharedCount,
   onCreateFolderClick,
   viewContext,
   onViewContextChange,
@@ -101,7 +103,7 @@ export const FilesHeader = ({
         >
           Мои файлы
           <span className="ml-2 text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-zinc-400 rounded-full">
-            {viewContext === "personal" ? totalCount : ""}
+            {personalCount}
           </span>
         </button>
         <button
@@ -114,7 +116,7 @@ export const FilesHeader = ({
         >
           Доступные мне
           <span className="ml-2 text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-zinc-400 rounded-full">
-            {viewContext === "shared" ? totalCount : ""}
+            {sharedCount}
           </span>
         </button>
         <button

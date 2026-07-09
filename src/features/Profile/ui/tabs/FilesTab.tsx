@@ -182,7 +182,8 @@ export const FilesTab = () => {
 				viewMode={viewMode}
 				onViewModeChange={setViewMode}
 				onUpload={handleUpload}
-				totalCount={viewContext === "shared" ? sharedFiles.length : files.length}
+				personalCount={folders.length}
+				sharedCount={sharedFolders.length}
 				onCreateFolderClick={() => setAddCategoryOpen(true)}
 				viewContext={viewContext}
 				onViewContextChange={(ctx) => {
@@ -202,6 +203,7 @@ export const FilesTab = () => {
 					<CategoryFilters
 				categories={viewContext === "shared" ? sharedCategoriesList : categoriesList}
 				activeCategory={activeCategoryId}
+				allCount={viewContext === "shared" ? sharedFiles.length : files.length}
 				onCategorySelect={(id) => setActiveFolderId(id)}
 				onAddCategoryClick={viewContext === "personal" ? () => setAddCategoryOpen(true) : undefined}
 				onRenameCategory={viewContext === "personal" ? (cat) => handleOpenRenameFolder(cat.name, Number(cat.id)) : undefined}
