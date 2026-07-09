@@ -339,7 +339,7 @@ export const FilesTab = () => {
 			/>
 
 			<FolderActionsModal
-				open={folderModalOpen}
+				isOpen={folderModalOpen}
 				onClose={() => {
 					setFolderModalOpen(false);
 					setEditingFolder(null);
@@ -347,7 +347,7 @@ export const FilesTab = () => {
 				initialName={editingFolder?.name || ""}
 				initialEmoji={editingFolder?.emoji || null}
 				title={folderModalTitle}
-				onSave={async (name, emoji) => {
+				onSubmit={async (name, emoji) => {
 					if (editingFolder) {
 						await updateFolder.mutateAsync({
 							id: editingFolder.id,

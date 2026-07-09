@@ -47,7 +47,7 @@ export const StaffingWidget = ({ dark = false }: IStaffingWidgetProps) => {
 
   const addDeptOrg = state.organizations.find((o) => o.id === state.addDeptOrgId) ?? null;
   const addPosDept = state.addPositionTarget
-    ? state.organizations.find((o) => o.id === state.addPositionTarget.orgId)?.departments.find((d) => d.id === state.addPositionTarget.deptId) ?? null
+    ? state.organizations.find((o) => o.id === state.addPositionTarget?.orgId)?.departments.find((d) => d.id === state.addPositionTarget?.deptId) ?? null
     : null;
 
   const headerCardBg = dark ? 'bg-gray-800/80 border-gray-700/60' : 'bg-white border-gray-100';
@@ -188,19 +188,19 @@ export const StaffingWidget = ({ dark = false }: IStaffingWidgetProps) => {
         <div>
           <If is={state.viewMode === 'list'}>
             <ListView
-              filteredOrgs={state.filteredOrgs}
+              organizations={state.filteredOrgs}
               employees={state.employees}
               dark={dark}
-              setAddDeptOrgId={state.setAddDeptOrgId}
-              handleDeleteOrg={() => {}}
-              setEditOrgTarget={state.setEditOrgTarget}
-              setAddPositionTarget={state.setAddPositionTarget}
-              handleDeleteDept={() => {}}
-              handleDeletePosition={() => {}}
-              handleUpdatePosition={() => {}}
-              setAssignTarget={state.setAssignTarget}
-              handleUnassignEmployee={methods.handleUnassignEmployee}
-              setEditDeptTarget={state.setEditDeptTarget}
+              onAddDept={state.setAddDeptOrgId}
+              onDeleteOrg={() => {}}
+              onEditOrg={state.setEditOrgTarget}
+              onAddPosition={(orgId, deptId) => state.setAddPositionTarget({orgId, deptId})}
+              onDeleteDept={() => {}}
+              onDeletePosition={() => {}}
+              onUpdatePosition={() => {}}
+              onOpenAssign={state.setAssignTarget}
+              onUnassignEmployee={methods.handleUnassignEmployee}
+              onEditDept={(orgId, dept) => state.setEditDeptTarget({orgId, dept})}
             />
           </If>
 

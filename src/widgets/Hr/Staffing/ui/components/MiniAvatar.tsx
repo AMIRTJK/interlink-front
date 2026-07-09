@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
 export interface IMiniAvatarProps {
-  photo: string;
-  initials: string;
-  color: string;
+  photo?: string;
+  initials?: string;
+  color?: string;
   size?: 'xs' | 'sm' | 'md';
 }
 

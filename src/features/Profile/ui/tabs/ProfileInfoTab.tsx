@@ -227,13 +227,13 @@ export const ProfileInfoTab = ({
 						icon={<CalendarIcon size={16} />}
 						label="Дата рождения"
 						value={formatDate(
-							userData?.birth_date || (userData as any)?.birthday,
+							(userData as any)?.birth_date || (userData as any)?.birthday,
 						)}
 					/>
 					<InfoRow
 						icon={<MapPin size={16} />}
 						label="Адрес"
-						value={orDash(userData?.address)}
+						value={orDash((userData as any)?.address)}
 					/>
 					<InfoRow
 						icon={<FileText size={16} />}
@@ -256,12 +256,12 @@ export const ProfileInfoTab = ({
 					<InfoRow
 						icon={<Mail size={16} />}
 						label="Корпоративный Email"
-						value={orDash(userData?.work_email)}
+						value={orDash((userData as any)?.work_email)}
 					/>
 					<InfoRow
 						icon={<Phone size={16} />}
 						label="Корпоративный телефон"
-						value={orDash(userData?.work_phone)}
+						value={orDash((userData as any)?.work_phone)}
 					/>
 				</Card>
 

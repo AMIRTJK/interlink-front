@@ -70,7 +70,7 @@ export const useStaffing = () => {
   });
 
   const assignEmployeesM = useMutationQuery({
-    url: (d: { id: number }) =>
+    url: (d: { id: number; user_ids: number[] }) =>
       ApiRoutes.ASSIGN_POSITION_EMPLOYEES.replace(":id", String(d.id)),
     method: "PUT",
     messages: {
