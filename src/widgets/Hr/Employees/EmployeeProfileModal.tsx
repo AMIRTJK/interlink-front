@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {
   X, Mail, Phone, Building2, Briefcase, Wallet, Pencil, Trash2, Copy,
   CircleUserRound, Activity, FolderOpen, Calendar, ScrollText, Hash,
-  CreditCard, Landmark, MapPin, Star, User, Award, Users, Shield,
+  CreditCard, Landmark, MapPin, Star, User, Award, Users, Shield, FileText,
 } from "lucide-react";
 import { IEmployee, money, statusMeta } from "./model";
 import { Avatar, Field, Section, ActivityTab, DocsTab } from "./parts";
@@ -129,6 +129,22 @@ export const EmployeeProfileModal = ({ employee: e, onClose, onEdit, onDelete, o
 
           <div className="px-6 py-5">
             <If is={tab === "info"}>
+              <If is={!!r.bio}>
+                <div className="mb-4 pb-4 border-b border-gray-100">
+                  <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                    Биография
+                  </p>
+                  <div className="flex gap-3 p-4 rounded-xl bg-gray-50">
+                    <div className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0">
+                      <FileText size={15} className="text-indigo-400" />
+                    </div>
+                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line break-words">
+                      {r.bio}
+                    </p>
+                  </div>
+                </div>
+              </If>
+
               <Section title="Персональные данные">
                 <Field icon={<Calendar size={15} />} label="Дата рождения" value={formatDate(r.birth_date)} />
                 <Field icon={<User size={15} />} label="Пол" value={genderLabel(r.gender)} />
