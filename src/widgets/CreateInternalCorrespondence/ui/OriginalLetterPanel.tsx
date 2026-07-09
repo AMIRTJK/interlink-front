@@ -24,6 +24,15 @@ const getInitials = (name: string) => {
   ).toUpperCase();
 };
 
+// Декодируем HTML-сущности (&nbsp;, &amp;, &lt; и т.д.) в обычный текст.
+// Без этого после вырезания тегов в тексте письма остаётся сырой «&nbsp;».
+const decodeHtmlEntities = (html: string): string => {
+  if (typeof document === "undefined") return html;
+  const el = document.createElement("textarea");
+  el.innerHTML = html;
+  return el.value;
+};
+
 const Lbl = ({ children }: { children: React.ReactNode }) => (
   <span className="text-[10px] font-semibold uppercase tracking-widest text-amber-500">
     {children}
@@ -55,8 +64,7 @@ export const OriginalLetterPanel = ({
   const label = mode === "reply" ? "Исходное письмо" : "Перенаправляемое письмо";
   const subjectSnippet =
     subject && subject.length > 40 ? subject.slice(0, 40) + "…" : subject;
-  const bodyText = (body || "")
-    .replace(/<[^>]+>/g, " ")
+  const bodyText = decodeHtmlEntities((body || "").replace(/<[^>]+>/g, " "))
     .replace(/\s+/g, " ")
     .trim();
   const statusBadge =
