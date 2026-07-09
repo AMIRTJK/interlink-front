@@ -67,6 +67,7 @@ export const SelectExecutorsModal: React.FC<ISelectExecutorsModalProps> = ({
       page?: number;
       with_departments?: number;
       with_roles?: number;
+      per_page?: number;
     },
     any
   >({
@@ -79,6 +80,7 @@ export const SelectExecutorsModal: React.FC<ISelectExecutorsModalProps> = ({
       ...(queryParams.role_id ? { role_id: queryParams.role_id } : {}),
       with_departments: 1,
       with_roles: 1,
+      per_page: 100,
       page: usersPage,
     },
     options: { enabled: open, keepPreviousData: true },
