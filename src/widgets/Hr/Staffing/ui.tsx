@@ -74,7 +74,7 @@ export const StaffingWidget = ({ dark = false }: IStaffingWidgetProps) => {
   ];
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-300">
+    <div className="space-y-4 animate-in fade-in duration-300 h-full overflow-hidden">
       <div className={`rounded-2xl border shadow-sm overflow-hidden ${headerCardBg}`}>
         <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>

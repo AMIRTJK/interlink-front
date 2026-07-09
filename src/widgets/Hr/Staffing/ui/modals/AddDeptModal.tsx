@@ -40,14 +40,19 @@ export const AddDeptModal = ({
   const [error, setError] = useState('');
 
   React.useEffect(() => {
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
     const currentCount = Number(document.body.getAttribute('data-modal-count') || 0);
+    if (currentCount === 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      document.body.style.overflow = 'hidden';
+    }
     document.body.setAttribute('data-modal-count', String(currentCount + 1));
-    document.body.style.overflow = 'hidden';
     return () => {
       const nextCount = Number(document.body.getAttribute('data-modal-count') || 1) - 1;
       document.body.setAttribute('data-modal-count', String(nextCount));
       if (nextCount <= 0) {
         document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
         document.body.removeAttribute('data-modal-count');
       }
     };
