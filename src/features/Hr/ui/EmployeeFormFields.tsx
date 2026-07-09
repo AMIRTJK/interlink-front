@@ -57,7 +57,7 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
   const { data: userRes } = useGetQuery({
     url: ApiRoutes.GET_USERS,
     method: "GET",
-    params: { with_departments: 1 },
+    params: { with_departments: 1, per_page: 1000 },
   });
   const { data: deptRes } = useGetQuery({
     url: ApiRoutes.GET_DEPARTMENTS,
