@@ -10,6 +10,7 @@ import { FolderActionsModal } from "./files/FolderActionsModal";
 import { AddCategoryModal } from "./files/AddCategoryModal";
 import { MoveToFolderModal } from "./files/MoveToFolderModal";
 import { ShareFileModal } from "./files/ShareFileModal";
+import { FilesAnalytics } from "./files/FilesAnalytics";
 import { IApiFile, IApiFolder } from "./files/lib";
 import { Modal } from "antd";
 import { Upload, ChevronRight, Folder } from "lucide-react";
@@ -18,7 +19,7 @@ import "./FilesTab.css";
 
 export const FilesTab = () => {
 	const [activeFolderId, setActiveFolderId] = useState<number | "all">("all");
-	const [viewContext, setViewContext] = useState<"personal" | "shared">("personal");
+	const [viewContext, setViewContext] = useState<"personal" | "shared" | "analytics">("personal");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [sortBy, setSortBy] = useState<"date" | "size" | "name">("date");
 	const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -49,8 +50,7 @@ export const FilesTab = () => {
 		pinnedFiles,
 		currentFiles: personalCurrentFiles,
 		currentFolders: personalCurrentFolders,
-		breadcrumbs,
-		showBreadcrumbs,
+
 		sharedFiles,
 		sharedFolders,
 		isLoadingSharedFiles,
@@ -108,7 +108,7 @@ export const FilesTab = () => {
 	const handleAddCategorySubmit = (payload: { name: string; icon?: string; allowed_user_ids?: number[] }) => {
 		createFolder.mutate({
 			name: payload.name,
-			parent_id: typeof activeFolderId === "number" ? activeFolderId : null,
+			parent_id: null,
 			...(payload.icon ? { icon: payload.icon } : {}),
 			...(payload.allowed_user_ids ? { allowed_user_ids: payload.allowed_user_ids } : {}),
 		} as any);
@@ -182,7 +182,7 @@ export const FilesTab = () => {
 				viewMode={viewMode}
 				onViewModeChange={setViewMode}
 				onUpload={handleUpload}
-				totalCount={currentFiles.length}
+				totalCount={viewContext === "shared" ? sharedFiles.length : files.length}
 				onCreateFolderClick={() => setAddCategoryOpen(true)}
 				viewContext={viewContext}
 				onViewContextChange={(ctx) => {
@@ -191,8 +191,15 @@ export const FilesTab = () => {
 				}}
 			/>
 
-			{/* Category/Folder Filters */}
-			<CategoryFilters
+			{/* Analytics View */}
+			<If is={viewContext === "analytics"}>
+				<FilesAnalytics />
+			</If>
+
+			<If is={viewContext !== "analytics"}>
+				<div className="space-y-6">
+					{/* Category/Folder Filters */}
+					<CategoryFilters
 				categories={viewContext === "shared" ? sharedCategoriesList : categoriesList}
 				activeCategory={activeCategoryId}
 				onCategorySelect={(id) => setActiveFolderId(id)}
@@ -205,42 +212,7 @@ export const FilesTab = () => {
 				} : undefined}
 			/>
 
-			{/* Breadcrumbs */}
-			<If is={showBreadcrumbs}>
-				<div className="flex flex-wrap items-center text-xs font-semibold text-slate-500 dark:text-zinc-400 py-1.5 border-b border-slate-100/50 dark:border-slate-800/50">
-					{breadcrumbs.map((crumb, idx) => {
-						const isLast = idx === breadcrumbs.length - 1;
-						return (
-							<React.Fragment key={crumb.id}>
-								<If is={idx > 0}>
-									<span className="text-slate-300 dark:text-zinc-700 mx-1.5">/</span>
-								</If>
-								<span
-									onClick={() => !isLast && setActiveFolderId(crumb.id)}
-									className={`transition-all ${
-										isLast
-											? "text-slate-700 dark:text-zinc-200 font-bold"
-											: "cursor-pointer hover:text-indigo-650 hover:underline"
-									}`}
-								>
-									{crumb.name}
-								</span>
-							</React.Fragment>
-						);
-					})}
-					{currentFolders.length > 0 && currentFolders.map((child) => (
-						<React.Fragment key={child.id}>
-							<span className="text-slate-300 dark:text-zinc-700 mx-1.5">/</span>
-							<span
-								onClick={() => setActiveFolderId(child.id)}
-								className="cursor-pointer hover:text-indigo-655 hover:underline text-slate-500 dark:text-zinc-400 transition-all font-semibold"
-							>
-								{child.name}
-							</span>
-						</React.Fragment>
-					))}
-				</div>
-			</If>
+
 
 			{/* Starred/Pinned Files */}
 			<If is={viewContext === "personal"}>
@@ -324,6 +296,8 @@ export const FilesTab = () => {
 			<If is={viewContext === "personal"}>
 				<StorageUsage meta={meta} files={files} />
 			</If>
+				</div>
+			</If>
 
 			{/* Modals */}
 			<AddCategoryModal
@@ -332,7 +306,7 @@ export const FilesTab = () => {
 				onSubmit={(payload) => {
 					createFolder.mutateAsync({
 						...payload,
-						parent_id: activeFolderId === "all" ? null : activeFolderId,
+						parent_id: null,
 					});
 					setAddCategoryOpen(false);
 				}}
@@ -353,7 +327,7 @@ export const FilesTab = () => {
 							id: editingFolder.id,
 							name,
 							emoji,
-							parent_id: editingFolder.parent_id,
+							parent_id: null,
 						});
 					}
 					setFolderModalOpen(false);
