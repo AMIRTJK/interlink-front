@@ -171,12 +171,9 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
 
       <section>
         <SectionTitle icon={<Landmark size={13} />}>Финансы</SectionTitle>
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-3 gap-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-3 gap-y-3">
           <FormItem label="Оклад (₽)" error={errors.salary}>
             <IconInput type="number" min={0} placeholder="50000" icon={iconEl(Wallet)} value={values.salary} onChange={(e) => handleChange("salary", e.target.value)} hasError={!!errors.salary} />
-          </FormItem>
-          <FormItem label="Рейтинг" error={errors.rating}>
-            <IconInput type="number" min={0} max={100} placeholder="82" value={values.rating} onChange={(e) => handleChange("rating", e.target.value)} hasError={!!errors.rating} />
           </FormItem>
           <FormItem label="Зарплатный счёт" error={errors.bank_account} className="sm:col-span-2">
             <IconInput placeholder="40817810000000000000" maxLength={20} icon={iconEl(CreditCard)} value={values.bank_account} onChange={(e) => handleChange("bank_account", e.target.value)} hasError={!!errors.bank_account} />

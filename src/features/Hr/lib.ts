@@ -49,7 +49,6 @@ export const mapEmployeeToForm = (employee: IAdminUser) => {
     inn: employee.inn,
     address: employee.address,
     bank_account: employee.bank_account,
-    rating: employee.rating,
     supervisor_id: employee.supervisor_id
       ? String(employee.supervisor_id)
       : undefined,
@@ -86,7 +85,6 @@ export const prepareEmployeePayload = (values: Record<string, unknown>) => {
       : undefined,
     department_ids: deptIds,
     salary: values.salary ? Number(values.salary) : undefined,
-    rating: values.rating ? Number(values.rating) : undefined,
   };
 };
 

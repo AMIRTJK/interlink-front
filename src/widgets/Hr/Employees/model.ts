@@ -37,7 +37,6 @@ export interface IEmployee {
   corporatePhone: string;
   birthDate: string;
   gender: string;
-  rating: number | null;
   supervisorName: string;
 }
 
@@ -111,7 +110,6 @@ export const normalizeUsers = (raw: IAdminUser[]): IEmployee[] =>
     corporatePhone: u.corporate_phone || "",
     birthDate: u.birth_date || "",
     gender: u.gender || "",
-    rating: u.rating ?? null,
     supervisorName: buildSupervisorName(u),
   }));
 

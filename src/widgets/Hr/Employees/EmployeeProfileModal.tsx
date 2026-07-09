@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {
   X, Mail, Phone, Building2, Briefcase, Wallet, Pencil, Trash2, Copy,
   CircleUserRound, Activity, FolderOpen, Calendar, ScrollText, Hash,
-  CreditCard, Landmark, MapPin, Star, User, Award, Users, Shield, FileText,
+  CreditCard, Landmark, MapPin, User, Users, Shield, FileText,
 } from "lucide-react";
 import { IEmployee, money, statusMeta } from "./model";
 import { Avatar, Field, Section, ActivityTab, DocsTab } from "./parts";
@@ -98,15 +98,6 @@ export const EmployeeProfileModal = ({ employee: e, onClose, onEdit, onDelete, o
                 {e.middleName && <p className="text-sm text-gray-500 mt-0.5">{e.middleName}</p>}
                 <p className="text-sm font-semibold text-indigo-500 mt-1">{e.position}</p>
               </div>
-              {r.rating != null && (
-                <div className="hidden sm:flex flex-col items-center gap-1.5 shrink-0">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-amber-600 bg-amber-50">
-                    <Award size={16} />
-                  </div>
-                  <span className="text-base font-bold tabular-nums text-gray-800">{r.rating}</span>
-                  <span className="text-[11px] text-center leading-tight text-gray-400">Рейтинг</span>
-                </div>
-              )}
             </div>
           </div>
 
@@ -152,7 +143,6 @@ export const EmployeeProfileModal = ({ employee: e, onClose, onEdit, onDelete, o
                 <Field icon={<Hash size={15} />} label="ИНН" value={r.inn} />
                 <Field icon={<MapPin size={15} />} label="Адрес" value={r.address} />
                 <Field icon={<CreditCard size={15} />} label="Банковский счёт" value={r.bank_account} />
-                <Field icon={<Star size={15} />} label="Рейтинг" value={r.rating != null ? String(r.rating) : ""} />
               </Section>
 
               <Section title="Рабочие данные">
