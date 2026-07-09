@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, Share2, Link, Trash2 } from "lucide-react";
+import { X, Share2, Trash2 } from "lucide-react";
 import { IApiFile, IApiFolder } from "./lib";
 import { If, Tooltip } from "@shared/ui";
 import { UserAccessList } from "./UserAccessList";
@@ -39,7 +39,6 @@ export const ShareFileModal = ({
 	onInvite,
 	onRemoveShare,
 }: IProps) => {
-	const [copied, setCopied] = useState(false);
 	const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
 
 	const sharesQuery = useGetQuery<
@@ -70,16 +69,6 @@ export const ShareFileModal = ({
 		type === "file"
 			? (item as IApiFile).original_name
 			: (item as IApiFolder).name;
-	const linkUrl =
-		type === "file"
-			? `https://interlink.app/files/share/${item.id}`
-			: `https://interlink.app/folders/share/${item.id}`;
-
-	const handleCopyLink = () => {
-		navigator.clipboard.writeText(linkUrl);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
-	};
 
 	const handleGrantAccess = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -99,8 +88,14 @@ export const ShareFileModal = ({
 	};
 
 	return (
-		<div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-			<div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]">
+		<div
+			className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+			onClick={onClose}
+		>
+			<div
+				className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]"
+				onClick={(e) => e.stopPropagation()}
+			>
 				<div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-800 shrink-0">
 					<div className="flex items-center gap-3">
 						<div className="w-9 h-9 rounded-full bg-gradient-to-tr from-pink-500 to-purple-500! flex items-center justify-center text-white!">
@@ -183,15 +178,6 @@ export const ShareFileModal = ({
 						Приглашенный пользователь сможет только просматривать и скачивать
 						содержимое.
 					</div>
-
-					<button
-						type="button"
-						onClick={handleCopyLink}
-						className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-zinc-350 hover:bg-slate-50 dark:hover:bg-slate-850 transition-colors cursor-pointer"
-					>
-						<Link size={14} className="text-slate-400" />
-						<span>{copied ? "Ссылка скопирована!" : "Копировать ссылку"}</span>
-					</button>
 				</div>
 
 				<div className="flex justify-end gap-3 p-6 border-t border-slate-100 dark:border-slate-800 shrink-0">

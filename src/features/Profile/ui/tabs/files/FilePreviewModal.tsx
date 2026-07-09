@@ -200,8 +200,14 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl w-full max-w-7xl overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div
+      className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl w-full max-w-7xl overflow-hidden animate-in fade-in zoom-in duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
             <Eye size={18} className="text-indigo-600 dark:text-indigo-400" />
