@@ -69,7 +69,7 @@ export const Login = () => {
 		tokenControl.set({ token });
 		if (userId) tokenControl.setUserId(userId);
 		toast.success("Вход выполнен");
-		navigate(AppRoutes.PROFILE_TASKS, { replace: true });
+		navigate(AppRoutes.PROFILE, { replace: true });
 	};
 
 	// Шаг 1: вход по номеру телефона и паролю
