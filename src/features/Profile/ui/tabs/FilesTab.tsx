@@ -54,6 +54,7 @@ export const FilesTab = () => {
 		currentFolders: personalCurrentFolders,
 
 		sharedFiles,
+		sharedFilesPagination,
 		sharedFolders,
 		isLoadingSharedFiles,
 		createFolder,
@@ -198,7 +199,13 @@ export const FilesTab = () => {
 
 			{/* Analytics View */}
 			<If is={viewContext === "analytics"}>
-				<FilesAnalytics sharedWithMe={sharedFiles} myFiles={files} />
+				<FilesAnalytics
+					sharedWithMe={sharedFiles}
+					myFiles={files}
+					meta={meta}
+					sharedFilesPagination={sharedFilesPagination}
+					onPageChange={setFilesPage}
+				/>
 			</If>
 
 			<If is={viewContext !== "analytics"}>

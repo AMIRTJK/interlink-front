@@ -118,7 +118,7 @@ export const useFilesData = (params: IFilesParams) => {
   };
 
   // 10. Get shared files
-  const sharedFilesQuery = useGetQuery<IFilesParams, { success: boolean; data: { data: IApiFile[]; current_page?: number; total?: number } }>({
+  const sharedFilesQuery = useGetQuery<IFilesParams, { success: boolean; data: { data: IApiFile[]; current_page?: number; total?: number; per_page?: number } }>({
     url: ApiRoutes.MY_FILES_SHARED_WITH_ME,
     params,
     useToken: true,
@@ -166,8 +166,15 @@ export const useFilesData = (params: IFilesParams) => {
     },
   });
 
-  const sharedFiles = getArrayData(sharedFilesQuery.data?.data);
+  const rawSharedFilesData = sharedFilesQuery.data?.data;
+  const sharedFiles = getArrayData(rawSharedFilesData);
   const sharedFolders = getArrayData(sharedFoldersQuery.data?.data);
+
+  const sharedFilesPagination = {
+    total: rawSharedFilesData?.total ?? 0,
+    currentPage: rawSharedFilesData?.current_page ?? 1,
+    perPage: rawSharedFilesData?.per_page ?? 30,
+  };
 
   const getFolderIcon = (name: string): string => {
     const n = name.toLowerCase();
@@ -257,6 +264,7 @@ export const useFilesData = (params: IFilesParams) => {
     currentFolders,
 
     sharedFiles,
+    sharedFilesPagination,
     isLoadingSharedFiles: sharedFilesQuery.isLoading,
     refetchSharedFiles: sharedFilesQuery.refetch,
 
