@@ -198,7 +198,7 @@ export const FilesTab = () => {
 
 			{/* Analytics View */}
 			<If is={viewContext === "analytics"}>
-				<FilesAnalytics />
+				<FilesAnalytics sharedWithMe={sharedFiles} myFiles={files} />
 			</If>
 
 			<If is={viewContext !== "analytics"}>
