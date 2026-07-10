@@ -1,4 +1,3 @@
-import React from "react";
 import { motion } from "framer-motion";
 import {
 	ResponsiveContainer,
@@ -74,7 +73,6 @@ export const FilesAnalytics = () => {
 			animate={{ opacity: 1 }}
 			className="flex flex-col gap-5 pb-6 animate-in fade-in slide-in-from-bottom-2 duration-300"
 		>
-			{/* KPI карточки */}
 			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
 				{kpiCards.map((card, index) => (
 					<motion.div
