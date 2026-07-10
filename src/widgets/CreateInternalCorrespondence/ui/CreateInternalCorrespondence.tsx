@@ -1056,16 +1056,19 @@ export const CreateInternalCorrespondence = ({
   };
 
   const availableUsers: RecipientOption[] =
-    usersData?.data?.data?.map((u: any) => ({
-      id: String(u.id),
-      name: u.full_name,
-      org: u.position || u.department,
-      initials: u.full_name
-        .split(" ")
-        .map((n: string) => n[0])
-        .join(""),
-      color: "bg-blue-100 text-blue-700",
-    })) || [];
+    usersData?.data?.data?.map((u: any) => {
+      const fullName = u.full_name || "";
+      return {
+        id: String(u.id),
+        name: fullName,
+        org: u.position || u.department || "Сотрудник",
+        initials: fullName
+          .split(" ")
+          .map((n: string) => n[0])
+          .join(""),
+        color: "bg-blue-100 text-blue-700",
+      };
+    }) || [];
 
   const { mutate: createDraft, isPending: isCreating } = useMutationQuery<any>({
     url: ApiRoutes.CREATE_INTERNAL,
