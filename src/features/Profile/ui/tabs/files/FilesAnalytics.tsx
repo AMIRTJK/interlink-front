@@ -12,7 +12,7 @@ import {
 	Tooltip,
 	CartesianGrid,
 } from "recharts";
-import { IApiFile, getUserFullName } from "./files/lib";
+import { IApiFile, getUserFullName } from "./lib";
 
 const tooltipStyle = {
 	borderRadius: "12px",
