@@ -1,8 +1,14 @@
-import React from "react";
+import { Pagination } from "antd";
 import { IApiFile } from "./lib";
 import { If } from "@shared/ui";
 import { FileGrid } from "./FileGrid";
 import { FileList } from "./FileList";
+
+interface IPagination {
+  total: number;
+  currentPage: number;
+  perPage: number;
+}
 
 interface IProps {
   files: IApiFile[];
@@ -15,6 +21,8 @@ interface IProps {
   onMove?: (file: IApiFile) => void;
   onShare?: (file: IApiFile) => void;
   showSharedWith?: boolean;
+  pagination?: IPagination;
+  onPageChange?: (page: number) => void;
 }
 
 export const FileGridList = ({
@@ -28,9 +36,11 @@ export const FileGridList = ({
   onMove,
   onShare,
   showSharedWith,
+  pagination,
+  onPageChange,
 }: IProps) => {
   return (
-    <div>
+    <div className="space-y-4">
       <If is={viewMode === "grid"}>
         <FileGrid
           files={files}
@@ -54,6 +64,21 @@ export const FileGridList = ({
           onShare={onShare}
           showSharedWith={showSharedWith}
         />
+      </If>
+
+      <If is={!!pagination}>
+        <div className="flex justify-end pt-2 pr-1">
+          <Pagination
+            current={pagination!.currentPage}
+            total={pagination!.total}
+            pageSize={pagination!.perPage}
+            onChange={onPageChange}
+            showSizeChanger={false}
+            showTotal={(total, range) =>
+              `${range[0]}–${range[1]} из ${total}`
+            }
+          />
+        </div>
       </If>
     </div>
   );

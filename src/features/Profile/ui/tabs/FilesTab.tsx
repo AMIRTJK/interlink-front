@@ -26,6 +26,7 @@ export const FilesTab = () => {
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 	const [selectedFileIds, setSelectedFileIds] = useState<number[]>([]);
 	const [isDragOver, setIsDragOver] = useState(false);
+	const [filesPage, setFilesPage] = useState(1);
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,6 +42,7 @@ export const FilesTab = () => {
 	// Queries & Mutations
 	const {
 		files,
+		filesPagination,
 		folders,
 		meta,
 		isLoadingFiles,
@@ -69,6 +71,7 @@ export const FilesTab = () => {
 		sort: sortBy,
 		dir: sortDir,
 		activeFolderId,
+		page: filesPage,
 	});
 
 	const currentFiles = viewContext === "shared" ? sharedFiles : personalCurrentFiles;
@@ -189,6 +192,7 @@ export const FilesTab = () => {
 				onViewContextChange={(ctx) => {
 					setViewContext(ctx);
 					setActiveFolderId("all");
+					setFilesPage(1);
 				}}
 			/>
 
@@ -204,7 +208,10 @@ export const FilesTab = () => {
 				categories={viewContext === "shared" ? sharedCategoriesList : categoriesList}
 				activeCategory={activeCategoryId}
 				allCount={viewContext === "shared" ? sharedFiles.length : files.length}
-				onCategorySelect={(id) => setActiveFolderId(id)}
+				onCategorySelect={(id) => {
+					setActiveFolderId(id);
+					setFilesPage(1);
+				}}
 				onAddCategoryClick={viewContext === "personal" ? () => setAddCategoryOpen(true) : undefined}
 				onRenameCategory={viewContext === "personal" ? (cat) => handleOpenRenameFolder(cat.name, Number(cat.id)) : undefined}
 				onDeleteCategory={viewContext === "personal" ? handleDeleteFolderConfirm : undefined}
@@ -291,6 +298,8 @@ export const FilesTab = () => {
 						onMove={viewContext === "personal" ? setMovingFile : undefined}
 						onShare={viewContext === "personal" ? (file) => setShareItem({ item: file, type: "file" }) : undefined}
 						showSharedWith={viewContext === "personal"}
+						pagination={filesPagination}
+						onPageChange={setFilesPage}
 					/>
 				</div>
 			)}
