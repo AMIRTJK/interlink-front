@@ -99,13 +99,12 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
       <motion.div
         variants={rowVariants}
         initial="visible"
-        whileHover={{ 
+        whileHover={{
           backgroundColor: "rgba(0, 0, 0, 0.015)",
           transition: { duration: 0.2 }
         }}
-        whileTap={{ scale: 0.98 }}
         className={cn(
-          "flex items-center group focus:outline-none! active:outline-none! border border-transparent rounded-2xl cursor-pointer relative select-none px-3 py-2",
+          "flex items-center group focus:outline-none! active:outline-none! border border-transparent rounded-2xl cursor-pointer relative isolate select-none px-3 py-2",
           variant === "vertical" ? "w-full" : "max-w-[180px]",
           isCollapsedMode ? "justify-center px-0" : "gap-1",
           isSelected
