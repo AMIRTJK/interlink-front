@@ -8,11 +8,19 @@ interface IFilesParams {
   sort?: "name" | "date" | "size";
   dir?: "asc" | "desc";
   activeFolderId?: number | "all";
+  page?: number;
+}
+
+interface IFilesPaginatedData {
+  current_page: number;
+  data: IApiFile[];
+  last_page: number;
+  per_page: number;
+  total: number;
 }
 
 export const useFilesData = (params: IFilesParams) => {
-  // 1. Get files query
-  const filesQuery = useGetQuery<IFilesParams, { success: boolean; data: IApiFile[] }>({
+  const filesQuery = useGetQuery<IFilesParams, { success: boolean; data: IFilesPaginatedData }>({
     url: ApiRoutes.MY_FILES,
     params,
     useToken: true,
@@ -98,7 +106,16 @@ export const useFilesData = (params: IFilesParams) => {
   };
 
   const folders = getArrayData(foldersQuery.data?.data);
-  const files = getArrayData(filesQuery.data?.data);
+  const rawFilesData = filesQuery.data?.data;
+  const files: IApiFile[] = Array.isArray(rawFilesData)
+    ? rawFilesData
+    : rawFilesData?.data ?? [];
+
+  const filesPagination = {
+    total: rawFilesData?.total ?? 0,
+    currentPage: rawFilesData?.current_page ?? 1,
+    perPage: rawFilesData?.per_page ?? 30,
+  };
 
   // 10. Get shared files
   const sharedFilesQuery = useGetQuery<IFilesParams, { success: boolean; data: { data: IApiFile[]; current_page?: number; total?: number } }>({
@@ -220,6 +237,7 @@ export const useFilesData = (params: IFilesParams) => {
 
   return {
     files,
+    filesPagination,
     isLoadingFiles: filesQuery.isLoading,
     refetchFiles: filesQuery.refetch,
 
