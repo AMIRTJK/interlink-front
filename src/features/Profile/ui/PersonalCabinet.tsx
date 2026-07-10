@@ -61,7 +61,7 @@ export const PersonalCabinet = ({
 
   const handleTabChange = (key: TabKey) => {
     if (key === "profile") {
-      navigate("/profile/profile");
+      navigate("/profile");
     } else {
       navigate(`/profile/${key}`);
     }

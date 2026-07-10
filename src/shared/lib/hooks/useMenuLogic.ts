@@ -100,7 +100,7 @@ export const useMenuLogic = (variant: "horizontal" | "compact" | "modern" | "ful
 
   const activeKey =
     activeItem?.key ||
-    (pathname.includes("modules") ? "" : AppRoutes.PROFILE_TASKS);
+    (pathname.includes("modules") ? "" : AppRoutes.PROFILE);
 
   const subItems = activeItem?.children;
 

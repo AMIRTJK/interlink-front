@@ -203,7 +203,7 @@ export const AppRouter = () => {
             path="/"
             element={
               tokenControl.get() ? (
-                <Navigate to={AppRoutes.PROFILE_TASKS} replace />
+                <Navigate to={AppRoutes.PROFILE} replace />
               ) : (
                 <Navigate to={AppRoutes.LOGIN} replace />
               )
@@ -218,11 +218,6 @@ export const AppRouter = () => {
             {/* Профиль */}
             <Route element={<ProfileLayout />}>
               <Route path="/profile" element={<ProfilePage />}>
-                <Route
-                  index
-                  element={<Navigate to={AppRoutes.PROFILE_TASKS} replace />}
-                />
-                <Route path="profile" element={<ProfilePage />} />
                 <Route path="tasks" element={<TasksPage />} />
                 <Route path="calendar" element={<CalendarPage />} />
                 <Route path="analytics" element={<AnalyticsPage />} />
