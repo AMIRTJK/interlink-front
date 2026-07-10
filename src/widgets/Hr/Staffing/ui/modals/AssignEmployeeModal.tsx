@@ -78,9 +78,9 @@ export const AssignEmployeeModal = ({
         onClick={onClose}
       />
       <motion.div
-        initial={{ opacity: 0, scale: 0.93, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.93, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 12 }}
         transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
         className={`relative ${cardBg} rounded-3xl shadow-2xl w-full max-w-md z-50 flex flex-col overflow-hidden`}
         style={{ maxHeight: '88vh' }}
