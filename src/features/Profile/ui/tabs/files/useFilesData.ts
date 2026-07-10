@@ -192,21 +192,12 @@ export const useFilesData = (params: IFilesParams) => {
   const activeCategoryId = useMemo((): number | 'all' => {
     const actId = params.activeFolderId;
     if (actId === undefined || actId === "all") return "all";
-
-    let currentId: number | null = actId;
-    let rootId: number = actId;
-
-    while (currentId !== null) {
-      const folder = folders.find((f) => Number(f.id) === Number(currentId));
-      if (folder) {
-        rootId = folder.id;
-        currentId = folder.parent_id;
-      } else {
-        currentId = null;
-      }
-    }
-    return rootId;
-  }, [folders, params.activeFolderId]);
+    // Highlight exactly the folder that is selected. Folders are shown as a
+    // flat list of chips (including subfolders), so each chip must select
+    // itself — resolving to the root ancestor would highlight the wrong chip
+    // when two folders share a name / a subfolder is picked.
+    return actId;
+  }, [params.activeFolderId]);
 
   const pinnedFiles = useMemo(() => {
     return files.filter((f) => f.is_starred);
