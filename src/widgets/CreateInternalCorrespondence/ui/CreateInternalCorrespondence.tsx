@@ -4214,7 +4214,7 @@ export const CreateInternalCorrespondence = ({
                   showOriginalLetterSides && composeMode && sourceLetter && "min-w-max"
                 )}>
                   {showOriginalLetterSides && composeMode && sourceLetter && (
-                    <div ref={originalCanvasWrapRef} className="shrink-0">
+                    <div ref={originalCanvasWrapRef} className="shrink-0 order-2">
                       <OriginalLetterCanvas
                         sheets={originalSheets.pages}
                         stamp={originalSheets.stamp}
@@ -4226,7 +4226,7 @@ export const CreateInternalCorrespondence = ({
 
                   <div
                     ref={pageCanvasRef}
-                    className="relative"
+                    className="relative order-1"
                     style={{
                       width: PAGE_WIDTH,
                       height: pageCount * PAGE_STRIDE - PAGE_GAP,
