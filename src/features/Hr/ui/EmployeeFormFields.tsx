@@ -150,7 +150,7 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
 
       <section>
         <SectionTitle icon={<Phone size={13} />}>Контакты</SectionTitle>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-3">
           <FormItem label="Корпоративный Email" error={errors.corporate_email}>
             <IconInput placeholder="user@corp.ru" icon={iconEl(Mail)} value={values.corporate_email} onChange={(e) => handleChange("corporate_email", e.target.value)} hasError={!!errors.corporate_email} />
           </FormItem>
