@@ -794,6 +794,10 @@ export const CreateInternalCorrespondence = ({
   // Подписывающий). Прижимаем её к верху видимой области при прокрутке, чтобы
   // вкладки и раскрытая панель были доступны на любой странице документа.
   const panelsGroupRef = useRef<HTMLDivElement>(null);
+  // Липкая шапка редактора: тулбар форматирования + панель разделов +
+  // пагинация входящего письма. Нужна её высота, чтобы прижимать боковые
+  // панели под неё, а не под самый верх экрана.
+  const stickyHeaderRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const wordInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -823,15 +827,15 @@ export const CreateInternalCorrespondence = ({
     const canvas = pageCanvasRef.current;
     if (!scroller || !wrap || !canvas) return;
 
-    // Верхний отступ больше нижнего: над холстами закреплена sticky-панель
-    // пагинации, лист должен прилипать ПОД ней. Сам лист за счёт maxHeight
-    // (calc(100vh - 88px) в OriginalLetterCanvas) всегда помещается в окно
-    // целиком — его содержимое при нехватке высоты прокручивается внутри.
-    const TOP_M = 64;
+    // Лист прилипает ПОД липкой шапкой редактора (тулбар + панель разделов +
+    // пагинация). Её высота динамическая, поэтому берём её в рантайме. Сам лист
+    // за счёт maxHeight (в OriginalLetterCanvas) помещается в окно целиком — его
+    // содержимое при нехватке высоты прокручивается внутри.
     const BOT_M = 24;
     let shift = 0;
 
     const update = () => {
+      const TOP_M = (stickyHeaderRef.current?.offsetHeight ?? 40) + 12;
       const viewH = scroller.clientHeight;
       const wrapH = wrap.offsetHeight;
       const canvasTop =
@@ -868,6 +872,7 @@ export const CreateInternalCorrespondence = ({
     pageCount,
     orientation,
     formExpanded,
+    panelsInToolbar,
   ]);
 
   // Боковые панели (вкладки + раскрытая панель) спозиционированы абсолютно
@@ -886,11 +891,14 @@ export const CreateInternalCorrespondence = ({
     const group = panelsGroupRef.current;
     if (!scroller || !canvas || !group) return;
 
-    const TOP_M = 24; // отступ группы от верха видимой области
     const BOT_M = 24; // нижний отступ для раскрытой панели
     const MIN_VISIBLE = 160; // минимум пикселей группы, что держим над холстом
 
     const update = () => {
+      // Прижимаем группу не к самому верху, а ПОД липкую шапку редактора
+      // (тулбар + панель разделов), иначе её содержимое пряталось бы под ней.
+      const headerH = stickyHeaderRef.current?.offsetHeight ?? 0;
+      const TOP_M = headerH + 12;
       const canvasTop =
         canvas.getBoundingClientRect().top -
         scroller.getBoundingClientRect().top;
@@ -910,9 +918,14 @@ export const CreateInternalCorrespondence = ({
     update();
     scroller.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
+    // Высота липкой шапки меняется (перенос кнопок на новую строку, включение
+    // панели разделов, пагинация входящего) — пересчитываем позицию панелей.
+    const headerRO = new ResizeObserver(update);
+    if (stickyHeaderRef.current) headerRO.observe(stickyHeaderRef.current);
     return () => {
       scroller.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
+      headerRO.disconnect();
       group.style.transform = "";
     };
   }, [id, pageCount, orientation, formExpanded, panelsInToolbar]);
@@ -3765,6 +3778,11 @@ export const CreateInternalCorrespondence = ({
                 )}
               </AnimatePresence>
 
+              {/* Липкая шапка редактора: тулбар форматирования, панель разделов
+                  и пагинация входящего письма прилипают к верху экрана при
+                  прокрутке — форматирование и разделы всегда под рукой. Общий
+                  sticky-контейнер, чтобы полосы не накладывались друг на друга. */}
+              <div ref={stickyHeaderRef} className="sticky top-0 z-[70] bg-white">
               <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60 flex flex-wrap items-center gap-0.5">
                 <TBtn
                   onMouseDown={(e) => {
@@ -4118,7 +4136,7 @@ export const CreateInternalCorrespondence = ({
                   блока, под разделом с кнопками импорта. При прокрутке страницы
                   прилипает к верхнему краю окна и всегда остаётся доступной. */}
               {showOriginalLetterSides && composeMode && sourceLetter && (
-                <div className="sticky top-0 z-[80] flex items-center justify-between gap-4 px-4 py-2 bg-white border-b border-slate-200 shadow-sm font-sans">
+                <div className="flex items-center justify-between gap-4 px-4 py-2 bg-white border-b border-slate-200 shadow-sm font-sans">
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 shrink-0">
                     <Eye size={14} className="text-amber-500" />
                     <span>Входящее письмо — только просмотр</span>
@@ -4167,6 +4185,7 @@ export const CreateInternalCorrespondence = ({
                   </div>
                 </div>
               )}
+              </div>
 
               <div
                 className="bg-[#E8EAED] overflow-auto rounded-b-2xl relative"

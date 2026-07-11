@@ -945,7 +945,7 @@ export const IncomingPreviewModal = ({
                   }}
                 >
                   <Users size={16} style={{ color: "#6366f1" }} />
-                  Лист согласования
+                  Этапы обработки документа
                 </span>
                 <button
                   type="button"
