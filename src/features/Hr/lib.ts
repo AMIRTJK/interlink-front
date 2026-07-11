@@ -101,6 +101,7 @@ export const validateEmployee = (values: Record<string, any>, isEdit: boolean) =
   if (!values.passport_series) errs.passport_series = "Введите серию паспорта";
   if (!values.passport_number) errs.passport_number = "Введите номер паспорта";
   if (!values.inn) errs.inn = "Введите ИНН";
+  if (!values.address) errs.address = "Введите адрес";
 
   if (!isEdit) {
     if (!values.phone) errs.phone = "Введите телефон";

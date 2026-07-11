@@ -59,10 +59,10 @@ export const ApproverItem = ({
           {approver.initials}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-slate-900 truncate">
+          <p className="text-xs font-semibold text-slate-900 break-words">
             {approver.name}
           </p>
-          <p className="text-[10px] text-slate-500 truncate">
+          <p className="text-[10px] text-slate-500 break-words">
             {approver.role}
           </p>
         </div>

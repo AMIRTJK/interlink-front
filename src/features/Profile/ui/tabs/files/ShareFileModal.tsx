@@ -106,7 +106,7 @@ export const ShareFileModal = ({
 			onClick={onClose}
 		>
 			<div
-				className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]"
+				className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl w-full max-w-[92vw]! md:max-w-[85vw]! xl:max-w-[1152px]! overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-800 shrink-0">
@@ -118,7 +118,7 @@ export const ShareFileModal = ({
 							<h3 className="text-sm font-bold text-slate-800 dark:text-zinc-100">
 								Поделиться {type === "file" ? "файлом" : "папкой"}
 							</h3>
-							<p className="text-[10px] text-slate-400 dark:text-zinc-550 truncate max-w-[250px]">
+							<p className="text-[10px] text-slate-400 dark:text-zinc-550 truncate max-w-[500px]">
 								{itemName}
 							</p>
 						</div>
@@ -131,7 +131,7 @@ export const ShareFileModal = ({
 					</button>
 				</div>
 
-				<div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-slate-800 overflow-hidden flex-1 min-h-[440px]">
+				<div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-slate-800 overflow-hidden flex-1 min-h-[560px]!">
 					{/* Слева — доступ и права */}
 					<div className="flex-1 p-6 space-y-5 overflow-y-auto">
 						<If is={activeShares.length > 0}>
@@ -153,7 +153,7 @@ export const ShareFileModal = ({
 									</div>
 								</If>
 
-								<div className="bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800 max-h-[300px] overflow-y-auto">
+								<div className="bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800 max-h-[420px]! overflow-y-auto">
 									<If is={filteredShares.length === 0}>
 										<div className="p-4 text-center text-xs text-slate-400 dark:text-zinc-500">
 											Ничего не найдено

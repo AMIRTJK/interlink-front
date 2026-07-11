@@ -212,7 +212,7 @@ export const SignersPanel = ({
                         {signer.initials}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-[13px] text-slate-800 leading-tight truncate">
+                        <p className="font-medium text-[13px] text-slate-800 leading-tight break-words">
                           {signer.name}
                         </p>
                       </div>

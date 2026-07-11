@@ -8,6 +8,7 @@ import { ApproverItem } from "./ApproverItem";
 
 interface IProps {
   isOpen: boolean;
+  hideTab?: boolean;
   onOpen: () => void;
   onClose: () => void;
   approvers: Approver[];
@@ -24,6 +25,7 @@ interface IProps {
 
 export const ApproversPanel = ({
   isOpen,
+  hideTab,
   onOpen,
   onClose,
   approvers,
@@ -49,33 +51,35 @@ export const ApproversPanel = ({
 
   return (
     <>
-      <div className="absolute z-20" style={{ right: -36, top: 10 }}>
-        <motion.button
-          onClick={isOpen ? onClose : onOpen}
-          className={cn(
-            "bg-white border border-slate-200 border-l-0 rounded-r-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-            isOpen ? "bg-slate-50" : "hover:bg-slate-50"
-          )}
-          aria-label="Согласующие"
-        >
-          <span
-            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-            style={{ backgroundColor: "oklch(0.828 0.189 84.429)" }}
-          />
-          <span
-            style={{
-              writingMode: "vertical-rl",
-              textOrientation: "mixed",
-              fontSize: 11,
-              fontWeight: 600,
-              color: "#475569",
-              letterSpacing: "0.08em",
-            }}
+      {!hideTab && (
+        <div className="absolute z-20" style={{ right: -36, top: 10 }}>
+          <motion.button
+            onClick={isOpen ? onClose : onOpen}
+            className={cn(
+              "bg-white border border-slate-200 border-l-0 rounded-r-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
+              isOpen ? "bg-slate-50" : "hover:bg-slate-50"
+            )}
+            aria-label="Согласующие"
           >
-            Согласующие
-          </span>
-        </motion.button>
-      </div>
+            <span
+              className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+              style={{ backgroundColor: "oklch(0.828 0.189 84.429)" }}
+            />
+            <span
+              style={{
+                writingMode: "vertical-rl",
+                textOrientation: "mixed",
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#475569",
+                letterSpacing: "0.08em",
+              }}
+            >
+              Согласующие
+            </span>
+          </motion.button>
+        </div>
+      )}
 
       <AnimatePresence>
         {isOpen && (
@@ -84,8 +88,11 @@ export const ApproversPanel = ({
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -12, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="absolute top-0 h-full w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl z-30 flex flex-col"
-            style={{ left: "calc(100% + 12px)" }}
+            className="absolute top-0 w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl z-30 flex flex-col"
+            style={{
+              left: "calc(100% + 12px)",
+              maxHeight: "var(--icc-panel-max-h, 70vh)",
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">

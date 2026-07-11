@@ -82,7 +82,7 @@ export const UserAccessList = ({ selectedUsers, onToggleUser }: IProps) => {
         />
       </div>
 
-      <div className="space-y-1 max-h-[340px] overflow-y-auto pr-1">
+      <div className="space-y-1 max-h-[460px]! overflow-y-auto pr-1">
         <If is={isLoading}>
           <div className="flex items-center justify-center py-8 text-xs text-slate-400">
             Загрузка...

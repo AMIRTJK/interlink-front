@@ -683,6 +683,11 @@ export const CreateInternalCorrespondence = ({
   const [signerOpen, setSignerOpen] = useState(false);
   const [incomingOpen, setIncomingOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
+  // Демо-режим (для показа руководству): «цилиндры» разделов выносятся в
+  // горизонтальную панель под тулбаром, а боковые вкладки у холста скрываются.
+  // Сами панели по-прежнему открываются у холста. По умолчанию выключен —
+  // текущий функционал не меняется.
+  const [panelsInToolbar, setPanelsInToolbar] = useState(false);
 
   const handleOpenApprovers = () => {
     setApproversOpen(true);
@@ -785,6 +790,14 @@ export const CreateInternalCorrespondence = ({
   // входящего письма (для его sticky-позиционирования при прокрутке).
   const rootScrollRef = useRef<HTMLDivElement>(null);
   const originalCanvasWrapRef = useRef<HTMLDivElement>(null);
+  // Обёртка боковых панелей (История версий / Входящие письма / Согласующие /
+  // Подписывающий). Прижимаем её к верху видимой области при прокрутке, чтобы
+  // вкладки и раскрытая панель были доступны на любой странице документа.
+  const panelsGroupRef = useRef<HTMLDivElement>(null);
+  // Липкая шапка редактора: тулбар форматирования + панель разделов +
+  // пагинация входящего письма. Нужна её высота, чтобы прижимать боковые
+  // панели под неё, а не под самый верх экрана.
+  const stickyHeaderRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const wordInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -814,15 +827,15 @@ export const CreateInternalCorrespondence = ({
     const canvas = pageCanvasRef.current;
     if (!scroller || !wrap || !canvas) return;
 
-    // Верхний отступ больше нижнего: над холстами закреплена sticky-панель
-    // пагинации, лист должен прилипать ПОД ней. Сам лист за счёт maxHeight
-    // (calc(100vh - 88px) в OriginalLetterCanvas) всегда помещается в окно
-    // целиком — его содержимое при нехватке высоты прокручивается внутри.
-    const TOP_M = 64;
+    // Лист прилипает ПОД липкой шапкой редактора (тулбар + панель разделов +
+    // пагинация). Её высота динамическая, поэтому берём её в рантайме. Сам лист
+    // за счёт maxHeight (в OriginalLetterCanvas) помещается в окно целиком — его
+    // содержимое при нехватке высоты прокручивается внутри.
     const BOT_M = 24;
     let shift = 0;
 
     const update = () => {
+      const TOP_M = (stickyHeaderRef.current?.offsetHeight ?? 40) + 12;
       const viewH = scroller.clientHeight;
       const wrapH = wrap.offsetHeight;
       const canvasTop =
@@ -859,7 +872,63 @@ export const CreateInternalCorrespondence = ({
     pageCount,
     orientation,
     formExpanded,
+    panelsInToolbar,
   ]);
+
+  // Боковые панели (вкладки + раскрытая панель) спозиционированы абсолютно
+  // внутри высокого холста (pageCanvasRef, высотой во все страницы), поэтому
+  // при прокрутке вниз уходили за верх экрана — чтобы выбрать версию/участника,
+  // приходилось скроллить в самое начало. Держим группу в поле зрения: смещаем
+  // её по вертикали за прокруткой через transform (position:sticky здесь не
+  // работает — его перехватывает серая область с overflow), а высоту раскрытой
+  // панели ограничиваем видимой областью (переменная --icc-panel-max-h), чтобы
+  // её внутренний список прокручивался на месте. Тот же приём, что для левого
+  // A4-холста входящего письма выше.
+  useEffect(() => {
+    if (!id) return;
+    const scroller = rootScrollRef.current;
+    const canvas = pageCanvasRef.current;
+    const group = panelsGroupRef.current;
+    if (!scroller || !canvas || !group) return;
+
+    const BOT_M = 24; // нижний отступ для раскрытой панели
+    const MIN_VISIBLE = 160; // минимум пикселей группы, что держим над холстом
+
+    const update = () => {
+      // Прижимаем группу не к самому верху, а ПОД липкую шапку редактора
+      // (тулбар + панель разделов), иначе её содержимое пряталось бы под ней.
+      const headerH = stickyHeaderRef.current?.offsetHeight ?? 0;
+      const TOP_M = headerH + 12;
+      const canvasTop =
+        canvas.getBoundingClientRect().top -
+        scroller.getBoundingClientRect().top;
+      let shift = Math.max(0, TOP_M - canvasTop);
+      shift = Math.min(shift, Math.max(0, canvas.offsetHeight - MIN_VISIBLE));
+      // Верх группы в координатах видимой области: от него отсчитываем
+      // доступную высоту, чтобы низ раскрытой панели не уезжал под экран.
+      const groupViewportTop = canvasTop + shift;
+      const availH = Math.max(
+        200,
+        scroller.clientHeight - groupViewportTop - BOT_M,
+      );
+      group.style.setProperty("--icc-panel-max-h", `${availH}px`);
+      group.style.transform = shift > 0 ? `translateY(${shift}px)` : "";
+    };
+
+    update();
+    scroller.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    // Высота липкой шапки меняется (перенос кнопок на новую строку, включение
+    // панели разделов, пагинация входящего) — пересчитываем позицию панелей.
+    const headerRO = new ResizeObserver(update);
+    if (stickyHeaderRef.current) headerRO.observe(stickyHeaderRef.current);
+    return () => {
+      scroller.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      headerRO.disconnect();
+      group.style.transform = "";
+    };
+  }, [id, pageCount, orientation, formExpanded, panelsInToolbar]);
 
   const [searchParams, setSearchParams] = useState({ query: "" });
 
@@ -3709,6 +3778,11 @@ export const CreateInternalCorrespondence = ({
                 )}
               </AnimatePresence>
 
+              {/* Липкая шапка редактора: тулбар форматирования, панель разделов
+                  и пагинация входящего письма прилипают к верху экрана при
+                  прокрутке — форматирование и разделы всегда под рукой. Общий
+                  sticky-контейнер, чтобы полосы не накладывались друг на друга. */}
+              <div ref={stickyHeaderRef} className="sticky top-0 z-[70] bg-white">
               <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60 flex flex-wrap items-center gap-0.5">
                 <TBtn
                   onMouseDown={(e) => {
@@ -3958,6 +4032,20 @@ export const CreateInternalCorrespondence = ({
                     />
                   </>
                 )}
+                {!!id && (
+                  <>
+                    <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
+                      <input
+                        type="checkbox"
+                        checked={panelsInToolbar}
+                        onChange={(e) => setPanelsInToolbar(e.target.checked)}
+                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <span>Панель разделов сверху</span>
+                    </label>
+                  </>
+                )}
                 {composeMode && sourceLetter && (
                   <>
                     <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
@@ -3974,11 +4062,81 @@ export const CreateInternalCorrespondence = ({
                 )}
               </div>
 
+              {/* Демо-режим: горизонтальная панель разделов под тулбаром.
+                  «Цилиндры» открывают те же панели у холста, что и боковые
+                  вкладки (боковые вкладки при этом скрыты). */}
+              {panelsInToolbar && !!id && (
+                <div className="px-3 py-2 border-b border-slate-100 bg-white flex flex-wrap items-center gap-2 font-sans">
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mr-1 select-none">
+                    Разделы
+                  </span>
+                  {[
+                    {
+                      key: "incoming",
+                      label: "Входящие письма",
+                      dotClass: "bg-blue-500",
+                      dotStyle: undefined as React.CSSProperties | undefined,
+                      isOpen: incomingOpen,
+                      onToggle: () =>
+                        incomingOpen ? setIncomingOpen(false) : handleOpenIncoming(),
+                    },
+                    {
+                      key: "versions",
+                      label: "История версий",
+                      dotClass: "bg-amber-500",
+                      dotStyle: undefined,
+                      isOpen: versionsOpen,
+                      onToggle: () =>
+                        versionsOpen ? setVersionsOpen(false) : handleOpenVersions(),
+                    },
+                    {
+                      key: "approvers",
+                      label: "Согласующие",
+                      dotClass: "",
+                      dotStyle: { backgroundColor: "oklch(0.828 0.189 84.429)" },
+                      isOpen: approversOpen,
+                      onToggle: () =>
+                        approversOpen ? setApproversOpen(false) : handleOpenApprovers(),
+                    },
+                    {
+                      key: "signer",
+                      label: "Подписывающий",
+                      dotClass: "",
+                      dotStyle: { backgroundColor: "oklch(0.6 0.25 250)" },
+                      isOpen: signerOpen,
+                      onToggle: () =>
+                        signerOpen ? setSignerOpen(false) : handleOpenSigner(),
+                    },
+                  ].map((p) => (
+                    <button
+                      key={p.key}
+                      type="button"
+                      onClick={p.onToggle}
+                      className={cn(
+                        "flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-full border text-xs font-semibold transition-all cursor-pointer select-none",
+                        p.isOpen
+                          ? "bg-slate-800 border-slate-800 text-white shadow-sm"
+                          : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "w-2.5 h-2.5 rounded-full flex-shrink-0",
+                          p.dotClass,
+                        )}
+                        style={p.dotStyle}
+                      />
+                      <span>{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Закреплённая панель пагинации входящего письма — на всю ширину
                   блока, под разделом с кнопками импорта. При прокрутке страницы
                   прилипает к верхнему краю окна и всегда остаётся доступной. */}
               {showOriginalLetterSides && composeMode && sourceLetter && (
-                <div className="sticky top-0 z-[80] flex items-center justify-between gap-4 px-4 py-2 bg-white border-b border-slate-200 shadow-sm font-sans">
+                <div className="flex items-center justify-between gap-4 px-4 py-2 bg-white border-b border-slate-200 shadow-sm font-sans">
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 shrink-0">
                     <Eye size={14} className="text-amber-500" />
                     <span>Входящее письмо — только просмотр</span>
@@ -4027,6 +4185,7 @@ export const CreateInternalCorrespondence = ({
                   </div>
                 </div>
               )}
+              </div>
 
               <div
                 className="bg-[#E8EAED] overflow-auto rounded-b-2xl relative"
@@ -4055,7 +4214,7 @@ export const CreateInternalCorrespondence = ({
                   showOriginalLetterSides && composeMode && sourceLetter && "min-w-max"
                 )}>
                   {showOriginalLetterSides && composeMode && sourceLetter && (
-                    <div ref={originalCanvasWrapRef} className="shrink-0">
+                    <div ref={originalCanvasWrapRef} className="shrink-0 order-2">
                       <OriginalLetterCanvas
                         sheets={originalSheets.pages}
                         stamp={originalSheets.stamp}
@@ -4067,7 +4226,7 @@ export const CreateInternalCorrespondence = ({
 
                   <div
                     ref={pageCanvasRef}
-                    className="relative"
+                    className="relative order-1"
                     style={{
                       width: PAGE_WIDTH,
                       height: pageCount * PAGE_STRIDE - PAGE_GAP,
@@ -4214,9 +4373,22 @@ export const CreateInternalCorrespondence = ({
                       </div>
                     )}
                     {!!id && (
-                      <div className="font-sans!">
+                      <div
+                        ref={panelsGroupRef}
+                        className="font-sans!"
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          height: 0,
+                          zIndex: 40,
+                          willChange: "transform",
+                        }}
+                      >
                         <ApproversPanel
                           isOpen={approversOpen}
+                          hideTab={panelsInToolbar}
                           onOpen={handleOpenApprovers}
                           onClose={() => setApproversOpen(false)}
                           approvers={approvers}
@@ -4234,6 +4406,7 @@ export const CreateInternalCorrespondence = ({
                         />
                         <SignerPanel
                           isOpen={signerOpen}
+                          hideTab={panelsInToolbar}
                           onOpen={handleOpenSigner}
                           onClose={() => setSignerOpen(false)}
                           finalSigner={finalSigner}
@@ -4264,6 +4437,7 @@ export const CreateInternalCorrespondence = ({
                         />
                         <IncomingLettersPanel
                           isOpen={incomingOpen}
+                          hideTab={panelsInToolbar}
                           onOpen={handleOpenIncoming}
                           onClose={() => setIncomingOpen(false)}
                           attachedLetters={attachedIncomingLetters}
@@ -4274,6 +4448,7 @@ export const CreateInternalCorrespondence = ({
                         />
                         <VersionsPanel
                           isOpen={versionsOpen}
+                          hideTab={panelsInToolbar}
                           onOpen={handleOpenVersions}
                           onClose={() => setVersionsOpen(false)}
                           versions={allVersions}

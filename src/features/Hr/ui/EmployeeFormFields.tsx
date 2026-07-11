@@ -11,7 +11,7 @@ import {
   transformDeps,
   transformRoles,
 } from "../lib";
-import { FormItem, IconInput, PhoneInput, SegmentControl, SectionTitle, TextArea } from "./inputs";
+import { FormItem, IconInput, PhoneInput, SegmentControl, SectionTitle, TextArea, PasswordInput } from "./inputs";
 import { CustomSelect } from "./CustomSelect";
 import { CustomDatePicker } from "./CustomDatePicker";
 import { MultiSelect } from "./MultiSelect";
@@ -117,7 +117,7 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
           <FormItem label="ИНН" error={errors.inn} required>
             <IconInput placeholder="040012345" maxLength={12} icon={iconEl(Hash)} value={values.inn} onChange={(e) => handleChange("inn", e.target.value)} hasError={!!errors.inn} />
           </FormItem>
-          <FormItem label="Адрес" error={errors.address} className="sm:col-span-3">
+          <FormItem label="Адрес" error={errors.address} className="sm:col-span-3" required>
             <IconInput placeholder="Душанбе" icon={iconEl(MapPin)} value={values.address} onChange={(e) => handleChange("address", e.target.value)} hasError={!!errors.address} />
           </FormItem>
         </div>
@@ -150,7 +150,7 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
 
       <section>
         <SectionTitle icon={<Phone size={13} />}>Контакты</SectionTitle>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-3">
           <FormItem label="Корпоративный Email" error={errors.corporate_email}>
             <IconInput placeholder="user@corp.ru" icon={iconEl(Mail)} value={values.corporate_email} onChange={(e) => handleChange("corporate_email", e.target.value)} hasError={!!errors.corporate_email} />
           </FormItem>
@@ -186,7 +186,7 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
           </FormItem>
           <If is={!isEdit}>
             <FormItem label="Пароль" error={errors.password} required>
-              <IconInput type="password" placeholder="••••••" value={values.password} onChange={(e) => handleChange("password", e.target.value)} hasError={!!errors.password} />
+              <PasswordInput placeholder="Введите пароль" value={values.password} onChange={(e) => handleChange("password", e.target.value)} hasError={!!errors.password} />
             </FormItem>
           </If>
         </div>
