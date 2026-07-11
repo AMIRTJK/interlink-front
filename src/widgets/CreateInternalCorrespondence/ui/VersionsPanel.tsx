@@ -7,6 +7,7 @@ import { VersionItem } from "./VersionItem";
 
 interface IProps {
   isOpen: boolean;
+  hideTab?: boolean;
   onOpen: () => void;
   onClose: () => void;
   versions: any[];
@@ -20,6 +21,7 @@ interface IProps {
 
 export const VersionsPanel = ({
   isOpen,
+  hideTab,
   onOpen,
   onClose,
   versions = [],
@@ -56,30 +58,32 @@ export const VersionsPanel = ({
 
   return (
     <>
-      <div className="absolute z-20" style={{ left: -36, top: 190 }}>
-        <motion.button
-          onClick={isOpen ? onClose : onOpen}
-          className={cn(
-            "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-            isOpen ? "bg-slate-50" : "hover:bg-slate-50"
-          )}
-          aria-label="История версий"
-        >
-          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-amber-500" />
-          <span
-            style={{
-              writingMode: "vertical-rl",
-              textOrientation: "mixed",
-              fontSize: 11,
-              fontWeight: 600,
-              color: "#475569",
-              letterSpacing: "0.08em",
-            }}
+      {!hideTab && (
+        <div className="absolute z-20" style={{ left: -36, top: 190 }}>
+          <motion.button
+            onClick={isOpen ? onClose : onOpen}
+            className={cn(
+              "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
+              isOpen ? "bg-slate-50" : "hover:bg-slate-50"
+            )}
+            aria-label="История версий"
           >
-            История версий
-          </span>
-        </motion.button>
-      </div>
+            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-amber-500" />
+            <span
+              style={{
+                writingMode: "vertical-rl",
+                textOrientation: "mixed",
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#475569",
+                letterSpacing: "0.08em",
+              }}
+            >
+              История версий
+            </span>
+          </motion.button>
+        </div>
+      )}
 
       <AnimatePresence>
         {isOpen && (

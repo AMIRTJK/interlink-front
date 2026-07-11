@@ -683,6 +683,11 @@ export const CreateInternalCorrespondence = ({
   const [signerOpen, setSignerOpen] = useState(false);
   const [incomingOpen, setIncomingOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
+  // Демо-режим (для показа руководству): «цилиндры» разделов выносятся в
+  // горизонтальную панель под тулбаром, а боковые вкладки у холста скрываются.
+  // Сами панели по-прежнему открываются у холста. По умолчанию выключен —
+  // текущий функционал не меняется.
+  const [panelsInToolbar, setPanelsInToolbar] = useState(false);
 
   const handleOpenApprovers = () => {
     setApproversOpen(true);
@@ -910,7 +915,7 @@ export const CreateInternalCorrespondence = ({
       window.removeEventListener("resize", update);
       group.style.transform = "";
     };
-  }, [id, pageCount, orientation, formExpanded]);
+  }, [id, pageCount, orientation, formExpanded, panelsInToolbar]);
 
   const [searchParams, setSearchParams] = useState({ query: "" });
 
@@ -4009,6 +4014,20 @@ export const CreateInternalCorrespondence = ({
                     />
                   </>
                 )}
+                {!!id && (
+                  <>
+                    <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
+                      <input
+                        type="checkbox"
+                        checked={panelsInToolbar}
+                        onChange={(e) => setPanelsInToolbar(e.target.checked)}
+                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <span>Панель разделов сверху</span>
+                    </label>
+                  </>
+                )}
                 {composeMode && sourceLetter && (
                   <>
                     <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
@@ -4024,6 +4043,76 @@ export const CreateInternalCorrespondence = ({
                   </>
                 )}
               </div>
+
+              {/* Демо-режим: горизонтальная панель разделов под тулбаром.
+                  «Цилиндры» открывают те же панели у холста, что и боковые
+                  вкладки (боковые вкладки при этом скрыты). */}
+              {panelsInToolbar && !!id && (
+                <div className="px-3 py-2 border-b border-slate-100 bg-white flex flex-wrap items-center gap-2 font-sans">
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mr-1 select-none">
+                    Разделы
+                  </span>
+                  {[
+                    {
+                      key: "incoming",
+                      label: "Входящие письма",
+                      dotClass: "bg-blue-500",
+                      dotStyle: undefined as React.CSSProperties | undefined,
+                      isOpen: incomingOpen,
+                      onToggle: () =>
+                        incomingOpen ? setIncomingOpen(false) : handleOpenIncoming(),
+                    },
+                    {
+                      key: "versions",
+                      label: "История версий",
+                      dotClass: "bg-amber-500",
+                      dotStyle: undefined,
+                      isOpen: versionsOpen,
+                      onToggle: () =>
+                        versionsOpen ? setVersionsOpen(false) : handleOpenVersions(),
+                    },
+                    {
+                      key: "approvers",
+                      label: "Согласующие",
+                      dotClass: "",
+                      dotStyle: { backgroundColor: "oklch(0.828 0.189 84.429)" },
+                      isOpen: approversOpen,
+                      onToggle: () =>
+                        approversOpen ? setApproversOpen(false) : handleOpenApprovers(),
+                    },
+                    {
+                      key: "signer",
+                      label: "Подписывающий",
+                      dotClass: "",
+                      dotStyle: { backgroundColor: "oklch(0.6 0.25 250)" },
+                      isOpen: signerOpen,
+                      onToggle: () =>
+                        signerOpen ? setSignerOpen(false) : handleOpenSigner(),
+                    },
+                  ].map((p) => (
+                    <button
+                      key={p.key}
+                      type="button"
+                      onClick={p.onToggle}
+                      className={cn(
+                        "flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-full border text-xs font-semibold transition-all cursor-pointer select-none",
+                        p.isOpen
+                          ? "bg-slate-800 border-slate-800 text-white shadow-sm"
+                          : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "w-2.5 h-2.5 rounded-full flex-shrink-0",
+                          p.dotClass,
+                        )}
+                        style={p.dotStyle}
+                      />
+                      <span>{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Закреплённая панель пагинации входящего письма — на всю ширину
                   блока, под разделом с кнопками импорта. При прокрутке страницы
@@ -4280,6 +4369,7 @@ export const CreateInternalCorrespondence = ({
                       >
                         <ApproversPanel
                           isOpen={approversOpen}
+                          hideTab={panelsInToolbar}
                           onOpen={handleOpenApprovers}
                           onClose={() => setApproversOpen(false)}
                           approvers={approvers}
@@ -4297,6 +4387,7 @@ export const CreateInternalCorrespondence = ({
                         />
                         <SignerPanel
                           isOpen={signerOpen}
+                          hideTab={panelsInToolbar}
                           onOpen={handleOpenSigner}
                           onClose={() => setSignerOpen(false)}
                           finalSigner={finalSigner}
@@ -4327,6 +4418,7 @@ export const CreateInternalCorrespondence = ({
                         />
                         <IncomingLettersPanel
                           isOpen={incomingOpen}
+                          hideTab={panelsInToolbar}
                           onOpen={handleOpenIncoming}
                           onClose={() => setIncomingOpen(false)}
                           attachedLetters={attachedIncomingLetters}
@@ -4337,6 +4429,7 @@ export const CreateInternalCorrespondence = ({
                         />
                         <VersionsPanel
                           isOpen={versionsOpen}
+                          hideTab={panelsInToolbar}
                           onOpen={handleOpenVersions}
                           onClose={() => setVersionsOpen(false)}
                           versions={allVersions}
