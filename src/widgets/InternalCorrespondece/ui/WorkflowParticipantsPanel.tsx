@@ -15,10 +15,9 @@ import {
   UpOutlined,
   DownOutlined,
 } from "@ant-design/icons";
-import { If } from "@shared/ui";
+import { If, Tooltip } from "@shared/ui";
 import {
   Avatar,
-  Tooltip,
   Button,
   Divider,
   Modal,
@@ -898,7 +897,7 @@ export const WorkflowParticipantsPanel = ({
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start">
             <span
-              className={`text-sm font-medium truncate pr-2 ${status === "pending" ? (isDarkMode ? "text-gray-500" : "text-gray-500") : isDarkMode ? "text-gray-200" : "text-gray-800"}`}
+              className={`text-sm font-medium break-words pr-2 ${status === "pending" ? (isDarkMode ? "text-gray-500" : "text-gray-500") : isDarkMode ? "text-gray-200" : "text-gray-800"}`}
             >
               {fullName}
               <If is={isCurrentUser}>
@@ -919,8 +918,7 @@ export const WorkflowParticipantsPanel = ({
             </If>
           </div>
           <div
-            className="text-xs text-gray-400 truncate mt-0.5"
-            title={position}
+            className="text-xs text-gray-400 break-words mt-0.5"
           >
             {position}
           </div>
@@ -1165,12 +1163,13 @@ export const WorkflowParticipantsPanel = ({
                                 </Tooltip>
                               )}
                             </div>
-                            <div
-                              className={`text-[10px] font-medium truncate mt-0.5 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
-                              title={author.full_name}
-                            >
-                              {author.full_name || "Неизвестный автор"}
-                            </div>
+                            <Tooltip title={author.full_name || "Неизвестный автор"}>
+                              <div
+                                className={`text-[10px] font-medium truncate mt-0.5 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
+                              >
+                                {author.full_name || "Неизвестный автор"}
+                              </div>
+                            </Tooltip>
                             <div className="text-[9px] text-gray-400 mt-0.5">
                               {new Date(v.date).toLocaleString("ru-RU")}
                             </div>
