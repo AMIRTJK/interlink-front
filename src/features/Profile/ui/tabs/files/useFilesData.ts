@@ -118,9 +118,15 @@ export const useFilesData = (params: IFilesParams) => {
   };
 
   // 10. Get shared files
-  const sharedFilesQuery = useGetQuery<IFilesParams, { success: boolean; data: { data: IApiFile[]; current_page?: number; total?: number; per_page?: number } }>({
+  const { activeFolderId: sharedFolderId, ...sharedBaseParams } = params;
+  const sharedFilesParams = {
+    ...sharedBaseParams,
+    ...(typeof sharedFolderId === "number" ? { folder_id: sharedFolderId } : {}),
+  };
+
+  const sharedFilesQuery = useGetQuery<typeof sharedFilesParams, { success: boolean; data: { data: IApiFile[]; current_page?: number; total?: number; per_page?: number } }>({
     url: ApiRoutes.MY_FILES_SHARED_WITH_ME,
-    params,
+    params: sharedFilesParams,
     useToken: true,
   });
 
