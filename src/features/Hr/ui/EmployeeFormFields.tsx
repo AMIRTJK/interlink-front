@@ -11,7 +11,7 @@ import {
   transformDeps,
   transformRoles,
 } from "../lib";
-import { FormItem, IconInput, PhoneInput, SegmentControl, SectionTitle, TextArea } from "./inputs";
+import { FormItem, IconInput, PhoneInput, SegmentControl, SectionTitle, TextArea, PasswordInput } from "./inputs";
 import { CustomSelect } from "./CustomSelect";
 import { CustomDatePicker } from "./CustomDatePicker";
 import { MultiSelect } from "./MultiSelect";
@@ -186,7 +186,7 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
           </FormItem>
           <If is={!isEdit}>
             <FormItem label="Пароль" error={errors.password} required>
-              <IconInput type="password" placeholder="••••••" value={values.password} onChange={(e) => handleChange("password", e.target.value)} hasError={!!errors.password} />
+              <PasswordInput placeholder="Введите пароль" value={values.password} onChange={(e) => handleChange("password", e.target.value)} hasError={!!errors.password} />
             </FormItem>
           </If>
         </div>

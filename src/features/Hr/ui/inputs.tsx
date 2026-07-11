@@ -1,30 +1,18 @@
 import React from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Eye, EyeOff } from "lucide-react";
 import { If } from "@shared/ui";
 
-interface IFormItemProps {
-  label: string;
-  error?: string;
-  required?: boolean;
-  className?: string;
-  children: React.ReactNode;
-}
+interface IFormItemProps { label: string; error?: string; required?: boolean; className?: string; children: React.ReactNode; }
 
 export const FormItem = ({ label, error, required, className = "", children }: IFormItemProps) => {
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
       <label className="text-xs font-semibold text-gray-600 dark:text-slate-400 flex items-center gap-0.5">
-        <If is={required}>
-          <span className="text-red-500">*</span>
-        </If>
+        <If is={required}><span className="text-red-500">*</span></If>
         {label}
       </label>
       {children}
-      <If is={error}>
-        <span className="text-[11px] text-red-500 font-medium">
-          {error}
-        </span>
-      </If>
+      <If is={error}><span className="text-[11px] text-red-500 font-medium">{error}</span></If>
     </div>
   );
 };
@@ -165,5 +153,38 @@ export const TextArea = ({ value, onChange, hasError, ...rest }: ITextAreaProps)
       onChange={onChange}
       className={`${getInputClasses(hasError, rest.disabled)} py-2.5 px-3 min-h-20 resize-y`}
     />
+  );
+};
+
+interface IPasswordInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange"> {
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  hasError?: boolean;
+}
+
+export const PasswordInput = ({ value, onChange, hasError, ...rest }: IPasswordInputProps) => {
+  const [show, setShow] = React.useState(false);
+  return (
+    <div className="relative">
+      <input
+        {...rest}
+        type={show ? "text" : "password"}
+        value={value ?? ""}
+        onChange={onChange}
+        className={`${getInputClasses(hasError, rest.disabled)} h-11 pl-3 pr-10`}
+      />
+      <button
+        type="button"
+        onClick={() => setShow((prev) => !prev)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300 cursor-pointer flex items-center justify-center"
+      >
+        <If is={show}>
+          <EyeOff size={16} />
+        </If>
+        <If is={!show}>
+          <Eye size={16} />
+        </If>
+      </button>
+    </div>
   );
 };
