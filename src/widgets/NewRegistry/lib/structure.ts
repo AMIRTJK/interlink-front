@@ -110,6 +110,14 @@ export const buildLetterMovement = (
     ? item.recipients
     : [];
 
+  // Инициатор служебных переходов (передан на согласование/подпись, отправлен).
+  // Отдельного «кто передал/отправил» в API нет, но эти действия выполняет
+  // владелец документа — показываем его вместо обезличенной «Системы».
+  // SYSTEM_ACTOR остаётся запасным вариантом, если автора нет в данных.
+  const initiator: MovementActor = item.creator
+    ? toActor(item.creator)
+    : SYSTEM_ACTOR;
+
   // 1. Создание документа.
   if (item.created_at) {
     events.push({
@@ -131,9 +139,9 @@ export const buildLetterMovement = (
     events.push({
       id: `to-approve-${item.id}`,
       kind: "to_approve",
-      actor: SYSTEM_ACTOR,
+      actor: initiator,
       title: "Передан на согласование",
-      statusLabel: "Статус",
+      statusLabel: "На согласование",
       at: firstInvite?.created_at ?? null,
     });
 
@@ -169,9 +177,9 @@ export const buildLetterMovement = (
     events.push({
       id: `to-sign-${item.id}`,
       kind: "to_sign",
-      actor: SYSTEM_ACTOR,
+      actor: initiator,
       title: "Передан на подпись",
-      statusLabel: "Статус",
+      statusLabel: "На подпись",
       at: firstSign?.created_at ?? null,
     });
 
@@ -204,9 +212,9 @@ export const buildLetterMovement = (
     events.push({
       id: `sent-${item.id}`,
       kind: "sent",
-      actor: SYSTEM_ACTOR,
+      actor: initiator,
       title: "Документ отправлен адресату",
-      statusLabel: "Завершён",
+      statusLabel: "Отправлен",
       at: item.sent_at,
     });
   }
