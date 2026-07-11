@@ -117,7 +117,7 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
           <FormItem label="ИНН" error={errors.inn} required>
             <IconInput placeholder="040012345" maxLength={12} icon={iconEl(Hash)} value={values.inn} onChange={(e) => handleChange("inn", e.target.value)} hasError={!!errors.inn} />
           </FormItem>
-          <FormItem label="Адрес" error={errors.address} className="sm:col-span-3">
+          <FormItem label="Адрес" error={errors.address} className="sm:col-span-3" required>
             <IconInput placeholder="Душанбе" icon={iconEl(MapPin)} value={values.address} onChange={(e) => handleChange("address", e.target.value)} hasError={!!errors.address} />
           </FormItem>
         </div>
