@@ -1,4 +1,4 @@
-import { IAdminUser } from "@entities/hr";
+import { IAdminUser, IPassportOcrFields } from "@entities/hr";
 
 export const transformOrgs = (res: unknown) => {
   const data = (res as { data: { data: { id: number; name: string }[] } })?.data?.data || [];
@@ -63,6 +63,59 @@ export const mapEmployeeToForm = (employee: IAdminUser) => {
   };
 };
 
+// Нормализация даты рождения из OCR к формату формы (YYYY-MM-DD).
+const normalizeOcrDate = (raw?: string | null): string | undefined => {
+  const s = String(raw ?? "").trim();
+  if (!s) return undefined;
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/); // ISO / YYYY-MM-DD...
+  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+  const dmy = s.match(/^(\d{2})[.\-/](\d{2})[.\-/](\d{4})$/); // DD.MM.YYYY
+  if (dmy) return `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
+  return undefined;
+};
+
+// Нормализация пола из OCR к значениям сегмента формы ("male" | "female").
+const normalizeOcrGender = (raw?: string | null): string | undefined => {
+  const s = String(raw ?? "").trim().toLowerCase();
+  if (!s) return undefined;
+  if (["male", "m", "муж", "м"].some((v) => s.startsWith(v))) return "male";
+  if (["female", "f", "жен", "ж"].some((v) => s.startsWith(v))) return "female";
+  return undefined;
+};
+
+/**
+ * Подставляет распознанные OCR-поля паспорта в значения формы сотрудника.
+ * Значение применяется, только если OCR вернул непустое значение И поле формы ещё пустое —
+ * так автозаполнение не затирает то, что пользователь уже ввёл вручную.
+ * Пока OCR отключён на сервере (fields === null), функция просто возвращает исходные значения,
+ * и форма продолжает работать в обычном режиме ручного ввода.
+ */
+export const applyPassportOcr = (
+  values: Record<string, any>,
+  fields?: IPassportOcrFields | null
+): Record<string, any> => {
+  if (!fields) return values;
+  const next = { ...values };
+
+  const setIfEmpty = (key: string, incoming?: string) => {
+    if (incoming == null || incoming === "") return;
+    const current = next[key];
+    if (current == null || current === "") next[key] = incoming;
+  };
+
+  setIfEmpty("last_name", fields.last_name ?? undefined);
+  setIfEmpty("first_name", fields.first_name ?? undefined);
+  setIfEmpty("middle_name", fields.middle_name ?? undefined);
+  setIfEmpty("passport_series", fields.passport_series ?? undefined);
+  setIfEmpty("passport_number", fields.passport_number ?? undefined);
+  setIfEmpty("inn", fields.inn ?? undefined);
+  setIfEmpty("address", fields.address ?? undefined);
+  setIfEmpty("birth_date", normalizeOcrDate(fields.birth_date));
+  setIfEmpty("gender", normalizeOcrGender(fields.gender));
+
+  return next;
+};
+
 export const prepareEmployeePayload = (values: Record<string, unknown>) => {
   const withCode = (v: unknown) => {
     const s = String(v || "");
@@ -86,6 +139,39 @@ export const prepareEmployeePayload = (values: Record<string, unknown>) => {
     department_ids: deptIds,
     salary: values.salary ? Number(values.salary) : undefined,
   };
+};
+
+// Максимальный размер фото сотрудника/профиля — 5 MB (ограничение Backend).
+export const MAX_PHOTO_SIZE_MB = 5;
+
+// Рекурсивно раскладывает значение в FormData в bracket-нотации (Laravel-совместимо):
+// File/Blob — как есть; массивы → key[i]; вложенные объекты → key[child];
+// null/undefined пропускаются (не отправляем пустые значения). Такая раскладка даёт
+// на сервере ту же вложенную структуру ($request->all()), что и прежний JSON-body.
+const appendFormData = (form: FormData, key: string, value: unknown) => {
+  if (value === undefined || value === null) return;
+  if (value instanceof File || value instanceof Blob) {
+    form.append(key, value);
+  } else if (Array.isArray(value)) {
+    value.forEach((item, i) => appendFormData(form, `${key}[${i}]`, item));
+  } else if (typeof value === "object") {
+    Object.entries(value as Record<string, unknown>).forEach(([k, v]) =>
+      appendFormData(form, `${key}[${k}]`, v)
+    );
+  } else {
+    form.append(key, String(value));
+  }
+};
+
+/**
+ * Собирает payload сотрудника (все поля формы + файл фото `photo` + паспортные/OCR-поля)
+ * в multipart/form-data. Отправляется в POST /api/v1/admin/users или
+ * PUT /api/v1/admin/users/{id} — фото передаётся прямо в запросе создания/редактирования.
+ */
+export const buildEmployeeFormData = (payload: Record<string, unknown>): FormData => {
+  const form = new FormData();
+  Object.entries(payload).forEach(([key, value]) => appendFormData(form, key, value));
+  return form;
 };
 
 export const validateEmployee = (values: Record<string, any>, isEdit: boolean) => {

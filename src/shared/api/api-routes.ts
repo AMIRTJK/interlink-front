@@ -3,6 +3,8 @@ export const ApiRoutes = {
 
   // ==================== AUTH / MFA (2FA) ====================
   AUTH_ME: "/api/v1/auth/me",
+  // Обновление собственного профиля (в т.ч. новые паспортные/OCR-поля). Метод PATCH.
+  UPDATE_ME: "/api/v1/auth/me",
   LOGOUT: "/api/v1/auth/logout",
   // Подтверждение MFA при входе (второй шаг, без авторизации)
   MFA_VERIFY: "/api/v1/auth/mfa/verify",
@@ -61,6 +63,10 @@ export const ApiRoutes = {
   GET_USERS: "/api/v1/admin/users",
   UPDATE_USER: "/api/v1/admin/users/:id",
   DELETE_USER: "/api/v1/admin/users/:id",
+  // Загрузка фото паспорта + OCR-распознавание. multipart/form-data:
+  // passport_front (обязательный), passport_back (необязательный).
+  // Возвращает passport_front_path/passport_back_path/passport_ocr_scanned_at/passport_ocr_data.
+  PASSPORT_OCR: "/api/v1/admin/users/passport-ocr",
   SET_USER_ROLES: "/api/v1/admin/users/assign-roles",
   // Полная картина прав пользователя: roles/role_permissions/direct_permissions/denied_permissions/effective_permissions
   GET_USER_PERMISSIONS: "/api/v1/admin/users/:id/permissions",

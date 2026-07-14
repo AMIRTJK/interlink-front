@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Camera, Trash2 } from "lucide-react";
 import { If } from "@shared/ui";
+import { toast } from "@shared/lib";
+import { MAX_PHOTO_SIZE_MB } from "../lib";
 import { SectionTitle } from "./inputs";
 
 interface IPhotoUploadFieldProps {
@@ -25,7 +27,15 @@ export const PhotoUploadField = ({ initialUrl, onChange }: IPhotoUploadFieldProp
   };
 
   const onFile = (f?: File | null) => {
-    if (!f || !f.type.startsWith("image/")) return;
+    if (!f) return;
+    if (!f.type.startsWith("image/")) {
+      toast.error("Загрузите изображение (JPG, PNG или WEBP)");
+      return;
+    }
+    if (f.size > MAX_PHOTO_SIZE_MB * 1024 * 1024) {
+      toast.error(`Файл больше ${MAX_PHOTO_SIZE_MB} MB`);
+      return;
+    }
     const url = URL.createObjectURL(f);
     setBlob(url);
     setPreview(url);

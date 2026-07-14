@@ -13,6 +13,7 @@ import {
 import { IUser } from "@entities/login";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib/hooks";
+import { toast } from "@shared/lib/toast";
 import { Loader } from "@shared/ui";
 import { getEnvVar } from "@shared/config";
 import userAvatar from "../../../../assets/images/user-avatar.jpg";
@@ -29,8 +30,11 @@ const resolvePhotoUrl = (path?: string | null): string => {
 	}
 	const apiHost = getEnvVar("VITE_API_URL") || "";
 	const host = apiHost.endsWith("/") ? apiHost.slice(0, -1) : apiHost;
-	const p = path.startsWith("/") ? path : `/${path}`;
-	return `${host}${p}`;
+	// Файлы хранятся на публичном диске Laravel и отдаются под /storage/.
+	// photo_path приходит относительным (напр. "user-photos/1/xxx.jfif").
+	let p = path.replace(/^\/+/, "");
+	if (!p.startsWith("storage/")) p = `storage/${p}`;
+	return `${host}/${p}`;
 };
 
 interface IProps {
@@ -39,6 +43,9 @@ interface IProps {
 	onEdit: () => void;
 	currentTheme?: string;
 }
+
+// Ограничение Backend на размер фото профиля — 5 MB.
+const MAX_PHOTO_SIZE_MB = 5;
 
 const NOT_SET = "Не указано";
 
@@ -113,28 +120,36 @@ export const ProfileInfoTab = ({
 		currentTheme || localStorage.getItem("currentTheme") || "emerald";
 	const activeTheme = THEMES[themeKey] || THEMES.emerald;
 
+	// Фото профиля обновляется напрямую через PATCH /api/v1/auth/me (multipart).
+	// Шлём POST-ом с _method=PATCH — PHP не разбирает файлы в теле настоящих PATCH.
 	const { mutate: uploadAvatar, isPending: isUploading } =
 		useMutationQuery<FormData>({
-			url: `${ApiRoutes.FETCH_USER_BY_ID}${userData?.id}/avatar`,
+			url: ApiRoutes.UPDATE_ME,
 			method: "POST",
 			messages: {
 				success: "Фото профиля обновлено",
 				error: "Ошибка при загрузке фото",
-				invalidate: [ApiRoutes.FETCH_USER_BY_ID],
+				invalidate: [ApiRoutes.AUTH_ME],
 			},
 		});
 
 	const handleAvatarClick = () => {
-		if (!userData?.id) return;
 		fileInputRef.current?.click();
 	};
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
-			const formData = new FormData();
-			formData.append("photo", file);
-			uploadAvatar(formData);
+			if (!file.type.startsWith("image/")) {
+				toast.error("Загрузите изображение (JPG, PNG или WEBP)");
+			} else if (file.size > MAX_PHOTO_SIZE_MB * 1024 * 1024) {
+				toast.error(`Файл больше ${MAX_PHOTO_SIZE_MB} MB`);
+			} else {
+				const formData = new FormData();
+				formData.append("_method", "PATCH");
+				formData.append("photo", file);
+				uploadAvatar(formData);
+			}
 		}
 		e.target.value = "";
 	};

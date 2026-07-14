@@ -1,3 +1,5 @@
+import type { IPassportOcrData } from "@entities/hr";
+
 export interface ILoginRequest {
 	phone: string;
 	password: string;
@@ -13,6 +15,16 @@ export interface IUser {
 	mfa_enabled?: boolean;
 	organization_id?: number | string;
 	inn?: string;
+	birth_date?: string | null;
+	gender?: string | null;
+	address?: string | null;
+	// Паспортные и OCR-данные — теперь доступны в GET /api/v1/auth/me
+	passport_series?: string | null;
+	passport_number?: string | null;
+	passport_front_path?: string | null;
+	passport_back_path?: string | null;
+	passport_ocr_scanned_at?: string | null;
+	passport_ocr_data?: IPassportOcrData | null;
 	photo_path: string | null;
 	phone_verified_at: string | null;
 	meta: null;
@@ -34,6 +46,29 @@ export interface IUser {
 		short_name: string;
 	};
 	departments: string[];
+}
+
+/**
+ * Тело запроса PATCH /api/v1/auth/me — частичное обновление собственного профиля.
+ * Помимо базовых полей теперь принимает паспортные/OCR-поля (см. IUser).
+ */
+export interface IUpdateMeDTO {
+	last_name?: string;
+	first_name?: string;
+	middle_name?: string | null;
+	personal_email?: string | null;
+	personal_phone?: string | null;
+	birth_date?: string | null;
+	gender?: string | null;
+	address?: string | null;
+	inn?: string | null;
+	bio?: string | null;
+	passport_series?: string | null;
+	passport_number?: string | null;
+	passport_front_path?: string | null;
+	passport_back_path?: string | null;
+	passport_ocr_scanned_at?: string | null;
+	passport_ocr_data?: IPassportOcrData | null;
 }
 
 /**

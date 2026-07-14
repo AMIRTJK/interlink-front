@@ -1,18 +1,27 @@
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
-import { CreateUserDTO, IAdminUser } from "@entities/hr";
+import { Loader2, X } from "lucide-react";
+import { IAdminUser, IPassportOcrData, IPassportOcrResponse } from "@entities/hr";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 import { If } from "@shared/ui";
 import { EmployeeFormFields } from "./EmployeeFormFields";
 import { PassportUploadStep, IPassportFile, IPassportSides } from "./PassportUploadStep";
-import { mapEmployeeToForm, prepareEmployeePayload, validateEmployee } from "../lib";
+import { applyPassportOcr, buildEmployeeFormData, mapEmployeeToForm, prepareEmployeePayload, validateEmployee } from "../lib";
 import "./employeeForm.css";
 
 interface IProps {
   open: boolean;
   onClose: () => void;
   employee?: IAdminUser | null;
+}
+
+// Результат загрузки паспорта (POST /api/v1/admin/users/passport-ocr), который
+// отправляется вместе с остальными полями в POST /api/v1/admin/users.
+interface IPassportMeta {
+  passport_front_path: string | null;
+  passport_back_path: string | null;
+  passport_ocr_scanned_at: string | null;
+  passport_ocr_data: IPassportOcrData | null;
 }
 
 // Черновик фото паспорта сохраняется в localStorage, чтобы случайное закрытие
@@ -67,24 +76,42 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
   const [values, setValues] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [passport, setPassport] = useState<IPassportSides>(EMPTY_PASSPORT);
+  // Паспортные пути и OCR-данные из ответа passport-ocr. Хранятся отдельно от values
+  // (пользователь их не редактирует напрямую) и отправляются вместе с формой при создании.
+  const [passportMeta, setPassportMeta] = useState<IPassportMeta | null>(null);
   // «Как сфотографировать паспорт» и «Новый сотрудник» — два отдельных шага/окна.
   // Пока showForm === false показываем только шаг с паспортом; после нажатия
   // «Продолжить» показываем только форму сотрудника (без блока с паспортом).
   const [showForm, setShowForm] = useState(false);
 
-  const canProceed = !!passport.front || !!passport.back;
+  // Лицевая сторона обязательна для эндпоинта passport-ocr (поле passport_front).
+  const canProceed = !!passport.front;
   const formVisible = isEdit || showForm;
 
-  const createM = useMutationQuery<CreateUserDTO>({
+  // Создание/редактирование сотрудника теперь идёт как multipart/form-data (в запросе
+  // передаётся файл фото). Редактирование шлётся POST-ом с _method=PUT (spoofing) —
+  // PHP не разбирает файлы в теле настоящих PUT/PATCH-запросов.
+  const createM = useMutationQuery<FormData>({
     url: ApiRoutes.CREATE_USER,
     method: "POST",
     messages: { success: "Сотрудник создан", invalidate: [ApiRoutes.GET_USERS] },
   });
 
-  const updateM = useMutationQuery<Partial<CreateUserDTO>>({
+  const updateM = useMutationQuery<FormData>({
     url: () => ApiRoutes.UPDATE_USER.replace(":id", String(employee?.id)),
-    method: "PUT",
+    method: "POST",
     messages: { success: "Сотрудник обновлён", invalidate: [ApiRoutes.GET_USERS] },
+  });
+
+  // Загрузка фото паспорта + OCR (multipart/form-data). В ответе — пути к файлам и
+  // структура passport_ocr_data. Пока OCR на сервере отключён, fields приходят null.
+  const ocrM = useMutationQuery<FormData>({
+    url: ApiRoutes.PASSPORT_OCR,
+    method: "POST",
+    messages: {
+      suppressSuccessToast: true,
+      error: "Не удалось загрузить фотографии паспорта",
+    },
   });
 
   useEffect(() => {
@@ -109,6 +136,7 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
     if (!open) return;
     setErrors({});
     setShowForm(false);
+    setPassportMeta(null);
     if (employee) {
       setPassport(EMPTY_PASSPORT);
       setValues(mapEmployeeToForm(employee));
@@ -151,28 +179,64 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
     }
   };
 
+  // Шаг «Продолжить»: загружаем фото паспорта на сервер (passport-ocr), сохраняем
+  // пути и OCR-данные, автоматически заполняем поля формы распознанными значениями
+  // (если OCR активен) и переходим к форме сотрудника.
+  const handleProceed = () => {
+    if (!passport.front || ocrM.isPending) return;
+
+    const fd = new FormData();
+    fd.append("passport_front", passport.front.file);
+    if (passport.back) fd.append("passport_back", passport.back.file);
+
+    ocrM.mutate(fd, {
+      onSuccess: (data: IPassportOcrResponse) => {
+        setPassportMeta({
+          passport_front_path: data?.passport_front_path ?? null,
+          passport_back_path: data?.passport_back_path ?? null,
+          passport_ocr_scanned_at: data?.passport_ocr_scanned_at ?? null,
+          passport_ocr_data: data?.passport_ocr_data ?? null,
+        });
+        // OCR отключён на сервере → fields === null → значения не меняются, ручной ввод.
+        // OCR активен → распознанные поля подставляются автоматически (не затирая ввод).
+        setValues((prev) => applyPassportOcr(prev, data?.passport_ocr_data?.fields));
+        setShowForm(true);
+      },
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validateEmployee(values, isEdit);
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
-    const payload = prepareEmployeePayload(values);
-    if (isEdit) delete (payload as any).password;
+    // Паспортные пути/OCR-данные и файл фото (values.photo) отправляются вместе с
+    // остальными полями формы одним multipart-запросом.
+    const payload: Record<string, any> = {
+      ...prepareEmployeePayload(values),
+      ...(passportMeta ?? {}),
+    };
+    if (isEdit) delete payload.password;
+
+    const formData = buildEmployeeFormData(payload);
+    // Method spoofing: настоящий PUT с multipart не даёт PHP разобрать файл.
+    if (isEdit) formData.append("_method", "PUT");
 
     const onSuccess = () => {
       localStorage.removeItem(PASSPORT_DRAFT_KEY);
       setValues({});
       setErrors({});
       setPassport(EMPTY_PASSPORT);
+      setPassportMeta(null);
       setShowForm(false);
       onClose();
     };
 
     if (isEdit) {
-      updateM.mutate(payload as Partial<CreateUserDTO>, { onSuccess });
+      updateM.mutate(formData, { onSuccess });
     } else {
-      createM.mutate(payload as unknown as CreateUserDTO, { onSuccess });
+      createM.mutate(formData, { onSuccess });
     }
   };
 
@@ -232,6 +296,11 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
           {/* Шаг 1 — отдельное окно «Как сфотографировать паспорт» */}
           <If is={!isEdit && !showForm}>
             <PassportUploadStep value={passport} onChange={handlePassportChange} />
+            <If is={!passport.front}>
+              <p className="text-[11px] text-gray-400 dark:text-slate-500 text-center">
+                Загрузите лицевую сторону паспорта, чтобы продолжить.
+              </p>
+            </If>
             <div className="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
               <button
                 type="button"
@@ -242,11 +311,14 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
               </button>
               <button
                 type="button"
-                onClick={() => setShowForm(true)}
-                disabled={!canProceed}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                onClick={handleProceed}
+                disabled={!canProceed || ocrM.isPending}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors cursor-pointer"
               >
-                Продолжить
+                <If is={ocrM.isPending}>
+                  <Loader2 size={16} className="animate-spin" />
+                </If>
+                {ocrM.isPending ? "Загрузка…" : "Продолжить"}
               </button>
             </div>
           </If>
