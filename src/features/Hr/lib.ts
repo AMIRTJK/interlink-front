@@ -141,6 +141,39 @@ export const prepareEmployeePayload = (values: Record<string, unknown>) => {
   };
 };
 
+// Максимальный размер фото сотрудника/профиля — 5 MB (ограничение Backend).
+export const MAX_PHOTO_SIZE_MB = 5;
+
+// Рекурсивно раскладывает значение в FormData в bracket-нотации (Laravel-совместимо):
+// File/Blob — как есть; массивы → key[i]; вложенные объекты → key[child];
+// null/undefined пропускаются (не отправляем пустые значения). Такая раскладка даёт
+// на сервере ту же вложенную структуру ($request->all()), что и прежний JSON-body.
+const appendFormData = (form: FormData, key: string, value: unknown) => {
+  if (value === undefined || value === null) return;
+  if (value instanceof File || value instanceof Blob) {
+    form.append(key, value);
+  } else if (Array.isArray(value)) {
+    value.forEach((item, i) => appendFormData(form, `${key}[${i}]`, item));
+  } else if (typeof value === "object") {
+    Object.entries(value as Record<string, unknown>).forEach(([k, v]) =>
+      appendFormData(form, `${key}[${k}]`, v)
+    );
+  } else {
+    form.append(key, String(value));
+  }
+};
+
+/**
+ * Собирает payload сотрудника (все поля формы + файл фото `photo` + паспортные/OCR-поля)
+ * в multipart/form-data. Отправляется в POST /api/v1/admin/users или
+ * PUT /api/v1/admin/users/{id} — фото передаётся прямо в запросе создания/редактирования.
+ */
+export const buildEmployeeFormData = (payload: Record<string, unknown>): FormData => {
+  const form = new FormData();
+  Object.entries(payload).forEach(([key, value]) => appendFormData(form, key, value));
+  return form;
+};
+
 export const validateEmployee = (values: Record<string, any>, isEdit: boolean) => {
   const errs: Record<string, string> = {};
   if (!values.last_name) errs.last_name = "Введите фамилию";

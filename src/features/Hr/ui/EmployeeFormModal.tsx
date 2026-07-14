@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
-import { CreateUserDTO, IAdminUser, IPassportOcrData, IPassportOcrResponse } from "@entities/hr";
+import { IAdminUser, IPassportOcrData, IPassportOcrResponse } from "@entities/hr";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 import { If } from "@shared/ui";
 import { EmployeeFormFields } from "./EmployeeFormFields";
 import { PassportUploadStep, IPassportFile, IPassportSides } from "./PassportUploadStep";
-import { applyPassportOcr, mapEmployeeToForm, prepareEmployeePayload, validateEmployee } from "../lib";
+import { applyPassportOcr, buildEmployeeFormData, mapEmployeeToForm, prepareEmployeePayload, validateEmployee } from "../lib";
 import "./employeeForm.css";
 
 interface IProps {
@@ -88,15 +88,18 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
   const canProceed = !!passport.front;
   const formVisible = isEdit || showForm;
 
-  const createM = useMutationQuery<CreateUserDTO>({
+  // Создание/редактирование сотрудника теперь идёт как multipart/form-data (в запросе
+  // передаётся файл фото). Редактирование шлётся POST-ом с _method=PUT (spoofing) —
+  // PHP не разбирает файлы в теле настоящих PUT/PATCH-запросов.
+  const createM = useMutationQuery<FormData>({
     url: ApiRoutes.CREATE_USER,
     method: "POST",
     messages: { success: "Сотрудник создан", invalidate: [ApiRoutes.GET_USERS] },
   });
 
-  const updateM = useMutationQuery<Partial<CreateUserDTO>>({
+  const updateM = useMutationQuery<FormData>({
     url: () => ApiRoutes.UPDATE_USER.replace(":id", String(employee?.id)),
-    method: "PUT",
+    method: "POST",
     messages: { success: "Сотрудник обновлён", invalidate: [ApiRoutes.GET_USERS] },
   });
 
@@ -208,12 +211,17 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
-    // Паспортные пути и OCR-данные отправляются вместе с остальными полями формы.
+    // Паспортные пути/OCR-данные и файл фото (values.photo) отправляются вместе с
+    // остальными полями формы одним multipart-запросом.
     const payload: Record<string, any> = {
       ...prepareEmployeePayload(values),
       ...(passportMeta ?? {}),
     };
     if (isEdit) delete payload.password;
+
+    const formData = buildEmployeeFormData(payload);
+    // Method spoofing: настоящий PUT с multipart не даёт PHP разобрать файл.
+    if (isEdit) formData.append("_method", "PUT");
 
     const onSuccess = () => {
       localStorage.removeItem(PASSPORT_DRAFT_KEY);
@@ -226,9 +234,9 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
     };
 
     if (isEdit) {
-      updateM.mutate(payload as Partial<CreateUserDTO>, { onSuccess });
+      updateM.mutate(formData, { onSuccess });
     } else {
-      createM.mutate(payload as unknown as CreateUserDTO, { onSuccess });
+      createM.mutate(formData, { onSuccess });
     }
   };
 

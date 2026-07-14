@@ -9,8 +9,11 @@ export const resolvePhotoUrl = (path?: string | null): string => {
   }
   const apiHost = getEnvVar("VITE_API_URL") || "";
   const host = apiHost.endsWith("/") ? apiHost.slice(0, -1) : apiHost;
-  const p = path.startsWith("/") ? path : `/${path}`;
-  return `${host}${p}`;
+  // Файлы хранятся на публичном диске Laravel и отдаются под /storage/.
+  // photo_path приходит относительным (напр. "user-photos/1/xxx.jfif").
+  let p = path.replace(/^\/+/, "");
+  if (!p.startsWith("storage/")) p = `storage/${p}`;
+  return `${host}/${p}`;
 };
 
 export const PAGE_SIZE = 10;
