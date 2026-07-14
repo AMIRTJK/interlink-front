@@ -2,7 +2,6 @@ import { useRef, useState } from "react";
 import { Image } from "antd";
 import {
   CheckCircle2,
-  Loader2,
   Maximize2,
   ScanLine,
   UploadCloud,
@@ -56,16 +55,12 @@ const PassportSide = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
-  const [uploading, setUploading] = useState(false);
 
   const handleFile = (file?: File | null) => {
     if (!file || !file.type.startsWith("image/")) return;
-    // Имитация загрузки на сервер. Позже здесь будет реальный upload + OCR.
-    setUploading(true);
-    setTimeout(() => {
-      setUploading(false);
-      onSelect(file);
-    }, 700);
+    // Файл только выбирается локально. Реальная загрузка + OCR-распознавание
+    // происходят на шаге «Продолжить» (POST /api/v1/admin/users/passport-ocr).
+    onSelect(file);
   };
 
   if (value) {
@@ -103,7 +98,7 @@ const PassportSide = ({
     <>
       <button
         type="button"
-        onClick={() => !uploading && inputRef.current?.click()}
+        onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);
@@ -114,33 +109,21 @@ const PassportSide = ({
           setDragOver(false);
           handleFile(e.dataTransfer.files?.[0]);
         }}
-        disabled={uploading}
-        className={`flex h-full min-h-[190px] w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-4 py-6 text-center transition-colors ${
+        className={`flex h-full min-h-[190px] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-4 py-6 text-center transition-colors ${
           dragOver
             ? "border-blue-400 bg-blue-50 dark:border-blue-500 dark:bg-blue-950/40"
             : "border-slate-200 bg-slate-50/60 hover:border-blue-300 hover:bg-blue-50/40 dark:border-slate-700 dark:bg-slate-800/40 dark:hover:border-blue-500 dark:hover:bg-blue-950/30"
-        } ${uploading ? "cursor-wait opacity-80" : "cursor-pointer"}`}
+        }`}
       >
-        {uploading ? (
-          <>
-            <Loader2 size={24} className="animate-spin text-blue-500" />
-            <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Загрузка…
-            </p>
-          </>
-        ) : (
-          <>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
-              <UploadCloud size={20} />
-            </div>
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-              {SIDE_LABEL[side]}
-            </p>
-            <p className="text-[11px] text-slate-400 dark:text-slate-500">
-              Перетащите или выберите файл
-            </p>
-          </>
-        )}
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
+          <UploadCloud size={20} />
+        </div>
+        <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+          {SIDE_LABEL[side]}
+        </p>
+        <p className="text-[11px] text-slate-400 dark:text-slate-500">
+          Перетащите или выберите файл
+        </p>
       </button>
 
       <input

@@ -30,6 +30,42 @@ export interface IRoleShort {
   guard_name?: string;
 }
 
+/**
+ * Поля, распознанные OCR из фотографий паспорта.
+ * Пока OCR на сервере отключён (не установлен Tesseract) — все поля приходят как null.
+ * После активации OCR контракт не меняется: fields начнёт приходить заполненным,
+ * и фронтенд автоматически подставит эти значения в форму создания сотрудника.
+ * Список полей может расширяться на бэкенде — поэтому допускаем произвольные ключи.
+ */
+export interface IPassportOcrFields {
+  last_name?: string | null;
+  first_name?: string | null;
+  middle_name?: string | null;
+  passport_series?: string | null;
+  passport_number?: string | null;
+  birth_date?: string | null;
+  gender?: string | null;
+  address?: string | null;
+  inn?: string | null;
+  [key: string]: string | null | undefined;
+}
+
+export interface IPassportOcrData {
+  /** "disabled" пока OCR не установлен на сервере; после активации — например "success". */
+  status: string;
+  /** Распознанные значения. null (или отсутствие) — OCR ещё не дал данных, форма работает вручную. */
+  fields?: IPassportOcrFields | null;
+  [key: string]: unknown;
+}
+
+/** Ответ POST /api/v1/admin/users/passport-ocr. */
+export interface IPassportOcrResponse {
+  passport_front_path: string;
+  passport_back_path: string | null;
+  passport_ocr_scanned_at: string | null;
+  passport_ocr_data: IPassportOcrData;
+}
+
 export interface IAdminUser {
   id: number;
   first_name?: string;
@@ -50,6 +86,10 @@ export interface IAdminUser {
   gender?: string;
   passport_series?: string;
   passport_number?: string;
+  passport_front_path?: string | null;
+  passport_back_path?: string | null;
+  passport_ocr_scanned_at?: string | null;
+  passport_ocr_data?: IPassportOcrData | null;
   inn?: string;
   address?: string;
   bank_account?: string;
@@ -101,6 +141,12 @@ export interface CreateUserDTO {
   gender?: string;
   passport_series?: string;
   passport_number?: string;
+  // Паспортные/OCR-поля, полученные из ответа POST /api/v1/admin/users/passport-ocr
+  // и отправляемые вместе с остальными полями при создании/редактировании сотрудника.
+  passport_front_path?: string | null;
+  passport_back_path?: string | null;
+  passport_ocr_scanned_at?: string | null;
+  passport_ocr_data?: IPassportOcrData | null;
   inn?: string;
   address?: string;
   bank_account?: string;

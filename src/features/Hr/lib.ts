@@ -1,4 +1,4 @@
-import { IAdminUser } from "@entities/hr";
+import { IAdminUser, IPassportOcrFields } from "@entities/hr";
 
 export const transformOrgs = (res: unknown) => {
   const data = (res as { data: { data: { id: number; name: string }[] } })?.data?.data || [];
@@ -61,6 +61,59 @@ export const mapEmployeeToForm = (employee: IAdminUser) => {
     roles: employee.roles?.map((r) => r.name),
     bio: employee.bio || "",
   };
+};
+
+// Нормализация даты рождения из OCR к формату формы (YYYY-MM-DD).
+const normalizeOcrDate = (raw?: string | null): string | undefined => {
+  const s = String(raw ?? "").trim();
+  if (!s) return undefined;
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/); // ISO / YYYY-MM-DD...
+  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+  const dmy = s.match(/^(\d{2})[.\-/](\d{2})[.\-/](\d{4})$/); // DD.MM.YYYY
+  if (dmy) return `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
+  return undefined;
+};
+
+// Нормализация пола из OCR к значениям сегмента формы ("male" | "female").
+const normalizeOcrGender = (raw?: string | null): string | undefined => {
+  const s = String(raw ?? "").trim().toLowerCase();
+  if (!s) return undefined;
+  if (["male", "m", "муж", "м"].some((v) => s.startsWith(v))) return "male";
+  if (["female", "f", "жен", "ж"].some((v) => s.startsWith(v))) return "female";
+  return undefined;
+};
+
+/**
+ * Подставляет распознанные OCR-поля паспорта в значения формы сотрудника.
+ * Значение применяется, только если OCR вернул непустое значение И поле формы ещё пустое —
+ * так автозаполнение не затирает то, что пользователь уже ввёл вручную.
+ * Пока OCR отключён на сервере (fields === null), функция просто возвращает исходные значения,
+ * и форма продолжает работать в обычном режиме ручного ввода.
+ */
+export const applyPassportOcr = (
+  values: Record<string, any>,
+  fields?: IPassportOcrFields | null
+): Record<string, any> => {
+  if (!fields) return values;
+  const next = { ...values };
+
+  const setIfEmpty = (key: string, incoming?: string) => {
+    if (incoming == null || incoming === "") return;
+    const current = next[key];
+    if (current == null || current === "") next[key] = incoming;
+  };
+
+  setIfEmpty("last_name", fields.last_name ?? undefined);
+  setIfEmpty("first_name", fields.first_name ?? undefined);
+  setIfEmpty("middle_name", fields.middle_name ?? undefined);
+  setIfEmpty("passport_series", fields.passport_series ?? undefined);
+  setIfEmpty("passport_number", fields.passport_number ?? undefined);
+  setIfEmpty("inn", fields.inn ?? undefined);
+  setIfEmpty("address", fields.address ?? undefined);
+  setIfEmpty("birth_date", normalizeOcrDate(fields.birth_date));
+  setIfEmpty("gender", normalizeOcrGender(fields.gender));
+
+  return next;
 };
 
 export const prepareEmployeePayload = (values: Record<string, unknown>) => {
