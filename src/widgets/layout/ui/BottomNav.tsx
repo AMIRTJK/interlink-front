@@ -102,12 +102,14 @@ export const BottomNav = () => {
               arrow={false}
               overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
             >
-              <button aria-label="Уведомления" className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
-                <Bell size={18} strokeWidth={2.2} />
-                <If is={unreadCount > 0}>
-                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose-500 text-[9px] text-white flex items-center justify-center rounded-full font-bold shadow-lg">{unreadCount > 9 ? "9+" : unreadCount}</span>
-                </If>
-              </button>
+              <Tooltip title="Уведомления" placement="top">
+                <button aria-label="Уведомления" className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
+                  <Bell size={18} strokeWidth={2.2} />
+                  <If is={unreadCount > 0}>
+                    <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose-500 text-[9px] text-white flex items-center justify-center rounded-full font-bold shadow-lg">{unreadCount > 9 ? "9+" : unreadCount}</span>
+                  </If>
+                </button>
+              </Tooltip>
             </Popover>
             <Tooltip title="Чат" placement="top">
               <button onClick={openChat} aria-label="Чат" className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
@@ -134,9 +136,11 @@ export const BottomNav = () => {
             arrow={false}
             overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
           >
-            <button aria-label="Тема" className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
-              <Palette size={18} strokeWidth={2.2} />
-            </button>
+            <Tooltip title="Выберите тему" placement="top">
+              <button aria-label="Тема" className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
+                <Palette size={18} strokeWidth={2.2} />
+              </button>
+            </Tooltip>
           </Popover>
           <Popover
             content={<BgContent currentBg={currentBg} setCurrentBg={setCurrentBg} isDarkMode={isDarkMode} />}
@@ -145,9 +149,11 @@ export const BottomNav = () => {
             arrow={false}
             overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
           >
-            <button aria-label="Фон" className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
-              <Layers size={18} strokeWidth={2.2} />
-            </button>
+            <Tooltip title="Фон страницы" placement="top">
+              <button aria-label="Фон" className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
+                <Layers size={18} strokeWidth={2.2} />
+              </button>
+            </Tooltip>
           </Popover>
           <Popover
             content={<LayoutContent layoutMode={layoutMode} setLayoutMode={setLayoutMode} moveHeader={moveHeader} setMoveHeader={setMoveHeader} layoutModes={layoutModes} />}
@@ -156,12 +162,14 @@ export const BottomNav = () => {
             arrow={false}
             overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
           >
-            <button aria-label="Макет" className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
-              <If is={layoutMode === "top"}><PanelTop size={18} strokeWidth={2.2} /></If>
-              <If is={layoutMode === "left"}><PanelLeft size={18} strokeWidth={2.2} /></If>
-              <If is={layoutMode === "bottom"}><PanelBottom size={18} strokeWidth={2.2} /></If>
-              <If is={layoutMode === "right"}><PanelRight size={18} strokeWidth={2.2} /></If>
-            </button>
+            <Tooltip title="Макет страницы" placement="top">
+              <button aria-label="Макет" className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
+                <If is={layoutMode === "top"}><PanelTop size={18} strokeWidth={2.2} /></If>
+                <If is={layoutMode === "left"}><PanelLeft size={18} strokeWidth={2.2} /></If>
+                <If is={layoutMode === "bottom"}><PanelBottom size={18} strokeWidth={2.2} /></If>
+                <If is={layoutMode === "right"}><PanelRight size={18} strokeWidth={2.2} /></If>
+              </button>
+            </Tooltip>
           </Popover>
           <Tooltip title="Выйти" placement="topRight">
             <button onClick={() => setShowLogoutConfirm(true)} aria-label="Выход" className="flex items-center gap-2 py-2 px-4 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 border border-white/20 dark:border-zinc-700/30 text-zinc-600 dark:text-zinc-300 font-semibold text-sm hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer focus:outline-none">

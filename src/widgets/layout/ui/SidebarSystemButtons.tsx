@@ -77,17 +77,19 @@ export const SidebarSystemButtons = ({ collapsed }: IProps) => {
           arrow={false}
           overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
         >
-          <button
-            aria-label="Уведомления"
-            className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            <Bell size={18} strokeWidth={2.2} />
-            <If is={unreadCount > 0}>
-              <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose-500 text-[9px] text-white flex items-center justify-center rounded-full font-bold shadow-lg">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </span>
-            </If>
-          </button>
+          <Tooltip title="Уведомления" placement={collapsed ? "right" : "top"}>
+            <button
+              aria-label="Уведомления"
+              className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+            >
+              <Bell size={18} strokeWidth={2.2} />
+              <If is={unreadCount > 0}>
+                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose-500 text-[9px] text-white flex items-center justify-center rounded-full font-bold shadow-lg">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              </If>
+            </button>
+          </Tooltip>
         </Popover>
 
         <Tooltip title="Чат" placement={collapsed ? "right" : "top"}>
@@ -132,12 +134,14 @@ export const SidebarSystemButtons = ({ collapsed }: IProps) => {
           arrow={false}
           overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
         >
-          <button
-            aria-label="Выбор темы"
-            className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            <Palette size={18} strokeWidth={2.2} />
-          </button>
+          <Tooltip title="Выберите тему" placement={collapsed ? "right" : "top"}>
+            <button
+              aria-label="Выбор темы"
+              className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+            >
+              <Palette size={18} strokeWidth={2.2} />
+            </button>
+          </Tooltip>
         </Popover>
 
         <Popover
@@ -147,12 +151,14 @@ export const SidebarSystemButtons = ({ collapsed }: IProps) => {
           arrow={false}
           overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
         >
-          <button
-            aria-label="Фон страницы"
-            className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            <Layers size={18} strokeWidth={2.2} />
-          </button>
+          <Tooltip title="Фон страницы" placement={collapsed ? "right" : "top"}>
+            <button
+              aria-label="Фон страницы"
+              className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+            >
+              <Layers size={18} strokeWidth={2.2} />
+            </button>
+          </Tooltip>
         </Popover>
 
         <Popover
@@ -170,23 +176,25 @@ export const SidebarSystemButtons = ({ collapsed }: IProps) => {
           arrow={false}
           overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
         >
-          <button
-            aria-label="Макет страницы"
-            className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            <If is={layoutMode === "top"}>
-              <PanelTop size={18} strokeWidth={2.2} />
-            </If>
-            <If is={layoutMode === "left"}>
-              <PanelLeft size={18} strokeWidth={2.2} />
-            </If>
-            <If is={layoutMode === "bottom"}>
-              <PanelBottom size={18} strokeWidth={2.2} />
-            </If>
-            <If is={layoutMode === "right"}>
-              <PanelRight size={18} strokeWidth={2.2} />
-            </If>
-          </button>
+          <Tooltip title="Макет страницы" placement={collapsed ? "right" : "top"}>
+            <button
+              aria-label="Макет страницы"
+              className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+            >
+              <If is={layoutMode === "top"}>
+                <PanelTop size={18} strokeWidth={2.2} />
+              </If>
+              <If is={layoutMode === "left"}>
+                <PanelLeft size={18} strokeWidth={2.2} />
+              </If>
+              <If is={layoutMode === "bottom"}>
+                <PanelBottom size={18} strokeWidth={2.2} />
+              </If>
+              <If is={layoutMode === "right"}>
+                <PanelRight size={18} strokeWidth={2.2} />
+              </If>
+            </button>
+          </Tooltip>
         </Popover>
 
         <Tooltip title="Выйти" placement={collapsed ? "right" : "top"}>
