@@ -106,7 +106,7 @@ export const normalizeUsers = (raw: IAdminUser[]): IEmployee[] =>
     email: u.corporate_email || u.email || "",
     phone: u.corporate_phone || u.phone || "",
     salary: parseSalary(u.salary),
-    photo: resolvePhotoUrl(u.photo_path),
+    photo: u.photo_url || resolvePhotoUrl(u.photo_path),
     corporateEmail: u.corporate_email || "",
     personalEmail: u.personal_email || "",
     personalPhone: u.personal_phone || "",

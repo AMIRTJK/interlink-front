@@ -49,7 +49,7 @@ export const BottomNav = () => {
   const { counters } = useNotificationCounters();
   const unreadCount = counters.unread;
 
-  useEffect(() => { setAvatarError(false); }, [userData?.photo_path]);
+  useEffect(() => { setAvatarError(false); }, [userData?.photo_url, userData?.photo_path]);
 
   const toggleTheme = () => {
     setIsDarkMode((prev) => {
@@ -74,7 +74,7 @@ export const BottomNav = () => {
           <div className="hidden md:flex items-center gap-4 min-w-0 pl-6 border-l border-zinc-900/10 dark:border-zinc-700/40">
             <div className="relative shrink-0">
               <img
-                src={avatarError ? userAvatar : (resolvePhotoUrl(userData?.photo_path) || userAvatar)}
+                src={avatarError ? userAvatar : (userData?.photo_url || resolvePhotoUrl(userData?.photo_path) || userAvatar)}
                 alt="Аватар"
                 className="w-11 h-11 rounded-[2.5rem] border-2 border-white/60 dark:border-zinc-900/60 object-cover shadow-lg"
                 onError={() => setAvatarError(true)}

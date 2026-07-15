@@ -95,6 +95,9 @@ export interface IAdminUser {
   bank_account?: string;
   rating?: number;
   photo_path?: string | null;
+  // Готовый публичный URL аватара (формирует backend). Для отображения в <img src>
+  // нужно использовать именно его; photo_path — внутренний путь и напрямую не годится.
+  photo_url?: string | null;
   bio?: string | null;
   organization_id?: number;
   supervisor_id?: number;

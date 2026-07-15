@@ -21,7 +21,7 @@ interface IProps {
 
 export const UserAvatar = ({ user, size = 32, ring = false, className = "" }: IProps) => {
   const [failed, setFailed] = useState(false);
-  const photo = resolveFilePhotoUrl(user?.photo_path);
+  const photo = user?.photo_url || resolveFilePhotoUrl(user?.photo_path);
   const colorClass = AVATAR_COLORS[(user?.id ?? 0) % AVATAR_COLORS.length];
   const ringClass = ring ? "ring-2 ring-white dark:ring-slate-900" : "";
 

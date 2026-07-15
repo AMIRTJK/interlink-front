@@ -7,6 +7,7 @@ export interface IFileUser {
   last_name?: string;
   position?: string;
   photo_path?: string | null;
+  photo_url?: string | null;
 }
 
 export interface IApiFile {

@@ -26,6 +26,9 @@ export interface IUser {
 	passport_ocr_scanned_at?: string | null;
 	passport_ocr_data?: IPassportOcrData | null;
 	photo_path: string | null;
+	// Готовый публичный URL аватара (формирует backend) — использовать его в <img src>.
+	// photo_path остаётся внутренним путём хранения и напрямую не подставляется.
+	photo_url?: string | null;
 	phone_verified_at: string | null;
 	meta: null;
 	created_at: string;

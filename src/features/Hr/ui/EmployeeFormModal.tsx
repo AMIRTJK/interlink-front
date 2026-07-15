@@ -6,7 +6,7 @@ import { useMutationQuery } from "@shared/lib";
 import { If } from "@shared/ui";
 import { EmployeeFormFields } from "./EmployeeFormFields";
 import { PassportUploadStep, IPassportFile, IPassportSides } from "./PassportUploadStep";
-import { applyPassportOcr, buildEmployeeFormData, mapEmployeeToForm, prepareEmployeePayload, validateEmployee } from "../lib";
+import { applyPassportOcr, buildEmployeeFormData, mapEmployeeToForm, prepareEmployeePayload, resolveEmployeePhotoUrl, validateEmployee } from "../lib";
 import "./employeeForm.css";
 
 interface IProps {
@@ -350,7 +350,7 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
               handleChange={handleChange}
               organizationId={organizationId}
               isEdit={isEdit}
-              initialPhoto={employee?.photo_path || undefined}
+              initialPhoto={resolveEmployeePhotoUrl(employee) || undefined}
             />
 
             <div className="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">

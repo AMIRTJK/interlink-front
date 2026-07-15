@@ -28,6 +28,6 @@ export const useProfileUser = () => {
     userData,
     userName: userData?.full_name || "—",
     userSubtitle,
-    userPhoto: userData?.photo_path || undefined,
+    userPhoto: userData?.photo_url || userData?.photo_path || undefined,
   };
 };
