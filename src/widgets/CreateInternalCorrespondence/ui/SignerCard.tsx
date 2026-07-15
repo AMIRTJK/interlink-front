@@ -15,6 +15,7 @@ import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { FinalSigner } from "../types";
 import { DSStamp } from "./DSStamp";
+import { ConfirmationModal } from "./ConfirmationModal";
 
 interface IProps {
   signer: FinalSigner;
@@ -40,6 +41,7 @@ export const SignerCard = ({
   handleInsertStamp,
 }: IProps) => {
   const [zoomOpen, setZoomOpen] = useState(false);
+  const [showSignConfirm, setShowSignConfirm] = useState(false);
 
   // Параметры штампа ЭЦП — одни и те же для миниатюры в карточке и для модалки
   // в полном размере, чтобы они выглядели идентично.
@@ -116,7 +118,7 @@ export const SignerCard = ({
           </If>
           <If is={!!signer.isInvited && !signer.dsApplied}>
             <button
-              onClick={applyFinalDS}
+              onClick={() => setShowSignConfirm(true)}
               disabled={signer.dsLoading || !isActiveVersionForSign}
               className={cn(
                 "flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border",
@@ -253,6 +255,21 @@ export const SignerCard = ({
         </AnimatePresence>,
         document.body,
       )}
+
+      <ConfirmationModal
+        open={showSignConfirm}
+        title="Подписание документа"
+        message="Вы действительно хотите подписать этот документ своей электронной цифровой подписью (ЭЦП)? После этого редактирование документа будет заблокировано."
+        confirmText="Подписать"
+        icon={<PenLine size={26} strokeWidth={2.2} />}
+        iconBg="bg-purple-50 dark:bg-purple-500/10 text-purple-600"
+        confirmBtnBg="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 shadow-purple-500/25"
+        onConfirm={async () => {
+          applyFinalDS();
+          setShowSignConfirm(false);
+        }}
+        onCancel={() => setShowSignConfirm(false)}
+      />
     </>
   );
 };

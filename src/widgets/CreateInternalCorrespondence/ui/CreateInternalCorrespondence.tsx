@@ -58,6 +58,7 @@ import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { If } from "@shared/ui";
 import { message } from "antd";
+import { ConfirmationModal } from "./ConfirmationModal";
 import type {
   // Status,
   ImportanceLevel,
@@ -712,6 +713,8 @@ export const CreateInternalCorrespondence = ({
   const [showFontSizeDropdown, setShowFontSizeDropdown] = useState(false);
   const [orientation, setOrientation] = useState<PageOrientation>("portrait");
   const [showPreview, setShowPreview] = useState(false);
+  const [showCancelSignConfirm, setShowCancelSignConfirm] = useState(false);
+  const [showSendConfirm, setShowSendConfirm] = useState(false);
   // Страницы для предпросмотра — берём из разложенного редактора в момент
   // открытия, чтобы предпросмотр совпадал с холстом 1-в-1.
   const [previewPages, setPreviewPages] = useState<string[]>([]);
@@ -3751,7 +3754,7 @@ export const CreateInternalCorrespondence = ({
             <If is={isSigned && !isAlreadySent}>
               <button
                 type="button"
-                onClick={() => message.info("API отмены подписи находится в доработке")}
+                onClick={() => setShowCancelSignConfirm(true)}
                 className="flex items-center gap-2 cursor-pointer px-4 py-2 text-sm font-semibold transition-all border border-red-200 text-red-600 bg-white hover:bg-red-50 rounded-xl"
               >
                 <Undo size={15} />
@@ -3769,7 +3772,7 @@ export const CreateInternalCorrespondence = ({
                     isAlreadySent
                   )
                     return;
-                  sendCorrespondence({});
+                  setShowSendConfirm(true);
                 }}
                 disabled={
                   !to.length ||
@@ -4952,8 +4955,37 @@ export const CreateInternalCorrespondence = ({
             </div>
           </div>
 
-          
       </div>
+      
+      <ConfirmationModal
+        open={showCancelSignConfirm}
+        title="Отмена подписи"
+        message="Вы действительно хотите отозвать свою подпись? Документ будет переведен обратно в статус «На подпись»."
+        confirmText="Отозвать"
+        icon={<Undo size={26} strokeWidth={2.2} />}
+        iconBg="bg-red-50 dark:bg-red-500/10 text-red-500"
+        confirmBtnBg="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-red-500/25"
+        onConfirm={async () => {
+          message.info("API отмены подписи находится в доработке");
+          setShowCancelSignConfirm(false);
+        }}
+        onCancel={() => setShowCancelSignConfirm(false)}
+      />
+
+      <ConfirmationModal
+        open={showSendConfirm}
+        title="Отправка письма"
+        message="Пожалуйста, перед отправкой внимательно проверьте тему письма, список получателей и прикрепленные файлы. Отменить отправку будет невозможно!"
+        confirmText="Отправить"
+        icon={<Send size={26} strokeWidth={2.2} />}
+        iconBg="bg-blue-50 dark:bg-blue-500/10 text-blue-500"
+        confirmBtnBg="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-blue-500/25"
+        onConfirm={async () => {
+          sendCorrespondence({});
+          setShowSendConfirm(false);
+        }}
+        onCancel={() => setShowSendConfirm(false)}
+      />
     </div>
   );
 };
