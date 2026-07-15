@@ -30,10 +30,16 @@ export const CustomDatePicker = ({
 	const [open, setOpen] = useState(false);
 	const [view, setView] = useState<"calendar" | "years">("calendar");
 
-	const initialDate = value ? new Date(value) : new Date();
-	const [currentYear, setCurrentYear] = useState(initialDate.getFullYear());
-	const [currentMonth, setCurrentMonth] = useState(initialDate.getMonth());
-	const [yearPage, setYearPage] = useState(Math.floor(currentYear / 12) * 12);
+  const getSafeInitialDate = (val?: string) => {
+    if (!val) return new Date();
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? new Date() : d;
+  };
+
+  const initialDate = getSafeInitialDate(value);
+  const [currentYear, setCurrentYear] = useState(initialDate.getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(initialDate.getMonth());
+  const [yearPage, setYearPage] = useState(Math.floor(currentYear / 12) * 12);
 
 	useEffect(() => {
 		if (!value) return;
@@ -79,20 +85,13 @@ export const CustomDatePicker = ({
 		setView("calendar");
 	};
 
-	const formattedValue = value
-		? new Date(value).toLocaleDateString("ru-RU")
-		: "";
-	const selectedDate = value ? new Date(value) : null;
-	// Бывший код..
-	// const days = Array(getFirstDayOfMonth(currentYear, currentMonth)).fill(null)
-	//   .concat(Array.from({ length: getDaysInMonth(currentYear, currentMonth) }, (_, i) => i + 1));
+  const parsedDate = value ? new Date(value) : null;
+  const isValidDate = parsedDate !== null && !isNaN(parsedDate.getTime());
+  const formattedValue = isValidDate && parsedDate ? parsedDate.toLocaleDateString("ru-RU") : "";
+  const selectedDate = isValidDate ? parsedDate : null;
 
-	const daysInMonth = getDaysInMonth(currentYear, currentMonth) ?? 0;
-	const days: (number | null)[] = Array(
-		getFirstDayOfMonth(currentYear, currentMonth) ?? 0,
-	)
-		.fill(null)
-		.concat(Array.from({ length: daysInMonth }, (_, i) => i + 1));
+  const days = Array(getFirstDayOfMonth(currentYear, currentMonth)).fill(null)
+    .concat(Array.from({ length: getDaysInMonth(currentYear, currentMonth) }, (_, i) => i + 1));
 
 	const years = Array.from({ length: 12 }, (_, i) => yearPage + i);
 
