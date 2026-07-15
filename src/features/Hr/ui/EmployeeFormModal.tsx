@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { IAdminUser, IPassportOcrData, IPassportOcrResponse } from "@entities/hr";
 import { ApiRoutes } from "@shared/api";
-import { useMutationQuery } from "@shared/lib";
+import { useMutationQuery, tokenControl } from "@shared/lib";
 import { If } from "@shared/ui";
 import { EmployeeFormFields } from "./EmployeeFormFields";
 import { PassportUploadStep, IPassportFile, IPassportSides } from "./PassportUploadStep";
@@ -73,6 +73,12 @@ const readPassportDraft = (): IPassportSides => {
 
 export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
   const isEdit = !!employee?.id;
+  // Через админ-форму можно отредактировать самого себя. Тогда фото/данные текущего
+  // пользователя показываются ещё и в шапке/сайдбаре/меню (общий запрос
+  // FETCH_USER_BY_ID/{id}) и в профиле (AUTH_ME) — их надо инвалидировать отдельно,
+  // иначе аватар в Header не обновится сразу после сохранения.
+  const currentUserId = tokenControl.getUserId();
+  const isSelf = isEdit && String(employee?.id) === String(currentUserId);
   const [values, setValues] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [passport, setPassport] = useState<IPassportSides>(EMPTY_PASSPORT);
@@ -100,7 +106,12 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
   const updateM = useMutationQuery<FormData>({
     url: () => ApiRoutes.UPDATE_USER.replace(":id", String(employee?.id)),
     method: "POST",
-    messages: { success: "Сотрудник обновлён", invalidate: [ApiRoutes.GET_USERS] },
+    messages: {
+      success: "Сотрудник обновлён",
+      invalidate: isSelf
+        ? [ApiRoutes.GET_USERS, ApiRoutes.AUTH_ME, `${ApiRoutes.FETCH_USER_BY_ID}${currentUserId}`]
+        : [ApiRoutes.GET_USERS],
+    },
   });
 
   // Загрузка фото паспорта + OCR (multipart/form-data). В ответе — пути к файлам и
