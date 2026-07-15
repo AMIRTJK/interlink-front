@@ -3915,7 +3915,7 @@ export const CreateInternalCorrespondence = ({
                           initial={{ opacity: 0, y: -6 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -6 }}
-                          className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden py-1"
+                          className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-[80] overflow-y-auto max-h-[180px] py-1"
                         >
                           {letterTypeOptions.map((opt) => (
                             <button
@@ -3976,7 +3976,7 @@ export const CreateInternalCorrespondence = ({
                           initial={{ opacity: 0, y: -6, scale: 0.97 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                          className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden py-1 min-w-[220px]"
+                          className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-[80] overflow-hidden py-1 min-w-[220px]"
                         >
                           {importanceOptions.map((opt) => (
                             <button
