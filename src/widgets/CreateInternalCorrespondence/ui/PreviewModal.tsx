@@ -8,8 +8,11 @@ import {
   Maximize2,
   ChevronLeft,
   ChevronRight,
+  Paperclip,
 } from "lucide-react";
-import type { PageOrientation } from "../types";
+import { If } from "@shared/ui";
+import { cn } from "@shared/lib";
+import type { PageOrientation, AttachedFile } from "../types";
 import { DSStamp } from "./DSStamp";
 
 const PAGE_PAD_H = 80;
@@ -76,13 +79,11 @@ export const PreviewModal = ({
   stampCertSerial,
   stampSignedAt,
   stampValidUntil,
+  attachments,
 }: {
   subject: string;
   editorHtml: string;
-  // Готовые страницы из разложенного редактора. Если переданы — используются
-  // напрямую (предпросмотр совпадает с холстом), иначе модалка считает сама.
   pages?: string[];
-  // Штамп ЭЦП из той же live-DOM, что и pages (страница/координаты).
   stamp?: {
     pageIndex: number;
     x: number;
@@ -100,6 +101,7 @@ export const PreviewModal = ({
   stampCertSerial: string;
   stampSignedAt: string;
   stampValidUntil: string;
+  attachments?: AttachedFile[];
 }) => {
   const isLandscape = orientation === "landscape";
   const pageWidth = isLandscape ? 1122 : 794;
@@ -115,6 +117,7 @@ export const PreviewModal = ({
   const [pages, setPages] = useState<string[]>([]);
   const [zoom, setZoom] = useState(1);
   const [currentPage, setCurrentPage] = useState(0);
+  const [showAttachments, setShowAttachments] = useState(false);
 
   // Стейт для унифицированного штампа ЭЦП (как для плейсхолдера, так и для вшитого)
   const [activeStamp, setActiveStamp] = useState<{
@@ -424,6 +427,57 @@ export const PreviewModal = ({
               </button>
             </div>
 
+            <If is={attachments !== undefined && attachments.length > 0}>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowAttachments(!showAttachments)}
+                  className={cn(
+                    "flex items-center gap-2 px-3.5 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer select-none",
+                    showAttachments && "bg-slate-600 border-slate-500"
+                  )}
+                >
+                  <Paperclip size={14} className="text-blue-400" />
+                  <span className="hidden md:inline">Вложения</span>
+                  <span className="flex items-center justify-center bg-blue-500/20 text-blue-300 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                    {attachments!.length}
+                  </span>
+                </button>
+                
+                <AnimatePresence>
+                  <If is={showAttachments}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-72 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3 font-sans"
+                    >
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        Список вложений ({attachments!.length})
+                      </p>
+                      <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
+                        {attachments!.map((file) => (
+                          <div
+                            key={file.id}
+                            className="flex items-center gap-3 px-3 py-2 bg-slate-700/50 border border-slate-600/50 rounded-xl text-xs text-slate-200"
+                          >
+                            <Paperclip size={14} className="text-blue-400 flex-shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold truncate text-slate-100" title={file.name}>
+                                {file.name}
+                              </p>
+                              <p className="text-[10px] text-slate-400">{file.size}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  </If>
+                </AnimatePresence>
+              </div>
+            </If>
+
             <button
               onClick={onClose}
               className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white text-sm font-medium rounded-xl transition-colors"
@@ -437,20 +491,19 @@ export const PreviewModal = ({
         {/* Рабочая область */}
         <div
           className="flex-1 flex flex-col justify-between items-center py-4 overflow-hidden bg-slate-900/10"
-          onClick={onClose}
+          onClick={() => {
+            if (showAttachments) setShowAttachments(false);
+            else onClose();
+          }}
         >
           <div
             ref={scrollRef}
             className="preview-scroll flex-1 w-full overflow-auto p-4 flex"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (showAttachments) setShowAttachments(false);
+            }}
           >
-            {/* Внешняя обёртка занимает РЕАЛЬНЫЙ (масштабированный) размер листа в
-                потоке — transform на размеры макета не влияет, поэтому раньше при
-                «По размеру» лист занимал полные 794×1122 и появлялся скролл. Теперь
-                габариты = pageW×zoom / pageH×zoom, а сам лист внутри масштабируется
-                трансформом. Скролл появляется только когда зум > вписанного.
-                margin:auto центрирует лист, но в отличие от justify-center не
-                «обрезает» верх/левый край при прокрутке увеличенного листа. */}
             <div
               style={{
                 width: pageWidth * zoom,
@@ -469,82 +522,79 @@ export const PreviewModal = ({
                   transition: "transform 0.1s ease-out",
                 }}
               >
-              <motion.div
-                key={currentPage}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.15 }}
-                className="bg-white shadow-2xl border border-slate-300 w-full h-full"
-                style={{
-                  // В режиме готовых страниц блоки спозиционированы абсолютно по
-                  // координатам холста — поля уже учтены, padding не нужен.
-                  padding: usingProvidedPages
-                    ? 0
-                    : `${PAGE_PAD_V}px ${PAGE_PAD_H}px`,
-                  position: "relative",
-                  boxSizing: "border-box",
-                  overflow: "hidden",
-                }}
-              >
-                {usingProvidedPages ? (
-                  <div
-                    className={CONTENT_CLASS}
-                    style={{
-                      ...CONTENT_STYLE,
-                      position: "absolute",
-                      inset: 0,
-                    }}
-                    dangerouslySetInnerHTML={{
-                      __html: sheets[currentPage] || "",
-                    }}
-                  />
-                ) : sheets[currentPage] ? (
-                  <div
-                    className={CONTENT_CLASS}
-                    style={{ ...CONTENT_STYLE, height: "100%" }}
-                    dangerouslySetInnerHTML={{ __html: sheets[currentPage] }}
-                  />
-                ) : (
-                  <p
-                    style={{
-                      ...CONTENT_STYLE,
-                      color: "#94a3b8",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    Текст письма не введён...
-                  </p>
-                )}
+                <motion.div
+                  key={currentPage}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="bg-white shadow-2xl border border-slate-300 w-full h-full"
+                  style={{
+                    padding: usingProvidedPages
+                      ? 0
+                      : `${PAGE_PAD_V}px ${PAGE_PAD_H}px`,
+                    position: "relative",
+                    boxSizing: "border-box",
+                    overflow: "hidden",
+                  }}
+                >
+                  {usingProvidedPages ? (
+                    <div
+                      className={CONTENT_CLASS}
+                      style={{
+                        ...CONTENT_STYLE,
+                        position: "absolute",
+                        inset: 0,
+                      }}
+                      dangerouslySetInnerHTML={{
+                        __html: sheets[currentPage] || "",
+                      }}
+                    />
+                  ) : sheets[currentPage] ? (
+                    <div
+                      className={CONTENT_CLASS}
+                      style={{ ...CONTENT_STYLE, height: "100%" }}
+                      dangerouslySetInnerHTML={{ __html: sheets[currentPage] }}
+                    />
+                  ) : (
+                    <p
+                      style={{
+                        ...CONTENT_STYLE,
+                        color: "#94a3b8",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Текст письма не введён...
+                    </p>
+                  )}
 
-                {/* Единый рендеринг штампа ЭЦП на правильной странице предпросмотра */}
-                {activeStamp && activeStamp.pageIndex === currentPage && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: PAGE_PAD_H + activeStamp.x,
-                      top: PAGE_PAD_V + activeStamp.y,
-                      width: activeStamp.width,
-                      height: "auto",
-                      overflow: "hidden",
-                      pointerEvents: "none",
-                      zIndex: 50,
-                    }}
-                  >
-                    {activeStamp.html ? (
-                      <div
-                        dangerouslySetInnerHTML={{ __html: activeStamp.html }}
-                      />
-                    ) : (
-                      <DSStamp
-                        name={stampSignerName}
-                        certSerial={stampCertSerial}
-                        signedAt={stampSignedAt}
-                        validUntil={stampValidUntil}
-                      />
-                    )}
-                  </div>
-                )}
-              </motion.div>
+                  {activeStamp && activeStamp.pageIndex === currentPage && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: PAGE_PAD_H + activeStamp.x,
+                        top: PAGE_PAD_V + activeStamp.y,
+                        width: activeStamp.width,
+                        height: "auto",
+                        overflow: "hidden",
+                        pointerEvents: "none",
+                        zIndex: 50,
+                      }}
+                    >
+                      {activeStamp.html ? (
+                        <div
+                          dangerouslySetInnerHTML={{ __html: activeStamp.html }}
+                        />
+                      ) : (
+                        <DSStamp
+                          name={stampSignerName}
+                          certSerial={stampCertSerial}
+                          signedAt={stampSignedAt}
+                          validUntil={stampValidUntil}
+                        />
+                      )}
+                    </div>
+                  )}
+                </motion.div>
               </div>
             </div>
           </div>

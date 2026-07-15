@@ -47,8 +47,9 @@ const MOVE_HEADER_CHANGE_EVENT = "moveheaderchange";
 
 export const useMoveHeader = (): [boolean, (val: boolean) => void] => {
   const [moveHeader, setMoveHeaderState] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem(MOVE_HEADER_KEY) === "true";
+    if (typeof window === "undefined") return true;
+    const saved = localStorage.getItem(MOVE_HEADER_KEY);
+    return saved === null ? true : saved === "true";
   });
 
   const setMoveHeader = useCallback((val: boolean) => {
@@ -59,7 +60,8 @@ export const useMoveHeader = (): [boolean, (val: boolean) => void] => {
 
   useEffect(() => {
     const sync = () => {
-      setMoveHeaderState(localStorage.getItem(MOVE_HEADER_KEY) === "true");
+      const saved = localStorage.getItem(MOVE_HEADER_KEY);
+      setMoveHeaderState(saved === null ? true : saved === "true");
     };
     window.addEventListener(MOVE_HEADER_CHANGE_EVENT, sync);
     window.addEventListener("storage", sync);
