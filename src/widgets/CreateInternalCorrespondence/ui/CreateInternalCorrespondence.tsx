@@ -56,6 +56,8 @@ import {
 } from "lucide-react";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { If } from "@shared/ui";
+import { message } from "antd";
 import type {
   // Status,
   ImportanceLevel,
@@ -3745,6 +3747,17 @@ export const CreateInternalCorrespondence = ({
               )}
               <span>Сохранить</span>
             </button>
+
+            <If is={isSigned && !isAlreadySent}>
+              <button
+                type="button"
+                onClick={() => message.info("API отмены подписи находится в доработке")}
+                className="flex items-center gap-2 cursor-pointer px-4 py-2 text-sm font-semibold transition-all border border-red-200 text-red-600 bg-white hover:bg-red-50 rounded-xl"
+              >
+                <Undo size={15} />
+                <span>Отменить подпись</span>
+              </button>
+            </If>
 
             {!!id && (
               <button
