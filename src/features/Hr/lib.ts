@@ -1,4 +1,26 @@
 import { IAdminUser, IPassportOcrFields } from "@entities/hr";
+import { getEnvVar } from "@shared/config";
+
+// Аватар сотрудника: backend возвращает готовый публичный photo_url — используем его.
+// Внутренний photo_path напрямую в <img src> не годится; достраиваем URL из него лишь
+// как запасной вариант для старых записей, у которых photo_url ещё не пришёл
+// (такие фото лежат в приватном хранилище и, скорее всего, не откроются — нужен повторный аплоад).
+export const resolveEmployeePhotoUrl = (
+  user?: Pick<IAdminUser, "photo_url" | "photo_path"> | null
+): string => {
+  if (!user) return "";
+  if (user.photo_url) return user.photo_url;
+  const path = user.photo_path;
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+    return path;
+  }
+  const apiHost = getEnvVar("VITE_API_URL") || "";
+  const host = apiHost.endsWith("/") ? apiHost.slice(0, -1) : apiHost;
+  let p = path.replace(/^\/+/, "");
+  if (!p.startsWith("storage/")) p = `storage/${p}`;
+  return `${host}/${p}`;
+};
 
 export const transformOrgs = (res: unknown) => {
   const data = (res as { data: { data: { id: number; name: string }[] } })?.data?.data || [];

@@ -115,7 +115,7 @@ export const ProfileInfoTab = ({
 
 	useEffect(() => {
 		setAvatarError(false);
-	}, [userData?.photo_path]);
+	}, [userData?.photo_url, userData?.photo_path]);
 	const themeKey =
 		currentTheme || localStorage.getItem("currentTheme") || "emerald";
 	const activeTheme = THEMES[themeKey] || THEMES.emerald;
@@ -185,7 +185,7 @@ export const ProfileInfoTab = ({
 								src={
 									avatarError
 										? userAvatar
-										: resolvePhotoUrl(userData?.photo_path) || userAvatar
+										: userData?.photo_url || resolvePhotoUrl(userData?.photo_path) || userAvatar
 								}
 								alt="Аватар"
 								className="w-64 h-64 rounded-[2.5rem] border-2 border-white/60 dark:border-zinc-900/60 object-cover shadow-lg"
