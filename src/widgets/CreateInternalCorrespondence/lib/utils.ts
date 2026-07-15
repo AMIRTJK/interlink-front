@@ -70,6 +70,47 @@ const convertPtToPx = (value: string): string =>
     (_, n: string) => `${(parseFloat(n) * PT_TO_PX).toFixed(1)}px`,
   );
 
+// Chrome при копировании из редактора вшивает в HTML буфера обмена фон
+// подложки под текстом (белый лист, серый холст #E8EAED вокруг листов) как
+// inline background-color. Реальным выделением текста (жёлтый маркер и т.п.)
+// такие нейтральные светлые фоны не являются — при вставке их надо вычищать,
+// иначе вставленный текст получает серую «плашку». Насыщенные цвета
+// (выделение маркером, заливка из Word) сохраняем.
+const isUiBackground = (rawVal: string): boolean => {
+  const v = rawVal.trim().toLowerCase();
+  if (v === "transparent" || v === "white" || v === "none") return true;
+  let r = -1;
+  let g = -1;
+  let b = -1;
+  let a = 1;
+  const rgb = v.match(
+    /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/,
+  );
+  const hex6 = v.match(/^#([0-9a-f]{6})$/);
+  const hex3 = v.match(/^#([0-9a-f]{3})$/);
+  if (rgb) {
+    r = +rgb[1];
+    g = +rgb[2];
+    b = +rgb[3];
+    if (rgb[4] != null) a = parseFloat(rgb[4]);
+  } else if (hex6) {
+    r = parseInt(hex6[1].slice(0, 2), 16);
+    g = parseInt(hex6[1].slice(2, 4), 16);
+    b = parseInt(hex6[1].slice(4, 6), 16);
+  } else if (hex3) {
+    r = parseInt(hex3[1][0] + hex3[1][0], 16);
+    g = parseInt(hex3[1][1] + hex3[1][1], 16);
+    b = parseInt(hex3[1][2] + hex3[1][2], 16);
+  } else {
+    return false; // незнакомый формат — не трогаем
+  }
+  if (a === 0) return true;
+  // Почти бесцветный светлый фон (белый, #E8EAED и близкие оттенки подложки)
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  return max - min <= 16 && min >= 200;
+};
+
 // Оставляем из инлайнового style только полезные для вёрстки текста свойства,
 // переводя пункты в пиксели. Служебные mso-* и всё лишнее выкидываем.
 const sanitizeStyle = (styleText: string): string => {
@@ -81,6 +122,7 @@ const sanitizeStyle = (styleText: string): string => {
     const rawVal = decl.slice(idx + 1).trim();
     if (!prop || !rawVal || prop.startsWith("mso-")) return;
     if (!KEEP_STYLE_PROPS.has(prop)) return;
+    if (prop === "background-color" && isUiBackground(rawVal)) return;
     // Word нередко проставляет «пустые» рамочные значения — пропускаем их.
     if (/^(0|0px|0pt|normal|auto|none|inherit|initial)$/i.test(rawVal)) {
       if (prop !== "list-style-type") return;

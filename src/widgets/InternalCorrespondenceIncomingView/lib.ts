@@ -32,6 +32,126 @@ export const contentStyle = (fontSize: number): React.CSSProperties => ({
 
 const ATOMIC = new Set(["TABLE", "IMG", "FIGURE", "SVG", "VIDEO", "CANVAS"]);
 
+// ===== Посимвольное деление блока с СОХРАНЕНИЕМ разметки =====
+// Пара операций «голова/хвост»: truncateToChars оставляет первые N символов
+// текста, dropChars — всё после первых N. Жирный/курсив/span'ы/<br> при этом
+// сохраняются. Старый способ (block.textContent = slice) уничтожал все
+// переносы строк и форматирование внутри разрезанного блока.
+
+// Обрезать узел до первых N символов текста, сохраняя структуру. Элементы
+// после исчерпания бюджета удаляются целиком (включая <br> на самой границе —
+// он считается принадлежащим хвосту, см. brAtCharBoundary).
+export const truncateToChars = (node: Node, budget: { left: number }) => {
+  const children = Array.from(node.childNodes);
+  for (const c of children) {
+    if (budget.left <= 0) {
+      node.removeChild(c);
+      continue;
+    }
+    if (c.nodeType === Node.TEXT_NODE) {
+      const len = c.textContent?.length ?? 0;
+      if (len <= budget.left) budget.left -= len;
+      else {
+        c.textContent = (c.textContent || "").slice(0, budget.left);
+        budget.left = 0;
+      }
+    } else {
+      truncateToChars(c, budget);
+    }
+  }
+};
+
+// Зеркальная операция: удалить первые N символов текста, сохранив разметку
+// остатка. «Нулевые» элементы (<br>, <img>, пустые обёртки), встреченные ДО
+// точки разреза, принадлежат голове и удаляются из хвоста.
+export const dropChars = (node: Node, budget: { left: number }) => {
+  const children = Array.from(node.childNodes);
+  for (const c of children) {
+    if (budget.left <= 0) return;
+    if (c.nodeType === Node.TEXT_NODE) {
+      const len = c.textContent?.length ?? 0;
+      if (len <= budget.left) {
+        budget.left -= len;
+        (c as ChildNode).remove();
+      } else {
+        c.textContent = (c.textContent || "").slice(budget.left);
+        budget.left = 0;
+      }
+    } else if (c.nodeType === Node.ELEMENT_NODE) {
+      const el = c as Element;
+      const textLen = (el.textContent || "").length;
+      if (textLen === 0) {
+        // <br>/<img>/пустые обёртки до точки разреза — часть головы
+        el.remove();
+        continue;
+      }
+      if (
+        textLen <= budget.left &&
+        !el.querySelector("br,img,svg,video,canvas")
+      ) {
+        budget.left -= textLen;
+        el.remove();
+      } else {
+        dropChars(el, budget);
+        if (
+          !(el.textContent || "").length &&
+          !el.querySelector("br,img,svg,video,canvas")
+        ) {
+          el.remove();
+        }
+      }
+    } else {
+      (c as ChildNode).remove();
+    }
+  }
+};
+
+// Стоит ли в исходном блоке <br> ровно в точке разреза (сразу после k
+// символов)? Такой <br> «закрывал» последнюю строку головы: голове он не
+// нужен (хвостовой <br> невидим), а в хвосте дал бы лишнюю пустую строку.
+export const brAtCharBoundary = (root: HTMLElement, k: number): boolean => {
+  const walker = document.createTreeWalker(
+    root,
+    NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+    null,
+  );
+  let acc = 0;
+  let n: Node | null;
+  while ((n = walker.nextNode())) {
+    if (n.nodeType === Node.TEXT_NODE) {
+      const len = n.textContent?.length ?? 0;
+      if (acc + len > k) return false; // разрез внутри текста (перенос по ширине)
+      acc += len;
+    } else if ((n as Element).nodeName === "BR") {
+      if (acc === k) return true;
+    }
+  }
+  return false;
+};
+
+// Удаляет первый «ведущий» <br> хвоста (пустую строку на стыке разреза).
+// Останавливается, встретив любой текст или атомарный элемент.
+export const removeLeadingBr = (root: HTMLElement): void => {
+  const walker = document.createTreeWalker(
+    root,
+    NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+    null,
+  );
+  let n: Node | null;
+  while ((n = walker.nextNode())) {
+    if (n.nodeType === Node.TEXT_NODE) {
+      if ((n.textContent || "").length) return;
+      continue;
+    }
+    const el = n as Element;
+    if (el.nodeName === "BR") {
+      el.remove();
+      return;
+    }
+    if (ATOMIC.has(el.nodeName)) return;
+  }
+};
+
 const BLOCK_TAGS = new Set([
   "DIV",
   "P",
@@ -162,34 +282,51 @@ export const paginateHtml = (
       }
     };
 
-    // Блок, который сам по себе выше страницы, режем по символам (бинарным поиском).
+    // Блок, который сам по себе выше страницы, режем на постраничные куски
+    // бинарным поиском по числу символов — с СОХРАНЕНИЕМ разметки (жирный,
+    // курсив, <br> и т.д.), а не через textContent, стиравший форматирование.
     const splitOversized = (el: HTMLElement) => {
-      const full = el.textContent || "";
-      const n = full.length;
-      let start = 0;
+      let rest: HTMLElement | null = el.cloneNode(true) as HTMLElement;
       let guard = 0;
-      while (start < n && guard++ < 5000) {
-        measurer.innerHTML = "";
-        const chunk = el.cloneNode(false) as HTMLElement;
-        measurer.appendChild(chunk);
+      while (rest && guard++ < 5000) {
+        const total = (rest.textContent || "").length;
+        if (!total) break;
 
-        let lo = start + 1;
-        let hi = n;
-        let best = start + 1;
+        const probeFits = (k: number): boolean => {
+          const probe = rest!.cloneNode(true) as HTMLElement;
+          truncateToChars(probe, { left: k });
+          measurer.innerHTML = "";
+          measurer.appendChild(probe);
+          return fits();
+        };
+
+        let lo = 1;
+        let hi = total;
+        let best = 1;
         while (lo <= hi) {
           const mid = (lo + hi) >> 1;
-          chunk.textContent = full.slice(start, mid);
-          if (fits()) {
+          if (probeFits(mid)) {
             best = mid;
             lo = mid + 1;
           } else {
             hi = mid - 1;
           }
         }
-        chunk.textContent = full.slice(start, best);
+
+        const head = rest.cloneNode(true) as HTMLElement;
+        truncateToChars(head, { left: best });
+        measurer.innerHTML = "";
+        measurer.appendChild(head);
         pages.push(measurer.innerHTML);
         measurer.innerHTML = "";
-        start = best;
+
+        if (best >= total) break;
+        const tail = rest.cloneNode(true) as HTMLElement;
+        dropChars(tail, { left: best });
+        if (brAtCharBoundary(rest, best)) removeLeadingBr(tail);
+        rest = (tail.textContent || "").trim() || tail.querySelector("br,img")
+          ? tail
+          : null;
       }
     };
 

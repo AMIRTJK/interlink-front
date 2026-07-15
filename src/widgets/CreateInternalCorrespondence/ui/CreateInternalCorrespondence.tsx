@@ -100,6 +100,10 @@ import { OriginalLetterPanel } from "./OriginalLetterPanel";
 import { OriginalLetterCanvas } from "./OriginalLetterCanvas";
 import {
   paginateHtml,
+  truncateToChars,
+  dropChars,
+  brAtCharBoundary,
+  removeLeadingBr,
   type StampInfo,
 } from "../../InternalCorrespondenceIncomingView/lib";
 import { ApproversPanel } from "./ApproversPanel";
@@ -357,27 +361,6 @@ const charPosAt = (
     acc += len;
   }
   return { node: root, offset: root.childNodes.length };
-};
-
-// Обрезать клон до первых N символов, сохраняя структуру/форматирование
-const truncateToChars = (node: Node, budget: { left: number }) => {
-  const children = Array.from(node.childNodes);
-  for (const c of children) {
-    if (budget.left <= 0) {
-      node.removeChild(c);
-      continue;
-    }
-    if (c.nodeType === Node.TEXT_NODE) {
-      const len = c.textContent?.length ?? 0;
-      if (len <= budget.left) budget.left -= len;
-      else {
-        c.textContent = (c.textContent || "").slice(0, budget.left);
-        budget.left = 0;
-      }
-    } else {
-      truncateToChars(c, budget);
-    }
-  }
 };
 
 // Удаление распорки без потери содержимого: браузер при Backspace/Delete на
@@ -802,6 +785,10 @@ export const CreateInternalCorrespondence = ({
   const wordInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const paginateEditorRef = useRef<(() => number) | null>(null);
+  // Высота содержимого редактора после последней пагинации. Нужна страховке на
+  // ResizeObserver, чтобы отличать собственные правки пагинатора (высота уже
+  // учтена) от внешних изменений (картинка загрузилась, innerHTML заменили).
+  const lastPaginatedHeightRef = useRef(0);
 
   const isLandscape = orientation === "landscape";
   const PAGE_WIDTH = isLandscape ? 1122 : 794;
@@ -1335,6 +1322,9 @@ export const CreateInternalCorrespondence = ({
             const stampHTML = `<div data-signature-stamp="true" contenteditable="false" style="position:absolute;left:${stampPos.x}px;top:${stampPos.y}px;width:${widthStr};height:${stampHeightVal}px;max-height:${stampHeightVal}px;z-index:99;user-select:none;-webkit-user-select:none;cursor:default;overflow:hidden!important;display:block!important;line-height:0!important;padding:0!important;margin:0!important;border:none!important;"><img src="${stampDataUri}" alt="ЭЦП" style="display:block!important;width:100%!important;height:${stampHeightVal}px!important;max-height:${stampHeightVal}px!important;pointer-events:none!important;-webkit-user-drag:none!important;padding:0!important;margin:0!important;border:none!important;outline:none!important;line-height:0!important;" /></div>`;
 
             editorRef.current.innerHTML += stampHTML;
+            // innerHTML-присвоение идёт мимо onInput — синхронизируем стейт,
+            // чтобы сохранение/предпросмотр видели тело письма со штампом.
+            setEditorContent(getCleanEditorHtml());
           }
         }
 
@@ -1605,7 +1595,11 @@ export const CreateInternalCorrespondence = ({
   };
 
   const execCmd = useCallback((command: string, value?: string) => {
-    editorRef.current?.focus();
+    const editor = editorRef.current;
+    // contentEditable=false — режим «только чтение» (подписано / старая
+    // версия): команды форматирования заблокированы.
+    if (!editor || !editor.isContentEditable) return;
+    editor.focus();
     document.execCommand(command, false, value);
   }, []);
 
@@ -1834,24 +1828,46 @@ export const CreateInternalCorrespondence = ({
   }, [rawWorkflowData]);
 
   const handleFontSize = (size: string) => {
-    setFontSize(size);
     setShowFontSizeDropdown(false);
-    editorRef.current?.focus();
+    const editor = editorRef.current;
+    // Подписанный документ / старая версия — размер шрифта менять нельзя.
+    if (!editor || !editor.isContentEditable) return;
+    setFontSize(size);
+    editor.focus();
+
+    // Точный размер для выделенного текста. execCommand("fontSize") умеет
+    // только 7 ступеней HTML (small/large/…): 13/14 давали одинаковые 16px, а
+    // «16» реально печатала 18px — измерения пагинации расходились с ожидаемым.
+    // Ставим ступень-маркер 7, затем переписываем её на точный px-размер.
+    const sel = window.getSelection();
+    const hasRangeSelection =
+      !!sel &&
+      sel.rangeCount > 0 &&
+      !sel.isCollapsed &&
+      editor.contains(sel.anchorNode);
+    // Без выделения меняется только базовый размер листа (setFontSize выше).
+    if (!hasRangeSelection) return;
+
     document.execCommand("styleWithCSS", false, "true");
-    const sizeMap: Record<string, string> = {
-      "10": "1",
-      "11": "1",
-      "12": "2",
-      "13": "3",
-      "14": "3",
-      "16": "4",
-      "18": "4",
-      "20": "5",
-      "24": "6",
-      "28": "6",
-      "36": "7",
-    };
-    document.execCommand("fontSize", false, sizeMap[size] ?? "3");
+    document.execCommand("fontSize", false, "7");
+    editor
+      .querySelectorAll<HTMLElement>('span[style*="font-size"]')
+      .forEach((s) => {
+        const fs = s.style.fontSize;
+        if (fs === "xxx-large" || fs === "-webkit-xxx-large") {
+          s.style.fontSize = `${size}px`;
+        }
+      });
+    // Fallback: некоторые движки вместо span со стилем вставляют <font size="7">
+    editor.querySelectorAll<HTMLElement>('font[size="7"]').forEach((f) => {
+      const span = document.createElement("span");
+      span.style.fontSize = `${size}px`;
+      while (f.firstChild) span.appendChild(f.firstChild);
+      f.replaceWith(span);
+    });
+
+    // Немедленная перепагинация с новым размером — без ожидания rAF-цепочки.
+    syncEditorAfterDomEdit();
   };
 
   // HTML без служебных артефактов (распорки/разрезы) — для сохранения и превью
@@ -1861,9 +1877,11 @@ export const CreateInternalCorrespondence = ({
     return cleanEditorArtifacts(el.innerHTML) || "<p></p>";
   }, []);
 
-  // Постраничная разбивка редактора. Блок, не помещающийся целиком, уезжает на
-  // следующий лист (распорка). Блок, который сам выше страницы (например, длинная
-  // строка без пробелов), режется по символам. Курсор сохраняется по смещению.
+  // Постраничная разбивка редактора. Абзац, не влезающий до конца страницы,
+  // делится: влезающие строки остаются, хвост уезжает за распорку на следующий
+  // лист (с сохранением разметки; части склеиваются при сохранении). Списки
+  // делятся по пунктам, таблицы — по строкам, атомарные блоки переносятся
+  // целиком. Курсор сохраняется структурно + сверяется по смещению в символах.
   const paginateEditor = useCallback(() => {
     const editor = editorRef.current;
     if (!editor) return 1;
@@ -1888,6 +1906,11 @@ export const CreateInternalCorrespondence = ({
         topBlock = topBlock.parentNode!;
       }
       if (!topBlock) return null;
+      // «Голый» текстовый узел верхнего уровня (например, сразу после вставки
+      // plain-text): структурный путь не работает — editor.children содержит
+      // только элементы, и индекс блока посчитался бы неверно. Позицию
+      // восстановит символьный fallback (getCaretCharOffset) ниже.
+      if (topBlock.nodeType !== Node.ELEMENT_NODE) return null;
 
       // Считаем индекс этого блока среди всех детей, игнорируя распорки spacer
       const children = Array.from(editor.children);
@@ -1971,6 +1994,21 @@ export const CreateInternalCorrespondence = ({
 
     // Сохраняем положение курсора через структуру
     const caretSnapshot = saveCaretStructure();
+    // Эталонный символьный снимок: пагинация переставляет/режет/клеит блоки,
+    // НЕ меняя сам текст, поэтому абсолютное смещение в символах инвариантно.
+    // Структурный снимок точнее в пустых блоках, но ломается, когда блоки
+    // сливаются/разрезаются (сдвигаются индексы) — тогда после структурного
+    // восстановления позиция сверяется по символам и чинится fallback'ом.
+    const caretChars = getCaretCharOffset(editor);
+    const restoreCaretHybrid = () => {
+      restoreCaretStructure(caretSnapshot);
+      if (caretChars) {
+        const after = getCaretCharOffset(editor);
+        if (!after || after.offset !== caretChars.offset) {
+          restoreCaretCharOffset(editor, caretChars);
+        }
+      }
+    };
     let textMutated = false;
 
     // 1. Убираем старые распорки и собираем ранее разрезанные блоки обратно
@@ -2007,7 +2045,8 @@ export const CreateInternalCorrespondence = ({
       editor.scrollHeight <= CONTENT_HEIGHT &&
       !editor.querySelector(`[${PAGE_BREAK_ATTR}]`)
     ) {
-      if (textMutated) restoreCaretStructure(caretSnapshot);
+      if (textMutated) restoreCaretHybrid();
+      lastPaginatedHeightRef.current = editor.scrollHeight;
       return 1;
     }
 
@@ -2108,6 +2147,138 @@ export const CreateInternalCorrespondence = ({
       return true;
     };
 
+    // Списки (UL/OL) делим по пунктам <li>, как таблицы по строкам: пункты, не
+    // влезшие до конца страницы, переезжают в список-продолжение с теми же
+    // атрибутами. Обе части — в одной AUTOSPLIT-группе, при сохранении
+    // склеиваются обратно в один список. Раньше высокий список резался
+    // посимвольно через textContent и терял всю структуру пунктов.
+    const splitListByItems = (
+      list: HTMLElement,
+      usableBottom: number,
+      page: number,
+      pageStart: number,
+    ): boolean => {
+      const items = Array.from(list.children).filter(
+        (n): n is HTMLElement => n.tagName === "LI",
+      );
+
+      const moveWholeToNextPage = (): boolean => {
+        if (list.offsetTop > pageStart + 2) {
+          editor.insertBefore(
+            makeSpacer((page + 1) * PAGE_STRIDE - list.offsetTop),
+            list,
+          );
+          return true;
+        }
+        return false;
+      };
+
+      if (items.length < 2) return moveWholeToNextPage();
+
+      // offsetTop у <li> считается относительно списка — меряем через rect и
+      // приводим к системе координат редактора (как у list.offsetTop).
+      const listRectTop = list.getBoundingClientRect().top;
+      const listOffsetTop = list.offsetTop;
+      const itemBottom = (li: HTMLElement) =>
+        li.getBoundingClientRect().bottom - listRectTop + listOffsetTop;
+
+      const splitIdx = items.findIndex(
+        (li) => itemBottom(li) > usableBottom + 1,
+      );
+      if (splitIdx === -1) return false;
+      // Даже первый пункт не влезает в остаток листа — переносим целиком.
+      if (splitIdx === 0) return moveWholeToNextPage();
+
+      const gid = list.getAttribute(AUTOSPLIT_ATTR) || `g${++splitGroupSeq}`;
+      list.setAttribute(AUTOSPLIT_ATTR, gid);
+
+      const tail = list.cloneNode(false) as HTMLElement;
+      // Нумерация продолжения OL продолжает исходную, а не начинается с 1.
+      if (list.tagName === "OL") {
+        const startBase = parseInt(list.getAttribute("start") || "1", 10);
+        tail.setAttribute("start", String(startBase + splitIdx));
+      }
+      for (let k = splitIdx; k < items.length; k++) tail.appendChild(items[k]);
+
+      editor.insertBefore(tail, list.nextSibling);
+      const blockBottom = list.offsetTop + list.offsetHeight;
+      editor.insertBefore(
+        makeSpacer((page + 1) * PAGE_STRIDE - blockBottom),
+        tail,
+      );
+      return true;
+    };
+
+    // Деление абзаца по вертикальному бюджету (остатку места на текущей
+    // странице) с СОХРАНЕНИЕМ разметки: голова остаётся на месте, хвост уезжает
+    // за распорку на следующий лист. Обе части — в одной AUTOSPLIT-группе и при
+    // сохранении склеиваются обратно. Так текст перетекает между страницами
+    // построчно, как в Word, без больших пустых областей внизу листа. Возвращает
+    // false, если в бюджет не влезает ни одной строки.
+    const splitBlockToBudget = (
+      block: HTMLElement,
+      budgetPx: number,
+      page: number,
+    ): boolean => {
+      const total = (block.textContent || "").length;
+      if (total < 2 || budgetPx <= 0) return false;
+
+      const template = block.cloneNode(true) as HTMLElement;
+      const originalHtml = block.innerHTML;
+
+      const headHtmlFor = (k: number): string => {
+        const probe = template.cloneNode(true) as HTMLElement;
+        truncateToChars(probe, { left: k });
+        return probe.innerHTML;
+      };
+
+      // Бинарный поиск числа символов, влезающих в остаток страницы. Меряем на
+      // живом блоке (та же ширина/шрифт/позиция), подменяя содержимое.
+      let lo = 1;
+      let hi = total - 1;
+      let best = 0;
+      while (lo <= hi) {
+        const mid = (lo + hi) >> 1;
+        block.innerHTML = headHtmlFor(mid);
+        if (block.offsetHeight <= budgetPx) {
+          best = mid;
+          lo = mid + 1;
+        } else {
+          hi = mid - 1;
+        }
+      }
+
+      if (best < 1) {
+        block.innerHTML = originalHtml;
+        return false;
+      }
+
+      const tail = template.cloneNode(true) as HTMLElement;
+      dropChars(tail, { left: best });
+      // <br> ровно на границе разреза принадлежит голове (там он невидим);
+      // в хвосте он дал бы лишнюю пустую строку в начале страницы.
+      if (brAtCharBoundary(template, best)) removeLeadingBr(tail);
+      if (!(tail.textContent || "").trim() && !tail.querySelector("br,img")) {
+        // Хвост пуст — деление не имеет смысла.
+        block.innerHTML = originalHtml;
+        return false;
+      }
+
+      block.innerHTML = headHtmlFor(best);
+
+      const gid = block.getAttribute(AUTOSPLIT_ATTR) || `g${++splitGroupSeq}`;
+      block.setAttribute(AUTOSPLIT_ATTR, gid);
+      tail.setAttribute(AUTOSPLIT_ATTR, gid);
+
+      editor.insertBefore(tail, block.nextSibling);
+      const blockBottom = block.offsetTop + block.offsetHeight;
+      editor.insertBefore(
+        makeSpacer((page + 1) * PAGE_STRIDE - blockBottom),
+        tail,
+      );
+      return true;
+    };
+
     // 3. Раскладка по страницам
     let i = 0;
     let guard = 0;
@@ -2148,9 +2319,6 @@ export const CreateInternalCorrespondence = ({
       }
 
       const tag = block.tagName;
-      const splittable =
-        !EDITOR_ATOMIC_TAGS.has(tag) &&
-        (block.textContent || "").trim().length > 0;
 
       // Таблицы паджинируем по строкам (атомарны для посимвольного деления).
       if (tag === "TABLE") {
@@ -2171,52 +2339,42 @@ export const CreateInternalCorrespondence = ({
         continue;
       }
 
-      if (h <= CONTENT_HEIGHT && top > pageStart + 2) {
+      // Списки делим по пунктам: часть остаётся, хвост уезжает на новый лист.
+      if (tag === "UL" || tag === "OL") {
+        if (splitListByItems(block, usableBottom, page, pageStart)) {
+          textMutated = true;
+        }
+        i++;
+        continue;
+      }
+
+      // Блок начинается уже за печатной областью (в зазоре между листами) —
+      // сдвигаем его на начало следующей страницы.
+      if (top >= usableBottom) {
         editor.insertBefore(makeSpacer((page + 1) * PAGE_STRIDE - top), block);
         i++;
         continue;
       }
 
-      if (h > CONTENT_HEIGHT && splittable) {
-        if (top > pageStart + 2) {
-          editor.insertBefore(
-            makeSpacer((page + 1) * PAGE_STRIDE - top),
-            block,
-          );
-          i++;
-          continue;
-        }
+      const splittable =
+        PAGE_SPLITTABLE_TAGS.has(tag) &&
+        !EDITOR_ATOMIC_TAGS.has(tag) &&
+        (block.textContent || "").trim().length > 0;
+
+      // Пробуем отрезать влезающую часть блока в остаток текущей страницы:
+      // абзац перетекает на следующий лист построчно, как в Word. Раньше блок
+      // выше страницы целиком уезжал на следующий лист, оставляя предыдущую
+      // страницу почти пустой (например, после смены размера шрифта).
+      if (splittable && splitBlockToBudget(block, usableBottom - top, page)) {
         textMutated = true;
-        const full = block.textContent || "";
-        let lo = 1;
-        let hi = full.length;
-        let best = 1;
-        while (lo <= hi) {
-          const mid = (lo + hi) >> 1;
-          block.textContent = full.slice(0, mid);
-          if (block.offsetHeight <= CONTENT_HEIGHT) {
-            best = mid;
-            lo = mid + 1;
-          } else {
-            hi = mid - 1;
-          }
-        }
-        block.textContent = full.slice(0, best);
-        const rest = full.slice(best);
-        if (rest) {
-          const gid =
-            block.getAttribute(AUTOSPLIT_ATTR) || `g${++splitGroupSeq}`;
-          block.setAttribute(AUTOSPLIT_ATTR, gid);
-          const next = document.createElement(tag);
-          next.setAttribute(AUTOSPLIT_ATTR, gid);
-          next.textContent = rest;
-          editor.insertBefore(next, block.nextSibling);
-          const blockBottom = block.offsetTop + block.offsetHeight;
-          editor.insertBefore(
-            makeSpacer((page + 1) * PAGE_STRIDE - blockBottom),
-            next,
-          );
-        }
+        i++;
+        continue;
+      }
+
+      // Не делится (атомарный, пустой, или в остаток не влезает ни строки) —
+      // переносим целиком на следующую страницу.
+      if (top > pageStart + 2) {
+        editor.insertBefore(makeSpacer((page + 1) * PAGE_STRIDE - top), block);
         i++;
         continue;
       }
@@ -2224,11 +2382,12 @@ export const CreateInternalCorrespondence = ({
       i++;
     }
 
-    // Восстанавливаем позицию курсора на основе структуры DOM-узлов
-    if (textMutated || caretSnapshot) {
-      restoreCaretStructure(caretSnapshot);
+    // Восстанавливаем позицию курсора: структурно + сверка по символам
+    if (textMutated || caretSnapshot || caretChars) {
+      restoreCaretHybrid();
     }
 
+    lastPaginatedHeightRef.current = editor.scrollHeight;
     return Math.max(1, Math.ceil(editor.scrollHeight / PAGE_STRIDE));
   }, [CONTENT_HEIGHT, PAGE_STRIDE]);
   paginateEditorRef.current = paginateEditor;
@@ -2603,8 +2762,13 @@ export const CreateInternalCorrespondence = ({
       range.insertNode(fragment);
       placeholder?.remove();
 
+      // Инлайновые куски вставки, оказавшиеся на верхнем уровне редактора,
+      // сразу заворачиваем в блоки: «голые» узлы ломают структурный снимок
+      // каретки и постраничную разбивку (см. wrapBareTopLevelNodes).
+      wrapBareTopLevelNodes(editor);
+
       // Курсор после вставленного содержимого
-      if (lastNode) {
+      if (lastNode && editor.contains(lastNode)) {
         const after = document.createRange();
         after.setStartAfter(lastNode);
         after.collapse(true);
@@ -2612,9 +2776,13 @@ export const CreateInternalCorrespondence = ({
         selection?.addRange(after);
       }
 
-      setEditorContent(getCleanEditorHtml());
+      // Пагинация синхронно, а не через rAF: при серии быстрых вставок каждая
+      // следующая ложится в уже разложенный документ с актуальными распорками,
+      // а не в «хвост» с устаревшей разметкой — без случайных пустых
+      // промежутков и лишних отступов.
+      syncEditorAfterDomEdit();
     },
-    [getCleanEditorHtml],
+    [syncEditorAfterDomEdit],
   );
 
   // Превращает очищенный HTML из Word в фрагмент для вставки.
@@ -2880,8 +3048,39 @@ export const CreateInternalCorrespondence = ({
       }
     };
 
-    window.requestAnimationFrame(updatePageCount);
+    // Неисполненный кадр отменяем при каждом новом изменении: при быстрых
+    // последовательных вставках/вводе выполняется одна актуальная пагинация,
+    // а не очередь устаревших друг за другом.
+    const raf = window.requestAnimationFrame(updatePageCount);
+    return () => window.cancelAnimationFrame(raf);
   }, [editorContent, orientation, fontSize, pageCount, paginateEditor]);
+
+  // Страховка от «пропущенной» пагинации: если высота содержимого изменилась
+  // мимо наших обработчиков (загрузилась картинка из Word, внешняя замена
+  // innerHTML без изменения стейта, поздний шрифт), а перепагинация не
+  // запускалась — текст лёг бы в зазор между листами. Собственные правки
+  // пагинатора цикл не создают: после его прохода высота записана в
+  // lastPaginatedHeightRef и совпадает с наблюдаемой.
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    let raf = 0;
+    const ro = new ResizeObserver(() => {
+      if (editor.scrollHeight === lastPaginatedHeightRef.current) return;
+      window.cancelAnimationFrame(raf);
+      raf = window.requestAnimationFrame(() => {
+        if (editor.scrollHeight === lastPaginatedHeightRef.current) return;
+        if (paginateEditorRef.current) {
+          setPageCount(paginateEditorRef.current());
+        }
+      });
+    });
+    ro.observe(editor);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -3102,6 +3301,13 @@ export const CreateInternalCorrespondence = ({
       if (isNewVersionId && currentCleanHtml !== incomingCleanHtml) {
         editorRef.current.innerHTML = targetVersion.content;
         setEditorContent(targetVersion.content);
+        // Пагинируем синхронно, не дожидаясь rAF-цепочки от setEditorContent:
+        // она может не сработать (React пропускает рендер при равном значении
+        // стейта), а в свежезагруженном теле нет распорок — без немедленной
+        // пагинации текст первого рендера ложится в зазор между листами.
+        if (paginateEditorRef.current) {
+          setPageCount(paginateEditorRef.current());
+        }
       }
     }
 
@@ -3785,6 +3991,7 @@ export const CreateInternalCorrespondence = ({
               <div ref={stickyHeaderRef} className="sticky top-0 z-[70] bg-white">
               <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60 flex flex-wrap items-center gap-0.5">
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("undo");
@@ -3794,6 +4001,7 @@ export const CreateInternalCorrespondence = ({
                   <Undo size={14} />
                 </TBtn>
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("redo");
@@ -3804,6 +4012,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("formatBlock", "h1");
@@ -3813,6 +4022,7 @@ export const CreateInternalCorrespondence = ({
                   <Heading1 size={14} />
                 </TBtn>
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("formatBlock", "h2");
@@ -3826,9 +4036,16 @@ export const CreateInternalCorrespondence = ({
                   <button
                     onMouseDown={(e) => {
                       e.preventDefault();
+                      if (isReadOnly) return;
                       setShowFontSizeDropdown((v) => !v);
                     }}
-                    className="flex items-center gap-1 px-2 py-1 rounded text-xs font-mono font-medium text-slate-600 hover:bg-slate-100 transition-colors border border-slate-200 bg-white"
+                    disabled={isReadOnly}
+                    className={cn(
+                      "flex items-center gap-1 px-2 py-1 rounded text-xs font-mono font-medium transition-colors border",
+                      isReadOnly
+                        ? "text-slate-300 border-slate-100 bg-slate-50 cursor-not-allowed"
+                        : "text-slate-600 hover:bg-slate-100 border-slate-200 bg-white",
+                    )}
                   >
                     <span>{fontSize}px</span>
                     <ChevronDown
@@ -3866,6 +4083,7 @@ export const CreateInternalCorrespondence = ({
                 </div>
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("bold");
@@ -3875,6 +4093,7 @@ export const CreateInternalCorrespondence = ({
                   <Bold size={14} />
                 </TBtn>
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("italic");
@@ -3884,6 +4103,7 @@ export const CreateInternalCorrespondence = ({
                   <Italic size={14} />
                 </TBtn>
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("underline");
@@ -3893,6 +4113,7 @@ export const CreateInternalCorrespondence = ({
                   <Underline size={14} />
                 </TBtn>
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("strikeThrough");
@@ -3902,6 +4123,7 @@ export const CreateInternalCorrespondence = ({
                   <Strikethrough size={14} />
                 </TBtn>
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("hiliteColor", "#fef08a");
@@ -3912,6 +4134,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("justifyLeft");
@@ -3921,6 +4144,7 @@ export const CreateInternalCorrespondence = ({
                   <AlignLeft size={14} />
                 </TBtn>
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("justifyCenter");
@@ -3930,6 +4154,7 @@ export const CreateInternalCorrespondence = ({
                   <AlignCenter size={14} />
                 </TBtn>
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("justifyRight");
@@ -3939,6 +4164,7 @@ export const CreateInternalCorrespondence = ({
                   <AlignRight size={14} />
                 </TBtn>
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("justifyFull");
@@ -3949,6 +4175,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("insertUnorderedList");
@@ -3958,6 +4185,7 @@ export const CreateInternalCorrespondence = ({
                   <List size={14} />
                 </TBtn>
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("insertOrderedList");
@@ -3967,6 +4195,7 @@ export const CreateInternalCorrespondence = ({
                   <ListOrdered size={14} />
                 </TBtn>
                 <TBtn
+                  disabled={isReadOnly}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("insertHorizontalRule");
@@ -3981,8 +4210,14 @@ export const CreateInternalCorrespondence = ({
                     e.preventDefault();
                     insertPageBreak();
                   }}
+                  disabled={isReadOnly}
                   title="Разрыв страницы: текст после курсора начнётся с нового листа"
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-colors border flex-shrink-0 bg-white border-slate-200 text-slate-600 hover:bg-slate-100"
+                  className={cn(
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-colors border flex-shrink-0",
+                    isReadOnly
+                      ? "bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed"
+                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-100",
+                  )}
                 >
                   <FilePlus2 size={14} />
                   <span>Новая страница</span>
@@ -4337,7 +4572,7 @@ export const CreateInternalCorrespondence = ({
                         wordBreak: "break-word",
                         overflow: "visible",
                       }}
-                      className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_pre]:whitespace-pre-wrap [&_div:not([data-signature-stamp])]:min-h-[1.8em]"
+                      className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_pre]:whitespace-pre-wrap [&_div:not([data-signature-stamp]):not([data-page-spacer])]:min-h-[1.8em]"
                     />
 
                     {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания.
