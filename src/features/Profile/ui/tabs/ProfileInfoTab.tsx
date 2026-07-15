@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { IUser } from "@entities/login";
 import { ApiRoutes } from "@shared/api";
+import { tokenControl } from "@shared/lib";
 import { useMutationQuery } from "@shared/lib/hooks";
 import { toast } from "@shared/lib/toast";
 import { Loader } from "@shared/ui";
@@ -129,7 +130,10 @@ export const ProfileInfoTab = ({
 			messages: {
 				success: "Фото профиля обновлено",
 				error: "Ошибка при загрузке фото",
-				invalidate: [ApiRoutes.AUTH_ME],
+				// AUTH_ME обновляет сам профиль; шапка/сайдбар/нижнее меню читают текущего
+				// пользователя другим запросом (useProfileUser → FETCH_USER_BY_ID/{id}),
+				// поэтому его тоже инвалидируем — иначе аватар в Header меняется не сразу.
+				invalidate: [ApiRoutes.AUTH_ME, `${ApiRoutes.FETCH_USER_BY_ID}${tokenControl.getUserId()}`],
 			},
 		});
 
