@@ -3668,6 +3668,7 @@ export const CreateInternalCorrespondence = ({
           stampCertSerial={`SN-2026-${finalSigner?.initials}-84201`}
           stampSignedAt="03.02.2026"
           stampValidUntil="аз 20.03.2025 то 20.03.2026"
+          attachments={attachments}
         />
       )}
       <header className="bg-white border-b border-slate-200 px-6 py-4 z-10 flex-shrink-0">
