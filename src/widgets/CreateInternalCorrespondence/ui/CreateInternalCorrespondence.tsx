@@ -59,6 +59,7 @@ import { ApiRoutes } from "@shared/api";
 import { If } from "@shared/ui";
 import { message } from "antd";
 import { ConfirmationModal } from "./ConfirmationModal";
+import { RecipientSelectModal } from "./RecipientSelectModal";
 import type {
   // Status,
   ImportanceLevel,
@@ -715,6 +716,7 @@ export const CreateInternalCorrespondence = ({
   const [showPreview, setShowPreview] = useState(false);
   const [showCancelSignConfirm, setShowCancelSignConfirm] = useState(false);
   const [showSendConfirm, setShowSendConfirm] = useState(false);
+  const [showRecipientModal, setShowRecipientModal] = useState(false);
   // Страницы для предпросмотра — берём из разложенного редактора в момент
   // открытия, чтобы предпросмотр совпадал с холстом 1-в-1.
   const [previewPages, setPreviewPages] = useState<string[]>([]);
@@ -4043,9 +4045,19 @@ export const CreateInternalCorrespondence = ({
 
               <div className="px-6 pt-5 pb-4 border-b border-slate-100 overflow-visible z-20">
                 <div className="flex items-start gap-3">
-                  <label className="text-sm font-semibold text-slate-500 pt-2 w-20 flex-shrink-0">
-                    Кому
-                  </label>
+                  <div className="w-20 flex-shrink-0 flex flex-col gap-1">
+                    <label className="text-sm font-semibold text-slate-500 pt-2">
+                      Кому
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowRecipientModal(true)}
+                      className="flex items-center justify-center px-1.5 py-1 rounded-lg text-[10px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors w-16 cursor-pointer"
+                      title="Выбрать получателей из реестра"
+                    >
+                      Выбрать
+                    </button>
+                  </div>
                   <div className="flex-1 relative overflow-visible">
                     <div className="flex flex-wrap gap-2 mb-2">
                       {to.map((r) => (
@@ -4099,7 +4111,7 @@ export const CreateInternalCorrespondence = ({
                     onClick={() => setShowCcField((v) => !v)}
                     className="text-xs text-blue-600 cursor-pointer font-semibold hover:text-blue-800 transition-colors pt-2 flex-shrink-0"
                   >
-                    + Копия
+                    {showCcField ? "- Скрыть копию" : "+ Копия"}
                   </button>
                 </div>
               </div>
@@ -4108,9 +4120,19 @@ export const CreateInternalCorrespondence = ({
                 {showCcField && (
                   <div className="px-6 pb-4 border-b border-slate-100 overflow-visible z-10">
                     <div className="flex items-start gap-3">
-                      <label className="text-sm font-semibold text-slate-500 pt-2 w-20 flex-shrink-0">
-                        Копия
-                      </label>
+                      <div className="w-20 flex-shrink-0 flex flex-col gap-1">
+                        <label className="text-sm font-semibold text-slate-500 pt-2">
+                          Копия
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowRecipientModal(true)}
+                          className="flex items-center justify-center px-1.5 py-1 rounded-lg text-[10px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors w-16 cursor-pointer"
+                          title="Выбрать получателей из реестра"
+                        >
+                          Выбрать
+                        </button>
+                      </div>
                       <div className="flex-1 relative overflow-visible">
                         <div className="flex flex-wrap gap-2 mb-2">
                           {cc.map((r) => (
@@ -4986,6 +5008,22 @@ export const CreateInternalCorrespondence = ({
           setShowSendConfirm(false);
         }}
         onCancel={() => setShowSendConfirm(false)}
+      />
+
+      <RecipientSelectModal
+        open={showRecipientModal}
+        onClose={() => setShowRecipientModal(false)}
+        availableUsers={availableUsers}
+        initialTo={to}
+        initialCc={cc}
+        onSave={(nextTo, nextCc) => {
+          setTo(nextTo);
+          setCc(nextCc);
+          if (nextCc.length > 0) {
+            setShowCcField(true);
+          }
+          setShowRecipientModal(false);
+        }}
       />
     </div>
   );
