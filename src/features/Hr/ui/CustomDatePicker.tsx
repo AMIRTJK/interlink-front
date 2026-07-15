@@ -21,7 +21,13 @@ export const CustomDatePicker = ({ value, onChange, hasError, disabled }: ICusto
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<"calendar" | "years">("calendar");
 
-  const initialDate = value ? new Date(value) : new Date();
+  const getSafeInitialDate = (val?: string) => {
+    if (!val) return new Date();
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? new Date() : d;
+  };
+
+  const initialDate = getSafeInitialDate(value);
   const [currentYear, setCurrentYear] = useState(initialDate.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(initialDate.getMonth());
   const [yearPage, setYearPage] = useState(Math.floor(currentYear / 12) * 12);
@@ -70,8 +76,10 @@ export const CustomDatePicker = ({ value, onChange, hasError, disabled }: ICusto
     setView("calendar");
   };
 
-  const formattedValue = value ? new Date(value).toLocaleDateString("ru-RU") : "";
-  const selectedDate = value ? new Date(value) : null;
+  const parsedDate = value ? new Date(value) : null;
+  const isValidDate = parsedDate !== null && !isNaN(parsedDate.getTime());
+  const formattedValue = isValidDate && parsedDate ? parsedDate.toLocaleDateString("ru-RU") : "";
+  const selectedDate = isValidDate ? parsedDate : null;
 
   const days = Array(getFirstDayOfMonth(currentYear, currentMonth)).fill(null)
     .concat(Array.from({ length: getDaysInMonth(currentYear, currentMonth) }, (_, i) => i + 1));
