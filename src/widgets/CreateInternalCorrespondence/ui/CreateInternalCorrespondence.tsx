@@ -1108,6 +1108,9 @@ export const CreateInternalCorrespondence = ({
         const nextPageCount = paginateEditorRef.current();
         setPageCount(nextPageCount);
       }
+      // Открыта другая версия — история изменений начинается заново, иначе
+      // Ctrl+Z «выныривал» бы в содержимое предыдущей открытой версии.
+      resetHistory();
     }
   };
 
@@ -1325,6 +1328,9 @@ export const CreateInternalCorrespondence = ({
             // innerHTML-присвоение идёт мимо onInput — синхронизируем стейт,
             // чтобы сохранение/предпросмотр видели тело письма со штампом.
             setEditorContent(getCleanEditorHtml());
+            // Подписанное состояние — новая точка отсчёта истории: отмена не
+            // должна убирать вшитый штамп ЭЦП.
+            resetHistory();
           }
         }
 
@@ -1594,15 +1600,6 @@ export const CreateInternalCorrespondence = ({
     else createDraft(requestPayload);
   };
 
-  const execCmd = useCallback((command: string, value?: string) => {
-    const editor = editorRef.current;
-    // contentEditable=false — режим «только чтение» (подписано / старая
-    // версия): команды форматирования заблокированы.
-    if (!editor || !editor.isContentEditable) return;
-    editor.focus();
-    document.execCommand(command, false, value);
-  }, []);
-
   useEffect(() => {
     if (initialData?.item) {
       const item = initialData.item;
@@ -1832,6 +1829,8 @@ export const CreateInternalCorrespondence = ({
     const editor = editorRef.current;
     // Подписанный документ / старая версия — размер шрифта менять нельзя.
     if (!editor || !editor.isContentEditable) return;
+    // Набор до смены размера — отдельный шаг истории изменений.
+    commitHistoryNow();
     setFontSize(size);
     editor.focus();
 
@@ -2391,6 +2390,204 @@ export const CreateInternalCorrespondence = ({
     return Math.max(1, Math.ceil(editor.scrollHeight / PAGE_STRIDE));
   }, [CONTENT_HEIGHT, PAGE_STRIDE]);
   paginateEditorRef.current = paginateEditor;
+
+  // ===== Собственная история изменений (Undo/Redo) =====
+  // Нативным стеком отмены браузера пользоваться нельзя: пагинация постоянно
+  // правит DOM программно (распорки, разрезы через innerHTML, замена тела при
+  // загрузке версии), такие правки в нативный стек не пишутся, но инвалидируют
+  // его записи — Ctrl+Z восстанавливал случайные старые состояния вместе с
+  // устаревшими распорками (лишние страницы со старым текстом). Поэтому храним
+  // свои снимки: ЧИСТЫЙ HTML (без распорок/разрезов — они пересоздаются
+  // пагинацией) + позиция курсора в символах. Серия набора текста склеивается
+  // в один шаг по паузе; дискретные операции (вставка, форматирование, разрыв
+  // страницы, слияние) фиксируются сразу.
+  type HistoryState = { html: string; caret: number | null };
+  const historyRef = useRef<{
+    undo: HistoryState[];
+    redo: HistoryState[];
+    present: HistoryState;
+  }>({ undo: [], redo: [], present: { html: "<p></p>", caret: null } });
+  const historyTimerRef = useRef<number | null>(null);
+  // Во время применения снимка (undo/redo) не фиксируем «изменения» повторно.
+  const suppressHistoryRef = useRef(false);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+
+  const syncHistoryFlags = useCallback(() => {
+    setCanUndo(
+      historyRef.current.undo.length > 0 || historyTimerRef.current != null,
+    );
+    setCanRedo(historyRef.current.redo.length > 0);
+  }, []);
+
+  // Текущее состояние документа для истории: чистый HTML + курсор в символах.
+  const captureHistoryState = useCallback((): HistoryState => {
+    const editor = editorRef.current;
+    const caret = editor ? (getCaretCharOffset(editor)?.offset ?? null) : null;
+    return { html: getCleanEditorHtml(), caret };
+  }, [getCleanEditorHtml]);
+
+  // Немедленная фиксация: если документ изменился с прошлого шага — прошлое
+  // состояние уходит в стек отмены, redo очищается (новая ветка правок).
+  const commitHistoryNow = useCallback(() => {
+    if (suppressHistoryRef.current) return;
+    if (historyTimerRef.current != null) {
+      window.clearTimeout(historyTimerRef.current);
+      historyTimerRef.current = null;
+    }
+    const h = historyRef.current;
+    const cur = captureHistoryState();
+    if (cur.html === h.present.html) {
+      // Текст не менялся — освежаем только позицию курсора текущего шага.
+      h.present = cur;
+      syncHistoryFlags();
+      return;
+    }
+    h.undo.push(h.present);
+    if (h.undo.length > 200) h.undo.shift();
+    h.present = cur;
+    h.redo = [];
+    syncHistoryFlags();
+  }, [captureHistoryState, syncHistoryFlags]);
+
+  // Отложенная фиксация для набора текста: серия нажатий между паузами
+  // становится одним шагом истории (как в Word).
+  const scheduleHistoryCommit = useCallback(() => {
+    if (suppressHistoryRef.current) return;
+    if (historyTimerRef.current != null) {
+      window.clearTimeout(historyTimerRef.current);
+    }
+    historyTimerRef.current = window.setTimeout(() => {
+      historyTimerRef.current = null;
+      commitHistoryNow();
+    }, 500);
+    syncHistoryFlags();
+  }, [commitHistoryNow, syncHistoryFlags]);
+
+  // Применение снимка истории: чистый HTML в редактор, курсор по символьному
+  // смещению, синхронная перепагинация. Распорки/разрезы в снимках не хранятся,
+  // поэтому «лишние страницы со старым содержимым» после отмены невозможны.
+  const applyHistoryState = useCallback(
+    (state: HistoryState) => {
+      const editor = editorRef.current;
+      if (!editor) return;
+      suppressHistoryRef.current = true;
+      try {
+        editor.innerHTML =
+          state.html && state.html !== "<p></p>"
+            ? state.html
+            : "<div><br></div>";
+        editor.focus();
+        if (state.caret != null) {
+          restoreCaretCharOffset(editor, {
+            offset: state.caret,
+            preferNext: false,
+          });
+        }
+        if (paginateEditorRef.current) {
+          setPageCount(paginateEditorRef.current());
+        }
+        setEditorContent(getCleanEditorHtml());
+      } finally {
+        suppressHistoryRef.current = false;
+      }
+    },
+    [getCleanEditorHtml],
+  );
+
+  const undoEdit = useCallback(() => {
+    const editor = editorRef.current;
+    if (!editor || !editor.isContentEditable) return;
+    // Незафиксированный набор добиваем в отдельный шаг — его и отменим.
+    commitHistoryNow();
+    const h = historyRef.current;
+    if (!h.undo.length) return;
+    const target = h.undo.pop()!;
+    h.redo.push(h.present);
+    applyHistoryState(target);
+    // present — нормализованная форма применённого снимка (innerHTML может
+    // пересериализовать разметку; фиксируем её, чтобы следующая фиксация не
+    // увидела фантомное «изменение»).
+    h.present = { html: getCleanEditorHtml(), caret: target.caret };
+    syncHistoryFlags();
+  }, [commitHistoryNow, applyHistoryState, getCleanEditorHtml, syncHistoryFlags]);
+
+  const redoEdit = useCallback(() => {
+    const editor = editorRef.current;
+    if (!editor || !editor.isContentEditable) return;
+    // Незафиксированные правки — это новая ветка: фиксация сама очистит redo.
+    commitHistoryNow();
+    const h = historyRef.current;
+    if (!h.redo.length) return;
+    const target = h.redo.pop()!;
+    h.undo.push(h.present);
+    applyHistoryState(target);
+    h.present = { html: getCleanEditorHtml(), caret: target.caret };
+    syncHistoryFlags();
+  }, [commitHistoryNow, applyHistoryState, getCleanEditorHtml, syncHistoryFlags]);
+
+  // Полный сброс истории — при загрузке другого содержимого (версия документа,
+  // вшивание штампа подписи): отмена не должна «выныривать» в чужую версию.
+  const resetHistory = useCallback(() => {
+    if (historyTimerRef.current != null) {
+      window.clearTimeout(historyTimerRef.current);
+      historyTimerRef.current = null;
+    }
+    historyRef.current = {
+      undo: [],
+      redo: [],
+      present: { html: getCleanEditorHtml(), caret: null },
+    };
+    syncHistoryFlags();
+  }, [getCleanEditorHtml, syncHistoryFlags]);
+
+  // Базовое состояние при монтировании + очистка отложенной фиксации.
+  useEffect(() => {
+    resetHistory();
+    return () => {
+      if (historyTimerRef.current != null) {
+        window.clearTimeout(historyTimerRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Перехват отмены из контекстного меню браузера / меню «Правка»: нативный
+  // стек не используется, вместо него — наша история.
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const onBeforeInput = (e: Event) => {
+      const inputType = (e as InputEvent).inputType;
+      if (inputType === "historyUndo") {
+        e.preventDefault();
+        undoEdit();
+      } else if (inputType === "historyRedo") {
+        e.preventDefault();
+        redoEdit();
+      }
+    };
+    editor.addEventListener("beforeinput", onBeforeInput);
+    return () => editor.removeEventListener("beforeinput", onBeforeInput);
+  }, [undoEdit, redoEdit]);
+
+  // Команды форматирования тулбара. Нативные undo/redo сюда не ходят —
+  // история изменений собственная (undoEdit/redoEdit).
+  const execCmd = useCallback(
+    (command: string, value?: string) => {
+      const editor = editorRef.current;
+      // contentEditable=false — режим «только чтение» (подписано / старая
+      // версия): команды форматирования заблокированы.
+      if (!editor || !editor.isContentEditable) return;
+      // Незакоммиченный набор — отдельный шаг истории, форматирование — свой.
+      commitHistoryNow();
+      editor.focus();
+      document.execCommand(command, false, value);
+      commitHistoryNow();
+    },
+    [commitHistoryNow],
+  );
+
   const handleEditorInput = useCallback(() => {
     const editor = editorRef.current;
     if (editor) {
@@ -2410,7 +2607,9 @@ export const CreateInternalCorrespondence = ({
       }
     }
     setEditorContent(getCleanEditorHtml());
-  }, [getCleanEditorHtml]);
+    // Набор текста складывается в шаги истории по паузам.
+    scheduleHistoryCommit();
+  }, [getCleanEditorHtml, scheduleHistoryCommit]);
 
   // После ручной правки DOM (слияние через границу, вставка разрыва) сразу
   // перепагинируем синхронно — не дожидаясь rAF-эффекта — и синхронизируем стейт.
@@ -2419,13 +2618,33 @@ export const CreateInternalCorrespondence = ({
   const syncEditorAfterDomEdit = useCallback(() => {
     setPageCount(paginateEditor());
     setEditorContent(getCleanEditorHtml());
-  }, [paginateEditor, getCleanEditorHtml]);
+    // Дискретная правка DOM — сразу отдельный шаг истории изменений.
+    commitHistoryNow();
+  }, [paginateEditor, getCleanEditorHtml, commitHistoryNow]);
 
   // Tab — четыре неразрывных пробела. Backspace/Delete на границе страниц —
   // управляемое слияние блоков: дефолтное поведение браузера рядом с
   // contenteditable=false распоркой прыгает курсором и теряет текст.
   const handleEditorKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
+      // Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z — только собственная история. Нативную
+      // отмену браузера глушим всегда: её стек разрушен программными правками
+      // пагинации и восстанавливает непредсказуемые старые состояния.
+      // e.code вместо e.key — чтобы работало и в русской раскладке (Ctrl+Я).
+      if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+        if (e.code === "KeyZ") {
+          e.preventDefault();
+          if (e.shiftKey) redoEdit();
+          else undoEdit();
+          return;
+        }
+        if (e.code === "KeyY" && !e.shiftKey) {
+          e.preventDefault();
+          redoEdit();
+          return;
+        }
+      }
+
       if (e.key === "Tab") {
         e.preventDefault();
         const selection = window.getSelection();
@@ -2438,6 +2657,9 @@ export const CreateInternalCorrespondence = ({
         range.setEndAfter(tabNode);
         selection.removeAllRanges();
         selection.addRange(range);
+        // Вставка через Range идёт мимо события input — синхронизируем стейт
+        // и историю вручную (иначе Tab не попадал ни в тело письма, ни в undo).
+        syncEditorAfterDomEdit();
         return;
       }
 
@@ -2489,6 +2711,7 @@ export const CreateInternalCorrespondence = ({
         // возвращается на предыдущую страницу, блоки не сливаются (как в Word)
         if (isPageBreakNode(stop)) {
           e.preventDefault();
+          commitHistoryNow(); // набор до операции — отдельный шаг истории
           stop.remove();
           spacers.forEach((s) => s.remove());
           syncEditorAfterDomEdit();
@@ -2498,6 +2721,7 @@ export const CreateInternalCorrespondence = ({
         if (!spacers.length) return; // обычный Backspace внутри страницы
 
         e.preventDefault();
+        commitHistoryNow(); // набор до операции — отдельный шаг истории
         spacers.forEach((s) => s.remove());
         if (stop && stop.nodeType === Node.ELEMENT_NODE) {
           const target = stop as HTMLElement;
@@ -2518,6 +2742,7 @@ export const CreateInternalCorrespondence = ({
 
       if (isPageBreakNode(stop)) {
         e.preventDefault();
+        commitHistoryNow(); // набор до операции — отдельный шаг истории
         stop.remove();
         spacers.forEach((s) => s.remove());
         syncEditorAfterDomEdit();
@@ -2527,6 +2752,7 @@ export const CreateInternalCorrespondence = ({
       if (!spacers.length) return;
 
       e.preventDefault();
+      commitHistoryNow(); // набор до операции — отдельный шаг истории
       spacers.forEach((s) => s.remove());
       if (stop && stop.nodeType === Node.ELEMENT_NODE) {
         const nextBlock = stop as HTMLElement;
@@ -2539,7 +2765,7 @@ export const CreateInternalCorrespondence = ({
       }
       syncEditorAfterDomEdit();
     },
-    [syncEditorAfterDomEdit],
+    [syncEditorAfterDomEdit, commitHistoryNow, undoEdit, redoEdit],
   );
 
   // Ручной разрыв страницы: текст после курсора начинается с нового листа.
@@ -2548,6 +2774,9 @@ export const CreateInternalCorrespondence = ({
     const editor = editorRef.current;
     // contentEditable=false означает режим «только чтение» (подписано/старая версия)
     if (!editor || !editor.isContentEditable) return;
+    // Набор до разрыва — отдельный шаг истории; сам разрыв зафиксирует
+    // syncEditorAfterDomEdit в конце.
+    commitHistoryNow();
     editor.focus();
 
     const breakEl = document.createElement("div");
@@ -2641,17 +2870,19 @@ export const CreateInternalCorrespondence = ({
     sel?.addRange(r);
 
     syncEditorAfterDomEdit();
-  }, [syncEditorAfterDomEdit]);
+  }, [syncEditorAfterDomEdit, commitHistoryNow]);
 
   // Удаление конкретной страницы: убираем верхнеуровневые блоки, визуально
   // расположенные на ней, плюс ручной разрыв, который её породил. Так не нужно
-  // вручную стирать весь текст. Прямое редактирование DOM (как разрыв/слияние)
-  // в стек Undo браузера не пишется — потому и подтверждение перед удалением.
+  // вручную стирать весь текст. Операция обратима через собственную историю
+  // изменений (Ctrl+Z), подтверждение оставлено как защита от случайного клика.
   const deletePage = useCallback(
     (pageIndex: number) => {
       const editor = editorRef.current;
       setPageToDelete(null);
       if (!editor || !editor.isContentEditable) return;
+      // Правки до удаления страницы — отдельный шаг истории.
+      commitHistoryNow();
 
       const children = Array.from(editor.children);
       const removals: Element[] = [];
@@ -2695,7 +2926,7 @@ export const CreateInternalCorrespondence = ({
 
       syncEditorAfterDomEdit();
     },
-    [PAGE_STRIDE, syncEditorAfterDomEdit],
+    [PAGE_STRIDE, syncEditorAfterDomEdit, commitHistoryNow],
   );
 
   // Закрываем подтверждение удаления, если страниц стало меньше
@@ -2712,6 +2943,9 @@ export const CreateInternalCorrespondence = ({
     (fragment: DocumentFragment) => {
       const editor = editorRef.current;
       if (!editor) return;
+      // Набор текста до вставки — отдельный шаг истории; сама вставка
+      // зафиксируется в syncEditorAfterDomEdit ниже.
+      commitHistoryNow();
       editor.focus();
 
       const selection = window.getSelection();
@@ -2782,7 +3016,7 @@ export const CreateInternalCorrespondence = ({
       // промежутков и лишних отступов.
       syncEditorAfterDomEdit();
     },
-    [syncEditorAfterDomEdit],
+    [syncEditorAfterDomEdit, commitHistoryNow],
   );
 
   // Превращает очищенный HTML из Word в фрагмент для вставки.
@@ -3308,6 +3542,8 @@ export const CreateInternalCorrespondence = ({
         if (paginateEditorRef.current) {
           setPageCount(paginateEditorRef.current());
         }
+        // Загружено другое содержимое — прежняя история изменений неприменима.
+        resetHistory();
       }
     }
 
@@ -3991,22 +4227,22 @@ export const CreateInternalCorrespondence = ({
               <div ref={stickyHeaderRef} className="sticky top-0 z-[70] bg-white">
               <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60 flex flex-wrap items-center gap-0.5">
                 <TBtn
-                  disabled={isReadOnly}
+                  disabled={isReadOnly || !canUndo}
                   onMouseDown={(e) => {
                     e.preventDefault();
-                    execCmd("undo");
+                    undoEdit();
                   }}
-                  title="Отменить"
+                  title="Отменить (Ctrl+Z)"
                 >
                   <Undo size={14} />
                 </TBtn>
                 <TBtn
-                  disabled={isReadOnly}
+                  disabled={isReadOnly || !canRedo}
                   onMouseDown={(e) => {
                     e.preventDefault();
-                    execCmd("redo");
+                    redoEdit();
                   }}
-                  title="Повторить"
+                  title="Повторить (Ctrl+Y)"
                 >
                   <Redo size={14} />
                 </TBtn>
