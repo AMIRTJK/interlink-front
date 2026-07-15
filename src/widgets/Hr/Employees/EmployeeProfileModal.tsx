@@ -337,7 +337,7 @@ export const EmployeeProfileModal = ({
 					>
 						<button
 							onClick={() => setShowPhotoModal(false)}
-							className="absolute -top-10 right-0 p-2 rounded-full text-white hover:bg-white/20 transition-colors"
+							className="absolute -top-12 right-0 p-2 rounded-full text-white hover:bg-white/20 transition-colors"
 						>
 							<X size={24} />
 						</button>
