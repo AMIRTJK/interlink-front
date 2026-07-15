@@ -135,7 +135,10 @@ export const EmployeeProfileModal = ({
 								{e.photo && (
 									<div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all rounded-2xl flex items-center justify-center">
 										<div className="relative flex items-center justify-center">
-											<div className="absolute inset-0 bg-white/20 rounded-full blur-md" style={{ width: 40, height: 40 }} />
+											<div
+												className="absolute inset-0 bg-white/20 rounded-full blur-md"
+												style={{ width: 40, height: 40 }}
+											/>
 											<Search
 												size={20}
 												className="text-white opacity-0 group-hover:opacity-100 transition-opacity relative"
