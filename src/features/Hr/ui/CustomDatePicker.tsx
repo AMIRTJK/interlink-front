@@ -83,7 +83,7 @@ export const CustomDatePicker = ({
 		? new Date(value).toLocaleDateString("ru-RU")
 		: "";
 	const selectedDate = value ? new Date(value) : null;
-	// Бывший код.
+	// Бывший код..
 	// const days = Array(getFirstDayOfMonth(currentYear, currentMonth)).fill(null)
 	//   .concat(Array.from({ length: getDaysInMonth(currentYear, currentMonth) }, (_, i) => i + 1));
 
