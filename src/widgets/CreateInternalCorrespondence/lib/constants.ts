@@ -7,6 +7,24 @@ import type {
   OrgStructureNode,
 } from "../types";
 
+// ── Ограничения вложений ──────────────────────────────────────────────────────
+// Повторяют валидацию бэкенда на attachments[] в POST/PUT /internal-correspondences.
+// Проверяем на фронте, чтобы не гонять заведомо отбраковываемый файл по сети.
+export const ATTACHMENT_EXTENSIONS = [
+  "pdf",
+  "jpg",
+  "jpeg",
+  "png",
+  "webp",
+  "doc",
+  "docx",
+  "xls",
+  "xlsx",
+];
+export const ATTACHMENT_ACCEPT = ATTACHMENT_EXTENSIONS.map((e) => `.${e}`).join(",");
+export const MAX_ATTACHMENTS = 10;
+export const MAX_ATTACHMENT_SIZE_MB = 20;
+
 export const ORG_STRUCTURE: OrgStructureNode = {
   id: "org-root",
   name: "Министерство Финансов",

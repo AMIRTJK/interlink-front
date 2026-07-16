@@ -1,11 +1,64 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { _axios } from "@shared/api";
+import { toast } from "@shared/lib";
+import type { AttachedFile } from "../types";
 import { TJK_EMBLEM_DATA_URI } from "./tjkEmblem";
 import { ORBITRON_WOFF2_BASE64 } from "./orbitronFont";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+// ── Вложения ──────────────────────────────────────────────────────────────────
+
+export const formatFileSize = (bytes: number): string =>
+  bytes > 1024 * 1024
+    ? `${(bytes / 1024 / 1024).toFixed(1)} МБ`
+    : `${(bytes / 1024).toFixed(0)} КБ`;
+
+/**
+ * Приводит вложение из ответа бэкенда к виду, с которым работает UI.
+ * Имя, размер и ссылка читаются по нескольким возможным ключам: точный набор
+ * полей ресурса attachments в ТЗ не зафиксирован, а разные модули этого API
+ * отдают файлы по-разному (original_name/name, download_url/url/file_url).
+ */
+export const mapServerAttachment = (raw: any): AttachedFile => {
+  const name = raw?.original_name || raw?.file_name || raw?.name || "Файл";
+  const size = Number(raw?.size ?? raw?.file_size);
+  return {
+    id: String(raw?.id ?? name),
+    name,
+    size: Number.isFinite(size) && size > 0 ? formatFileSize(size) : "",
+    type: name.split(".").pop()?.toUpperCase() ?? "FILE",
+    url: raw?.download_url || raw?.url || raw?.file_url || undefined,
+  };
+};
+
+/**
+ * Скачивает сохранённое вложение. Тянем файл через _axios (с Authorization),
+ * а не простой ссылкой <a download>: хранилище приватное и на прямой запрос
+ * без токена ответит 401.
+ */
+export const downloadAttachment = async (file: AttachedFile): Promise<void> => {
+  if (!file.url) return;
+  try {
+    const response = await _axios.get(file.url, { responseType: "blob" });
+    const blob = new Blob([response.data], {
+      type: response.headers["content-type"],
+    });
+    const href = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(href);
+  } catch {
+    toast.error("Не удалось скачать вложение");
+  }
+};
 
 // Холст редактора — А4 при 96 DPI (794px ширина). Word измеряет в пунктах,
 // поэтому переводим pt → px (1pt = 1/72in, 1px = 1/96in), чтобы размеры
