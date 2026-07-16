@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { _axios } from "@shared/api";
+import { getEnvVar } from "@shared/config";
 import { toast } from "@shared/lib";
 import type { AttachedFile } from "../types";
 import { TJK_EMBLEM_DATA_URI } from "./tjkEmblem";
@@ -19,41 +20,75 @@ export const formatFileSize = (bytes: number): string =>
 
 /**
  * Приводит вложение из ответа бэкенда к виду, с которым работает UI.
- * Имя, размер и ссылка читаются по нескольким возможным ключам: точный набор
- * полей ресурса attachments в ТЗ не зафиксирован, а разные модули этого API
- * отдают файлы по-разному (original_name/name, download_url/url/file_url).
+ * Ответ POST/PUT /internal-correspondences отдаёт по файлу: id, original_name,
+ * mime, size (в байтах), path (внутренний путь) и url — ссылку на файл
+ * в публичном хранилище, относительную: «/storage/correspondences/11/…».
  */
 export const mapServerAttachment = (raw: any): AttachedFile => {
-  const name = raw?.original_name || raw?.file_name || raw?.name || "Файл";
-  const size = Number(raw?.size ?? raw?.file_size);
+  const name = raw?.original_name || "Файл";
+  const size = Number(raw?.size);
   return {
     id: String(raw?.id ?? name),
     name,
     size: Number.isFinite(size) && size > 0 ? formatFileSize(size) : "",
     type: name.split(".").pop()?.toUpperCase() ?? "FILE",
-    url: raw?.download_url || raw?.url || raw?.file_url || undefined,
+    url: raw?.url || undefined,
   };
 };
 
 /**
- * Скачивает сохранённое вложение. Тянем файл через _axios (с Authorization),
- * а не простой ссылкой <a download>: хранилище приватное и на прямой запрос
- * без токена ответит 401.
+ * Достраивает относительную ссылку бэкенда до абсолютной по хосту API.
+ * Без этого «/storage/…» уходит на origin фронта: в деве это dev-сервер Vite,
+ * который на любой неизвестный путь отдаёт index.html — и вместо файла
+ * скачивается html-страница. Тот же приём, что в resolveEmployeePhotoUrl.
+ */
+const toAbsoluteUrl = (url: string): string => {
+  if (/^(https?:|blob:|data:)/i.test(url)) return url;
+  const apiHost = (getEnvVar("VITE_API_URL") || "").replace(/\/+$/, "");
+  return `${apiHost}/${url.replace(/^\/+/, "")}`;
+};
+
+const clickDownloadLink = (href: string, name: string, newTab = false) => {
+  const link = document.createElement("a");
+  link.href = href;
+  link.download = name;
+  if (newTab) {
+    link.target = "_blank";
+    link.rel = "noopener";
+  }
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+/**
+ * Скачивает сохранённое вложение. Способ зависит от того, что вернул бэкенд:
+ *
+ * • Ссылка на /api/… — тянем blob-ом: такой маршрут требует Bearer-токен, и CORS
+ *   для api/* настроен (в ответе приходит Access-Control-Allow-Origin).
+ * • Прямая ссылка в хранилище (/storage/…) — открываем обычной ссылкой. XHR тут
+ *   не работает: в config/cors.php на бэкенде в paths только api/*, статика
+ *   отдаётся без CORS-заголовков, и браузер режет ответ с CORS-ошибкой.
+ *   Оговорка: для чужого origin (в деве localhost → IP бэкенда) браузер
+ *   игнорирует атрибут download, поэтому PDF и картинки откроются во вкладке,
+ *   а не сохранятся. Форсировать сохранение может только бэкенд — заголовком
+ *   Content-Disposition: attachment на отдельном /api/…/download.
  */
 export const downloadAttachment = async (file: AttachedFile): Promise<void> => {
   if (!file.url) return;
+
+  if (!file.url.includes("/api/")) {
+    clickDownloadLink(toAbsoluteUrl(file.url), file.name, true);
+    return;
+  }
+
   try {
     const response = await _axios.get(file.url, { responseType: "blob" });
     const blob = new Blob([response.data], {
       type: response.headers["content-type"],
     });
     const href = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = href;
-    link.download = file.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    clickDownloadLink(href, file.name);
     window.URL.revokeObjectURL(href);
   } catch {
     toast.error("Не удалось скачать вложение");
