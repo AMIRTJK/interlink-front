@@ -17,7 +17,7 @@ import {
   // Calendar,
   User,
   Clock,
-  // Download,
+  Download,
   Trash2,
   X,
   Paperclip,
@@ -54,7 +54,7 @@ import {
   Save,
   Printer,
 } from "lucide-react";
-import { useGetQuery, useMutationQuery } from "@shared/lib";
+import { useGetQuery, useMutationQuery, buildFormData, toast } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { If } from "@shared/ui";
 import { message } from "antd";
@@ -78,6 +78,10 @@ import {
   IMPORTANCE_DOT,
   // RECIPIENT_OPTIONS,
   FONT_SIZES,
+  ATTACHMENT_ACCEPT,
+  ATTACHMENT_EXTENSIONS,
+  MAX_ATTACHMENTS,
+  MAX_ATTACHMENT_SIZE_MB,
   // INBOX_DOC_TYPES,
   // INBOX_DOC_TYPE_STYLE,
   // MOCK_CONTENT_LINES,
@@ -90,6 +94,9 @@ import {
   sanitizeWordHtml,
   buildDSStampSvg,
   dsStampHeightForWidth,
+  formatFileSize,
+  mapServerAttachment,
+  downloadAttachment,
 } from "../lib/utils";
 
 // Ширина штампа ЭЦП на листе А4 по умолчанию (≈47% ширины полосы) и высота,
@@ -1136,12 +1143,22 @@ export const CreateInternalCorrespondence = ({
       };
     }) || [];
 
+  // После успешного сохранения файлы уже лежат на бэкенде: заменяем локальную
+  // очередь списком из ответа. Иначе следующее сохранение отправит те же файлы
+  // повторно и в письме появятся дубликаты.
+  const syncAttachmentsAfterSave = useCallback((data: any) => {
+    const saved = data?.item?.attachments;
+    if (Array.isArray(saved)) setAttachments(saved.map(mapServerAttachment));
+    else setAttachments((prev) => prev.filter((a) => !a.file));
+  }, []);
+
   const { mutate: createDraft, isPending: isCreating } = useMutationQuery<any>({
     url: ApiRoutes.CREATE_INTERNAL,
     method: "POST",
     messages: { invalidate: [ApiRoutes.GET_INTERNAL_DRAFTS] },
     queryOptions: {
       onSuccess: (data: any) => {
+        syncAttachmentsAfterSave(data);
         const newId = data?.item?.id;
         if (newId)
           navigate(`/modules/correspondence/internal/outgoing/${newId}`, {
@@ -1151,44 +1168,93 @@ export const CreateInternalCorrespondence = ({
     },
   });
 
+  // Обновление черновика создаёт на бэкенде новую версию письма — общий хвост
+  // для обоих режимов сохранения (JSON и multipart, см. saveDraft ниже).
+  const handleDraftUpdated = useCallback(
+    (data: any) => {
+      syncAttachmentsAfterSave(data);
+      // 1. Сначала стягиваем свежие версии, чтобы узнать ID только что созданной (1.6)
+      refetchVersions().then((updatedResponse) => {
+        const freshVersions = updatedResponse?.data?.data?.versions;
+
+        if (Array.isArray(freshVersions) && freshVersions.length > 0) {
+          const latestVersion = freshVersions[freshVersions.length - 1];
+
+          if (latestVersion?.id) {
+            // 2. Мгновенно меняем активную версию в стейте фронтенда
+            setActiveVersionId(latestVersion.id);
+
+            // 3. Передаем в selectVersionForSign колбэк для повторного рефетча ПОСЛЕ успешного выбора
+            selectVersionForSign(
+              { versionId: latestVersion.id },
+              {
+                onSuccess: () => {
+                  // 4. Перезапрашиваем версии еще раз, когда бэкенд точно проставил галочку в БД
+                  refetchVersions();
+                },
+              },
+            );
+          }
+        }
+      });
+    },
+    [refetchVersions, selectVersionForSign, syncAttachmentsAfterSave],
+  );
+
+  const updateDraftMessages = {
+    invalidate: [
+      ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
+      // Убираем отсюда автоматический инвалейд версий, чтобы контролировать поток вручную
+    ],
+  };
+
   const { mutate: updateDraft, isPending: isUpdating } = useMutationQuery<any>({
     url: ApiRoutes.PUT_INTERNAL.replace(":id", String(id || "")),
     method: "PUT",
-    messages: {
-      invalidate: [
-        ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
-        // Убираем отсюда автоматический инвалейд версий, чтобы контролировать поток вручную
-      ],
-    },
-    queryOptions: {
-      onSuccess: () => {
-        // 1. Сначала стягиваем свежие версии, чтобы узнать ID только что созданной (1.6)
-        refetchVersions().then((updatedResponse) => {
-          const freshVersions = updatedResponse?.data?.data?.versions;
-
-          if (Array.isArray(freshVersions) && freshVersions.length > 0) {
-            const latestVersion = freshVersions[freshVersions.length - 1];
-
-            if (latestVersion?.id) {
-              // 2. Мгновенно меняем активную версию в стейте фронтенда
-              setActiveVersionId(latestVersion.id);
-
-              // 3. Передаем в selectVersionForSign колбэк для повторного рефетча ПОСЛЕ успешного выбора
-              selectVersionForSign(
-                { versionId: latestVersion.id },
-                {
-                  onSuccess: () => {
-                    // 4. Перезапрашиваем версии еще раз, когда бэкенд точно проставил галочку в БД
-                    refetchVersions();
-                  },
-                },
-              );
-            }
-          }
-        });
-      },
-    },
+    messages: updateDraftMessages,
+    queryOptions: { onSuccess: handleDraftUpdated },
   });
+
+  // Тот же PUT, но с новыми вложениями в теле. Метод именно POST: PHP не
+  // разбирает файлы в теле настоящего PUT, поэтому реальный метод уезжает
+  // на бэкенд полем `_method` (см. saveDraft).
+  const { mutate: updateDraftWithFiles, isPending: isUpdatingWithFiles } =
+    useMutationQuery<FormData>({
+      url: ApiRoutes.PUT_INTERNAL.replace(":id", String(id || "")),
+      method: "POST",
+      messages: updateDraftMessages,
+      queryOptions: { onSuccess: handleDraftUpdated },
+    });
+
+  /**
+   * Сохраняет черновик, сам выбирая формат запроса. Пока новых файлов нет —
+   * шлём привычный JSON. Если есть — тот же payload уходит multipart-ом вместе
+   * с файлами: отдельного эндпоинта для загрузки вложений у внутренней
+   * корреспонденции нет, они принимаются прямо в создании/обновлении письма.
+   */
+  const saveDraft = (requestPayload: Record<string, any>) => {
+    const pending = attachments.filter((a) => a.file);
+
+    if (!pending.length) {
+      if (id) updateDraft(requestPayload);
+      else createDraft(requestPayload);
+      return;
+    }
+
+    const form = buildFormData(requestPayload);
+    pending.forEach((a) => form.append("attachments[]", a.file!));
+
+    if (id) {
+      form.append("_method", "PUT");
+      updateDraftWithFiles(form);
+    } else {
+      createDraft(form);
+    }
+  };
+
+  // Загрузка файлов идёт тем же запросом, что и сам черновик, поэтому
+  // «Сохранить» ждёт и её тоже.
+  const isSaving = isCreating || isUpdating || isUpdatingWithFiles;
 
   const { mutate: inviteSigner, isPending: isSignerInviting } =
     useMutationQuery<any>({
@@ -1358,7 +1424,7 @@ export const CreateInternalCorrespondence = ({
           priority: importance,
         };
 
-        if (id) updateDraft(requestPayload);
+        if (id) saveDraft(requestPayload);
       },
       onError: () =>
         setFinalSigner((prev) => (prev ? { ...prev, dsLoading: false } : null)),
@@ -1603,8 +1669,7 @@ export const CreateInternalCorrespondence = ({
       priority: importance,
     };
 
-    if (id) updateDraft(requestPayload);
-    else createDraft(requestPayload);
+    saveDraft(requestPayload);
   };
 
   useEffect(() => {
@@ -1676,6 +1741,16 @@ export const CreateInternalCorrespondence = ({
             };
           }),
         );
+      }
+
+      // Уже сохранённые вложения. Файлы, выбранные пользователем прямо сейчас,
+      // оставляем: письмо перезапрашивается и после посторонних действий,
+      // и такой рефетч не должен съедать несохранённый выбор.
+      if (Array.isArray(item.attachments)) {
+        setAttachments((prev) => [
+          ...item.attachments.map(mapServerAttachment),
+          ...prev.filter((a) => a.file),
+        ]);
       }
 
       if (item.creator) {
@@ -3326,17 +3401,41 @@ export const CreateInternalCorrespondence = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    const newFiles: AttachedFile[] = Array.from(files).map((f) => ({
-      id: `f-${Date.now()}-${f.name}`,
-      name: f.name,
-      size:
-        f.size > 1024 * 1024
-          ? `${(f.size / 1024 / 1024).toFixed(1)} МБ`
-          : `${(f.size / 1024).toFixed(0)} КБ`,
-      type: f.name.split(".").pop()?.toUpperCase() ?? "FILE",
-    }));
-    setAttachments((prev) => [...prev, ...newFiles]);
+    const picked = Array.from(files);
+    // Сбрасываем input сразу: иначе повторный выбор того же файла не даст change.
     e.target.value = "";
+
+    const accepted: AttachedFile[] = [];
+    // Лимит общий на письмо, поэтому считаем и уже загруженные вложения.
+    let freeSlots = MAX_ATTACHMENTS - attachments.length;
+
+    for (const f of picked) {
+      const ext = f.name.split(".").pop()?.toLowerCase() ?? "";
+      if (!ATTACHMENT_EXTENSIONS.includes(ext)) {
+        toast.error(`«${f.name}»: недопустимый формат файла`);
+        continue;
+      }
+      if (f.size > MAX_ATTACHMENT_SIZE_MB * 1024 * 1024) {
+        toast.error(`«${f.name}»: файл больше ${MAX_ATTACHMENT_SIZE_MB} МБ`);
+        continue;
+      }
+      if (freeSlots <= 0) {
+        toast.error(`К письму можно прикрепить не больше ${MAX_ATTACHMENTS} файлов`);
+        break;
+      }
+      freeSlots -= 1;
+      accepted.push({
+        id: `f-${Date.now()}-${f.name}`,
+        name: f.name,
+        size: formatFileSize(f.size),
+        type: ext.toUpperCase() || "FILE",
+        // Сам файл держим в стейте до сохранения — он уйдёт на бэкенд
+        // вместе с письмом (multipart), отдельной загрузки вложений нет.
+        file: f,
+      });
+    }
+
+    if (accepted.length) setAttachments((prev) => [...prev, ...accepted]);
   };
 
   const applyFinalDS = async () => {
@@ -3727,8 +3826,7 @@ export const CreateInternalCorrespondence = ({
               disabled={
                 !to.length ||
                 !subject.trim() ||
-                isCreating ||
-                isUpdating ||
+                isSaving ||
                 isOldVersionSelected ||
                 isSigned ||
                 isAlreadySent
@@ -3737,8 +3835,7 @@ export const CreateInternalCorrespondence = ({
                 "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border",
                 to.length &&
                   subject.trim() &&
-                  !isCreating &&
-                  !isUpdating &&
+                  !isSaving &&
                   !isOldVersionSelected &&
                   !isSigned &&
                   !isAlreadySent
@@ -3746,7 +3843,7 @@ export const CreateInternalCorrespondence = ({
                   : "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed",
               )}
             >
-              {isCreating || isUpdating ? (
+              {isSaving ? (
                 <Clock size={15} className="animate-spin" />
               ) : (
                 <Save size={15} />
@@ -4219,23 +4316,42 @@ export const CreateInternalCorrespondence = ({
                           <p className="font-semibold text-slate-800 truncate max-w-[140px]">
                             {file.name}
                           </p>
-                          <p className="text-slate-400">{file.size}</p>
+                          <p className="text-slate-400">
+                            {file.file ? `${file.size} · не сохранён` : file.size}
+                          </p>
                         </div>
-                        <button
-                          onClick={() =>
-                            setAttachments((prev) =>
-                              prev.filter((f) => f.id !== file.id),
-                            )
-                          }
-                          className="text-slate-300 hover:text-rose-400 transition-colors flex-shrink-0"
-                        >
-                          <X size={12} />
-                        </button>
+                        {/* Убрать можно только ещё не отправленный файл: удаления
+                            сохранённого вложения в API пока нет. */}
+                        {file.file ? (
+                          <button
+                            onClick={() =>
+                              setAttachments((prev) =>
+                                prev.filter((f) => f.id !== file.id),
+                              )
+                            }
+                            title="Убрать файл"
+                            className="text-slate-300 hover:text-rose-400 transition-colors flex-shrink-0"
+                          >
+                            <X size={12} />
+                          </button>
+                        ) : (
+                          <If is={!!file.url}>
+                            <button
+                              onClick={() => downloadAttachment(file)}
+                              title="Скачать"
+                              className="text-slate-400 hover:text-blue-600 transition-colors flex-shrink-0"
+                            >
+                              <Download size={12} />
+                            </button>
+                          </If>
+                        )}
                       </div>
                     ))}
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
+                      disabled={isReadOnly || attachments.length >= MAX_ATTACHMENTS}
+                      title={`${ATTACHMENT_EXTENSIONS.join(", ")} · до ${MAX_ATTACHMENTS} файлов · до ${MAX_ATTACHMENT_SIZE_MB} МБ каждый`}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-50"
                     >
                       <Paperclip size={12} />
                       <span>Прикрепить файл</span>
@@ -4249,6 +4365,7 @@ export const CreateInternalCorrespondence = ({
                       ref={fileInputRef}
                       type="file"
                       multiple
+                      accept={ATTACHMENT_ACCEPT}
                       className="hidden"
                       onChange={handleFileChange}
                     />

@@ -9,10 +9,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Paperclip,
+  Download,
 } from "lucide-react";
 import { If } from "@shared/ui";
 import { cn } from "@shared/lib";
 import type { PageOrientation, AttachedFile } from "../types";
+import { downloadAttachment } from "../lib/utils";
 import { DSStamp } from "./DSStamp";
 
 const PAGE_PAD_H = 80;
@@ -467,8 +469,21 @@ export const PreviewModal = ({
                               <p className="font-semibold truncate text-slate-100" title={file.name}>
                                 {file.name}
                               </p>
-                              <p className="text-[10px] text-slate-400">{file.size}</p>
+                              <p className="text-[10px] text-slate-400">
+                                {file.file ? `${file.size} · не сохранён` : file.size}
+                              </p>
                             </div>
+                            {/* Скачать можно только то, что уже сохранено на бэкенде. */}
+                            <If is={!!file.url}>
+                              <button
+                                type="button"
+                                onClick={() => downloadAttachment(file)}
+                                title="Скачать"
+                                className="text-slate-400 hover:text-blue-400 transition-colors flex-shrink-0 cursor-pointer"
+                              >
+                                <Download size={14} />
+                              </button>
+                            </If>
                           </div>
                         ))}
                       </div>
