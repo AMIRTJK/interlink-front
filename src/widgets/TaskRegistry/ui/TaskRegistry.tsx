@@ -29,6 +29,7 @@ export const TaskRegistry = () => {
     colleagues,
     stats,
     isLoading,
+    getTaskById,
     createTask,
     updateTask,
     deleteTask,
@@ -37,6 +38,36 @@ export const TaskRegistry = () => {
     downloadAttachment,
     deleteAttachment,
   } = useTasks({ filters, active: view === "list", displayMode, page });
+
+  // Открытие карточки: мгновенно показываем снимок из списка, затем подтягиваем
+  // свежую задачу через GET /tasks/{id}.
+  const openDetail = async (task: Task) => {
+    setDetailTask(task);
+    if (task.rawId == null) return;
+    const fresh = await getTaskById(task.rawId);
+    if (fresh) {
+      setDetailTask((prev) =>
+        prev && prev.rawId === task.rawId ? fresh : prev,
+      );
+    }
+  };
+
+  const refreshDetail = async (taskId: number) => {
+    const fresh = await getTaskById(taskId);
+    if (fresh) {
+      setDetailTask((prev) => (prev && prev.rawId === taskId ? fresh : prev));
+    }
+  };
+
+  const handleUpload = async (taskId: number, files: File[]) => {
+    await uploadAttachments(taskId, files);
+    await refreshDetail(taskId);
+  };
+
+  const handleDeleteAttachment = async (taskId: number, attachmentId: number) => {
+    await deleteAttachment(taskId, attachmentId);
+    await refreshDetail(taskId);
+  };
 
   const handleFilterChange = (patch: Partial<TaskFilters>) => {
     setFilters((prev) => ({ ...prev, ...patch }));
@@ -115,13 +146,13 @@ export const TaskRegistry = () => {
                 page={page}
                 onPageChange={setPage}
                 isLoading={isLoading}
-                onOpenTask={setDetailTask}
+                onOpenTask={openDetail}
               />
             ) : (
               <TaskBoardView
                 board={board}
                 isLoading={isLoading}
-                onOpenTask={setDetailTask}
+                onOpenTask={openDetail}
                 onStatusChange={(id, status) => updateStatus(id, status)}
               />
             )}
@@ -147,9 +178,9 @@ export const TaskRegistry = () => {
             onEdit={openEdit}
             onDelete={handleDelete}
             onStatusChange={handleStatus}
-            onUploadAttachments={uploadAttachments}
+            onUploadAttachments={handleUpload}
             onDownloadAttachment={downloadAttachment}
-            onDeleteAttachment={deleteAttachment}
+            onDeleteAttachment={handleDeleteAttachment}
           />
         )}
       </AnimatePresence>
