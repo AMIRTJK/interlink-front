@@ -932,6 +932,10 @@ export const CreateInternalCorrespondence = ({
   }, [id, pageCount, orientation, formExpanded, panelsInToolbar]);
 
   const [searchParams, setSearchParams] = useState({ query: "" });
+  const handleOpenRecipientModal = () => {
+    setSearchParams({ query: "" });
+    setShowRecipientModal(true);
+  };
 
   const { data: usersData, isLoading: loadingUsers } = useGetQuery({
     url: ApiRoutes.GET_INTERNAL_RECIPIENTS_USERS,
@@ -4170,7 +4174,7 @@ export const CreateInternalCorrespondence = ({
                     </label>
                     <button
                       type="button"
-                      onClick={() => setShowRecipientModal(true)}
+                      onClick={handleOpenRecipientModal}
                       className="flex items-center justify-center px-1.5 py-1 rounded-lg text-[10px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors w-16 cursor-pointer"
                       title="Выбрать получателей из реестра"
                     >
@@ -4210,7 +4214,10 @@ export const CreateInternalCorrespondence = ({
                         setSearchParams({ query: e.target.value });
                         setShowToDropdown(true);
                       }}
-                      onFocus={() => setShowToDropdown(true)}
+                      onFocus={() => {
+                        setSearchParams({ query: toSearch });
+                        setShowToDropdown(true);
+                      }}
                       onBlur={() =>
                         setTimeout(() => setShowToDropdown(false), 150)
                       }
@@ -4222,6 +4229,7 @@ export const CreateInternalCorrespondence = ({
                       onSelect={(u) => {
                         setTo([...to, u]);
                         setToSearch("");
+                        setSearchParams({ query: "" });
                         setShowToDropdown(false);
                       }}
                     />
@@ -4245,7 +4253,7 @@ export const CreateInternalCorrespondence = ({
                         </label>
                         <button
                           type="button"
-                          onClick={() => setShowRecipientModal(true)}
+                          onClick={handleOpenRecipientModal}
                           className="flex items-center justify-center px-1.5 py-1 rounded-lg text-[10px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors w-16 cursor-pointer"
                           title="Выбрать получателей из реестра"
                         >
@@ -4286,7 +4294,10 @@ export const CreateInternalCorrespondence = ({
                             setSearchParams({ query: e.target.value });
                             setShowCcDropdown(true);
                           }}
-                          onFocus={() => setShowCcDropdown(true)}
+                          onFocus={() => {
+                            setSearchParams({ query: ccSearch });
+                            setShowCcDropdown(true);
+                          }}
                           onBlur={() =>
                             setTimeout(() => setShowCcDropdown(false), 150)
                           }
@@ -4298,6 +4309,7 @@ export const CreateInternalCorrespondence = ({
                           onSelect={(u) => {
                             setCc([...cc, u]);
                             setCcSearch("");
+                            setSearchParams({ query: "" });
                             setShowCcDropdown(false);
                           }}
                         />
