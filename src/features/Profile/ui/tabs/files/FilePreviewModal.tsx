@@ -164,7 +164,7 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
     const iconSize = 48;
     switch (type) {
       case "pdf":
-        return <div className="text-red-500 font-black text-3xl">PDF</div>;
+        return <FileText size={iconSize} className="text-red-500!" />;
       case "spreadsheet":
         return <FileSpreadsheet size={iconSize} className="text-green-500!" />;
       case "image":

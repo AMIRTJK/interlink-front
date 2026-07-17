@@ -4,7 +4,7 @@ import { IDiskMeta, formatBytes } from "./lib";
 const kpiColorMap: Record<string, string> = {
 	emerald: "text-emerald-700 dark:text-emerald-400",
 	indigo: "text-indigo-700 dark:text-indigo-400",
-	red: "text-red-650 dark:text-red-400",
+	red: "text-red-600 dark:text-red-400",
 	blue: "text-blue-700 dark:text-blue-400",
 };
 

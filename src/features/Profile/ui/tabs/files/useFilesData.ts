@@ -3,6 +3,24 @@ import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { IApiFile, IApiFolder, IDiskMeta } from "./lib";
 
+// Page size used by the "counts" queries. These fetch files without a folder
+// filter so we can show the grand total and per-folder counts regardless of
+// which folder is currently selected. Capped at 100 because the backend
+// rejects a larger `per_page` (422). The grand-total badge stays exact
+// regardless (it reads the paginator `total`, not the array length); per-folder
+// badges are derived from the returned page and prefer a backend `files_count`
+// when present.
+const COUNT_FETCH_SIZE = 100;
+
+// Group files by their direct folder to get a per-folder file count.
+const buildFolderFileCounts = (items: IApiFile[]): Record<number, number> =>
+  items.reduce<Record<number, number>>((acc, file) => {
+    if (file.folder_id != null) {
+      acc[file.folder_id] = (acc[file.folder_id] ?? 0) + 1;
+    }
+    return acc;
+  }, {});
+
 interface IFilesParams {
   search?: string;
   sort?: "name" | "date" | "size";
@@ -35,6 +53,15 @@ export const useFilesData = (params: IFilesParams) => {
   // 3. Get storage meta query
   const metaQuery = useGetQuery<any, { success: boolean; data: IDiskMeta }>({
     url: ApiRoutes.MY_FILES_META,
+    useToken: true,
+  });
+
+  // 3.1. Personal files counts: fetched without a folder filter so the "Все
+  // файлы" badge shows the grand total and each folder chip shows its own
+  // count, independent of the selected folder / current page.
+  const filesCountQuery = useGetQuery<{ per_page: number }, { success: boolean; data: IFilesPaginatedData }>({
+    url: ApiRoutes.MY_FILES,
+    params: { per_page: COUNT_FETCH_SIZE },
     useToken: true,
   });
 
@@ -136,6 +163,15 @@ export const useFilesData = (params: IFilesParams) => {
     useToken: true,
   });
 
+  // 11.1. Shared files counts: fetched without a folder filter so the "Все
+  // общие файлы" badge shows the total across all shared folders and each
+  // shared folder chip shows its own count, regardless of the selected folder.
+  const sharedFilesCountQuery = useGetQuery<{ per_page: number }, { success: boolean; data: { data: IApiFile[]; total?: number } }>({
+    url: ApiRoutes.MY_FILES_SHARED_WITH_ME,
+    params: { per_page: COUNT_FETCH_SIZE },
+    useToken: true,
+  });
+
   // 12. Invite to file
   const inviteToFile = useMutationQuery<{ id: number; user_id: number }, any>({
     url: (data) => ApiRoutes.MY_FILES_INVITE.replace(":id", String(data.id)),
@@ -182,6 +218,26 @@ export const useFilesData = (params: IFilesParams) => {
     perPage: rawSharedFilesData?.per_page ?? 30,
   };
 
+  // Grand totals and per-folder counts derived from the unfiltered counts
+  // queries. Keyed on the query `data` reference (stable until data changes)
+  // so the category lists don't recompute on every render.
+  const allFilesList = useMemo(
+    () => getArrayData(filesCountQuery.data?.data),
+    [filesCountQuery.data],
+  );
+  const allFilesCount = filesCountQuery.data?.data?.total ?? allFilesList.length;
+  const folderFileCounts = useMemo(() => buildFolderFileCounts(allFilesList), [allFilesList]);
+
+  const allSharedFilesList = useMemo(
+    () => getArrayData(sharedFilesCountQuery.data?.data),
+    [sharedFilesCountQuery.data],
+  );
+  const allSharedFilesCount = sharedFilesCountQuery.data?.data?.total ?? allSharedFilesList.length;
+  const sharedFolderFileCounts = useMemo(
+    () => buildFolderFileCounts(allSharedFilesList),
+    [allSharedFilesList],
+  );
+
   const getFolderIcon = (name: string): string => {
     const n = name.toLowerCase();
     if (n.includes("рабоч")) return "💼";
@@ -192,32 +248,34 @@ export const useFilesData = (params: IFilesParams) => {
   };
 
   const categoriesList = useMemo(() => {
-    const list: { id: number | "all"; name: string; icon: string }[] = [];
-    list.push({ id: "all" as const, name: "Все файлы", icon: "📁" });
+    const list: { id: number | "all"; name: string; icon: string; count: number }[] = [];
+    list.push({ id: "all" as const, name: "Все файлы", icon: "📁", count: allFilesCount });
     folders
       .forEach((f) => {
         list.push({
           id: f.id,
           name: f.name,
           icon: f.emoji || getFolderIcon(f.name),
+          count: f.files_count ?? folderFileCounts[f.id] ?? 0,
         });
       });
     return list;
-  }, [folders]);
+  }, [folders, allFilesCount, folderFileCounts]);
 
   const sharedCategoriesList = useMemo(() => {
-    const list: { id: number | "all"; name: string; icon: string }[] = [];
-    list.push({ id: "all" as const, name: "Все общие файлы", icon: "🤝" });
+    const list: { id: number | "all"; name: string; icon: string; count: number }[] = [];
+    list.push({ id: "all" as const, name: "Все общие файлы", icon: "🤝", count: allSharedFilesCount });
     sharedFolders
       .forEach((f) => {
         list.push({
           id: f.id,
           name: f.name,
           icon: f.emoji || getFolderIcon(f.name),
+          count: f.files_count ?? sharedFolderFileCounts[f.id] ?? 0,
         });
       });
     return list;
-  }, [sharedFolders]);
+  }, [sharedFolders, allSharedFilesCount, sharedFolderFileCounts]);
 
   const activeCategoryId = useMemo((): number | 'all' => {
     const actId = params.activeFolderId;

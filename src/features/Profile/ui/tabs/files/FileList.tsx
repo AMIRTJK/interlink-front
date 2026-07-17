@@ -46,7 +46,11 @@ export const FileList = ({
 
 		switch (fileType) {
 			case "pdf":
-				return <div className={`${baseClass} bg-red-500!`}>PDF</div>;
+				return (
+					<div className={`${baseClass} bg-red-500!`}>
+						<FileText size={13} />
+					</div>
+				);
 			case "spreadsheet":
 				return (
 					<div className={`${baseClass} bg-emerald-500!`}>
@@ -186,7 +190,7 @@ export const FileList = ({
 										type="checkbox"
 										checked={isSelected}
 										onChange={() => onToggleSelectFile(file.id)}
-										className="rounded border-slate-200 dark:border-slate-800 text-indigo-650 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
+										className="rounded border-slate-200 dark:border-slate-800 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
 									/>
 								</td>
 
@@ -196,7 +200,7 @@ export const FileList = ({
 										{getSmallIcon(file)}
 										<span
 											onClick={() => onView(file)}
-											className="text-sm font-bold text-slate-800 dark:text-zinc-200 hover:text-indigo-650 transition-colors cursor-pointer"
+											className="text-sm font-bold text-slate-800 dark:text-zinc-200 hover:text-indigo-600 transition-colors cursor-pointer"
 										>
 											{file.original_name}
 										</span>
@@ -290,7 +294,7 @@ export const FileList = ({
 												<button
 													type="button"
 													onClick={() => onDelete(file.id)}
-													className="p-1.5 text-slate-400 hover:text-red-650! hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all cursor-pointer"
+													className="p-1.5 text-slate-400 hover:text-red-600! hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all cursor-pointer"
 												>
 													<Trash2 size={15} />
 												</button>
