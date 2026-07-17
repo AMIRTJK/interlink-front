@@ -54,7 +54,7 @@ import {
   Save,
   Printer,
 } from "lucide-react";
-import { useGetQuery, useMutationQuery, buildFormData, toast } from "@shared/lib";
+import { useGetQuery, useMutationQuery, buildFormData, toast, tokenControl } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { If } from "@shared/ui";
 import { message } from "antd";
@@ -1317,6 +1317,17 @@ export const CreateInternalCorrespondence = ({
     });
 
   const isAlreadySent = initialData?.item?.status === "sent";
+
+  const currentUserId = tokenControl.getUserId() || tokenControl.getUserData()?.id;
+  const pendingSignature = rawWorkflowData?.data?.signatures?.find(
+    (sig: any) => sig.status === "pending"
+  );
+  const isCurrentSigner = pendingSignature && currentUserId && String(currentUserId) === String(pendingSignature.user_id || pendingSignature.user?.id);
+  const canDecline = !!pendingSignature && !!isCurrentSigner;
+
+  const handleDeclineClick = () => {
+    toast.info("Функциональность отклонения станет доступна после реализации API на стороне бэкенда");
+  };
 
   const assignSelfAsSigner = () => {
     if (!docCreator) return;
@@ -3850,6 +3861,17 @@ export const CreateInternalCorrespondence = ({
               )}
               <span>Сохранить</span>
             </button>
+
+            <If is={canDecline}>
+              <button
+                type="button"
+                onClick={handleDeclineClick}
+                className="flex items-center gap-2 cursor-pointer px-4 py-2 text-sm font-semibold transition-all border border-red-200 text-red-600 bg-white hover:bg-red-50 rounded-xl"
+              >
+                <X size={15} className="text-red-500" />
+                <span>Отклонить</span>
+              </button>
+            </If>
 
             <If is={isSigned && !isAlreadySent}>
               <button
