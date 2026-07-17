@@ -1,10 +1,11 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { X, FileIcon, Download, Paperclip, Calendar } from "lucide-react";
+import { X, FileIcon, Download, Paperclip, Calendar, Trash2 } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
-import type { Task } from "../model/types";
+import type { Task, TaskStatus } from "../model/types";
+import { STATUS_OPTIONS } from "../model/constants";
 import { formatDueDate, getPriorityMeta, getStatusMeta, getCountdown } from "../lib/helpers";
 import { Avatar } from "./Avatar";
 import { CountdownTimer } from "./Countdown";
@@ -41,12 +42,44 @@ const ModalContainer = ({
 export const TaskDetailModal = ({
   task,
   onClose,
+  onDelete,
+  onStatusChange,
+  onDownloadAttachment,
 }: {
   task: Task;
   onClose: () => void;
+  onDelete?: (task: Task) => Promise<void> | void;
+  onStatusChange?: (task: Task, status: TaskStatus) => Promise<void> | void;
+  onDownloadAttachment?: (
+    taskId: number,
+    attachmentId: number,
+    fileName: string,
+  ) => Promise<void> | void;
 }) => {
   const pMeta = getPriorityMeta(task.priority);
-  const sMeta = getStatusMeta(task.status);
+  const [busy, setBusy] = React.useState(false);
+  const [confirmDelete, setConfirmDelete] = React.useState(false);
+
+  const handleStatus = async (status: TaskStatus) => {
+    if (!onStatusChange || status === task.status) return;
+    setBusy(true);
+    try {
+      await onStatusChange(task, status);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!onDelete) return;
+    setBusy(true);
+    try {
+      await onDelete(task);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <ModalContainer onClose={onClose}>
       <div className="p-6 border-b border-slate-100 dark:border-white/10 flex items-center justify-between">
@@ -132,7 +165,15 @@ export const TaskDetailModal = ({
                       </p>
                       <p className="text-[10px] text-slate-400">{file.size}</p>
                     </div>
-                    <button className="opacity-0 group-hover:opacity-100 p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all text-slate-400 hover:text-emerald-600">
+                    <button
+                      onClick={() => {
+                        if (task.rawId != null && file.rawId != null) {
+                          onDownloadAttachment?.(task.rawId, file.rawId, file.name);
+                        }
+                      }}
+                      disabled={task.rawId == null || file.rawId == null}
+                      className="opacity-0 group-hover:opacity-100 p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all text-slate-400 hover:text-emerald-600 disabled:opacity-0"
+                    >
                       <Download size={16} />
                     </button>
                   </div>
@@ -186,10 +227,24 @@ export const TaskDetailModal = ({
                   Статус
                 </label>
                 <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10">
-                  <div className={cn("w-2 h-2 rounded-full", sMeta.color)} />
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                    {sMeta.label}
-                  </span>
+                  <div
+                    className={cn(
+                      "w-2 h-2 rounded-full shrink-0",
+                      getStatusMeta(task.status).color,
+                    )}
+                  />
+                  <select
+                    value={task.status}
+                    disabled={busy || !onStatusChange}
+                    onChange={(e) => handleStatus(e.target.value as TaskStatus)}
+                    className="flex-1 min-w-0 bg-transparent border-none outline-none text-xs font-bold text-slate-700 dark:text-slate-200 focus:ring-0 cursor-pointer disabled:cursor-default"
+                  >
+                    {STATUS_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
@@ -225,15 +280,44 @@ export const TaskDetailModal = ({
         </div>
       </div>
 
-      <div className="p-6 bg-slate-50/80 dark:bg-slate-800/60 border-t border-slate-200 dark:border-white/10 flex justify-end gap-3">
+      <div className="p-6 bg-slate-50/80 dark:bg-slate-800/60 border-t border-slate-200 dark:border-white/10 flex justify-between gap-3">
+        <If is={Boolean(onDelete)}>
+          {confirmDelete ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                Удалить задачу?
+              </span>
+              <button
+                onClick={handleDelete}
+                disabled={busy}
+                className="px-4 py-2 text-xs font-bold text-white bg-rose-500 hover:bg-rose-600 rounded-xl transition-colors disabled:opacity-60"
+              >
+                Да, удалить
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                disabled={busy}
+                className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
+              >
+                Отмена
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              disabled={busy}
+              className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-colors disabled:opacity-60"
+            >
+              <Trash2 size={16} />
+              Удалить
+            </button>
+          )}
+        </If>
         <button
           onClick={onClose}
-          className="px-6 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
+          className="ml-auto px-6 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
         >
           Закрыть
-        </button>
-        <button className="px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 rounded-xl shadow-lg shadow-emerald-200 dark:shadow-emerald-900/40 hover:scale-[1.02] active:scale-[0.98] transition-all">
-          Редактировать
         </button>
       </div>
     </ModalContainer>

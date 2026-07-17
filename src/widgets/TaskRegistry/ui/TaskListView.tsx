@@ -23,11 +23,20 @@ const PER_PAGE = 7;
 
 interface TaskListViewProps {
   tasks: Task[];
+  /** Статистика с бэкенда для верхних карточек (если недоступна — считаем локально). */
+  stats?: TaskStats | null;
+  isLoading?: boolean;
   onOpenTask: (task: Task) => void;
   onCreate: () => void;
 }
 
-export const TaskListView = ({ tasks, onOpenTask, onCreate }: TaskListViewProps) => {
+export const TaskListView = ({
+  tasks,
+  stats: apiStats,
+  isLoading,
+  onOpenTask,
+  onCreate,
+}: TaskListViewProps) => {
   const [selectedTasks, setSelectedTasks] = React.useState<string[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [filterTab, setFilterTab] = React.useState<FilterTabId>("all");
@@ -37,7 +46,7 @@ export const TaskListView = ({ tasks, onOpenTask, onCreate }: TaskListViewProps)
   });
   const [page, setPage] = React.useState(1);
 
-  const stats: TaskStats = React.useMemo(() => {
+  const localStats: TaskStats = React.useMemo(() => {
     return {
       total: tasks.length,
       inProgress: tasks.filter(
@@ -52,6 +61,11 @@ export const TaskListView = ({ tasks, onOpenTask, onCreate }: TaskListViewProps)
       ).length,
     };
   }, [tasks]);
+
+  // Верхние карточки — из API (точный total по всем задачам), вкладки-фильтры —
+  // локально, т.к. отражают текущую загруженную выборку.
+  const stats = localStats;
+  const topStats = apiStats ?? localStats;
 
   const filteredTasks = React.useMemo(() => {
     const result = tasks.filter((task) => {
@@ -157,7 +171,7 @@ export const TaskListView = ({ tasks, onOpenTask, onCreate }: TaskListViewProps)
                   {stat.label}
                 </p>
                 <p className="text-3xl font-black text-slate-800 dark:text-slate-100 leading-none">
-                  {stats[stat.key]}
+                  {topStats[stat.key]}
                 </p>
               </div>
             </motion.div>
@@ -522,10 +536,12 @@ export const TaskListView = ({ tasks, onOpenTask, onCreate }: TaskListViewProps)
                           <Search size={32} />
                         </div>
                         <p className="text-slate-500 dark:text-slate-400 font-bold">
-                          Ничего не найдено
+                          {isLoading ? "Загрузка задач..." : "Ничего не найдено"}
                         </p>
                         <p className="text-slate-400 text-sm">
-                          Попробуйте изменить параметры поиска или фильтры
+                          {isLoading
+                            ? "Пожалуйста, подождите"
+                            : "Попробуйте изменить параметры поиска или фильтры"}
                         </p>
                       </div>
                     </td>
