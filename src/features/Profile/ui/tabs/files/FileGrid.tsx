@@ -52,8 +52,8 @@ export const FileGrid = ({
         );
       case "pdf":
         return (
-          <div className="w-full h-full bg-gradient-to-tr from-red-650 to-rose-550! flex items-center justify-center">
-            <span className="text-white! font-black text-2xl tracking-wider">PDF</span>
+          <div className="w-full h-full bg-gradient-to-tr from-red-500 to-rose-500! flex items-center justify-center">
+            <FileText size={42} className="text-white!" />
           </div>
         );
       case "document":
@@ -101,7 +101,7 @@ export const FileGrid = ({
       {files.map((file) => (
         <div
           key={file.id}
-          className="group bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-650 overflow-hidden transition-all duration-200"
+          className="group bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600 overflow-hidden transition-all duration-200"
         >
           {/* Cover Area */}
           <div
@@ -133,7 +133,7 @@ export const FileGrid = ({
           <div className="p-5 space-y-1">
             <h4
               onClick={() => onView(file)}
-              className="text-sm font-bold text-slate-800 dark:text-zinc-200 truncate cursor-pointer hover:text-indigo-650 transition-colors"
+              className="text-sm font-bold text-slate-800 dark:text-zinc-200 truncate cursor-pointer hover:text-indigo-600 transition-colors"
               title={file.original_name}
             >
               {file.original_name}

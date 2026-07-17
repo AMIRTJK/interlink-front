@@ -150,7 +150,7 @@ export const DesktopMode = ({ userData, onClose, isDark }: IProps) => {
           {formattedTime}
         </h1>
         <p
-          className={`text-sm md:text-base font-semibold tracking-widest uppercase mt-4 ${isDark ? "text-white/70" : "text-slate-650"}`}
+          className={`text-sm md:text-base font-semibold tracking-widest uppercase mt-4 ${isDark ? "text-white/70" : "text-slate-600"}`}
         >
           {formattedDate}
         </p>

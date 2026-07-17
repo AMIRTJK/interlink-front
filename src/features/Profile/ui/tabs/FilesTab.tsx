@@ -251,8 +251,8 @@ export const FilesTab = () => {
 					onClick={() => fileInputRef.current?.click()}
 					className={`w-full py-6 border-2 border-dashed rounded-3xl flex items-center justify-center gap-2 cursor-pointer transition-all ${
 						isDragOver
-							? "border-indigo-600 bg-indigo-50/30 text-indigo-650"
-							: "border-slate-200 dark:border-slate-800 text-slate-400 hover:border-slate-355 dark:hover:border-slate-700"
+							? "border-indigo-600 bg-indigo-50/30 text-indigo-600"
+							: "border-slate-200 dark:border-slate-800 text-slate-400 hover:border-slate-300 dark:hover:border-slate-700"
 					}`}
 				>
 					<input
