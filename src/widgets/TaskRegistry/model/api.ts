@@ -182,6 +182,34 @@ export const mapApiTaskToTask = (item: IApiTask): Task => {
   };
 };
 
+const BOARD_COLUMNS: TaskStatus[] = [
+  "new",
+  "in_progress",
+  "review",
+  "completed",
+  "overdue",
+];
+
+/** Маппит ответ /api/v1/tasks/board в колонки доменных задач. */
+export const mapBoard = (res: unknown): Record<TaskStatus, Task[]> => {
+  const r = res as { data?: unknown } | undefined;
+  const cols = (r?.data ?? r) as Record<string, IApiTask[]> | undefined;
+  const result = {
+    new: [],
+    in_progress: [],
+    review: [],
+    completed: [],
+    overdue: [],
+  } as Record<TaskStatus, Task[]>;
+  if (cols) {
+    BOARD_COLUMNS.forEach((key) => {
+      const arr = cols[key];
+      result[key] = Array.isArray(arr) ? arr.map(mapApiTaskToTask) : [];
+    });
+  }
+  return result;
+};
+
 /**
  * Достаёт массив сущностей из ответа API, устойчиво к разным обёрткам:
  * `{ data: [...] }`, `{ data: { data: [...] } }`, либо сам массив.
@@ -193,4 +221,40 @@ export const extractList = <T = unknown>(res: unknown): T[] => {
   const nested = (r?.data as { data?: unknown } | undefined)?.data;
   if (Array.isArray(nested)) return nested as T[];
   return [];
+};
+
+export interface Pagination {
+  total: number;
+  lastPage: number;
+  currentPage: number;
+  perPage: number;
+}
+
+/**
+ * Извлекает метаданные серверной пагинации, устойчиво к разным форматам:
+ * `res.meta`, `res.data.meta` или пагинатор Laravel в `res.data`
+ * (`current_page/last_page/total/per_page`).
+ */
+export const extractPagination = (
+  res: unknown,
+  fallbackCount: number,
+  defaultPerPage: number,
+): Pagination => {
+  const r = (res ?? {}) as Record<string, unknown>;
+  const dataField = r.data as Record<string, unknown> | unknown[] | undefined;
+  const metaCandidate =
+    (r.meta as Record<string, unknown> | undefined) ??
+    (dataField && !Array.isArray(dataField)
+      ? ((dataField.meta as Record<string, unknown> | undefined) ?? dataField)
+      : undefined);
+  const meta = (metaCandidate ?? {}) as Record<string, unknown>;
+  const num = (v: unknown, d: number) => {
+    const n = Number(v);
+    return Number.isFinite(n) && n > 0 ? n : d;
+  };
+  const perPage = num(meta.per_page, defaultPerPage);
+  const total = num(meta.total, fallbackCount);
+  const currentPage = num(meta.current_page, 1);
+  const lastPage = num(meta.last_page, Math.max(1, Math.ceil(total / perPage)));
+  return { total, lastPage, currentPage, perPage };
 };
