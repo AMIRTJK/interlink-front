@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { X, FileIcon, Download, Paperclip, Calendar, Trash2 } from "lucide-react";
+import { X, FileIcon, Download, Paperclip, Calendar, Trash2, Upload, Pencil } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { Task, TaskStatus } from "../model/types";
@@ -42,23 +42,46 @@ const ModalContainer = ({
 export const TaskDetailModal = ({
   task,
   onClose,
+  onEdit,
   onDelete,
   onStatusChange,
+  onUploadAttachments,
   onDownloadAttachment,
+  onDeleteAttachment,
 }: {
   task: Task;
   onClose: () => void;
+  onEdit?: (task: Task) => void;
   onDelete?: (task: Task) => Promise<void> | void;
   onStatusChange?: (task: Task, status: TaskStatus) => Promise<void> | void;
+  onUploadAttachments?: (taskId: number, files: File[]) => Promise<void> | void;
   onDownloadAttachment?: (
     taskId: number,
     attachmentId: number,
     fileName: string,
   ) => Promise<void> | void;
+  onDeleteAttachment?: (
+    taskId: number,
+    attachmentId: number,
+  ) => Promise<void> | void;
 }) => {
   const pMeta = getPriorityMeta(task.priority);
   const [busy, setBusy] = React.useState(false);
   const [confirmDelete, setConfirmDelete] = React.useState(false);
+  const [uploading, setUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (!files.length || task.rawId == null || !onUploadAttachments) return;
+    setUploading(true);
+    try {
+      await onUploadAttachments(task.rawId, files);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleStatus = async (status: TaskStatus) => {
     if (!onStatusChange || status === task.status) return;
@@ -146,9 +169,28 @@ export const TaskDetailModal = ({
           </section>
 
           <section>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">
-              Вложения
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                Вложения
+              </h3>
+              <If is={Boolean(onUploadAttachments) && task.rawId != null}>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors disabled:opacity-60"
+                >
+                  <Upload size={13} />
+                  {uploading ? "Загрузка..." : "Загрузить"}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  hidden
+                  onChange={handleUpload}
+                />
+              </If>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               {task.attachments.length > 0 ? (
                 task.attachments.map((file) => (
@@ -165,17 +207,34 @@ export const TaskDetailModal = ({
                       </p>
                       <p className="text-[10px] text-slate-400">{file.size}</p>
                     </div>
-                    <button
-                      onClick={() => {
-                        if (task.rawId != null && file.rawId != null) {
-                          onDownloadAttachment?.(task.rawId, file.rawId, file.name);
-                        }
-                      }}
-                      disabled={task.rawId == null || file.rawId == null}
-                      className="opacity-0 group-hover:opacity-100 p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all text-slate-400 hover:text-emerald-600 disabled:opacity-0"
-                    >
-                      <Download size={16} />
-                    </button>
+                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => {
+                          if (task.rawId != null && file.rawId != null) {
+                            onDownloadAttachment?.(task.rawId, file.rawId, file.name);
+                          }
+                        }}
+                        disabled={task.rawId == null || file.rawId == null}
+                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all text-slate-400 hover:text-emerald-600 disabled:opacity-40"
+                        title="Скачать"
+                      >
+                        <Download size={16} />
+                      </button>
+                      <If is={Boolean(onDeleteAttachment)}>
+                        <button
+                          onClick={() => {
+                            if (task.rawId != null && file.rawId != null) {
+                              onDeleteAttachment?.(task.rawId, file.rawId);
+                            }
+                          }}
+                          disabled={task.rawId == null || file.rawId == null}
+                          className="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all text-slate-400 hover:text-rose-600 disabled:opacity-40"
+                          title="Удалить"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </If>
+                    </div>
                   </div>
                 ))
               ) : (
@@ -313,12 +372,24 @@ export const TaskDetailModal = ({
             </button>
           )}
         </If>
-        <button
-          onClick={onClose}
-          className="ml-auto px-6 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
-        >
-          Закрыть
-        </button>
+        <div className="ml-auto flex items-center gap-3">
+          <button
+            onClick={onClose}
+            className="px-6 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors"
+          >
+            Закрыть
+          </button>
+          <If is={Boolean(onEdit)}>
+            <button
+              onClick={() => onEdit?.(task)}
+              disabled={busy || task.rawId == null}
+              className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 rounded-xl shadow-lg shadow-emerald-200 dark:shadow-emerald-900/40 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 disabled:scale-100"
+            >
+              <Pencil size={16} />
+              Редактировать
+            </button>
+          </If>
+        </div>
       </div>
     </ModalContainer>
   );

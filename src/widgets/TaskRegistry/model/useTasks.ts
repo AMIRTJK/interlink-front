@@ -138,14 +138,40 @@ export const useTasks = () => {
   /* ---------- ATTACHMENTS ---------- */
   const uploadAttachments = useCallback(
     async (taskId: number, files: File[]) => {
-      const formData = new FormData();
-      files.forEach((file) => formData.append("attachments[]", file));
-      const token = tokenControl.get();
-      const url = ApiRoutes.TASK_ATTACHMENTS.replace(":id", String(taskId));
-      await _axios.post(url, formData, {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      });
-      await refetch();
+      if (!files.length) return;
+      try {
+        const formData = new FormData();
+        files.forEach((file) => formData.append("attachments[]", file));
+        const token = tokenControl.get();
+        const url = ApiRoutes.TASK_ATTACHMENTS.replace(":id", String(taskId));
+        await _axios.post(url, formData, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+        toast.success("Вложения загружены");
+        await refetch();
+      } catch {
+        toast.error("Не удалось загрузить вложения");
+      }
+    },
+    [refetch],
+  );
+
+  const deleteAttachment = useCallback(
+    async (taskId: number, attachmentId: number) => {
+      try {
+        const url = ApiRoutes.TASK_ATTACHMENT_DELETE.replace(
+          ":id",
+          String(taskId),
+        ).replace(":attachmentId", String(attachmentId));
+        const token = tokenControl.get();
+        await _axios.delete(url, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+        toast.success("Вложение удалено");
+        await refetch();
+      } catch {
+        toast.error("Не удалось удалить вложение");
+      }
     },
     [refetch],
   );
@@ -189,5 +215,6 @@ export const useTasks = () => {
     updateStatus,
     uploadAttachments,
     downloadAttachment,
+    deleteAttachment,
   };
 };

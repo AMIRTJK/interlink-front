@@ -13,17 +13,27 @@ export const TaskRegistry = () => {
     stats,
     isLoading,
     createTask,
+    updateTask,
     deleteTask,
     updateStatus,
+    uploadAttachments,
     downloadAttachment,
+    deleteAttachment,
   } = useTasks();
   const [view, setView] = React.useState<ViewState>("list");
   const [detailTask, setDetailTask] = React.useState<Task | null>(null);
+  const [editingTask, setEditingTask] = React.useState<Task | null>(null);
 
   const handleCreate = async (payloads: TaskPayload[]) => {
     for (const payload of payloads) {
       await createTask(payload);
     }
+    setView("list");
+  };
+
+  const handleUpdate = async (id: number, payload: TaskPayload) => {
+    await updateTask(id, payload);
+    setEditingTask(null);
     setView("list");
   };
 
@@ -39,6 +49,17 @@ export const TaskRegistry = () => {
     setDetailTask((prev) => (prev ? { ...prev, status } : prev));
   };
 
+  const openEdit = (task: Task) => {
+    setDetailTask(null);
+    setEditingTask(task);
+    setView("create");
+  };
+
+  const leaveCreate = () => {
+    setEditingTask(null);
+    setView("list");
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden selection:bg-emerald-100 selection:text-emerald-900">
       <AnimatePresence mode="wait">
@@ -49,14 +70,19 @@ export const TaskRegistry = () => {
             stats={stats}
             isLoading={isLoading}
             onOpenTask={setDetailTask}
-            onCreate={() => setView("create")}
+            onCreate={() => {
+              setEditingTask(null);
+              setView("create");
+            }}
           />
         ) : (
           <CreateTaskView
             key="create"
             colleagues={colleagues}
-            onBack={() => setView("list")}
+            editTask={editingTask}
+            onBack={leaveCreate}
             onCreate={handleCreate}
+            onUpdate={handleUpdate}
           />
         )}
       </AnimatePresence>
@@ -67,9 +93,12 @@ export const TaskRegistry = () => {
           <TaskDetailModal
             task={detailTask}
             onClose={() => setDetailTask(null)}
+            onEdit={openEdit}
             onDelete={handleDelete}
             onStatusChange={handleStatus}
+            onUploadAttachments={uploadAttachments}
             onDownloadAttachment={downloadAttachment}
+            onDeleteAttachment={deleteAttachment}
           />
         )}
       </AnimatePresence>
