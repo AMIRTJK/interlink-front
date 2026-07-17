@@ -17,7 +17,7 @@ import type {
   Colleague,
   Priority,
   SubRow,
-  Task,
+  TaskPayload,
   TaskStatus,
   TaskType,
 } from "../model/types";
@@ -28,11 +28,13 @@ import { Avatar } from "./Avatar";
 interface CreateTaskViewProps {
   colleagues: Colleague[];
   onBack: () => void;
-  onCreated: (task: Task) => void;
+  /** Создаёт одну или несколько задач через API. */
+  onCreate: (payloads: TaskPayload[]) => Promise<void>;
 }
 
-export const CreateTaskView = ({ colleagues, onBack, onCreated }: CreateTaskViewProps) => {
+export const CreateTaskView = ({ colleagues, onBack, onCreate }: CreateTaskViewProps) => {
   const firstId = colleagues[0]?.id ?? "";
+  const [isSaving, setIsSaving] = React.useState(false);
 
   // --- Personal form state ---
   const [formTitle, setFormTitle] = React.useState("");
@@ -71,28 +73,31 @@ export const CreateTaskView = ({ colleagues, onBack, onCreated }: CreateTaskView
   const [chairmanSigned, setChairmanSigned] = React.useState<string | null>(null);
   const [secretarySigned, setSecretarySigned] = React.useState<string | null>(null);
 
-  const handleCreateTask = () => {
+  const toAssigneeIds = (ids: string[]): number[] =>
+    ids.map((id) => Number(id)).filter((n) => Number.isFinite(n) && n > 0);
+
+  const handleCreateTask = async () => {
     if (!formTitle.trim()) {
       setTitleError(true);
       return;
     }
-    const assignee =
-      colleagues.find((c) => formAssignees.includes(c.id)) || colleagues[0];
-    const newTask: Task = {
-      id: `TSK-${Math.floor(1000 + Math.random() * 9000)}`,
-      title: formTitle,
+    if (isSaving) return;
+    const payload: TaskPayload = {
+      title: formTitle.trim(),
       description: formDescription,
       priority: formPriority,
       status: formStatus,
-      assignee,
-      dueDate: new Date(formDueDate).toISOString(),
-      createdAt: new Date().toISOString(),
+      due_date: formDueDate || null,
       tags: formTags.split(",").map((t) => t.trim()).filter((t) => t !== ""),
       progress: 0,
-      attachments: [],
+      assignees: toAssigneeIds(formAssignees),
     };
-    onCreated(newTask);
-    onBack();
+    setIsSaving(true);
+    try {
+      await onCreate([payload]);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const toggleAssignee = (id: string) => {
@@ -128,34 +133,39 @@ export const CreateTaskView = ({ colleagues, onBack, onCreated }: CreateTaskView
       prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)),
     );
   };
-  const handleBatchCreate = () => {
+  const handleBatchCreate = async () => {
+    if (isSaving) return;
     const filledRows = batchRows.filter((r) => r.title.trim() !== "");
-    const chairman =
-      colleagues.find((c) => c.id === batchGlobal.chairmanId) || colleagues[0];
-    const participantNames =
-      batchGlobal.participants
-        .map((id) => colleagues.find((c) => c.id === id)?.name)
-        .filter(Boolean)
-        .join(", ") || "—";
-    const protocolTask: Task = {
-      id: `PROTO-${Date.now()}`,
-      title: batchGlobal.number.trim()
-        ? `Протокол №${batchGlobal.number.trim()}`
-        : "Протокол",
-      description: `Председатель: ${chairman.name}. Участники: ${participantNames}. Задач в протоколе: ${filledRows.length}`,
-      status: "new",
-      priority: "high",
-      assignee: chairman,
-      dueDate: new Date(
-        batchGlobal.date || new Date().toISOString().split("T")[0],
-      ).toISOString(),
-      createdAt: new Date().toISOString(),
-      tags: ["протокол"],
-      progress: 0,
-      attachments: [],
-    };
-    onCreated(protocolTask);
-    onBack();
+    if (filledRows.length === 0) return;
+    const protocolTag = batchGlobal.number.trim()
+      ? `протокол №${batchGlobal.number.trim()}`
+      : "протокол";
+    const payloads: TaskPayload[] = filledRows.map((row) => {
+      const subs = (subRowsMap[row.id] || [])
+        .map((s) => s.title.trim())
+        .filter(Boolean);
+      const description = subs.length
+        ? `Подпункты:\n${subs.map((s) => `• ${s}`).join("\n")}`
+        : "";
+      return {
+        title: row.title.trim(),
+        description,
+        status: row.status,
+        priority: row.priority,
+        due_date: batchGlobal.date || null,
+        tags: ["протокол", protocolTag].filter(
+          (t, i, arr) => arr.indexOf(t) === i,
+        ),
+        progress: 0,
+        assignees: toAssigneeIds([row.assigneeId]),
+      };
+    });
+    setIsSaving(true);
+    try {
+      await onCreate(payloads);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // --- Sub-row helpers ---
@@ -240,10 +250,11 @@ export const CreateTaskView = ({ colleagues, onBack, onCreated }: CreateTaskView
         </div>
         <button
           onClick={handleCreateTask}
-          className="flex items-center gap-2 px-7 py-3.5 bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 hover:brightness-110 rounded-2xl text-sm font-bold text-white shadow-xl shadow-emerald-200 dark:shadow-emerald-900/40 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          disabled={isSaving}
+          className="flex items-center gap-2 px-7 py-3.5 bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 hover:brightness-110 rounded-2xl text-sm font-bold text-white shadow-xl shadow-emerald-200 dark:shadow-emerald-900/40 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100"
         >
           <Plus size={18} />
-          Создать задачу
+          {isSaving ? "Сохранение..." : "Создать задачу"}
         </button>
       </header>
 
@@ -1049,10 +1060,10 @@ export const CreateTaskView = ({ colleagues, onBack, onCreated }: CreateTaskView
                   </p>
                   <button
                     onClick={handleBatchCreate}
-                    disabled={filledBatchCount === 0}
+                    disabled={filledBatchCount === 0 || isSaving}
                     className="px-8 py-3 text-sm font-bold text-white bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-emerald-900/40 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:scale-100"
                   >
-                    Создать протокол
+                    {isSaving ? "Сохранение..." : "Создать протокол"}
                   </button>
                 </div>
               </div>

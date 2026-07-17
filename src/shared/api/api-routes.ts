@@ -25,6 +25,17 @@ export const ApiRoutes = {
   DELETE_TASK_BY_ID: "/api/v1/tasks/",
   UPDATE_EVENT: "/api/v1/events",
 
+  // ==================== TASKS MODULE (/modules/tasks) ====================
+  // Общие задачи модуля /tasks (не связаны с /personal-tasks).
+  TASKS_BOARD: "/api/v1/tasks/board",
+  TASKS_STATS: "/api/v1/tasks/stats",
+  TASK_BY_ID: "/api/v1/tasks/:id",
+  TASK_STATUS: "/api/v1/tasks/:id/status",
+  TASK_ATTACHMENTS: "/api/v1/tasks/:id/attachments",
+  TASK_ATTACHMENT_DOWNLOAD:
+    "/api/v1/tasks/:id/attachments/:attachmentId/download",
+  TASK_ATTACHMENT_DELETE: "/api/v1/tasks/:id/attachments/:attachmentId",
+
   // Corresspondence
   GET_CORRESPONDENCES: "/api/v1/correspondences",
   // Внутренняя корреспонденция (для папок Отправленные/Полученные)
