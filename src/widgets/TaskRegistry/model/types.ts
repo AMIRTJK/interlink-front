@@ -92,3 +92,15 @@ export interface TaskStats {
   completed: number;
   overdue: number;
 }
+
+/** Полная статистика с /api/v1/tasks/stats (по каждому статусу). */
+export interface TaskStatsFull {
+  total: number;
+  new: number;
+  in_progress: number;
+  review: number;
+  completed: number;
+  overdue: number;
+  active: number;
+  priority_breakdown?: Record<string, number>;
+}

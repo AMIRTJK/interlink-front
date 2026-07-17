@@ -17,6 +17,7 @@ import type {
   Colleague,
   Priority,
   SubRow,
+  Task,
   TaskPayload,
   TaskStatus,
   TaskType,
@@ -30,22 +31,56 @@ interface CreateTaskViewProps {
   onBack: () => void;
   /** Создаёт одну или несколько задач через API. */
   onCreate: (payloads: TaskPayload[]) => Promise<void>;
+  /** Редактируемая задача (режим PUT). Если задана — форма работает на обновление. */
+  editTask?: Task | null;
+  /** Обновляет существующую задачу через API. */
+  onUpdate?: (id: number, payload: TaskPayload) => Promise<void>;
 }
 
-export const CreateTaskView = ({ colleagues, onBack, onCreate }: CreateTaskViewProps) => {
+const toDateInput = (iso: string): string => {
+  if (!iso) return new Date().toISOString().split("T")[0];
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime())
+    ? new Date().toISOString().split("T")[0]
+    : d.toISOString().split("T")[0];
+};
+
+export const CreateTaskView = ({
+  colleagues,
+  onBack,
+  onCreate,
+  editTask,
+  onUpdate,
+}: CreateTaskViewProps) => {
   const firstId = colleagues[0]?.id ?? "";
+  const isEdit = Boolean(editTask);
   const [isSaving, setIsSaving] = React.useState(false);
 
   // --- Personal form state ---
-  const [formTitle, setFormTitle] = React.useState("");
-  const [formDescription, setFormDescription] = React.useState("");
-  const [formTags, setFormTags] = React.useState("");
-  const [formPriority, setFormPriority] = React.useState<Priority>("medium");
-  const [formStatus, setFormStatus] = React.useState<TaskStatus>("new");
-  const [formDueDate, setFormDueDate] = React.useState(
-    new Date().toISOString().split("T")[0],
+  const [formTitle, setFormTitle] = React.useState(editTask?.title ?? "");
+  const [formDescription, setFormDescription] = React.useState(
+    editTask?.description ?? "",
   );
-  const [formAssignees, setFormAssignees] = React.useState<string[]>([firstId]);
+  const [formTags, setFormTags] = React.useState(
+    editTask?.tags?.join(", ") ?? "",
+  );
+  const [formPriority, setFormPriority] = React.useState<Priority>(
+    editTask?.priority ?? "medium",
+  );
+  const [formStatus, setFormStatus] = React.useState<TaskStatus>(
+    editTask?.status ?? "new",
+  );
+  const [formDueDate, setFormDueDate] = React.useState(
+    editTask ? toDateInput(editTask.dueDate) : new Date().toISOString().split("T")[0],
+  );
+  const [formProgress, setFormProgress] = React.useState<number>(
+    editTask?.progress ?? 0,
+  );
+  const [formAssignees, setFormAssignees] = React.useState<string[]>(
+    editTask
+      ? editTask.assignees.map((a) => a.id).filter(Boolean)
+      : [firstId],
+  );
   const [assigneeQuery, setAssigneeQuery] = React.useState("");
   const [assigneeOpen, setAssigneeOpen] = React.useState(false);
   const [titleError, setTitleError] = React.useState(false);
@@ -89,12 +124,16 @@ export const CreateTaskView = ({ colleagues, onBack, onCreate }: CreateTaskViewP
       status: formStatus,
       due_date: formDueDate || null,
       tags: formTags.split(",").map((t) => t.trim()).filter((t) => t !== ""),
-      progress: 0,
+      progress: formProgress,
       assignees: toAssigneeIds(formAssignees),
     };
     setIsSaving(true);
     try {
-      await onCreate([payload]);
+      if (isEdit && editTask?.rawId != null && onUpdate) {
+        await onUpdate(editTask.rawId, payload);
+      } else {
+        await onCreate([payload]);
+      }
     } finally {
       setIsSaving(false);
     }
@@ -245,7 +284,7 @@ export const CreateTaskView = ({ colleagues, onBack, onCreate }: CreateTaskViewP
             Назад
           </button>
           <h1 className="text-4xl font-black text-slate-800 dark:text-slate-100 tracking-tight">
-            Новая задача
+            {isEdit ? "Редактирование задачи" : "Новая задача"}
           </h1>
         </div>
         <button
@@ -254,12 +293,16 @@ export const CreateTaskView = ({ colleagues, onBack, onCreate }: CreateTaskViewP
           className="flex items-center gap-2 px-7 py-3.5 bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 hover:brightness-110 rounded-2xl text-sm font-bold text-white shadow-xl shadow-emerald-200 dark:shadow-emerald-900/40 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100"
         >
           <Plus size={18} />
-          {isSaving ? "Сохранение..." : "Создать задачу"}
+          {isSaving
+            ? "Сохранение..."
+            : isEdit
+              ? "Сохранить изменения"
+              : "Создать задачу"}
         </button>
       </header>
 
-      {/* Task type segmented control */}
-      <div className="flex items-center gap-4">
+      {/* Task type segmented control (только при создании) */}
+      <div className={cn("flex items-center gap-4", isEdit && "hidden")}>
         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
           Тип
         </span>
@@ -411,6 +454,26 @@ export const CreateTaskView = ({ colleagues, onBack, onCreate }: CreateTaskViewP
                   value={formDueDate}
                   onChange={(e) => setFormDueDate(e.target.value)}
                   className="w-full px-4 py-3 bg-white/60 dark:bg-slate-800/60 border border-white/30 dark:border-white/10 rounded-2xl outline-none font-medium text-slate-700 dark:text-slate-100"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    Прогресс
+                  </label>
+                  <span className="text-xs font-bold text-emerald-600">
+                    {formProgress}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={formProgress}
+                  onChange={(e) => setFormProgress(Number(e.target.value))}
+                  className="w-full accent-emerald-600 cursor-pointer"
                 />
               </div>
 
