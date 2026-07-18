@@ -244,6 +244,7 @@ export const InternalCorrespondenceIncomingView = ({
           senderName,
           date: formattedSentDate,
           status: item.status,
+          priority: item.priority,
           inboundNumber,
           body: documentBody,
         },

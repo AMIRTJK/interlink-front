@@ -656,6 +656,7 @@ export const CreateInternalCorrespondence = ({
       senderName?: string;
       date?: string;
       status?: string;
+      priority?: string;
       inboundNumber?: string;
       body?: string;
     };
@@ -3943,6 +3944,7 @@ export const CreateInternalCorrespondence = ({
             }
             date={sourceLetter.date || "—"}
             status={sourceLetter.status || ""}
+            priority={sourceLetter.priority}
             inboundNumber={sourceLetter.inboundNumber || "—"}
             subject={sourceLetter.subject || ""}
             body={sourceLetter.body}

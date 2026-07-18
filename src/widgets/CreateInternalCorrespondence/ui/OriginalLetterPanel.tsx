@@ -8,12 +8,62 @@ import { cn } from "@shared/lib";
 // OriginalLetterPanel). Данные реальные, прокидываются через navigate state.
 
 const STATUS_STYLE: Record<string, string> = {
+  // Russian keys
   "на резолюции": "bg-emerald-50 text-emerald-700 border-emerald-200",
   "на исполнении": "bg-amber-100 text-amber-700 border-amber-200",
   "на согласовании": "bg-blue-50 text-blue-700 border-blue-200",
   "на подпись": "bg-purple-50 text-purple-700 border-purple-200",
   завершено: "bg-slate-100 text-slate-600 border-slate-200",
   sent: "bg-blue-50 text-blue-700 border-blue-200",
+
+  // English keys
+  draft: "bg-slate-100 text-slate-600 border-slate-200",
+  to_register: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  to_visa: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  to_execute: "bg-amber-100 text-amber-700 border-amber-200",
+  to_approve: "bg-blue-50 text-blue-700 border-blue-200",
+  to_sign: "bg-purple-50 text-purple-700 border-purple-200",
+  done: "bg-slate-100 text-slate-600 border-slate-200",
+  cancelled: "bg-rose-50 text-rose-700 border-rose-200",
+  approved: "bg-blue-50 text-blue-700 border-blue-200",
+  signed: "bg-purple-50 text-purple-700 border-purple-200",
+};
+
+const STATUS_TRANSLATIONS: Record<string, string> = {
+  draft: "Черновик",
+  to_register: "Регистрация",
+  to_visa: "На резолюции",
+  to_execute: "На исполнении",
+  to_approve: "На согласовании",
+  to_sign: "На подпись",
+  done: "Завершено",
+  cancelled: "Отклонено",
+  sent: "Отправлено",
+  approved: "Согласовано",
+  signed: "Подписано",
+};
+
+const PRIORITY_STYLE: Record<string, { label: string; className: string }> = {
+  high: {
+    label: "Высокая",
+    className: "bg-rose-50! text-rose-700! border-rose-100!",
+  },
+  middle: {
+    label: "Средняя",
+    className: "bg-amber-50! text-amber-700! border-amber-100!",
+  },
+  medium: {
+    label: "Средняя",
+    className: "bg-amber-50! text-amber-700! border-amber-100!",
+  },
+  normal: {
+    label: "Средняя",
+    className: "bg-amber-50! text-amber-700! border-amber-100!",
+  },
+  low: {
+    label: "Низкая важность",
+    className: "bg-slate-50! text-slate-600! border-slate-200!",
+  },
 };
 
 const getInitials = (name: string) => {
@@ -48,6 +98,7 @@ export const OriginalLetterPanel = ({
   subject,
   body,
   sourceId,
+  priority,
 }: {
   mode: "reply" | "forward";
   sender: string;
@@ -57,6 +108,7 @@ export const OriginalLetterPanel = ({
   subject: string;
   body?: string | null;
   sourceId?: string | number;
+  priority?: string;
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [showFullText, setShowFullText] = useState(false);
@@ -157,13 +209,24 @@ export const OriginalLetterPanel = ({
                     statusBadge,
                   )}
                 >
-                  {status || "—"}
+                  {STATUS_TRANSLATIONS[status] || status || "—"}
                 </span>
               </div>
               <div className="flex flex-col gap-1 min-w-0">
                 <Lbl>Вх. номер</Lbl>
                 <span className="font-mono text-[10px] bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100 inline-flex w-fit text-slate-700">
                   {inboundNumber}
+                </span>
+              </div>
+              <div className="flex flex-col gap-1 min-w-0">
+                <Lbl>Важность</Lbl>
+                <span
+                  className={cn(
+                    "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border w-fit capitalize",
+                    PRIORITY_STYLE[priority || "low"]?.className || "bg-slate-50! text-slate-600! border-slate-200!"
+                  )}
+                >
+                  {PRIORITY_STYLE[priority || "low"]?.label || "Низкая важность"}
                 </span>
               </div>
             </div>
