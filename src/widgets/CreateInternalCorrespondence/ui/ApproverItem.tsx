@@ -66,7 +66,18 @@ export const ApproverItem = ({
             {approver.role}
           </p>
         </div>
-        <div className="flex items-center gap-1.5 flex-shrink-0">
+        <If is={!approver.approved && !approver.isInvited}>
+          <button
+            onClick={() => onRemoveApprover(approver.id)}
+            className="text-slate-300 hover:text-rose-400 transition-colors ml-1 flex-shrink-0"
+          >
+            <X size={13} />
+          </button>
+        </If>
+      </div>
+
+      <If is={!approver.approved || !!approver.isInvited}>
+        <div className="flex items-center justify-end gap-1.5 px-3 pb-2.5 pt-1.5 border-t border-slate-100/60 flex-shrink-0">
           <If is={!approver.approved}>
             <button
               onClick={() => toggleApproverComment(approver.id)}
@@ -132,16 +143,8 @@ export const ApproverItem = ({
               </span>
             </button>
           </If>
-          <If is={!approver.approved && !approver.isInvited}>
-            <button
-              onClick={() => onRemoveApprover(approver.id)}
-              className="text-slate-300 hover:text-rose-400 transition-colors ml-1"
-            >
-              <X size={13} />
-            </button>
-          </If>
         </div>
-      </div>
+      </If>
 
       <AnimatePresence>
         {approver.showCommentInput && !approver.approved && (
