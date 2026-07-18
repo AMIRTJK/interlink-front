@@ -113,8 +113,12 @@ export const TaskPanel = ({ onClose }: { onClose: () => void }) => {
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 12, opacity: 0 }}
       transition={{ type: "spring", stiffness: 320, damping: 28 }}
-      className="absolute top-0 max-h-[calc(100vh-140px)] w-80 bg-white shadow-2xl rounded-2xl border border-slate-200 z-30 flex flex-col overflow-hidden"
-      style={{ right: "calc(100% + 12px)", top: 10 }}
+      className="absolute w-80 bg-white shadow-2xl rounded-2xl border border-slate-200 z-30 flex flex-col overflow-hidden"
+      style={{
+        right: "calc(100% + 12px)",
+        top: 10,
+        maxHeight: "var(--icc-panel-max-h, calc(100vh - 140px))",
+      }}
     >
       <div className="flex-shrink-0 flex items-center justify-between px-5 py-4 border-b border-slate-100">
         <div className="flex items-center gap-2">

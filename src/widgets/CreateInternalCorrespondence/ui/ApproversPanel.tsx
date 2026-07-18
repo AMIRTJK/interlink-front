@@ -46,18 +46,18 @@ export const ApproversPanel = ({
     (r) =>
       !approvers.some((a) => a.id === r.id) &&
       (r.name.toLowerCase().includes(search.toLowerCase()) ||
-        r.org.toLowerCase().includes(search.toLowerCase()))
+        r.org.toLowerCase().includes(search.toLowerCase())),
   );
 
   return (
     <>
       {!hideTab && (
-        <div className="absolute z-20" style={{ right: -36, top: 10 }}>
+        <div className="absolute z-20 right-[-36px] top-[190px]">
           <motion.button
             onClick={isOpen ? onClose : onOpen}
             className={cn(
               "bg-white border border-slate-200 border-l-0 rounded-r-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-              isOpen ? "bg-slate-50" : "hover:bg-slate-50"
+              isOpen ? "bg-slate-50" : "hover:bg-slate-50",
             )}
             aria-label="Согласующие"
           >

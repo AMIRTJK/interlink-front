@@ -50,6 +50,50 @@ export const IncomingPreviewModal = ({
   approvals?: any[];
 }) => {
   const [zoom, setZoom] = useState(1);
+  const [isScaleFocused, setIsScaleFocused] = useState(false);
+  const [scaleInput, setScaleInput] = useState("");
+
+  useEffect(() => {
+    if (!isScaleFocused) {
+      setScaleInput(`${Math.round(zoom * 100)}%`);
+    }
+  }, [zoom, isScaleFocused]);
+
+  const handleScaleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9%]/g, "");
+    setScaleInput(value);
+  };
+
+  const handleScaleInputFocus = () => {
+    setIsScaleFocused(true);
+    setScaleInput(Math.round(zoom * 100).toString());
+  };
+
+  const commitScale = (value: string) => {
+    const numeric = parseInt(value.replace(/[^0-9]/g, ""), 10);
+    if (!isNaN(numeric) && numeric > 0) {
+      const clamped = Math.max(30, Math.min(300, numeric));
+      setZoom(clamped / 100);
+    } else {
+      setScaleInput(`${Math.round(zoom * 100)}%`);
+    }
+  };
+
+  const handleScaleInputBlur = () => {
+    setIsScaleFocused(false);
+    commitScale(scaleInput);
+  };
+
+  const handleScaleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      commitScale(scaleInput);
+      e.currentTarget.blur();
+    } else if (e.key === "Escape") {
+      setScaleInput(`${Math.round(zoom * 100)}%`);
+      e.currentTarget.blur();
+    }
+  };
+
   const [currentPage, setCurrentPage] = useState(0);
   const [activeApprover, setActiveApprover] = useState<PreviewApprover | null>(
     null,
@@ -309,17 +353,27 @@ export const IncomingPreviewModal = ({
             >
               <Minus size={15} />
             </button>
-            <span
+            <input
+              type="text"
+              value={scaleInput}
+              onChange={handleScaleInputChange}
+              onFocus={handleScaleInputFocus}
+              onBlur={handleScaleInputBlur}
+              onKeyDown={handleScaleInputKeyDown}
               style={{
                 fontFamily: "monospace",
                 fontSize: 12,
                 color: "#475569",
                 width: 44,
                 textAlign: "center",
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                borderRadius: 4,
+                padding: "2px 0",
               }}
-            >
-              {Math.round(zoom * 100)}%
-            </span>
+              className="focus:bg-slate-50 focus:ring-1 focus:ring-slate-200 transition-colors"
+            />
             <button
               type="button"
               onClick={zoomIn}

@@ -140,6 +140,7 @@ const DOC_TYPE_LABELS: Record<string, string> = {
   darkhost: "Дархост",
   ariza: "Ариза",
   guzorish: "Гузориш",
+  malumotnoma: "Маълумотнома",
 };
 
 const formatDate = (iso?: string | null) =>
