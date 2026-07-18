@@ -6,6 +6,8 @@ export interface ICategoryItem {
   id: number | "all";
   name: string;
   icon: string;
+  /** File count shown as a badge next to the chip. */
+  count?: number;
 }
 
 interface IProps {
@@ -16,7 +18,6 @@ interface IProps {
   onRenameCategory?: (cat: ICategoryItem) => void;
   onDeleteCategory?: (id: number) => void;
   onShareCategory?: (cat: ICategoryItem) => void;
-  allCount?: number;
 }
 
 export const CategoryFilters = ({
@@ -27,7 +28,6 @@ export const CategoryFilters = ({
   onRenameCategory,
   onDeleteCategory,
   onShareCategory,
-  allCount,
 }: IProps) => {
   return (
     <div className="flex flex-wrap items-center gap-2.5">
@@ -45,11 +45,11 @@ export const CategoryFilters = ({
           >
             <span className="text-sm leading-none">{cat.icon}</span>
             <span>{cat.name}</span>
-            <If is={cat.id === "all" && allCount !== undefined}>
+            <If is={cat.count !== undefined}>
               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                 isActive ? "bg-white/20 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-zinc-400"
               }`}>
-                {allCount}
+                {cat.count}
               </span>
             </If>
             <If is={!!(isActive && cat.id !== "all" && onRenameCategory && onDeleteCategory)}>

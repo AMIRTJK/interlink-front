@@ -47,6 +47,8 @@ export interface IApiFolder {
   emoji?: string | null;
   parent_id: number | null;
   sort_order: number;
+  /** Number of files directly inside this folder, when provided by the backend. */
+  files_count?: number;
   access?: {
     is_owner: boolean;
     can_view: boolean;

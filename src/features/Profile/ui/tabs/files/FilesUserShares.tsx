@@ -120,8 +120,8 @@ export const FilesUserShares = ({
 									onClick={() => setViewType("pie")}
 									className={`p-1 rounded-md transition-all cursor-pointer ${
 										viewType === "pie"
-											? "bg-white dark:bg-slate-800 text-indigo-650 dark:text-indigo-400 shadow-sm"
-											: "text-slate-455 hover:text-slate-650 dark:hover:text-zinc-300"
+											? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
+											: "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
 									}`}
 									title="Диаграмма"
 								>
@@ -132,8 +132,8 @@ export const FilesUserShares = ({
 									onClick={() => setViewType("list")}
 									className={`p-1 rounded-md transition-all cursor-pointer ${
 										viewType === "list"
-											? "bg-white dark:bg-slate-800 text-indigo-650 dark:text-indigo-400 shadow-sm"
-											: "text-slate-455 hover:text-slate-650 dark:hover:text-zinc-300"
+											? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
+											: "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
 									}`}
 									title="Карточки"
 								>

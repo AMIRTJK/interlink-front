@@ -54,7 +54,7 @@ import {
   Save,
   Printer,
 } from "lucide-react";
-import { useGetQuery, useMutationQuery, buildFormData, toast } from "@shared/lib";
+import { useGetQuery, useMutationQuery, buildFormData, toast, tokenControl } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { If } from "@shared/ui";
 import { message } from "antd";
@@ -932,6 +932,10 @@ export const CreateInternalCorrespondence = ({
   }, [id, pageCount, orientation, formExpanded, panelsInToolbar]);
 
   const [searchParams, setSearchParams] = useState({ query: "" });
+  const handleOpenRecipientModal = () => {
+    setSearchParams({ query: "" });
+    setShowRecipientModal(true);
+  };
 
   const { data: usersData, isLoading: loadingUsers } = useGetQuery({
     url: ApiRoutes.GET_INTERNAL_RECIPIENTS_USERS,
@@ -1317,6 +1321,17 @@ export const CreateInternalCorrespondence = ({
     });
 
   const isAlreadySent = initialData?.item?.status === "sent";
+
+  const currentUserId = tokenControl.getUserId() || tokenControl.getUserData()?.id;
+  const pendingSignature = rawWorkflowData?.data?.signatures?.find(
+    (sig: any) => sig.status === "pending"
+  );
+  const isCurrentSigner = pendingSignature && currentUserId && String(currentUserId) === String(pendingSignature.user_id || pendingSignature.user?.id);
+  const canDecline = !!pendingSignature && !!isCurrentSigner;
+
+  const handleDeclineClick = () => {
+    toast.info("Функциональность отклонения станет доступна после реализации API на стороне бэкенда");
+  };
 
   const assignSelfAsSigner = () => {
     if (!docCreator) return;
@@ -3851,6 +3866,17 @@ export const CreateInternalCorrespondence = ({
               <span>Сохранить</span>
             </button>
 
+            <If is={canDecline}>
+              <button
+                type="button"
+                onClick={handleDeclineClick}
+                className="flex items-center gap-2 cursor-pointer px-4 py-2 text-sm font-semibold transition-all border border-red-200 text-red-600 bg-white hover:bg-red-50 rounded-xl"
+              >
+                <X size={15} className="text-red-500" />
+                <span>Отклонить</span>
+              </button>
+            </If>
+
             <If is={isSigned && !isAlreadySent}>
               <button
                 type="button"
@@ -4148,7 +4174,7 @@ export const CreateInternalCorrespondence = ({
                     </label>
                     <button
                       type="button"
-                      onClick={() => setShowRecipientModal(true)}
+                      onClick={handleOpenRecipientModal}
                       className="flex items-center justify-center px-1.5 py-1 rounded-lg text-[10px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors w-16 cursor-pointer"
                       title="Выбрать получателей из реестра"
                     >
@@ -4188,7 +4214,10 @@ export const CreateInternalCorrespondence = ({
                         setSearchParams({ query: e.target.value });
                         setShowToDropdown(true);
                       }}
-                      onFocus={() => setShowToDropdown(true)}
+                      onFocus={() => {
+                        setSearchParams({ query: toSearch });
+                        setShowToDropdown(true);
+                      }}
                       onBlur={() =>
                         setTimeout(() => setShowToDropdown(false), 150)
                       }
@@ -4200,6 +4229,7 @@ export const CreateInternalCorrespondence = ({
                       onSelect={(u) => {
                         setTo([...to, u]);
                         setToSearch("");
+                        setSearchParams({ query: "" });
                         setShowToDropdown(false);
                       }}
                     />
@@ -4223,7 +4253,7 @@ export const CreateInternalCorrespondence = ({
                         </label>
                         <button
                           type="button"
-                          onClick={() => setShowRecipientModal(true)}
+                          onClick={handleOpenRecipientModal}
                           className="flex items-center justify-center px-1.5 py-1 rounded-lg text-[10px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors w-16 cursor-pointer"
                           title="Выбрать получателей из реестра"
                         >
@@ -4264,7 +4294,10 @@ export const CreateInternalCorrespondence = ({
                             setSearchParams({ query: e.target.value });
                             setShowCcDropdown(true);
                           }}
-                          onFocus={() => setShowCcDropdown(true)}
+                          onFocus={() => {
+                            setSearchParams({ query: ccSearch });
+                            setShowCcDropdown(true);
+                          }}
                           onBlur={() =>
                             setTimeout(() => setShowCcDropdown(false), 150)
                           }
@@ -4276,6 +4309,7 @@ export const CreateInternalCorrespondence = ({
                           onSelect={(u) => {
                             setCc([...cc, u]);
                             setCcSearch("");
+                            setSearchParams({ query: "" });
                             setShowCcDropdown(false);
                           }}
                         />
