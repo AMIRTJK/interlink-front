@@ -342,7 +342,7 @@ export const EmployeeProfileModal = ({
 							<X size={24} />
 						</button>
 						<img
-							src={e.photo}
+							src={e.photo || undefined}
 							alt={e.fullName}
 							onClick={(e) => e.stopPropagation()}
 							className="rounded-2xl max-w-full max-h-[90vh] object-contain shadow-2xl"
