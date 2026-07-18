@@ -118,6 +118,50 @@ export const PreviewModal = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<string[]>([]);
   const [zoom, setZoom] = useState(1);
+  const [isScaleFocused, setIsScaleFocused] = useState(false);
+  const [scaleInput, setScaleInput] = useState("");
+
+  useEffect(() => {
+    if (!isScaleFocused) {
+      setScaleInput(`${Math.round(zoom * 100)}%`);
+    }
+  }, [zoom, isScaleFocused]);
+
+  const handleScaleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9%]/g, "");
+    setScaleInput(value);
+  };
+
+  const handleScaleInputFocus = () => {
+    setIsScaleFocused(true);
+    setScaleInput(Math.round(zoom * 100).toString());
+  };
+
+  const commitScale = (value: string) => {
+    const numeric = parseInt(value.replace(/[^0-9]/g, ""), 10);
+    if (!isNaN(numeric) && numeric > 0) {
+      const clamped = Math.max(30, Math.min(300, numeric));
+      setZoom(clamped / 100);
+    } else {
+      setScaleInput(`${Math.round(zoom * 100)}%`);
+    }
+  };
+
+  const handleScaleInputBlur = () => {
+    setIsScaleFocused(false);
+    commitScale(scaleInput);
+  };
+
+  const handleScaleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      commitScale(scaleInput);
+      e.currentTarget.blur();
+    } else if (e.key === "Escape") {
+      setScaleInput(`${Math.round(zoom * 100)}%`);
+      e.currentTarget.blur();
+    }
+  };
+
   const [currentPage, setCurrentPage] = useState(0);
   const [showAttachments, setShowAttachments] = useState(false);
 
@@ -408,9 +452,15 @@ export const PreviewModal = ({
               >
                 <ZoomOut size={15} />
               </button>
-              <span className="px-2 text-xs font-semibold text-slate-200 tabular-nums min-w-[44px] text-center">
-                {Math.round(zoom * 100)}%
-              </span>
+              <input
+                type="text"
+                value={scaleInput}
+                onChange={handleScaleInputChange}
+                onFocus={handleScaleInputFocus}
+                onBlur={handleScaleInputBlur}
+                onKeyDown={handleScaleInputKeyDown}
+                className="w-12 bg-transparent text-slate-200 text-xs font-semibold text-center outline-none border-none focus:bg-slate-600 focus:ring-1 focus:ring-slate-500 rounded px-0.5 transition-colors"
+              />
               <button
                 onClick={zoomIn}
                 className="p-1.5 rounded-lg text-slate-200 hover:bg-slate-600 transition-colors"
