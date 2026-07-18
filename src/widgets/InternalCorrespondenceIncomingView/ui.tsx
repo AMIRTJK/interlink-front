@@ -23,6 +23,7 @@ import { SignersPanel } from "./SignersPanel";
 import { VersionsPanel } from "./VersionsPanel";
 import { IncomingPreviewModal } from "./IncomingPreviewModal";
 import { TaskPanel } from "./TaskPanel";
+import { EditorToolbar, type ToolbarSection } from "./EditorToolbar";
 
 const inboxStatusStyle: Record<string, string> = {
   "на резолюции": "bg-emerald-50 text-emerald-700 border-emerald-100",
@@ -31,6 +32,29 @@ const inboxStatusStyle: Record<string, string> = {
   "на подпись": "bg-purple-50 text-purple-700 border-purple-100",
   завершено: "bg-slate-100 text-slate-600 border-slate-200",
   sent: "bg-blue-50 text-blue-700 border-blue-100",
+};
+
+const priorityConfig: Record<string, { label: string; className: string }> = {
+  high: {
+    label: "Высокая",
+    className: "bg-rose-50! text-rose-700! border-rose-100!",
+  },
+  middle: {
+    label: "Средняя",
+    className: "bg-amber-50! text-amber-700! border-amber-100!",
+  },
+  medium: {
+    label: "Средняя",
+    className: "bg-amber-50! text-amber-700! border-amber-100!",
+  },
+  normal: {
+    label: "Средняя",
+    className: "bg-amber-50! text-amber-700! border-amber-100!",
+  },
+  low: {
+    label: "Низкая важность",
+    className: "bg-slate-50! text-slate-600! border-slate-200!",
+  },
 };
 
 const ACTION_MENU_ITEMS: {
@@ -70,6 +94,7 @@ interface RegistryItem {
     position?: string;
     department?: string;
   };
+  priority?: string;
 }
 
 // Ячейка деталей письма (label сверху, значение снизу)
@@ -107,6 +132,20 @@ export const InternalCorrespondenceIncomingView = ({
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [activeVersionId, setActiveVersionId] = useState<number | string | null>(null);
+
+  // Режим «Панель разделов сверху»: цилиндры-вкладки выносятся в горизонтальную
+  // панель под тулбаром, а боковые вкладки у холста скрываются (сами панели
+  // по-прежнему открываются у холста). Перенесён 1-в-1 из редактора исходящего.
+  const [panelsInToolbar, setPanelsInToolbar] = useState(false);
+
+  // Прокручиваемый контейнер холста, обёртка A4-холста и группа боковых панелей.
+  // Панели спозиционированы абсолютно внутри группы (высотой 0 у верха холста);
+  // при прокрутке страницы группу смещаем через transform, чтобы вкладки и
+  // раскрытая панель оставались привязаны к холсту и были видны на любой
+  // странице документа. Тот же приём, что в редакторе исходящего письма.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const panelsGroupRef = useRef<HTMLDivElement>(null);
 
   const { data: workflowResponse } = useGetQuery({
     url: item?.id
@@ -211,6 +250,57 @@ export const InternalCorrespondenceIncomingView = ({
   // старой версией (1.0) перед подменой на свежую.
   const isResolvingBody = !!item?.id && loadingVersions;
 
+  // Эффект «следования за холстом» для боковых панелей (цилиндров). Группа
+  // панелей лежит абсолютно у верха холста; при прокрутке страницы смещаем её
+  // вниз через transform, чтобы вкладки и раскрытая панель были доступны на
+  // любой странице, а высоту раскрытой панели ограничиваем видимой областью
+  // (переменная --icc-panel-max-h). CSS position:sticky здесь не работает — его
+  // перехватывает серый контейнер холста с overflow. 1-в-1 как в редакторе
+  // исходящего письма.
+  useEffect(() => {
+    if (isResolvingBody) return;
+    const scroller = scrollRef.current;
+    const canvas = canvasRef.current;
+    const group = panelsGroupRef.current;
+    if (!scroller || !canvas || !group) return;
+
+    const TOP_M = 12; // отступ группы от верхнего края видимой области
+    const BOT_M = 24; // нижний отступ для раскрытой панели
+    const MIN_VISIBLE = 160; // минимум пикселей группы, что держим над холстом
+
+    const update = () => {
+      const canvasTop =
+        canvas.getBoundingClientRect().top -
+        scroller.getBoundingClientRect().top;
+      let shift = Math.max(0, TOP_M - canvasTop);
+      shift = Math.min(shift, Math.max(0, canvas.offsetHeight - MIN_VISIBLE));
+      // Верх группы в координатах видимой области: от него отсчитываем доступную
+      // высоту, чтобы низ раскрытой панели не уезжал под экран.
+      const groupViewportTop = canvasTop + shift;
+      const availH = Math.max(
+        200,
+        scroller.clientHeight - groupViewportTop - BOT_M,
+      );
+      group.style.setProperty("--icc-panel-max-h", `${availH}px`);
+      group.style.transform = shift > 0 ? `translateY(${shift}px)` : "";
+    };
+
+    update();
+    scroller.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    // Высота холста меняется после постраничной разбивки (paginateHtml в
+    // DocumentCanvas выполняется в layout-эффекте уже после первого рендера) —
+    // пересчитываем позицию панелей, когда высота холста устоялась.
+    const canvasRO = new ResizeObserver(update);
+    canvasRO.observe(canvas);
+    return () => {
+      scroller.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      canvasRO.disconnect();
+      group.style.transform = "";
+    };
+  }, [documentBody, isResolvingBody, panelsInToolbar]);
+
   // Вспомогательная функция для генерации инициалов
   const getInitials = (fullName: string) => {
     if (!fullName) return "??";
@@ -239,6 +329,67 @@ export const InternalCorrespondenceIncomingView = ({
   const formattedSentDate = item.sent_at
     ? new Date(item.sent_at).toLocaleDateString("ru-RU")
     : "—";
+
+  // Открытие раздела — взаимное закрытие остальных (одновременно только один).
+  // Общие для боковых вкладок цилиндров и горизонтальной панели разделов.
+  const openSigners = () => {
+    setSignersOpen(true);
+    setApproversOpen(false);
+    setVersionsOpen(false);
+    setShowTaskPanel(false);
+  };
+  const openApprovers = () => {
+    setApproversOpen(true);
+    setSignersOpen(false);
+    setVersionsOpen(false);
+    setShowTaskPanel(false);
+  };
+  const openVersions = () => {
+    setVersionsOpen(true);
+    setSignersOpen(false);
+    setApproversOpen(false);
+    setShowTaskPanel(false);
+  };
+  const openTask = () => {
+    setShowTaskPanel(true);
+    setSignersOpen(false);
+    setApproversOpen(false);
+    setVersionsOpen(false);
+  };
+
+  // Разделы для режима «Панель разделов сверху» — те же цвета/подписи, что у
+  // боковых цилиндров у холста.
+  const sections: ToolbarSection[] = [
+    {
+      key: "task",
+      label: "Поручение",
+      dotClass: "bg-indigo-500",
+      isOpen: showTaskPanel,
+      onToggle: () => (showTaskPanel ? setShowTaskPanel(false) : openTask()),
+    },
+    {
+      key: "versions",
+      label: "История версий",
+      dotClass: "bg-amber-500",
+      isOpen: versionsOpen,
+      onToggle: () => (versionsOpen ? setVersionsOpen(false) : openVersions()),
+    },
+    {
+      key: "signers",
+      label: "Подписывающий",
+      dotStyle: { backgroundColor: "oklch(0.6 0.25 250)" },
+      isOpen: signersOpen,
+      onToggle: () => (signersOpen ? setSignersOpen(false) : openSigners()),
+    },
+    {
+      key: "approvers",
+      label: "Согласующие",
+      dotStyle: { backgroundColor: "oklch(0.828 0.189 84.429)" },
+      isOpen: approversOpen,
+      onToggle: () =>
+        approversOpen ? setApproversOpen(false) : openApprovers(),
+    },
+  ];
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-[#F8FAFC] overflow-hidden w-full">
@@ -469,17 +620,43 @@ export const InternalCorrespondenceIncomingView = ({
                     {item.status}
                   </span>
                 </DetailField>
+
+                {/* Приоритет */}
+                <DetailField label="Приоритет">
+                  <span
+                    className={cn(
+                      "inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border capitalize w-fit",
+                      priorityConfig[item.priority || "low"]?.className || "bg-slate-50! text-slate-600! border-slate-200!"
+                    )}
+                  >
+                    {priorityConfig[item.priority || "low"]?.label || "Низкая важность"}
+                  </span>
+                </DetailField>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
+      {/* Панель управления редактором — перенесена из «Исходящих писем».
+          Инструменты форматирования показаны в неактивном (disabled) виде, т.к.
+          входящее письмо не редактируется. Активны только элементы просмотра:
+          переключатель «Панель разделов сверху» и, в этом режиме, горизонтальные
+          кнопки разделов (цилиндров). */}
+      <EditorToolbar
+        panelsInToolbar={panelsInToolbar}
+        onTogglePanelsInToolbar={setPanelsInToolbar}
+        sections={sections}
+      />
+
       {/* Основная рабочая область: холст документа + всплывающие панели */}
       <div className="flex flex-1 min-h-0 overflow-hidden w-full relative">
         {/* Холст основного бланка документа: постраничная разбивка (разделение
             страниц A4) и рисунок ЭЦП — 1-в-1 как в редакторе исходящего письма */}
-        <div className="absolute inset-0 overflow-auto bg-[#E8EAED] flex items-start justify-center py-6 px-6">
+        <div
+          ref={scrollRef}
+          className="absolute inset-0 overflow-auto bg-[#E8EAED] flex items-start justify-center py-8 px-8"
+        >
           {isResolvingBody ? (
             <div className="flex flex-col items-center gap-2 text-slate-400 py-20">
               <Loader2 size={22} className="animate-spin text-blue-500" />
@@ -488,84 +665,92 @@ export const InternalCorrespondenceIncomingView = ({
               </span>
             </div>
           ) : (
-            <div className="relative shrink-0" style={{ width: PAGE_WIDTH }}>
+            <div
+              ref={canvasRef}
+              className="relative shrink-0"
+              style={{ width: PAGE_WIDTH }}
+            >
               <DocumentCanvas html={documentBody} />
-              <SignersPanel
-                isOpen={signersOpen}
-                onOpen={() => {
-                  setSignersOpen(true);
-                  setApproversOpen(false);
-                  setVersionsOpen(false);
-                  setShowTaskPanel(false);
-                }}
-                onClose={() => setSignersOpen(false)}
-                signatures={signatures}
-              />
-              <ApproversPanel
-                isOpen={approversOpen}
-                onOpen={() => {
-                  setApproversOpen(true);
-                  setSignersOpen(false);
-                  setVersionsOpen(false);
-                  setShowTaskPanel(false);
-                }}
-                onClose={() => setApproversOpen(false)}
-                approvals={approvals}
-              />
+              {/* Группа боковых панелей (цилиндров): высотой 0 у верха холста;
+                  смещается за прокруткой (эффект «следования за холстом»), чтобы
+                  оставаться привязанной к холсту — как в редакторе исходящего. */}
               <div
-                className="absolute z-20"
-                style={{ left: -36, top: 10 }}
+                ref={panelsGroupRef}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 0,
+                  zIndex: 40,
+                  willChange: "transform",
+                }}
               >
-                <motion.button
-                  onClick={() => {
-                    setShowTaskPanel((v) => !v);
-                    setSignersOpen(false);
-                    setApproversOpen(false);
-                    setVersionsOpen(false);
-                  }}
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 24 }}
-                  className={cn(
-                    "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-                    showTaskPanel ? "bg-slate-50" : "hover:bg-slate-50",
-                  )}
-                  aria-label="Поручение"
-                >
-                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
-                  <span
-                    style={{
-                      writingMode: "vertical-rl",
-                      textOrientation: "mixed",
-                      fontSize: 11,
-                      fontWeight: 600,
-                      color: "#475569",
-                      letterSpacing: "0.08em",
-                    }}
-                  >
-                    Поручение
-                  </span>
-                </motion.button>
-              </div>
-              <VersionsPanel
-                isOpen={versionsOpen}
-                onOpen={() => {
-                  setVersionsOpen(true);
-                  setSignersOpen(false);
-                  setApproversOpen(false);
-                  setShowTaskPanel(false);
-                }}
-                onClose={() => setVersionsOpen(false)}
-                versions={docVersions}
-                activeVersionId={activeVersionId}
-                onSelectVersion={(versionId) => {
-                  setActiveVersionId(versionId);
-                }}
-              />
-              <AnimatePresence>
-                {showTaskPanel && (
-                  <TaskPanel onClose={() => setShowTaskPanel(false)} />
+                <SignersPanel
+                  isOpen={signersOpen}
+                  hideTab={panelsInToolbar}
+                  onOpen={openSigners}
+                  onClose={() => setSignersOpen(false)}
+                  signatures={signatures}
+                />
+                <ApproversPanel
+                  isOpen={approversOpen}
+                  hideTab={panelsInToolbar}
+                  onOpen={openApprovers}
+                  onClose={() => setApproversOpen(false)}
+                  approvals={approvals}
+                />
+                {!panelsInToolbar && (
+                  <div className="absolute z-20" style={{ left: -36, top: 10 }}>
+                    <motion.button
+                      onClick={() =>
+                        showTaskPanel ? setShowTaskPanel(false) : openTask()
+                      }
+                      whileHover={{ scale: 1.02 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 24,
+                      }}
+                      className={cn(
+                        "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
+                        showTaskPanel ? "bg-slate-50" : "hover:bg-slate-50",
+                      )}
+                      aria-label="Поручение"
+                    >
+                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
+                      <span
+                        style={{
+                          writingMode: "vertical-rl",
+                          textOrientation: "mixed",
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: "#475569",
+                          letterSpacing: "0.08em",
+                        }}
+                      >
+                        Поручение
+                      </span>
+                    </motion.button>
+                  </div>
                 )}
-              </AnimatePresence>
+                <VersionsPanel
+                  isOpen={versionsOpen}
+                  hideTab={panelsInToolbar}
+                  onOpen={openVersions}
+                  onClose={() => setVersionsOpen(false)}
+                  versions={docVersions}
+                  activeVersionId={activeVersionId}
+                  onSelectVersion={(versionId) => {
+                    setActiveVersionId(versionId);
+                  }}
+                />
+                <AnimatePresence>
+                  {showTaskPanel && (
+                    <TaskPanel onClose={() => setShowTaskPanel(false)} />
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           )}
         </div>

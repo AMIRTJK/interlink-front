@@ -31,6 +31,7 @@ export interface RegistryItem {
   status: Status;
   isPinned?: boolean;
   isRead: boolean;
+  priority?: string;
 }
 
 export interface RecipientOption {
