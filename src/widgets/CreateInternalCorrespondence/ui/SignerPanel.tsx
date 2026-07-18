@@ -57,7 +57,7 @@ export const SignerPanel = ({
   return (
     <>
       {!hideTab && (
-        <div className="absolute z-20" style={{ right: -36, top: 190 }}>
+        <div className="absolute z-20 right-[-36px] top-[10px]">
           <motion.button
             onClick={isOpen ? onClose : onOpen}
             className={cn(

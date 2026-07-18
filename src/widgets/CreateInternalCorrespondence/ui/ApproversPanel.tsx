@@ -52,7 +52,7 @@ export const ApproversPanel = ({
   return (
     <>
       {!hideTab && (
-        <div className="absolute z-20" style={{ right: -36, top: 10 }}>
+        <div className="absolute z-20 right-[-36px] top-[190px]">
           <motion.button
             onClick={isOpen ? onClose : onOpen}
             className={cn(

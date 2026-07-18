@@ -4751,15 +4751,6 @@ export const CreateInternalCorrespondence = ({
                         versionsOpen ? setVersionsOpen(false) : handleOpenVersions(),
                     },
                     {
-                      key: "approvers",
-                      label: "Согласующие",
-                      dotClass: "",
-                      dotStyle: { backgroundColor: "oklch(0.828 0.189 84.429)" },
-                      isOpen: approversOpen,
-                      onToggle: () =>
-                        approversOpen ? setApproversOpen(false) : handleOpenApprovers(),
-                    },
-                    {
                       key: "signer",
                       label: "Подписывающий",
                       dotClass: "",
@@ -4767,6 +4758,15 @@ export const CreateInternalCorrespondence = ({
                       isOpen: signerOpen,
                       onToggle: () =>
                         signerOpen ? setSignerOpen(false) : handleOpenSigner(),
+                    },
+                    {
+                      key: "approvers",
+                      label: "Согласующие",
+                      dotClass: "",
+                      dotStyle: { backgroundColor: "oklch(0.828 0.189 84.429)" },
+                      isOpen: approversOpen,
+                      onToggle: () =>
+                        approversOpen ? setApproversOpen(false) : handleOpenApprovers(),
                     },
                   ].map((p) => (
                     <button
