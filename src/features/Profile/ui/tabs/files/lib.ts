@@ -60,6 +60,14 @@ export interface ITreeNode extends IApiFolder {
   children: ITreeNode[];
 }
 
+/** Ответ каскадного удаления папки: DELETE /api/v1/my-file-folders/{id}. */
+export interface IDeleteFolderResult {
+  deleted_folder_id: number;
+  deleted_folders_count: number;
+  deleted_files_count: number;
+  storage_cleanup_failed: boolean;
+}
+
 export interface ITypeBreakdownItem {
   type: string;
   count: number;
