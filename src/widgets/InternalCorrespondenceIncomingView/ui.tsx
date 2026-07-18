@@ -26,13 +26,41 @@ import { TaskPanel } from "./TaskPanel";
 import { EditorToolbar, type ToolbarSection } from "./EditorToolbar";
 
 const inboxStatusStyle: Record<string, string> = {
+  // Russian keys
   "на резолюции": "bg-emerald-50 text-emerald-700 border-emerald-100",
   "на исполнении": "bg-amber-50 text-amber-700 border-amber-100",
   "на согласовании": "bg-blue-50 text-blue-700 border-blue-100",
   "на подпись": "bg-purple-50 text-purple-700 border-purple-100",
   завершено: "bg-slate-100 text-slate-600 border-slate-200",
   sent: "bg-blue-50 text-blue-700 border-blue-100",
+
+  // English keys mapping to styles
+  draft: "bg-slate-100 text-slate-600 border-slate-200",
+  to_register: "bg-emerald-50 text-emerald-700 border-emerald-100",
+  to_visa: "bg-emerald-50 text-emerald-700 border-emerald-100",
+  to_execute: "bg-amber-50 text-amber-700 border-amber-100",
+  to_approve: "bg-blue-50 text-blue-700 border-blue-100",
+  to_sign: "bg-purple-50 text-purple-700 border-purple-100",
+  done: "bg-slate-100 text-slate-600 border-slate-200",
+  cancelled: "bg-rose-50 text-rose-700 border-rose-100",
+  approved: "bg-blue-50 text-blue-700 border-blue-100",
+  signed: "bg-purple-50 text-purple-700 border-purple-100",
 };
+
+const statusTranslations: Record<string, string> = {
+  draft: "Черновик",
+  to_register: "Регистрация",
+  to_visa: "На резолюции",
+  to_execute: "На исполнении",
+  to_approve: "На согласовании",
+  to_sign: "На подпись",
+  done: "Завершено",
+  cancelled: "Отклонено",
+  sent: "Отправлено",
+  approved: "Согласовано",
+  signed: "Подписано",
+};
+
 
 const priorityConfig: Record<string, { label: string; className: string }> = {
   high: {
@@ -531,7 +559,7 @@ export const InternalCorrespondenceIncomingView = ({
                   "bg-slate-100 text-slate-600 border-slate-200",
               )}
             >
-              {item.status}
+              {statusTranslations[item.status] || item.status}
             </span>
           </div>
         </button>
@@ -617,7 +645,7 @@ export const InternalCorrespondenceIncomingView = ({
                         "bg-slate-100 text-slate-600 border-slate-200",
                     )}
                   >
-                    {item.status}
+                    {statusTranslations[item.status] || item.status}
                   </span>
                 </DetailField>
 
