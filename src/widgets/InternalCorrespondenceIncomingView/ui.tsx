@@ -730,7 +730,7 @@ export const InternalCorrespondenceIncomingView = ({
                   approvals={approvals}
                 />
                 {!panelsInToolbar && (
-                  <div className="absolute z-20" style={{ left: -36, top: 10 }}>
+                  <div className="absolute z-20" style={{ left: -33, top: 10 }}>
                     <motion.button
                       onClick={() =>
                         showTaskPanel ? setShowTaskPanel(false) : openTask()

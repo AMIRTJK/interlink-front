@@ -5,6 +5,7 @@ import { cn } from "@shared/lib";
 
 export const VersionsPanel = ({
   isOpen,
+  hideTab,
   onOpen,
   onClose,
   versions = [],
@@ -12,6 +13,7 @@ export const VersionsPanel = ({
   onSelectVersion,
 }: {
   isOpen: boolean;
+  hideTab?: boolean;
   onOpen: () => void;
   onClose: () => void;
   versions?: any[];
@@ -20,35 +22,37 @@ export const VersionsPanel = ({
 }) => {
   return (
     <>
-      <div
-        className="absolute z-20"
-        style={{ left: -36, top: 190 }}
-      >
-        <motion.button
-          onClick={isOpen ? onClose : onOpen}
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: "spring", stiffness: 300, damping: 24 }}
-          className={cn(
-            "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-            isOpen ? "bg-slate-50" : "hover:bg-slate-50",
-          )}
-          aria-label="Версии"
+      {!hideTab && (
+        <div
+          className="absolute z-20"
+          style={{ left: -33, top: 190 }}
         >
-          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-teal-500" />
-          <span
-            style={{
-              writingMode: "vertical-rl",
-              textOrientation: "mixed",
-              fontSize: 11,
-              fontWeight: 600,
-              color: "#475569",
-              letterSpacing: "0.08em",
-            }}
+          <motion.button
+            onClick={isOpen ? onClose : onOpen}
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 300, damping: 24 }}
+            className={cn(
+              "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
+              isOpen ? "bg-slate-50" : "hover:bg-slate-50",
+            )}
+            aria-label="История версий"
           >
-            Версии
-          </span>
-        </motion.button>
-      </div>
+            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-amber-500" />
+            <span
+              style={{
+                writingMode: "vertical-rl",
+                textOrientation: "mixed",
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#475569",
+                letterSpacing: "0.08em",
+              }}
+            >
+              История версий
+            </span>
+          </motion.button>
+        </div>
+      )}
 
       <AnimatePresence>
         {isOpen && (
@@ -57,8 +61,11 @@ export const VersionsPanel = ({
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 12, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="absolute top-0 h-full w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl z-30 flex flex-col"
-            style={{ right: "calc(100% + 12px)" }}
+            className="absolute top-0 w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl z-30 flex flex-col"
+            style={{
+              right: "calc(100% + 12px)",
+              maxHeight: "var(--icc-panel-max-h, 70vh)",
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
