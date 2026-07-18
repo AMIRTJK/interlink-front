@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
+import { toast } from "@shared/lib/toast";
 import { ApiRoutes } from "@shared/api";
-import { IApiFile, IApiFolder, IDiskMeta } from "./lib";
+import { IApiFile, IApiFolder, IDeleteFolderResult, IDiskMeta } from "./lib";
 
 // Page size used by the "counts" queries. These fetch files without a folder
 // filter so we can show the grand total and per-folder counts regardless of
@@ -85,13 +86,24 @@ export const useFilesData = (params: IFilesParams) => {
     },
   });
 
-  // 6. Delete Folder
-  const deleteFolder = useMutationQuery<{ id: number }, void>({
+  // 6. Delete Folder (каскадное удаление: папка + вложенные папки/файлы + доступы)
+  const deleteFolder = useMutationQuery<{ id: number }, IDeleteFolderResult>({
     url: (data) => ApiRoutes.MY_FILE_FOLDERS_ID.replace(":id", String(data.id)),
     method: "DELETE",
     messages: {
-      success: "Папка удалена",
+      // success-тост формируем вручную из ответа сервера (со счётчиками).
+      suppressSuccessToast: true,
       invalidate: [ApiRoutes.MY_FILE_FOLDERS, ApiRoutes.MY_FILES, ApiRoutes.MY_FILES_META],
+      onSuccessCb: (data?: IDeleteFolderResult) => {
+        const folders = data?.deleted_folders_count ?? 1;
+        const files = data?.deleted_files_count ?? 0;
+        toast.success(`Удалено: папок — ${folders}, файлов — ${files}`);
+        if (data?.storage_cleanup_failed) {
+          toast.warning(
+            "Часть файлов не удалось очистить из хранилища. Обратитесь к администратору.",
+          );
+        }
+      },
     },
   });
 

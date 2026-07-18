@@ -212,6 +212,21 @@ export const useTasks = ({
     [statusMutate],
   );
 
+  /* ---------- SINGLE TASK ---------- */
+  const getTaskById = useCallback(async (id: number): Promise<Task | null> => {
+    try {
+      const url = ApiRoutes.TASK_BY_ID.replace(":id", String(id));
+      const token = tokenControl.get();
+      const res = await _axios.get(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      const raw = ((res.data?.data ?? res.data) as IApiTask) || null;
+      return raw ? mapApiTaskToTask(raw) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
   /* ---------- ATTACHMENTS ---------- */
   const uploadAttachments = useCallback(
     async (taskId: number, files: File[]) => {
@@ -291,6 +306,7 @@ export const useTasks = ({
         ? boardLoading || boardFetching
         : listLoading || listFetching,
     refetch,
+    getTaskById,
     createTask,
     updateTask,
     deleteTask,
