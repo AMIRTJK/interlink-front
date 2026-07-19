@@ -97,7 +97,10 @@ import {
   formatFileSize,
   mapServerAttachment,
   downloadAttachment,
+  createApiFileFromAttachedFile,
+  CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE,
 } from "../lib/utils";
+import { FilePreviewModal } from "@features/Profile";
 
 // Ширина штампа ЭЦП на листе А4 по умолчанию (≈47% ширины полосы) и высота,
 // рассчитанная по пропорциям макета. Один источник правды для плейсхолдера,
@@ -668,6 +671,7 @@ export const CreateInternalCorrespondence = ({
   const [cc, setCc] = useState<RecipientOption[]>([]);
   const [subject, setSubject] = useState("");
   const [attachments, setAttachments] = useState<AttachedFile[]>([]);
+  const [previewAttachment, setPreviewAttachment] = useState<AttachedFile | null>(null);
   const [approvers, setApprovers] = useState<Approver[]>([]);
   const [finalSigner, setFinalSigner] = useState<FinalSigner | null>(null);
   const [showToDropdown, setShowToDropdown] = useState(false);
@@ -4431,6 +4435,14 @@ export const CreateInternalCorrespondence = ({
                         </div>
                         {/* Убрать можно только ещё не отправленный файл: удаления
                             сохранённого вложения в API пока нет. */}
+                        <button
+                          type="button"
+                          onClick={() => setPreviewAttachment(file)}
+                          title="Просмотр вложения"
+                          className="text-slate-400 hover:text-indigo-600 transition-colors flex-shrink-0 cursor-pointer"
+                        >
+                          <Eye size={13} />
+                        </button>
                         {file.file ? (
                           <button
                             onClick={() =>
@@ -4439,7 +4451,7 @@ export const CreateInternalCorrespondence = ({
                               )
                             }
                             title="Убрать файл"
-                            className="text-slate-300 hover:text-rose-400 transition-colors flex-shrink-0"
+                            className="text-slate-300 hover:text-rose-400 transition-colors flex-shrink-0 cursor-pointer"
                           >
                             <X size={12} />
                           </button>
@@ -4448,7 +4460,7 @@ export const CreateInternalCorrespondence = ({
                             <button
                               onClick={() => downloadAttachment(file)}
                               title="Скачать"
-                              className="text-slate-400 hover:text-blue-600 transition-colors flex-shrink-0"
+                              className="text-slate-400 hover:text-blue-600 transition-colors flex-shrink-0 cursor-pointer"
                             >
                               <Download size={12} />
                             </button>
@@ -5314,6 +5326,13 @@ export const CreateInternalCorrespondence = ({
           setShowRecipientModal(false);
         }}
       />
+      <If is={!!previewAttachment}>
+        <FilePreviewModal
+          file={createApiFileFromAttachedFile(previewAttachment)}
+          onClose={() => setPreviewAttachment(null)}
+          unavailableNotice={CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE}
+        />
+      </If>
     </div>
   );
 };

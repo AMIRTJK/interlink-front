@@ -20,6 +20,12 @@ import * as XLSX from "xlsx";
 interface IProps {
   file: IApiFile | null;
   onClose: () => void;
+  /**
+   * Текст заглушки, когда предпросмотр не удалось загрузить (пустой ответ/ошибка
+   * запроса файла). Например, для вложений корреспонденции — пока бэкенд не
+   * поднял API отдачи файла. Если не передан, показывается общий текст.
+   */
+  unavailableNotice?: string;
 }
 
 interface IPptxSlide {
@@ -33,7 +39,31 @@ interface IExcelSheet {
   html: string;
 }
 
-export const FilePreviewModal = ({ file, onClose }: IProps) => {
+const fetchFileBuffer = async (
+  url: string,
+  responseType: "blob" | "text" = "blob",
+) => {
+  if (url.startsWith("blob:") || url.startsWith("data:")) {
+    const res = await fetch(url);
+    if (responseType === "text") {
+      return { data: await res.text() };
+    }
+    return { data: await res.blob() };
+  }
+  return _axios.get(url, { responseType });
+};
+
+// Можно ли отдать ссылку напрямую в src <img>/<iframe>/<video> вместо загрузки
+// байтов через XHR. Верно для blob:/data: и для публичной статики бэкенда
+// (/storage/…): такие файлы не требуют токена, а браузеру для ПОКАЗА ресурса
+// CORS-заголовки не нужны. Тянуть их через _axios нельзя — статика отдаётся без
+// CORS (в config/cors.php только api/*), и браузер режет ответ CORS-ошибкой.
+// Маршруты /api/… наоборот требуют Bearer-токен, поэтому их грузим blob-ом (ниже),
+// чтобы приложить заголовок авторизации; CORS для них на бэкенде настроен.
+const canRenderDirectly = (url: string): boolean =>
+  /^(blob:|data:)/i.test(url) || !url.includes("/api/");
+
+export const FilePreviewModal = ({ file, onClose, unavailableNotice }: IProps) => {
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [htmlContent, setHtmlContent] = useState<string | null>(null);
   const [textContent, setTextContent] = useState<string | null>(null);
@@ -112,62 +142,67 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
 
     let activeUrl: string | null = null;
 
+    // Тихо логируем ошибку загрузки файла: пустой предпросмотр перехватит заглушка
+    // ниже (showUnavailable) — с текстом unavailableNotice и кнопкой скачивания.
+    const onFetchError = (err: unknown) => {
+      console.error("Не удалось загрузить предпросмотр вложения", err);
+    };
+
     if (isImage) {
       setPreviewType("image");
-      setIsLoading(true);
-      _axios
-        .get(file.preview_url, { responseType: "blob" })
-        .then((response) => {
-          const url = URL.createObjectURL(response.data);
-          activeUrl = url;
-          setBlobUrl(url);
-        })
-        .catch((err) => {
-          console.error("Failed to load image preview", err);
-          toast.error("Не удалось загрузить предпросмотр изображения");
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+      if (canRenderDirectly(file.preview_url)) {
+        setBlobUrl(file.preview_url);
+      } else {
+        setIsLoading(true);
+        fetchFileBuffer(file.preview_url, "blob")
+          .then((response) => {
+            const url = URL.createObjectURL(response.data);
+            activeUrl = url;
+            setBlobUrl(url);
+          })
+          .catch(onFetchError)
+          .finally(() => {
+            setIsLoading(false);
+          });
+      }
     } else if (isPdf) {
       setPreviewType("pdf");
-      setIsLoading(true);
-      _axios
-        .get(file.preview_url, { responseType: "blob" })
-        .then((response) => {
-          const url = URL.createObjectURL(response.data);
-          activeUrl = url;
-          setBlobUrl(url);
-        })
-        .catch((err) => {
-          console.error("Failed to load PDF preview", err);
-          toast.error("Не удалось загрузить предпросмотр PDF");
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+      if (canRenderDirectly(file.preview_url)) {
+        setBlobUrl(file.preview_url);
+      } else {
+        setIsLoading(true);
+        fetchFileBuffer(file.preview_url, "blob")
+          .then((response) => {
+            const url = URL.createObjectURL(response.data);
+            activeUrl = url;
+            setBlobUrl(url);
+          })
+          .catch(onFetchError)
+          .finally(() => {
+            setIsLoading(false);
+          });
+      }
     } else if (isVideo) {
       setPreviewType("video");
-      setIsLoading(true);
-      _axios
-        .get(file.preview_url, { responseType: "blob" })
-        .then((response) => {
-          const url = URL.createObjectURL(response.data);
-          activeUrl = url;
-          setBlobUrl(url);
-        })
-        .catch((err) => {
-          console.error("Failed to load video preview", err);
-          toast.error("Не удалось загрузить видео");
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+      if (canRenderDirectly(file.preview_url)) {
+        setBlobUrl(file.preview_url);
+      } else {
+        setIsLoading(true);
+        fetchFileBuffer(file.preview_url, "blob")
+          .then((response) => {
+            const url = URL.createObjectURL(response.data);
+            activeUrl = url;
+            setBlobUrl(url);
+          })
+          .catch(onFetchError)
+          .finally(() => {
+            setIsLoading(false);
+          });
+      }
     } else if (isPptx) {
       setPreviewType("pptx");
       setIsLoading(true);
-      _axios
-        .get(file.preview_url, { responseType: "blob" })
+      fetchFileBuffer(file.preview_url, "blob")
         .then(async (response) => {
           const arrayBuffer = await response.data.arrayBuffer();
           try {
@@ -232,35 +267,27 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
             ]);
           }
         })
-        .catch((err) => {
-          console.error("Failed to load presentation preview", err);
-          toast.error("Не удалось загрузить презентацию PowerPoint");
-        })
+        .catch(onFetchError)
         .finally(() => {
           setIsLoading(false);
         });
     } else if (isDocx) {
       setPreviewType("html-doc");
       setIsLoading(true);
-      _axios
-        .get(file.preview_url, { responseType: "blob" })
+      fetchFileBuffer(file.preview_url, "blob")
         .then(async (response) => {
           const arrayBuffer = await response.data.arrayBuffer();
           const result = await mammoth.convertToHtml({ arrayBuffer });
           setHtmlContent(result.value || "<p>Пустой документ</p>");
         })
-        .catch((err) => {
-          console.error("Failed to parse Word preview", err);
-          toast.error("Не удалось обработать документ Word");
-        })
+        .catch(onFetchError)
         .finally(() => {
           setIsLoading(false);
         });
     } else if (isXlsx) {
       setPreviewType("html-xls");
       setIsLoading(true);
-      _axios
-        .get(file.preview_url, { responseType: "blob" })
+      fetchFileBuffer(file.preview_url, "blob")
         .then(async (response) => {
           const arrayBuffer = await response.data.arrayBuffer();
           const workbook = XLSX.read(arrayBuffer, { type: "array" });
@@ -277,25 +304,18 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
             setHtmlContent("<p>Пустой Excel файл</p>");
           }
         })
-        .catch((err) => {
-          console.error("Failed to parse Excel preview", err);
-          toast.error("Не удалось обработать таблицу Excel");
-        })
+        .catch(onFetchError)
         .finally(() => {
           setIsLoading(false);
         });
     } else if (isText) {
       setPreviewType("text");
       setIsLoading(true);
-      _axios
-        .get(file.preview_url, { responseType: "text" })
+      fetchFileBuffer(file.preview_url, "text")
         .then((response) => {
           setTextContent(String(response.data));
         })
-        .catch((err) => {
-          console.error("Failed to load text preview", err);
-          toast.error("Не удалось загрузить текст файла");
-        })
+        .catch(onFetchError)
         .finally(() => {
           setIsLoading(false);
         });
@@ -313,6 +333,17 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
   if (!file) return null;
 
   const fileType = getFileType(file.extension);
+
+  // Тип поддерживается (не «none»), загрузка завершилась, но контента нет — почти
+  // всегда это упавший запрос к файлу (нет API/CORS). Показываем заглушку вместо
+  // пустоты. Как только файл начнёт отдаваться — контент появится и заглушка уйдёт.
+  const hasPreviewContent =
+    !!blobUrl ||
+    htmlContent !== null ||
+    textContent !== null ||
+    pptxSlides.length > 0;
+  const showUnavailable =
+    !isLoading && previewType !== "none" && !hasPreviewContent;
 
   const getFormatIcon = (type: string) => {
     const iconSize = 48;
@@ -337,6 +368,27 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
 
   const handleDownload = async () => {
     try {
+      // Прямые ссылки (blob:/data: и публичная статика /storage/… без CORS)
+      // скачиваем обычной ссылкой — XHR по ним упрётся в CORS. Через _axios тянем
+      // только защищённые /api/…-маршруты: им нужен Bearer-токен, и CORS настроен.
+      if (canRenderDirectly(file.download_url)) {
+        const isInline =
+          file.download_url.startsWith("blob:") ||
+          file.download_url.startsWith("data:");
+        const link = document.createElement("a");
+        link.href = file.download_url;
+        link.download = file.original_name;
+        if (!isInline) {
+          // Чужой origin (в деве localhost → IP бэкенда) — браузер игнорирует
+          // download и открыл бы файл в текущей вкладке; уводим в новую.
+          link.target = "_blank";
+          link.rel = "noopener";
+        }
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
       const response = await _axios.get(file.download_url, {
         responseType: "blob",
       });
@@ -359,7 +411,7 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
 
   return (
     <div
-      className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[10000] p-4"
       onClick={onClose}
     >
       <div
@@ -627,6 +679,35 @@ export const FilePreviewModal = ({ file, onClose }: IProps) => {
                   можете скачать его на свой компьютер для работы.
                 </p>
               </div>
+            </div>
+          </If>
+
+          <If is={!isLoading && showUnavailable}>
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="w-24 h-24 rounded-[1.5rem] bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner">
+                {getFormatIcon(fileType)}
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-lg font-bold text-slate-800 dark:text-zinc-200">
+                  {file.original_name}
+                </h4>
+                <p className="text-xs text-slate-400 dark:text-zinc-500">
+                  Формат: {file.extension.toUpperCase()} • Размер:{" "}
+                  {formatBytes(file.size)}
+                </p>
+                <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-sm mx-auto pt-2">
+                  {unavailableNotice ||
+                    "Не удалось загрузить предпросмотр этого файла. Вы можете скачать его на свой компьютер."}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleDownload}
+                className="px-6 py-2.5 rounded-full text-xs font-bold text-white! bg-indigo-600! hover:bg-indigo-700! transition-colors shadow-lg shadow-indigo-600/10 flex items-center gap-2 cursor-pointer"
+              >
+                <Download size={14} />
+                <span>Скачать файл</span>
+              </button>
             </div>
           </If>
         </div>

@@ -59,6 +59,10 @@ export const ApiRoutes = {
   UPLOAD_CORRESPONDENCE_ATTACHMENTS_BULK:
     "/api/v1/correspondences/:id/attachments/bulk",
   DELETE_CORRESPONDENCE_ATTACHMENT: "/api/v1/correspondence-attachments/:id",
+  // Отдаёт сам файл вложения через API (Bearer + CORS), как /api/v1/my-files/:id/download.
+  // ?inline=1 — показать в браузере (Content-Disposition: inline), без параметра — скачать.
+  DOWNLOAD_CORRESPONDENCE_ATTACHMENT:
+    "/api/v1/correspondence-attachments/:id/download",
   ASSIGNMENTS_CORRESPONDENCE: "/api/v1/correspondences/:id/assignments",
 
   // ==================== HR MODULE ====================
