@@ -16,6 +16,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { cn, useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { If } from "@shared/ui";
 import { DocumentCanvas } from "./DocumentCanvas";
 import { downloadDocumentPdf, PAGE_WIDTH } from "./lib";
 import { ApproversPanel } from "./ApproversPanel";
@@ -425,7 +426,7 @@ export const InternalCorrespondenceIncomingView = ({
       {/* Просмотр: окно по макету входящих (тулбар, миниатюры, «Согласующие»,
           статус-бар). Тело письма раскладывается постранично той же логикой
           (paginateHtml), что и холст — со встроенным рисунком ЭЦП. */}
-      {showPreview && (
+      <If is={showPreview}>
         <IncomingPreviewModal
           subject={item.subject || ""}
           inboundNumber={inboundNumber}
@@ -435,8 +436,13 @@ export const InternalCorrespondenceIncomingView = ({
           onClose={() => setShowPreview(false)}
           signatures={signatures}
           approvals={approvals}
+          versions={docVersions}
+          activeVersionId={activeVersionId}
+          onSelectVersion={(versionId) => {
+            setActiveVersionId(versionId);
+          }}
         />
-      )}
+      </If>
 
       {/* Шапка страницы / верхняя панель управления */}
       <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white z-10">

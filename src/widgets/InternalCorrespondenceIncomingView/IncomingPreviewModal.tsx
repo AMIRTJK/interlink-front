@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Minus, Users, Check, Clock } from "lucide-react";
+import { cn } from "@shared/lib";
+import { If } from "@shared/ui";
+import { ApproversPanel } from "./ApproversPanel";
+import { SignersPanel } from "./SignersPanel";
+import { VersionsPanel } from "./VersionsPanel";
+import { TaskPanel } from "./TaskPanel";
 import {
   paginateHtml,
   contentStyle,
@@ -9,12 +16,6 @@ import {
   PAGE_PAD_H,
   PAGE_PAD_V,
 } from "./lib";
-
-// Окно «Просмотр» для ВХОДЯЩЕГО письма. Визуально 1-в-1 с макетом
-// (InboxPreviewModal): светлая тема, тулбар с зумом, миниатюры страниц, полоса
-// «Согласующие» + всплывающая панель и статус-бар. В отличие от макета тело
-// письма не мок, а реальное — раскладывается постранично той же логикой
-// (paginateHtml), что и холст просмотра и предпросмотр исходящего.
 
 interface PreviewApprover {
   name: string;
@@ -27,19 +28,7 @@ interface PreviewApprover {
   cert: string;
 }
 
-const pageWord = (n: number) =>
-  n === 1 ? "страница" : n < 5 ? "страницы" : "страниц";
-
-export const IncomingPreviewModal = ({
-  subject,
-  inboundNumber,
-  lastModified,
-  html,
-  fontSize = 14,
-  onClose,
-  signatures = [],
-  approvals = [],
-}: {
+interface IProps {
   subject: string;
   inboundNumber: string;
   lastModified: string;
@@ -48,10 +37,102 @@ export const IncomingPreviewModal = ({
   onClose: () => void;
   signatures?: any[];
   approvals?: any[];
+  versions?: any[];
+  activeVersionId?: number | string | null;
+  onSelectVersion?: (versionId: number | string) => void;
+}
+
+const pageWord = (n: number) =>
+  n === 1 ? "страница" : n < 5 ? "страницы" : "страниц";
+
+export const IncomingPreviewModal: React.FC<IProps> = ({
+  subject,
+  inboundNumber,
+  lastModified,
+  html,
+  fontSize = 14,
+  onClose,
+  signatures = [],
+  approvals = [],
+  versions = [],
+  activeVersionId = null,
+  onSelectVersion,
 }) => {
   const [zoom, setZoom] = useState(1);
   const [isScaleFocused, setIsScaleFocused] = useState(false);
   const [scaleInput, setScaleInput] = useState("");
+
+  const [showTaskPanel, setShowTaskPanel] = useState(false);
+  const [signersOpen, setSignersOpen] = useState(false);
+  const [approversOpen, setApproversOpen] = useState(false);
+  const [versionsOpen, setVersionsOpen] = useState(false);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const panelsGroupRef = useRef<HTMLDivElement>(null);
+
+  const openSigners = () => {
+    setSignersOpen(true);
+    setApproversOpen(false);
+    setVersionsOpen(false);
+    setShowTaskPanel(false);
+  };
+  const openApprovers = () => {
+    setApproversOpen(true);
+    setSignersOpen(false);
+    setVersionsOpen(false);
+    setShowTaskPanel(false);
+  };
+  const openVersions = () => {
+    setVersionsOpen(true);
+    setSignersOpen(false);
+    setApproversOpen(false);
+    setShowTaskPanel(false);
+  };
+  const openTask = () => {
+    setShowTaskPanel(true);
+    setSignersOpen(false);
+    setApproversOpen(false);
+    setVersionsOpen(false);
+  };
+
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    const canvas = canvasRef.current;
+    const group = panelsGroupRef.current;
+    if (!scroller || !canvas || !group) return;
+
+    const TOP_M = 12;
+    const BOT_M = 24;
+    const MIN_VISIBLE = 160;
+
+    const update = () => {
+      const canvasTop =
+        canvas.getBoundingClientRect().top -
+        scroller.getBoundingClientRect().top;
+      let shift = Math.max(0, TOP_M - canvasTop);
+      shift = Math.min(shift, Math.max(0, canvas.offsetHeight - MIN_VISIBLE));
+      const groupViewportTop = canvasTop + shift;
+      const availH = Math.max(
+        200,
+        scroller.clientHeight - groupViewportTop - BOT_M,
+      );
+      group.style.setProperty("--icc-panel-max-h", `${availH}px`);
+      group.style.transform = shift > 0 ? `translateY(${shift}px)` : "";
+    };
+
+    update();
+    scroller.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    const canvasRO = new ResizeObserver(update);
+    canvasRO.observe(canvas);
+    return () => {
+      scroller.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      canvasRO.disconnect();
+      group.style.transform = "";
+    };
+  }, [html, zoom]);
 
   useEffect(() => {
     if (!isScaleFocused) {
@@ -434,8 +515,7 @@ export const IncomingPreviewModal = ({
             flexWrap: "wrap",
           }}
         >
-          {/* Подписывающий */}
-          {previewSigners.length > 0 && (
+          <If is={previewSigners.length > 0}>
             <>
               <span
                 style={{
@@ -498,8 +578,7 @@ export const IncomingPreviewModal = ({
                 </button>
               ))}
               
-              {/* Визуальный вертикальный разделитель */}
-              {previewApprovers.length > 0 && (
+              <If is={previewApprovers.length > 0}>
                 <div
                   style={{
                     width: 1,
@@ -508,12 +587,11 @@ export const IncomingPreviewModal = ({
                     margin: "0 6px",
                   }}
                 />
-              )}
+              </If>
             </>
-          )}
+          </If>
 
-          {/* Согласующие */}
-          {previewApprovers.length > 0 && (
+          <If is={previewApprovers.length > 0}>
             <>
               <span
                 style={{
@@ -576,8 +654,7 @@ export const IncomingPreviewModal = ({
                 </button>
               ))}
 
-              {/* Если согласующих больше 10 */}
-              {previewApprovers.length > 10 && (
+              <If is={previewApprovers.length > 10}>
                 <span
                   style={{
                     fontSize: 11,
@@ -590,9 +667,9 @@ export const IncomingPreviewModal = ({
                 >
                   +{previewApprovers.length - 10}
                 </span>
-              )}
+              </If>
             </>
-          )}
+          </If>
 
           <span
             style={{
@@ -625,8 +702,7 @@ export const IncomingPreviewModal = ({
           </button>
         </div>
 
-        {/* Поповер согласующего */}
-        {activeApprover && (
+        <If is={!!activeApprover}>
           <div
             style={{
               position: "absolute",
@@ -672,7 +748,7 @@ export const IncomingPreviewModal = ({
                   width: 44,
                   height: 44,
                   borderRadius: "50%",
-                  background: activeApprover.gradient,
+                  background: activeApprover?.gradient,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -681,7 +757,7 @@ export const IncomingPreviewModal = ({
                   fontWeight: 700,
                 }}
               >
-                {activeApprover.initials}
+                {activeApprover?.initials}
               </div>
               <div>
                 <p
@@ -692,7 +768,7 @@ export const IncomingPreviewModal = ({
                     margin: 0,
                   }}
                 >
-                  {activeApprover.name}
+                  {activeApprover?.name}
                 </p>
                 <span
                   style={{
@@ -703,11 +779,11 @@ export const IncomingPreviewModal = ({
                     padding: "2px 8px",
                   }}
                 >
-                  {activeApprover.role}
+                  {activeApprover?.role}
                 </span>
               </div>
             </div>
-            {activeApprover.signed ? (
+            {activeApprover?.signed ? (
               <div
                 style={{
                   background: "#f0fdf4",
@@ -743,12 +819,12 @@ export const IncomingPreviewModal = ({
                       margin: "0 0 2px",
                     }}
                   >
-                    {activeApprover.name}
+                    {activeApprover?.name}
                   </p>
                   <p
                     style={{ fontSize: 9, color: "#64748b", margin: "0 0 2px" }}
                   >
-                    {activeApprover.date}
+                    {activeApprover?.date}
                   </p>
                   <p
                     style={{
@@ -758,7 +834,7 @@ export const IncomingPreviewModal = ({
                       margin: 0,
                     }}
                   >
-                    {activeApprover.cert}
+                    {activeApprover?.cert}
                   </p>
                 </div>
               </div>
@@ -788,7 +864,7 @@ export const IncomingPreviewModal = ({
               </div>
             )}
           </div>
-        )}
+        </If>
 
         {/* Контент */}
         <div
@@ -872,15 +948,17 @@ export const IncomingPreviewModal = ({
 
           {/* Область прокрутки страниц */}
           <div
+            ref={scrollRef}
             style={{
               flex: 1,
               overflowY: "auto",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              padding: "32px 24px",
+              padding: "32px 48px",
               gap: 24,
               background: "#e2e8f0",
+              position: "relative",
             }}
           >
             {sheets.map((pageHtml, idx) => (
@@ -888,14 +966,94 @@ export const IncomingPreviewModal = ({
                 key={idx}
                 ref={(el) => {
                   pageRefs.current[idx] = el;
+                  if (idx === 0) {
+                    canvasRef.current = el;
+                  }
                 }}
                 style={{
                   width: PAGE_WIDTH * zoom,
                   height: PAGE_HEIGHT * zoom,
                   flexShrink: 0,
                   transition: "width 0.15s ease, height 0.15s ease",
+                  position: "relative",
                 }}
               >
+                <If is={idx === 0}>
+                  <div
+                    ref={panelsGroupRef}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: 0,
+                      zIndex: 40,
+                      willChange: "transform",
+                    }}
+                  >
+                    <SignersPanel
+                      isOpen={signersOpen}
+                      onOpen={openSigners}
+                      onClose={() => setSignersOpen(false)}
+                      signatures={signatures}
+                    />
+                    <ApproversPanel
+                      isOpen={approversOpen}
+                      onOpen={openApprovers}
+                      onClose={() => setApproversOpen(false)}
+                      approvals={approvals}
+                    />
+                    <div className="absolute z-20" style={{ left: -33, top: 10 }}>
+                      <motion.button
+                        onClick={() =>
+                          showTaskPanel ? setShowTaskPanel(false) : openTask()
+                        }
+                        whileHover={{ scale: 1.02 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 24,
+                        }}
+                        className={cn(
+                          "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
+                          showTaskPanel ? "bg-slate-50" : "hover:bg-slate-50",
+                        )}
+                        aria-label="Поручение"
+                      >
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
+                        <span
+                          style={{
+                            writingMode: "vertical-rl",
+                            textOrientation: "mixed",
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: "#475569",
+                            letterSpacing: "0.08em",
+                          }}
+                        >
+                          Поручение
+                        </span>
+                      </motion.button>
+                    </div>
+                    <VersionsPanel
+                      isOpen={versionsOpen}
+                      onOpen={openVersions}
+                      onClose={() => setVersionsOpen(false)}
+                      versions={versions}
+                      activeVersionId={activeVersionId}
+                      onSelectVersion={(versionId) => {
+                        if (onSelectVersion) {
+                          onSelectVersion(versionId);
+                        }
+                      }}
+                    />
+                    <AnimatePresence>
+                      <If is={showTaskPanel}>
+                        <TaskPanel onClose={() => setShowTaskPanel(false)} />
+                      </If>
+                    </AnimatePresence>
+                  </div>
+                </If>
                 <div
                   style={{
                     width: PAGE_WIDTH,
@@ -923,22 +1081,21 @@ export const IncomingPreviewModal = ({
                       dangerouslySetInnerHTML={{ __html: pageHtml }}
                     />
 
-                    {/* Рисунок ЭЦП на своей странице */}
-                    {stamp && stamp.pageIndex === idx && stamp.html && (
+                    <If is={Boolean(stamp && stamp.pageIndex === idx && stamp.html)}>
                       <div
                         style={{
                           position: "absolute",
-                          left: PAGE_PAD_H + stamp.x,
-                          top: PAGE_PAD_V + stamp.y,
-                          width: stamp.width,
+                          left: PAGE_PAD_H + (stamp?.x ?? 0),
+                          top: PAGE_PAD_V + (stamp?.y ?? 0),
+                          width: stamp?.width,
                           height: "auto",
                           overflow: "hidden",
                           pointerEvents: "none",
                           zIndex: 50,
                         }}
-                        dangerouslySetInnerHTML={{ __html: stamp.html }}
+                        dangerouslySetInnerHTML={{ __html: stamp?.html || "" }}
                       />
-                    )}
+                    </If>
 
                     <span
                       style={{
@@ -962,8 +1119,7 @@ export const IncomingPreviewModal = ({
             ))}
           </div>
 
-          {/* Выезжающая панель «Согласующие» */}
-          {approversPanelOpen && (
+          <If is={approversPanelOpen}>
             <div
               style={{
                 position: "absolute",
@@ -1092,7 +1248,7 @@ export const IncomingPreviewModal = ({
                       boxSizing: "border-box",
                     }}
                   />
-                  {panelSearch && (
+                  <If is={Boolean(panelSearch)}>
                     <button
                       onClick={() => setPanelSearch("")}
                       style={{
@@ -1110,7 +1266,7 @@ export const IncomingPreviewModal = ({
                     >
                       <X size={12} />
                     </button>
-                  )}
+                  </If>
                 </div>
               </div>
               <div
@@ -1123,8 +1279,7 @@ export const IncomingPreviewModal = ({
                   gap: 12,
                 }}
               >
-                {/* Секция: Подписывающий */}
-                {filteredSigners.length > 0 && (
+                <If is={filteredSigners.length > 0}>
                   <div>
                     <h4
                       style={{
@@ -1191,7 +1346,7 @@ export const IncomingPreviewModal = ({
                               </p>
                             </div>
                           </div>
-                          {a.signed ? (
+                          <If is={a.signed}>
                             <div
                               style={{
                                 background: "#f0fdf4",
@@ -1236,7 +1391,8 @@ export const IncomingPreviewModal = ({
                                 {a.cert}
                               </p>
                             </div>
-                          ) : (
+                          </If>
+                          <If is={!a.signed}>
                             <div
                               style={{
                                 background: "#fffbeb",
@@ -1259,20 +1415,18 @@ export const IncomingPreviewModal = ({
                                 Ожидает подписи
                               </span>
                             </div>
-                          )}
+                          </If>
                         </div>
                       ))}
                     </div>
                   </div>
-                )}
+                </If>
 
-                {/* Разделитель между разделами */}
-                {filteredSigners.length > 0 && filteredApprovers.length > 0 && (
+                <If is={filteredSigners.length > 0 && filteredApprovers.length > 0}>
                   <div style={{ height: 1, background: "#f1f5f9", margin: "4px 0" }} />
-                )}
+                </If>
 
-                {/* Секция: Согласующие */}
-                {filteredApprovers.length > 0 && (
+                <If is={filteredApprovers.length > 0}>
                   <div>
                     <h4
                       style={{
@@ -1339,7 +1493,7 @@ export const IncomingPreviewModal = ({
                               </p>
                             </div>
                           </div>
-                          {a.signed ? (
+                          <If is={a.signed}>
                             <div
                               style={{
                                 background: "#f0fdf4",
@@ -1384,7 +1538,8 @@ export const IncomingPreviewModal = ({
                                 {a.cert}
                               </p>
                             </div>
-                          ) : (
+                          </If>
+                          <If is={!a.signed}>
                             <div
                               style={{
                                 background: "#fffbeb",
@@ -1407,22 +1562,21 @@ export const IncomingPreviewModal = ({
                                 Ожидает подписи
                               </span>
                             </div>
-                          )}
+                          </If>
                         </div>
                       ))}
                     </div>
                   </div>
-                )}
+                </If>
 
-                {/* Ничего не найдено */}
-                {filteredSigners.length === 0 && filteredApprovers.length === 0 && (panelSearch || roleFilter !== "all") && (
+                <If is={filteredSigners.length === 0 && filteredApprovers.length === 0 && Boolean(panelSearch || roleFilter !== "all")}>
                   <p style={{ fontSize: 11, color: "#94a3b8", textAlign: "center", marginTop: 20 }}>
                     Ничего не найдено
                   </p>
-                )}
+                </If>
               </div>
             </div>
-          )}
+          </If>
         </div>
 
         {/* Статус-бар */}
