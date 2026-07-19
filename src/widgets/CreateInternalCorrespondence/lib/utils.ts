@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { _axios } from "@shared/api";
+import { _axios, ApiRoutes } from "@shared/api";
 import { getEnvVar } from "@shared/config";
 import { toast } from "@shared/lib";
 import type { AttachedFile } from "../types";
@@ -33,6 +33,9 @@ export const mapServerAttachment = (raw: any): AttachedFile => {
     size: Number.isFinite(size) && size > 0 ? formatFileSize(size) : "",
     type: name.split(".").pop()?.toUpperCase() ?? "FILE",
     url: raw?.url || undefined,
+    // Если бэкенд добавит эти поля (как в /my-files) — используем их напрямую.
+    previewUrl: raw?.preview_url || undefined,
+    downloadUrl: raw?.download_url || undefined,
   };
 };
 
@@ -93,6 +96,70 @@ export const downloadAttachment = async (file: AttachedFile): Promise<void> => {
   } catch {
     toast.error("Не удалось скачать вложение");
   }
+};
+
+/**
+ * Текст заглушки в модалке предпросмотра для СОХРАНЁННЫХ вложений корреспонденции,
+ * пока бэкенд не поднял API отдачи файла (/api/v1/correspondence-attachments/:id/
+ * download). До этого превью через XHR невозможно (прямой /storage-URL без CORS),
+ * поэтому показываем это сообщение и даём скачать файл напрямую.
+ */
+export const CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE =
+  "Предпросмотр пока недоступен: фронтенд ожидает API для отдачи вложения. " +
+  "Файл можно скачать кнопкой ниже.";
+
+export const createApiFileFromAttachedFile = (file?: AttachedFile | null): any => {
+  if (!file) return null;
+  const name = file.name || "";
+  const ext = name.split(".").pop()?.toLowerCase() || "";
+
+  let previewUrl = "";
+  let downloadUrl = "";
+
+  if (file.file) {
+    // Локальный файл, ещё не отправленный на сервер — читаем прямо из памяти.
+    previewUrl = URL.createObjectURL(file.file);
+    downloadUrl = previewUrl;
+  } else if (file.previewUrl || file.downloadUrl) {
+    // Бэкенд отдал готовые ссылки (как /my-files) — берём их как есть.
+    previewUrl = toAbsoluteUrl(file.previewUrl || file.downloadUrl || "");
+    downloadUrl = toAbsoluteUrl(file.downloadUrl || file.previewUrl || "");
+  } else if (file.url && /^\d+$/.test(file.id)) {
+    // Сохранённое вложение. Просмотр — через /api/-маршрут (Bearer-токен + CORS),
+    // как в модуле «Файлы» (/api/v1/my-files/:id/download): прямой /storage/-URL
+    // для XHR-предпросмотра не годится, статика отдаётся без CORS-заголовков (в
+    // config/cors.php только api/*), и браузер режет ответ. inline=1 просит
+    // показать файл в браузере. ВАЖНО: пока бэкенд не поднял этот маршрут, запрос
+    // вернёт 404 — тогда сработает заглушка в FilePreviewModal.
+    previewUrl = `${toAbsoluteUrl(
+      ApiRoutes.DOWNLOAD_CORRESPONDENCE_ATTACHMENT.replace(":id", file.id),
+    )}?inline=1`;
+    // Скачивание оставляем на прямой /storage-ссылке — она работает уже сейчас
+    // (открывается в новой вкладке), не дожидаясь API. Когда бэкенд вернёт
+    // download_url (ветка выше), скачивание автоматически пойдёт через /api/.
+    downloadUrl = toAbsoluteUrl(file.url);
+  } else if (file.url) {
+    // Подстраховка: сохранённое вложение без числового id — отдаём как есть.
+    previewUrl = toAbsoluteUrl(file.url);
+    downloadUrl = previewUrl;
+  }
+
+  return {
+    id: Math.floor(Math.random() * 1000000),
+    folder_id: null,
+    original_name: name,
+    stored_name: name,
+    extension: ext,
+    mime: file.file?.type || "",
+    type: file.type || ext.toUpperCase(),
+    size: file.file?.size || 0,
+    is_starred: false,
+    meta: null,
+    download_url: downloadUrl,
+    preview_url: previewUrl,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
 };
 
 // Холст редактора — А4 при 96 DPI (794px ширина). Word измеряет в пунктах,

@@ -97,7 +97,10 @@ import {
   formatFileSize,
   mapServerAttachment,
   downloadAttachment,
+  createApiFileFromAttachedFile,
+  CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE,
 } from "../lib/utils";
+import { FilePreviewModal } from "@features/Profile";
 
 // Ширина штампа ЭЦП на листе А4 по умолчанию (≈47% ширины полосы) и высота,
 // рассчитанная по пропорциям макета. Один источник правды для плейсхолдера,
@@ -121,6 +124,7 @@ import { ApproversPanel } from "./ApproversPanel";
 import { SignerPanel } from "./SignerPanel";
 import { IncomingLettersPanel } from "./IncomingLettersPanel";
 import { VersionsPanel } from "./VersionsPanel";
+import { AttachmentsPanel } from "./AttachmentsPanel";
 
 function FileTextIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -668,6 +672,7 @@ export const CreateInternalCorrespondence = ({
   const [cc, setCc] = useState<RecipientOption[]>([]);
   const [subject, setSubject] = useState("");
   const [attachments, setAttachments] = useState<AttachedFile[]>([]);
+  const [previewAttachment, setPreviewAttachment] = useState<AttachedFile | null>(null);
   const [approvers, setApprovers] = useState<Approver[]>([]);
   const [finalSigner, setFinalSigner] = useState<FinalSigner | null>(null);
   const [showToDropdown, setShowToDropdown] = useState(false);
@@ -678,6 +683,7 @@ export const CreateInternalCorrespondence = ({
   const [signerOpen, setSignerOpen] = useState(false);
   const [incomingOpen, setIncomingOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
+  const [attachmentsOpen, setAttachmentsOpen] = useState(false);
   // Демо-режим (для показа руководству): «цилиндры» разделов выносятся в
   // горизонтальную панель под тулбаром, а боковые вкладки у холста скрываются.
   // Сами панели по-прежнему открываются у холста. По умолчанию выключен —
@@ -689,6 +695,7 @@ export const CreateInternalCorrespondence = ({
     setSignerOpen(false);
     setIncomingOpen(false);
     setVersionsOpen(false);
+    setAttachmentsOpen(false);
   };
 
   const handleOpenSigner = () => {
@@ -696,6 +703,7 @@ export const CreateInternalCorrespondence = ({
     setApproversOpen(false);
     setIncomingOpen(false);
     setVersionsOpen(false);
+    setAttachmentsOpen(false);
   };
 
   const handleOpenIncoming = () => {
@@ -703,6 +711,7 @@ export const CreateInternalCorrespondence = ({
     setApproversOpen(false);
     setSignerOpen(false);
     setVersionsOpen(false);
+    setAttachmentsOpen(false);
   };
 
   const handleOpenVersions = () => {
@@ -710,6 +719,15 @@ export const CreateInternalCorrespondence = ({
     setApproversOpen(false);
     setSignerOpen(false);
     setIncomingOpen(false);
+    setAttachmentsOpen(false);
+  };
+
+  const handleOpenAttachments = () => {
+    setAttachmentsOpen(true);
+    setApproversOpen(false);
+    setSignerOpen(false);
+    setIncomingOpen(false);
+    setVersionsOpen(false);
   };
   const [showCcField, setShowCcField] = useState(false);
   const [sent, setSent] = useState(false);
@@ -779,15 +797,61 @@ export const CreateInternalCorrespondence = ({
   const originalTotal = Math.max(originalSheets.pages.length, 1);
   const originalCurrent = Math.min(originalPage, originalTotal - 1);
 
+  const [showVersionCompareSides, setShowVersionCompareSides] = useState(false);
+  const [versionComparePage, setVersionComparePage] = useState(0);
+
   const composeAppliedRef = useRef(false);
   const isDraggingStamp = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const stampRef = useRef<HTMLDivElement>(null);
   const pageCanvasRef = useRef<HTMLDivElement>(null);
-  // Вертикальный скролл-контейнер страницы и обёртка левого A4-холста
-  // входящего письма (для его sticky-позиционирования при прокрутке).
   const rootScrollRef = useRef<HTMLDivElement>(null);
   const originalCanvasWrapRef = useRef<HTMLDivElement>(null);
+  const versionCompareCanvasWrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const activeWrap = showVersionCompareSides
+      ? versionCompareCanvasWrapRef.current
+      : showOriginalLetterSides
+      ? originalCanvasWrapRef.current
+      : null;
+    if (!activeWrap) return;
+    const scroller = rootScrollRef.current;
+    const canvas = pageCanvasRef.current;
+    if (!scroller || !canvas) return;
+
+    const BOT_M = 24;
+    let shift = 0;
+
+    const update = () => {
+      const TOP_M = (stickyHeaderRef.current?.offsetHeight ?? 40) + 12;
+      const viewH = scroller.clientHeight;
+      const wrapH = activeWrap.offsetHeight;
+      const canvasTop =
+        canvas.getBoundingClientRect().top -
+        scroller.getBoundingClientRect().top;
+      const maxShift = Math.max(canvas.offsetHeight - wrapH, 0);
+
+      if (wrapH <= viewH - TOP_M - BOT_M) {
+        shift = TOP_M - canvasTop;
+      } else {
+        const pinTop = TOP_M - canvasTop;
+        const pinBottom = viewH - BOT_M - wrapH - canvasTop;
+        shift = Math.min(Math.max(shift, pinBottom), pinTop);
+      }
+      shift = Math.min(Math.max(shift, 0), maxShift);
+      activeWrap.style.transform = shift > 0 ? `translateY(${shift}px)` : "";
+    };
+
+    update();
+    scroller.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      scroller.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [showOriginalLetterSides, showVersionCompareSides, composeMode, sourceLetter]);
+
   // Обёртка боковых панелей (История версий / Входящие письма / Согласующие /
   // Подписывающий). Прижимаем её к верху видимой области при прокрутке, чтобы
   // вкладки и раскрытая панель были доступны на любой странице документа.
@@ -1061,29 +1125,34 @@ export const CreateInternalCorrespondence = ({
     );
   }, [allVersions, selectedAuthorId]);
 
-  const latestVersionId =
-    allVersions.length > 0 ? allVersions[allVersions.length - 1].id : null;
+  const latestVersion = useMemo(
+    () => (allVersions.length > 0 ? allVersions[allVersions.length - 1] : null),
+    [allVersions],
+  );
+  const latestVersionId = latestVersion ? latestVersion.id : null;
   const isOldVersionSelected =
     activeVersionId !== null && activeVersionId !== latestVersionId;
 
-  // Версия, открытая сейчас в редакторе.
   const activeVersion = useMemo(
-    () => allVersions.find((v: any) => v.id === activeVersionId) || null,
-    [allVersions, activeVersionId],
+    () => allVersions.find((v: any) => v.id === activeVersionId) || latestVersion || null,
+    [allVersions, activeVersionId, latestVersion],
   );
-  // Помечена ли открытая версия как «Для подписи». ЭЦП ставится на ту версию,
-  // что выбрана для подписи на бэкенде (is_selected), а в редакторе можно
-  // открыть любую другую версию. Чтобы не подписать одну версию, поставив
-  // штамп на другую, разрешаем «Указать место для ЭЦП» и «Подписать» только
-  // когда открытая версия совпадает с выбранной для подписи.
+
+  const versionCompareSheets = useMemo((): { pages: string[]; stamp: StampInfo } => {
+    if (!showVersionCompareSides || !activeVersion || !activeVersion.content) {
+      return { pages: [], stamp: null };
+    }
+    const res = paginateHtml(activeVersion.content, Number(fontSize) || 14);
+    const pages = [...res.pages];
+    if (res.stamp) while (pages.length <= res.stamp.pageIndex) pages.push("");
+    return { pages, stamp: res.stamp };
+  }, [showVersionCompareSides, activeVersion, fontSize]);
+
+  const versionCompareTotal = Math.max(versionCompareSheets.pages.length, 1);
+  const versionCompareCurrent = Math.min(versionComparePage, versionCompareTotal - 1);
+
   const isActiveVersionForSign = activeVersion ? !!activeVersion.is_selected : false;
 
-  // Версия, на которой реально стоит «Подписано».
-  // Бэкенд при подписании помечает is_current_signed на версии, которая была
-  // выбрана «Для подписи», но сам рисунок ЭЦП сохраняется отдельным сохранением
-  // тела письма уже в НОВОЙ версии. Чтобы «Подписано» в UI стояло там, где
-  // реально лежит штамп, считаем подписанной последнюю версию со штампом в теле,
-  // а если штампа нет ни в одной — используем флаг бэкенда.
   const signedVersionId = useMemo(() => {
     const stamped = allVersions.filter(
       (v: any) =>
@@ -1114,22 +1183,44 @@ export const CreateInternalCorrespondence = ({
     selectVersionForSign({ versionId: clickedVersionId });
   };
 
+  useEffect(() => {
+    if (showVersionCompareSides && latestVersion && latestVersion.content) {
+      if (editorRef.current && editorRef.current.innerHTML !== latestVersion.content) {
+        editorRef.current.innerHTML = latestVersion.content;
+        setEditorContent(latestVersion.content);
+        if (paginateEditorRef.current) {
+          const nextPageCount = paginateEditorRef.current();
+          setPageCount(nextPageCount);
+        }
+      }
+    } else if (!showVersionCompareSides && activeVersion && activeVersion.content) {
+      if (editorRef.current && editorRef.current.innerHTML !== activeVersion.content) {
+        editorRef.current.innerHTML = activeVersion.content;
+        setEditorContent(activeVersion.content);
+        if (paginateEditorRef.current) {
+          const nextPageCount = paginateEditorRef.current();
+          setPageCount(nextPageCount);
+        }
+      }
+    }
+  }, [showVersionCompareSides, latestVersion, activeVersion]);
+
   const handleSelectVersion = (content: string, versionId: string | number) => {
-    if (editorRef.current) {
-      editorRef.current.innerHTML = content;
-      setEditorContent(content);
-      setActiveVersionId(versionId);
-      const target = allVersions.find((v: any) => v.id === versionId);
-      if (!target?.is_selected && !finalSigner?.dsApplied) {
-        setStampVisible(false);
+    setActiveVersionId(versionId);
+    if (!showVersionCompareSides) {
+      if (editorRef.current) {
+        editorRef.current.innerHTML = content;
+        setEditorContent(content);
+        const target = allVersions.find((v: any) => v.id === versionId);
+        if (!target?.is_selected && !finalSigner?.dsApplied) {
+          setStampVisible(false);
+        }
+        if (paginateEditorRef.current) {
+          const nextPageCount = paginateEditorRef.current();
+          setPageCount(nextPageCount);
+        }
+        resetHistory();
       }
-      if (paginateEditorRef.current) {
-        const nextPageCount = paginateEditorRef.current();
-        setPageCount(nextPageCount);
-      }
-      // Открыта другая версия — история изменений начинается заново, иначе
-      // Ctrl+Z «выныривал» бы в содержимое предыдущей открытой версии.
-      resetHistory();
     }
   };
 
@@ -4342,7 +4433,11 @@ export const CreateInternalCorrespondence = ({
                     Вложения
                   </label>
                   <div className="flex-1 min-w-0 flex flex-wrap items-center gap-2">
-                    {attachments.map((file) => (
+                    {/* В блоке — только ещё не сохранённые файлы. После сохранения
+                        у вложения появляется url, и оно уходит в цилиндр «Вложения». */}
+                    {attachments
+                      .filter((a) => a.file)
+                      .map((file) => (
                       <div
                         key={file.id}
                         className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
@@ -4358,6 +4453,14 @@ export const CreateInternalCorrespondence = ({
                         </div>
                         {/* Убрать можно только ещё не отправленный файл: удаления
                             сохранённого вложения в API пока нет. */}
+                        <button
+                          type="button"
+                          onClick={() => setPreviewAttachment(file)}
+                          title="Просмотр вложения"
+                          className="text-slate-400 hover:text-indigo-600 transition-colors flex-shrink-0 cursor-pointer"
+                        >
+                          <Eye size={13} />
+                        </button>
                         {file.file ? (
                           <button
                             onClick={() =>
@@ -4366,7 +4469,7 @@ export const CreateInternalCorrespondence = ({
                               )
                             }
                             title="Убрать файл"
-                            className="text-slate-300 hover:text-rose-400 transition-colors flex-shrink-0"
+                            className="text-slate-300 hover:text-rose-400 transition-colors flex-shrink-0 cursor-pointer"
                           >
                             <X size={12} />
                           </button>
@@ -4375,7 +4478,7 @@ export const CreateInternalCorrespondence = ({
                             <button
                               onClick={() => downloadAttachment(file)}
                               title="Скачать"
-                              className="text-slate-400 hover:text-blue-600 transition-colors flex-shrink-0"
+                              className="text-slate-400 hover:text-blue-600 transition-colors flex-shrink-0 cursor-pointer"
                             >
                               <Download size={12} />
                             </button>
@@ -4391,9 +4494,9 @@ export const CreateInternalCorrespondence = ({
                     >
                       <Paperclip size={12} />
                       <span>Прикрепить файл</span>
-                      {attachments.length > 0 && (
+                      {attachments.some((a) => a.file) && (
                         <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-blue-600 text-white">
-                          {attachments.length}
+                          {attachments.filter((a) => a.file).length}
                         </span>
                       )}
                     </button>
@@ -4723,6 +4826,18 @@ export const CreateInternalCorrespondence = ({
                     </label>
                   </>
                 )}
+                <If is={allVersions.length > 0}>
+                  <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
+                    <input
+                      type="checkbox"
+                      checked={showVersionCompareSides}
+                      onChange={(e) => setShowVersionCompareSides(e.target.checked)}
+                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span>Режим просмотра истории версий</span>
+                  </label>
+                </If>
               </div>
 
               {/* Демо-режим: горизонтальная панель разделов под тулбаром.
@@ -4751,6 +4866,17 @@ export const CreateInternalCorrespondence = ({
                       isOpen: versionsOpen,
                       onToggle: () =>
                         versionsOpen ? setVersionsOpen(false) : handleOpenVersions(),
+                    },
+                    {
+                      key: "attachments",
+                      label: "Вложения",
+                      dotClass: "bg-indigo-500",
+                      dotStyle: undefined,
+                      isOpen: attachmentsOpen,
+                      onToggle: () =>
+                        attachmentsOpen
+                          ? setAttachmentsOpen(false)
+                          : handleOpenAttachments(),
                     },
                     {
                       key: "signer",
@@ -4848,6 +4974,43 @@ export const CreateInternalCorrespondence = ({
                   </div>
                 </div>
               )}
+
+              <If is={Boolean(showVersionCompareSides && activeVersion)}>
+                <div className="flex items-center justify-between gap-4 px-4 py-2 bg-white border-b border-slate-200 shadow-sm font-sans">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 shrink-0">
+                    <Clock size={14} className="text-amber-500" />
+                    <span>
+                      История версий — Слева: Версия №{activeVersion?.versionNumber}
+                      {activeVersion?.date ? ` (${new Date(activeVersion.date).toLocaleDateString("ru-RU")})` : ""}
+                      {" • "}
+                      Справа: Актуальная версия №{latestVersion?.versionNumber}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setVersionComparePage(Math.max(0, versionCompareCurrent - 1))}
+                      disabled={versionCompareCurrent === 0}
+                      className="flex items-center justify-center w-7 h-7 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+                    <span className="text-xs font-semibold text-slate-600 tabular-nums whitespace-nowrap">
+                      {versionCompareCurrent + 1} / {versionCompareTotal}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setVersionComparePage(Math.min(versionCompareTotal - 1, versionCompareCurrent + 1))
+                      }
+                      disabled={versionCompareCurrent === versionCompareTotal - 1}
+                      className="flex items-center justify-center w-7 h-7 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                </div>
+              </If>
               </div>
 
               <div
@@ -4874,10 +5037,21 @@ export const CreateInternalCorrespondence = ({
                 )}
                 <div className={cn(
                   "py-8 px-8 flex justify-center items-start gap-12 w-full",
-                  showOriginalLetterSides && composeMode && sourceLetter && "min-w-max"
+                  (showOriginalLetterSides || showVersionCompareSides) && "min-w-max"
                 )}>
-                  {showOriginalLetterSides && composeMode && sourceLetter && (
-                    <div ref={originalCanvasWrapRef} className="shrink-0 order-2">
+                  <If is={Boolean(showVersionCompareSides && activeVersion)}>
+                    <div ref={versionCompareCanvasWrapRef} className="shrink-0 order-1">
+                      <OriginalLetterCanvas
+                        sheets={versionCompareSheets.pages}
+                        stamp={versionCompareSheets.stamp}
+                        page={versionCompareCurrent}
+                        fitToViewport={pageCount > 1}
+                      />
+                    </div>
+                  </If>
+
+                  <If is={Boolean(showOriginalLetterSides && composeMode && sourceLetter)}>
+                    <div ref={originalCanvasWrapRef} className="shrink-0 order-1">
                       <OriginalLetterCanvas
                         sheets={originalSheets.pages}
                         stamp={originalSheets.stamp}
@@ -4885,11 +5059,14 @@ export const CreateInternalCorrespondence = ({
                         fitToViewport={pageCount > 1}
                       />
                     </div>
-                  )}
+                  </If>
 
                   <div
                     ref={pageCanvasRef}
-                    className="relative order-1"
+                    className={cn(
+                      "relative",
+                      (showOriginalLetterSides || showVersionCompareSides) ? "order-2" : "order-1"
+                    )}
                     style={{
                       width: PAGE_WIDTH,
                       height: pageCount * PAGE_STRIDE - PAGE_GAP,
@@ -5122,6 +5299,15 @@ export const CreateInternalCorrespondence = ({
                           isSelectingVersion={isSelectingVersion}
                           isSigned={isSigned}
                         />
+                        <AttachmentsPanel
+                          isOpen={attachmentsOpen}
+                          hideTab={panelsInToolbar}
+                          onOpen={handleOpenAttachments}
+                          onClose={() => setAttachmentsOpen(false)}
+                          attachments={attachments.filter((a) => !a.file)}
+                          onPreview={setPreviewAttachment}
+                          onDownload={downloadAttachment}
+                        />
                       </div>
                     )}
                   </div>
@@ -5178,6 +5364,13 @@ export const CreateInternalCorrespondence = ({
           setShowRecipientModal(false);
         }}
       />
+      <If is={!!previewAttachment}>
+        <FilePreviewModal
+          file={createApiFileFromAttachedFile(previewAttachment)}
+          onClose={() => setPreviewAttachment(null)}
+          unavailableNotice={CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE}
+        />
+      </If>
     </div>
   );
 };

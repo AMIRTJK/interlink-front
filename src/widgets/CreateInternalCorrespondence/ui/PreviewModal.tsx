@@ -14,7 +14,12 @@ import {
 import { If } from "@shared/ui";
 import { cn } from "@shared/lib";
 import type { PageOrientation, AttachedFile } from "../types";
-import { downloadAttachment } from "../lib/utils";
+import {
+  downloadAttachment,
+  createApiFileFromAttachedFile,
+  CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE,
+} from "../lib/utils";
+import { FilePreviewModal } from "@features/Profile";
 import { DSStamp } from "./DSStamp";
 
 const PAGE_PAD_H = 80;
@@ -164,6 +169,7 @@ export const PreviewModal = ({
 
   const [currentPage, setCurrentPage] = useState(0);
   const [showAttachments, setShowAttachments] = useState(false);
+  const [previewAttachment, setPreviewAttachment] = useState<AttachedFile | null>(null);
 
   // Стейт для унифицированного штампа ЭЦП (как для плейсхолдера, так и для вшитого)
   const [activeStamp, setActiveStamp] = useState<{
@@ -523,6 +529,14 @@ export const PreviewModal = ({
                                 {file.file ? `${file.size} · не сохранён` : file.size}
                               </p>
                             </div>
+                            <button
+                              type="button"
+                              onClick={() => setPreviewAttachment(file)}
+                              title="Просмотр вложения"
+                              className="text-slate-400 hover:text-indigo-400 transition-colors flex-shrink-0 cursor-pointer"
+                            >
+                              <Eye size={14} />
+                            </button>
                             {/* Скачать можно только то, что уже сохранено на бэкенде. */}
                             <If is={!!file.url}>
                               <button
@@ -709,6 +723,13 @@ export const PreviewModal = ({
             zIndex: -1,
           }}
         />
+        <If is={!!previewAttachment}>
+          <FilePreviewModal
+            file={createApiFileFromAttachedFile(previewAttachment)}
+            onClose={() => setPreviewAttachment(null)}
+            unavailableNotice={CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE}
+          />
+        </If>
       </motion.div>
     </AnimatePresence>
   );

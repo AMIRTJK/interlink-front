@@ -16,6 +16,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { cn, useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { If } from "@shared/ui";
 import { DocumentCanvas } from "./DocumentCanvas";
 import { downloadDocumentPdf, PAGE_WIDTH } from "./lib";
 import { ApproversPanel } from "./ApproversPanel";
@@ -351,9 +352,11 @@ export const InternalCorrespondenceIncomingView = ({
   const senderInitials = item.creator?.full_name
     ? getInitials(item.creator.full_name)
     : "МФ";
-  const inboundNumber = item.my_prefix
-    ? `${item.my_prefix}-${item.reg_number}`
-    : item.reg_number || "—";
+  const inboundNumber = item.reg_number
+    ? item.reg_number.replace(/^[A-Z]+/i, item.my_prefix || "IN")
+    : item.my_prefix
+      ? `${item.my_prefix}`
+      : "—";
 
   const formattedSentDate = item.sent_at
     ? new Date(item.sent_at).toLocaleDateString("ru-RU")
@@ -425,7 +428,7 @@ export const InternalCorrespondenceIncomingView = ({
       {/* Просмотр: окно по макету входящих (тулбар, миниатюры, «Согласующие»,
           статус-бар). Тело письма раскладывается постранично той же логикой
           (paginateHtml), что и холст — со встроенным рисунком ЭЦП. */}
-      {showPreview && (
+      <If is={showPreview}>
         <IncomingPreviewModal
           subject={item.subject || ""}
           inboundNumber={inboundNumber}
@@ -435,11 +438,18 @@ export const InternalCorrespondenceIncomingView = ({
           onClose={() => setShowPreview(false)}
           signatures={signatures}
           approvals={approvals}
+          versions={docVersions}
+          activeVersionId={activeVersionId}
+          onSelectVersion={(versionId) => {
+            setActiveVersionId(versionId);
+          }}
+          panelsInToolbar={panelsInToolbar}
+          onTogglePanelsInToolbar={setPanelsInToolbar}
         />
-      )}
+      </If>
 
       {/* Шапка страницы / верхняя панель управления */}
-      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white z-10">
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white relative z-40">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
@@ -487,7 +497,7 @@ export const InternalCorrespondenceIncomingView = ({
                   exit={{ opacity: 0, scale: 0.92 }}
                   transition={{ type: "spring", stiffness: 280, damping: 22 }}
                   style={{ transformOrigin: "top right" }}
-                  className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 w-56 py-2 overflow-hidden z-50"
+                  className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 w-56 py-2 overflow-hidden z-[100]"
                 >
                   {ACTION_MENU_ITEMS.map((menuItem, idx) => (
                     <motion.button

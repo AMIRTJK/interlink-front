@@ -187,7 +187,9 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                 id: item.id,
                 title: item.subject || "Без темы",
                 subtitle: creator?.full_name || "Не указано",
-                reg_number: item.reg_number || "Не указано",
+                reg_number: item.reg_number
+                  ? item.reg_number.replace(/^[A-Z]+/i, item.my_prefix || "IN")
+                  : "Не указано",
                 date: item.sent_at,
                 tag: "Входящее",
               };

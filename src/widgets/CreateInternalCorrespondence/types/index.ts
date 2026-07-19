@@ -55,6 +55,13 @@ export interface AttachedFile {
   file?: File;
   /** Ссылка на скачивание; есть только у вложений, сохранённых на бэкенде. */
   url?: string;
+  /**
+   * Готовые ссылки от бэкенда (как отдаёт /my-files): просмотр в браузере
+   * (inline) и скачивание — оба под /api/… с CORS и Bearer-токеном. Если бэкенд
+   * их вернёт, фронт возьмёт именно их (см. createApiFileFromAttachedFile).
+   */
+  previewUrl?: string;
+  downloadUrl?: string;
 }
 
 export interface Approver {
