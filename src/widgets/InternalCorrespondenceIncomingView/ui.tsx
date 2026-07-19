@@ -449,7 +449,7 @@ export const InternalCorrespondenceIncomingView = ({
       </If>
 
       {/* Шапка страницы / верхняя панель управления */}
-      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white z-10">
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white relative z-40">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
@@ -497,7 +497,7 @@ export const InternalCorrespondenceIncomingView = ({
                   exit={{ opacity: 0, scale: 0.92 }}
                   transition={{ type: "spring", stiffness: 280, damping: 22 }}
                   style={{ transformOrigin: "top right" }}
-                  className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 w-56 py-2 overflow-hidden z-50"
+                  className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 w-56 py-2 overflow-hidden z-[100]"
                 >
                   {ACTION_MENU_ITEMS.map((menuItem, idx) => (
                     <motion.button
