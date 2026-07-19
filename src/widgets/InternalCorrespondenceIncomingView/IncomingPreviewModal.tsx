@@ -28,6 +28,15 @@ interface PreviewApprover {
   cert: string;
 }
 
+interface ToolbarSection {
+  key: string;
+  label: string;
+  dotClass?: string;
+  dotStyle?: React.CSSProperties;
+  isOpen: boolean;
+  onToggle: () => void;
+}
+
 interface IProps {
   subject: string;
   inboundNumber: string;
@@ -40,6 +49,8 @@ interface IProps {
   versions?: any[];
   activeVersionId?: number | string | null;
   onSelectVersion?: (versionId: number | string) => void;
+  panelsInToolbar?: boolean;
+  onTogglePanelsInToolbar?: (value: boolean) => void;
 }
 
 const pageWord = (n: number) =>
@@ -57,6 +68,8 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
   versions = [],
   activeVersionId = null,
   onSelectVersion,
+  panelsInToolbar = false,
+  onTogglePanelsInToolbar,
 }) => {
   const [zoom, setZoom] = useState(1);
   const [isScaleFocused, setIsScaleFocused] = useState(false);
@@ -95,6 +108,38 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
     setApproversOpen(false);
     setVersionsOpen(false);
   };
+
+  const sections: ToolbarSection[] = [
+    {
+      key: "task",
+      label: "Поручение",
+      dotClass: "bg-indigo-500",
+      isOpen: showTaskPanel,
+      onToggle: () => (showTaskPanel ? setShowTaskPanel(false) : openTask()),
+    },
+    {
+      key: "versions",
+      label: "История версий",
+      dotClass: "bg-amber-500",
+      isOpen: versionsOpen,
+      onToggle: () => (versionsOpen ? setVersionsOpen(false) : openVersions()),
+    },
+    {
+      key: "signers",
+      label: "Подписывающий",
+      dotStyle: { backgroundColor: "oklch(0.6 0.25 250)" },
+      isOpen: signersOpen,
+      onToggle: () => (signersOpen ? setSignersOpen(false) : openSigners()),
+    },
+    {
+      key: "approvers",
+      label: "Согласующие",
+      dotStyle: { backgroundColor: "oklch(0.828 0.189 84.429)" },
+      isOpen: approversOpen,
+      onToggle: () =>
+        approversOpen ? setApproversOpen(false) : openApprovers(),
+    },
+  ];
 
   useEffect(() => {
     const scroller = scrollRef.current;
@@ -502,7 +547,47 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
           </div>
         </div>
 
-        {/* Полоса согласующих */}
+        <If is={Boolean(panelsInToolbar)}>
+          <div className="px-6 py-2 border-b border-slate-100 bg-white flex flex-wrap items-center justify-between gap-2 font-sans flex-shrink-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mr-1 select-none">
+                Разделы
+              </span>
+              {sections.map((section) => (
+                <button
+                  key={section.key}
+                  type="button"
+                  onClick={section.onToggle}
+                  className={cn(
+                    "flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-full border text-xs font-semibold transition-all cursor-pointer select-none",
+                    section.isOpen
+                      ? "bg-slate-800 border-slate-800 text-white shadow-sm"
+                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "w-2.5 h-2.5 rounded-full flex-shrink-0",
+                      section.dotClass,
+                    )}
+                    style={section.dotStyle}
+                  />
+                  <span>{section.label}</span>
+                </button>
+              ))}
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600">
+              <input
+                type="checkbox"
+                checked={panelsInToolbar}
+                onChange={(e) => onTogglePanelsInToolbar?.(e.target.checked)}
+                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+              />
+              <span>Панель разделов сверху</span>
+            </label>
+          </div>
+        </If>
+
         <div
           style={{
             background: "white",
@@ -993,50 +1078,55 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
                   >
                     <SignersPanel
                       isOpen={signersOpen}
+                      hideTab={panelsInToolbar}
                       onOpen={openSigners}
                       onClose={() => setSignersOpen(false)}
                       signatures={signatures}
                     />
                     <ApproversPanel
                       isOpen={approversOpen}
+                      hideTab={panelsInToolbar}
                       onOpen={openApprovers}
                       onClose={() => setApproversOpen(false)}
                       approvals={approvals}
                     />
-                    <div className="absolute z-20" style={{ left: -33, top: 10 }}>
-                      <motion.button
-                        onClick={() =>
-                          showTaskPanel ? setShowTaskPanel(false) : openTask()
-                        }
-                        whileHover={{ scale: 1.02 }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 24,
-                        }}
-                        className={cn(
-                          "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-                          showTaskPanel ? "bg-slate-50" : "hover:bg-slate-50",
-                        )}
-                        aria-label="Поручение"
-                      >
-                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
-                        <span
-                          style={{
-                            writingMode: "vertical-rl",
-                            textOrientation: "mixed",
-                            fontSize: 11,
-                            fontWeight: 600,
-                            color: "#475569",
-                            letterSpacing: "0.08em",
+                    <If is={!panelsInToolbar}>
+                      <div className="absolute z-20" style={{ left: -33, top: 10 }}>
+                        <motion.button
+                          onClick={() =>
+                            showTaskPanel ? setShowTaskPanel(false) : openTask()
+                          }
+                          whileHover={{ scale: 1.02 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 24,
                           }}
+                          className={cn(
+                            "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
+                            showTaskPanel ? "bg-slate-50" : "hover:bg-slate-50",
+                          )}
+                          aria-label="Поручение"
                         >
-                          Поручение
-                        </span>
-                      </motion.button>
-                    </div>
+                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
+                          <span
+                            style={{
+                              writingMode: "vertical-rl",
+                              textOrientation: "mixed",
+                              fontSize: 11,
+                              fontWeight: 600,
+                              color: "#475569",
+                              letterSpacing: "0.08em",
+                            }}
+                          >
+                            Поручение
+                          </span>
+                        </motion.button>
+                      </div>
+                    </If>
                     <VersionsPanel
                       isOpen={versionsOpen}
+                      hideTab={panelsInToolbar}
                       onOpen={openVersions}
                       onClose={() => setVersionsOpen(false)}
                       versions={versions}

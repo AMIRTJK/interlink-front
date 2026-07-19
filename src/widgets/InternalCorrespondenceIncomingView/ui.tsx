@@ -441,6 +441,8 @@ export const InternalCorrespondenceIncomingView = ({
           onSelectVersion={(versionId) => {
             setActiveVersionId(versionId);
           }}
+          panelsInToolbar={panelsInToolbar}
+          onTogglePanelsInToolbar={setPanelsInToolbar}
         />
       </If>
 
