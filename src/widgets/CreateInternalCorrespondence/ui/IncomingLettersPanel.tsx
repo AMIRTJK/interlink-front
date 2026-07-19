@@ -44,7 +44,9 @@ export const IncomingLettersPanel = ({
       ?.map((letter: any) => ({
         id: String(letter.id),
         subject: letter.subject || "Без темы",
-        regNumber: letter.reg_number || "Не указано",
+        regNumber: letter.reg_number
+          ? letter.reg_number.replace(/^[A-Z]+/i, letter.my_prefix || "IN")
+          : "Не указано",
         date: letter.sent_at || letter.created_at,
         sender: letter.creator?.full_name || "Не указано",
       }))

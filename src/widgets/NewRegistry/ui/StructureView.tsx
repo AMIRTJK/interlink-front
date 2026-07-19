@@ -301,7 +301,9 @@ const LetterActivityCard = ({
                   />
                 )}
                 <span className="font-mono text-[11px] text-slate-400 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 px-1.5 py-0.5 rounded">
-                  {item.reg_number || "Без номера"}
+                  {item.reg_number
+                    ? item.reg_number.replace(/^[A-Z]+/i, item.my_prefix || "IN")
+                    : "Без номера"}
                 </span>
                 {status && (
                   <span

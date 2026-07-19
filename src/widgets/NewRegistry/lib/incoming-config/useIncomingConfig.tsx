@@ -82,7 +82,11 @@ export const useIncomingConfig = (type: string): RegistryConfig => {
         label: isInternal ? "Рег. №" : "Вх.",
         icon: <Mail size={10} />,
         color: "blue",
-        render: (d) => d.reg_number || "Не присвоен",
+        render: (d) => {
+          if (!d.reg_number) return "Не присвоен";
+          const prefix = d.my_prefix || "IN";
+          return d.reg_number.replace(/^[A-Z]+/i, prefix);
+        },
       },
       {
         label: "Исх.",

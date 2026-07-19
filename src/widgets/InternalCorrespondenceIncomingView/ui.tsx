@@ -352,9 +352,11 @@ export const InternalCorrespondenceIncomingView = ({
   const senderInitials = item.creator?.full_name
     ? getInitials(item.creator.full_name)
     : "МФ";
-  const inboundNumber = item.my_prefix
-    ? `${item.my_prefix}-${item.reg_number}`
-    : item.reg_number || "—";
+  const inboundNumber = item.reg_number
+    ? item.reg_number.replace(/^[A-Z]+/i, item.my_prefix || "IN")
+    : item.my_prefix
+      ? `${item.my_prefix}`
+      : "—";
 
   const formattedSentDate = item.sent_at
     ? new Date(item.sent_at).toLocaleDateString("ru-RU")

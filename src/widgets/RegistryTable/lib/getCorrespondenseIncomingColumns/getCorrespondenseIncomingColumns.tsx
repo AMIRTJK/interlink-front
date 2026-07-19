@@ -111,6 +111,12 @@ export const useCorrespondenseIncomingColumns = (
     {
       title: isInternal ? "Рег. номер" : "Вх. номер",
       dataIndex: "reg_number",
+      render: (val: string, record: any) => {
+        const num = val || record?.reg_number;
+        if (!num) return "—";
+        const prefix = record?.my_prefix || "IN";
+        return num.replace(/^[A-Z]+/i, prefix);
+      },
     },
     {
       title: "Исх. номер",
