@@ -130,11 +130,32 @@ export const formatBytes = (bytes: number): string => {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 };
 
-export const getFileType = (ext: string): "pdf" | "image" | "spreadsheet" | "archive" | "document" => {
+export const getFileType = (
+  ext: string,
+):
+  | "pdf"
+  | "image"
+  | "spreadsheet"
+  | "archive"
+  | "presentation"
+  | "video"
+  | "document" => {
   const extension = ext.toLowerCase();
   if (extension === "pdf") return "pdf";
-  if (["xls", "xlsx", "csv"].includes(extension)) return "spreadsheet";
-  if (["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(extension)) return "image";
+  if (["xls", "xlsx", "csv", "ods", "xlsb", "xlsm"].includes(extension))
+    return "spreadsheet";
+  if (["ppt", "pptx", "potx", "ppsx", "odp"].includes(extension))
+    return "presentation";
+  if (
+    ["mp4", "webm", "ogg", "mov", "mkv", "avi", "m4v"].includes(extension)
+  )
+    return "video";
+  if (
+    ["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "ico"].includes(
+      extension,
+    )
+  )
+    return "image";
   if (["zip", "rar", "tar", "gz", "7z"].includes(extension)) return "archive";
   return "document";
 };
