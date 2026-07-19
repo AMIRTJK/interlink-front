@@ -124,6 +124,7 @@ import { ApproversPanel } from "./ApproversPanel";
 import { SignerPanel } from "./SignerPanel";
 import { IncomingLettersPanel } from "./IncomingLettersPanel";
 import { VersionsPanel } from "./VersionsPanel";
+import { AttachmentsPanel } from "./AttachmentsPanel";
 
 function FileTextIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -682,6 +683,7 @@ export const CreateInternalCorrespondence = ({
   const [signerOpen, setSignerOpen] = useState(false);
   const [incomingOpen, setIncomingOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
+  const [attachmentsOpen, setAttachmentsOpen] = useState(false);
   // Демо-режим (для показа руководству): «цилиндры» разделов выносятся в
   // горизонтальную панель под тулбаром, а боковые вкладки у холста скрываются.
   // Сами панели по-прежнему открываются у холста. По умолчанию выключен —
@@ -693,6 +695,7 @@ export const CreateInternalCorrespondence = ({
     setSignerOpen(false);
     setIncomingOpen(false);
     setVersionsOpen(false);
+    setAttachmentsOpen(false);
   };
 
   const handleOpenSigner = () => {
@@ -700,6 +703,7 @@ export const CreateInternalCorrespondence = ({
     setApproversOpen(false);
     setIncomingOpen(false);
     setVersionsOpen(false);
+    setAttachmentsOpen(false);
   };
 
   const handleOpenIncoming = () => {
@@ -707,6 +711,7 @@ export const CreateInternalCorrespondence = ({
     setApproversOpen(false);
     setSignerOpen(false);
     setVersionsOpen(false);
+    setAttachmentsOpen(false);
   };
 
   const handleOpenVersions = () => {
@@ -714,6 +719,15 @@ export const CreateInternalCorrespondence = ({
     setApproversOpen(false);
     setSignerOpen(false);
     setIncomingOpen(false);
+    setAttachmentsOpen(false);
+  };
+
+  const handleOpenAttachments = () => {
+    setAttachmentsOpen(true);
+    setApproversOpen(false);
+    setSignerOpen(false);
+    setIncomingOpen(false);
+    setVersionsOpen(false);
   };
   const [showCcField, setShowCcField] = useState(false);
   const [sent, setSent] = useState(false);
@@ -4419,7 +4433,11 @@ export const CreateInternalCorrespondence = ({
                     Вложения
                   </label>
                   <div className="flex-1 min-w-0 flex flex-wrap items-center gap-2">
-                    {attachments.map((file) => (
+                    {/* В блоке — только ещё не сохранённые файлы. После сохранения
+                        у вложения появляется url, и оно уходит в цилиндр «Вложения». */}
+                    {attachments
+                      .filter((a) => a.file)
+                      .map((file) => (
                       <div
                         key={file.id}
                         className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
@@ -4476,9 +4494,9 @@ export const CreateInternalCorrespondence = ({
                     >
                       <Paperclip size={12} />
                       <span>Прикрепить файл</span>
-                      {attachments.length > 0 && (
+                      {attachments.some((a) => a.file) && (
                         <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-blue-600 text-white">
-                          {attachments.length}
+                          {attachments.filter((a) => a.file).length}
                         </span>
                       )}
                     </button>
@@ -4848,6 +4866,17 @@ export const CreateInternalCorrespondence = ({
                       isOpen: versionsOpen,
                       onToggle: () =>
                         versionsOpen ? setVersionsOpen(false) : handleOpenVersions(),
+                    },
+                    {
+                      key: "attachments",
+                      label: "Вложения",
+                      dotClass: "bg-indigo-500",
+                      dotStyle: undefined,
+                      isOpen: attachmentsOpen,
+                      onToggle: () =>
+                        attachmentsOpen
+                          ? setAttachmentsOpen(false)
+                          : handleOpenAttachments(),
                     },
                     {
                       key: "signer",
@@ -5269,6 +5298,15 @@ export const CreateInternalCorrespondence = ({
                           onSetVersionForSign={handleSetVersionForSign}
                           isSelectingVersion={isSelectingVersion}
                           isSigned={isSigned}
+                        />
+                        <AttachmentsPanel
+                          isOpen={attachmentsOpen}
+                          hideTab={panelsInToolbar}
+                          onOpen={handleOpenAttachments}
+                          onClose={() => setAttachmentsOpen(false)}
+                          attachments={attachments.filter((a) => !a.file)}
+                          onPreview={setPreviewAttachment}
+                          onDownload={downloadAttachment}
                         />
                       </div>
                     )}
