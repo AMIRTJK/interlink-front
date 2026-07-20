@@ -148,6 +148,7 @@ export const ApiRoutes = {
   READ_INTERNAL: "/api/v1/internal-correspondences/:id/read",
   DELETE_INTERNAL: "/api/v1/internal-correspondences/:id",
   RESTORE_INTERNAL: "/api/v1/internal-correspondences/:id/restore",
+  GET_INTERNAL_STRUCTURE: "/api/v1/internal-correspondences/:id/structure",
 
   // Recipients
   GET_INTERNAL_RECIPIENTS_USERS:
