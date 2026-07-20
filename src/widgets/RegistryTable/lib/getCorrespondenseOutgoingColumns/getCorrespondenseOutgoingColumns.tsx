@@ -15,6 +15,7 @@ import folderIcon from "../../../../assets/icons/folder-icon.svg";
 import trashIcon from "../../../../assets/icons/trash-icon.svg";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
+import { CORRESPONDENCE_INVALIDATE_KEYS } from "@shared/config";
 
 export const useCorrespondenseOutgoingColumns = (
   type?: string,
@@ -22,7 +23,6 @@ export const useCorrespondenseOutgoingColumns = (
 ): TableColumnsType => {
   const isInternal = type?.includes("internal");
 
-  // Archive mutation
   const { mutate: archiveCorrespondence } = useMutationQuery<{
     id: number;
     is_archived: boolean;
@@ -33,13 +33,7 @@ export const useCorrespondenseOutgoingColumns = (
     messages: {
       success: "Письмо успешно архивировано",
       error: "Ошибка архивирования письма",
-      invalidate: [
-        ApiRoutes.GET_CORRESPONDENCES,
-        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
-        ApiRoutes.GET_INTERNAL_INCOMING,
-        ApiRoutes.GET_INTERNAL_OUTGOING,
-        ApiRoutes.GET_INTERNAL_COUNTERS,
-      ],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 
@@ -50,18 +44,10 @@ export const useCorrespondenseOutgoingColumns = (
         : ApiRoutes.RESTORE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "POST",
     messages: {
-      invalidate: [
-        ApiRoutes.GET_CORRESPONDENCES,
-        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
-        ApiRoutes.GET_INTERNAL_INCOMING,
-        ApiRoutes.GET_INTERNAL_OUTGOING,
-        ApiRoutes.GET_INTERNAL_COUNTERS,
-        ApiRoutes.GET_INTERNAL_TRASH,
-      ],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 
-  // Pin mutation
   const { mutate: pinCorrespondence } = useMutationQuery<{
     id: number;
     is_pinned: boolean;
@@ -71,19 +57,10 @@ export const useCorrespondenseOutgoingColumns = (
     messages: {
       success: "Письмо успешно закреплено",
       error: "Ошибка закрепления письма",
-      invalidate: [
-        ApiRoutes.GET_CORRESPONDENCES,
-        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
-        ApiRoutes.GET_INTERNAL_INCOMING,
-        ApiRoutes.GET_INTERNAL_OUTGOING,
-        ApiRoutes.GET_INTERNAL_COUNTERS,
-      ],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 
-
-
-  // Delete mutation
   const { mutate: deleteCorrespondence } = useMutationQuery<{ id: number }>({
     url: (data) =>
       isInternal
@@ -93,13 +70,7 @@ export const useCorrespondenseOutgoingColumns = (
     messages: {
       success: "Письмо успешно удалено",
       error: "Ошибка удаления письма",
-      invalidate: [
-        ApiRoutes.GET_CORRESPONDENCES,
-        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
-        ApiRoutes.GET_INTERNAL_INCOMING,
-        ApiRoutes.GET_INTERNAL_OUTGOING,
-        ApiRoutes.GET_INTERNAL_COUNTERS,
-      ],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 

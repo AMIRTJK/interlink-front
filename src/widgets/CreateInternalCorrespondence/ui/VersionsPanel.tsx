@@ -92,10 +92,9 @@ export const VersionsPanel = ({
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 12, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="absolute top-0 w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl z-30 flex flex-col"
+            className="absolute top-0 w-[320px] h-[520px] bg-white rounded-2xl border border-slate-200 shadow-2xl z-30 flex flex-col"
             style={{
               right: "calc(100% + 12px)",
-              maxHeight: "var(--icc-panel-max-h, 70vh)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -221,7 +220,7 @@ export const VersionsPanel = ({
               </If>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-3 min-h-0">
+            <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-3 min-h-0 custom-scrollbar">
               <If is={filteredVersions.length === 0}>
                 <p className="text-xs text-slate-400 text-center py-4">
                   Нет версий от этого автора

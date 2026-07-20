@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
+import { CORRESPONDENCE_INVALIDATE_KEYS } from "@shared/config";
 import { RegistryConfig } from "../types";
 import { getOutgoingFilters } from "../filters.config";
 import { RecipientsViewer } from "@widgets/NewRegistry/ui";
@@ -26,7 +27,7 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
     method: "PATCH",
     messages: {
       success: "Архивировано",
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 
@@ -38,7 +39,7 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
     method: "POST",
     messages: {
       success: "Восстановлено",
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 
@@ -47,7 +48,7 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
     method: "PATCH",
     messages: {
       success: "Закреплено",
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 
@@ -59,7 +60,7 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
     method: "DELETE",
     messages: {
       success: "Удалено",
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 

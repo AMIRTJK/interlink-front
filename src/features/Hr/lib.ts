@@ -186,7 +186,9 @@ export const validateEmployee = (values: Record<string, any>, isEdit: boolean) =
   if (!values.birth_date) errs.birth_date = "Укажите дату рождения";
   if (!values.gender) errs.gender = "Выберите пол";
   if (!values.passport_series) errs.passport_series = "Введите серию паспорта";
+  else if (!/^[A-ZА-ЯЁ]{1}$/i.test(values.passport_series)) errs.passport_series = "1 заглавная буква";
   if (!values.passport_number) errs.passport_number = "Введите номер паспорта";
+  else if (!/^\d{9}$/.test(values.passport_number)) errs.passport_number = "Введите 9 цифр";
   if (!values.inn) errs.inn = "Введите ИНН";
   if (!values.address) errs.address = "Введите адрес";
 

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Folder, FolderOpen, ChevronRight } from "lucide-react";
 import { useMutationQuery, useIsDarkMode } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { CORRESPONDENCE_INVALIDATE_KEYS } from "@shared/config";
 import { IFolder, IMoveToFolderModalProps } from "../model";
 import { useFolderTree, TFolderTreeNode } from "../lib/useFolderTree";
 
@@ -44,13 +45,7 @@ export const MoveToFolderModal: React.FC<IMoveToFolderModalProps> = ({
     }),
     messages: {
       success: "Документ успешно перемещен",
-      invalidate: [
-        ApiRoutes.GET_CORRESPONDENCES,
-        ApiRoutes.GET_INTERNAL_COUNTERS,
-        ApiRoutes.GET_INTERNAL_INCOMING,
-        ApiRoutes.GET_INTERNAL_OUTGOING,
-        ApiRoutes.GET_INTERNAL_DRAFTS,
-      ],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
       onSuccessCb: () => {
         onClose();
         setSelectedFolder(null);

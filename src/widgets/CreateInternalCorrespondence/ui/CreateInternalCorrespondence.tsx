@@ -56,10 +56,13 @@ import {
 } from "lucide-react";
 import { useGetQuery, useMutationQuery, buildFormData, toast, tokenControl } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { CORRESPONDENCE_INVALIDATE_KEYS } from "@shared/config";
 import { If } from "@shared/ui";
 import { message } from "antd";
 import { ConfirmationModal } from "./ConfirmationModal";
 import { RecipientSelectModal } from "./RecipientSelectModal";
+import { DeclineReasonModal } from "./DeclineReasonModal";
+import { CancelSignatureModal } from "./CancelSignatureModal";
 import type {
   // Status,
   ImportanceLevel,
@@ -1061,35 +1064,66 @@ export const CreateInternalCorrespondence = ({
     },
   });
 
+  const hasSignedWorkflowSignature = useMemo(() => {
+    const wfSigs = rawWorkflowData?.data?.signatures || [];
+    return wfSigs.some((sig: any) => sig.status === "signed");
+  }, [rawWorkflowData]);
+
+  const revokedVersionIds = useMemo(() => {
+    const ids = new Set<number | string>();
+    const wfSignatures = rawWorkflowData?.data?.signatures || [];
+    wfSignatures.forEach((s: any) => {
+      if (s.status === "revoked") {
+        if (s.version_id) ids.add(s.version_id);
+        if (s.payload_json?.version_id) ids.add(s.payload_json.version_id);
+      }
+    });
+    return ids;
+  }, [rawWorkflowData]);
+
   // Массив всех версий с бэкенда
   const allVersions = useMemo(() => {
     const rawVersions = versionsResponse?.data?.versions || [];
-    return rawVersions.map((v: any, idx: number) => ({
-      id: v.id,
-      versionNumber: v.version || idx + 1,
-      content: v.body,
-      date: v.created_at,
-      author: v.author
-        ? {
-            id: String(v.author.id),
-            name: v.author.full_name || "Неизвестный автор",
-            position: v.author.position || "Сотрудник",
-            initials: (v.author.full_name || "НА")
-              .split(" ")
-              .map((n: string) => n[0])
-              .slice(0, 2)
-              .join(""),
-          }
-        : {
-            id: "unknown",
-            name: "Неизвестный автор",
-            position: "Сотрудник",
-            initials: "НА",
-          },
-      is_selected: v.is_selected,
-      is_current_signed: v.is_current_signed,
-    }));
-  }, [versionsResponse]);
+    return rawVersions.map((v: any, idx: number) => {
+      const isExplicitRevoked =
+        v.signature_state === "revoked" ||
+        revokedVersionIds.has(v.id) ||
+        (v.parent_id && revokedVersionIds.has(v.parent_id)) ||
+        (!hasSignedWorkflowSignature &&
+          typeof v.body === "string" &&
+          v.body.includes(STAMP_ATTR));
+
+      return {
+        id: v.id,
+        parent_id: v.parent_id,
+        versionNumber: v.version || idx + 1,
+        content: v.body,
+        date: v.created_at,
+        author: v.author
+          ? {
+              id: String(v.author.id),
+              name: v.author.full_name || "Неизвестный автор",
+              position: v.author.position || "Сотрудник",
+              initials: (v.author.full_name || "НА")
+                .split(" ")
+                .map((n: string) => n[0])
+                .slice(0, 2)
+                .join(""),
+            }
+          : {
+              id: "unknown",
+              name: "Неизвестный автор",
+              position: "Сотрудник",
+              initials: "НА",
+            },
+        is_selected: v.is_selected,
+        is_current_signed: v.is_current_signed && !isExplicitRevoked,
+        signature_state: isExplicitRevoked ? "revoked" : v.signature_state,
+        signature_revoked_at: v.signature_revoked_at,
+        signature_signed_at: v.signature_signed_at,
+      };
+    });
+  }, [versionsResponse, revokedVersionIds, hasSignedWorkflowSignature]);
 
   // Список уникальных авторов для выпадающего фильтра
   const versionAuthors = useMemo(() => {
@@ -1154,15 +1188,20 @@ export const CreateInternalCorrespondence = ({
   const isActiveVersionForSign = activeVersion ? !!activeVersion.is_selected : false;
 
   const signedVersionId = useMemo(() => {
+    if (!hasSignedWorkflowSignature) return null;
+    const backendSigned = allVersions.find(
+      (v: any) => v.is_current_signed && v.signature_state !== "revoked",
+    );
+    if (backendSigned) return backendSigned.id;
     const stamped = allVersions.filter(
       (v: any) =>
+        v.signature_state !== "revoked" &&
         typeof v.content === "string" &&
         v.content.includes(STAMP_ATTR),
     );
     if (stamped.length) return stamped[stamped.length - 1].id;
-    const backendSigned = allVersions.find((v: any) => v.is_current_signed);
-    return backendSigned ? backendSigned.id : null;
-  }, [allVersions]);
+    return null;
+  }, [allVersions, hasSignedWorkflowSignature]);
 
   const { mutate: selectVersionForSign, isPending: isSelectingVersion } =
     useMutationQuery<{ versionId: string | number }, any>({
@@ -1421,8 +1460,34 @@ export const CreateInternalCorrespondence = ({
   const isCurrentSigner = pendingSignature && currentUserId && String(currentUserId) === String(pendingSignature.user_id || pendingSignature.user?.id);
   const canDecline = !!pendingSignature && !!isCurrentSigner;
 
+  const [showDeclineModal, setShowDeclineModal] = useState(false);
+  const [isDeclining, setIsDeclining] = useState(false);
+
   const handleDeclineClick = () => {
-    toast.info("Функциональность отклонения станет доступна после реализации API на стороне бэкенда");
+    setShowDeclineModal(true);
+  };
+
+  const handleConfirmDecline = async (reasonText: string) => {
+    setIsDeclining(true);
+    try {
+      const payloadData = await signaturesPayloadAsync({ action: "sign" });
+      if (payloadData?.signature_id && payloadData?.nonce) {
+        signaturesConfirm({
+          signature_id: payloadData.signature_id,
+          nonce: payloadData.nonce,
+          status: "declined",
+          reason: reasonText,
+          method: "simple",
+        });
+        setShowDeclineModal(false);
+      } else {
+        toast.error("Не удалось получить параметры для отклонения");
+      }
+    } catch (error: any) {
+      toast.error(error?.message || "Ошибка при отклонении документа");
+    } finally {
+      setIsDeclining(false);
+    }
   };
 
   const assignSelfAsSigner = () => {
@@ -1451,6 +1516,36 @@ export const CreateInternalCorrespondence = ({
     method: "POST",
   });
 
+  const { mutate: signaturesCancel, isPending: isCancellingSign } =
+    useMutationQuery<any>({
+      url: ApiRoutes.INTERNAL_SIGNATURES_CANCEL?.replace(
+        ":id",
+        String(id || ""),
+      ),
+      method: "POST",
+      messages: {
+        invalidate: [
+          ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+          ApiRoutes.GET_INTERNAL_VERSIONS?.replace(":id", String(id || "")),
+          ApiRoutes.GET_INTERNAL_BY_ID?.replace(":id", String(id || "")),
+          ...CORRESPONDENCE_INVALIDATE_KEYS,
+        ],
+      },
+      queryOptions: {
+        onSuccess: () => {
+          toast.success("Подпись отменена. Создана новая версия документа.");
+          setShowCancelSignConfirm(false);
+          refetchVersions();
+        },
+      },
+    });
+
+  const handleConfirmCancelSignature = (reasonText: string) => {
+    signaturesCancel({
+      reason: reasonText || undefined,
+    });
+  };
+
   const { mutate: signaturesConfirm } = useMutationQuery<any>({
     url: ApiRoutes.INTERNAL_SIGNATURES_CONFIRM?.replace(
       ":id",
@@ -1458,13 +1553,19 @@ export const CreateInternalCorrespondence = ({
     ),
     method: "POST",
     messages: {
-      success: "Документ успешно подписан",
       invalidate: [
         ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+        ...CORRESPONDENCE_INVALIDATE_KEYS,
       ],
     },
     queryOptions: {
-      onSuccess: () => {
+      onSuccess: (_data, variables) => {
+        if (variables?.status === "declined") {
+          toast.success("Документ успешно отклонен");
+          return;
+        }
+
+        toast.success("Документ успешно подписан");
         setFinalSigner((prev) =>
           prev ? { ...prev, dsApplied: true, dsLoading: false } : null,
         );
@@ -1867,6 +1968,7 @@ export const CreateInternalCorrespondence = ({
       if (item.signatures && item.signatures.length > 0) {
         const s = item.signatures[0];
         const isCurrentlySigned = s.status === "signed";
+        const isCurrentlyDeclined = s.status === "declined";
         setFinalSigner({
           id: String(s.user.id),
           isInvited: true,
@@ -1879,9 +1981,10 @@ export const CreateInternalCorrespondence = ({
             .join(""),
           color: "bg-purple-100 text-purple-700",
           dsApplied: isCurrentlySigned,
+          dsDeclined: isCurrentlyDeclined,
+          declineReason: s.decline_reason || s.reason,
           dsLoading: false,
         });
-        // Убираем ручное отображение плавающего React-компонента если подписано
         if (isCurrentlySigned) {
           setStampVisible(false);
         }
@@ -1990,6 +2093,7 @@ export const CreateInternalCorrespondence = ({
         const wfS = wfSignatures[0];
         const user = wfS.user;
         const isCurrentlySigned = wfS.status === "signed";
+        const isCurrentlyDeclined = wfS.status === "declined";
         if (user) {
           setFinalSigner({
             id: String(user.id),
@@ -2003,6 +2107,8 @@ export const CreateInternalCorrespondence = ({
               .join(""),
             color: "bg-purple-100 text-purple-700",
             dsApplied: isCurrentlySigned,
+            dsDeclined: isCurrentlyDeclined,
+            declineReason: wfS.decline_reason || wfS.reason,
             dsLoading: false,
           });
           if (isCurrentlySigned) {
@@ -5319,19 +5425,11 @@ export const CreateInternalCorrespondence = ({
 
       </div>
       
-      <ConfirmationModal
-        open={showCancelSignConfirm}
-        title="Отмена подписи"
-        message="Вы действительно хотите отозвать свою подпись? Документ будет переведен обратно в статус «На подпись»."
-        confirmText="Отозвать"
-        icon={<Undo size={26} strokeWidth={2.2} />}
-        iconBg="bg-red-50 dark:bg-red-500/10 text-red-500"
-        confirmBtnBg="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-red-500/25"
-        onConfirm={async () => {
-          message.info("API отмены подписи находится в доработке");
-          setShowCancelSignConfirm(false);
-        }}
-        onCancel={() => setShowCancelSignConfirm(false)}
+      <CancelSignatureModal
+        isOpen={showCancelSignConfirm}
+        onClose={() => setShowCancelSignConfirm(false)}
+        onConfirm={handleConfirmCancelSignature}
+        isLoading={isCancellingSign}
       />
 
       <ConfirmationModal
@@ -5371,6 +5469,12 @@ export const CreateInternalCorrespondence = ({
           unavailableNotice={CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE}
         />
       </If>
+      <DeclineReasonModal
+        isOpen={showDeclineModal}
+        onClose={() => setShowDeclineModal(false)}
+        onConfirm={handleConfirmDecline}
+        isLoading={isDeclining}
+      />
     </div>
   );
 };

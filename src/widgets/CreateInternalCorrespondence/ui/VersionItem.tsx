@@ -1,5 +1,5 @@
 import React from "react";
-import { Check, Shield } from "lucide-react";
+import { Check, Shield, Undo } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 
@@ -22,8 +22,9 @@ export const VersionItem = ({
   onSelectVersion,
   onSetVersionForSign,
 }: IProps) => {
+  const isRevoked = version.signature_state === "revoked";
   const isCurrentActive = version.id === activeVersionId;
-  const isSignedVersion = version.id === signedVersionId;
+  const isSignedVersion = !isRevoked && version.id === signedVersionId;
 
   return (
     <div
@@ -32,21 +33,30 @@ export const VersionItem = ({
         "flex items-start justify-between p-3 rounded-xl border transition-all cursor-pointer group text-xs gap-3",
         isSignedVersion
           ? "bg-emerald-50/60 border-emerald-400 shadow-sm ring-1 ring-emerald-200"
-          : isCurrentActive
-            ? "bg-blue-50/50 border-blue-500 shadow-sm"
-            : "bg-slate-50/40 border-slate-100 hover:bg-slate-50 hover:border-slate-200"
+          : isRevoked
+            ? "bg-rose-50/40 border-rose-200 hover:bg-rose-50 hover:border-rose-300"
+            : isCurrentActive
+              ? "bg-blue-50/50 border-blue-500 shadow-sm"
+              : "bg-slate-50/40 border-slate-100 hover:bg-slate-50 hover:border-slate-200"
       )}
     >
       <div
         className={cn(
           "w-7 h-7 rounded-full font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5 border border-white shadow-sm",
-          isSignedVersion ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-600"
+          isSignedVersion
+            ? "bg-emerald-500 text-white"
+            : isRevoked
+              ? "bg-rose-100 text-rose-600 border-rose-200"
+              : "bg-slate-200 text-slate-600"
         )}
       >
         <If is={isSignedVersion}>
           <Check size={14} />
         </If>
-        <If is={!isSignedVersion}>
+        <If is={isRevoked}>
+          <Undo size={12} />
+        </If>
+        <If is={!isSignedVersion && !isRevoked}>
           {version.author.initials}
         </If>
       </div>
@@ -58,21 +68,29 @@ export const VersionItem = ({
               "font-bold",
               isSignedVersion
                 ? "text-emerald-700"
-                : isCurrentActive
-                  ? "text-blue-600"
-                  : "text-slate-700"
+                : isRevoked
+                  ? "text-rose-700"
+                  : isCurrentActive
+                    ? "text-blue-600"
+                    : "text-slate-700"
             )}
           >
             Версия {version.versionNumber}
           </span>
           <If is={isSignedVersion}>
-            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-500 text-white font-semibold rounded text-[9px]">
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-500 text-white font-semibold rounded text-[9px] whitespace-nowrap shrink-0">
               <Shield size={9} />
               Подписано
             </span>
           </If>
-          <If is={!isSignedVersion && version.is_selected}>
-            <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 font-medium rounded text-[9px] border border-emerald-100">
+          <If is={isRevoked}>
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-rose-50 text-rose-600 font-semibold rounded text-[9px] border border-rose-200 whitespace-nowrap shrink-0">
+              <Undo size={9} />
+              Подпись отменена
+            </span>
+          </If>
+          <If is={!isSignedVersion && !isRevoked && version.is_selected}>
+            <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 font-medium rounded text-[9px] border border-emerald-100 whitespace-nowrap shrink-0">
               Для подписи
             </span>
           </If>
@@ -90,13 +108,7 @@ export const VersionItem = ({
         className="flex items-center gap-1.5 flex-shrink-0 mt-0.5"
         onClick={(e) => e.stopPropagation()}
       >
-        <If is={isSignedVersion}>
-          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 select-none">
-            <Check size={13} className="text-emerald-500" />
-            Подписано
-          </span>
-        </If>
-        <If is={!isSignedVersion}>
+        <If is={!isSignedVersion && !isRevoked}>
           <input
             type="checkbox"
             id={`version-sign-${version.id}`}

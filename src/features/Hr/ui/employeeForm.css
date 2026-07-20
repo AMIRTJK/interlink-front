@@ -15,3 +15,16 @@
 .hidden-input {
   display: none !important;
 }
+
+@keyframes scanBeam {
+  0% {
+    top: 5%;
+  }
+  100% {
+    top: 90%;
+  }
+}
+
+.animate-scan-beam {
+  animation: scanBeam 2.2s ease-in-out infinite alternate;
+}

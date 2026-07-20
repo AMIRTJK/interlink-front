@@ -109,10 +109,32 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
         <SectionTitle icon={<ScrollText size={13} />}>Документы</SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-3 gap-y-3">
           <FormItem label="Серия паспорта" error={errors.passport_series} required>
-            <IconInput placeholder="A" maxLength={5} icon={iconEl(ScrollText)} value={values.passport_series} onChange={(e) => handleChange("passport_series", e.target.value)} hasError={!!errors.passport_series} />
+            <IconInput
+              placeholder="A"
+              maxLength={1}
+              icon={iconEl(ScrollText)}
+              value={values.passport_series}
+              onChange={(e) => {
+                const val = e.target.value
+                  .toUpperCase()
+                  .replace(/[^A-ZА-ЯЁ]/gi, "")
+                  .slice(0, 1);
+                handleChange("passport_series", val);
+              }}
+              hasError={!!errors.passport_series}
+            />
           </FormItem>
           <FormItem label="Номер паспорта" error={errors.passport_number} required>
-            <IconInput placeholder="1234567" maxLength={10} value={values.passport_number} onChange={(e) => handleChange("passport_number", e.target.value)} hasError={!!errors.passport_number} />
+            <IconInput
+              placeholder="123456789"
+              maxLength={9}
+              value={values.passport_number}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, "").slice(0, 9);
+                handleChange("passport_number", val);
+              }}
+              hasError={!!errors.passport_number}
+            />
           </FormItem>
           <FormItem label="ИНН" error={errors.inn} required>
             <IconInput placeholder="040012345" maxLength={12} icon={iconEl(Hash)} value={values.inn} onChange={(e) => handleChange("inn", e.target.value)} hasError={!!errors.inn} />

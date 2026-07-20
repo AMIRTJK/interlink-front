@@ -148,6 +148,7 @@ export const ApiRoutes = {
   READ_INTERNAL: "/api/v1/internal-correspondences/:id/read",
   DELETE_INTERNAL: "/api/v1/internal-correspondences/:id",
   RESTORE_INTERNAL: "/api/v1/internal-correspondences/:id/restore",
+  GET_INTERNAL_STRUCTURE: "/api/v1/internal-correspondences/:id/structure",
 
   // Recipients
   GET_INTERNAL_RECIPIENTS_USERS:
@@ -168,6 +169,8 @@ export const ApiRoutes = {
     "/api/v1/internal-correspondences/:id/signatures/payload",
   INTERNAL_SIGNATURES_CONFIRM:
     "/api/v1/internal-correspondences/:id/signatures/confirm",
+  INTERNAL_SIGNATURES_CANCEL:
+    "/api/v1/internal-correspondences/:id/signatures/cancel",
   INTERNAL_APPROVALS_CONFIRM:
     "/api/v1/internal-correspondences/approvals/:id/status",
 

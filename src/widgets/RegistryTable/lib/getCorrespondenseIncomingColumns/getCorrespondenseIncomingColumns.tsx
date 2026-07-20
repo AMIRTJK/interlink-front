@@ -16,6 +16,7 @@ import folderIcon from "../../../../assets/icons/folder-icon.svg";
 import trashIcon from "../../../../assets/icons/trash-icon.svg";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
+import { CORRESPONDENCE_INVALIDATE_KEYS } from "@shared/config";
 
 export const useCorrespondenseIncomingColumns = (
   type?: string,
@@ -23,15 +24,11 @@ export const useCorrespondenseIncomingColumns = (
 ): TableColumnsType => {
   const isInternal = type?.includes("internal");
 
-  // Archive mutation
   const { mutate: archiveCorrespondence } = useMutationQuery<{
     id: number;
     is_archived: boolean;
   }>({
     url: (data) =>
-      // TODO: Check if Internal has specific Archive endpoint or if it shares logic
-      // For now assuming internal might generally use DELETE or specific route
-      // Defaulting to standard Archive for non-internal or if internal shares it
       ApiRoutes.ARCHIVE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "PATCH",
     preload: true,
@@ -41,13 +38,7 @@ export const useCorrespondenseIncomingColumns = (
       "correspondence.delete",
     ],
     messages: {
-      invalidate: [
-        ApiRoutes.GET_CORRESPONDENCES,
-        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
-        ApiRoutes.GET_INTERNAL_INCOMING,
-        ApiRoutes.GET_INTERNAL_OUTGOING,
-        ApiRoutes.GET_INTERNAL_COUNTERS,
-      ],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 
@@ -58,18 +49,10 @@ export const useCorrespondenseIncomingColumns = (
         : ApiRoutes.RESTORE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "POST",
     messages: {
-      invalidate: [
-        ApiRoutes.GET_CORRESPONDENCES,
-        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
-        ApiRoutes.GET_INTERNAL_INCOMING,
-        ApiRoutes.GET_INTERNAL_OUTGOING,
-        ApiRoutes.GET_INTERNAL_COUNTERS,
-        ApiRoutes.GET_INTERNAL_TRASH,
-      ],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 
-  // Pin mutation
   const { mutate: pinCorrespondence } = useMutationQuery<{
     id: number;
     is_pinned: boolean;
@@ -77,19 +60,10 @@ export const useCorrespondenseIncomingColumns = (
     url: (data) => ApiRoutes.PIN_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "PATCH",
     messages: {
-      invalidate: [
-        ApiRoutes.GET_CORRESPONDENCES,
-        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
-        ApiRoutes.GET_INTERNAL_INCOMING,
-        ApiRoutes.GET_INTERNAL_OUTGOING,
-        ApiRoutes.GET_INTERNAL_COUNTERS,
-      ],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 
-
-
-  // Delete mutation
   const { mutate: deleteCorrespondence } = useMutationQuery<{ id: number }>({
     url: (data) =>
       isInternal
@@ -97,13 +71,7 @@ export const useCorrespondenseIncomingColumns = (
         : ApiRoutes.DELETE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "DELETE",
     messages: {
-      invalidate: [
-        ApiRoutes.GET_CORRESPONDENCES,
-        ApiRoutes.GET_COUNTERS_CORRESPONDENCE,
-        ApiRoutes.GET_INTERNAL_INCOMING,
-        ApiRoutes.GET_INTERNAL_OUTGOING,
-        ApiRoutes.GET_INTERNAL_COUNTERS,
-      ],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 
