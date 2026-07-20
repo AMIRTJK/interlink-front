@@ -82,7 +82,11 @@ export const TaskRegistry = () => {
   const handleCreate = async (payloads: TaskPayload[], files?: File[]) => {
     for (const payload of payloads) {
       const created = await createTask(payload);
-      const createdId = created?.id;
+      const createdId =
+        created?.id ??
+        created?.item?.id ??
+        created?.data?.id ??
+        created?.data?.item?.id;
       if (files && files.length > 0 && createdId) {
         await uploadAttachments(createdId, files);
       }
