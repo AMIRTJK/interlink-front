@@ -11,7 +11,8 @@ import {
   Undo2,
 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
-import { useMutationQuery } from "@shared/lib"; // Ваши хуки
+import { useMutationQuery } from "@shared/lib";
+import { CORRESPONDENCE_INVALIDATE_KEYS } from "@shared/config";
 import { RegistryConfig } from "../types";
 import { getIncomingFilters } from "../filters.config";
 import { RecipientsViewer } from "@widgets/NewRegistry/ui";
@@ -19,15 +20,13 @@ import { RecipientsViewer } from "@widgets/NewRegistry/ui";
 export const useIncomingConfig = (type: string): RegistryConfig => {
   const isInternal = type.includes("internal");
 
-  // --- MUTATIONS (Логика из вашего примера) ---
-
   const { mutate: archiveCorrespondence } = useMutationQuery({
     url: (data) =>
       ApiRoutes.ARCHIVE_CORRESPONDENCE.replace(":id", String(data.id)),
     method: "PATCH",
     messages: {
       success: "Архивировано",
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 
@@ -39,7 +38,7 @@ export const useIncomingConfig = (type: string): RegistryConfig => {
     method: "POST",
     messages: {
       success: "Восстановлено",
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 
@@ -48,7 +47,7 @@ export const useIncomingConfig = (type: string): RegistryConfig => {
     method: "PATCH",
     messages: {
       success: "Закреплено",
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 
@@ -60,7 +59,7 @@ export const useIncomingConfig = (type: string): RegistryConfig => {
     method: "DELETE",
     messages: {
       success: "Удалено",
-      invalidate: [ApiRoutes.GET_CORRESPONDENCES],
+      invalidate: CORRESPONDENCE_INVALIDATE_KEYS,
     },
   });
 
