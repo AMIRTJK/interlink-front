@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, X } from "lucide-react";
+import { AlertTriangle, Loader2, X } from "lucide-react";
 import { IAdminUser, IPassportOcrData, IPassportOcrResponse } from "@entities/hr";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery, tokenControl } from "@shared/lib";
@@ -336,6 +336,16 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
 
           {/* Шаг 2 — отдельное окно «Новый сотрудник» (форма без блока паспорта) */}
           <If is={formVisible}>
+            <If is={!isEdit}>
+              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/50 text-amber-900 dark:text-amber-200 text-xs leading-relaxed">
+                <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-semibold block mb-0.5">Внимание!</span>
+                  OCR-сканирование паспорта не гарантирует 100% точность автозаполнения. Перед созданием сотрудника обязательно проверьте и скорректируйте распознанные данные.
+                </div>
+              </div>
+            </If>
+
             <If is={!isEdit && canProceed}>
               <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-800">
                 <span className="text-xs font-semibold text-gray-500 dark:text-slate-400 mr-1">Паспорт:</span>
