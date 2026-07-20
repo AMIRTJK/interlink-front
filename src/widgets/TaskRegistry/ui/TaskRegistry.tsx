@@ -79,15 +79,26 @@ export const TaskRegistry = () => {
     setPage(1);
   };
 
-  const handleCreate = async (payloads: TaskPayload[]) => {
+  const handleCreate = async (payloads: TaskPayload[], files?: File[]) => {
     for (const payload of payloads) {
-      await createTask(payload);
+      const created = await createTask(payload);
+      const createdId =
+        created?.id ??
+        created?.item?.id ??
+        created?.data?.id ??
+        created?.data?.item?.id;
+      if (files && files.length > 0 && createdId) {
+        await uploadAttachments(createdId, files);
+      }
     }
     setView("list");
   };
 
-  const handleUpdate = async (id: number, payload: TaskPayload) => {
+  const handleUpdate = async (id: number, payload: TaskPayload, files?: File[]) => {
     await updateTask(id, payload);
+    if (files && files.length > 0) {
+      await uploadAttachments(id, files);
+    }
     setEditingTask(null);
     setView("list");
   };
@@ -165,6 +176,8 @@ export const TaskRegistry = () => {
             onBack={leaveCreate}
             onCreate={handleCreate}
             onUpdate={handleUpdate}
+            onDownloadAttachment={downloadAttachment}
+            onDeleteAttachment={handleDeleteAttachment}
           />
         )}
       </AnimatePresence>

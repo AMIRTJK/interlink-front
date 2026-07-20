@@ -10,9 +10,15 @@ import {
   CheckCircle2,
   Trash2,
   Pen,
+  Upload,
+  Download,
+  Paperclip,
+  FileIcon,
 } from "lucide-react";
 import { cn } from "@shared/lib";
+import { If } from "@shared/ui";
 import type {
+  Attachment,
   BatchRow,
   Colleague,
   Priority,
@@ -29,12 +35,18 @@ import { Avatar } from "./Avatar";
 interface CreateTaskViewProps {
   colleagues: Colleague[];
   onBack: () => void;
-  /** Создаёт одну или несколько задач через API. */
-  onCreate: (payloads: TaskPayload[]) => Promise<void>;
-  /** Редактируемая задача (режим PUT). Если задана — форма работает на обновление. */
+  onCreate: (payloads: TaskPayload[], files?: File[]) => Promise<void>;
   editTask?: Task | null;
-  /** Обновляет существующую задачу через API. */
-  onUpdate?: (id: number, payload: TaskPayload) => Promise<void>;
+  onUpdate?: (id: number, payload: TaskPayload, files?: File[]) => Promise<void>;
+  onDownloadAttachment?: (
+    taskId: number,
+    attachmentId: number,
+    fileName: string,
+  ) => Promise<void> | void;
+  onDeleteAttachment?: (
+    taskId: number,
+    attachmentId: number,
+  ) => Promise<void> | void;
 }
 
 const toDateInput = (iso: string): string => {
@@ -51,12 +63,20 @@ export const CreateTaskView = ({
   onCreate,
   editTask,
   onUpdate,
+  onDownloadAttachment,
+  onDeleteAttachment,
 }: CreateTaskViewProps) => {
   const firstId = colleagues[0]?.id ?? "";
   const isEdit = Boolean(editTask);
   const [isSaving, setIsSaving] = React.useState(false);
 
-  // --- Personal form state ---
+  const [newFiles, setNewFiles] = React.useState<File[]>([]);
+  const [attachments, setAttachments] = React.useState<Attachment[]>(
+    editTask?.attachments ?? [],
+  );
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
   const [formTitle, setFormTitle] = React.useState(editTask?.title ?? "");
   const [formDescription, setFormDescription] = React.useState(
     editTask?.description ?? "",
@@ -130,9 +150,9 @@ export const CreateTaskView = ({
     setIsSaving(true);
     try {
       if (isEdit && editTask?.rawId != null && onUpdate) {
-        await onUpdate(editTask.rawId, payload);
+        await onUpdate(editTask.rawId, payload, newFiles);
       } else {
-        await onCreate([payload]);
+        await onCreate([payload], newFiles);
       }
     } finally {
       setIsSaving(false);
@@ -406,6 +426,123 @@ export const CreateTaskView = ({
                   className="w-full px-4 py-3 bg-white/60 dark:bg-slate-800/60 border border-white/30 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-slate-800 outline-none transition-all font-medium text-slate-700 dark:text-slate-100"
                   placeholder="Backend, API, High Priority"
                 />
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between border-t border-white/20 dark:border-white/10 pt-4">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    Вложения
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                  >
+                    <Upload size={13} />
+                    Выбрать файлы
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      e.target.value = "";
+                      if (files.length) {
+                        setNewFiles((prev) => [...prev, ...files]);
+                      }
+                    }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <If is={attachments.length > 0 || newFiles.length > 0}>
+                    {attachments.map((file) => (
+                      <div
+                        key={file.id}
+                        className="group flex items-center gap-3 p-3 bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 rounded-xl hover:border-emerald-300 transition-colors"
+                      >
+                        <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-600">
+                          <FileIcon size={20} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                            {file.name}
+                          </p>
+                          <p className="text-[10px] text-slate-400">{file.size}</p>
+                        </div>
+                        <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (editTask?.rawId != null && file.rawId != null) {
+                                onDownloadAttachment?.(editTask.rawId, file.rawId, file.name);
+                              }
+                            }}
+                            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all text-slate-400 hover:text-emerald-600"
+                          >
+                            <Download size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (editTask?.rawId != null && file.rawId != null) {
+                                await onDeleteAttachment?.(editTask.rawId, file.rawId);
+                                setAttachments((prev) => prev.filter((a) => a.id !== file.id));
+                              }
+                            }}
+                            className="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all text-slate-400 hover:text-rose-600"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    {newFiles.map((file, index) => (
+                      <div
+                        key={`new-${index}-${file.name}`}
+                        className="group flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-850/40 border border-white/20 dark:border-white/5 rounded-xl hover:border-emerald-300 transition-colors"
+                      >
+                        <div className="w-10 h-10 bg-amber-50 dark:bg-amber-900/30 rounded-lg flex items-center justify-center text-amber-600">
+                          <FileIcon size={20} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                            {file.name}
+                          </p>
+                          <p className="text-[10px] text-slate-400">
+                            {(file.size / 1024).toFixed(0)} KB
+                          </p>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-[9px] font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded mr-1">
+                            Очередь
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setNewFiles((prev) => prev.filter((_, i) => i !== index));
+                            }}
+                            className="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all text-slate-400 hover:text-rose-600"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </If>
+
+                  <If is={attachments.length === 0 && newFiles.length === 0}>
+                    <div className="col-span-2 py-8 text-center border-2 border-dashed border-slate-100 dark:border-white/10 rounded-2xl">
+                      <Paperclip className="mx-auto text-slate-300 mb-2" size={24} />
+                      <p className="text-sm text-slate-400 font-medium">
+                        Нет прикрепленных файлов
+                      </p>
+                    </div>
+                  </If>
+                </div>
               </div>
             </div>
 
