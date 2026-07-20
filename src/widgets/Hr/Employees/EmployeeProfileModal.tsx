@@ -96,7 +96,7 @@ export const EmployeeProfileModal = ({
 				exit={{ y: "100%" }}
 				transition={{ type: "spring", stiffness: 360, damping: 36 }}
 				onClick={(ev) => ev.stopPropagation()}
-				className="relative w-full max-w-3xl bg-white border-t border-gray-100 shadow-2xl flex flex-col z-50 rounded-t-3xl h-[90vh]"
+				className="relative w-full max-w-6xl bg-white border-t border-gray-100 shadow-2xl flex flex-col z-50 rounded-t-3xl h-[90vh]"
 			>
 				<div className="flex justify-center pt-3 pb-1 shrink-0">
 					<div className="w-10 h-1 rounded-full bg-gray-300" />
