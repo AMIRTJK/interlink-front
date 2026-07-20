@@ -8,6 +8,7 @@ export { OrgStructureModal } from "./OrgStructureModal";
 export { DSStampAppendix } from "./DSStampAppendix";
 export { PreviewModal } from "./PreviewModal";
 export { DocumentDrawer } from "./DocumentDrawer";
+export { DeclineReasonModal } from "./DeclineReasonModal";
 export { CreateInternalCorrespondence } from "./CreateInternalCorrespondence";
 
 export type {

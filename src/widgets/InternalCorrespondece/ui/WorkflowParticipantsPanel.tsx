@@ -177,6 +177,7 @@ const FullHistoryModal = ({
     const map: Record<string, any> = {
       signed: { color: "success", text: "Подписано" },
       approved: { color: "success", text: "Согласовано" },
+      declined: { color: "error", text: "Отклонил право подписи" },
       rejected: { color: "error", text: "Отказано" },
       pending: { color: "default", text: "Ожидание" },
       created: { color: "blue", text: "Автор" },
@@ -784,10 +785,12 @@ export const WorkflowParticipantsPanel = ({
           bgList: isDarkMode ? "bg-[#00c9501a]" : "bg-[#00c95026]",
           icon: <CheckCircleFilled className="text-green-500!" />,
         };
+      case "declined":
       case "rejected":
         return {
           color: "text-red-500",
           bg: isDarkMode ? "bg-[#111827]" : "bg-white",
+          bgList: isDarkMode ? "bg-[#ff4d4f1a]" : "bg-[#ff4d4f26]",
           icon: <CloseCircleFilled className="text-red-500!" />,
         };
       default:
@@ -922,6 +925,17 @@ export const WorkflowParticipantsPanel = ({
           >
             {position}
           </div>
+
+          <If is={status === "declined"}>
+            <div className="text-xs text-red-500 font-semibold mt-1">
+              Отклонил право подписи
+              <If is={Boolean(item.decline_reason || item.reason)}>
+                <span className="block text-[11px] text-red-400 font-normal italic mt-0.5">
+                  Причина: {item.decline_reason || item.reason}
+                </span>
+              </If>
+            </div>
+          </If>
 
           <div className="mt-2">
             {role === "signer" && isCurrentUser && isPending && (

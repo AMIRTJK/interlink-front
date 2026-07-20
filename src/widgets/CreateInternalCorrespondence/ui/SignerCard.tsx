@@ -67,27 +67,42 @@ export const SignerCard = ({
     <div
       className={cn(
         "rounded-xl border transition-all flex flex-col overflow-hidden",
-        signer.dsApplied
-          ? "border-emerald-100 bg-emerald-50/40"
-          : "border-slate-100 bg-slate-50/40"
+        signer.dsDeclined
+          ? "border-red-200 bg-red-50/40"
+          : signer.dsApplied
+            ? "border-emerald-100 bg-emerald-50/40"
+            : "border-slate-100 bg-slate-50/40"
       )}
     >
-      <div className="flex items-center gap-2.5 px-3 py-2.5">
+      <div className="flex items-start gap-2.5 px-3 py-2.5">
         <div
           className={cn(
-            "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0",
+            "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5",
             signer.color
           )}
         >
           {signer.initials}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-slate-900 break-words">
+          <p className="text-xs font-semibold text-slate-900 leading-snug">
             {signer.name}
           </p>
-          <p className="text-[10px] text-slate-500 break-words">
+          <p className="text-[10px] text-slate-500 mt-0.5">
             {signer.role}
           </p>
+          <If is={!!signer.isInvited && signer.dsDeclined}>
+            <div className="inline-flex items-center gap-1 px-2 py-0.5 mt-1.5 bg-red-50 border border-red-100 rounded-full">
+              <X size={10} className="text-red-500 shrink-0" />
+              <span className="text-[10px] font-semibold text-red-600">
+                Отклонил право подписи
+              </span>
+            </div>
+            <If is={Boolean(signer.declineReason)}>
+              <p className="text-[10px] text-red-500 italic mt-1">
+                Причина: {signer.declineReason}
+              </p>
+            </If>
+          </If>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
           <If is={!signer.isInvited && !!docId}>
@@ -116,7 +131,7 @@ export const SignerCard = ({
               <Check size={10} className="text-emerald-500" />
             </div>
           </If>
-          <If is={!!signer.isInvited && !signer.dsApplied}>
+          <If is={!!signer.isInvited && !signer.dsApplied && !signer.dsDeclined}>
             <button
               onClick={() => setShowSignConfirm(true)}
               disabled={signer.dsLoading || !isActiveVersionForSign}

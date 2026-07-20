@@ -121,6 +121,21 @@ export const getEventMeta = (event: ITimelineEvent) => {
     };
   }
 
+  if (
+    type === "signature_declined" ||
+    action === "declined" ||
+    event.data?.status === "declined"
+  ) {
+    return {
+      icon: X,
+      ring: "bg-rose-100 dark:bg-rose-900/40",
+      iconColor: "text-rose-500",
+      badge: "bg-rose-100 dark:bg-rose-900/40 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300",
+      title: "Подпись отклонена",
+      badgeText: "Отклонено",
+    };
+  }
+
   if (type === "document_sent" || action === "sent") {
     return {
       icon: Send,

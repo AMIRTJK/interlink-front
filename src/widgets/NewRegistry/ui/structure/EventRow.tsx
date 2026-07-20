@@ -15,7 +15,7 @@ export const EventRow: React.FC<IEventRowProps> = ({ event, isLast }) => {
   const Icon = meta.icon;
   const actorName = event.actor?.full_name || "Система";
   const initials = event.actor ? getInitials(actorName) : "С";
-  const note = event.data?.note || event.data?.subject;
+  const note = event.data?.decline_reason || event.data?.reason || event.data?.note || event.data?.subject;
 
   return (
     <motion.div

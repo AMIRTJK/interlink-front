@@ -89,6 +89,8 @@ export interface FinalSigner {
   color: string;
   dsApplied: boolean;
   dsLoading: boolean;
+  dsDeclined?: boolean;
+  declineReason?: string;
 }
 
 export interface OrgStructureNode {

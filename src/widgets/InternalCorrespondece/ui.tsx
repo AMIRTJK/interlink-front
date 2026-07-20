@@ -7,6 +7,7 @@ import {
   useModalState,
   useMutationQuery,
 } from "@shared/lib";
+import { CORRESPONDENCE_INVALIDATE_KEYS } from "@shared/config";
 import { ActionToolbar, If, ISearchItem } from "@shared/ui";
 import { DrawerActionsModal } from "@widgets/DrawerActionsModal";
 import { TopNavigation } from "./ui/TopNavigation";
@@ -151,6 +152,7 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         invalidate: [
           ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", String(id || "")),
           ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
+          ...CORRESPONDENCE_INVALIDATE_KEYS,
         ],
       },
       preload: true,

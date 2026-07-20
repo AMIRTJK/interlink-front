@@ -56,10 +56,12 @@ import {
 } from "lucide-react";
 import { useGetQuery, useMutationQuery, buildFormData, toast, tokenControl } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { CORRESPONDENCE_INVALIDATE_KEYS } from "@shared/config";
 import { If } from "@shared/ui";
 import { message } from "antd";
 import { ConfirmationModal } from "./ConfirmationModal";
 import { RecipientSelectModal } from "./RecipientSelectModal";
+import { DeclineReasonModal } from "./DeclineReasonModal";
 import type {
   // Status,
   ImportanceLevel,
@@ -1421,8 +1423,34 @@ export const CreateInternalCorrespondence = ({
   const isCurrentSigner = pendingSignature && currentUserId && String(currentUserId) === String(pendingSignature.user_id || pendingSignature.user?.id);
   const canDecline = !!pendingSignature && !!isCurrentSigner;
 
+  const [showDeclineModal, setShowDeclineModal] = useState(false);
+  const [isDeclining, setIsDeclining] = useState(false);
+
   const handleDeclineClick = () => {
-    toast.info("Функциональность отклонения станет доступна после реализации API на стороне бэкенда");
+    setShowDeclineModal(true);
+  };
+
+  const handleConfirmDecline = async (reasonText: string) => {
+    setIsDeclining(true);
+    try {
+      const payloadData = await signaturesPayloadAsync({ action: "sign" });
+      if (payloadData?.signature_id && payloadData?.nonce) {
+        signaturesConfirm({
+          signature_id: payloadData.signature_id,
+          nonce: payloadData.nonce,
+          status: "declined",
+          reason: reasonText,
+          method: "simple",
+        });
+        setShowDeclineModal(false);
+      } else {
+        toast.error("Не удалось получить параметры для отклонения");
+      }
+    } catch (error: any) {
+      toast.error(error?.message || "Ошибка при отклонении документа");
+    } finally {
+      setIsDeclining(false);
+    }
   };
 
   const assignSelfAsSigner = () => {
@@ -1458,13 +1486,19 @@ export const CreateInternalCorrespondence = ({
     ),
     method: "POST",
     messages: {
-      success: "Документ успешно подписан",
       invalidate: [
         ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+        ...CORRESPONDENCE_INVALIDATE_KEYS,
       ],
     },
     queryOptions: {
-      onSuccess: () => {
+      onSuccess: (_data, variables) => {
+        if (variables?.status === "declined") {
+          toast.success("Документ успешно отклонен");
+          return;
+        }
+
+        toast.success("Документ успешно подписан");
         setFinalSigner((prev) =>
           prev ? { ...prev, dsApplied: true, dsLoading: false } : null,
         );
@@ -1867,6 +1901,7 @@ export const CreateInternalCorrespondence = ({
       if (item.signatures && item.signatures.length > 0) {
         const s = item.signatures[0];
         const isCurrentlySigned = s.status === "signed";
+        const isCurrentlyDeclined = s.status === "declined";
         setFinalSigner({
           id: String(s.user.id),
           isInvited: true,
@@ -1879,9 +1914,10 @@ export const CreateInternalCorrespondence = ({
             .join(""),
           color: "bg-purple-100 text-purple-700",
           dsApplied: isCurrentlySigned,
+          dsDeclined: isCurrentlyDeclined,
+          declineReason: s.decline_reason || s.reason,
           dsLoading: false,
         });
-        // Убираем ручное отображение плавающего React-компонента если подписано
         if (isCurrentlySigned) {
           setStampVisible(false);
         }
@@ -1990,6 +2026,7 @@ export const CreateInternalCorrespondence = ({
         const wfS = wfSignatures[0];
         const user = wfS.user;
         const isCurrentlySigned = wfS.status === "signed";
+        const isCurrentlyDeclined = wfS.status === "declined";
         if (user) {
           setFinalSigner({
             id: String(user.id),
@@ -2003,6 +2040,8 @@ export const CreateInternalCorrespondence = ({
               .join(""),
             color: "bg-purple-100 text-purple-700",
             dsApplied: isCurrentlySigned,
+            dsDeclined: isCurrentlyDeclined,
+            declineReason: wfS.decline_reason || wfS.reason,
             dsLoading: false,
           });
           if (isCurrentlySigned) {
@@ -5371,6 +5410,12 @@ export const CreateInternalCorrespondence = ({
           unavailableNotice={CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE}
         />
       </If>
+      <DeclineReasonModal
+        isOpen={showDeclineModal}
+        onClose={() => setShowDeclineModal(false)}
+        onConfirm={handleConfirmDecline}
+        isLoading={isDeclining}
+      />
     </div>
   );
 };
