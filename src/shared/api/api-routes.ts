@@ -169,6 +169,8 @@ export const ApiRoutes = {
     "/api/v1/internal-correspondences/:id/signatures/payload",
   INTERNAL_SIGNATURES_CONFIRM:
     "/api/v1/internal-correspondences/:id/signatures/confirm",
+  INTERNAL_SIGNATURES_CANCEL:
+    "/api/v1/internal-correspondences/:id/signatures/cancel",
   INTERNAL_APPROVALS_CONFIRM:
     "/api/v1/internal-correspondences/approvals/:id/status",
 

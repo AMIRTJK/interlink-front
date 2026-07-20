@@ -9,6 +9,7 @@ import {
   FileCheck,
   UserPlus,
   Send,
+  Undo,
 } from "lucide-react";
 import { ITimelineEvent, IGroupedStructureLetters } from "./types";
 
@@ -133,6 +134,21 @@ export const getEventMeta = (event: ITimelineEvent) => {
       badge: "bg-rose-100 dark:bg-rose-900/40 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300",
       title: "Подпись отклонена",
       badgeText: "Отклонено",
+    };
+  }
+
+  if (
+    type === "signature_revoked" ||
+    action === "revoked" ||
+    event.data?.status === "revoked"
+  ) {
+    return {
+      icon: Undo,
+      ring: "bg-amber-100 dark:bg-amber-900/40",
+      iconColor: "text-amber-500",
+      badge: "bg-amber-100 dark:bg-amber-900/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300",
+      title: "Подпись отменена",
+      badgeText: "Отменено",
     };
   }
 

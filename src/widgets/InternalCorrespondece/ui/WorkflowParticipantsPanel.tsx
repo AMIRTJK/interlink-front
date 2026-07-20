@@ -1171,10 +1171,16 @@ export const WorkflowParticipantsPanel = ({
                                   <CheckCircleFilled className="text-green-500! text-[12px]!" />
                                 </Tooltip>
                               )}
-                              {v.is_current_signed && (
-                                <Tooltip title="Подписанная версия">
-                                  <SafetyCertificateOutlined className="text-blue-500! text-[13px]!" />
+                              {v.signature_state === "revoked" ? (
+                                <Tooltip title="Подпись отменена">
+                                  <CloseCircleFilled className="text-red-500! text-[13px]!" />
                                 </Tooltip>
+                              ) : (
+                                v.is_current_signed && (
+                                  <Tooltip title="Подписанная версия">
+                                    <SafetyCertificateOutlined className="text-blue-500! text-[13px]!" />
+                                  </Tooltip>
+                                )
                               )}
                             </div>
                             <Tooltip title={author.full_name || "Неизвестный автор"}>
