@@ -378,9 +378,7 @@ export const FilePreviewModal = ({
 
 	const handleDownload = async () => {
 		try {
-			// Прямые ссылки (blob:/data: и публичная статика /storage/… без CORS)
-			// скачиваем обычной ссылкой — XHR по ним упрётся в CORS. Через _axios тянем
-			// только защищённые /api/…-маршруты: им нужен Bearer-токен, и CORS настроен.
+			const downloadUrl = file.download_url || "";
 			if (canRenderDirectly(downloadUrl)) {
 				const isInline =
 					downloadUrl.startsWith("blob:") || downloadUrl.startsWith("data:");
@@ -388,8 +386,6 @@ export const FilePreviewModal = ({
 				link.href = downloadUrl;
 				link.download = file.original_name;
 				if (!isInline) {
-					// Чужой origin (в деве localhost → IP бэкенда) — браузер игнорирует
-					// download и открыл бы файл в текущей вкладке; уводим в новую.
 					link.target = "_blank";
 					link.rel = "noopener";
 				}
