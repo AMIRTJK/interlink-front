@@ -132,6 +132,7 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
             in_review: "На рассмотрении",
             on_approval: "На согласовании",
             revoked: "Отозвано",
+            author: "Автор",
           };
 
           return statusMap[rawStatus] || rawStatus;
