@@ -29,12 +29,31 @@ const axisTick = { fontSize: 11, fill: "#9ca3af" } as const;
 
 const pieColors = ["#6366f1", "#8b5cf6", "#38bdf8", "#a8a29e", "#a78bfa"];
 
-const formatMonthLabel = (mStr: string): string => {
+const formatMonthLabel = (mStr?: string): string => {
+	if (!mStr || typeof mStr !== "string") {
+		return "";
+	}
+
 	const parts = mStr.split("-");
 	if (parts.length === 2) {
 		const monthIdx = parseInt(parts[1], 10) - 1;
-		const months = ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"];
-		return months[monthIdx] ? `${months[monthIdx]} '${parts[0].slice(2)}` : mStr;
+		const months = [
+			"Янв",
+			"Фев",
+			"Мар",
+			"Апр",
+			"Май",
+			"Июн",
+			"Июл",
+			"Авг",
+			"Сен",
+			"Окт",
+			"Ноя",
+			"Дек",
+		];
+		return months[monthIdx]
+			? `${months[monthIdx]} '${parts[0].slice(-2)}`
+			: mStr;
 	}
 	return mStr;
 };
@@ -67,7 +86,9 @@ export const FilesVolumeChart = ({ uploadActivity = [] }: IProps) => {
 				<h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200 mb-4">
 					Динамика загрузок
 				</h3>
-				<span className="text-xs text-slate-400">Нет данных для отображения</span>
+				<span className="text-xs text-slate-400">
+					Нет данных для отображения
+				</span>
 			</motion.div>
 		);
 	}
@@ -76,11 +97,23 @@ export const FilesVolumeChart = ({ uploadActivity = [] }: IProps) => {
 
 	if (chartType === "line") {
 		chartElement = (
-			<LineChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
-				<XAxis dataKey="name" axisLine={false} tickLine={false} tick={axisTick} />
+			<LineChart
+				data={chartData}
+				margin={{ top: 4, right: 4, left: 0, bottom: 4 }}
+			>
+				<XAxis
+					dataKey="name"
+					axisLine={false}
+					tickLine={false}
+					tick={axisTick}
+				/>
 				<YAxis axisLine={false} tickLine={false} tick={axisTick} width={30} />
 				<RechartsTooltip
-					formatter={(v: number | undefined, name: string | undefined, props: any) => [
+					formatter={(
+						v: number | undefined,
+						name: string | undefined,
+						props: any,
+					) => [
 						`${props.payload.sizeHuman} (${props.payload.count} файлов)`,
 						"Объем",
 					]}
@@ -97,17 +130,29 @@ export const FilesVolumeChart = ({ uploadActivity = [] }: IProps) => {
 		);
 	} else if (chartType === "area") {
 		chartElement = (
-			<AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
+			<AreaChart
+				data={chartData}
+				margin={{ top: 4, right: 4, left: 0, bottom: 4 }}
+			>
 				<defs>
 					<linearGradient id="filesVolumeAreaGrad" x1="0" y1="0" x2="0" y2="1">
 						<stop offset="5%" stopColor="#6366f1" stopOpacity={0.35} />
 						<stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
 					</linearGradient>
 				</defs>
-				<XAxis dataKey="name" axisLine={false} tickLine={false} tick={axisTick} />
+				<XAxis
+					dataKey="name"
+					axisLine={false}
+					tickLine={false}
+					tick={axisTick}
+				/>
 				<YAxis axisLine={false} tickLine={false} tick={axisTick} width={30} />
 				<RechartsTooltip
-					formatter={(v: number | undefined, name: string | undefined, props: any) => [
+					formatter={(
+						v: number | undefined,
+						name: string | undefined,
+						props: any,
+					) => [
 						`${props.payload.sizeHuman} (${props.payload.count} файлов)`,
 						"Объем",
 					]}
@@ -142,7 +187,11 @@ export const FilesVolumeChart = ({ uploadActivity = [] }: IProps) => {
 					))}
 				</Pie>
 				<RechartsTooltip
-					formatter={(v: number | undefined, n: string | undefined, props: any) => [
+					formatter={(
+						v: number | undefined,
+						n: string | undefined,
+						props: any,
+					) => [
 						`${props.payload.sizeHuman} (${props.payload.count} файлов)`,
 						n || "",
 					]}
@@ -163,16 +212,15 @@ export const FilesVolumeChart = ({ uploadActivity = [] }: IProps) => {
 					tickLine={false}
 					tick={axisTick}
 				/>
-				<YAxis
-					axisLine={false}
-					tickLine={false}
-					tick={axisTick}
-					width={30}
-				/>
+				<YAxis axisLine={false} tickLine={false} tick={axisTick} width={30} />
 				<RechartsTooltip
 					cursor={{ fill: "rgba(0,0,0,0.04)" }}
 					contentStyle={tooltipStyle}
-					formatter={(v: number | undefined, name: string | undefined, props: any) => [
+					formatter={(
+						v: number | undefined,
+						name: string | undefined,
+						props: any,
+					) => [
 						`${props.payload.sizeHuman} (${props.payload.count} файлов)`,
 						"Объем",
 					]}
@@ -211,3 +259,4 @@ export const FilesVolumeChart = ({ uploadActivity = [] }: IProps) => {
 		</motion.div>
 	);
 };
+

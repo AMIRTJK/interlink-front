@@ -7,12 +7,9 @@ import {
 	Image as ImageIcon,
 	Video,
 	Presentation,
-	Download,
-	Eye
 } from "lucide-react";
 import { IApiFile, getFileType, formatBytes } from "./lib";
-import { Tooltip, If } from "@shared/ui";
-import { _axios } from "@shared/api";
+import { If } from "@shared/ui";
 
 const getIconConfig = (ext: string) => {
 	const type = getFileType(ext);
@@ -43,27 +40,9 @@ const formatDate = (dateStr: string) => {
 
 interface IProps {
 	largestFiles?: IApiFile[];
-	onView: (file: IApiFile) => void;
 }
 
-export const FilesLargestList = ({ largestFiles = [], onView }: IProps) => {
-	const handleDownload = async (file: IApiFile) => {
-		try {
-			const response = await _axios.get(file.download_url, { responseType: "blob" });
-			const blob = new Blob([response.data], { type: response.headers["content-type"] });
-			const url = window.URL.createObjectURL(blob);
-			const link = document.createElement("a");
-			link.href = url;
-			link.download = file.original_name;
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-			window.URL.revokeObjectURL(url);
-		} catch (error) {
-			console.error(error);
-		}
-	};
-
+export const FilesLargestList = ({ largestFiles = [] }: IProps) => {
 	if (largestFiles.length === 0) {
 		return (
 			<motion.div
@@ -104,10 +83,7 @@ export const FilesLargestList = ({ largestFiles = [], onView }: IProps) => {
 									<Icon size={16} />
 								</div>
 								<div className="min-w-0 flex-1">
-									<div
-										onClick={() => onView(file)}
-										className="text-[11px] font-bold text-slate-700 dark:text-zinc-200 truncate hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
-									>
+									<div className="text-[11px] font-bold text-slate-700 dark:text-zinc-200 truncate">
 										{file.original_name}
 									</div>
 									<div className="flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-zinc-500 truncate mt-0.5">
@@ -126,26 +102,6 @@ export const FilesLargestList = ({ largestFiles = [], onView }: IProps) => {
 										</If>
 									</div>
 								</div>
-							</div>
-							<div className="flex items-center gap-1.5 ml-2">
-								<Tooltip title="Просмотр">
-									<button
-										type="button"
-										onClick={() => onView(file)}
-										className="p-1.5 text-slate-400 hover:text-slate-650 dark:hover:text-zinc-250 hover:bg-slate-200/40 dark:hover:bg-slate-700/40 rounded-lg transition-colors cursor-pointer"
-									>
-										<Eye size={13} />
-									</button>
-								</Tooltip>
-								<Tooltip title="Скачать">
-									<button
-										type="button"
-										onClick={() => handleDownload(file)}
-										className="p-1.5 text-slate-400 hover:text-slate-650 dark:hover:text-zinc-250 hover:bg-slate-200/40 dark:hover:bg-slate-700/40 rounded-lg transition-colors cursor-pointer"
-									>
-										<Download size={13} />
-									</button>
-								</Tooltip>
 							</div>
 						</div>
 					);
