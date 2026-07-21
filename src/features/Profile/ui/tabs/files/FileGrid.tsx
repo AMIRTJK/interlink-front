@@ -1,5 +1,5 @@
 import React from "react";
-import { Pin, Trash2, Archive, FileText, FileSpreadsheet, Eye, Share2, Download, Folder, Check, Image as ImageIcon, Video, Presentation } from "lucide-react";
+import { Pin, Trash2, Archive, FileText, FileSpreadsheet, Eye, Share2, Download, Folder, Check, Image as ImageIcon, Video, Presentation, GripVertical } from "lucide-react";
 import { IApiFile, getFileType, formatBytes } from "./lib";
 import { Tooltip, If } from "@shared/ui";
 import { _axios } from "@shared/api";
@@ -15,6 +15,7 @@ interface IProps {
   selectedFileIds?: number[];
   onToggleSelectFile?: (id: number) => void;
   showSelection?: boolean;
+  onReorderFiles?: (fileIds: number[]) => void;
 }
 
 const COVER_STYLES: Record<string, { bg: string; icon: React.ComponentType<any> }> = {
@@ -36,7 +37,40 @@ export const FileGrid = ({
   selectedFileIds = [],
   onToggleSelectFile,
   showSelection = false,
+  onReorderFiles,
 }: IProps) => {
+  const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = React.useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(index));
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) return;
+
+    const updated = [...files];
+    const [moved] = updated.splice(draggedIndex, 1);
+    updated.splice(targetIndex, 0, moved);
+
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+
+    if (onReorderFiles) {
+      onReorderFiles(updated.map((f) => f.id));
+    }
+  };
   const getCoverContent = (file: IApiFile) => {
     const fileType = getFileType(file.extension);
     const isMarkdown = file.original_name.endsWith(".md");
@@ -77,12 +111,29 @@ export const FileGrid = ({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {files.map((file) => {
+      {files.map((file, index) => {
         const isSelected = selectedFileIds.includes(file.id);
+        const isDragging = draggedIndex === index;
+        const isOver = dragOverIndex === index;
+
         return (
           <div
             key={file.id}
-            className="group bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600 overflow-hidden transition-all duration-200"
+            draggable={!!onReorderFiles}
+            onDragStart={(e) => handleDragStart(e, index)}
+            onDragOver={(e) => handleDragOver(e, index)}
+            onDrop={(e) => handleDrop(e, index)}
+            onDragEnd={() => {
+              setDraggedIndex(null);
+              setDragOverIndex(null);
+            }}
+            className={`group bg-white dark:bg-slate-800 rounded-[2rem] border shadow-sm transition-all duration-200 overflow-hidden ${
+              isDragging ? "opacity-30 border-indigo-400" : ""
+            } ${
+              isOver
+                ? "border-2 border-indigo-500 scale-[1.02] shadow-indigo-100"
+                : "border-slate-100 dark:border-slate-700 hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600"
+            }`}
           >
             <div
               onClick={() => onView(file)}
@@ -127,6 +178,12 @@ export const FileGrid = ({
                 >
                   <Pin size={14} className={file.is_starred ? "fill-white!" : ""} />
                 </button>
+              </If>
+
+              <If is={!!onReorderFiles}>
+                <div className="absolute bottom-3 right-3 p-1.5 bg-black/40 rounded-full text-white/70 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing">
+                  <GripVertical size={14} />
+                </div>
               </If>
             </div>
 

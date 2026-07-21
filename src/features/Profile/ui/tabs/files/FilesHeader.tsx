@@ -7,8 +7,8 @@ import { useDesignSettings } from "@widgets/layout/ui/useDesignSettings";
 interface IProps {
   searchQuery: string;
   onSearchChange: (val: string) => void;
-  sortBy: "date" | "size" | "name";
-  onSortChange: (val: "date" | "size" | "name") => void;
+  sortBy: "date" | "size" | "name" | "manual";
+  onSortChange: (val: "date" | "size" | "name" | "manual") => void;
   sortDir: "asc" | "desc";
   onSortDirToggle: () => void;
   viewMode: "grid" | "list";
@@ -73,6 +73,7 @@ export const FilesHeader = ({
   };
 
   const getSortLabel = () => {
+    if (sortBy === "manual") return "Ручная";
     if (sortBy === "date") return "Дата";
     if (sortBy === "size") return "Размер";
     return "Имя";
@@ -185,7 +186,7 @@ export const FilesHeader = ({
 
             <If is={sortOpen}>
               <div className="absolute right-0 mt-1.5 w-32 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-xl py-1 z-50">
-                {(["date", "size", "name"] as const).map((option) => (
+                {(["manual", "date", "size", "name"] as const).map((option) => (
                   <button
                     key={option}
                     onClick={() => {
@@ -203,7 +204,7 @@ export const FilesHeader = ({
                         : undefined
                     }
                   >
-                    {option === "date" ? "Дата" : option === "size" ? "Размер" : "Имя"}
+                    {option === "manual" ? "Ручная" : option === "date" ? "Дата" : option === "size" ? "Размер" : "Имя"}
                   </button>
                 ))}
               </div>

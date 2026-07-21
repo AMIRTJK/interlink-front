@@ -9,6 +9,9 @@ import {
   Trash2,
   FolderInput,
   Undo2,
+  Users,
+  CornerUpLeft,
+  Forward,
 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
@@ -92,6 +95,31 @@ export const useIncomingConfig = (type: string): RegistryConfig => {
         icon: <Send size={10} />,
         color: "emerald",
         render: (d) => d.outgoing_number || "Не присвоен",
+      },
+    ],
+    // Списки пользователей — отдельными колонками с окном по клику (как
+    // «Получатели»). Только для входящих. Пустой список показывает «—».
+    people: [
+      {
+        key: "replied",
+        label: "Ответили",
+        icon: <CornerUpLeft size={12} />,
+        avatarBg: "bg-blue-600!",
+        getUsers: (d) => d.replied_users || [],
+      },
+      {
+        key: "forwarded",
+        label: "Переслали",
+        icon: <Forward size={12} />,
+        avatarBg: "bg-amber-500!",
+        getUsers: (d) => d.forwarded_users || [],
+      },
+      {
+        key: "acknowledged",
+        label: "Ознакомились",
+        icon: <Users size={12} />,
+        avatarBg: "bg-emerald-600!",
+        getUsers: (d) => d.acknowledged_users || [],
       },
     ],
     getActions: (record, onMove) => {

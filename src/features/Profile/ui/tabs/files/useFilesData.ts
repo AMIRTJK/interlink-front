@@ -24,7 +24,7 @@ const buildFolderFileCounts = (items: IApiFile[]): Record<number, number> =>
 
 interface IFilesParams {
   search?: string;
-  sort?: "name" | "date" | "size";
+  sort?: "name" | "date" | "size" | "manual";
   dir?: "asc" | "desc";
   activeFolderId?: number | "all";
   page?: number;
@@ -134,6 +134,19 @@ export const useFilesData = (params: IFilesParams) => {
     messages: {
       success: "Файл успешно загружен",
       invalidate: [ApiRoutes.MY_FILES, ApiRoutes.MY_FILES_META],
+    },
+  });
+
+  // 9.1. Reorder Files (Drag & Drop)
+  const reorderFiles = useMutationQuery<
+    { folder_id: number | null; file_ids: number[] },
+    { success: boolean; message: string; data: any }
+  >({
+    url: ApiRoutes.MY_FILES_ORDER,
+    method: "PATCH",
+    messages: {
+      success: "Порядок файлов сохранен",
+      invalidate: [ApiRoutes.MY_FILES],
     },
   });
 
@@ -399,6 +412,7 @@ export const useFilesData = (params: IFilesParams) => {
     updateFile,
     deleteFile,
     uploadFile,
+    reorderFiles,
 
     inviteToFile,
     removeFileShare,

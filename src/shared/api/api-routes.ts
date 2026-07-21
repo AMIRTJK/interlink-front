@@ -208,6 +208,7 @@ export const ApiRoutes = {
   MY_FILES_BULK_SHARE: "/api/v1/my-files/bulk-share",
   MY_FILES_BULK_DELETE: "/api/v1/my-files/bulk-delete",
   MY_FILES_ANALYTICS: "/api/v1/my-files/analytics",
+  MY_FILES_ORDER: "/api/v1/my-files/order",
 
   MY_FILE_FOLDERS: "/api/v1/my-file-folders",
   MY_FILE_FOLDERS_SHARED_WITH_ME: "/api/v1/my-file-folders/shared-with-me",

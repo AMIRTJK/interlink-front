@@ -86,6 +86,7 @@ export const CreateAssignmentModal: React.FC<IProps> = ({
             rules={[requiredRule]}
           >
             <SelectField
+              name="executor_user_id"
               url={ApiRoutes.GET_INTERNAL_RECIPIENTS_USERS}
               placeholder="Выберите исполнителя"
               allowClear

@@ -25,6 +25,7 @@ interface IProps {
   onPageChange?: (page: number) => void;
   onSelectAll?: (ids: number[]) => void;
   onDeselectAll?: (ids: number[]) => void;
+  onReorderFiles?: (fileIds: number[]) => void;
 }
 
 export const FileGridList = ({
@@ -42,6 +43,7 @@ export const FileGridList = ({
   onPageChange,
   onSelectAll,
   onDeselectAll,
+  onReorderFiles,
 }: IProps) => {
   return (
     <div className="space-y-4">
@@ -56,6 +58,7 @@ export const FileGridList = ({
           onView={onView}
           onMove={onMove}
           onShare={onShare}
+          onReorderFiles={onReorderFiles}
         />
       </If>
 
@@ -72,6 +75,7 @@ export const FileGridList = ({
           showSharedWith={showSharedWith}
           onSelectAll={onSelectAll}
           onDeselectAll={onDeselectAll}
+          onReorderFiles={onReorderFiles}
         />
       </If>
 

@@ -46,6 +46,7 @@ import {
 import { useLocation } from "react-router";
 import { tokenControl } from "@shared/lib";
 import { StructureView } from "./StructureView";
+import { PeopleViewer } from "./PeopleViewer";
 import type { LetterDirection } from "../lib/structure/types";
 
 type ViewMode = "list" | "block" | "structure";
@@ -653,6 +654,29 @@ export const DocumentCard = ({
 						})}
 					</div>
 				)}
+
+				{/* PEOPLE COLUMNS (списки пользователей с окном по клику) */}
+				{fieldConfig?.people && fieldConfig.people.length > 0 && (
+					<div className="pt-3 mt-1 border-t border-gray-100 dark:border-slate-700 flex gap-2">
+						{fieldConfig.people.map((col: any) => (
+							<div key={col.key} className="flex-1 min-w-0">
+								<div className="flex items-center gap-1 mb-0.5 text-gray-400 dark:text-slate-500">
+									{col.icon}
+									<span className="text-[10px] text-gray-500 dark:text-slate-400">
+										{col.label}
+									</span>
+								</div>
+								<div className="text-xs font-medium">
+									<PeopleViewer
+										label={col.label}
+										avatarBg={col.avatarBg}
+										users={col.getUsers(data)}
+									/>
+								</div>
+							</div>
+						))}
+					</div>
+				)}
 			</div>
 		</motion.div>
 	);
@@ -713,7 +737,7 @@ export const DocumentListItem = ({
 						</div>
 
 						{/* Subject */}
-						<div className="col-span-3 min-w-0">
+						<div className="col-span-4 min-w-0">
 							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">Тема</div>
 							<div className="text-sm font-semibold text-gray-900 dark:text-slate-100 truncate">
 								{data.subject}
@@ -722,7 +746,7 @@ export const DocumentListItem = ({
 
 						{/* DYNAMIC PRIMARY */}
 						{fieldConfig?.primary && (
-							<div className="col-span-2 min-w-0">
+							<div className="col-span-3 min-w-0">
 								<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">
 									{fieldConfig.primary.label}
 								</div>
@@ -734,7 +758,7 @@ export const DocumentListItem = ({
 
 						{/* DYNAMIC SECONDARY */}
 						{fieldConfig?.secondary && (
-							<div className="col-span-2 min-w-0">
+							<div className="col-span-3 min-w-0">
 								<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">
 									{fieldConfig.secondary.label}
 								</div>
@@ -744,33 +768,51 @@ export const DocumentListItem = ({
 							</div>
 						)}
 
-						{/* DYNAMIC BADGES (Compact view) */}
-						<div className="col-span-3 flex gap-2">
-							{fieldConfig?.badges?.map((badge: any, i: number) => {
-								const style = getBadgeStyles(badge.color);
-								// Берем только text color класс, чтобы не было фона в списке (для чистоты)
-								// Или оставляем как есть. Давайте сделаем легкий фон.
-								return (
-									<div key={i} className="flex-1 min-w-0">
-										<div className="flex items-center gap-1 mb-0.5">
-											{badge.icon}
-											<span className="text-xs text-gray-500 dark:text-slate-400">
-												{badge.label}
-											</span>
-										</div>
-										<div
-											className={`text-xs font-mono font-semibold px-2 py-1 rounded truncate ${style}`}
-										>
-											{badge.render(data)}
-										</div>
-									</div>
-								);
-							})}
-						</div>
 					</div>
 
 					{/* Right Side: Status + Actions */}
-					<div className="flex items-center gap-3 flex-shrink-0">
+					<div className="flex items-center gap-4 flex-shrink-0">
+						{/* Бейджи-колонки (Дата / Рег. № / Тип письма / Мой статус) —
+						    равномерно, с отступами как у столбца «Статус письма». */}
+						{fieldConfig?.badges?.map((badge: any, i: number) => {
+							const style = getBadgeStyles(badge.color);
+							return (
+								<div key={`badge-${i}`} className="min-w-[120px]">
+									<div className="flex items-center gap-1 mb-0.5 text-gray-400 dark:text-slate-500">
+										{badge.icon}
+										<span className="text-xs text-gray-500 dark:text-slate-400">
+											{badge.label}
+										</span>
+									</div>
+									<div
+										className={`text-xs font-mono font-semibold px-2 py-1 rounded truncate ${style}`}
+									>
+										{badge.render(data)}
+									</div>
+								</div>
+							);
+						})}
+
+						{/* Колонки-списки пользователей (Ответили / Переслали /
+						    Ознакомились) — равномерно, каждая открывает окно по клику. */}
+						{fieldConfig?.people?.map((col: any) => (
+							<div key={col.key} className="min-w-[130px]">
+								<div className="flex items-center gap-1 mb-0.5 text-gray-400 dark:text-slate-500">
+									{col.icon}
+									<span className="text-xs text-gray-500 dark:text-slate-400">
+										{col.label}
+									</span>
+								</div>
+								<div className="text-sm font-medium">
+									<PeopleViewer
+										label={col.label}
+										avatarBg={col.avatarBg}
+										users={col.getUsers(data)}
+									/>
+								</div>
+							</div>
+						))}
+
 						{/* Статус письма — в стиле столбца «Мой статус» */}
 						<div className="min-w-[120px]">
 							<div className="flex items-center gap-1 mb-0.5">

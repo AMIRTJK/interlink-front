@@ -9,6 +9,7 @@ import {
   Pin,
   Archive,
   UserCheck,
+  CornerUpLeft,
 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
@@ -87,6 +88,19 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
         icon: <CheckCheck size={10} />,
         color: "blue",
         render: (d) => d.reg_number || "Не присвоен",
+      },
+      {
+        label: "Тип письма",
+        icon: <CornerUpLeft size={10} />,
+        color: "purple",
+        render: (d) => {
+          // Бэкенд отдаёт локализованный relation_label и link_type
+          // ("reply" | "forward" | null). Null — обычное письмо без связи.
+          if (d.relation_label) return d.relation_label;
+          if (d.link_type === "reply") return "Ответное";
+          if (d.link_type === "forward") return "Пересланное";
+          return "Обычное";
+        },
       },
       {
         label: "Мой статус",

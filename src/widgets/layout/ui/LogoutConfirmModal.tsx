@@ -77,10 +77,10 @@ export const LogoutConfirmModal = ({
               disabled={loading}
               className="flex-1 py-2.5 rounded-2xl font-semibold text-sm text-white bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-lg shadow-red-500/25 transition-all disabled:opacity-70 cursor-pointer focus:outline-none flex items-center justify-center gap-2"
             >
-              <If condition={loading}>
+              <If is={loading}>
                 <Loader2 className="w-4 h-4 animate-spin" />
               </If>
-              <If condition={!loading}>
+              <If is={!loading}>
                 <LogOut className="w-4 h-4" />
               </If>
               {loading ? "Выход…" : "Выйти"}

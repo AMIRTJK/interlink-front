@@ -33,6 +33,10 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
   isIncoming,
   isReadOnly,
   isDarkMode,
+  onAcknowledge,
+  isAcknowledged,
+  onForward,
+  onOpenAssignment,
 }) => {
   const [activeTab, setActiveTab] = useState<TTab>("actions");
 

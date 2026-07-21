@@ -193,6 +193,10 @@ const FullHistoryModal = ({
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const handleOpenApproveModal = () => {
+    onApprove({ status: "approved" });
+  };
+
   // Вспомогательная функция для рендера строки участника внутри модалки
   const renderParticipantRow = (
     item: any,
@@ -719,26 +723,9 @@ export const WorkflowParticipantsPanel = ({
   isDarkMode,
   onSetVersionForSign,
   isSelectingVersion,
-  docId?: string | number;
-  workflowData: any;
-  isCollapsed: boolean;
-  toggleCollapse: () => void;
-  onSign: () => void;
-  onApprove: (payload?: { status?: "approved" | "returned"; note?: string }) => void;
-  isSigning: boolean;
-  currentUserId: string | number | null;
-  isReadOnly: boolean;
-  isReadPage?: boolean;
-  isSignedDocument?: boolean;
-  hasQRInSelectedVersion?: boolean;
-  versions?: any[];
-  activeVersionId?: string | number | null;
-  onSelectVersion?: (content: string, versionId: string | number) => void;
-  documentCreator?: any;
-  isDarkMode?: boolean;
-  onSetVersionForSign?: (versionId: string | number) => void;
-  isSelectingVersion?: boolean;
-}) => {
+  docId,
+}: any) => {
+
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     tab: string;

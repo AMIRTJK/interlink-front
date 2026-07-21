@@ -8,6 +8,7 @@ import {
   Typography,
 } from "antd";
 import { getCorrespondenseOutgoingStatusLabel } from "./getCorrespondenseOutgoingStatusLabel";
+import { getCorrespondenceLinkTypeLabel } from "../getCorrespondenceLinkTypeLabel";
 
 import archiveIcon from "../../../../assets/icons/archive-icon.svg";
 import pinnedIcon from "../../../../assets/icons/pinned-icon.svg";
@@ -95,6 +96,30 @@ export const useCorrespondenseOutgoingColumns = (
     {
       title: "Тема",
       dataIndex: "subject",
+    },
+    {
+      title: "Тип письма",
+      dataIndex: "link_type",
+      render: (linkType: string, record: any) => {
+        const info = getCorrespondenceLinkTypeLabel(
+          linkType as any,
+          record?.relation_label,
+        );
+        if (!info) return "—";
+        return (
+          <Tag
+            color={info.color}
+            className="py-0! px-3! overflow-hidden! block! text-white!"
+          >
+            <Typography.Text
+              className="font-medium! text-white! text-center! truncate! block!"
+              ellipsis
+            >
+              {info.label}
+            </Typography.Text>
+          </Tag>
+        );
+      },
     },
     {
       title: isInternal ? "Получатель" : "Исполнитель",

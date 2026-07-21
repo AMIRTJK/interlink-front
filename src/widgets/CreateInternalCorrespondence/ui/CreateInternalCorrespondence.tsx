@@ -671,6 +671,60 @@ export const CreateInternalCorrespondence = ({
   const composeMode = composeState?.composeMode;
   const sourceLetter = composeState?.sourceLetter;
 
+  // Связь ответа/пересылки с исходным письмом. Контекст приходит двумя путями:
+  // со страницы просмотра входящего (composeMode + sourceLetter.id) либо из
+  // реестра исходящих (source_correspondence_id + link_type напрямую в state).
+  // Нормализуем к паре полей бэкенда — их всегда передаём вместе.
+  const linkState = (location.state || null) as {
+    source_correspondence_id?: string | number;
+    link_type?: "reply" | "forward";
+  } | null;
+  const sourceCorrespondenceId =
+    linkState?.source_correspondence_id ?? sourceLetter?.id ?? null;
+  const linkType: "reply" | "forward" | null =
+    linkState?.link_type ?? composeMode ?? null;
+
+  // Блок «Исходное письмо» показываем не только ДО сохранения (из navigate
+  // state), но и ПОСЛЕ — GET уже отдаёт link_type + source_document связанного
+  // письма. Здесь собираем поля для панели из сохранённого ответа как фолбэк.
+  // ВАЖНО: только для отображения. Префилл темы/получателей и боковой A4-показ
+  // исходного письма ниже завязаны строго на navigate state (composeMode/
+  // sourceLetter), чтобы при открытии готового черновика ничего не перетиралось.
+  const savedItem = initialData?.item;
+  const savedLinkType: "reply" | "forward" | null =
+    savedItem?.link_type === "reply" || savedItem?.link_type === "forward"
+      ? savedItem.link_type
+      : null;
+  const savedSourceDoc = savedItem?.source_document;
+  // Тело исходного письма source_document не содержит — достаём из incoming_links.
+  const savedSourceBody: string | undefined =
+    savedItem?.incoming_links?.find(
+      (l: any) => Number(l?.incoming_id) === Number(savedSourceDoc?.id),
+    )?.incoming?.body ?? undefined;
+
+  const panelMode: "reply" | "forward" | undefined =
+    composeMode ?? savedLinkType ?? undefined;
+  const panelSource = sourceLetter
+    ? sourceLetter
+    : savedSourceDoc
+      ? {
+          id: savedSourceDoc.id,
+          subject: savedSourceDoc.subject,
+          creator: savedSourceDoc.creator,
+          senderName: savedSourceDoc.creator?.full_name,
+          date: savedSourceDoc.sent_at
+            ? new Date(savedSourceDoc.sent_at).toLocaleDateString("ru-RU")
+            : savedSourceDoc.created_at
+              ? new Date(savedSourceDoc.created_at).toLocaleDateString("ru-RU")
+              : "—",
+          status: savedSourceDoc.status,
+          priority: undefined as string | undefined,
+          inboundNumber:
+            savedSourceDoc.reg_number || savedSourceDoc.tracking_number || "—",
+          body: savedSourceBody,
+        }
+      : undefined;
+
   const [to, setTo] = useState<RecipientOption[]>([]);
   const [cc, setCc] = useState<RecipientOption[]>([]);
   const [subject, setSubject] = useState("");
@@ -1637,11 +1691,10 @@ export const CreateInternalCorrespondence = ({
           priority: importance,
         };
 
-        if (location.state?.source_correspondence_id) {
-          requestPayload.source_correspondence_id = Number(location.state.source_correspondence_id);
-        }
-        if (location.state?.link_type) {
-          requestPayload.link_type = location.state.link_type;
+        // source_correspondence_id и link_type передаём только вместе.
+        if (sourceCorrespondenceId != null && linkType) {
+          requestPayload.source_correspondence_id = Number(sourceCorrespondenceId);
+          requestPayload.link_type = linkType;
         }
 
         if (id) saveDraft(requestPayload);
@@ -1885,8 +1938,6 @@ export const CreateInternalCorrespondence = ({
 
   const onSaveClick = async () => {
     const editorBody = editorContent || getCleanEditorHtml();
-    const sourceCorrespondenceId = location.state?.source_correspondence_id;
-    const linkType = location.state?.link_type;
 
     const requestPayload: any = {
       subject,
@@ -1903,10 +1954,9 @@ export const CreateInternalCorrespondence = ({
       priority: importance,
     };
 
-    if (sourceCorrespondenceId) {
+    // source_correspondence_id и link_type передаём только вместе.
+    if (sourceCorrespondenceId != null && linkType) {
       requestPayload.source_correspondence_id = Number(sourceCorrespondenceId);
-    }
-    if (linkType) {
       requestPayload.link_type = linkType;
     }
 
@@ -4188,19 +4238,19 @@ export const CreateInternalCorrespondence = ({
           </div>
         </div>
 
-        {composeMode && sourceLetter && (
+        {panelMode && panelSource && (
           <OriginalLetterPanel
-            mode={composeMode}
+            mode={panelMode}
             sender={
-              sourceLetter.senderName || sourceLetter.creator?.full_name || "—"
+              panelSource.senderName || panelSource.creator?.full_name || "—"
             }
-            date={sourceLetter.date || "—"}
-            status={sourceLetter.status || ""}
-            priority={sourceLetter.priority}
-            inboundNumber={sourceLetter.inboundNumber || "—"}
-            subject={sourceLetter.subject || ""}
-            body={sourceLetter.body}
-            sourceId={sourceLetter.id}
+            date={panelSource.date || "—"}
+            status={panelSource.status || ""}
+            priority={panelSource.priority}
+            inboundNumber={panelSource.inboundNumber || "—"}
+            subject={panelSource.subject || ""}
+            body={panelSource.body}
+            sourceId={panelSource.id}
           />
         )}
 

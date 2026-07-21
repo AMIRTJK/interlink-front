@@ -51,6 +51,7 @@ interface IProps {
   onSelectVersion?: (versionId: number | string) => void;
   panelsInToolbar?: boolean;
   onTogglePanelsInToolbar?: (value: boolean) => void;
+  correspondenceId?: string | number;
 }
 
 const pageWord = (n: number) =>
@@ -70,6 +71,7 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
   onSelectVersion,
   panelsInToolbar = false,
   onTogglePanelsInToolbar,
+  correspondenceId,
 }) => {
   const [zoom, setZoom] = useState(1);
   const [isScaleFocused, setIsScaleFocused] = useState(false);
@@ -1139,7 +1141,7 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
                     />
                     <AnimatePresence>
                       <If is={showTaskPanel}>
-                        <TaskPanel onClose={() => setShowTaskPanel(false)} />
+                        <TaskPanel onClose={() => setShowTaskPanel(false)} correspondenceId={correspondenceId || ""} />
                       </If>
                     </AnimatePresence>
                   </div>
