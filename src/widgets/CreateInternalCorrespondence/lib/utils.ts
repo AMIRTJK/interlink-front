@@ -18,33 +18,37 @@ export const formatFileSize = (bytes: number): string =>
     ? `${(bytes / 1024 / 1024).toFixed(1)} МБ`
     : `${(bytes / 1024).toFixed(0)} КБ`;
 
-/**
- * Приводит вложение из ответа бэкенда к виду, с которым работает UI.
- * Ответ POST/PUT /internal-correspondences отдаёт по файлу: id, original_name,
- * mime, size (в байтах), path (внутренний путь) и url — ссылку на файл
- * в публичном хранилище, относительную: «/storage/correspondences/11/…».
- */
-export const mapServerAttachment = (raw: any): AttachedFile => {
-  const name = raw?.original_name || "Файл";
+export const mapServerAttachment = (
+  raw: any,
+  correspondenceId?: string | number,
+): AttachedFile => {
+  const name = raw?.original_name || raw?.name || "Файл";
   const size = Number(raw?.size);
+  const id = String(raw?.id ?? name);
+
+  let previewUrl = raw?.preview_url || raw?.previewUrl || undefined;
+  let downloadUrl = raw?.download_url || raw?.downloadUrl || undefined;
+
+  if (correspondenceId && raw?.id) {
+    if (!downloadUrl) {
+      downloadUrl = `/api/v1/internal-correspondences/${correspondenceId}/attachments/${raw.id}/download`;
+    }
+    if (!previewUrl) {
+      previewUrl = `/api/v1/internal-correspondences/${correspondenceId}/attachments/${raw.id}/download?inline=1`;
+    }
+  }
+
   return {
-    id: String(raw?.id ?? name),
+    id,
     name,
     size: Number.isFinite(size) && size > 0 ? formatFileSize(size) : "",
     type: name.split(".").pop()?.toUpperCase() ?? "FILE",
-    url: raw?.url || undefined,
-    // Если бэкенд добавит эти поля (как в /my-files) — используем их напрямую.
-    previewUrl: raw?.preview_url || undefined,
-    downloadUrl: raw?.download_url || undefined,
+    url: raw?.url || downloadUrl || undefined,
+    previewUrl,
+    downloadUrl,
   };
 };
 
-/**
- * Достраивает относительную ссылку бэкенда до абсолютной по хосту API.
- * Без этого «/storage/…» уходит на origin фронта: в деве это dev-сервер Vite,
- * который на любой неизвестный путь отдаёт index.html — и вместо файла
- * скачивается html-страница. Тот же приём, что в resolveEmployeePhotoUrl.
- */
 const toAbsoluteUrl = (url: string): string => {
   if (/^(https?:|blob:|data:)/i.test(url)) return url;
   const apiHost = (getEnvVar("VITE_API_URL") || "").replace(/\/+$/, "");
@@ -64,49 +68,43 @@ const clickDownloadLink = (href: string, name: string, newTab = false) => {
   document.body.removeChild(link);
 };
 
-/**
- * Скачивает сохранённое вложение. Способ зависит от того, что вернул бэкенд:
- *
- * • Ссылка на /api/… — тянем blob-ом: такой маршрут требует Bearer-токен, и CORS
- *   для api/* настроен (в ответе приходит Access-Control-Allow-Origin).
- * • Прямая ссылка в хранилище (/storage/…) — открываем обычной ссылкой. XHR тут
- *   не работает: в config/cors.php на бэкенде в paths только api/*, статика
- *   отдаётся без CORS-заголовков, и браузер режет ответ с CORS-ошибкой.
- *   Оговорка: для чужого origin (в деве localhost → IP бэкенда) браузер
- *   игнорирует атрибут download, поэтому PDF и картинки откроются во вкладке,
- *   а не сохранятся. Форсировать сохранение может только бэкенд — заголовком
- *   Content-Disposition: attachment на отдельном /api/…/download.
- */
 export const downloadAttachment = async (file: AttachedFile): Promise<void> => {
-  if (!file.url) return;
+  const targetUrl = file.downloadUrl || file.url;
+  if (!targetUrl) return;
 
-  if (!file.url.includes("/api/")) {
-    clickDownloadLink(toAbsoluteUrl(file.url), file.name, true);
+  if (file.file) {
+    clickDownloadLink(file.downloadUrl || file.url || "", file.name);
+    return;
+  }
+
+  if (!targetUrl.includes("/api/")) {
+    clickDownloadLink(toAbsoluteUrl(targetUrl), file.name, true);
     return;
   }
 
   try {
-    const response = await _axios.get(file.url, { responseType: "blob" });
+    const response = await _axios.get(toAbsoluteUrl(targetUrl), {
+      responseType: "blob",
+    });
     const blob = new Blob([response.data], {
-      type: response.headers["content-type"],
+      type: response.headers["content-type"] || "application/octet-stream",
     });
     const href = window.URL.createObjectURL(blob);
     clickDownloadLink(href, file.name);
     window.URL.revokeObjectURL(href);
-  } catch {
-    toast.error("Не удалось скачать вложение");
+  } catch (err: any) {
+    if (err?.response?.status === 403) {
+      toast.error("Нет доступа к скачиванию вложения");
+    } else if (err?.response?.status === 404) {
+      toast.error("Вложение или файл не найден");
+    } else {
+      toast.error("Не удалось скачать вложение");
+    }
   }
 };
 
-/**
- * Текст заглушки в модалке предпросмотра для СОХРАНЁННЫХ вложений корреспонденции,
- * пока бэкенд не поднял API отдачи файла (/api/v1/correspondence-attachments/:id/
- * download). До этого превью через XHR невозможно (прямой /storage-URL без CORS),
- * поэтому показываем это сообщение и даём скачать файл напрямую.
- */
 export const CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE =
-  "Предпросмотр пока недоступен: фронтенд ожидает API для отдачи вложения. " +
-  "Файл можно скачать кнопкой ниже.";
+  "Не удалось загрузить предпросмотр файла или файл отсутствует. Попробуйте скачать файл.";
 
 export const createApiFileFromAttachedFile = (file?: AttachedFile | null): any => {
   if (!file) return null;
@@ -117,29 +115,12 @@ export const createApiFileFromAttachedFile = (file?: AttachedFile | null): any =
   let downloadUrl = "";
 
   if (file.file) {
-    // Локальный файл, ещё не отправленный на сервер — читаем прямо из памяти.
     previewUrl = URL.createObjectURL(file.file);
     downloadUrl = previewUrl;
   } else if (file.previewUrl || file.downloadUrl) {
-    // Бэкенд отдал готовые ссылки (как /my-files) — берём их как есть.
     previewUrl = toAbsoluteUrl(file.previewUrl || file.downloadUrl || "");
     downloadUrl = toAbsoluteUrl(file.downloadUrl || file.previewUrl || "");
-  } else if (file.url && /^\d+$/.test(file.id)) {
-    // Сохранённое вложение. Просмотр — через /api/-маршрут (Bearer-токен + CORS),
-    // как в модуле «Файлы» (/api/v1/my-files/:id/download): прямой /storage/-URL
-    // для XHR-предпросмотра не годится, статика отдаётся без CORS-заголовков (в
-    // config/cors.php только api/*), и браузер режет ответ. inline=1 просит
-    // показать файл в браузере. ВАЖНО: пока бэкенд не поднял этот маршрут, запрос
-    // вернёт 404 — тогда сработает заглушка в FilePreviewModal.
-    previewUrl = `${toAbsoluteUrl(
-      ApiRoutes.DOWNLOAD_CORRESPONDENCE_ATTACHMENT.replace(":id", file.id),
-    )}?inline=1`;
-    // Скачивание оставляем на прямой /storage-ссылке — она работает уже сейчас
-    // (открывается в новой вкладке), не дожидаясь API. Когда бэкенд вернёт
-    // download_url (ветка выше), скачивание автоматически пойдёт через /api/.
-    downloadUrl = toAbsoluteUrl(file.url);
   } else if (file.url) {
-    // Подстраховка: сохранённое вложение без числового id — отдаём как есть.
     previewUrl = toAbsoluteUrl(file.url);
     downloadUrl = previewUrl;
   }

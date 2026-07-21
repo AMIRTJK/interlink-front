@@ -1281,11 +1281,16 @@ export const CreateInternalCorrespondence = ({
   // После успешного сохранения файлы уже лежат на бэкенде: заменяем локальную
   // очередь списком из ответа. Иначе следующее сохранение отправит те же файлы
   // повторно и в письме появятся дубликаты.
-  const syncAttachmentsAfterSave = useCallback((data: any) => {
-    const saved = data?.item?.attachments;
-    if (Array.isArray(saved)) setAttachments(saved.map(mapServerAttachment));
-    else setAttachments((prev) => prev.filter((a) => !a.file));
-  }, []);
+  const syncAttachmentsAfterSave = useCallback(
+    (data: any) => {
+      const saved = data?.item?.attachments;
+      const docId = id || data?.item?.id;
+      if (Array.isArray(saved))
+        setAttachments(saved.map((a: any) => mapServerAttachment(a, docId)));
+      else setAttachments((prev) => prev.filter((a) => !a.file));
+    },
+    [id],
+  );
 
   const { mutate: createDraft, isPending: isCreating } = useMutationQuery<any>({
     url: ApiRoutes.CREATE_INTERNAL,
@@ -1956,7 +1961,7 @@ export const CreateInternalCorrespondence = ({
       // и такой рефетч не должен съедать несохранённый выбор.
       if (Array.isArray(item.attachments)) {
         setAttachments((prev) => [
-          ...item.attachments.map(mapServerAttachment),
+          ...item.attachments.map((a: any) => mapServerAttachment(a, item.id || id)),
           ...prev.filter((a) => a.file),
         ]);
       }
