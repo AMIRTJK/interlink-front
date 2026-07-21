@@ -9,13 +9,14 @@ import { FilePreviewModal } from "./files/FilePreviewModal";
 import { FolderActionsModal } from "./files/FolderActionsModal";
 import { AddCategoryModal } from "./files/AddCategoryModal";
 import { MoveToFolderModal } from "./files/MoveToFolderModal";
-import { Upload, ChevronRight, Folder, Share2 } from "lucide-react";
+import { Upload, ChevronRight, Folder, Share2, Trash2 } from "lucide-react";
 import { BulkShareModal } from "./files/BulkShareModal";
 import { ShareFileModal } from "./files/ShareFileModal";
 import { FilesAnalytics } from "./files/FilesAnalytics";
 import { IApiFile, IApiFolder } from "./files/lib";
 import { Modal } from "antd";
 import { If } from "@shared/ui";
+import { toast } from "@shared/lib/toast";
 import "./FilesTab.css";
 
 export const FilesTab = () => {
@@ -70,6 +71,7 @@ export const FilesTab = () => {
 		inviteToFolder,
 		removeFolderShare,
 		bulkShareFiles,
+		bulkDeleteFiles,
 	} = useFilesData({
 		search: searchQuery,
 		sort: sortBy,
@@ -164,6 +166,31 @@ export const FilesTab = () => {
 			},
 			cancelText: "Отмена",
 			onOk: () => deleteFile.mutate({ id }),
+		});
+	};
+
+	const handleBulkDeleteConfirm = () => {
+		Modal.confirm({
+			title: "Удалить выбранные файлы?",
+			content: `Вы действительно хотите удалить выбранные файлы (${selectedFileIds.length} шт.)? Действие необратимо.`,
+			okText: "Удалить",
+			okButtonProps: {
+				danger: true,
+				className: "bg-red-600! hover:bg-red-700!",
+			},
+			cancelText: "Отмена",
+			onOk: async () => {
+				try {
+					const res = await bulkDeleteFiles.mutateAsync({ file_ids: selectedFileIds });
+					toast.success(`Успешно удалено файлов: ${res.data.deleted_files_count}`);
+					if (res.data.storage_cleanup_failed) {
+						toast.warning("Часть файлов не удалось очистить из хранилища. Обратитесь к администратору.");
+					}
+					setSelectedFileIds([]);
+				} catch (err) {
+					console.error(err);
+				}
+			},
 		});
 	};
 
@@ -405,6 +432,13 @@ export const FilesTab = () => {
 					>
 						<Share2 size={13} />
 						<span>Поделиться</span>
+					</button>
+					<button
+						onClick={handleBulkDeleteConfirm}
+						className="flex items-center gap-2 bg-red-600! hover:bg-red-700! text-white! px-4 py-2 rounded-full text-xs font-bold transition-all shadow-md cursor-pointer hover:opacity-90"
+					>
+						<Trash2 size={13} />
+						<span>Удалить</span>
 					</button>
 					<button
 						onClick={() => setSelectedFileIds([])}
