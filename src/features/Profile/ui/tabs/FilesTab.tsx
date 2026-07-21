@@ -227,9 +227,8 @@ export const FilesTab = () => {
 				}}
 			/>
 
-			{/* Analytics View */}
 			<If is={viewContext === "analytics"}>
-				<FilesAnalytics onView={setPreviewFile} />
+				<FilesAnalytics />
 			</If>
 
 			<If is={viewContext !== "analytics"}>

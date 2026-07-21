@@ -10,7 +10,7 @@ import { FilesFolderBreakdown } from "./FilesFolderBreakdown";
 import { FilesRecentList } from "./FilesRecentList";
 import { FilesLargestList } from "./FilesLargestList";
 import { IFilesAnalyticsStorage } from "./analyticsModel";
-import { IApiFile, formatBytes } from "./lib";
+import { formatBytes } from "./lib";
 
 const StorageCard = ({ storage }: { storage: IFilesAnalyticsStorage }) => {
 	const pct = storage.used_pct;
@@ -72,11 +72,7 @@ const StorageCard = ({ storage }: { storage: IFilesAnalyticsStorage }) => {
 	);
 };
 
-interface IProps {
-	onView: (file: IApiFile) => void;
-}
-
-export const FilesAnalytics = ({ onView }: IProps) => {
+export const FilesAnalytics = () => {
 	const [months, setMonths] = useState(12);
 	const [limit, setLimit] = useState(5);
 	const { data, isLoading, isError } = useFilesAnalytics({ months, limit });
@@ -152,8 +148,8 @@ export const FilesAnalytics = ({ onView }: IProps) => {
 			</div>
 
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-				<FilesRecentList recentFiles={data.recent_files} onView={onView} />
-				<FilesLargestList largestFiles={data.largest_files} onView={onView} />
+				<FilesRecentList recentFiles={data.recent_files} />
+				<FilesLargestList largestFiles={data.largest_files} />
 			</div>
 		</motion.div>
 	);
