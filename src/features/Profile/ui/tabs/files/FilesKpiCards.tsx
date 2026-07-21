@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { IDiskMeta, formatBytes } from "./lib";
+import { IFilesAnalyticsSummary } from "./analyticsModel";
 
 const kpiColorMap: Record<string, string> = {
 	emerald: "text-emerald-700 dark:text-emerald-400",
@@ -16,38 +16,33 @@ const kpiBgMap: Record<string, string> = {
 };
 
 interface IProps {
-	meta: IDiskMeta | null;
-	sharedCount: number;
+	summary: IFilesAnalyticsSummary;
 }
 
-export const FilesKpiCards = ({ meta, sharedCount }: IProps) => {
-	const totalFiles = meta?.total_count ?? 0;
-	const usedBytes = meta?.storage_used_bytes ?? 0;
-	const limitBytes = meta?.storage_limit_bytes ?? 15 * 1024 * 1024 * 1024;
-
+export const FilesKpiCards = ({ summary }: IProps) => {
 	const kpiCards = [
 		{
 			label: "Всего файлов",
-			value: String(totalFiles),
+			value: String(summary.files_count),
 			sub: "В хранилище",
 			color: "indigo",
 		},
 		{
-			label: "Занято места",
-			value: formatBytes(usedBytes),
-			sub: `Из ${formatBytes(limitBytes)}`,
+			label: "Всего папок",
+			value: String(summary.folders_count),
+			sub: "В структуре",
 			color: "emerald",
 		},
 		{
 			label: "Поделились",
-			value: String(sharedCount),
+			value: String(summary.shared_count),
 			sub: "Файлов доступно",
 			color: "blue",
 		},
 		{
-			label: "Удалено",
-			value: "3",
-			sub: "В корзине",
+			label: "В избранном",
+			value: String(summary.starred_count),
+			sub: "Отмечено звездой",
 			color: "red",
 		},
 	];
