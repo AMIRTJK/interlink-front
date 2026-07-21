@@ -46,7 +46,7 @@ import {
 import { useLocation } from "react-router";
 import { tokenControl } from "@shared/lib";
 import { StructureView } from "./StructureView";
-import type { LetterDirection } from "../lib/structure";
+import type { LetterDirection } from "../lib/structure/types";
 
 type ViewMode = "list" | "block" | "structure";
 
