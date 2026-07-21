@@ -193,6 +193,31 @@ export const useFilesData = (params: IFilesParams) => {
     },
   });
 
+  const bulkShareFiles = useMutationQuery<
+    { file_ids: number[]; user_ids: number[]; can_download?: boolean },
+    {
+      success: boolean;
+      message: string;
+      data: {
+        file_ids: number[];
+        user_ids: number[];
+        files_count: number;
+        users_count: number;
+        share_links_count: number;
+        created_share_links_count: number;
+        existing_share_links_count: number;
+        can_download: boolean;
+      };
+    }
+  >({
+    url: ApiRoutes.MY_FILES_BULK_SHARE,
+    method: "POST",
+    messages: {
+      suppressSuccessToast: true,
+      invalidate: [ApiRoutes.MY_FILES],
+    },
+  });
+
   // 13. Remove share from file
   const removeFileShare = useMutationQuery<{ id: number; shareId: number }, any>({
     url: (data) => ApiRoutes.MY_FILES_SHARES_ID.replace(":id", String(data.id)).replace(":shareId", String(data.shareId)),
@@ -359,5 +384,6 @@ export const useFilesData = (params: IFilesParams) => {
     removeFileShare,
     inviteToFolder,
     removeFolderShare,
+    bulkShareFiles,
   };
 };

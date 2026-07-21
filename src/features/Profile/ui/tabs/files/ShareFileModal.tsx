@@ -131,7 +131,7 @@ export const ShareFileModal = ({
 					</button>
 				</div>
 
-				<div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-slate-800 overflow-hidden flex-1 min-h-[560px]!">
+				<div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-slate-800 overflow-hidden flex-1 min-h-[300px] md:min-h-[500px]">
 					{/* Слева — доступ и права */}
 					<div className="flex-1 p-6 space-y-5 overflow-y-auto">
 						<If is={activeShares.length > 0}>

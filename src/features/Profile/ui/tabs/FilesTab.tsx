@@ -9,11 +9,12 @@ import { FilePreviewModal } from "./files/FilePreviewModal";
 import { FolderActionsModal } from "./files/FolderActionsModal";
 import { AddCategoryModal } from "./files/AddCategoryModal";
 import { MoveToFolderModal } from "./files/MoveToFolderModal";
+import { Upload, ChevronRight, Folder, Share2 } from "lucide-react";
+import { BulkShareModal } from "./files/BulkShareModal";
 import { ShareFileModal } from "./files/ShareFileModal";
 import { FilesAnalytics } from "./files/FilesAnalytics";
 import { IApiFile, IApiFolder } from "./files/lib";
 import { Modal } from "antd";
-import { Upload, ChevronRight, Folder } from "lucide-react";
 import { If } from "@shared/ui";
 import "./FilesTab.css";
 
@@ -38,6 +39,7 @@ export const FilesTab = () => {
 	const [editingFolder, setEditingFolder] = useState<IApiFolder | null>(null);
 	const [addCategoryOpen, setAddCategoryOpen] = useState(false);
 	const [shareItem, setShareItem] = useState<{ item: IApiFile | IApiFolder; type: "file" | "folder" } | null>(null);
+	const [isBulkShareOpen, setIsBulkShareOpen] = useState(false);
 
 	// Queries & Mutations
 	const {
@@ -67,6 +69,7 @@ export const FilesTab = () => {
 		removeFileShare,
 		inviteToFolder,
 		removeFolderShare,
+		bulkShareFiles,
 	} = useFilesData({
 		search: searchQuery,
 		sort: sortBy,
@@ -306,6 +309,8 @@ export const FilesTab = () => {
 						showSharedWith={viewContext === "personal"}
 						pagination={filesPagination}
 						onPageChange={setFilesPage}
+						onSelectAll={(ids) => setSelectedFileIds((prev) => Array.from(new Set([...prev, ...ids])))}
+						onDeselectAll={(ids) => setSelectedFileIds((prev) => prev.filter((id) => !ids.includes(id)))}
 					/>
 				</div>
 			)}
@@ -387,6 +392,40 @@ export const FilesTab = () => {
 					}}
 				/>
 			)}
+
+			<If is={selectedFileIds.length > 0 && viewContext === "personal"}>
+				<div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full px-6 py-3.5 shadow-2xl flex items-center gap-6 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
+					<span className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+						Выбрано файлов: {selectedFileIds.length}
+					</span>
+					<div className="h-4 w-px bg-slate-250 dark:bg-slate-750" />
+					<button
+						onClick={() => setIsBulkShareOpen(true)}
+						className="flex items-center gap-2 bg-indigo-600! hover:bg-indigo-700! text-white! px-4 py-2 rounded-full text-xs font-bold transition-all shadow-md cursor-pointer hover:opacity-90"
+					>
+						<Share2 size={13} />
+						<span>Поделиться</span>
+					</button>
+					<button
+						onClick={() => setSelectedFileIds([])}
+						className="text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+					>
+						Снять выделение
+					</button>
+				</div>
+			</If>
+
+			<If is={isBulkShareOpen}>
+				<BulkShareModal
+					selectedFiles={files.filter((f) => selectedFileIds.includes(f.id))}
+					onClose={() => setIsBulkShareOpen(false)}
+					onShare={async (payload) => {
+						const res = await bulkShareFiles.mutateAsync(payload);
+						setSelectedFileIds([]);
+						return res;
+					}}
+				/>
+			</If>
 		</div>
 	);
 };

@@ -26,6 +26,8 @@ interface IProps {
 	onMove?: (file: IApiFile) => void;
 	onShare?: (file: IApiFile) => void;
 	showSharedWith?: boolean;
+	onSelectAll?: (ids: number[]) => void;
+	onDeselectAll?: (ids: number[]) => void;
 }
 
 export const FileList = ({
@@ -38,6 +40,8 @@ export const FileList = ({
 	onMove,
 	onShare,
 	showSharedWith,
+	onSelectAll,
+	onDeselectAll,
 }: IProps) => {
 	const getSmallIcon = (file: IApiFile) => {
 		const fileType = getFileType(file.extension);
@@ -164,7 +168,23 @@ export const FileList = ({
 			<table className="w-full text-left border-collapse min-w-[700px]">
 				<thead>
 					<tr className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 tracking-wider uppercase border-b border-slate-100 dark:border-slate-800">
-						<th className="py-4 px-4 w-12 text-center"></th>
+						<If is={!!showSharedWith}>
+							<th className="py-4 px-4 w-12 text-center">
+								<input
+									type="checkbox"
+									checked={files.length > 0 && files.every((file) => selectedFileIds.includes(file.id))}
+									onChange={(e) => {
+										const fileIds = files.map((f) => f.id);
+										if (e.target.checked) {
+											onSelectAll?.(fileIds);
+										} else {
+											onDeselectAll?.(fileIds);
+										}
+									}}
+									className="rounded border-slate-200 dark:border-slate-800 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
+								/>
+							</th>
+						</If>
 						<th className="py-4 px-4">НАЗВАНИЕ</th>
 						<th className="py-4 px-4 w-56">ВЛАДЕЛЕЦ</th>
 						<If is={!!showSharedWith}>
@@ -185,14 +205,16 @@ export const FileList = ({
 								className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors"
 							>
 								{/* Checkbox */}
-								<td className="py-3 px-4 text-center">
-									<input
-										type="checkbox"
-										checked={isSelected}
-										onChange={() => onToggleSelectFile(file.id)}
-										className="rounded border-slate-200 dark:border-slate-800 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
-									/>
-								</td>
+								<If is={!!showSharedWith}>
+									<td className="py-3 px-4 text-center">
+										<input
+											type="checkbox"
+											checked={isSelected}
+											onChange={() => onToggleSelectFile(file.id)}
+											className="rounded border-slate-200 dark:border-slate-800 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
+										/>
+									</td>
+								</If>
 
 								{/* Name */}
 								<td className="py-3 px-4">

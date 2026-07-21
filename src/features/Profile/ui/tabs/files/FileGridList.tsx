@@ -23,6 +23,8 @@ interface IProps {
   showSharedWith?: boolean;
   pagination?: IPagination;
   onPageChange?: (page: number) => void;
+  onSelectAll?: (ids: number[]) => void;
+  onDeselectAll?: (ids: number[]) => void;
 }
 
 export const FileGridList = ({
@@ -38,12 +40,17 @@ export const FileGridList = ({
   showSharedWith,
   pagination,
   onPageChange,
+  onSelectAll,
+  onDeselectAll,
 }: IProps) => {
   return (
     <div className="space-y-4">
       <If is={viewMode === "grid"}>
         <FileGrid
           files={files}
+          selectedFileIds={selectedFileIds}
+          onToggleSelectFile={onToggleSelectFile}
+          showSelection={showSharedWith}
           onTogglePin={onTogglePin}
           onDelete={onDelete}
           onView={onView}
@@ -63,6 +70,8 @@ export const FileGridList = ({
           onMove={onMove}
           onShare={onShare}
           showSharedWith={showSharedWith}
+          onSelectAll={onSelectAll}
+          onDeselectAll={onDeselectAll}
         />
       </If>
 
