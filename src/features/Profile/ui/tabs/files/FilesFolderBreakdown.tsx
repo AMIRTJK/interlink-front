@@ -9,7 +9,9 @@ interface IProps {
 }
 
 export const FilesFolderBreakdown = ({ folderBreakdown }: IProps) => {
-	const normalizedFolderBreakdown = Array.isArray(folderBreakdown) ? folderBreakdown : [];
+	const normalizedFolderBreakdown = Array.isArray(folderBreakdown)
+		? folderBreakdown
+		: [];
 
 	if (normalizedFolderBreakdown.length === 0) {
 		return (
@@ -22,7 +24,9 @@ export const FilesFolderBreakdown = ({ folderBreakdown }: IProps) => {
 				<h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200 mb-4">
 					Распределение по папкам
 				</h3>
-				<span className="text-xs text-slate-400">Нет данных для отображения</span>
+				<span className="text-xs text-slate-400">
+					Нет данных для отображения
+				</span>
 			</motion.div>
 		);
 	}
@@ -51,9 +55,17 @@ export const FilesFolderBreakdown = ({ folderBreakdown }: IProps) => {
 							<div className="flex items-center gap-3 min-w-0">
 								<div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-base shrink-0 border border-indigo-100/20 dark:border-indigo-900/10 shadow-sm">
 									{isNullFolder ? (
-										<FileText size={16} className="text-indigo-600 dark:text-indigo-400" />
+										<FileText
+											size={16}
+											className="text-indigo-600 dark:text-indigo-400"
+										/>
 									) : (
-										item.emoji || <Folder size={16} className="text-indigo-600 dark:text-indigo-400" />
+										item.emoji || (
+											<Folder
+												size={16}
+												className="text-indigo-600 dark:text-indigo-400"
+											/>
+										)
 									)}
 								</div>
 								<div className="min-w-0">
@@ -75,3 +87,4 @@ export const FilesFolderBreakdown = ({ folderBreakdown }: IProps) => {
 		</motion.div>
 	);
 };
+
