@@ -19,3 +19,4 @@ export * from './Logo'
 
 
 export * from "./ToastContainer";
+export * from "./ErrorBoundary";
