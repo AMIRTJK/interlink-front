@@ -87,6 +87,7 @@ export const ApproverItem = ({
                   ? "bg-amber-50 border-amber-200 text-amber-600"
                   : "bg-white border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600"
               )}
+              title="Добавить комментарий"
             >
               <MessageSquarePlus size={12} />
             </button>
@@ -117,7 +118,7 @@ export const ApproverItem = ({
               <Check size={10} className="text-emerald-500" />
             </div>
           </If>
-          <If is={!!approver.isInvited && !approver.dsApplied}>
+          <If is={!!approver.isInvited && !approver.dsApplied && !approver.approved}>
             <button
               onClick={() => {
                 if (approver.approvalRecordId) {
@@ -142,6 +143,22 @@ export const ApproverItem = ({
                 {approver.dsLoading ? "Согласую..." : "Согласовать"}
               </span>
             </button>
+          </If>
+        </div>
+      </If>
+
+      <If is={Boolean(approver.note || (approver.approved && approver.comment))}>
+        <div className="px-3 py-2 bg-amber-50/70 border-t border-amber-100/80 text-[11px] text-slate-700">
+          <span className="font-semibold block text-[10px] text-amber-800 mb-0.5">
+            💬 Комментарий:
+          </span>
+          <p className="whitespace-pre-wrap leading-relaxed">
+            {approver.note || approver.comment}
+          </p>
+          <If is={Boolean(approver.decided_at)}>
+            <span className="text-[9px] text-slate-400 block mt-1">
+              Решение принято: {new Date(approver.decided_at!).toLocaleString("ru-RU")}
+            </span>
           </If>
         </div>
       </If>

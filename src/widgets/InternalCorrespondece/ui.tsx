@@ -237,17 +237,18 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     }
   };
 
-  const handleApprove = async () => {
-    if (!canSign) return;
-
+  const handleApprove = async (payload?: { status?: "approved" | "returned"; note?: string }) => {
     try {
-      // const payloadData = await signaturesPayloadAsync({ action: "sign" });
+      const status = payload?.status || "approved";
+      const rawNote = payload?.note?.trim();
+      const note = rawNote && rawNote.length > 0 ? rawNote : null;
 
       approvalsConfirm({
-        status: "approved",
+        status,
+        note,
       });
     } catch (error) {
-      console.error("Ошибка при процессе подписания:", error);
+      console.error("Ошибка при процессе согласования:", error);
     }
   };
 

@@ -1652,17 +1652,28 @@ export const CreateInternalCorrespondence = ({
       ),
     method: "PATCH",
     messages: {
-      success: "Документ согласован",
+      success: "Решение по согласованию сохранено",
       invalidate: [
         ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+        ApiRoutes.GET_INTERNAL_BY_ID?.replace(":id", String(id || "")),
       ],
     },
     queryOptions: {
-      onSuccess: (_, req) => {
+      onSuccess: (res, req) => {
+        const item = res?.data || res?.item;
         setApprovers((prev) =>
           prev.map((a) =>
             a.approvalRecordId === req.approvalRecordId
-              ? { ...a, approved: true, dsApplied: true, dsLoading: false }
+              ? {
+                  ...a,
+                  approved: (item?.status || req.status) === "approved",
+                  status: item?.status || req.status,
+                  note: item?.note !== undefined ? item.note : req.note,
+                  comment: item?.note !== undefined ? (item.note || "") : a.comment,
+                  decided_at: item?.decided_at || new Date().toISOString(),
+                  dsApplied: (item?.status || req.status) === "approved",
+                  dsLoading: false,
+                }
               : a,
           ),
         );
@@ -1947,10 +1958,13 @@ export const CreateInternalCorrespondence = ({
               color: "bg-slate-100 text-slate-700",
               approved: a.status === "approved",
               approving: false,
-              comment: "",
+              comment: a.note || "",
               showCommentInput: false,
               dsApplied: a.status === "approved",
               dsLoading: false,
+              status: a.status,
+              note: a.note || null,
+              decided_at: a.decided_at || null,
             };
           }),
         );
@@ -3687,6 +3701,10 @@ export const CreateInternalCorrespondence = ({
   };
 
   const applyApproverDS = (recordId: string) => {
+    const approverObj = approvers.find((a) => a.approvalRecordId === recordId);
+    const rawNote = approverObj?.comment?.trim();
+    const note = rawNote && rawNote.length > 0 ? rawNote : null;
+
     setApprovers((prev) =>
       prev.map((a) =>
         a.approvalRecordId === recordId ? { ...a, dsLoading: true } : a,
@@ -3696,6 +3714,7 @@ export const CreateInternalCorrespondence = ({
     approvalsConfirm({
       approvalRecordId: recordId,
       status: "approved",
+      note,
     });
   };
 

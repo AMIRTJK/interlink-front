@@ -64,7 +64,7 @@ const FullHistoryModal = ({
   workflowData: any;
   initialTab?: string;
   onSign: () => void;
-  onApprove: () => void;
+  onApprove: (payload?: { status?: "approved"; note?: string }) => void;
   isSigning: boolean;
   currentUserId: string | number | null;
   onShowSignature: (e: any, item: any) => void;
@@ -177,8 +177,9 @@ const FullHistoryModal = ({
     const map: Record<string, any> = {
       signed: { color: "success", text: "Подписано" },
       approved: { color: "success", text: "Согласовано" },
+      returned: { color: "warning", text: "Возвращено" },
       declined: { color: "error", text: "Отклонил право подписи" },
-      rejected: { color: "error", text: "Отказано" },
+      rejected: { color: "error", text: "Отклонено" },
       pending: { color: "default", text: "Ожидание" },
       created: { color: "blue", text: "Автор" },
     };
@@ -298,7 +299,7 @@ const FullHistoryModal = ({
                 htmlType="button"
                 type="primary"
                 size="small"
-                onClick={onApprove}
+                onClick={handleOpenApproveModal}
                 loading={isSigning}
                 disabled={item.status !== "pending" || isReadOnly}
                 className="bg-green-600! hover:bg-green-500! border-green-600!"
@@ -308,6 +309,21 @@ const FullHistoryModal = ({
             )}
           </div>
         </div>
+
+        <If is={Boolean(item.note)}>
+          <div
+            className={`mt-1.5 mx-3 p-2 rounded-lg text-xs leading-relaxed border ${
+              isDarkMode
+                ? "bg-amber-950/30 border-amber-800/50 text-amber-200"
+                : "bg-amber-50/80 border-amber-200/80 text-amber-900"
+            }`}
+          >
+            <span className="font-semibold block mb-0.5 text-[11px] opacity-80">
+              💬 Комментарий:
+            </span>
+            {item.note}
+          </div>
+        </If>
 
         {/* --- СПИСОК ВЕРСИЙ УЧАСТНИКА --- */}
         {isExpanded && userVersions.length > 0 && (
@@ -676,7 +692,7 @@ export const WorkflowParticipantsPanel = ({
   isCollapsed: boolean;
   toggleCollapse: () => void;
   onSign: () => void;
-  onApprove: () => void;
+  onApprove: (payload?: { status?: "approved" | "returned"; note?: string }) => void;
   isSigning: boolean;
   currentUserId: string | number | null;
   isReadOnly: boolean;
@@ -703,6 +719,23 @@ export const WorkflowParticipantsPanel = ({
     isOpen: boolean;
     data: any | null;
   }>({ isOpen: false, data: null });
+
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [approvalNote, setApprovalNote] = useState("");
+
+  const handleOpenApproveModal = () => {
+    setApprovalNote("");
+    setIsApprovalModalOpen(true);
+  };
+
+  const handleConfirmApproval = () => {
+    onApprove({
+      status: "approved",
+      note: approvalNote.trim() || undefined,
+    });
+    setIsApprovalModalOpen(false);
+    setApprovalNote("");
+  };
 
   const openSignatureModal = (e: React.MouseEvent, item: any) => {
     e.stopPropagation();
@@ -784,6 +817,13 @@ export const WorkflowParticipantsPanel = ({
           bg: isDarkMode ? "bg-[#111827]" : "bg-white",
           bgList: isDarkMode ? "bg-[#00c9501a]" : "bg-[#00c95026]",
           icon: <CheckCircleFilled className="text-green-500!" />,
+        };
+      case "returned":
+        return {
+          color: "text-amber-500",
+          bg: isDarkMode ? "bg-[#111827]" : "bg-white",
+          bgList: isDarkMode ? "bg-[#f59e0b1a]" : "bg-[#f59e0b26]",
+          icon: <ClockCircleFilled className="text-amber-500!" />,
         };
       case "declined":
       case "rejected":
@@ -964,17 +1004,31 @@ export const WorkflowParticipantsPanel = ({
             )}
             {role === "approver" && isCurrentUser && isPending && (
               <Button
-                onClick={onApprove}
+                onClick={handleOpenApproveModal}
                 disabled={status !== "pending" || isReadOnly}
                 loading={isSigning}
                 type="primary"
                 size="small"
-                className={`${status !== "penging" || isReadOnly ? (isDarkMode ? "bg-gray-700 text-gray-500" : "bg-[#f0f1f3]") : "bg-blue-600! hover:bg-blue-500!"}`}
+                className={`${status !== "pending" || isReadOnly ? (isDarkMode ? "bg-gray-700 text-gray-500" : "bg-[#f0f1f3]") : "bg-blue-600! hover:bg-blue-500!"}`}
               >
                 Согласовать
               </Button>
             )}
           </div>
+          <If is={Boolean(item.note)}>
+            <div
+              className={`mt-2 p-2 rounded-lg text-xs leading-relaxed border ${
+                isDarkMode
+                  ? "bg-amber-950/30 border-amber-800/50 text-amber-200"
+                  : "bg-amber-50/80 border-amber-200/80 text-amber-900"
+              }`}
+            >
+              <span className="font-semibold block mb-0.5 text-[11px] opacity-80">
+                💬 Комментарий:
+              </span>
+              {item.note}
+            </div>
+          </If>
         </div>
       </div>
     );
@@ -1380,6 +1434,38 @@ export const WorkflowParticipantsPanel = ({
         data={signatureModal.data}
         isDarkMode={isDarkMode}
       />
+
+      <ConfigProvider
+        theme={{
+          algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
+        }}
+      >
+        <Modal
+          open={isApprovalModalOpen}
+          onCancel={() => setIsApprovalModalOpen(false)}
+          onOk={handleConfirmApproval}
+          confirmLoading={isSigning}
+          title="Согласование документа"
+          okText="Согласовать"
+          cancelText="Отмена"
+          centered
+          destroyOnClose
+        >
+          <div className="flex flex-col gap-3 py-2">
+            <label className={`block text-xs font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+              Комментарий к согласованию (необязательно, до 5000 символов):
+            </label>
+            <Input.TextArea
+              rows={4}
+              maxLength={5000}
+              showCount
+              value={approvalNote}
+              onChange={(e) => setApprovalNote(e.target.value)}
+              placeholder="Введите комментарий к согласованию..."
+            />
+          </div>
+        </Modal>
+      </ConfigProvider>
     </>
   );
 };

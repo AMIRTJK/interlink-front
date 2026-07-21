@@ -83,6 +83,9 @@ export interface Approver {
   showCommentInput: boolean;
   dsApplied: boolean;
   dsLoading: boolean;
+  status?: string;
+  note?: string | null;
+  decided_at?: string | null;
 }
 
 export interface FinalSigner {
