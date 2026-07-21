@@ -21,7 +21,7 @@ export const getCorrespondenseIncomingStatusLabel = (status: string) => {
       color: "#2E52B2",
     },
     [CorrespondenseStatus.TO_SIGN]: {
-      label: "Подпись",
+      label: "На подпись",
       color: "#2E52B2",
     },
     [CorrespondenseStatus.DONE]: { label: "Завершено", color: "#229A2E" },
@@ -29,10 +29,18 @@ export const getCorrespondenseIncomingStatusLabel = (status: string) => {
       label: "Отменено",
       color: "#2E52B2",
     },
+    to_sign: { label: "На подпись", color: "#2E52B2" },
+    to_approve: { label: "На согласовании", color: "#2E52B2" },
+    to_visa: { label: "На визировании", color: "#2E52B2" },
+    to_execute: { label: "На исполнении", color: "#2E52B2" },
+    to_register: { label: "На регистрации", color: "#7B46C0" },
+    approved: { label: "Согласовано", color: "#229A2E" },
+    signed: { label: "Подписано", color: "#229A2E" },
+    rejected: { label: "Отклонено", color: "#FF4D4F" },
   };
 
-  if (status === null || !(status in statusMap)) {
-    return { label: "Неизвестный статус", color: "red" };
+  if (!status || !(status in statusMap)) {
+    return { label: status || "Неизвестный статус", color: "blue" };
   }
 
   return statusMap[status];
