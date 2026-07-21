@@ -1025,7 +1025,7 @@ export const CreateInternalCorrespondence = ({
     return metaTypes.map((t) => ({
       value: t.key,
       label: t.label,
-      desc: LETTER_TYPE_DESC[t.key] ?? "",
+      desc: LETTER_TYPE_DESC[t.key] ?? LETTER_TYPE_DESC[t.label] ?? "",
     }));
   }, [metaData]);
 
