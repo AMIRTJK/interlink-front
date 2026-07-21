@@ -79,7 +79,7 @@ interface IProps {
 export const FilesAnalytics = ({ onView }: IProps) => {
 	const [months, setMonths] = useState(12);
 	const [limit, setLimit] = useState(5);
-	const { data, isLoading, isError, refetch } = useFilesAnalytics({ months, limit });
+	const { data, isLoading, isError } = useFilesAnalytics({ months, limit });
 
 	if (isLoading) {
 		return (
@@ -95,8 +95,6 @@ export const FilesAnalytics = ({ onView }: IProps) => {
 				<EmptyState
 					title="Не удалось загрузить аналитику"
 					description="Проверьте подключение и попробуйте обновить данные."
-					actionText="Повторить"
-					onAction={() => refetch()}
 				/>
 			</div>
 		);
