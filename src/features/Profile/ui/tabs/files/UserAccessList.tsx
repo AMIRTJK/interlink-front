@@ -17,6 +17,7 @@ interface IApiUsersResponse {
 interface IProps {
   selectedUsers: number[];
   onToggleUser: (userId: number) => void;
+  excludeUserIds?: number[];
 }
 
 const getInitials = (user: IAdminUser): string => {
@@ -41,7 +42,7 @@ const AVATAR_COLORS = [
 
 const getAvatarColor = (id: number): string => AVATAR_COLORS[id % AVATAR_COLORS.length];
 
-export const UserAccessList = ({ selectedUsers, onToggleUser }: IProps) => {
+export const UserAccessList = ({ selectedUsers, onToggleUser, excludeUserIds }: IProps) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data, isLoading } = useGetQuery<{ per_page: number }, IApiUsersResponse>({
@@ -53,6 +54,7 @@ export const UserAccessList = ({ selectedUsers, onToggleUser }: IProps) => {
   const users: IAdminUser[] = Array.isArray(data?.data?.data) ? data!.data.data : [];
 
   const filteredUsers = users.filter((user) => {
+    if (excludeUserIds?.includes(user.id)) return false;
     const name = getFullName(user).toLowerCase();
     const pos = (user.position ?? "").toLowerCase();
     const q = searchQuery.toLowerCase();

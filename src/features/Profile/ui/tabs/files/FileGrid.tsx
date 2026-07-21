@@ -1,5 +1,5 @@
 import React from "react";
-import { Pin, Trash2, Archive, FileText, FileSpreadsheet, Eye, History, Share2, Download, Folder } from "lucide-react";
+import { Pin, Trash2, Archive, FileText, FileSpreadsheet, Eye, History, Share2, Download, Folder, Check } from "lucide-react";
 import { IApiFile, getFileType, formatBytes } from "./lib";
 import { Tooltip, If } from "@shared/ui";
 import { _axios } from "@shared/api";
@@ -12,6 +12,9 @@ interface IProps {
   onView: (file: IApiFile) => void;
   onMove?: (file: IApiFile) => void;
   onShare?: (file: IApiFile) => void;
+  selectedFileIds?: number[];
+  onToggleSelectFile?: (id: number) => void;
+  showSelection?: boolean;
 }
 
 export const FileGrid = ({
@@ -21,6 +24,9 @@ export const FileGrid = ({
   onView,
   onMove,
   onShare,
+  selectedFileIds = [],
+  onToggleSelectFile,
+  showSelection = false,
 }: IProps) => {
   const getCoverContent = (file: IApiFile) => {
     const fileType = getFileType(file.extension);
@@ -98,17 +104,38 @@ export const FileGrid = ({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {files.map((file) => (
-        <div
-          key={file.id}
-          className="group bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600 overflow-hidden transition-all duration-200"
-        >
-          {/* Cover Area */}
+      {files.map((file) => {
+        const isSelected = selectedFileIds.includes(file.id);
+        return (
           <div
-            onClick={() => onView(file)}
-            className="h-44 relative overflow-hidden bg-slate-100 dark:bg-slate-900 cursor-pointer"
+            key={file.id}
+            className="group bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600 overflow-hidden transition-all duration-200"
           >
-            {getCoverContent(file)}
+            {/* Cover Area */}
+            <div
+              onClick={() => onView(file)}
+              className="h-44 relative overflow-hidden bg-slate-100 dark:bg-slate-900 cursor-pointer"
+            >
+              {getCoverContent(file)}
+
+              {/* Selection Checkbox */}
+              <If is={showSelection}>
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleSelectFile?.(file.id);
+                  }}
+                  className={`absolute top-3 left-3 w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all z-10 cursor-pointer ${
+                    isSelected
+                      ? "bg-indigo-600! border-indigo-600! text-white! scale-100 opacity-100"
+                      : "bg-black/20 border-white/60 text-transparent scale-0 group-hover:scale-100 group-hover:opacity-100 hover:border-white hover:bg-black/35 focus:scale-100 focus:opacity-100"
+                  }`}
+                >
+                  <If is={isSelected}>
+                    <Check size={12} className="stroke-[3]" />
+                  </If>
+                </div>
+              </If>
 
             {/* Pin / Star toggle */}
             <If is={!!onTogglePin}>
@@ -217,7 +244,7 @@ export const FileGrid = ({
             </div>
           </div>
         </div>
-      ))}
+      )})}
     </div>
   );
 };
