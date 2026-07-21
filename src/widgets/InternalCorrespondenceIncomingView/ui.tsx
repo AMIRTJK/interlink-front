@@ -12,6 +12,7 @@ import {
   CornerUpLeft,
   Forward,
   ClipboardList,
+  Check,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn, useGetQuery, useMutationQuery } from "@shared/lib";
@@ -212,7 +213,7 @@ export const InternalCorrespondenceIncomingView = ({
   const { mutate: seenMutate } = useMutationQuery({
     method: "POST",
     url: item?.id
-      ? ApiRoutes.READ_INTERNAL.replace(":id", String(item.id))
+      ? ApiRoutes.ACKNOWLEDGE_INTERNAL.replace(":id", String(item.id))
       : "",
     messages: {
       success: "Вы успешно ознакомились с документом",
@@ -222,6 +223,13 @@ export const InternalCorrespondenceIncomingView = ({
         : [],
     },
   });
+
+  const isAcknowledged =
+    item.is_unread === false ||
+    (item.recipients &&
+      item.recipients.some(
+        (r: any) => r.read_at !== null && r.read_at !== undefined,
+      ));
 
   const handleAction = (id: "seen" | "reply" | "forward" | "task") => {
     setShowActionMenu(false);
@@ -449,7 +457,7 @@ export const InternalCorrespondenceIncomingView = ({
       </If>
 
       {/* Шапка страницы / верхняя панель управления */}
-      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white relative z-40">
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white relative z-[100]">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
@@ -474,6 +482,13 @@ export const InternalCorrespondenceIncomingView = ({
             <span>Просмотр</span>
           </button>
 
+          <If is={isAcknowledged}>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-semibold select-none">
+              <Check size={14} className="text-emerald-600" />
+              <span>Ознакомлен</span>
+            </span>
+          </If>
+
           {/* Действие — выпадающее меню */}
           <div className="relative" ref={actionMenuRef}>
             <button
@@ -497,7 +512,7 @@ export const InternalCorrespondenceIncomingView = ({
                   exit={{ opacity: 0, scale: 0.92 }}
                   transition={{ type: "spring", stiffness: 280, damping: 22 }}
                   style={{ transformOrigin: "top right" }}
-                  className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 w-56 py-2 overflow-hidden z-[100]"
+                  className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 w-56 py-2 overflow-hidden z-[1000]"
                 >
                   {ACTION_MENU_ITEMS.map((menuItem, idx) => (
                     <motion.button
@@ -786,7 +801,7 @@ export const InternalCorrespondenceIncomingView = ({
                 />
                 <AnimatePresence>
                   {showTaskPanel && (
-                    <TaskPanel onClose={() => setShowTaskPanel(false)} />
+                    <TaskPanel correspondenceId={item.id} onClose={() => setShowTaskPanel(false)} />
                   )}
                 </AnimatePresence>
               </div>

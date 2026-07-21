@@ -35,6 +35,9 @@ interface DocumentHeaderFormProps {
   isIncoming: boolean;
   isReadOnly: boolean;
   creator?: any;
+  relationType?: string;
+  relationLabel?: string;
+  sourceDocument?: any;
 }
 
 export interface Recipient {
@@ -54,6 +57,9 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
   isIncoming,
   isReadOnly = false,
   creator,
+  relationType,
+  relationLabel,
+  sourceDocument,
 }) => {
   const [selectedRecipients, setSelectedRecipients] =
     useState<Recipient[]>(initialRecipients);
@@ -241,6 +247,20 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
         <Form.Item name="copy" hidden>
           <Input />
         </Form.Item>
+
+        <If is={Boolean(relationLabel || sourceDocument)}>
+          <div className="flex items-center gap-2 px-3 py-1.5 mb-1.5 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-lg text-xs text-blue-700 dark:text-blue-300">
+            <span className="font-semibold">
+              {relationLabel || (relationType === "reply" ? "Ответное письмо" : "Пересланное письмо")}
+            </span>
+            {sourceDocument && (
+              <span>
+                на {sourceDocument.reg_number || sourceDocument.subject || `#${sourceDocument.id}`}
+                {sourceDocument.creator?.full_name ? ` (${sourceDocument.creator.full_name})` : ""}
+              </span>
+            )}
+          </div>
+        </If>
 
         <Form.Item name="subject" rules={[requiredRule]} className="m-0!">
           <Input

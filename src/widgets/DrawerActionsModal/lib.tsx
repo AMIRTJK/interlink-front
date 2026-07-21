@@ -5,6 +5,8 @@ import {
   TeamOutlined,
   MailOutlined,
   SendOutlined,
+  CheckOutlined,
+  FileDoneOutlined,
 } from "@ant-design/icons";
 
 export const Ui={
@@ -18,4 +20,6 @@ export const Icons={
     TeamOutlined,
     MailOutlined,
     SendOutlined,
+    CheckOutlined,
+    FileDoneOutlined,
 }

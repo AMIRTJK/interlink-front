@@ -26,6 +26,7 @@ import { generateMockWorkflow } from "./lib";
 import { Editor, EditorHandle } from "./ui/Editor";
 import { AppRoutes } from "@shared/config";
 import { versionControl, IDocumentVersion } from "@shared/lib";
+import { CreateAssignmentModal } from "./ui/assignments/CreateAssignmentModal";
 
 interface IProps {
   mode: "create" | "show";
@@ -256,9 +257,68 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     sendCorrespondence({});
   };
 
+  const [isCreateAssignmentOpen, setIsCreateAssignmentOpen] = useState(false);
+
+  const { mutate: acknowledge, isPending: isAcknowledging } = useMutationQuery({
+    url: id ? ApiRoutes.ACKNOWLEDGE_INTERNAL.replace(":id", String(id)) : "",
+    method: "POST",
+    messages: {
+      success: "Ознакомление сохранено",
+      invalidate: [
+        ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
+        ApiRoutes.GET_INTERNAL_INCOMING,
+        ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", String(id || "")),
+      ],
+    },
+  });
+
+  const acknowledgedUsers = useMemo(() => {
+    return initialData?.item?.acknowledged_users || rawWorkflowData?.data?.acknowledged_users || [];
+  }, [initialData, rawWorkflowData]);
+
+  const isAlreadyAcknowledged = useMemo(() => {
+    const fromAckUsers = acknowledgedUsers.some(
+      (u: any) => String(u.user_id || u.user?.id || u.id) === String(currentUserId),
+    );
+    const fromRecipients = initialData?.item?.recipients?.some(
+      (r: any) => r.read_at !== null && r.read_at !== undefined,
+    );
+    return fromAckUsers || fromRecipients || initialData?.item?.is_unread === false;
+  }, [acknowledgedUsers, currentUserId, initialData]);
+
+  const handleAcknowledge = () => {
+    if (id) acknowledge({});
+  };
+
   const handleReply = () => {
     close();
-    navigate(AppRoutes.INTERNAL_OUTGOING_CREATE);
+    navigate(AppRoutes.INTERNAL_OUTGOING_CREATE, {
+      state: {
+        source_correspondence_id: Number(id),
+        link_type: "reply",
+        subject: initialData?.item?.subject ? `Re: ${initialData.item.subject}` : "",
+        recipient_id: initialData?.item?.creator?.id,
+      },
+    });
+  };
+
+  const handleForward = () => {
+    close();
+    navigate(AppRoutes.INTERNAL_OUTGOING_CREATE, {
+      state: {
+        source_correspondence_id: Number(id),
+        link_type: "forward",
+        subject: initialData?.item?.subject ? `Fwd: ${initialData.item.subject}` : "",
+        body: initialData?.item?.body
+          ? `<p><br></p><p>---------- Пересылаемое сообщение ----------<br><strong>От:</strong> ${initialData.item.creator?.full_name || "Не указан"}<br><strong>Тема:</strong> ${initialData.item.subject || ""}</p>${initialData.item.body}`
+          : "",
+      },
+    });
+  };
+
+  const handleOpenAssignment = () => {
+    close();
+    setIsCreateAssignmentOpen(true);
   };
 
   const { mutate: createDraft, isPending: isCreating } =
@@ -501,6 +561,9 @@ export const InternalCorrespondece: React.FC<IProps> = ({
               isIncoming={isIncoming}
               isReadOnly={isReadOnly}
               creator={creator}
+              relationType={initialData?.item?.relation_type}
+              relationLabel={initialData?.item?.relation_label}
+              sourceDocument={initialData?.item?.source_document}
             />
 
             <div className="flex gap-3 items-stretch">
@@ -567,6 +630,10 @@ export const InternalCorrespondece: React.FC<IProps> = ({
         onClose={close}
         docId={id}
         onReply={handleReply}
+        onForward={handleForward}
+        onAcknowledge={handleAcknowledge}
+        isAcknowledged={isAlreadyAcknowledged}
+        onOpenAssignment={handleOpenAssignment}
         onRefresh={refetchWorkflow}
         isIncoming={isIncoming}
         isReadOnly={isReadOnly}
@@ -598,6 +665,16 @@ export const InternalCorrespondece: React.FC<IProps> = ({
           </div>
         </Modal>
       </ConfigProvider>
+
+      <CreateAssignmentModal
+        isOpen={isCreateAssignmentOpen}
+        onClose={() => setIsCreateAssignmentOpen(false)}
+        docId={id || ""}
+        isDarkMode={isDarkMode}
+        onSuccess={() => {
+          refetchWorkflow();
+        }}
+      />
     </div>
   );
 };

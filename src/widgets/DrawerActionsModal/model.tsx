@@ -9,6 +9,10 @@ export interface IActionsModal {
   onClose: () => void;
   docId?: string;
   onReply?: () => void;
+  onForward?: () => void;
+  onAcknowledge?: () => void;
+  isAcknowledged?: boolean;
+  onOpenAssignment?: () => void;
   onRefresh?: () => void;
   isIncoming: boolean;
   isReadOnly: boolean;

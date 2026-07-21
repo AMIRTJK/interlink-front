@@ -1637,6 +1637,13 @@ export const CreateInternalCorrespondence = ({
           priority: importance,
         };
 
+        if (location.state?.source_correspondence_id) {
+          requestPayload.source_correspondence_id = Number(location.state.source_correspondence_id);
+        }
+        if (location.state?.link_type) {
+          requestPayload.link_type = location.state.link_type;
+        }
+
         if (id) saveDraft(requestPayload);
       },
       onError: () =>
@@ -1878,6 +1885,9 @@ export const CreateInternalCorrespondence = ({
 
   const onSaveClick = async () => {
     const editorBody = editorContent || getCleanEditorHtml();
+    const sourceCorrespondenceId = location.state?.source_correspondence_id;
+    const linkType = location.state?.link_type;
+
     const requestPayload: any = {
       subject,
       body: editorBody,
@@ -1893,8 +1903,29 @@ export const CreateInternalCorrespondence = ({
       priority: importance,
     };
 
+    if (sourceCorrespondenceId) {
+      requestPayload.source_correspondence_id = Number(sourceCorrespondenceId);
+    }
+    if (linkType) {
+      requestPayload.link_type = linkType;
+    }
+
     saveDraft(requestPayload);
   };
+
+  useEffect(() => {
+    if (!id && location.state) {
+      if (location.state.subject && !subject) {
+        setSubject(location.state.subject);
+      }
+      if (location.state.body && !editorContent) {
+        setEditorContent(location.state.body);
+        if (editorRef.current) {
+          editorRef.current.innerHTML = location.state.body;
+        }
+      }
+    }
+  }, [id, location.state]);
 
   useEffect(() => {
     if (initialData?.item) {

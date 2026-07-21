@@ -15,6 +15,8 @@ import {
   UpOutlined,
   DownOutlined,
 } from "@ant-design/icons";
+import { versionControl } from "@shared/lib";
+import { AssignmentsSection } from "./assignments/AssignmentsSection";
 import { If, Tooltip } from "@shared/ui";
 import {
   Avatar,
@@ -464,6 +466,36 @@ const FullHistoryModal = ({
               Никого не найдено
             </div>
           )}
+
+          {sourceData.acknowledged_users && sourceData.acknowledged_users.length > 0 && (
+            <div className="mt-4 border-t pt-3 border-gray-100 dark:border-gray-800">
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 pl-1">
+                Ознакомились ({sourceData.acknowledged_users.length})
+              </div>
+              {sourceData.acknowledged_users.map((ackUser: any) => {
+                const user = ackUser.user || ackUser;
+                return (
+                  <div
+                    key={ackUser.id || user.id}
+                    className="flex items-center gap-2.5 p-2 rounded-lg mb-1.5 border border-emerald-100 bg-emerald-50/50 dark:bg-emerald-950/30 dark:border-emerald-900/40"
+                  >
+                    <Avatar src={user.photo_path || null} size={28} icon={<UserOutlined />} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
+                        {user.full_name || `${user.last_name || ""} ${user.first_name || ""}`}
+                      </p>
+                      <p className="text-[10px] text-gray-400">{user.position || "Сотрудник"}</p>
+                    </div>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium whitespace-nowrap">
+                      {ackUser.acknowledged_at
+                        ? new Date(ackUser.acknowledged_at).toLocaleString("ru-RU")
+                        : "Ознакомлен"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       ),
     },
@@ -687,7 +719,7 @@ export const WorkflowParticipantsPanel = ({
   isDarkMode,
   onSetVersionForSign,
   isSelectingVersion,
-}: {
+  docId?: string | number;
   workflowData: any;
   isCollapsed: boolean;
   toggleCollapse: () => void;
@@ -1385,6 +1417,16 @@ export const WorkflowParticipantsPanel = ({
               {!isCollapsed &&
                 hiddenApproversCount > 0 &&
                 renderShowMoreParticipants(hiddenApproversCount)}
+            </div>
+          )}
+
+          {!isCollapsed && docId && (
+            <div className="p-3 border-t border-gray-100 dark:border-gray-800">
+              <AssignmentsSection
+                docId={docId}
+                currentUserId={currentUserId}
+                isDarkMode={isDarkMode}
+              />
             </div>
           )}
         </div>

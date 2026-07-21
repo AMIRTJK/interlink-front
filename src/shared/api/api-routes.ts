@@ -188,6 +188,12 @@ export const ApiRoutes = {
     "/api/v1/internal-correspondences/:correspondenceId/versions/:versionId/select",
   DOWNLOAD_INTERNAL_ATTACHMENT:
     "/api/v1/internal-correspondences/:correspondenceId/attachments/:attachmentId/download",
+  ACKNOWLEDGE_INTERNAL: "/api/v1/internal-correspondences/:id/acknowledge",
+  INTERNAL_ASSIGNMENTS: "/api/v1/internal-correspondences/:id/assignments",
+  INTERNAL_ASSIGNMENT_RESULT:
+    "/api/v1/internal-correspondences/assignments/:id/result",
+  INTERNAL_ASSIGNMENT_REVIEW:
+    "/api/v1/internal-correspondences/assignments/:id/review",
 
   // ==================== MY FILES (PERSONAL STORAGE) ====================
   MY_FILES: "/api/v1/my-files",
