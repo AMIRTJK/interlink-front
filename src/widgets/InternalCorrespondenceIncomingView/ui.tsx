@@ -12,6 +12,7 @@ import {
   CornerUpLeft,
   Forward,
   ClipboardList,
+  Check,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn, useGetQuery, useMutationQuery } from "@shared/lib";
@@ -106,6 +107,24 @@ interface Recipient {
   };
 }
 
+// Пользователь, совершивший действие над письмом (ознакомился / ответил /
+// переслал). Для ознакомления дата приходит в acknowledged_at, для ответа и
+// пересылки — в action_at.
+interface ActionUser {
+  id?: string | number;
+  user_id?: string | number;
+  correspondence_id?: string | number;
+  link_type?: "reply" | "forward";
+  status?: string;
+  action_at?: string;
+  acknowledged_at?: string;
+  user?: {
+    id?: string | number;
+    full_name?: string;
+    position?: string;
+  };
+}
+
 interface RegistryItem {
   id: string | number;
   reg_prefix?: string;
@@ -116,6 +135,7 @@ interface RegistryItem {
   subject?: string;
   body?: string;
   status: string;
+  is_unread?: boolean;
   recipients?: Recipient[];
   creator?: {
     id?: string | number;
@@ -124,7 +144,102 @@ interface RegistryItem {
     department?: string;
   };
   priority?: string;
+  acknowledged_users?: ActionUser[];
+  replied_users?: ActionUser[];
+  forwarded_users?: ActionUser[];
+  reply_count?: number;
+  forward_count?: number;
 }
+
+const initialsOf = (fullName?: string) => {
+  if (!fullName) return "?";
+  const parts = fullName.trim().split(/\s+/);
+  return (
+    parts.length >= 2 ? parts[0][0] + parts[1][0] : parts[0].slice(0, 2)
+  ).toUpperCase();
+};
+
+// Свёрнутая группа аватаров с поповером-списком: используется в шапке письма
+// для ознакомившихся, ответивших и переславших. Скрывается, если действий нет.
+const UserActionCluster = ({
+  label,
+  users,
+  accent,
+}: {
+  label: string;
+  users: ActionUser[];
+  accent: { avatar: string; date: string };
+}) => {
+  if (!users || users.length === 0) return null;
+  return (
+    <div className="relative group">
+      <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-default">
+        <div className="flex -space-x-2">
+          {users.slice(0, 3).map((au) => {
+            const u = au.user || {};
+            return (
+              <span
+                key={au.id || u.id}
+                title={u.full_name || "Без имени"}
+                className={cn(
+                  "w-6 h-6 rounded-full text-white text-[10px] font-bold flex items-center justify-center border-2 border-white",
+                  accent.avatar,
+                )}
+              >
+                {initialsOf(u.full_name)}
+              </span>
+            );
+          })}
+        </div>
+        <span>
+          {label}: {users.length}
+        </span>
+      </button>
+      <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-[1000] max-h-80 overflow-y-auto">
+        <div className="px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+          {label} ({users.length})
+        </div>
+        {users.map((au) => {
+          const u = au.user || {};
+          const when = au.action_at || au.acknowledged_at;
+          return (
+            <div
+              key={au.id || u.id}
+              className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50"
+            >
+              <span
+                className={cn(
+                  "w-8 h-8 rounded-full text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0",
+                  accent.avatar,
+                )}
+              >
+                {initialsOf(u.full_name)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-slate-800 truncate">
+                  {u.full_name || "Без имени"}
+                </p>
+                <p className="text-[10px] text-slate-400 truncate">
+                  {u.position || "Сотрудник"}
+                </p>
+              </div>
+              <If is={Boolean(when)}>
+                <span
+                  className={cn(
+                    "text-[10px] font-medium whitespace-nowrap",
+                    accent.date,
+                  )}
+                >
+                  {when ? new Date(when).toLocaleDateString("ru-RU") : ""}
+                </span>
+              </If>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 // Ячейка деталей письма (label сверху, значение снизу)
 const DetailField = ({
@@ -212,7 +327,7 @@ export const InternalCorrespondenceIncomingView = ({
   const { mutate: seenMutate } = useMutationQuery({
     method: "POST",
     url: item?.id
-      ? ApiRoutes.READ_INTERNAL.replace(":id", String(item.id))
+      ? ApiRoutes.ACKNOWLEDGE_INTERNAL.replace(":id", String(item.id))
       : "",
     messages: {
       success: "Вы успешно ознакомились с документом",
@@ -222,6 +337,13 @@ export const InternalCorrespondenceIncomingView = ({
         : [],
     },
   });
+
+  const isAcknowledged =
+    item.is_unread === false ||
+    (item.recipients &&
+      item.recipients.some(
+        (r: any) => r.read_at !== null && r.read_at !== undefined,
+      ));
 
   const handleAction = (id: "seen" | "reply" | "forward" | "task") => {
     setShowActionMenu(false);
@@ -362,6 +484,12 @@ export const InternalCorrespondenceIncomingView = ({
     ? new Date(item.sent_at).toLocaleDateString("ru-RU")
     : "—";
 
+  // Действия над письмом: ознакомились / ответили / переслали. Бэкенд отдаёт
+  // их отдельными массивами прямо в объекте письма (для входящих).
+  const acknowledgedUsers = item.acknowledged_users || [];
+  const repliedUsers = item.replied_users || [];
+  const forwardedUsers = item.forwarded_users || [];
+
   // Открытие раздела — взаимное закрытие остальных (одновременно только один).
   // Общие для боковых вкладок цилиндров и горизонтальной панели разделов.
   const openSigners = () => {
@@ -449,7 +577,7 @@ export const InternalCorrespondenceIncomingView = ({
       </If>
 
       {/* Шапка страницы / верхняя панель управления */}
-      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white relative z-40">
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white relative z-[100]">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
@@ -474,6 +602,32 @@ export const InternalCorrespondenceIncomingView = ({
             <span>Просмотр</span>
           </button>
 
+          {/* Действия над письмом — свёрнуты в группы аватаров, полный перечень
+              раскрывается поповером при наведении. Каждая группа скрыта, если
+              соответствующих действий не было. */}
+          <UserActionCluster
+            label="Ответили"
+            users={repliedUsers}
+            accent={{ avatar: "bg-blue-500", date: "text-blue-600" }}
+          />
+          <UserActionCluster
+            label="Переслали"
+            users={forwardedUsers}
+            accent={{ avatar: "bg-amber-500", date: "text-amber-600" }}
+          />
+          <UserActionCluster
+            label="Ознакомились"
+            users={acknowledgedUsers}
+            accent={{ avatar: "bg-emerald-500", date: "text-emerald-600" }}
+          />
+
+          <If is={isAcknowledged}>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-semibold select-none">
+              <Check size={14} className="text-emerald-600" />
+              <span>Ознакомлен</span>
+            </span>
+          </If>
+
           {/* Действие — выпадающее меню */}
           <div className="relative" ref={actionMenuRef}>
             <button
@@ -497,7 +651,7 @@ export const InternalCorrespondenceIncomingView = ({
                   exit={{ opacity: 0, scale: 0.92 }}
                   transition={{ type: "spring", stiffness: 280, damping: 22 }}
                   style={{ transformOrigin: "top right" }}
-                  className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 w-56 py-2 overflow-hidden z-[100]"
+                  className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 w-56 py-2 overflow-hidden z-[1000]"
                 >
                   {ACTION_MENU_ITEMS.map((menuItem, idx) => (
                     <motion.button
@@ -786,7 +940,7 @@ export const InternalCorrespondenceIncomingView = ({
                 />
                 <AnimatePresence>
                   {showTaskPanel && (
-                    <TaskPanel onClose={() => setShowTaskPanel(false)} />
+                    <TaskPanel correspondenceId={item.id} onClose={() => setShowTaskPanel(false)} />
                   )}
                 </AnimatePresence>
               </div>

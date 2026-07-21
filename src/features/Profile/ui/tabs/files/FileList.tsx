@@ -8,11 +8,13 @@ import {
 	Download,
 	Folder,
 	Share2,
+	GripVertical,
 } from "lucide-react";
 import { IApiFile, getFileType, formatBytes, getUserFullName } from "./lib";
 import { Tooltip, If } from "@shared/ui";
 import { _axios } from "@shared/api";
 import { toast } from "@shared/lib/toast";
+import { useState } from "react";
 import { UserAvatar } from "./UserAvatar";
 import { SharedAccessCell } from "./SharedAccessCell";
 
@@ -28,6 +30,7 @@ interface IProps {
 	showSharedWith?: boolean;
 	onSelectAll?: (ids: number[]) => void;
 	onDeselectAll?: (ids: number[]) => void;
+	onReorderFiles?: (fileIds: number[]) => void;
 }
 
 export const FileList = ({
@@ -42,7 +45,40 @@ export const FileList = ({
 	showSharedWith,
 	onSelectAll,
 	onDeselectAll,
+	onReorderFiles,
 }: IProps) => {
+	const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+	const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+	const handleDragStart = (e: React.DragEvent, index: number) => {
+		setDraggedIndex(index);
+		e.dataTransfer.effectAllowed = "move";
+		e.dataTransfer.setData("text/plain", String(index));
+	};
+
+	const handleDragOver = (e: React.DragEvent, index: number) => {
+		e.preventDefault();
+		e.dataTransfer.dropEffect = "move";
+		if (dragOverIndex !== index) {
+			setDragOverIndex(index);
+		}
+	};
+
+	const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+		e.preventDefault();
+		if (draggedIndex === null || draggedIndex === targetIndex) return;
+
+		const updated = [...files];
+		const [moved] = updated.splice(draggedIndex, 1);
+		updated.splice(targetIndex, 0, moved);
+
+		setDraggedIndex(null);
+		setDragOverIndex(null);
+
+		if (onReorderFiles) {
+			onReorderFiles(updated.map((f) => f.id));
+		}
+	};
 	const getSmallIcon = (file: IApiFile) => {
 		const fileType = getFileType(file.extension);
 		const baseClass =
@@ -197,12 +233,27 @@ export const FileList = ({
 					</tr>
 				</thead>
 				<tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
-					{files.map((file) => {
+					{files.map((file, index) => {
 						const isSelected = selectedFileIds.includes(file.id);
+						const isDragging = draggedIndex === index;
+						const isOver = dragOverIndex === index;
+
 						return (
 							<tr
 								key={file.id}
-								className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors"
+								draggable={!!onReorderFiles}
+								onDragStart={(e) => handleDragStart(e, index)}
+								onDragOver={(e) => handleDragOver(e, index)}
+								onDrop={(e) => handleDrop(e, index)}
+								onDragEnd={() => {
+									setDraggedIndex(null);
+									setDragOverIndex(null);
+								}}
+								className={`group transition-all ${
+									isDragging ? "opacity-30 bg-indigo-50/50 dark:bg-indigo-950/20" : ""
+								} ${
+									isOver ? "border-t-2 border-t-indigo-500 bg-indigo-50/30 dark:bg-indigo-950/30" : "hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
+								}`}
 							>
 								{/* Checkbox */}
 								<If is={!!showSharedWith}>
@@ -219,6 +270,9 @@ export const FileList = ({
 								{/* Name */}
 								<td className="py-3 px-4">
 									<div className="flex items-center gap-3">
+										<If is={!!onReorderFiles}>
+											<GripVertical size={14} className="text-slate-300 group-hover:text-slate-400 cursor-grab active:cursor-grabbing shrink-0" />
+										</If>
 										{getSmallIcon(file)}
 										<span
 											onClick={() => onView(file)}

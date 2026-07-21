@@ -24,7 +24,7 @@ const buildFolderFileCounts = (items: IApiFile[]): Record<number, number> =>
 
 interface IFilesParams {
   search?: string;
-  sort?: "name" | "date" | "size";
+  sort?: "name" | "date" | "size" | "manual";
   dir?: "asc" | "desc";
   activeFolderId?: number | "all";
   page?: number;
@@ -137,11 +137,35 @@ export const useFilesData = (params: IFilesParams) => {
     },
   });
 
+  // 9.1. Reorder Files (Drag & Drop)
+  const reorderFiles = useMutationQuery<
+    { folder_id: number | null; file_ids: number[] },
+    { success: boolean; message: string; data: any }
+  >({
+    url: ApiRoutes.MY_FILES_ORDER,
+    method: "PATCH",
+    messages: {
+      success: "Порядок файлов сохранен",
+      invalidate: [ApiRoutes.MY_FILES],
+    },
+  });
+
   const getArrayData = (response: any): any[] => {
     if (!response) return [];
     if (Array.isArray(response)) return response;
     if (response.data && Array.isArray(response.data)) return response.data;
     return [];
+  };
+
+  // Ручная сортировка (drag&drop) идёт по ключу sort_order. У бэкенда sort_order
+  // — это позиция: file_ids[0] получает sort_order 0 и должен быть ПЕРВЫМ. Поэтому
+  // в ручном режиме всегда сортируем по возрастанию sort_order (0 — сверху),
+  // независимо от переключателя направления (он касается только name/date/size).
+  // Так порядок детерминирован и совпадает с тем, что сохранил бэкенд. Сортировка
+  // стабильная: при равных sort_order исходный порядок ответа сохраняется.
+  const sortByManualOrder = <T extends { sort_order?: number }>(arr: T[]): T[] => {
+    if (params.sort && params.sort !== "manual") return arr;
+    return [...arr].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
   };
 
   const folders = getArrayData(foldersQuery.data?.data);
@@ -266,7 +290,10 @@ export const useFilesData = (params: IFilesParams) => {
   });
 
   const rawSharedFilesData = sharedFilesQuery.data?.data;
-  const sharedFiles = getArrayData(rawSharedFilesData);
+  const sharedFiles = useMemo(
+    () => sortByManualOrder(getArrayData(rawSharedFilesData)),
+    [rawSharedFilesData, params.sort, params.dir],
+  );
   const sharedFolders = getArrayData(sharedFoldersQuery.data?.data);
 
   const sharedFilesPagination = {
@@ -345,14 +372,15 @@ export const useFilesData = (params: IFilesParams) => {
   }, [params.activeFolderId]);
 
   const pinnedFiles = useMemo(() => {
-    return files.filter((f) => f.is_starred);
-  }, [files]);
+    return sortByManualOrder(files.filter((f) => f.is_starred));
+  }, [files, params.sort, params.dir]);
 
   const currentFiles = useMemo(() => {
     const actId = params.activeFolderId;
     const parentId = actId === undefined || actId === "all" ? null : actId;
-    return files.filter((f) => (f.folder_id === null && parentId === null) || (f.folder_id !== null && parentId !== null && Number(f.folder_id) === Number(parentId)));
-  }, [files, params.activeFolderId]);
+    const filtered = files.filter((f) => (f.folder_id === null && parentId === null) || (f.folder_id !== null && parentId !== null && Number(f.folder_id) === Number(parentId)));
+    return sortByManualOrder(filtered);
+  }, [files, params.activeFolderId, params.sort, params.dir]);
 
   const currentFolders = useMemo(() => {
     const actId = params.activeFolderId;
@@ -399,6 +427,7 @@ export const useFilesData = (params: IFilesParams) => {
     updateFile,
     deleteFile,
     uploadFile,
+    reorderFiles,
 
     inviteToFile,
     removeFileShare,

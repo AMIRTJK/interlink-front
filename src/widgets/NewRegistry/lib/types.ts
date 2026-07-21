@@ -17,11 +17,24 @@ export interface BadgeDefinition {
   render: (data: any) => React.ReactNode;
 }
 
+// Колонка со списком пользователей (ответили / переслали / ознакомились).
+// Рендерится как ячейка «Получатели»: превью + окно со всем списком по клику.
+export interface PeopleColumn {
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+  // Tailwind-класс фона аватара (bg-blue-600 и т.п.)
+  avatarBg: string;
+  getUsers: (data: any) => any[];
+}
+
 // Итоговый конфиг, который возвращает хук
 export interface RegistryConfig {
   primary: FieldDefinition;
   secondary: FieldDefinition;
   badges: BadgeDefinition[];
+  // Необязательные колонки-списки пользователей (только у входящих).
+  people?: PeopleColumn[];
   // Функция, возвращающая пункты меню для конкретной записи
   getActions: (record: any, onMove?: (id: number) => void) => MenuProps["items"];
   filters: IFilterItem[];

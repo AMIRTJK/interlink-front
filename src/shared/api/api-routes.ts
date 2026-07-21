@@ -186,6 +186,14 @@ export const ApiRoutes = {
   GET_INTERNAL_VERSIONS: "/api/v1/internal-correspondences/:id/versions",
   SELECT_INTERNAL_VERISION_FOR_SIGN:
     "/api/v1/internal-correspondences/:correspondenceId/versions/:versionId/select",
+  DOWNLOAD_INTERNAL_ATTACHMENT:
+    "/api/v1/internal-correspondences/:correspondenceId/attachments/:attachmentId/download",
+  ACKNOWLEDGE_INTERNAL: "/api/v1/internal-correspondences/:id/acknowledge",
+  INTERNAL_ASSIGNMENTS: "/api/v1/internal-correspondences/:id/assignments",
+  INTERNAL_ASSIGNMENT_RESULT:
+    "/api/v1/internal-correspondences/assignments/:id/result",
+  INTERNAL_ASSIGNMENT_REVIEW:
+    "/api/v1/internal-correspondences/assignments/:id/review",
 
   // ==================== MY FILES (PERSONAL STORAGE) ====================
   MY_FILES: "/api/v1/my-files",
@@ -200,6 +208,7 @@ export const ApiRoutes = {
   MY_FILES_BULK_SHARE: "/api/v1/my-files/bulk-share",
   MY_FILES_BULK_DELETE: "/api/v1/my-files/bulk-delete",
   MY_FILES_ANALYTICS: "/api/v1/my-files/analytics",
+  MY_FILES_ORDER: "/api/v1/my-files/order",
 
   MY_FILE_FOLDERS: "/api/v1/my-file-folders",
   MY_FILE_FOLDERS_SHARED_WITH_ME: "/api/v1/my-file-folders/shared-with-me",

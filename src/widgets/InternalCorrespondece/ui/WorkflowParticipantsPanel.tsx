@@ -15,6 +15,8 @@ import {
   UpOutlined,
   DownOutlined,
 } from "@ant-design/icons";
+import { versionControl } from "@shared/lib";
+import { AssignmentsSection } from "./assignments/AssignmentsSection";
 import { If, Tooltip } from "@shared/ui";
 import {
   Avatar,
@@ -64,7 +66,7 @@ const FullHistoryModal = ({
   workflowData: any;
   initialTab?: string;
   onSign: () => void;
-  onApprove: () => void;
+  onApprove: (payload?: { status?: "approved"; note?: string }) => void;
   isSigning: boolean;
   currentUserId: string | number | null;
   onShowSignature: (e: any, item: any) => void;
@@ -177,8 +179,9 @@ const FullHistoryModal = ({
     const map: Record<string, any> = {
       signed: { color: "success", text: "Подписано" },
       approved: { color: "success", text: "Согласовано" },
+      returned: { color: "warning", text: "Возвращено" },
       declined: { color: "error", text: "Отклонил право подписи" },
-      rejected: { color: "error", text: "Отказано" },
+      rejected: { color: "error", text: "Отклонено" },
       pending: { color: "default", text: "Ожидание" },
       created: { color: "blue", text: "Автор" },
     };
@@ -188,6 +191,10 @@ const FullHistoryModal = ({
 
   const toggleRow = (id: string) => {
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleOpenApproveModal = () => {
+    onApprove({ status: "approved" });
   };
 
   // Вспомогательная функция для рендера строки участника внутри модалки
@@ -298,7 +305,7 @@ const FullHistoryModal = ({
                 htmlType="button"
                 type="primary"
                 size="small"
-                onClick={onApprove}
+                onClick={handleOpenApproveModal}
                 loading={isSigning}
                 disabled={item.status !== "pending" || isReadOnly}
                 className="bg-green-600! hover:bg-green-500! border-green-600!"
@@ -308,6 +315,21 @@ const FullHistoryModal = ({
             )}
           </div>
         </div>
+
+        <If is={Boolean(item.note)}>
+          <div
+            className={`mt-1.5 mx-3 p-2 rounded-lg text-xs leading-relaxed border ${
+              isDarkMode
+                ? "bg-amber-950/30 border-amber-800/50 text-amber-200"
+                : "bg-amber-50/80 border-amber-200/80 text-amber-900"
+            }`}
+          >
+            <span className="font-semibold block mb-0.5 text-[11px] opacity-80">
+              💬 Комментарий:
+            </span>
+            {item.note}
+          </div>
+        </If>
 
         {/* --- СПИСОК ВЕРСИЙ УЧАСТНИКА --- */}
         {isExpanded && userVersions.length > 0 && (
@@ -446,6 +468,36 @@ const FullHistoryModal = ({
           {totalParticipants === 0 && (
             <div className="text-center text-gray-400 py-4">
               Никого не найдено
+            </div>
+          )}
+
+          {sourceData.acknowledged_users && sourceData.acknowledged_users.length > 0 && (
+            <div className="mt-4 border-t pt-3 border-gray-100 dark:border-gray-800">
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 pl-1">
+                Ознакомились ({sourceData.acknowledged_users.length})
+              </div>
+              {sourceData.acknowledged_users.map((ackUser: any) => {
+                const user = ackUser.user || ackUser;
+                return (
+                  <div
+                    key={ackUser.id || user.id}
+                    className="flex items-center gap-2.5 p-2 rounded-lg mb-1.5 border border-emerald-100 bg-emerald-50/50 dark:bg-emerald-950/30 dark:border-emerald-900/40"
+                  >
+                    <Avatar src={user.photo_path || null} size={28} icon={<UserOutlined />} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
+                        {user.full_name || `${user.last_name || ""} ${user.first_name || ""}`}
+                      </p>
+                      <p className="text-[10px] text-gray-400">{user.position || "Сотрудник"}</p>
+                    </div>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium whitespace-nowrap">
+                      {ackUser.acknowledged_at
+                        ? new Date(ackUser.acknowledged_at).toLocaleString("ru-RU")
+                        : "Ознакомлен"}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -671,26 +723,9 @@ export const WorkflowParticipantsPanel = ({
   isDarkMode,
   onSetVersionForSign,
   isSelectingVersion,
-}: {
-  workflowData: any;
-  isCollapsed: boolean;
-  toggleCollapse: () => void;
-  onSign: () => void;
-  onApprove: () => void;
-  isSigning: boolean;
-  currentUserId: string | number | null;
-  isReadOnly: boolean;
-  isReadPage?: boolean;
-  isSignedDocument?: boolean;
-  hasQRInSelectedVersion?: boolean;
-  versions?: any[];
-  activeVersionId?: string | number | null;
-  onSelectVersion?: (content: string, versionId: string | number) => void;
-  documentCreator?: any;
-  isDarkMode?: boolean;
-  onSetVersionForSign?: (versionId: string | number) => void;
-  isSelectingVersion?: boolean;
-}) => {
+  docId,
+}: any) => {
+
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     tab: string;
@@ -703,6 +738,23 @@ export const WorkflowParticipantsPanel = ({
     isOpen: boolean;
     data: any | null;
   }>({ isOpen: false, data: null });
+
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [approvalNote, setApprovalNote] = useState("");
+
+  const handleOpenApproveModal = () => {
+    setApprovalNote("");
+    setIsApprovalModalOpen(true);
+  };
+
+  const handleConfirmApproval = () => {
+    onApprove({
+      status: "approved",
+      note: approvalNote.trim() || undefined,
+    });
+    setIsApprovalModalOpen(false);
+    setApprovalNote("");
+  };
 
   const openSignatureModal = (e: React.MouseEvent, item: any) => {
     e.stopPropagation();
@@ -784,6 +836,13 @@ export const WorkflowParticipantsPanel = ({
           bg: isDarkMode ? "bg-[#111827]" : "bg-white",
           bgList: isDarkMode ? "bg-[#00c9501a]" : "bg-[#00c95026]",
           icon: <CheckCircleFilled className="text-green-500!" />,
+        };
+      case "returned":
+        return {
+          color: "text-amber-500",
+          bg: isDarkMode ? "bg-[#111827]" : "bg-white",
+          bgList: isDarkMode ? "bg-[#f59e0b1a]" : "bg-[#f59e0b26]",
+          icon: <ClockCircleFilled className="text-amber-500!" />,
         };
       case "declined":
       case "rejected":
@@ -964,17 +1023,31 @@ export const WorkflowParticipantsPanel = ({
             )}
             {role === "approver" && isCurrentUser && isPending && (
               <Button
-                onClick={onApprove}
+                onClick={handleOpenApproveModal}
                 disabled={status !== "pending" || isReadOnly}
                 loading={isSigning}
                 type="primary"
                 size="small"
-                className={`${status !== "penging" || isReadOnly ? (isDarkMode ? "bg-gray-700 text-gray-500" : "bg-[#f0f1f3]") : "bg-blue-600! hover:bg-blue-500!"}`}
+                className={`${status !== "pending" || isReadOnly ? (isDarkMode ? "bg-gray-700 text-gray-500" : "bg-[#f0f1f3]") : "bg-blue-600! hover:bg-blue-500!"}`}
               >
                 Согласовать
               </Button>
             )}
           </div>
+          <If is={Boolean(item.note)}>
+            <div
+              className={`mt-2 p-2 rounded-lg text-xs leading-relaxed border ${
+                isDarkMode
+                  ? "bg-amber-950/30 border-amber-800/50 text-amber-200"
+                  : "bg-amber-50/80 border-amber-200/80 text-amber-900"
+              }`}
+            >
+              <span className="font-semibold block mb-0.5 text-[11px] opacity-80">
+                💬 Комментарий:
+              </span>
+              {item.note}
+            </div>
+          </If>
         </div>
       </div>
     );
@@ -1333,6 +1406,16 @@ export const WorkflowParticipantsPanel = ({
                 renderShowMoreParticipants(hiddenApproversCount)}
             </div>
           )}
+
+          {!isCollapsed && docId && (
+            <div className="p-3 border-t border-gray-100 dark:border-gray-800">
+              <AssignmentsSection
+                docId={docId}
+                currentUserId={currentUserId}
+                isDarkMode={isDarkMode}
+              />
+            </div>
+          )}
         </div>
 
         {!isCollapsed && (
@@ -1380,6 +1463,38 @@ export const WorkflowParticipantsPanel = ({
         data={signatureModal.data}
         isDarkMode={isDarkMode}
       />
+
+      <ConfigProvider
+        theme={{
+          algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
+        }}
+      >
+        <Modal
+          open={isApprovalModalOpen}
+          onCancel={() => setIsApprovalModalOpen(false)}
+          onOk={handleConfirmApproval}
+          confirmLoading={isSigning}
+          title="Согласование документа"
+          okText="Согласовать"
+          cancelText="Отмена"
+          centered
+          destroyOnClose
+        >
+          <div className="flex flex-col gap-3 py-2">
+            <label className={`block text-xs font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+              Комментарий к согласованию (необязательно, до 5000 символов):
+            </label>
+            <Input.TextArea
+              rows={4}
+              maxLength={5000}
+              showCount
+              value={approvalNote}
+              onChange={(e) => setApprovalNote(e.target.value)}
+              placeholder="Введите комментарий к согласованию..."
+            />
+          </div>
+        </Modal>
+      </ConfigProvider>
     </>
   );
 };

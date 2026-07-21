@@ -101,15 +101,16 @@ export const LETTER_TYPE_OPTIONS: {
   { value: "ariza", label: "Ариза", desc: "Заявление" },
   { value: "darkhost", label: "Дархост", desc: "Запрос / Обращение" },
   { value: "malumotnoma", label: "Маълумотнома", desc: "Справка" },
+  { value: "maktub", label: "Мактуб", desc: "Письмо" },
 ];
 
-// Локальные пояснения к типам письма по ключу — обогащаем подписи из /meta,
-// т.к. бэкенд присылает только key + label.
 export const LETTER_TYPE_DESC: Record<string, string> = {
   guzorish: "Отчёт / Доклад",
   ariza: "Заявление",
   darkhost: "Запрос / Обращение",
   malumotnoma: "Справка",
+  maktub: "Письмо",
+  Мактуб: "Письмо",
 };
 
 export const IMPORTANCE_OPTIONS: {
@@ -234,6 +235,7 @@ export const INBOX_DOC_TYPE_STYLE: Record<string, string> = {
   Дархост: "bg-purple-50 text-purple-700 border-purple-100",
   Гузориш: "bg-teal-50 text-teal-700 border-teal-100",
   Ариза: "bg-amber-50 text-amber-700 border-amber-100",
+  Мактуб: "bg-blue-50 text-blue-700 border-blue-100",
 };
 
 export const MOCK_CONTENT_LINES = [

@@ -1,11 +1,17 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { toast } from "@shared/lib/toast";
 import { AppRoutes, getEnvVar } from "@shared/config";
-import { tokenControl } from "@shared/lib";
+import { tokenControl, queryClient } from "@shared/lib";
+import { ApiRoutes } from "./api-routes";
 
 export const _axios = axios.create({
   baseURL: getEnvVar("VITE_API_URL"),
 });
+
+export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig<unknown> {
+  suppressErrorToast?: boolean;
+  skipAuth?: boolean;
+}
 
 _axios.interceptors.request.use((config: CustomAxiosRequestConfig) => {
   const token = tokenControl.get();
@@ -13,7 +19,10 @@ _axios.interceptors.request.use((config: CustomAxiosRequestConfig) => {
   if (!config.skipAuth) {
     if (!token) {
       tokenControl.remove();
-      window.location.href = AppRoutes.LOGIN;
+      queryClient.clear();
+      if (window.location.pathname !== AppRoutes.LOGIN) {
+        window.location.replace(AppRoutes.LOGIN);
+      }
       return Promise.reject(new axios.Cancel("Token expired"));
     }
     config.headers.set("Authorization", `Bearer ${token}`);
@@ -23,24 +32,23 @@ _axios.interceptors.request.use((config: CustomAxiosRequestConfig) => {
   return config;
 });
 
-export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig<unknown> {
-  suppressErrorToast?: boolean;
-  skipAuth?: boolean;
-}
-
 _axios.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<unknown>) => {
-    // toast.dismiss();
-
     const { status } = error.response || {};
-
     const originalRequest = error.config as CustomAxiosRequestConfig;
 
-    if (status === 401 && !originalRequest?.skipAuth) {
+    if (
+      status === 401 &&
+      !originalRequest?.skipAuth &&
+      !originalRequest?.url?.includes(ApiRoutes.LOGOUT)
+    ) {
       toast.error("Пользователь не авторизован");
       tokenControl.remove();
-      window.location.href = AppRoutes.LOGIN;
+      queryClient.clear();
+      if (window.location.pathname !== AppRoutes.LOGIN) {
+        window.location.replace(AppRoutes.LOGIN);
+      }
     }
 
     return Promise.reject(error);

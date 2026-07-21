@@ -23,7 +23,7 @@ export const FilesTab = () => {
 	const [activeFolderId, setActiveFolderId] = useState<number | "all">("all");
 	const [viewContext, setViewContext] = useState<"personal" | "shared" | "analytics">("personal");
 	const [searchQuery, setSearchQuery] = useState("");
-	const [sortBy, setSortBy] = useState<"date" | "size" | "name">("date");
+	const [sortBy, setSortBy] = useState<"date" | "size" | "name" | "manual">("manual");
 	const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 	const [selectedFileIds, setSelectedFileIds] = useState<number[]>([]);
@@ -66,6 +66,7 @@ export const FilesTab = () => {
 		updateFile,
 		deleteFile,
 		uploadFile,
+		reorderFiles,
 		inviteToFile,
 		removeFileShare,
 		inviteToFolder,
@@ -201,6 +202,13 @@ export const FilesTab = () => {
 		}
 	};
 
+	const handleReorderFiles = (fileIds: number[]) => {
+		reorderFiles.mutate({
+			folder_id: typeof activeFolderId === "number" ? activeFolderId : null,
+			file_ids: fileIds,
+		});
+	};
+
 	return (
 		<div className="files-tab-container space-y-6">
 			{/* Header */}
@@ -331,6 +339,7 @@ export const FilesTab = () => {
 						onPageChange={setFilesPage}
 						onSelectAll={(ids) => setSelectedFileIds((prev) => Array.from(new Set([...prev, ...ids])))}
 						onDeselectAll={(ids) => setSelectedFileIds((prev) => prev.filter((id) => !ids.includes(id)))}
+						onReorderFiles={viewContext === "personal" ? handleReorderFiles : undefined}
 					/>
 				</div>
 			)}

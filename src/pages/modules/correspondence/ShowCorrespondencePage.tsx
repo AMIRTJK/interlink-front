@@ -60,7 +60,17 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
       // Поля с префиксом my_ (my_prefix, my_folder) приходят в корне ответа,
       // а не внутри item — прокидываем my_prefix в item для «Номер (ВХ)».
       const incomingItem = letterItem
-        ? { ...letterItem, my_prefix: data?.my_prefix ?? letterItem.my_prefix }
+        ? {
+            ...letterItem,
+            my_prefix: data?.my_prefix ?? letterItem.my_prefix,
+            // Списки действий над письмом бэкенд может отдать как внутри item,
+            // так и в корне ответа (как my_prefix) — берём отовсюду.
+            acknowledged_users:
+              letterItem.acknowledged_users ?? data?.acknowledged_users,
+            replied_users: letterItem.replied_users ?? data?.replied_users,
+            forwarded_users:
+              letterItem.forwarded_users ?? data?.forwarded_users,
+          }
         : {
             id,
             subject: "",

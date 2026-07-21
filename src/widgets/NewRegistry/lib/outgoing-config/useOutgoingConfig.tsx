@@ -9,6 +9,7 @@ import {
   Pin,
   Archive,
   UserCheck,
+  CornerUpLeft,
 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
@@ -73,10 +74,6 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
     secondary: {
       label: "Получатели",
       icon: <Loader size={12} />,
-      // render: (d) => {
-      //   if (d.status === "to_sign") return "На подписании";
-      //   return d.recipient_name || d.recipients?.[0]?.user?.full_name || "—";
-      // },
       render: (d) => <RecipientsViewer data={d} />,
     },
     badges: [
@@ -93,21 +90,52 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
         render: (d) => d.reg_number || "Не присвоен",
       },
       {
+        label: "Тип письма",
+        icon: <CornerUpLeft size={10} />,
+        color: "purple",
+        render: (d) => {
+          // Бэкенд отдаёт локализованный relation_label и link_type
+          // ("reply" | "forward" | null). Null — обычное письмо без связи.
+          if (d.relation_label) return d.relation_label;
+          if (d.link_type === "reply") return "Ответное";
+          if (d.link_type === "forward") return "Пересланное";
+          return "Обычное";
+        },
+      },
+      {
         label: "Мой статус",
         icon: <UserCheck size={10} />,
         color: "emerald",
         render: (d) => {
-          const myStatus = d.my_status?.primary;
-          if (!myStatus) return "—";
+          const rawStatus =
+            typeof d.my_status === "string"
+              ? d.my_status
+              : d.my_status?.primary;
+
+          if (!rawStatus) return "—";
 
           const statusMap: Record<string, string> = {
+            to_sign: "На подпись",
+            to_approve: "На согласовании",
+            to_visa: "На визировании",
+            to_execute: "На исполнении",
+            to_register: "На регистрации",
             approved: "Согласовано",
             rejected: "Отклонено",
-            pending: "Ожидает",
+            pending: "В ожидании",
             signed: "Подписано",
+            draft: "Черновик",
+            done: "Завершено",
+            cancelled: "Отменено",
+            canceled: "Отменено",
+            sent: "Отправлено",
+            in_review: "На рассмотрении",
+            on_approval: "На согласовании",
+            revoked: "Отозвано",
+            author: "Автор",
           };
 
-          return statusMap[myStatus] || myStatus;
+          return statusMap[rawStatus] || rawStatus;
         },
       },
     ],
@@ -118,8 +146,6 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
 
       const items: MenuProps["items"] = [];
 
-      // «В архив» и «Закрепить» нужны только во внешней корреспонденции —
-      // во внутренних реестрах эти действия убраны.
       if (!isArchived && !isInternal) {
         items.push({
           key: "archive",

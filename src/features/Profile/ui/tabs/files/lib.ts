@@ -28,6 +28,8 @@ export interface IApiFile {
   size: number;
   size_human?: string;
   is_starred: boolean;
+  /** Позиция в ручной сортировке (drag&drop). Бэкенд отдаёт при sort=manual. */
+  sort_order?: number;
   meta: Record<string, any> | null;
   access?: {
     is_owner: boolean;

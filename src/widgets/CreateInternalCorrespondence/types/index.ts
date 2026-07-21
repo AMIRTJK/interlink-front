@@ -7,7 +7,12 @@ export type Status =
 
 // Ключи document_type из бэкенда (/internal-correspondences/meta).
 // Подписи (Гузориш/Ариза/…) приходят из /meta, здесь — только ключи.
-export type LetterType = "guzorish" | "ariza" | "darkhost" | "malumotnoma";
+export type LetterType =
+  | "guzorish"
+  | "ariza"
+  | "darkhost"
+  | "malumotnoma"
+  | "maktub";
 
 // Ключи priority из бэкенда: low / normal / high (раньше было medium)
 export type ImportanceLevel = "high" | "normal" | "low";
@@ -78,6 +83,9 @@ export interface Approver {
   showCommentInput: boolean;
   dsApplied: boolean;
   dsLoading: boolean;
+  status?: string;
+  note?: string | null;
+  decided_at?: string | null;
 }
 
 export interface FinalSigner {

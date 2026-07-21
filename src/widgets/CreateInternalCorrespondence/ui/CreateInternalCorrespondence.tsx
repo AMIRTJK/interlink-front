@@ -671,6 +671,60 @@ export const CreateInternalCorrespondence = ({
   const composeMode = composeState?.composeMode;
   const sourceLetter = composeState?.sourceLetter;
 
+  // Связь ответа/пересылки с исходным письмом. Контекст приходит двумя путями:
+  // со страницы просмотра входящего (composeMode + sourceLetter.id) либо из
+  // реестра исходящих (source_correspondence_id + link_type напрямую в state).
+  // Нормализуем к паре полей бэкенда — их всегда передаём вместе.
+  const linkState = (location.state || null) as {
+    source_correspondence_id?: string | number;
+    link_type?: "reply" | "forward";
+  } | null;
+  const sourceCorrespondenceId =
+    linkState?.source_correspondence_id ?? sourceLetter?.id ?? null;
+  const linkType: "reply" | "forward" | null =
+    linkState?.link_type ?? composeMode ?? null;
+
+  // Блок «Исходное письмо» показываем не только ДО сохранения (из navigate
+  // state), но и ПОСЛЕ — GET уже отдаёт link_type + source_document связанного
+  // письма. Здесь собираем поля для панели из сохранённого ответа как фолбэк.
+  // ВАЖНО: только для отображения. Префилл темы/получателей и боковой A4-показ
+  // исходного письма ниже завязаны строго на navigate state (composeMode/
+  // sourceLetter), чтобы при открытии готового черновика ничего не перетиралось.
+  const savedItem = initialData?.item;
+  const savedLinkType: "reply" | "forward" | null =
+    savedItem?.link_type === "reply" || savedItem?.link_type === "forward"
+      ? savedItem.link_type
+      : null;
+  const savedSourceDoc = savedItem?.source_document;
+  // Тело исходного письма source_document не содержит — достаём из incoming_links.
+  const savedSourceBody: string | undefined =
+    savedItem?.incoming_links?.find(
+      (l: any) => Number(l?.incoming_id) === Number(savedSourceDoc?.id),
+    )?.incoming?.body ?? undefined;
+
+  const panelMode: "reply" | "forward" | undefined =
+    composeMode ?? savedLinkType ?? undefined;
+  const panelSource = sourceLetter
+    ? sourceLetter
+    : savedSourceDoc
+      ? {
+          id: savedSourceDoc.id,
+          subject: savedSourceDoc.subject,
+          creator: savedSourceDoc.creator,
+          senderName: savedSourceDoc.creator?.full_name,
+          date: savedSourceDoc.sent_at
+            ? new Date(savedSourceDoc.sent_at).toLocaleDateString("ru-RU")
+            : savedSourceDoc.created_at
+              ? new Date(savedSourceDoc.created_at).toLocaleDateString("ru-RU")
+              : "—",
+          status: savedSourceDoc.status,
+          priority: undefined as string | undefined,
+          inboundNumber:
+            savedSourceDoc.reg_number || savedSourceDoc.tracking_number || "—",
+          body: savedSourceBody,
+        }
+      : undefined;
+
   const [to, setTo] = useState<RecipientOption[]>([]);
   const [cc, setCc] = useState<RecipientOption[]>([]);
   const [subject, setSubject] = useState("");
@@ -1025,7 +1079,7 @@ export const CreateInternalCorrespondence = ({
     return metaTypes.map((t) => ({
       value: t.key,
       label: t.label,
-      desc: LETTER_TYPE_DESC[t.key] ?? "",
+      desc: LETTER_TYPE_DESC[t.key] ?? LETTER_TYPE_DESC[t.label] ?? "",
     }));
   }, [metaData]);
 
@@ -1281,11 +1335,16 @@ export const CreateInternalCorrespondence = ({
   // После успешного сохранения файлы уже лежат на бэкенде: заменяем локальную
   // очередь списком из ответа. Иначе следующее сохранение отправит те же файлы
   // повторно и в письме появятся дубликаты.
-  const syncAttachmentsAfterSave = useCallback((data: any) => {
-    const saved = data?.item?.attachments;
-    if (Array.isArray(saved)) setAttachments(saved.map(mapServerAttachment));
-    else setAttachments((prev) => prev.filter((a) => !a.file));
-  }, []);
+  const syncAttachmentsAfterSave = useCallback(
+    (data: any) => {
+      const saved = data?.item?.attachments;
+      const docId = id || data?.item?.id;
+      if (Array.isArray(saved))
+        setAttachments(saved.map((a: any) => mapServerAttachment(a, docId)));
+      else setAttachments((prev) => prev.filter((a) => !a.file));
+    },
+    [id],
+  );
 
   const { mutate: createDraft, isPending: isCreating } = useMutationQuery<any>({
     url: ApiRoutes.CREATE_INTERNAL,
@@ -1632,6 +1691,12 @@ export const CreateInternalCorrespondence = ({
           priority: importance,
         };
 
+        // source_correspondence_id и link_type передаём только вместе.
+        if (sourceCorrespondenceId != null && linkType) {
+          requestPayload.source_correspondence_id = Number(sourceCorrespondenceId);
+          requestPayload.link_type = linkType;
+        }
+
         if (id) saveDraft(requestPayload);
       },
       onError: () =>
@@ -1647,17 +1712,28 @@ export const CreateInternalCorrespondence = ({
       ),
     method: "PATCH",
     messages: {
-      success: "Документ согласован",
+      success: "Решение по согласованию сохранено",
       invalidate: [
         ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+        ApiRoutes.GET_INTERNAL_BY_ID?.replace(":id", String(id || "")),
       ],
     },
     queryOptions: {
-      onSuccess: (_, req) => {
+      onSuccess: (res, req) => {
+        const item = res?.data || res?.item;
         setApprovers((prev) =>
           prev.map((a) =>
             a.approvalRecordId === req.approvalRecordId
-              ? { ...a, approved: true, dsApplied: true, dsLoading: false }
+              ? {
+                  ...a,
+                  approved: (item?.status || req.status) === "approved",
+                  status: item?.status || req.status,
+                  note: item?.note !== undefined ? item.note : req.note,
+                  comment: item?.note !== undefined ? (item.note || "") : a.comment,
+                  decided_at: item?.decided_at || new Date().toISOString(),
+                  dsApplied: (item?.status || req.status) === "approved",
+                  dsLoading: false,
+                }
               : a,
           ),
         );
@@ -1862,6 +1938,7 @@ export const CreateInternalCorrespondence = ({
 
   const onSaveClick = async () => {
     const editorBody = editorContent || getCleanEditorHtml();
+
     const requestPayload: any = {
       subject,
       body: editorBody,
@@ -1877,8 +1954,28 @@ export const CreateInternalCorrespondence = ({
       priority: importance,
     };
 
+    // source_correspondence_id и link_type передаём только вместе.
+    if (sourceCorrespondenceId != null && linkType) {
+      requestPayload.source_correspondence_id = Number(sourceCorrespondenceId);
+      requestPayload.link_type = linkType;
+    }
+
     saveDraft(requestPayload);
   };
+
+  useEffect(() => {
+    if (!id && location.state) {
+      if (location.state.subject && !subject) {
+        setSubject(location.state.subject);
+      }
+      if (location.state.body && !editorContent) {
+        setEditorContent(location.state.body);
+        if (editorRef.current) {
+          editorRef.current.innerHTML = location.state.body;
+        }
+      }
+    }
+  }, [id, location.state]);
 
   useEffect(() => {
     if (initialData?.item) {
@@ -1942,10 +2039,13 @@ export const CreateInternalCorrespondence = ({
               color: "bg-slate-100 text-slate-700",
               approved: a.status === "approved",
               approving: false,
-              comment: "",
+              comment: a.note || "",
               showCommentInput: false,
               dsApplied: a.status === "approved",
               dsLoading: false,
+              status: a.status,
+              note: a.note || null,
+              decided_at: a.decided_at || null,
             };
           }),
         );
@@ -1956,7 +2056,7 @@ export const CreateInternalCorrespondence = ({
       // и такой рефетч не должен съедать несохранённый выбор.
       if (Array.isArray(item.attachments)) {
         setAttachments((prev) => [
-          ...item.attachments.map(mapServerAttachment),
+          ...item.attachments.map((a: any) => mapServerAttachment(a, item.id || id)),
           ...prev.filter((a) => a.file),
         ]);
       }
@@ -3682,6 +3782,10 @@ export const CreateInternalCorrespondence = ({
   };
 
   const applyApproverDS = (recordId: string) => {
+    const approverObj = approvers.find((a) => a.approvalRecordId === recordId);
+    const rawNote = approverObj?.comment?.trim();
+    const note = rawNote && rawNote.length > 0 ? rawNote : null;
+
     setApprovers((prev) =>
       prev.map((a) =>
         a.approvalRecordId === recordId ? { ...a, dsLoading: true } : a,
@@ -3691,6 +3795,7 @@ export const CreateInternalCorrespondence = ({
     approvalsConfirm({
       approvalRecordId: recordId,
       status: "approved",
+      note,
     });
   };
 
@@ -4133,19 +4238,19 @@ export const CreateInternalCorrespondence = ({
           </div>
         </div>
 
-        {composeMode && sourceLetter && (
+        {panelMode && panelSource && (
           <OriginalLetterPanel
-            mode={composeMode}
+            mode={panelMode}
             sender={
-              sourceLetter.senderName || sourceLetter.creator?.full_name || "—"
+              panelSource.senderName || panelSource.creator?.full_name || "—"
             }
-            date={sourceLetter.date || "—"}
-            status={sourceLetter.status || ""}
-            priority={sourceLetter.priority}
-            inboundNumber={sourceLetter.inboundNumber || "—"}
-            subject={sourceLetter.subject || ""}
-            body={sourceLetter.body}
-            sourceId={sourceLetter.id}
+            date={panelSource.date || "—"}
+            status={panelSource.status || ""}
+            priority={panelSource.priority}
+            inboundNumber={panelSource.inboundNumber || "—"}
+            subject={panelSource.subject || ""}
+            body={panelSource.body}
+            sourceId={panelSource.id}
           />
         )}
 
