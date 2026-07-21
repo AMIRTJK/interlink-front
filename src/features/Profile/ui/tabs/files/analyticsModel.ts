@@ -55,3 +55,71 @@ export interface IFilesAnalyticsResponse {
   success: boolean;
   data: IFilesAnalyticsData;
 }
+
+export interface IRawFilesAnalyticsSummary {
+  total_files: number;
+  total_folders: number;
+  starred_files: number;
+  shared_files: number;
+  average_file_size?: number;
+  average_file_size_human?: string;
+}
+
+export interface IRawFilesAnalyticsStorage {
+  used_bytes: number;
+  used_human?: string;
+  limit_bytes: number;
+  limit_human?: string;
+  free_bytes: number;
+  free_human?: string;
+  usage_pct: number;
+}
+
+export interface IRawFilesTypeBreakdownItem {
+  type: string;
+  file_count: number;
+  total_size: number;
+  total_size_human?: string;
+  percentage?: number;
+}
+
+export interface IRawFilesFolderItem {
+  id: number;
+  name: string;
+  emoji?: string | null;
+  file_count: number;
+  total_size: number;
+  total_size_human?: string;
+}
+
+export interface IRawFilesFolderBreakdown {
+  folders: IRawFilesFolderItem[];
+  without_folder?: {
+    file_count: number;
+    total_size: number;
+    total_size_human?: string;
+  };
+}
+
+export interface IRawFilesUploadActivityItem {
+  period: string;
+  file_count: number;
+  total_size: number;
+  total_size_human?: string;
+}
+
+export interface IRawFilesAnalyticsData {
+  summary: IRawFilesAnalyticsSummary;
+  storage: IRawFilesAnalyticsStorage;
+  type_breakdown: IRawFilesTypeBreakdownItem[];
+  folder_breakdown: IRawFilesFolderBreakdown;
+  upload_activity: IRawFilesUploadActivityItem[];
+  recent_files: IApiFile[];
+  largest_files: IApiFile[];
+}
+
+export interface IRawFilesAnalyticsResponse {
+  success: boolean;
+  message?: string;
+  data: IRawFilesAnalyticsData;
+}

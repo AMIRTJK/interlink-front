@@ -5,11 +5,13 @@ import { IFilesFolderBreakdownItem } from "./analyticsModel";
 import { formatBytes } from "./lib";
 
 interface IProps {
-	folderBreakdown?: IFilesFolderBreakdownItem[];
+	folderBreakdown?: IFilesFolderBreakdownItem[] | null;
 }
 
-export const FilesFolderBreakdown = ({ folderBreakdown = [] }: IProps) => {
-	if (folderBreakdown.length === 0) {
+export const FilesFolderBreakdown = ({ folderBreakdown }: IProps) => {
+	const normalizedFolderBreakdown = Array.isArray(folderBreakdown) ? folderBreakdown : [];
+
+	if (normalizedFolderBreakdown.length === 0) {
 		return (
 			<motion.div
 				initial={{ opacity: 0, y: 16 }}
@@ -39,7 +41,7 @@ export const FilesFolderBreakdown = ({ folderBreakdown = [] }: IProps) => {
 			</div>
 
 			<div className="flex-1 overflow-y-auto max-h-[250px] pr-1 space-y-2">
-				{folderBreakdown.map((item) => {
+				{normalizedFolderBreakdown.map((item) => {
 					const isNullFolder = item.folder_id === null;
 					return (
 						<div

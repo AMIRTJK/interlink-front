@@ -29,12 +29,16 @@ const axisTick = { fontSize: 11, fill: "#9ca3af" } as const;
 
 const pieColors = ["#6366f1", "#8b5cf6", "#38bdf8", "#a8a29e", "#a78bfa"];
 
-const formatMonthLabel = (mStr: string): string => {
+const formatMonthLabel = (mStr?: string): string => {
+	if (!mStr || typeof mStr !== "string") {
+		return "";
+	}
+
 	const parts = mStr.split("-");
 	if (parts.length === 2) {
 		const monthIdx = parseInt(parts[1], 10) - 1;
 		const months = ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"];
-		return months[monthIdx] ? `${months[monthIdx]} '${parts[0].slice(2)}` : mStr;
+		return months[monthIdx] ? `${months[monthIdx]} '${parts[0].slice(-2)}` : mStr;
 	}
 	return mStr;
 };
