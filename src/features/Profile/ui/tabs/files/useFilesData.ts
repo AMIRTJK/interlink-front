@@ -245,7 +245,15 @@ export const useFilesData = (params: IFilesParams) => {
     url: (data) => ApiRoutes.MY_FILES_INVITE.replace(":id", String(data.id)),
     method: "POST",
     messages: {
-      success: "Пользователь приглашен к файлу",
+      suppressSuccessToast: true,
+    },
+  });
+
+  const inviteToFolder = useMutationQuery<{ id: number; user_id: number }, any>({
+    url: (data) => ApiRoutes.MY_FILE_FOLDERS_INVITE.replace(":id", String(data.id)),
+    method: "POST",
+    messages: {
+      suppressSuccessToast: true,
     },
   });
 
@@ -300,15 +308,6 @@ export const useFilesData = (params: IFilesParams) => {
     method: "DELETE",
     messages: {
       success: "Доступ к файлу закрыт",
-    },
-  });
-
-  // 14. Invite to folder
-  const inviteToFolder = useMutationQuery<{ id: number; user_id: number }, any>({
-    url: (data) => ApiRoutes.MY_FILE_FOLDERS_INVITE.replace(":id", String(data.id)),
-    method: "POST",
-    messages: {
-      success: "Пользователь приглашен в папку",
     },
   });
 

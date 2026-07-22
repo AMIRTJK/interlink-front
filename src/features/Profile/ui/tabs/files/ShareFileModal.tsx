@@ -5,6 +5,7 @@ import { If, Tooltip } from "@shared/ui";
 import { UserAccessList } from "./UserAccessList";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { toast } from "@shared/lib/toast";
 
 interface IProps {
 	item: IApiFile | IApiFolder | null;
@@ -53,6 +54,11 @@ export const ShareFileModal = ({
 					? ApiRoutes.MY_FILE_FOLDERS_SHARES.replace(":id", String(item.id))
 					: "",
 		useToken: true,
+		options: {
+			enabled: !!item,
+			staleTime: 60 * 1000,
+			refetchOnWindowFocus: false,
+		},
 	});
 
 	if (!item) return null;
@@ -87,8 +93,17 @@ export const ShareFileModal = ({
 		e.preventDefault();
 		if (selectedUsers.length === 0) return;
 
-		for (const uId of selectedUsers) {
-			await onInvite(uId);
+		const count = selectedUsers.length;
+		try {
+			await Promise.all(selectedUsers.map((uId) => onInvite(uId)));
+			toast.success(
+				`Доступ успешно предоставлен (${count} ${
+					count === 1 ? "пользователь" : "пользователей"
+				})`,
+			);
+		} catch (err) {
+			console.error("Ошибка отправки приглашений:", err);
+			toast.error("Не удалось предоставить доступ");
 		}
 
 		setSelectedUsers([]);
