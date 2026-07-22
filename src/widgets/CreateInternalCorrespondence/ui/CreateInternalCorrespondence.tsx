@@ -244,6 +244,37 @@ const topLevelBlockOf = (
   return n && n.nodeType === Node.ELEMENT_NODE ? (n as HTMLElement) : null;
 };
 
+// Соседний РЕАЛЬНЫЙ блок за границей страницы: идём по сиблингам, пропуская
+// распорки/разрывы/печати ЭЦП/пустой текст. Возвращаем блок, ТОЛЬКО если по пути
+// пересекли распорку или разрыв страницы (иначе граница страницы ни при чём и
+// коррекция каретки не нужна — дефолт браузера справится сам).
+const blockAcrossPageBoundary = (
+  block: HTMLElement,
+  dir: "next" | "prev",
+): HTMLElement | null => {
+  const step = (n: ChildNode | null) =>
+    dir === "next" ? n?.nextSibling ?? null : n?.previousSibling ?? null;
+  let n: ChildNode | null = step(block);
+  let crossed = false;
+  while (n) {
+    if (isSpacerNode(n) || isPageBreakNode(n)) {
+      crossed = true;
+      n = step(n);
+      continue;
+    }
+    if (
+      isStampNode(n) ||
+      (n.nodeType === Node.TEXT_NODE && !(n.textContent || "").trim())
+    ) {
+      n = step(n);
+      continue;
+    }
+    break;
+  }
+  if (!crossed || !n || n.nodeType !== Node.ELEMENT_NODE) return null;
+  return n as HTMLElement;
+};
+
 // Есть ли в диапазоне видимое содержимое (текст / br / атомарные элементы)
 const rangeHasContent = (r: Range): boolean => {
   if (r.toString().length > 0) return true;
@@ -2420,7 +2451,6 @@ export const CreateInternalCorrespondence = ({
     if (!editor || !editor.isContentEditable) return;
     // Набор до смены размера — отдельный шаг истории изменений.
     commitHistoryNow();
-    setFontSize(size);
     editor.focus();
 
     // Точный размер для выделенного текста. execCommand("fontSize") умеет
@@ -2433,8 +2463,13 @@ export const CreateInternalCorrespondence = ({
       sel.rangeCount > 0 &&
       !sel.isCollapsed &&
       editor.contains(sel.anchorNode);
-    // Без выделения меняется только базовый размер листа (setFontSize выше).
-    if (!hasRangeSelection) return;
+    // Есть выделение → меняем размер ТОЛЬКО выделенного фрагмента (inline-span),
+    // базовый размер листа НЕ трогаем (иначе перекрасился бы весь текст).
+    // Нет выделения → меняем базовый размер всего листа.
+    if (!hasRangeSelection) {
+      setFontSize(size);
+      return;
+    }
 
     document.execCommand("styleWithCSS", false, "true");
     document.execCommand("fontSize", false, "7");
@@ -3422,6 +3457,62 @@ export const CreateInternalCorrespondence = ({
         // Вставка через Range идёт мимо события input — синхронизируем стейт
         // и историю вручную (иначе Tab не попадал ни в тело письма, ни в undo).
         syncEditorAfterDomEdit();
+        return;
+      }
+
+      // Стрелки на границе страниц: между блоками стоит невидимая распорка
+      // (contenteditable=false, большая высота). Вертикальная навигация браузера
+      // геометрическая — каретка «проваливается» в пустоту распорки и застревает,
+      // требуя второго нажатия. Перехватываем ТОЛЬКО когда каретка на краю блока
+      // и за границей действительно есть распорка/разрыв: тогда ставим её в
+      // начало/конец соседнего блока. Мид-блочную навигацию не трогаем (caretAt*
+      // истинны лишь на первой/последней визуальной строке блока).
+      if (
+        e.key === "ArrowDown" ||
+        e.key === "ArrowUp" ||
+        e.key === "ArrowRight" ||
+        e.key === "ArrowLeft"
+      ) {
+        if (e.shiftKey || e.ctrlKey || e.metaKey || e.altKey) return;
+        const editor = editorRef.current;
+        if (!editor) return;
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0 || !sel.isCollapsed) return;
+        const range = sel.getRangeAt(0);
+        if (!editor.contains(range.startContainer)) return;
+        const block = topLevelBlockOf(editor, range.startContainer);
+        if (!block) return;
+
+        const forward = e.key === "ArrowDown" || e.key === "ArrowRight";
+        const atEdge = forward
+          ? caretAtBlockEnd(block, range)
+          : caretAtBlockStart(block, range);
+        if (!atEdge) return;
+
+        const neighbour = blockAcrossPageBoundary(block, forward ? "next" : "prev");
+        if (!neighbour) return;
+
+        // Список — крайний пункт; атомарный блок (таблица/картинка) отдаём дефолту.
+        let target: HTMLElement = neighbour;
+        if (neighbour.tagName === "UL" || neighbour.tagName === "OL") {
+          const li = forward
+            ? neighbour.firstElementChild
+            : neighbour.lastElementChild;
+          if (!li) return;
+          target = li as HTMLElement;
+        } else if (EDITOR_ATOMIC_TAGS.has(neighbour.tagName)) {
+          return;
+        }
+
+        const pos = forward
+          ? charPosAt(target, 0)
+          : charPosAt(target, (target.textContent || "").length);
+        e.preventDefault();
+        const r = document.createRange();
+        r.setStart(pos.node, pos.offset);
+        r.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(r);
         return;
       }
 
