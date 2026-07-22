@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, X, CheckCircle2, TrendingUp } from "lucide-react";
 import {
@@ -16,7 +16,7 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
-import { If } from "@shared/ui/If";
+import { If, Tooltip as SharedTooltip } from "@shared/ui";
 import type { IPersonalTask } from "../model/types";
 
 interface IProps {
@@ -29,35 +29,36 @@ type ChartType = "bar" | "line" | "area" | "pie";
 const tooltipStyle = { borderRadius: "12px", border: "none", boxShadow: "0 4px 20px rgba(0,0,0,0.1)", fontSize: "12px" } as const;
 const axisTick = { fontSize: 11, fill: "#9ca3af" } as const;
 
-const ChartSwitcher = ({ current, onChange }: { current: ChartType; onChange: (v: ChartType) => void }) => {
+const ChartSwitcher = memo(({ current, onChange }: { current: ChartType; onChange: (v: ChartType) => void }) => {
   const btn = (type: ChartType, svgPath: React.ReactNode, title: string) => (
-    <button
-      type="button"
-      onClick={() => onChange(type)}
-      title={title}
-      className={`rounded-lg p-1.5 transition-all duration-200 border-0 cursor-pointer flex items-center justify-center ${
-        current === type
-          ? "bg-white dark:bg-zinc-700 shadow-sm text-indigo-600 dark:text-indigo-400"
-          : "bg-transparent text-zinc-400 hover:text-zinc-650 dark:hover:text-zinc-200"
-      }`}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        {svgPath}
-      </svg>
-    </button>
+    <SharedTooltip title={title} key={type}>
+      <button
+        type="button"
+        onClick={() => onChange(type)}
+        className={`rounded-lg! p-1.5! transition-all! duration-200! border-0! cursor-pointer! flex! items-center! justify-center! ${
+          current === type
+            ? "bg-white! dark:bg-zinc-700! shadow-sm! text-indigo-600! dark:text-indigo-400!"
+            : "bg-transparent! text-zinc-400! hover:text-zinc-600! dark:hover:text-zinc-200!"
+        }`}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          {svgPath}
+        </svg>
+      </button>
+    </SharedTooltip>
   );
 
   return (
-    <div className="rounded-xl bg-zinc-100 dark:bg-zinc-800 p-0.5 flex gap-0.5">
+    <div className="rounded-xl! bg-zinc-100! dark:bg-zinc-800! p-0.5! flex! gap-0.5!">
       {btn("bar", <><line x1="18" x2="18" y1="20" y2="10"></line><line x1="12" x2="12" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="14"></line></>, "Столбцы")}
       {btn("line", <><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="m19 9-5 5-4-4-3 3"></path></>, "Линия")}
       {btn("area", <><path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path></>, "Область")}
       {btn("pie", <><path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z"></path><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path></>, "Круговая")}
     </div>
   );
-};
+});
 
-export const PersonalAnalytics = ({ tasks, activeTheme }: IProps) => {
+export const PersonalAnalytics = memo(({ tasks, activeTheme }: IProps) => {
   const [statusChart, setStatusChart] = React.useState<ChartType>("bar");
   const [priorityChart, setPriorityChart] = React.useState<ChartType>("bar");
   const [progressChart, setProgressChart] = React.useState<ChartType>("area");
@@ -228,4 +229,4 @@ export const PersonalAnalytics = ({ tasks, activeTheme }: IProps) => {
       </div>
     </motion.div>
   );
-};
+});
