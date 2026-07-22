@@ -3283,6 +3283,12 @@ export const CreateInternalCorrespondence = ({
 
   const handleEditorInput = useCallback(
     (e?: React.FormEvent<HTMLDivElement>) => {
+    const native = e?.nativeEvent as InputEvent | undefined;
+    const inputType = native?.inputType || "";
+    const data = native?.data ?? "";
+    const isParaBoundary =
+      inputType === "insertParagraph" || inputType === "insertLineBreak";
+
     const editor = editorRef.current;
     if (editor) {
       // Документ очищен полностью: браузер оставляет пустые обёртки с прежним
@@ -3291,9 +3297,13 @@ export const CreateInternalCorrespondence = ({
       // Важно: пусто == НЕТ символов вообще (length 0), а не «только пробелы».
       // trim() считал пустыми пробел/табуляцию и стирал их — из-за этого Space
       // в пустом редакторе не срабатывал, а Tab+Space «съедал» табуляцию.
+      // НО: Enter/Shift+Enter в пустом холсте создаёт вторую пустую строку
+      // (<p><br></p>×2) — тоже textContent="", и сброс схлопывал бы её обратно,
+      // из-за чего Enter «не работал» на пустом документе. Для вставки абзаца/
+      // переноса сброс не делаем.
       const isEmpty =
         !editor.textContent?.length && !editor.querySelector("img,table,hr");
-      if (isEmpty && editor.innerHTML !== "<p><br></p>") {
+      if (isEmpty && !isParaBoundary && editor.innerHTML !== "<p><br></p>") {
         editor.innerHTML = "<p><br></p>";
         const sel = window.getSelection();
         const range = document.createRange();
@@ -3309,13 +3319,8 @@ export const CreateInternalCorrespondence = ({
     // паузам (scheduleHistoryCommit), но граница слова/абзаца немедленно фиксирует
     // набранное — тогда Ctrl+Z откатывает по словам, а не всю фразу целиком.
     // Enter/Shift+Enter (insertParagraph/insertLineBreak) — тоже граница шага.
-    const native = e?.nativeEvent as InputEvent | undefined;
-    const inputType = native?.inputType || "";
-    const data = native?.data ?? "";
     const isWordBoundary =
       inputType === "insertText" && !!data && WORD_BOUNDARY_RE.test(data);
-    const isParaBoundary =
-      inputType === "insertParagraph" || inputType === "insertLineBreak";
     if (isWordBoundary || isParaBoundary) {
       commitHistoryNow();
     } else {
