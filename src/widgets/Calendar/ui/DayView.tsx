@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, memo } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { If } from "@shared/ui";
 import type { Task } from "@features/tasks";
@@ -36,7 +36,7 @@ const getEventPosition = (task: Task) => {
   return { top, height };
 };
 
-export const DayView = ({
+export const DayView = memo(({
   currentDate,
   tasks,
   onDayClick,
@@ -46,14 +46,6 @@ export const DayView = ({
     const targetDate = currentDate.format("YYYY-MM-DD");
     return tasks.filter((task) => task.date === targetDate);
   }, [currentDate, tasks]);
-
-  const nowTop = useMemo(() => {
-    const now = dayjs();
-    const isToday = now.isSame(currentDate, "day");
-    if (!isToday) return null;
-    const min = now.hour() * 60 + now.minute();
-    return ((min - START_HOUR * 60) / 60) * HOUR_HEIGHT;
-  }, [currentDate]);
 
   const dayName = currentDate.format("dd").toUpperCase();
   const monthYear = currentDate.format("MMMM YYYY");
@@ -98,8 +90,6 @@ export const DayView = ({
               />
             ))}
 
-
-
             {dayTasks.map((task) => {
               const { top, height } = getEventPosition(task);
               return (
@@ -129,4 +119,4 @@ export const DayView = ({
       </div>
     </div>
   );
-};
+});

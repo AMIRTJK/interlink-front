@@ -1,4 +1,4 @@
-import React from "react";
+import { memo } from "react";
 import { PlusOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import type { ViewMode } from "../model";
 import { useCalendarTheme } from "../lib/useCalendarTheme";
@@ -13,7 +13,13 @@ interface CalendarHeaderProps {
   onCreateEvent: () => void;
 }
 
-export const CalendarHeader = ({
+const VIEW_MODES: { key: ViewMode; label: string }[] = [
+  { key: "day", label: "День" },
+  { key: "week", label: "Неделя" },
+  { key: "month", label: "Месяц" },
+];
+
+export const CalendarHeader = memo(({
   viewMode,
   setViewMode,
   onPrev,
@@ -24,12 +30,6 @@ export const CalendarHeader = ({
 }: CalendarHeaderProps) => {
   const { theme } = useCalendarTheme();
 
-  const VIEW_MODES: { key: ViewMode; label: string }[] = [
-    { key: "day", label: "День" },
-    { key: "week", label: "Неделя" },
-    { key: "month", label: "Месяц" },
-  ];
-
   return (
     <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4! mb-6! w-full!">
       <div className="bg-white/50! dark:bg-slate-800/50! p-1.5! rounded-[1.5rem]! border! border-white/20! dark:border-slate-700/50! shadow-sm! flex! items-center! gap-1! self-start!">
@@ -38,6 +38,7 @@ export const CalendarHeader = ({
           return (
             <button
               key={key}
+              type="button"
               onClick={() => setViewMode(key)}
               className={`px-6! py-2! rounded-[1.25rem]! text-xs! font-bold! transition-all! cursor-pointer! border-0! ${
                 isActive
@@ -53,6 +54,7 @@ export const CalendarHeader = ({
 
       <div className="flex! items-center! justify-center! gap-4! self-center!">
         <button
+          type="button"
           onClick={onPrev}
           className="w-9! h-9! flex! items-center! justify-center! bg-white/70! hover:bg-white! dark:bg-slate-800/70! dark:hover:bg-slate-800! border! border-zinc-100! dark:border-slate-700! rounded-full! transition-colors! cursor-pointer!"
         >
@@ -64,6 +66,7 @@ export const CalendarHeader = ({
         </h3>
 
         <button
+          type="button"
           onClick={onNext}
           className="w-9! h-9! flex! items-center! justify-center! bg-white/70! hover:bg-white! dark:bg-slate-800/70! dark:hover:bg-slate-800! border! border-zinc-100! dark:border-slate-700! rounded-full! transition-colors! cursor-pointer!"
         >
@@ -71,6 +74,7 @@ export const CalendarHeader = ({
         </button>
 
         <button
+          type="button"
           onClick={onToday}
           className="px-4! py-2! bg-white/70! hover:bg-white! dark:bg-slate-800/70! dark:hover:bg-slate-800! border! border-zinc-100! dark:border-slate-700! text-xs! font-bold! text-zinc-600! dark:text-zinc-300! rounded-full! transition-colors! cursor-pointer!"
         >
@@ -79,6 +83,7 @@ export const CalendarHeader = ({
       </div>
 
       <button
+        type="button"
         onClick={onCreateEvent}
         className={`flex! items-center! gap-2! text-white! font-bold! text-xs! px-5! py-3! rounded-2xl! cursor-pointer! transition-all! shadow-md! self-end! sm:self-center! border-0! bg-gradient-to-r! ${theme.gradient} hover:opacity-90!`}
       >
@@ -87,4 +92,4 @@ export const CalendarHeader = ({
       </button>
     </div>
   );
-};
+});

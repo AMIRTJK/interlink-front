@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useState, useCallback, memo } from "react";
+import dayjs, { Dayjs } from "dayjs";
 import { CalendarHeader } from "./CalendarHeader";
 import { MonthView } from "./MonthView";
 import { WeekView } from "./WeekView";
@@ -10,9 +11,8 @@ import { useCalendarEvents } from "@shared/lib/hooks/useCalendarEvents";
 import { useCalendarView } from "@shared/lib/hooks/useCalendarView";
 import { useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import dayjs, { Dayjs } from "dayjs";
 
-export const Calendar = () => {
+export const Calendar = memo(() => {
   const { tasks, currentDate, setCurrentDate, fetchEvents } = useCalendarEvents();
 
   const {
@@ -41,52 +41,63 @@ export const Calendar = () => {
     },
   });
 
-  const handleDeleteEvent = (eventId: string) => {
-    deleteEvent(eventId);
-  };
+  const handleDeleteEvent = useCallback(
+    (eventId: string) => {
+      deleteEvent(eventId);
+    },
+    [deleteEvent],
+  );
 
-  const handleEventClick = (task: Task) => {
+  const handleEventClick = useCallback((task: Task) => {
     setSelectedEvent(task);
-  };
+  }, []);
 
-  const handleCloseEventDetails = () => {
+  const handleCloseEventDetails = useCallback(() => {
     setSelectedEvent(null);
-  };
+  }, []);
 
-  const handleDayClick = (date: Dayjs, selectedHour?: number) => {
-    const finalTime = selectedHour !== undefined 
-      ? dayjs().hour(selectedHour).minute(0) 
-      : dayjs().hour(9).minute(0);
+  const handleDayClick = useCallback((date: Dayjs, selectedHour?: number) => {
+    const finalTime =
+      selectedHour !== undefined
+        ? dayjs().hour(selectedHour).minute(0)
+        : dayjs().hour(9).minute(0);
 
     setSelectedDateTime({
       date,
       time: finalTime,
     });
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleCreateClick = () => {
+  const handleCreateClick = useCallback(() => {
     setSelectedDateTime({
       date: currentDate,
       time: dayjs().hour(9).minute(0),
     });
     setIsModalOpen(true);
-  };
+  }, [currentDate]);
 
-  const handleCancelCreate = () => {
+  const handleCancelCreate = useCallback(() => {
     setIsModalOpen(false);
     setSelectedDateTime(null);
-  };
+  }, []);
 
-  const handleTaskCreated = () => {
+  const handleTaskCreated = useCallback(() => {
     fetchEvents();
     setIsModalOpen(false);
     setSelectedDateTime(null);
-  };
+  }, [fetchEvents]);
 
-  const handleHeaderClick = (date: Dayjs) => {
-    setCurrentDate(date);
-  };
+  const handleHeaderClick = useCallback(
+    (date: Dayjs) => {
+      setCurrentDate(date);
+    },
+    [setCurrentDate],
+  );
+
+  const handleTodayClick = useCallback(() => {
+    setCurrentDate(dayjs());
+  }, [setCurrentDate]);
 
   const renderActiveView = () => {
     if (viewMode === "month") {
@@ -133,7 +144,7 @@ export const Calendar = () => {
         onPrev={goToPrev}
         onNext={goToNext}
         dateRange={formatDateRange()}
-        onToday={() => setCurrentDate(dayjs())}
+        onToday={handleTodayClick}
         onCreateEvent={handleCreateClick}
       />
 
@@ -156,4 +167,4 @@ export const Calendar = () => {
       />
     </div>
   );
-};
+});

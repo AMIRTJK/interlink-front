@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo, memo } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import type { Task } from "@features/tasks";
 import { useCalendarTheme } from "../lib/useCalendarTheme";
@@ -43,7 +43,7 @@ const getEventColorClasses = (color?: string) => {
   return "bg-emerald-500! text-white! hover:bg-emerald-600!";
 };
 
-export const MonthView = ({
+export const MonthView = memo(({
   daysToShow,
   tasks,
   currentDate,
@@ -52,18 +52,14 @@ export const MonthView = ({
 }: IMonthViewProps) => {
   const { theme } = useCalendarTheme();
 
-  const getTasksForDay = (day: Dayjs) => {
-    const targetDate = day.format("YYYY-MM-DD");
-    return tasks.filter((task) => task.date === targetDate);
-  };
-
-  const isCurrentMonth = (day: Dayjs) => {
-    return day.month() === currentDate.month();
-  };
-
-  const isToday = (day: Dayjs) => {
-    return day.isSame(dayjs(), "day");
-  };
+  const tasksMap = useMemo(() => {
+    const map: Record<string, Task[]> = {};
+    tasks.forEach((task) => {
+      if (!map[task.date]) map[task.date] = [];
+      map[task.date].push(task);
+    });
+    return map;
+  }, [tasks]);
 
   return (
     <div className="w-full! bg-white/40! dark:bg-slate-800/40! rounded-3xl! p-4! border! border-white/20! dark:border-slate-700/30! shadow-sm!">
@@ -77,13 +73,14 @@ export const MonthView = ({
 
       <div className="grid! grid-cols-7! gap-2! auto-rows-[120px]!">
         {daysToShow.map((day) => {
-          const dayTasks = getTasksForDay(day);
-          const inMonth = isCurrentMonth(day);
-          const current = isToday(day);
+          const dateStr = day.format("YYYY-MM-DD");
+          const dayTasks = tasksMap[dateStr] || [];
+          const inMonth = day.month() === currentDate.month();
+          const current = day.isSame(dayjs(), "day");
 
           return (
             <div
-              key={day.format("YYYY-MM-DD")}
+              key={dateStr}
               onClick={() => onDayClick(day)}
               className={`flex! flex-col! p-2! rounded-2xl! border! border-zinc-100/50! dark:border-slate-700/20! bg-white/30! dark:bg-slate-900/30! cursor-pointer! transition-all! hover:bg-white/70! dark:hover:bg-slate-900/70! overflow-hidden! ${
                 inMonth ? "" : "opacity-30!"
@@ -121,4 +118,4 @@ export const MonthView = ({
       </div>
     </div>
   );
-};
+});

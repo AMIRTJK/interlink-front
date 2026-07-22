@@ -52,9 +52,9 @@ export const FilesKpiCards = ({ summary }: IProps) => {
 			{kpiCards.map((card, index) => (
 				<motion.div
 					key={card.label}
-					initial={{ opacity: 0, scale: 0.95 }}
-					animate={{ opacity: 1, scale: 1 }}
-					transition={{ duration: 0.3, delay: index * 0.05 }}
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{ duration: 0.15 }}
 					className="rounded-2xl p-4 bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm border border-white/40 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all duration-200"
 				>
 					<div className={`text-[10px] tracking-wider font-bold uppercase mb-1 ${kpiColorMap[card.color]}`}>

@@ -42,10 +42,20 @@ export const CreateTaskModal = ({
 		return () => window.removeEventListener("storage", onStorage);
 	}, []);
 
-	const { data: usersData, isFetching: isFetchingUsers } = useGetQuery<any>({
+	const userParams = useMemo(() => ({ per_page: 100 }), []);
+	const cacheOptions = useMemo(
+		() => ({
+			staleTime: 5 * 60 * 1000,
+			refetchOnWindowFocus: false,
+		}),
+		[],
+	);
+
+	const { data: usersData, isLoading: isFetchingUsers } = useGetQuery<any>({
 		url: ApiRoutes.GET_USERS,
-		params: { per_page: 100 },
+		params: userParams,
 		useToken: true,
+		options: cacheOptions,
 	});
 
 	const assigneesOptions = useMemo(() => {
