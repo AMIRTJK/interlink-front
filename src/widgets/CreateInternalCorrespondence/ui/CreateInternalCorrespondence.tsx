@@ -110,6 +110,12 @@ import { FilePreviewModal } from "@features/Profile";
 // вшитой картинки и границ перетаскивания.
 const DS_STAMP_DEFAULT_WIDTH = 377;
 const DS_STAMP_DEFAULT_HEIGHT = dsStampHeightForWidth(DS_STAMP_DEFAULT_WIDTH);
+// Границы масштабирования штампа ЭЦП при размещении. Высота всегда выводится из
+// ширины по пропорциям макета (dsStampHeightForWidth), так что достаточно
+// ограничить только ширину. Дефолт (377) остаётся внутри диапазона — размер «по
+// умолчанию» не меняется.
+const DS_STAMP_MIN_WIDTH = 160;
+const DS_STAMP_MAX_WIDTH = 760;
 import { PreviewModal } from "./PreviewModal";
 import { TBtn } from "./TBtn";
 import { DSStamp } from "./DSStamp";
@@ -4484,6 +4490,53 @@ export const CreateInternalCorrespondence = ({
     window.addEventListener("mouseup", onMouseUp);
   };
 
+  // Масштабирование штампа ЭЦП за угловой маркер (только на этапе размещения, до
+  // подписания). Пропорции макета фиксированы (SVG preserveAspectRatio), поэтому
+  // тянем ТОЛЬКО ширину, а высоту выводим из неё через dsStampHeightForWidth —
+  // так экранный, вшитый и печатный штампы остаются идентичными. Выбранный размер
+  // хранится в stampSize и уже проброшен во все режимы (плейсхолдер, вшитая
+  // картинка при подписании, предпросмотр и печать через getPreviewStamp).
+  const handleStampResizeMouseDown = (e: React.MouseEvent) => {
+    if (finalSigner?.dsApplied) return;
+    // stopPropagation — чтобы захват маркера не запускал перетаскивание штампа.
+    e.preventDefault();
+    e.stopPropagation();
+
+    const startX = e.clientX;
+    const startWidth =
+      typeof stampSize.width === "number"
+        ? stampSize.width
+        : DS_STAMP_DEFAULT_WIDTH;
+
+    const onMouseMove = (ev: MouseEvent) => {
+      // Верхняя граница: не даём штампу вылезти за правый край печатной области.
+      const cr = editorRef.current?.getBoundingClientRect();
+      const maxByCanvas = cr ? cr.width - stampPos.x : DS_STAMP_MAX_WIDTH;
+      const upperBound = Math.min(DS_STAMP_MAX_WIDTH, Math.max(
+        DS_STAMP_MIN_WIDTH,
+        maxByCanvas,
+      ));
+      const nextWidth = Math.round(
+        Math.max(
+          DS_STAMP_MIN_WIDTH,
+          Math.min(startWidth + (ev.clientX - startX), upperBound),
+        ),
+      );
+      setStampSize({
+        width: nextWidth,
+        height: dsStampHeightForWidth(nextWidth),
+      });
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
   const selectedImportance =
     importanceOptions.find((o) => o.value === importance) ??
     importanceOptions[0] ??
@@ -5995,6 +6048,26 @@ export const CreateInternalCorrespondence = ({
                           certSerial={`SN-2026-${finalSigner.initials}-84201`}
                           signedAt={new Date().toLocaleDateString("ru-RU")}
                           validUntil="аз 20.03.2025 то 20.03.2026"
+                        />
+                        {/* Угловой маркер масштабирования (только при размещении,
+                            до подписания). На вшитый/печатный штамп не влияет —
+                            это лишь аффорданс редактора. */}
+                        <div
+                          onMouseDown={handleStampResizeMouseDown}
+                          title="Потяните, чтобы изменить размер ЭЦП"
+                          style={{
+                            position: "absolute",
+                            right: -6,
+                            bottom: -6,
+                            width: 14,
+                            height: 14,
+                            borderRadius: 3,
+                            background: "#3b82f6",
+                            border: "2px solid #fff",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+                            cursor: "nwse-resize",
+                            zIndex: 51,
+                          }}
                         />
                       </div>
                     )}
