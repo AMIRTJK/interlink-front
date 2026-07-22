@@ -180,7 +180,7 @@ export const CreateTaskModal = ({
 					<EventFormFields
 						form={form}
 						activeColor={activeColor}
-						isFetchingUsers={isFetchingUsers}
+						isFetchingUsers={!!isFetchingUsers}
 						assigneesOptions={assigneesOptions}
 					/>
 

@@ -17,7 +17,7 @@ export const CONTENT_HEIGHT = PAGE_HEIGHT - PAGE_PAD_V * 2;
 // ВАЖНО: классы должны совпадать с холстом редактора и PreviewModal, иначе
 // просмотр/печать будут отличаться от того, что видно в редакторе исходящего.
 export const CONTENT_CLASS =
-  "max-w-full [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_div:not([data-signature-stamp])]:min-h-[1.8em]";
+  "doc-preview-content max-w-full [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1";
 
 export const contentStyle = (fontSize: number): React.CSSProperties => ({
   fontFamily: "Times New Roman, serif",
