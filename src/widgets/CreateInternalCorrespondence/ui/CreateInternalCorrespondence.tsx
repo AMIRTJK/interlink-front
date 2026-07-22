@@ -414,6 +414,36 @@ const deleteTabBeforeCaret = (range: Range): boolean => {
   return false;
 };
 
+// Пустые inline-обёртки (<b></b>, <span></span> и т.п.), остающиеся после
+// слияния/правок блоков, чистим — иначе каретка «залипает» в невидимом узле,
+// а разметка распухает. Узлы с текстом или значимым содержимым (img/br/table)
+// не трогаем. Порядок обхода — документный, remove() на уже удалённом узле
+// (когда удалили родителя раньше ребёнка) безопасен.
+const EMPTY_INLINE_TAGS = new Set([
+  "B",
+  "I",
+  "U",
+  "S",
+  "STRIKE",
+  "EM",
+  "STRONG",
+  "SPAN",
+  "SUB",
+  "SUP",
+  "FONT",
+  "MARK",
+  "SMALL",
+]);
+const normalizeBlock = (el: HTMLElement) => {
+  el.querySelectorAll("*").forEach((node) => {
+    if (!EMPTY_INLINE_TAGS.has(node.tagName)) return;
+    if ((node.textContent || "").length) return;
+    if (node.querySelector("img,br,hr,table")) return;
+    node.remove();
+  });
+  el.normalize();
+};
+
 // Слияние первого блока следующей страницы с последним блоком предыдущей —
 // как при обычном Backspace внутри одной страницы.
 const mergePageBlocks = (target: HTMLElement, source: HTMLElement) => {
@@ -455,6 +485,7 @@ const mergeAcrossBoundary = (
 
   const junction = (t.textContent || "").length;
   mergePageBlocks(t, s);
+  normalizeBlock(t);
   if (sourceList && !sourceList.firstElementChild) sourceList.remove();
   return charPosAt(t, junction);
 };
@@ -3236,6 +3267,34 @@ export const CreateInternalCorrespondence = ({
         return;
       }
 
+      // Enter на ПУСТОМ пункте списка — выход из списка (как в Word): outdent
+      // либо понижает уровень вложенного пункта, либо выносит пункт из списка
+      // обычным блоком. Непустые пункты обрабатывает нативный split (Enter не
+      // перехватываем — наследование формата идёт через defaultParagraphSeparator).
+      if (e.key === "Enter" && !e.shiftKey) {
+        const editor = editorRef.current;
+        if (editor && editor.isContentEditable) {
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0 && selection.isCollapsed) {
+            const range = selection.getRangeAt(0);
+            if (editor.contains(range.startContainer)) {
+              const li = closestLiOf(editor, range.startContainer);
+              if (
+                li &&
+                !(li.textContent || "").trim() &&
+                !li.querySelector("img,table")
+              ) {
+                e.preventDefault();
+                commitHistoryNow();
+                execCmd("outdent");
+                syncEditorAfterDomEdit();
+                return;
+              }
+            }
+          }
+        }
+      }
+
       // Tab / Shift+Tab — контекстное поведение как в Word:
       //  • в списке   → изменение уровня пункта (indent/outdent);
       //  • Shift+Tab  → удаление табулятора слева (фокус НЕ уводим из редактора —
@@ -3355,7 +3414,17 @@ export const CreateInternalCorrespondence = ({
           return;
         }
 
-        if (!spacers.length) return;
+        // Своё слияние блоков и БЕЗ распорок (обычные соседние абзацы на одной
+        // странице): дефолт браузера тянет формат из произвольной стороны и
+        // ломает разметку. mergeAcrossBoundary вливает текущий блок в приёмник,
+        // СОХРАНЯЯ формат приёмника (как в Word). Атомарные блоки (img/table) и
+        // <hr> оставляем дефолту — там слияние абзацев неуместно.
+        const prevIsMergeable =
+          !!stop &&
+          stop.nodeType === Node.ELEMENT_NODE &&
+          (stop as HTMLElement).tagName !== "HR" &&
+          !EDITOR_ATOMIC_TAGS.has((stop as HTMLElement).tagName);
+        if (!spacers.length && !prevIsMergeable) return;
 
         e.preventDefault();
         commitHistoryNow();
@@ -3385,7 +3454,13 @@ export const CreateInternalCorrespondence = ({
         return;
       }
 
-      if (!spacers.length) return;
+      // Зеркально Backspace: своё слияние со следующим блоком и без распорок.
+      const nextIsMergeable =
+        !!stop &&
+        stop.nodeType === Node.ELEMENT_NODE &&
+        (stop as HTMLElement).tagName !== "HR" &&
+        !EDITOR_ATOMIC_TAGS.has((stop as HTMLElement).tagName);
+      if (!spacers.length && !nextIsMergeable) return;
 
       e.preventDefault();
       commitHistoryNow(); // набор до операции — отдельный шаг истории
