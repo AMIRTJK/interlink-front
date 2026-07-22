@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Select } from "antd";
 import { Loader, EmptyState } from "@shared/ui";
@@ -75,7 +75,9 @@ const StorageCard = ({ storage }: { storage: IFilesAnalyticsStorage }) => {
 export const FilesAnalytics = () => {
 	const [months, setMonths] = useState(12);
 	const [limit, setLimit] = useState(5);
-	const { data, isLoading, isError } = useFilesAnalytics({ months, limit });
+
+	const analyticsParams = useMemo(() => ({ months, limit }), [months, limit]);
+	const { data, isLoading, isError } = useFilesAnalytics(analyticsParams);
 
 	if (isLoading) {
 		return (

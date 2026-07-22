@@ -14,7 +14,7 @@ import { IApiFile, getFileType, formatBytes, getUserFullName } from "./lib";
 import { Tooltip, If } from "@shared/ui";
 import { _axios } from "@shared/api";
 import { toast } from "@shared/lib/toast";
-import { useState } from "react";
+import { useState, memo } from "react";
 import { UserAvatar } from "./UserAvatar";
 import { SharedAccessCell } from "./SharedAccessCell";
 
@@ -33,7 +33,7 @@ interface IProps {
 	onReorderFiles?: (fileIds: number[]) => void;
 }
 
-export const FileList = ({
+export const FileList = memo(({
 	files,
 	selectedFileIds,
 	onToggleSelectFile,
@@ -271,7 +271,13 @@ export const FileList = ({
 								<td className="py-3 px-4">
 									<div className="flex items-center gap-3">
 										<If is={!!onReorderFiles}>
-											<GripVertical size={14} className="text-slate-300 group-hover:text-slate-400 cursor-grab active:cursor-grabbing shrink-0" />
+											<div
+												onClick={(e) => e.stopPropagation()}
+												onMouseDown={(e) => e.stopPropagation()}
+												className="cursor-grab active:cursor-grabbing shrink-0"
+											>
+												<GripVertical size={14} className="text-slate-300 group-hover:text-slate-400" />
+											</div>
 										</If>
 										{getSmallIcon(file)}
 										<span
@@ -385,5 +391,5 @@ export const FileList = ({
 			</table>
 		</div>
 	);
-};
+});
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Search, Users } from "lucide-react";
 import { If } from "@shared/ui";
 import { useGetQuery } from "@shared/lib";
@@ -45,10 +45,13 @@ const getAvatarColor = (id: number): string => AVATAR_COLORS[id % AVATAR_COLORS.
 export const UserAccessList = ({ selectedUsers, onToggleUser, excludeUserIds }: IProps) => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  const userQueryParams = useMemo(() => ({ per_page: 100 }), []);
+
   const { data, isLoading } = useGetQuery<{ per_page: number }, IApiUsersResponse>({
     url: ApiRoutes.GET_USERS,
-    params: { per_page: 100 },
+    params: userQueryParams,
     useToken: true,
+    options: { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false },
   });
 
   const users: IAdminUser[] = Array.isArray(data?.data?.data) ? data!.data.data : [];
