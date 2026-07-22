@@ -271,6 +271,149 @@ const caretAtBlockEnd = (block: HTMLElement, range: Range): boolean => {
   return frag.querySelectorAll("br").length <= 1;
 };
 
+// Шаг табуляции/красной строки ≈ позиция табуляции Word (1.27 см).
+const TAB_STEP_CM = 1.27;
+const NBSP = " ";
+
+const isTabSpacer = (n: Node | null): n is HTMLElement =>
+  !!n &&
+  n.nodeType === Node.ELEMENT_NODE &&
+  (n as HTMLElement).getAttribute("data-tab") === "1";
+
+// Сколько неразрывных пробелов даёт ширину ≈ одного шага табуляции Word (1.27см)
+// при текущем шрифте редактора. Ширину пробела меряем через canvas, без reflow.
+let tabMeasureCanvas: HTMLCanvasElement | null = null;
+const tabNbspCount = (editor: HTMLElement): number => {
+  const TARGET_PX = 48; // 1.27 см при 96 DPI
+  try {
+    const cs = getComputedStyle(editor);
+    if (!tabMeasureCanvas) tabMeasureCanvas = document.createElement("canvas");
+    const ctx = tabMeasureCanvas.getContext("2d");
+    if (ctx) {
+      ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+      const w = ctx.measureText(NBSP).width || ctx.measureText(" ").width;
+      if (w > 0) return Math.min(40, Math.max(2, Math.round(TARGET_PX / w)));
+    }
+  } catch {
+    /* getComputedStyle/canvas недоступны — берём разумный дефолт */
+  }
+  return 12;
+};
+
+// Табулятор — прогон неразрывных пробелов в помеченном <span>. Почему не \t и не
+// inline-block:
+//  • \t выравнивается по сетке tab-size — после слова «схлопывался» до пробела;
+//  • trailing-\t не подсвечивается при выделении (Ctrl+A «не видел» табуляцию);
+//  • у inline-block фикс. ширины каретка залезала внутрь, и ввод переносился на
+//    новую строку внутри коробки.
+// Неразрывные пробелы лишены этих проблем: одинаковая ширина независимо от
+// позиции, всегда подсвечиваются, не переносятся и не меняют высоту строки.
+// Атомарность удаления обеспечивают обработчики клавиш (Backspace/Delete/
+// Shift+Tab) по атрибуту data-tab.
+const makeTabSpacer = (count: number): HTMLElement => {
+  const span = document.createElement("span");
+  span.setAttribute("data-tab", "1");
+  span.textContent = NBSP.repeat(Math.max(1, count));
+  return span;
+};
+
+// Узел непосредственно слева от свёрнутой каретки (или null).
+const nodeBeforeCaret = (range: Range): Node | null => {
+  if (!range.collapsed) return null;
+  const { startContainer, startOffset } = range;
+  if (startContainer.nodeType === Node.TEXT_NODE) {
+    return startOffset === 0 ? startContainer.previousSibling : null;
+  }
+  return startOffset > 0 ? startContainer.childNodes[startOffset - 1] : null;
+};
+
+// Узел непосредственно справа от свёрнутой каретки (или null).
+const nodeAfterCaret = (range: Range): Node | null => {
+  if (!range.collapsed) return null;
+  const { startContainer, startOffset } = range;
+  if (startContainer.nodeType === Node.TEXT_NODE) {
+    return startOffset === (startContainer as Text).length
+      ? startContainer.nextSibling
+      : null;
+  }
+  return startContainer.childNodes[startOffset] ?? null;
+};
+
+// Табулятор, который надо удалить целиком при Backspace/Delete: тот, внутри
+// которого стоит каретка, либо соседний слева ("prev") / справа ("next").
+const tabSpacerToDelete = (
+  range: Range,
+  dir: "prev" | "next",
+): HTMLElement | null => {
+  const host =
+    range.startContainer.nodeType === Node.ELEMENT_NODE
+      ? (range.startContainer as HTMLElement)
+      : range.startContainer.parentElement;
+  const inside = host?.closest?.("[data-tab]") as HTMLElement | null;
+  if (isTabSpacer(inside)) return inside;
+  const sib = dir === "prev" ? nodeBeforeCaret(range) : nodeAfterCaret(range);
+  return isTabSpacer(sib) ? sib : null;
+};
+
+// Удаление табулятора целиком с установкой каретки на его место.
+const removeTabSpacer = (
+  span: HTMLElement,
+  setCaret: (node: Node, offset: number) => void,
+) => {
+  const parent = span.parentNode as Node;
+  const idx = Array.prototype.indexOf.call(parent.childNodes, span);
+  span.remove();
+  setCaret(parent, idx);
+};
+
+// Ближайший <li>, содержащий узел (в пределах редактора). null — вне списка.
+const closestLiOf = (
+  editor: HTMLElement,
+  node: Node | null,
+): HTMLElement | null => {
+  let n: Node | null =
+    node && node.nodeType === Node.TEXT_NODE ? node.parentNode : node;
+  while (n && n !== editor) {
+    if (n.nodeType === Node.ELEMENT_NODE && (n as HTMLElement).tagName === "LI")
+      return n as HTMLElement;
+    n = n.parentNode;
+  }
+  return null;
+};
+
+// Красная строка (first-line indent) блока в сантиметрах; 0 — если не задана в cm.
+const getTextIndentCm = (block: HTMLElement | null): number => {
+  const v = block?.style?.textIndent || "";
+  const m = /^(-?[\d.]+)cm$/.exec(v.trim());
+  return m ? parseFloat(m[1]) : 0;
+};
+
+// Удаляет один табулятор слева от свёрнутой каретки. true — если удалил.
+const deleteTabBeforeCaret = (range: Range): boolean => {
+  if (!range.collapsed) return false;
+  const { startContainer, startOffset } = range;
+  // а) символ табуляции в тексте (совместимость со старым форматом)
+  if (startContainer.nodeType === Node.TEXT_NODE && startOffset > 0) {
+    const text = startContainer as Text;
+    if (text.data[startOffset - 1] === "\t") {
+      text.deleteData(startOffset - 1, 1);
+      range.setStart(text, startOffset - 1);
+      range.collapse(true);
+      return true;
+    }
+  }
+  // б) табулятор-спейсер слева (или тот, внутри которого стоит каретка)
+  const spacer = tabSpacerToDelete(range, "prev");
+  if (spacer) {
+    removeTabSpacer(spacer, (node, offset) => {
+      range.setStart(node, offset);
+      range.collapse(true);
+    });
+    return true;
+  }
+  return false;
+};
+
 // Слияние первого блока следующей страницы с последним блоком предыдущей —
 // как при обычном Backspace внутри одной страницы.
 const mergePageBlocks = (target: HTMLElement, source: HTMLElement) => {
@@ -387,7 +530,7 @@ const charPosAt = (
 // Возвращает true, если содержимое пришлось спасать.
 const removeSpacerSafely = (n: Element): boolean => {
   if ((n.textContent || "").trim()) {
-    const div = document.createElement("div");
+    const div = document.createElement("p");
     while (n.firstChild) div.appendChild(n.firstChild);
     n.replaceWith(div);
     return true;
@@ -416,7 +559,7 @@ const wrapBareTopLevelNodes = (root: HTMLElement): boolean => {
         (n.nodeType === Node.TEXT_NODE && (n.textContent || "").trim() !== ""),
     );
     if (!meaningful) return;
-    const div = document.createElement("div");
+    const div = document.createElement("p");
     nodes[0].parentNode?.insertBefore(div, nodes[0]);
     nodes.forEach((n) => div.appendChild(n));
     mutated = true;
@@ -2444,11 +2587,11 @@ export const CreateInternalCorrespondence = ({
       return 1;
     }
 
-    // 2. «Голый» текст и инлайн-узлы заворачиваем в блок <div>
+    // 2. «Голый» текст и инлайн-узлы заворачиваем в блок <p>
     let buf: Node[] = [];
     const flushBuf = () => {
       if (!buf.length) return;
-      const div = document.createElement("div");
+      const div = document.createElement("p");
       buf[0].parentNode?.insertBefore(div, buf[0]);
       buf.forEach((n) => div.appendChild(n));
       buf = [];
@@ -2871,7 +3014,7 @@ export const CreateInternalCorrespondence = ({
         editor.innerHTML =
           state.html && state.html !== "<p></p>"
             ? state.html
-            : "<div><br></div>";
+            : "<p><br></p>";
         editor.focus();
         if (state.caret != null) {
           restoreCaretCharOffset(editor, {
@@ -2989,10 +3132,13 @@ export const CreateInternalCorrespondence = ({
       // Документ очищен полностью: браузер оставляет пустые обёртки с прежним
       // оформлением (<strong>, text-align и т.п.), из-за чего новый текст
       // печатается жирным/со старым выравниванием. Сбрасываем к чистому блоку.
+      // Важно: пусто == НЕТ символов вообще (length 0), а не «только пробелы».
+      // trim() считал пустыми пробел/табуляцию и стирал их — из-за этого Space
+      // в пустом редакторе не срабатывал, а Tab+Space «съедал» табуляцию.
       const isEmpty =
-        !editor.textContent?.trim() && !editor.querySelector("img,table,hr");
-      if (isEmpty && editor.innerHTML !== "<div><br></div>") {
-        editor.innerHTML = "<div><br></div>";
+        !editor.textContent?.length && !editor.querySelector("img,table,hr");
+      if (isEmpty && editor.innerHTML !== "<p><br></p>") {
+        editor.innerHTML = "<p><br></p>";
         const sel = window.getSelection();
         const range = document.createRange();
         range.setStart(editor.firstChild as Node, 0);
@@ -3017,9 +3163,9 @@ export const CreateInternalCorrespondence = ({
     commitHistoryNow();
   }, [paginateEditor, getCleanEditorHtml, commitHistoryNow]);
 
-  // Tab — четыре неразрывных пробела. Backspace/Delete на границе страниц —
-  // управляемое слияние блоков: дефолтное поведение браузера рядом с
-  // contenteditable=false распоркой прыгает курсором и теряет текст.
+  // Tab — выделяемый табулятор (прогон неразрывных пробелов). Backspace/Delete на
+  // границе страниц — управляемое слияние блоков: дефолтное поведение браузера
+  // рядом с contenteditable=false распоркой прыгает курсором и теряет текст.
   const handleEditorKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       // Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z — только собственная история. Нативную
@@ -3040,14 +3186,92 @@ export const CreateInternalCorrespondence = ({
         }
       }
 
-      if (e.key === "Tab") {
+      // Shift+Enter — мягкий перенос строки внутри абзаца (soft return), как в
+      // Word: один <br>, без завершения абзаца. Перехватываем ради единообразия
+      // между браузерами и корректной установки каретки (в конце блока нужен
+      // «якорный» <br>, иначе каретка не встаёт на новую строку).
+      if (e.key === "Enter" && e.shiftKey) {
         e.preventDefault();
+        const editor = editorRef.current;
+        if (!editor || !editor.isContentEditable) return;
         const selection = window.getSelection();
         if (!selection || selection.rangeCount === 0) return;
         const range = selection.getRangeAt(0);
+        if (!editor.contains(range.startContainer)) return;
         range.deleteContents();
-        const tabNode = document.createTextNode("    ");
+        const br = document.createElement("br");
+        range.insertNode(br);
+        range.setStartAfter(br);
+        range.collapse(true);
+        const brBlock = topLevelBlockOf(editor, br);
+        if (brBlock && caretAtBlockEnd(brBlock, range)) {
+          const anchor = document.createElement("br");
+          br.after(anchor);
+          range.setStartBefore(anchor);
+          range.collapse(true);
+        }
+        selection.removeAllRanges();
+        selection.addRange(range);
+        syncEditorAfterDomEdit();
+        return;
+      }
+
+      // Tab / Shift+Tab — контекстное поведение как в Word:
+      //  • в списке   → изменение уровня пункта (indent/outdent);
+      //  • Shift+Tab  → удаление табулятора слева (фокус НЕ уводим из редактора —
+      //                 дефолт браузера перенёс бы его на предыдущий элемент);
+      //  • иначе      → вставка ВЫДЕЛЯЕМОГО табулятора (прогон неразрывных
+      //                 пробелов). В т.ч. в начале абзаца: НЕ используем CSS
+      //                 text-indent — он не содержимое и не попадает в Ctrl+A.
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const editor = editorRef.current;
+        if (!editor || !editor.isContentEditable) return;
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return;
+        const range = selection.getRangeAt(0);
+        if (!editor.contains(range.startContainer)) return;
+
+        // 1) Список — менять уровень пункта
+        if (closestLiOf(editor, range.startContainer)) {
+          execCmd(e.shiftKey ? "outdent" : "indent");
+          return;
+        }
+
+        const block = topLevelBlockOf(editor, range.startContainer);
+
+        if (e.shiftKey) {
+          // Убрать табулятор слева (или тот, внутри которого стоит каретка).
+          if (deleteTabBeforeCaret(range)) {
+            selection.removeAllRanges();
+            selection.addRange(range);
+            syncEditorAfterDomEdit();
+            return;
+          }
+          // Легаси/импорт из Word: уменьшить красную строку, заданную в стиле.
+          const indent = getTextIndentCm(block);
+          if (block && indent > 0) {
+            commitHistoryNow();
+            const next = Math.max(0, indent - TAB_STEP_CM);
+            block.style.textIndent = next > 0 ? `${next}cm` : "";
+            syncEditorAfterDomEdit();
+          }
+          return;
+        }
+
+        // Tab (в т.ч. в начале абзаца) — вставляем ВЫДЕЛЯЕМЫЙ табулятор.
+        const blockWasEmpty =
+          !!block &&
+          !(block.textContent || "").length &&
+          !block.querySelector("img,table");
+        range.deleteContents();
+        const tabNode = makeTabSpacer(tabNbspCount(editor));
         range.insertNode(tabNode);
+        // Пустой блок держал placeholder <br> — после вставки табулятора он лишний
+        // (иначе под строкой осталась бы пустая строка).
+        if (blockWasEmpty && block) {
+          block.querySelectorAll(":scope > br").forEach((br) => br.remove());
+        }
         range.setStartAfter(tabNode);
         range.setEndAfter(tabNode);
         selection.removeAllRanges();
@@ -3096,6 +3320,16 @@ export const CreateInternalCorrespondence = ({
       };
 
       if (e.key === "Backspace") {
+        // Табулятор слева — атомарная единица: удаляем его целиком одним
+        // нажатием (иначе браузер оставил бы пустой inline-block-спейсер).
+        const tab = tabSpacerToDelete(range, "prev");
+        if (tab) {
+          e.preventDefault();
+          commitHistoryNow();
+          removeTabSpacer(tab, setCaret);
+          syncEditorAfterDomEdit();
+          return;
+        }
         if (!caretAtBlockStart(block, range)) return;
         const { spacers, stop } = collectBoundary(
           block.previousSibling,
@@ -3131,6 +3365,16 @@ export const CreateInternalCorrespondence = ({
         return;
       }
 
+      // Delete: табулятор справа (или под кареткой) — удаляем целиком.
+      const tabFwd = tabSpacerToDelete(range, "next");
+      if (tabFwd) {
+        e.preventDefault();
+        commitHistoryNow();
+        removeTabSpacer(tabFwd, setCaret);
+        syncEditorAfterDomEdit();
+        return;
+      }
+
       // Delete в конце блока перед границей страницы
       if (!caretAtBlockEnd(block, range)) return;
       const { spacers, stop } = collectBoundary(block.nextSibling, "next");
@@ -3160,7 +3404,7 @@ export const CreateInternalCorrespondence = ({
       }
       syncEditorAfterDomEdit();
     },
-    [syncEditorAfterDomEdit, commitHistoryNow, undoEdit, redoEdit],
+    [syncEditorAfterDomEdit, commitHistoryNow, undoEdit, redoEdit, execCmd],
   );
 
   // Ручной разрыв страницы: текст после курсора начинается с нового листа.
@@ -3189,7 +3433,7 @@ export const CreateInternalCorrespondence = ({
     const block = range ? topLevelBlockOf(editor, range.startContainer) : null;
 
     const makeEmptyPara = () => {
-      const p = document.createElement("div");
+      const p = document.createElement("p");
       p.appendChild(document.createElement("br"));
       return p;
     };
@@ -3664,6 +3908,10 @@ export const CreateInternalCorrespondence = ({
 
   useEffect(() => {
     document.execCommand("styleWithCSS", false, "true");
+    // Единая модель «абзаца»: Enter должен создавать <p>, а не <div> (Chrome по
+    // умолчанию делает <div>, Firefox — <br>). Выравнивает браузеры на <p> —
+    // тот же тег, что приходит из вставки/импорта Word (см. модель блоков 4.9).
+    document.execCommand("defaultParagraphSeparator", false, "p");
   }, []);
 
   useLayoutEffect(() => {
@@ -5384,11 +5632,14 @@ export const CreateInternalCorrespondence = ({
                         lineHeight: 1.8,
                         color: "#1e293b",
                         whiteSpace: "pre-wrap",
+                        // Символ табуляции (\t) при pre-wrap выравнивается по
+                        // сетке шага ≈ 1.27 см — как позиции табуляции Word.
+                        tabSize: "1.27cm",
                         overflowWrap: "break-word",
                         wordBreak: "break-word",
                         overflow: "visible",
                       }}
-                      className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_pre]:whitespace-pre-wrap [&_div:not([data-signature-stamp]):not([data-page-spacer])]:min-h-[1.8em]"
+                      className="focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_pre]:whitespace-pre-wrap [&_div:not([data-signature-stamp]):not([data-page-spacer])]:min-h-[1.8em] [&_p]:min-h-[1.8em] [&_p]:!my-0"
                     />
 
                     {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания.
