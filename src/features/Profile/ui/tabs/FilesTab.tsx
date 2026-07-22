@@ -1,23 +1,52 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback, useMemo, lazy, Suspense } from "react";
 import { useFilesData } from "./files/useFilesData";
 import { FilesHeader } from "./files/FilesHeader";
 import { CategoryFilters } from "./files/CategoryFilters";
 import { PinnedFiles } from "./files/PinnedFiles";
 import { FileGridList } from "./files/FileGridList";
 import { StorageUsage } from "./files/StorageUsage";
-import { FilePreviewModal } from "./files/FilePreviewModal";
-import { FolderActionsModal } from "./files/FolderActionsModal";
-import { AddCategoryModal } from "./files/AddCategoryModal";
-import { MoveToFolderModal } from "./files/MoveToFolderModal";
 import { Upload, ChevronRight, Folder, Share2, Trash2 } from "lucide-react";
-import { BulkShareModal } from "./files/BulkShareModal";
-import { ShareFileModal } from "./files/ShareFileModal";
-import { FilesAnalytics } from "./files/FilesAnalytics";
 import { IApiFile, IApiFolder } from "./files/lib";
 import { Modal } from "antd";
 import { If } from "@shared/ui";
 import { toast } from "@shared/lib/toast";
 import "./FilesTab.css";
+
+const FilePreviewModal = lazy(() =>
+	import("./files/FilePreviewModal").then((m) => ({
+		default: m.FilePreviewModal,
+	})),
+);
+const FolderActionsModal = lazy(() =>
+	import("./files/FolderActionsModal").then((m) => ({
+		default: m.FolderActionsModal,
+	})),
+);
+const AddCategoryModal = lazy(() =>
+	import("./files/AddCategoryModal").then((m) => ({
+		default: m.AddCategoryModal,
+	})),
+);
+const MoveToFolderModal = lazy(() =>
+	import("./files/MoveToFolderModal").then((m) => ({
+		default: m.MoveToFolderModal,
+	})),
+);
+const BulkShareModal = lazy(() =>
+	import("./files/BulkShareModal").then((m) => ({
+		default: m.BulkShareModal,
+	})),
+);
+const ShareFileModal = lazy(() =>
+	import("./files/ShareFileModal").then((m) => ({
+		default: m.ShareFileModal,
+	})),
+);
+const FilesAnalytics = lazy(() =>
+	import("./files/FilesAnalytics").then((m) => ({
+		default: m.FilesAnalytics,
+	})),
+);
 
 export const FilesTab = () => {
 	const [activeFolderId, setActiveFolderId] = useState<number | "all">("all");
@@ -41,6 +70,17 @@ export const FilesTab = () => {
 	const [addCategoryOpen, setAddCategoryOpen] = useState(false);
 	const [shareItem, setShareItem] = useState<{ item: IApiFile | IApiFolder; type: "file" | "folder" } | null>(null);
 	const [isBulkShareOpen, setIsBulkShareOpen] = useState(false);
+
+	const filesParams = useMemo(
+		() => ({
+			search: searchQuery,
+			sort: sortBy,
+			dir: sortDir,
+			activeFolderId,
+			page: filesPage,
+		}),
+		[searchQuery, sortBy, sortDir, activeFolderId, filesPage],
+	);
 
 	// Queries & Mutations
 	const {
@@ -73,67 +113,72 @@ export const FilesTab = () => {
 		removeFolderShare,
 		bulkShareFiles,
 		bulkDeleteFiles,
-	} = useFilesData({
-		search: searchQuery,
-		sort: sortBy,
-		dir: sortDir,
-		activeFolderId,
-		page: filesPage,
-	});
+	} = useFilesData(filesParams);
 
 	const currentFiles = viewContext === "shared" ? sharedFiles : personalCurrentFiles;
 	const currentFolders = viewContext === "shared" ? sharedFolders : personalCurrentFolders;
 	const isLoadingCurrent = viewContext === "shared" ? isLoadingSharedFiles : isLoadingFiles;
 
+	React.useEffect(() => {
+		setSelectedFileIds((prev) => {
+			if (prev.length === 0) return prev;
+			const existingIds = new Set(currentFiles.map((f) => f.id));
+			const valid = prev.filter((id) => existingIds.has(id));
+			return valid.length === prev.length ? prev : valid;
+		});
+	}, [currentFiles]);
+
 	// Toggle selection
-	const handleToggleSelectFile = (id: number) => {
+	const handleToggleSelectFile = useCallback((id: number) => {
 		setSelectedFileIds((prev) =>
 			prev.includes(id)
 				? prev.filter((fileId) => fileId !== id)
 				: [...prev, id],
 		);
-	};
+	}, []);
 
 	// Upload handler
-	const handleUpload = (file: File) => {
+	const handleUpload = useCallback((file: File) => {
 		const formData = new FormData();
 		formData.append("files[]", file);
 		if (typeof activeFolderId === "number") {
 			formData.append("folder_id", String(activeFolderId));
 		}
 		uploadFile.mutate(formData);
-	};
+	}, [activeFolderId, uploadFile]);
 
 	// Folder Actions
-	const handleCreateFolderSubmit = (name: string, emoji: string | null) => {
-		updateFolder.mutate({
-			id: editingFolder!.id,
-			name,
-			parent_id: editingFolder!.parent_id,
-			...(emoji !== undefined ? { emoji } : {}),
-		});
+	const handleCreateFolderSubmit = useCallback((name: string, emoji: string | null) => {
+		if (editingFolder) {
+			updateFolder.mutate({
+				id: editingFolder.id,
+				name,
+				parent_id: editingFolder.parent_id,
+				...(emoji !== undefined ? { emoji } : {}),
+			});
+		}
 		setEditingFolder(null);
-	};
+	}, [editingFolder, updateFolder]);
 
-	const handleAddCategorySubmit = (payload: { name: string; icon?: string; allowed_user_ids?: number[] }) => {
+	const handleAddCategorySubmit = useCallback((payload: { name: string; icon?: string; allowed_user_ids?: number[] }) => {
 		createFolder.mutate({
 			name: payload.name,
 			parent_id: null,
 			...(payload.icon ? { icon: payload.icon } : {}),
 			...(payload.allowed_user_ids ? { allowed_user_ids: payload.allowed_user_ids } : {}),
 		} as any);
-	};
+	}, [createFolder]);
 
-	const handleOpenRenameFolder = (folderName: string, id: number) => {
+	const handleOpenRenameFolder = useCallback((folderName: string, id: number) => {
 		const folder = folders.find((f) => Number(f.id) === Number(id));
 		if (folder) {
 			setEditingFolder(folder);
 			setFolderModalTitle("Переименовать папку");
 			setFolderModalOpen(true);
 		}
-	};
+	}, [folders]);
 
-	const handleDeleteFolderConfirm = (id: number) => {
+	const handleDeleteFolderConfirm = useCallback((id: number) => {
 		Modal.confirm({
 			title: "Удалить папку?",
 			content:
@@ -149,14 +194,14 @@ export const FilesTab = () => {
 				setActiveFolderId("all");
 			},
 		});
-	};
+	}, [deleteFolder]);
 
 	// File Actions
-	const handleTogglePin = (file: IApiFile) => {
+	const handleTogglePin = useCallback((file: IApiFile) => {
 		updateFile.mutate({ id: file.id, is_starred: !file.is_starred });
-	};
+	}, [updateFile]);
 
-	const handleDeleteFileConfirm = (id: number) => {
+	const handleDeleteFileConfirm = useCallback((id: number) => {
 		Modal.confirm({
 			title: "Удалить файл?",
 			content: "Вы действительно хотите удалить этот файл?",
@@ -168,9 +213,9 @@ export const FilesTab = () => {
 			cancelText: "Отмена",
 			onOk: () => deleteFile.mutate({ id }),
 		});
-	};
+	}, [deleteFile]);
 
-	const handleBulkDeleteConfirm = () => {
+	const handleBulkDeleteConfirm = useCallback(() => {
 		Modal.confirm({
 			title: "Удалить выбранные файлы?",
 			content: `Вы действительно хотите удалить выбранные файлы (${selectedFileIds.length} шт.)? Действие необратимо.`,
@@ -193,21 +238,21 @@ export const FilesTab = () => {
 				}
 			},
 		});
-	};
+	}, [selectedFileIds, bulkDeleteFiles]);
 
-	const handleMoveFileConfirm = (targetFolderId: number | null) => {
+	const handleMoveFileConfirm = useCallback((targetFolderId: number | null) => {
 		if (movingFile) {
 			updateFile.mutate({ id: movingFile.id, folder_id: targetFolderId });
 			setMovingFile(null);
 		}
-	};
+	}, [movingFile, updateFile]);
 
-	const handleReorderFiles = (fileIds: number[]) => {
+	const handleReorderFiles = useCallback((fileIds: number[]) => {
 		reorderFiles.mutate({
 			folder_id: typeof activeFolderId === "number" ? activeFolderId : null,
 			file_ids: fileIds,
 		});
-	};
+	}, [activeFolderId, reorderFiles]);
 
 	return (
 		<div className="files-tab-container space-y-6">
@@ -232,11 +277,14 @@ export const FilesTab = () => {
 					setViewContext(ctx);
 					setActiveFolderId("all");
 					setFilesPage(1);
+					setSelectedFileIds([]);
 				}}
 			/>
 
 			<If is={viewContext === "analytics"}>
-				<FilesAnalytics />
+				<Suspense fallback={null}>
+					<FilesAnalytics />
+				</Suspense>
 			</If>
 
 			<If is={viewContext !== "analytics"}>
@@ -248,6 +296,7 @@ export const FilesTab = () => {
 				onCategorySelect={(id) => {
 					setActiveFolderId(id);
 					setFilesPage(1);
+					setSelectedFileIds([]);
 				}}
 				onAddCategoryClick={viewContext === "personal" ? () => setAddCategoryOpen(true) : undefined}
 				onRenameCategory={viewContext === "personal" ? (cat) => handleOpenRenameFolder(cat.name, Number(cat.id)) : undefined}
@@ -352,116 +401,121 @@ export const FilesTab = () => {
 			</If>
 
 			{/* Modals */}
-			<AddCategoryModal
-				isOpen={addCategoryOpen}
-				onClose={() => setAddCategoryOpen(false)}
-				onSubmit={(payload) => {
-					createFolder.mutateAsync({
-						...payload,
-						parent_id: null,
-					});
-					setAddCategoryOpen(false);
-				}}
-			/>
-
-			<FolderActionsModal
-				isOpen={folderModalOpen}
-				onClose={() => {
-					setFolderModalOpen(false);
-					setEditingFolder(null);
-				}}
-				initialName={editingFolder?.name || ""}
-				initialEmoji={editingFolder?.emoji || null}
-				title={folderModalTitle}
-				onSubmit={async (name, emoji) => {
-					if (editingFolder) {
-						await updateFolder.mutateAsync({
-							id: editingFolder.id,
-							name,
-							emoji,
+			<Suspense fallback={null}>
+				<AddCategoryModal
+					isOpen={addCategoryOpen}
+					onClose={() => setAddCategoryOpen(false)}
+					onSubmit={(payload) => {
+						createFolder.mutateAsync({
+							...payload,
 							parent_id: null,
 						});
-					}
-					setFolderModalOpen(false);
-				}}
-			/>
-
-			<MoveToFolderModal
-				isOpen={!!movingFile}
-				onClose={() => setMovingFile(null)}
-				folders={folders}
-				currentFolderId={movingFile?.folder_id || null}
-				onConfirm={handleMoveFileConfirm}
-				fileName={movingFile?.original_name || ""}
-			/>
-
-			<FilePreviewModal
-				file={previewFile}
-				onClose={() => setPreviewFile(null)}
-			/>
-
-			{shareItem && (
-				<ShareFileModal
-					item={shareItem.item}
-					type={shareItem.type}
-					onClose={() => setShareItem(null)}
-					onInvite={(userId) => {
-						if (shareItem.type === "file") {
-							return inviteToFile.mutateAsync({ id: shareItem.item.id, user_id: userId });
-						} else {
-							return inviteToFolder.mutateAsync({ id: shareItem.item.id, user_id: userId });
-						}
-					}}
-					onRemoveShare={(shareId) => {
-						if (shareItem.type === "file") {
-							return removeFileShare.mutateAsync({ id: shareItem.item.id, shareId });
-						} else {
-							return removeFolderShare.mutateAsync({ id: shareItem.item.id, shareId });
-						}
+						setAddCategoryOpen(false);
 					}}
 				/>
-			)}
 
-			<If is={selectedFileIds.length > 0 && viewContext === "personal"}>
-				<div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full px-6 py-3.5 shadow-2xl flex items-center gap-6 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
-					<span className="text-xs font-bold text-slate-700 dark:text-zinc-300">
-						Выбрано файлов: {selectedFileIds.length}
-					</span>
-					<div className="h-4 w-px bg-slate-250 dark:bg-slate-750" />
-					<button
-						onClick={() => setIsBulkShareOpen(true)}
-						className="flex items-center gap-2 bg-indigo-600! hover:bg-indigo-700! text-white! px-4 py-2 rounded-full text-xs font-bold transition-all shadow-md cursor-pointer hover:opacity-90"
-					>
-						<Share2 size={13} />
-						<span>Поделиться</span>
-					</button>
-					<button
-						onClick={handleBulkDeleteConfirm}
-						className="flex items-center gap-2 bg-red-600! hover:bg-red-700! text-white! px-4 py-2 rounded-full text-xs font-bold transition-all shadow-md cursor-pointer hover:opacity-90"
-					>
-						<Trash2 size={13} />
-						<span>Удалить</span>
-					</button>
-					<button
-						onClick={() => setSelectedFileIds([])}
-						className="text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors cursor-pointer"
-					>
-						Снять выделение
-					</button>
-				</div>
-			</If>
-
-			<If is={isBulkShareOpen}>
-				<BulkShareModal
-					selectedFiles={files.filter((f) => selectedFileIds.includes(f.id))}
-					onClose={() => setIsBulkShareOpen(false)}
-					onShare={async (payload) => {
-						const res = await bulkShareFiles.mutateAsync(payload);
-						setSelectedFileIds([]);
-						return res;
+				<FolderActionsModal
+					isOpen={folderModalOpen}
+					onClose={() => {
+						setFolderModalOpen(false);
+						setEditingFolder(null);
+					}}
+					initialName={editingFolder?.name || ""}
+					initialEmoji={editingFolder?.emoji || null}
+					title={folderModalTitle}
+					onSubmit={async (name, emoji) => {
+						if (editingFolder) {
+							await updateFolder.mutateAsync({
+								id: editingFolder.id,
+								name,
+								emoji,
+								parent_id: null,
+							});
+						}
+						setFolderModalOpen(false);
 					}}
 				/>
-			</If>
+
+				<MoveToFolderModal
+					isOpen={!!movingFile}
+					onClose={() => setMovingFile(null)}
+					folders={folders}
+					currentFolderId={movingFile?.folder_id || null}
+					onConfirm={handleMoveFileConfirm}
+					fileName={movingFile?.original_name || ""}
+				/>
+
+				<FilePreviewModal
+					file={previewFile}
+					onClose={() => setPreviewFile(null)}
+				/>
+
+				{shareItem && (
+					<ShareFileModal
+						item={shareItem.item}
+						type={shareItem.type}
+						onClose={() => setShareItem(null)}
+						onInvite={(userId) => {
+							if (shareItem.type === "file") {
+								return inviteToFile.mutateAsync({ id: shareItem.item.id, user_id: userId });
+							} else {
+								return inviteToFolder.mutateAsync({ id: shareItem.item.id, user_id: userId });
+							}
+						}}
+						onRemoveShare={(shareId) => {
+							if (shareItem.type === "file") {
+								return removeFileShare.mutateAsync({ id: shareItem.item.id, shareId });
+							} else {
+								return removeFolderShare.mutateAsync({ id: shareItem.item.id, shareId });
+							}
+						}}
+					/>
+				)}
+
+				<If is={selectedFileIds.length > 0 && viewContext === "personal"}>
+					<div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full px-6 py-3.5 shadow-2xl flex items-center gap-6 z-[9999] animate-in fade-in slide-in-from-bottom-4 duration-300">
+						<span className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+							Выбрано файлов: {selectedFileIds.length}
+						</span>
+						<div className="h-4 w-px bg-slate-250 dark:bg-slate-750" />
+						<button
+							type="button"
+							onClick={() => setIsBulkShareOpen(true)}
+							className="flex items-center gap-2 bg-indigo-600! hover:bg-indigo-700! text-white! px-4 py-2 rounded-full text-xs font-bold transition-all shadow-md cursor-pointer hover:opacity-90"
+						>
+							<Share2 size={13} />
+							<span>Поделиться</span>
+						</button>
+						<button
+							type="button"
+							onClick={handleBulkDeleteConfirm}
+							className="flex items-center gap-2 bg-red-600! hover:bg-red-700! text-white! px-4 py-2 rounded-full text-xs font-bold transition-all shadow-md cursor-pointer hover:opacity-90"
+						>
+							<Trash2 size={13} />
+							<span>Удалить</span>
+						</button>
+						<button
+							type="button"
+							onClick={() => setSelectedFileIds([])}
+							className="text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+						>
+							Снять выделение
+						</button>
+					</div>
+				</If>
+
+				<If is={isBulkShareOpen}>
+					<BulkShareModal
+						selectedFiles={files.filter((f) => selectedFileIds.includes(f.id))}
+						onClose={() => setIsBulkShareOpen(false)}
+						onShare={async (payload) => {
+							const res = await bulkShareFiles.mutateAsync(payload);
+							setSelectedFileIds([]);
+							return res;
+						}}
+					/>
+				</If>
+			</Suspense>
 		</div>
 	);
 };
