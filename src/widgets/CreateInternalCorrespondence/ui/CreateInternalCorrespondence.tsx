@@ -6,6 +6,7 @@ import React, {
   useLayoutEffect,
   useMemo,
 } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -110,6 +111,12 @@ import { FilePreviewModal } from "@features/Profile";
 // вшитой картинки и границ перетаскивания.
 const DS_STAMP_DEFAULT_WIDTH = 377;
 const DS_STAMP_DEFAULT_HEIGHT = dsStampHeightForWidth(DS_STAMP_DEFAULT_WIDTH);
+// Границы масштабирования штампа ЭЦП при размещении. Высота всегда выводится из
+// ширины по пропорциям макета (dsStampHeightForWidth), так что достаточно
+// ограничить только ширину. Дефолт (377) остаётся внутри диапазона — размер «по
+// умолчанию» не меняется.
+const DS_STAMP_MIN_WIDTH = 160;
+const DS_STAMP_MAX_WIDTH = 760;
 import { PreviewModal } from "./PreviewModal";
 import { TBtn } from "./TBtn";
 import { DSStamp } from "./DSStamp";
@@ -244,6 +251,37 @@ const topLevelBlockOf = (
   return n && n.nodeType === Node.ELEMENT_NODE ? (n as HTMLElement) : null;
 };
 
+// Соседний РЕАЛЬНЫЙ блок за границей страницы: идём по сиблингам, пропуская
+// распорки/разрывы/печати ЭЦП/пустой текст. Возвращаем блок, ТОЛЬКО если по пути
+// пересекли распорку или разрыв страницы (иначе граница страницы ни при чём и
+// коррекция каретки не нужна — дефолт браузера справится сам).
+const blockAcrossPageBoundary = (
+  block: HTMLElement,
+  dir: "next" | "prev",
+): HTMLElement | null => {
+  const step = (n: ChildNode | null) =>
+    dir === "next" ? n?.nextSibling ?? null : n?.previousSibling ?? null;
+  let n: ChildNode | null = step(block);
+  let crossed = false;
+  while (n) {
+    if (isSpacerNode(n) || isPageBreakNode(n)) {
+      crossed = true;
+      n = step(n);
+      continue;
+    }
+    if (
+      isStampNode(n) ||
+      (n.nodeType === Node.TEXT_NODE && !(n.textContent || "").trim())
+    ) {
+      n = step(n);
+      continue;
+    }
+    break;
+  }
+  if (!crossed || !n || n.nodeType !== Node.ELEMENT_NODE) return null;
+  return n as HTMLElement;
+};
+
 // Есть ли в диапазоне видимое содержимое (текст / br / атомарные элементы)
 const rangeHasContent = (r: Range): boolean => {
   if (r.toString().length > 0) return true;
@@ -270,6 +308,11 @@ const caretAtBlockEnd = (block: HTMLElement, range: Range): boolean => {
     return false;
   return frag.querySelectorAll("br").length <= 1;
 };
+
+// Граница слова для гранулярной отмены (undo по словам, как в Word): пробелы,
+// табуляция, неразрывный пробел и пунктуация завершают «слово» → отдельный шаг
+// истории. Ввод такого символа фиксирует набранное слово в стек отмены.
+const WORD_BOUNDARY_RE = /[\s.,;:!?…()[\]{}"'«»„“”‚‘’—–\-/\\|]/;
 
 // Шаг табуляции/красной строки ≈ позиция табуляции Word (1.27 см).
 const TAB_STEP_CM = 1.27;
@@ -414,6 +457,36 @@ const deleteTabBeforeCaret = (range: Range): boolean => {
   return false;
 };
 
+// Пустые inline-обёртки (<b></b>, <span></span> и т.п.), остающиеся после
+// слияния/правок блоков, чистим — иначе каретка «залипает» в невидимом узле,
+// а разметка распухает. Узлы с текстом или значимым содержимым (img/br/table)
+// не трогаем. Порядок обхода — документный, remove() на уже удалённом узле
+// (когда удалили родителя раньше ребёнка) безопасен.
+const EMPTY_INLINE_TAGS = new Set([
+  "B",
+  "I",
+  "U",
+  "S",
+  "STRIKE",
+  "EM",
+  "STRONG",
+  "SPAN",
+  "SUB",
+  "SUP",
+  "FONT",
+  "MARK",
+  "SMALL",
+]);
+const normalizeBlock = (el: HTMLElement) => {
+  el.querySelectorAll("*").forEach((node) => {
+    if (!EMPTY_INLINE_TAGS.has(node.tagName)) return;
+    if ((node.textContent || "").length) return;
+    if (node.querySelector("img,br,hr,table")) return;
+    node.remove();
+  });
+  el.normalize();
+};
+
 // Слияние первого блока следующей страницы с последним блоком предыдущей —
 // как при обычном Backspace внутри одной страницы.
 const mergePageBlocks = (target: HTMLElement, source: HTMLElement) => {
@@ -455,6 +528,7 @@ const mergeAcrossBoundary = (
 
   const junction = (t.textContent || "").length;
   mergePageBlocks(t, s);
+  normalizeBlock(t);
   if (sourceList && !sourceList.firstElementChild) sourceList.remove();
   return charPosAt(t, junction);
 };
@@ -643,7 +717,7 @@ const makeImportPageBreak = (): HTMLElement => {
   div.setAttribute("contenteditable", "false");
   div.setAttribute("aria-hidden", "true");
   div.style.cssText =
-    "height:0;line-height:0;font-size:0;break-after:page;page-break-after:always;";
+    "height:0;line-height:0;font-size:0;break-after:page;page-break-after:always;user-select:none;-webkit-user-select:none;pointer-events:none;";
   return div;
 };
 
@@ -2389,7 +2463,6 @@ export const CreateInternalCorrespondence = ({
     if (!editor || !editor.isContentEditable) return;
     // Набор до смены размера — отдельный шаг истории изменений.
     commitHistoryNow();
-    setFontSize(size);
     editor.focus();
 
     // Точный размер для выделенного текста. execCommand("fontSize") умеет
@@ -2402,8 +2475,13 @@ export const CreateInternalCorrespondence = ({
       sel.rangeCount > 0 &&
       !sel.isCollapsed &&
       editor.contains(sel.anchorNode);
-    // Без выделения меняется только базовый размер листа (setFontSize выше).
-    if (!hasRangeSelection) return;
+    // Есть выделение → меняем размер ТОЛЬКО выделенного фрагмента (inline-span),
+    // базовый размер листа НЕ трогаем (иначе перекрасился бы весь текст).
+    // Нет выделения → меняем базовый размер всего листа.
+    if (!hasRangeSelection) {
+      setFontSize(size);
+      return;
+    }
 
     document.execCommand("styleWithCSS", false, "true");
     document.execCommand("fontSize", false, "7");
@@ -3129,6 +3207,66 @@ export const CreateInternalCorrespondence = ({
     return () => editor.removeEventListener("beforeinput", onBeforeInput);
   }, [undoEdit, redoEdit]);
 
+  // Подсветка активных кнопок тулбара: какие форматы применены к текущему
+  // выделению/каретке. Обновляется по selectionchange и после execCmd.
+  const [activeFmt, setActiveFmt] = useState<Record<string, boolean>>({});
+  const refreshActiveFmt = useCallback(() => {
+    const editor = editorRef.current;
+    const sel = window.getSelection();
+    // Выделение вне редактора (или редактор readonly) — гасим всю подсветку.
+    if (
+      !editor ||
+      !editor.isContentEditable ||
+      !sel ||
+      sel.rangeCount === 0 ||
+      !editor.contains(sel.anchorNode)
+    ) {
+      setActiveFmt((prev) => (Object.keys(prev).length ? {} : prev));
+      return;
+    }
+    const q = (cmd: string) => {
+      try {
+        return document.queryCommandState(cmd);
+      } catch {
+        return false;
+      }
+    };
+    let block = "";
+    try {
+      block = (document.queryCommandValue("formatBlock") || "").toLowerCase();
+    } catch {
+      block = "";
+    }
+    const next: Record<string, boolean> = {
+      bold: q("bold"),
+      italic: q("italic"),
+      underline: q("underline"),
+      strikeThrough: q("strikeThrough"),
+      justifyLeft: q("justifyLeft"),
+      justifyCenter: q("justifyCenter"),
+      justifyRight: q("justifyRight"),
+      justifyFull: q("justifyFull"),
+      insertUnorderedList: q("insertUnorderedList"),
+      insertOrderedList: q("insertOrderedList"),
+      h1: block === "h1",
+      h2: block === "h2",
+    };
+    // Меняем стейт только при реальном отличии — selectionchange частит.
+    setActiveFmt((prev) => {
+      const keys = Object.keys(next);
+      const same =
+        keys.length === Object.keys(prev).length &&
+        keys.every((k) => prev[k] === next[k]);
+      return same ? prev : next;
+    });
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("selectionchange", refreshActiveFmt);
+    return () =>
+      document.removeEventListener("selectionchange", refreshActiveFmt);
+  }, [refreshActiveFmt]);
+
   // Команды форматирования тулбара. Нативные undo/redo сюда не ходят —
   // история изменений собственная (undoEdit/redoEdit).
   const execCmd = useCallback(
@@ -3142,11 +3280,22 @@ export const CreateInternalCorrespondence = ({
       editor.focus();
       document.execCommand(command, false, value);
       commitHistoryNow();
+      // Тулбар-переключение (bold/список/выравнивание) часто НЕ двигает
+      // выделение → событие selectionchange не сработает. Обновляем подсветку
+      // кнопок вручную сразу после команды.
+      refreshActiveFmt();
     },
-    [commitHistoryNow],
+    [commitHistoryNow, refreshActiveFmt],
   );
 
-  const handleEditorInput = useCallback(() => {
+  const handleEditorInput = useCallback(
+    (e?: React.FormEvent<HTMLDivElement>) => {
+    const native = e?.nativeEvent as InputEvent | undefined;
+    const inputType = native?.inputType || "";
+    const data = native?.data ?? "";
+    const isParaBoundary =
+      inputType === "insertParagraph" || inputType === "insertLineBreak";
+
     const editor = editorRef.current;
     if (editor) {
       // Документ очищен полностью: браузер оставляет пустые обёртки с прежним
@@ -3155,9 +3304,13 @@ export const CreateInternalCorrespondence = ({
       // Важно: пусто == НЕТ символов вообще (length 0), а не «только пробелы».
       // trim() считал пустыми пробел/табуляцию и стирал их — из-за этого Space
       // в пустом редакторе не срабатывал, а Tab+Space «съедал» табуляцию.
+      // НО: Enter/Shift+Enter в пустом холсте создаёт вторую пустую строку
+      // (<p><br></p>×2) — тоже textContent="", и сброс схлопывал бы её обратно,
+      // из-за чего Enter «не работал» на пустом документе. Для вставки абзаца/
+      // переноса сброс не делаем.
       const isEmpty =
         !editor.textContent?.length && !editor.querySelector("img,table,hr");
-      if (isEmpty && editor.innerHTML !== "<p><br></p>") {
+      if (isEmpty && !isParaBoundary && editor.innerHTML !== "<p><br></p>") {
         editor.innerHTML = "<p><br></p>";
         const sel = window.getSelection();
         const range = document.createRange();
@@ -3168,9 +3321,22 @@ export const CreateInternalCorrespondence = ({
       }
     }
     setEditorContent(getCleanEditorHtml());
-    // Набор текста складывается в шаги истории по паузам.
-    scheduleHistoryCommit();
-  }, [getCleanEditorHtml, scheduleHistoryCommit]);
+
+    // Гранулярность отмены как в Word: обычный набор складывается в один шаг по
+    // паузам (scheduleHistoryCommit), но граница слова/абзаца немедленно фиксирует
+    // набранное — тогда Ctrl+Z откатывает по словам, а не всю фразу целиком.
+    // Enter/Shift+Enter (insertParagraph/insertLineBreak) — тоже граница шага.
+    const isWordBoundary =
+      inputType === "insertText" && !!data && WORD_BOUNDARY_RE.test(data);
+    if (isWordBoundary || isParaBoundary) {
+      commitHistoryNow();
+    } else {
+      // Набор текста складывается в шаги истории по паузам.
+      scheduleHistoryCommit();
+    }
+    },
+    [getCleanEditorHtml, scheduleHistoryCommit, commitHistoryNow],
+  );
 
   // После ручной правки DOM (слияние через границу, вставка разрыва) сразу
   // перепагинируем синхронно — не дожидаясь rAF-эффекта — и синхронизируем стейт.
@@ -3234,6 +3400,34 @@ export const CreateInternalCorrespondence = ({
         selection.addRange(range);
         syncEditorAfterDomEdit();
         return;
+      }
+
+      // Enter на ПУСТОМ пункте списка — выход из списка (как в Word): outdent
+      // либо понижает уровень вложенного пункта, либо выносит пункт из списка
+      // обычным блоком. Непустые пункты обрабатывает нативный split (Enter не
+      // перехватываем — наследование формата идёт через defaultParagraphSeparator).
+      if (e.key === "Enter" && !e.shiftKey) {
+        const editor = editorRef.current;
+        if (editor && editor.isContentEditable) {
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0 && selection.isCollapsed) {
+            const range = selection.getRangeAt(0);
+            if (editor.contains(range.startContainer)) {
+              const li = closestLiOf(editor, range.startContainer);
+              if (
+                li &&
+                !(li.textContent || "").trim() &&
+                !li.querySelector("img,table")
+              ) {
+                e.preventDefault();
+                commitHistoryNow();
+                execCmd("outdent");
+                syncEditorAfterDomEdit();
+                return;
+              }
+            }
+          }
+        }
       }
 
       // Tab / Shift+Tab — контекстное поведение как в Word:
@@ -3302,6 +3496,62 @@ export const CreateInternalCorrespondence = ({
         return;
       }
 
+      // Стрелки на границе страниц: между блоками стоит невидимая распорка
+      // (contenteditable=false, большая высота). Вертикальная навигация браузера
+      // геометрическая — каретка «проваливается» в пустоту распорки и застревает,
+      // требуя второго нажатия. Перехватываем ТОЛЬКО когда каретка на краю блока
+      // и за границей действительно есть распорка/разрыв: тогда ставим её в
+      // начало/конец соседнего блока. Мид-блочную навигацию не трогаем (caretAt*
+      // истинны лишь на первой/последней визуальной строке блока).
+      if (
+        e.key === "ArrowDown" ||
+        e.key === "ArrowUp" ||
+        e.key === "ArrowRight" ||
+        e.key === "ArrowLeft"
+      ) {
+        if (e.shiftKey || e.ctrlKey || e.metaKey || e.altKey) return;
+        const editor = editorRef.current;
+        if (!editor) return;
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0 || !sel.isCollapsed) return;
+        const range = sel.getRangeAt(0);
+        if (!editor.contains(range.startContainer)) return;
+        const block = topLevelBlockOf(editor, range.startContainer);
+        if (!block) return;
+
+        const forward = e.key === "ArrowDown" || e.key === "ArrowRight";
+        const atEdge = forward
+          ? caretAtBlockEnd(block, range)
+          : caretAtBlockStart(block, range);
+        if (!atEdge) return;
+
+        const neighbour = blockAcrossPageBoundary(block, forward ? "next" : "prev");
+        if (!neighbour) return;
+
+        // Список — крайний пункт; атомарный блок (таблица/картинка) отдаём дефолту.
+        let target: HTMLElement = neighbour;
+        if (neighbour.tagName === "UL" || neighbour.tagName === "OL") {
+          const li = forward
+            ? neighbour.firstElementChild
+            : neighbour.lastElementChild;
+          if (!li) return;
+          target = li as HTMLElement;
+        } else if (EDITOR_ATOMIC_TAGS.has(neighbour.tagName)) {
+          return;
+        }
+
+        const pos = forward
+          ? charPosAt(target, 0)
+          : charPosAt(target, (target.textContent || "").length);
+        e.preventDefault();
+        const r = document.createRange();
+        r.setStart(pos.node, pos.offset);
+        r.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(r);
+        return;
+      }
+
       if (e.key !== "Backspace" && e.key !== "Delete") return;
       const editor = editorRef.current;
       if (!editor) return;
@@ -3355,7 +3605,17 @@ export const CreateInternalCorrespondence = ({
           return;
         }
 
-        if (!spacers.length) return;
+        // Своё слияние блоков и БЕЗ распорок (обычные соседние абзацы на одной
+        // странице): дефолт браузера тянет формат из произвольной стороны и
+        // ломает разметку. mergeAcrossBoundary вливает текущий блок в приёмник,
+        // СОХРАНЯЯ формат приёмника (как в Word). Атомарные блоки (img/table) и
+        // <hr> оставляем дефолту — там слияние абзацев неуместно.
+        const prevIsMergeable =
+          !!stop &&
+          stop.nodeType === Node.ELEMENT_NODE &&
+          (stop as HTMLElement).tagName !== "HR" &&
+          !EDITOR_ATOMIC_TAGS.has((stop as HTMLElement).tagName);
+        if (!spacers.length && !prevIsMergeable) return;
 
         e.preventDefault();
         commitHistoryNow();
@@ -3385,7 +3645,13 @@ export const CreateInternalCorrespondence = ({
         return;
       }
 
-      if (!spacers.length) return;
+      // Зеркально Backspace: своё слияние со следующим блоком и без распорок.
+      const nextIsMergeable =
+        !!stop &&
+        stop.nodeType === Node.ELEMENT_NODE &&
+        (stop as HTMLElement).tagName !== "HR" &&
+        !EDITOR_ATOMIC_TAGS.has((stop as HTMLElement).tagName);
+      if (!spacers.length && !nextIsMergeable) return;
 
       e.preventDefault();
       commitHistoryNow(); // набор до операции — отдельный шаг истории
@@ -3420,7 +3686,7 @@ export const CreateInternalCorrespondence = ({
     breakEl.setAttribute("contenteditable", "false");
     breakEl.setAttribute("aria-hidden", "true");
     breakEl.style.cssText =
-      "height:0;line-height:0;font-size:0;break-after:page;page-break-after:always;";
+      "height:0;line-height:0;font-size:0;break-after:page;page-break-after:always;user-select:none;-webkit-user-select:none;pointer-events:none;";
 
     const sel = window.getSelection();
     const range =
@@ -4225,6 +4491,77 @@ export const CreateInternalCorrespondence = ({
     window.addEventListener("mouseup", onMouseUp);
   };
 
+  // Масштабирование штампа ЭЦП за угловой маркер (только на этапе размещения, до
+  // подписания). Пропорции макета фиксированы (SVG preserveAspectRatio), поэтому
+  // тянем ТОЛЬКО ширину, а высоту выводим из неё через dsStampHeightForWidth —
+  // так экранный, вшитый и печатный штампы остаются идентичными. Выбранный размер
+  // хранится в stampSize и уже проброшен во все режимы (плейсхолдер, вшитая
+  // картинка при подписании, предпросмотр и печать через getPreviewStamp).
+  const handleStampResizeMouseDown = (e: React.MouseEvent) => {
+    if (finalSigner?.dsApplied) return;
+    // stopPropagation — чтобы захват маркера не запускал перетаскивание штампа.
+    e.preventDefault();
+    e.stopPropagation();
+
+    const startX = e.clientX;
+    const startWidth =
+      typeof stampSize.width === "number"
+        ? stampSize.width
+        : DS_STAMP_DEFAULT_WIDTH;
+
+    const onMouseMove = (ev: MouseEvent) => {
+      // Верхняя граница: не даём штампу вылезти за правый край печатной области.
+      const cr = editorRef.current?.getBoundingClientRect();
+      const maxByCanvas = cr ? cr.width - stampPos.x : DS_STAMP_MAX_WIDTH;
+      const upperBound = Math.min(DS_STAMP_MAX_WIDTH, Math.max(
+        DS_STAMP_MIN_WIDTH,
+        maxByCanvas,
+      ));
+      const nextWidth = Math.round(
+        Math.max(
+          DS_STAMP_MIN_WIDTH,
+          Math.min(startWidth + (ev.clientX - startX), upperBound),
+        ),
+      );
+      setStampSize({
+        width: nextWidth,
+        height: dsStampHeightForWidth(nextWidth),
+      });
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  // Просмотр вшитого штампа ЭЦП в полном размере (после подписания). Штамп в теле
+  // письма — это <img> с data-URI SVG; по клику берём его src и показываем крупно
+  // в модалке-оверлее. Ничего в body не добавляем и не исполняем — фича живёт
+  // только в слое отображения (как зум в карточке «Подписывающий»).
+  const [zoomedStampSrc, setZoomedStampSrc] = useState<string | null>(null);
+
+  const handleCanvasStampZoom = useCallback((e: React.MouseEvent) => {
+    const stamp = (e.target as HTMLElement)?.closest?.(
+      `[${STAMP_ATTR}]`,
+    ) as HTMLElement | null;
+    if (!stamp) return;
+    const src = stamp.querySelector("img")?.getAttribute("src");
+    if (src) setZoomedStampSrc(src);
+  }, []);
+
+  useEffect(() => {
+    if (!zoomedStampSrc) return;
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === "Escape") setZoomedStampSrc(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [zoomedStampSrc]);
+
   const selectedImportance =
     importanceOptions.find((o) => o.value === importance) ??
     importanceOptions[0] ??
@@ -4391,6 +4728,58 @@ export const CreateInternalCorrespondence = ({
           attachments={attachments}
         />
       )}
+
+      {/* Просмотр вшитого штампа ЭЦП в полном размере (после подписания). Портал
+          в body — чтобы fixed-оверлей не смещался transform'ами предков.
+          Закрытие — по фону, крестику или Escape. */}
+      {createPortal(
+        <AnimatePresence>
+          {zoomedStampSrc && (
+            <motion.div
+              key="ds-doc-zoom"
+              className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 font-sans"
+              onClick={() => setZoomedStampSrc(null)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="relative w-full max-w-3xl rounded-2xl bg-white p-5 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+                initial={{ opacity: 0, scale: 0.96, y: 8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: 8 }}
+                transition={{ type: "spring", stiffness: 320, damping: 30 }}
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Shield size={16} className="text-emerald-500" />
+                    <span className="text-sm font-semibold text-slate-800">
+                      Электронная подпись
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setZoomedStampSrc(null)}
+                    aria-label="Закрыть"
+                    className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+                <img
+                  src={zoomedStampSrc}
+                  alt="Электронная подпись"
+                  className="block w-full h-auto select-none"
+                  draggable={false}
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
+
       <header className="bg-white border-b border-slate-200 px-6 py-4 z-10 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -5056,6 +5445,7 @@ export const CreateInternalCorrespondence = ({
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.h1}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("formatBlock", "h1");
@@ -5066,6 +5456,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.h2}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("formatBlock", "h2");
@@ -5127,6 +5518,7 @@ export const CreateInternalCorrespondence = ({
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.bold}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("bold");
@@ -5137,6 +5529,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.italic}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("italic");
@@ -5147,6 +5540,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.underline}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("underline");
@@ -5157,6 +5551,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.strikeThrough}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("strikeThrough");
@@ -5178,6 +5573,7 @@ export const CreateInternalCorrespondence = ({
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.justifyLeft}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("justifyLeft");
@@ -5188,6 +5584,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.justifyCenter}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("justifyCenter");
@@ -5198,6 +5595,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.justifyRight}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("justifyRight");
@@ -5208,6 +5606,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.justifyFull}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("justifyFull");
@@ -5219,6 +5618,7 @@ export const CreateInternalCorrespondence = ({
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.insertUnorderedList}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("insertUnorderedList");
@@ -5229,6 +5629,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.insertOrderedList}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("insertOrderedList");
@@ -5673,6 +6074,7 @@ export const CreateInternalCorrespondence = ({
                       data-placeholder="Начните вводить текст письма..."
                       onInput={handleEditorInput}
                       onKeyDown={handleEditorKeyDown}
+                      onClick={handleCanvasStampZoom}
                       style={{
                         position: "relative",
                         zIndex: 1,
@@ -5692,7 +6094,7 @@ export const CreateInternalCorrespondence = ({
                         wordBreak: "break-word",
                         overflow: "visible",
                       }}
-                      className="doc-preview-content focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_pre]:whitespace-pre-wrap [&_p]:!my-0"
+                      className="doc-preview-content focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_pre]:whitespace-pre-wrap [&_p]:!my-0 [&_[data-page-spacer]]:select-none [&_[data-page-spacer]]:pointer-events-none [&_[data-page-break]]:select-none [&_[data-page-break]]:pointer-events-none [&_[data-signature-stamp]]:select-none [&_[data-signature-stamp]]:!cursor-zoom-in"
                     />
 
                     {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания.
@@ -5724,6 +6126,26 @@ export const CreateInternalCorrespondence = ({
                           certSerial={`SN-2026-${finalSigner.initials}-84201`}
                           signedAt={new Date().toLocaleDateString("ru-RU")}
                           validUntil="аз 20.03.2025 то 20.03.2026"
+                        />
+                        {/* Угловой маркер масштабирования (только при размещении,
+                            до подписания). На вшитый/печатный штамп не влияет —
+                            это лишь аффорданс редактора. */}
+                        <div
+                          onMouseDown={handleStampResizeMouseDown}
+                          title="Потяните, чтобы изменить размер ЭЦП"
+                          style={{
+                            position: "absolute",
+                            right: -6,
+                            bottom: -6,
+                            width: 14,
+                            height: 14,
+                            borderRadius: 3,
+                            background: "#3b82f6",
+                            border: "2px solid #fff",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+                            cursor: "nwse-resize",
+                            zIndex: 51,
+                          }}
                         />
                       </div>
                     )}
