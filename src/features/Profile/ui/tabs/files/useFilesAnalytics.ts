@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import {
@@ -120,10 +121,24 @@ const normalizeAnalyticsData = (
 });
 
 export const useFilesAnalytics = (params: IParams) => {
+	const memoizedParams = useMemo(
+		() => ({ months: params.months, limit: params.limit }),
+		[params.months, params.limit],
+	);
+
+	const cacheOptions = useMemo(
+		() => ({
+			staleTime: 5 * 60 * 1000,
+			refetchOnWindowFocus: false,
+		}),
+		[],
+	);
+
 	const query = useGetQuery<IParams, IRawFilesAnalyticsResponse>({
 		url: ApiRoutes.MY_FILES_ANALYTICS,
-		params,
+		params: memoizedParams,
 		useToken: true,
+		options: cacheOptions,
 	});
 
 	return {
@@ -133,4 +148,3 @@ export const useFilesAnalytics = (params: IParams) => {
 		refetch: query.refetch,
 	};
 };
-
