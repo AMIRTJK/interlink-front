@@ -14,7 +14,7 @@ import { IApiFile, getFileType, formatBytes, getUserFullName } from "./lib";
 import { Tooltip, If } from "@shared/ui";
 import { _axios } from "@shared/api";
 import { toast } from "@shared/lib/toast";
-import { useState } from "react";
+import { useState, memo } from "react";
 import { UserAvatar } from "./UserAvatar";
 import { SharedAccessCell } from "./SharedAccessCell";
 
@@ -33,7 +33,7 @@ interface IProps {
 	onReorderFiles?: (fileIds: number[]) => void;
 }
 
-export const FileList = ({
+export const FileList = memo(({
 	files,
 	selectedFileIds,
 	onToggleSelectFile,
@@ -391,5 +391,5 @@ export const FileList = ({
 			</table>
 		</div>
 	);
-};
+});
 

@@ -17,7 +17,7 @@ interface IProps {
 	onReorderFiles?: (fileIds: number[]) => void;
 }
 
-export const FileGrid = ({
+export const FileGrid = React.memo(({
 	files,
 	onTogglePin,
 	onDelete,
@@ -122,4 +122,4 @@ export const FileGrid = ({
 			))}
 		</div>
 	);
-};
+});

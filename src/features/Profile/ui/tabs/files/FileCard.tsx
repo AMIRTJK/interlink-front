@@ -84,7 +84,7 @@ const getCoverContent = (file: IApiFile) => {
 	);
 };
 
-export const FileCard = ({
+export const FileCard = React.memo(({
 	file,
 	index,
 	isSelected,
@@ -137,9 +137,9 @@ export const FileCard = ({
 							e.stopPropagation();
 							onToggleSelectFile?.(file.id);
 						}}
-						className={`absolute top-3 left-3 w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all z-10 cursor-pointer ${
+						className={`absolute top-4 left-4 w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all z-10 cursor-pointer ${
 							isSelected
-								? "bg-indigo-600! border-indigo-600! text-white! scale-100 opacity-100"
+								? "bg-indigo-600! border-indigo-600! text-white! scale-100 opacity-100 shadow-md"
 								: "bg-black/20 border-white/60 text-transparent scale-0 group-hover:scale-100 group-hover:opacity-100 hover:border-white hover:bg-black/35 focus:scale-100 focus:opacity-100"
 						}`}
 					>
@@ -269,4 +269,4 @@ export const FileCard = ({
 			</div>
 		</div>
 	);
-};
+});
