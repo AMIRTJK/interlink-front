@@ -371,7 +371,7 @@ export const FilesTab = () => {
 					</p>
 				</div>
 			) : (
-				<div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+				<div className="space-y-8 animate-in fade-in duration-200">
 					{/* Files View */}
 					<FileGridList
 						files={currentFiles}

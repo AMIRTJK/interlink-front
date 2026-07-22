@@ -102,7 +102,7 @@ export const FilesAnalytics = () => {
 		<motion.div
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
-			className="flex flex-col gap-5 pb-6 animate-in fade-in slide-in-from-bottom-2 duration-300"
+			className="flex flex-col gap-5 pb-6 animate-in fade-in duration-200"
 		>
 			<div className="flex flex-wrap items-center justify-end gap-3 bg-white/40 dark:bg-slate-800/40 p-3 rounded-2xl border border-white/20 dark:border-slate-700/30">
 				<div className="flex items-center gap-2">
