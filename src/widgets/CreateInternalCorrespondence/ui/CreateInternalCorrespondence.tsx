@@ -6,6 +6,7 @@ import React, {
   useLayoutEffect,
   useMemo,
 } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -4537,6 +4538,30 @@ export const CreateInternalCorrespondence = ({
     window.addEventListener("mouseup", onMouseUp);
   };
 
+  // Просмотр вшитого штампа ЭЦП в полном размере (после подписания). Штамп в теле
+  // письма — это <img> с data-URI SVG; по клику берём его src и показываем крупно
+  // в модалке-оверлее. Ничего в body не добавляем и не исполняем — фича живёт
+  // только в слое отображения (как зум в карточке «Подписывающий»).
+  const [zoomedStampSrc, setZoomedStampSrc] = useState<string | null>(null);
+
+  const handleCanvasStampZoom = useCallback((e: React.MouseEvent) => {
+    const stamp = (e.target as HTMLElement)?.closest?.(
+      `[${STAMP_ATTR}]`,
+    ) as HTMLElement | null;
+    if (!stamp) return;
+    const src = stamp.querySelector("img")?.getAttribute("src");
+    if (src) setZoomedStampSrc(src);
+  }, []);
+
+  useEffect(() => {
+    if (!zoomedStampSrc) return;
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === "Escape") setZoomedStampSrc(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [zoomedStampSrc]);
+
   const selectedImportance =
     importanceOptions.find((o) => o.value === importance) ??
     importanceOptions[0] ??
@@ -4703,6 +4728,58 @@ export const CreateInternalCorrespondence = ({
           attachments={attachments}
         />
       )}
+
+      {/* Просмотр вшитого штампа ЭЦП в полном размере (после подписания). Портал
+          в body — чтобы fixed-оверлей не смещался transform'ами предков.
+          Закрытие — по фону, крестику или Escape. */}
+      {createPortal(
+        <AnimatePresence>
+          {zoomedStampSrc && (
+            <motion.div
+              key="ds-doc-zoom"
+              className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 font-sans"
+              onClick={() => setZoomedStampSrc(null)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="relative w-full max-w-3xl rounded-2xl bg-white p-5 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+                initial={{ opacity: 0, scale: 0.96, y: 8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: 8 }}
+                transition={{ type: "spring", stiffness: 320, damping: 30 }}
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Shield size={16} className="text-emerald-500" />
+                    <span className="text-sm font-semibold text-slate-800">
+                      Электронная подпись
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setZoomedStampSrc(null)}
+                    aria-label="Закрыть"
+                    className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+                <img
+                  src={zoomedStampSrc}
+                  alt="Электронная подпись"
+                  className="block w-full h-auto select-none"
+                  draggable={false}
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
+
       <header className="bg-white border-b border-slate-200 px-6 py-4 z-10 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -5997,6 +6074,7 @@ export const CreateInternalCorrespondence = ({
                       data-placeholder="Начните вводить текст письма..."
                       onInput={handleEditorInput}
                       onKeyDown={handleEditorKeyDown}
+                      onClick={handleCanvasStampZoom}
                       style={{
                         position: "relative",
                         zIndex: 1,
@@ -6016,7 +6094,7 @@ export const CreateInternalCorrespondence = ({
                         wordBreak: "break-word",
                         overflow: "visible",
                       }}
-                      className="doc-preview-content focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_pre]:whitespace-pre-wrap [&_p]:!my-0 [&_[data-page-spacer]]:select-none [&_[data-page-spacer]]:pointer-events-none [&_[data-page-break]]:select-none [&_[data-page-break]]:pointer-events-none [&_[data-signature-stamp]]:select-none [&_[data-signature-stamp]]:pointer-events-none"
+                      className="doc-preview-content focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_pre]:whitespace-pre-wrap [&_p]:!my-0 [&_[data-page-spacer]]:select-none [&_[data-page-spacer]]:pointer-events-none [&_[data-page-break]]:select-none [&_[data-page-break]]:pointer-events-none [&_[data-signature-stamp]]:select-none [&_[data-signature-stamp]]:!cursor-zoom-in"
                     />
 
                     {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания.
