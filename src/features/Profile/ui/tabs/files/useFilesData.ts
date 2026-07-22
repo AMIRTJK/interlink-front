@@ -1,19 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { toast } from "@shared/lib/toast";
 import { ApiRoutes } from "@shared/api";
 import { IApiFile, IApiFolder, IDeleteFolderResult, IDiskMeta } from "./lib";
 
-// Page size used by the "counts" queries. These fetch files without a folder
-// filter so we can show the grand total and per-folder counts regardless of
-// which folder is currently selected. Capped at 100 because the backend
-// rejects a larger `per_page` (422). The grand-total badge stays exact
-// regardless (it reads the paginator `total`, not the array length); per-folder
-// badges are derived from the returned page and prefer a backend `files_count`
-// when present.
 const COUNT_FETCH_SIZE = 100;
 
-// Group files by their direct folder to get a per-folder file count.
 const buildFolderFileCounts = (items: IApiFile[]): Record<number, number> =>
   items.reduce<Record<number, number>>((acc, file) => {
     if (file.folder_id != null) {
@@ -39,34 +31,30 @@ interface IFilesPaginatedData {
 }
 
 export const useFilesData = (params: IFilesParams) => {
+  const [manualOrderMap, setManualOrderMap] = useState<Record<number, number>>({});
+
   const filesQuery = useGetQuery<IFilesParams, { success: boolean; data: IFilesPaginatedData }>({
     url: ApiRoutes.MY_FILES,
     params,
     useToken: true,
   });
 
-  // 2. Get folders query
   const foldersQuery = useGetQuery<any, { success: boolean; data: IApiFolder[] }>({
     url: ApiRoutes.MY_FILE_FOLDERS,
     useToken: true,
   });
 
-  // 3. Get storage meta query
   const metaQuery = useGetQuery<any, { success: boolean; data: IDiskMeta }>({
     url: ApiRoutes.MY_FILES_META,
     useToken: true,
   });
 
-  // 3.1. Personal files counts: fetched without a folder filter so the "Все
-  // файлы" badge shows the grand total and each folder chip shows its own
-  // count, independent of the selected folder / current page.
   const filesCountQuery = useGetQuery<{ per_page: number }, { success: boolean; data: IFilesPaginatedData }>({
     url: ApiRoutes.MY_FILES,
     params: { per_page: COUNT_FETCH_SIZE },
     useToken: true,
   });
 
-  // 4. Create Folder
   const createFolder = useMutationQuery<{ name: string; parent_id: number | null; sort_order?: number; emoji?: string | null; shared_user_ids?: number[] }, IApiFolder>({
     url: ApiRoutes.MY_FILE_FOLDERS,
     method: "POST",
@@ -76,7 +64,6 @@ export const useFilesData = (params: IFilesParams) => {
     },
   });
 
-  // 5. Update Folder (Rename / Move)
   const updateFolder = useMutationQuery<{ id: number; name: string; parent_id: number | null; sort_order?: number; emoji?: string | null }, IApiFolder>({
     url: (data) => ApiRoutes.MY_FILE_FOLDERS_ID.replace(":id", String(data.id)),
     method: "PUT",
@@ -86,12 +73,10 @@ export const useFilesData = (params: IFilesParams) => {
     },
   });
 
-  // 6. Delete Folder (каскадное удаление: папка + вложенные папки/файлы + доступы)
   const deleteFolder = useMutationQuery<{ id: number }, IDeleteFolderResult>({
     url: (data) => ApiRoutes.MY_FILE_FOLDERS_ID.replace(":id", String(data.id)),
     method: "DELETE",
     messages: {
-      // success-тост формируем вручную из ответа сервера (со счётчиками).
       suppressSuccessToast: true,
       invalidate: [ApiRoutes.MY_FILE_FOLDERS, ApiRoutes.MY_FILES, ApiRoutes.MY_FILES_META],
       onSuccessCb: (data?: IDeleteFolderResult) => {
@@ -107,7 +92,6 @@ export const useFilesData = (params: IFilesParams) => {
     },
   });
 
-  // 7. Update File (Starred, Folder ID, Meta)
   const updateFile = useMutationQuery<{ id: number; folder_id?: number | null; is_starred?: boolean; meta?: any }, IApiFile>({
     url: (data) => ApiRoutes.MY_FILES_ID.replace(":id", String(data.id)),
     method: "PUT",
@@ -117,7 +101,6 @@ export const useFilesData = (params: IFilesParams) => {
     },
   });
 
-  // 8. Delete File
   const deleteFile = useMutationQuery<{ id: number }, void>({
     url: (data) => ApiRoutes.MY_FILES_ID.replace(":id", String(data.id)),
     method: "DELETE",
@@ -127,7 +110,6 @@ export const useFilesData = (params: IFilesParams) => {
     },
   });
 
-  // 9. Upload File
   const uploadFile = useMutationQuery<FormData, IApiFile>({
     url: ApiRoutes.MY_FILES_UPLOAD,
     method: "POST",
@@ -137,8 +119,7 @@ export const useFilesData = (params: IFilesParams) => {
     },
   });
 
-  // 9.1. Reorder Files (Drag & Drop)
-  const reorderFiles = useMutationQuery<
+  const reorderFilesMutation = useMutationQuery<
     { folder_id: number | null; file_ids: number[] },
     { success: boolean; message: string; data: any }
   >({
@@ -150,6 +131,34 @@ export const useFilesData = (params: IFilesParams) => {
     },
   });
 
+  const reorderFiles = useMemo(() => ({
+    ...reorderFilesMutation,
+    mutate: (variables: { folder_id: number | null; file_ids: number[] }) => {
+      if (variables?.file_ids) {
+        setManualOrderMap((prev) => {
+          const next = { ...prev };
+          variables.file_ids.forEach((id, idx) => {
+            next[id] = idx;
+          });
+          return next;
+        });
+      }
+      return reorderFilesMutation.mutate(variables);
+    },
+    mutateAsync: async (variables: { folder_id: number | null; file_ids: number[] }) => {
+      if (variables?.file_ids) {
+        setManualOrderMap((prev) => {
+          const next = { ...prev };
+          variables.file_ids.forEach((id, idx) => {
+            next[id] = idx;
+          });
+          return next;
+        });
+      }
+      return reorderFilesMutation.mutateAsync(variables);
+    },
+  }), [reorderFilesMutation]);
+
   const getArrayData = (response: any): any[] => {
     if (!response) return [];
     if (Array.isArray(response)) return response;
@@ -157,15 +166,13 @@ export const useFilesData = (params: IFilesParams) => {
     return [];
   };
 
-  // Ручная сортировка (drag&drop) идёт по ключу sort_order. У бэкенда sort_order
-  // — это позиция: file_ids[0] получает sort_order 0 и должен быть ПЕРВЫМ. Поэтому
-  // в ручном режиме всегда сортируем по возрастанию sort_order (0 — сверху),
-  // независимо от переключателя направления (он касается только name/date/size).
-  // Так порядок детерминирован и совпадает с тем, что сохранил бэкенд. Сортировка
-  // стабильная: при равных sort_order исходный порядок ответа сохраняется.
-  const sortByManualOrder = <T extends { sort_order?: number }>(arr: T[]): T[] => {
+  const sortByManualOrder = <T extends { id?: number; sort_order?: number }>(arr: T[]): T[] => {
     if (params.sort && params.sort !== "manual") return arr;
-    return [...arr].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    return [...arr].sort((a, b) => {
+      const orderA = a.id != null && manualOrderMap[a.id] !== undefined ? manualOrderMap[a.id] : (a.sort_order ?? 0);
+      const orderB = b.id != null && manualOrderMap[b.id] !== undefined ? manualOrderMap[b.id] : (b.sort_order ?? 0);
+      return orderA - orderB;
+    });
   };
 
   const folders = getArrayData(foldersQuery.data?.data);

@@ -271,7 +271,13 @@ export const FileList = ({
 								<td className="py-3 px-4">
 									<div className="flex items-center gap-3">
 										<If is={!!onReorderFiles}>
-											<GripVertical size={14} className="text-slate-300 group-hover:text-slate-400 cursor-grab active:cursor-grabbing shrink-0" />
+											<div
+												onClick={(e) => e.stopPropagation()}
+												onMouseDown={(e) => e.stopPropagation()}
+												className="cursor-grab active:cursor-grabbing shrink-0"
+											>
+												<GripVertical size={14} className="text-slate-300 group-hover:text-slate-400" />
+											</div>
 										</If>
 										{getSmallIcon(file)}
 										<span
