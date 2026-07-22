@@ -705,7 +705,7 @@ const makeImportPageBreak = (): HTMLElement => {
   div.setAttribute("contenteditable", "false");
   div.setAttribute("aria-hidden", "true");
   div.style.cssText =
-    "height:0;line-height:0;font-size:0;break-after:page;page-break-after:always;";
+    "height:0;line-height:0;font-size:0;break-after:page;page-break-after:always;user-select:none;-webkit-user-select:none;pointer-events:none;";
   return div;
 };
 
@@ -3650,7 +3650,7 @@ export const CreateInternalCorrespondence = ({
     breakEl.setAttribute("contenteditable", "false");
     breakEl.setAttribute("aria-hidden", "true");
     breakEl.style.cssText =
-      "height:0;line-height:0;font-size:0;break-after:page;page-break-after:always;";
+      "height:0;line-height:0;font-size:0;break-after:page;page-break-after:always;user-select:none;-webkit-user-select:none;pointer-events:none;";
 
     const sel = window.getSelection();
     const range =
@@ -5934,7 +5934,7 @@ export const CreateInternalCorrespondence = ({
                         wordBreak: "break-word",
                         overflow: "visible",
                       }}
-                      className="doc-preview-content focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_pre]:whitespace-pre-wrap [&_p]:!my-0"
+                      className="doc-preview-content focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_pre]:whitespace-pre-wrap [&_p]:!my-0 [&_[data-page-spacer]]:select-none [&_[data-page-spacer]]:pointer-events-none [&_[data-page-break]]:select-none [&_[data-page-break]]:pointer-events-none [&_[data-signature-stamp]]:select-none [&_[data-signature-stamp]]:pointer-events-none"
                     />
 
                     {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания.
