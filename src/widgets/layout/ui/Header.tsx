@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Popover } from "antd";
-import { Bell, LogOut, CheckCircle, Sun, Moon, Palette, Layers, MessageSquare, PanelTop, PanelLeft, PanelBottom, PanelRight, Monitor, FlaskConical } from "lucide-react";
+import { Bell, LogOut, CheckCircle, Sun, Moon, Palette, Layers, MessageSquare, PanelTop, PanelLeft, PanelBottom, PanelRight, Monitor } from "lucide-react";
 import { tokenControl, useLogout } from "@shared/lib";
 import { AppRoutes } from "@shared/config";
 import { Logo, Tooltip } from "@shared/ui";
@@ -279,15 +279,6 @@ export const Header = ({
 
       <div className="flex items-center gap-2 shrink-0">
         <div className="flex items-center gap-2">
-          <Tooltip title="Тест" placement="bottom">
-            <button
-              aria-label="Тест"
-              className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-            >
-              <FlaskConical size={18} strokeWidth={2.2} />
-            </button>
-          </Tooltip>
-
           <Popover
             content={<NotificationsPopover open={notifOpen} />}
             open={notifOpen}
