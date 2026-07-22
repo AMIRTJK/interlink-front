@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -8,12 +9,26 @@ import {
   FolderOpen,
 } from "lucide-react";
 import { IUser } from "@entities/login";
-import { ProfileInfoTab } from "./tabs/ProfileInfoTab";
-import { AnalyticsTab } from "./tabs/AnalyticsTab";
-import { FilesTab } from "./tabs/FilesTab";
 import { THEMES } from "@widgets/layout/ui/designSettings";
-import { Calendar } from "@widgets/Calendar";
-import { PersonalTasksRegistry } from "@widgets/PersonalTasksRegistry";
+import { Loader } from "@shared/ui";
+
+const ProfileInfoTab = lazy(() =>
+  import("./tabs/ProfileInfoTab").then((m) => ({ default: m.ProfileInfoTab }))
+);
+const AnalyticsTab = lazy(() =>
+  import("./tabs/AnalyticsTab").then((m) => ({ default: m.AnalyticsTab }))
+);
+const FilesTab = lazy(() =>
+  import("./tabs/FilesTab").then((m) => ({ default: m.FilesTab }))
+);
+const Calendar = lazy(() =>
+  import("@widgets/Calendar").then((m) => ({ default: m.Calendar }))
+);
+const PersonalTasksRegistry = lazy(() =>
+  import("@widgets/PersonalTasksRegistry").then((m) => ({
+    default: m.PersonalTasksRegistry,
+  }))
+);
 
 type TabKey = "profile" | "tasks" | "calendar" | "analytics" | "files";
 
@@ -129,7 +144,15 @@ export const PersonalCabinet = ({
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.2 }}
         >
-          {renderTabContent()}
+          <Suspense
+            fallback={
+              <div className="flex justify-center items-center min-h-[350px]">
+                <Loader />
+              </div>
+            }
+          >
+            {renderTabContent()}
+          </Suspense>
         </motion.div>
       </AnimatePresence>
     </div>
