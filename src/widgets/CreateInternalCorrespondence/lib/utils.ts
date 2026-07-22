@@ -350,15 +350,19 @@ export function sanitizeWordHtml(html: string): string {
     });
   });
 
-  // 5. Нормализуем пробелы: переводы строк/табы → один пробел; пробельные узлы
-  // на границе блоков (отступы между тегами из буфера) удаляем.
+  // 5. Нормализуем пробелы: технические переводы строк/табы форматирования
+  // исходного HTML схлопываем в один пробел, а вот ПОДРЯД ИДУЩИЕ ПРОБЕЛЫ внутри
+  // текста НЕ трогаем — Word их сохраняет, и холст (white-space: pre-wrap) тоже.
+  // Раньше здесь стоял `.replace(/ {2,}/g, " ")`, из-за чего вставленный из Word
+  // текст с несколькими пробелами их терял. Чисто пробельные узлы на границах
+  // блоков (отступы между тегами из буфера) по-прежнему удаляем.
   const textWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const textNodes: Text[] = [];
   while (textWalker.nextNode())
     textNodes.push(textWalker.currentNode as Text);
   textNodes.forEach((t) => {
     const raw = t.textContent || "";
-    let v = raw.replace(/[\t\r\n]+/g, " ").replace(/ {2,}/g, " ");
+    let v = raw.replace(/[\t\r\n]+/g, " ");
     if (!t.previousSibling || isBlockNode(t.previousSibling))
       v = v.replace(/^ +/, "");
     if (!t.nextSibling || isBlockNode(t.nextSibling)) v = v.replace(/ +$/, "");

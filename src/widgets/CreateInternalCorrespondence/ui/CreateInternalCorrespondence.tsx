@@ -575,6 +575,24 @@ const wrapBareTopLevelNodes = (root: HTMLElement): boolean => {
   return mutated;
 };
 
+// HTML → плоский текст для буфера обмена: блоки дают перевод строки, <br> → \n.
+// Нужно для того, чтобы при копировании/вырезании text/plain не «слипался»
+// (вставка в plain-поля должна сохранять переносы абзацев, как в Word).
+const htmlToPlainText = (html: string): string => {
+  const d = document.createElement("div");
+  d.innerHTML = html;
+  d.querySelectorAll("br").forEach((br) =>
+    br.replaceWith(document.createTextNode("\n")),
+  );
+  const blockSel = "p,div,h1,h2,h3,h4,h5,h6,li,tr,blockquote,pre";
+  d.querySelectorAll(blockSel).forEach((b) => {
+    if (b.nextSibling) b.appendChild(document.createTextNode("\n"));
+  });
+  return (d.textContent || "")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]+\n/g, "\n");
+};
+
 const cleanEditorArtifacts = (html: string): string => {
   const w = document.createElement("div");
   w.innerHTML = html;
@@ -3698,14 +3716,28 @@ export const CreateInternalCorrespondence = ({
         // ветку plain-text и терял жирный/курсив/подчёркивание/цвет.
         fragment = buildInlineFragmentFromHtml(sanitizeWordHtml(html));
       } else if (text) {
-        // Совсем без разметки — вставляем как текст, перенос строки → <br>.
         fragment = document.createDocumentFragment();
-        const lines = text.split(/\r?\n/);
-        lines.forEach((line, idx) => {
-          fragment.appendChild(document.createTextNode(line));
-          if (idx < lines.length - 1)
-            fragment.appendChild(document.createElement("br"));
-        });
+        if (!isMultiline) {
+          // Однострочный обычный текст — вставляем инлайн рядом с курсором.
+          fragment.appendChild(document.createTextNode(text));
+        } else {
+          // Многострочный обычный текст вставляем АБЗАЦАМИ (как Word): пустая
+          // строка разделяет абзацы, одиночный перенос — мягкий <br> внутри
+          // абзаца. Раньше все строки склеивались в один блок через <br>.
+          const paragraphs = text.replace(/\r\n/g, "\n").split(/\n{2,}/);
+          paragraphs.forEach((para) => {
+            const block = document.createElement("p");
+            const lines = para.split("\n");
+            lines.forEach((line, idx) => {
+              block.appendChild(document.createTextNode(line));
+              if (idx < lines.length - 1)
+                block.appendChild(document.createElement("br"));
+            });
+            if (!block.textContent)
+              block.appendChild(document.createElement("br"));
+            fragment.appendChild(block);
+          });
+        }
       } else {
         return;
       }
@@ -3884,6 +3916,48 @@ export const CreateInternalCorrespondence = ({
     editor.addEventListener("paste", handleEditorPaste);
     return () => editor.removeEventListener("paste", handleEditorPaste);
   }, [handleEditorPaste]);
+
+  // Копирование/вырезание: в буфер кладём ОЧИЩЕННЫЙ фрагмент — без служебной
+  // разметки пагинации (распорки/разрезы) и без zero-height блоков. Иначе
+  // нативный copy выносил во внешние редакторы/Word внутренние артефакты и
+  // «рваное» форматирование. text/plain формируем с переносами абзацев, чтобы
+  // вставка в обычные поля не «слипалась». Для cut дополнительно удаляем
+  // выделение через собственную логику с фиксацией истории.
+  const handleEditorCopyCut = useCallback(
+    (e: ClipboardEvent, isCut: boolean) => {
+      const editor = editorRef.current;
+      const sel = window.getSelection();
+      if (!editor || !e.clipboardData || !sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+      if (range.collapsed || !editor.contains(range.commonAncestorContainer))
+        return;
+      e.preventDefault();
+      const holder = document.createElement("div");
+      holder.appendChild(range.cloneContents());
+      const cleanHtml = cleanEditorArtifacts(holder.innerHTML);
+      e.clipboardData.setData("text/html", cleanHtml);
+      e.clipboardData.setData("text/plain", htmlToPlainText(cleanHtml));
+      if (isCut && editor.isContentEditable) {
+        commitHistoryNow();
+        range.deleteContents();
+        syncEditorAfterDomEdit();
+      }
+    },
+    [commitHistoryNow, syncEditorAfterDomEdit],
+  );
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const onCopy = (e: ClipboardEvent) => handleEditorCopyCut(e, false);
+    const onCut = (e: ClipboardEvent) => handleEditorCopyCut(e, true);
+    editor.addEventListener("copy", onCopy);
+    editor.addEventListener("cut", onCut);
+    return () => {
+      editor.removeEventListener("copy", onCopy);
+      editor.removeEventListener("cut", onCut);
+    };
+  }, [handleEditorCopyCut]);
 
   useEffect(() => {
     document.execCommand("styleWithCSS", false, "true");
