@@ -14,7 +14,7 @@ import {
 	Tooltip,
 } from "recharts";
 import { ChartType } from "./AnalyticsChartSwitcher";
-import type { ICategoricalDatum, IProgressItem, IMonthEventsItem } from "./lib";
+import type { ICategoricalDatum, IProgressDatum, IMonthlyDatum } from "./lib";
 
 const tooltipStyle = {
 	borderRadius: "12px",
@@ -89,7 +89,7 @@ export const CategoricalChart = memo(({ type, data, stroke, gradId }: ICategoric
 
 interface IProgressChartProps {
 	type: ChartType;
-	data: IProgressItem[];
+	data: IProgressDatum[];
 }
 
 export const ProgressChart = memo(({ type, data }: IProgressChartProps) => {
@@ -144,7 +144,7 @@ export const ProgressChart = memo(({ type, data }: IProgressChartProps) => {
 
 interface ICalendarChartProps {
 	type: ChartType;
-	data: IMonthEventsItem[];
+	data: IMonthlyDatum[];
 }
 
 export const CalendarEventsChart = memo(({ type, data }: ICalendarChartProps) => {
