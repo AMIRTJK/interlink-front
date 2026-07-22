@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { AnimatePresence } from "framer-motion";
-import { BarChart2 } from "lucide-react";
 import { If } from "@shared/ui/If";
 import { useGetQuery, useMutationQuery, tokenControl } from "@shared/lib";
 import { ApiRoutes } from "@shared/api/api-routes";
@@ -16,17 +15,22 @@ import { THEMES } from "@widgets/layout/ui/designSettings";
 import { PersonalAnalytics } from "./PersonalAnalytics";
 import "./style.css";
 
-export const PersonalTasksRegistry = () => {
-  const [subTab, setSubTab] = React.useState<"registry" | "analytics">("registry");
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [filterTab, setFilterTab] = React.useState<TFilterTab>("all");
-  const [sortConfig, setSortConfig] = React.useState<ISortConfig>({ field: "dueDate", order: "asc" });
-  const [isCreateOpen, setIsCreateOpen] = React.useState(false);
-  const [isDetailsOpen, setIsDetailsOpen] = React.useState(false);
-  const [activeTask, setActiveTask] = React.useState<IPersonalTask | null>(null);
-  const [themeKey, setThemeKey] = React.useState(() => localStorage.getItem("currentTheme") || "emerald");
+const cacheOptions = {
+  staleTime: 5 * 60 * 1000,
+  refetchOnWindowFocus: false,
+};
 
-  React.useEffect(() => {
+export const PersonalTasksRegistry = memo(() => {
+  const [subTab, setSubTab] = useState<"registry" | "analytics">("registry");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterTab, setFilterTab] = useState<TFilterTab>("all");
+  const [sortConfig, setSortConfig] = useState<ISortConfig>({ field: "dueDate", order: "asc" });
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [activeTask, setActiveTask] = useState<IPersonalTask | null>(null);
+  const [themeKey, setThemeKey] = useState(() => localStorage.getItem("currentTheme") || "emerald");
+
+  useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
       if (e.key === "currentTheme" && e.newValue) {
         setThemeKey(e.newValue);
@@ -38,9 +42,10 @@ export const PersonalTasksRegistry = () => {
 
   const activeTheme = THEMES[themeKey] || THEMES.emerald;
 
-  const { data: rawTasks, refetch } = useGetQuery<any, any>({
+  const { data: rawTasks } = useGetQuery<any, any>({
     url: ApiRoutes.PERSONAL_TASKS,
     useToken: true,
+    options: cacheOptions,
   });
 
   const { mutateAsync: createTask } = useMutationQuery<any, any>({
@@ -64,17 +69,17 @@ export const PersonalTasksRegistry = () => {
   const userData = tokenControl.getUserData();
   const userName = getUserName(userData?.data?.user || userData?.user || userData?.data || userData);
   const tasks: IPersonalTask[] = rawTasks?.data || [];
-  const stats = React.useMemo(() => calculateStats(tasks), [tasks]);
-  const filteredTasks = React.useMemo(() => getFilteredTasks(tasks, searchQuery, filterTab, sortConfig), [tasks, searchQuery, filterTab, sortConfig]);
+  const stats = useMemo(() => calculateStats(tasks), [tasks]);
+  const filteredTasks = useMemo(() => getFilteredTasks(tasks, searchQuery, filterTab, sortConfig), [tasks, searchQuery, filterTab, sortConfig]);
 
-  const handleSortChange = (field: TSortField) => {
+  const handleSortChange = useCallback((field: TSortField) => {
     setSortConfig((prev) => ({
       field,
       order: prev.field === field && prev.order === "asc" ? "desc" : "asc",
     }));
-  };
+  }, []);
 
-  const handleSaveTask = async (values: any) => {
+  const handleSaveTask = useCallback(async (values: any) => {
     if (activeTask) {
       await updateTask({ id: activeTask.id, ...values });
     } else {
@@ -82,34 +87,64 @@ export const PersonalTasksRegistry = () => {
     }
     setIsCreateOpen(false);
     setActiveTask(null);
-    refetch();
-  };
+  }, [activeTask, createTask, updateTask]);
 
-  const handleDeleteTask = async (id: number) => {
+  const handleDeleteTask = useCallback(async (id: number) => {
     await deleteTask(id);
-    refetch();
-  };
+  }, [deleteTask]);
+
+  const handleOpenTask = useCallback((t: IPersonalTask) => {
+    setActiveTask(t);
+    setIsDetailsOpen(true);
+  }, []);
+
+  const handleEditTask = useCallback((t: IPersonalTask) => {
+    setActiveTask(t);
+    setIsCreateOpen(true);
+  }, []);
+
+  const handleCreateTaskClick = useCallback(() => {
+    setActiveTask(null);
+    setIsCreateOpen(true);
+  }, []);
+
+  const handleCloseCreateModal = useCallback(() => {
+    setIsCreateOpen(false);
+    setActiveTask(null);
+  }, []);
+
+  const handleCloseDetailsModal = useCallback(() => {
+    setIsDetailsOpen(false);
+    setActiveTask(null);
+  }, []);
+
+  const handleEditFromDetails = useCallback(() => {
+    setIsDetailsOpen(false);
+    setIsCreateOpen(true);
+  }, []);
 
   return (
-    <div className="w-full flex flex-col gap-4 selection:bg-emerald-100 selection:text-emerald-900">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1 p-1 rounded-2xl bg-zinc-100 dark:bg-zinc-800">
+    <div className="w-full! flex! flex-col! gap-4! selection:bg-emerald-100! selection:text-emerald-900!">
+      <div className="flex! items-center! gap-3!">
+        <div className="flex! items-center! gap-1! p-1! rounded-2xl! bg-zinc-100! dark:bg-zinc-800!">
           <button
+            type="button"
             onClick={() => setSubTab("registry")}
-            className={`px-4 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 border-0 cursor-pointer ${
+            className={`px-4! py-1.5! rounded-xl! text-sm! font-semibold! transition-all! duration-200! border-0! cursor-pointer! ${
               subTab === "registry"
-                ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-white"
-                : "bg-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                ? "bg-white! dark:bg-zinc-700! shadow! text-zinc-900! dark:text-white!"
+                : "bg-transparent! text-zinc-500! dark:text-zinc-400! hover:text-zinc-700! dark:hover:text-zinc-200!"
             }`}
           >
             Реестр
           </button>
           <button
+            type="button"
             onClick={() => setSubTab("analytics")}
-            className={`px-4 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 border-0 cursor-pointer ${
+            className={`px-4! py-1.5! rounded-xl! text-sm! font-semibold! transition-all! duration-200! border-0! cursor-pointer! ${
               subTab === "analytics"
-                ? "bg-white dark:bg-zinc-700 shadow text-zinc-900 dark:text-white"
-                : "bg-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                ? "bg-white! dark:bg-zinc-700! shadow! text-zinc-900! dark:text-white!"
+                : "bg-transparent! text-zinc-500! dark:text-zinc-400! hover:text-zinc-700! dark:hover:text-zinc-200!"
             }`}
           >
             Аналитика
@@ -118,32 +153,23 @@ export const PersonalTasksRegistry = () => {
       </div>
 
       <If is={subTab === "registry"}>
-        <div className="flex flex-col gap-4">
+        <div className="flex! flex-col! gap-4!">
           <StatsCards stats={stats} />
-          <div className="rounded-3xl bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-white/30 dark:border-zinc-700/30 shadow-none flex flex-col overflow-hidden">
+          <div className="rounded-3xl! bg-white/60! dark:bg-zinc-900/60! backdrop-blur-xl! border! border-white/30! dark:border-zinc-700/30! shadow-none! flex! flex-col! overflow-hidden!">
             <RegistryHeader
               taskCount={filteredTasks.length}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
               sortConfig={sortConfig}
               onSortChange={handleSortChange}
-              onCreateClick={() => {
-                setActiveTask(null);
-                setIsCreateOpen(true);
-              }}
+              onCreateClick={handleCreateTaskClick}
               activeTheme={activeTheme}
             />
             <FilterTabs activeTab={filterTab} onTabChange={setFilterTab} stats={stats} activeTheme={activeTheme} />
             <TasksTable
               tasks={filteredTasks}
-              onOpen={(t) => {
-                setActiveTask(t);
-                setIsDetailsOpen(true);
-              }}
-              onEdit={(t) => {
-                setActiveTask(t);
-                setIsCreateOpen(true);
-              }}
+              onOpen={handleOpenTask}
+              onEdit={handleEditTask}
               onDelete={handleDeleteTask}
               userName={userName}
             />
@@ -158,10 +184,7 @@ export const PersonalTasksRegistry = () => {
       <AnimatePresence>
         {isCreateOpen && (
           <CreateTaskModal
-            onClose={() => {
-              setIsCreateOpen(false);
-              setActiveTask(null);
-            }}
+            onClose={handleCloseCreateModal}
             task={activeTask}
             userName={userName}
             onSave={handleSaveTask}
@@ -174,20 +197,14 @@ export const PersonalTasksRegistry = () => {
       <AnimatePresence>
         {isDetailsOpen && (
           <TaskDetailsModal
-            onClose={() => {
-              setIsDetailsOpen(false);
-              setActiveTask(null);
-            }}
+            onClose={handleCloseDetailsModal}
             task={activeTask}
             userName={userName}
-            onEditClick={() => {
-              setIsDetailsOpen(false);
-              setIsCreateOpen(true);
-            }}
+            onEditClick={handleEditFromDetails}
             activeTheme={activeTheme}
           />
         )}
       </AnimatePresence>
     </div>
   );
-};
+});

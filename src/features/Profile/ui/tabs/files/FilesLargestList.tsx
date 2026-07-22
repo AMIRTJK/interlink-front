@@ -46,7 +46,7 @@ export const FilesLargestList = ({ largestFiles = [] }: IProps) => {
 	if (largestFiles.length === 0) {
 		return (
 			<motion.div
-				initial={{ opacity: 0, y: 16 }}
+				initial={{ opacity: 0 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.3, delay: 0.2 }}
 				className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm border border-white/40 dark:border-slate-700/50 shadow-md p-5 flex flex-col items-center justify-center min-h-[320px]"
@@ -61,7 +61,7 @@ export const FilesLargestList = ({ largestFiles = [] }: IProps) => {
 
 	return (
 		<motion.div
-			initial={{ opacity: 0, y: 16 }}
+			initial={{ opacity: 0 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.3, delay: 0.2 }}
 			className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm border border-white/40 dark:border-slate-700/50 shadow-md p-5 flex flex-col min-h-[320px]"

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, memo } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { If } from "@shared/ui";
 import type { Task } from "@features/tasks";
@@ -40,7 +40,7 @@ const getEventPosition = (task: Task) => {
   return { top, height };
 };
 
-export const WeekView = ({
+export const WeekView = memo(({
   daysToShow,
   tasks,
   currentDate,
@@ -49,21 +49,16 @@ export const WeekView = ({
   onEventClick,
 }: IWeekViewProps) => {
   const { theme } = useCalendarTheme();
-  const isToday = (day: Dayjs) => day.isSame(dayjs(), "day");
   const isSelected = (day: Dayjs) => day.isSame(currentDate, "day");
 
-  const getTasksForDay = (day: Dayjs) => {
-    const targetDate = day.format("YYYY-MM-DD");
-    return tasks.filter((t) => t.date === targetDate);
-  };
-
-  const nowTop = useMemo(() => {
-    const now = dayjs();
-    const min = now.hour() * 60 + now.minute();
-    return ((min - START_HOUR * 60) / 60) * HOUR_HEIGHT;
-  }, []);
-
-  const todayIndex = daysToShow.findIndex((d) => isToday(d));
+  const tasksMap = useMemo(() => {
+    const map: Record<string, Task[]> = {};
+    tasks.forEach((task) => {
+      if (!map[task.date]) map[task.date] = [];
+      map[task.date].push(task);
+    });
+    return map;
+  }, [tasks]);
 
   return (
     <div className="w-full! bg-white! dark:bg-slate-800/40! rounded-2xl! overflow-hidden! border! border-zinc-100! dark:border-slate-700/30! shadow-sm!">
@@ -116,10 +111,11 @@ export const WeekView = ({
           ))}
 
           {daysToShow.map((day, colIdx) => {
-            const dayTasks = getTasksForDay(day);
+            const dateStr = day.format("YYYY-MM-DD");
+            const dayTasks = tasksMap[dateStr] || [];
             return (
               <div
-                key={day.format("YYYY-MM-DD")}
+                key={dateStr}
                 className="relative! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! transition-colors! hover:bg-zinc-50/50! dark:hover:bg-slate-900/20!"
                 style={{ height: HOUR_HEIGHT * HOURS.length, gridColumn: colIdx + 1 }}
                 onClick={(e) => {
@@ -160,4 +156,4 @@ export const WeekView = ({
       </div>
     </div>
   );
-};
+});
