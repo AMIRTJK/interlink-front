@@ -3160,6 +3160,66 @@ export const CreateInternalCorrespondence = ({
     return () => editor.removeEventListener("beforeinput", onBeforeInput);
   }, [undoEdit, redoEdit]);
 
+  // Подсветка активных кнопок тулбара: какие форматы применены к текущему
+  // выделению/каретке. Обновляется по selectionchange и после execCmd.
+  const [activeFmt, setActiveFmt] = useState<Record<string, boolean>>({});
+  const refreshActiveFmt = useCallback(() => {
+    const editor = editorRef.current;
+    const sel = window.getSelection();
+    // Выделение вне редактора (или редактор readonly) — гасим всю подсветку.
+    if (
+      !editor ||
+      !editor.isContentEditable ||
+      !sel ||
+      sel.rangeCount === 0 ||
+      !editor.contains(sel.anchorNode)
+    ) {
+      setActiveFmt((prev) => (Object.keys(prev).length ? {} : prev));
+      return;
+    }
+    const q = (cmd: string) => {
+      try {
+        return document.queryCommandState(cmd);
+      } catch {
+        return false;
+      }
+    };
+    let block = "";
+    try {
+      block = (document.queryCommandValue("formatBlock") || "").toLowerCase();
+    } catch {
+      block = "";
+    }
+    const next: Record<string, boolean> = {
+      bold: q("bold"),
+      italic: q("italic"),
+      underline: q("underline"),
+      strikeThrough: q("strikeThrough"),
+      justifyLeft: q("justifyLeft"),
+      justifyCenter: q("justifyCenter"),
+      justifyRight: q("justifyRight"),
+      justifyFull: q("justifyFull"),
+      insertUnorderedList: q("insertUnorderedList"),
+      insertOrderedList: q("insertOrderedList"),
+      h1: block === "h1",
+      h2: block === "h2",
+    };
+    // Меняем стейт только при реальном отличии — selectionchange частит.
+    setActiveFmt((prev) => {
+      const keys = Object.keys(next);
+      const same =
+        keys.length === Object.keys(prev).length &&
+        keys.every((k) => prev[k] === next[k]);
+      return same ? prev : next;
+    });
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("selectionchange", refreshActiveFmt);
+    return () =>
+      document.removeEventListener("selectionchange", refreshActiveFmt);
+  }, [refreshActiveFmt]);
+
   // Команды форматирования тулбара. Нативные undo/redo сюда не ходят —
   // история изменений собственная (undoEdit/redoEdit).
   const execCmd = useCallback(
@@ -3173,8 +3233,12 @@ export const CreateInternalCorrespondence = ({
       editor.focus();
       document.execCommand(command, false, value);
       commitHistoryNow();
+      // Тулбар-переключение (bold/список/выравнивание) часто НЕ двигает
+      // выделение → событие selectionchange не сработает. Обновляем подсветку
+      // кнопок вручную сразу после команды.
+      refreshActiveFmt();
     },
-    [commitHistoryNow],
+    [commitHistoryNow, refreshActiveFmt],
   );
 
   const handleEditorInput = useCallback(() => {
@@ -5131,6 +5195,7 @@ export const CreateInternalCorrespondence = ({
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.h1}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("formatBlock", "h1");
@@ -5141,6 +5206,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.h2}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("formatBlock", "h2");
@@ -5202,6 +5268,7 @@ export const CreateInternalCorrespondence = ({
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.bold}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("bold");
@@ -5212,6 +5279,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.italic}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("italic");
@@ -5222,6 +5290,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.underline}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("underline");
@@ -5232,6 +5301,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.strikeThrough}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("strikeThrough");
@@ -5253,6 +5323,7 @@ export const CreateInternalCorrespondence = ({
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.justifyLeft}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("justifyLeft");
@@ -5263,6 +5334,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.justifyCenter}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("justifyCenter");
@@ -5273,6 +5345,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.justifyRight}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("justifyRight");
@@ -5283,6 +5356,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.justifyFull}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("justifyFull");
@@ -5294,6 +5368,7 @@ export const CreateInternalCorrespondence = ({
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.insertUnorderedList}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("insertUnorderedList");
@@ -5304,6 +5379,7 @@ export const CreateInternalCorrespondence = ({
                 </TBtn>
                 <TBtn
                   disabled={isReadOnly}
+                  active={activeFmt.insertOrderedList}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     execCmd("insertOrderedList");

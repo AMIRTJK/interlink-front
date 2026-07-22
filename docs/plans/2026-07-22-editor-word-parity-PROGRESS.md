@@ -26,7 +26,7 @@
 - ✅ 4.14 Списки: Tab/Shift+Tab уровень (было), Enter на пустом `<li>` — выход через `execCmd("outdent")`
 
 ## Этап 3 (P2–P3, полировка и «потолок»)
-- ⬜ 4.15 Индикация кнопок по queryCommandState (selectionchange)
+- ✅ 4.15 Индикация кнопок по queryCommandState (`activeFmt` + listener `selectionchange` + вызов после `execCmd`; `TBtn active` уже поддерживал стиль). Подсвечиваются bold/italic/underline/strikeThrough, выравнивания, оба списка, h1/h2. Highlight/hiliteColor не подсвечивается — `queryCommandState` для него ненадёжен между браузерами.
 - ⬜ 4.10 Коррекция каретки на границах страниц (стрелки через spacer/page-break)
 - ⬜ 4.11 Выделение: user-select:none на служебных узлах, коррекция границ
 - ⬜ 4.16 Undo по границам слов (пробел/пунктуация/Enter → commitHistoryNow)
@@ -58,6 +58,8 @@
   - **4.14** Новая ветка Enter (без Shift) в `handleEditorKeyDown` перед Tab: если каретка в пустом `<li>` (нет текста, нет img/table) → `preventDefault` + `execCmd("outdent")` (понижает уровень вложенного пункта либо выносит из списка обычным блоком). Непустые пункты по-прежнему обрабатывает нативный split. Tab/Shift+Tab уровня уже были в Этапе 1.
   - `tsc -b` чисто. Deps `handleEditorKeyDown` не менялись (execCmd/commitHistoryNow/syncEditorAfterDomEdit уже были). Ручная QA под логином: Backspace/Delete слияние абзацев с сохранением формата приёмника; отсутствие залипания каретки в пустых inline; Enter на пустом пункте списка (верхний уровень и вложенный); отсутствие регрессий на границах страниц/атомарных блоках/hr.
   - Следующий шаг при «продолжай» — **Этап 3, задача 4.15** (индикация кнопок по queryCommandState через selectionchange).
+- 2026-07-22 (сессия 8, продолжение): **4.15 — индикация активных кнопок тулбара** (в `CreateInternalCorrespondence.tsx`). Добавлен стейт `activeFmt: Record<string, boolean>` и `refreshActiveFmt` (перед `execCmd`): при выделении внутри редактора опрашивает `document.queryCommandState` (bold/italic/underline/strikeThrough/justify*/insert*List) и `queryCommandValue("formatBlock")` для h1/h2; вне редактора/readonly — гасит подсветку. Меняет стейт только при реальном отличии (selectionchange частит). Слушатель `selectionchange` на `document` + вызов `refreshActiveFmt()` в конце `execCmd` (тулбар-тоглы формата не двигают выделение → одного selectionchange мало). `TBtn` уже умел `active` (bg-blue-100). Пробросил `active={activeFmt.*}` на все кнопки форматирования. Highlight не подсвечивается (ненадёжный queryCommandState). `tsc -b` чисто. Ручная QA: постановка каретки в жирный/курсив/список/заголовок/по-центру → соответствующая кнопка синяя; клик вне редактора → гаснут.
+  - Следующий шаг при «продолжай» — **4.10** (коррекция каретки на границах страниц: стрелки через spacer/page-break).
 - 2026-07-22 (сессия 6): **изменена логика удаления при вводе символов после/внутри TAB**:
   - Убрано атомарное удаление всего спана `data-tab` вместе с набранным текстом по Backspace и Delete.
   - Теперь все символы (как набранные вручную буквы, так и символы/пробелы табуляции) удаляются строго посимвольно (по одному символу за одно нажатие Backspace/Delete).
