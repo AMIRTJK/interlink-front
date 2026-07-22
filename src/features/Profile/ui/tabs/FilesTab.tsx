@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, lazy, Suspense } from "react";
+import React, { useState, useRef, useCallback, useMemo, lazy, Suspense } from "react";
 import { useFilesData } from "./files/useFilesData";
 import { FilesHeader } from "./files/FilesHeader";
 import { CategoryFilters } from "./files/CategoryFilters";
@@ -71,6 +71,17 @@ export const FilesTab = () => {
 	const [shareItem, setShareItem] = useState<{ item: IApiFile | IApiFolder; type: "file" | "folder" } | null>(null);
 	const [isBulkShareOpen, setIsBulkShareOpen] = useState(false);
 
+	const filesParams = useMemo(
+		() => ({
+			search: searchQuery,
+			sort: sortBy,
+			dir: sortDir,
+			activeFolderId,
+			page: filesPage,
+		}),
+		[searchQuery, sortBy, sortDir, activeFolderId, filesPage],
+	);
+
 	// Queries & Mutations
 	const {
 		files,
@@ -102,13 +113,7 @@ export const FilesTab = () => {
 		removeFolderShare,
 		bulkShareFiles,
 		bulkDeleteFiles,
-	} = useFilesData({
-		search: searchQuery,
-		sort: sortBy,
-		dir: sortDir,
-		activeFolderId,
-		page: filesPage,
-	});
+	} = useFilesData(filesParams);
 
 	const currentFiles = viewContext === "shared" ? sharedFiles : personalCurrentFiles;
 	const currentFolders = viewContext === "shared" ? sharedFolders : personalCurrentFolders;

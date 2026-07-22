@@ -33,26 +33,59 @@ interface IFilesPaginatedData {
 export const useFilesData = (params: IFilesParams) => {
   const [manualOrderMap, setManualOrderMap] = useState<Record<number, number>>({});
 
+  const memoizedParams = useMemo(
+    () => ({
+      search: params.search ?? "",
+      sort: params.sort ?? "manual",
+      dir: params.dir ?? "desc",
+      activeFolderId: params.activeFolderId ?? "all",
+      page: params.page ?? 1,
+    }),
+    [params.search, params.sort, params.dir, params.activeFolderId, params.page],
+  );
+
+  const countParams = useMemo(() => ({ per_page: COUNT_FETCH_SIZE }), []);
+
+  const sharedFilesParams = useMemo(() => {
+    const { activeFolderId: sharedFolderId, ...sharedBaseParams } = memoizedParams;
+    return {
+      ...sharedBaseParams,
+      ...(typeof sharedFolderId === "number" ? { folder_id: sharedFolderId } : {}),
+    };
+  }, [memoizedParams]);
+
+  const cacheOptions = useMemo(
+    () => ({
+      staleTime: 1000 * 60 * 5,
+      refetchOnWindowFocus: false,
+    }),
+    [],
+  );
+
   const filesQuery = useGetQuery<IFilesParams, { success: boolean; data: IFilesPaginatedData }>({
     url: ApiRoutes.MY_FILES,
-    params,
+    params: memoizedParams,
     useToken: true,
+    options: cacheOptions,
   });
 
   const foldersQuery = useGetQuery<any, { success: boolean; data: IApiFolder[] }>({
     url: ApiRoutes.MY_FILE_FOLDERS,
     useToken: true,
+    options: cacheOptions,
   });
 
   const metaQuery = useGetQuery<any, { success: boolean; data: IDiskMeta }>({
     url: ApiRoutes.MY_FILES_META,
     useToken: true,
+    options: cacheOptions,
   });
 
   const filesCountQuery = useGetQuery<{ per_page: number }, { success: boolean; data: IFilesPaginatedData }>({
     url: ApiRoutes.MY_FILES,
-    params: { per_page: COUNT_FETCH_SIZE },
+    params: countParams,
     useToken: true,
+    options: cacheOptions,
   });
 
   const createFolder = useMutationQuery<{ name: string; parent_id: number | null; sort_order?: number; emoji?: string | null; shared_user_ids?: number[] }, IApiFolder>({
@@ -187,32 +220,24 @@ export const useFilesData = (params: IFilesParams) => {
     perPage: rawFilesData?.per_page ?? 30,
   };
 
-  // 10. Get shared files
-  const { activeFolderId: sharedFolderId, ...sharedBaseParams } = params;
-  const sharedFilesParams = {
-    ...sharedBaseParams,
-    ...(typeof sharedFolderId === "number" ? { folder_id: sharedFolderId } : {}),
-  };
-
   const sharedFilesQuery = useGetQuery<typeof sharedFilesParams, { success: boolean; data: { data: IApiFile[]; current_page?: number; total?: number; per_page?: number } }>({
     url: ApiRoutes.MY_FILES_SHARED_WITH_ME,
     params: sharedFilesParams,
     useToken: true,
+    options: cacheOptions,
   });
 
-  // 11. Get shared folders
   const sharedFoldersQuery = useGetQuery<any, { success: boolean; data: IApiFolder[] }>({
     url: ApiRoutes.MY_FILE_FOLDERS_SHARED_WITH_ME,
     useToken: true,
+    options: cacheOptions,
   });
 
-  // 11.1. Shared files counts: fetched without a folder filter so the "Все
-  // общие файлы" badge shows the total across all shared folders and each
-  // shared folder chip shows its own count, regardless of the selected folder.
   const sharedFilesCountQuery = useGetQuery<{ per_page: number }, { success: boolean; data: { data: IApiFile[]; total?: number } }>({
     url: ApiRoutes.MY_FILES_SHARED_WITH_ME,
-    params: { per_page: COUNT_FETCH_SIZE },
+    params: countParams,
     useToken: true,
+    options: cacheOptions,
   });
 
   // 12. Invite to file
