@@ -579,8 +579,10 @@ const cleanEditorArtifacts = (html: string): string => {
   const w = document.createElement("div");
   w.innerHTML = html;
 
-  // Удаляем распорки
   w.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => removeSpacerSafely(n));
+  w.querySelectorAll<HTMLElement>("[data-tab]").forEach((s) => {
+    if (!s.textContent) s.remove();
+  });
 
   const groups = new Map<string, HTMLElement[]>();
   w.querySelectorAll<HTMLElement>(`[${AUTOSPLIT_ATTR}]`).forEach((el) => {
@@ -3320,37 +3322,25 @@ export const CreateInternalCorrespondence = ({
       };
 
       if (e.key === "Backspace") {
-        // Табулятор слева — атомарная единица: удаляем его целиком одним
-        // нажатием (иначе браузер оставил бы пустой inline-block-спейсер).
-        const tab = tabSpacerToDelete(range, "prev");
-        if (tab) {
-          e.preventDefault();
-          commitHistoryNow();
-          removeTabSpacer(tab, setCaret);
-          syncEditorAfterDomEdit();
-          return;
-        }
         if (!caretAtBlockStart(block, range)) return;
         const { spacers, stop } = collectBoundary(
           block.previousSibling,
           "prev",
         );
 
-        // Перед блоком ручной разрыв — Backspace удаляет его; контент
-        // возвращается на предыдущую страницу, блоки не сливаются (как в Word)
         if (isPageBreakNode(stop)) {
           e.preventDefault();
-          commitHistoryNow(); // набор до операции — отдельный шаг истории
+          commitHistoryNow();
           stop.remove();
           spacers.forEach((s) => s.remove());
           syncEditorAfterDomEdit();
           return;
         }
 
-        if (!spacers.length) return; // обычный Backspace внутри страницы
+        if (!spacers.length) return;
 
         e.preventDefault();
-        commitHistoryNow(); // набор до операции — отдельный шаг истории
+        commitHistoryNow();
         spacers.forEach((s) => s.remove());
         if (stop && stop.nodeType === Node.ELEMENT_NODE) {
           const target = stop as HTMLElement;
@@ -3365,17 +3355,6 @@ export const CreateInternalCorrespondence = ({
         return;
       }
 
-      // Delete: табулятор справа (или под кареткой) — удаляем целиком.
-      const tabFwd = tabSpacerToDelete(range, "next");
-      if (tabFwd) {
-        e.preventDefault();
-        commitHistoryNow();
-        removeTabSpacer(tabFwd, setCaret);
-        syncEditorAfterDomEdit();
-        return;
-      }
-
-      // Delete в конце блока перед границей страницы
       if (!caretAtBlockEnd(block, range)) return;
       const { spacers, stop } = collectBoundary(block.nextSibling, "next");
 
