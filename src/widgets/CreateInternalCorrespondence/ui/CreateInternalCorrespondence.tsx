@@ -302,6 +302,11 @@ const caretAtBlockEnd = (block: HTMLElement, range: Range): boolean => {
   return frag.querySelectorAll("br").length <= 1;
 };
 
+// Граница слова для гранулярной отмены (undo по словам, как в Word): пробелы,
+// табуляция, неразрывный пробел и пунктуация завершают «слово» → отдельный шаг
+// истории. Ввод такого символа фиксирует набранное слово в стек отмены.
+const WORD_BOUNDARY_RE = /[\s.,;:!?…()[\]{}"'«»„“”‚‘’—–\-/\\|]/;
+
 // Шаг табуляции/красной строки ≈ позиция табуляции Word (1.27 см).
 const TAB_STEP_CM = 1.27;
 const NBSP = " ";
@@ -3276,7 +3281,8 @@ export const CreateInternalCorrespondence = ({
     [commitHistoryNow, refreshActiveFmt],
   );
 
-  const handleEditorInput = useCallback(() => {
+  const handleEditorInput = useCallback(
+    (e?: React.FormEvent<HTMLDivElement>) => {
     const editor = editorRef.current;
     if (editor) {
       // Документ очищен полностью: браузер оставляет пустые обёртки с прежним
@@ -3298,9 +3304,27 @@ export const CreateInternalCorrespondence = ({
       }
     }
     setEditorContent(getCleanEditorHtml());
-    // Набор текста складывается в шаги истории по паузам.
-    scheduleHistoryCommit();
-  }, [getCleanEditorHtml, scheduleHistoryCommit]);
+
+    // Гранулярность отмены как в Word: обычный набор складывается в один шаг по
+    // паузам (scheduleHistoryCommit), но граница слова/абзаца немедленно фиксирует
+    // набранное — тогда Ctrl+Z откатывает по словам, а не всю фразу целиком.
+    // Enter/Shift+Enter (insertParagraph/insertLineBreak) — тоже граница шага.
+    const native = e?.nativeEvent as InputEvent | undefined;
+    const inputType = native?.inputType || "";
+    const data = native?.data ?? "";
+    const isWordBoundary =
+      inputType === "insertText" && !!data && WORD_BOUNDARY_RE.test(data);
+    const isParaBoundary =
+      inputType === "insertParagraph" || inputType === "insertLineBreak";
+    if (isWordBoundary || isParaBoundary) {
+      commitHistoryNow();
+    } else {
+      // Набор текста складывается в шаги истории по паузам.
+      scheduleHistoryCommit();
+    }
+    },
+    [getCleanEditorHtml, scheduleHistoryCommit, commitHistoryNow],
+  );
 
   // После ручной правки DOM (слияние через границу, вставка разрыва) сразу
   // перепагинируем синхронно — не дожидаясь rAF-эффекта — и синхронизируем стейт.
