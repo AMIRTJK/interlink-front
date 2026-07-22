@@ -12,9 +12,8 @@ import { IUser } from "@entities/login";
 import { THEMES } from "@widgets/layout/ui/designSettings";
 import { Loader } from "@shared/ui";
 
-const ProfileInfoTab = lazy(() =>
-  import("./tabs/ProfileInfoTab").then((m) => ({ default: m.ProfileInfoTab }))
-);
+import { ProfileInfoTab } from "./tabs/ProfileInfoTab";
+
 const AnalyticsTab = lazy(() =>
   import("./tabs/AnalyticsTab").then((m) => ({ default: m.AnalyticsTab }))
 );
