@@ -5358,41 +5358,45 @@ export const CreateInternalCorrespondence = ({
 
               <div className="px-6 py-4 border-b border-slate-100">
                 <div className="flex items-start gap-3">
-                  <label className="text-sm font-semibold text-slate-500 pt-1.5 w-20 flex-shrink-0">
-                    Вложения
-                  </label>
+                  <div className="flex items-center gap-2 pt-1.5 w-24 flex-shrink-0">
+                    <label className="text-sm font-semibold text-slate-500">
+                      Вложения
+                    </label>
+                    <If is={attachments.length > 0}>
+                      <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                        {attachments.length}
+                      </span>
+                    </If>
+                  </div>
                   <div className="flex-1 min-w-0 flex flex-wrap items-center gap-2">
-                    {/* В блоке — только ещё не сохранённые файлы. После сохранения
-                        у вложения появляется url, и оно уходит в цилиндр «Вложения». */}
                     {attachments
                       .filter((a) => a.file)
                       .map((file) => (
-                      <div
-                        key={file.id}
-                        onClick={() => setPreviewAttachment(file)}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 hover:border-slate-300 rounded-xl text-xs cursor-pointer transition-all group"
-                      >
-                        <FileTextIcon className="w-4 h-4 text-blue-500 flex-shrink-0 group-hover:scale-105 transition-transform" />
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-slate-800 truncate max-w-[140px] group-hover:text-blue-600 transition-colors">
-                            {file.name}
-                          </p>
-                          <p className="text-slate-400">
-                            {file.file ? `${file.size} · не сохранён` : file.size}
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPreviewAttachment(file);
-                          }}
-                          title="Просмотр вложения"
-                          className="text-slate-400 hover:text-indigo-600 transition-colors flex-shrink-0 cursor-pointer"
+                        <div
+                          key={file.id}
+                          onClick={() => setPreviewAttachment(file)}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-amber-50/60 hover:bg-amber-100/80 border border-amber-200 rounded-xl text-xs cursor-pointer transition-all group"
                         >
-                          <Eye size={13} />
-                        </button>
-                        {file.file ? (
+                          <FileTextIcon className="w-4 h-4 text-amber-500 flex-shrink-0 group-hover:scale-105 transition-transform" />
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-slate-800 truncate max-w-[140px] group-hover:text-blue-600 transition-colors">
+                              {file.name}
+                            </p>
+                            <p className="text-[10px] text-slate-400">
+                              {file.size} · не сохранён
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewAttachment(file);
+                            }}
+                            title="Просмотр вложения"
+                            className="text-slate-400 hover:text-indigo-600 transition-colors flex-shrink-0 cursor-pointer"
+                          >
+                            <Eye size={13} />
+                          </button>
                           <button
                             type="button"
                             onClick={(e) => {
@@ -5406,24 +5410,14 @@ export const CreateInternalCorrespondence = ({
                           >
                             <X size={12} />
                           </button>
-                        ) : (
-                          <If is={!!file.url}>
-                            <button
-                              onClick={() => downloadAttachment(file)}
-                              title="Скачать"
-                              className="text-slate-400 hover:text-blue-600 transition-colors flex-shrink-0 cursor-pointer"
-                            >
-                              <Download size={12} />
-                            </button>
-                          </If>
-                        )}
-                      </div>
-                    ))}
+                        </div>
+                      ))}
                     <button
+                      type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={isReadOnly || attachments.length >= MAX_ATTACHMENTS}
                       title={`${ATTACHMENT_EXTENSIONS.join(", ")} · до ${MAX_ATTACHMENTS} файлов · до ${MAX_ATTACHMENT_SIZE_MB} МБ каждый`}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-50"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-50 cursor-pointer"
                     >
                       <Paperclip size={12} />
                       <span>Прикрепить файл</span>
@@ -5814,7 +5808,7 @@ export const CreateInternalCorrespondence = ({
                     },
                     {
                       key: "attachments",
-                      label: "Вложения",
+                      label: attachments.length > 0 ? `Вложения (${attachments.length})` : "Вложения",
                       dotClass: "bg-indigo-500",
                       dotStyle: undefined,
                       isOpen: attachmentsOpen,
