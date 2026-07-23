@@ -3995,20 +3995,14 @@ export const CreateInternalCorrespondence = ({
         // Многострочный форматированный контент (документ из Word) — сохраняем
         // структуру и оформление как есть.
         fragment = buildFragmentFromHtml(sanitizeWordHtml(html));
+        fragment = buildFragmentFromHtml(sanitizeWordHtml(html));
       } else if (htmlHasText) {
-        // Однострочный форматированный фрагмент: вставляем инлайн (рядом с
-        // курсором), но СОХРАНЯЕМ оформление — раньше такой текст уходил в
-        // ветку plain-text и терял жирный/курсив/подчёркивание/цвет.
         fragment = buildInlineFragmentFromHtml(sanitizeWordHtml(html));
       } else if (text) {
         fragment = document.createDocumentFragment();
         if (!isMultiline) {
-          // Однострочный обычный текст — вставляем инлайн рядом с курсором.
           fragment.appendChild(document.createTextNode(text));
         } else {
-          // Многострочный обычный текст вставляем АБЗАЦАМИ (как Word): пустая
-          // строка разделяет абзацы, одиночный перенос — мягкий <br> внутри
-          // абзаца. Раньше все строки склеивались в один блок через <br>.
           const paragraphs = text.replace(/\r\n/g, "\n").split(/\n{2,}/);
           paragraphs.forEach((para) => {
             const block = document.createElement("p");
@@ -4032,12 +4026,6 @@ export const CreateInternalCorrespondence = ({
     [buildFragmentFromHtml, buildInlineFragmentFromHtml, insertFragmentAtCaret],
   );
 
-  // Переносит специфичную для импорта разметку mammoth в формат холста:
-  //  - класс pfmt_<align>_<firstLinePx>_<leftPx> (из styleMap) → inline-стили
-  //    (выравнивание, красная строка, левый отступ);
-  //  - пустым абзацам возвращаем высоту строки (<br>) — иначе теряются
-  //    пустые строки-отступы из Word;
-  //  - маркеры разрыва страницы Word → настоящие разрывы редактора.
   const mammothToEditorHtml = useCallback((html: string) => {
     const root = document.createElement("div");
     root.innerHTML = html;
@@ -5360,22 +5348,24 @@ export const CreateInternalCorrespondence = ({
                       .map((file) => (
                       <div
                         key={file.id}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                        onClick={() => setPreviewAttachment(file)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 hover:border-slate-300 rounded-xl text-xs cursor-pointer transition-all group"
                       >
-                        <FileTextIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                        <div className="min-w-0">
-                          <p className="font-semibold text-slate-800 truncate max-w-[140px]">
+                        <FileTextIcon className="w-4 h-4 text-blue-500 flex-shrink-0 group-hover:scale-105 transition-transform" />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-slate-800 truncate max-w-[140px] group-hover:text-blue-600 transition-colors">
                             {file.name}
                           </p>
                           <p className="text-slate-400">
                             {file.file ? `${file.size} · не сохранён` : file.size}
                           </p>
                         </div>
-                        {/* Убрать можно только ещё не отправленный файл: удаления
-                            сохранённого вложения в API пока нет. */}
                         <button
                           type="button"
-                          onClick={() => setPreviewAttachment(file)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewAttachment(file);
+                          }}
                           title="Просмотр вложения"
                           className="text-slate-400 hover:text-indigo-600 transition-colors flex-shrink-0 cursor-pointer"
                         >
@@ -5383,11 +5373,13 @@ export const CreateInternalCorrespondence = ({
                         </button>
                         {file.file ? (
                           <button
-                            onClick={() =>
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setAttachments((prev) =>
                                 prev.filter((f) => f.id !== file.id),
-                              )
-                            }
+                              );
+                            }}
                             title="Убрать файл"
                             className="text-slate-300 hover:text-rose-400 transition-colors flex-shrink-0 cursor-pointer"
                           >
