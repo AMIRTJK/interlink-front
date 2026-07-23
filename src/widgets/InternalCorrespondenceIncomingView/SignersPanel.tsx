@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check, Clock } from "lucide-react";
+import { X, Clock } from "lucide-react";
 import { cn } from "@shared/lib";
+import { SignatureStamp } from "./SignatureStamp";
 
 interface DocSignerItem {
   id: string;
@@ -20,14 +21,6 @@ const GRADIENTS = [
   { from: "#3b82f6", to: "#1d4ed8" },
   { from: "#10b981", to: "#059669" },
 ];
-
-function getCertSnippet(initials: string): string {
-  const hex = initials
-    .split("")
-    .map((c) => c.charCodeAt(0).toString(16).toUpperCase())
-    .join("");
-  return `SN: ${hex}A3F9...C12D`;
-}
 
 export const SignersPanel = ({
   isOpen,
@@ -233,46 +226,15 @@ export const SignersPanel = ({
                     </p>
 
                     {signer.signed && (
-                      <div className="bg-green-50 border border-green-100 rounded-lg px-2.5 py-1.5 flex items-center gap-2">
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="#16a34a"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          style={{ flexShrink: 0 }}
-                          aria-hidden="true"
-                        >
-                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                          <polyline points="9 12 11 14 15 10" />
-                        </svg>
-                        <div className="min-w-0">
-                          <p className="text-[9px] font-bold text-green-700 uppercase tracking-wide leading-tight">
-                            ЭЦП действительна
-                          </p>
-                          <p className="text-[9px] text-green-600 leading-tight">
-                            <span>{signer.signedAt}</span>
-                            <span className="font-mono text-slate-400 ml-1">
-                              {getCertSnippet(signer.initials)}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
+                      <SignatureStamp
+                        name={signer.name}
+                        certSerial={`SN-2026-${signer.initials}-84201`}
+                        signedAt={signer.signedAt.split(" ")[0] || signer.signedAt}
+                        validUntil="аз 20.03.2025 то 20.03.2026"
+                      />
                     )}
 
-                    {signer.signed ? (
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                          <Check size={9} className="text-green-600" />
-                        </span>
-                        <span className="text-[11px] font-semibold text-green-700">
-                          Подписано
-                        </span>
-                      </div>
-                    ) : (
+                    {!signer.signed && (
                       <div className="flex items-center gap-1.5">
                         <span className="w-4 h-4 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0 border border-amber-200">
                           <Clock size={9} className="text-amber-500" />

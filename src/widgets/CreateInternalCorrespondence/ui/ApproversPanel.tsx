@@ -9,6 +9,7 @@ import { ApproverItem } from "./ApproverItem";
 interface IProps {
   isOpen: boolean;
   hideTab?: boolean;
+  openLeft?: boolean;
   onOpen: () => void;
   onClose: () => void;
   approvers: Approver[];
@@ -26,6 +27,7 @@ interface IProps {
 export const ApproversPanel = ({
   isOpen,
   hideTab,
+  openLeft = false,
   onOpen,
   onClose,
   approvers,
@@ -84,13 +86,15 @@ export const ApproversPanel = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ x: -12, opacity: 0 }}
+            initial={{ x: openLeft ? 12 : -12, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -12, opacity: 0 }}
+            exit={{ x: openLeft ? 12 : -12, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
             className="absolute top-0 w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl z-30 flex flex-col"
             style={{
-              left: "calc(100% + 12px)",
+              ...(openLeft
+                ? { right: "calc(100% + 12px)" }
+                : { left: "calc(100% + 12px)" }),
               maxHeight: "var(--icc-panel-max-h, 70vh)",
             }}
             onClick={(e) => e.stopPropagation()}

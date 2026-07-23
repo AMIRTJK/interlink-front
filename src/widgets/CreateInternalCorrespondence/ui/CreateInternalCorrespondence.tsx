@@ -982,7 +982,7 @@ export const CreateInternalCorrespondence = ({
   // горизонтальную панель под тулбаром, а боковые вкладки у холста скрываются.
   // Сами панели по-прежнему открываются у холста. По умолчанию выключен —
   // текущий функционал не меняется.
-  const [panelsInToolbar, setPanelsInToolbar] = useState(false);
+  const [panelsInToolbar, setPanelsInToolbar] = useState(true);
 
   const handleOpenApprovers = () => {
     setApproversOpen(true);
@@ -1455,8 +1455,15 @@ export const CreateInternalCorrespondence = ({
     [allVersions],
   );
   const latestVersionId = latestVersion ? latestVersion.id : null;
+  // В режиме сравнения версий выбор предыдущей версии влияет только на ЛЕВЫЙ
+  // холст (versionCompareSheets). Правый холст всегда держит последнюю версию
+  // (см. эффект синхронизации editorRef ниже) и должен оставаться активным для
+  // редактирования/сохранения, поэтому здесь «старая версия» не считается
+  // выбранной. Блокировка подписанного документа остаётся через isSigned.
   const isOldVersionSelected =
-    activeVersionId !== null && activeVersionId !== latestVersionId;
+    !showVersionCompareSides &&
+    activeVersionId !== null &&
+    activeVersionId !== latestVersionId;
 
   const activeVersion = useMemo(
     () => allVersions.find((v: any) => v.id === activeVersionId) || latestVersion || null,
@@ -1513,8 +1520,15 @@ export const CreateInternalCorrespondence = ({
     selectVersionForSign({ versionId: clickedVersionId });
   };
 
+  // Правый холст в режиме сравнения синхронизируем с последней версией только
+  // при ВХОДЕ в режим и при появлении новой последней версии (новый id). При
+  // переключении сравниваемой (левой) версии activeVersion меняется, но правый
+  // холст трогать нельзя — иначе затрутся несохранённые правки пользователя.
+  const lastCompareSyncRef = useRef<string | number | null>(null);
   useEffect(() => {
     if (showVersionCompareSides && latestVersion && latestVersion.content) {
+      if (lastCompareSyncRef.current === latestVersionId) return;
+      lastCompareSyncRef.current = latestVersionId;
       if (editorRef.current && editorRef.current.innerHTML !== latestVersion.content) {
         editorRef.current.innerHTML = latestVersion.content;
         setEditorContent(latestVersion.content);
@@ -1523,17 +1537,22 @@ export const CreateInternalCorrespondence = ({
           setPageCount(nextPageCount);
         }
       }
-    } else if (!showVersionCompareSides && activeVersion && activeVersion.content) {
-      if (editorRef.current && editorRef.current.innerHTML !== activeVersion.content) {
-        editorRef.current.innerHTML = activeVersion.content;
-        setEditorContent(activeVersion.content);
-        if (paginateEditorRef.current) {
-          const nextPageCount = paginateEditorRef.current();
-          setPageCount(nextPageCount);
+    } else if (!showVersionCompareSides) {
+      // Вышли из режима сравнения — сбрасываем метку, чтобы повторный вход снова
+      // подтянул актуальную версию в правый холст.
+      lastCompareSyncRef.current = null;
+      if (activeVersion && activeVersion.content) {
+        if (editorRef.current && editorRef.current.innerHTML !== activeVersion.content) {
+          editorRef.current.innerHTML = activeVersion.content;
+          setEditorContent(activeVersion.content);
+          if (paginateEditorRef.current) {
+            const nextPageCount = paginateEditorRef.current();
+            setPageCount(nextPageCount);
+          }
         }
       }
     }
-  }, [showVersionCompareSides, latestVersion, activeVersion]);
+  }, [showVersionCompareSides, latestVersion, latestVersionId, activeVersion]);
 
   const handleSelectVersion = (content: string, versionId: string | number) => {
     setActiveVersionId(versionId);
@@ -6166,6 +6185,7 @@ export const CreateInternalCorrespondence = ({
                         <ApproversPanel
                           isOpen={approversOpen}
                           hideTab={panelsInToolbar}
+                          openLeft={showVersionCompareSides || showOriginalLetterSides}
                           onOpen={handleOpenApprovers}
                           onClose={() => setApproversOpen(false)}
                           approvers={approvers}
@@ -6184,6 +6204,7 @@ export const CreateInternalCorrespondence = ({
                         <SignerPanel
                           isOpen={signerOpen}
                           hideTab={panelsInToolbar}
+                          openLeft={showVersionCompareSides || showOriginalLetterSides}
                           onOpen={handleOpenSigner}
                           onClose={() => setSignerOpen(false)}
                           finalSigner={finalSigner}
