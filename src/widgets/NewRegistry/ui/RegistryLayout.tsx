@@ -71,6 +71,74 @@ const getLinkTypeInfo = (data: any) => {
   return null;
 };
 
+export const getEffectiveStatusData = (doc: any, statusConfig: Record<string, any>) => {
+	if (!doc || !statusConfig) return statusConfig?.default || {};
+
+	const letterStatusRaw = (
+		doc.letter_status ||
+		doc.status ||
+		doc.status_code ||
+		""
+	).toString().toLowerCase();
+
+	const isSent =
+		letterStatusRaw === "sent" ||
+		letterStatusRaw === "отправлено" ||
+		letterStatusRaw === "sent_out";
+
+	if (isSent) {
+		return statusConfig.sent || statusConfig.default || {};
+	}
+
+	const rawMyStatus = (
+		typeof doc.my_status === "string"
+			? doc.my_status
+			: doc.my_status?.key ||
+			  doc.my_status?.primary ||
+			  doc.my_status?.status ||
+			  doc.my_status_code ||
+			  doc.user_status ||
+			  ""
+	).toString().toLowerCase();
+
+	let effectiveKey = "draft";
+
+	if (
+		rawMyStatus.includes("author") ||
+		rawMyStatus.includes("автор") ||
+		rawMyStatus.includes("draft") ||
+		rawMyStatus.includes("черновик")
+	) {
+		effectiveKey = "draft";
+	} else if (rawMyStatus.includes("approve") || rawMyStatus.includes("согласован")) {
+		if (
+			rawMyStatus === "approved" ||
+			rawMyStatus === "согласован" ||
+			rawMyStatus === "согласовано"
+		) {
+			effectiveKey = "approved";
+		} else {
+			effectiveKey = "to_approve";
+		}
+	} else if (rawMyStatus.includes("sign") || rawMyStatus.includes("подпис")) {
+		if (
+			rawMyStatus === "signed" ||
+			rawMyStatus === "подписан" ||
+			rawMyStatus === "подписано"
+		) {
+			effectiveKey = "signed";
+		} else {
+			effectiveKey = "to_sign";
+		}
+	} else if (rawMyStatus && statusConfig[rawMyStatus]) {
+		effectiveKey = rawMyStatus;
+	} else if (letterStatusRaw && statusConfig[letterStatusRaw]) {
+		effectiveKey = letterStatusRaw;
+	}
+
+	return statusConfig[effectiveKey] || statusConfig.draft || statusConfig.default || {};
+};
+
 import { useLocation } from "react-router";
 import { tokenControl } from "@shared/lib";
 import { StructureView } from "./StructureView";
@@ -436,8 +504,10 @@ export const RegistryLayout = ({
 									/>
 								) : documents && documents.length > 0 ? (
 									documents?.map((doc: any, idx: number) => {
-										const statusData =
-											statusConfig[doc.status] || statusConfig.default;
+										const statusData = getEffectiveStatusData(
+											doc,
+											statusConfig,
+										);
 										const props = {
 											key: doc.id,
 											data: doc,
@@ -890,7 +960,7 @@ export const DocumentListItem = ({
 							</div>
 						))}
 
-						{/* Статус письма — в стиле столбца «Мой статус» */}
+						{/* Статус письма — строго "Черновик" или "Отправлено" */}
 						<div className="w-[112px] flex-shrink-0 overflow-hidden">
 							<div className="flex items-center gap-1 mb-0.5 whitespace-nowrap">
 								<Activity size={12} className="text-gray-400 dark:text-slate-500 flex-shrink-0" />
@@ -898,10 +968,10 @@ export const DocumentListItem = ({
 							</div>
 							<div
 								className={`text-xs font-mono font-semibold px-2 py-1 rounded truncate ${getBadgeStyles(
-									getStatusBadgeColor(data.status),
+									(data.status === "sent" || data.status === "sent_out" || data.status === "отправлено") ? "emerald" : "blue",
 								)}`}
 							>
-								{statusData?.label}
+								{(data.status === "sent" || data.status === "sent_out" || data.status === "отправлено") ? "Отправлено" : "Черновик"}
 							</div>
 						</div>
 
