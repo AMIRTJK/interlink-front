@@ -7,23 +7,18 @@ import type { AttachedFile } from "../types";
 interface IProps {
   isOpen: boolean;
   hideTab?: boolean;
+  openLeft?: boolean;
   onOpen: () => void;
   onClose: () => void;
-  /** Уже сохранённые на бэкенде вложения (без локального File). */
   attachments: AttachedFile[];
   onPreview: (file: AttachedFile) => void;
   onDownload: (file: AttachedFile) => void;
 }
 
-/**
- * Цилиндр «Вложения» — как «Входящие письма»/«История версий», но с сохранёнными
- * файлами письма. Неотправленные файлы остаются в блоке «Вложения» над редактором;
- * после сохранения они уходят из блока (у них появляется url) и показываются здесь.
- * Панель только для просмотра/скачивания — прикрепление и удаление живут в блоке.
- */
 export const AttachmentsPanel = ({
   isOpen,
   hideTab,
+  openLeft = true,
   onOpen,
   onClose,
   attachments,
@@ -33,12 +28,16 @@ export const AttachmentsPanel = ({
   return (
     <>
       {!hideTab && (
-        <div className="absolute z-20" style={{ left: -36, top: 370 }}>
+        <div
+          className="absolute z-20"
+          style={openLeft ? { left: -36, top: 370 } : { right: -36, top: 370 }}
+        >
           <motion.button
             onClick={isOpen ? onClose : onOpen}
             className={cn(
-              "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-              isOpen ? "bg-slate-50" : "hover:bg-slate-50"
+              "bg-white border border-slate-200 shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
+              openLeft ? "border-r-0 rounded-l-xl" : "border-l-0 rounded-r-xl",
+              isOpen ? "bg-slate-50" : "hover:bg-slate-50",
             )}
             aria-label="Вложения"
           >
@@ -62,13 +61,15 @@ export const AttachmentsPanel = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ x: 12, opacity: 0 }}
+            initial={{ x: openLeft ? 12 : -12, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 12, opacity: 0 }}
+            exit={{ x: openLeft ? 12 : -12, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
             className="absolute top-0 w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl z-30 flex flex-col"
             style={{
-              right: "calc(100% + 12px)",
+              ...(openLeft
+                ? { right: "calc(100% + 12px)" }
+                : { left: "calc(100% + 12px)" }),
               maxHeight: "var(--icc-panel-max-h, 70vh)",
             }}
             onClick={(e) => e.stopPropagation()}
@@ -84,7 +85,7 @@ export const AttachmentsPanel = ({
               </div>
               <button
                 onClick={onClose}
-                className="hover:bg-slate-100 rounded-lg p-1 transition-colors text-slate-400 hover:text-slate-700"
+                className="hover:bg-slate-100 rounded-lg p-1 transition-colors text-slate-400 hover:text-slate-700 cursor-pointer"
                 aria-label="Закрыть панель вложений"
               >
                 <X size={15} />
@@ -108,18 +109,19 @@ export const AttachmentsPanel = ({
                 {attachments.map((file, idx) => (
                   <div
                     key={file.id}
-                    className="rounded-xl border border-slate-100 bg-slate-50/40 p-3"
+                    onClick={() => onPreview(file)}
+                    className="rounded-xl border border-slate-100 bg-slate-50/40 p-3 cursor-pointer hover:bg-slate-100/70 hover:border-slate-200 transition-all group"
                   >
                     <div className="flex items-center gap-2.5">
                       <span className="text-xs font-bold text-slate-300 w-4 flex-shrink-0">
                         {idx + 1}
                       </span>
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-indigo-100 text-indigo-600">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-indigo-100 text-indigo-600 group-hover:scale-105 transition-transform">
                         <FileText size={14} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p
-                          className="text-xs font-semibold text-slate-900 truncate"
+                          className="text-xs font-semibold text-slate-900 truncate group-hover:text-indigo-600 transition-colors"
                           title={file.name}
                         >
                           {file.name}
@@ -129,7 +131,11 @@ export const AttachmentsPanel = ({
                         </p>
                       </div>
                       <button
-                        onClick={() => onPreview(file)}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onPreview(file);
+                        }}
                         title="Просмотр"
                         className="text-slate-400 hover:text-indigo-600 transition-colors flex-shrink-0 cursor-pointer"
                       >
@@ -137,7 +143,11 @@ export const AttachmentsPanel = ({
                       </button>
                       <If is={!!file.url}>
                         <button
-                          onClick={() => onDownload(file)}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDownload(file);
+                          }}
                           title="Скачать"
                           className="text-slate-400 hover:text-blue-600 transition-colors flex-shrink-0 cursor-pointer"
                         >

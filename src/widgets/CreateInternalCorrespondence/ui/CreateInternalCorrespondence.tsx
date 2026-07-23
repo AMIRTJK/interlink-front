@@ -241,6 +241,175 @@ const isStampNode = (n: Node | null): boolean =>
   n.nodeType === Node.ELEMENT_NODE &&
   (n as HTMLElement).hasAttribute(STAMP_ATTR);
 
+// CSS-пикселей в сантиметре при 96 dpi (A4 794px = 21см). Константа физическая,
+// от ориентации не зависит.
+const PX_PER_CM = 96 / 2.54;
+
+// Горизонтальная линейка над листом: сантиметровые деления с подписями, поля
+// страницы затенены, границы полей — синие. Ширину и поля берём из геометрии
+// листа, поэтому линейка точно совпадает с колонкой набора. Sticky — остаётся
+// вверху вьюпорта при вертикальной прокрутке (как в Word).
+const RULER_MIN_MARGIN = 16; // минимальное поле, px
+const RULER_MIN_CONTENT = 160; // минимальная ширина колонки набора, px
+
+const EditorRuler = ({
+  pageWidth,
+  marginLeft,
+  marginRight,
+  onChange,
+}: {
+  pageWidth: number;
+  marginLeft: number;
+  marginRight: number;
+  onChange: (side: "left" | "right", value: number) => void;
+}) => {
+  const H = 30;
+  const baseY = H - 1;
+  const contentStart = marginLeft;
+  const contentEnd = pageWidth - marginRight;
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<null | "left" | "right">(null);
+
+  // Перетаскивание маркеров полей: слушатели на window, чтобы тянуть можно было
+  // и за пределами линейки. Значение зажимаем (минимальное поле и минимальная
+  // ширина колонки набора) и прокидываем наверх — там пересчитается раскладка и
+  // пагинация.
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      const side = dragRef.current;
+      const box = containerRef.current;
+      if (!side || !box) return;
+      const x = e.clientX - box.getBoundingClientRect().left;
+      if (side === "left") {
+        const max = pageWidth - marginRight - RULER_MIN_CONTENT;
+        onChange("left", Math.round(Math.min(Math.max(x, RULER_MIN_MARGIN), max)));
+      } else {
+        const max = pageWidth - marginLeft - RULER_MIN_CONTENT;
+        onChange(
+          "right",
+          Math.round(Math.min(Math.max(pageWidth - x, RULER_MIN_MARGIN), max)),
+        );
+      }
+    };
+    const onUp = () => {
+      if (dragRef.current) {
+        dragRef.current = null;
+        document.body.style.cursor = "";
+      }
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [pageWidth, marginLeft, marginRight, onChange]);
+
+  const startDrag = (side: "left" | "right") => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragRef.current = side;
+    document.body.style.cursor = "ew-resize";
+  };
+
+  const majors: { x: number; label: number }[] = [];
+  const minors: number[] = [];
+  const stepsLeft = Math.floor(contentStart / PX_PER_CM);
+  const stepsRight = Math.ceil((pageWidth - contentStart) / PX_PER_CM);
+  for (let cm = -stepsLeft; cm <= stepsRight; cm++) {
+    const x = Math.round(contentStart + cm * PX_PER_CM) + 0.5;
+    if (x >= 0.5 && x <= pageWidth - 0.5) majors.push({ x, label: cm });
+    const half = Math.round(contentStart + (cm + 0.5) * PX_PER_CM) + 0.5;
+    if (half >= 0.5 && half <= pageWidth - 0.5) minors.push(half);
+  }
+
+  const handleStyle = (x: number): React.CSSProperties => ({
+    position: "absolute",
+    top: 0,
+    left: x - 6,
+    width: 12,
+    height: H,
+    cursor: "ew-resize",
+    zIndex: 3,
+  });
+  const gripStyle: React.CSSProperties = {
+    position: "absolute",
+    left: 4,
+    top: 0,
+    width: 4,
+    height: H,
+    background: "#3b82f6",
+    borderRadius: 2,
+    boxShadow: "0 1px 2px rgba(15,23,42,0.35)",
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="select-none"
+      style={{
+        position: "sticky",
+        top: 8,
+        zIndex: 20,
+        width: pageWidth,
+        height: H,
+        marginBottom: 12,
+        background: "#fff",
+        border: "1px solid rgba(148,163,184,0.35)",
+        borderRadius: 8,
+        boxShadow: "0 4px 12px rgba(15,23,42,0.06)",
+        overflow: "hidden",
+      }}
+    >
+      <svg width={pageWidth} height={H} style={{ display: "block" }}>
+        {/* Поля страницы — затенённые зоны слева/справа */}
+        <rect x={0} y={0} width={contentStart} height={H} fill="rgba(148,163,184,0.16)" />
+        <rect
+          x={contentEnd}
+          y={0}
+          width={Math.max(0, pageWidth - contentEnd)}
+          height={H}
+          fill="rgba(148,163,184,0.16)"
+        />
+        {/* Мелкие деления (полсантиметра) */}
+        {minors.map((x, i) => (
+          <line key={`mn${i}`} x1={x} y1={baseY} x2={x} y2={baseY - 4} stroke="rgba(100,116,139,0.55)" />
+        ))}
+        {/* Крупные деления и подписи (см) */}
+        {majors.map(({ x, label }, i) => (
+          <g key={`mj${i}`}>
+            <line x1={x} y1={baseY} x2={x} y2={baseY - 8} stroke="rgba(71,85,105,0.9)" />
+            {label > 0 && (
+              <text x={x + 2} y={11} fontSize={8} fill="#64748b" fontFamily="system-ui, sans-serif">
+                {label}
+              </text>
+            )}
+          </g>
+        ))}
+      </svg>
+
+      {/* Перетаскиваемые маркеры полей (двойной клик — сброс к 80px) */}
+      <div
+        onMouseDown={startDrag("left")}
+        onDoubleClick={() => onChange("left", 80)}
+        title="Левое поле — потяните, чтобы сузить/расширить область текста (двойной клик — сброс)"
+        style={handleStyle(contentStart)}
+      >
+        <div style={gripStyle} />
+      </div>
+      <div
+        onMouseDown={startDrag("right")}
+        onDoubleClick={() => onChange("right", 80)}
+        title="Правое поле — потяните, чтобы сузить/расширить область текста (двойной клик — сброс)"
+        style={handleStyle(contentEnd)}
+      >
+        <div style={gripStyle} />
+      </div>
+    </div>
+  );
+};
+
 // Верхнеуровневый блок редактора, содержащий узел
 const topLevelBlockOf = (
   editor: HTMLElement,
@@ -1033,6 +1202,20 @@ export const CreateInternalCorrespondence = ({
   const [fontSize, setFontSize] = useState("14");
   const [showFontSizeDropdown, setShowFontSizeDropdown] = useState(false);
   const [orientation, setOrientation] = useState<PageOrientation>("portrait");
+  // Показ сантиметровой линейки над листом (переключатель в панели редактора).
+  const [rulerEnabled, setRulerEnabled] = useState(false);
+  // Поля страницы (px) — регулируются перетаскиванием маркеров линейки. Задают
+  // ширину колонки набора, поэтому влияют на перенос текста, пагинацию и печать.
+  const [marginLeft, setMarginLeft] = useState(80);
+  const [marginRight, setMarginRight] = useState(80);
+  // Смена ориентации меняет ширину листа — зажимаем поля, чтобы колонка набора
+  // не «схлопнулась» в узком портрете после широкого альбома.
+  useEffect(() => {
+    const w = orientation === "landscape" ? 1122 : 794;
+    const cap = Math.round((w - 160) / 2);
+    setMarginLeft((l) => Math.max(16, Math.min(l, cap)));
+    setMarginRight((r) => Math.max(16, Math.min(r, cap)));
+  }, [orientation]);
   const [showPreview, setShowPreview] = useState(false);
   const [showCancelSignConfirm, setShowCancelSignConfirm] = useState(false);
   const [showSendConfirm, setShowSendConfirm] = useState(false);
@@ -1072,26 +1255,46 @@ export const CreateInternalCorrespondence = ({
   // Над редактором тащат файл — показываем подсказку-оверлей для импорта
   const [isDraggingWord, setIsDraggingWord] = useState(false);
   // Режим просмотра входящего письма включён по умолчанию, когда страница
-  // открыта через «Ответить»/«Перенаправить» (есть исходное письмо).
   const [showOriginalLetterSides, setShowOriginalLetterSides] = useState(
-    !!(composeMode && sourceLetter),
+    !!(panelMode && panelSource),
   );
-  // Страницы исходного входящего письма для левого A4-холста. Разбивка та же,
-  // что на странице просмотра входящего (paginateHtml), поэтому письмо
-  // выглядит 1-в-1 с оригиналом. Пагинация — в закреплённой панели над холстами.
+  const [showVersionCompareSides, setShowVersionCompareSides] = useState(false);
+
+  const toggleOriginalLetterSides = (checked: boolean) => {
+    setShowOriginalLetterSides(checked);
+    if (checked) {
+      setShowVersionCompareSides(false);
+    }
+  };
+
+  const toggleVersionCompareSides = (checked: boolean) => {
+    setShowVersionCompareSides(checked);
+    if (checked) {
+      setShowOriginalLetterSides(false);
+    }
+  };
+
+  useEffect(() => {
+    if (panelMode && panelSource) {
+      setShowOriginalLetterSides((prev) => {
+        if (prev === false) return false;
+        setShowVersionCompareSides(false);
+        return true;
+      });
+    }
+  }, [panelMode, panelSource]);
+
   const [originalPage, setOriginalPage] = useState(0);
   const originalSheets = useMemo((): { pages: string[]; stamp: StampInfo } => {
-    if (!composeMode || !sourceLetter) return { pages: [], stamp: null };
-    const res = paginateHtml(sourceLetter.body, 14);
+    if (!panelMode || !panelSource || !panelSource.body) return { pages: [], stamp: null };
+    const res = paginateHtml(panelSource.body, 14);
     const pages = [...res.pages];
-    // Страница со штампом ЭЦП должна существовать, даже если на ней нет текста.
     if (res.stamp) while (pages.length <= res.stamp.pageIndex) pages.push("");
     return { pages, stamp: res.stamp };
-  }, [composeMode, sourceLetter]);
+  }, [panelMode, panelSource]);
   const originalTotal = Math.max(originalSheets.pages.length, 1);
   const originalCurrent = Math.min(originalPage, originalTotal - 1);
 
-  const [showVersionCompareSides, setShowVersionCompareSides] = useState(false);
   const [versionComparePage, setVersionComparePage] = useState(0);
 
   const composeAppliedRef = useRef(false);
@@ -1166,7 +1369,6 @@ export const CreateInternalCorrespondence = ({
   const isLandscape = orientation === "landscape";
   const PAGE_WIDTH = isLandscape ? 1122 : 794;
   const PAGE_HEIGHT = isLandscape ? 794 : 1122;
-  const PAGE_PAD_H = 80;
   const PAGE_PAD_V = 72;
   const CONTENT_HEIGHT = PAGE_HEIGHT - PAGE_PAD_V * 2;
   const PAGE_GAP = 32; // визуальный отступ между листами
@@ -1613,6 +1815,7 @@ export const CreateInternalCorrespondence = ({
         if (newId)
           navigate(`/modules/correspondence/internal/outgoing/${newId}`, {
             replace: true,
+            state: location.state,
           });
       },
     },
@@ -2022,7 +2225,7 @@ export const CreateInternalCorrespondence = ({
     // на одну страницу (перебираем только element-детей) и пропадёт из
     // предпросмотра/печати — как было с одиночной цифрой, набранной в редактор.
     wrapBareTopLevelNodes(editor);
-    const contentWidth = PAGE_WIDTH - PAGE_PAD_H * 2;
+    const contentWidth = PAGE_WIDTH - marginLeft - marginRight;
     const buckets: string[][] = [];
     Array.from(editor.children).forEach((child) => {
       const el = child as HTMLElement;
@@ -2042,14 +2245,14 @@ export const CreateInternalCorrespondence = ({
       clone.style.marginTop = "0";
       clone.style.marginBottom = "0";
       (buckets[page] ||= []).push(
-        `<div style="position:absolute;left:${PAGE_PAD_H}px;top:${localTop}px;width:${contentWidth}px;box-sizing:border-box;">${clone.outerHTML}</div>`,
+        `<div style="position:absolute;left:${marginLeft}px;top:${localTop}px;width:${contentWidth}px;box-sizing:border-box;">${clone.outerHTML}</div>`,
       );
     });
     const pages: string[] = [];
     for (let i = 0; i < buckets.length; i++)
       pages.push((buckets[i] || []).join(""));
     return pages.length ? pages : [""];
-  }, [PAGE_WIDTH, PAGE_PAD_H, PAGE_PAD_V, PAGE_STRIDE]);
+  }, [PAGE_WIDTH, marginLeft, marginRight, PAGE_PAD_V, PAGE_STRIDE]);
 
   // Позиция вшитого штампа ЭЦП относительно своей страницы (для печати).
   const getEmbeddedStampInfo = useCallback(() => {
@@ -2146,7 +2349,7 @@ export const CreateInternalCorrespondence = ({
       .map((html, idx) => {
         const stampHtml =
           stamp && stamp.pageIndex === idx
-            ? `<div style="position:absolute;left:${PAGE_PAD_H + stamp.x}px;top:${PAGE_PAD_V + stamp.y}px;width:${stamp.width};overflow:hidden;pointer-events:none;">${stamp.html}</div>`
+            ? `<div style="position:absolute;left:${marginLeft + stamp.x}px;top:${PAGE_PAD_V + stamp.y}px;width:${stamp.width};overflow:hidden;pointer-events:none;">${stamp.html}</div>`
             : "";
         return `<div class="page">${html}${stampHtml}</div>`;
       })
@@ -3444,6 +3647,74 @@ export const CreateInternalCorrespondence = ({
                 syncEditorAfterDomEdit();
                 return;
               }
+
+              // Enter внутри блока, разрезанного пагинацией по границе страницы
+              // (data-page-split): нативный split создаёт новый блок, который
+              // наследует id группы, и шаг слияния пагинации склеивает половины
+              // обратно — перенос «мерцал и откатывался». Делим блок сами и
+              // разводим половины по разным группам: всё до курсора остаётся в
+              // старой группе (абзац до переноса), курсорный хвост и нижележащие
+              // куски получают новый id (абзац после переноса) — слияние их уже
+              // не соединит, а пагинация переразложит по страницам заново.
+              const block = topLevelBlockOf(editor, range.startContainer);
+              const gid = block?.getAttribute(AUTOSPLIT_ATTR) || null;
+              if (block && gid && PAGE_SPLITTABLE_TAGS.has(block.tagName)) {
+                e.preventDefault();
+                commitHistoryNow();
+
+                const pieces = Array.from(
+                  editor.querySelectorAll<HTMLElement>(
+                    `[${AUTOSPLIT_ATTR}="${gid}"]`,
+                  ),
+                );
+                const k = pieces.indexOf(block);
+                const hasBefore = k > 0;
+                const hasAfter = k >= 0 && k < pieces.length - 1;
+
+                // Хвост блока (после курсора) уносим в блок-клон.
+                const cut = document.createRange();
+                cut.setStart(range.startContainer, range.startOffset);
+                cut.setEnd(block, block.childNodes.length);
+                const next = block.cloneNode(false) as HTMLElement;
+                next.appendChild(cut.extractContents());
+
+                // Пустую половину держит placeholder <br> — но только если она не
+                // сольётся с соседями по своей группе (иначе лишняя пустая строка).
+                if (
+                  !hasBefore &&
+                  !(block.textContent || "").length &&
+                  !block.querySelector("br,img")
+                ) {
+                  block.appendChild(document.createElement("br"));
+                }
+                if (
+                  !hasAfter &&
+                  !(next.textContent || "").length &&
+                  !next.querySelector("br,img")
+                ) {
+                  next.appendChild(document.createElement("br"));
+                }
+
+                block.after(next);
+
+                // Разводим группы: старый id — по курсорный блок включительно,
+                // новый id — клон next и все нижележащие куски прежней группы.
+                const newGid = `g${++splitGroupSeq}`;
+                next.setAttribute(AUTOSPLIT_ATTR, newGid);
+                for (let j = k + 1; j < pieces.length; j++) {
+                  pieces[j].setAttribute(AUTOSPLIT_ATTR, newGid);
+                }
+
+                const pos = charPosAt(next, 0);
+                const caret = document.createRange();
+                caret.setStart(pos.node, pos.offset);
+                caret.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(caret);
+
+                syncEditorAfterDomEdit();
+                return;
+              }
             }
           }
         }
@@ -3995,20 +4266,14 @@ export const CreateInternalCorrespondence = ({
         // Многострочный форматированный контент (документ из Word) — сохраняем
         // структуру и оформление как есть.
         fragment = buildFragmentFromHtml(sanitizeWordHtml(html));
+        fragment = buildFragmentFromHtml(sanitizeWordHtml(html));
       } else if (htmlHasText) {
-        // Однострочный форматированный фрагмент: вставляем инлайн (рядом с
-        // курсором), но СОХРАНЯЕМ оформление — раньше такой текст уходил в
-        // ветку plain-text и терял жирный/курсив/подчёркивание/цвет.
         fragment = buildInlineFragmentFromHtml(sanitizeWordHtml(html));
       } else if (text) {
         fragment = document.createDocumentFragment();
         if (!isMultiline) {
-          // Однострочный обычный текст — вставляем инлайн рядом с курсором.
           fragment.appendChild(document.createTextNode(text));
         } else {
-          // Многострочный обычный текст вставляем АБЗАЦАМИ (как Word): пустая
-          // строка разделяет абзацы, одиночный перенос — мягкий <br> внутри
-          // абзаца. Раньше все строки склеивались в один блок через <br>.
           const paragraphs = text.replace(/\r\n/g, "\n").split(/\n{2,}/);
           paragraphs.forEach((para) => {
             const block = document.createElement("p");
@@ -4032,12 +4297,6 @@ export const CreateInternalCorrespondence = ({
     [buildFragmentFromHtml, buildInlineFragmentFromHtml, insertFragmentAtCaret],
   );
 
-  // Переносит специфичную для импорта разметку mammoth в формат холста:
-  //  - класс pfmt_<align>_<firstLinePx>_<leftPx> (из styleMap) → inline-стили
-  //    (выравнивание, красная строка, левый отступ);
-  //  - пустым абзацам возвращаем высоту строки (<br>) — иначе теряются
-  //    пустые строки-отступы из Word;
-  //  - маркеры разрыва страницы Word → настоящие разрывы редактора.
   const mammothToEditorHtml = useCallback((html: string) => {
     const root = document.createElement("div");
     root.innerHTML = html;
@@ -4268,7 +4527,15 @@ export const CreateInternalCorrespondence = ({
     // а не очередь устаревших друг за другом.
     const raf = window.requestAnimationFrame(updatePageCount);
     return () => window.cancelAnimationFrame(raf);
-  }, [editorContent, orientation, fontSize, pageCount, paginateEditor]);
+  }, [
+    editorContent,
+    orientation,
+    fontSize,
+    pageCount,
+    paginateEditor,
+    marginLeft,
+    marginRight,
+  ]);
 
   // Страховка от «пропущенной» пагинации: если высота содержимого изменилась
   // мимо наших обработчиков (загрузилась картинка из Word, внешняя замена
@@ -5349,68 +5616,66 @@ export const CreateInternalCorrespondence = ({
 
               <div className="px-6 py-4 border-b border-slate-100">
                 <div className="flex items-start gap-3">
-                  <label className="text-sm font-semibold text-slate-500 pt-1.5 w-20 flex-shrink-0">
-                    Вложения
-                  </label>
+                  <div className="flex items-center gap-2 pt-1.5 w-24 flex-shrink-0">
+                    <label className="text-sm font-semibold text-slate-500">
+                      Вложения
+                    </label>
+                    <If is={attachments.length > 0}>
+                      <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                        {attachments.length}
+                      </span>
+                    </If>
+                  </div>
                   <div className="flex-1 min-w-0 flex flex-wrap items-center gap-2">
-                    {/* В блоке — только ещё не сохранённые файлы. После сохранения
-                        у вложения появляется url, и оно уходит в цилиндр «Вложения». */}
                     {attachments
                       .filter((a) => a.file)
                       .map((file) => (
-                      <div
-                        key={file.id}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-                      >
-                        <FileTextIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                        <div className="min-w-0">
-                          <p className="font-semibold text-slate-800 truncate max-w-[140px]">
-                            {file.name}
-                          </p>
-                          <p className="text-slate-400">
-                            {file.file ? `${file.size} · не сохранён` : file.size}
-                          </p>
-                        </div>
-                        {/* Убрать можно только ещё не отправленный файл: удаления
-                            сохранённого вложения в API пока нет. */}
-                        <button
-                          type="button"
+                        <div
+                          key={file.id}
                           onClick={() => setPreviewAttachment(file)}
-                          title="Просмотр вложения"
-                          className="text-slate-400 hover:text-indigo-600 transition-colors flex-shrink-0 cursor-pointer"
+                          className="flex items-center gap-2 px-3 py-1.5 bg-amber-50/60 hover:bg-amber-100/80 border border-amber-200 rounded-xl text-xs cursor-pointer transition-all group"
                         >
-                          <Eye size={13} />
-                        </button>
-                        {file.file ? (
+                          <FileTextIcon className="w-4 h-4 text-amber-500 flex-shrink-0 group-hover:scale-105 transition-transform" />
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-slate-800 truncate max-w-[140px] group-hover:text-blue-600 transition-colors">
+                              {file.name}
+                            </p>
+                            <p className="text-[10px] text-slate-400">
+                              {file.size} · не сохранён
+                            </p>
+                          </div>
                           <button
-                            onClick={() =>
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewAttachment(file);
+                            }}
+                            title="Просмотр вложения"
+                            className="text-slate-400 hover:text-indigo-600 transition-colors flex-shrink-0 cursor-pointer"
+                          >
+                            <Eye size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setAttachments((prev) =>
                                 prev.filter((f) => f.id !== file.id),
-                              )
-                            }
+                              );
+                            }}
                             title="Убрать файл"
                             className="text-slate-300 hover:text-rose-400 transition-colors flex-shrink-0 cursor-pointer"
                           >
                             <X size={12} />
                           </button>
-                        ) : (
-                          <If is={!!file.url}>
-                            <button
-                              onClick={() => downloadAttachment(file)}
-                              title="Скачать"
-                              className="text-slate-400 hover:text-blue-600 transition-colors flex-shrink-0 cursor-pointer"
-                            >
-                              <Download size={12} />
-                            </button>
-                          </If>
-                        )}
-                      </div>
-                    ))}
+                        </div>
+                      ))}
                     <button
+                      type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={isReadOnly || attachments.length >= MAX_ATTACHMENTS}
                       title={`${ATTACHMENT_EXTENSIONS.join(", ")} · до ${MAX_ATTACHMENTS} файлов · до ${MAX_ATTACHMENT_SIZE_MB} МБ каждый`}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-50"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-50 cursor-pointer"
                     >
                       <Paperclip size={12} />
                       <span>Прикрепить файл</span>
@@ -5704,16 +5969,15 @@ export const CreateInternalCorrespondence = ({
                     {orientation === "portrait" ? "Книжный" : "Альбомный"}
                   </span>
                 </button>
+                <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 {!isReadOnly && (
                   <>
-                    <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                     <button
                       onMouseDown={(e) => {
                         e.preventDefault();
                         if (!importingWord) wordInputRef.current?.click();
                       }}
                       disabled={importingWord}
-                      title="Импортировать документ Word (.docx) с сохранением форматирования"
                       className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-colors border flex-shrink-0 bg-white border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       <FileType size={14} />
@@ -5730,6 +5994,34 @@ export const CreateInternalCorrespondence = ({
                     />
                   </>
                 )}
+                <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
+                <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 mr-2 ml-1">
+                  <input
+                    type="checkbox"
+                    checked={rulerEnabled}
+                    onChange={(e) => setRulerEnabled(e.target.checked)}
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span>Линейка</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 mr-2 ml-1">
+                  <input
+                    type="checkbox"
+                    checked={false}
+                    onChange={() => toast.info("Функционал «Сетка» находится в разработке")}
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span>Сетка</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
+                  <input
+                    type="checkbox"
+                    checked={false}
+                    onChange={() => toast.info("Функционал «Область навигации» находится в разработке")}
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span>Область навигации</span>
+                </label>
                 {!!id && (
                   <>
                     <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
@@ -5744,14 +6036,14 @@ export const CreateInternalCorrespondence = ({
                     </label>
                   </>
                 )}
-                {composeMode && sourceLetter && (
+                {panelMode && panelSource && (
                   <>
                     <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                     <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
                       <input
                         type="checkbox"
                         checked={showOriginalLetterSides}
-                        onChange={(e) => setShowOriginalLetterSides(e.target.checked)}
+                        onChange={(e) => toggleOriginalLetterSides(e.target.checked)}
                         className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                       />
                       <span>Режим просмотра входящего письма</span>
@@ -5764,7 +6056,7 @@ export const CreateInternalCorrespondence = ({
                     <input
                       type="checkbox"
                       checked={showVersionCompareSides}
-                      onChange={(e) => setShowVersionCompareSides(e.target.checked)}
+                      onChange={(e) => toggleVersionCompareSides(e.target.checked)}
                       className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                     />
                     <span>Режим просмотра истории версий</span>
@@ -5801,7 +6093,7 @@ export const CreateInternalCorrespondence = ({
                     },
                     {
                       key: "attachments",
-                      label: "Вложения",
+                      label: attachments.length > 0 ? `Вложения (${attachments.length})` : "Вложения",
                       dotClass: "bg-indigo-500",
                       dotStyle: undefined,
                       isOpen: attachmentsOpen,
@@ -5856,20 +6148,20 @@ export const CreateInternalCorrespondence = ({
               {/* Закреплённая панель пагинации входящего письма — на всю ширину
                   блока, под разделом с кнопками импорта. При прокрутке страницы
                   прилипает к верхнему краю окна и всегда остаётся доступной. */}
-              {showOriginalLetterSides && composeMode && sourceLetter && (
+              {showOriginalLetterSides && panelMode && panelSource && (
                 <div className="flex items-center justify-between gap-4 px-4 py-2 bg-white border-b border-slate-200 shadow-sm font-sans">
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 shrink-0">
                     <Eye size={14} className="text-amber-500" />
                     <span>Входящее письмо — только просмотр</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {sourceLetter.id != null && (
+                    {panelSource.id != null && (
                       <>
                         <button
                           type="button"
                           onClick={() =>
                             window.open(
-                              `/modules/correspondence/internal/incoming/${sourceLetter.id}`,
+                              `/modules/correspondence/internal/incoming/${panelSource.id}`,
                               "_blank",
                               "noopener,noreferrer",
                             )
@@ -5912,10 +6204,10 @@ export const CreateInternalCorrespondence = ({
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 shrink-0">
                     <Clock size={14} className="text-amber-500" />
                     <span>
-                      История версий — Слева: Версия №{activeVersion?.versionNumber}
-                      {activeVersion?.date ? ` (${new Date(activeVersion.date).toLocaleDateString("ru-RU")})` : ""}
+                      История версий — Слева: Актуальная версия №{latestVersion?.versionNumber}
                       {" • "}
-                      Справа: Актуальная версия №{latestVersion?.versionNumber}
+                      Справа: Версия №{activeVersion?.versionNumber}
+                      {activeVersion?.date ? ` (${new Date(activeVersion.date).toLocaleDateString("ru-RU")})` : ""}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -5972,7 +6264,7 @@ export const CreateInternalCorrespondence = ({
                   (showOriginalLetterSides || showVersionCompareSides) && "min-w-max"
                 )}>
                   <If is={Boolean(showVersionCompareSides && activeVersion)}>
-                    <div ref={versionCompareCanvasWrapRef} className="shrink-0 order-1">
+                    <div ref={versionCompareCanvasWrapRef} className="shrink-0 order-2">
                       <OriginalLetterCanvas
                         sheets={versionCompareSheets.pages}
                         stamp={versionCompareSheets.stamp}
@@ -5982,8 +6274,8 @@ export const CreateInternalCorrespondence = ({
                     </div>
                   </If>
 
-                  <If is={Boolean(showOriginalLetterSides && composeMode && sourceLetter)}>
-                    <div ref={originalCanvasWrapRef} className="shrink-0 order-1">
+                  <If is={Boolean(showOriginalLetterSides && panelMode && panelSource)}>
+                    <div ref={originalCanvasWrapRef} className="shrink-0 order-2">
                       <OriginalLetterCanvas
                         sheets={originalSheets.pages}
                         stamp={originalSheets.stamp}
@@ -5993,16 +6285,26 @@ export const CreateInternalCorrespondence = ({
                     </div>
                   </If>
 
+                  <div className="order-1 flex flex-col items-center">
+                  {rulerEnabled && (
+                    <EditorRuler
+                      pageWidth={PAGE_WIDTH}
+                      marginLeft={marginLeft}
+                      marginRight={marginRight}
+                      onChange={(side, value) =>
+                        side === "left"
+                          ? setMarginLeft(value)
+                          : setMarginRight(value)
+                      }
+                    />
+                  )}
                   <div
                     ref={pageCanvasRef}
-                    className={cn(
-                      "relative",
-                      (showOriginalLetterSides || showVersionCompareSides) ? "order-2" : "order-1"
-                    )}
+                    className="relative"
                     style={{
                       width: PAGE_WIDTH,
                       height: pageCount * PAGE_STRIDE - PAGE_GAP,
-                      padding: `${PAGE_PAD_V}px ${PAGE_PAD_H}px`,
+                      padding: `${PAGE_PAD_V}px ${marginRight}px ${PAGE_PAD_V}px ${marginLeft}px`,
                       fontFamily: "Times New Roman, serif",
                       fontSize: `${fontSize}px`,
                       lineHeight: 1.8,
@@ -6129,7 +6431,7 @@ export const CreateInternalCorrespondence = ({
                           // stampPos хранится в координатах редактора; placeholder —
                           // потомок холста страницы, поэтому добавляем поля страницы,
                           // чтобы он визуально совпал с местом будущей печати.
-                          left: PAGE_PAD_H + stampPos.x,
+                          left: marginLeft + stampPos.x,
                           top: PAGE_PAD_V + stampPos.y,
                           width: stampSize.width,
                           height: stampSize.height,
@@ -6185,7 +6487,7 @@ export const CreateInternalCorrespondence = ({
                         <ApproversPanel
                           isOpen={approversOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={showVersionCompareSides || showOriginalLetterSides}
+                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
                           onOpen={handleOpenApprovers}
                           onClose={() => setApproversOpen(false)}
                           approvers={approvers}
@@ -6204,7 +6506,7 @@ export const CreateInternalCorrespondence = ({
                         <SignerPanel
                           isOpen={signerOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={showVersionCompareSides || showOriginalLetterSides}
+                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
                           onOpen={handleOpenSigner}
                           onClose={() => setSignerOpen(false)}
                           finalSigner={finalSigner}
@@ -6236,6 +6538,7 @@ export const CreateInternalCorrespondence = ({
                         <IncomingLettersPanel
                           isOpen={incomingOpen}
                           hideTab={panelsInToolbar}
+                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
                           onOpen={handleOpenIncoming}
                           onClose={() => setIncomingOpen(false)}
                           attachedLetters={attachedIncomingLetters}
@@ -6247,6 +6550,7 @@ export const CreateInternalCorrespondence = ({
                         <VersionsPanel
                           isOpen={versionsOpen}
                           hideTab={panelsInToolbar}
+                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
                           onOpen={handleOpenVersions}
                           onClose={() => setVersionsOpen(false)}
                           versions={allVersions}
@@ -6260,6 +6564,7 @@ export const CreateInternalCorrespondence = ({
                         <AttachmentsPanel
                           isOpen={attachmentsOpen}
                           hideTab={panelsInToolbar}
+                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
                           onOpen={handleOpenAttachments}
                           onClose={() => setAttachmentsOpen(false)}
                           attachments={attachments.filter((a) => !a.file)}
@@ -6268,6 +6573,7 @@ export const CreateInternalCorrespondence = ({
                         />
                       </div>
                     )}
+                  </div>
                   </div>
 
                 </div>

@@ -26,6 +26,7 @@ import { VersionsPanel } from "./VersionsPanel";
 import { IncomingPreviewModal } from "./IncomingPreviewModal";
 import { TaskPanel } from "./TaskPanel";
 import { EditorToolbar, type ToolbarSection } from "./EditorToolbar";
+import { AttachmentsPanel, type IAttachment } from "./AttachmentsPanel";
 
 const inboxStatusStyle: Record<string, string> = {
   // Russian keys
@@ -149,6 +150,7 @@ interface RegistryItem {
   forwarded_users?: ActionUser[];
   reply_count?: number;
   forward_count?: number;
+  attachments?: IAttachment[];
 }
 
 const initialsOf = (fullName?: string) => {
@@ -274,6 +276,7 @@ export const InternalCorrespondenceIncomingView = ({
   const [signersOpen, setSignersOpen] = useState(false);
   const [approversOpen, setApproversOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
+  const [attachmentsOpen, setAttachmentsOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [activeVersionId, setActiveVersionId] = useState<number | string | null>(null);
 
@@ -497,21 +500,32 @@ export const InternalCorrespondenceIncomingView = ({
     setApproversOpen(false);
     setVersionsOpen(false);
     setShowTaskPanel(false);
+    setAttachmentsOpen(false);
   };
   const openApprovers = () => {
     setApproversOpen(true);
     setSignersOpen(false);
     setVersionsOpen(false);
     setShowTaskPanel(false);
+    setAttachmentsOpen(false);
   };
   const openVersions = () => {
     setVersionsOpen(true);
     setSignersOpen(false);
     setApproversOpen(false);
     setShowTaskPanel(false);
+    setAttachmentsOpen(false);
   };
   const openTask = () => {
     setShowTaskPanel(true);
+    setSignersOpen(false);
+    setApproversOpen(false);
+    setVersionsOpen(false);
+    setAttachmentsOpen(false);
+  };
+  const openAttachments = () => {
+    setAttachmentsOpen(true);
+    setShowTaskPanel(false);
     setSignersOpen(false);
     setApproversOpen(false);
     setVersionsOpen(false);
@@ -549,6 +563,14 @@ export const InternalCorrespondenceIncomingView = ({
       onToggle: () =>
         approversOpen ? setApproversOpen(false) : openApprovers(),
     },
+    {
+      key: "attachments",
+      label: "Вложения",
+      dotClass: "bg-teal-500",
+      isOpen: attachmentsOpen,
+      onToggle: () =>
+        attachmentsOpen ? setAttachmentsOpen(false) : openAttachments(),
+    },
   ];
 
   return (
@@ -573,6 +595,7 @@ export const InternalCorrespondenceIncomingView = ({
           }}
           panelsInToolbar={panelsInToolbar}
           onTogglePanelsInToolbar={setPanelsInToolbar}
+          attachments={item.attachments || []}
         />
       </If>
 
@@ -927,6 +950,13 @@ export const InternalCorrespondenceIncomingView = ({
                     </motion.button>
                   </div>
                 )}
+                <AttachmentsPanel
+                  isOpen={attachmentsOpen}
+                  hideTab={panelsInToolbar}
+                  onOpen={openAttachments}
+                  onClose={() => setAttachmentsOpen(false)}
+                  attachments={item.attachments || []}
+                />
                 <VersionsPanel
                   isOpen={versionsOpen}
                   hideTab={panelsInToolbar}

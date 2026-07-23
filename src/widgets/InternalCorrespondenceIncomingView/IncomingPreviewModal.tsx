@@ -7,6 +7,7 @@ import { ApproversPanel } from "./ApproversPanel";
 import { SignersPanel } from "./SignersPanel";
 import { VersionsPanel } from "./VersionsPanel";
 import { TaskPanel } from "./TaskPanel";
+import { AttachmentsPanel, type IAttachment } from "./AttachmentsPanel";
 import {
   paginateHtml,
   contentStyle,
@@ -52,6 +53,7 @@ interface IProps {
   panelsInToolbar?: boolean;
   onTogglePanelsInToolbar?: (value: boolean) => void;
   correspondenceId?: string | number;
+  attachments?: IAttachment[];
 }
 
 const pageWord = (n: number) =>
@@ -72,6 +74,7 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
   panelsInToolbar = false,
   onTogglePanelsInToolbar,
   correspondenceId,
+  attachments = [],
 }) => {
   const [zoom, setZoom] = useState(1);
   const [isScaleFocused, setIsScaleFocused] = useState(false);
@@ -81,6 +84,7 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
   const [signersOpen, setSignersOpen] = useState(false);
   const [approversOpen, setApproversOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
+  const [attachmentsOpen, setAttachmentsOpen] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -91,21 +95,32 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
     setApproversOpen(false);
     setVersionsOpen(false);
     setShowTaskPanel(false);
+    setAttachmentsOpen(false);
   };
   const openApprovers = () => {
     setApproversOpen(true);
     setSignersOpen(false);
     setVersionsOpen(false);
     setShowTaskPanel(false);
+    setAttachmentsOpen(false);
   };
   const openVersions = () => {
     setVersionsOpen(true);
     setSignersOpen(false);
     setApproversOpen(false);
     setShowTaskPanel(false);
+    setAttachmentsOpen(false);
   };
   const openTask = () => {
     setShowTaskPanel(true);
+    setSignersOpen(false);
+    setApproversOpen(false);
+    setVersionsOpen(false);
+    setAttachmentsOpen(false);
+  };
+  const openAttachments = () => {
+    setAttachmentsOpen(true);
+    setShowTaskPanel(false);
     setSignersOpen(false);
     setApproversOpen(false);
     setVersionsOpen(false);
@@ -140,6 +155,14 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
       isOpen: approversOpen,
       onToggle: () =>
         approversOpen ? setApproversOpen(false) : openApprovers(),
+    },
+    {
+      key: "attachments",
+      label: "Вложения",
+      dotClass: "bg-teal-500",
+      isOpen: attachmentsOpen,
+      onToggle: () =>
+        attachmentsOpen ? setAttachmentsOpen(false) : openAttachments(),
     },
   ];
 
@@ -1144,6 +1167,13 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
                         <TaskPanel onClose={() => setShowTaskPanel(false)} correspondenceId={correspondenceId || ""} />
                       </If>
                     </AnimatePresence>
+                    <AttachmentsPanel
+                      isOpen={attachmentsOpen}
+                      hideTab={panelsInToolbar}
+                      onOpen={openAttachments}
+                      onClose={() => setAttachmentsOpen(false)}
+                      attachments={attachments}
+                    />
                   </div>
                 </If>
                 <div

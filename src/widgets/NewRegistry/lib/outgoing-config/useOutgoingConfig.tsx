@@ -19,6 +19,8 @@ import { getOutgoingFilters } from "../filters.config";
 import { RecipientsViewer } from "@widgets/NewRegistry/ui";
 import { MenuProps } from "antd";
 
+import { getLetterTypeName } from "@widgets/RegistryTable/lib/getCorrespondenceLinkTypeLabel";
+
 export const useOutgoingConfig = (type: string): RegistryConfig => {
   const isInternal = type.includes("internal");
 
@@ -93,14 +95,7 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
         label: "Тип письма",
         icon: <CornerUpLeft size={10} />,
         color: "purple",
-        render: (d) => {
-          // Бэкенд отдаёт локализованный relation_label и link_type
-          // ("reply" | "forward" | null). Null — обычное письмо без связи.
-          if (d.relation_label) return d.relation_label;
-          if (d.link_type === "reply") return "Ответное";
-          if (d.link_type === "forward") return "Пересланное";
-          return "Обычное";
-        },
+        render: (d) => getLetterTypeName(d),
       },
       {
         label: "Мой статус",

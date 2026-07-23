@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { useGetQuery, useMutationQuery } from "@shared/lib";
-import { toast } from "@shared/lib/toast";
+import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { IApiFile, IApiFolder, IDeleteFolderResult, IDiskMeta } from "./lib";
+import { IApiFile, IApiFolder, IDiskMeta } from "./lib";
+import { useFilesMutations } from "./useFilesMutations";
 
 const COUNT_FETCH_SIZE = 100;
 
@@ -32,6 +32,7 @@ interface IFilesPaginatedData {
 
 export const useFilesData = (params: IFilesParams) => {
   const [manualOrderMap, setManualOrderMap] = useState<Record<number, number>>({});
+  const mutations = useFilesMutations(setManualOrderMap);
 
   const memoizedParams = useMemo(
     () => ({
@@ -45,6 +46,14 @@ export const useFilesData = (params: IFilesParams) => {
   );
 
   const countParams = useMemo(() => ({ per_page: COUNT_FETCH_SIZE }), []);
+
+  const personalFilesParams = useMemo(() => {
+    const { activeFolderId: personalFolderId, ...baseParams } = memoizedParams;
+    return {
+      ...baseParams,
+      ...(typeof personalFolderId === "number" ? { folder_id: personalFolderId } : {}),
+    };
+  }, [memoizedParams]);
 
   const sharedFilesParams = useMemo(() => {
     const { activeFolderId: sharedFolderId, ...sharedBaseParams } = memoizedParams;
@@ -62,9 +71,9 @@ export const useFilesData = (params: IFilesParams) => {
     [],
   );
 
-  const filesQuery = useGetQuery<IFilesParams, { success: boolean; data: IFilesPaginatedData }>({
+  const filesQuery = useGetQuery<typeof personalFilesParams, { success: boolean; data: IFilesPaginatedData }>({
     url: ApiRoutes.MY_FILES,
-    params: memoizedParams,
+    params: personalFilesParams,
     useToken: true,
     options: cacheOptions,
   });
@@ -88,109 +97,25 @@ export const useFilesData = (params: IFilesParams) => {
     options: cacheOptions,
   });
 
-  const createFolder = useMutationQuery<{ name: string; parent_id: number | null; sort_order?: number; emoji?: string | null; shared_user_ids?: number[] }, IApiFolder>({
-    url: ApiRoutes.MY_FILE_FOLDERS,
-    method: "POST",
-    messages: {
-      success: "Папка создана",
-      invalidate: [ApiRoutes.MY_FILE_FOLDERS],
-    },
+  const sharedFilesQuery = useGetQuery<typeof sharedFilesParams, { success: boolean; data: { data: IApiFile[]; current_page?: number; total?: number; per_page?: number } }>({
+    url: ApiRoutes.MY_FILES_SHARED_WITH_ME,
+    params: sharedFilesParams,
+    useToken: true,
+    options: cacheOptions,
   });
 
-  const updateFolder = useMutationQuery<{ id: number; name: string; parent_id: number | null; sort_order?: number; emoji?: string | null }, IApiFolder>({
-    url: (data) => ApiRoutes.MY_FILE_FOLDERS_ID.replace(":id", String(data.id)),
-    method: "PUT",
-    messages: {
-      success: "Папка обновлена",
-      invalidate: [ApiRoutes.MY_FILE_FOLDERS],
-    },
+  const sharedFoldersQuery = useGetQuery<any, { success: boolean; data: IApiFolder[] }>({
+    url: ApiRoutes.MY_FILE_FOLDERS_SHARED_WITH_ME,
+    useToken: true,
+    options: cacheOptions,
   });
 
-  const deleteFolder = useMutationQuery<{ id: number }, IDeleteFolderResult>({
-    url: (data) => ApiRoutes.MY_FILE_FOLDERS_ID.replace(":id", String(data.id)),
-    method: "DELETE",
-    messages: {
-      suppressSuccessToast: true,
-      invalidate: [ApiRoutes.MY_FILE_FOLDERS, ApiRoutes.MY_FILES, ApiRoutes.MY_FILES_META],
-      onSuccessCb: (data?: IDeleteFolderResult) => {
-        const folders = data?.deleted_folders_count ?? 1;
-        const files = data?.deleted_files_count ?? 0;
-        toast.success(`Удалено: папок — ${folders}, файлов — ${files}`);
-        if (data?.storage_cleanup_failed) {
-          toast.warning(
-            "Часть файлов не удалось очистить из хранилища. Обратитесь к администратору.",
-          );
-        }
-      },
-    },
+  const sharedFilesCountQuery = useGetQuery<{ per_page: number }, { success: boolean; data: { data: IApiFile[]; total?: number } }>({
+    url: ApiRoutes.MY_FILES_SHARED_WITH_ME,
+    params: countParams,
+    useToken: true,
+    options: cacheOptions,
   });
-
-  const updateFile = useMutationQuery<{ id: number; folder_id?: number | null; is_starred?: boolean; meta?: any }, IApiFile>({
-    url: (data) => ApiRoutes.MY_FILES_ID.replace(":id", String(data.id)),
-    method: "PUT",
-    messages: {
-      success: "Файл обновлен",
-      invalidate: [ApiRoutes.MY_FILES],
-    },
-  });
-
-  const deleteFile = useMutationQuery<{ id: number }, void>({
-    url: (data) => ApiRoutes.MY_FILES_ID.replace(":id", String(data.id)),
-    method: "DELETE",
-    messages: {
-      success: "Файл удален",
-      invalidate: [ApiRoutes.MY_FILES, ApiRoutes.MY_FILES_META],
-    },
-  });
-
-  const uploadFile = useMutationQuery<FormData, IApiFile>({
-    url: ApiRoutes.MY_FILES_UPLOAD,
-    method: "POST",
-    messages: {
-      success: "Файл успешно загружен",
-      invalidate: [ApiRoutes.MY_FILES, ApiRoutes.MY_FILES_META],
-    },
-  });
-
-  const reorderFilesMutation = useMutationQuery<
-    { folder_id: number | null; file_ids: number[] },
-    { success: boolean; message: string; data: any }
-  >({
-    url: ApiRoutes.MY_FILES_ORDER,
-    method: "PATCH",
-    messages: {
-      success: "Порядок файлов сохранен",
-      invalidate: [ApiRoutes.MY_FILES],
-    },
-  });
-
-  const reorderFiles = useMemo(() => ({
-    ...reorderFilesMutation,
-    mutate: (variables: { folder_id: number | null; file_ids: number[] }) => {
-      if (variables?.file_ids) {
-        setManualOrderMap((prev) => {
-          const next = { ...prev };
-          variables.file_ids.forEach((id, idx) => {
-            next[id] = idx;
-          });
-          return next;
-        });
-      }
-      return reorderFilesMutation.mutate(variables);
-    },
-    mutateAsync: async (variables: { folder_id: number | null; file_ids: number[] }) => {
-      if (variables?.file_ids) {
-        setManualOrderMap((prev) => {
-          const next = { ...prev };
-          variables.file_ids.forEach((id, idx) => {
-            next[id] = idx;
-          });
-          return next;
-        });
-      }
-      return reorderFilesMutation.mutateAsync(variables);
-    },
-  }), [reorderFilesMutation]);
 
   const getArrayData = (response: any): any[] => {
     if (!response) return [];
@@ -220,110 +145,10 @@ export const useFilesData = (params: IFilesParams) => {
     perPage: rawFilesData?.per_page ?? 30,
   };
 
-  const sharedFilesQuery = useGetQuery<typeof sharedFilesParams, { success: boolean; data: { data: IApiFile[]; current_page?: number; total?: number; per_page?: number } }>({
-    url: ApiRoutes.MY_FILES_SHARED_WITH_ME,
-    params: sharedFilesParams,
-    useToken: true,
-    options: cacheOptions,
-  });
-
-  const sharedFoldersQuery = useGetQuery<any, { success: boolean; data: IApiFolder[] }>({
-    url: ApiRoutes.MY_FILE_FOLDERS_SHARED_WITH_ME,
-    useToken: true,
-    options: cacheOptions,
-  });
-
-  const sharedFilesCountQuery = useGetQuery<{ per_page: number }, { success: boolean; data: { data: IApiFile[]; total?: number } }>({
-    url: ApiRoutes.MY_FILES_SHARED_WITH_ME,
-    params: countParams,
-    useToken: true,
-    options: cacheOptions,
-  });
-
-  // 12. Invite to file
-  const inviteToFile = useMutationQuery<{ id: number; user_id: number }, any>({
-    url: (data) => ApiRoutes.MY_FILES_INVITE.replace(":id", String(data.id)),
-    method: "POST",
-    messages: {
-      suppressSuccessToast: true,
-    },
-  });
-
-  const inviteToFolder = useMutationQuery<{ id: number; user_id: number }, any>({
-    url: (data) => ApiRoutes.MY_FILE_FOLDERS_INVITE.replace(":id", String(data.id)),
-    method: "POST",
-    messages: {
-      suppressSuccessToast: true,
-    },
-  });
-
-  const bulkShareFiles = useMutationQuery<
-    { file_ids: number[]; user_ids: number[]; can_download?: boolean },
-    {
-      success: boolean;
-      message: string;
-      data: {
-        file_ids: number[];
-        user_ids: number[];
-        files_count: number;
-        users_count: number;
-        share_links_count: number;
-        created_share_links_count: number;
-        existing_share_links_count: number;
-        can_download: boolean;
-      };
-    }
-  >({
-    url: ApiRoutes.MY_FILES_BULK_SHARE,
-    method: "POST",
-    messages: {
-      suppressSuccessToast: true,
-      invalidate: [ApiRoutes.MY_FILES],
-    },
-  });
-
-  const bulkDeleteFiles = useMutationQuery<
-    { file_ids: number[] },
-    {
-      success: boolean;
-      message: string;
-      data: {
-        deleted_file_ids: number[];
-        deleted_files_count: number;
-        storage_cleanup_failed: boolean;
-      };
-    }
-  >({
-    url: ApiRoutes.MY_FILES_BULK_DELETE,
-    method: "DELETE",
-    messages: {
-      suppressSuccessToast: true,
-      invalidate: [ApiRoutes.MY_FILES, ApiRoutes.MY_FILES_META],
-    },
-  });
-
-  // 13. Remove share from file
-  const removeFileShare = useMutationQuery<{ id: number; shareId: number }, any>({
-    url: (data) => ApiRoutes.MY_FILES_SHARES_ID.replace(":id", String(data.id)).replace(":shareId", String(data.shareId)),
-    method: "DELETE",
-    messages: {
-      success: "Доступ к файлу закрыт",
-    },
-  });
-
-  // 15. Remove share from folder
-  const removeFolderShare = useMutationQuery<{ id: number; shareId: number }, any>({
-    url: (data) => ApiRoutes.MY_FILE_FOLDERS_SHARES_ID.replace(":id", String(data.id)).replace(":shareId", String(data.shareId)),
-    method: "DELETE",
-    messages: {
-      success: "Доступ к папке закрыт",
-    },
-  });
-
   const rawSharedFilesData = sharedFilesQuery.data?.data;
   const sharedFiles = useMemo(
     () => sortByManualOrder(getArrayData(rawSharedFilesData)),
-    [rawSharedFilesData, params.sort, params.dir],
+    [rawSharedFilesData, params.sort, params.dir, manualOrderMap],
   );
   const sharedFolders = getArrayData(sharedFoldersQuery.data?.data);
 
@@ -333,25 +158,60 @@ export const useFilesData = (params: IFilesParams) => {
     perPage: rawSharedFilesData?.per_page ?? 30,
   };
 
-  // Grand totals and per-folder counts derived from the unfiltered counts
-  // queries. Keyed on the query `data` reference (stable until data changes)
-  // so the category lists don't recompute on every render.
   const allFilesList = useMemo(
     () => getArrayData(filesCountQuery.data?.data),
     [filesCountQuery.data],
   );
-  const allFilesCount = filesCountQuery.data?.data?.total ?? allFilesList.length;
   const folderFileCounts = useMemo(() => buildFolderFileCounts(allFilesList), [allFilesList]);
+
+  const calculatedTotalFromFolders = useMemo(() => {
+    const foldersCount = folders.reduce((sum, f) => {
+      const cnt = f.files_count ?? folderFileCounts[f.id] ?? 0;
+      return sum + cnt;
+    }, 0);
+    const rootCount = allFilesList.filter((f) => f.folder_id === null).length;
+    return foldersCount + rootCount;
+  }, [folders, folderFileCounts, allFilesList]);
+
+  const allFilesCount = useMemo(() => {
+    const backendTotal = filesCountQuery.data?.data?.total;
+    const metaTotal = metaQuery.data?.data?.total_count;
+    return Math.max(
+      backendTotal ?? 0,
+      metaTotal ?? 0,
+      allFilesList.length,
+      files.length,
+      calculatedTotalFromFolders,
+    );
+  }, [filesCountQuery.data, metaQuery.data, allFilesList, files, calculatedTotalFromFolders]);
 
   const allSharedFilesList = useMemo(
     () => getArrayData(sharedFilesCountQuery.data?.data),
     [sharedFilesCountQuery.data],
   );
-  const allSharedFilesCount = sharedFilesCountQuery.data?.data?.total ?? allSharedFilesList.length;
   const sharedFolderFileCounts = useMemo(
     () => buildFolderFileCounts(allSharedFilesList),
     [allSharedFilesList],
   );
+
+  const calculatedSharedTotalFromFolders = useMemo(() => {
+    const foldersCount = sharedFolders.reduce((sum, f) => {
+      const cnt = f.files_count ?? sharedFolderFileCounts[f.id] ?? 0;
+      return sum + cnt;
+    }, 0);
+    const rootCount = allSharedFilesList.filter((f) => f.folder_id === null).length;
+    return foldersCount + rootCount;
+  }, [sharedFolders, sharedFolderFileCounts, allSharedFilesList]);
+
+  const allSharedFilesCount = useMemo(() => {
+    const backendTotal = sharedFilesCountQuery.data?.data?.total;
+    return Math.max(
+      backendTotal ?? 0,
+      allSharedFilesList.length,
+      sharedFiles.length,
+      calculatedSharedTotalFromFolders,
+    );
+  }, [sharedFilesCountQuery.data, allSharedFilesList, sharedFiles, calculatedSharedTotalFromFolders]);
 
   const getFolderIcon = (name: string): string => {
     const n = name.toLowerCase();
@@ -365,53 +225,51 @@ export const useFilesData = (params: IFilesParams) => {
   const categoriesList = useMemo(() => {
     const list: { id: number | "all"; name: string; icon: string; count: number }[] = [];
     list.push({ id: "all" as const, name: "Все файлы", icon: "📁", count: allFilesCount });
-    folders
-      .forEach((f) => {
-        list.push({
-          id: f.id,
-          name: f.name,
-          icon: f.emoji || getFolderIcon(f.name),
-          count: f.files_count ?? folderFileCounts[f.id] ?? 0,
-        });
+    folders.forEach((f) => {
+      list.push({
+        id: f.id,
+        name: f.name,
+        icon: f.emoji || getFolderIcon(f.name),
+        count: f.files_count ?? folderFileCounts[f.id] ?? 0,
       });
+    });
     return list;
   }, [folders, allFilesCount, folderFileCounts]);
 
   const sharedCategoriesList = useMemo(() => {
     const list: { id: number | "all"; name: string; icon: string; count: number }[] = [];
     list.push({ id: "all" as const, name: "Все общие файлы", icon: "🤝", count: allSharedFilesCount });
-    sharedFolders
-      .forEach((f) => {
-        list.push({
-          id: f.id,
-          name: f.name,
-          icon: f.emoji || getFolderIcon(f.name),
-          count: f.files_count ?? sharedFolderFileCounts[f.id] ?? 0,
-        });
+    sharedFolders.forEach((f) => {
+      list.push({
+        id: f.id,
+        name: f.name,
+        icon: f.emoji || getFolderIcon(f.name),
+        count: f.files_count ?? sharedFolderFileCounts[f.id] ?? 0,
       });
+    });
     return list;
   }, [sharedFolders, allSharedFilesCount, sharedFolderFileCounts]);
 
-  const activeCategoryId = useMemo((): number | 'all' => {
+  const activeCategoryId = useMemo((): number | "all" => {
     const actId = params.activeFolderId;
     if (actId === undefined || actId === "all") return "all";
-    // Highlight exactly the folder that is selected. Folders are shown as a
-    // flat list of chips (including subfolders), so each chip must select
-    // itself — resolving to the root ancestor would highlight the wrong chip
-    // when two folders share a name / a subfolder is picked.
     return actId;
   }, [params.activeFolderId]);
 
   const pinnedFiles = useMemo(() => {
     return sortByManualOrder(files.filter((f) => f.is_starred));
-  }, [files, params.sort, params.dir]);
+  }, [files, params.sort, params.dir, manualOrderMap]);
 
   const currentFiles = useMemo(() => {
     const actId = params.activeFolderId;
-    const parentId = actId === undefined || actId === "all" ? null : actId;
-    const filtered = files.filter((f) => (f.folder_id === null && parentId === null) || (f.folder_id !== null && parentId !== null && Number(f.folder_id) === Number(parentId)));
+    if (actId === undefined || actId === "all") {
+      return sortByManualOrder(files);
+    }
+    const filtered = files.filter(
+      (f) => f.folder_id !== null && Number(f.folder_id) === Number(actId),
+    );
     return sortByManualOrder(filtered);
-  }, [files, params.activeFolderId, params.sort, params.dir]);
+  }, [files, params.activeFolderId, params.sort, params.dir, manualOrderMap]);
 
   const currentFolders = useMemo(() => {
     const actId = params.activeFolderId;
@@ -419,8 +277,6 @@ export const useFilesData = (params: IFilesParams) => {
     if (parentId === null) return [];
     return folders.filter((f) => f.parent_id !== null && Number(f.parent_id) === Number(parentId));
   }, [folders, params.activeFolderId]);
-
-
 
   return {
     files,
@@ -452,19 +308,6 @@ export const useFilesData = (params: IFilesParams) => {
     isLoadingSharedFolders: sharedFoldersQuery.isLoading,
     refetchSharedFolders: sharedFoldersQuery.refetch,
 
-    createFolder,
-    updateFolder,
-    deleteFolder,
-    updateFile,
-    deleteFile,
-    uploadFile,
-    reorderFiles,
-
-    inviteToFile,
-    removeFileShare,
-    inviteToFolder,
-    removeFolderShare,
-    bulkShareFiles,
-    bulkDeleteFiles,
+    ...mutations,
   };
 };

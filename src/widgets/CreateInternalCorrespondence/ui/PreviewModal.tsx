@@ -518,11 +518,12 @@ export const PreviewModal = ({
                         {attachments!.map((file) => (
                           <div
                             key={file.id}
-                            className="flex items-center gap-3 px-3 py-2 bg-slate-700/50 border border-slate-600/50 rounded-xl text-xs text-slate-200"
+                            onClick={() => setPreviewAttachment(file)}
+                            className="flex items-center gap-3 px-3 py-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 hover:border-slate-500 rounded-xl text-xs text-slate-200 cursor-pointer transition-all group"
                           >
-                            <Paperclip size={14} className="text-blue-400 flex-shrink-0" />
+                            <Paperclip size={14} className="text-blue-400 flex-shrink-0 group-hover:scale-105 transition-transform" />
                             <div className="min-w-0 flex-1">
-                              <p className="font-semibold truncate text-slate-100" title={file.name}>
+                              <p className="font-semibold truncate text-slate-100 group-hover:text-blue-300 transition-colors" title={file.name}>
                                 {file.name}
                               </p>
                               <p className="text-[10px] text-slate-400">
@@ -531,17 +532,22 @@ export const PreviewModal = ({
                             </div>
                             <button
                               type="button"
-                              onClick={() => setPreviewAttachment(file)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPreviewAttachment(file);
+                              }}
                               title="Просмотр вложения"
                               className="text-slate-400 hover:text-indigo-400 transition-colors flex-shrink-0 cursor-pointer"
                             >
                               <Eye size={14} />
                             </button>
-                            {/* Скачать можно только то, что уже сохранено на бэкенде. */}
                             <If is={!!file.url}>
                               <button
                                 type="button"
-                                onClick={() => downloadAttachment(file)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  downloadAttachment(file);
+                                }}
                                 title="Скачать"
                                 className="text-slate-400 hover:text-blue-400 transition-colors flex-shrink-0 cursor-pointer"
                               >

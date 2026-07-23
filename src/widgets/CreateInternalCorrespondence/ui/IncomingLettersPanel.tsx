@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Plus, X, Check } from "lucide-react";
-import { useGetQuery } from "@shared/lib";
-import { ApiRoutes } from "@shared/api";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
+import { IncomingLetterSelectModal } from "./IncomingLetterSelectModal";
 
 interface IProps {
   isOpen: boolean;
   hideTab?: boolean;
+  openLeft?: boolean;
   onOpen: () => void;
   onClose: () => void;
   attachedLetters: any[];
@@ -21,6 +21,7 @@ interface IProps {
 export const IncomingLettersPanel = ({
   isOpen,
   hideTab,
+  openLeft = true,
   onOpen,
   onClose,
   attachedLetters,
@@ -29,51 +30,25 @@ export const IncomingLettersPanel = ({
   onSaveLetters,
   docId,
 }: IProps) => {
-  const [showSearch, setShowSearch] = useState(false);
-  const [search, setSearch] = useState("");
-
-  const { data: incomingLettersData } = useGetQuery({
-    url: docId ? ApiRoutes.GET_INTERNAL_INCOMING_PICKER : "",
-    useToken: true,
-    options: { enabled: !!docId && showSearch && isOpen },
-    params: { query: search },
-  });
-
-  const availableIncomingLetters =
-    incomingLettersData?.data?.data
-      ?.map((letter: any) => ({
-        id: String(letter.id),
-        subject: letter.subject || "Без темы",
-        regNumber: letter.reg_number
-          ? letter.reg_number.replace(/^[A-Z]+/i, letter.my_prefix || "IN")
-          : "Не указано",
-        date: letter.sent_at || letter.created_at,
-        sender: letter.creator?.full_name || "Не указано",
-      }))
-      .filter(
-        (letter: any) =>
-          (letter.subject.toLowerCase().includes(search.toLowerCase()) ||
-            letter.sender.toLowerCase().includes(search.toLowerCase()) ||
-            letter.regNumber.toLowerCase().includes(search.toLowerCase())) &&
-          !attachedLetters.some((l) => l.id === letter.id)
-      )
-      .slice(0, 15) || [];
+  const [showSelectModal, setShowSelectModal] = useState(false);
 
   return (
     <>
       {!hideTab && (
-        <div className="absolute z-20" style={{ left: -36, top: 10 }}>
+        <div
+          className="absolute z-20"
+          style={openLeft ? { left: -36, top: 10 } : { right: -36, top: 10 }}
+        >
           <motion.button
             onClick={isOpen ? onClose : onOpen}
             className={cn(
-              "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-              isOpen ? "bg-slate-50" : "hover:bg-slate-50"
+              "bg-white border border-slate-200 shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
+              openLeft ? "border-r-0 rounded-l-xl" : "border-l-0 rounded-r-xl",
+              isOpen ? "bg-slate-50" : "hover:bg-slate-50",
             )}
             aria-label="Входящие письма"
           >
-            <span
-              className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-blue-500"
-            />
+            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-blue-500" />
             <span
               style={{
                 writingMode: "vertical-rl",
@@ -93,18 +68,20 @@ export const IncomingLettersPanel = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ x: 12, opacity: 0 }}
+            initial={{ x: openLeft ? 12 : -12, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 12, opacity: 0 }}
+            exit={{ x: openLeft ? 12 : -12, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="absolute top-0 w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl z-30 flex flex-col"
+            className="absolute top-0 w-[320px] bg-white rounded-2xl border border-slate-200 shadow-2xl z-30 flex flex-col"
             style={{
-              right: "calc(100% + 12px)",
+              ...(openLeft
+                ? { right: "calc(100% + 12px)" }
+                : { left: "calc(100% + 12px)" }),
               maxHeight: "var(--icc-panel-max-h, 70vh)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center">
                 <span className="font-semibold text-sm text-slate-800">
                   Входящие письма
@@ -114,23 +91,25 @@ export const IncomingLettersPanel = ({
                 </span>
               </div>
               <button
+                type="button"
                 onClick={onClose}
-                className="hover:bg-slate-100 rounded-lg p-1 transition-colors text-slate-400 hover:text-slate-700"
+                className="hover:bg-slate-100 rounded-lg p-1 transition-colors text-slate-400 hover:text-slate-700 cursor-pointer"
                 aria-label="Закрыть панель входящих писем"
               >
                 <X size={15} />
               </button>
             </div>
 
-            <div className="px-5 py-3 border-b border-slate-100 flex justify-between items-center z-40 relative">
-              <span className="text-xs text-slate-500 font-medium">
+            <div className="px-4 py-2.5 border-b border-slate-100 flex justify-between items-center gap-2 flex-shrink-0">
+              <span className="text-xs text-slate-500 font-medium truncate min-w-0 flex-1">
                 Прикрепленные письма
               </span>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-shrink-0">
                 <If is={attachedLetters.length > 0}>
                   <button
+                    type="button"
                     onClick={onSaveLetters}
-                    className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-lg hover:bg-emerald-100 transition-colors"
+                    className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-lg hover:bg-emerald-100 transition-colors cursor-pointer whitespace-nowrap"
                   >
                     <Check size={12} />
                     <span>Сохранить</span>
@@ -138,70 +117,14 @@ export const IncomingLettersPanel = ({
                 </If>
                 <If is={!!docId}>
                   <button
-                    onClick={() => setShowSearch((v) => !v)}
-                    className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
+                    type="button"
+                    onClick={() => setShowSelectModal(true)}
+                    className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer whitespace-nowrap"
                   >
                     <Plus size={12} />
                     <span>Добавить</span>
                   </button>
                 </If>
-                <AnimatePresence>
-                  {showSearch && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -6, scale: 0.97 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                      className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden w-72"
-                    >
-                      <div className="p-2 border-b border-slate-100">
-                        <input
-                          type="text"
-                          placeholder="Поиск писем..."
-                          value={search}
-                          onChange={(e) => setSearch(e.target.value)}
-                          autoFocus
-                          className="w-full text-sm px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
-                        />
-                      </div>
-                      <div className="max-h-48 overflow-y-auto py-1">
-                        <If is={availableIncomingLetters.length === 0}>
-                          <p className="text-xs text-slate-400 text-center py-4">
-                            Нет доступных писем
-                          </p>
-                        </If>
-                        <If is={availableIncomingLetters.length > 0}>
-                          {availableIncomingLetters.map((letter: any) => (
-                            <button
-                              key={letter.id}
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                onAddLetter(letter);
-                                setShowSearch(false);
-                                setSearch("");
-                              }}
-                              className="w-full flex items-start gap-3 px-3 py-2.5 hover:bg-blue-50 transition-colors text-left"
-                            >
-                              <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-blue-100 text-blue-700">
-                                <Mail size={12} />
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-sm font-semibold text-slate-900 truncate">
-                                  {letter.subject}
-                                </p>
-                                <p className="text-xs text-slate-500 truncate">
-                                  {letter.sender}
-                                </p>
-                                <p className="text-xs text-slate-400 truncate">
-                                  №{letter.regNumber} • {letter.date}
-                                </p>
-                              </div>
-                            </button>
-                          ))}
-                        </If>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
             </div>
 
@@ -237,8 +160,9 @@ export const IncomingLettersPanel = ({
                         </p>
                       </div>
                       <button
+                        type="button"
                         onClick={() => onRemoveLetter(letter.id)}
-                        className="text-slate-300 hover:text-rose-400 transition-colors flex-shrink-0"
+                        className="text-slate-300 hover:text-rose-400 transition-colors flex-shrink-0 cursor-pointer"
                       >
                         <X size={13} />
                       </button>
@@ -250,6 +174,14 @@ export const IncomingLettersPanel = ({
           </motion.div>
         )}
       </AnimatePresence>
+
+      <IncomingLetterSelectModal
+        open={showSelectModal}
+        onClose={() => setShowSelectModal(false)}
+        attachedLetters={attachedLetters}
+        onAddLetter={onAddLetter}
+        docId={docId}
+      />
     </>
   );
 };

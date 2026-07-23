@@ -25,6 +25,8 @@ import {
 	ChevronRight,
 	Calendar,
 	Activity,
+	CornerUpLeft,
+	Forward,
 } from "lucide-react";
 
 import {
@@ -41,7 +43,101 @@ import {
 	Count,
 	If,
 	EmptyState,
+	Tooltip,
 } from "@shared/ui";
+import { cn } from "@shared/lib";
+import { getLetterTypeName } from "@widgets/RegistryTable/lib/getCorrespondenceLinkTypeLabel";
+
+const getLinkTypeInfo = (data: any) => {
+  const linkType = data?.link_type || data?.relation_type;
+  if (linkType === "reply") {
+    return {
+      isReply: true,
+      label: data?.relation_label || "Ответное письмо",
+      borderColor: "border-l-4! border-l-emerald-500!",
+      badgeClass: "bg-emerald-50 text-emerald-700 border border-emerald-200/80 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800",
+      icon: <CornerUpLeft size={11} className="flex-shrink-0" />,
+    };
+  }
+  if (linkType === "forward") {
+    return {
+      isForward: true,
+      label: data?.relation_label || "Пересланное письмо",
+      borderColor: "border-l-4! border-l-purple-500!",
+      badgeClass: "bg-purple-50 text-purple-700 border border-purple-200/80 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800",
+      icon: <Forward size={11} className="flex-shrink-0" />,
+    };
+  }
+  return null;
+};
+
+export const getEffectiveStatusData = (doc: any, statusConfig: Record<string, any>) => {
+	if (!doc || !statusConfig) return statusConfig?.default || {};
+
+	const letterStatusRaw = (
+		doc.letter_status ||
+		doc.status ||
+		doc.status_code ||
+		""
+	).toString().toLowerCase();
+
+	const isSent =
+		letterStatusRaw === "sent" ||
+		letterStatusRaw === "отправлено" ||
+		letterStatusRaw === "sent_out";
+
+	if (isSent) {
+		return statusConfig.sent || statusConfig.default || {};
+	}
+
+	const rawMyStatus = (
+		typeof doc.my_status === "string"
+			? doc.my_status
+			: doc.my_status?.key ||
+			  doc.my_status?.primary ||
+			  doc.my_status?.status ||
+			  doc.my_status_code ||
+			  doc.user_status ||
+			  ""
+	).toString().toLowerCase();
+
+	let effectiveKey = "draft";
+
+	if (
+		rawMyStatus.includes("author") ||
+		rawMyStatus.includes("автор") ||
+		rawMyStatus.includes("draft") ||
+		rawMyStatus.includes("черновик")
+	) {
+		effectiveKey = "draft";
+	} else if (rawMyStatus.includes("approve") || rawMyStatus.includes("согласован")) {
+		if (
+			rawMyStatus === "approved" ||
+			rawMyStatus === "согласован" ||
+			rawMyStatus === "согласовано"
+		) {
+			effectiveKey = "approved";
+		} else {
+			effectiveKey = "to_approve";
+		}
+	} else if (rawMyStatus.includes("sign") || rawMyStatus.includes("подпис")) {
+		if (
+			rawMyStatus === "signed" ||
+			rawMyStatus === "подписан" ||
+			rawMyStatus === "подписано"
+		) {
+			effectiveKey = "signed";
+		} else {
+			effectiveKey = "to_sign";
+		}
+	} else if (rawMyStatus && statusConfig[rawMyStatus]) {
+		effectiveKey = rawMyStatus;
+	} else if (letterStatusRaw && statusConfig[letterStatusRaw]) {
+		effectiveKey = letterStatusRaw;
+	}
+
+	return statusConfig[effectiveKey] || statusConfig.draft || statusConfig.default || {};
+};
 
 import { useLocation } from "react-router";
 import { tokenControl } from "@shared/lib";
@@ -408,8 +504,10 @@ export const RegistryLayout = ({
 									/>
 								) : documents && documents.length > 0 ? (
 									documents?.map((doc: any, idx: number) => {
-										const statusData =
-											statusConfig[doc.status] || statusConfig.default;
+										const statusData = getEffectiveStatusData(
+											doc,
+											statusConfig,
+										);
 										const props = {
 											key: doc.id,
 											data: doc,
@@ -532,6 +630,7 @@ export const DocumentCard = ({
 	const actionItems = fieldConfig?.getActions
 		? fieldConfig.getActions(data)
 		: [];
+	const linkInfo = getLinkTypeInfo(data);
 
 	return (
 		<motion.div
@@ -540,24 +639,27 @@ export const DocumentCard = ({
 			animate={{ opacity: 1, y: 0 }}
 			whileHover={{ y: -4, boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.15)" }}
 			onClick={onClick}
-			className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden hover:border-blue-300 dark:hover:border-blue-500 transition-all cursor-pointer group"
+			className={cn(
+				"bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden hover:border-blue-300 dark:hover:border-blue-500 transition-all cursor-pointer group flex flex-col justify-between relative",
+				linkInfo?.borderColor,
+			)}
 		>
 			{/* Header */}
 			<div
 				className={`p-3 bg-gradient-to-r ${
-					activeStatusData?.gradient ||
 					statusData?.gradient ||
+					activeStatusData?.gradient ||
 					"from-gray-100 to-gray-200"
 				} flex justify-between items-center`}
 			>
 				<div className="flex items-center gap-2 text-white">
 					<div className="p-1.5 bg-white/20 rounded-md backdrop-blur-sm">
-						{statusData.icon}
+						{statusData?.icon || activeStatusData?.icon}
 					</div>
 					<div>
 						<div className="text-xs font-medium opacity-90">ID: {data.id}</div>
 						<div className="text-white font-semibold text-sm">
-							{activeStatusData?.label || statusData?.label}
+							{statusData?.label || activeStatusData?.label}
 						</div>
 					</div>
 				</div>
@@ -589,11 +691,21 @@ export const DocumentCard = ({
 			{/* Body */}
 			<div className="p-4 space-y-3">
 				<div>
-					<div className="flex items-center gap-1.5 mb-1 text-gray-400 dark:text-slate-500">
-						<FileType size={12} />
-						<span className="text-[10px] uppercase font-bold tracking-wider">
-							Тема
-						</span>
+					<div className="flex items-center justify-between gap-1.5 mb-1 text-gray-400 dark:text-slate-500">
+						<div className="flex items-center gap-1">
+							<FileType size={12} />
+							<span className="text-[10px] uppercase font-bold tracking-wider">
+								Тема
+							</span>
+						</div>
+						<If is={!!linkInfo}>
+							<Tooltip title={linkInfo?.label}>
+								<span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold", linkInfo?.badgeClass)}>
+									{linkInfo?.icon}
+									<span>{linkInfo?.isReply ? "Ответное" : "Переслано"}</span>
+								</span>
+							</Tooltip>
+						</If>
 					</div>
 					<p className="text-sm font-semibold text-gray-800 dark:text-slate-100 line-clamp-2 leading-tight">
 						{data.subject}
@@ -695,6 +807,7 @@ export const DocumentListItem = ({
 	const actionItems = fieldConfig?.getActions
 		? fieldConfig.getActions(data)
 		: [];
+	const linkInfo = getLinkTypeInfo(data);
 
 	return (
 		<motion.div
@@ -707,7 +820,10 @@ export const DocumentListItem = ({
 			}}
 			whileHover={{ x: 4, boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.1)" }}
 			onClick={onClick}
-			className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 transition-all duration-300 cursor-pointer mb-2"
+			className={cn(
+				"bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 transition-all duration-300 cursor-pointer mb-2 overflow-hidden",
+				linkInfo?.borderColor,
+			)}
 		>
 			<div className="p-4">
 				<div className="flex items-center gap-4">
@@ -716,41 +832,72 @@ export const DocumentListItem = ({
 						animate={{ rotate: [0, 5, -5, 0] }}
 						transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
 						className={`flex-shrink-0 p-2.5 rounded-lg bg-gradient-to-r ${
-							activeStatusData?.gradient ||
 							statusData?.gradient ||
+							activeStatusData?.gradient ||
 							"from-gray-100 to-gray-200"
 						}`}
 					>
-						{statusData?.icon && (
-							<div className="text-white">{statusData.icon}</div>
+						{(statusData?.icon || activeStatusData?.icon) && (
+							<div className="text-white">{statusData?.icon || activeStatusData?.icon}</div>
 						)}
 					</motion.div>
 
 					{/* Document Info Grid */}
-					<div className="flex-1 grid grid-cols-12 gap-4 items-center min-w-0">
+					<div className="flex-1 flex items-center gap-4 min-w-0">
 						{/* ID & Date */}
-						<div className="col-span-2">
-							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">№ {data.id}</div>
-							<div className="text-xs font-medium text-gray-700 dark:text-slate-300">
+						<div className="w-[76px] flex-shrink-0">
+							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5 whitespace-nowrap">
+								№ {data.id}
+							</div>
+							<div className="text-xs font-medium text-gray-700 dark:text-slate-300 whitespace-nowrap">
 								{new Date(data.created_at).toLocaleDateString("ru-RU")}
 							</div>
 						</div>
 
 						{/* Subject */}
-						<div className="col-span-4 min-w-0">
-							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">Тема</div>
-							<div className="text-sm font-semibold text-gray-900 dark:text-slate-100 truncate">
+						<div className="flex-1 min-w-0">
+							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5 flex items-center gap-1.5 whitespace-nowrap">
+								<span>Тема</span>
+								<If is={!!linkInfo}>
+									<Tooltip title={linkInfo?.label}>
+										<span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold flex-shrink-0", linkInfo?.badgeClass)}>
+											{linkInfo?.icon}
+											<span>{linkInfo?.isReply ? "Ответное" : "Переслано"}</span>
+										</span>
+									</Tooltip>
+								</If>
+							</div>
+							<div className="text-sm font-semibold text-gray-900 dark:text-slate-100 truncate" title={data.subject}>
 								{data.subject}
 							</div>
 						</div>
 
+						{/* Тип письма (сразу после столбца Тема — только для Входящих) */}
+						<If is={!!fieldConfig?.isIncoming}>
+							<div className="w-[112px] flex-shrink-0 overflow-hidden">
+								<div className="flex items-center gap-1 mb-0.5 text-gray-400 dark:text-slate-500 whitespace-nowrap">
+									<CornerUpLeft size={10} className="flex-shrink-0" />
+									<span className="text-xs text-gray-500 dark:text-slate-400 whitespace-nowrap">
+										Тип письма
+									</span>
+								</div>
+								<div
+									className={`text-xs font-mono font-semibold px-2 py-1 rounded truncate ${getBadgeStyles(
+										"purple",
+									)}`}
+								>
+									{getLetterTypeName(data)}
+								</div>
+							</div>
+						</If>
+
 						{/* DYNAMIC PRIMARY */}
 						{fieldConfig?.primary && (
-							<div className="col-span-3 min-w-0">
-								<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">
+							<div className="flex-1 min-w-0">
+								<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5 whitespace-nowrap">
 									{fieldConfig.primary.label}
 								</div>
-								<div className="text-sm text-gray-900 dark:text-slate-100 font-medium truncate">
+								<div className="text-sm text-gray-900 dark:text-slate-100 font-medium truncate" title={String(fieldConfig.primary.render(data))}>
 									{fieldConfig.primary.render(data)}
 								</div>
 							</div>
@@ -758,8 +905,8 @@ export const DocumentListItem = ({
 
 						{/* DYNAMIC SECONDARY */}
 						{fieldConfig?.secondary && (
-							<div className="col-span-3 min-w-0">
-								<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">
+							<div className="flex-1 min-w-0">
+								<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5 whitespace-nowrap">
 									{fieldConfig.secondary.label}
 								</div>
 								<div className="text-sm text-gray-900 dark:text-slate-100 font-medium truncate">
@@ -777,10 +924,10 @@ export const DocumentListItem = ({
 						{fieldConfig?.badges?.map((badge: any, i: number) => {
 							const style = getBadgeStyles(badge.color);
 							return (
-								<div key={`badge-${i}`} className="min-w-[120px]">
-									<div className="flex items-center gap-1 mb-0.5 text-gray-400 dark:text-slate-500">
+								<div key={`badge-${i}`} className="w-[112px] flex-shrink-0 overflow-hidden">
+									<div className="flex items-center gap-1 mb-0.5 text-gray-400 dark:text-slate-500 whitespace-nowrap">
 										{badge.icon}
-										<span className="text-xs text-gray-500 dark:text-slate-400">
+										<span className="text-xs text-gray-500 dark:text-slate-400 truncate">
 											{badge.label}
 										</span>
 									</div>
@@ -796,10 +943,10 @@ export const DocumentListItem = ({
 						{/* Колонки-списки пользователей (Ответили / Переслали /
 						    Ознакомились) — равномерно, каждая открывает окно по клику. */}
 						{fieldConfig?.people?.map((col: any) => (
-							<div key={col.key} className="min-w-[130px]">
-								<div className="flex items-center gap-1 mb-0.5 text-gray-400 dark:text-slate-500">
+							<div key={col.key} className="w-[112px] flex-shrink-0 overflow-hidden">
+								<div className="flex items-center gap-1 mb-0.5 text-gray-400 dark:text-slate-500 whitespace-nowrap">
 									{col.icon}
-									<span className="text-xs text-gray-500 dark:text-slate-400">
+									<span className="text-xs text-gray-500 dark:text-slate-400 truncate">
 										{col.label}
 									</span>
 								</div>
@@ -813,18 +960,18 @@ export const DocumentListItem = ({
 							</div>
 						))}
 
-						{/* Статус письма — в стиле столбца «Мой статус» */}
-						<div className="min-w-[120px]">
-							<div className="flex items-center gap-1 mb-0.5">
-								<Activity size={12} className="text-gray-400 dark:text-slate-500" />
-								<span className="text-xs text-gray-500 dark:text-slate-400">Статус письма</span>
+						{/* Статус письма — строго "Черновик" или "Отправлено" */}
+						<div className="w-[112px] flex-shrink-0 overflow-hidden">
+							<div className="flex items-center gap-1 mb-0.5 whitespace-nowrap">
+								<Activity size={12} className="text-gray-400 dark:text-slate-500 flex-shrink-0" />
+								<span className="text-xs text-gray-500 dark:text-slate-400 truncate">Статус письма</span>
 							</div>
 							<div
 								className={`text-xs font-mono font-semibold px-2 py-1 rounded truncate ${getBadgeStyles(
-									getStatusBadgeColor(data.status),
+									(data.status === "sent" || data.status === "sent_out" || data.status === "отправлено") ? "emerald" : "blue",
 								)}`}
 							>
-								{statusData?.label}
+								{(data.status === "sent" || data.status === "sent_out" || data.status === "отправлено") ? "Отправлено" : "Черновик"}
 							</div>
 						</div>
 
@@ -1008,7 +1155,7 @@ const FilterDrawer = ({
 
 						{/* Filter Controls (ANTD + DYNAMIC) */}
 						<ConfigProvider theme={glassTheme} locale={locale}>
-							<div className="relative p-6 space-y-4 flex-1">
+							<div className="relative p-6 space-y-4 flex-1 overflow-y-auto min-h-0">
 								<motion.div
 									className="space-y-4"
 									initial="hidden"

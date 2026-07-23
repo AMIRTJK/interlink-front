@@ -104,6 +104,7 @@ export const useCorrespondenseOutgoingColumns = (
         const info = getCorrespondenceLinkTypeLabel(
           linkType as any,
           record?.relation_label,
+          record,
         );
         if (!info) return "—";
         return (
