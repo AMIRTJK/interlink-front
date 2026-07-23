@@ -1072,26 +1072,46 @@ export const CreateInternalCorrespondence = ({
   // Над редактором тащат файл — показываем подсказку-оверлей для импорта
   const [isDraggingWord, setIsDraggingWord] = useState(false);
   // Режим просмотра входящего письма включён по умолчанию, когда страница
-  // открыта через «Ответить»/«Перенаправить» (есть исходное письмо).
   const [showOriginalLetterSides, setShowOriginalLetterSides] = useState(
-    !!(composeMode && sourceLetter),
+    !!(panelMode && panelSource),
   );
-  // Страницы исходного входящего письма для левого A4-холста. Разбивка та же,
-  // что на странице просмотра входящего (paginateHtml), поэтому письмо
-  // выглядит 1-в-1 с оригиналом. Пагинация — в закреплённой панели над холстами.
+  const [showVersionCompareSides, setShowVersionCompareSides] = useState(false);
+
+  const toggleOriginalLetterSides = (checked: boolean) => {
+    setShowOriginalLetterSides(checked);
+    if (checked) {
+      setShowVersionCompareSides(false);
+    }
+  };
+
+  const toggleVersionCompareSides = (checked: boolean) => {
+    setShowVersionCompareSides(checked);
+    if (checked) {
+      setShowOriginalLetterSides(false);
+    }
+  };
+
+  useEffect(() => {
+    if (panelMode && panelSource) {
+      setShowOriginalLetterSides((prev) => {
+        if (prev === false) return false;
+        setShowVersionCompareSides(false);
+        return true;
+      });
+    }
+  }, [panelMode, panelSource]);
+
   const [originalPage, setOriginalPage] = useState(0);
   const originalSheets = useMemo((): { pages: string[]; stamp: StampInfo } => {
-    if (!composeMode || !sourceLetter) return { pages: [], stamp: null };
-    const res = paginateHtml(sourceLetter.body, 14);
+    if (!panelMode || !panelSource || !panelSource.body) return { pages: [], stamp: null };
+    const res = paginateHtml(panelSource.body, 14);
     const pages = [...res.pages];
-    // Страница со штампом ЭЦП должна существовать, даже если на ней нет текста.
     if (res.stamp) while (pages.length <= res.stamp.pageIndex) pages.push("");
     return { pages, stamp: res.stamp };
-  }, [composeMode, sourceLetter]);
+  }, [panelMode, panelSource]);
   const originalTotal = Math.max(originalSheets.pages.length, 1);
   const originalCurrent = Math.min(originalPage, originalTotal - 1);
 
-  const [showVersionCompareSides, setShowVersionCompareSides] = useState(false);
   const [versionComparePage, setVersionComparePage] = useState(0);
 
   const composeAppliedRef = useRef(false);
@@ -1613,6 +1633,7 @@ export const CreateInternalCorrespondence = ({
         if (newId)
           navigate(`/modules/correspondence/internal/outgoing/${newId}`, {
             replace: true,
+            state: location.state,
           });
       },
     },
@@ -5736,14 +5757,14 @@ export const CreateInternalCorrespondence = ({
                     </label>
                   </>
                 )}
-                {composeMode && sourceLetter && (
+                {panelMode && panelSource && (
                   <>
                     <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                     <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
                       <input
                         type="checkbox"
                         checked={showOriginalLetterSides}
-                        onChange={(e) => setShowOriginalLetterSides(e.target.checked)}
+                        onChange={(e) => toggleOriginalLetterSides(e.target.checked)}
                         className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                       />
                       <span>Режим просмотра входящего письма</span>
@@ -5756,7 +5777,7 @@ export const CreateInternalCorrespondence = ({
                     <input
                       type="checkbox"
                       checked={showVersionCompareSides}
-                      onChange={(e) => setShowVersionCompareSides(e.target.checked)}
+                      onChange={(e) => toggleVersionCompareSides(e.target.checked)}
                       className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                     />
                     <span>Режим просмотра истории версий</span>
@@ -5848,20 +5869,20 @@ export const CreateInternalCorrespondence = ({
               {/* Закреплённая панель пагинации входящего письма — на всю ширину
                   блока, под разделом с кнопками импорта. При прокрутке страницы
                   прилипает к верхнему краю окна и всегда остаётся доступной. */}
-              {showOriginalLetterSides && composeMode && sourceLetter && (
+              {showOriginalLetterSides && panelMode && panelSource && (
                 <div className="flex items-center justify-between gap-4 px-4 py-2 bg-white border-b border-slate-200 shadow-sm font-sans">
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 shrink-0">
                     <Eye size={14} className="text-amber-500" />
                     <span>Входящее письмо — только просмотр</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {sourceLetter.id != null && (
+                    {panelSource.id != null && (
                       <>
                         <button
                           type="button"
                           onClick={() =>
                             window.open(
-                              `/modules/correspondence/internal/incoming/${sourceLetter.id}`,
+                              `/modules/correspondence/internal/incoming/${panelSource.id}`,
                               "_blank",
                               "noopener,noreferrer",
                             )
@@ -5974,7 +5995,7 @@ export const CreateInternalCorrespondence = ({
                     </div>
                   </If>
 
-                  <If is={Boolean(showOriginalLetterSides && composeMode && sourceLetter)}>
+                  <If is={Boolean(showOriginalLetterSides && panelMode && panelSource)}>
                     <div ref={originalCanvasWrapRef} className="shrink-0 order-2">
                       <OriginalLetterCanvas
                         sheets={originalSheets.pages}
