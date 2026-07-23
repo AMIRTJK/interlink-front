@@ -577,19 +577,19 @@ export const DocumentCard = ({
 			{/* Header */}
 			<div
 				className={`p-3 bg-gradient-to-r ${
-					activeStatusData?.gradient ||
 					statusData?.gradient ||
+					activeStatusData?.gradient ||
 					"from-gray-100 to-gray-200"
 				} flex justify-between items-center`}
 			>
 				<div className="flex items-center gap-2 text-white">
 					<div className="p-1.5 bg-white/20 rounded-md backdrop-blur-sm">
-						{statusData.icon}
+						{statusData?.icon || activeStatusData?.icon}
 					</div>
 					<div>
 						<div className="text-xs font-medium opacity-90">ID: {data.id}</div>
 						<div className="text-white font-semibold text-sm">
-							{activeStatusData?.label || statusData?.label}
+							{statusData?.label || activeStatusData?.label}
 						</div>
 					</div>
 				</div>
@@ -762,13 +762,13 @@ export const DocumentListItem = ({
 						animate={{ rotate: [0, 5, -5, 0] }}
 						transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
 						className={`flex-shrink-0 p-2.5 rounded-lg bg-gradient-to-r ${
-							activeStatusData?.gradient ||
 							statusData?.gradient ||
+							activeStatusData?.gradient ||
 							"from-gray-100 to-gray-200"
 						}`}
 					>
-						{statusData?.icon && (
-							<div className="text-white">{statusData.icon}</div>
+						{(statusData?.icon || activeStatusData?.icon) && (
+							<div className="text-white">{statusData?.icon || activeStatusData?.icon}</div>
 						)}
 					</motion.div>
 
