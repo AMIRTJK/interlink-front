@@ -5970,25 +5970,14 @@ export const CreateInternalCorrespondence = ({
                   </span>
                 </button>
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
-                <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
-                  <input
-                    type="checkbox"
-                    checked={rulerEnabled}
-                    onChange={(e) => setRulerEnabled(e.target.checked)}
-                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                  />
-                  <span>Линейка</span>
-                </label>
                 {!isReadOnly && (
                   <>
-                    <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                     <button
                       onMouseDown={(e) => {
                         e.preventDefault();
                         if (!importingWord) wordInputRef.current?.click();
                       }}
                       disabled={importingWord}
-                      title="Импортировать документ Word (.docx) с сохранением форматирования"
                       className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-colors border flex-shrink-0 bg-white border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       <FileType size={14} />
@@ -6005,6 +5994,34 @@ export const CreateInternalCorrespondence = ({
                     />
                   </>
                 )}
+                <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
+                <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 mr-2 ml-1">
+                  <input
+                    type="checkbox"
+                    checked={rulerEnabled}
+                    onChange={(e) => setRulerEnabled(e.target.checked)}
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span>Линейка</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 mr-2 ml-1">
+                  <input
+                    type="checkbox"
+                    checked={false}
+                    onChange={() => toast.info("Функционал «Сетка» находится в разработке")}
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span>Сетка</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
+                  <input
+                    type="checkbox"
+                    checked={false}
+                    onChange={() => toast.info("Функционал «Область навигации» находится в разработке")}
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span>Область навигации</span>
+                </label>
                 {!!id && (
                   <>
                     <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
