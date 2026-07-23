@@ -46,6 +46,7 @@ import {
 	Tooltip,
 } from "@shared/ui";
 import { cn } from "@shared/lib";
+import { getLetterTypeName } from "@widgets/RegistryTable/lib/getCorrespondenceLinkTypeLabel";
 
 const getLinkTypeInfo = (data: any) => {
   const linkType = data?.link_type || data?.relation_type;
@@ -772,42 +773,61 @@ export const DocumentListItem = ({
 					</motion.div>
 
 					{/* Document Info Grid */}
-					<div className="flex-1 grid grid-cols-12 gap-4 items-center min-w-0">
+					<div className="flex-1 flex items-center gap-4 min-w-0">
 						{/* ID & Date */}
-						<div className="col-span-2">
-							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5 flex items-center gap-1">
-								<span>№ {data.id}</span>
+						<div className="w-[76px] flex-shrink-0">
+							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5 whitespace-nowrap">
+								№ {data.id}
 							</div>
-							<div className="text-xs font-medium text-gray-700 dark:text-slate-300">
+							<div className="text-xs font-medium text-gray-700 dark:text-slate-300 whitespace-nowrap">
 								{new Date(data.created_at).toLocaleDateString("ru-RU")}
 							</div>
 						</div>
 
 						{/* Subject */}
-						<div className="col-span-4 min-w-0">
-							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5 flex items-center gap-1.5">
+						<div className="flex-1 min-w-0">
+							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5 flex items-center gap-1.5 whitespace-nowrap">
 								<span>Тема</span>
 								<If is={!!linkInfo}>
 									<Tooltip title={linkInfo?.label}>
-										<span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold", linkInfo?.badgeClass)}>
+										<span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold flex-shrink-0", linkInfo?.badgeClass)}>
 											{linkInfo?.icon}
 											<span>{linkInfo?.isReply ? "Ответное" : "Переслано"}</span>
 										</span>
 									</Tooltip>
 								</If>
 							</div>
-							<div className="text-sm font-semibold text-gray-900 dark:text-slate-100 truncate">
+							<div className="text-sm font-semibold text-gray-900 dark:text-slate-100 truncate" title={data.subject}>
 								{data.subject}
 							</div>
 						</div>
 
+						{/* Тип письма (сразу после столбца Тема — только для Входящих) */}
+						<If is={!!fieldConfig?.isIncoming}>
+							<div className="w-[112px] flex-shrink-0 overflow-hidden">
+								<div className="flex items-center gap-1 mb-0.5 text-gray-400 dark:text-slate-500 whitespace-nowrap">
+									<CornerUpLeft size={10} className="flex-shrink-0" />
+									<span className="text-xs text-gray-500 dark:text-slate-400 whitespace-nowrap">
+										Тип письма
+									</span>
+								</div>
+								<div
+									className={`text-xs font-mono font-semibold px-2 py-1 rounded truncate ${getBadgeStyles(
+										"purple",
+									)}`}
+								>
+									{getLetterTypeName(data)}
+								</div>
+							</div>
+						</If>
+
 						{/* DYNAMIC PRIMARY */}
 						{fieldConfig?.primary && (
-							<div className="col-span-3 min-w-0">
-								<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">
+							<div className="flex-1 min-w-0">
+								<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5 whitespace-nowrap">
 									{fieldConfig.primary.label}
 								</div>
-								<div className="text-sm text-gray-900 dark:text-slate-100 font-medium truncate">
+								<div className="text-sm text-gray-900 dark:text-slate-100 font-medium truncate" title={String(fieldConfig.primary.render(data))}>
 									{fieldConfig.primary.render(data)}
 								</div>
 							</div>
@@ -815,8 +835,8 @@ export const DocumentListItem = ({
 
 						{/* DYNAMIC SECONDARY */}
 						{fieldConfig?.secondary && (
-							<div className="col-span-3 min-w-0">
-								<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">
+							<div className="flex-1 min-w-0">
+								<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5 whitespace-nowrap">
 									{fieldConfig.secondary.label}
 								</div>
 								<div className="text-sm text-gray-900 dark:text-slate-100 font-medium truncate">
@@ -834,10 +854,10 @@ export const DocumentListItem = ({
 						{fieldConfig?.badges?.map((badge: any, i: number) => {
 							const style = getBadgeStyles(badge.color);
 							return (
-								<div key={`badge-${i}`} className="min-w-[120px]">
-									<div className="flex items-center gap-1 mb-0.5 text-gray-400 dark:text-slate-500">
+								<div key={`badge-${i}`} className="w-[112px] flex-shrink-0 overflow-hidden">
+									<div className="flex items-center gap-1 mb-0.5 text-gray-400 dark:text-slate-500 whitespace-nowrap">
 										{badge.icon}
-										<span className="text-xs text-gray-500 dark:text-slate-400">
+										<span className="text-xs text-gray-500 dark:text-slate-400 truncate">
 											{badge.label}
 										</span>
 									</div>
@@ -853,10 +873,10 @@ export const DocumentListItem = ({
 						{/* Колонки-списки пользователей (Ответили / Переслали /
 						    Ознакомились) — равномерно, каждая открывает окно по клику. */}
 						{fieldConfig?.people?.map((col: any) => (
-							<div key={col.key} className="min-w-[130px]">
-								<div className="flex items-center gap-1 mb-0.5 text-gray-400 dark:text-slate-500">
+							<div key={col.key} className="w-[112px] flex-shrink-0 overflow-hidden">
+								<div className="flex items-center gap-1 mb-0.5 text-gray-400 dark:text-slate-500 whitespace-nowrap">
 									{col.icon}
-									<span className="text-xs text-gray-500 dark:text-slate-400">
+									<span className="text-xs text-gray-500 dark:text-slate-400 truncate">
 										{col.label}
 									</span>
 								</div>
@@ -871,10 +891,10 @@ export const DocumentListItem = ({
 						))}
 
 						{/* Статус письма — в стиле столбца «Мой статус» */}
-						<div className="min-w-[120px]">
-							<div className="flex items-center gap-1 mb-0.5">
-								<Activity size={12} className="text-gray-400 dark:text-slate-500" />
-								<span className="text-xs text-gray-500 dark:text-slate-400">Статус письма</span>
+						<div className="w-[112px] flex-shrink-0 overflow-hidden">
+							<div className="flex items-center gap-1 mb-0.5 whitespace-nowrap">
+								<Activity size={12} className="text-gray-400 dark:text-slate-500 flex-shrink-0" />
+								<span className="text-xs text-gray-500 dark:text-slate-400 truncate">Статус письма</span>
 							</div>
 							<div
 								className={`text-xs font-mono font-semibold px-2 py-1 rounded truncate ${getBadgeStyles(

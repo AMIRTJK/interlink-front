@@ -20,6 +20,8 @@ import { RegistryConfig } from "../types";
 import { getIncomingFilters } from "../filters.config";
 import { RecipientsViewer } from "@widgets/NewRegistry/ui";
 
+import { getLetterTypeName } from "@widgets/RegistryTable/lib/getCorrespondenceLinkTypeLabel";
+
 export const useIncomingConfig = (type: string): RegistryConfig => {
   const isInternal = type.includes("internal");
 
@@ -69,6 +71,7 @@ export const useIncomingConfig = (type: string): RegistryConfig => {
   // --- CONFIGURATION ---
 
   return {
+    isIncoming: type.includes("incoming"),
     primary: {
       label: "Отправитель",
       icon: <Building2 size={12} />,
