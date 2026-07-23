@@ -25,6 +25,8 @@ import {
 	ChevronRight,
 	Calendar,
 	Activity,
+	CornerUpLeft,
+	Forward,
 } from "lucide-react";
 
 import {
@@ -41,7 +43,32 @@ import {
 	Count,
 	If,
 	EmptyState,
+	Tooltip,
 } from "@shared/ui";
+import { cn } from "@shared/lib";
+
+const getLinkTypeInfo = (data: any) => {
+  const linkType = data?.link_type || data?.relation_type;
+  if (linkType === "reply") {
+    return {
+      isReply: true,
+      label: data?.relation_label || "Ответное письмо",
+      borderColor: "border-l-4! border-l-emerald-500!",
+      badgeClass: "bg-emerald-50 text-emerald-700 border border-emerald-200/80 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800",
+      icon: <CornerUpLeft size={11} className="flex-shrink-0" />,
+    };
+  }
+  if (linkType === "forward") {
+    return {
+      isForward: true,
+      label: data?.relation_label || "Пересланное письмо",
+      borderColor: "border-l-4! border-l-purple-500!",
+      badgeClass: "bg-purple-50 text-purple-700 border border-purple-200/80 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800",
+      icon: <Forward size={11} className="flex-shrink-0" />,
+    };
+  }
+  return null;
+};
 
 import { useLocation } from "react-router";
 import { tokenControl } from "@shared/lib";
@@ -532,6 +559,7 @@ export const DocumentCard = ({
 	const actionItems = fieldConfig?.getActions
 		? fieldConfig.getActions(data)
 		: [];
+	const linkInfo = getLinkTypeInfo(data);
 
 	return (
 		<motion.div
@@ -540,7 +568,10 @@ export const DocumentCard = ({
 			animate={{ opacity: 1, y: 0 }}
 			whileHover={{ y: -4, boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.15)" }}
 			onClick={onClick}
-			className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden hover:border-blue-300 dark:hover:border-blue-500 transition-all cursor-pointer group"
+			className={cn(
+				"bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden hover:border-blue-300 dark:hover:border-blue-500 transition-all cursor-pointer group flex flex-col justify-between relative",
+				linkInfo?.borderColor,
+			)}
 		>
 			{/* Header */}
 			<div
@@ -589,11 +620,21 @@ export const DocumentCard = ({
 			{/* Body */}
 			<div className="p-4 space-y-3">
 				<div>
-					<div className="flex items-center gap-1.5 mb-1 text-gray-400 dark:text-slate-500">
-						<FileType size={12} />
-						<span className="text-[10px] uppercase font-bold tracking-wider">
-							Тема
-						</span>
+					<div className="flex items-center justify-between gap-1.5 mb-1 text-gray-400 dark:text-slate-500">
+						<div className="flex items-center gap-1">
+							<FileType size={12} />
+							<span className="text-[10px] uppercase font-bold tracking-wider">
+								Тема
+							</span>
+						</div>
+						<If is={!!linkInfo}>
+							<Tooltip title={linkInfo?.label}>
+								<span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold", linkInfo?.badgeClass)}>
+									{linkInfo?.icon}
+									<span>{linkInfo?.isReply ? "Ответное" : "Переслано"}</span>
+								</span>
+							</Tooltip>
+						</If>
 					</div>
 					<p className="text-sm font-semibold text-gray-800 dark:text-slate-100 line-clamp-2 leading-tight">
 						{data.subject}
@@ -695,6 +736,7 @@ export const DocumentListItem = ({
 	const actionItems = fieldConfig?.getActions
 		? fieldConfig.getActions(data)
 		: [];
+	const linkInfo = getLinkTypeInfo(data);
 
 	return (
 		<motion.div
@@ -707,7 +749,10 @@ export const DocumentListItem = ({
 			}}
 			whileHover={{ x: 4, boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.1)" }}
 			onClick={onClick}
-			className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 transition-all duration-300 cursor-pointer mb-2"
+			className={cn(
+				"bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 transition-all duration-300 cursor-pointer mb-2 overflow-hidden",
+				linkInfo?.borderColor,
+			)}
 		>
 			<div className="p-4">
 				<div className="flex items-center gap-4">
@@ -730,7 +775,9 @@ export const DocumentListItem = ({
 					<div className="flex-1 grid grid-cols-12 gap-4 items-center min-w-0">
 						{/* ID & Date */}
 						<div className="col-span-2">
-							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">№ {data.id}</div>
+							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5 flex items-center gap-1">
+								<span>№ {data.id}</span>
+							</div>
 							<div className="text-xs font-medium text-gray-700 dark:text-slate-300">
 								{new Date(data.created_at).toLocaleDateString("ru-RU")}
 							</div>
@@ -738,7 +785,17 @@ export const DocumentListItem = ({
 
 						{/* Subject */}
 						<div className="col-span-4 min-w-0">
-							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">Тема</div>
+							<div className="text-xs text-gray-500 dark:text-slate-400 mb-0.5 flex items-center gap-1.5">
+								<span>Тема</span>
+								<If is={!!linkInfo}>
+									<Tooltip title={linkInfo?.label}>
+										<span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold", linkInfo?.badgeClass)}>
+											{linkInfo?.icon}
+											<span>{linkInfo?.isReply ? "Ответное" : "Переслано"}</span>
+										</span>
+									</Tooltip>
+								</If>
+							</div>
 							<div className="text-sm font-semibold text-gray-900 dark:text-slate-100 truncate">
 								{data.subject}
 							</div>
