@@ -40,6 +40,17 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
     item.recipients?.[0]?.user?.full_name;
   const isUnread = Boolean(item.is_unread);
 
+  const countFromItem =
+    item.structure_count ??
+    item.events_count ??
+    item.timeline_count ??
+    item.history_count;
+
+  const displayCount =
+    responseData?.data?.timeline != null
+      ? responseData.data.timeline.length
+      : countFromItem;
+
   return (
     <motion.div
       layout
@@ -123,8 +134,8 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
             <If is={isLoading}>
               <Loader2 size={12} className="animate-spin text-blue-500" />
             </If>
-            <If is={!isLoading}>
-              <span>{timelineEvents.length}</span>
+            <If is={!isLoading && displayCount !== undefined}>
+              <span>{displayCount}</span>
             </If>
             <motion.div animate={{ rotate: open ? 180 : 0 }}>
               <ChevronDown size={12} />
