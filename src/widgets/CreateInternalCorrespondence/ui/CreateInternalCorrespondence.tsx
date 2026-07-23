@@ -3465,6 +3465,74 @@ export const CreateInternalCorrespondence = ({
                 syncEditorAfterDomEdit();
                 return;
               }
+
+              // Enter внутри блока, разрезанного пагинацией по границе страницы
+              // (data-page-split): нативный split создаёт новый блок, который
+              // наследует id группы, и шаг слияния пагинации склеивает половины
+              // обратно — перенос «мерцал и откатывался». Делим блок сами и
+              // разводим половины по разным группам: всё до курсора остаётся в
+              // старой группе (абзац до переноса), курсорный хвост и нижележащие
+              // куски получают новый id (абзац после переноса) — слияние их уже
+              // не соединит, а пагинация переразложит по страницам заново.
+              const block = topLevelBlockOf(editor, range.startContainer);
+              const gid = block?.getAttribute(AUTOSPLIT_ATTR) || null;
+              if (block && gid && PAGE_SPLITTABLE_TAGS.has(block.tagName)) {
+                e.preventDefault();
+                commitHistoryNow();
+
+                const pieces = Array.from(
+                  editor.querySelectorAll<HTMLElement>(
+                    `[${AUTOSPLIT_ATTR}="${gid}"]`,
+                  ),
+                );
+                const k = pieces.indexOf(block);
+                const hasBefore = k > 0;
+                const hasAfter = k >= 0 && k < pieces.length - 1;
+
+                // Хвост блока (после курсора) уносим в блок-клон.
+                const cut = document.createRange();
+                cut.setStart(range.startContainer, range.startOffset);
+                cut.setEnd(block, block.childNodes.length);
+                const next = block.cloneNode(false) as HTMLElement;
+                next.appendChild(cut.extractContents());
+
+                // Пустую половину держит placeholder <br> — но только если она не
+                // сольётся с соседями по своей группе (иначе лишняя пустая строка).
+                if (
+                  !hasBefore &&
+                  !(block.textContent || "").length &&
+                  !block.querySelector("br,img")
+                ) {
+                  block.appendChild(document.createElement("br"));
+                }
+                if (
+                  !hasAfter &&
+                  !(next.textContent || "").length &&
+                  !next.querySelector("br,img")
+                ) {
+                  next.appendChild(document.createElement("br"));
+                }
+
+                block.after(next);
+
+                // Разводим группы: старый id — по курсорный блок включительно,
+                // новый id — клон next и все нижележащие куски прежней группы.
+                const newGid = `g${++splitGroupSeq}`;
+                next.setAttribute(AUTOSPLIT_ATTR, newGid);
+                for (let j = k + 1; j < pieces.length; j++) {
+                  pieces[j].setAttribute(AUTOSPLIT_ATTR, newGid);
+                }
+
+                const pos = charPosAt(next, 0);
+                const caret = document.createRange();
+                caret.setStart(pos.node, pos.offset);
+                caret.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(caret);
+
+                syncEditorAfterDomEdit();
+                return;
+              }
             }
           }
         }

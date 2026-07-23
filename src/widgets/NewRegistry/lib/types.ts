@@ -30,6 +30,8 @@ export interface PeopleColumn {
 
 // Итоговый конфиг, который возвращает хук
 export interface RegistryConfig {
+  // Реестр входящих (для условной отрисовки колонок в RegistryLayout).
+  isIncoming?: boolean;
   primary: FieldDefinition;
   secondary: FieldDefinition;
   badges: BadgeDefinition[];
