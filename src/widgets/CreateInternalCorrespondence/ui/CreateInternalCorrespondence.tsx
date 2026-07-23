@@ -5975,7 +5975,7 @@ export const CreateInternalCorrespondence = ({
                   </If>
 
                   <If is={Boolean(showOriginalLetterSides && composeMode && sourceLetter)}>
-                    <div ref={originalCanvasWrapRef} className="shrink-0 order-1">
+                    <div ref={originalCanvasWrapRef} className="shrink-0 order-2">
                       <OriginalLetterCanvas
                         sheets={originalSheets.pages}
                         stamp={originalSheets.stamp}
@@ -5987,10 +5987,7 @@ export const CreateInternalCorrespondence = ({
 
                   <div
                     ref={pageCanvasRef}
-                    className={cn(
-                      "relative",
-                      showOriginalLetterSides ? "order-2" : "order-1"
-                    )}
+                    className="relative order-1"
                     style={{
                       width: PAGE_WIDTH,
                       height: pageCount * PAGE_STRIDE - PAGE_GAP,
@@ -6177,7 +6174,7 @@ export const CreateInternalCorrespondence = ({
                         <ApproversPanel
                           isOpen={approversOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides}
+                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
                           onOpen={handleOpenApprovers}
                           onClose={() => setApproversOpen(false)}
                           approvers={approvers}
@@ -6196,7 +6193,7 @@ export const CreateInternalCorrespondence = ({
                         <SignerPanel
                           isOpen={signerOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides}
+                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
                           onOpen={handleOpenSigner}
                           onClose={() => setSignerOpen(false)}
                           finalSigner={finalSigner}
@@ -6228,7 +6225,7 @@ export const CreateInternalCorrespondence = ({
                         <IncomingLettersPanel
                           isOpen={incomingOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides}
+                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
                           onOpen={handleOpenIncoming}
                           onClose={() => setIncomingOpen(false)}
                           attachedLetters={attachedIncomingLetters}
@@ -6240,7 +6237,7 @@ export const CreateInternalCorrespondence = ({
                         <VersionsPanel
                           isOpen={versionsOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides}
+                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
                           onOpen={handleOpenVersions}
                           onClose={() => setVersionsOpen(false)}
                           versions={allVersions}
@@ -6254,7 +6251,7 @@ export const CreateInternalCorrespondence = ({
                         <AttachmentsPanel
                           isOpen={attachmentsOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides}
+                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
                           onOpen={handleOpenAttachments}
                           onClose={() => setAttachmentsOpen(false)}
                           attachments={attachments.filter((a) => !a.file)}
