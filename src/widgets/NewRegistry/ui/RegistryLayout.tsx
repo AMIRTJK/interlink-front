@@ -1065,7 +1065,7 @@ const FilterDrawer = ({
 
 						{/* Filter Controls (ANTD + DYNAMIC) */}
 						<ConfigProvider theme={glassTheme} locale={locale}>
-							<div className="relative p-6 space-y-4 flex-1">
+							<div className="relative p-6 space-y-4 flex-1 overflow-y-auto min-h-0">
 								<motion.div
 									className="space-y-4"
 									initial="hidden"
