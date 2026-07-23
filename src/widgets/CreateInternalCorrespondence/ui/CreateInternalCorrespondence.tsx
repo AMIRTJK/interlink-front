@@ -5904,10 +5904,10 @@ export const CreateInternalCorrespondence = ({
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 shrink-0">
                     <Clock size={14} className="text-amber-500" />
                     <span>
-                      История версий — Слева: Версия №{activeVersion?.versionNumber}
-                      {activeVersion?.date ? ` (${new Date(activeVersion.date).toLocaleDateString("ru-RU")})` : ""}
+                      История версий — Слева: Актуальная версия №{latestVersion?.versionNumber}
                       {" • "}
-                      Справа: Актуальная версия №{latestVersion?.versionNumber}
+                      Справа: Версия №{activeVersion?.versionNumber}
+                      {activeVersion?.date ? ` (${new Date(activeVersion.date).toLocaleDateString("ru-RU")})` : ""}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -5964,7 +5964,7 @@ export const CreateInternalCorrespondence = ({
                   (showOriginalLetterSides || showVersionCompareSides) && "min-w-max"
                 )}>
                   <If is={Boolean(showVersionCompareSides && activeVersion)}>
-                    <div ref={versionCompareCanvasWrapRef} className="shrink-0 order-1">
+                    <div ref={versionCompareCanvasWrapRef} className="shrink-0 order-2">
                       <OriginalLetterCanvas
                         sheets={versionCompareSheets.pages}
                         stamp={versionCompareSheets.stamp}
@@ -5989,7 +5989,7 @@ export const CreateInternalCorrespondence = ({
                     ref={pageCanvasRef}
                     className={cn(
                       "relative",
-                      (showOriginalLetterSides || showVersionCompareSides) ? "order-2" : "order-1"
+                      showOriginalLetterSides ? "order-2" : "order-1"
                     )}
                     style={{
                       width: PAGE_WIDTH,
@@ -6177,7 +6177,7 @@ export const CreateInternalCorrespondence = ({
                         <ApproversPanel
                           isOpen={approversOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={showVersionCompareSides || showOriginalLetterSides}
+                          openLeft={!showVersionCompareSides}
                           onOpen={handleOpenApprovers}
                           onClose={() => setApproversOpen(false)}
                           approvers={approvers}
@@ -6196,7 +6196,7 @@ export const CreateInternalCorrespondence = ({
                         <SignerPanel
                           isOpen={signerOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={showVersionCompareSides || showOriginalLetterSides}
+                          openLeft={!showVersionCompareSides}
                           onOpen={handleOpenSigner}
                           onClose={() => setSignerOpen(false)}
                           finalSigner={finalSigner}
@@ -6228,6 +6228,7 @@ export const CreateInternalCorrespondence = ({
                         <IncomingLettersPanel
                           isOpen={incomingOpen}
                           hideTab={panelsInToolbar}
+                          openLeft={!showVersionCompareSides}
                           onOpen={handleOpenIncoming}
                           onClose={() => setIncomingOpen(false)}
                           attachedLetters={attachedIncomingLetters}
@@ -6239,6 +6240,7 @@ export const CreateInternalCorrespondence = ({
                         <VersionsPanel
                           isOpen={versionsOpen}
                           hideTab={panelsInToolbar}
+                          openLeft={!showVersionCompareSides}
                           onOpen={handleOpenVersions}
                           onClose={() => setVersionsOpen(false)}
                           versions={allVersions}
@@ -6252,6 +6254,7 @@ export const CreateInternalCorrespondence = ({
                         <AttachmentsPanel
                           isOpen={attachmentsOpen}
                           hideTab={panelsInToolbar}
+                          openLeft={!showVersionCompareSides}
                           onOpen={handleOpenAttachments}
                           onClose={() => setAttachmentsOpen(false)}
                           attachments={attachments.filter((a) => !a.file)}

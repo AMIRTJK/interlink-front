@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Search, ChevronDown, Check, X } from "lucide-react";
+import { Search, ChevronDown, Check, X } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import { VersionItem } from "./VersionItem";
@@ -8,6 +8,7 @@ import { VersionItem } from "./VersionItem";
 interface IProps {
   isOpen: boolean;
   hideTab?: boolean;
+  openLeft?: boolean;
   onOpen: () => void;
   onClose: () => void;
   versions: any[];
@@ -22,6 +23,7 @@ interface IProps {
 export const VersionsPanel = ({
   isOpen,
   hideTab,
+  openLeft = true,
   onOpen,
   onClose,
   versions = [],
@@ -59,12 +61,16 @@ export const VersionsPanel = ({
   return (
     <>
       {!hideTab && (
-        <div className="absolute z-20" style={{ left: -36, top: 190 }}>
+        <div
+          className="absolute z-20"
+          style={openLeft ? { left: -36, top: 190 } : { right: -36, top: 190 }}
+        >
           <motion.button
             onClick={isOpen ? onClose : onOpen}
             className={cn(
-              "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-              isOpen ? "bg-slate-50" : "hover:bg-slate-50"
+              "bg-white border border-slate-200 shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
+              openLeft ? "border-r-0 rounded-l-xl" : "border-l-0 rounded-r-xl",
+              isOpen ? "bg-slate-50" : "hover:bg-slate-50",
             )}
             aria-label="История версий"
           >
@@ -88,13 +94,15 @@ export const VersionsPanel = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ x: 12, opacity: 0 }}
+            initial={{ x: openLeft ? 12 : -12, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 12, opacity: 0 }}
+            exit={{ x: openLeft ? 12 : -12, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
             className="absolute top-0 w-[320px] h-[520px] bg-white rounded-2xl border border-slate-200 shadow-2xl z-30 flex flex-col"
             style={{
-              right: "calc(100% + 12px)",
+              ...(openLeft
+                ? { right: "calc(100% + 12px)" }
+                : { left: "calc(100% + 12px)" }),
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -109,7 +117,7 @@ export const VersionsPanel = ({
               </div>
               <button
                 onClick={onClose}
-                className="hover:bg-slate-100 rounded-lg p-1 transition-colors text-slate-400 hover:text-slate-700"
+                className="hover:bg-slate-100 rounded-lg p-1 transition-colors text-slate-400 hover:text-slate-700 cursor-pointer"
                 aria-label="Закрыть панель версий"
               >
                 <X size={15} />
@@ -129,7 +137,7 @@ export const VersionsPanel = ({
                       "w-30 flex items-center justify-between gap-2 px-2 py-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer text-left",
                       selectedAuthorId
                         ? "bg-amber-50 border-amber-200 text-amber-800"
-                        : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300"
+                        : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300",
                     )}
                   >
                     <div className="flex items-center gap-1 min-w-0 flex-1">
@@ -137,7 +145,7 @@ export const VersionsPanel = ({
                         size={11}
                         className={cn(
                           "flex-shrink-0",
-                          selectedAuthorId ? "text-amber-500" : "text-slate-400"
+                          selectedAuthorId ? "text-amber-500" : "text-slate-400",
                         )}
                       />
                       <span className="truncate block flex-1 pr-1">
@@ -150,7 +158,7 @@ export const VersionsPanel = ({
                       size={11}
                       className={cn(
                         "transition-transform text-slate-400 flex-shrink-0",
-                        showAuthorDropdown && "rotate-180"
+                        showAuthorDropdown && "rotate-180",
                       )}
                     />
                   </button>
@@ -171,10 +179,10 @@ export const VersionsPanel = ({
                             setShowAuthorDropdown(false);
                           }}
                           className={cn(
-                            "w-full flex items-center justify-between px-3 py-2 text-left text-xs transition-colors hover:bg-slate-50 font-medium",
+                            "w-full flex items-center justify-between px-3 py-2 text-left text-xs transition-colors hover:bg-slate-50 font-medium cursor-pointer",
                             !selectedAuthorId
                               ? "bg-slate-50 text-blue-600 font-bold"
-                              : "text-slate-700"
+                              : "text-slate-700",
                           )}
                         >
                           <span>Все авторы</span>
@@ -195,10 +203,10 @@ export const VersionsPanel = ({
                                 setShowAuthorDropdown(false);
                               }}
                               className={cn(
-                                "w-full flex items-center justify-between px-3 py-2 text-left text-xs transition-colors hover:bg-slate-50",
+                                "w-full flex items-center justify-between px-3 py-2 text-left text-xs transition-colors hover:bg-slate-50 cursor-pointer",
                                 isSelected
                                   ? "bg-slate-50 text-blue-600 font-bold"
-                                  : "text-slate-600"
+                                  : "text-slate-600",
                               )}
                             >
                               <span className="truncate pr-2">{auth.name}</span>

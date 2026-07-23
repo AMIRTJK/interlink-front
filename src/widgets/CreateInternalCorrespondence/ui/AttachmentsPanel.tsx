@@ -7,6 +7,7 @@ import type { AttachedFile } from "../types";
 interface IProps {
   isOpen: boolean;
   hideTab?: boolean;
+  openLeft?: boolean;
   onOpen: () => void;
   onClose: () => void;
   attachments: AttachedFile[];
@@ -17,6 +18,7 @@ interface IProps {
 export const AttachmentsPanel = ({
   isOpen,
   hideTab,
+  openLeft = true,
   onOpen,
   onClose,
   attachments,
@@ -26,12 +28,16 @@ export const AttachmentsPanel = ({
   return (
     <>
       {!hideTab && (
-        <div className="absolute z-20" style={{ left: -36, top: 370 }}>
+        <div
+          className="absolute z-20"
+          style={openLeft ? { left: -36, top: 370 } : { right: -36, top: 370 }}
+        >
           <motion.button
             onClick={isOpen ? onClose : onOpen}
             className={cn(
-              "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-              isOpen ? "bg-slate-50" : "hover:bg-slate-50"
+              "bg-white border border-slate-200 shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
+              openLeft ? "border-r-0 rounded-l-xl" : "border-l-0 rounded-r-xl",
+              isOpen ? "bg-slate-50" : "hover:bg-slate-50",
             )}
             aria-label="Вложения"
           >
@@ -55,13 +61,15 @@ export const AttachmentsPanel = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ x: 12, opacity: 0 }}
+            initial={{ x: openLeft ? 12 : -12, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 12, opacity: 0 }}
+            exit={{ x: openLeft ? 12 : -12, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
             className="absolute top-0 w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl z-30 flex flex-col"
             style={{
-              right: "calc(100% + 12px)",
+              ...(openLeft
+                ? { right: "calc(100% + 12px)" }
+                : { left: "calc(100% + 12px)" }),
               maxHeight: "var(--icc-panel-max-h, 70vh)",
             }}
             onClick={(e) => e.stopPropagation()}
