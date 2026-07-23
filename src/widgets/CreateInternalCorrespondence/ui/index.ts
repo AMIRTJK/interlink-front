@@ -10,6 +10,7 @@ export { PreviewModal } from "./PreviewModal";
 export { DocumentDrawer } from "./DocumentDrawer";
 export { DeclineReasonModal } from "./DeclineReasonModal";
 export { CancelSignatureModal } from "./CancelSignatureModal";
+export { IncomingLetterSelectModal } from "./IncomingLetterSelectModal";
 export { CreateInternalCorrespondence } from "./CreateInternalCorrespondence";
 
 export type {
