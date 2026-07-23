@@ -6166,6 +6166,7 @@ export const CreateInternalCorrespondence = ({
                         <ApproversPanel
                           isOpen={approversOpen}
                           hideTab={panelsInToolbar}
+                          openLeft={showVersionCompareSides || showOriginalLetterSides}
                           onOpen={handleOpenApprovers}
                           onClose={() => setApproversOpen(false)}
                           approvers={approvers}
@@ -6184,6 +6185,7 @@ export const CreateInternalCorrespondence = ({
                         <SignerPanel
                           isOpen={signerOpen}
                           hideTab={panelsInToolbar}
+                          openLeft={showVersionCompareSides || showOriginalLetterSides}
                           onOpen={handleOpenSigner}
                           onClose={() => setSignerOpen(false)}
                           finalSigner={finalSigner}
