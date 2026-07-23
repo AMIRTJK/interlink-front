@@ -167,6 +167,7 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
                         key={event.performed_at + i}
                         event={event}
                         isLast={i === timelineEvents.length - 1}
+                        fallbackActorName={creatorName}
                       />
                     ))}
                   </div>

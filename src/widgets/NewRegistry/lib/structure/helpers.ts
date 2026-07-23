@@ -47,30 +47,36 @@ export const getEventMeta = (event: ITimelineEvent) => {
       ring: "bg-blue-100 dark:bg-blue-900/40",
       iconColor: "text-blue-500",
       badge: "bg-blue-100 dark:bg-blue-900/40 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300",
-      title: "Документ создан",
+      title: "Создал документ",
       badgeText: "Черновик",
     };
   }
 
   if (type === "version_created" || action === "version_created") {
-    const versionNum = event.data?.version ? `v${event.data.version}` : "";
+    const versionNum = event.data?.version ? ` v${event.data.version}` : "";
     return {
       icon: FileText,
       ring: "bg-slate-100 dark:bg-slate-700",
       iconColor: "text-slate-500",
       badge: "bg-slate-100 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300",
-      title: `Создана новая версия ${versionNum}`.trim(),
-      badgeText: versionNum || "Версия",
+      title: `Создал новую версию${versionNum}`.trim(),
+      badgeText: versionNum.trim() || "Версия",
     };
   }
 
-  if (type === "version_selected_for_signature" || action === "version_selected") {
+  if (
+    type === "version_selected_for_signature" ||
+    type === "version_selected" ||
+    action === "version_selected_for_signing" ||
+    action === "version_selected"
+  ) {
+    const versionNum = event.data?.version ? ` (v${event.data.version})` : "";
     return {
       icon: FileCheck,
       ring: "bg-purple-100 dark:bg-purple-900/40",
       iconColor: "text-purple-500",
       badge: "bg-purple-100 dark:bg-purple-900/40 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300",
-      title: "Версия выбрана для подписи",
+      title: `Выбрал версию для подписи${versionNum}`,
       badgeText: "Для подписи",
     };
   }
@@ -81,7 +87,7 @@ export const getEventMeta = (event: ITimelineEvent) => {
       ring: "bg-violet-100 dark:bg-violet-900/40",
       iconColor: "text-violet-500",
       badge: "bg-violet-100 dark:bg-violet-900/40 border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300",
-      title: "Отправлено на согласование",
+      title: "Отправил на согласование",
       badgeText: "Согласование",
     };
   }
@@ -95,7 +101,7 @@ export const getEventMeta = (event: ITimelineEvent) => {
       badge: isApproved
         ? "bg-emerald-100 dark:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300"
         : "bg-rose-100 dark:bg-rose-900/40 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300",
-      title: isApproved ? "Результат: Согласовано" : "Результат: Возвращено",
+      title: isApproved ? "Согласовал документ" : "Вернул документ",
       badgeText: isApproved ? "Согласовано" : "Возвращено",
     };
   }
@@ -106,7 +112,7 @@ export const getEventMeta = (event: ITimelineEvent) => {
       ring: "bg-amber-100 dark:bg-amber-900/40",
       iconColor: "text-amber-500",
       badge: "bg-amber-100 dark:bg-amber-900/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300",
-      title: "Приглашение на подпись",
+      title: "Направил на подпись",
       badgeText: "На подпись",
     };
   }
@@ -117,7 +123,7 @@ export const getEventMeta = (event: ITimelineEvent) => {
       ring: "bg-purple-100 dark:bg-purple-900/40",
       iconColor: "text-purple-500",
       badge: "bg-purple-100 dark:bg-purple-900/40 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300",
-      title: "Документ подписан",
+      title: "Подписал документ",
       badgeText: "Подписан",
     };
   }
@@ -132,7 +138,7 @@ export const getEventMeta = (event: ITimelineEvent) => {
       ring: "bg-rose-100 dark:bg-rose-900/40",
       iconColor: "text-rose-500",
       badge: "bg-rose-100 dark:bg-rose-900/40 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300",
-      title: "Подпись отклонена",
+      title: "Отклонил подпись",
       badgeText: "Отклонено",
     };
   }
@@ -147,7 +153,7 @@ export const getEventMeta = (event: ITimelineEvent) => {
       ring: "bg-amber-100 dark:bg-amber-900/40",
       iconColor: "text-amber-500",
       badge: "bg-amber-100 dark:bg-amber-900/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300",
-      title: "Подпись отменена",
+      title: "Отменил подпись",
       badgeText: "Отменено",
     };
   }
@@ -158,7 +164,7 @@ export const getEventMeta = (event: ITimelineEvent) => {
       ring: "bg-emerald-100 dark:bg-emerald-900/40",
       iconColor: "text-emerald-500",
       badge: "bg-emerald-100 dark:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300",
-      title: "Документ отправлен",
+      title: "Отправил документ",
       badgeText: "Отправлено",
     };
   }
@@ -190,10 +196,7 @@ export const groupLettersByDate = (documents: any[]): IGroupedStructureLetters[]
     map[label].push(doc);
   });
 
-  return Object.keys(map).map((label) => ({
-    label,
-    items: map[label],
-  }));
+  return Object.keys(map).map((label) => ({ label, items: map[label] }));
 };
 
 export const pluralizeDocuments = (count: number): string => {

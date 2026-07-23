@@ -8,14 +8,29 @@ import { getEventMeta, getInitials, formatTime } from "../../lib/structure/helpe
 interface IEventRowProps {
   event: ITimelineEvent;
   isLast: boolean;
+  fallbackActorName?: string;
 }
 
-export const EventRow: React.FC<IEventRowProps> = ({ event, isLast }) => {
+export const EventRow: React.FC<IEventRowProps> = ({
+  event,
+  isLast,
+  fallbackActorName,
+}) => {
   const meta = getEventMeta(event);
   const Icon = meta.icon;
-  const actorName = event.actor?.full_name || "Система";
-  const initials = event.actor ? getInitials(actorName) : "С";
-  const note = event.data?.decline_reason || event.data?.reason || event.data?.note || event.data?.subject;
+  const rawActorName = event.actor?.full_name;
+  const actorName =
+    rawActorName ||
+    (fallbackActorName && fallbackActorName !== "—"
+      ? fallbackActorName
+      : "Система");
+  const hasKnownActor = Boolean(rawActorName || (fallbackActorName && fallbackActorName !== "—"));
+  const initials = getInitials(actorName);
+  const note =
+    event.data?.decline_reason ||
+    event.data?.reason ||
+    event.data?.note ||
+    event.data?.subject;
 
   return (
     <motion.div
@@ -38,7 +53,7 @@ export const EventRow: React.FC<IEventRowProps> = ({ event, isLast }) => {
             <div
               className={cn(
                 "w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0",
-                !event.actor
+                !hasKnownActor
                   ? "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300"
                   : "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300",
               )}
