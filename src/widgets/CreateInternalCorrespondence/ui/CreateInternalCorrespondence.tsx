@@ -241,6 +241,175 @@ const isStampNode = (n: Node | null): boolean =>
   n.nodeType === Node.ELEMENT_NODE &&
   (n as HTMLElement).hasAttribute(STAMP_ATTR);
 
+// CSS-пикселей в сантиметре при 96 dpi (A4 794px = 21см). Константа физическая,
+// от ориентации не зависит.
+const PX_PER_CM = 96 / 2.54;
+
+// Горизонтальная линейка над листом: сантиметровые деления с подписями, поля
+// страницы затенены, границы полей — синие. Ширину и поля берём из геометрии
+// листа, поэтому линейка точно совпадает с колонкой набора. Sticky — остаётся
+// вверху вьюпорта при вертикальной прокрутке (как в Word).
+const RULER_MIN_MARGIN = 16; // минимальное поле, px
+const RULER_MIN_CONTENT = 160; // минимальная ширина колонки набора, px
+
+const EditorRuler = ({
+  pageWidth,
+  marginLeft,
+  marginRight,
+  onChange,
+}: {
+  pageWidth: number;
+  marginLeft: number;
+  marginRight: number;
+  onChange: (side: "left" | "right", value: number) => void;
+}) => {
+  const H = 30;
+  const baseY = H - 1;
+  const contentStart = marginLeft;
+  const contentEnd = pageWidth - marginRight;
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<null | "left" | "right">(null);
+
+  // Перетаскивание маркеров полей: слушатели на window, чтобы тянуть можно было
+  // и за пределами линейки. Значение зажимаем (минимальное поле и минимальная
+  // ширина колонки набора) и прокидываем наверх — там пересчитается раскладка и
+  // пагинация.
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      const side = dragRef.current;
+      const box = containerRef.current;
+      if (!side || !box) return;
+      const x = e.clientX - box.getBoundingClientRect().left;
+      if (side === "left") {
+        const max = pageWidth - marginRight - RULER_MIN_CONTENT;
+        onChange("left", Math.round(Math.min(Math.max(x, RULER_MIN_MARGIN), max)));
+      } else {
+        const max = pageWidth - marginLeft - RULER_MIN_CONTENT;
+        onChange(
+          "right",
+          Math.round(Math.min(Math.max(pageWidth - x, RULER_MIN_MARGIN), max)),
+        );
+      }
+    };
+    const onUp = () => {
+      if (dragRef.current) {
+        dragRef.current = null;
+        document.body.style.cursor = "";
+      }
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [pageWidth, marginLeft, marginRight, onChange]);
+
+  const startDrag = (side: "left" | "right") => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragRef.current = side;
+    document.body.style.cursor = "ew-resize";
+  };
+
+  const majors: { x: number; label: number }[] = [];
+  const minors: number[] = [];
+  const stepsLeft = Math.floor(contentStart / PX_PER_CM);
+  const stepsRight = Math.ceil((pageWidth - contentStart) / PX_PER_CM);
+  for (let cm = -stepsLeft; cm <= stepsRight; cm++) {
+    const x = Math.round(contentStart + cm * PX_PER_CM) + 0.5;
+    if (x >= 0.5 && x <= pageWidth - 0.5) majors.push({ x, label: cm });
+    const half = Math.round(contentStart + (cm + 0.5) * PX_PER_CM) + 0.5;
+    if (half >= 0.5 && half <= pageWidth - 0.5) minors.push(half);
+  }
+
+  const handleStyle = (x: number): React.CSSProperties => ({
+    position: "absolute",
+    top: 0,
+    left: x - 6,
+    width: 12,
+    height: H,
+    cursor: "ew-resize",
+    zIndex: 3,
+  });
+  const gripStyle: React.CSSProperties = {
+    position: "absolute",
+    left: 4,
+    top: 0,
+    width: 4,
+    height: H,
+    background: "#3b82f6",
+    borderRadius: 2,
+    boxShadow: "0 1px 2px rgba(15,23,42,0.35)",
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="select-none"
+      style={{
+        position: "sticky",
+        top: 8,
+        zIndex: 20,
+        width: pageWidth,
+        height: H,
+        marginBottom: 12,
+        background: "#fff",
+        border: "1px solid rgba(148,163,184,0.35)",
+        borderRadius: 8,
+        boxShadow: "0 4px 12px rgba(15,23,42,0.06)",
+        overflow: "hidden",
+      }}
+    >
+      <svg width={pageWidth} height={H} style={{ display: "block" }}>
+        {/* Поля страницы — затенённые зоны слева/справа */}
+        <rect x={0} y={0} width={contentStart} height={H} fill="rgba(148,163,184,0.16)" />
+        <rect
+          x={contentEnd}
+          y={0}
+          width={Math.max(0, pageWidth - contentEnd)}
+          height={H}
+          fill="rgba(148,163,184,0.16)"
+        />
+        {/* Мелкие деления (полсантиметра) */}
+        {minors.map((x, i) => (
+          <line key={`mn${i}`} x1={x} y1={baseY} x2={x} y2={baseY - 4} stroke="rgba(100,116,139,0.55)" />
+        ))}
+        {/* Крупные деления и подписи (см) */}
+        {majors.map(({ x, label }, i) => (
+          <g key={`mj${i}`}>
+            <line x1={x} y1={baseY} x2={x} y2={baseY - 8} stroke="rgba(71,85,105,0.9)" />
+            {label > 0 && (
+              <text x={x + 2} y={11} fontSize={8} fill="#64748b" fontFamily="system-ui, sans-serif">
+                {label}
+              </text>
+            )}
+          </g>
+        ))}
+      </svg>
+
+      {/* Перетаскиваемые маркеры полей (двойной клик — сброс к 80px) */}
+      <div
+        onMouseDown={startDrag("left")}
+        onDoubleClick={() => onChange("left", 80)}
+        title="Левое поле — потяните, чтобы сузить/расширить область текста (двойной клик — сброс)"
+        style={handleStyle(contentStart)}
+      >
+        <div style={gripStyle} />
+      </div>
+      <div
+        onMouseDown={startDrag("right")}
+        onDoubleClick={() => onChange("right", 80)}
+        title="Правое поле — потяните, чтобы сузить/расширить область текста (двойной клик — сброс)"
+        style={handleStyle(contentEnd)}
+      >
+        <div style={gripStyle} />
+      </div>
+    </div>
+  );
+};
+
 // Верхнеуровневый блок редактора, содержащий узел
 const topLevelBlockOf = (
   editor: HTMLElement,
@@ -1033,6 +1202,20 @@ export const CreateInternalCorrespondence = ({
   const [fontSize, setFontSize] = useState("14");
   const [showFontSizeDropdown, setShowFontSizeDropdown] = useState(false);
   const [orientation, setOrientation] = useState<PageOrientation>("portrait");
+  // Показ сантиметровой линейки над листом (переключатель в панели редактора).
+  const [rulerEnabled, setRulerEnabled] = useState(false);
+  // Поля страницы (px) — регулируются перетаскиванием маркеров линейки. Задают
+  // ширину колонки набора, поэтому влияют на перенос текста, пагинацию и печать.
+  const [marginLeft, setMarginLeft] = useState(80);
+  const [marginRight, setMarginRight] = useState(80);
+  // Смена ориентации меняет ширину листа — зажимаем поля, чтобы колонка набора
+  // не «схлопнулась» в узком портрете после широкого альбома.
+  useEffect(() => {
+    const w = orientation === "landscape" ? 1122 : 794;
+    const cap = Math.round((w - 160) / 2);
+    setMarginLeft((l) => Math.max(16, Math.min(l, cap)));
+    setMarginRight((r) => Math.max(16, Math.min(r, cap)));
+  }, [orientation]);
   const [showPreview, setShowPreview] = useState(false);
   const [showCancelSignConfirm, setShowCancelSignConfirm] = useState(false);
   const [showSendConfirm, setShowSendConfirm] = useState(false);
@@ -1186,7 +1369,6 @@ export const CreateInternalCorrespondence = ({
   const isLandscape = orientation === "landscape";
   const PAGE_WIDTH = isLandscape ? 1122 : 794;
   const PAGE_HEIGHT = isLandscape ? 794 : 1122;
-  const PAGE_PAD_H = 80;
   const PAGE_PAD_V = 72;
   const CONTENT_HEIGHT = PAGE_HEIGHT - PAGE_PAD_V * 2;
   const PAGE_GAP = 32; // визуальный отступ между листами
@@ -2043,7 +2225,7 @@ export const CreateInternalCorrespondence = ({
     // на одну страницу (перебираем только element-детей) и пропадёт из
     // предпросмотра/печати — как было с одиночной цифрой, набранной в редактор.
     wrapBareTopLevelNodes(editor);
-    const contentWidth = PAGE_WIDTH - PAGE_PAD_H * 2;
+    const contentWidth = PAGE_WIDTH - marginLeft - marginRight;
     const buckets: string[][] = [];
     Array.from(editor.children).forEach((child) => {
       const el = child as HTMLElement;
@@ -2063,14 +2245,14 @@ export const CreateInternalCorrespondence = ({
       clone.style.marginTop = "0";
       clone.style.marginBottom = "0";
       (buckets[page] ||= []).push(
-        `<div style="position:absolute;left:${PAGE_PAD_H}px;top:${localTop}px;width:${contentWidth}px;box-sizing:border-box;">${clone.outerHTML}</div>`,
+        `<div style="position:absolute;left:${marginLeft}px;top:${localTop}px;width:${contentWidth}px;box-sizing:border-box;">${clone.outerHTML}</div>`,
       );
     });
     const pages: string[] = [];
     for (let i = 0; i < buckets.length; i++)
       pages.push((buckets[i] || []).join(""));
     return pages.length ? pages : [""];
-  }, [PAGE_WIDTH, PAGE_PAD_H, PAGE_PAD_V, PAGE_STRIDE]);
+  }, [PAGE_WIDTH, marginLeft, marginRight, PAGE_PAD_V, PAGE_STRIDE]);
 
   // Позиция вшитого штампа ЭЦП относительно своей страницы (для печати).
   const getEmbeddedStampInfo = useCallback(() => {
@@ -2167,7 +2349,7 @@ export const CreateInternalCorrespondence = ({
       .map((html, idx) => {
         const stampHtml =
           stamp && stamp.pageIndex === idx
-            ? `<div style="position:absolute;left:${PAGE_PAD_H + stamp.x}px;top:${PAGE_PAD_V + stamp.y}px;width:${stamp.width};overflow:hidden;pointer-events:none;">${stamp.html}</div>`
+            ? `<div style="position:absolute;left:${marginLeft + stamp.x}px;top:${PAGE_PAD_V + stamp.y}px;width:${stamp.width};overflow:hidden;pointer-events:none;">${stamp.html}</div>`
             : "";
         return `<div class="page">${html}${stampHtml}</div>`;
       })
@@ -4345,7 +4527,15 @@ export const CreateInternalCorrespondence = ({
     // а не очередь устаревших друг за другом.
     const raf = window.requestAnimationFrame(updatePageCount);
     return () => window.cancelAnimationFrame(raf);
-  }, [editorContent, orientation, fontSize, pageCount, paginateEditor]);
+  }, [
+    editorContent,
+    orientation,
+    fontSize,
+    pageCount,
+    paginateEditor,
+    marginLeft,
+    marginRight,
+  ]);
 
   // Страховка от «пропущенной» пагинации: если высота содержимого изменилась
   // мимо наших обработчиков (загрузилась картинка из Word, внешняя замена
@@ -5779,6 +5969,16 @@ export const CreateInternalCorrespondence = ({
                     {orientation === "portrait" ? "Книжный" : "Альбомный"}
                   </span>
                 </button>
+                <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
+                <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
+                  <input
+                    type="checkbox"
+                    checked={rulerEnabled}
+                    onChange={(e) => setRulerEnabled(e.target.checked)}
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span>Линейка</span>
+                </label>
                 {!isReadOnly && (
                   <>
                     <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
@@ -6068,13 +6268,26 @@ export const CreateInternalCorrespondence = ({
                     </div>
                   </If>
 
+                  <div className="order-1 flex flex-col items-center">
+                  {rulerEnabled && (
+                    <EditorRuler
+                      pageWidth={PAGE_WIDTH}
+                      marginLeft={marginLeft}
+                      marginRight={marginRight}
+                      onChange={(side, value) =>
+                        side === "left"
+                          ? setMarginLeft(value)
+                          : setMarginRight(value)
+                      }
+                    />
+                  )}
                   <div
                     ref={pageCanvasRef}
-                    className="relative order-1"
+                    className="relative"
                     style={{
                       width: PAGE_WIDTH,
                       height: pageCount * PAGE_STRIDE - PAGE_GAP,
-                      padding: `${PAGE_PAD_V}px ${PAGE_PAD_H}px`,
+                      padding: `${PAGE_PAD_V}px ${marginRight}px ${PAGE_PAD_V}px ${marginLeft}px`,
                       fontFamily: "Times New Roman, serif",
                       fontSize: `${fontSize}px`,
                       lineHeight: 1.8,
@@ -6201,7 +6414,7 @@ export const CreateInternalCorrespondence = ({
                           // stampPos хранится в координатах редактора; placeholder —
                           // потомок холста страницы, поэтому добавляем поля страницы,
                           // чтобы он визуально совпал с местом будущей печати.
-                          left: PAGE_PAD_H + stampPos.x,
+                          left: marginLeft + stampPos.x,
                           top: PAGE_PAD_V + stampPos.y,
                           width: stampSize.width,
                           height: stampSize.height,
@@ -6343,6 +6556,7 @@ export const CreateInternalCorrespondence = ({
                         />
                       </div>
                     )}
+                  </div>
                   </div>
 
                 </div>
