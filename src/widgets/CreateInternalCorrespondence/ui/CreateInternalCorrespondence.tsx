@@ -2574,7 +2574,8 @@ export const CreateInternalCorrespondence = ({
       }
 
       if (item.signatures && item.signatures.length > 0) {
-        const s = item.signatures[0];
+        const activeSigs = item.signatures.filter((s: any) => s.status !== "revoked");
+        const s = activeSigs.length > 0 ? activeSigs[activeSigs.length - 1] : item.signatures[item.signatures.length - 1];
         const isCurrentlySigned = s.status === "signed";
         const isCurrentlyDeclined = s.status === "declined";
         setFinalSigner({
@@ -2597,6 +2598,7 @@ export const CreateInternalCorrespondence = ({
           setStampVisible(false);
         }
       } else if (item.creator) {
+
         setFinalSigner({
           id: String(item.creator.id),
           isInvited: false,
@@ -2698,10 +2700,12 @@ export const CreateInternalCorrespondence = ({
       }
 
       if (wfSignatures.length > 0) {
-        const wfS = wfSignatures[0];
+        const activeSigs = wfSignatures.filter((s: any) => s.status !== "revoked");
+        const wfS = activeSigs.length > 0 ? activeSigs[activeSigs.length - 1] : wfSignatures[wfSignatures.length - 1];
         const user = wfS.user;
         const isCurrentlySigned = wfS.status === "signed";
         const isCurrentlyDeclined = wfS.status === "declined";
+
         if (user) {
           setFinalSigner({
             id: String(user.id),
@@ -4908,12 +4912,16 @@ export const CreateInternalCorrespondence = ({
 
   const isReadOnly = isSigned || isOldVersionSelected;
 
+  const activeSignatures =
+    rawWorkflowData?.data?.signatures?.filter(
+      (sig: any) => sig.status !== "revoked",
+    ) || [];
+
   const allSignaturesSigned =
-    rawWorkflowData?.data?.signatures?.length > 0
-      ? rawWorkflowData.data.signatures.every(
-          (sig: any) => sig.status === "signed",
-        )
+    activeSignatures.length > 0
+      ? activeSignatures.every((sig: any) => sig.status === "signed")
       : false;
+
 
   useEffect(() => {
     if (allVersions.length === 0) return;
