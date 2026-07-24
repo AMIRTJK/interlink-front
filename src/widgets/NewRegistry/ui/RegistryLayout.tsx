@@ -27,7 +27,12 @@ import {
   Activity,
   CornerUpLeft,
   Forward,
+  Clock,
+  FileEdit,
+  CheckCheck,
+  XCircle,
 } from "lucide-react";
+
 
 import {
   ConfigProvider,
@@ -75,11 +80,125 @@ const getLinkTypeInfo = (data: any, isIncoming?: boolean) => {
 };
 
 
+export const getLetterStatusBadge = (
+  doc: any,
+  isIncoming?: boolean,
+): { label: string; color: string } => {
+  const isIncomingDoc =
+    isIncoming ||
+    doc?.kind === "incoming" ||
+    (doc?.channel === "internal" && doc?.kind === "incoming");
+
+  if (isIncomingDoc) {
+    const assignments = Array.isArray(doc?.assignments)
+      ? doc.assignments
+      : Array.isArray(doc?.assignment_list)
+      ? doc.assignment_list
+      : doc?.assignment
+      ? [doc.assignment]
+      : [];
+
+    if (assignments.length > 0) {
+      const activeAssign = assignments[assignments.length - 1];
+      const assignStatus = (activeAssign?.status || "").toString().toLowerCase();
+
+      if (
+        assignStatus === "pending" ||
+        assignStatus === "in_progress" ||
+        assignStatus === "in-progress"
+      ) {
+        return { label: "В процессе исполнения", color: "amber" };
+      }
+      if (
+        assignStatus === "submitted" ||
+        assignStatus === "review" ||
+        assignStatus === "to_review"
+      ) {
+        return { label: "На проверке", color: "purple" };
+      }
+      if (assignStatus === "done" || assignStatus === "completed") {
+        return { label: "Завершено", color: "emerald" };
+      }
+      if (assignStatus === "returned") {
+        return { label: "На доработке", color: "rose" };
+      }
+      return { label: "В процессе исполнения", color: "amber" };
+    }
+
+    return { label: "Без поручения", color: "blue" };
+  }
+
+  const isSent =
+    doc?.status === "sent" ||
+    doc?.status === "sent_out" ||
+    doc?.status === "отправлено";
+
+  return isSent
+    ? { label: "Отправлено", color: "emerald" }
+    : { label: "Черновик", color: "blue" };
+};
+
 export const getEffectiveStatusData = (
   doc: any,
   statusConfig: Record<string, any>,
+  isIncoming?: boolean,
 ) => {
   if (!doc || !statusConfig) return statusConfig?.default || {};
+
+  const isIncomingDoc =
+    isIncoming ||
+    doc?.kind === "incoming" ||
+    (doc?.channel === "internal" && doc?.kind === "incoming");
+
+  if (isIncomingDoc) {
+    const badge = getLetterStatusBadge(doc, true);
+    if (badge.label === "В процессе исполнения") {
+      return (
+        statusConfig["in-progress"] ||
+        statusConfig.in_progress || {
+          label: "В процессе исполнения",
+          gradient: "from-amber-500 to-amber-600",
+          icon: <Clock size={14} />,
+        }
+      );
+    }
+    if (badge.label === "На проверке") {
+      return (
+        statusConfig.submitted || {
+          label: "На проверке",
+          gradient: "from-purple-500 to-purple-600",
+          icon: <FileEdit size={14} />,
+        }
+      );
+    }
+    if (badge.label === "Завершено") {
+      return (
+        statusConfig.completed ||
+        statusConfig.done || {
+          label: "Завершено",
+          gradient: "from-emerald-500 to-emerald-600",
+          icon: <CheckCheck size={14} />,
+        }
+      );
+    }
+    if (badge.label === "На доработке") {
+      return (
+        statusConfig.returned || {
+          label: "На доработке",
+          gradient: "from-rose-500 to-rose-600",
+          icon: <XCircle size={14} />,
+        }
+      );
+    }
+    return (
+      statusConfig.no_assignment ||
+      statusConfig.analysis || {
+        label: "Без поручения",
+        gradient: "from-blue-500 to-blue-600",
+        icon: <Clock size={14} />,
+      }
+    );
+  }
 
   const letterStatusRaw = (
     doc.letter_status ||
@@ -157,6 +276,7 @@ export const getEffectiveStatusData = (
     {}
   );
 };
+
 
 import { useLocation } from "react-router";
 import { tokenControl } from "@shared/lib";
@@ -528,7 +648,9 @@ export const RegistryLayout = ({
                     const statusData = getEffectiveStatusData(
                       doc,
                       statusConfig,
+                      fieldConfig?.isIncoming,
                     );
+
                     const props = {
                       key: doc.id,
                       data: doc,
@@ -1008,33 +1130,34 @@ export const DocumentListItem = ({
               </div>
             ))}
 
-            {/* Статус письма — строго "Черновик" или "Отправлено" */}
-            <div className="w-[112px] flex-shrink-0 overflow-hidden">
-              <div className="flex items-center gap-1 mb-0.5 whitespace-nowrap">
-                <Activity
-                  size={12}
-                  className="text-gray-400 dark:text-slate-500 flex-shrink-0"
-                />
-                <span className="text-xs text-gray-500 dark:text-slate-400 truncate">
-                  Статус письма
-                </span>
-              </div>
-              <div
-                className={`text-xs font-mono font-semibold px-2 py-1 rounded truncate ${getBadgeStyles(
-                  data.status === "sent" ||
-                    data.status === "sent_out" ||
-                    data.status === "отправлено"
-                    ? "emerald"
-                    : "blue",
-                )}`}
-              >
-                {data.status === "sent" ||
-                data.status === "sent_out" ||
-                data.status === "отправлено"
-                  ? "Отправлено"
-                  : "Черновик"}
-              </div>
-            </div>
+            {/* Статус письма */}
+            {(() => {
+              const statusBadge = getLetterStatusBadge(
+                data,
+                fieldConfig?.isIncoming,
+              );
+              return (
+                <div className="w-[112px] flex-shrink-0 overflow-hidden">
+                  <div className="flex items-center gap-1 mb-0.5 whitespace-nowrap">
+                    <Activity
+                      size={12}
+                      className="text-gray-400 dark:text-slate-500 flex-shrink-0"
+                    />
+                    <span className="text-xs text-gray-500 dark:text-slate-400 truncate">
+                      Статус письма
+                    </span>
+                  </div>
+                  <div
+                    className={`text-xs font-mono font-semibold px-2 py-1 rounded truncate ${getBadgeStyles(
+                      statusBadge.color,
+                    )}`}
+                  >
+                    {statusBadge.label}
+                  </div>
+                </div>
+              );
+            })()}
+
 
             {/* Action Menu List View */}
             {actionItems.length > 0 && (
