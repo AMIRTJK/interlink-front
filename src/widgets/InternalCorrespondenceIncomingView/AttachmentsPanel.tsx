@@ -1,5 +1,6 @@
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Paperclip, X, Eye, Download, FileText } from "lucide-react";
+import { Paperclip, X, Eye, Download, FileText, AlertCircle } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { AttachedFile } from "@widgets/CreateInternalCorrespondence";
@@ -13,9 +14,12 @@ interface IProps {
   attachments: AttachedFile[];
   onPreview: (file: AttachedFile) => void;
   onDownload: (file: AttachedFile) => void;
+  onUpload?: () => void;
+  onRemove?: (file: AttachedFile) => void;
+  isReadOnly?: boolean;
 }
 
-export const AttachmentsPanel = ({
+export const AttachmentsPanel: React.FC<IProps> = ({
   isOpen,
   hideTab,
   openLeft = false,
@@ -24,7 +28,10 @@ export const AttachmentsPanel = ({
   attachments,
   onPreview,
   onDownload,
-}: IProps) => {
+  onUpload,
+  onRemove,
+  isReadOnly = true,
+}) => {
   return (
     <>
       <If is={!hideTab}>
@@ -70,7 +77,7 @@ export const AttachmentsPanel = ({
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: openLeft ? 12 : -12, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="absolute top-0 w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl z-30 flex flex-col"
+            className="absolute top-0 w-80 bg-white rounded-2xl border border-slate-200 shadow-2xl z-[500] flex flex-col"
             style={{
               ...(openLeft
                 ? { right: "calc(100% + 12px)" }
@@ -89,6 +96,7 @@ export const AttachmentsPanel = ({
                 </span>
               </div>
               <button
+                type="button"
                 onClick={onClose}
                 className="hover:bg-slate-100 rounded-lg p-1 transition-colors text-slate-400 hover:text-slate-700 cursor-pointer"
                 aria-label="Закрыть панель вложений"
@@ -97,17 +105,36 @@ export const AttachmentsPanel = ({
               </button>
             </div>
 
-            <div className="px-5 py-3 border-b border-slate-100 flex justify-between items-center">
+            <div className="px-5 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <span className="text-xs text-slate-500 font-medium">
-                Сохранённые файлы
+                Файлы документа
               </span>
+              <If is={!isReadOnly && !!onUpload}>
+                <button
+                  type="button"
+                  onClick={onUpload}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 rounded-xl transition-all cursor-pointer active:scale-95"
+                >
+                  <Paperclip size={13} />
+                  <span>Загрузить файл</span>
+                </button>
+              </If>
             </div>
+
+            <If is={!isReadOnly}>
+              <div className="mx-4 mt-3 p-2.5 bg-amber-50/90 border border-amber-200/80 rounded-xl flex items-start gap-2 text-[11px] text-amber-900 leading-snug">
+                <AlertCircle size={14} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                <span>
+                  <strong>Внимание:</strong> Не забудьте нажать кнопку <strong>«Сохранить»</strong> в верхней панели документа, чтобы вложения сохранились!
+                </span>
+              </div>
+            </If>
 
             <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-2.5 min-h-0">
               <If is={attachments.length === 0}>
                 <div className="py-8 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs">
                   <Paperclip size={15} />
-                  <span>Нет сохранённых вложений</span>
+                  <span>Нет прикреплённых файлов</span>
                 </div>
               </If>
               <If is={attachments.length > 0}>
@@ -125,12 +152,19 @@ export const AttachmentsPanel = ({
                         <FileText size={14} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p
-                          className="text-xs font-semibold text-slate-900 truncate group-hover:text-indigo-600 transition-colors"
-                          title={file.name}
-                        >
-                          {file.name}
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <p
+                            className="text-xs font-semibold text-slate-900 truncate group-hover:text-indigo-600 transition-colors"
+                            title={file.name}
+                          >
+                            {file.name}
+                          </p>
+                          <If is={!!file.file}>
+                            <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-bold rounded-md flex-shrink-0">
+                              Новое
+                            </span>
+                          </If>
+                        </div>
                         <p className="text-[10px] text-slate-400 truncate">
                           {[file.type, file.size].filter(Boolean).join(" · ")}
                         </p>
@@ -159,6 +193,19 @@ export const AttachmentsPanel = ({
                           <Download size={13} />
                         </button>
                       </If>
+                      <If is={!isReadOnly && !!onRemove}>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRemove?.(file);
+                          }}
+                          title="Удалить файл"
+                          className="text-slate-400 hover:text-rose-500 transition-colors flex-shrink-0 cursor-pointer"
+                        >
+                          <X size={13} />
+                        </button>
+                      </If>
                     </div>
                   </div>
                 ))}
@@ -170,3 +217,4 @@ export const AttachmentsPanel = ({
     </>
   );
 };
+

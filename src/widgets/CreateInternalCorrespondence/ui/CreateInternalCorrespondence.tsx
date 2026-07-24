@@ -6568,10 +6568,18 @@ export const CreateInternalCorrespondence = ({
                           openLeft={!showVersionCompareSides && !showOriginalLetterSides}
                           onOpen={handleOpenAttachments}
                           onClose={() => setAttachmentsOpen(false)}
-                          attachments={attachments.filter((a) => !a.file)}
+                          attachments={attachments}
                           onPreview={setPreviewAttachment}
                           onDownload={downloadAttachment}
+                          onUpload={() => fileInputRef.current?.click()}
+                          onRemove={(file) =>
+                            setAttachments((prev) =>
+                              prev.filter((f) => f.id !== file.id),
+                            )
+                          }
+                          isReadOnly={isReadOnly}
                         />
+
                       </div>
                     )}
                   </div>
