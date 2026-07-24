@@ -84,12 +84,7 @@ export const getLetterStatusBadge = (
   doc: any,
   isIncoming?: boolean,
 ): { label: string; color: string } => {
-  const isIncomingDoc =
-    isIncoming ||
-    doc?.kind === "incoming" ||
-    (doc?.channel === "internal" && doc?.kind === "incoming");
-
-  if (isIncomingDoc) {
+  if (isIncoming === true) {
     const assignments = Array.isArray(doc?.assignments)
       ? doc.assignments
       : Array.isArray(doc?.assignment_list)
@@ -145,13 +140,9 @@ export const getEffectiveStatusData = (
 ) => {
   if (!doc || !statusConfig) return statusConfig?.default || {};
 
-  const isIncomingDoc =
-    isIncoming ||
-    doc?.kind === "incoming" ||
-    (doc?.channel === "internal" && doc?.kind === "incoming");
-
-  if (isIncomingDoc) {
+  if (isIncoming === true) {
     const badge = getLetterStatusBadge(doc, true);
+
     if (badge.label === "В процессе исполнения") {
       return (
         statusConfig["in-progress"] ||
