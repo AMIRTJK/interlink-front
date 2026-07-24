@@ -121,6 +121,7 @@ import { PreviewModal } from "./PreviewModal";
 import { TBtn } from "./TBtn";
 import { DSStamp } from "./DSStamp";
 import { OriginalLetterPanel } from "./OriginalLetterPanel";
+import { RelatedDocsAccordion } from "./RelatedDocsBlock";
 import { OriginalLetterCanvas } from "./OriginalLetterCanvas";
 import {
   paginateHtml,
@@ -1556,6 +1557,21 @@ export const CreateInternalCorrespondence = ({
       refetchOnWindowFocus: false,
     },
   });
+
+  const { data: rawStructureData } = useGetQuery<
+    Record<string, unknown>,
+    { data: any }
+  >({
+    url: id ? ApiRoutes.GET_INTERNAL_STRUCTURE.replace(":id", String(id)) : "",
+    useToken: true,
+    options: {
+      enabled: !!id,
+      refetchOnWindowFocus: false,
+    },
+  });
+
+  const relatedDocs = rawStructureData?.data?.related_documents || [];
+
 
   const hasSignedWorkflowSignature = useMemo(() => {
     const wfSigs = rawWorkflowData?.data?.signatures || [];
@@ -5286,6 +5302,8 @@ export const CreateInternalCorrespondence = ({
             sourceId={panelSource.id}
           />
         )}
+
+        <RelatedDocsAccordion relatedDocuments={relatedDocs} />
 
         <div className="w-full">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">

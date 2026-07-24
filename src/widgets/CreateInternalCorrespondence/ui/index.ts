@@ -11,6 +11,7 @@ export { DocumentDrawer } from "./DocumentDrawer";
 export { DeclineReasonModal } from "./DeclineReasonModal";
 export { CancelSignatureModal } from "./CancelSignatureModal";
 export { IncomingLetterSelectModal } from "./IncomingLetterSelectModal";
+export { RelatedDocsBlock, RelatedDocsAccordion } from "./RelatedDocsBlock";
 export { CreateInternalCorrespondence } from "./CreateInternalCorrespondence";
 
 export type {

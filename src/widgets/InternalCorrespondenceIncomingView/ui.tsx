@@ -33,6 +33,7 @@ import {
   createApiFileFromAttachedFile,
   downloadAttachment,
   CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE,
+  RelatedDocsBlock,
   type AttachedFile,
 } from "@widgets/CreateInternalCorrespondence";
 
@@ -317,6 +318,19 @@ export const InternalCorrespondenceIncomingView = ({
     useToken: true,
     options: { enabled: !!item?.id, refetchOnWindowFocus: false },
   });
+
+  const { data: rawStructureData } = useGetQuery<
+    Record<string, unknown>,
+    { data: any }
+  >({
+    url: item?.id
+      ? ApiRoutes.GET_INTERNAL_STRUCTURE.replace(":id", String(item.id))
+      : "",
+    useToken: true,
+    options: { enabled: !!item?.id, refetchOnWindowFocus: false },
+  });
+
+  const relatedDocs = rawStructureData?.data?.related_documents || [];
 
   const signatures = workflowResponse?.data?.signatures || [];
   const approvals = workflowResponse?.data?.approvals || [];
@@ -871,6 +885,12 @@ export const InternalCorrespondenceIncomingView = ({
           )}
         </AnimatePresence>
       </div>
+
+      <If is={relatedDocs.length > 0}>
+        <div className="px-6 pt-4 flex-shrink-0">
+          <RelatedDocsBlock relatedDocuments={relatedDocs} />
+        </div>
+      </If>
 
       {/* Панель управления редактором — перенесена из «Исходящих писем».
           Инструменты форматирования показаны в неактивном (disabled) виде, т.к.
