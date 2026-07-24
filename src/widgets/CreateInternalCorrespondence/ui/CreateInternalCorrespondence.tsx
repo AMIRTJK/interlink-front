@@ -1047,6 +1047,70 @@ const cleanEditorArtifacts = (html: string): string => {
   return w.innerHTML;
 };
 
+// ===== Цитата пересылаемого письма (как в Outlook) =====
+// При «Перенаправить» тело входящего письма кладётся прямо в холст: сверху
+// пустое место под свой текст, ниже — разделитель и само пересылаемое письмо.
+// Каждый блок цитаты помечаем FWD_ATTR: по метке её потом находят, чтобы убрать
+// (в режиме просмотра входящего письма цитата в холсте не нужна — оригинал и
+// так открыт на боковом холсте) и чтобы не вставить её второй раз.
+const FWD_ATTR = "data-forwarded";
+
+const hasForwardQuote = (editor: HTMLElement): boolean =>
+  !!editor.querySelector(`[${FWD_ATTR}]`);
+
+const removeForwardQuote = (editor: HTMLElement): boolean => {
+  const nodes = editor.querySelectorAll(`[${FWD_ATTR}]`);
+  nodes.forEach((n) => n.remove());
+  return nodes.length > 0;
+};
+
+// Блоки цитаты кладём СИБЛИНГАМИ верхнего уровня, а не одной обёрткой: пагинатор
+// разбирает документ по верхнеуровневым детям редактора, и один гигантский
+// контейнер ему пришлось бы резать целиком.
+const buildForwardQuoteNodes = (
+  meta: { sender: string; date: string; subject: string; inboundNumber: string },
+  bodyHtml: string,
+): HTMLElement[] => {
+  const nodes: HTMLElement[] = [];
+
+  const divider = document.createElement("div");
+  divider.setAttribute(FWD_ATTR, "divider");
+  divider.style.cssText =
+    "border-top:1px solid #94a3b8;margin:22px 0 14px;height:0;line-height:0;font-size:0;";
+  nodes.push(divider);
+
+  const head = document.createElement("div");
+  head.setAttribute(FWD_ATTR, "head");
+  head.style.cssText = "margin-bottom:12px;";
+  const row = (label: string, value: string) =>
+    value ? `<div><b>${label}:</b> ${value}</div>` : "";
+  head.innerHTML =
+    row("От", meta.sender) +
+    row("Отправлено", meta.date) +
+    row("Вх. номер", meta.inboundNumber) +
+    row("Тема", meta.subject);
+  nodes.push(head);
+
+  const holder = document.createElement("div");
+  holder.innerHTML = bodyHtml;
+  // Разметку пагинатора исходного письма в цитату не тащим. Рисунок ЭЦП тоже
+  // убираем, и не только из-за абсолютного позиционирования: по наличию
+  // STAMP_ATTR в теле вычисляется состояние подписи версии (см. allVersions),
+  // и чужая печать внутри цитаты сломала бы этот расчёт у нового письма.
+  holder
+    .querySelectorAll(`[${SPACER_ATTR}],[${PAGE_BREAK_ATTR}],[${STAMP_ATTR}]`)
+    .forEach((n) => n.remove());
+  wrapBareTopLevelNodes(holder);
+  Array.from(holder.children).forEach((child) => {
+    const el = child as HTMLElement;
+    el.setAttribute(FWD_ATTR, "body");
+    el.removeAttribute(AUTOSPLIT_ATTR);
+    nodes.push(el);
+  });
+
+  return nodes;
+};
+
 // Маркер разрыва страницы редактора — тот же, что создаёт кнопка «Новая
 // страница». Используется при импорте Word, чтобы перенести разрывы из .docx.
 const makeImportPageBreak = (): HTMLElement => {
@@ -1485,8 +1549,11 @@ export const CreateInternalCorrespondence = ({
   // Над редактором тащат файл — показываем подсказку-оверлей для импорта
   const [isDraggingWord, setIsDraggingWord] = useState(false);
   // Режим просмотра входящего письма включён по умолчанию, когда страница
+  // открыта из «Ответить». При «Перенаправить» — выключен: там исходное письмо
+  // по умолчанию лежит цитатой прямо в холсте (как в Outlook), а боковой показ
+  // оригинала — альтернатива, которая эту цитату из холста убирает.
   const [showOriginalLetterSides, setShowOriginalLetterSides] = useState(
-    !!(panelMode && panelSource),
+    !!(panelMode && panelSource) && panelMode !== "forward",
   );
   const [showVersionCompareSides, setShowVersionCompareSides] = useState(false);
 
@@ -3788,6 +3855,7 @@ export const CreateInternalCorrespondence = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+
   // Перехват отмены из контекстного меню браузера / меню «Правка»: нативный
   // стек не используется, вместо него — наша история.
   useEffect(() => {
@@ -5241,6 +5309,88 @@ export const CreateInternalCorrespondence = ({
   );
 
   const isReadOnly = isSigned || isOldVersionSelected;
+
+  // ===== Пересылка: цитата исходного письма в холсте =====
+  // «Перенаправить» кладёт входящее письмо прямо в холст (сверху остаётся место
+  // под свой текст, ниже разделитель и само письмо) — как это делает Outlook.
+  // Исключение — режим просмотра входящего письма: там оригинал уже открыт на
+  // боковом холсте, и в основной холст мы не добавляем ничего.
+  //
+  // Отслеживаем именно ПЕРЕКЛЮЧЕНИЕ режима: вставлять цитату на каждое
+  // изменение текста нельзя, иначе она возвращалась бы сразу после того, как
+  // пользователь сам её удалил.
+  const forwardSyncedModeRef = useRef<boolean | null>(null);
+  useEffect(() => {
+    if (panelMode !== "forward" || isReadOnly) return;
+    const editor = editorRef.current;
+    if (!editor || !panelSourceBody) return;
+
+    const modeChanged = forwardSyncedModeRef.current !== showOriginalLetterSides;
+    forwardSyncedModeRef.current = showOriginalLetterSides;
+
+    const afterMutation = () => {
+      setEditorContent(getCleanEditorHtml());
+      if (paginateEditorRef.current) setPageCount(paginateEditorRef.current());
+      resetHistory();
+    };
+
+    if (showOriginalLetterSides) {
+      // Цитата могла приехать из сохранённого черновика — убираем её здесь же,
+      // а не только на переключении режима.
+      if (removeForwardQuote(editor)) afterMutation();
+      return;
+    }
+
+    if (!modeChanged || hasForwardQuote(editor)) return;
+
+    const nodes = buildForwardQuoteNodes(
+      {
+        sender: panelSource?.senderName || panelSource?.creator?.full_name || "",
+        date: panelSource?.date || "",
+        subject: panelSource?.subject || "",
+        inboundNumber: panelSource?.inboundNumber || "",
+      },
+      panelSourceBody,
+    );
+    if (!nodes.length) return;
+
+    // Свой текст пишется НАД цитатой, поэтому если холст пуст — заводим пустой
+    // абзац сверху и ставим в него курсор (как курсор Outlook при пересылке).
+    const ownBlocks = Array.from(editor.children).filter(
+      (el) => !(el as HTMLElement).hasAttribute(FWD_ATTR),
+    );
+    let caretTarget: HTMLElement | null = null;
+    if (!ownBlocks.length) {
+      const p = document.createElement("p");
+      p.appendChild(document.createElement("br"));
+      editor.insertBefore(p, editor.firstChild);
+      caretTarget = p;
+    }
+    nodes.forEach((n) => editor.appendChild(n));
+    afterMutation();
+
+    if (caretTarget) {
+      const range = document.createRange();
+      range.setStart(caretTarget, 0);
+      range.collapse(true);
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+    }
+  }, [
+    panelMode,
+    isReadOnly,
+    showOriginalLetterSides,
+    panelSourceBody,
+    panelSource?.senderName,
+    panelSource?.creator?.full_name,
+    panelSource?.date,
+    panelSource?.subject,
+    panelSource?.inboundNumber,
+    editorContent,
+    getCleanEditorHtml,
+    resetHistory,
+  ]);
 
   const activeSignatures =
     rawWorkflowData?.data?.signatures?.filter(
