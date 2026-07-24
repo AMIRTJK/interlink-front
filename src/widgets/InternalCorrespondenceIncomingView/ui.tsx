@@ -888,7 +888,16 @@ export const InternalCorrespondenceIncomingView = ({
 
       <If is={relatedDocs.length > 0}>
         <div className="px-6 pt-4 flex-shrink-0">
-          <RelatedDocsBlock relatedDocuments={relatedDocs} />
+          <RelatedDocsBlock
+            relatedDocuments={relatedDocs}
+            currentDoc={{
+              id: item.id,
+              kind: "incoming",
+              date: item.sent_at || (item as any).doc_date || (item as any).created_at,
+              reg_number: item.reg_number,
+              subject: item.subject,
+            }}
+          />
         </div>
       </If>
 

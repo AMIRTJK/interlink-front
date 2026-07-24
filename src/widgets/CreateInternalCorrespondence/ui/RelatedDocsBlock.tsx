@@ -7,49 +7,137 @@ import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { IRelatedDocumentLink, IRelatedDocItem } from "@widgets/NewRegistry/lib/structure/types";
 
-interface IProps {
-  relatedDocuments?: IRelatedDocumentLink[];
+export interface IChainDocItem {
+  id: number;
+  kind: "incoming" | "outgoing";
+  typeLabel: string;
+  dateLabel?: string;
+  regNumber?: string;
+  subject?: string;
+  isCurrent?: boolean;
+  rawDateObj?: Date;
 }
 
-const DocBadge: React.FC<{
-  doc?: IRelatedDocItem;
-  label: string;
-  onClick: (id: number, kind?: string) => void;
-}> = ({ doc, label, onClick }) => {
-  if (!doc) return null;
+export function buildRelatedChain(
+  relatedDocuments?: IRelatedDocumentLink[],
+  currentDoc?: {
+    id?: number | string;
+    kind?: "incoming" | "outgoing" | string;
+    date?: string;
+    reg_number?: string;
+    subject?: string;
+  },
+): IChainDocItem[] {
+  const map = new Map<string, IChainDocItem>();
 
-  const isIncoming = doc.kind === "incoming" || label === "Входящее";
+  const formatDateStr = (raw?: string) => {
+    if (!raw) return undefined;
+    try {
+      const d = new Date(raw);
+      if (isNaN(d.getTime())) return undefined;
+      return d.toLocaleDateString("ru-RU");
+    } catch {
+      return undefined;
+    }
+  };
 
-  return (
-    <div
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick(doc.id, doc.kind);
-      }}
-      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-blue-400 hover:shadow-xs cursor-pointer transition-all"
-    >
-      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-        {label}:
-      </span>
-      <If is={Boolean(doc.reg_number)}>
-        <span className="font-mono text-xs font-semibold text-blue-600">
-          {doc.reg_number}
-        </span>
-      </If>
-      <span className="text-xs text-slate-800 font-medium truncate max-w-[220px]">
-        {doc.subject || "Без темы"}
-      </span>
-    </div>
-  );
-};
+  const currentIdNum = currentDoc?.id != null ? Number(currentDoc.id) : undefined;
+  const currentKind = currentDoc?.kind === "incoming" ? "incoming" : "outgoing";
 
-export const RelatedDocsAccordion: React.FC<IProps> = ({ relatedDocuments }) => {
+  const addDoc = (
+    doc?: IRelatedDocItem | any,
+    fallbackKind?: "incoming" | "outgoing",
+    forceCurrent?: boolean,
+  ) => {
+    if (!doc || doc.id == null) return;
+    const id = Number(doc.id);
+    const kind = (doc.kind as "incoming" | "outgoing") || fallbackKind || "incoming";
+    const key = `${kind}-${id}`;
+    if (map.has(key)) return;
+
+    const isCurrent =
+      forceCurrent ||
+      (currentIdNum != null && id === currentIdNum && kind === currentKind);
+
+    const rawDate = doc.doc_date || doc.sent_at || doc.created_at || doc.date;
+    const formattedDate =
+      formatDateStr(rawDate) ||
+      (typeof doc.date === "string" && doc.date.includes(".") ? doc.date : undefined);
+    const rawDateObj = rawDate ? new Date(rawDate) : undefined;
+
+    map.set(key, {
+      id,
+      kind,
+      typeLabel: kind === "incoming" ? "Входящее письмо" : "Исходящее письмо",
+      dateLabel: formattedDate ? `от ${formattedDate}` : "",
+      regNumber: doc.reg_number || doc.inboundNumber,
+      subject: doc.subject,
+      isCurrent: Boolean(isCurrent),
+      rawDateObj,
+    });
+  };
+
+  if (relatedDocuments && relatedDocuments.length > 0) {
+    relatedDocuments.forEach((rel) => {
+      if (rel.incoming) addDoc(rel.incoming, "incoming");
+      if (rel.outgoing) addDoc(rel.outgoing, "outgoing");
+    });
+  }
+
+  if (currentDoc && currentDoc.id != null) {
+    const key = `${currentKind}-${currentIdNum}`;
+    if (!map.has(key)) {
+      addDoc(currentDoc, currentKind, true);
+    } else {
+      const existing = map.get(key)!;
+      existing.isCurrent = true;
+      if (!existing.dateLabel && currentDoc.date) {
+        existing.dateLabel = currentDoc.date.includes("от")
+          ? currentDoc.date
+          : `от ${currentDoc.date}`;
+      }
+    }
+  }
+
+  const list = Array.from(map.values());
+
+  list.sort((a, b) => {
+    if (a.rawDateObj && b.rawDateObj) {
+      const diff = a.rawDateObj.getTime() - b.rawDateObj.getTime();
+      if (diff !== 0) return diff;
+    }
+    if (a.id !== b.id) return a.id - b.id;
+    return a.kind === "incoming" ? -1 : 1;
+  });
+
+  return list;
+}
+
+interface IProps {
+  relatedDocuments?: IRelatedDocumentLink[];
+  currentDoc?: {
+    id?: number | string;
+    kind?: "incoming" | "outgoing" | string;
+    date?: string;
+    reg_number?: string;
+    subject?: string;
+  };
+}
+
+export const RelatedDocsAccordion: React.FC<IProps> = ({
+  relatedDocuments,
+  currentDoc,
+}) => {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(true);
 
-  if (!relatedDocuments || relatedDocuments.length === 0) return null;
+  const chain = buildRelatedChain(relatedDocuments, currentDoc);
 
-  const handleDocClick = (id: number, kind?: string) => {
+  if (chain.length <= 1 && (!relatedDocuments || relatedDocuments.length === 0)) {
+    return null;
+  }
+
+  const handleDocClick = (id: number, kind: "incoming" | "outgoing") => {
     if (kind === "incoming") {
       navigate(AppRoutes.INTERNAL_INCOMING_SHOW.replace(":id", String(id)));
     } else {
@@ -72,7 +160,7 @@ export const RelatedDocsAccordion: React.FC<IProps> = ({ relatedDocuments }) => 
             Связанные документы
           </span>
           <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-xs font-bold border border-blue-100">
-            {relatedDocuments.length}
+            {chain.length}
           </span>
         </div>
 
@@ -90,7 +178,7 @@ export const RelatedDocsAccordion: React.FC<IProps> = ({ relatedDocuments }) => 
         </div>
       </div>
 
-      {/* Содержимое аккордеона */}
+      {/* Содержимое аккордеона: горизонтальная цепочка */}
       <AnimatePresence initial={false}>
         {isExpanded && (
           <motion.div
@@ -100,27 +188,81 @@ export const RelatedDocsAccordion: React.FC<IProps> = ({ relatedDocuments }) => 
             transition={{ duration: 0.22, ease: "easeOut" }}
             className="overflow-hidden"
           >
-            <div className="p-4 flex flex-col gap-2.5 bg-slate-50/30">
-              {relatedDocuments.map((rel, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2 flex-wrap text-xs bg-white p-3 rounded-xl border border-slate-100 shadow-2xs"
-                >
-                  <DocBadge
-                    doc={rel.incoming}
-                    label="Входящее"
-                    onClick={handleDocClick}
-                  />
-                  <If is={Boolean(rel.incoming && rel.outgoing)}>
-                    <ArrowRight size={14} className="text-slate-300 flex-shrink-0" />
-                  </If>
-                  <DocBadge
-                    doc={rel.outgoing}
-                    label="Исходящее"
-                    onClick={handleDocClick}
-                  />
-                </div>
-              ))}
+            <div className="p-4 bg-slate-50/40">
+              <div className="flex items-center gap-2 overflow-x-auto py-1 px-1 scrollbar-thin scrollbar-thumb-slate-200">
+                {chain.map((item, index) => {
+                  const isCurrent = item.isCurrent;
+
+                  return (
+                    <React.Fragment key={`${item.kind}-${item.id}`}>
+                      {index > 0 && (
+                        <ArrowRight
+                          size={18}
+                          className="text-slate-300 flex-shrink-0 mx-1"
+                        />
+                      )}
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDocClick(item.id, item.kind);
+                        }}
+                        className={cn(
+                          "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border flex-shrink-0 cursor-pointer transition-all shadow-2xs select-none min-w-[200px] max-w-[300px]",
+                          isCurrent
+                            ? "bg-blue-600 text-white border-blue-600 ring-2 ring-blue-200 shadow-md font-semibold"
+                            : "bg-white text-slate-800 border-slate-200 hover:border-blue-400 hover:bg-blue-50/50",
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "w-2.5 h-2.5 rounded-full flex-shrink-0",
+                            isCurrent
+                              ? "bg-white"
+                              : item.kind === "incoming"
+                                ? "bg-emerald-500"
+                                : "bg-blue-500",
+                          )}
+                        />
+
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 text-xs font-bold leading-snug truncate">
+                            <span>{item.typeLabel}</span>
+                            {item.dateLabel && (
+                              <span
+                                className={cn(
+                                  "text-[11px] font-normal",
+                                  isCurrent ? "text-blue-100" : "text-slate-400",
+                                )}
+                              >
+                                {item.dateLabel}
+                              </span>
+                            )}
+                          </div>
+
+                          {(item.regNumber || item.subject) && (
+                            <div
+                              className={cn(
+                                "text-[11px] truncate mt-0.5",
+                                isCurrent ? "text-blue-100 font-medium" : "text-slate-500",
+                              )}
+                            >
+                              {item.regNumber ? `№ ${item.regNumber}` : ""}
+                              {item.regNumber && item.subject ? " • " : ""}
+                              {item.subject || ""}
+                            </div>
+                          )}
+                        </div>
+
+                        <If is={Boolean(isCurrent)}>
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider bg-white/20 text-white px-2 py-0.5 rounded-md flex-shrink-0 border border-white/20">
+                            Текущий
+                          </span>
+                        </If>
+                      </div>
+                    </React.Fragment>
+                  );
+                })}
+              </div>
             </div>
           </motion.div>
         )}

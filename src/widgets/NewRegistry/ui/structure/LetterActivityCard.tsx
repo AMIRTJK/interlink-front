@@ -20,6 +20,7 @@ interface ILetterActivityCardProps {
 
 export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
   item,
+  direction,
   index,
   onClick,
 }) => {
@@ -195,7 +196,14 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
                   </div>
                   <RelatedDocsSection
                     relatedDocuments={relatedDocs}
-                    onDocClick={() => onClick()}
+                    currentDoc={{
+                      id: item.id,
+                      kind: item.kind || direction,
+                      date: item.sent_at || item.created_at,
+                      reg_number: item.reg_number,
+                      subject: item.subject,
+                    }}
+                    onDocClick={(_id) => onClick()}
                   />
                 </If>
               </div>

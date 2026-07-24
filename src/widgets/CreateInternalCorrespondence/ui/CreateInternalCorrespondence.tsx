@@ -5303,7 +5303,16 @@ export const CreateInternalCorrespondence = ({
           />
         )}
 
-        <RelatedDocsAccordion relatedDocuments={relatedDocs} />
+        <RelatedDocsAccordion
+          relatedDocuments={relatedDocs}
+          currentDoc={{
+            id: id || initialData?.item?.id,
+            kind: "outgoing",
+            date: initialData?.item?.doc_date || initialData?.item?.created_at,
+            reg_number: initialData?.item?.reg_number,
+            subject: subject || initialData?.item?.subject,
+          }}
+        />
 
         <div className="w-full">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
