@@ -1,4 +1,5 @@
 import * as React from "react";
+import { motion, LayoutGroup } from "framer-motion";
 import { Search, Plus, Filter, ArrowUp, ArrowDown, LayoutGrid, List as ListIcon, UserCheck, X } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
@@ -114,31 +115,40 @@ export const TasksFilterBar = ({
         </div>
       </div>
 
-      <nav className="flex flex-wrap gap-1.5 p-1.5 bg-slate-200/40 dark:bg-slate-800/60 rounded-2xl w-fit max-w-full">
-        {STATUS_TABS.map((tab) => {
-          const activeTab = filters.status === tab.value;
-          const cnt = stats ? (stats[tab.statKey] as number) : undefined;
-          return (
-            <button
-              key={tab.value || "all"}
-              onClick={() => onFilterChange({ status: tab.value })}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                activeTab
-                  ? "bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 text-white shadow-sm"
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-white/50 dark:hover:bg-white/5",
-              )}
-            >
-              <span>{tab.label}</span>
-              <If is={cnt != null}>
-                <span className={cn("text-[10px] px-1.5 py-0.5 rounded-md transition-colors", activeTab ? "bg-white/20 text-white" : "bg-slate-300/40 dark:bg-white/10")}>
-                  {cnt}
-                </span>
-              </If>
-            </button>
-          );
-        })}
-      </nav>
+      <LayoutGroup id="statusTabsGroup">
+        <nav className="flex flex-wrap gap-1.5 p-1.5 bg-slate-200/40 dark:bg-slate-800/60 rounded-2xl w-fit max-w-full">
+          {STATUS_TABS.map((tab) => {
+            const activeTab = filters.status === tab.value;
+            const cnt = stats ? (stats[tab.statKey] as number) : undefined;
+            return (
+              <button
+                key={tab.value || "all"}
+                onClick={() => onFilterChange({ status: tab.value })}
+                className={cn(
+                  "relative flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer",
+                  activeTab
+                    ? "text-white"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-white/50 dark:hover:bg-white/5",
+                )}
+              >
+                <If is={activeTab}>
+                  <motion.div
+                    layoutId="activeStatusTabPill"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    className="absolute inset-0 bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 rounded-xl"
+                  />
+                </If>
+                <span className="relative z-10">{tab.label}</span>
+                <If is={cnt != null}>
+                  <span className={cn("relative z-10 text-[10px] px-1.5 py-0.5 rounded-md", activeTab ? "bg-white/20 text-white" : "bg-slate-300/40 dark:bg-white/10")}>
+                    {cnt}
+                  </span>
+                </If>
+              </button>
+            );
+          })}
+        </nav>
+      </LayoutGroup>
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
