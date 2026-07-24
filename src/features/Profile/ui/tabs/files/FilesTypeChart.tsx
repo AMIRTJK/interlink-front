@@ -179,4 +179,3 @@ export const FilesTypeChart = ({ typeBreakdown = [] }: IProps) => {
 		</motion.div>
 	);
 };
-

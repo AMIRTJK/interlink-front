@@ -154,5 +154,3 @@ export const FilesVolumeChart = ({ uploadActivity = [] }: IProps) => {
 		</motion.div>
 	);
 };
-
-

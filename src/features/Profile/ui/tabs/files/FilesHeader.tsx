@@ -92,17 +92,7 @@ export const FilesHeader = ({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={(e) => {
-            if (e.target.files?.[0]) {
-              onUpload(e.target.files[0]);
-              e.target.value = "";
-            }
-          }}
-          className="hidden!"
-        />
+        <input type="file" ref={fileInputRef} onChange={(e) => { if (e.target.files?.[0]) { onUpload(e.target.files[0]); e.target.value = ""; } }} className="hidden!" />
 
         <div className="relative w-full sm:w-64">
           <input
@@ -202,6 +192,3 @@ export const FilesHeader = ({
     </div>
   );
 };
-
-
-
