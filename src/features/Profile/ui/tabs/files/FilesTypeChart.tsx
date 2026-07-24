@@ -75,166 +75,108 @@ export const FilesTypeChart = ({ typeBreakdown = [] }: IProps) => {
 		})
 		.filter((item) => item.value > 0 || item.count > 0);
 
-	if (chartData.length === 0) {
+	const renderChartContent = () => {
+		if (chartType === "line") {
+			return (
+				<LineChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
+					<XAxis dataKey="name" axisLine={false} tickLine={false} tick={axisTick} />
+					<YAxis axisLine={false} tickLine={false} tick={axisTick} width={24} />
+					<RechartsTooltip formatter={(v: any, _, props: any) => [`${v}% (${props.payload.count} ф., ${props.payload.sizeHuman})`, "Доля"]} contentStyle={tooltipStyle} />
+					<Line type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={2} dot={{ r: 4, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }} />
+				</LineChart>
+			);
+		}
+		if (chartType === "area") {
+			return (
+				<AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
+					<defs>
+						<linearGradient id="filesTypeAreaGrad" x1="0" y1="0" x2="0" y2="1">
+							<stop offset="5%" stopColor="#6366f1" stopOpacity={0.35} />
+							<stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+						</linearGradient>
+					</defs>
+					<XAxis dataKey="name" axisLine={false} tickLine={false} tick={axisTick} />
+					<YAxis axisLine={false} tickLine={false} tick={axisTick} width={24} />
+					<RechartsTooltip formatter={(v: any, _, props: any) => [`${v}% (${props.payload.count} ф., ${props.payload.sizeHuman})`, "Доля"]} contentStyle={tooltipStyle} />
+					<Area type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#filesTypeAreaGrad)" dot={{ r: 4, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6, fill: "#6366f1" }} />
+				</AreaChart>
+			);
+		}
+		if (chartType === "bar") {
+			return (
+				<BarChart data={chartData} barSize={36} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
+					<XAxis dataKey="name" axisLine={false} tickLine={false} tick={axisTick} />
+					<YAxis axisLine={false} tickLine={false} tick={axisTick} width={24} />
+					<RechartsTooltip formatter={(v: any, _, props: any) => [`${v}% (${props.payload.count} ф., ${props.payload.sizeHuman})`, "Доля"]} contentStyle={tooltipStyle} cursor={{ fill: "rgba(0,0,0,0.04)" }} />
+					<Bar dataKey="value" radius={[6, 6, 0, 0]}>
+						{chartData.map((entry, i) => (
+							<Cell key={`bar-${i}`} fill={entry.fill} />
+						))}
+					</Bar>
+				</BarChart>
+			);
+		}
 		return (
-			<motion.div
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.3 }}
-				className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm border border-white/40 dark:border-slate-700/50 shadow-md p-5 flex flex-col items-center justify-center min-h-[320px]"
-			>
-				<h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200 mb-4">
-					Типы файлов
-				</h3>
-				<span className="text-xs text-slate-400">Нет данных для отображения</span>
-			</motion.div>
-		);
-	}
-
-	let chartElement: React.ReactNode = null;
-
-	if (chartType === "line") {
-		chartElement = (
-			<LineChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
-				<XAxis dataKey="name" axisLine={false} tickLine={false} tick={axisTick} />
-				<YAxis axisLine={false} tickLine={false} tick={axisTick} width={24} />
-				<RechartsTooltip
-					formatter={(v: number | undefined, name: string | undefined, props: any) => [
-						`${v}% (${props.payload.count} ф., ${props.payload.sizeHuman})`,
-						"Доля",
-					]}
-					contentStyle={tooltipStyle}
-				/>
-				<Line
-					type="monotone"
-					dataKey="value"
-					stroke="#6366f1"
-					strokeWidth={2}
-					dot={{ r: 4, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }}
-				/>
-			</LineChart>
-		);
-	} else if (chartType === "area") {
-		chartElement = (
-			<AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
-				<defs>
-					<linearGradient id="filesTypeAreaGrad" x1="0" y1="0" x2="0" y2="1">
-						<stop offset="5%" stopColor="#6366f1" stopOpacity={0.35} />
-						<stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-					</linearGradient>
-				</defs>
-				<XAxis dataKey="name" axisLine={false} tickLine={false} tick={axisTick} />
-				<YAxis axisLine={false} tickLine={false} tick={axisTick} width={24} />
-				<RechartsTooltip
-					formatter={(v: number | undefined, name: string | undefined, props: any) => [
-						`${v}% (${props.payload.count} ф., ${props.payload.sizeHuman})`,
-						"Доля",
-					]}
-					contentStyle={tooltipStyle}
-				/>
-				<Area
-					type="monotone"
-					dataKey="value"
-					stroke="#6366f1"
-					strokeWidth={2}
-					fillOpacity={1}
-					fill="url(#filesTypeAreaGrad)"
-					dot={{ r: 4, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }}
-					activeDot={{ r: 6, fill: "#6366f1" }}
-				/>
-			</AreaChart>
-		);
-	} else if (chartType === "bar") {
-		chartElement = (
-			<BarChart data={chartData} barSize={36} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
-				<XAxis dataKey="name" axisLine={false} tickLine={false} tick={axisTick} />
-				<YAxis axisLine={false} tickLine={false} tick={axisTick} width={24} />
-				<RechartsTooltip
-					formatter={(v: number | undefined, name: string | undefined, props: any) => [
-						`${v}% (${props.payload.count} ф., ${props.payload.sizeHuman})`,
-						"Доля",
-					]}
-					contentStyle={tooltipStyle}
-					cursor={{ fill: "rgba(0,0,0,0.04)" }}
-				/>
-				<Bar dataKey="value" radius={[6, 6, 0, 0]}>
-					{chartData.map((entry, i) => (
-						<Cell key={`bar-${i}`} fill={entry.fill} />
-					))}
-				</Bar>
-			</BarChart>
-		);
-	} else {
-		chartElement = (
 			<PieChart>
-				<Pie
-					data={chartData}
-					cx="50%"
-					cy="50%"
-					innerRadius={55}
-					outerRadius={95}
-					paddingAngle={3}
-					dataKey="value"
-				>
+				<Pie data={chartData} cx="50%" cy="50%" innerRadius={55} outerRadius={95} paddingAngle={3} dataKey="value">
 					{chartData.map((entry, i) => (
 						<Cell key={`pie-${i}`} fill={entry.fill} />
 					))}
 				</Pie>
-				<RechartsTooltip
-					formatter={(v: number | undefined, n: string | undefined, props: any) => [
-						`${v}% (${props.payload.count} ф., ${props.payload.sizeHuman})`,
-						n || "",
-					]}
-					contentStyle={tooltipStyle}
-				/>
+				<RechartsTooltip formatter={(v: any, n: any, props: any) => [`${v}% (${props.payload.count} ф., ${props.payload.sizeHuman})`, n || ""]} contentStyle={tooltipStyle} />
 			</PieChart>
 		);
-	}
+	};
 
 	return (
 		<motion.div
 			initial={{ opacity: 0 }}
-			animate={{ opacity: 1, y: 0 }}
+			animate={{ opacity: 1 }}
 			transition={{ duration: 0.3 }}
 			className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm border border-white/40 dark:border-slate-700/50 shadow-md p-5 min-h-[320px] flex flex-col justify-between"
 		>
-			<div>
-				<div className="flex items-center justify-between mb-4">
-					<h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200">
+			{chartData.length === 0 ? (
+				<div className="flex flex-col items-center justify-center h-full min-h-[260px]">
+					<h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200 mb-4">
 						Типы файлов
 					</h3>
-					<ChartSwitcher current={chartType} onChange={setChartType} />
+					<span className="text-xs text-slate-400">Нет данных для отображения</span>
 				</div>
-				<AnimatePresence mode="wait">
-					<motion.div
-						key={chartType}
-						initial={{ opacity: 0, scale: 0.97 }}
-						animate={{ opacity: 1, scale: 1 }}
-						exit={{ opacity: 0, scale: 0.97 }}
-						transition={{ duration: 0.15 }}
-					>
-						<ResponsiveContainer width="100%" height={220}>
-							{chartElement}
-						</ResponsiveContainer>
-					</motion.div>
-				</AnimatePresence>
-			</div>
-			<div className="flex flex-wrap gap-3 mt-4 justify-center">
-				{chartData.map((d) => (
-					<div key={d.name} className="flex items-center gap-1.5">
-						<span
-							className="w-2.5 h-2.5 rounded-full shrink-0"
-							style={{ background: d.fill }}
-						/>
-						<span className="text-[11px] text-zinc-500 dark:text-zinc-400">
-							{d.name}
-						</span>
-						<span className="text-[11px] font-bold text-zinc-700 dark:text-zinc-200">
-							{d.value}%
-						</span>
+			) : (
+				<>
+					<div>
+						<div className="flex items-center justify-between mb-4">
+							<h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200">
+								Типы файлов
+							</h3>
+							<ChartSwitcher current={chartType} onChange={setChartType} />
+						</div>
+						<AnimatePresence mode="wait">
+							<motion.div
+								key={chartType}
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
+								transition={{ duration: 0.15 }}
+							>
+								<ResponsiveContainer width="100%" height={220}>
+									{renderChartContent()}
+								</ResponsiveContainer>
+							</motion.div>
+						</AnimatePresence>
 					</div>
-				))}
-			</div>
+					<div className="flex flex-wrap gap-3 mt-4 justify-center">
+						{chartData.map((d) => (
+							<div key={d.name} className="flex items-center gap-1.5">
+								<span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: d.fill }} />
+								<span className="text-[11px] text-zinc-500 dark:text-zinc-400">{d.name}</span>
+								<span className="text-[11px] font-bold text-zinc-700 dark:text-zinc-200">{d.value}%</span>
+							</div>
+						))}
+					</div>
+				</>
+			)}
 		</motion.div>
 	);
 };
+
