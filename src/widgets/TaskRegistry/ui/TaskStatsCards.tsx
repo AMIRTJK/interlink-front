@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
 import { cn } from "@shared/lib";
+import { If } from "@shared/ui";
 import type { Priority, TaskStatsFull } from "../model/types";
 import { STAT_CARDS, PRIORITY_OPTIONS } from "../model/constants";
 
@@ -7,15 +7,8 @@ interface TaskStatsCardsProps {
   stats: TaskStatsFull | null;
 }
 
-const PriorityBreakdown = ({
-  breakdown,
-}: {
-  breakdown: Record<string, number>;
-}) => {
-  const total = PRIORITY_OPTIONS.reduce(
-    (sum, o) => sum + (breakdown[o.value] || 0),
-    0,
-  );
+const PriorityBreakdown = ({ breakdown }: { breakdown: Record<string, number> }) => {
+  const total = PRIORITY_OPTIONS.reduce((sum, o) => sum + (breakdown[o.value] || 0), 0);
 
   return (
     <div className="p-5 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-white/10 rounded-3xl shadow-sm flex flex-col gap-3">
@@ -28,10 +21,9 @@ const PriorityBreakdown = ({
         </span>
       </div>
 
-      {/* Стек-бар */}
       <div className="flex h-2.5 w-full rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-        {total > 0 &&
-          PRIORITY_OPTIONS.map((o) => {
+        <If is={total > 0}>
+          {PRIORITY_OPTIONS.map((o) => {
             const value = breakdown[o.value as Priority] || 0;
             if (value === 0) return null;
             return (
@@ -43,9 +35,9 @@ const PriorityBreakdown = ({
               />
             );
           })}
+        </If>
       </div>
 
-      {/* Легенда */}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
         {PRIORITY_OPTIONS.map((o) => (
           <div key={o.value} className="flex items-center gap-2">
@@ -74,23 +66,14 @@ export const TaskStatsCards = ({ stats }: TaskStatsCardsProps) => {
   return (
     <div className="flex flex-col gap-6">
       <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {STAT_CARDS.map((stat, idx) => {
+        {STAT_CARDS.map((stat) => {
           const Icon = stat.icon;
           return (
-            <motion.div
+            <div
               key={stat.key}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-white/10 rounded-3xl shadow-sm flex items-center gap-5 hover:scale-[1.02] transition-transform duration-300"
+              className="p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-white/10 rounded-3xl shadow-sm flex items-center gap-5 hover:scale-[1.02] transition-all duration-300"
             >
-              <div
-                className={cn(
-                  "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0",
-                  stat.bg,
-                  stat.color,
-                )}
-              >
+              <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0", stat.bg, stat.color)}>
                 <Icon size={28} />
               </div>
               <div>
@@ -101,14 +84,12 @@ export const TaskStatsCards = ({ stats }: TaskStatsCardsProps) => {
                   {values[stat.key]}
                 </p>
               </div>
-            </motion.div>
+            </div>
           );
         })}
       </section>
 
-      {stats?.priority_breakdown && (
-        <PriorityBreakdown breakdown={stats.priority_breakdown} />
-      )}
+      <PriorityBreakdown breakdown={stats?.priority_breakdown || {}} />
     </div>
   );
 };
