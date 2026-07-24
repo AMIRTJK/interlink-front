@@ -21,6 +21,8 @@ import {
   Monitor,
 } from "lucide-react";
 import { cn } from "@shared/lib";
+import { If } from "@shared/ui";
+
 
 // Панель управления редактором для ПРОСМОТРА входящего письма. Внешне 1-в-1
 // повторяет тулбар редактора исходящего письма (CreateInternalCorrespondence),
@@ -34,9 +36,11 @@ export interface ToolbarSection {
   label: string;
   dotClass?: string;
   dotStyle?: React.CSSProperties;
+  badge?: number | string;
   isOpen: boolean;
   onToggle: () => void;
 }
+
 
 // Неактивная кнопка тулбара — повторяет вид TBtn редактора в disabled-состоянии.
 const TBtn = ({
@@ -198,7 +202,20 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
                 style={section.dotStyle}
               />
               <span>{section.label}</span>
+              <If is={section.badge !== undefined && section.badge !== null && section.badge !== ""}>
+                <span
+                  className={cn(
+                    "text-[10px] font-bold rounded-full px-1.5 py-0.5 flex items-center justify-center flex-shrink-0 min-w-4 h-4",
+                    section.isOpen
+                      ? "bg-white text-slate-800"
+                      : "bg-indigo-100 text-indigo-700",
+                  )}
+                >
+                  {section.badge}
+                </span>
+              </If>
             </button>
+
           ))}
         </div>
       )}

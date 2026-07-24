@@ -54,7 +54,13 @@ export const AttachmentsPanel = ({
             >
               Вложения
             </span>
+            <If is={attachments.length > 0}>
+              <span className="bg-indigo-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">
+                {attachments.length}
+              </span>
+            </If>
           </motion.button>
+
         </div>
       )}
 

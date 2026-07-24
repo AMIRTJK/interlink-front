@@ -7,7 +7,16 @@ import { ApproversPanel } from "./ApproversPanel";
 import { SignersPanel } from "./SignersPanel";
 import { VersionsPanel } from "./VersionsPanel";
 import { TaskPanel } from "./TaskPanel";
-import { AttachmentsPanel, type IAttachment } from "./AttachmentsPanel";
+import { AttachmentsPanel } from "./AttachmentsPanel";
+import { FilePreviewModal } from "@features/Profile";
+import {
+  mapServerAttachment,
+  createApiFileFromAttachedFile,
+  downloadAttachment,
+  CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE,
+  type AttachedFile,
+} from "@widgets/CreateInternalCorrespondence";
+
 import {
   paginateHtml,
   contentStyle,
@@ -34,9 +43,11 @@ interface ToolbarSection {
   label: string;
   dotClass?: string;
   dotStyle?: React.CSSProperties;
+  badge?: number | string;
   isOpen: boolean;
   onToggle: () => void;
 }
+
 
 interface IProps {
   subject: string;
@@ -53,8 +64,9 @@ interface IProps {
   panelsInToolbar?: boolean;
   onTogglePanelsInToolbar?: (value: boolean) => void;
   correspondenceId?: string | number;
-  attachments?: IAttachment[];
+  attachments?: any[];
 }
+
 
 const pageWord = (n: number) =>
   n === 1 ? "страница" : n < 5 ? "страницы" : "страниц";
@@ -85,6 +97,11 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
   const [approversOpen, setApproversOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [attachmentsOpen, setAttachmentsOpen] = useState(false);
+  const [previewAttachment, setPreviewAttachment] = useState<AttachedFile | null>(null);
+
+  const mappedAttachments: AttachedFile[] = (attachments || []).map((att: any) =>
+    mapServerAttachment(att, correspondenceId)
+  );
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -160,10 +177,12 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
       key: "attachments",
       label: "Вложения",
       dotClass: "bg-teal-500",
+      badge: mappedAttachments.length > 0 ? mappedAttachments.length : undefined,
       isOpen: attachmentsOpen,
       onToggle: () =>
         attachmentsOpen ? setAttachmentsOpen(false) : openAttachments(),
     },
+
   ];
 
   useEffect(() => {
@@ -598,7 +617,20 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
                     style={section.dotStyle}
                   />
                   <span>{section.label}</span>
+                  <If is={section.badge !== undefined && section.badge !== null && section.badge !== ""}>
+                    <span
+                      className={cn(
+                        "text-[10px] font-bold rounded-full px-1.5 py-0.5 flex items-center justify-center flex-shrink-0 min-w-4 h-4",
+                        section.isOpen
+                          ? "bg-white text-slate-800"
+                          : "bg-indigo-100 text-indigo-700",
+                      )}
+                    >
+                      {section.badge}
+                    </span>
+                  </If>
                 </button>
+
               ))}
             </div>
             <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600">
@@ -1172,8 +1204,11 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
                       hideTab={panelsInToolbar}
                       onOpen={openAttachments}
                       onClose={() => setAttachmentsOpen(false)}
-                      attachments={attachments}
+                      attachments={mappedAttachments}
+                      onPreview={(file) => setPreviewAttachment(file)}
+                      onDownload={(file) => downloadAttachment(file)}
                     />
+
                   </div>
                 </If>
                 <div
@@ -1721,7 +1756,16 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
             Последнее изменение: {lastModified}
           </span>
         </div>
+
       </div>
+      <If is={!!previewAttachment}>
+        <FilePreviewModal
+          file={createApiFileFromAttachedFile(previewAttachment)}
+          onClose={() => setPreviewAttachment(null)}
+          unavailableNotice={CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE}
+        />
+      </If>
     </div>
   );
 };
+

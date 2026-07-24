@@ -26,7 +26,16 @@ import { VersionsPanel } from "./VersionsPanel";
 import { IncomingPreviewModal } from "./IncomingPreviewModal";
 import { TaskPanel } from "./TaskPanel";
 import { EditorToolbar, type ToolbarSection } from "./EditorToolbar";
-import { AttachmentsPanel, type IAttachment } from "./AttachmentsPanel";
+import { AttachmentsPanel } from "./AttachmentsPanel";
+import { FilePreviewModal } from "@features/Profile";
+import {
+  mapServerAttachment,
+  createApiFileFromAttachedFile,
+  downloadAttachment,
+  CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE,
+  type AttachedFile,
+} from "@widgets/CreateInternalCorrespondence";
+
 
 const inboxStatusStyle: Record<string, string> = {
   // Russian keys
@@ -150,8 +159,9 @@ interface RegistryItem {
   forwarded_users?: ActionUser[];
   reply_count?: number;
   forward_count?: number;
-  attachments?: IAttachment[];
+  attachments?: any[];
 }
+
 
 const initialsOf = (fullName?: string) => {
   if (!fullName) return "?";
@@ -279,6 +289,12 @@ export const InternalCorrespondenceIncomingView = ({
   const [attachmentsOpen, setAttachmentsOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [activeVersionId, setActiveVersionId] = useState<number | string | null>(null);
+  const [previewAttachment, setPreviewAttachment] = useState<AttachedFile | null>(null);
+
+  const mappedAttachments: AttachedFile[] = (item.attachments || []).map((att: any) =>
+    mapServerAttachment(att, item.id)
+  );
+
 
   // Режим «Панель разделов сверху»: цилиндры-вкладки выносятся в горизонтальную
   // панель под тулбаром, а боковые вкладки у холста скрываются (сами панели
@@ -567,10 +583,12 @@ export const InternalCorrespondenceIncomingView = ({
       key: "attachments",
       label: "Вложения",
       dotClass: "bg-teal-500",
+      badge: mappedAttachments.length > 0 ? mappedAttachments.length : undefined,
       isOpen: attachmentsOpen,
       onToggle: () =>
         attachmentsOpen ? setAttachmentsOpen(false) : openAttachments(),
     },
+
   ];
 
   return (
@@ -955,8 +973,11 @@ export const InternalCorrespondenceIncomingView = ({
                   hideTab={panelsInToolbar}
                   onOpen={openAttachments}
                   onClose={() => setAttachmentsOpen(false)}
-                  attachments={item.attachments || []}
+                  attachments={mappedAttachments}
+                  onPreview={(file) => setPreviewAttachment(file)}
+                  onDownload={(file) => downloadAttachment(file)}
                 />
+
                 <VersionsPanel
                   isOpen={versionsOpen}
                   hideTab={panelsInToolbar}
@@ -978,6 +999,15 @@ export const InternalCorrespondenceIncomingView = ({
           )}
         </div>
       </div>
+      <If is={!!previewAttachment}>
+        <FilePreviewModal
+          file={createApiFileFromAttachedFile(previewAttachment)}
+          onClose={() => setPreviewAttachment(null)}
+          unavailableNotice={CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE}
+        />
+      </If>
     </div>
   );
 };
+
+
