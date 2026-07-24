@@ -89,10 +89,7 @@ export const TaskStatsCards = ({ stats }: TaskStatsCardsProps) => {
         })}
       </section>
 
-      <If is={!!stats?.priority_breakdown}>
-        <PriorityBreakdown breakdown={stats?.priority_breakdown || {}} />
-      </If>
+      <PriorityBreakdown breakdown={stats?.priority_breakdown || {}} />
     </div>
   );
 };
-

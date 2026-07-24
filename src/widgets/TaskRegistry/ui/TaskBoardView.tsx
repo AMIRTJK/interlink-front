@@ -1,5 +1,4 @@
 import * as React from "react";
-import { motion } from "framer-motion";
 import { Paperclip, Calendar, GripVertical } from "lucide-react";
 import { cn } from "@shared/lib";
 import type { Task, TaskStatus } from "../model/types";
@@ -134,12 +133,7 @@ export const TaskBoardView = ({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex gap-4 overflow-x-auto pb-4"
-    >
+    <div className="flex gap-4 overflow-x-auto pb-4">
       {COLUMNS.map((status) => {
         const meta = STATUS_OPTIONS.find((o) => o.value === status)!;
         const items = board[status] || [];
@@ -187,6 +181,6 @@ export const TaskBoardView = ({
           </div>
         );
       })}
-    </motion.div>
+    </div>
   );
 };
