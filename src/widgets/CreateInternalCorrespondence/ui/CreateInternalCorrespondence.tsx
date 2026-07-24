@@ -1712,11 +1712,13 @@ export const CreateInternalCorrespondence = ({
         ).replace(":versionId", String(requestData.versionId)),
       method: "POST",
       messages: {
+        suppressSuccessToast: true,
         invalidate: [
           ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
         ],
       },
     });
+
 
   const handleSetVersionForSign = (clickedVersionId: string | number) => {
     selectVersionForSign({ versionId: clickedVersionId });
@@ -1868,6 +1870,16 @@ export const CreateInternalCorrespondence = ({
     queryOptions: { onSuccess: handleDraftUpdated },
   });
 
+  const { mutate: updateDraftSilent } = useMutationQuery<any>({
+    url: ApiRoutes.PUT_INTERNAL.replace(":id", String(id || "")),
+    method: "PUT",
+    messages: {
+      ...updateDraftMessages,
+      suppressSuccessToast: true,
+    },
+    queryOptions: { onSuccess: handleDraftUpdated },
+  });
+
   // Тот же PUT, но с новыми вложениями в теле. Метод именно POST: PHP не
   // разбирает файлы в теле настоящего PUT, поэтому реальный метод уезжает
   // на бэкенд полем `_method` (см. saveDraft).
@@ -1879,14 +1891,44 @@ export const CreateInternalCorrespondence = ({
       queryOptions: { onSuccess: handleDraftUpdated },
     });
 
+  const { mutate: updateDraftWithFilesSilent } = useMutationQuery<FormData>({
+    url: ApiRoutes.PUT_INTERNAL.replace(":id", String(id || "")),
+    method: "POST",
+    messages: {
+      ...updateDraftMessages,
+      suppressSuccessToast: true,
+    },
+    queryOptions: { onSuccess: handleDraftUpdated },
+  });
+
   /**
    * Сохраняет черновик, сам выбирая формат запроса. Пока новых файлов нет —
    * шлём привычный JSON. Если есть — тот же payload уходит multipart-ом вместе
    * с файлами: отдельного эндпоинта для загрузки вложений у внутренней
    * корреспонденции нет, они принимаются прямо в создании/обновлении письма.
    */
-  const saveDraft = (requestPayload: Record<string, any>) => {
+  const saveDraft = (
+    requestPayload: Record<string, any>,
+    options?: { suppressToast?: boolean },
+  ) => {
     const pending = attachments.filter((a) => a.file);
+
+    if (options?.suppressToast) {
+      if (!pending.length) {
+        if (id) updateDraftSilent(requestPayload);
+        else createDraft(requestPayload);
+        return;
+      }
+      const form = buildFormData(requestPayload);
+      pending.forEach((a) => form.append("attachments[]", a.file!));
+      if (id) {
+        form.append("_method", "PUT");
+        updateDraftWithFilesSilent(form);
+      } else {
+        createDraft(form);
+      }
+      return;
+    }
 
     if (!pending.length) {
       if (id) updateDraft(requestPayload);
@@ -1904,6 +1946,7 @@ export const CreateInternalCorrespondence = ({
       createDraft(form);
     }
   };
+
 
   // Загрузка файлов идёт тем же запросом, что и сам черновик, поэтому
   // «Сохранить» ждёт и её тоже.
@@ -2032,6 +2075,9 @@ export const CreateInternalCorrespondence = ({
       String(id || ""),
     ),
     method: "POST",
+    messages: {
+      suppressSuccessToast: true,
+    },
   });
 
   const { mutate: signaturesCancel, isPending: isCancellingSign } =
@@ -2042,6 +2088,7 @@ export const CreateInternalCorrespondence = ({
       ),
       method: "POST",
       messages: {
+        suppressSuccessToast: true,
         invalidate: [
           ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
           ApiRoutes.GET_INTERNAL_VERSIONS?.replace(":id", String(id || "")),
@@ -2071,6 +2118,7 @@ export const CreateInternalCorrespondence = ({
     ),
     method: "POST",
     messages: {
+      suppressSuccessToast: true,
       invalidate: [
         ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
         ...CORRESPONDENCE_INVALIDATE_KEYS,
@@ -2156,8 +2204,9 @@ export const CreateInternalCorrespondence = ({
           requestPayload.link_type = linkType;
         }
 
-        if (id) saveDraft(requestPayload);
+        if (id) saveDraft(requestPayload, { suppressToast: true });
       },
+
       onError: () =>
         setFinalSigner((prev) => (prev ? { ...prev, dsLoading: false } : null)),
     },
