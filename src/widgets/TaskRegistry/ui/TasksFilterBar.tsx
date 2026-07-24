@@ -1,5 +1,4 @@
 import * as React from "react";
-import { motion } from "framer-motion";
 import { Search, Plus, Filter, ArrowUp, ArrowDown, LayoutGrid, List as ListIcon, UserCheck, X } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
@@ -124,20 +123,15 @@ export const TasksFilterBar = ({
               key={tab.value || "all"}
               onClick={() => onFilterChange({ status: tab.value })}
               className={cn(
-                "relative flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer",
-                activeTab ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-white/50 dark:hover:bg-white/5",
+                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                activeTab
+                  ? "bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 text-white shadow-sm"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-white/50 dark:hover:bg-white/5",
               )}
             >
-              <If is={activeTab}>
-                <motion.div
-                  layoutId="activeStatusTab"
-                  className="absolute inset-0 bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 rounded-xl"
-                  transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
-                />
-              </If>
-              <span className="relative z-10">{tab.label}</span>
+              <span>{tab.label}</span>
               <If is={cnt != null}>
-                <span className={cn("relative z-10 text-[10px] px-1.5 py-0.5 rounded-md", activeTab ? "bg-white/20" : "bg-slate-300/40 dark:bg-white/10")}>
+                <span className={cn("text-[10px] px-1.5 py-0.5 rounded-md transition-colors", activeTab ? "bg-white/20 text-white" : "bg-slate-300/40 dark:bg-white/10")}>
                   {cnt}
                 </span>
               </If>
@@ -154,33 +148,23 @@ export const TasksFilterBar = ({
 
         <select value={filters.priority} onChange={(e) => onFilterChange({ priority: e.target.value as Priority | "" })} className={selectClass}>
           <option value="">Все приоритеты</option>
-          {PRIORITY_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
+          {PRIORITY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
 
         <select value={filters.assigneeId} onChange={(e) => onFilterChange({ assigneeId: e.target.value })} className={selectClass}>
           <option value="">Все исполнители</option>
-          {colleagues.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
+          {colleagues.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
 
-        <button
-          onClick={() => onFilterChange({ mine: !filters.mine })}
-          className={cn("flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer", filters.mine ? "bg-emerald-600 border-emerald-600 text-white" : "bg-white/60 dark:bg-slate-800/60 border-white/30 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:border-emerald-300")}
-        >
-          <UserCheck size={14} />
-          Только мои
+        <button onClick={() => onFilterChange({ mine: !filters.mine })} className={cn("flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer", filters.mine ? "bg-emerald-600 border-emerald-600 text-white" : "bg-white/60 dark:bg-slate-800/60 border-white/30 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:border-emerald-300")}>
+          <UserCheck size={14} /> Только мои
         </button>
 
         <div className="flex items-center gap-2">
           <input type="date" value={filters.date} onChange={(e) => onFilterChange({ date: e.target.value })} className={selectClass} />
           <If is={Boolean(filters.date)}>
             <select value={filters.dateType} onChange={(e) => onFilterChange({ dateType: e.target.value as TaskDateType })} className={selectClass}>
-              {DATE_TYPE_OPTIONS.map((o) => (
-                <option key={o.id} value={o.id}>{o.label}</option>
-              ))}
+              {DATE_TYPE_OPTIONS.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
             </select>
             <button onClick={() => onFilterChange({ date: "" })} className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors" title="Сбросить дату">
               <X size={15} />
@@ -189,20 +173,11 @@ export const TasksFilterBar = ({
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hidden lg:inline">
-            Сортировка
-          </span>
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hidden lg:inline">Сортировка</span>
           <select value={filters.sort} onChange={(e) => onFilterChange({ sort: e.target.value as TaskSortField })} className={selectClass}>
-            {SORT_FIELD_OPTIONS.map((o) => (
-              <option key={o.id} value={o.id}>{o.label}</option>
-            ))}
+            {SORT_FIELD_OPTIONS.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
           </select>
-          <button
-            onClick={() => onFilterChange({ dir: filters.dir === "asc" ? "desc" : "asc" })}
-            disabled={filters.sort === "manual"}
-            className="flex items-center gap-1 px-3 py-2 rounded-xl border border-white/30 dark:border-white/10 bg-white/60 dark:bg-slate-800/60 text-xs font-bold text-slate-600 dark:text-slate-300 hover:border-emerald-300 transition-all disabled:opacity-40 cursor-pointer"
-            title={filters.dir === "asc" ? "По возрастанию" : "По убыванию"}
-          >
+          <button onClick={() => onFilterChange({ dir: filters.dir === "asc" ? "desc" : "asc" })} disabled={filters.sort === "manual"} className="flex items-center gap-1 px-3 py-2 rounded-xl border border-white/30 dark:border-white/10 bg-white/60 dark:bg-slate-800/60 text-xs font-bold text-slate-600 dark:text-slate-300 hover:border-emerald-300 transition-all disabled:opacity-40 cursor-pointer" title={filters.dir === "asc" ? "По возрастанию" : "По убыванию"}>
             {filters.dir === "asc" ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
           </button>
         </div>
