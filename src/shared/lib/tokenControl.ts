@@ -4,6 +4,7 @@ const OUTGOING_LETTER_COUNT = "interlink/outgoingLetterCount";
 const VIEW_MODE_KEY = "interlink/viewMode";
 const DARK_MODE_KEY = "interlink/darkMode";
 const PROFILE_EXPANDED_KEY = "interlink/profileExpanded";
+const EDITOR_RULER_KEY = "interlink/editorRulerEnabled";
 interface IToken {
   token: string;
   userId?: number;
@@ -90,6 +91,17 @@ export const tokenControl = {
 
   getProfileExpanded: (): boolean => {
     return localStorage.getItem(PROFILE_EXPANDED_KEY) === "true";
+  },
+
+  // Линейка в редакторе корреспонденции. По умолчанию выключена (ключа нет),
+  // но однажды включённая переживает перезагрузку страницы — пока пользователь
+  // сам не снимет галочку.
+  setEditorRulerEnabled: (enabled: boolean) => {
+    localStorage.setItem(EDITOR_RULER_KEY, String(enabled));
+  },
+
+  getEditorRulerEnabled: (): boolean => {
+    return localStorage.getItem(EDITOR_RULER_KEY) === "true";
   },
 };
 

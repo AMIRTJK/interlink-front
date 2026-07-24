@@ -54,6 +54,7 @@ import {
   ListOrdered,
   Save,
   Printer,
+  RotateCcw,
 } from "lucide-react";
 import { useGetQuery, useMutationQuery, buildFormData, toast, tokenControl } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
@@ -252,6 +253,96 @@ const PX_PER_CM = 96 / 2.54;
 // вверху вьюпорта при вертикальной прокрутке (как в Word).
 const RULER_MIN_MARGIN = 16; // минимальное поле, px
 const RULER_MIN_CONTENT = 160; // минимальная ширина колонки набора, px
+const RULER_DEFAULT_MARGIN = 80; // поле «по умолчанию» — к нему возвращает сброс
+
+// ===== Раскладка листа в теле версии =====
+// Отдельного поля под настройки линейки у версии на бэкенде нет, а тело письма
+// (`body`) версионируется целиком. Поэтому раскладку кладём скрытым маркером в
+// начало сохраняемого HTML и снимаем его сразу при загрузке: в DOM редактора,
+// истории правок и пагинации маркер никогда не участвует.
+const DOC_LAYOUT_ATTR = "data-doc-layout";
+
+type DocLayout = {
+  marginLeft: number;
+  marginRight: number;
+  orientation: PageOrientation;
+};
+
+const DEFAULT_DOC_LAYOUT: DocLayout = {
+  marginLeft: RULER_DEFAULT_MARGIN,
+  marginRight: RULER_DEFAULT_MARGIN,
+  orientation: "portrait",
+};
+
+const pageWidthForOrientation = (orientation: PageOrientation) =>
+  orientation === "landscape" ? 1122 : 794;
+
+// Значения из чужой/устаревшей версии зажимаем теми же границами, что и
+// перетаскивание маркеров, — колонка набора не должна «схлопнуться».
+const normalizeDocLayout = (raw: unknown): DocLayout | null => {
+  if (!raw || typeof raw !== "object") return null;
+  const src = raw as Record<string, unknown>;
+  const orientation: PageOrientation =
+    src.orientation === "landscape" ? "landscape" : "portrait";
+  const cap = Math.round(
+    (pageWidthForOrientation(orientation) - RULER_MIN_CONTENT) / 2,
+  );
+  const margin = (value: unknown, fallback: number) => {
+    // null/undefined/"" — поля в маркере нет: это «не задано», а не ноль,
+    // иначе Number(null) === 0 зажался бы в минимальное поле вместо дефолта.
+    if (value === null || value === undefined || value === "") return fallback;
+    const n = Number(value);
+    if (!Number.isFinite(n)) return fallback;
+    return Math.round(Math.min(Math.max(n, RULER_MIN_MARGIN), cap));
+  };
+  return {
+    orientation,
+    marginLeft: margin(src.marginLeft, DEFAULT_DOC_LAYOUT.marginLeft),
+    marginRight: margin(src.marginRight, DEFAULT_DOC_LAYOUT.marginRight),
+  };
+};
+
+// Сброс относится именно к линейке, поэтому сравниваем только поля: ориентация
+// переключается отдельной кнопкой тулбара и её выбор сбросом не трогаем.
+const hasDefaultRulerMargins = (layout: DocLayout): boolean =>
+  layout.marginLeft === DEFAULT_DOC_LAYOUT.marginLeft &&
+  layout.marginRight === DEFAULT_DOC_LAYOUT.marginRight;
+
+const parseDocLayoutAttr = (value: string | null): DocLayout | null => {
+  if (!value) return null;
+  try {
+    return normalizeDocLayout(JSON.parse(decodeURIComponent(value)));
+  } catch {
+    return null;
+  }
+};
+
+// Маркер пишем в начало тела: hidden + display:none, поэтому ни на холсте, ни в
+// предпросмотре/печати он ничего не занимает. JSON кодируем percent-escape —
+// иначе кавычки внутри атрибута порвут разметку.
+const withDocLayout = (html: string, layout: DocLayout): string =>
+  `<div ${DOC_LAYOUT_ATTR}="${encodeURIComponent(
+    JSON.stringify(layout),
+  )}" hidden aria-hidden="true" style="display:none"></div>${html}`;
+
+const splitDocLayout = (
+  html: string | null | undefined,
+): { layout: DocLayout | null; body: string } => {
+  const src = html || "";
+  if (!src.includes(DOC_LAYOUT_ATTR)) return { layout: null, body: src };
+  const holder = document.createElement("div");
+  holder.innerHTML = src;
+  const nodes = Array.from(holder.querySelectorAll(`[${DOC_LAYOUT_ATTR}]`));
+  let layout: DocLayout | null = null;
+  for (const node of nodes) {
+    if (!layout) layout = parseDocLayoutAttr(node.getAttribute(DOC_LAYOUT_ATTR));
+    node.remove();
+  }
+  return { layout, body: holder.innerHTML };
+};
+
+const stripDocLayout = (html: string | null | undefined): string =>
+  splitDocLayout(html).body;
 
 const EditorRuler = ({
   pageWidth,
@@ -393,7 +484,7 @@ const EditorRuler = ({
       {/* Перетаскиваемые маркеры полей (двойной клик — сброс к 80px) */}
       <div
         onMouseDown={startDrag("left")}
-        onDoubleClick={() => onChange("left", 80)}
+        onDoubleClick={() => onChange("left", RULER_DEFAULT_MARGIN)}
         title="Левое поле — потяните, чтобы сузить/расширить область текста (двойной клик — сброс)"
         style={handleStyle(contentStart)}
       >
@@ -401,7 +492,7 @@ const EditorRuler = ({
       </div>
       <div
         onMouseDown={startDrag("right")}
-        onDoubleClick={() => onChange("right", 80)}
+        onDoubleClick={() => onChange("right", RULER_DEFAULT_MARGIN)}
         title="Правое поле — потяните, чтобы сузить/расширить область текста (двойной клик — сброс)"
         style={handleStyle(contentEnd)}
       >
@@ -1132,6 +1223,13 @@ export const CreateInternalCorrespondence = ({
         }
       : undefined;
 
+  // Исходное письмо могло быть создано этим же редактором — снимаем служебный
+  // маркер раскладки, чтобы он не попадал в боковой просмотр и его пагинацию.
+  const panelSourceBody = useMemo(
+    () => stripDocLayout(panelSource?.body),
+    [panelSource?.body],
+  );
+
   const [to, setTo] = useState<RecipientOption[]>([]);
   const [cc, setCc] = useState<RecipientOption[]>([]);
   const [subject, setSubject] = useState("");
@@ -1202,21 +1300,58 @@ export const CreateInternalCorrespondence = ({
   const [showImportanceDropdown, setShowImportanceDropdown] = useState(false);
   const [fontSize, setFontSize] = useState("14");
   const [showFontSizeDropdown, setShowFontSizeDropdown] = useState(false);
-  const [orientation, setOrientation] = useState<PageOrientation>("portrait");
+  const [orientation, setOrientation] = useState<PageOrientation>(
+    DEFAULT_DOC_LAYOUT.orientation,
+  );
   // Показ сантиметровой линейки над листом (переключатель в панели редактора).
-  const [rulerEnabled, setRulerEnabled] = useState(false);
+  // По умолчанию выключена, но выбор пользователя запоминается между сессиями,
+  // поэтому включённая линейка переживает перезагрузку страницы.
+  const [rulerEnabled, setRulerEnabled] = useState<boolean>(() =>
+    tokenControl.getEditorRulerEnabled(),
+  );
+  const toggleRuler = useCallback((enabled: boolean) => {
+    setRulerEnabled(enabled);
+    tokenControl.setEditorRulerEnabled(enabled);
+  }, []);
   // Поля страницы (px) — регулируются перетаскиванием маркеров линейки. Задают
   // ширину колонки набора, поэтому влияют на перенос текста, пагинацию и печать.
-  const [marginLeft, setMarginLeft] = useState(80);
-  const [marginRight, setMarginRight] = useState(80);
+  const [marginLeft, setMarginLeft] = useState(DEFAULT_DOC_LAYOUT.marginLeft);
+  const [marginRight, setMarginRight] = useState(DEFAULT_DOC_LAYOUT.marginRight);
   // Смена ориентации меняет ширину листа — зажимаем поля, чтобы колонка набора
   // не «схлопнулась» в узком портрете после широкого альбома.
   useEffect(() => {
-    const w = orientation === "landscape" ? 1122 : 794;
-    const cap = Math.round((w - 160) / 2);
-    setMarginLeft((l) => Math.max(16, Math.min(l, cap)));
-    setMarginRight((r) => Math.max(16, Math.min(r, cap)));
+    const cap = Math.round(
+      (pageWidthForOrientation(orientation) - RULER_MIN_CONTENT) / 2,
+    );
+    setMarginLeft((l) => Math.max(RULER_MIN_MARGIN, Math.min(l, cap)));
+    setMarginRight((r) => Math.max(RULER_MIN_MARGIN, Math.min(r, cap)));
   }, [orientation]);
+
+  // Раскладка листа, которая уезжает в версию вместе с телом письма.
+  const docLayout = useMemo<DocLayout>(
+    () => ({ marginLeft, marginRight, orientation }),
+    [marginLeft, marginRight, orientation],
+  );
+  const isRulerDefault = hasDefaultRulerMargins(docLayout);
+
+  // Восстановление раскладки из открываемой версии. У версий, сохранённых до
+  // появления маркера, раскладки нет — для них берём значения по умолчанию,
+  // чтобы вид не «наследовался» от предыдущей открытой версии.
+  const applyDocLayout = useCallback((layout: DocLayout | null) => {
+    const next = layout || DEFAULT_DOC_LAYOUT;
+    setOrientation(next.orientation);
+    setMarginLeft(next.marginLeft);
+    setMarginRight(next.marginRight);
+  }, []);
+
+  // Сброс линейки: возвращаем стандартные поля страницы одним действием, если
+  // маркеры случайно утащили не туда. Ориентацию не трогаем — она задаётся
+  // отдельной кнопкой и к линейке отношения не имеет.
+  const resetRulerMargins = useCallback(() => {
+    setMarginLeft(DEFAULT_DOC_LAYOUT.marginLeft);
+    setMarginRight(DEFAULT_DOC_LAYOUT.marginRight);
+    toast.success("Поля страницы сброшены к значениям по умолчанию");
+  }, []);
   const [showPreview, setShowPreview] = useState(false);
   const [showCancelSignConfirm, setShowCancelSignConfirm] = useState(false);
   const [showSendConfirm, setShowSendConfirm] = useState(false);
@@ -1287,12 +1422,12 @@ export const CreateInternalCorrespondence = ({
 
   const [originalPage, setOriginalPage] = useState(0);
   const originalSheets = useMemo((): { pages: string[]; stamp: StampInfo } => {
-    if (!panelMode || !panelSource || !panelSource.body) return { pages: [], stamp: null };
-    const res = paginateHtml(panelSource.body, 14);
+    if (!panelMode || !panelSourceBody) return { pages: [], stamp: null };
+    const res = paginateHtml(panelSourceBody, 14);
     const pages = [...res.pages];
     if (res.stamp) while (pages.length <= res.stamp.pageIndex) pages.push("");
     return { pages, stamp: res.stamp };
-  }, [panelMode, panelSource]);
+  }, [panelMode, panelSourceBody]);
   const originalTotal = Math.max(originalSheets.pages.length, 1);
   const originalCurrent = Math.min(originalPage, originalTotal - 1);
 
@@ -1602,11 +1737,17 @@ export const CreateInternalCorrespondence = ({
           typeof v.body === "string" &&
           v.body.includes(STAMP_ATTR));
 
+      // Маркер раскладки снимаем здесь, на границе с бэкендом: ниже по коду
+      // `content` уходит и в редактор, и в пагинатор, и в сравнение версий —
+      // везде он должен быть чистым телом письма.
+      const { layout, body } = splitDocLayout(v.body);
+
       return {
         id: v.id,
         parent_id: v.parent_id,
         versionNumber: v.version || idx + 1,
-        content: v.body,
+        content: body,
+        layout,
         date: v.created_at,
         author: v.author
           ? {
@@ -1750,6 +1891,9 @@ export const CreateInternalCorrespondence = ({
       if (lastCompareSyncRef.current === latestVersionId) return;
       lastCompareSyncRef.current = latestVersionId;
       if (editorRef.current && editorRef.current.innerHTML !== latestVersion.content) {
+        // Раскладку применяем вместе с телом: колонка набора должна совпасть с
+        // той, в которой версия сохранялась.
+        applyDocLayout(latestVersion.layout);
         editorRef.current.innerHTML = latestVersion.content;
         setEditorContent(latestVersion.content);
         if (paginateEditorRef.current) {
@@ -1763,6 +1907,7 @@ export const CreateInternalCorrespondence = ({
       lastCompareSyncRef.current = null;
       if (activeVersion && activeVersion.content) {
         if (editorRef.current && editorRef.current.innerHTML !== activeVersion.content) {
+          applyDocLayout(activeVersion.layout);
           editorRef.current.innerHTML = activeVersion.content;
           setEditorContent(activeVersion.content);
           if (paginateEditorRef.current) {
@@ -1772,15 +1917,24 @@ export const CreateInternalCorrespondence = ({
         }
       }
     }
-  }, [showVersionCompareSides, latestVersion, latestVersionId, activeVersion]);
+  }, [
+    showVersionCompareSides,
+    latestVersion,
+    latestVersionId,
+    activeVersion,
+    applyDocLayout,
+  ]);
 
   const handleSelectVersion = (content: string, versionId: string | number) => {
     setActiveVersionId(versionId);
     if (!showVersionCompareSides) {
       if (editorRef.current) {
+        const target = allVersions.find((v: any) => v.id === versionId);
+        // Переключение версии восстанавливает и её раскладку — иначе поля
+        // остались бы от предыдущей открытой версии.
+        applyDocLayout(target?.layout ?? null);
         editorRef.current.innerHTML = content;
         setEditorContent(content);
-        const target = allVersions.find((v: any) => v.id === versionId);
         if (!target?.is_selected && !finalSigner?.dsApplied) {
           setStampVisible(false);
         }
@@ -2203,7 +2357,7 @@ export const CreateInternalCorrespondence = ({
         const editorBody = getCleanEditorHtml();
         const requestPayload: any = {
           subject,
-          body: editorBody,
+          body: withDocLayout(editorBody, docLayout),
           recipients: {
             to: to.map((r) => r.id),
             cc: cc.map((r) => r.id),
@@ -2465,7 +2619,9 @@ export const CreateInternalCorrespondence = ({
 
     const requestPayload: any = {
       subject,
-      body: editorBody,
+      // Раскладку линейки версионируем вместе с телом — иначе после сохранения
+      // и переключения версий поля возвращались бы к дефолтным.
+      body: withDocLayout(editorBody, docLayout),
       recipients: {
         to: to.map((r) => r.id),
         cc: cc.map((r) => r.id),
@@ -2493,9 +2649,13 @@ export const CreateInternalCorrespondence = ({
         setSubject(location.state.subject);
       }
       if (location.state.body && !editorContent) {
-        setEditorContent(location.state.body);
+        // Префилл может прийти из письма, сохранённого этим редактором, —
+        // раскладку из него применяем, а маркер в редактор не пускаем.
+        const { layout, body } = splitDocLayout(location.state.body);
+        if (layout) applyDocLayout(layout);
+        setEditorContent(body);
         if (editorRef.current) {
-          editorRef.current.innerHTML = location.state.body;
+          editorRef.current.innerHTML = body;
         }
       }
     }
@@ -4947,6 +5107,10 @@ export const CreateInternalCorrespondence = ({
     autoLoadedLatestRef.current = targetVersion.id;
     setActiveVersionId(targetVersion.id);
 
+    // Раскладку подтягиваем только вместе с новой версией. На обычном рефетче
+    // (тот же id) её трогать нельзя — затёрли бы несохранённые правки линейки.
+    if (isNewVersionId) applyDocLayout(targetVersion.layout);
+
     if (editorRef.current && targetVersion.content) {
       const currentCleanHtml = cleanEditorArtifacts(
         editorRef.current.innerHTML,
@@ -5298,7 +5462,7 @@ export const CreateInternalCorrespondence = ({
             priority={panelSource.priority}
             inboundNumber={panelSource.inboundNumber || "—"}
             subject={panelSource.subject || ""}
-            body={panelSource.body}
+            body={panelSourceBody}
             sourceId={panelSource.id}
           />
         )}
@@ -6079,15 +6243,32 @@ export const CreateInternalCorrespondence = ({
                   </>
                 )}
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
-                <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 mr-2 ml-1">
+                <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
                   <input
                     type="checkbox"
                     checked={rulerEnabled}
-                    onChange={(e) => setRulerEnabled(e.target.checked)}
+                    onChange={(e) => toggleRuler(e.target.checked)}
                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
                   <span>Линейка</span>
                 </label>
+                {rulerEnabled && (
+                  <button
+                    type="button"
+                    onClick={resetRulerMargins}
+                    disabled={isRulerDefault}
+                    title={
+                      isRulerDefault
+                        ? "Поля страницы уже стандартные"
+                        : "Вернуть поля страницы к значениям по умолчанию"
+                    }
+                    className="flex items-center gap-1.5 px-2.5 py-1 ml-2 rounded text-xs font-semibold transition-colors border flex-shrink-0 bg-white border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
+                  >
+                    <RotateCcw size={14} />
+                    <span>Сбросить</span>
+                  </button>
+                )}
+                <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 mr-2 ml-1">
                   <input
                     type="checkbox"
