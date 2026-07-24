@@ -54,6 +54,7 @@ import {
   ListOrdered,
   Save,
   Printer,
+  RotateCcw,
 } from "lucide-react";
 import { useGetQuery, useMutationQuery, buildFormData, toast, tokenControl } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
@@ -86,6 +87,10 @@ import {
   ATTACHMENT_EXTENSIONS,
   MAX_ATTACHMENTS,
   MAX_ATTACHMENT_SIZE_MB,
+  SPACER_ATTR,
+  AUTOSPLIT_ATTR,
+  PAGE_BREAK_ATTR,
+  STAMP_ATTR,
   // INBOX_DOC_TYPES,
   // INBOX_DOC_TYPE_STYLE,
   // MOCK_CONTENT_LINES,
@@ -121,6 +126,7 @@ import { PreviewModal } from "./PreviewModal";
 import { TBtn } from "./TBtn";
 import { DSStamp } from "./DSStamp";
 import { OriginalLetterPanel } from "./OriginalLetterPanel";
+import { RelatedDocsAccordion } from "./RelatedDocsBlock";
 import { OriginalLetterCanvas } from "./OriginalLetterCanvas";
 import {
   paginateHtml,
@@ -134,6 +140,7 @@ import { ApproversPanel } from "./ApproversPanel";
 import { SignerPanel } from "./SignerPanel";
 import { IncomingLettersPanel } from "./IncomingLettersPanel";
 import { VersionsPanel } from "./VersionsPanel";
+import { NavigationPane } from "./NavigationPane";
 import { AttachmentsPanel } from "./AttachmentsPanel";
 
 function FileTextIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -177,10 +184,8 @@ function buildStampQRSvg(value: string, size = 52) {
 }
 
 // ===== Постраничная разбивка редактора =====
-const SPACER_ATTR = "data-page-spacer"; // невидимая распорка на границе страниц
-const AUTOSPLIT_ATTR = "data-page-split"; // части одного блока, разрезанного по высоте
-const PAGE_BREAK_ATTR = "data-page-break"; // ручной разрыв страницы (кнопка «Новая страница»)
-const STAMP_ATTR = "data-signature-stamp"; // печать ЭЦП (вне потока, не трогаем)
+// Служебные атрибуты (SPACER_ATTR и соседи) вынесены в ../lib/constants —
+// их читает ещё и область навигации.
 
 const EDITOR_BLOCK_TAGS = new Set([
   "DIV",
@@ -251,6 +256,96 @@ const PX_PER_CM = 96 / 2.54;
 // вверху вьюпорта при вертикальной прокрутке (как в Word).
 const RULER_MIN_MARGIN = 16; // минимальное поле, px
 const RULER_MIN_CONTENT = 160; // минимальная ширина колонки набора, px
+const RULER_DEFAULT_MARGIN = 80; // поле «по умолчанию» — к нему возвращает сброс
+
+// ===== Раскладка листа в теле версии =====
+// Отдельного поля под настройки линейки у версии на бэкенде нет, а тело письма
+// (`body`) версионируется целиком. Поэтому раскладку кладём скрытым маркером в
+// начало сохраняемого HTML и снимаем его сразу при загрузке: в DOM редактора,
+// истории правок и пагинации маркер никогда не участвует.
+const DOC_LAYOUT_ATTR = "data-doc-layout";
+
+type DocLayout = {
+  marginLeft: number;
+  marginRight: number;
+  orientation: PageOrientation;
+};
+
+const DEFAULT_DOC_LAYOUT: DocLayout = {
+  marginLeft: RULER_DEFAULT_MARGIN,
+  marginRight: RULER_DEFAULT_MARGIN,
+  orientation: "portrait",
+};
+
+const pageWidthForOrientation = (orientation: PageOrientation) =>
+  orientation === "landscape" ? 1122 : 794;
+
+// Значения из чужой/устаревшей версии зажимаем теми же границами, что и
+// перетаскивание маркеров, — колонка набора не должна «схлопнуться».
+const normalizeDocLayout = (raw: unknown): DocLayout | null => {
+  if (!raw || typeof raw !== "object") return null;
+  const src = raw as Record<string, unknown>;
+  const orientation: PageOrientation =
+    src.orientation === "landscape" ? "landscape" : "portrait";
+  const cap = Math.round(
+    (pageWidthForOrientation(orientation) - RULER_MIN_CONTENT) / 2,
+  );
+  const margin = (value: unknown, fallback: number) => {
+    // null/undefined/"" — поля в маркере нет: это «не задано», а не ноль,
+    // иначе Number(null) === 0 зажался бы в минимальное поле вместо дефолта.
+    if (value === null || value === undefined || value === "") return fallback;
+    const n = Number(value);
+    if (!Number.isFinite(n)) return fallback;
+    return Math.round(Math.min(Math.max(n, RULER_MIN_MARGIN), cap));
+  };
+  return {
+    orientation,
+    marginLeft: margin(src.marginLeft, DEFAULT_DOC_LAYOUT.marginLeft),
+    marginRight: margin(src.marginRight, DEFAULT_DOC_LAYOUT.marginRight),
+  };
+};
+
+// Сброс относится именно к линейке, поэтому сравниваем только поля: ориентация
+// переключается отдельной кнопкой тулбара и её выбор сбросом не трогаем.
+const hasDefaultRulerMargins = (layout: DocLayout): boolean =>
+  layout.marginLeft === DEFAULT_DOC_LAYOUT.marginLeft &&
+  layout.marginRight === DEFAULT_DOC_LAYOUT.marginRight;
+
+const parseDocLayoutAttr = (value: string | null): DocLayout | null => {
+  if (!value) return null;
+  try {
+    return normalizeDocLayout(JSON.parse(decodeURIComponent(value)));
+  } catch {
+    return null;
+  }
+};
+
+// Маркер пишем в начало тела: hidden + display:none, поэтому ни на холсте, ни в
+// предпросмотре/печати он ничего не занимает. JSON кодируем percent-escape —
+// иначе кавычки внутри атрибута порвут разметку.
+const withDocLayout = (html: string, layout: DocLayout): string =>
+  `<div ${DOC_LAYOUT_ATTR}="${encodeURIComponent(
+    JSON.stringify(layout),
+  )}" hidden aria-hidden="true" style="display:none"></div>${html}`;
+
+const splitDocLayout = (
+  html: string | null | undefined,
+): { layout: DocLayout | null; body: string } => {
+  const src = html || "";
+  if (!src.includes(DOC_LAYOUT_ATTR)) return { layout: null, body: src };
+  const holder = document.createElement("div");
+  holder.innerHTML = src;
+  const nodes = Array.from(holder.querySelectorAll(`[${DOC_LAYOUT_ATTR}]`));
+  let layout: DocLayout | null = null;
+  for (const node of nodes) {
+    if (!layout) layout = parseDocLayoutAttr(node.getAttribute(DOC_LAYOUT_ATTR));
+    node.remove();
+  }
+  return { layout, body: holder.innerHTML };
+};
+
+const stripDocLayout = (html: string | null | undefined): string =>
+  splitDocLayout(html).body;
 
 const EditorRuler = ({
   pageWidth,
@@ -392,7 +487,7 @@ const EditorRuler = ({
       {/* Перетаскиваемые маркеры полей (двойной клик — сброс к 80px) */}
       <div
         onMouseDown={startDrag("left")}
-        onDoubleClick={() => onChange("left", 80)}
+        onDoubleClick={() => onChange("left", RULER_DEFAULT_MARGIN)}
         title="Левое поле — потяните, чтобы сузить/расширить область текста (двойной клик — сброс)"
         style={handleStyle(contentStart)}
       >
@@ -400,13 +495,87 @@ const EditorRuler = ({
       </div>
       <div
         onMouseDown={startDrag("right")}
-        onDoubleClick={() => onChange("right", 80)}
+        onDoubleClick={() => onChange("right", RULER_DEFAULT_MARGIN)}
         title="Правое поле — потяните, чтобы сузить/расширить область текста (двойной клик — сброс)"
         style={handleStyle(contentEnd)}
       >
         <div style={gripStyle} />
       </div>
     </div>
+  );
+};
+
+// Сетка как в Word («Вид → Сетка»): непечатаемые направляющие поверх листа, но
+// ПОД текстом. Значения — дефолты из вордовского диалога «Сетка и направляющие»:
+// шаг сетки 0,32 см, на экране показывается каждая 2-я вертикальная и каждая
+// 3-я горизонтальная линия, отсчёт идёт от полей страницы («привязать к полям»).
+// Поэтому видимая ячейка — 0,64 × 0,96 см, а начало координат совпадает с левым
+// верхним углом колонки набора и едет вместе с маркерами линейки.
+const GRID_STEP_CM = 0.32;
+const GRID_VERTICAL_EVERY = 2;
+const GRID_HORIZONTAL_EVERY = 3;
+const GRID_COL_STEP = GRID_STEP_CM * GRID_VERTICAL_EVERY * PX_PER_CM;
+const GRID_ROW_STEP = GRID_STEP_CM * GRID_HORIZONTAL_EVERY * PX_PER_CM;
+const GRID_COLOR = "rgba(148,163,184,0.5)";
+// Привязка объектов идёт к БАЗОВОМУ шагу сетки (0,32 см), а не к видимым линиям:
+// Word рисует на экране каждую 2-ю/3-ю линию, но «магнитит» по полному шагу,
+// поэтому объект может встать и между линиями. Alt при перетаскивании временно
+// отключает привязку — тоже как в Word.
+const GRID_SNAP_STEP = GRID_STEP_CM * PX_PER_CM;
+
+const snapToGrid = (value: number, step: number): number =>
+  Math.round(value / step) * step;
+
+// Линии рисуем явными <line>, а не паттерном/градиентом: шаг дробный (≈24,19 и
+// ≈36,28 px), и при заливке браузер размывает каждую вторую линию. Округление
+// позиции к целому + 0.5 даёт чёткий хайрлайн, а сама позиция считается от
+// i * step, поэтому накопленного дрейфа относительно линейки нет.
+const gridLinePositions = (extent: number, step: number): number[] => {
+  const out: number[] = [];
+  for (let i = 0; i * step <= extent; i++) {
+    const pos = Math.round(i * step) + 0.5;
+    if (pos <= extent) out.push(pos);
+  }
+  return out;
+};
+
+const PageGrid = ({
+  left,
+  top,
+  width,
+  height,
+}: {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}) => {
+  const cols = useMemo(() => gridLinePositions(width, GRID_COL_STEP), [width]);
+  const rows = useMemo(() => gridLinePositions(height, GRID_ROW_STEP), [height]);
+
+  if (width <= 0 || height <= 0) return null;
+
+  return (
+    <svg
+      width={width}
+      height={height}
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        left,
+        top,
+        display: "block",
+        pointerEvents: "none",
+        userSelect: "none",
+      }}
+    >
+      {cols.map((x) => (
+        <line key={`c${x}`} x1={x} y1={0} x2={x} y2={height} stroke={GRID_COLOR} />
+      ))}
+      {rows.map((y) => (
+        <line key={`r${y}`} x1={0} y1={y} x2={width} y2={y} stroke={GRID_COLOR} />
+      ))}
+    </svg>
   );
 };
 
@@ -878,6 +1047,70 @@ const cleanEditorArtifacts = (html: string): string => {
   return w.innerHTML;
 };
 
+// ===== Цитата пересылаемого письма (как в Outlook) =====
+// При «Перенаправить» тело входящего письма кладётся прямо в холст: сверху
+// пустое место под свой текст, ниже — разделитель и само пересылаемое письмо.
+// Каждый блок цитаты помечаем FWD_ATTR: по метке её потом находят, чтобы убрать
+// (в режиме просмотра входящего письма цитата в холсте не нужна — оригинал и
+// так открыт на боковом холсте) и чтобы не вставить её второй раз.
+const FWD_ATTR = "data-forwarded";
+
+const hasForwardQuote = (editor: HTMLElement): boolean =>
+  !!editor.querySelector(`[${FWD_ATTR}]`);
+
+const removeForwardQuote = (editor: HTMLElement): boolean => {
+  const nodes = editor.querySelectorAll(`[${FWD_ATTR}]`);
+  nodes.forEach((n) => n.remove());
+  return nodes.length > 0;
+};
+
+// Блоки цитаты кладём СИБЛИНГАМИ верхнего уровня, а не одной обёрткой: пагинатор
+// разбирает документ по верхнеуровневым детям редактора, и один гигантский
+// контейнер ему пришлось бы резать целиком.
+const buildForwardQuoteNodes = (
+  meta: { sender: string; date: string; subject: string; inboundNumber: string },
+  bodyHtml: string,
+): HTMLElement[] => {
+  const nodes: HTMLElement[] = [];
+
+  const divider = document.createElement("div");
+  divider.setAttribute(FWD_ATTR, "divider");
+  divider.style.cssText =
+    "border-top:1px solid #94a3b8;margin:22px 0 14px;height:0;line-height:0;font-size:0;";
+  nodes.push(divider);
+
+  const head = document.createElement("div");
+  head.setAttribute(FWD_ATTR, "head");
+  head.style.cssText = "margin-bottom:12px;";
+  const row = (label: string, value: string) =>
+    value ? `<div><b>${label}:</b> ${value}</div>` : "";
+  head.innerHTML =
+    row("От", meta.sender) +
+    row("Отправлено", meta.date) +
+    row("Вх. номер", meta.inboundNumber) +
+    row("Тема", meta.subject);
+  nodes.push(head);
+
+  const holder = document.createElement("div");
+  holder.innerHTML = bodyHtml;
+  // Разметку пагинатора исходного письма в цитату не тащим. Рисунок ЭЦП тоже
+  // убираем, и не только из-за абсолютного позиционирования: по наличию
+  // STAMP_ATTR в теле вычисляется состояние подписи версии (см. allVersions),
+  // и чужая печать внутри цитаты сломала бы этот расчёт у нового письма.
+  holder
+    .querySelectorAll(`[${SPACER_ATTR}],[${PAGE_BREAK_ATTR}],[${STAMP_ATTR}]`)
+    .forEach((n) => n.remove());
+  wrapBareTopLevelNodes(holder);
+  Array.from(holder.children).forEach((child) => {
+    const el = child as HTMLElement;
+    el.setAttribute(FWD_ATTR, "body");
+    el.removeAttribute(AUTOSPLIT_ATTR);
+    nodes.push(el);
+  });
+
+  return nodes;
+};
+
 // Маркер разрыва страницы редактора — тот же, что создаёт кнопка «Новая
 // страница». Используется при импорте Word, чтобы перенести разрывы из .docx.
 const makeImportPageBreak = (): HTMLElement => {
@@ -1131,6 +1364,13 @@ export const CreateInternalCorrespondence = ({
         }
       : undefined;
 
+  // Исходное письмо могло быть создано этим же редактором — снимаем служебный
+  // маркер раскладки, чтобы он не попадал в боковой просмотр и его пагинацию.
+  const panelSourceBody = useMemo(
+    () => stripDocLayout(panelSource?.body),
+    [panelSource?.body],
+  );
+
   const [to, setTo] = useState<RecipientOption[]>([]);
   const [cc, setCc] = useState<RecipientOption[]>([]);
   const [subject, setSubject] = useState("");
@@ -1201,21 +1441,75 @@ export const CreateInternalCorrespondence = ({
   const [showImportanceDropdown, setShowImportanceDropdown] = useState(false);
   const [fontSize, setFontSize] = useState("14");
   const [showFontSizeDropdown, setShowFontSizeDropdown] = useState(false);
-  const [orientation, setOrientation] = useState<PageOrientation>("portrait");
+  const [orientation, setOrientation] = useState<PageOrientation>(
+    DEFAULT_DOC_LAYOUT.orientation,
+  );
   // Показ сантиметровой линейки над листом (переключатель в панели редактора).
-  const [rulerEnabled, setRulerEnabled] = useState(false);
+  // По умолчанию выключена, но выбор пользователя запоминается между сессиями,
+  // поэтому включённая линейка переживает перезагрузку страницы.
+  const [rulerEnabled, setRulerEnabled] = useState<boolean>(() =>
+    tokenControl.getEditorRulerEnabled(),
+  );
+  const toggleRuler = useCallback((enabled: boolean) => {
+    setRulerEnabled(enabled);
+    tokenControl.setEditorRulerEnabled(enabled);
+  }, []);
+  // Показ сетки — тоже настройка приложения (в Word это галочка на вкладке
+  // «Вид», а не свойство документа), поэтому запоминаем так же, как линейку.
+  const [gridEnabled, setGridEnabled] = useState<boolean>(() =>
+    tokenControl.getEditorGridEnabled(),
+  );
+  const toggleGrid = useCallback((enabled: boolean) => {
+    setGridEnabled(enabled);
+    tokenControl.setEditorGridEnabled(enabled);
+  }, []);
+  // Область навигации — тоже галочка вкладки «Вид» в Word, запоминаем так же.
+  const [navPaneEnabled, setNavPaneEnabled] = useState<boolean>(() =>
+    tokenControl.getEditorNavPaneEnabled(),
+  );
+  const toggleNavPane = useCallback((enabled: boolean) => {
+    setNavPaneEnabled(enabled);
+    tokenControl.setEditorNavPaneEnabled(enabled);
+  }, []);
   // Поля страницы (px) — регулируются перетаскиванием маркеров линейки. Задают
   // ширину колонки набора, поэтому влияют на перенос текста, пагинацию и печать.
-  const [marginLeft, setMarginLeft] = useState(80);
-  const [marginRight, setMarginRight] = useState(80);
+  const [marginLeft, setMarginLeft] = useState(DEFAULT_DOC_LAYOUT.marginLeft);
+  const [marginRight, setMarginRight] = useState(DEFAULT_DOC_LAYOUT.marginRight);
   // Смена ориентации меняет ширину листа — зажимаем поля, чтобы колонка набора
   // не «схлопнулась» в узком портрете после широкого альбома.
   useEffect(() => {
-    const w = orientation === "landscape" ? 1122 : 794;
-    const cap = Math.round((w - 160) / 2);
-    setMarginLeft((l) => Math.max(16, Math.min(l, cap)));
-    setMarginRight((r) => Math.max(16, Math.min(r, cap)));
+    const cap = Math.round(
+      (pageWidthForOrientation(orientation) - RULER_MIN_CONTENT) / 2,
+    );
+    setMarginLeft((l) => Math.max(RULER_MIN_MARGIN, Math.min(l, cap)));
+    setMarginRight((r) => Math.max(RULER_MIN_MARGIN, Math.min(r, cap)));
   }, [orientation]);
+
+  // Раскладка листа, которая уезжает в версию вместе с телом письма.
+  const docLayout = useMemo<DocLayout>(
+    () => ({ marginLeft, marginRight, orientation }),
+    [marginLeft, marginRight, orientation],
+  );
+  const isRulerDefault = hasDefaultRulerMargins(docLayout);
+
+  // Восстановление раскладки из открываемой версии. У версий, сохранённых до
+  // появления маркера, раскладки нет — для них берём значения по умолчанию,
+  // чтобы вид не «наследовался» от предыдущей открытой версии.
+  const applyDocLayout = useCallback((layout: DocLayout | null) => {
+    const next = layout || DEFAULT_DOC_LAYOUT;
+    setOrientation(next.orientation);
+    setMarginLeft(next.marginLeft);
+    setMarginRight(next.marginRight);
+  }, []);
+
+  // Сброс линейки: возвращаем стандартные поля страницы одним действием, если
+  // маркеры случайно утащили не туда. Ориентацию не трогаем — она задаётся
+  // отдельной кнопкой и к линейке отношения не имеет.
+  const resetRulerMargins = useCallback(() => {
+    setMarginLeft(DEFAULT_DOC_LAYOUT.marginLeft);
+    setMarginRight(DEFAULT_DOC_LAYOUT.marginRight);
+    toast.success("Поля страницы сброшены к значениям по умолчанию");
+  }, []);
   const [showPreview, setShowPreview] = useState(false);
   const [showCancelSignConfirm, setShowCancelSignConfirm] = useState(false);
   const [showSendConfirm, setShowSendConfirm] = useState(false);
@@ -1255,8 +1549,11 @@ export const CreateInternalCorrespondence = ({
   // Над редактором тащат файл — показываем подсказку-оверлей для импорта
   const [isDraggingWord, setIsDraggingWord] = useState(false);
   // Режим просмотра входящего письма включён по умолчанию, когда страница
+  // открыта из «Ответить». При «Перенаправить» — выключен: там исходное письмо
+  // по умолчанию лежит цитатой прямо в холсте (как в Outlook), а боковой показ
+  // оригинала — альтернатива, которая эту цитату из холста убирает.
   const [showOriginalLetterSides, setShowOriginalLetterSides] = useState(
-    !!(panelMode && panelSource),
+    !!(panelMode && panelSource) && panelMode !== "forward",
   );
   const [showVersionCompareSides, setShowVersionCompareSides] = useState(false);
 
@@ -1286,12 +1583,12 @@ export const CreateInternalCorrespondence = ({
 
   const [originalPage, setOriginalPage] = useState(0);
   const originalSheets = useMemo((): { pages: string[]; stamp: StampInfo } => {
-    if (!panelMode || !panelSource || !panelSource.body) return { pages: [], stamp: null };
-    const res = paginateHtml(panelSource.body, 14);
+    if (!panelMode || !panelSourceBody) return { pages: [], stamp: null };
+    const res = paginateHtml(panelSourceBody, 14);
     const pages = [...res.pages];
     if (res.stamp) while (pages.length <= res.stamp.pageIndex) pages.push("");
     return { pages, stamp: res.stamp };
-  }, [panelMode, panelSource]);
+  }, [panelMode, panelSourceBody]);
   const originalTotal = Math.max(originalSheets.pages.length, 1);
   const originalCurrent = Math.min(originalPage, originalTotal - 1);
 
@@ -1304,6 +1601,7 @@ export const CreateInternalCorrespondence = ({
   const pageCanvasRef = useRef<HTMLDivElement>(null);
   const rootScrollRef = useRef<HTMLDivElement>(null);
   const originalCanvasWrapRef = useRef<HTMLDivElement>(null);
+  const navPaneWrapRef = useRef<HTMLDivElement>(null);
   const versionCompareCanvasWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1492,6 +1790,52 @@ export const CreateInternalCorrespondence = ({
     };
   }, [id, pageCount, orientation, formExpanded, panelsInToolbar]);
 
+  // Область навигации должна оставаться на виду при прокрутке документа, как
+  // пришвартованная панель Word. Тот же приём, что для левого A4-холста и
+  // группы боковых панелей выше: CSS sticky здесь перехватывает серая область
+  // с overflow, поэтому смещаем обёртку сами и заодно отдаём панели доступную
+  // высоту (--icc-nav-max-h), чтобы её списки прокручивались внутри.
+  useEffect(() => {
+    if (!navPaneEnabled) return;
+    const scroller = rootScrollRef.current;
+    const canvas = pageCanvasRef.current;
+    const wrap = navPaneWrapRef.current;
+    if (!scroller || !canvas || !wrap) return;
+
+    const BOT_M = 24;
+    const MIN_VISIBLE = 200;
+
+    const update = () => {
+      const TOP_M = (stickyHeaderRef.current?.offsetHeight ?? 0) + 12;
+      const canvasTop =
+        canvas.getBoundingClientRect().top -
+        scroller.getBoundingClientRect().top;
+      let shift = Math.max(0, TOP_M - canvasTop);
+      shift = Math.min(shift, Math.max(0, canvas.offsetHeight - MIN_VISIBLE));
+      const paneViewportTop = canvasTop + shift;
+      const availH = Math.max(
+        240,
+        scroller.clientHeight - paneViewportTop - BOT_M,
+      );
+      // Отдаём панели всю доступную высоту — распределить её между шапкой,
+      // поиском, вкладками и прокручиваемым списком она умеет сама (flex).
+      wrap.style.setProperty("--icc-nav-max-h", `${availH}px`);
+      wrap.style.transform = shift > 0 ? `translateY(${shift}px)` : "";
+    };
+
+    update();
+    scroller.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    const headerRO = new ResizeObserver(update);
+    if (stickyHeaderRef.current) headerRO.observe(stickyHeaderRef.current);
+    return () => {
+      scroller.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      headerRO.disconnect();
+      wrap.style.transform = "";
+    };
+  }, [navPaneEnabled, pageCount, orientation, formExpanded, panelsInToolbar]);
+
   const [searchParams, setSearchParams] = useState({ query: "" });
   const handleOpenRecipientModal = () => {
     setSearchParams({ query: "" });
@@ -1557,6 +1901,21 @@ export const CreateInternalCorrespondence = ({
     },
   });
 
+  const { data: rawStructureData } = useGetQuery<
+    Record<string, unknown>,
+    { data: any }
+  >({
+    url: id ? ApiRoutes.GET_INTERNAL_STRUCTURE.replace(":id", String(id)) : "",
+    useToken: true,
+    options: {
+      enabled: !!id,
+      refetchOnWindowFocus: false,
+    },
+  });
+
+  const relatedDocs = rawStructureData?.data?.related_documents || [];
+
+
   const hasSignedWorkflowSignature = useMemo(() => {
     const wfSigs = rawWorkflowData?.data?.signatures || [];
     return wfSigs.some((sig: any) => sig.status === "signed");
@@ -1586,11 +1945,17 @@ export const CreateInternalCorrespondence = ({
           typeof v.body === "string" &&
           v.body.includes(STAMP_ATTR));
 
+      // Маркер раскладки снимаем здесь, на границе с бэкендом: ниже по коду
+      // `content` уходит и в редактор, и в пагинатор, и в сравнение версий —
+      // везде он должен быть чистым телом письма.
+      const { layout, body } = splitDocLayout(v.body);
+
       return {
         id: v.id,
         parent_id: v.parent_id,
         versionNumber: v.version || idx + 1,
-        content: v.body,
+        content: body,
+        layout,
         date: v.created_at,
         author: v.author
           ? {
@@ -1712,11 +2077,13 @@ export const CreateInternalCorrespondence = ({
         ).replace(":versionId", String(requestData.versionId)),
       method: "POST",
       messages: {
+        suppressSuccessToast: true,
         invalidate: [
           ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
         ],
       },
     });
+
 
   const handleSetVersionForSign = (clickedVersionId: string | number) => {
     selectVersionForSign({ versionId: clickedVersionId });
@@ -1732,6 +2099,9 @@ export const CreateInternalCorrespondence = ({
       if (lastCompareSyncRef.current === latestVersionId) return;
       lastCompareSyncRef.current = latestVersionId;
       if (editorRef.current && editorRef.current.innerHTML !== latestVersion.content) {
+        // Раскладку применяем вместе с телом: колонка набора должна совпасть с
+        // той, в которой версия сохранялась.
+        applyDocLayout(latestVersion.layout);
         editorRef.current.innerHTML = latestVersion.content;
         setEditorContent(latestVersion.content);
         if (paginateEditorRef.current) {
@@ -1745,6 +2115,7 @@ export const CreateInternalCorrespondence = ({
       lastCompareSyncRef.current = null;
       if (activeVersion && activeVersion.content) {
         if (editorRef.current && editorRef.current.innerHTML !== activeVersion.content) {
+          applyDocLayout(activeVersion.layout);
           editorRef.current.innerHTML = activeVersion.content;
           setEditorContent(activeVersion.content);
           if (paginateEditorRef.current) {
@@ -1754,15 +2125,24 @@ export const CreateInternalCorrespondence = ({
         }
       }
     }
-  }, [showVersionCompareSides, latestVersion, latestVersionId, activeVersion]);
+  }, [
+    showVersionCompareSides,
+    latestVersion,
+    latestVersionId,
+    activeVersion,
+    applyDocLayout,
+  ]);
 
   const handleSelectVersion = (content: string, versionId: string | number) => {
     setActiveVersionId(versionId);
     if (!showVersionCompareSides) {
       if (editorRef.current) {
+        const target = allVersions.find((v: any) => v.id === versionId);
+        // Переключение версии восстанавливает и её раскладку — иначе поля
+        // остались бы от предыдущей открытой версии.
+        applyDocLayout(target?.layout ?? null);
         editorRef.current.innerHTML = content;
         setEditorContent(content);
-        const target = allVersions.find((v: any) => v.id === versionId);
         if (!target?.is_selected && !finalSigner?.dsApplied) {
           setStampVisible(false);
         }
@@ -1868,6 +2248,16 @@ export const CreateInternalCorrespondence = ({
     queryOptions: { onSuccess: handleDraftUpdated },
   });
 
+  const { mutate: updateDraftSilent } = useMutationQuery<any>({
+    url: ApiRoutes.PUT_INTERNAL.replace(":id", String(id || "")),
+    method: "PUT",
+    messages: {
+      ...updateDraftMessages,
+      suppressSuccessToast: true,
+    },
+    queryOptions: { onSuccess: handleDraftUpdated },
+  });
+
   // Тот же PUT, но с новыми вложениями в теле. Метод именно POST: PHP не
   // разбирает файлы в теле настоящего PUT, поэтому реальный метод уезжает
   // на бэкенд полем `_method` (см. saveDraft).
@@ -1879,14 +2269,44 @@ export const CreateInternalCorrespondence = ({
       queryOptions: { onSuccess: handleDraftUpdated },
     });
 
+  const { mutate: updateDraftWithFilesSilent } = useMutationQuery<FormData>({
+    url: ApiRoutes.PUT_INTERNAL.replace(":id", String(id || "")),
+    method: "POST",
+    messages: {
+      ...updateDraftMessages,
+      suppressSuccessToast: true,
+    },
+    queryOptions: { onSuccess: handleDraftUpdated },
+  });
+
   /**
    * Сохраняет черновик, сам выбирая формат запроса. Пока новых файлов нет —
    * шлём привычный JSON. Если есть — тот же payload уходит multipart-ом вместе
    * с файлами: отдельного эндпоинта для загрузки вложений у внутренней
    * корреспонденции нет, они принимаются прямо в создании/обновлении письма.
    */
-  const saveDraft = (requestPayload: Record<string, any>) => {
+  const saveDraft = (
+    requestPayload: Record<string, any>,
+    options?: { suppressToast?: boolean },
+  ) => {
     const pending = attachments.filter((a) => a.file);
+
+    if (options?.suppressToast) {
+      if (!pending.length) {
+        if (id) updateDraftSilent(requestPayload);
+        else createDraft(requestPayload);
+        return;
+      }
+      const form = buildFormData(requestPayload);
+      pending.forEach((a) => form.append("attachments[]", a.file!));
+      if (id) {
+        form.append("_method", "PUT");
+        updateDraftWithFilesSilent(form);
+      } else {
+        createDraft(form);
+      }
+      return;
+    }
 
     if (!pending.length) {
       if (id) updateDraft(requestPayload);
@@ -1904,6 +2324,7 @@ export const CreateInternalCorrespondence = ({
       createDraft(form);
     }
   };
+
 
   // Загрузка файлов идёт тем же запросом, что и сам черновик, поэтому
   // «Сохранить» ждёт и её тоже.
@@ -2032,6 +2453,9 @@ export const CreateInternalCorrespondence = ({
       String(id || ""),
     ),
     method: "POST",
+    messages: {
+      suppressSuccessToast: true,
+    },
   });
 
   const { mutate: signaturesCancel, isPending: isCancellingSign } =
@@ -2042,6 +2466,7 @@ export const CreateInternalCorrespondence = ({
       ),
       method: "POST",
       messages: {
+        suppressSuccessToast: true,
         invalidate: [
           ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
           ApiRoutes.GET_INTERNAL_VERSIONS?.replace(":id", String(id || "")),
@@ -2071,6 +2496,7 @@ export const CreateInternalCorrespondence = ({
     ),
     method: "POST",
     messages: {
+      suppressSuccessToast: true,
       invalidate: [
         ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
         ...CORRESPONDENCE_INVALIDATE_KEYS,
@@ -2139,7 +2565,7 @@ export const CreateInternalCorrespondence = ({
         const editorBody = getCleanEditorHtml();
         const requestPayload: any = {
           subject,
-          body: editorBody,
+          body: withDocLayout(editorBody, docLayout),
           recipients: {
             to: to.map((r) => r.id),
             cc: cc.map((r) => r.id),
@@ -2156,8 +2582,9 @@ export const CreateInternalCorrespondence = ({
           requestPayload.link_type = linkType;
         }
 
-        if (id) saveDraft(requestPayload);
+        if (id) saveDraft(requestPayload, { suppressToast: true });
       },
+
       onError: () =>
         setFinalSigner((prev) => (prev ? { ...prev, dsLoading: false } : null)),
     },
@@ -2218,13 +2645,16 @@ export const CreateInternalCorrespondence = ({
   // так предпросмотр/печать не перетекают контент заново (без распорок), а
   // повторяют холст пиксель-в-пиксель. Иначе блоки «сползали» и часть текста
   // (например, нижний колонтитул) терялась при печати.
-  const getEditorPages = useCallback((): string[] => {
+  const getEditorPages = useCallback((options?: { readOnly?: boolean }): string[] => {
     const editor = editorRef.current;
     if (!editor) return [];
     // «Голый» текст верхнего уровня заворачиваем в блок, иначе он не попадёт ни
     // на одну страницу (перебираем только element-детей) и пропадёт из
     // предпросмотра/печати — как было с одиночной цифрой, набранной в редактор.
-    wrapBareTopLevelNodes(editor);
+    // Эскизы области навигации просят readOnly: они пересобираются прямо во
+    // время набора, а обёртка двигает узлы и может утащить за собой каретку.
+    // Такой «голый» текст — редкое переходное состояние, в эскиз он не попадёт.
+    if (!options?.readOnly) wrapBareTopLevelNodes(editor);
     const contentWidth = PAGE_WIDTH - marginLeft - marginRight;
     const buckets: string[][] = [];
     Array.from(editor.children).forEach((child) => {
@@ -2253,6 +2683,11 @@ export const CreateInternalCorrespondence = ({
       pages.push((buckets[i] || []).join(""));
     return pages.length ? pages : [""];
   }, [PAGE_WIDTH, marginLeft, marginRight, PAGE_PAD_V, PAGE_STRIDE]);
+
+  const getEditorPagesReadOnly = useCallback(
+    () => getEditorPages({ readOnly: true }),
+    [getEditorPages],
+  );
 
   // Позиция вшитого штампа ЭЦП относительно своей страницы (для печати).
   const getEmbeddedStampInfo = useCallback(() => {
@@ -2400,7 +2835,9 @@ export const CreateInternalCorrespondence = ({
 
     const requestPayload: any = {
       subject,
-      body: editorBody,
+      // Раскладку линейки версионируем вместе с телом — иначе после сохранения
+      // и переключения версий поля возвращались бы к дефолтным.
+      body: withDocLayout(editorBody, docLayout),
       recipients: {
         to: to.map((r) => r.id),
         cc: cc.map((r) => r.id),
@@ -2428,9 +2865,13 @@ export const CreateInternalCorrespondence = ({
         setSubject(location.state.subject);
       }
       if (location.state.body && !editorContent) {
-        setEditorContent(location.state.body);
+        // Префилл может прийти из письма, сохранённого этим редактором, —
+        // раскладку из него применяем, а маркер в редактор не пускаем.
+        const { layout, body } = splitDocLayout(location.state.body);
+        if (layout) applyDocLayout(layout);
+        setEditorContent(body);
         if (editorRef.current) {
-          editorRef.current.innerHTML = location.state.body;
+          editorRef.current.innerHTML = body;
         }
       }
     }
@@ -2525,7 +2966,8 @@ export const CreateInternalCorrespondence = ({
       }
 
       if (item.signatures && item.signatures.length > 0) {
-        const s = item.signatures[0];
+        const activeSigs = item.signatures.filter((s: any) => s.status !== "revoked");
+        const s = activeSigs.length > 0 ? activeSigs[activeSigs.length - 1] : item.signatures[item.signatures.length - 1];
         const isCurrentlySigned = s.status === "signed";
         const isCurrentlyDeclined = s.status === "declined";
         setFinalSigner({
@@ -2548,6 +2990,7 @@ export const CreateInternalCorrespondence = ({
           setStampVisible(false);
         }
       } else if (item.creator) {
+
         setFinalSigner({
           id: String(item.creator.id),
           isInvited: false,
@@ -2649,10 +3092,12 @@ export const CreateInternalCorrespondence = ({
       }
 
       if (wfSignatures.length > 0) {
-        const wfS = wfSignatures[0];
+        const activeSigs = wfSignatures.filter((s: any) => s.status !== "revoked");
+        const wfS = activeSigs.length > 0 ? activeSigs[activeSigs.length - 1] : wfSignatures[wfSignatures.length - 1];
         const user = wfS.user;
         const isCurrentlySigned = wfS.status === "signed";
         const isCurrentlyDeclined = wfS.status === "declined";
+
         if (user) {
           setFinalSigner({
             id: String(user.id),
@@ -3409,6 +3854,7 @@ export const CreateInternalCorrespondence = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   // Перехват отмены из контекстного меню браузера / меню «Правка»: нативный
   // стек не используется, вместо него — наша история.
@@ -4749,21 +5195,26 @@ export const CreateInternalCorrespondence = ({
           ? stampSize.height
           : DS_STAMP_DEFAULT_HEIGHT;
 
+      let nextX = ev.clientX - cr.left - dragOffset.current.x;
+      let nextY = ev.clientY - cr.top - dragOffset.current.y;
+
+      // Привязка к сетке работает, пока сетка показана (в Word — «привязать
+      // объекты к сетке, когда она отображается»), и снимается зажатым Alt.
+      if (gridEnabled && !ev.altKey) {
+        nextX = snapToGrid(nextX, GRID_SNAP_STEP);
+        // Сетка отсчитывается от полей КАЖДОЙ страницы, поэтому по вертикали
+        // магнитим внутри страницы, а не по сквозной координате холста —
+        // иначе на второй и дальше странице привязка ушла бы мимо линий.
+        const page = Math.max(0, Math.floor(nextY / PAGE_STRIDE));
+        nextY =
+          page * PAGE_STRIDE +
+          snapToGrid(nextY - page * PAGE_STRIDE, GRID_SNAP_STEP);
+      }
+
+      // Границы печатной области важнее привязки: у края объект встаёт вплотную.
       setStampPos({
-        x: Math.max(
-          0,
-          Math.min(
-            ev.clientX - cr.left - dragOffset.current.x,
-            cr.width - currentStampWidth,
-          ),
-        ),
-        y: Math.max(
-          0,
-          Math.min(
-            ev.clientY - cr.top - dragOffset.current.y,
-            maxCanvasHeight - currentStampHeight,
-          ),
-        ),
+        x: Math.max(0, Math.min(nextX, cr.width - currentStampWidth)),
+        y: Math.max(0, Math.min(nextY, maxCanvasHeight - currentStampHeight)),
       });
     };
 
@@ -4859,12 +5310,98 @@ export const CreateInternalCorrespondence = ({
 
   const isReadOnly = isSigned || isOldVersionSelected;
 
+  // ===== Пересылка: цитата исходного письма в холсте =====
+  // «Перенаправить» кладёт входящее письмо прямо в холст (сверху остаётся место
+  // под свой текст, ниже разделитель и само письмо) — как это делает Outlook.
+  // Исключение — режим просмотра входящего письма: там оригинал уже открыт на
+  // боковом холсте, и в основной холст мы не добавляем ничего.
+  //
+  // Отслеживаем именно ПЕРЕКЛЮЧЕНИЕ режима: вставлять цитату на каждое
+  // изменение текста нельзя, иначе она возвращалась бы сразу после того, как
+  // пользователь сам её удалил.
+  const forwardSyncedModeRef = useRef<boolean | null>(null);
+  useEffect(() => {
+    if (panelMode !== "forward" || isReadOnly) return;
+    const editor = editorRef.current;
+    if (!editor || !panelSourceBody) return;
+
+    const modeChanged = forwardSyncedModeRef.current !== showOriginalLetterSides;
+    forwardSyncedModeRef.current = showOriginalLetterSides;
+
+    const afterMutation = () => {
+      setEditorContent(getCleanEditorHtml());
+      if (paginateEditorRef.current) setPageCount(paginateEditorRef.current());
+      resetHistory();
+    };
+
+    if (showOriginalLetterSides) {
+      // Цитата могла приехать из сохранённого черновика — убираем её здесь же,
+      // а не только на переключении режима.
+      if (removeForwardQuote(editor)) afterMutation();
+      return;
+    }
+
+    if (!modeChanged || hasForwardQuote(editor)) return;
+
+    const nodes = buildForwardQuoteNodes(
+      {
+        sender: panelSource?.senderName || panelSource?.creator?.full_name || "",
+        date: panelSource?.date || "",
+        subject: panelSource?.subject || "",
+        inboundNumber: panelSource?.inboundNumber || "",
+      },
+      panelSourceBody,
+    );
+    if (!nodes.length) return;
+
+    // Свой текст пишется НАД цитатой, поэтому если холст пуст — заводим пустой
+    // абзац сверху и ставим в него курсор (как курсор Outlook при пересылке).
+    const ownBlocks = Array.from(editor.children).filter(
+      (el) => !(el as HTMLElement).hasAttribute(FWD_ATTR),
+    );
+    let caretTarget: HTMLElement | null = null;
+    if (!ownBlocks.length) {
+      const p = document.createElement("p");
+      p.appendChild(document.createElement("br"));
+      editor.insertBefore(p, editor.firstChild);
+      caretTarget = p;
+    }
+    nodes.forEach((n) => editor.appendChild(n));
+    afterMutation();
+
+    if (caretTarget) {
+      const range = document.createRange();
+      range.setStart(caretTarget, 0);
+      range.collapse(true);
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+    }
+  }, [
+    panelMode,
+    isReadOnly,
+    showOriginalLetterSides,
+    panelSourceBody,
+    panelSource?.senderName,
+    panelSource?.creator?.full_name,
+    panelSource?.date,
+    panelSource?.subject,
+    panelSource?.inboundNumber,
+    editorContent,
+    getCleanEditorHtml,
+    resetHistory,
+  ]);
+
+  const activeSignatures =
+    rawWorkflowData?.data?.signatures?.filter(
+      (sig: any) => sig.status !== "revoked",
+    ) || [];
+
   const allSignaturesSigned =
-    rawWorkflowData?.data?.signatures?.length > 0
-      ? rawWorkflowData.data.signatures.every(
-          (sig: any) => sig.status === "signed",
-        )
+    activeSignatures.length > 0
+      ? activeSignatures.every((sig: any) => sig.status === "signed")
       : false;
+
 
   useEffect(() => {
     if (allVersions.length === 0) return;
@@ -4873,6 +5410,10 @@ export const CreateInternalCorrespondence = ({
     const isNewVersionId = autoLoadedLatestRef.current !== targetVersion.id;
     autoLoadedLatestRef.current = targetVersion.id;
     setActiveVersionId(targetVersion.id);
+
+    // Раскладку подтягиваем только вместе с новой версией. На обычном рефетче
+    // (тот же id) её трогать нельзя — затёрли бы несохранённые правки линейки.
+    if (isNewVersionId) applyDocLayout(targetVersion.layout);
 
     if (editorRef.current && targetVersion.content) {
       const currentCleanHtml = cleanEditorArtifacts(
@@ -5225,10 +5766,21 @@ export const CreateInternalCorrespondence = ({
             priority={panelSource.priority}
             inboundNumber={panelSource.inboundNumber || "—"}
             subject={panelSource.subject || ""}
-            body={panelSource.body}
+            body={panelSourceBody}
             sourceId={panelSource.id}
           />
         )}
+
+        <RelatedDocsAccordion
+          relatedDocuments={relatedDocs}
+          currentDoc={{
+            id: id || initialData?.item?.id,
+            kind: "outgoing",
+            date: initialData?.item?.doc_date || initialData?.item?.created_at,
+            reg_number: initialData?.item?.reg_number,
+            subject: subject || initialData?.item?.subject,
+          }}
+        />
 
         <div className="w-full">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
@@ -5995,29 +6547,47 @@ export const CreateInternalCorrespondence = ({
                   </>
                 )}
                 <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
-                <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 mr-2 ml-1">
+                <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
                   <input
                     type="checkbox"
                     checked={rulerEnabled}
-                    onChange={(e) => setRulerEnabled(e.target.checked)}
+                    onChange={(e) => toggleRuler(e.target.checked)}
                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
                   <span>Линейка</span>
                 </label>
+                {rulerEnabled && (
+                  <button
+                    type="button"
+                    onClick={resetRulerMargins}
+                    disabled={isRulerDefault}
+                    title={
+                      isRulerDefault
+                        ? "Поля страницы уже стандартные"
+                        : "Вернуть поля страницы к значениям по умолчанию"
+                    }
+                    className="flex items-center gap-1.5 px-2.5 py-1 ml-2 rounded text-xs font-semibold transition-colors border flex-shrink-0 bg-white border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
+                  >
+                    <RotateCcw size={14} />
+                    <span>Сбросить</span>
+                  </button>
+                )}
+                <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 mr-2 ml-1">
                   <input
                     type="checkbox"
-                    checked={false}
-                    onChange={() => toast.info("Функционал «Сетка» находится в разработке")}
+                    checked={gridEnabled}
+                    onChange={(e) => toggleGrid(e.target.checked)}
                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
                   <span>Сетка</span>
                 </label>
+                <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
                   <input
                     type="checkbox"
-                    checked={false}
-                    onChange={() => toast.info("Функционал «Область навигации» находится в разработке")}
+                    checked={navPaneEnabled}
+                    onChange={(e) => toggleNavPane(e.target.checked)}
                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
                   <span>Область навигации</span>
@@ -6263,6 +6833,27 @@ export const CreateInternalCorrespondence = ({
                   "py-8 px-8 flex justify-center items-start gap-12 w-full",
                   (showOriginalLetterSides || showVersionCompareSides) && "min-w-max"
                 )}>
+                  {/* Область навигации пришвартована слева от листа, как в Word.
+                      Обёртка нужна для sticky-эмуляции (см. эффект ниже). */}
+                  {navPaneEnabled && (
+                    <div ref={navPaneWrapRef} className="order-0 shrink-0">
+                      <NavigationPane
+                        onClose={() => toggleNavPane(false)}
+                        editorRef={editorRef}
+                        scrollerRef={rootScrollRef}
+                        headerRef={stickyHeaderRef}
+                        canvasRef={pageCanvasRef}
+                        editorContent={editorContent}
+                        pageCount={pageCount}
+                        pageStride={PAGE_STRIDE}
+                        pageWidth={PAGE_WIDTH}
+                        pageHeight={PAGE_HEIGHT}
+                        fontSize={Number(fontSize) || 14}
+                        getPages={getEditorPagesReadOnly}
+                      />
+                    </div>
+                  )}
+
                   <If is={Boolean(showVersionCompareSides && activeVersion)}>
                     <div ref={versionCompareCanvasWrapRef} className="shrink-0 order-2">
                       <OriginalLetterCanvas
@@ -6388,6 +6979,22 @@ export const CreateInternalCorrespondence = ({
                         )}
                       </div>
                     ))}
+                    {/* Сетка живёт в системе координат холста, а не листа: у
+                        листа есть 1px рамка, и вложенная сетка съезжала бы на
+                        неё относительно колонки набора и маркеров линейки.
+                        Идёт после листов и до редактора — поверх белой бумаги,
+                        но под текстом. В предпросмотр и печать не попадает: они
+                        собираются только из содержимого редактора. */}
+                    {gridEnabled &&
+                      Array.from({ length: pageCount }, (_, index) => (
+                        <PageGrid
+                          key={`grid${index}`}
+                          left={marginLeft}
+                          top={index * PAGE_STRIDE + PAGE_PAD_V}
+                          width={PAGE_WIDTH - marginLeft - marginRight}
+                          height={CONTENT_HEIGHT}
+                        />
+                      ))}
                     <div
                       ref={editorRef}
                       contentEditable={!isReadOnly}
@@ -6480,8 +7087,9 @@ export const CreateInternalCorrespondence = ({
                           left: 0,
                           right: 0,
                           height: 0,
-                          zIndex: 40,
+                          zIndex: 500,
                           willChange: "transform",
+
                         }}
                       >
                         <ApproversPanel
@@ -6567,10 +7175,18 @@ export const CreateInternalCorrespondence = ({
                           openLeft={!showVersionCompareSides && !showOriginalLetterSides}
                           onOpen={handleOpenAttachments}
                           onClose={() => setAttachmentsOpen(false)}
-                          attachments={attachments.filter((a) => !a.file)}
+                          attachments={attachments}
                           onPreview={setPreviewAttachment}
                           onDownload={downloadAttachment}
+                          onUpload={() => fileInputRef.current?.click()}
+                          onRemove={(file) =>
+                            setAttachments((prev) =>
+                              prev.filter((f) => f.id !== file.id),
+                            )
+                          }
+                          isReadOnly={isReadOnly}
                         />
+
                       </div>
                     )}
                   </div>

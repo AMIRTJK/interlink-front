@@ -55,7 +55,8 @@ export const TaskPanel: React.FC<IProps> = ({ onClose, correspondenceId }) => {
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 12, opacity: 0 }}
       transition={{ type: "spring", stiffness: 320, damping: 28 }}
-      className="absolute w-80 bg-white shadow-2xl rounded-2xl border border-slate-200 z-30 flex flex-col overflow-hidden"
+      className="absolute w-80 bg-white shadow-2xl rounded-2xl border border-slate-200 z-[500] flex flex-col overflow-hidden"
+
       style={{
         right: "calc(100% + 12px)",
         top: 10,

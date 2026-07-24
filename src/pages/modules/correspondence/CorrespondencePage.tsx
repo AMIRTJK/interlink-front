@@ -19,6 +19,16 @@ export const CorrespondencePage = () => {
     localStorage.setItem("registry-sidebar-variant", variant);
   }, [variant]);
 
+  useEffect(() => {
+    return () => {
+      if (!window.location.pathname.includes("correspondence")) {
+        localStorage.removeItem("correspondence_open_structures");
+      }
+    };
+  }, []);
+
+
+
   return (
     <div
       className={cn(

@@ -269,3 +269,12 @@ export const OUTBOX_STATUS_STYLE: Record<Status, string> = {
   "на подпись": "bg-purple-50 text-purple-600 border-purple-100",
   завершено: "bg-emerald-50 text-emerald-600 border-emerald-100",
 };
+
+// ===== Служебные атрибуты разметки редактора =====
+// Живут здесь, а не в самом редакторе, потому что их читает не только он:
+// область навигации ищет по тексту и строит структуру документа и обязана
+// пропускать те же служебные узлы.
+export const SPACER_ATTR = "data-page-spacer"; // невидимая распорка на границе страниц
+export const AUTOSPLIT_ATTR = "data-page-split"; // части одного блока, разрезанного по высоте
+export const PAGE_BREAK_ATTR = "data-page-break"; // ручной разрыв страницы (кнопка «Новая страница»)
+export const STAMP_ATTR = "data-signature-stamp"; // печать ЭЦП (вне потока, не трогаем)

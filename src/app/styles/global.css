@@ -186,6 +186,20 @@ body {
   min-height: 1.8em;
 }
 
+/* Подсветка результатов поиска области навигации (редактор корреспонденции).
+   CSS Custom Highlight API рисует выделение поверх текста, не меняя DOM, —
+   для contenteditable это единственный безопасный способ: обёртки <mark>
+   попали бы в тело письма, в сохранение и в историю правок. */
+::highlight(icc-search) {
+  background-color: #fef08a;
+  color: inherit;
+}
+
+::highlight(icc-search-active) {
+  background-color: #fb923c;
+  color: #1e293b;
+}
+
 
 /* No Animations Mode - REMOVED */
 

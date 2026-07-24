@@ -63,6 +63,22 @@ const STATUS_CONFIG: Record<string, any> = {
 		icon: <FileEdit size={14} />,
 		gradient: "from-blue-500 to-blue-600",
 	},
+	no_assignment: {
+		label: "Без поручения",
+		icon: <Clock size={14} />,
+		gradient: "from-blue-500 to-blue-600",
+	},
+	submitted: {
+		label: "На проверке",
+		icon: <FileEdit size={14} />,
+		gradient: "from-purple-500 to-purple-600",
+	},
+	returned: {
+		label: "На доработке",
+		icon: <XCircle size={14} />,
+		gradient: "from-rose-500 to-rose-600",
+	},
+
 	["in-progress"]: {
 		label: "В процессе исполнения",
 		icon: <Clock size={14} />,
