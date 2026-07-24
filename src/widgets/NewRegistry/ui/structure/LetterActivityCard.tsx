@@ -9,6 +9,8 @@ import { getInitials, formatDate } from "../../lib/structure/helpers";
 import { EventRow } from "./EventRow";
 import { RelatedDocsSection } from "./RelatedDocsSection";
 
+const STORAGE_KEY = "correspondence_open_structures";
+
 interface ILetterActivityCardProps {
   item: any;
   direction: LetterDirection;
@@ -21,7 +23,40 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
   index,
   onClick,
 }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<boolean>(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw || !item?.id) return false;
+      const parsed = JSON.parse(raw);
+      return Boolean(parsed[item.id] || parsed[String(item.id)]);
+    } catch {
+      return false;
+    }
+  });
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!item?.id) return;
+    setOpen((prev) => {
+      const next = !prev;
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        const key = String(item.id);
+        if (next) {
+          parsed[key] = true;
+        } else {
+          delete parsed[key];
+          delete parsed[item.id];
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+      } catch (err) {
+        console.error(err);
+      }
+      return next;
+    });
+  };
+
 
   const { data: responseData, isLoading } = useGetQuery<
     Record<string, unknown>,
@@ -33,23 +68,13 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
   const structureData = responseData?.data;
   const timelineEvents = structureData?.timeline || [];
   const relatedDocs = structureData?.related_documents || [];
-
   const creatorName = item.creator?.full_name || structureData?.document?.creator?.full_name || "—";
   const primaryRecipient =
     item.recipients?.find((r: any) => r.type === "to")?.user?.full_name ||
     item.recipients?.[0]?.user?.full_name;
   const isUnread = Boolean(item.is_unread);
-
-  const countFromItem =
-    item.structure_count ??
-    item.events_count ??
-    item.timeline_count ??
-    item.history_count;
-
-  const displayCount =
-    responseData?.data?.timeline != null
-      ? responseData.data.timeline.length
-      : countFromItem;
+  const countFromItem = item.structure_count ?? item.events_count ?? item.timeline_count ?? item.history_count;
+  const displayCount = responseData?.data?.timeline != null ? responseData.data.timeline.length : countFromItem;
 
   return (
     <motion.div
@@ -118,10 +143,7 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
 
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen((v) => !v);
-            }}
+            onClick={handleToggle}
             className={cn(
               "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex-shrink-0 mt-0.5 cursor-pointer",
               open
@@ -184,3 +206,4 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
     </motion.div>
   );
 };
+
