@@ -1129,8 +1129,9 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
                       left: 0,
                       right: 0,
                       height: 0,
-                      zIndex: 40,
+                      zIndex: 500,
                       willChange: "transform",
+
                     }}
                   >
                     <SignersPanel
