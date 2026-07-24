@@ -87,6 +87,10 @@ import {
   ATTACHMENT_EXTENSIONS,
   MAX_ATTACHMENTS,
   MAX_ATTACHMENT_SIZE_MB,
+  SPACER_ATTR,
+  AUTOSPLIT_ATTR,
+  PAGE_BREAK_ATTR,
+  STAMP_ATTR,
   // INBOX_DOC_TYPES,
   // INBOX_DOC_TYPE_STYLE,
   // MOCK_CONTENT_LINES,
@@ -136,6 +140,7 @@ import { ApproversPanel } from "./ApproversPanel";
 import { SignerPanel } from "./SignerPanel";
 import { IncomingLettersPanel } from "./IncomingLettersPanel";
 import { VersionsPanel } from "./VersionsPanel";
+import { NavigationPane } from "./NavigationPane";
 import { AttachmentsPanel } from "./AttachmentsPanel";
 
 function FileTextIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -179,10 +184,8 @@ function buildStampQRSvg(value: string, size = 52) {
 }
 
 // ===== Постраничная разбивка редактора =====
-const SPACER_ATTR = "data-page-spacer"; // невидимая распорка на границе страниц
-const AUTOSPLIT_ATTR = "data-page-split"; // части одного блока, разрезанного по высоте
-const PAGE_BREAK_ATTR = "data-page-break"; // ручной разрыв страницы (кнопка «Новая страница»)
-const STAMP_ATTR = "data-signature-stamp"; // печать ЭЦП (вне потока, не трогаем)
+// Служебные атрибуты (SPACER_ATTR и соседи) вынесены в ../lib/constants —
+// их читает ещё и область навигации.
 
 const EDITOR_BLOCK_TAGS = new Set([
   "DIV",
@@ -499,6 +502,80 @@ const EditorRuler = ({
         <div style={gripStyle} />
       </div>
     </div>
+  );
+};
+
+// Сетка как в Word («Вид → Сетка»): непечатаемые направляющие поверх листа, но
+// ПОД текстом. Значения — дефолты из вордовского диалога «Сетка и направляющие»:
+// шаг сетки 0,32 см, на экране показывается каждая 2-я вертикальная и каждая
+// 3-я горизонтальная линия, отсчёт идёт от полей страницы («привязать к полям»).
+// Поэтому видимая ячейка — 0,64 × 0,96 см, а начало координат совпадает с левым
+// верхним углом колонки набора и едет вместе с маркерами линейки.
+const GRID_STEP_CM = 0.32;
+const GRID_VERTICAL_EVERY = 2;
+const GRID_HORIZONTAL_EVERY = 3;
+const GRID_COL_STEP = GRID_STEP_CM * GRID_VERTICAL_EVERY * PX_PER_CM;
+const GRID_ROW_STEP = GRID_STEP_CM * GRID_HORIZONTAL_EVERY * PX_PER_CM;
+const GRID_COLOR = "rgba(148,163,184,0.5)";
+// Привязка объектов идёт к БАЗОВОМУ шагу сетки (0,32 см), а не к видимым линиям:
+// Word рисует на экране каждую 2-ю/3-ю линию, но «магнитит» по полному шагу,
+// поэтому объект может встать и между линиями. Alt при перетаскивании временно
+// отключает привязку — тоже как в Word.
+const GRID_SNAP_STEP = GRID_STEP_CM * PX_PER_CM;
+
+const snapToGrid = (value: number, step: number): number =>
+  Math.round(value / step) * step;
+
+// Линии рисуем явными <line>, а не паттерном/градиентом: шаг дробный (≈24,19 и
+// ≈36,28 px), и при заливке браузер размывает каждую вторую линию. Округление
+// позиции к целому + 0.5 даёт чёткий хайрлайн, а сама позиция считается от
+// i * step, поэтому накопленного дрейфа относительно линейки нет.
+const gridLinePositions = (extent: number, step: number): number[] => {
+  const out: number[] = [];
+  for (let i = 0; i * step <= extent; i++) {
+    const pos = Math.round(i * step) + 0.5;
+    if (pos <= extent) out.push(pos);
+  }
+  return out;
+};
+
+const PageGrid = ({
+  left,
+  top,
+  width,
+  height,
+}: {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}) => {
+  const cols = useMemo(() => gridLinePositions(width, GRID_COL_STEP), [width]);
+  const rows = useMemo(() => gridLinePositions(height, GRID_ROW_STEP), [height]);
+
+  if (width <= 0 || height <= 0) return null;
+
+  return (
+    <svg
+      width={width}
+      height={height}
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        left,
+        top,
+        display: "block",
+        pointerEvents: "none",
+        userSelect: "none",
+      }}
+    >
+      {cols.map((x) => (
+        <line key={`c${x}`} x1={x} y1={0} x2={x} y2={height} stroke={GRID_COLOR} />
+      ))}
+      {rows.map((y) => (
+        <line key={`r${y}`} x1={0} y1={y} x2={width} y2={y} stroke={GRID_COLOR} />
+      ))}
+    </svg>
   );
 };
 
@@ -1313,6 +1390,23 @@ export const CreateInternalCorrespondence = ({
     setRulerEnabled(enabled);
     tokenControl.setEditorRulerEnabled(enabled);
   }, []);
+  // Показ сетки — тоже настройка приложения (в Word это галочка на вкладке
+  // «Вид», а не свойство документа), поэтому запоминаем так же, как линейку.
+  const [gridEnabled, setGridEnabled] = useState<boolean>(() =>
+    tokenControl.getEditorGridEnabled(),
+  );
+  const toggleGrid = useCallback((enabled: boolean) => {
+    setGridEnabled(enabled);
+    tokenControl.setEditorGridEnabled(enabled);
+  }, []);
+  // Область навигации — тоже галочка вкладки «Вид» в Word, запоминаем так же.
+  const [navPaneEnabled, setNavPaneEnabled] = useState<boolean>(() =>
+    tokenControl.getEditorNavPaneEnabled(),
+  );
+  const toggleNavPane = useCallback((enabled: boolean) => {
+    setNavPaneEnabled(enabled);
+    tokenControl.setEditorNavPaneEnabled(enabled);
+  }, []);
   // Поля страницы (px) — регулируются перетаскиванием маркеров линейки. Задают
   // ширину колонки набора, поэтому влияют на перенос текста, пагинацию и печать.
   const [marginLeft, setMarginLeft] = useState(DEFAULT_DOC_LAYOUT.marginLeft);
@@ -1440,6 +1534,7 @@ export const CreateInternalCorrespondence = ({
   const pageCanvasRef = useRef<HTMLDivElement>(null);
   const rootScrollRef = useRef<HTMLDivElement>(null);
   const originalCanvasWrapRef = useRef<HTMLDivElement>(null);
+  const navPaneWrapRef = useRef<HTMLDivElement>(null);
   const versionCompareCanvasWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1627,6 +1722,52 @@ export const CreateInternalCorrespondence = ({
       group.style.transform = "";
     };
   }, [id, pageCount, orientation, formExpanded, panelsInToolbar]);
+
+  // Область навигации должна оставаться на виду при прокрутке документа, как
+  // пришвартованная панель Word. Тот же приём, что для левого A4-холста и
+  // группы боковых панелей выше: CSS sticky здесь перехватывает серая область
+  // с overflow, поэтому смещаем обёртку сами и заодно отдаём панели доступную
+  // высоту (--icc-nav-max-h), чтобы её списки прокручивались внутри.
+  useEffect(() => {
+    if (!navPaneEnabled) return;
+    const scroller = rootScrollRef.current;
+    const canvas = pageCanvasRef.current;
+    const wrap = navPaneWrapRef.current;
+    if (!scroller || !canvas || !wrap) return;
+
+    const BOT_M = 24;
+    const MIN_VISIBLE = 200;
+
+    const update = () => {
+      const TOP_M = (stickyHeaderRef.current?.offsetHeight ?? 0) + 12;
+      const canvasTop =
+        canvas.getBoundingClientRect().top -
+        scroller.getBoundingClientRect().top;
+      let shift = Math.max(0, TOP_M - canvasTop);
+      shift = Math.min(shift, Math.max(0, canvas.offsetHeight - MIN_VISIBLE));
+      const paneViewportTop = canvasTop + shift;
+      const availH = Math.max(
+        240,
+        scroller.clientHeight - paneViewportTop - BOT_M,
+      );
+      // Отдаём панели всю доступную высоту — распределить её между шапкой,
+      // поиском, вкладками и прокручиваемым списком она умеет сама (flex).
+      wrap.style.setProperty("--icc-nav-max-h", `${availH}px`);
+      wrap.style.transform = shift > 0 ? `translateY(${shift}px)` : "";
+    };
+
+    update();
+    scroller.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    const headerRO = new ResizeObserver(update);
+    if (stickyHeaderRef.current) headerRO.observe(stickyHeaderRef.current);
+    return () => {
+      scroller.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      headerRO.disconnect();
+      wrap.style.transform = "";
+    };
+  }, [navPaneEnabled, pageCount, orientation, formExpanded, panelsInToolbar]);
 
   const [searchParams, setSearchParams] = useState({ query: "" });
   const handleOpenRecipientModal = () => {
@@ -2437,13 +2578,16 @@ export const CreateInternalCorrespondence = ({
   // так предпросмотр/печать не перетекают контент заново (без распорок), а
   // повторяют холст пиксель-в-пиксель. Иначе блоки «сползали» и часть текста
   // (например, нижний колонтитул) терялась при печати.
-  const getEditorPages = useCallback((): string[] => {
+  const getEditorPages = useCallback((options?: { readOnly?: boolean }): string[] => {
     const editor = editorRef.current;
     if (!editor) return [];
     // «Голый» текст верхнего уровня заворачиваем в блок, иначе он не попадёт ни
     // на одну страницу (перебираем только element-детей) и пропадёт из
     // предпросмотра/печати — как было с одиночной цифрой, набранной в редактор.
-    wrapBareTopLevelNodes(editor);
+    // Эскизы области навигации просят readOnly: они пересобираются прямо во
+    // время набора, а обёртка двигает узлы и может утащить за собой каретку.
+    // Такой «голый» текст — редкое переходное состояние, в эскиз он не попадёт.
+    if (!options?.readOnly) wrapBareTopLevelNodes(editor);
     const contentWidth = PAGE_WIDTH - marginLeft - marginRight;
     const buckets: string[][] = [];
     Array.from(editor.children).forEach((child) => {
@@ -2472,6 +2616,11 @@ export const CreateInternalCorrespondence = ({
       pages.push((buckets[i] || []).join(""));
     return pages.length ? pages : [""];
   }, [PAGE_WIDTH, marginLeft, marginRight, PAGE_PAD_V, PAGE_STRIDE]);
+
+  const getEditorPagesReadOnly = useCallback(
+    () => getEditorPages({ readOnly: true }),
+    [getEditorPages],
+  );
 
   // Позиция вшитого штампа ЭЦП относительно своей страницы (для печати).
   const getEmbeddedStampInfo = useCallback(() => {
@@ -4978,21 +5127,26 @@ export const CreateInternalCorrespondence = ({
           ? stampSize.height
           : DS_STAMP_DEFAULT_HEIGHT;
 
+      let nextX = ev.clientX - cr.left - dragOffset.current.x;
+      let nextY = ev.clientY - cr.top - dragOffset.current.y;
+
+      // Привязка к сетке работает, пока сетка показана (в Word — «привязать
+      // объекты к сетке, когда она отображается»), и снимается зажатым Alt.
+      if (gridEnabled && !ev.altKey) {
+        nextX = snapToGrid(nextX, GRID_SNAP_STEP);
+        // Сетка отсчитывается от полей КАЖДОЙ страницы, поэтому по вертикали
+        // магнитим внутри страницы, а не по сквозной координате холста —
+        // иначе на второй и дальше странице привязка ушла бы мимо линий.
+        const page = Math.max(0, Math.floor(nextY / PAGE_STRIDE));
+        nextY =
+          page * PAGE_STRIDE +
+          snapToGrid(nextY - page * PAGE_STRIDE, GRID_SNAP_STEP);
+      }
+
+      // Границы печатной области важнее привязки: у края объект встаёт вплотную.
       setStampPos({
-        x: Math.max(
-          0,
-          Math.min(
-            ev.clientX - cr.left - dragOffset.current.x,
-            cr.width - currentStampWidth,
-          ),
-        ),
-        y: Math.max(
-          0,
-          Math.min(
-            ev.clientY - cr.top - dragOffset.current.y,
-            maxCanvasHeight - currentStampHeight,
-          ),
-        ),
+        x: Math.max(0, Math.min(nextX, cr.width - currentStampWidth)),
+        y: Math.max(0, Math.min(nextY, maxCanvasHeight - currentStampHeight)),
       });
     };
 
@@ -6272,17 +6426,18 @@ export const CreateInternalCorrespondence = ({
                 <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 mr-2 ml-1">
                   <input
                     type="checkbox"
-                    checked={false}
-                    onChange={() => toast.info("Функционал «Сетка» находится в разработке")}
+                    checked={gridEnabled}
+                    onChange={(e) => toggleGrid(e.target.checked)}
                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
                   <span>Сетка</span>
                 </label>
+                <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
                 <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
                   <input
                     type="checkbox"
-                    checked={false}
-                    onChange={() => toast.info("Функционал «Область навигации» находится в разработке")}
+                    checked={navPaneEnabled}
+                    onChange={(e) => toggleNavPane(e.target.checked)}
                     className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
                   <span>Область навигации</span>
@@ -6528,6 +6683,27 @@ export const CreateInternalCorrespondence = ({
                   "py-8 px-8 flex justify-center items-start gap-12 w-full",
                   (showOriginalLetterSides || showVersionCompareSides) && "min-w-max"
                 )}>
+                  {/* Область навигации пришвартована слева от листа, как в Word.
+                      Обёртка нужна для sticky-эмуляции (см. эффект ниже). */}
+                  {navPaneEnabled && (
+                    <div ref={navPaneWrapRef} className="order-0 shrink-0">
+                      <NavigationPane
+                        onClose={() => toggleNavPane(false)}
+                        editorRef={editorRef}
+                        scrollerRef={rootScrollRef}
+                        headerRef={stickyHeaderRef}
+                        canvasRef={pageCanvasRef}
+                        editorContent={editorContent}
+                        pageCount={pageCount}
+                        pageStride={PAGE_STRIDE}
+                        pageWidth={PAGE_WIDTH}
+                        pageHeight={PAGE_HEIGHT}
+                        fontSize={Number(fontSize) || 14}
+                        getPages={getEditorPagesReadOnly}
+                      />
+                    </div>
+                  )}
+
                   <If is={Boolean(showVersionCompareSides && activeVersion)}>
                     <div ref={versionCompareCanvasWrapRef} className="shrink-0 order-2">
                       <OriginalLetterCanvas
@@ -6653,6 +6829,22 @@ export const CreateInternalCorrespondence = ({
                         )}
                       </div>
                     ))}
+                    {/* Сетка живёт в системе координат холста, а не листа: у
+                        листа есть 1px рамка, и вложенная сетка съезжала бы на
+                        неё относительно колонки набора и маркеров линейки.
+                        Идёт после листов и до редактора — поверх белой бумаги,
+                        но под текстом. В предпросмотр и печать не попадает: они
+                        собираются только из содержимого редактора. */}
+                    {gridEnabled &&
+                      Array.from({ length: pageCount }, (_, index) => (
+                        <PageGrid
+                          key={`grid${index}`}
+                          left={marginLeft}
+                          top={index * PAGE_STRIDE + PAGE_PAD_V}
+                          width={PAGE_WIDTH - marginLeft - marginRight}
+                          height={CONTENT_HEIGHT}
+                        />
+                      ))}
                     <div
                       ref={editorRef}
                       contentEditable={!isReadOnly}

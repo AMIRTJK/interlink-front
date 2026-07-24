@@ -5,6 +5,8 @@ const VIEW_MODE_KEY = "interlink/viewMode";
 const DARK_MODE_KEY = "interlink/darkMode";
 const PROFILE_EXPANDED_KEY = "interlink/profileExpanded";
 const EDITOR_RULER_KEY = "interlink/editorRulerEnabled";
+const EDITOR_GRID_KEY = "interlink/editorGridEnabled";
+const EDITOR_NAV_PANE_KEY = "interlink/editorNavPaneEnabled";
 interface IToken {
   token: string;
   userId?: number;
@@ -102,6 +104,25 @@ export const tokenControl = {
 
   getEditorRulerEnabled: (): boolean => {
     return localStorage.getItem(EDITOR_RULER_KEY) === "true";
+  },
+
+  // Сетка редактора. Как и в Word, показ сетки — настройка приложения, а не
+  // свойство документа: живёт рядом с линейкой и не версионируется.
+  setEditorGridEnabled: (enabled: boolean) => {
+    localStorage.setItem(EDITOR_GRID_KEY, String(enabled));
+  },
+
+  getEditorGridEnabled: (): boolean => {
+    return localStorage.getItem(EDITOR_GRID_KEY) === "true";
+  },
+
+  // Область навигации — та же вкладка «Вид» в Word, тот же принцип хранения.
+  setEditorNavPaneEnabled: (enabled: boolean) => {
+    localStorage.setItem(EDITOR_NAV_PANE_KEY, String(enabled));
+  },
+
+  getEditorNavPaneEnabled: (): boolean => {
+    return localStorage.getItem(EDITOR_NAV_PANE_KEY) === "true";
   },
 };
 
