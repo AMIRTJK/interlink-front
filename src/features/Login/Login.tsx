@@ -14,7 +14,7 @@ import {
 
 import { toast } from "@shared/lib/toast";
 
-import { AppRoutes } from "@shared/config";
+import { AppRoutes, welcomeStorage } from "@shared/config";
 import { ApiRoutes } from "@shared/api";
 import { tokenControl, useMutationQuery } from "@shared/lib";
 import {
@@ -69,6 +69,16 @@ export const Login = () => {
 		tokenControl.set({ token });
 		if (userId) tokenControl.setUserId(userId);
 		toast.success("Вход выполнен");
+
+		if (welcomeStorage.shouldShow()) {
+			welcomeStorage.markPending();
+			navigate(AppRoutes.AUTH_WELCOME, {
+				replace: true,
+				state: { to: AppRoutes.PROFILE },
+			});
+			return;
+		}
+
 		navigate(AppRoutes.PROFILE, { replace: true });
 	};
 

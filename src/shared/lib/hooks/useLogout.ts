@@ -1,6 +1,6 @@
 import { toast } from "@shared/lib/toast";
 import { _axios, ApiRoutes } from "@shared/api";
-import { AppRoutes } from "@shared/config";
+import { AppRoutes, welcomeStorage } from "@shared/config";
 import { tokenControl } from "../tokenControl";
 import { queryClient } from "../queryClient";
 
@@ -12,6 +12,7 @@ export const useLogout = () => {
     } catch {
     } finally {
       tokenControl.remove();
+      welcomeStorage.clearPending();
       queryClient.clear();
       if (window.location.pathname !== AppRoutes.LOGIN) {
         window.location.replace(AppRoutes.LOGIN);

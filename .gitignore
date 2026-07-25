@@ -26,6 +26,14 @@ tsconfig.tsbuildinfo
 
 # GEMINI.md
 
+# HyperFrames: скилы агента и результаты рендера (композиции коммитим, mp4 — нет)
+.agents/
+.claude/skills/
+skills-lock.json
+hyperframes/**/out/
+hyperframes/**/*.mp4
+hyperframes/**/node_modules/
+
 src/widgets/NewProfileDesign/
 src/widgets/DesignTaskCode/
 src/widgets/NewDesignAccess/

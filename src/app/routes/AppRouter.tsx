@@ -5,10 +5,17 @@ import { tokenControl } from "@shared/lib";
 import { Suspense, lazy } from "react";
 import { Loader } from "@shared/ui/Loader";
 import PrivateRoute from "./PrivateRoute";
+import WelcomeRoute from "./WelcomeRoute";
 
 // Lazy-loaded страницы
 const Auth = lazy(() =>
   import("@pages/Auth/Auth").then((m) => ({ default: m.Auth })),
+);
+
+const AuthWelcomePage = lazy(() =>
+  import("@pages/Auth/AuthWelcomePage").then((m) => ({
+    default: m.AuthWelcomePage,
+  })),
 );
 
 const ProfileLayout = lazy(() =>
@@ -212,6 +219,14 @@ export const AppRouter = () => {
 
           {/* Публичный маршрут */}
           <Route path="/auth/login" element={<Auth />} />
+
+          {/* Экран приветствия сразу после входа */}
+          <Route element={<WelcomeRoute />}>
+            <Route
+              path={AppRoutes.AUTH_WELCOME}
+              element={<AuthWelcomePage />}
+            />
+          </Route>
 
           {/* Приватные маршруты */}
           <Route element={<PrivateRoute />}>

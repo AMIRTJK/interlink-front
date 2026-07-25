@@ -2,6 +2,7 @@ import { Settings } from "lucide-react";
 import { SettingsModalShell } from "./settings/SettingsModalShell";
 import { MfaSecurity } from "./MfaSecurity";
 import { ChangePassword } from "./ChangePassword";
+import { WelcomeAnimationSettings } from "./WelcomeAnimationSettings";
 
 interface IProps {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export const ProfileSettingsModal = ({
           onRefresh={onRefresh}
         />
         <ChangePassword />
+        <WelcomeAnimationSettings />
       </div>
     </SettingsModalShell>
   );
