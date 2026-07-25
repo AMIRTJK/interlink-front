@@ -1,5 +1,6 @@
 export const AppRoutes = {
 	LOGIN: "/auth/login",
+	AUTH_WELCOME: "/auth/welcome",
 	PROFILE: "/profile",
 	PROFILE_TASKS: "/profile/tasks",
 	PROFILE_CALENDAR: "/profile/calendar",

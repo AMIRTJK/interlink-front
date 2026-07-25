@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>INTERLINK — Welcome «Досье»</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Orbitron";
+        font-style: normal;
+        font-weight: 400 900;
+        font-display: block;
+        src: url("assets/fonts/Orbitron-Variable.woff2") format("woff2");
+      }
+
+      :root {
+        --bg: #020617;
+        --accent: #10b981;
+        --accent-2: #14b8a6;
+        --paper: rgba(255, 255, 255, 0.08);
+        --paper-border: rgba(255, 255, 255, 0.15);
+        --ink: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Segoe UI", Inter, system-ui, sans-serif;
+      }
+
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+
+      .clip {
+        position: absolute;
+        inset: 0;
+      }
+
+      .fill {
+        position: absolute;
+        inset: 0;
+      }
+
+      .bg-fill {
+        background: var(--bg);
+      }
+
+      .glow {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 1100px;
+        height: 1100px;
+        margin: -550px 0 0 -550px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          var(--accent) 0%,
+          var(--accent-2) 45%,
+          transparent 72%
+        );
+        opacity: 0.22;
+        filter: blur(140px);
+      }
+
+      .vignette {
+        background: radial-gradient(
+          ellipse at center,
+          rgba(2, 6, 23, 0.35) 0%,
+          var(--bg) 74%
+        );
+        opacity: 0;
+      }
+
+      .stage {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+      }
+
+      .sheet {
+        position: absolute;
+        width: 300px;
+        height: 420px;
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        border: 1px solid var(--paper-border);
+        border-radius: 20px;
+        background: var(--paper);
+        box-shadow: 0 40px 90px rgba(2, 6, 23, 0.6);
+        transform-origin: 50% 50%;
+        opacity: 0;
+      }
+
+      .sheet__head {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .sheet__mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      }
+
+      .sheet__meta {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .sheet__meta-line {
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.4);
+      }
+
+      .sheet__meta-line-short {
+        width: 55%;
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .sheet__divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      .sheet__body {
+        flex: 1;
+        background-image: repeating-linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.18) 0 8px,
+          rgba(255, 255, 255, 0) 8px 34px
+        );
+        border-radius: 6px;
+      }
+
+      .sheet__foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .sheet__foot-line {
+        width: 70px;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.25);
+      }
+
+      .sheet__foot-seal {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+      }
+
+      .stamp {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        display: grid;
+        place-items: center;
+        opacity: 0;
+      }
+
+      .stamp__svg {
+        position: absolute;
+        inset: 0;
+        width: 300px;
+        height: 300px;
+      }
+
+      .stamp__ring {
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 2.5;
+        stroke-dasharray: 296;
+        stroke-dashoffset: 296;
+      }
+
+      .stamp__ring-inner {
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 0.8;
+        stroke-dasharray: 3 3;
+        opacity: 0.7;
+      }
+
+      .stamp__label {
+        position: relative;
+        text-align: center;
+      }
+
+      .stamp__title {
+        font-size: 64px;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        line-height: 1;
+      }
+
+      .stamp__caption {
+        margin-top: 12px;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .flash {
+        position: absolute;
+        width: 420px;
+        height: 420px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0) 0 34%,
+          rgba(255, 255, 255, 0.9) 48%,
+          rgba(255, 255, 255, 0) 72%
+        );
+        mix-blend-mode: screen;
+        opacity: 0;
+      }
+
+      .brand {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 26px;
+        text-align: center;
+      }
+
+      .brand__greeting {
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.45);
+        opacity: 0;
+      }
+
+      .brand__name-wrap {
+        position: relative;
+        overflow: hidden;
+        padding: 0 12px;
+      }
+
+      .brand__name {
+        font-size: 104px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        opacity: 0;
+      }
+
+      .brand__sweep {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 50%;
+        background: linear-gradient(
+          to right,
+          transparent,
+          rgba(255, 255, 255, 0.6),
+          transparent
+        );
+        mix-blend-mode: overlay;
+      }
+
+      .brand__rule {
+        width: 420px;
+        height: 2px;
+        background: linear-gradient(to right, var(--accent), var(--accent-2));
+        opacity: 0;
+      }
+
+      .brand__logo {
+        font-family: "Orbitron", system-ui, sans-serif;
+        font-weight: 500;
+        font-size: 46px;
+        letter-spacing: 0.25em;
+        color: rgba(255, 255, 255, 0.85);
+        opacity: 0;
+      }
+
+      .brand__tagline {
+        max-width: 900px;
+        font-size: 20px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.62);
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-width="1920"
+      data-height="1080"
+      data-duration="7"
+    >
+      <section
+        id="s1"
+        class="clip"
+        data-start="0"
+        data-duration="7"
+        data-track-index="0"
+      >
+        <div class="fill bg-fill"></div>
+        <div class="glow"></div>
+        <div id="s1-vignette" class="fill vignette"></div>
+      </section>
+
+      <section
+        id="s2"
+        class="clip"
+        data-start="0"
+        data-duration="5.6"
+        data-track-index="1"
+      >
+        <div class="stage">
+          <div data-layout-allow-overflow id="sheet-1" class="sheet">
+            <div class="sheet__head">
+              <div class="sheet__mark"></div>
+              <div class="sheet__meta">
+                <div class="sheet__meta-line"></div>
+                <div class="sheet__meta-line sheet__meta-line-short"></div>
+              </div>
+            </div>
+            <div class="sheet__divider"></div>
+            <div class="sheet__body"></div>
+            <div class="sheet__foot">
+              <div class="sheet__foot-line"></div>
+              <div class="sheet__foot-seal"></div>
+            </div>
+          </div>
+
+          <div data-layout-allow-overflow id="sheet-2" class="sheet">
+            <div class="sheet__head">
+              <div class="sheet__mark"></div>
+              <div class="sheet__meta">
+                <div class="sheet__meta-line"></div>
+                <div class="sheet__meta-line sheet__meta-line-short"></div>
+              </div>
+            </div>
+            <div class="sheet__divider"></div>
+            <div class="sheet__body"></div>
+            <div class="sheet__foot">
+              <div class="sheet__foot-line"></div>
+              <div class="sheet__foot-seal"></div>
+            </div>
+          </div>
+
+          <div data-layout-allow-overflow id="sheet-3" class="sheet">
+            <div class="sheet__head">
+              <div class="sheet__mark"></div>
+              <div class="sheet__meta">
+                <div class="sheet__meta-line"></div>
+                <div class="sheet__meta-line sheet__meta-line-short"></div>
+              </div>
+            </div>
+            <div class="sheet__divider"></div>
+            <div class="sheet__body"></div>
+            <div class="sheet__foot">
+              <div class="sheet__foot-line"></div>
+              <div class="sheet__foot-seal"></div>
+            </div>
+          </div>
+
+          <div data-layout-allow-overflow id="sheet-4" class="sheet">
+            <div class="sheet__head">
+              <div class="sheet__mark"></div>
+              <div class="sheet__meta">
+                <div class="sheet__meta-line"></div>
+                <div class="sheet__meta-line sheet__meta-line-short"></div>
+              </div>
+            </div>
+            <div class="sheet__divider"></div>
+            <div class="sheet__body"></div>
+            <div class="sheet__foot">
+              <div class="sheet__foot-line"></div>
+              <div class="sheet__foot-seal"></div>
+            </div>
+          </div>
+
+          <div data-layout-allow-overflow id="sheet-5" class="sheet">
+            <div class="sheet__head">
+              <div class="sheet__mark"></div>
+              <div class="sheet__meta">
+                <div class="sheet__meta-line"></div>
+                <div class="sheet__meta-line sheet__meta-line-short"></div>
+              </div>
+            </div>
+            <div class="sheet__divider"></div>
+            <div class="sheet__body"></div>
+            <div class="sheet__foot">
+              <div class="sheet__foot-line"></div>
+              <div class="sheet__foot-seal"></div>
+            </div>
+          </div>
+
+          <div data-layout-allow-overflow id="sheet-6" class="sheet">
+            <div class="sheet__head">
+              <div class="sheet__mark"></div>
+              <div class="sheet__meta">
+                <div class="sheet__meta-line"></div>
+                <div class="sheet__meta-line sheet__meta-line-short"></div>
+              </div>
+            </div>
+            <div class="sheet__divider"></div>
+            <div class="sheet__body"></div>
+            <div class="sheet__foot">
+              <div class="sheet__foot-line"></div>
+              <div class="sheet__foot-seal"></div>
+            </div>
+          </div>
+
+          <div id="flash" class="flash"></div>
+
+          <div id="stamp" class="stamp">
+            <svg class="stamp__svg" viewBox="0 0 100 100">
+              <circle id="stamp-ring" class="stamp__ring" cx="50" cy="50" r="47" />
+              <circle class="stamp__ring-inner" cx="50" cy="50" r="39" />
+            </svg>
+            <div class="stamp__label">
+              <div class="stamp__title">ЭЦП</div>
+              <div class="stamp__caption">Подписано</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="s3"
+        class="clip"
+        data-start="4.3"
+        data-duration="2.7"
+        data-track-index="2"
+      >
+        <div class="stage">
+          <div class="brand">
+            <div id="brand-greeting" class="brand__greeting">Добро пожаловать</div>
+            <div class="brand__name-wrap">
+              <div id="brand-name" class="brand__name">Амир Шарипов</div>
+              <div
+                data-layout-allow-overflow
+                id="brand-sweep"
+                class="brand__sweep"
+              ></div>
+            </div>
+            <div id="brand-rule" class="brand__rule"></div>
+            <div id="brand-logo" class="brand__logo">INFRATECH</div>
+            <div id="brand-tagline" class="brand__tagline">
+              Единая система электронного документооборота
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+
+      var SHEETS = [
+        { id: "#sheet-1", from: { x: -900, y: -520, r: -34 }, rest: { x: -38, y: -26, r: -8 }, away: { x: -620, y: -380, r: -26 } },
+        { id: "#sheet-2", from: { x: 940, y: -450, r: 30 }, rest: { x: 26, y: -14, r: 6 }, away: { x: 680, y: -300, r: 22 } },
+        { id: "#sheet-3", from: { x: -820, y: 560, r: 24 }, rest: { x: -18, y: -6, r: -3 }, away: { x: -540, y: 440, r: 18 } },
+        { id: "#sheet-4", from: { x: 860, y: 600, r: -26 }, rest: { x: 14, y: 4, r: 4 }, away: { x: 600, y: 480, r: -20 } },
+        { id: "#sheet-5", from: { x: 0, y: -720, r: 16 }, rest: { x: -6, y: 12, r: -2 }, away: { x: -140, y: -540, r: 12 } },
+        { id: "#sheet-6", from: { x: 0, y: 760, r: -14 }, rest: { x: 6, y: 20, r: 2 }, away: { x: 200, y: 560, r: -10 } },
+      ];
+
+      var SHEET_STEP = 0.09;
+      var FLY_IN_AT = 0.2;
+      var STRAIGHTEN_AT = 1.7;
+      var SCATTER_AT = 3.9;
+      var STAMP_AT = 2.55;
+      var FLASH_AT = 3.05;
+
+      var tl = gsap.timeline({ paused: true });
+
+      SHEETS.forEach(function (sheet, index) {
+        var offset = index * SHEET_STEP;
+
+        tl.fromTo(
+          sheet.id,
+          { x: sheet.from.x, y: sheet.from.y, rotation: sheet.from.r, scale: 0.8, autoAlpha: 0 },
+          { x: sheet.rest.x, y: sheet.rest.y, rotation: sheet.rest.r, scale: 1, autoAlpha: 1, duration: 1.3, ease: "power3.out" },
+          FLY_IN_AT + offset
+        );
+
+        tl.to(
+          sheet.id,
+          { rotation: 0, duration: 0.7, ease: "power2.inOut" },
+          STRAIGHTEN_AT + offset
+        );
+
+        tl.to(
+          sheet.id,
+          { x: sheet.away.x, y: sheet.away.y, rotation: sheet.away.r, scale: 0.86, autoAlpha: 0, duration: 1.1, ease: "power2.in" },
+          SCATTER_AT + offset
+        );
+      });
+
+      tl.fromTo(
+        "#stamp",
+        { scale: 2.9, rotation: -32, autoAlpha: 0 },
+        { scale: 1, rotation: -8, autoAlpha: 1, duration: 0.5, ease: "power4.out" },
+        STAMP_AT
+      );
+
+      tl.fromTo(
+        "#stamp-ring",
+        { strokeDashoffset: 296 },
+        { strokeDashoffset: 0, duration: 0.7, ease: "power2.out" },
+        STAMP_AT + 0.1
+      );
+
+      tl.to("#stamp", { scale: 1.03, duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: 1 }, STAMP_AT + 0.6);
+
+      tl.fromTo(
+        "#flash",
+        { scale: 0.4, autoAlpha: 0 },
+        { scale: 2.4, autoAlpha: 0.85, duration: 0.28, ease: "power2.out" },
+        FLASH_AT
+      );
+
+      tl.to("#flash", { scale: 3.2, autoAlpha: 0, duration: 0.45, ease: "power2.in" }, FLASH_AT + 0.28);
+
+      tl.to("#stamp", { scale: 1.12, autoAlpha: 0, duration: 0.9, ease: "power2.in" }, 4.1);
+
+      tl.to("#s1-vignette", { autoAlpha: 1, duration: 1.2, ease: "power2.out" }, 3.6);
+
+      tl.fromTo("#brand-greeting", { y: 26, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.5, ease: "power3.out" }, 4.5);
+      tl.fromTo("#brand-name", { y: 44, scale: 0.97, autoAlpha: 0 }, { y: 0, scale: 1, autoAlpha: 1, duration: 0.7, ease: "power3.out" }, 4.62);
+      tl.fromTo("#brand-rule", { scaleX: 0, autoAlpha: 0 }, { scaleX: 1, autoAlpha: 1, duration: 0.7, ease: "power3.out" }, 4.9);
+      tl.fromTo("#brand-sweep", { xPercent: -130 }, { xPercent: 230, duration: 1.1, ease: "power1.inOut" }, 5.05);
+      tl.fromTo("#brand-logo", { y: 20, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.6, ease: "power3.out" }, 5.05);
+      tl.fromTo("#brand-tagline", { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.6, ease: "power3.out" }, 5.2);
+
+      tl.to("#brand-logo", { y: -5, duration: 1.3, ease: "sine.inOut", yoyo: true, repeat: 1 }, 5.9);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

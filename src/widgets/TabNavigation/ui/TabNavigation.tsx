@@ -9,7 +9,7 @@ export const TabNavigation = () => {
   const { handleNavigate, menuItems, subItems } = useNavbar();
   const { pathname } = useLocation();
 
-  if (tabMode === "off" || tabs.length === 0) {
+  if (tabMode === "off" || tabs.length === 0 || pathname.startsWith("/auth")) {
     return null;
   }
 
