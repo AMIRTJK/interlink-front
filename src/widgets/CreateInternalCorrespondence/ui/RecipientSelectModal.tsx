@@ -11,6 +11,8 @@ interface IProps {
   availableUsers: RecipientOption[];
   initialTo: RecipientOption[];
   initialCc: RecipientOption[];
+  isLoading?: boolean;
+  onSearchChange?: (val: string) => void;
   onSave: (selectedTo: RecipientOption[], selectedCc: RecipientOption[]) => void;
 }
 
@@ -20,6 +22,8 @@ export const RecipientSelectModal = ({
   availableUsers,
   initialTo,
   initialCc,
+  isLoading,
+  onSearchChange,
   onSave,
 }: IProps) => {
   const [selectedToIds, setSelectedToIds] = useState<string[]>([]);
@@ -33,6 +37,14 @@ export const RecipientSelectModal = ({
       setSearch("");
     }
   }, [open, initialTo, initialCc]);
+
+  useEffect(() => {
+    if (!open) return;
+    const timer = setTimeout(() => {
+      onSearchChange?.(search);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search, open, onSearchChange]);
 
   const toggleTo = (id: string) => {
     setSelectedToIds((prev) =>
@@ -53,11 +65,6 @@ export const RecipientSelectModal = ({
     const nextCc = availableUsers.filter((u) => selectedCcIds.includes(u.id));
     onSave(nextTo, nextCc);
   };
-
-  const filteredUsers = availableUsers.filter((u) =>
-    u.name.toLowerCase().includes(search.toLowerCase()) ||
-    u.org.toLowerCase().includes(search.toLowerCase())
-  );
 
   return createPortal(
     <AnimatePresence>
@@ -117,7 +124,7 @@ export const RecipientSelectModal = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((u) => (
+                  {availableUsers.map((u) => (
                     <tr
                       key={u.id}
                       className="border-b border-slate-100 dark:border-zinc-800/50 hover:bg-slate-50/30 dark:hover:bg-zinc-800/20 transition-colors"

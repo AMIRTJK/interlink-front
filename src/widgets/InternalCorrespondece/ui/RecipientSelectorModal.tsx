@@ -39,7 +39,7 @@ export const RecipientSelectorModal: React.FC<RecipientSelectorModalProps> = ({
   const textTertiary = isDarkMode ? "text-gray-500" : "text-gray-400";
 
   const searchParams = useMemo(() => {
-    return debouncedSearch ? { search: debouncedSearch } : {};
+    return debouncedSearch ? { query: debouncedSearch } : {};
   }, [debouncedSearch]);
 
   const { data: usersData, isLoading: loadingUsers } = useGetQuery({
