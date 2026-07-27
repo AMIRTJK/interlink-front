@@ -4,7 +4,7 @@ import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 
 export interface IAssignmentUser {
-  id: number;
+  id?: number;
   full_name?: string;
   position?: string;
   photo_url?: string;
