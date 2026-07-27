@@ -1,12 +1,30 @@
-import { useMemo, Dispatch, SetStateAction } from "react";
+import { useCallback, useMemo, Dispatch, SetStateAction } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useMutationQuery } from "@shared/lib";
 import { toast } from "@shared/lib/toast";
 import { ApiRoutes } from "@shared/api";
 import { IApiFile, IApiFolder, IDeleteFolderResult } from "./lib";
 
+const SHARES_URL_SUFFIX = "/shares";
+
 export const useFilesMutations = (
   setManualOrderMap: Dispatch<SetStateAction<Record<number, number>>>,
 ) => {
+  const queryClient = useQueryClient();
+
+  // Списки доступа кэшируются по URL конкретного файла или папки, поэтому
+  // статическим ключом их не сбросить: после выдачи/закрытия доступа гасим все
+  // запросы .../shares, чтобы столбец «Доступ» в реестре сразу показал нового
+  // пользователя с его должностью.
+  const invalidateShares = useCallback(() => {
+    queryClient.invalidateQueries({
+      predicate: (query) => {
+        const key = query.queryKey?.[0];
+        return typeof key === "string" && key.endsWith(SHARES_URL_SUFFIX);
+      },
+    });
+  }, [queryClient]);
+
   const createFolder = useMutationQuery<{ name: string; parent_id: number | null; sort_order?: number; emoji?: string | null; shared_user_ids?: number[] }, IApiFolder>({
     url: ApiRoutes.MY_FILE_FOLDERS,
     method: "POST",
@@ -117,6 +135,7 @@ export const useFilesMutations = (
     messages: {
       suppressSuccessToast: true,
     },
+    queryOptions: { onSuccess: invalidateShares },
   });
 
   const inviteToFolder = useMutationQuery<{ id: number; user_id: number }, any>({
@@ -125,6 +144,7 @@ export const useFilesMutations = (
     messages: {
       suppressSuccessToast: true,
     },
+    queryOptions: { onSuccess: invalidateShares },
   });
 
   const bulkShareFiles = useMutationQuery<
@@ -150,6 +170,7 @@ export const useFilesMutations = (
       suppressSuccessToast: true,
       invalidate: [ApiRoutes.MY_FILES],
     },
+    queryOptions: { onSuccess: invalidateShares },
   });
 
   const bulkDeleteFiles = useMutationQuery<
@@ -178,6 +199,7 @@ export const useFilesMutations = (
     messages: {
       success: "Доступ к файлу закрыт",
     },
+    queryOptions: { onSuccess: invalidateShares },
   });
 
   const removeFolderShare = useMutationQuery<{ id: number; shareId: number }, any>({
@@ -186,6 +208,7 @@ export const useFilesMutations = (
     messages: {
       success: "Доступ к папке закрыт",
     },
+    queryOptions: { onSuccess: invalidateShares },
   });
 
   return {

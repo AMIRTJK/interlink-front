@@ -3,9 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Activity, ChevronDown, Pin, User, Loader2 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
 import { cn, useGetQuery } from "@shared/lib";
-import { If } from "@shared/ui";
+import { If, Tooltip } from "@shared/ui";
 import { LetterDirection, IInternalStructureResponse } from "../../lib/structure/types";
-import { getInitials, formatDate } from "../../lib/structure/helpers";
+import {
+  getInitials,
+  formatDate,
+  getStructureCount,
+} from "../../lib/structure/helpers";
 import { EventRow } from "./EventRow";
 import { RelatedDocsSection } from "./RelatedDocsSection";
 
@@ -74,8 +78,14 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
     item.recipients?.find((r: any) => r.type === "to")?.user?.full_name ||
     item.recipients?.[0]?.user?.full_name;
   const isUnread = Boolean(item.is_unread);
-  const countFromItem = item.structure_count ?? item.events_count ?? item.timeline_count ?? item.history_count;
-  const displayCount = responseData?.data?.timeline != null ? responseData.data.timeline.length : countFromItem;
+  // Счётчик этапов виден сразу, до раскрытия: значение приходит вместе с
+  // письмом (structure_count). После загрузки структуры уточняем его длиной
+  // timeline.
+  const countFromItem = getStructureCount(item);
+  const displayCount = responseData?.data?.timeline
+    ? responseData.data.timeline.length
+    : countFromItem;
+  const hasCount = displayCount !== undefined;
 
   return (
     <motion.div
@@ -142,6 +152,13 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
             </If>
           </div>
 
+          <Tooltip
+            title={
+              hasCount
+                ? `Этапов структуры: ${displayCount}`
+                : "Структура письма"
+            }
+          >
           <button
             type="button"
             onClick={handleToggle}
@@ -154,16 +171,17 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
             aria-label="Показать структуру письма"
           >
             <Activity size={12} />
+            <If is={hasCount}>
+              <span>{displayCount}</span>
+            </If>
             <If is={isLoading}>
               <Loader2 size={12} className="animate-spin text-blue-500" />
-            </If>
-            <If is={!isLoading && displayCount !== undefined}>
-              <span>{displayCount}</span>
             </If>
             <motion.div animate={{ rotate: open ? 180 : 0 }}>
               <ChevronDown size={12} />
             </motion.div>
           </button>
+          </Tooltip>
         </div>
 
         <AnimatePresence initial={false}>

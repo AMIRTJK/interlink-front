@@ -174,6 +174,14 @@ export const ApiRoutes = {
   INTERNAL_APPROVALS_CONFIRM:
     "/api/v1/internal-correspondences/approvals/:id/status",
 
+  // Визирующие входящего письма: приглашение руководителя, который получает
+  // письмо во «Входящие» и право создавать по нему поручения.
+  INTERNAL_VISORS: "/api/v1/internal-correspondences/:id/visors",
+  INTERNAL_VISOR_CANDIDATES:
+    "/api/v1/internal-correspondences/:id/visors/candidates",
+  INTERNAL_VISOR_REVOKE:
+    "/api/v1/internal-correspondences/:id/visors/:userId",
+
   // Folder
   INTERNAL_MOVE_FOLDER: "/api/v1/internal-correspondences/:id/move-folder",
   CREATE_INTERNAL_FOLDER: "/api/v1/internal-mail-folders",

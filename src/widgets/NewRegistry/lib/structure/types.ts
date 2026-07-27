@@ -68,6 +68,17 @@ export interface IRelatedDocumentLink {
   outgoing?: IRelatedDocItem;
 }
 
+// Количество этапов структуры письма. Реестры внутренней корреспонденции
+// (inbox/sent/drafts/trash/to-approve/to-sign/processed) отдают его в каждом
+// письме как structure_count — оно равно длине timeline из /structure,
+// поэтому для показа счётчика отдельный запрос не нужен.
+export interface IStructureCountable {
+  structure_count?: number;
+  events_count?: number;
+  timeline_count?: number;
+  history_count?: number;
+}
+
 export interface IInternalStructureResponse {
   document: IStructureDocument;
   lifecycle: IStructureLifecycle;

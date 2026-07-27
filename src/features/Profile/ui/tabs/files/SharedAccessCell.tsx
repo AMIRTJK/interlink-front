@@ -2,14 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { If } from "@shared/ui";
-import { IFileUser, getUserFullName } from "./lib";
+import { If, Tooltip } from "@shared/ui";
+import { IFileUser, getUserFullName, getUserPosition } from "./lib";
 import { UserAvatar } from "./UserAvatar";
 
 interface IShareData {
   id: number;
   shared_with_user_id?: number;
   user_id?: number;
+  position?: string;
   shared_with?: IFileUser;
   user?: IFileUser;
 }
@@ -18,6 +19,9 @@ interface IProps {
   fileId: number;
 }
 
+// Должность приходит внутри shared_with (GET /my-files/:id/shares). Старые
+// ответы могли отдавать её рядом с самой записью доступа — учитываем оба
+// варианта, чтобы столбец «Доступ» всегда показывал должность.
 const parseShares = (raw: unknown): IFileUser[] => {
   let list: IShareData[] = [];
   const data = (raw as { data?: unknown })?.data;
@@ -26,9 +30,15 @@ const parseShares = (raw: unknown): IFileUser[] => {
 
   return list.map((s) => {
     const u = s.shared_with || s.user;
-    return (
-      u || { id: s.shared_with_user_id || s.user_id || 0, full_name: `Пользователь #${s.shared_with_user_id || s.user_id}` }
-    );
+    const fallbackId = s.shared_with_user_id || s.user_id || 0;
+    if (!u) {
+      return {
+        id: fallbackId,
+        full_name: `Пользователь #${fallbackId}`,
+        position: s.position,
+      };
+    }
+    return { ...u, position: u.position || s.position };
   });
 };
 
@@ -77,14 +87,20 @@ export const SharedAccessCell = ({ fileId }: IProps) => {
   const shown = users.slice(0, 3);
   const extra = users.length - shown.length;
 
+  const accessSummary = users
+    .map((u) => `${getUserFullName(u)} — ${getUserPosition(u)}`)
+    .join("\n");
+
   return (
     <>
+      <Tooltip
+        title={<span className="whitespace-pre-line">{accessSummary}</span>}
+      >
       <button
         ref={anchorRef}
         type="button"
         onClick={openPopover}
         className="flex items-center cursor-pointer"
-        title="Пользователи с доступом"
       >
         <div className="flex items-center -space-x-2">
           {shown.map((u) => (
@@ -97,6 +113,7 @@ export const SharedAccessCell = ({ fileId }: IProps) => {
           </If>
         </div>
       </button>
+      </Tooltip>
 
       <If is={open && !!coords}>
         {createPortal(
@@ -117,7 +134,7 @@ export const SharedAccessCell = ({ fileId }: IProps) => {
                       {getUserFullName(u)}
                     </div>
                     <div className="text-xs text-slate-400 dark:text-zinc-500 truncate">
-                      {u.position || "—"}
+                      {getUserPosition(u)}
                     </div>
                   </div>
                 </div>

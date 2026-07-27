@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { X, Share2, Trash2, Search } from "lucide-react";
-import { IApiFile, IApiFolder, IFileUser } from "./lib";
+import { IApiFile, IApiFolder, IFileUser, getUserPosition } from "./lib";
 import { If, Tooltip } from "@shared/ui";
 import { UserAccessList } from "./UserAccessList";
 import { useGetQuery } from "@shared/lib";
@@ -166,7 +166,7 @@ export const ShareFileModal = ({
 									</If>
 									{filteredShares.map((share) => {
 										const uName = getShareName(share);
-										const uPosition = (share.shared_with || share.user)?.position;
+										const uPosition = getUserPosition(share.shared_with || share.user);
 										return (
 											<div
 												key={share.id}
@@ -181,7 +181,7 @@ export const ShareFileModal = ({
 															{uName}
 														</div>
 														<div className="text-[10px] text-slate-400 dark:text-zinc-500 truncate">
-															{uPosition || "—"}
+															{uPosition}
 														</div>
 													</div>
 												</div>

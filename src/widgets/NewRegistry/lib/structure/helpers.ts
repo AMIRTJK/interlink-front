@@ -11,7 +11,29 @@ import {
   Send,
   Undo,
 } from "lucide-react";
-import { ITimelineEvent, IGroupedStructureLetters } from "./types";
+import {
+  ITimelineEvent,
+  IGroupedStructureLetters,
+  IStructureCountable,
+} from "./types";
+
+// Количество этапов структуры письма берём из самого реестра: бэкенд отдаёт
+// structure_count (длина timeline из /structure) в каждом письме, поэтому до
+// раскрытия аккордиона дополнительный запрос не нужен. Остальные ключи —
+// поддержка старых ответов.
+export const getStructureCount = (
+  item?: IStructureCountable | null,
+): number | undefined => {
+  const value =
+    item?.structure_count ??
+    item?.events_count ??
+    item?.timeline_count ??
+    item?.history_count;
+
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
+};
 
 export const getInitials = (fullName?: string | null): string => {
   if (!fullName) return "—";
