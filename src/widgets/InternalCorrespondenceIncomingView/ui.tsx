@@ -368,6 +368,23 @@ export const InternalCorrespondenceIncomingView = ({
 
   const relatedDocs = rawStructureData?.data?.related_documents || [];
 
+  const { data: assignmentsData } = useGetQuery({
+    url: item?.id
+      ? ApiRoutes.INTERNAL_ASSIGNMENTS.replace(":id", String(item.id))
+      : "",
+    useToken: true,
+    options: { enabled: !!item?.id, refetchOnWindowFocus: false },
+  });
+
+  const itemAssignments = item.assignments || [];
+  const assignmentsCount =
+    itemAssignments.length > 0
+      ? itemAssignments.length
+      : assignmentsData?.data?.items?.length ||
+        assignmentsData?.data?.assignments?.length ||
+        assignmentsData?.items?.length ||
+        (Array.isArray(assignmentsData?.data) ? assignmentsData.data.length : 0);
+
   const signatures = workflowResponse?.data?.signatures || [];
   const approvals = workflowResponse?.data?.approvals || [];
 
@@ -684,6 +701,7 @@ export const InternalCorrespondenceIncomingView = ({
       key: "task",
       label: "Поручение",
       dotClass: "bg-indigo-500",
+      badge: assignmentsCount > 0 ? assignmentsCount : undefined,
       isOpen: showTaskPanel,
       disabled: !canCreateAssignment,
       hint: canCreateAssignment ? undefined : VISOR_INVITE_HINT,
@@ -1128,7 +1146,14 @@ export const InternalCorrespondenceIncomingView = ({
                         )}
                         aria-label="Поручение"
                       >
-                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
+                          <If is={assignmentsCount > 0}>
+                            <span className="w-4 h-4 rounded-full bg-indigo-500 text-white text-[9px] font-bold flex items-center justify-center">
+                              {assignmentsCount}
+                            </span>
+                          </If>
+                        </div>
                         <span
                           style={{
                             writingMode: "vertical-rl",
@@ -1164,7 +1189,14 @@ export const InternalCorrespondenceIncomingView = ({
                       )}
                       aria-label="Визирующие"
                     >
-                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-violet-500" />
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-violet-500" />
+                        <If is={visors.length > 0}>
+                          <span className="w-4 h-4 rounded-full bg-violet-500 text-white text-[9px] font-bold flex items-center justify-center">
+                            {visors.length}
+                          </span>
+                        </If>
+                      </div>
                       <span
                         style={{
                           writingMode: "vertical-rl",
