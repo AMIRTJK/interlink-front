@@ -7227,6 +7227,8 @@ export const CreateInternalCorrespondence = ({
         availableUsers={availableUsers}
         initialTo={to}
         initialCc={cc}
+        isLoading={loadingUsers}
+        onSearchChange={(val) => setSearchParams({ query: val })}
         onSave={(nextTo, nextCc) => {
           setTo(nextTo);
           setCc(nextCc);

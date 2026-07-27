@@ -16,6 +16,7 @@ export * from './EmptyState'
 export * from './Tooltip/ui'
 export * from './Can'
 export * from './Logo'
+export * from "./VisorInviteNoticeModal";
 
 
 export * from "./ToastContainer";
