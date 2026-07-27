@@ -376,7 +376,7 @@ export const InternalCorrespondenceIncomingView = ({
     options: { enabled: !!item?.id, refetchOnWindowFocus: false },
   });
 
-  const itemAssignments = item.assignments || [];
+  const itemAssignments = (item as any).assignments || [];
   const assignmentsCount =
     itemAssignments.length > 0
       ? itemAssignments.length
@@ -1244,7 +1244,7 @@ export const InternalCorrespondenceIncomingView = ({
                     <VisorsPanel
                       correspondenceId={item.id}
                       visors={visors}
-                      isLoading={loadingVisors}
+                      isLoading={Boolean(loadingVisors)}
                       canInvite={canInviteVisor}
                       onClose={() => setVisorsOpen(false)}
                     />
