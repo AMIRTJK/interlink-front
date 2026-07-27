@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { X, Share2, Trash2, Search } from "lucide-react";
-import { IApiFile, IApiFolder } from "./lib";
+import { IApiFile, IApiFolder, IFileUser } from "./lib";
 import { If, Tooltip } from "@shared/ui";
 import { UserAccessList } from "./UserAccessList";
 import { useGetQuery } from "@shared/lib";
@@ -19,18 +19,8 @@ interface IShareData {
 	id: number;
 	shared_with_user_id?: number;
 	user_id?: number;
-	shared_with?: {
-		id: number;
-		full_name?: string;
-		first_name?: string;
-		last_name?: string;
-	};
-	user?: {
-		id: number;
-		full_name?: string;
-		first_name?: string;
-		last_name?: string;
-	};
+	shared_with?: IFileUser;
+	user?: IFileUser;
 }
 
 export const ShareFileModal = ({
@@ -176,6 +166,7 @@ export const ShareFileModal = ({
 									</If>
 									{filteredShares.map((share) => {
 										const uName = getShareName(share);
+										const uPosition = (share.shared_with || share.user)?.position;
 										return (
 											<div
 												key={share.id}
@@ -185,8 +176,13 @@ export const ShareFileModal = ({
 													<div className="w-8 h-8 rounded-full bg-indigo-500! flex items-center justify-center text-white! text-xs font-bold shrink-0">
 														{uName[0]?.toUpperCase() || "?"}
 													</div>
-													<div className="text-xs font-bold text-slate-700 dark:text-zinc-300 truncate">
-														{uName}
+													<div className="min-w-0">
+														<div className="text-xs font-bold text-slate-700 dark:text-zinc-300 truncate">
+															{uName}
+														</div>
+														<div className="text-[10px] text-slate-400 dark:text-zinc-500 truncate">
+															{uPosition || "—"}
+														</div>
 													</div>
 												</div>
 												<Tooltip title="Закрыть доступ">
