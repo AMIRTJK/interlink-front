@@ -43,6 +43,24 @@ type HighlightRegistry = {
   set: (name: string, highlight: unknown) => void;
   delete: (name: string) => void;
 };
+const ensureHighlightStyles = (): void => {
+  if (typeof document === "undefined") return;
+  if (document.getElementById("icc-search-styles")) return;
+  const style = document.createElement("style");
+  style.id = "icc-search-styles";
+  style.textContent = `
+    ::highlight(icc-search) {
+      background-color: #fef08a;
+      color: inherit;
+    }
+    ::highlight(icc-search-active) {
+      background-color: #fb923c;
+      color: #1e293b;
+    }
+  `;
+  document.head.appendChild(style);
+};
+
 const highlightApi = (): {
   registry: HighlightRegistry;
   create: (ranges: Range[]) => unknown;
@@ -52,6 +70,7 @@ const highlightApi = (): {
     Highlight?: new (...ranges: Range[]) => unknown;
   };
   if (!g.CSS?.highlights || !g.Highlight) return null;
+  ensureHighlightStyles();
   const Ctor = g.Highlight;
   return {
     registry: g.CSS.highlights,
