@@ -4,7 +4,7 @@ import { DrawerQRCodeSection } from "./ui/QRCodeSection";
 import { SelectedCard } from "./ui/SelectedCard";
 import { ActionSelector } from "./ui/ActionSelector";
 import { SmartTabs } from "@shared/ui/SmartTabs/ui";
-import { CommentCard, If } from "@shared/ui";
+import { CommentCard, If, VisorInviteNoticeModal } from "@shared/ui";
 import { ChatView } from "../../features/chat";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icons, Ui } from "./lib";
@@ -54,11 +54,31 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
   const [selectedItems, setSelectedItems] = useState<ISearchItem[]>([]);
   const [selectedSigners, setSelectedSigners] = useState<ISearchItem[]>([]);
   const [selectedApprovers, setSelectedApprovers] = useState<ISearchItem[]>([]);
+  const [showVisorNotice, setShowVisorNotice] = useState(false);
 
   const { data: usersData } = useGetQuery({
     url: ApiRoutes.GET_USERS,
     useToken: true,
   });
+
+  const { data: visorsData } = useGetQuery({
+    url: docId ? ApiRoutes.INTERNAL_VISORS.replace(":id", String(docId)) : "",
+    useToken: true,
+    options: { enabled: !!docId },
+  });
+
+  const visorsList: any[] =
+    visorsData?.data?.visors ||
+    visorsData?.data?.data ||
+    (Array.isArray(visorsData?.data) ? visorsData.data : []);
+
+  const handleAssignmentClick = () => {
+    if (docId && visorsList.length === 0) {
+      setShowVisorNotice(true);
+      return;
+    }
+    onOpenAssignment?.();
+  };
 
   // 2. Мутации для приглашения
   const { mutate: inviteSigner } = useMutationQuery({
@@ -359,7 +379,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                           </Ui.Button>
 
                           <Ui.Button
-                            onClick={onOpenAssignment}
+                            onClick={handleAssignmentClick}
                             size="large"
                             className={`w-full! h-14! px-4! py-3! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm! ${
                               isDarkMode
@@ -658,6 +678,10 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
           </div>
         </Ui.Modal>
       </ConfigProvider>
+      <VisorInviteNoticeModal
+        open={showVisorNotice}
+        onClose={() => setShowVisorNotice(false)}
+      />
     </>
   );
 };

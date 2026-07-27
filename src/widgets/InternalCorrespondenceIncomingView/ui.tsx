@@ -18,7 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { cn, useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { If, Tooltip } from "@shared/ui";
+import { If, Tooltip, VisorInviteNoticeModal } from "@shared/ui";
 import { DocumentCanvas } from "./DocumentCanvas";
 import { downloadDocumentPdf, PAGE_WIDTH } from "./lib";
 import { ApproversPanel } from "./ApproversPanel";
@@ -306,6 +306,7 @@ export const InternalCorrespondenceIncomingView = ({
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [activeVersionId, setActiveVersionId] = useState<number | string | null>(null);
   const [previewAttachment, setPreviewAttachment] = useState<AttachedFile | null>(null);
+  const [showVisorNotice, setShowVisorNotice] = useState(false);
 
   const mappedAttachments: AttachedFile[] = (item.attachments || []).map((att: any) =>
     mapServerAttachment(att, item.id)
@@ -462,6 +463,10 @@ export const InternalCorrespondenceIncomingView = ({
       return;
     }
     if (id === "task") {
+      if (!canCreateAssignment || visors.length === 0) {
+        setShowVisorNotice(true);
+        return;
+      }
       openTask();
       return;
     }
@@ -662,7 +667,13 @@ export const InternalCorrespondenceIncomingView = ({
       isOpen: showTaskPanel,
       disabled: !canCreateAssignment,
       hint: canCreateAssignment ? undefined : VISOR_INVITE_HINT,
-      onToggle: () => (showTaskPanel ? setShowTaskPanel(false) : openTask()),
+      onToggle: () => {
+        if (!canCreateAssignment || visors.length === 0) {
+          setShowVisorNotice(true);
+          return;
+        }
+        showTaskPanel ? setShowTaskPanel(false) : openTask();
+      },
     },
     {
       key: "versions",
@@ -1206,6 +1217,11 @@ export const InternalCorrespondenceIncomingView = ({
           unavailableNotice={CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE}
         />
       </If>
+      <VisorInviteNoticeModal
+        open={showVisorNotice}
+        onClose={() => setShowVisorNotice(false)}
+        onInviteVisor={canInviteVisor ? openVisors : undefined}
+      />
     </div>
   );
 };
