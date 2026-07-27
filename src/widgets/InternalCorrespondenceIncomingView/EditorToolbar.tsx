@@ -21,7 +21,7 @@ import {
   Monitor,
 } from "lucide-react";
 import { cn } from "@shared/lib";
-import { If } from "@shared/ui";
+import { If, Tooltip } from "@shared/ui";
 
 
 // Панель управления редактором для ПРОСМОТРА входящего письма. Внешне 1-в-1
@@ -38,6 +38,8 @@ export interface ToolbarSection {
   dotStyle?: React.CSSProperties;
   badge?: number | string;
   isOpen: boolean;
+  disabled?: boolean;
+  hint?: string;
   onToggle: () => void;
 }
 
@@ -183,15 +185,21 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
             Разделы
           </span>
           {sections.map((section) => (
+            <Tooltip key={section.key} title={section.hint}>
+              <span className="inline-flex">
             <button
-              key={section.key}
               type="button"
               onClick={section.onToggle}
+              disabled={section.disabled}
               className={cn(
-                "flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-full border text-xs font-semibold transition-all cursor-pointer select-none",
+                "flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-full border text-xs font-semibold transition-all select-none",
+                section.disabled
+                  ? "bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed"
+                  : "cursor-pointer",
                 section.isOpen
                   ? "bg-slate-800 border-slate-800 text-white shadow-sm"
-                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300",
+                  : !section.disabled &&
+                      "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300",
               )}
             >
               <span
@@ -215,7 +223,8 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
                 </span>
               </If>
             </button>
-
+              </span>
+            </Tooltip>
           ))}
         </div>
       )}

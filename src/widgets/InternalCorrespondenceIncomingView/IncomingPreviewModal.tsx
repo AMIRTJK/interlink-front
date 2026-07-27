@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Minus, Users, Check, Clock } from "lucide-react";
 import { cn } from "@shared/lib";
-import { If } from "@shared/ui";
+import { If, Tooltip } from "@shared/ui";
+import { VISOR_INVITE_HINT } from "./model";
 import { ApproversPanel } from "./ApproversPanel";
 import { SignersPanel } from "./SignersPanel";
 import { VersionsPanel } from "./VersionsPanel";
@@ -45,6 +46,8 @@ interface ToolbarSection {
   dotStyle?: React.CSSProperties;
   badge?: number | string;
   isOpen: boolean;
+  disabled?: boolean;
+  hint?: string;
   onToggle: () => void;
 }
 
@@ -65,6 +68,7 @@ interface IProps {
   onTogglePanelsInToolbar?: (value: boolean) => void;
   correspondenceId?: string | number;
   attachments?: any[];
+  canCreateAssignment?: boolean;
 }
 
 
@@ -87,6 +91,7 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
   onTogglePanelsInToolbar,
   correspondenceId,
   attachments = [],
+  canCreateAssignment = true,
 }) => {
   const [zoom, setZoom] = useState(1);
   const [isScaleFocused, setIsScaleFocused] = useState(false);
@@ -129,6 +134,7 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
     setAttachmentsOpen(false);
   };
   const openTask = () => {
+    if (!canCreateAssignment) return;
     setShowTaskPanel(true);
     setSignersOpen(false);
     setApproversOpen(false);
@@ -149,6 +155,8 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
       label: "Поручение",
       dotClass: "bg-indigo-500",
       isOpen: showTaskPanel,
+      disabled: !canCreateAssignment,
+      hint: canCreateAssignment ? undefined : VISOR_INVITE_HINT,
       onToggle: () => (showTaskPanel ? setShowTaskPanel(false) : openTask()),
     },
     {
@@ -598,15 +606,21 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
                 Разделы
               </span>
               {sections.map((section) => (
+                <Tooltip key={section.key} title={section.hint}>
+                <span className="inline-flex">
                 <button
-                  key={section.key}
                   type="button"
                   onClick={section.onToggle}
+                  disabled={section.disabled}
                   className={cn(
-                    "flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-full border text-xs font-semibold transition-all cursor-pointer select-none",
+                    "flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-full border text-xs font-semibold transition-all select-none",
+                    section.disabled
+                      ? "bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed"
+                      : "cursor-pointer",
                     section.isOpen
                       ? "bg-slate-800 border-slate-800 text-white shadow-sm"
-                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300",
+                      : !section.disabled &&
+                          "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300",
                   )}
                 >
                   <span
@@ -630,7 +644,8 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
                     </span>
                   </If>
                 </button>
-
+                </span>
+                </Tooltip>
               ))}
             </div>
             <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600">
@@ -1154,15 +1169,23 @@ export const IncomingPreviewModal: React.FC<IProps> = ({
                           onClick={() =>
                             showTaskPanel ? setShowTaskPanel(false) : openTask()
                           }
-                          whileHover={{ scale: 1.02 }}
+                          disabled={!canCreateAssignment}
+                          whileHover={
+                            canCreateAssignment ? { scale: 1.02 } : undefined
+                          }
                           transition={{
                             type: "spring",
                             stiffness: 300,
                             damping: 24,
                           }}
                           className={cn(
-                            "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-                            showTaskPanel ? "bg-slate-50" : "hover:bg-slate-50",
+                            "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] flex flex-col items-center gap-1.5 select-none transition-all duration-200",
+                            canCreateAssignment
+                              ? "cursor-pointer"
+                              : "cursor-not-allowed opacity-60",
+                            showTaskPanel
+                              ? "bg-slate-50"
+                              : canCreateAssignment && "hover:bg-slate-50",
                           )}
                           aria-label="Поручение"
                         >

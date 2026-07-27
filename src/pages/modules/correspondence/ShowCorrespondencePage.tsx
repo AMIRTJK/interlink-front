@@ -70,6 +70,14 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
             replied_users: letterItem.replied_users ?? data?.replied_users,
             forwarded_users:
               letterItem.forwarded_users ?? data?.forwarded_users,
+            // Флаги визирования и создания поручений считает бэкенд по правам
+            // пользователя — они тоже могут прийти в корне ответа.
+            visors: letterItem.visors ?? data?.visors,
+            is_visor: letterItem.is_visor ?? data?.is_visor,
+            can_invite_visor:
+              letterItem.can_invite_visor ?? data?.can_invite_visor,
+            can_create_assignment:
+              letterItem.can_create_assignment ?? data?.can_create_assignment,
           }
         : {
             id,

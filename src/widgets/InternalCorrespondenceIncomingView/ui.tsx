@@ -13,11 +13,12 @@ import {
   Forward,
   ClipboardList,
   Check,
+  ShieldCheck,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn, useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { If } from "@shared/ui";
+import { If, Tooltip } from "@shared/ui";
 import { DocumentCanvas } from "./DocumentCanvas";
 import { downloadDocumentPdf, PAGE_WIDTH } from "./lib";
 import { ApproversPanel } from "./ApproversPanel";
@@ -25,6 +26,8 @@ import { SignersPanel } from "./SignersPanel";
 import { VersionsPanel } from "./VersionsPanel";
 import { IncomingPreviewModal } from "./IncomingPreviewModal";
 import { TaskPanel } from "./TaskPanel";
+import { VisorsPanel } from "./VisorsPanel";
+import { VISOR_INVITE_HINT, normalizeVisors } from "./model";
 import { EditorToolbar, type ToolbarSection } from "./EditorToolbar";
 import { AttachmentsPanel } from "./AttachmentsPanel";
 import { FilePreviewModal } from "@features/Profile";
@@ -98,14 +101,19 @@ const priorityConfig: Record<string, { label: string; className: string }> = {
   },
 };
 
+type TActionId = "seen" | "reply" | "forward" | "visor" | "task";
+
+// Порядок пунктов меню «Действие»: приглашение визирующего идёт перед
+// поручением — поручение становится доступным только после него.
 const ACTION_MENU_ITEMS: {
-  id: "seen" | "reply" | "forward" | "task";
+  id: TActionId;
   label: string;
   icon: React.ElementType;
 }[] = [
   { id: "seen", label: "Ознакомлен", icon: Eye },
   { id: "reply", label: "Ответить", icon: CornerUpLeft },
   { id: "forward", label: "Перенаправить", icon: Forward },
+  { id: "visor", label: "Пригласить визирующего", icon: ShieldCheck },
   { id: "task", label: "Поручение", icon: ClipboardList },
 ];
 
@@ -161,6 +169,12 @@ interface RegistryItem {
   reply_count?: number;
   forward_count?: number;
   attachments?: any[];
+  // Флаги доступа к визированию и поручениям. Считаются бэкендом по правам
+  // пользователя — на должность в тексте не ориентируемся.
+  visors?: any[];
+  is_visor?: boolean;
+  can_invite_visor?: boolean;
+  can_create_assignment?: boolean;
 }
 
 
@@ -284,6 +298,7 @@ export const InternalCorrespondenceIncomingView = ({
   const [showActionMenu, setShowActionMenu] = useState(false);
   const actionMenuRef = useRef<HTMLDivElement>(null);
   const [showTaskPanel, setShowTaskPanel] = useState(false);
+  const [visorsOpen, setVisorsOpen] = useState(false);
   const [signersOpen, setSignersOpen] = useState(false);
   const [approversOpen, setApproversOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
@@ -335,6 +350,51 @@ export const InternalCorrespondenceIncomingView = ({
   const signatures = workflowResponse?.data?.signatures || [];
   const approvals = workflowResponse?.data?.approvals || [];
 
+  // Кнопки визирования показываем строго по флагам бэкенда. Если старый ответ
+  // их не содержит — поручение не блокируем, а приглашение просто не предлагаем.
+  const canInviteVisor = item.can_invite_visor === true;
+  const canCreateAssignment = item.can_create_assignment !== false;
+  const itemVisors = normalizeVisors({ data: item.visors });
+  const isVisorsAvailable =
+    canInviteVisor || item.is_visor === true || itemVisors.length > 0;
+
+  const { data: visorsResponse, isLoading: loadingVisors } = useGetQuery({
+    url: item?.id
+      ? ApiRoutes.INTERNAL_VISORS.replace(":id", String(item.id))
+      : "",
+    useToken: true,
+    options: {
+      enabled: !!item?.id && isVisorsAvailable,
+      refetchOnWindowFocus: false,
+    },
+  });
+
+  const visors = visorsResponse ? normalizeVisors(visorsResponse) : itemVisors;
+
+  // Открытие приглашённого письма отмечаем прочитанным — бэкенд обновляет
+  // статус и счётчик входящих.
+  const { mutate: markRead } = useMutationQuery({
+    method: "POST",
+    url: item?.id
+      ? ApiRoutes.READ_INTERNAL.replace(":id", String(item.id))
+      : "",
+    messages: {
+      suppressSuccessToast: true,
+      invalidate: [
+        ApiRoutes.GET_INTERNAL_INCOMING,
+        ApiRoutes.GET_INTERNAL_COUNTERS,
+      ],
+    },
+  });
+
+  const markedReadIdRef = useRef<string | number | null>(null);
+
+  useEffect(() => {
+    if (!item?.id || markedReadIdRef.current === item.id) return;
+    markedReadIdRef.current = item.id;
+    markRead({});
+  }, [item?.id, markRead]);
+
   // Закрытие выпадающего меню «Действие» по клику вне / Escape
   useEffect(() => {
     if (!showActionMenu) return;
@@ -378,14 +438,31 @@ export const InternalCorrespondenceIncomingView = ({
         (r: any) => r.read_at !== null && r.read_at !== undefined,
       ));
 
-  const handleAction = (id: "seen" | "reply" | "forward" | "task") => {
+  // «Пригласить визирующего» показываем только тем, кому это разрешено, а
+  // «Поручение» держим неактивным, пока бэкенд не разрешит его создание.
+  const visibleActionItems = ACTION_MENU_ITEMS.filter(
+    (menuItem) => menuItem.id !== "visor" || canInviteVisor,
+  ).map((menuItem) => ({
+    ...menuItem,
+    disabled: menuItem.id === "task" && !canCreateAssignment,
+    hint:
+      menuItem.id === "task" && !canCreateAssignment
+        ? VISOR_INVITE_HINT
+        : undefined,
+  }));
+
+  const handleAction = (id: TActionId) => {
     setShowActionMenu(false);
     if (id === "seen") {
       seenMutate({});
       return;
     }
+    if (id === "visor") {
+      openVisors();
+      return;
+    }
     if (id === "task") {
-      setShowTaskPanel(true);
+      openTask();
       return;
     }
     // «Ответить»/«Перенаправить» → переход на создание исходящего письма с
@@ -525,50 +602,66 @@ export const InternalCorrespondenceIncomingView = ({
 
   // Открытие раздела — взаимное закрытие остальных (одновременно только один).
   // Общие для боковых вкладок цилиндров и горизонтальной панели разделов.
-  const openSigners = () => {
-    setSignersOpen(true);
+  const closeAllPanels = () => {
+    setSignersOpen(false);
     setApproversOpen(false);
     setVersionsOpen(false);
     setShowTaskPanel(false);
     setAttachmentsOpen(false);
+    setVisorsOpen(false);
+  };
+  const openSigners = () => {
+    closeAllPanels();
+    setSignersOpen(true);
   };
   const openApprovers = () => {
+    closeAllPanels();
     setApproversOpen(true);
-    setSignersOpen(false);
-    setVersionsOpen(false);
-    setShowTaskPanel(false);
-    setAttachmentsOpen(false);
   };
   const openVersions = () => {
+    closeAllPanels();
     setVersionsOpen(true);
-    setSignersOpen(false);
-    setApproversOpen(false);
-    setShowTaskPanel(false);
-    setAttachmentsOpen(false);
   };
   const openTask = () => {
+    if (!canCreateAssignment) {
+      if (canInviteVisor) openVisors();
+      return;
+    }
+    closeAllPanels();
     setShowTaskPanel(true);
-    setSignersOpen(false);
-    setApproversOpen(false);
-    setVersionsOpen(false);
-    setAttachmentsOpen(false);
   };
   const openAttachments = () => {
+    closeAllPanels();
     setAttachmentsOpen(true);
-    setShowTaskPanel(false);
-    setSignersOpen(false);
-    setApproversOpen(false);
-    setVersionsOpen(false);
+  };
+  const openVisors = () => {
+    closeAllPanels();
+    setVisorsOpen(true);
   };
 
   // Разделы для режима «Панель разделов сверху» — те же цвета/подписи, что у
   // боковых цилиндров у холста.
   const sections: ToolbarSection[] = [
+    ...(isVisorsAvailable
+      ? [
+          {
+            key: "visors",
+            label: "Визирующие",
+            dotClass: "bg-violet-500",
+            badge: visors.length > 0 ? visors.length : undefined,
+            isOpen: visorsOpen,
+            onToggle: () =>
+              visorsOpen ? setVisorsOpen(false) : openVisors(),
+          },
+        ]
+      : []),
     {
       key: "task",
       label: "Поручение",
       dotClass: "bg-indigo-500",
       isOpen: showTaskPanel,
+      disabled: !canCreateAssignment,
+      hint: canCreateAssignment ? undefined : VISOR_INVITE_HINT,
       onToggle: () => (showTaskPanel ? setShowTaskPanel(false) : openTask()),
     },
     {
@@ -628,6 +721,8 @@ export const InternalCorrespondenceIncomingView = ({
           panelsInToolbar={panelsInToolbar}
           onTogglePanelsInToolbar={setPanelsInToolbar}
           attachments={item.attachments || []}
+          correspondenceId={item.id}
+          canCreateAssignment={canCreateAssignment}
         />
       </If>
 
@@ -706,22 +801,38 @@ export const InternalCorrespondenceIncomingView = ({
                   exit={{ opacity: 0, scale: 0.92 }}
                   transition={{ type: "spring", stiffness: 280, damping: 22 }}
                   style={{ transformOrigin: "top right" }}
-                  className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 w-56 py-2 overflow-hidden z-[1000]"
+                  className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 w-64 py-2 overflow-hidden z-[1000]"
                 >
-                  {ACTION_MENU_ITEMS.map((menuItem, idx) => (
+                  {visibleActionItems.map((menuItem, idx) => (
                     <motion.button
                       key={menuItem.id}
                       initial={{ opacity: 0, y: 4 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.035, duration: 0.18 }}
                       onClick={() => handleAction(menuItem.id)}
-                      className="w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 cursor-pointer flex items-center gap-3 transition-colors text-left"
+                      disabled={menuItem.disabled}
+                      className={cn(
+                        "w-full px-4 py-2.5 text-sm flex items-center gap-3 transition-colors text-left",
+                        menuItem.disabled
+                          ? "text-slate-300 cursor-not-allowed"
+                          : "text-slate-700 hover:bg-slate-50 cursor-pointer",
+                      )}
                     >
                       <menuItem.icon
                         size={16}
-                        className="text-slate-400 flex-shrink-0"
+                        className={cn(
+                          "flex-shrink-0",
+                          menuItem.disabled ? "text-slate-200" : "text-slate-400",
+                        )}
                       />
-                      <span>{menuItem.label}</span>
+                      <span className="flex-1 min-w-0">
+                        <span className="block">{menuItem.label}</span>
+                        <If is={!!menuItem.hint}>
+                          <span className="block text-[10px] leading-tight text-slate-400 whitespace-normal">
+                            {menuItem.hint}
+                          </span>
+                        </If>
+                      </span>
                     </motion.button>
                   ))}
                 </motion.div>
@@ -966,9 +1077,56 @@ export const InternalCorrespondenceIncomingView = ({
                 />
                 {!panelsInToolbar && (
                   <div className="absolute z-20" style={{ left: -33, top: 10 }}>
+                    <Tooltip
+                      title={canCreateAssignment ? undefined : VISOR_INVITE_HINT}
+                    >
+                      <motion.button
+                        onClick={() =>
+                          showTaskPanel ? setShowTaskPanel(false) : openTask()
+                        }
+                        disabled={!canCreateAssignment}
+                        whileHover={
+                          canCreateAssignment ? { scale: 1.02 } : undefined
+                        }
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 24,
+                        }}
+                        className={cn(
+                          "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] flex flex-col items-center gap-1.5 select-none transition-all duration-200",
+                          canCreateAssignment
+                            ? "cursor-pointer"
+                            : "cursor-not-allowed opacity-60",
+                          showTaskPanel
+                            ? "bg-slate-50"
+                            : canCreateAssignment && "hover:bg-slate-50",
+                        )}
+                        aria-label="Поручение"
+                      >
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
+                        <span
+                          style={{
+                            writingMode: "vertical-rl",
+                            textOrientation: "mixed",
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: "#475569",
+                            letterSpacing: "0.08em",
+                          }}
+                        >
+                          Поручение
+                        </span>
+                      </motion.button>
+                    </Tooltip>
+                  </div>
+                )}
+
+                {!panelsInToolbar && isVisorsAvailable && (
+                  <div className="absolute z-20" style={{ left: -33, top: 190 }}>
                     <motion.button
                       onClick={() =>
-                        showTaskPanel ? setShowTaskPanel(false) : openTask()
+                        visorsOpen ? setVisorsOpen(false) : openVisors()
                       }
                       whileHover={{ scale: 1.02 }}
                       transition={{
@@ -978,11 +1136,11 @@ export const InternalCorrespondenceIncomingView = ({
                       }}
                       className={cn(
                         "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-                        showTaskPanel ? "bg-slate-50" : "hover:bg-slate-50",
+                        visorsOpen ? "bg-slate-50" : "hover:bg-slate-50",
                       )}
-                      aria-label="Поручение"
+                      aria-label="Визирующие"
                     >
-                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
+                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-violet-500" />
                       <span
                         style={{
                           writingMode: "vertical-rl",
@@ -993,7 +1151,7 @@ export const InternalCorrespondenceIncomingView = ({
                           letterSpacing: "0.08em",
                         }}
                       >
-                        Поручение
+                        Визирующие
                       </span>
                     </motion.button>
                   </div>
@@ -1022,6 +1180,18 @@ export const InternalCorrespondenceIncomingView = ({
                 <AnimatePresence>
                   {showTaskPanel && (
                     <TaskPanel correspondenceId={item.id} onClose={() => setShowTaskPanel(false)} />
+                  )}
+                </AnimatePresence>
+
+                <AnimatePresence>
+                  {visorsOpen && (
+                    <VisorsPanel
+                      correspondenceId={item.id}
+                      visors={visors}
+                      isLoading={loadingVisors}
+                      canInvite={canInviteVisor}
+                      onClose={() => setVisorsOpen(false)}
+                    />
                   )}
                 </AnimatePresence>
               </div>

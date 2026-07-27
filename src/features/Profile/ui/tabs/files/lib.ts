@@ -5,7 +5,9 @@ export interface IFileUser {
   full_name?: string;
   first_name?: string;
   last_name?: string;
+  /** Должность. Приходит в shared_with у GET /my-files/:id/shares и в ответе POST /my-files/:id/invite. */
   position?: string;
+  phone?: string;
   photo_path?: string | null;
   photo_url?: string | null;
 }
@@ -111,6 +113,9 @@ export const getUserFullName = (user?: IFileUser | null): string => {
     "—"
   );
 };
+
+export const getUserPosition = (user?: IFileUser | null): string =>
+  user?.position?.trim() || "—";
 
 export const getUserInitials = (user?: IFileUser | null): string => {
   const name = getUserFullName(user);
