@@ -13,7 +13,6 @@ import { tokenControl } from "../tokenControl";
 /* ===================== TYPES ===================== */
 type TBaseRequest = Record<string, string | number | boolean | undefined | any>;
 
-/** Расширяем стандартный конфиг Axios нашими полями */
 interface CustomAxiosRequestConfig<T = any> extends Omit<AxiosRequestConfig<T>, "headers"> {
   suppressErrorToast?: boolean;
   skipAuth?: boolean;
@@ -37,7 +36,6 @@ interface IUseMutationQueryOptions<TRequest = TBaseRequest, TData = any, TSecond
   method: "POST" | "PUT" | "DELETE" | "GET" | "PATCH";
   messages?: {
     success?: string;
-    /** Не показывать success-тост (например, для промежуточных шагов) */
     suppressSuccessToast?: boolean;
     error?: string;
     invalidate?: string[];
@@ -49,11 +47,10 @@ interface IUseMutationQueryOptions<TRequest = TBaseRequest, TData = any, TSecond
   queryOptions?: UseMutationOptions<any, AxiosError, TRequest, unknown>;
   secondQuery?: ISecondMutationQuery<TData, TSecondData>;
   skipAuth?: boolean;
-  preload?: boolean; // грузим permissions
-  preloadConditional?: string[]; // permissions для разрешения мутации
+  preload?: boolean;
+  preloadConditional?: string[];
 }
 
-/* ===================== HOOK ===================== */
 export const useMutationQuery = <
   TRequest = TBaseRequest,
   TData = any,
@@ -76,7 +73,6 @@ export const useMutationQuery = <
   
   const queryClient = useQueryClient();
 
-  /* ---------- PERMISSIONS CHECK ---------- */
   const permissionsQuery = useQuery({
     queryKey: [ApiRoutes.FETCH_PERMISSIONS],
     queryFn: async () => {
@@ -92,9 +88,9 @@ export const useMutationQuery = <
     },
     enabled: !!preload && tokenControl.get() !== null,
     staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
-  // Учитываем загрузку прав в состоянии isAllowed, чтобы кнопка была disabled (а не loading)
   const isAllowedResult = useMemo(() => {
     if (!preload) return true;
     if (permissionsQuery.isLoading) return false; 
@@ -105,17 +101,14 @@ export const useMutationQuery = <
     return preloadConditional.every(perm => currentPermissions.includes(perm));
   }, [preload, permissionsQuery.isLoading, permissionsQuery.isSuccess, permissionsQuery.data, preloadConditional]);
 
-  /* ---------- MUTATION FUNCTION ---------- */
   const mutationFn = useCallback(
     async (requestData: TRequest): Promise<TSecondData | TData> => {
-      // Защита: если права нужны, но их нет ИЛИ они еще грузятся - блокируем выполнение
       if (preload && !isAllowedResult) {
         const errorMsg = "У вас недостаточно прав для выполнения этой операции";
         toast.error(errorMsg);
         throw new Error(errorMsg);
       }
 
-      // 1. ПЕРВЫЙ ЗАПРОС (Основная мутация)
       const firstUrl = typeof url === "function" ? url(requestData) : url;
       
       const firstResponse = await _axios<IApiResponse<TData>>({
@@ -135,7 +128,6 @@ export const useMutationQuery = <
 
       const firstData = firstBody.data;
 
-      // 2. ВТОРОЙ ЗАПРОС (Цепочка)
       if (secondQuery) {
         const secondUrl = typeof secondQuery.url === "function" 
           ? secondQuery.url(firstData) 
@@ -164,7 +156,7 @@ export const useMutationQuery = <
 
       return firstData;
     },
-    [url, method, skipAuth, messages, secondQuery, preload, isAllowedResult, queryParams]
+    [url, method, skipAuth, messages, secondQuery, preload, isAllowedResult, queryParams, transformBody]
   );
 
   const mutation = useMutation({
