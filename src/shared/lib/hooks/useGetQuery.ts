@@ -11,16 +11,15 @@ import { useMemo } from "react";
 type TBaseRequest = Record<string, string | number | boolean | undefined | any>;
 
 interface IUseGetQueryOptions<TRequest = TBaseRequest, TResponse = any, TSelect = any> {
-  url?: string; // Опциональный URL
+  url?: string;
   method?: "GET" | "POST";
   params?: TRequest;
   useToken?: boolean;
   options?: Partial<UseQueryOptions<TResponse, any, TSelect>>;
-  preload?: boolean; // грузим permissions
-  preloadConditional?: string[]; // permissions для запуска mainQuery ИЛИ для возврата data: true
+  preload?: boolean;
+  preloadConditional?: string[];
 }
 
-/* ===================== HOOK ===================== */
 export const useGetQuery = <
   TRequest = TBaseRequest,
   TResponse = any,
@@ -38,7 +37,6 @@ export const useGetQuery = <
     preloadConditional,
   } = options;
 
-  /* ---------- PRELOAD QUERY ---------- */
   const preloadQuery = useQuery({
     queryKey: [ApiRoutes.FETCH_PERMISSIONS],
     queryFn: async () => {
@@ -51,15 +49,14 @@ export const useGetQuery = <
         method: "GET",
         headers,
       });
-      return response.data.data; // массив permissions
+      return response.data.data;
     },
     enabled: preload ? tokenControl.get() !== null : false,
-    staleTime: 1000 * 60 * 5, // кэшируем на 5 минут
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
-  /* ---------- MAIN QUERY ENABLED ---------- */
   const mainEnabled = useMemo(() => {
-    // Режим с URL: проверяем условия для запуска запроса
     if (url) {
       if (!preload) return true;
       if (!preloadQuery.isSuccess || !preloadQuery.data) return false;
@@ -68,19 +65,16 @@ export const useGetQuery = <
       return preloadConditional.every((perm) => current.includes(perm));
     }
     
-    // Режим "проверка прав": URL нет, но есть условия
     if (!url && preload && preloadConditional && preloadConditional.length) {
       if (!preloadQuery.isSuccess || !preloadQuery.data) return false;
       const current = (preloadQuery.data as { name: string }[]).map((p) => p.name);
       return preloadConditional.every((perm) => current.includes(perm));
     }
 
-    return false; // По умолчанию отключен, если нет URL или условий
+    return false;
   }, [url, preload, preloadQuery.isSuccess, preloadQuery.data, preloadConditional]);
 
-  /* ---------- MAIN QUERY ---------- */
   const mainQuery = useQuery({
-    // Если нет URL, ключ базируется на условиях, чтобы разные проверки не конфликтовали
     queryKey: url ? [url, params, useToken] : ["__permission_check__", preloadConditional],
     queryFn: async () => {
       if (url) {
@@ -96,26 +90,25 @@ export const useGetQuery = <
         });
         return response.data;
       }
-      // Если URL нет, возвращаем true как сигнал выполнения условий
       return true as any;
     },
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
     ...queryOptions,
     enabled: mainEnabled && queryOptions?.enabled !== false,
   }) as UseQueryResult<TSelect, any>;
 
-  // В React Query v4 isLoading = true для отключенных запросов.
   const isMainLoading = mainQuery.isLoading && (mainEnabled && queryOptions?.enabled !== false);
   const isPreloadLoading = preload && preloadQuery.isLoading && tokenControl.get() !== null;
   const loadingState = isMainLoading || isPreloadLoading;
 
-  /* ---------- RETURN ---------- */
   return {
-    data: mainQuery.data, // Для "проверки прав" тут будет true
+    data: mainQuery.data,
     refetch: mainQuery.refetch,
     isFetching: mainQuery.isFetching,
     preloadData: preloadQuery.data,
     isLoading: loadingState,
-    isPending: loadingState, // Для обратной совместимости
+    isPending: loadingState,
     isError: mainQuery.isError || (preload ? preloadQuery.isError : false),
     mainQuery,
     preloadQuery,
