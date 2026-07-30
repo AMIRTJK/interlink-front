@@ -151,7 +151,7 @@ export const OrgTreeChart = ({
               borderTopWidth: 3,
               width: cardW,
             }}
-            whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}
+            whileHover={{ boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}
           >
             <div className="px-2.5 py-2.5 flex flex-col items-center gap-1.5">
               <div

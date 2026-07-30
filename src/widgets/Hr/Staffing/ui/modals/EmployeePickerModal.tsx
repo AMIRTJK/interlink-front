@@ -99,18 +99,11 @@ export const EmployeePickerModal = ({
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+      <div
         className="fixed inset-0 bg-black/60"
         onClick={onClose}
       />
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 12 }}
-        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      <div
         className={`relative ${cardBg} rounded-3xl shadow-2xl w-full max-w-md z-[71] flex flex-col overflow-hidden h-[500px] max-h-[82vh]`}
       >
         <div className={`px-5 py-4 border-b ${headerBorder} shrink-0`}>
@@ -227,7 +220,7 @@ export const EmployeePickerModal = ({
             Отмена
           </button>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

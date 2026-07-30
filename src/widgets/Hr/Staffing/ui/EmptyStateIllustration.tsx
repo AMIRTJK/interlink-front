@@ -52,15 +52,13 @@ export const EmptyStateIllustration = ({
         </p>
       </div>
       <If is={!hasSearch}>
-        <motion.button
-          whileHover={{ scale: 1.02, y: -1 }}
-          whileTap={{ scale: 0.97 }}
+        <button
           onClick={onAddOrg}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-900/25"
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-900/25"
         >
           <Plus size={16} />
           <span>Добавить организацию</span>
-        </motion.button>
+        </button>
       </If>
     </motion.div>
   );
