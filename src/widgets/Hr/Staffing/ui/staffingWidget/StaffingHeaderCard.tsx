@@ -1,8 +1,8 @@
-import React from 'react';
-import { GitBranch, FileText, Eye, Download, X, Upload } from 'lucide-react';
-import { If } from '@shared/ui/If';
-import { SummaryBar } from '../SummaryBar';
-import type { ISubOrganization } from '../../model';
+import React from "react";
+import { GitBranch, FileText, Eye, Download, X, Upload } from "lucide-react";
+import { If } from "@shared/ui/If";
+import { SummaryBar } from "../SummaryBar";
+import type { ISubOrganization } from "../../model";
 
 interface IProps {
   dark?: boolean;
@@ -22,6 +22,8 @@ interface IProps {
     totalPositions: number;
     totalSlots: number;
     totalOccupied: number;
+    totalVacant: number; 
+    totalFot: number; 
     occupancyPct: number;
   };
 }
@@ -42,14 +44,18 @@ export function StaffingHeaderCard({
   allTotals,
 }: IProps) {
   return (
-    <div className={`rounded-2xl border shadow-sm overflow-hidden ${headerCardBg}`}>
+    <div
+      className={`rounded-2xl border shadow-sm overflow-hidden ${headerCardBg}`}
+    >
       <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
               <GitBranch size={15} className="text-white" />
             </div>
-            <h2 className={`text-lg font-bold ${titleText}`}>Штатное расписание</h2>
+            <h2 className={`text-lg font-bold ${titleText}`}>
+              Штатное расписание
+            </h2>
           </div>
           <p className={`text-sm ml-10 ${subText}`}>
             Управление структурой организаций, отделов и должностей
@@ -104,7 +110,11 @@ export function StaffingHeaderCard({
       </div>
       <If is={organizations.length > 0}>
         <div className="px-6 pb-5">
-          <SummaryBar organizations={organizations} {...allTotals} dark={dark} />
+          <SummaryBar
+            organizations={organizations}
+            {...allTotals}
+            dark={dark}
+          />
         </div>
       </If>
     </div>

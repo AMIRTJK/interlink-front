@@ -11,7 +11,11 @@ interface CreateTaskViewProps {
   onBack: () => void;
   onCreate: (payloads: TaskPayload[], files?: File[]) => Promise<void>;
   editTask?: Task | null;
-  onUpdate?: (id: number, payload: TaskPayload, files?: File[]) => Promise<void>;
+  onUpdate?: (
+    id: number,
+    payload: TaskPayload,
+    files?: File[],
+  ) => Promise<void>;
   onDownloadAttachment?: (
     taskId: number,
     attachmentId: number,
@@ -136,13 +140,17 @@ export const CreateTaskView = ({
             onFormTagsChange={setFormTags}
             attachments={attachments}
             onRemoveAttachment={(id) =>
-              setAttachments((prev) => prev.filter((a) => a.id !== id))
+              setAttachments((prev) =>
+                prev.filter((a) => String(a.id) !== String(id)),
+              )
             }
             newFiles={newFiles}
             onRemoveNewFile={(index) =>
               setNewFiles((prev) => prev.filter((_, i) => i !== index))
             }
-            onAddNewFiles={(files) => setNewFiles((prev) => [...prev, ...files])}
+            onAddNewFiles={(files) =>
+              setNewFiles((prev) => [...prev, ...files])
+            }
             fileInputRef={fileInputRef}
             editTask={editTask}
             onDownloadAttachment={onDownloadAttachment}

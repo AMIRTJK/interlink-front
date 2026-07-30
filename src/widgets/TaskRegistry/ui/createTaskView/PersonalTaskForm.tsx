@@ -1,13 +1,6 @@
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  X,
-  Upload,
-  Download,
-  Trash2,
-  Paperclip,
-  FileIcon,
-} from "lucide-react";
+import { X, Upload, Download, Trash2, Paperclip, FileIcon } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type {
@@ -30,7 +23,7 @@ interface IProps {
   formTags: string;
   onFormTagsChange: (val: string) => void;
   attachments: Attachment[];
-  onRemoveAttachment: (id: number) => void;
+  onRemoveAttachment: (id: string) => void;
   newFiles: File[];
   onRemoveNewFile: (index: number) => void;
   onAddNewFiles: (files: File[]) => void;
@@ -213,7 +206,11 @@ export function PersonalTaskForm({
                       type="button"
                       onClick={() => {
                         if (editTask?.rawId != null && file.rawId != null) {
-                          onDownloadAttachment?.(editTask.rawId, file.rawId, file.name);
+                          onDownloadAttachment?.(
+                            editTask.rawId,
+                            file.rawId,
+                            file.name,
+                          );
                         }
                       }}
                       className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all text-slate-400 hover:text-emerald-600"
@@ -224,7 +221,10 @@ export function PersonalTaskForm({
                       type="button"
                       onClick={async () => {
                         if (editTask?.rawId != null && file.rawId != null) {
-                          await onDeleteAttachment?.(editTask.rawId, file.rawId);
+                          await onDeleteAttachment?.(
+                            editTask.rawId,
+                            file.rawId,
+                          );
                           onRemoveAttachment(file.id);
                         }
                       }}
@@ -410,7 +410,9 @@ export function PersonalTaskForm({
                       <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
                         {col.name}
                       </p>
-                      <p className="text-[10px] text-slate-400 truncate">{col.role}</p>
+                      <p className="text-[10px] text-slate-400 truncate">
+                        {col.role}
+                      </p>
                     </div>
                   </button>
                 ))}
