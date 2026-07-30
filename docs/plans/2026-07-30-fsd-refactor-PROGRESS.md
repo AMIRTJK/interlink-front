@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 28 / 89 шагов закрыто.
-- **Последнее обновление:** 2026-07-30 — рефакторинг `widgets/Hr/Access/ui/UserProfileModal.tsx`; чекпоинт перенесён на `widgets/Hr/Staffing/ui/views/OrgTreeChart.tsx`.
+- **Прогресс:** 31 / 89 шагов закрыто.
+- **Последнее обновление:** 2026-07-30 — рефакторинг `widgets/Hr/Orders/ui/OrderDetailModal.tsx`; чекпоинт перенесён на `widgets/Hr/Orders/ui/renderOrderFields.tsx`.
 
 ---
 
@@ -149,11 +149,16 @@
 
 - [x] `S` 344 → `widgets/Hr/Staffing/ui/modals/AddOrgModal.tsx` → **180**
 
+- [x] `S` 332 → `widgets/Hr/Staffing/ui/modals/EditOrgModal.tsx` → **253**
+
+- [x] `S` 309 → `features/Hr/ui/SetRoles.tsx` → **120**
+
 ⏹ **ЧЕКПОИНТ**
 
-- [ ] `S` 332 → `widgets/Hr/Staffing/ui/modals/EditOrgModal.tsx`
-- [ ] `S` 309 → `features/Hr/ui/SetRoles.tsx`
-- [ ] `S` 276 → `widgets/Hr/Orders/ui/OrderDetailModal.tsx`
+- [x] `S` 276 → `widgets/Hr/Orders/ui/OrderDetailModal.tsx` → **182**
+
+⏹ **ЧЕКПОИНТ**
+
 - [ ] `S` 263 → `widgets/Hr/Orders/ui/renderOrderFields.tsx`
 - [ ] `S` 258 → `widgets/Hr/Access/ui/RoleUsersTable.tsx`
 - [ ] `S` 257 → `widgets/Hr/Staffing/ui/modals/AssignEmployeeModal.tsx`
@@ -254,6 +259,9 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-30 | `widgets/Hr/Orders/ui/OrderDetailModal.tsx` | новая подпапка `orderDetailModal/` (1 файл): `OrderDetailSidebar.tsx` (правый сайдбар с 3 карточками: реквизиты, исполнитель, приложения) | 276 → **182** (макс. новый — 110) | на ревью |
+| 2026-07-30 | `features/Hr/ui/SetRoles.tsx` | новая подпапка `setRoles/` (3 файла): `setRolesModel.ts` (тип `IOption`, хук `useClickOutside`), `SingleSelect.tsx` (дропдаун выбора одного значения с поиском), `SetRolesMultiSelect.tsx` (дропдаун мультивыбора с чипсами и поиском) | 309 → **120** (макс. новый — 100) | на ревью |
+| 2026-07-30 | `widgets/Hr/Staffing/ui/modals/EditOrgModal.tsx` | новая подпапка `editOrgModal/` (1 файл): `EditOrgCuratorPickerSlot.tsx` (слот выбора куратора с отображением текущего curatorName) | 332 → **253** (макс. новый — 110) | на ревью |
 | 2026-07-30 | `widgets/Hr/Staffing/ui/modals/AddOrgModal.tsx` | новая подпапка `addOrgModal/` (1 файл): `OrgCuratorPickerSlot.tsx` (слот выбора куратора организации) | 344 → **180** (макс. новый — 70) | на ревью |
 | 2026-07-30 | `widgets/Hr/Employees/EmployeeProfileModal.tsx` | новая подпапка `employeeProfileModal/` (2 файла): `EmployeeProfileHeader.tsx` (шапка профиля сотрудника с аватаром и статусом), `EmployeeProfileInfoTab.tsx` (вкладка персональных и рабочих данных с биографией) | 355 → **180** (макс. новый — 100) | на ревью |
 | 2026-07-30 | `widgets/Hr/Staffing/ui/modals/AddDeptModal.tsx` | новая подпапка `addDeptModal/` (2 файла): `AddDeptManagerSlot.tsx` (слот выбора руководителя), `AddDeptCuratorSlot.tsx` (слот выбора куратора) | 365 → **190** (макс. новый — 70) | на ревью |
@@ -303,6 +311,8 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Находка |
 |---|---|---|
+| 2026-07-30 | `features/Hr/ui/SetRoles.tsx` | `userOptions` и `roleOptions` разбирают ответ `GET_USERS`/`GET_ROLES` через множественные `as any` касты (`(usersData as any)?.data?.data`, `(rolesData as any)?.data`, `arr.map((u: any) =>)`), нет типизации ответа API |
+| 2026-07-30 | `features/Hr/ui/setRoles/setRolesModel.ts` | `useClickOutside` принимает `cb` по ссылке и помещает её в зависимости `useEffect` — при каждом рендере создаётся новая стрелочная функция, пересоздающая обработчик `mousedown`; нужна обёртка `useRef` для `cb` или `useCallback` на стороне вызова |
 | 2026-07-30 | `widgets/TaskRegistry/ui/createTaskView/` | В `ProtocolTaskForm.tsx` подписанные штампы ЭЦП председателя и секретаря вызывают `signTimestamp()`, генерирующий локальную строку с текущей датой без вызова бэкенд-сервиса подписи |
 | 2026-07-30 | `widgets/Administration/ui/usersView/` | В `useUsersViewState.ts` карточки `statChips` (Активные, Неактивные, Заблокированные) высчитывают количество по маппингу массива текущей страницы `users` (из 7 записей), а не по агрегатам ответа сервера — значения показывают данные только 1-й страницы |
 | 2026-07-30 | `widgets/Administration/ui/roleDrawer/` | `RoleDrawerFooter.tsx` имеет прямые inline DOM-мутации стилей фона при наведении мыши (`onMouseEnter`/`onMouseLeave`) |

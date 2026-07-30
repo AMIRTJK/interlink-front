@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Landmark, Network, ChevronDown, UserCircle2, Pencil } from 'lucide-react';
+import { X, Landmark, Network } from 'lucide-react';
 import { ISubOrganization, IEmployee, ORG_TYPES } from '../../model';
 import { EmployeePickerModal } from './EmployeePickerModal';
-import { MiniAvatar } from '../components/MiniAvatar';
 import { If } from '@shared/ui/If';
+import { EditOrgCuratorPickerSlot } from './editOrgModal/EditOrgCuratorPickerSlot';
 
 export interface IEditOrgModalProps {
   org: ISubOrganization;
@@ -67,12 +67,6 @@ export const EditOrgModal = ({
   const cancelCls = dark
     ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
     : 'bg-gray-100 text-gray-600 hover:bg-gray-200';
-  const curatorBtnCls = dark
-    ? 'border-gray-700 bg-gray-800 text-gray-400 hover:border-indigo-600'
-    : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-indigo-300';
-  const curatorSelectedCls = dark
-    ? 'border-indigo-600/50 bg-indigo-900/20'
-    : 'border-indigo-200 bg-indigo-50';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -200,90 +194,16 @@ export const EditOrgModal = ({
               className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all ${inputBg}`}
             />
           </div>
-          <div>
-            <label
-              className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${labelCls}`}
-            >
-              Куратор
-            </label>
-            <If is={!!selectedEmp}>
-              <div
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl border ${curatorSelectedCls}`}
-              >
-                <MiniAvatar
-                  photo={selectedEmp?.avatarPhoto}
-                  initials={selectedEmp?.avatarInitials}
-                  color={selectedEmp?.avatarColor}
-                  size="md"
-                />
-                <div className="flex-1 min-w-0">
-                  <p
-                    className={`text-sm font-semibold truncate ${
-                      dark ? 'text-indigo-300' : 'text-indigo-800'
-                    }`}
-                  >
-                    {selectedEmp?.lastName} {selectedEmp?.firstName}
-                  </p>
-                  <p
-                    className={`text-xs truncate ${
-                      dark ? 'text-indigo-400/70' : 'text-indigo-600/70'
-                    }`}
-                  >
-                    {selectedEmp?.position}
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setCuratorId(null);
-                    setCuratorName('');
-                  }}
-                  className={`p-1 rounded-lg transition-colors ${
-                    dark
-                      ? 'text-indigo-400 hover:bg-indigo-900/40'
-                      : 'text-indigo-500 hover:bg-indigo-100'
-                  }`}
-                >
-                  <X size={13} />
-                </button>
-                <button
-                  onClick={() => setPickerOpen(true)}
-                  className={`p-1 rounded-lg transition-colors ${
-                    dark
-                      ? 'text-indigo-400 hover:bg-indigo-900/40'
-                      : 'text-indigo-500 hover:bg-indigo-100'
-                  }`}
-                >
-                  <Pencil size={13} />
-                </button>
-              </div>
-            </If>
-            <If is={!selectedEmp}>
-              <button
-                type="button"
-                onClick={() => setPickerOpen(true)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl border text-sm font-medium transition-all ${curatorBtnCls}`}
-              >
-                <UserCircle2 size={16} className={dark ? 'text-gray-500' : 'text-gray-400'} />
-                <span
-                  className={
-                    curatorName
-                      ? dark
-                        ? 'text-gray-200'
-                        : 'text-gray-700'
-                      : dark
-                      ? 'text-gray-500'
-                      : 'text-gray-400'
-                  }
-                >
-                  {curatorName || 'Выбрать куратора'}
-                </span>
-                <ChevronDown
-                  size={14}
-                  className={`ml-auto ${dark ? 'text-gray-600' : 'text-gray-300'}`}
-                />
-              </button>
-            </If>
-          </div>
+          <EditOrgCuratorPickerSlot
+            dark={dark}
+            selectedEmp={selectedEmp}
+            curatorName={curatorName}
+            onClear={() => {
+              setCuratorId(null);
+              setCuratorName('');
+            }}
+            onOpenPicker={() => setPickerOpen(true)}
+          />
           <div className="flex gap-3 pt-1">
             <button
               onClick={onClose}
