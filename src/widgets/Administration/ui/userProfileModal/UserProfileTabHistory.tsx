@@ -11,11 +11,11 @@ export function UserProfileTabHistory({
 }: IUserProfileTabHistoryProps) {
   return (
     <div style={{ padding: "20px 24px" }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {historyItems.map((h, idx) => (
           <div
             key={idx}
-            style={{ display: "flex", gap: 14, paddingBottom: 0 }}
+            style={{ display: "flex", gap: 14 }}
           >
             <div
               style={{
@@ -44,10 +44,11 @@ export function UserProfileTabHistory({
                 <div
                   style={{
                     width: 1,
-                    height: 28,
+                    flex: 1,
+                    minHeight: 12,
                     background: T.border,
                     marginTop: 4,
-                    marginBottom: 4,
+                    marginBottom: -10,
                   }}
                 />
               )}

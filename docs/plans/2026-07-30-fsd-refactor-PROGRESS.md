@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 16 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
-- **Последнее обновление:** 2026-07-30 — закрыт `widgets/Administration/ui/RolesView.tsx`; чекпоинт на `widgets/Administration/ui/AddUserModal.tsx`.
+- **Прогресс:** 23 / 89 шагов закрыто (Модуль 3 — Администрирование полностью завершён).
+- **Последнее обновление:** 2026-07-30 — завершён Модуль 3 (Администрирование); чекпоинт установлен перед Модулем 4 (HR).
 
 ---
 
@@ -99,17 +99,27 @@
 
 - [x] `L` 1183 → `widgets/Administration/ui/RolesView.tsx` → **185**
 
+- [x] `L` 1071 → `widgets/Administration/ui/AddUserModal.tsx` → **210**
+
+- [x] `L` 971 → `widgets/Administration/ui/CreateRoleModal.tsx` → **160**
+
+- [x] `M` 569 → `widgets/Administration/ui/RoleDrawer.tsx` → **75**
+
+- [x] `M` 565 → `widgets/Administration/ui/UsersView.tsx` → **165**
+
+- [x] `S` 361 → `widgets/Administration/ui/components.tsx` → **5**
+
+- [x] `S` 359 → `widgets/Administration/ui/UserDrawer.tsx` → **65**
+
+- [x] `S` 341 → `widgets/Administration/lib/adapters.ts` → **5**
+
+- [x] `S` 276 → `pages/modules/administration/AdministrationHomePage.tsx` → **7**
+
+- [x] `⏭️` 259 → `widgets/Administration/theme/tokens.ts` — SKIP (файл-данные)
+
 ⏹ **ЧЕКПОИНТ**
 
-- [ ] `L` 1071 → `widgets/Administration/ui/AddUserModal.tsx`
-- [ ] `L` 971 → `widgets/Administration/ui/CreateRoleModal.tsx`
-- [ ] `M` 569 → `widgets/Administration/ui/RoleDrawer.tsx`
-- [ ] `M` 565 → `widgets/Administration/ui/UsersView.tsx`
-- [ ] `S` 361 → `widgets/Administration/ui/components.tsx`
-- [ ] `S` 359 → `widgets/Administration/ui/UserDrawer.tsx`
-- [ ] `S` 341 → `widgets/Administration/lib/adapters.ts`
-- [ ] `S` 276 → `pages/modules/administration/AdministrationHomePage.tsx` — логика со страницы уходит в виджет (§3)
-- [ ] `⏭️` 259 → `widgets/Administration/theme/tokens.ts` — файл-данные, проверить и закрыть как SKIP
+---
 
 ### Модуль 4 — HR
 
@@ -226,6 +236,14 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-30 | `pages/modules/administration/AdministrationHomePage.tsx` | разметка и презентационная логика перенесены в новый виджет `widgets/Administration/ui/AdministrationHomeWidget.tsx` (215 строк). Страница превращена в тонкую точку монтирования (FSD §3) | 276 → **7** | на ревью |
+| 2026-07-30 | `widgets/Administration/lib/adapters.ts` | новая подпапка `adapters/` (4 файла): `translations.ts` (словари перевода модулей, действий и статусов), `formatters.ts` (инициалы, форматирование дат, `unwrapList`, `extractPermNames`), `userAdapters.ts` (`adaptExtUser`, `adaptTableUser`), `permAdapters.ts` (`buildPermModules`, `applyEffectiveState`, `collectEnabledPermNames`, `deriveEcp`, `adaptRoleCard`). В `adapters.ts` оставлен реэкспорт | 341 → **5** (макс. новый — 160) | на ревью |
+| 2026-07-30 | `widgets/Administration/ui/UserDrawer.tsx` | новая подпапка `userDrawer/` (4 файла): `useUserDrawerState.ts` (запрос `GET_USER_PERMISSIONS`, мутации `updateDirectM` и `updateDeniedM`, расчет `applyEffectiveState`), `UserDrawerHeader.tsx` (шапка профиля сотрудника с аватаром и ролями), `UserDrawerPermsList.tsx` (список индивидуальных прав с тумблерами), `UserDrawerFooter.tsx` (кнопка сохранения) | 359 → **65** (макс. новый — 150) | на ревью |
+| 2026-07-30 | `widgets/Administration/ui/components.tsx` | новая подпапка `components/` (4 файла): `ToggleSwitch.tsx` (тумблер переключения), `MultiRolePicker.tsx` (выбор нескольких ролей), `ToastContainer.tsx` (всплывающие тост-уведомления), `ModalBackdrop.tsx` (обёртка оверлея модалок). В `components.tsx` оставлен реэкспорт | 361 → **5** (макс. новый — 185) | на ревью |
+| 2026-07-30 | `widgets/Administration/ui/UsersView.tsx` | новая подпапка `usersView/` (5 файлов): `usersViewModel.ts` (`PER_PAGE`), `useUsersViewState.ts` (состояния фильтров/поиска, `useGetQuery` ответа `GET_USERS`/`GET_ROLES`/`GET_DEPARTMENTS`/`FETCH_PERMISSIONS`, расчёт `statChips` и `chipFilters`), `UsersViewTopBar.tsx` (шапка с кнопкой «Добавить»), `UsersViewStatChips.tsx` (карточки статистики), `UsersViewFilterBar.tsx` (панель поиска, дропдаунов и плашек фильтрации по ролям) | 565 → **165** (макс. новый — 190) | на ревью |
+| 2026-07-30 | `widgets/Administration/ui/RoleDrawer.tsx` | новая подпапка `roleDrawer/` (5 файлов): `roleDrawerModel.ts` (`clonePerms`), `useRoleDrawerState.ts` (состояние `perms`, `staggerGen`, `useGetQuery` ответа `GET_ROLE` и мутация `updateRoleM`), `RoleDrawerHeader.tsx` (шапка роли с аватаром и кнопкой закрытия), `RoleDrawerPermsList.tsx` (список категорий прав с тумблерами и список аватаров участников), `RoleDrawerFooter.tsx` (кнопки сохранения и удаления) | 569 → **75** (макс. новый — 250) | на ревью |
+| 2026-07-30 | `widgets/Administration/ui/CreateRoleModal.tsx` | новая подпапка `createRoleModal/` (4 файла): `createRoleModalModel.ts` (`CREATE_ROLE_COLORS`, `DESC_MAX`, `moduleSlug`, `countModuleToggles`, `isEcpLabel`), `useCreateRoleModalState.ts` (состояние шаблона/цвета, раскрытия модулей, навигации со скроллом, мутация `createRoleM`), `CreateRoleMetadataSidebar.tsx` (левый сайдбар названия, описания, шаблона, цвета), `CreateRolePermsPanel.tsx` (правая панель дерева модулей и тумблеров) | 971 → **160** (макс. новый — 250) | на ревью |
+| 2026-07-30 | `widgets/Administration/ui/AddUserModal.tsx` | новая подпапка `addUserModal/` (4 файла): `addUserModalModel.ts` (`AddUserEmployeeTab`, `SelectedEmployee`, `UserFormData`, `emptyFormData`, `buildFormDataFromExtUser`), `useAddUserModalState.ts` (состояние вкладок, поиска, `useGetQuery` отдели/организации/GET_USERS, мутации `createUserM` и `setUserRolesM`), `AddUserEmployeeSelection.tsx` (вкладки выбора существующего/нового сотрудника + автокомплит поиска), `AddUserFormFields.tsx` (двухколоночная форма персональной и рабочей информации) | 1071 → **210** (макс. новый — 248) | на ревью |
 | 2026-07-30 | `widgets/Administration/ui/RolesView.tsx` | новая подпапка `rolesView/` (6 файлов): `rolesViewModel.ts` (`PER_PAGE`, `countTotalPerms`), `useRolesViewState.ts` (состояния модалок/сайдбаров, запросы `GET_ROLES`/`FETCH_PERMISSIONS`/`GET_USERS`, расчет `roleUserCounts`, `roleCards`, `usersParams`), `RolesTopBar.tsx` (заголовок, переключатель вида, кнопки создания), `RolesBlockCards.tsx` (плиточный вид карточек ролей), `RolesRegistryTable.tsx` (табличный вид ролей), `RoleUsersTable.tsx` (реестр пользователей, поиск, пагинация, столбцы) | 1183 → **185** (макс. новый — 230) | на ревью |
 | 2026-07-30 | `widgets/Administration/ui/UserProfileModal.tsx` | новая подпапка `userProfileModal/` (8 файлов): `userProfileModalModel.ts` (`ACCESS_LEVEL_ITEMS`, `clonePerms`, `EMPTY_PERMS`), `useUserProfileModalState.ts` (состояния вкладок, ролей, точечных переопределений direct/denied, `useGetQuery` прав пользователя, мутации `setUserRolesM`, `updateDirectM`, `updateDeniedM`, `updateStatusM`), `UserProfileHeader.tsx` (шляпа с аватаром, статусом, ФИО и вкладками), `UserProfileTabProfile.tsx` (вкладка «Профиль»), `UserProfileTabAccess.tsx` (вкладка «Права доступа»), `UserProfileTabSessions.tsx` (вкладка «Сессии»), `UserProfileTabHistory.tsx` (вкладка «История»), `UserProfileFooter.tsx` (кнопки сохранения и меню смены статуса) | 1421 → **173** (макс. новый — 374) | на ревью |
 | 2026-07-30 | `shared/ui/SmartSearchModal/ui.tsx` | 3 файла: `ui/SearchInputBar.tsx` (поле ввода поиска `Input`), `ui/SelectedBadgesBar.tsx` (панель выбраных чипсов/элементов), `useSmartSearchState.ts` (поисковый запрос `useGetQuery`, разбор различных контрактов ответа API, управление выделением `selectedIds`, `selectedItemsMap`, предпросмотром `activePreviewItem`) | 269 → **124** (макс. новый — 143) | на ревью |
@@ -249,6 +267,12 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Находка |
 |---|---|---|
+| 2026-07-30 | `widgets/Administration/ui/usersView/` | В `useUsersViewState.ts` карточки `statChips` (Активные, Неактивные, Заблокированные) высчитывают количество по маппингу массива текущей страницы `users` (из 7 записей), а не по агрегатам ответа сервера — значения показывают данные только 1-й страницы |
+| 2026-07-30 | `widgets/Administration/ui/roleDrawer/` | `RoleDrawerFooter.tsx` имеет прямые inline DOM-мутации стилей фона при наведении мыши (`onMouseEnter`/`onMouseLeave`) |
+| 2026-07-30 | `widgets/Administration/ui/createRoleModal/` | В `CreateRoleModal.tsx` заголовок «1. Основная информация / 2. Права доступа» статичен и декоративен: переключения по шагам нет, метаданные и права отображаются на одном экране одновременно |
+| 2026-07-30 | `widgets/Administration/ui/createRoleModal/` | `CreateRolePermsPanel.tsx` содержит прямую мутацию inline DOM-стилей на событиях `onMouseEnter`/`onMouseLeave` на кнопках модулей и элементах прав |
+| 2026-07-30 | `widgets/Administration/ui/addUserModal/` | Поля `dob`, `gender`, `inn`, `phone`, `address`, `supervisor`, `corpEmail` в `AddUserFormFields.tsx` являются визуальной заглушкой (MOCK): не передаются в DTO при отправке `createUserM` или `setUserRolesM` |
+| 2026-07-30 | `widgets/Administration/ui/addUserModal/` | `AddUserModal.tsx` содержит прямую мутацию inline DOM-стилей по событиям `onMouseEnter`/`onMouseLeave` на кнопке закрытия крестика и элементах выпавшего списка |
 | 2026-07-30 | `widgets/Administration/ui/rolesView/` | `useRolesViewState.ts` запускает `Promise.all` с прямой отправкой `_axios.get` на каждую роль внутри `useEffect` вместо React Query; при ошибке молча возвращает count 0 |
 | 2026-07-30 | `widgets/Administration/ui/rolesView/` | `RolesTopBar.tsx`, `RolesBlockCards.tsx` и `RolesRegistryTable.tsx` используют прямую мутацию inline DOM-стилей по событиям `onMouseEnter`/`onMouseLeave` вместо Tailwind hover-классов / React-состояния |
 | 2026-07-30 | `widgets/Administration/ui/rolesView/` | `RoleUsersTable.tsx` содержал кнопку действия в таблице с иконкой `MoreHorizontal` без `aria-label`/`Tooltip` и без обработчика клика (заглушка `e.stopPropagation()`) |
