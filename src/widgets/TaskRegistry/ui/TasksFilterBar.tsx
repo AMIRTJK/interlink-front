@@ -1,6 +1,9 @@
 import * as React from "react";
 import { motion, LayoutGroup } from "framer-motion";
-import { Search, Plus, Filter, ArrowUp, ArrowDown, LayoutGrid, List as ListIcon, UserCheck, X } from "lucide-react";
+import { Search, Plus, Filter, ArrowUp, ArrowDown, LayoutGrid, List as ListIcon, UserCheck } from "lucide-react";
+import { Select, DatePicker, ConfigProvider } from "antd";
+import dayjs from "dayjs";
+import "dayjs/locale/ru";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { Colleague, Priority, TaskStatsFull, TaskStatus } from "../model/types";
@@ -14,7 +17,9 @@ import {
   type TaskSortField,
 } from "../model/filters";
 
-interface TasksFilterBarProps {
+dayjs.locale("ru");
+
+interface IProps {
   filters: TaskFilters;
   onFilterChange: (patch: Partial<TaskFilters>) => void;
   stats: TaskStatsFull | null;
@@ -34,8 +39,9 @@ const STATUS_TABS: { value: TaskStatus | ""; label: string; statKey: keyof TaskS
   { value: "overdue", label: "Просрочено", statKey: "overdue" },
 ];
 
-const selectClass =
-  "px-3 py-2 bg-white/60 dark:bg-slate-800/60 border border-white/30 dark:border-white/10 rounded-xl outline-none text-xs font-bold text-slate-600 dark:text-slate-300 focus:ring-2 focus:ring-emerald-500/20 transition-all cursor-pointer";
+const antdTheme = {
+  token: { borderRadius: 12, controlHeight: 38, fontSize: 12, colorPrimary: "#10b981" },
+};
 
 export const TasksFilterBar = ({
   filters,
@@ -46,7 +52,7 @@ export const TasksFilterBar = ({
   onDisplayModeChange,
   onCreate,
   count,
-}: TasksFilterBarProps) => {
+}: IProps) => {
   const [searchLocal, setSearchLocal] = React.useState(filters.search);
 
   React.useEffect(() => {
@@ -63,10 +69,8 @@ export const TasksFilterBar = ({
     <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border border-white/30 dark:border-white/10 rounded-3xl shadow-sm p-6 flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">
-            Реестр задач
-          </h1>
-          <span className="px-2.5 py-1 bg-slate-800 dark:bg-slate-700 text-white text-[10px] font-bold rounded-lg">
+          <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">Реестр задач</h1>
+          <span className="w-7 h-6 flex items-center justify-center bg-slate-800 dark:bg-slate-700 text-white text-[11px] font-bold rounded-lg shrink-0">
             {count}
           </span>
         </div>
@@ -81,11 +85,6 @@ export const TasksFilterBar = ({
               onChange={(e) => setSearchLocal(e.target.value)}
               className="w-full pl-12 pr-9 py-3 bg-white/60 dark:bg-slate-800/60 border border-white/30 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/40 transition-all text-sm font-medium text-slate-700 dark:text-slate-100 placeholder:text-slate-400"
             />
-            <If is={!!searchLocal}>
-              <button onClick={() => setSearchLocal("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                <X size={15} />
-              </button>
-            </If>
           </div>
 
           <div className="flex items-center gap-1 p-1 bg-slate-200/50 dark:bg-slate-800/60 rounded-2xl">
@@ -93,15 +92,13 @@ export const TasksFilterBar = ({
               onClick={() => onDisplayModeChange("table")}
               className={cn("flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer", displayMode === "table" ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200")}
             >
-              <ListIcon size={15} />
-              Список
+              <ListIcon size={15} /> Список
             </button>
             <button
               onClick={() => onDisplayModeChange("board")}
               className={cn("flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer", displayMode === "board" ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200")}
             >
-              <LayoutGrid size={15} />
-              Доска
+              <LayoutGrid size={15} /> Доска
             </button>
           </div>
 
@@ -109,8 +106,7 @@ export const TasksFilterBar = ({
             onClick={onCreate}
             className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 hover:brightness-110 rounded-2xl text-sm font-bold text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900/40 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
           >
-            <Plus size={18} />
-            Создать
+            <Plus size={18} /> Создать
           </button>
         </div>
       </div>
@@ -124,12 +120,7 @@ export const TasksFilterBar = ({
               <button
                 key={tab.value || "all"}
                 onClick={() => onFilterChange({ status: tab.value })}
-                className={cn(
-                  "relative flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer",
-                  activeTab
-                    ? "text-white"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-white/50 dark:hover:bg-white/5",
-                )}
+                className={cn("relative flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer", activeTab ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-white/50 dark:hover:bg-white/5")}
               >
                 <If is={activeTab}>
                   <motion.div
@@ -140,7 +131,7 @@ export const TasksFilterBar = ({
                 </If>
                 <span className="relative z-10">{tab.label}</span>
                 <If is={cnt != null}>
-                  <span className={cn("relative z-10 text-[10px] px-1.5 py-0.5 rounded-md", activeTab ? "bg-white/20 text-white" : "bg-slate-300/40 dark:bg-white/10")}>
+                  <span className={cn("relative z-10 text-[10px] font-bold w-6 h-5 flex items-center justify-center rounded-md shrink-0", activeTab ? "bg-white/20 text-white" : "bg-slate-300/40 dark:bg-white/10")}>
                     {cnt}
                   </span>
                 </If>
@@ -150,48 +141,55 @@ export const TasksFilterBar = ({
         </nav>
       </LayoutGroup>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-          <Filter size={14} />
-          Фильтры
-        </div>
+      <ConfigProvider theme={antdTheme}>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+            <Filter size={14} /> Фильтры
+          </div>
 
-        <select value={filters.priority} onChange={(e) => onFilterChange({ priority: e.target.value as Priority | "" })} className={selectClass}>
-          <option value="">Все приоритеты</option>
-          {PRIORITY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
-
-        <select value={filters.assigneeId} onChange={(e) => onFilterChange({ assigneeId: e.target.value })} className={selectClass}>
-          <option value="">Все исполнители</option>
-          {colleagues.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
-
-        <button onClick={() => onFilterChange({ mine: !filters.mine })} className={cn("flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer", filters.mine ? "bg-emerald-600 border-emerald-600 text-white" : "bg-white/60 dark:bg-slate-800/60 border-white/30 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:border-emerald-300")}>
-          <UserCheck size={14} /> Только мои
-        </button>
-
-        <div className="flex items-center gap-2">
-          <input type="date" value={filters.date} onChange={(e) => onFilterChange({ date: e.target.value })} className={selectClass} />
-          <If is={Boolean(filters.date)}>
-            <select value={filters.dateType} onChange={(e) => onFilterChange({ dateType: e.target.value as TaskDateType })} className={selectClass}>
-              {DATE_TYPE_OPTIONS.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
-            </select>
-            <button onClick={() => onFilterChange({ date: "" })} className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors" title="Сбросить дату">
-              <X size={15} />
-            </button>
-          </If>
-        </div>
-
-        <div className="ml-auto flex items-center gap-2">
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hidden lg:inline">Сортировка</span>
-          <select value={filters.sort} onChange={(e) => onFilterChange({ sort: e.target.value as TaskSortField })} className={selectClass}>
-            {SORT_FIELD_OPTIONS.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
-          </select>
-          <button onClick={() => onFilterChange({ dir: filters.dir === "asc" ? "desc" : "asc" })} disabled={filters.sort === "manual"} className="flex items-center gap-1 px-3 py-2 rounded-xl border border-white/30 dark:border-white/10 bg-white/60 dark:bg-slate-800/60 text-xs font-bold text-slate-600 dark:text-slate-300 hover:border-emerald-300 transition-all disabled:opacity-40 cursor-pointer" title={filters.dir === "asc" ? "По возрастанию" : "По убыванию"}>
-            {filters.dir === "asc" ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
+          <Select
+            value={filters.priority || undefined}
+            placeholder="Все приоритеты"
+            onChange={(val) => onFilterChange({ priority: (val || "") as Priority })}
+            allowClear
+            options={PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+            className="min-w-[150px]"
+          />
+          <Select
+            value={filters.assigneeId ? String(filters.assigneeId) : undefined}
+            placeholder="Все исполнители"
+            onChange={(val) => onFilterChange({ assigneeId: val || "" })}
+            allowClear
+            showSearch
+            filterOption={(input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())}
+            options={colleagues.map((c) => ({ value: String(c.id), label: c.name }))}
+            className="min-w-[170px]"
+          />
+          <button onClick={() => onFilterChange({ mine: !filters.mine })} className={cn("flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer h-[38px]", filters.mine ? "bg-emerald-600 border-emerald-600 text-white" : "bg-white/60 dark:bg-slate-800/60 border-white/30 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:border-emerald-300")}>
+            <UserCheck size={14} /> Только мои
           </button>
+          <div className="flex items-center gap-2">
+            <DatePicker
+              value={filters.date ? dayjs(filters.date) : null}
+              onChange={(d) => onFilterChange({ date: d ? d.format("YYYY-MM-DD") : "" })}
+              format="DD.MM.YYYY"
+              placeholder="дд.мм.гггг"
+              allowClear
+              className="w-[140px]"
+            />
+            <If is={Boolean(filters.date)}>
+              <Select value={filters.dateType} onChange={(val) => onFilterChange({ dateType: val as TaskDateType })} options={DATE_TYPE_OPTIONS.map((o) => ({ value: o.id, label: o.label }))} className="w-[130px]" />
+            </If>
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hidden lg:inline">Сортировка</span>
+            <Select value={filters.sort} onChange={(val) => onFilterChange({ sort: val as TaskSortField })} options={SORT_FIELD_OPTIONS.map((o) => ({ value: o.id, label: o.label }))} className="w-[160px]" />
+            <button onClick={() => onFilterChange({ dir: filters.dir === "asc" ? "desc" : "asc" })} disabled={filters.sort === "manual"} className="flex items-center gap-1 px-3 h-[38px] rounded-xl border border-white/30 dark:border-white/10 bg-white/60 dark:bg-slate-800/60 text-xs font-bold text-slate-600 dark:text-slate-300 hover:border-emerald-300 transition-all disabled:opacity-40 cursor-pointer" title={filters.dir === "asc" ? "По возрастанию" : "По убыванию"}>
+              {filters.dir === "asc" ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
+            </button>
+          </div>
         </div>
-      </div>
+      </ConfigProvider>
     </div>
   );
 };
