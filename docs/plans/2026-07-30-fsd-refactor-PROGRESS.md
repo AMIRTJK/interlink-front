@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 9 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
-- **Последнее обновление:** 2026-07-30 — закрыт `Login.tsx`; модули 0 (Профиль) и 1 (Авторизация) пройдены целиком, чекпоинт на модуле 2 (`app/routes/AppRouter.tsx`).
+- **Прогресс:** 10 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
+- **Последнее обновление:** 2026-07-30 — закрыт `app/routes/AppRouter.tsx`; чекпоинт на `widgets/layout/ui/ModuleMenu/ModuleMenu.tsx`.
 
 ---
 
@@ -81,11 +81,12 @@
 
 - [x] `M` 482 → `features/Login/Login.tsx` → **190**
 
-⏹ **ЧЕКПОИНТ**
-
 ### Модуль 2 — Общий каркас (layout, роутинг, shared)
 
-- [ ] `M` 499 → `app/routes/AppRouter.tsx` — заодно удалить закомментированную разводку реестров
+- [x] `M` 499 → `app/routes/AppRouter.tsx` → **249** — заодно удалена закомментированная разводка реестров
+
+⏹ **ЧЕКПОИНТ**
+
 - [ ] `M` 476 → `widgets/layout/ui/ModuleMenu/ModuleMenu.tsx`
 - [ ] `M` 432 → `widgets/layout/ui/Header.tsx`
 - [ ] `S` 371 → `shared/ui/UniversalTable/ui.tsx`
@@ -220,6 +221,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-30 | `app/routes/AppRouter.tsx` | 2 файла: `routesModel.ts` (константы параметров `incomingParams`, `outgoingParams` и др.), `lazyPages.ts` (вынос lazy-импортов всех страниц и layout). Полностью удалены закомментированные фрагменты роутинга и закомментированная разводка реестров | 499 → **249** (макс. новый — 186) | на ревью |
 | 2026-07-30 | `features/Login/Login.tsx` | 7 файлов: `loginModel.ts` (`TAuthStep`, `OTP_LENGTH`, `PHONE_LENGTHS`, тема antd `LOGIN_ANTD_THEME`), `loginLib.ts` (`normalizePhoneNumber`, `createEmptyOtp`), `PhoneField.tsx` (префикс + номер, опции стран), `PasswordField.tsx` (пароль с глазом), `LoginOptionsRow.tsx` («Запомнить меня» / «Забыли пароль?»), `LoginAltActions.tsx` (разделитель, соц-кнопки, «Регистрация»), `LoginStep.tsx` (форма входа целиком), `VerificationStep.tsx` (экран 2FA с 6 полями). Состояние, мутации и обработчики остались в `Login.tsx` (хуки не выносились) | 482 → **190** (макс. новый — 86) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/files/ShareFileModal.tsx` | 3 файла: `shareFileModalLib.ts` (тип `IShareData`, `getShareName`), `useSharesQuery.ts` (запрос списка выданных доступов + нормализация ответа `data` / `data.data`), `ShareActiveList.tsx` (левый блок «Уже имеют доступ» вместе со своим `shareSearch`, фильтрацией и кнопкой «Закрыть доступ») | 253 → **148** (макс. новый — 82) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/files/FilesHeader.tsx` | 4 файла: `filesHeaderModel.ts` (`SORT_OPTIONS`, `SORT_LABELS`), `FilesHeaderTabs.tsx` (вкладки «Мои файлы / Доступные мне / Аналитика» со счётчиками и подчёркиванием), `FilesHeaderSearch.tsx` (поиск вместе с локальным `localSearch` и синхронизацией с пропом), `FilesHeaderSort.tsx` (дропдаун сортировки со своим `sortOpen`/click-outside + кнопка направления). Локальные union-типы пропсов заменены на существующие `TFilesSort`/`TFilesSortDir`/`TFilesViewMode`/`TFilesViewContext` из `filesTabModel.ts` (те же литералы). Вложенный тернарник подписи сортировки заменён на `SORT_LABELS` | 269 → **140** (макс. новый — 81) | на ревью |
@@ -236,7 +238,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Находка |
 |---|---|---|
-| 2026-07-30 | `app/routes/AppRouter.tsx` | Закомментированная разводка `RegistryTable` / `NewRegistry` — удалить вместе с решением по модулю 6 |
+| 2026-07-30 | `app/routes/AppRouter.tsx` | ~~Закомментированная разводка `RegistryTable` / `NewRegistry`~~ — удалена при декомпозиции `AppRouter.tsx` |
 | 2026-07-30 | `shared/lib/utils.ts` | `formatDatesInObject` — заглушка, возвращает объект без изменений |
 | 2026-07-30 | `shared/lib/utils.ts` | `cn()` не разрешает конфликты Tailwind-классов, хотя `tailwind-merge` в зависимостях |
 | 2026-07-30 | `pages/modules/correspondence/` | `InternalСorrespondencePage.tsx` — кириллическая `С` в имени файла |
