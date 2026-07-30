@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { X, Share2, Trash2, Search } from "lucide-react";
-import { IApiFile, IApiFolder, IFileUser, getUserPosition } from "./lib";
-import { If, Tooltip } from "@shared/ui";
+import { X, Share2 } from "lucide-react";
+import { IApiFile, IApiFolder } from "./lib";
 import { UserAccessList } from "./UserAccessList";
-import { useGetQuery } from "@shared/lib";
-import { ApiRoutes } from "@shared/api";
 import { toast } from "@shared/lib/toast";
+import { ShareActiveList } from "./ShareActiveList";
+import { useSharesQuery } from "./useSharesQuery";
 
 interface IProps {
 	item: IApiFile | IApiFolder | null;
@@ -13,14 +12,6 @@ interface IProps {
 	onClose: () => void;
 	onInvite: (userId: number) => Promise<void>;
 	onRemoveShare: (shareId: number) => Promise<void>;
-}
-
-interface IShareData {
-	id: number;
-	shared_with_user_id?: number;
-	user_id?: number;
-	shared_with?: IFileUser;
-	user?: IFileUser;
 }
 
 export const ShareFileModal = ({
@@ -31,53 +22,15 @@ export const ShareFileModal = ({
 	onRemoveShare,
 }: IProps) => {
 	const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
-	const [shareSearch, setShareSearch] = useState("");
 
-	const sharesQuery = useGetQuery<
-		any,
-		{ success: boolean; data: IShareData[] | { data: IShareData[] } }
-	>({
-		url:
-			item && type === "file"
-				? ApiRoutes.MY_FILES_SHARES.replace(":id", String(item.id))
-				: item && type === "folder"
-					? ApiRoutes.MY_FILE_FOLDERS_SHARES.replace(":id", String(item.id))
-					: "",
-		useToken: true,
-		options: {
-			enabled: !!item,
-			staleTime: 60 * 1000,
-			refetchOnWindowFocus: false,
-		},
-	});
+	const { activeShares, refetchShares } = useSharesQuery(item, type);
 
 	if (!item) return null;
-
-	let activeShares: IShareData[] = [];
-	if (sharesQuery.data?.data) {
-		if (Array.isArray(sharesQuery.data.data)) {
-			activeShares = sharesQuery.data.data;
-		} else if (Array.isArray((sharesQuery.data.data as any).data)) {
-			activeShares = (sharesQuery.data.data as any).data;
-		}
-	}
 
 	const itemName =
 		type === "file"
 			? (item as IApiFile).original_name
 			: (item as IApiFolder).name;
-
-	const getShareName = (share: IShareData): string => {
-		const targetUser = share.shared_with || share.user;
-		return targetUser
-			? targetUser.full_name ||
-					`${targetUser.first_name || ""} ${targetUser.last_name || ""}`.trim()
-			: `Пользователь #${share.shared_with_user_id || share.user_id}`;
-	};
-
-	const filteredShares = activeShares.filter((share) =>
-		getShareName(share).toLowerCase().includes(shareSearch.trim().toLowerCase()),
-	);
 
 	const handleGrantAccess = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -97,12 +50,12 @@ export const ShareFileModal = ({
 		}
 
 		setSelectedUsers([]);
-		sharesQuery.refetch();
+		refetchShares();
 	};
 
 	const handleRemove = async (shareId: number) => {
 		await onRemoveShare(shareId);
-		sharesQuery.refetch();
+		refetchShares();
 	};
 
 	return (
@@ -139,67 +92,10 @@ export const ShareFileModal = ({
 				<div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-slate-800 overflow-hidden flex-1 min-h-[300px] md:min-h-[500px]">
 					{/* Слева — доступ и права */}
 					<div className="flex-1 p-6 space-y-5 overflow-y-auto">
-						<If is={activeShares.length > 0}>
-							<div className="space-y-2">
-								<span className="text-xs font-bold text-slate-400 dark:text-zinc-500 tracking-widest uppercase">
-									УЖЕ ИМЕЮТ ДОСТУП ({activeShares.length})
-								</span>
-
-								<If is={activeShares.length > 5}>
-									<div className="relative">
-										<Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-										<input
-											type="text"
-											placeholder="Поиск среди тех, у кого есть доступ..."
-											value={shareSearch}
-											onChange={(e) => setShareSearch(e.target.value)}
-											className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
-										/>
-									</div>
-								</If>
-
-								<div className="bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800 max-h-[420px]! overflow-y-auto">
-									<If is={filteredShares.length === 0}>
-										<div className="p-4 text-center text-xs text-slate-400 dark:text-zinc-500">
-											Ничего не найдено
-										</div>
-									</If>
-									{filteredShares.map((share) => {
-										const uName = getShareName(share);
-										const uPosition = getUserPosition(share.shared_with || share.user);
-										return (
-											<div
-												key={share.id}
-												className="flex items-center justify-between p-3"
-											>
-												<div className="flex items-center gap-3 min-w-0">
-													<div className="w-8 h-8 rounded-full bg-indigo-500! flex items-center justify-center text-white! text-xs font-bold shrink-0">
-														{uName[0]?.toUpperCase() || "?"}
-													</div>
-													<div className="min-w-0">
-														<div className="text-xs font-bold text-slate-700 dark:text-zinc-300 truncate">
-															{uName}
-														</div>
-														<div className="text-[10px] text-slate-400 dark:text-zinc-500 truncate">
-															{uPosition}
-														</div>
-													</div>
-												</div>
-												<Tooltip title="Закрыть доступ">
-													<button
-														type="button"
-														onClick={() => handleRemove(share.id)}
-														className="p-1.5 text-slate-400 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer shrink-0"
-													>
-														<Trash2 size={14} />
-													</button>
-												</Tooltip>
-											</div>
-										);
-									})}
-								</div>
-							</div>
-						</If>
+						<ShareActiveList
+							activeShares={activeShares}
+							onRemove={handleRemove}
+						/>
 
 						<div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-zinc-400">
 							<span className="font-bold text-slate-700 dark:text-zinc-300 block mb-1">
@@ -250,4 +146,3 @@ export const ShareFileModal = ({
 		</div>
 	);
 };
-

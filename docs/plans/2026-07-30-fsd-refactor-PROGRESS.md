@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 5 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
-- **Последнее обновление:** 2026-07-30 — закрыт `FilesUserShares.tsx`, чекпоинт на `FileCard.tsx`.
+- **Прогресс:** 8 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
+- **Последнее обновление:** 2026-07-30 — закрыт `ShareFileModal.tsx`; модуль 0 (Профиль) пройден целиком, чекпоинт на модуле 1 (`features/Login/Login.tsx`).
 
 ---
 
@@ -71,11 +71,13 @@
 
 - [x] `S` 305 → `features/Profile/ui/tabs/files/FilesUserShares.tsx` → **41**
 
-⏹ **ЧЕКПОИНТ**
+- [x] `S` 272 → `features/Profile/ui/tabs/files/FileCard.tsx` → **100**
 
-- [ ] `S` 272 → `features/Profile/ui/tabs/files/FileCard.tsx`
-- [ ] `S` 269 → `features/Profile/ui/tabs/files/FilesHeader.tsx`
-- [ ] `S` 253 → `features/Profile/ui/tabs/files/ShareFileModal.tsx`
+- [x] `S` 269 → `features/Profile/ui/tabs/files/FilesHeader.tsx` → **140**
+
+- [x] `S` 253 → `features/Profile/ui/tabs/files/ShareFileModal.tsx` → **148**
+
+⏹ **ЧЕКПОИНТ**
 
 ### Модуль 1 — Авторизация (тренировочный, изолированный)
 
@@ -218,6 +220,9 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-30 | `features/Profile/ui/tabs/files/ShareFileModal.tsx` | 3 файла: `shareFileModalLib.ts` (тип `IShareData`, `getShareName`), `useSharesQuery.ts` (запрос списка выданных доступов + нормализация ответа `data` / `data.data`), `ShareActiveList.tsx` (левый блок «Уже имеют доступ» вместе со своим `shareSearch`, фильтрацией и кнопкой «Закрыть доступ») | 253 → **148** (макс. новый — 82) | на ревью |
+| 2026-07-30 | `features/Profile/ui/tabs/files/FilesHeader.tsx` | 4 файла: `filesHeaderModel.ts` (`SORT_OPTIONS`, `SORT_LABELS`), `FilesHeaderTabs.tsx` (вкладки «Мои файлы / Доступные мне / Аналитика» со счётчиками и подчёркиванием), `FilesHeaderSearch.tsx` (поиск вместе с локальным `localSearch` и синхронизацией с пропом), `FilesHeaderSort.tsx` (дропдаун сортировки со своим `sortOpen`/click-outside + кнопка направления). Локальные union-типы пропсов заменены на существующие `TFilesSort`/`TFilesSortDir`/`TFilesViewMode`/`TFilesViewContext` из `filesTabModel.ts` (те же литералы). Вложенный тернарник подписи сортировки заменён на `SORT_LABELS` | 269 → **140** (макс. новый — 81) | на ревью |
+| 2026-07-30 | `features/Profile/ui/tabs/files/FileCard.tsx` | 2 файла: `FileCardCover.tsx` (обложка карточки целиком — `COVER_STYLES`, `getCoverContent`, оверлеи: чекбокс выделения, кнопка закрепления, ручка перетаскивания), `FileCardActions.tsx` (ряд иконочных кнопок: просмотр, скачать, переместить, поделиться, удалить). Локальный `formatDate` был байт-в-байт равен `formatFileDate` из `fileListLib.ts` — удалён, карточка использует общий хелпер | 272 → **100** (макс. новый — 125) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/files/FilesUserShares.tsx` | 4 файла: `filesSharesLib.ts` (цвета, стиль тултипа, типы, `buildSharedWithMeData`, `buildSharedFoldersData`), `FilesSharesEmptyBar.tsx`, `SharedWithMeCard.tsx` (левая карточка с диаграммой/списком и пагинацией), `MySharesCard.tsx` (правая карточка) | 305 → **41** (макс. новый — 174) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/ProfileInfoTab.tsx` | новая подпапка `profileInfo/` (по образцу `files/`): `profileInfoLib.ts` (`resolvePhotoUrl`, `orDash`, `formatDate`, константы), `ProfileInfoCards.tsx` (`InfoRow`, `Card`), `useProfileAvatarUpload.ts` (загрузка фото + сброс ошибки аватара), `ProfileAvatarCard.tsx` (левая карточка со своим состоянием) | 307 → **130** (макс. новый — 85) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/files/useFilesData.ts` | 3 файла: `filesDataModel.ts` (типы + `COUNT_FETCH_SIZE`), `filesDataLib.ts` (`buildFolderFileCounts`, `getArrayData`, `sortByManualOrder`, `getFolderIcon`, `buildCategoriesList`), `useFilesQueries.ts` (мемо-параметры + 7 `useGetQuery`) | 313 → **214** (макс. новый — 104) | на ревью |
@@ -255,6 +260,22 @@ XL не влезает в одну сессию. Работаем **срезам
 | 2026-07-30 | `tabs/ProfileInfoTab.tsx` | Тема читается напрямую из `localStorage.getItem("currentTheme")` внутри компонента, ключ — строка без константы (§7) |
 | 2026-07-30 | `tabs/ProfileInfoTab.tsx` | Поля `birth_date`/`birthday`, `address`, `work_email`, `work_phone` читаются через `(userData as any)` — тип `IUser` из `entities/login` не покрывает реальный ответ `auth/me` |
 | 2026-07-30 | `tabs/ProfileInfoTab.tsx` | В блоке «Биография» строка `"Не указано"` захардкожена, хотя рядом используется константа `NOT_SET` с тем же значением |
+| 2026-07-30 | `files/useSharesQuery.ts` | При `item === null` в `useGetQuery` уходит пустой `url` (запрос выключен через `enabled`), но ключ кэша всё равно строится по пустой строке. Работает, но выглядит как обход отсутствия ленивого запроса |
+| 2026-07-30 | `files/useSharesQuery.ts` | Ответ приходит в двух формах — массив или `{ data: [...] }`, нормализация с `as any`. Бэкенд отдаёт разный контракт для файлов и папок |
+| 2026-07-30 | `files/ShareFileModal.tsx` | `handleGrantAccess` показывает свой `toast.success` — при переводе `onInvite` на `useMutationQuery` получится дубль тоста (§9) |
+| 2026-07-30 | `files/ShareFileModal.tsx` | В сообщении «Доступ успешно предоставлен (N пользователей)» склонение только для `1`; при 2–4 будет «2 пользователей» |
+| 2026-07-30 | `files/ShareFileModal.tsx` | Ошибка `onInvite` перехватывается общим `catch` на `Promise.all`: при частичном отказе часть приглашений уже ушла, но пользователь видит только «Не удалось предоставить доступ» |
+| 2026-07-30 | `files/ShareActiveList.tsx` | Поле поиска появляется только при более чем 5 записях, но введённый текст не сбрасывается, если список сократился — фильтр продолжает действовать невидимо |
+| 2026-07-30 | `files/FilesHeader.tsx` | Union-типы `"date" \| "size" \| "name" \| "manual"` и др. были продублированы прямо в пропсах, хотя те же типы уже объявлены в `filesTabModel.ts`. При переносе заменены на общие — литералы совпадают |
+| 2026-07-30 | `files/FilesHeader.tsx` | `THEMES` и `useDesignSettings` импортируются из `@widgets/layout/ui/...` — импорт из `features` в `widgets`, да ещё глубокий (§3). Та же проблема, что в `ProfileInfoTab.tsx` |
+| 2026-07-30 | `files/FilesHeaderSort.tsx` | Кнопка направления сортировки использует нативный атрибут `title` вместо `Tooltip` (§11) |
+| 2026-07-30 | `files/FilesHeaderSearch.tsx` | Поиск применяется только по Enter или клику по лупе, при этом иконка «крестик» сбрасывает поиск сразу. Поведение непоследовательное, но перенесено как есть |
+| 2026-07-30 | `files/FilesHeaderTabs.tsx` | Вкладка «Аналитика» — единственная без счётчика; `count` там просто `undefined`, счётчик скрыт через `If`. Возможно, забытый показатель |
+| 2026-07-30 | `files/FileCard.tsx` | Локальный `formatDate` полностью дублировал `formatFileDate` из `fileListLib.ts` (та же дата, та же локаль). При переносе заменён на общий хелпер — вывод идентичен |
+| 2026-07-30 | `files/FileCardCover.tsx` | `getCoverContent` определяет тип класса эвристикой `config.bg.includes(" ")`: пробел в строке = градиент, иначе обычный класс. Хрупко — добавление второго слова в `excel-grid-bg` молча сломает фон таблиц |
+| 2026-07-30 | `files/FileCardCover.tsx` | `COVER_STYLES` типизирован `React.ComponentType<any>` — `any` в существующем коде, перенесён как есть |
+| 2026-07-30 | `files/FileCardCover.tsx` | Чекбокс выделения — `<div>` с `onClick`, без `role`/`tabIndex`/клавиатуры, хотя в классах есть `focus:` состояния, которые никогда не сработают (§11) |
+| 2026-07-30 | `files/FileCardActions.tsx` | Иконочные кнопки действий без `aria-label` (только `Tooltip`) — та же проблема, что и в `FileListRow.tsx`, §11 |
 | 2026-07-30 | `files/useFilesData.ts` | Хук возвращает 24 поля, потребитель использует ~17: `refetchFiles`, `isLoadingFolders`, `refetchFolders`, `isLoadingMeta`, `refetchMeta`, `refetchSharedFiles`, `isLoadingSharedFolders`, `refetchSharedFolders` нигде не читаются |
 
 ---
