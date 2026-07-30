@@ -26,8 +26,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 0 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
-- **Последнее обновление:** 2026-07-30 — трекер переведён на пофайловые шаги.
+- **Прогресс:** 1 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
+- **Последнее обновление:** 2026-07-30 — закрыт `FilesTab.tsx`, чекпоинт на `FileList.tsx`.
 
 ---
 
@@ -39,9 +39,10 @@
 
 ### Модуль 0 — Профиль (хвост; FSD уже сделан)
 
-⏹ **ЧЕКПОИНТ — старт здесь**
+- [x] `S` 522 → `features/Profile/ui/tabs/FilesTab.tsx` → **231**
 
-- [ ] `S` 522 → `features/Profile/ui/tabs/FilesTab.tsx`
+⏹ **ЧЕКПОИНТ**
+
 - [ ] `S` 395 → `features/Profile/ui/tabs/files/FileList.tsx`
 - [ ] `S` 313 → `features/Profile/ui/tabs/files/useFilesData.ts`
 - [ ] `S` 307 → `features/Profile/ui/tabs/ProfileInfoTab.tsx`
@@ -191,7 +192,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Коммит |
 |---|---|---|---|---|
-| — | — | — | — | — |
+| 2026-07-30 | `features/Profile/ui/tabs/FilesTab.tsx` | 9 файлов в `files/`: `filesTabModel.ts` (типы), `lazyModals.ts` (7 lazy-объявлений), `confirmations.ts` (3 обёртки `Modal.confirm`), `FilesDropzone.tsx` (+ собственные `isDragOver`/`fileInputRef`), `FilesStates.tsx`, `BulkActionsBar.tsx`, `useFilesSelection.ts`, `useFilesTabActions.ts` (состояние модалок + 10 обработчиков), `FilesModals.tsx` | 522 → **231** (макс. новый — 198) | `refactor(profile): декомпозиция FilesTab` |
 
 ---
 
@@ -204,6 +205,11 @@ XL не влезает в одну сессию. Работаем **срезам
 | 2026-07-30 | `shared/lib/utils.ts` | `cn()` не разрешает конфликты Tailwind-классов, хотя `tailwind-merge` в зависимостях |
 | 2026-07-30 | `pages/modules/correspondence/` | `InternalСorrespondencePage.tsx` — кириллическая `С` в имени файла |
 | 2026-07-30 | `widgets/InternalCorrespondece/` | Опечатка в имени директории (пропущена `n`) |
+| 2026-07-30 | `files/useFilesTabActions.ts` | `handleCreateFolderSubmit` и `handleAddCategorySubmit` — мёртвый код: объявлены, но нигде не вызываются (модалки используют собственные инлайновые `onSubmit`). Перенесены как есть, удалить отдельной задачей |
+| 2026-07-30 | `files/useFilesTabActions.ts` | `handleOpenRenameFolder` принимает `folderName`, но не использует его — ищет папку по `id` |
+| 2026-07-30 | `files/useFilesTabActions.ts` | `handleAddCategorySubmit` содержит `as any` в payload `createFolder.mutate` |
+| 2026-07-30 | `files/BulkActionsBar.tsx` | Классы `bg-slate-250` / `dark:bg-slate-750` — таких оттенков в Tailwind нет, разделитель невидим |
+| 2026-07-30 | `features/Profile/ui/tabs/FilesTab.tsx` | Файл имеет одновременно именованный и `default` экспорт; потребитель (`PersonalCabinet.tsx`) использует именованный — `default` лишний |
 
 ---
 
