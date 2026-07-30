@@ -1,476 +1,84 @@
-import { Menu, Tooltip } from "antd";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Menu } from "antd";
 import { AppRoutes } from "@shared/config/AppRoutes";
-import { getModuleItems, MenuItem } from "./lib";
-import { tokenControl, useGetQuery } from "@shared/lib";
-import { useEffect, useMemo, type ReactNode } from "react";
-import { ApiRoutes } from "@shared/api";
-import { motion, AnimatePresence } from "framer-motion";
 import { IosVariant } from "./IosVariant";
-import { User, Mail, Users, Layout, ShieldCheck, ClipboardList } from "lucide-react";
-import { THEMES } from "../designSettings";
+import { IProps } from "./moduleMenuModel";
+import { ModuleMenuHeader } from "./ModuleMenuHeader";
+import { ModuleSubMenuBar } from "./ModuleSubMenuBar";
+import { ModuleCustomMenu } from "./ModuleCustomMenu";
+import { useModuleMenuState } from "./useModuleMenuState";
 import "./style.css";
 
-interface IProps {
-	variant: "horizontal" | "compact" | "modern" | "full" | "ios" | "header";
-	hideTopLevel?: boolean;
-	/**
-	 * Раскладка навигации для варианта "header":
-	 * - "top"     — горизонтальный ряд, только иконки + tooltip (верхнее меню);
-	 * - "sidebar" — вертикальный список, иконка + подпись (боковое меню);
-	 * - "bottom"  — горизонтальный ряд, иконка над подписью (нижнее меню).
-	 */
-	navLayout?: "top" | "sidebar" | "bottom";
-	/** Свёрнутая боковая панель (navLayout="sidebar"): показывать только иконки. */
-	collapsed?: boolean;
-}
-type TSubMenuItem = {
-	key: string;
-	label: React.ReactNode;
-	children?: MenuItem[];
-	requiredRole?: string[];
-	icon?: React.ReactNode;
-};
-
-const SHARED_ROUTES = ["archive", "pinned", "trashed"];
-const STORAGE_KEY = "correspondence_active_tab";
-
 export const ModuleMenu = ({
-	variant,
-	hideTopLevel,
-	navLayout = "top",
-	collapsed,
+  variant,
+  hideTopLevel,
+  navLayout = "top",
+  collapsed,
 }: IProps) => {
-	const navigate = useNavigate();
-	const { pathname } = useLocation();
+  const {
+    pathname,
+    menuItems,
+    activeKey,
+    subItems,
+    handleNavigate,
+  } = useModuleMenuState(variant);
 
-	const items = useMemo(() => getModuleItems(variant), [variant]);
+  if (variant === "header") {
+    return (
+      <ModuleMenuHeader
+        menuItems={menuItems}
+        pathname={pathname}
+        navLayout={navLayout}
+        collapsed={collapsed}
+        onNavigate={handleNavigate}
+      />
+    );
+  }
 
-	useEffect(() => {
-		try {
-			const saved = sessionStorage.getItem(STORAGE_KEY);
-			if (saved && !String(saved).startsWith("/modules/correspondence")) {
-				sessionStorage.removeItem(STORAGE_KEY);
-			}
-		} catch (e) {
-			console.log(e);
-		}
-	}, []);
+  const hasSubMenu =
+    (variant === "compact" || variant === "modern") &&
+    !!subItems &&
+    activeKey !== AppRoutes.HR;
 
-	const { data, preloadData } = useGetQuery({
-		method: "GET",
-		url: `${ApiRoutes.FETCH_USER_BY_ID}${tokenControl.getUserId()}`,
-		useToken: true,
-		preload: true,
-		options: { refetchOnWindowFocus: false, staleTime: Infinity },
-	});
+  if (hideTopLevel && !hasSubMenu) {
+    return null;
+  }
 
-	const userRolesArray = useMemo(() => {
-		const roles = (
-			data as
-				| { data: { group: string; name: string; permissions: string[] }[] }
-				| undefined
-		)?.data;
-		return Array.isArray(roles) ? roles : [];
-	}, [data]);
+  return (
+    <div className={`menu-container ${variant}-mode`}>
+      {hideTopLevel ? null : variant === "horizontal" || variant === "full" ? (
+        <Menu
+          onClick={(e) => handleNavigate(e.key)}
+          selectedKeys={[activeKey]}
+          mode="horizontal"
+          items={menuItems}
+          theme="light"
+          disabledOverflow
+          className="flex-wrap p-2 border-b-0! full-style"
+        />
+      ) : variant === "ios" ? (
+        <IosVariant
+          items={menuItems}
+          activeKey={activeKey}
+          handleNavigate={handleNavigate}
+          subItems={subItems}
+          pathname={pathname}
+        />
+      ) : (
+        <ModuleCustomMenu
+          variant={variant}
+          menuItems={menuItems}
+          activeKey={activeKey}
+          onNavigate={handleNavigate}
+        />
+      )}
 
-	const userRoleNames = useMemo(() => {
-		const namesFromRoles = userRolesArray.map((item) => item.name);
-		const namesFromPreload =
-			preloadData?.map((item: { name: string }) => item.name) || [];
-		return [...new Set([...namesFromRoles, ...namesFromPreload])];
-	}, [userRolesArray, preloadData]);
-
-	// console.log(userRoleNames);
-
-	const userPosition = useMemo(() => {
-		return (data as { data: { position: string } } | undefined)?.data?.position;
-	}, [data]);
-
-	const hasChildren = (item: MenuItem): item is TSubMenuItem => {
-		return item !== null && typeof item === "object" && "children" in item;
-	};
-
-	const filteredItems = useMemo(() => {
-		const checkAccess = (item: MenuItem): boolean => {
-			if (!item || !("requiredRole" in item)) return true;
-			const menuItem = item as TSubMenuItem;
-			if (!menuItem.requiredRole?.length) return true;
-			if (userPosition === "Super Administrator") return true;
-
-			return menuItem.requiredRole.some(
-				(role) =>
-					userRoleNames.includes(role) ||
-					preloadData?.some((p: { name: string }) => p.name === role),
-			);
-		};
-
-		const filterRecursively = (itemsToFilter: MenuItem[]): MenuItem[] => {
-			return itemsToFilter.reduce((acc, item) => {
-				if (!checkAccess(item)) return acc;
-
-				if (hasChildren(item)) {
-					const { children, ...rest } = item;
-					const filteredChildren = filterRecursively(children || []);
-					// Показываем родителя, даже если детей нет (или можно скрыть, добавив проверку length > 0)
-					acc.push({ ...rest, children: filteredChildren });
-				} else {
-					acc.push(item);
-				}
-				return acc;
-			}, [] as MenuItem[]);
-		};
-
-		return filterRecursively(items);
-	}, [items, userRoleNames, userPosition, preloadData]);
-
-	useEffect(() => {
-		const isSharedRoute = SHARED_ROUTES.some((route) =>
-			pathname.includes(route),
-		);
-		if (isSharedRoute) {
-			sessionStorage.setItem(STORAGE_KEY, pathname);
-		}
-	}, [pathname]);
-
-	const activeItem = useMemo(() => {
-		const isSharedRoute = SHARED_ROUTES.some((route) =>
-			pathname.includes(route),
-		);
-
-		// 1. Если мы на общем роуте (архив и т.д.), пытаемся восстановить контекст родителя
-		if (isSharedRoute) {
-			const lastContextKey = sessionStorage.getItem(STORAGE_KEY);
-			if (lastContextKey) {
-				const parent = filteredItems.find(
-					(item) =>
-						hasChildren(item) &&
-						item.children?.some(
-							(child) => String(child.key) === lastContextKey,
-						),
-				);
-				if (parent) return parent as TSubMenuItem;
-			}
-		}
-
-		return filteredItems.find((item) => {
-			if (!item || !("key" in item)) return false;
-			const itemKey = String(item.key);
-			return pathname === itemKey || pathname.startsWith(itemKey + "/");
-		}) as TSubMenuItem | undefined;
-	}, [pathname, filteredItems]);
-
-	useEffect(() => {
-		const isSharedRoute = SHARED_ROUTES.some((route) =>
-			pathname.includes(route),
-		);
-
-		if (!isSharedRoute && activeItem && hasChildren(activeItem)) {
-			const currentActiveChild = activeItem.children?.find((sub) =>
-				pathname.startsWith(String(sub.key)),
-			);
-
-			if (currentActiveChild) {
-				sessionStorage.setItem(STORAGE_KEY, String(currentActiveChild.key));
-			}
-		}
-	}, [pathname, activeItem]);
-
-	const activeKey =
-		activeItem?.key ||
-		(pathname.includes("modules") ? "" : AppRoutes.PROFILE);
-
-	const subItems = activeItem?.children;
-
-	const handleNavigate = (path: string) => {
-		let targetPath = path;
-
-		if (path === "/modules/correspondence") {
-			const saved = sessionStorage.getItem(STORAGE_KEY);
-			// Use saved path only if it belongs to correspondence module
-			if (saved && String(saved).startsWith("/modules/correspondence")) {
-				targetPath = String(saved);
-			} else {
-				targetPath = AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING;
-			}
-		}
-
-		if (pathname !== targetPath) {
-			navigate(targetPath);
-		}
-	};
-
-	const menuItems = useMemo(() => {
-		if (variant === "compact" || variant === "modern") {
-			return filteredItems.map((item) => {
-				if (item && "children" in item) {
-					const { children: _, ...rest } = item as TSubMenuItem;
-					return rest;
-				}
-				return item;
-			});
-		}
-		return filteredItems;
-	}, [variant, filteredItems]);
-
-	const containerVariants = {
-		hidden: { opacity: 0 },
-		visible: {
-			opacity: 1,
-			transition: {
-				staggerChildren: 0.1,
-				delayChildren: 0.1,
-			},
-		},
-		exit: { opacity: 0 },
-	};
-
-	const itemVariants = {
-		hidden: { y: -10, opacity: 0 },
-		visible: {
-			y: 0,
-			opacity: 1,
-			transition: {
-				staggerChildren: 0.1,
-			},
-		},
-	};
-
-	const contentVariants = {
-		hidden: { y: 5, opacity: 0 },
-		visible: { y: 0, opacity: 1 },
-	};
-
-	if (variant === "header") {
-		const currentTheme =
-			(typeof window !== "undefined" && localStorage.getItem("currentTheme")) ||
-			"emerald";
-		const activeGradient =
-			THEMES[currentTheme]?.gradient || THEMES.emerald.gradient;
-		const headerIcon: Record<string, ReactNode> = {
-			[AppRoutes.PROFILE]: <User size={18} />,
-			[AppRoutes.CORRESPONDENCE]: <Mail size={18} />,
-			[AppRoutes.HR]: <Users size={18} />,
-			[AppRoutes.TASKS]: <ClipboardList size={18} />,
-			[AppRoutes.ADMINISTRATION]: <ShieldCheck size={18} />,
-		};
-		const navClass =
-			navLayout === "sidebar"
-				? "flex flex-col items-stretch w-full gap-1.5"
-				: navLayout === "bottom"
-					? "flex items-center justify-center gap-1 sm:gap-3 overflow-x-auto"
-					: "flex items-center gap-2";
-
-		return (
-			<nav className={navClass}>
-				{menuItems.map((item) => {
-					if (!item || !("key" in item)) return null;
-					const itemKey = String(item.key);
-					const isActive =
-						pathname === itemKey || pathname.startsWith(itemKey + "/");
-					const label = "label" in item ? item.label : "";
-					const labelText = typeof label === "string" ? label : undefined;
-					const icon = headerIcon[itemKey] ?? <Layout size={18} />;
-
-					// Нижнее меню: иконка над подписью
-					if (navLayout === "bottom") {
-						return (
-							<button
-								key={itemKey}
-								onClick={() => handleNavigate(itemKey)}
-								title={labelText}
-								className={`flex flex-col items-center justify-center gap-1.5 px-4 py-2 rounded-2xl min-w-[72px] transition-all ${
-									isActive
-										? `bg-linear-to-br ${activeGradient} text-white shadow-md`
-										: "text-zinc-550 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
-								}`}
-							>
-								<span className="shrink-0">{icon}</span>
-								<span className="text-[11px] font-bold leading-none truncate max-w-[72px]">
-									{label}
-								</span>
-							</button>
-						);
-					}
-
-					// Боковое меню: иконка + подпись (в свёрнутом виде — только иконка)
-					if (navLayout === "sidebar") {
-						return (
-							<button
-								key={itemKey}
-								onClick={() => handleNavigate(itemKey)}
-								title={labelText}
-								className={`relative flex items-center gap-3 rounded-[2.5rem] text-sm font-semibold transition-all ${
-									collapsed ? "justify-center px-0 py-3" : "px-4 py-3"
-								} ${
-									isActive
-										? `bg-linear-to-r ${activeGradient} text-white shadow-md`
-										: "text-zinc-600 dark:text-zinc-400 hover:bg-white/40 dark:hover:bg-zinc-800/40"
-								}`}
-							>
-								<span className="shrink-0">{icon}</span>
-								{!collapsed && (
-									<span className="truncate text-left leading-tight min-w-0">
-										{label}
-									</span>
-								)}
-							</button>
-						);
-					}
-
-					// Верхнее меню: только иконки, название — во всплывающей подсказке
-					return (
-						<Tooltip key={itemKey} title={labelText} placement="bottom">
-							<button
-								onClick={() => handleNavigate(itemKey)}
-								aria-label={labelText}
-								className={`p-2.5 rounded-[2.5rem] transition-all ${
-									isActive
-										? `bg-linear-to-r ${activeGradient} text-white shadow-md`
-										: "text-zinc-600 dark:text-zinc-400 hover:bg-white/30 dark:hover:bg-zinc-800/30"
-								}`}
-							>
-								{icon}
-							</button>
-						</Tooltip>
-					);
-				})}
-			</nav>
-		);
-	}
-
-	const hasSubMenu =
-		(variant === "compact" || variant === "modern") &&
-		!!subItems &&
-		activeKey !== AppRoutes.HR;
-
-	if (hideTopLevel && !hasSubMenu) {
-		return null;
-	}
-
-	return (
-		<div className={`menu-container ${variant}-mode`}>
-			{hideTopLevel ? null : variant === "horizontal" || variant === "full" ? (
-				<Menu
-					onClick={(e) => handleNavigate(e.key)}
-					selectedKeys={[activeKey]}
-					mode="horizontal"
-					items={menuItems}
-					theme="light"
-					disabledOverflow
-					className="flex-wrap p-2 border-b-0! full-style"
-				/>
-			) : variant === "ios" ? (
-				<IosVariant
-					items={menuItems}
-					activeKey={activeKey}
-					handleNavigate={handleNavigate}
-					subItems={subItems}
-					pathname={pathname}
-				/>
-			) : (
-				<div className={`custom-main-menu ${variant}-style`}>
-					{menuItems.map((item) => {
-						if (!item || !("key" in item)) return null;
-						const itemKey = String(item.key);
-						const isActive = activeKey === itemKey;
-
-						return (
-							<div
-								key={itemKey}
-								className={`custom-menu-item ${isActive ? "selected" : ""}`}
-								onClick={() => handleNavigate(itemKey)}
-							>
-								{isActive && (
-									<motion.div
-										layoutId="mainActiveIndicator"
-										className="main-active-indicator"
-										transition={{
-											type: "spring",
-											stiffness: 380,
-											damping: 30,
-										}}
-									/>
-								)}
-								<span className="custom-menu-title">
-									{"label" in item ? item.label : ""}
-								</span>
-							</div>
-						);
-					})}
-				</div>
-			)}
-			<AnimatePresence mode="wait">
-				{(variant === "compact" || variant === "modern") &&
-					subItems &&
-					activeKey !== AppRoutes.HR && (
-						<motion.div
-							key={activeKey}
-							className="sub-menu-bar"
-							variants={containerVariants}
-							initial="hidden"
-							animate="visible"
-							exit="exit"
-						>
-							{subItems?.map((sub) => {
-								if (!sub || !("key" in sub)) return null;
-
-								const subKey = String(sub.key);
-
-								const isDirectMatch =
-									pathname === subKey || pathname.startsWith(subKey + "/");
-
-								const isRestoredMatch = (() => {
-									const isSharedRoute = SHARED_ROUTES.some((route) =>
-										pathname.includes(route),
-									);
-									if (isSharedRoute) {
-										const lastActiveKey = sessionStorage.getItem(STORAGE_KEY);
-										return lastActiveKey === subKey;
-									}
-									return false;
-								})();
-
-								const isActive = isDirectMatch || isRestoredMatch;
-
-								return (
-									<motion.div
-										key={sub.key}
-										className={`sub-menu-item ${isActive ? "active" : ""} `}
-										onClick={() => handleNavigate(sub.key as string)}
-										variants={itemVariants}
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
-										style={{ position: "relative" }}
-									>
-										{isActive && (
-											<motion.div
-												layoutId="activeBorder"
-												className="active-border"
-												transition={{
-													type: "spring",
-													stiffness: 200,
-													damping: 25,
-												}}
-											/>
-										)}
-										{variant === "modern" && "icon" in sub && (
-											<motion.span
-												variants={contentVariants}
-												className="flex items-center"
-											>
-												{sub.icon}
-											</motion.span>
-										)}
-										<motion.span variants={contentVariants}>
-											{"label" in sub ? sub.label : ""}
-										</motion.span>
-									</motion.div>
-								);
-							})}
-						</motion.div>
-					)}
-			</AnimatePresence>
-		</div>
-	);
+      <ModuleSubMenuBar
+        variant={variant}
+        activeKey={activeKey}
+        subItems={subItems}
+        pathname={pathname}
+        onNavigate={handleNavigate}
+      />
+    </div>
+  );
 };

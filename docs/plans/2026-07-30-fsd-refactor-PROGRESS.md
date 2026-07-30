@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 10 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
-- **Последнее обновление:** 2026-07-30 — закрыт `app/routes/AppRouter.tsx`; чекпоинт на `widgets/layout/ui/ModuleMenu/ModuleMenu.tsx`.
+- **Прогресс:** 11 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
+- **Последнее обновление:** 2026-07-30 — закрыт `ModuleMenu.tsx`; чекпоинт на `widgets/layout/ui/Header.tsx`.
 
 ---
 
@@ -85,9 +85,10 @@
 
 - [x] `M` 499 → `app/routes/AppRouter.tsx` → **249** — заодно удалена закомментированная разводка реестров
 
+- [x] `M` 476 → `widgets/layout/ui/ModuleMenu/ModuleMenu.tsx` → **73**
+
 ⏹ **ЧЕКПОИНТ**
 
-- [ ] `M` 476 → `widgets/layout/ui/ModuleMenu/ModuleMenu.tsx`
 - [ ] `M` 432 → `widgets/layout/ui/Header.tsx`
 - [ ] `S` 371 → `shared/ui/UniversalTable/ui.tsx`
 - [ ] `S` 269 → `shared/ui/SmartSearchModal/ui.tsx`
@@ -221,6 +222,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-30 | `widgets/layout/ui/ModuleMenu/ModuleMenu.tsx` | 5 файлов: `moduleMenuModel.ts` (типы, варианты анимирования, константы `SHARED_ROUTES`, `STORAGE_KEY`), `ModuleMenuHeader.tsx` (вариант `header` — top, sidebar, bottom), `ModuleSubMenuBar.tsx` (второстепенные подменю), `ModuleCustomMenu.tsx` (кастомный вид верхнего меню), `useModuleMenuState.ts` (получение ролей, проверка прав доступа, рекурсивная фильтрация `filteredItems`, сохранение и восстановление контекста) | 476 → **73** (макс. новый — 158) | на ревью |
 | 2026-07-30 | `app/routes/AppRouter.tsx` | 2 файла: `routesModel.ts` (константы параметров `incomingParams`, `outgoingParams` и др.), `lazyPages.ts` (вынос lazy-импортов всех страниц и layout). Полностью удалены закомментированные фрагменты роутинга и закомментированная разводка реестров | 499 → **249** (макс. новый — 186) | на ревью |
 | 2026-07-30 | `features/Login/Login.tsx` | 7 файлов: `loginModel.ts` (`TAuthStep`, `OTP_LENGTH`, `PHONE_LENGTHS`, тема antd `LOGIN_ANTD_THEME`), `loginLib.ts` (`normalizePhoneNumber`, `createEmptyOtp`), `PhoneField.tsx` (префикс + номер, опции стран), `PasswordField.tsx` (пароль с глазом), `LoginOptionsRow.tsx` («Запомнить меня» / «Забыли пароль?»), `LoginAltActions.tsx` (разделитель, соц-кнопки, «Регистрация»), `LoginStep.tsx` (форма входа целиком), `VerificationStep.tsx` (экран 2FA с 6 полями). Состояние, мутации и обработчики остались в `Login.tsx` (хуки не выносились) | 482 → **190** (макс. новый — 86) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/files/ShareFileModal.tsx` | 3 файла: `shareFileModalLib.ts` (тип `IShareData`, `getShareName`), `useSharesQuery.ts` (запрос списка выданных доступов + нормализация ответа `data` / `data.data`), `ShareActiveList.tsx` (левый блок «Уже имеют доступ» вместе со своим `shareSearch`, фильтрацией и кнопкой «Закрыть доступ») | 253 → **148** (макс. новый — 82) | на ревью |
@@ -238,6 +240,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Находка |
 |---|---|---|
+| 2026-07-30 | `widgets/layout/ui/ModuleMenu/` | `ModuleMenu/lib.tsx` содержит закомментированные варианты пунктов меню ("Организация", "Основные документы", "Первичные документы", "Заявки", "CRM"); в `useModuleMenuState.ts` перехват ошибки в `useEffect` молча пишет `console.log(e)` |
 | 2026-07-30 | `app/routes/AppRouter.tsx` | ~~Закомментированная разводка `RegistryTable` / `NewRegistry`~~ — удалена при декомпозиции `AppRouter.tsx` |
 | 2026-07-30 | `shared/lib/utils.ts` | `formatDatesInObject` — заглушка, возвращает объект без изменений |
 | 2026-07-30 | `shared/lib/utils.ts` | `cn()` не разрешает конфликты Tailwind-классов, хотя `tailwind-merge` в зависимостях |
