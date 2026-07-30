@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 15 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
-- **Последнее обновление:** 2026-07-30 — закрыт `widgets/Administration/ui/UserProfileModal.tsx`; чекпоинт на `widgets/Administration/ui/RolesView.tsx`.
+- **Прогресс:** 16 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
+- **Последнее обновление:** 2026-07-30 — закрыт `widgets/Administration/ui/RolesView.tsx`; чекпоинт на `widgets/Administration/ui/AddUserModal.tsx`.
 
 ---
 
@@ -97,9 +97,10 @@
 
 - [x] `L` 1421 → `widgets/Administration/ui/UserProfileModal.tsx` → **173**
 
+- [x] `L` 1183 → `widgets/Administration/ui/RolesView.tsx` → **185**
+
 ⏹ **ЧЕКПОИНТ**
 
-- [ ] `L` 1183 → `widgets/Administration/ui/RolesView.tsx`
 - [ ] `L` 1071 → `widgets/Administration/ui/AddUserModal.tsx`
 - [ ] `L` 971 → `widgets/Administration/ui/CreateRoleModal.tsx`
 - [ ] `M` 569 → `widgets/Administration/ui/RoleDrawer.tsx`
@@ -225,6 +226,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-30 | `widgets/Administration/ui/RolesView.tsx` | новая подпапка `rolesView/` (6 файлов): `rolesViewModel.ts` (`PER_PAGE`, `countTotalPerms`), `useRolesViewState.ts` (состояния модалок/сайдбаров, запросы `GET_ROLES`/`FETCH_PERMISSIONS`/`GET_USERS`, расчет `roleUserCounts`, `roleCards`, `usersParams`), `RolesTopBar.tsx` (заголовок, переключатель вида, кнопки создания), `RolesBlockCards.tsx` (плиточный вид карточек ролей), `RolesRegistryTable.tsx` (табличный вид ролей), `RoleUsersTable.tsx` (реестр пользователей, поиск, пагинация, столбцы) | 1183 → **185** (макс. новый — 230) | на ревью |
 | 2026-07-30 | `widgets/Administration/ui/UserProfileModal.tsx` | новая подпапка `userProfileModal/` (8 файлов): `userProfileModalModel.ts` (`ACCESS_LEVEL_ITEMS`, `clonePerms`, `EMPTY_PERMS`), `useUserProfileModalState.ts` (состояния вкладок, ролей, точечных переопределений direct/denied, `useGetQuery` прав пользователя, мутации `setUserRolesM`, `updateDirectM`, `updateDeniedM`, `updateStatusM`), `UserProfileHeader.tsx` (шляпа с аватаром, статусом, ФИО и вкладками), `UserProfileTabProfile.tsx` (вкладка «Профиль»), `UserProfileTabAccess.tsx` (вкладка «Права доступа»), `UserProfileTabSessions.tsx` (вкладка «Сессии»), `UserProfileTabHistory.tsx` (вкладка «История»), `UserProfileFooter.tsx` (кнопки сохранения и меню смены статуса) | 1421 → **173** (макс. новый — 374) | на ревью |
 | 2026-07-30 | `shared/ui/SmartSearchModal/ui.tsx` | 3 файла: `ui/SearchInputBar.tsx` (поле ввода поиска `Input`), `ui/SelectedBadgesBar.tsx` (панель выбраных чипсов/элементов), `useSmartSearchState.ts` (поисковый запрос `useGetQuery`, разбор различных контрактов ответа API, управление выделением `selectedIds`, `selectedItemsMap`, предпросмотром `activePreviewItem`) | 269 → **124** (макс. новый — 143) | на ревью |
 | 2026-07-30 | `shared/ui/UniversalTable/ui.tsx` | 3 файла: `model.ts` (`IProps`, `DEFAULT_PAGE_SIZE`, `NUMERIC_FIELDS`), `customItemRender.tsx` (отрисовка кастомных стрелок и кнопок пагинации «Назад» / «Дальше»), `useUniversalTableState.ts` (сбор параметров `searchParams`/`activeFilters`, `transformFilterValues`, очистка пустых/числовых значений, `useGetQuery`, реакция на `'correspondence-moved'`) | 371 → **99** (макс. новый — 190) | на ревью |
@@ -247,6 +249,10 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Находка |
 |---|---|---|
+| 2026-07-30 | `widgets/Administration/ui/rolesView/` | `useRolesViewState.ts` запускает `Promise.all` с прямой отправкой `_axios.get` на каждую роль внутри `useEffect` вместо React Query; при ошибке молча возвращает count 0 |
+| 2026-07-30 | `widgets/Administration/ui/rolesView/` | `RolesTopBar.tsx`, `RolesBlockCards.tsx` и `RolesRegistryTable.tsx` используют прямую мутацию inline DOM-стилей по событиям `onMouseEnter`/`onMouseLeave` вместо Tailwind hover-классов / React-состояния |
+| 2026-07-30 | `widgets/Administration/ui/rolesView/` | `RoleUsersTable.tsx` содержал кнопку действия в таблице с иконкой `MoreHorizontal` без `aria-label`/`Tooltip` и без обработчика клика (заглушка `e.stopPropagation()`) |
+| 2026-07-30 | `widgets/Administration/ui/rolesView/` | `RoleUsersTable.tsx` поле ввода поиска не имеет дебаунса — каждый введённый символ сразу отправляет новый запрос `GET_USERS` с параметром `search` |
 | 2026-07-30 | `widgets/Administration/ui/UserProfileModal.tsx` | Вкладки «Сессии» и «История» вызывают моки `mockSessions()`, `mockHistory()`, `mockProfileStats()`; `useUserProfileModalState.ts` делает нестрогие касты при получении `effective_permissions`/`direct_permissions`/`denied_permissions` |
 | 2026-07-30 | `shared/ui/SmartSearchModal/` | `useSmartSearchState.ts` разбирает 5 видов вложенности массивов ответа API (`Array.isArray`, `items`, `data`, `data.items`, `data.data`) с кастом `(fetchedData as any)`; сохранён закомментированный код ограничения `// if (!isSelected && prev.selectedIds.length >= 3)` |
 | 2026-07-30 | `shared/ui/UniversalTable/` | `NUMERIC_FIELDS` содержит хардкод названий доменных полей бэкенда (`creator_id`, `assignee_user_id`, `assignee_department_id`) внутри общего инфраструктурного UI-компонента слоя `shared`; в `customItemRender.tsx` проп `disabled` читается через `(originalElement as any).props.disabled` |
