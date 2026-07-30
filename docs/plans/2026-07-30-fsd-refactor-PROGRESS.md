@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 23 / 89 шагов закрыто (Модуль 3 — Администрирование полностью завершён).
-- **Последнее обновление:** 2026-07-30 — завершён Модуль 3 (Администрирование); чекпоинт установлен перед Модулем 4 (HR).
+- **Прогресс:** 27 / 89 шагов закрыто (Модуль 3 — Администрирование и Модуль 5 — Задачи полностью завершены).
+- **Последнее обновление:** 2026-07-30 — завершён Модуль 5 (Задачи); чекпоинт установлен перед Модулем 6 (Реестр корреспонденции).
 
 ---
 
@@ -150,10 +150,15 @@
 
 ### Модуль 5 — Задачи
 
-- [ ] `L` 1276 → `widgets/TaskRegistry/ui/CreateTaskView.tsx`
-- [ ] `S` 396 → `widgets/TaskRegistry/ui/TaskDetailModal.tsx`
-- [ ] `S` 318 → `widgets/TaskRegistry/model/useTasks.ts`
-- [ ] `S` 260 → `widgets/TaskRegistry/model/api.ts`
+- [x] `L` 1276 → `widgets/TaskRegistry/ui/CreateTaskView.tsx` → **200**
+
+- [x] `S` 396 → `widgets/TaskRegistry/ui/TaskDetailModal.tsx` → **95**
+
+- [x] `S` 318 → `widgets/TaskRegistry/model/useTasks.ts` → **170**
+
+- [x] `S` 260 → `widgets/TaskRegistry/model/api.ts` → **261** (SKIP: типы и мапперы)
+
+⏹ **ЧЕКПОИНТ**
 
 ### Модуль 6 — Реестр корреспонденции
 
@@ -236,6 +241,9 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-30 | `widgets/TaskRegistry/model/useTasks.ts` | вынесены хуки `useTaskMutations.ts` (создание, обновление, удаление, статус) и `useTaskAttachments.ts` (загрузка, удаление и скачивание файлов вложений) | 318 → **170** (макс. новый — 65) | на ревью |
+| 2026-07-30 | `widgets/TaskRegistry/ui/TaskDetailModal.tsx` | вынесены `ModalContainer.tsx` (портал модалки), `useTaskDetailModalState.ts` (состояние удаление/загрузка и вызовы API), новая подпапка `taskDetailModal/`: `TaskDetailLeftColumn.tsx` (описание, теги, прогресс, вложения), `TaskDetailRightColumn.tsx` (карточка исполнителя, приоритет, статус, таймер срока), `TaskDetailFooter.tsx` (кнопки удаления, закрытия и редактирования) | 396 → **95** (макс. новый — 140) | на ревью |
+| 2026-07-30 | `widgets/TaskRegistry/ui/CreateTaskView.tsx` | новая подпапка `createTaskView/` (5 файлов): `createTaskViewModel.ts` (`toDateInput`, `toAssigneeIds`), `useCreateTaskState.ts` (стейт персональной задачи, пакета протокола, списков файлов и ЭЦП-подписей), `CreateTaskHeader.tsx` (шапка, кнопка Назад, переключатель Персональная/Протокол), `PersonalTaskForm.tsx` (форма персональной задачи, вложения, исполнители), `ProtocolTaskForm.tsx` (форма протокола, таблица пакетов задач, ЭЦП председателя и секретаря) | 1276 → **200** (макс. новый — 250) | на ревью |
 | 2026-07-30 | `pages/modules/administration/AdministrationHomePage.tsx` | разметка и презентационная логика перенесены в новый виджет `widgets/Administration/ui/AdministrationHomeWidget.tsx` (215 строк). Страница превращена в тонкую точку монтирования (FSD §3) | 276 → **7** | на ревью |
 | 2026-07-30 | `widgets/Administration/lib/adapters.ts` | новая подпапка `adapters/` (4 файла): `translations.ts` (словари перевода модулей, действий и статусов), `formatters.ts` (инициалы, форматирование дат, `unwrapList`, `extractPermNames`), `userAdapters.ts` (`adaptExtUser`, `adaptTableUser`), `permAdapters.ts` (`buildPermModules`, `applyEffectiveState`, `collectEnabledPermNames`, `deriveEcp`, `adaptRoleCard`). В `adapters.ts` оставлен реэкспорт | 341 → **5** (макс. новый — 160) | на ревью |
 | 2026-07-30 | `widgets/Administration/ui/UserDrawer.tsx` | новая подпапка `userDrawer/` (4 файла): `useUserDrawerState.ts` (запрос `GET_USER_PERMISSIONS`, мутации `updateDirectM` и `updateDeniedM`, расчет `applyEffectiveState`), `UserDrawerHeader.tsx` (шапка профиля сотрудника с аватаром и ролями), `UserDrawerPermsList.tsx` (список индивидуальных прав с тумблерами), `UserDrawerFooter.tsx` (кнопка сохранения) | 359 → **65** (макс. новый — 150) | на ревью |
@@ -267,6 +275,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Находка |
 |---|---|---|
+| 2026-07-30 | `widgets/TaskRegistry/ui/createTaskView/` | В `ProtocolTaskForm.tsx` подписанные штампы ЭЦП председателя и секретаря вызывают `signTimestamp()`, генерирующий локальную строку с текущей датой без вызова бэкенд-сервиса подписи |
 | 2026-07-30 | `widgets/Administration/ui/usersView/` | В `useUsersViewState.ts` карточки `statChips` (Активные, Неактивные, Заблокированные) высчитывают количество по маппингу массива текущей страницы `users` (из 7 записей), а не по агрегатам ответа сервера — значения показывают данные только 1-й страницы |
 | 2026-07-30 | `widgets/Administration/ui/roleDrawer/` | `RoleDrawerFooter.tsx` имеет прямые inline DOM-мутации стилей фона при наведении мыши (`onMouseEnter`/`onMouseLeave`) |
 | 2026-07-30 | `widgets/Administration/ui/createRoleModal/` | В `CreateRoleModal.tsx` заголовок «1. Основная информация / 2. Права доступа» статичен и декоративен: переключения по шагам нет, метаданные и права отображаются на одном экране одновременно |
