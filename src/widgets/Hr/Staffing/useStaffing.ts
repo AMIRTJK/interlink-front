@@ -31,7 +31,10 @@ export const useStaffing = () => {
   });
 
   const employees = useMemo<IEmployee[]>(() => {
-    const raw = (usersData?.data?.data || usersData?.data || usersData || []) as any[];
+    const raw = (usersData?.data?.data ||
+      usersData?.data ||
+      usersData ||
+      []) as any[];
     return raw.map((u: any) => ({
       id: u.id,
       firstName: u.first_name || "",
@@ -44,7 +47,9 @@ export const useStaffing = () => {
       phone: u.corporate_phone || u.phone || "",
       salary: u.salary ? Number(u.salary) : 0,
       avatarColor: ORG_COLORS[u.id % ORG_COLORS.length],
-      avatarInitials: `${u.last_name?.[0] || ""}${u.first_name?.[0] || ""}`.toUpperCase() || "??",
+      avatarInitials:
+        `${u.last_name?.[0] || ""}${u.first_name?.[0] || ""}`.toUpperCase() ||
+        "??",
       avatarPhoto: resolvePhotoUrl(u.photo_path),
       rating: u.rating || 0,
     }));
@@ -84,22 +89,35 @@ export const useStaffing = () => {
   const [search, setSearch] = useState("");
   const [addOrgOpen, setAddOrgOpen] = useState(false);
   const [addDeptOrgId, setAddDeptOrgId] = useState<number | null>(null);
-  const [addPositionTarget, setAddPositionTarget] = useState<{ orgId: number; deptId: number } | null>(null);
-  
-  const [assignTarget, setAssignTarget] = useState<IAssignModalTarget | null>(null);
-  
-  const [editOrgTarget, setEditOrgTarget] = useState<ISubOrganization | null>(null);
-  const [editDeptTarget, setEditDeptTarget] = useState<{ orgId: number; dept: IStaffingDepartment } | null>(null);
+  const [addPositionTarget, setAddPositionTarget] = useState<{
+    orgId: number;
+    deptId: number;
+  } | null>(null);
+
+  const [assignTarget, setAssignTarget] = useState<IAssignModalTarget | null>(
+    null,
+  );
+
+  const [editOrgTarget, setEditOrgTarget] = useState<ISubOrganization | null>(
+    null,
+  );
+  const [editDeptTarget, setEditDeptTarget] = useState<{
+    orgId: number;
+    dept: IStaffingDepartment;
+  } | null>(null);
 
   // Totals calculations
   const allTotals = useMemo(() => {
-    let totalPositions = 0,
+    let totalDepts = 0,
+      totalPositions = 0,
       totalSlots = 0,
       totalOccupied = 0,
       totalVacant = 0,
       totalFot = 0;
 
-    organizations.forEach((org) =>
+    organizations.forEach((org) => {
+      totalDepts += org.departments.length; // Подсчитываем количество отделов
+
       org.departments.forEach((dept) =>
         dept.positions.forEach((pos) => {
           totalPositions++;
@@ -107,11 +125,23 @@ export const useStaffing = () => {
           totalOccupied += pos.occupied;
           totalVacant += pos.vacant;
           totalFot += pos.salary * pos.slots;
-        })
-      )
-    );
+        }),
+      );
+    });
 
-    return { totalPositions, totalSlots, totalOccupied, totalVacant, totalFot };
+    // Расчитываем процент укомплектованности (защита от деления на 0)
+    const occupancyPct =
+      totalSlots > 0 ? Math.round((totalOccupied / totalSlots) * 100) : 0;
+
+    return {
+      totalDepts,
+      totalPositions,
+      totalSlots,
+      totalOccupied,
+      totalVacant,
+      totalFot,
+      occupancyPct,
+    };
   }, [organizations]);
 
   const filteredOrgs = useMemo(() => {
@@ -123,11 +153,18 @@ export const useStaffing = () => {
         departments: org.departments
           .map((d) => ({
             ...d,
-            positions: d.positions.filter((p) => p.name.toLowerCase().includes(q)),
+            positions: d.positions.filter((p) =>
+              p.name.toLowerCase().includes(q),
+            ),
           }))
-          .filter((d) => d.name.toLowerCase().includes(q) || d.positions.length > 0),
+          .filter(
+            (d) => d.name.toLowerCase().includes(q) || d.positions.length > 0,
+          ),
       }))
-      .filter((org) => org.name.toLowerCase().includes(q) || org.departments.length > 0);
+      .filter(
+        (org) =>
+          org.name.toLowerCase().includes(q) || org.departments.length > 0,
+      );
   }, [organizations, search]);
 
   const currentAssignedIds = useMemo(() => {
@@ -148,38 +185,51 @@ export const useStaffing = () => {
 
   // Operations
   const handleAddOrg = useCallback(
-    (name: string, shortName: string, type: string, isMain: boolean, curatorName: string, curatorId?: number | null) => {
-      addOrgM.mutate({
-        organization_id: 1, // Default main organization
-        name,
-        short_name: shortName,
-        type,
-        color: ORG_COLORS[organizations.length % ORG_COLORS.length],
-        is_main: isMain,
-        sort_order: organizations.length,
-        curator_user_id: curatorId || undefined,
-      }, {
-        onSuccess: () => setAddOrgOpen(false),
-      });
+    (
+      name: string,
+      shortName: string,
+      type: string,
+      isMain: boolean,
+      curatorName: string,
+      curatorId?: number | null,
+    ) => {
+      addOrgM.mutate(
+        {
+          organization_id: 1, // Default main organization
+          name,
+          short_name: shortName,
+          type,
+          color: ORG_COLORS[organizations.length % ORG_COLORS.length],
+          is_main: isMain,
+          sort_order: organizations.length,
+          curator_user_id: curatorId || undefined,
+        },
+        {
+          onSuccess: () => setAddOrgOpen(false),
+        },
+      );
     },
-    [organizations.length, addOrgM]
+    [organizations.length, addOrgM],
   );
 
   const handleAddPosition = useCallback(
     (orgId: number, deptId: number, pos: Omit<IStaffingPosition, "id">) => {
-      addPositionM.mutate({
-        organization_id: 1,
-        sub_organization_id: orgId,
-        department_id: deptId,
-        name: pos.name,
-        slots: pos.slots,
-        salary: pos.salary,
-        sort_order: 0,
-      }, {
-        onSuccess: () => setAddPositionTarget(null),
-      });
+      addPositionM.mutate(
+        {
+          organization_id: 1,
+          sub_organization_id: orgId,
+          department_id: deptId,
+          name: pos.name,
+          slots: pos.slots,
+          salary: pos.salary,
+          sort_order: 0,
+        },
+        {
+          onSuccess: () => setAddPositionTarget(null),
+        },
+      );
     },
-    [addPositionM]
+    [addPositionM],
   );
 
   const handleAssignEmployee = useCallback(
@@ -190,7 +240,7 @@ export const useStaffing = () => {
         user_ids: newUserIds,
       });
     },
-    [currentAssignedIds, assignEmployeesM]
+    [currentAssignedIds, assignEmployeesM],
   );
 
   const handleUnassignEmployee = useCallback(
@@ -201,7 +251,7 @@ export const useStaffing = () => {
         user_ids: newUserIds,
       });
     },
-    [currentAssignedIds, assignEmployeesM]
+    [currentAssignedIds, assignEmployeesM],
   );
 
   return {
@@ -209,14 +259,22 @@ export const useStaffing = () => {
       organizations,
       employees,
       isLoading: isStructureLoading,
-      viewMode, setViewMode,
-      search, setSearch,
-      addOrgOpen, setAddOrgOpen,
-      addDeptOrgId, setAddDeptOrgId,
-      addPositionTarget, setAddPositionTarget,
-      assignTarget, setAssignTarget,
-      editOrgTarget, setEditOrgTarget,
-      editDeptTarget, setEditDeptTarget,
+      viewMode,
+      setViewMode,
+      search,
+      setSearch,
+      addOrgOpen,
+      setAddOrgOpen,
+      addDeptOrgId,
+      setAddDeptOrgId,
+      addPositionTarget,
+      setAddPositionTarget,
+      assignTarget,
+      setAssignTarget,
+      editOrgTarget,
+      setEditOrgTarget,
+      editDeptTarget,
+      setEditDeptTarget,
       allTotals,
       filteredOrgs,
       currentAssignedIds,

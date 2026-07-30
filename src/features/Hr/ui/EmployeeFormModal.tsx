@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
-import { AlertTriangle, Loader2, Sparkles, X } from "lucide-react";
-import { IAdminUser, IPassportOcrData, IPassportOcrResponse } from "@entities/hr";
-import { ApiRoutes } from "@shared/api";
-import { useMutationQuery, tokenControl } from "@shared/lib";
+import React from "react";
+import { X } from "lucide-react";
+import type { IAdminUser } from "@entities/hr";
 import { If } from "@shared/ui";
-import { EmployeeFormFields } from "./EmployeeFormFields";
-import { PassportUploadStep, IPassportFile, IPassportSides } from "./PassportUploadStep";
-import { applyPassportOcr, buildEmployeeFormData, mapEmployeeToForm, prepareEmployeePayload, resolveEmployeePhotoUrl, validateEmployee } from "../lib";
+import { useEmployeeFormModalState } from "./employeeFormModal/useEmployeeFormModalState";
+import { PassportStepContainer } from "./employeeFormModal/PassportStepContainer";
+import { EmployeeFormStepContainer } from "./employeeFormModal/EmployeeFormStepContainer";
 import "./employeeForm.css";
 
 interface IProps {
@@ -15,248 +13,32 @@ interface IProps {
   employee?: IAdminUser | null;
 }
 
-// Результат загрузки паспорта (POST /api/v1/admin/users/passport-ocr), который
-// отправляется вместе с остальными полями в POST /api/v1/admin/users.
-interface IPassportMeta {
-  passport_front_path: string | null;
-  passport_back_path: string | null;
-  passport_ocr_scanned_at: string | null;
-  passport_ocr_data: IPassportOcrData | null;
-}
-
-// Черновик фото паспорта сохраняется в localStorage, чтобы случайное закрытие
-// модалки не приводило к потере уже загруженного файла — при повторном открытии
-// создания сотрудника паспорт (и, соответственно, поля формы) восстанавливаются.
-const PASSPORT_DRAFT_KEY = "hr_passport_draft";
-
-const fileToDataUrl = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-
-const dataUrlToFile = (dataUrl: string, name: string, type: string): File => {
-  const [meta, base64] = dataUrl.split(",");
-  const mime = type || meta.match(/:(.*?);/)?.[1] || "image/png";
-  const bstr = atob(base64);
-  let n = bstr.length;
-  const u8 = new Uint8Array(n);
-  while (n--) u8[n] = bstr.charCodeAt(n);
-  return new File([u8], name, { type: mime });
-};
-
-const EMPTY_PASSPORT: IPassportSides = { front: null, back: null };
-
-const sideToStored = (side: IPassportFile | null) =>
-  side ? fileToDataUrl(side.file).then((dataUrl) => ({ name: side.file.name, type: side.file.type, dataUrl })) : Promise.resolve(null);
-
-const storedToSide = (stored: { name: string; type: string; dataUrl: string } | null): IPassportFile | null => {
-  if (!stored?.dataUrl) return null;
-  return { file: dataUrlToFile(stored.dataUrl, stored.name, stored.type), previewUrl: stored.dataUrl };
-};
-
-const readPassportDraft = (): IPassportSides => {
-  try {
-    const raw = localStorage.getItem(PASSPORT_DRAFT_KEY);
-    if (!raw) return EMPTY_PASSPORT;
-    const parsed = JSON.parse(raw);
-    return {
-      front: storedToSide(parsed.front),
-      back: storedToSide(parsed.back),
-    };
-  } catch {
-    return EMPTY_PASSPORT;
-  }
-};
-
 export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
-  const isEdit = !!employee?.id;
-  // Через админ-форму можно отредактировать самого себя. Тогда фото/данные текущего
-  // пользователя показываются ещё и в шапке/сайдбаре/меню (общий запрос
-  // FETCH_USER_BY_ID/{id}) и в профиле (AUTH_ME) — их надо инвалидировать отдельно,
-  // иначе аватар в Header не обновится сразу после сохранения.
-  const currentUserId = tokenControl.getUserId();
-  const isSelf = isEdit && String(employee?.id) === String(currentUserId);
-  const [values, setValues] = useState<Record<string, any>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [passport, setPassport] = useState<IPassportSides>(EMPTY_PASSPORT);
-  // Паспортные пути и OCR-данные из ответа passport-ocr. Хранятся отдельно от values
-  // (пользователь их не редактирует напрямую) и отправляются вместе с формой при создании.
-  const [passportMeta, setPassportMeta] = useState<IPassportMeta | null>(null);
-  // «Как сфотографировать паспорт» и «Новый сотрудник» — два отдельных шага/окна.
-  // Пока showForm === false показываем только шаг с паспортом; после нажатия
-  // «Продолжить» показываем только форму сотрудника (без блока с паспортом).
-  const [showForm, setShowForm] = useState(false);
-
-  // Лицевая сторона обязательна для эндпоинта passport-ocr (поле passport_front).
-  const canProceed = !!passport.front;
-  const formVisible = isEdit || showForm;
-
-  // Создание/редактирование сотрудника теперь идёт как multipart/form-data (в запросе
-  // передаётся файл фото). Редактирование шлётся POST-ом с _method=PUT (spoofing) —
-  // PHP не разбирает файлы в теле настоящих PUT/PATCH-запросов.
-  const createM = useMutationQuery<FormData>({
-    url: ApiRoutes.CREATE_USER,
-    method: "POST",
-    messages: { success: "Сотрудник создан", invalidate: [ApiRoutes.GET_USERS] },
-  });
-
-  const updateM = useMutationQuery<FormData>({
-    url: () => ApiRoutes.UPDATE_USER.replace(":id", String(employee?.id)),
-    method: "POST",
-    messages: {
-      success: "Сотрудник обновлён",
-      invalidate: isSelf
-        ? [ApiRoutes.GET_USERS, ApiRoutes.AUTH_ME, `${ApiRoutes.FETCH_USER_BY_ID}${currentUserId}`]
-        : [ApiRoutes.GET_USERS],
-    },
-  });
-
-  // Загрузка фото паспорта + OCR (multipart/form-data). В ответе — пути к файлам и
-  // структура passport_ocr_data. Пока OCR на сервере отключён, fields приходят null.
-  const ocrM = useMutationQuery<FormData>({
-    url: ApiRoutes.PASSPORT_OCR,
-    method: "POST",
-    messages: {
-      suppressSuccessToast: true,
-      error: "Не удалось загрузить фотографии паспорта",
-    },
-  });
-
-  useEffect(() => {
-    if (!open) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, onClose]);
-
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    setErrors({});
-    setShowForm(false);
-    setPassportMeta(null);
-    if (employee) {
-      setPassport(EMPTY_PASSPORT);
-      setValues(mapEmployeeToForm(employee));
-    } else {
-      setValues({});
-      // Восстанавливаем ранее загруженный паспорт (если модалку случайно закрыли).
-      setPassport(readPassportDraft());
-    }
-  }, [open, employee]);
-
-  const handlePassportChange = async (val: IPassportSides) => {
-    setPassport(val);
-    if (isEdit) return;
-    if (!val.front && !val.back) {
-      localStorage.removeItem(PASSPORT_DRAFT_KEY);
-      return;
-    }
-    try {
-      const [front, back] = await Promise.all([sideToStored(val.front), sideToStored(val.back)]);
-      localStorage.setItem(PASSPORT_DRAFT_KEY, JSON.stringify({ front, back }));
-    } catch {
-      // Файлы слишком большие для localStorage — просто не сохраняем черновик.
-    }
-  };
-
-  const handleChange = (name: string, value: any) => {
-    setValues((prev) => {
-      const next = { ...prev, [name]: value };
-      if (name === "organization_id") {
-        next.department_ids = undefined;
-      }
-      return next;
-    });
-    if (errors[name]) {
-      setErrors((prev) => {
-        const next = { ...prev };
-        delete next[name];
-        return next;
-      });
-    }
-  };
-
-  // Шаг «Продолжить»: загружаем фото паспорта на сервер (passport-ocr), сохраняем
-  // пути и OCR-данные, автоматически заполняем поля формы распознанными значениями
-  // (если OCR активен) и переходим к форме сотрудника.
-  const handleProceed = () => {
-    if (!passport.front || ocrM.isPending) return;
-
-    const fd = new FormData();
-    fd.append("passport_front", passport.front.file);
-    if (passport.back) fd.append("passport_back", passport.back.file);
-
-    ocrM.mutate(fd, {
-      onSuccess: (data: IPassportOcrResponse) => {
-        setPassportMeta({
-          passport_front_path: data?.passport_front_path ?? null,
-          passport_back_path: data?.passport_back_path ?? null,
-          passport_ocr_scanned_at: data?.passport_ocr_scanned_at ?? null,
-          passport_ocr_data: data?.passport_ocr_data ?? null,
-        });
-        // OCR отключён на сервере → fields === null → значения не меняются, ручной ввод.
-        // OCR активен → распознанные поля подставляются автоматически (не затирая ввод).
-        setValues((prev) => applyPassportOcr(prev, data?.passport_ocr_data?.fields));
-        setShowForm(true);
-      },
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const errs = validateEmployee(values, isEdit);
-    setErrors(errs);
-    if (Object.keys(errs).length > 0) return;
-
-    // Паспортные пути/OCR-данные и файл фото (values.photo) отправляются вместе с
-    // остальными полями формы одним multipart-запросом.
-    const payload: Record<string, any> = {
-      ...prepareEmployeePayload(values),
-      ...(passportMeta ?? {}),
-    };
-    if (isEdit) delete payload.password;
-
-    const formData = buildEmployeeFormData(payload);
-    // Method spoofing: настоящий PUT с multipart не даёт PHP разобрать файл.
-    if (isEdit) formData.append("_method", "PUT");
-
-    const onSuccess = () => {
-      localStorage.removeItem(PASSPORT_DRAFT_KEY);
-      setValues({});
-      setErrors({});
-      setPassport(EMPTY_PASSPORT);
-      setPassportMeta(null);
-      setShowForm(false);
-      onClose();
-    };
-
-    if (isEdit) {
-      updateM.mutate(formData, { onSuccess });
-    } else {
-      createM.mutate(formData, { onSuccess });
-    }
-  };
+  const {
+    isEdit,
+    values,
+    errors,
+    passport,
+    setShowForm,
+    canProceed,
+    formVisible,
+    ocrM,
+    isPending,
+    handlePassportChange,
+    handleChange,
+    handleProceed,
+    handleSubmit,
+  } = useEmployeeFormModalState({ open, onClose, employee });
 
   if (!open) return null;
 
-  const isPending = isEdit ? updateM.isPending : createM.isPending;
-  const badge = isEdit ? [employee?.last_name?.[0], employee?.first_name?.[0]].filter(Boolean).join("").toUpperCase() || "✎" : "??";
+  const badge = isEdit
+    ? [employee?.last_name?.[0], employee?.first_name?.[0]]
+        .filter(Boolean)
+        .join("")
+        .toUpperCase() || "✎"
+    : "??";
   const showTitle = formVisible;
-  const organizationId = values.organization_id;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
@@ -302,137 +84,34 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
 
         <form
           onSubmit={handleSubmit}
-          className={`hr-create-form px-6 pb-6 space-y-5 overflow-y-auto flex-1 scrollbar-stable ${showTitle ? "pt-6" : "pt-0"}`}
+          className={`hr-create-form px-6 pb-6 space-y-5 overflow-y-auto flex-1 scrollbar-stable ${
+            showTitle ? "pt-6" : "pt-0"
+          }`}
         >
-          {/* Шаг 1 — отдельное окно «Как сфотографировать паспорт» */}
-          <If is={!isEdit && !showForm}>
-            <If is={ocrM.isPending}>
-              <div className="flex flex-col items-center justify-center py-8 px-4 text-center space-y-5">
-                <div className="relative w-36 h-44 rounded-2xl bg-slate-900 border-2 border-indigo-500/50 shadow-2xl flex flex-col items-center justify-center overflow-hidden">
-                  <div className="w-28 h-36 border border-indigo-400/20 rounded-lg p-2 flex flex-col justify-between opacity-60">
-                    <div className="flex gap-2 items-center">
-                      <div className="w-8 h-10 rounded bg-indigo-500/30 border border-indigo-400/30 flex-shrink-0" />
-                      <div className="space-y-1.5 flex-1">
-                        <div className="h-2 bg-indigo-400/30 rounded w-full" />
-                        <div className="h-2 bg-indigo-400/30 rounded w-3/4" />
-                        <div className="h-1.5 bg-indigo-400/20 rounded w-1/2" />
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <div className="h-1.5 bg-indigo-400/20 rounded w-full" />
-                      <div className="h-1.5 bg-indigo-400/20 rounded w-4/5" />
-                      <div className="h-1.5 bg-indigo-400/20 rounded w-2/3" />
-                    </div>
-                  </div>
-
-                  <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_15px_3px_rgba(34,211,238,0.8)] animate-scan-beam" />
-
-                  <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center">
-                    <div className="p-3 rounded-full bg-indigo-600/90 text-white shadow-lg shadow-indigo-500/50">
-                      <Sparkles className="w-6 h-6 animate-pulse" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2 max-w-sm">
-                  <h3 className="text-base font-bold text-gray-900 dark:text-slate-100 flex items-center justify-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-indigo-600 dark:text-indigo-400" />
-                    Сканирование паспорта (OCR)...
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed">
-                    Выполняется обработка документа и извлечение данных. Пожалуйста, подождите, процесс распознавания может занять от 20 до 40 секунд...
-                  </p>
-                </div>
-
-                <div className="w-full max-w-xs h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-indigo-500 via-cyan-400 to-indigo-600 rounded-full animate-pulse w-full" />
-                </div>
-              </div>
-            </If>
-
-            <If is={!ocrM.isPending}>
-              <PassportUploadStep value={passport} onChange={handlePassportChange} />
-              <If is={!passport.front}>
-                <p className="text-[11px] text-gray-400 dark:text-slate-500 text-center">
-                  Загрузите лицевую сторону паспорта, чтобы продолжить.
-                </p>
-              </If>
-              <div className="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex-1 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors border-gray-200 dark:border-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer"
-                >
-                  Отмена
-                </button>
-                <button
-                  type="button"
-                  onClick={handleProceed}
-                  disabled={!canProceed}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                >
-                  Продолжить
-                </button>
-              </div>
-            </If>
+          <If is={!isEdit && !formVisible}>
+            <PassportStepContainer
+              isOcrPending={ocrM.isPending}
+              passport={passport}
+              onPassportChange={handlePassportChange}
+              canProceed={canProceed}
+              onClose={onClose}
+              onProceed={handleProceed}
+            />
           </If>
 
-          {/* Шаг 2 — отдельное окно «Новый сотрудник» (форма без блока паспорта) */}
           <If is={formVisible}>
-            <If is={!isEdit}>
-              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/50 text-amber-900 dark:text-amber-200 text-xs leading-relaxed">
-                <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold block mb-0.5">Внимание!</span>
-                  OCR-сканирование паспорта не гарантирует 100% точность автозаполнения. Перед созданием сотрудника обязательно проверьте и скорректируйте распознанные данные.
-                </div>
-              </div>
-            </If>
-
-            <If is={!isEdit && canProceed}>
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-800">
-                <span className="text-xs font-semibold text-gray-500 dark:text-slate-400 mr-1">Паспорт:</span>
-                <If is={!!passport.front}>
-                  <img src={passport.front?.previewUrl} alt="Лицевая" className="h-12 w-16 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-slate-700" />
-                </If>
-                <If is={!!passport.back}>
-                  <img src={passport.back?.previewUrl} alt="Обратная" className="h-12 w-16 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-slate-700" />
-                </If>
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  className="ml-auto text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
-                >
-                  Изменить
-                </button>
-              </div>
-            </If>
-
-            <EmployeeFormFields
+            <EmployeeFormStepContainer
+              isEdit={isEdit}
+              canProceed={canProceed}
+              passport={passport}
+              onShowPassportStep={() => setShowForm(false)}
               values={values}
               errors={errors}
-              handleChange={handleChange}
-              organizationId={organizationId}
-              isEdit={isEdit}
-              initialPhoto={resolveEmployeePhotoUrl(employee) || undefined}
+              onChange={handleChange}
+              employee={employee}
+              onClose={onClose}
+              isPending={isPending}
             />
-
-            <div className="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors border-gray-200 dark:border-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer"
-              >
-                Отмена
-              </button>
-              <button
-                type="submit"
-                disabled={isPending}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 transition-colors cursor-pointer"
-              >
-                {isEdit ? "Сохранить" : "Добавить сотрудника"}
-              </button>
-            </div>
           </If>
         </form>
       </div>

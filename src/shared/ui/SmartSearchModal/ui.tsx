@@ -1,158 +1,53 @@
-import React, { useState, useMemo } from "react";
-import { Input, Button, Empty } from "antd";
-import { CloseOutlined, SearchOutlined } from "@ant-design/icons";
-import { ISmartSearchModalProps, ISelectionState, ISearchItem } from "./model";
+import React from "react";
+import { Button, Empty } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
+import { ISmartSearchModalProps, ISearchItem } from "./model";
 import { SearchPreviewPanel } from "./ui/SearchPreviewPanel";
 import { SearchListItem } from "./ui/SearchListItem";
-import { useGetQuery } from "@shared/lib/hooks";
+import { SearchInputBar } from "./ui/SearchInputBar";
+import { SelectedBadgesBar } from "./ui/SelectedBadgesBar";
+import { useSmartSearchState } from "./useSmartSearchState";
 import { Loader, If } from "@shared/ui";
 import { motion, AnimatePresence } from "framer-motion";
 
-export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
-  placeholder = "Поиск по теме или отправителю...",
-  items = [],
-  querySettings,
-  transformResponse,
-  onConfirm,
-  multiple = true,
-  mode = "attach",
-  isDarkMode,
-}) => {
-  const [state, setState] = useState<ISelectionState>({
-    selectedIds: [],
-    activePreviewItem: null,
-  });
+export const SmartSearchUI: React.FC<ISmartSearchModalProps> = (props) => {
+  const {
+    placeholder = "Поиск по теме или отправителю...",
+    mode = "attach",
+    isDarkMode,
+  } = props;
 
-  const [selectedItemsMap, setSelectedItemsMap] = useState<
-    Record<string, ISearchItem>
-  >({});
-  const [searchText, setSearchText] = useState("");
-
-  const { data: fetchedData, isLoading } = useGetQuery<any, any>({
-    url: querySettings?.url,
-    params: {
-      ...querySettings?.params,
-      ...(mode === "attach" ? { q: searchText } : { search: searchText }), // Для поиска людей теперь используем один ключ search
-      page: 1,
-      per_page: 50,
-    },
-    options: {
-      enabled: !!querySettings?.url,
-    },
-  });
-
-  const displayItems = useMemo(() => {
-    if (!querySettings?.url) return items;
-    let rawItems: any[] = [];
-    if (Array.isArray(fetchedData)) {
-      rawItems = fetchedData;
-    } else if (fetchedData) {
-      const data = fetchedData as any;
-      if (Array.isArray(data.items)) rawItems = data.items;
-      else if (Array.isArray(data.data)) rawItems = data.data;
-      else if (data.data && Array.isArray(data.data.items))
-        rawItems = data.data.items;
-      else if (data.data && Array.isArray(data.data.data))
-        rawItems = data.data.data;
-    }
-
-    if (transformResponse) {
-      return transformResponse(rawItems);
-    }
-    return rawItems;
-  }, [querySettings?.url, fetchedData, items, transformResponse]);
-
-  const isExpanded = mode === "attach" && !!state.activePreviewItem;
-
-  const handleItemClick = (item: ISearchItem) => {
-    setSelectedItemsMap((prev) => {
-      const newMap = { ...prev };
-      if (!multiple) {
-        return newMap[item.id] ? {} : { [item.id]: item };
-      }
-      if (newMap[item.id]) {
-        delete newMap[item.id];
-      } else {
-        newMap[item.id] = item;
-      }
-      return newMap;
-    });
-
-    setState((prev) => {
-      let newSelectedIds = prev.selectedIds;
-
-      if (multiple) {
-        const isSelected = prev.selectedIds.includes(item.id);
-        // if (!isSelected && prev.selectedIds.length >= 3) {
-        //   return prev;
-        // }
-        newSelectedIds = isSelected
-          ? prev.selectedIds.filter((id) => id !== item.id)
-          : [...prev.selectedIds, item.id];
-      } else {
-        newSelectedIds = prev.selectedIds.includes(item.id) ? [] : [item.id];
-      }
-
-      return {
-        ...prev,
-        activePreviewItem: mode === "attach" ? item : null,
-        selectedIds: newSelectedIds,
-      };
-    });
-  };
-
-  const handleConfirmClick = () => {
-    const selectedItems = state.selectedIds
-      .map((id) => selectedItemsMap[id])
-      .filter(Boolean);
-    onConfirm(state.selectedIds, selectedItems);
-    setState({
-      selectedIds: [],
-      activePreviewItem: null,
-    });
-    setSelectedItemsMap({});
-    setSearchText("");
-  };
-
-  const handleClosePreview = () => {
-    setState((prev) => ({ ...prev, activePreviewItem: null }));
-  };
-
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const {
+    state,
+    selectedItemsMap,
+    searchText,
+    setSearchText,
+    isSearchFocused,
+    setIsSearchFocused,
+    isLoading,
+    displayItems,
+    isExpanded,
+    handleItemClick,
+    handleConfirmClick,
+    handleClosePreview,
+    setActivePreview,
+  } = useSmartSearchState(props);
 
   return (
     <div
-      className={`smart-search-content flex flex-col h-full rounded-3xl ${isDarkMode ? "transparent" : "bg-gray-50/30"}`}
+      className={`smart-search-content flex flex-col h-full rounded-3xl ${
+        isDarkMode ? "transparent" : "bg-gray-50/30"
+      }`}
     >
-      <div className="py-4 w-full transition-all duration-300 ease-out transform">
-        <Input
-          size="large"
-          placeholder="Поиск..."
-          prefix={
-            <SearchOutlined
-              className={`text-lg! mr-2! transition-colors! duration-300! ${
-                isSearchFocused
-                  ? "text-blue-600!"
-                  : isDarkMode
-                    ? "text-gray-500!"
-                    : "text-gray-400!"
-              }`}
-            />
-          }
-          onFocus={() => setIsSearchFocused(true)}
-          onBlur={() => setIsSearchFocused(false)}
-          className={`w-full! h-12! rounded-2xl! border! text-base! shadow-sm! transition-all! duration-300! ${
-            isSearchFocused
-              ? "border-blue-500! shadow-lg! shadow-blue-500/15!"
-              : isDarkMode
-                ? "bg-gray-800! border-gray-700! text-white! hover:border-gray-600!"
-                : "bg-white! border-gray-200! text-black! hover:border-blue-300!"
-          }`}
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          allowClear
-        />
-      </div>
+      <SearchInputBar
+        searchText={searchText}
+        setSearchText={setSearchText}
+        isSearchFocused={isSearchFocused}
+        setIsSearchFocused={setIsSearchFocused}
+        isDarkMode={isDarkMode}
+        placeholder={placeholder}
+      />
+
       <div className="flex min-h-0 gap-3 mb-6 overflow-hidden">
         <AnimatePresence mode="popLayout">
           {isExpanded && (
@@ -183,10 +78,9 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
         <motion.div
           layout
           transition={{ type: "spring", damping: 25, stiffness: 200 }}
-          className={`
-                flex flex-col relative
-                ${isExpanded ? "w-[440px]" : "w-full"}
-            `}
+          className={`flex flex-col relative ${
+            isExpanded ? "w-[440px]" : "w-full"
+          }`}
         >
           <If is={isLoading}>
             <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] flex items-center justify-center rounded-[24px] overflow-hidden">
@@ -214,6 +108,7 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
           </div>
         </motion.div>
       </div>
+
       <div className="flex items-center gap-3">
         <div className="text-gray-400 text-sm font-medium whitespace-nowrap">
           Выбрано:{" "}
@@ -223,32 +118,13 @@ export const SmartSearchUI: React.FC<ISmartSearchModalProps> = ({
         </div>
 
         <If is={mode === "attach" && state.selectedIds.length > 0}>
-          <div className="flex-1 flex gap-2 overflow-x-auto no-scrollbar py-1">
-            {state.selectedIds.map((id) => {
-              const item = selectedItemsMap[id];
-              if (!item) return null;
-              const isActive = state.activePreviewItem?.id === id;
-
-              const activeClass =
-                "bg-[#8C52FF] text-white border-[#8C52FF] shadow-sm";
-              const inactiveClass = isDarkMode
-                ? "bg-gray-800 text-gray-300 border-gray-700 hover:border-gray-500"
-                : "bg-white text-gray-500 border-gray-100 hover:border-purple-200";
-
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() =>
-                    setState((prev) => ({ ...prev, activePreviewItem: item }))
-                  }
-                  className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border outline-none ${isActive ? activeClass : inactiveClass}`}
-                >
-                  {item.title || "Без названия"}
-                </button>
-              );
-            })}
-          </div>
+          <SelectedBadgesBar
+            selectedIds={state.selectedIds}
+            selectedItemsMap={selectedItemsMap}
+            activePreviewItem={state.activePreviewItem}
+            onSelectPreview={setActivePreview}
+            isDarkMode={isDarkMode}
+          />
         </If>
 
         <If is={!(mode === "attach" && state.selectedIds.length > 0)}>

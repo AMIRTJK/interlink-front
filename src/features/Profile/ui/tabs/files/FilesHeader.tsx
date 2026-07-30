@@ -1,35 +1,33 @@
-import { useRef, useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import {
-	Search,
-	ChevronDown,
-	Upload,
-	LayoutGrid,
-	List,
-	ArrowUp,
-	ArrowDown,
-	FolderPlus,
-	X,
-} from "lucide-react";
+import { useRef } from "react";
+import { Upload, LayoutGrid, List, FolderPlus } from "lucide-react";
 import { If } from "@shared/ui";
 import { THEMES } from "@widgets/layout/ui/designSettings";
 import { useDesignSettings } from "@widgets/layout/ui/useDesignSettings";
+import type {
+	TFilesSort,
+	TFilesSortDir,
+	TFilesViewContext,
+	TFilesViewMode,
+} from "./filesTabModel";
+import { FilesHeaderTabs } from "./FilesHeaderTabs";
+import { FilesHeaderSearch } from "./FilesHeaderSearch";
+import { FilesHeaderSort } from "./FilesHeaderSort";
 
 interface IProps {
 	searchQuery: string;
 	onSearchChange: (val: string) => void;
-	sortBy: "date" | "size" | "name" | "manual";
-	onSortChange: (val: "date" | "size" | "name" | "manual") => void;
-	sortDir: "asc" | "desc";
+	sortBy: TFilesSort;
+	onSortChange: (val: TFilesSort) => void;
+	sortDir: TFilesSortDir;
 	onSortDirToggle: () => void;
-	viewMode: "grid" | "list";
-	onViewModeChange: (val: "grid" | "list") => void;
+	viewMode: TFilesViewMode;
+	onViewModeChange: (val: TFilesViewMode) => void;
 	onUpload: (file: File) => void;
 	personalCount: number;
 	sharedCount: number;
 	onCreateFolderClick: () => void;
-	viewContext: "personal" | "shared" | "analytics";
-	onViewContextChange: (val: "personal" | "shared" | "analytics") => void;
+	viewContext: TFilesViewContext;
+	onViewContextChange: (val: TFilesViewContext) => void;
 }
 
 export const FilesHeader = ({
@@ -49,73 +47,19 @@ export const FilesHeader = ({
 	onViewContextChange,
 }: IProps) => {
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const [localSearch, setLocalSearch] = useState(searchQuery);
-	const [sortOpen, setSortOpen] = useState(false);
-	const sortRef = useRef<HTMLDivElement>(null);
 
 	const { currentTheme, isDarkMode } = useDesignSettings();
 	const theme = THEMES[currentTheme] || THEMES.emerald;
 	const accent = isDarkMode ? theme.dark : theme.light;
 
-	useEffect(() => {
-		setLocalSearch(searchQuery);
-	}, [searchQuery]);
-
-	useEffect(() => {
-		if (!sortOpen) return;
-		const handleClickOutside = (e: MouseEvent) => {
-			if (sortRef.current && !sortRef.current.contains(e.target as Node))
-				setSortOpen(false);
-		};
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => document.removeEventListener("mousedown", handleClickOutside);
-	}, [sortOpen]);
-
-	const tabsData = [
-		{ key: "personal" as const, label: "Мои файлы", count: personalCount },
-		{ key: "shared" as const, label: "Доступные мне", count: sharedCount },
-		{ key: "analytics" as const, label: "Аналитика" },
-	];
-
-	const getSortLabel = () => {
-		if (sortBy === "manual") return "Ручная";
-		if (sortBy === "date") return "Дата";
-		if (sortBy === "size") return "Размер";
-		return "Имя";
-	};
-
 	return (
 		<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-			<div className="flex items-center gap-4 border-b border-slate-200 dark:border-slate-800 w-full md:w-auto">
-				{tabsData.map((t) => {
-					const isActive = viewContext === t.key;
-					return (
-						<button
-							key={t.key}
-							onClick={() => onViewContextChange(t.key)}
-							className={`relative pb-2 px-1 font-bold text-base transition-colors cursor-pointer ${
-								isActive
-									? "text-slate-800 dark:text-zinc-100"
-									: "text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300"
-							}`}
-						>
-							<span>{t.label}</span>
-							<If is={t.count !== undefined}>
-								<span className="ml-2 text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-zinc-400 rounded-full">
-									{t.count}
-								</span>
-							</If>
-							<If is={isActive}>
-								<motion.div
-									layoutId="filesActiveTabBorder"
-									className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"
-									transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-								/>
-							</If>
-						</button>
-					);
-				})}
-			</div>
+			<FilesHeaderTabs
+				viewContext={viewContext}
+				onViewContextChange={onViewContextChange}
+				personalCount={personalCount}
+				sharedCount={sharedCount}
+			/>
 
 			<div className="flex flex-wrap items-center gap-3">
 				<input
@@ -130,90 +74,18 @@ export const FilesHeader = ({
 					className="hidden!"
 				/>
 
-				<div className="relative w-full sm:w-64">
-					<input
-						type="text"
-						placeholder="Поиск файлов..."
-						value={localSearch}
-						onChange={(e) => setLocalSearch(e.target.value)}
-						onKeyDown={(e) => {
-							if (e.key === "Enter") onSearchChange(localSearch);
-						}}
-						className="w-full bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-zinc-200 placeholder-slate-400 pl-4 pr-14 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-					/>
-					<div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
-						<If is={!!localSearch}>
-							<X
-								size={15}
-								className="text-slate-400 hover:text-red-500 transition-colors cursor-pointer"
-								onClick={() => {
-									setLocalSearch("");
-									onSearchChange("");
-								}}
-							/>
-						</If>
-						<Search
-							size={15}
-							className="text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer"
-							onClick={() => onSearchChange(localSearch)}
-						/>
-					</div>
-				</div>
+				<FilesHeaderSearch
+					searchQuery={searchQuery}
+					onSearchChange={onSearchChange}
+				/>
 
-				<div className="flex items-center gap-1">
-					<div className="relative" ref={sortRef}>
-						<button
-							onClick={() => setSortOpen((prev) => !prev)}
-							className="flex items-center gap-1.5 px-4 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-zinc-300 rounded-full border border-slate-200 dark:border-slate-700 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-all font-medium cursor-pointer"
-						>
-							<span>{getSortLabel()}</span>
-							<ChevronDown
-								size={14}
-								className={`text-slate-400 transition-transform ${sortOpen ? "rotate-180" : ""}`}
-							/>
-						</button>
-
-						<If is={sortOpen}>
-							<div className="absolute right-0 mt-1.5 w-32 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-xl py-1 z-50">
-								{(["manual", "date", "size", "name"] as const).map((option) => (
-									<button
-										key={option}
-										onClick={() => {
-											onSortChange(option);
-											setSortOpen(false);
-										}}
-										className={`w-full text-left px-4 py-2 text-sm transition-colors cursor-pointer ${
-											sortBy === option
-												? "bg-slate-100 dark:bg-slate-700/60 text-slate-800 dark:text-zinc-100 font-semibold"
-												: "text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-slate-700"
-										}`}
-										style={sortBy === option ? { color: accent } : undefined}
-									>
-										{option === "manual"
-											? "Ручная"
-											: option === "date"
-												? "Дата"
-												: option === "size"
-													? "Размер"
-													: "Имя"}
-									</button>
-								))}
-							</div>
-						</If>
-					</div>
-
-					<button
-						onClick={onSortDirToggle}
-						className="p-2 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-full text-slate-500 dark:text-zinc-300 cursor-pointer transition-all"
-						title={sortDir === "asc" ? "По возрастанию" : "По убыванию"}
-					>
-						{sortDir === "asc" ? (
-							<ArrowUp size={14} />
-						) : (
-							<ArrowDown size={14} />
-						)}
-					</button>
-				</div>
+				<FilesHeaderSort
+					sortBy={sortBy}
+					onSortChange={onSortChange}
+					sortDir={sortDir}
+					onSortDirToggle={onSortDirToggle}
+					accent={accent}
+				/>
 
 				<div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-full border border-slate-200/50 dark:border-slate-700/50">
 					<button
@@ -266,4 +138,3 @@ export const FilesHeader = ({
 		</div>
 	);
 };
-

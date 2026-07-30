@@ -1,400 +1,56 @@
-// Подмодуль «Роли и доступы» — порт RolesTabContent + RoleDrawer из
-// IAMDashboard.tsx, подключённый к GET_ROLES/GET_ROLE/FETCH_PERMISSIONS/GET_USERS.
 import * as React from "react";
-import {
-  Plus,
-  Search,
-  LayoutGrid,
-  List,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-  ShieldPlus,
-} from "lucide-react";
-import { Table } from "antd";
-import type { ColumnsType, TableRowSelection } from "antd/es/table/interface";
-import { useGetQuery } from "@shared/lib";
-import { ApiRoutes, _axios } from "@shared/api";
-import type { IAdminUser } from "@entities/hr";
-import {
-  T,
-  getRoleColor,
-  STATUS_CFG,
-  thStyle,
-  tdStyle,
-} from "../theme/tokens";
 import { ToastContainer } from "./components";
-import { useToasts } from "../lib/useToasts";
 import { RoleDrawer } from "./RoleDrawer";
 import { CreateRoleModal } from "./CreateRoleModal";
 import { CreateUiPermissionModal } from "./CreateUiPermissionModal";
 import { DeleteRoleModal } from "./DeleteRoleModal";
 import { UserDrawer } from "./UserDrawer";
-import type { RoleCard, PermModule, ExtUser, TableUser } from "../model";
-import {
-  adaptRoleCard,
-  adaptTableUser,
-  adaptExtUser,
-  extractPermNames,
-  unwrapList,
-} from "../lib/adapters";
 
-const PER_PAGE = 10;
-
-function countTotalPerms(perms: PermModule[]): number {
-  let count = 0;
-  perms.forEach((mod) =>
-    mod.perms.forEach((perm) => {
-      perm.subperms?.forEach((sp) => {
-        if (sp.value) count++;
-      });
-      perm.children?.forEach((ch) =>
-        ch.subperms?.forEach((csp) => {
-          if (csp.value) count++;
-        }),
-      );
-    }),
-  );
-  return count;
-}
+import { useRolesViewState } from "./rolesView/useRolesViewState";
+import { RolesTopBar } from "./rolesView/RolesTopBar";
+import { RolesBlockCards } from "./rolesView/RolesBlockCards";
+import { RolesRegistryTable } from "./rolesView/RolesRegistryTable";
+import { RoleUsersTable } from "./rolesView/RoleUsersTable";
 
 export function RolesView() {
-  const { toasts, addToast, removeToast } = useToasts();
-  const [selectedRoleId, setSelectedRoleId] = React.useState<string | null>(
-    null,
-  );
-  const [drawerOpen, setDrawerOpen] = React.useState(true);
-  const [isFirstOpen, setIsFirstOpen] = React.useState(false);
-  const [pulsingCardId, setPulsingCardId] = React.useState<string | null>(null);
-  const [viewMode, setViewMode] = React.useState<"block" | "registry">("block");
-  const [viewTransitioning, setViewTransitioning] = React.useState(false);
-  const [checkedUsers, setCheckedUsers] = React.useState<Set<string>>(
-    new Set(),
-  );
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [showCreateRole, setShowCreateRole] = React.useState(false);
-  const [showCreateUiPerm, setShowCreateUiPerm] = React.useState(false);
-  const [showDeleteRole, setShowDeleteRole] = React.useState(false);
-  const [profileUser, setProfileUser] = React.useState<ExtUser | null>(null);
-
-  const { data: rolesData } = useGetQuery({
-    url: ApiRoutes.GET_ROLES,
-    useToken: true,
-    options: { refetchOnWindowFocus: false, staleTime: 30 * 60 * 1000 },
-  });
-
-  const { data: allPermsData } = useGetQuery({
-    url: ApiRoutes.FETCH_PERMISSIONS,
-    useToken: true,
-    options: {
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      staleTime: 30 * 60 * 1000,
-    },
-  });
-
-  const rolesList = React.useMemo(
-    () =>
-      unwrapList<{
-        id: number;
-        name: string;
-        description?: string;
-        permissions?: unknown;
-        created_at?: string;
-      }>(rolesData),
-    [rolesData],
-  );
-
-  const allPermNames = React.useMemo(() => {
-    const set = new Set<string>();
-    const rawSystem = (allPermsData as { data?: unknown })?.data ?? allPermsData;
-    extractPermNames(rawSystem).forEach((n) => set.add(n));
-    rolesList.forEach((r) =>
-      extractPermNames(r.permissions).forEach((n) => set.add(n)),
-    );
-    return Array.from(set);
-  }, [allPermsData, rolesList]);
-
-  // Реальный счётчик «пользователей на роль» — total из GET_USERS?role=X&per_page=1
-  const [roleUserCounts, setRoleUserCounts] = React.useState<
-    Record<string, number>
-  >({});
-  React.useEffect(() => {
-    if (rolesList.length === 0) return;
-    let cancelled = false;
-    Promise.all(
-      rolesList.map((r) =>
-        _axios
-          .get(ApiRoutes.GET_USERS, { params: { role: r.name, per_page: 1 } })
-          .then((res) => {
-            const body = res.data;
-            const total = body?.data?.total ?? body?.total ?? 0;
-            return [r.name, total] as const;
-          })
-          .catch(() => [r.name, 0] as const),
-      ),
-    ).then((results) => {
-      if (!cancelled) setRoleUserCounts(Object.fromEntries(results));
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [rolesList]);
-
-  const roleCards: RoleCard[] = React.useMemo(
-    () =>
-      rolesList.map((r) =>
-        adaptRoleCard(r, {
-          allPermNames,
-          userCount: roleUserCounts[r.name] ?? 0,
-        }),
-      ),
-    [rolesList, allPermNames, roleUserCounts],
-  );
-
-  // Выбор первой роли по умолчанию
-  React.useEffect(() => {
-    if (roleCards.length > 0 && selectedRoleId === null && drawerOpen) {
-      setSelectedRoleId(roleCards[0].id);
-    }
-  }, [roleCards, selectedRoleId, drawerOpen]);
-
-  const selectedCard =
-    roleCards.find((c) => c.id === selectedRoleId) ?? null;
-  const selectedRoleName = selectedCard?.name ?? null;
-  const isRoleFiltered = drawerOpen && selectedRoleName !== null;
-
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedRoleId, searchQuery]);
-
-  // Пользователи (для таблицы) — фильтр по выбранной роли + поиск
-  const usersParams = React.useMemo(() => {
-    const p: Record<string, string> = {
-      page: String(currentPage),
-      per_page: String(PER_PAGE),
-    };
-    if (isRoleFiltered && selectedRoleName) p.role = selectedRoleName;
-    if (searchQuery) p.search = searchQuery;
-    return p;
-  }, [currentPage, isRoleFiltered, selectedRoleName, searchQuery]);
-
-  const { data: usersData } = useGetQuery({
-    url: ApiRoutes.GET_USERS,
-    useToken: true,
-    params: usersParams,
-    options: {
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000,
-    },
-  });
-
-  const rawUsers = React.useMemo(
-    () => unwrapList<IAdminUser>(usersData),
-    [usersData],
-  );
-  const displayedUsers = React.useMemo(
-    () => rawUsers.map(adaptTableUser),
-    [rawUsers],
-  );
-  const totalUsers = React.useMemo(() => {
-    const d = usersData as
-      | { data?: { total?: number }; total?: number }
-      | undefined;
-    return d?.data?.total ?? d?.total ?? displayedUsers.length;
-  }, [usersData, displayedUsers.length]);
-
-  const memberInitials = React.useMemo(
-    () => displayedUsers.slice(0, 12).map((u) => u.avatarInitials),
-    [displayedUsers],
-  );
-
-  const switchView = (mode: "block" | "registry") => {
-    if (mode === viewMode) return;
-    setViewTransitioning(true);
-    setTimeout(() => {
-      setViewMode(mode);
-      setViewTransitioning(false);
-    }, 150);
-  };
-
-  const handleCardClick = (cardId: string) => {
-    setProfileUser(null);
-    if (selectedRoleId === cardId && drawerOpen) {
-      setDrawerOpen(false);
-      setSelectedRoleId(null);
-      setPulsingCardId(null);
-    } else {
-      const isOpening = !drawerOpen || selectedRoleId === null;
-      setIsFirstOpen(isOpening);
-      setSelectedRoleId(cardId);
-      setDrawerOpen(true);
-      setPulsingCardId(cardId);
-      setTimeout(() => setPulsingCardId(null), 700);
-    }
-  };
-
-  const handleRowClick = (userId: string) => {
-    const rawUser = rawUsers.find((u) => String(u.id) === userId);
-    if (!rawUser) return;
-    setIsFirstOpen(!profileUser);
-    setProfileUser(adaptExtUser(rawUser));
-  };
-
-  const rowSelection: TableRowSelection<TableUser> = {
-    selectedRowKeys: Array.from(checkedUsers),
-    onChange: (keys) => setCheckedUsers(new Set(keys.map(String))),
-  };
-
-  const userColumns: ColumnsType<TableUser> = React.useMemo(
-    () => [
-      {
-        title: "ФИО / Должность",
-        key: "employee",
-        render: (_, user) => {
-          const roleCfg = getRoleColor(user.roles[0]);
-          return (
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  background: roleCfg.bg,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: roleCfg.text,
-                  flexShrink: 0,
-                }}
-              >
-                {user.avatarInitials}
-              </div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: T.textPrimary }}>
-                  {user.fio}
-                </div>
-                <div style={{ fontSize: 11, color: T.textSecondary, marginTop: 1 }}>
-                  {user.position}
-                </div>
-              </div>
-            </div>
-          );
-        },
-      },
-      {
-        title: "Отдел",
-        dataIndex: "department",
-        key: "department",
-        render: (val: string) => (
-          <span style={{ fontSize: 13, color: T.textPrimary }}>{val}</span>
-        ),
-      },
-      {
-        title: "Роли",
-        dataIndex: "roles",
-        key: "roles",
-        render: (roles: string[]) => (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-            {roles.slice(0, 2).map((role) => {
-              const cfg = getRoleColor(role);
-              return (
-                <span
-                  key={role}
-                  style={{
-                    background: cfg.bg,
-                    color: cfg.text,
-                    borderRadius: 6,
-                    padding: "2px 8px",
-                    fontSize: 11,
-                    fontWeight: 600,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {role}
-                </span>
-              );
-            })}
-            {roles.length > 2 && (
-              <span
-                style={{
-                  background: T.hoverBg,
-                  color: T.textSecondary,
-                  borderRadius: 6,
-                  padding: "2px 8px",
-                  fontSize: 11,
-                  fontWeight: 600,
-                }}
-              >
-                +{roles.length - 2}
-              </span>
-            )}
-          </div>
-        ),
-      },
-      {
-        title: "Статус",
-        dataIndex: "status",
-        key: "status",
-        render: (status: string) => {
-          const statusCfg = STATUS_CFG[status] ?? STATUS_CFG["Активен"];
-          return (
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span
-                style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
-                  background: statusCfg.dot,
-                  display: "inline-block",
-                  flexShrink: 0,
-                }}
-              />
-              <span style={{ fontSize: 13, color: T.textPrimary, fontWeight: 500 }}>
-                {status}
-              </span>
-            </div>
-          );
-        },
-      },
-      {
-        title: "Дата назначения",
-        dataIndex: "assignedDate",
-        key: "assignedDate",
-        render: (val: string) => (
-          <span style={{ fontSize: 12, color: T.textSecondary }}>{val}</span>
-        ),
-      },
-      {
-        title: "",
-        key: "actions",
-        width: 36,
-        render: () => (
-          <button
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: T.textSecondary,
-              padding: 4,
-              borderRadius: 6,
-              display: "flex",
-            }}
-          >
-            <MoreHorizontal size={15} />
-          </button>
-        ),
-      },
-    ],
-    [],
-  );
-
-  const showRoleDrawer = drawerOpen && selectedCard;
+  const {
+    toasts,
+    addToast,
+    removeToast,
+    selectedRoleId,
+    setSelectedRoleId,
+    drawerOpen,
+    setDrawerOpen,
+    isFirstOpen,
+    pulsingCardId,
+    viewMode,
+    viewTransitioning,
+    searchQuery,
+    setSearchQuery,
+    currentPage,
+    setCurrentPage,
+    showCreateRole,
+    setShowCreateRole,
+    showCreateUiPerm,
+    setShowCreateUiPerm,
+    showDeleteRole,
+    setShowDeleteRole,
+    profileUser,
+    setProfileUser,
+    allPermNames,
+    roleCards,
+    selectedCard,
+    selectedRoleName,
+    isRoleFiltered,
+    displayedUsers,
+    totalUsers,
+    memberInitials,
+    switchView,
+    handleCardClick,
+    handleRowClick,
+    rowSelection,
+    showRoleDrawer,
+  } = useRolesViewState();
 
   return (
     <div
@@ -415,151 +71,13 @@ export function RolesView() {
           overflowY: "auto",
         }}
       >
-        {/* Top bar */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "space-between",
-            marginBottom: 20,
-            gap: 16,
-          }}
-        >
-          <div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: 20,
-                fontWeight: 700,
-                color: T.textPrimary,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              Роли и доступы
-            </h1>
-            <p
-              style={{
-                margin: "3px 0 0",
-                fontSize: 13,
-                color: T.textSecondary,
-              }}
-            >
-              Управление ролями пользователей СЭД
-            </p>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <button
-                onClick={() => switchView("block")}
-                title="Блочный вид"
-                aria-label="Блочный вид"
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  border: viewMode === "block" ? "none" : `1px solid #E2E8F0`,
-                  background: viewMode === "block" ? "#3B82F6" : "#FFFFFF",
-                  color: viewMode === "block" ? "#FFFFFF" : "#94A3B8",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                  flexShrink: 0,
-                  padding: 0,
-                }}
-              >
-                <LayoutGrid size={15} />
-              </button>
-              <button
-                onClick={() => switchView("registry")}
-                title="Реестровый вид"
-                aria-label="Реестровый вид"
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  border:
-                    viewMode === "registry" ? "none" : `1px solid #E2E8F0`,
-                  background: viewMode === "registry" ? "#3B82F6" : "#FFFFFF",
-                  color: viewMode === "registry" ? "#FFFFFF" : "#94A3B8",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                  flexShrink: 0,
-                  padding: 0,
-                }}
-              >
-                <List size={15} />
-              </button>
-            </div>
-            <button
-              onClick={() => setShowCreateUiPerm(true)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "0 16px",
-                height: 36,
-                borderRadius: 8,
-                border: `1px solid ${T.border}`,
-                background: "#fff",
-                color: T.textSecondary,
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: T.font,
-                whiteSpace: "nowrap",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background =
-                  T.hoverBg;
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background =
-                  "#fff";
-              }}
-            >
-              <ShieldPlus size={14} />
-              <span>Создать UI-право</span>
-            </button>
-            <button
-              onClick={() => setShowCreateRole(true)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "0 16px",
-                height: 36,
-                borderRadius: 8,
-                border: "none",
-                background: T.accent,
-                color: "#fff",
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: T.font,
-                boxShadow: `0 2px 8px ${T.accent}35`,
-                whiteSpace: "nowrap",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background =
-                  "#2563EB";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background =
-                  T.accent;
-              }}
-            >
-              <Plus size={14} />
-              <span>Создать роль</span>
-            </button>
-          </div>
-        </div>
+        <RolesTopBar
+          viewMode={viewMode}
+          onSwitchView={switchView}
+          onCreateUiPerm={() => setShowCreateUiPerm(true)}
+          onCreateRole={() => setShowCreateRole(true)}
+        />
 
-        {/* Roles display */}
         <div
           style={{
             opacity: viewTransitioning ? 0 : 1,
@@ -568,534 +86,45 @@ export function RolesView() {
           }}
         >
           {viewMode === "block" && (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: 12,
+            <RolesBlockCards
+              roleCards={roleCards}
+              selectedRoleId={selectedRoleId}
+              drawerOpen={drawerOpen}
+              pulsingCardId={pulsingCardId}
+              onCardClick={handleCardClick}
+              onDeleteRole={(cardId) => {
+                setSelectedRoleId(cardId);
+                setShowDeleteRole(true);
               }}
-            >
-              {roleCards.map((card) => {
-                const isSelected = selectedRoleId === card.id && drawerOpen;
-                const isPulsing = pulsingCardId === card.id;
-                const borderColor = getRoleColor(card.name).text;
-                const permCount = countTotalPerms(card.perms);
-                return (
-                  <div
-                    key={card.id}
-                    onClick={() => handleCardClick(card.id)}
-                    style={{
-                      background: isSelected ? `${borderColor}0D` : T.surface,
-                      borderRadius: 10,
-                      padding: "14px 16px",
-                      borderTop: isSelected
-                        ? `1px solid ${borderColor}40`
-                        : `1px solid ${T.border}`,
-                      borderRight: isSelected
-                        ? `1px solid ${borderColor}40`
-                        : `1px solid ${T.border}`,
-                      borderBottom: isSelected
-                        ? `1px solid ${borderColor}40`
-                        : `1px solid ${T.border}`,
-                      borderLeft: `4px solid ${borderColor}`,
-                      cursor: "pointer",
-                      transition:
-                        "border-color 0.15s, box-shadow 0.15s, background 0.15s",
-                      boxShadow: isPulsing
-                        ? `0 0 0 0 ${borderColor}33`
-                        : isSelected
-                          ? `0 4px 12px ${borderColor}15`
-                          : T.shadow,
-                      animation: isPulsing
-                        ? "cardPulse 0.6s ease-out forwards"
-                        : "none",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) {
-                        (e.currentTarget as HTMLDivElement).style.boxShadow = T.shadowMd;
-                        const el = e.currentTarget as HTMLDivElement;
-                        el.style.borderTopColor = `${borderColor}40`;
-                        el.style.borderRightColor = `${borderColor}40`;
-                        el.style.borderBottomColor = `${borderColor}40`;
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) {
-                        (e.currentTarget as HTMLDivElement).style.boxShadow = T.shadow;
-                        const el = e.currentTarget as HTMLDivElement;
-                        el.style.borderTopColor = T.border;
-                        el.style.borderRightColor = T.border;
-                        el.style.borderBottomColor = T.border;
-                      }
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginBottom: 8,
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 7,
-                          minWidth: 0,
-                        }}
-                      >
-                        <span
-                          style={{
-                            width: 12,
-                            height: 12,
-                            borderRadius: "50%",
-                            background: borderColor,
-                            display: "inline-block",
-                            flexShrink: 0,
-                          }}
-                        />
-                        <span
-                          style={{
-                            fontSize: 13,
-                            fontWeight: 600,
-                            color: T.textPrimary,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {card.name}
-                        </span>
-                      </div>
-                      <span
-                        style={{
-                          background: T.hoverBg,
-                          color: T.textSecondary,
-                          borderRadius: 20,
-                          padding: "2px 8px",
-                          fontSize: 11,
-                          fontWeight: 600,
-                          whiteSpace: "nowrap",
-                          flexShrink: 0,
-                          marginLeft: 6,
-                        }}
-                      >
-                        {card.userCount}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 12,
-                        color: T.textSecondary,
-                        marginBottom: 10,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {card.description}
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 4,
-                        marginBottom: 10,
-                      }}
-                    >
-                      {permCount > 0 && (
-                        <span
-                          style={{
-                            background: `${borderColor}10`,
-                            color: borderColor,
-                            borderRadius: 5,
-                            padding: "1px 5px",
-                            fontSize: 10,
-                            fontWeight: 600,
-                            border: `1px solid ${borderColor}25`,
-                            height: 18,
-                            display: "inline-flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          {permCount} разр.
-                        </span>
-                      )}
-                    </div>
-                    <div
-                      style={{
-                        borderTop: `1px solid ${T.border}`,
-                        paddingTop: 8,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                      }}
-                    >
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCardClick(card.id);
-                        }}
-                        style={{
-                          fontSize: 11,
-                          color: T.accent,
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          fontFamily: T.font,
-                          fontWeight: 500,
-                          padding: 0,
-                        }}
-                      >
-                        Ред.
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedRoleId(card.id);
-                          setShowDeleteRole(true);
-                        }}
-                        style={{
-                          fontSize: 11,
-                          color: T.danger,
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          fontFamily: T.font,
-                          fontWeight: 500,
-                          padding: 0,
-                        }}
-                      >
-                        Уд.
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            />
           )}
 
           {viewMode === "registry" && (
-            <div
-              style={{
-                background: T.surface,
-                borderRadius: 10,
-                border: `1px solid ${T.border}`,
-                overflow: "hidden",
-                boxShadow: T.shadow,
+            <RolesRegistryTable
+              roleCards={roleCards}
+              selectedRoleId={selectedRoleId}
+              drawerOpen={drawerOpen}
+              onCardClick={handleCardClick}
+              onDeleteRole={(cardId) => {
+                setSelectedRoleId(cardId);
+                setShowDeleteRole(true);
               }}
-            >
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ background: T.bg }}>
-                    <th style={{ ...thStyle, width: 32, padding: "0 8px 0 16px" }} />
-                    <th style={{ ...thStyle, textAlign: "left", paddingLeft: 8 }}>
-                      Название роли
-                    </th>
-                    <th style={{ ...thStyle, textAlign: "left" }}>Описание</th>
-                    <th style={{ ...thStyle, textAlign: "left" }}>
-                      Пользователей
-                    </th>
-                    <th style={{ ...thStyle, textAlign: "left" }}>Разрешений</th>
-                    <th style={{ ...thStyle, textAlign: "left" }}>
-                      Дата создания
-                    </th>
-                    <th
-                      style={{
-                        ...thStyle,
-                        textAlign: "center",
-                        paddingRight: 16,
-                      }}
-                    >
-                      Действия
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {roleCards.map((card) => {
-                    const isSelected =
-                      selectedRoleId === card.id && drawerOpen;
-                    const borderColor = getRoleColor(card.name).text;
-                    const permCount = countTotalPerms(card.perms);
-                    return (
-                      <tr
-                        key={card.id}
-                        onClick={() => handleCardClick(card.id)}
-                        style={{
-                          height: 48,
-                          borderBottom: `1px solid #F1F5F9`,
-                          background: isSelected
-                            ? `${borderColor}08`
-                            : "transparent",
-                          cursor: "pointer",
-                          transition: "background 0.12s",
-                          borderLeft: `4px solid ${borderColor}`,
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!isSelected)
-                            (e.currentTarget as HTMLTableRowElement).style.background =
-                              "#F8FAFC";
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLTableRowElement).style.background =
-                            isSelected ? `${borderColor}08` : "transparent";
-                        }}
-                      >
-                        <td
-                          style={{
-                            padding: "0 8px 0 12px",
-                            verticalAlign: "middle",
-                            width: 32,
-                          }}
-                        >
-                          <span
-                            style={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: "50%",
-                              background: borderColor,
-                              display: "inline-block",
-                            }}
-                          />
-                        </td>
-                        <td
-                          style={{
-                            padding: "0 12px 0 8px",
-                            verticalAlign: "middle",
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: 14,
-                              fontWeight: 600,
-                              color: borderColor,
-                            }}
-                          >
-                            {card.name}
-                          </span>
-                        </td>
-                        <td
-                          style={{
-                            padding: "0 12px",
-                            verticalAlign: "middle",
-                            maxWidth: 220,
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: 13,
-                              color: T.textSecondary,
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              display: "block",
-                              maxWidth: 200,
-                            }}
-                          >
-                            {card.description}
-                          </span>
-                        </td>
-                        <td style={{ padding: "0 12px", verticalAlign: "middle" }}>
-                          <span
-                            style={{
-                              background: `${borderColor}12`,
-                              color: borderColor,
-                              borderRadius: 20,
-                              padding: "2px 10px",
-                              fontSize: 12,
-                              fontWeight: 600,
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {card.userCount} чел.
-                          </span>
-                        </td>
-                        <td style={{ padding: "0 12px", verticalAlign: "middle" }}>
-                          <span style={{ fontSize: 13, color: T.textSecondary }}>
-                            {permCount} разрешений
-                          </span>
-                        </td>
-                        <td style={{ padding: "0 12px", verticalAlign: "middle" }}>
-                          <span style={{ fontSize: 12, color: T.textSecondary }}>
-                            {card.createdAt}
-                          </span>
-                        </td>
-                        <td
-                          style={{
-                            padding: "0 16px 0 12px",
-                            verticalAlign: "middle",
-                            textAlign: "center",
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: 6,
-                            }}
-                          >
-                            <button
-                              onClick={() => handleCardClick(card.id)}
-                              title="Редактировать"
-                              style={{
-                                width: 28,
-                                height: 28,
-                                borderRadius: 6,
-                                border: `1px solid ${T.border}`,
-                                background: T.surface,
-                                color: T.textSecondary,
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                padding: 0,
-                              }}
-                            >
-                              <Pencil size={13} />
-                            </button>
-                            <button
-                              title="Удалить"
-                              onClick={() => {
-                                setSelectedRoleId(card.id);
-                                setShowDeleteRole(true);
-                              }}
-                              style={{
-                                width: 28,
-                                height: 28,
-                                borderRadius: 6,
-                                border: `1px solid ${T.border}`,
-                                background: T.surface,
-                                color: T.textSecondary,
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                padding: 0,
-                              }}
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            />
           )}
         </div>
 
-        {/* Users table */}
-        <div
-          style={{
-            background: T.surface,
-            borderRadius: 10,
-            border: `1px solid ${T.border}`,
-            overflow: "hidden",
-            boxShadow: T.shadow,
-            // Держим минимальную высоту как у "полной" страницы (10 строк),
-            // иначе на пустом реестре карточка схлопывается и вся раскладка
-            // рядом с сайдбаром прав "прыгает".
-            minHeight: 700,
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div
-            style={{
-              padding: "14px 20px 12px",
-              borderBottom: `1px solid ${T.border}`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 12,
-            }}
-          >
-            <div>
-              <div
-                style={{ fontSize: 14, fontWeight: 700, color: T.textPrimary }}
-              >
-                {isRoleFiltered ? (
-                  <span>
-                    <span>Пользователи с ролью: </span>
-                    <span style={{ color: T.accent }}>{selectedRoleName}</span>
-                  </span>
-                ) : (
-                  <span>Все пользователи и их роли</span>
-                )}
-              </div>
-              <div
-                style={{ fontSize: 12, color: T.textSecondary, marginTop: 2 }}
-              >
-                {isRoleFiltered
-                  ? `Найдено: ${totalUsers}`
-                  : "Назначение ролей сотрудникам системы"}
-              </div>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                background: T.bg,
-                border: `1px solid ${T.border}`,
-                borderRadius: 8,
-                padding: "0 12px",
-                height: 36,
-                minWidth: 200,
-              }}
-            >
-              <Search size={13} color={T.textSecondary} />
-              <input
-                type="text"
-                className="admin__search-input"
-                placeholder="Поиск пользователя..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  border: "none",
-                  outline: "none",
-                  background: "transparent",
-                  fontSize: 13,
-                  color: T.textPrimary,
-                  fontFamily: T.font,
-                  width: "100%",
-                }}
-              />
-            </div>
-          </div>
-          <Table<TableUser>
-            rowKey="id"
-            columns={userColumns}
-            dataSource={displayedUsers}
-            rowSelection={rowSelection}
-            onRow={(user) => ({
-              onClick: () => handleRowClick(user.id),
-              style: {
-                cursor: "pointer",
-                background:
-                  isRoleFiltered &&
-                  !!selectedRoleName &&
-                  user.roles.includes(selectedRoleName)
-                    ? "#EFF6FF"
-                    : undefined,
-              },
-            })}
-            pagination={{
-              current: currentPage,
-              pageSize: PER_PAGE,
-              total: totalUsers,
-              onChange: (page) => setCurrentPage(page),
-              showTotal: (total, range) =>
-                `Показано ${range[0]}-${range[1]} из ${total} пользователей`,
-            }}
-            locale={{ emptyText: "Пользователи не найдены" }}
-          />
-        </div>
+        <RoleUsersTable
+          isRoleFiltered={isRoleFiltered}
+          selectedRoleName={selectedRoleName}
+          totalUsers={totalUsers}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          displayedUsers={displayedUsers}
+          rowSelection={rowSelection}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          onRowClick={handleRowClick}
+        />
       </div>
 
       {profileUser ? (

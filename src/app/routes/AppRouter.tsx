@@ -2,202 +2,50 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppRoutes } from "@shared/config/AppRoutes";
 import { ApiRoutes } from "@shared/api";
 import { tokenControl } from "@shared/lib";
-import { Suspense, lazy } from "react";
+import { Suspense } from "react";
 import { Loader } from "@shared/ui/Loader";
 import PrivateRoute from "./PrivateRoute";
 import WelcomeRoute from "./WelcomeRoute";
-
-// Lazy-loaded страницы
-const Auth = lazy(() =>
-  import("@pages/Auth/Auth").then((m) => ({ default: m.Auth })),
-);
-
-const AuthWelcomePage = lazy(() =>
-  import("@pages/Auth/AuthWelcomePage").then((m) => ({
-    default: m.AuthWelcomePage,
-  })),
-);
-
-const ProfileLayout = lazy(() =>
-  import("@widgets/layout").then((m) => ({ default: m.ProfileLayout })),
-);
-
-const MainLayout = lazy(() =>
-  import("@widgets/layout").then((m) => ({ default: m.MainLayout })),
-);
-
-const ProfilePage = lazy(() =>
-  import("@pages/modules/profile/ProfilePage").then((m) => ({
-    default: m.ProfilePage,
-  })),
-);
-
-const TasksPage = lazy(() =>
-  import("@pages/modules/profile/TasksPage").then((m) => ({
-    default: m.TasksPage,
-  })),
-);
-const CalendarPage = lazy(() =>
-  import("@pages/modules/profile/CalendarPage").then((m) => ({
-    default: m.CalendarPage,
-  })),
-);
-
-const AnalyticsPage = lazy(() =>
-  import("@pages/modules/profile/AnalyticsPage").then((m) => ({
-    default: m.AnalyticsPage,
-  })),
-);
-
-const InternalCorrespondenceReadPage = lazy(() =>
-  import("@pages/modules/correspondence/InternalCorrespondenceRead").then(
-    (m) => ({ default: m.InternalCorrespondenceRead }),
-  ),
-);
-
-const RegistryTable = lazy(() =>
-  import("@widgets/RegistryTable").then((m) => ({
-    default: m.RegistryTable,
-  })),
-);
-
-const NewRegistry = lazy(() =>
-  import("@widgets/NewRegistry").then((m) => ({
-    default: m.NewRegistry,
-  })),
-);
-
-const CorrespondencePage = lazy(() =>
-  import("@pages/modules/correspondence/CorrespondencePage").then((m) => ({
-    default: m.CorrespondencePage,
-  })),
-);
-
-const CreateCorrespondencePage = lazy(() =>
-  import("@pages/modules/correspondence/CreateCorrespondencePage").then(
-    (m) => ({ default: m.CreateCorrespondencePage }),
-  ),
-);
-
-const ShowCorrespondencePage = lazy(() =>
-  import("@pages/modules/correspondence/ShowCorrespondencePage").then((m) => ({
-    default: m.ShowCorrespondencePage,
-  })),
-);
-
-const PlaceholderPage = lazy(() =>
-  import("@pages/modules/placeholderpage/PlaceholderPage").then((m) => ({
-    default: m.PlaceholderPage,
-  })),
-);
-
-const NotFoundPage = lazy(() =>
-  import("@shared/ui/NotFoundPage/NotFoundPage").then((m) => ({
-    default: m.NotFoundPage,
-  })),
-);
-
-const CorrespondenceTableWrapper = lazy(() =>
-  import("@widgets/RegistryTable").then((m) => ({
-    default: m.CorrespondenceTableWrapper,
-  })),
-);
-
-const NewCorrespondenceTableWrapper = lazy(() =>
-  import("@widgets/NewRegistry").then((m) => ({
-    default: m.NewCorrespondenceTableWrapper,
-  })),
-);
-
-const HrLayoutPage = lazy(() =>
-  import("@pages/modules/hr/Hr").then((m) => ({ default: m.HrLayoutPage })),
-);
-const TasksModulePage = lazy(() =>
-  import("@pages/modules/tasks/TasksModulePage").then((m) => ({
-    default: m.TasksModulePage,
-  })),
-);
-const HrEmployeesPage = lazy(() =>
-  import("@pages/modules/hr/EmployeesPage").then((m) => ({
-    default: m.HrEmployeesPage,
-  })),
-);
-const HrAccessPage = lazy(() =>
-  import("@pages/modules/hr/AccessPage").then((m) => ({
-    default: m.HrAccessPage,
-  })),
-);
-const HrOrdersPage = lazy(() =>
-  import("@pages/modules/hr/OrdersPage").then((m) => ({
-    default: m.HrOrdersPage,
-  })),
-);
-const HrTimesheetPage = lazy(() =>
-  import("@pages/modules/hr/TimesheetPage").then((m) => ({
-    default: m.HrTimesheetPage,
-  })),
-);
-const HrStaffingPage = lazy(() =>
-  import("@pages/modules/hr/StaffingPage").then((m) => ({
-    default: m.HrStaffingPage,
-  })),
-);
-
-// Administration module
-const AdministrationLayoutPage = lazy(() =>
-  import("@pages/modules/administration/Administration").then((m) => ({
-    default: m.AdministrationLayoutPage,
-  })),
-);
-const AdministrationHomePage = lazy(() =>
-  import("@pages/modules/administration/AdministrationHomePage").then((m) => ({
-    default: m.AdministrationHomePage,
-  })),
-);
-const AdminUsersPage = lazy(() =>
-  import("@pages/modules/administration/AdminUsersPage").then((m) => ({
-    default: m.AdminUsersPage,
-  })),
-);
-const AdminRolesPage = lazy(() =>
-  import("@pages/modules/administration/AdminRolesPage").then((m) => ({
-    default: m.AdminRolesPage,
-  })),
-);
-const AdminTabsLayout = lazy(() =>
-  import("@widgets/Administration").then((m) => ({
-    default: m.AdminTabsLayout,
-  })),
-);
-
-// const InternalСorrespondencePage = lazy(() =>
-//   import("@pages/modules/correspondence/InternalСorrespondencePage").then(
-//     (m) => ({ default: m.InternalСorrespondencePage }),
-//   ),
-// );
-
-const incomingParams = {
-  kind: "incoming",
-};
-
-const outgoingParams = {
-  kind: "outgoing",
-  
-};
-
-const archivedParams = {
-  archived: 1,
-};
-
-const pinnedParams = {
-  pinned: 1,
-};
-
-const trashedParams = {
-  trashed: 1,
-};
-
 import { TabNavigation } from "@widgets/TabNavigation/ui/TabNavigation";
+import {
+  incomingParams,
+  outgoingParams,
+  archivedParams,
+  pinnedParams,
+  trashedParams,
+} from "./routesModel";
+import {
+  Auth,
+  AuthWelcomePage,
+  ProfileLayout,
+  MainLayout,
+  ProfilePage,
+  TasksPage,
+  CalendarPage,
+  AnalyticsPage,
+  InternalCorrespondenceReadPage,
+  RegistryTable,
+  NewRegistry,
+  CorrespondencePage,
+  CreateCorrespondencePage,
+  ShowCorrespondencePage,
+  PlaceholderPage,
+  NotFoundPage,
+  CorrespondenceTableWrapper,
+  NewCorrespondenceTableWrapper,
+  HrLayoutPage,
+  TasksModulePage,
+  HrEmployeesPage,
+  HrAccessPage,
+  HrOrdersPage,
+  HrTimesheetPage,
+  HrStaffingPage,
+  AdministrationLayoutPage,
+  AdministrationHomePage,
+  AdminUsersPage,
+  AdminRolesPage,
+  AdminTabsLayout,
+} from "./lazyPages";
 
 export const AppRouter = () => {
   return (
@@ -344,7 +192,6 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        // <CorrespondenceTableWrapper type="internal-incoming" />
                         <NewCorrespondenceTableWrapper type="internal-incoming" />
                       }
                     />
@@ -365,10 +212,6 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        // <CorrespondenceTableWrapper
-                        //   type="internal-outgoing"
-                        //   createButtonText="Добавить письмо"
-                        // />
                         <NewCorrespondenceTableWrapper
                           type="internal-outgoing"
                           createButtonText="Добавить"
@@ -396,10 +239,6 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        // <CorrespondenceTableWrapper
-                        //   type="internal-drafts"
-                        //   createButtonText="Добавить письмо"
-                        // />
                         <NewCorrespondenceTableWrapper type="internal-drafts" />
                       }
                     />
@@ -408,11 +247,6 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        // <RegistryTable
-                        //   type="internal-archived"
-                        //   url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
-                        //   extraParams={archivedParams}
-                        // />
                         <NewRegistry
                           type="internal-archived"
                           url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
@@ -425,11 +259,6 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        // <RegistryTable
-                        //   type="internal-pinned"
-                        //   url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
-                        //   extraParams={pinnedParams}
-                        // />
                         <NewRegistry
                           type="internal-pinned"
                           url={ApiRoutes.GET_INTERNAL_CORRESPONDENCES}
@@ -442,10 +271,6 @@ export const AppRouter = () => {
                     <Route
                       index
                       element={
-                        // <RegistryTable
-                        //   type="internal-trashed"
-                        //   url={ApiRoutes.GET_INTERNAL_TRASH}
-                        // />
                         <NewRegistry
                           type="internal-trashed"
                           url={ApiRoutes.GET_INTERNAL_TRASH}
@@ -493,7 +318,6 @@ export const AppRouter = () => {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
-
     </BrowserRouter>
   );
 };

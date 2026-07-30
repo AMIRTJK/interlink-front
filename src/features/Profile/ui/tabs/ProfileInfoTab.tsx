@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback, memo } from "react";
+import { memo } from "react";
 import { motion } from "framer-motion";
 import {
 	Phone,
@@ -6,35 +6,15 @@ import {
 	Building2,
 	Briefcase,
 	Calendar as CalendarIcon,
-	Camera,
 	Mail,
 	MapPin,
 } from "lucide-react";
 import { IUser } from "@entities/login";
-import { ApiRoutes } from "@shared/api";
-import { tokenControl } from "@shared/lib";
-import { useMutationQuery } from "@shared/lib/hooks";
-import { toast } from "@shared/lib/toast";
 import { Loader, If } from "@shared/ui";
-import { getEnvVar } from "@shared/config";
-import userAvatar from "../../../../assets/images/user-avatar.jpg";
 import { THEMES } from "@widgets/layout/ui/designSettings";
-
-const resolvePhotoUrl = (path?: string | null): string => {
-	if (!path) return "";
-	if (
-		path.startsWith("http://") ||
-		path.startsWith("https://") ||
-		path.startsWith("data:")
-	) {
-		return path;
-	}
-	const apiHost = getEnvVar("VITE_API_URL") || "";
-	const host = apiHost.endsWith("/") ? apiHost.slice(0, -1) : apiHost;
-	let p = path.replace(/^\/+/, "");
-	if (!p.startsWith("storage/")) p = `storage/${p}`;
-	return `${host}/${p}`;
-};
+import { ProfileAvatarCard } from "./profileInfo/ProfileAvatarCard";
+import { Card, InfoRow } from "./profileInfo/ProfileInfoCards";
+import { formatDate, orDash } from "./profileInfo/profileInfoLib";
 
 interface IProps {
 	userData: IUser | null;
@@ -43,120 +23,15 @@ interface IProps {
 	currentTheme?: string;
 }
 
-const MAX_PHOTO_SIZE_MB = 5;
-const NOT_SET = "Не указано";
-
-const orDash = (value?: string | null): string =>
-	value && String(value).trim() ? String(value) : NOT_SET;
-
-const formatDate = (iso?: string | null): string => {
-	if (!iso) return NOT_SET;
-	const d = new Date(iso);
-	if (Number.isNaN(d.getTime())) return NOT_SET;
-	return d.toLocaleDateString("ru-RU", {
-		day: "numeric",
-		month: "long",
-		year: "numeric",
-	});
-};
-
-interface IInfoRowProps {
-	icon: React.ReactNode;
-	label: string;
-	value: string;
-}
-
-const InfoRow = memo(({ icon, label, value }: IInfoRowProps) => (
-	<div className="flex! items-start! gap-3!">
-		<span className="text-zinc-400! mt-0.5! shrink-0!">{icon}</span>
-		<div className="min-w-0!">
-			<span className="block! text-[10px]! font-bold! text-zinc-400! uppercase! tracking-wider!">
-				{label}
-			</span>
-			<span
-				className={`text-sm! font-medium! break-words! ${
-					value === NOT_SET
-						? "text-zinc-400! dark:text-zinc-500! italic!"
-						: "text-zinc-800! dark:text-zinc-200!"
-				}`}
-			>
-				{value}
-			</span>
-		</div>
-	</div>
-));
-
-const Card = memo(({
-	title,
-	children,
-}: {
-	title: string;
-	children: React.ReactNode;
-}) => (
-	<div className="bg-white/40! dark:bg-slate-800/90! backdrop-blur-3xl! p-6! rounded-[2.5rem]! border! border-white/20! dark:border-slate-700/50! shadow-sm!">
-		<h3 className="text-xs! font-bold! text-zinc-400! dark:text-zinc-500! uppercase! tracking-wider! mb-4!">
-			{title}
-		</h3>
-		<div className="grid! grid-cols-1! md:grid-cols-2! gap-5!">{children}</div>
-	</div>
-));
-
 export const ProfileInfoTab = memo(({
 	userData,
 	isLoading,
 	onEdit,
 	currentTheme,
 }: IProps) => {
-	const fileInputRef = useRef<HTMLInputElement>(null);
-	const [avatarError, setAvatarError] = useState(false);
-
-	useEffect(() => {
-		setAvatarError(false);
-	}, [userData?.photo_url, userData?.photo_path]);
-
 	const themeKey =
 		currentTheme || localStorage.getItem("currentTheme") || "emerald";
 	const activeTheme = THEMES[themeKey] || THEMES.emerald;
-
-	const { mutate: uploadAvatar, isPending: isUploading } =
-		useMutationQuery<FormData>({
-			url: ApiRoutes.UPDATE_ME,
-			method: "POST",
-			messages: {
-				success: "Фото профиля обновлено",
-				error: "Ошибка при загрузке фото",
-				invalidate: [
-					ApiRoutes.AUTH_ME,
-					`${ApiRoutes.FETCH_USER_BY_ID}${tokenControl.getUserId()}`,
-				],
-			},
-		});
-
-	const handleAvatarClick = useCallback(() => {
-		fileInputRef.current?.click();
-	}, []);
-
-	const handleFileChange = useCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const file = e.target.files?.[0];
-			if (file) {
-				if (!file.type.startsWith("image/")) {
-					toast.error("Загрузите изображение (JPG, PNG или WEBP)");
-				} else if (file.size > MAX_PHOTO_SIZE_MB * 1024 * 1024) {
-					toast.error(`Файл больше ${MAX_PHOTO_SIZE_MB} MB`);
-				} else {
-					const formData = new FormData();
-					formData.append("_method", "PATCH");
-					formData.append("photo", file);
-					uploadAvatar(formData);
-				}
-			}
-			e.target.value = "";
-		},
-		[uploadAvatar],
-	);
-
-	const handleAvatarError = useCallback(() => setAvatarError(true), []);
 
 	return (
 		<div>
@@ -173,63 +48,11 @@ export const ProfileInfoTab = memo(({
 					className="grid! grid-cols-1! lg:grid-cols-3! gap-6!"
 				>
 					<div className="lg:col-span-1!">
-						<div className="bg-white/40! dark:bg-slate-800/90! backdrop-blur-3xl! p-6! rounded-[2.5rem]! border! border-white/20! dark:border-slate-700/50! shadow-sm! flex! flex-col! items-center!">
-							<div className="relative! mb-4!">
-								<button
-									type="button"
-									onClick={handleAvatarClick}
-									aria-label="Изменить фото профиля"
-									className={`group! relative! block! rounded-[2.5rem]! overflow-hidden! focus:outline-none! focus:ring-2! focus:ring-indigo-400/40! ${
-										isUploading
-											? "opacity-60! pointer-events-none!"
-											: "cursor-pointer!"
-									}`}
-								>
-									<img
-										src={
-											avatarError
-												? userAvatar
-												: userData?.photo_url ||
-												  resolvePhotoUrl(userData?.photo_path) ||
-												  userAvatar
-										}
-										alt="Аватар"
-										className="w-64! h-64! rounded-[2.5rem]! border-2! border-white/60! dark:border-zinc-900/60! object-cover! shadow-lg!"
-										onError={handleAvatarError}
-									/>
-									<span className="absolute! inset-0! bg-black/40! flex! flex-col! items-center! justify-center! gap-1! text-white! opacity-0! group-hover:opacity-100! transition-opacity!">
-										<Camera size={26} />
-										<span className="text-xs! font-semibold!">
-											{isUploading ? "Загрузка…" : "Изменить фото"}
-										</span>
-									</span>
-								</button>
-								<span className="absolute! bottom-1! right-1! w-4! h-4! rounded-full! border-2! border-white/60! dark:border-zinc-900/60! bg-emerald-500! shadow-lg!" />
-								<input
-									type="file"
-									ref={fileInputRef}
-									className="hidden!"
-									accept="image/*"
-									onChange={handleFileChange}
-								/>
-							</div>
-							<h2 className="text-base! font-bold! text-zinc-900! dark:text-white! text-center!">
-								{orDash(userData?.full_name)}
-							</h2>
-							<p className="text-xs! text-zinc-500! dark:text-zinc-400! mt-1!">
-								{orDash(userData?.position)}
-							</p>
-							<p className="text-xs! text-zinc-500! dark:text-zinc-400!">
-								{orDash(userData?.organization?.name)}
-							</p>
-							<button
-								type="button"
-								onClick={onEdit}
-								className={`mt-5! w-full! bg-gradient-to-r! ${activeTheme.gradient} hover:opacity-90! text-white! py-2.5! rounded-[2.5rem]! text-sm! font-semibold! transition-all! shadow-md! border-0! cursor-pointer!`}
-							>
-								Настройки
-							</button>
-						</div>
+						<ProfileAvatarCard
+							userData={userData}
+							onEdit={onEdit}
+							gradient={activeTheme.gradient}
+						/>
 					</div>
 
 					<div className="lg:col-span-2! space-y-6!">
