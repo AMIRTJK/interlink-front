@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 14 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
-- **Последнее обновление:** 2026-07-30 — закрыт `shared/ui/SmartSearchModal/ui.tsx`; модуль 2 пройден целиком, чекпоинт на модуле 3 (`widgets/Administration/ui/UserProfileModal.tsx`).
+- **Прогресс:** 15 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
+- **Последнее обновление:** 2026-07-30 — закрыт `widgets/Administration/ui/UserProfileModal.tsx`; чекпоинт на `widgets/Administration/ui/RolesView.tsx`.
 
 ---
 
@@ -93,11 +93,12 @@
 
 - [x] `S` 269 → `shared/ui/SmartSearchModal/ui.tsx` → **124**
 
-⏹ **ЧЕКПОИНТ**
-
 ### Модуль 3 — Администрирование
 
-- [ ] `L` 1421 → `widgets/Administration/ui/UserProfileModal.tsx`
+- [x] `L` 1421 → `widgets/Administration/ui/UserProfileModal.tsx` → **173**
+
+⏹ **ЧЕКПОИНТ**
+
 - [ ] `L` 1183 → `widgets/Administration/ui/RolesView.tsx`
 - [ ] `L` 1071 → `widgets/Administration/ui/AddUserModal.tsx`
 - [ ] `L` 971 → `widgets/Administration/ui/CreateRoleModal.tsx`
@@ -224,6 +225,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-30 | `widgets/Administration/ui/UserProfileModal.tsx` | новая подпапка `userProfileModal/` (8 файлов): `userProfileModalModel.ts` (`ACCESS_LEVEL_ITEMS`, `clonePerms`, `EMPTY_PERMS`), `useUserProfileModalState.ts` (состояния вкладок, ролей, точечных переопределений direct/denied, `useGetQuery` прав пользователя, мутации `setUserRolesM`, `updateDirectM`, `updateDeniedM`, `updateStatusM`), `UserProfileHeader.tsx` (шляпа с аватаром, статусом, ФИО и вкладками), `UserProfileTabProfile.tsx` (вкладка «Профиль»), `UserProfileTabAccess.tsx` (вкладка «Права доступа»), `UserProfileTabSessions.tsx` (вкладка «Сессии»), `UserProfileTabHistory.tsx` (вкладка «История»), `UserProfileFooter.tsx` (кнопки сохранения и меню смены статуса) | 1421 → **173** (макс. новый — 374) | на ревью |
 | 2026-07-30 | `shared/ui/SmartSearchModal/ui.tsx` | 3 файла: `ui/SearchInputBar.tsx` (поле ввода поиска `Input`), `ui/SelectedBadgesBar.tsx` (панель выбраных чипсов/элементов), `useSmartSearchState.ts` (поисковый запрос `useGetQuery`, разбор различных контрактов ответа API, управление выделением `selectedIds`, `selectedItemsMap`, предпросмотром `activePreviewItem`) | 269 → **124** (макс. новый — 143) | на ревью |
 | 2026-07-30 | `shared/ui/UniversalTable/ui.tsx` | 3 файла: `model.ts` (`IProps`, `DEFAULT_PAGE_SIZE`, `NUMERIC_FIELDS`), `customItemRender.tsx` (отрисовка кастомных стрелок и кнопок пагинации «Назад» / «Дальше»), `useUniversalTableState.ts` (сбор параметров `searchParams`/`activeFilters`, `transformFilterValues`, очистка пустых/числовых значений, `useGetQuery`, реакция на `'correspondence-moved'`) | 371 → **99** (макс. новый — 190) | на ревью |
 | 2026-07-30 | `widgets/layout/ui/Header.tsx` | новая подпапка `header/` (6 файлов): `headerModel.ts` (`IProps`, `resolvePhotoUrl`), `HeaderThemePopover.tsx` (поповер `THEMES`), `HeaderBgPopover.tsx` (поповер `BACKGROUNDS`), `HeaderLayoutPopover.tsx` (поповер макетов и чекбокс `moveHeader`), `HeaderUserBadge.tsx` (аватар, имя, статус), `HeaderActionButtons.tsx` (кнопки уведомлений, чата, режима, выхода), `useHeaderState.ts` (состояние `isDarkMode`, модалок, аватар-ошибки) | 432 → **99** (макс. новый — 190) | на ревью |
@@ -245,6 +247,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Находка |
 |---|---|---|
+| 2026-07-30 | `widgets/Administration/ui/UserProfileModal.tsx` | Вкладки «Сессии» и «История» вызывают моки `mockSessions()`, `mockHistory()`, `mockProfileStats()`; `useUserProfileModalState.ts` делает нестрогие касты при получении `effective_permissions`/`direct_permissions`/`denied_permissions` |
 | 2026-07-30 | `shared/ui/SmartSearchModal/` | `useSmartSearchState.ts` разбирает 5 видов вложенности массивов ответа API (`Array.isArray`, `items`, `data`, `data.items`, `data.data`) с кастом `(fetchedData as any)`; сохранён закомментированный код ограничения `// if (!isSelected && prev.selectedIds.length >= 3)` |
 | 2026-07-30 | `shared/ui/UniversalTable/` | `NUMERIC_FIELDS` содержит хардкод названий доменных полей бэкенда (`creator_id`, `assignee_user_id`, `assignee_department_id`) внутри общего инфраструктурного UI-компонента слоя `shared`; в `customItemRender.tsx` проп `disabled` читается через `(originalElement as any).props.disabled` |
 | 2026-07-30 | `widgets/layout/ui/Header.tsx` | `HeaderUserBadge.tsx` использует `any` в `userData`; в поповерах настроек прямой доступ к `localStorage` по хардкод-ключам `"currentTheme"`, `"currentBg"`, `"layoutMode"` |
