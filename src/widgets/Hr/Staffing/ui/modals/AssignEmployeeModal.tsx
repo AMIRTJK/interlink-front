@@ -70,18 +70,11 @@ export const AssignEmployeeModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+      <div
         className="fixed inset-0 bg-black/60"
         onClick={onClose}
       />
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 12 }}
-        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+      <div
         className={`relative ${cardBg} rounded-3xl shadow-2xl w-full max-w-md z-50 flex flex-col overflow-hidden`}
         style={{ maxHeight: '88vh' }}
       >
@@ -258,7 +251,7 @@ export const AssignEmployeeModal = ({
             <span>Готово</span>
           </motion.button>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

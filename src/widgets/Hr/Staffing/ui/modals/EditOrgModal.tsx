@@ -76,18 +76,11 @@ export const EditOrgModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+      <div
         className="fixed inset-0 bg-black/60"
         onClick={onClose}
       />
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 12 }}
-        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+      <div
         className={`relative ${cardBg} rounded-3xl shadow-2xl w-full max-w-md overflow-hidden z-50`}
       >
         <div
@@ -320,7 +313,7 @@ export const EditOrgModal = ({
             </motion.button>
           </div>
         </div>
-      </motion.div>
+      </div>
       <AnimatePresence>
         <If is={pickerOpen}>
           <EmployeePickerModal
