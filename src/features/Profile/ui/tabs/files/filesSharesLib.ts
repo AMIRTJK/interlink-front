@@ -28,6 +28,7 @@ export interface ISharedWithMeEntry {
 	name: string;
 	value: number;
 	fill: string;
+	[key: string]: any;
 }
 
 export interface ISharedFolderEntry {

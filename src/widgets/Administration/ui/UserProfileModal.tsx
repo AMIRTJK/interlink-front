@@ -162,7 +162,7 @@ export function UserProfileModal({
           setUserRolesPending={setUserRolesM.isPending}
           handleSaveOverrides={handleSaveOverrides}
           permsInitialized={permsInitialized}
-          isUserPermsLoading={isUserPermsLoading}
+          isUserPermsLoading={Boolean(isUserPermsLoading)}
           updateDirectPending={updateDirectM.isPending}
           updateDeniedPending={updateDeniedM.isPending}
           actionDropdownRef={actionDropdownRef}
