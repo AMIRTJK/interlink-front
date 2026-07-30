@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 3 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
-- **Последнее обновление:** 2026-07-30 — закрыт `useFilesData.ts`, чекпоинт на `ProfileInfoTab.tsx`.
+- **Прогресс:** 4 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
+- **Последнее обновление:** 2026-07-30 — закрыт `ProfileInfoTab.tsx`, чекпоинт на `FilesUserShares.tsx`.
 
 ---
 
@@ -67,9 +67,10 @@
 
 - [x] `S` 313 → `features/Profile/ui/tabs/files/useFilesData.ts` → **214**
 
+- [x] `S` 307 → `features/Profile/ui/tabs/ProfileInfoTab.tsx` → **130**
+
 ⏹ **ЧЕКПОИНТ**
 
-- [ ] `S` 307 → `features/Profile/ui/tabs/ProfileInfoTab.tsx`
 - [ ] `S` 305 → `features/Profile/ui/tabs/files/FilesUserShares.tsx`
 - [ ] `S` 272 → `features/Profile/ui/tabs/files/FileCard.tsx`
 - [ ] `S` 269 → `features/Profile/ui/tabs/files/FilesHeader.tsx`
@@ -216,6 +217,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-30 | `features/Profile/ui/tabs/ProfileInfoTab.tsx` | новая подпапка `profileInfo/` (по образцу `files/`): `profileInfoLib.ts` (`resolvePhotoUrl`, `orDash`, `formatDate`, константы), `ProfileInfoCards.tsx` (`InfoRow`, `Card`), `useProfileAvatarUpload.ts` (загрузка фото + сброс ошибки аватара), `ProfileAvatarCard.tsx` (левая карточка со своим состоянием) | 307 → **130** (макс. новый — 85) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/files/useFilesData.ts` | 3 файла: `filesDataModel.ts` (типы + `COUNT_FETCH_SIZE`), `filesDataLib.ts` (`buildFolderFileCounts`, `getArrayData`, `sortByManualOrder`, `getFolderIcon`, `buildCategoriesList`), `useFilesQueries.ts` (мемо-параметры + 7 `useGetQuery`) | 313 → **214** (макс. новый — 104) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/files/FileList.tsx` | 5 файлов: `fileRowVisuals.tsx` (`getSmallIcon`, `getTypeBadge`), `fileListLib.ts` (`downloadFile`, `formatFileDate`), `useFileDragReorder.ts` (состояние и обработчики перетаскивания), `FileListHeader.tsx` (`thead`), `FileListRow.tsx` (`tr`) | 395 → **80** (макс. новый — 197) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/FilesTab.tsx` | 9 файлов в `files/`: `filesTabModel.ts` (типы), `lazyModals.ts` (7 lazy-объявлений), `confirmations.ts` (3 обёртки `Modal.confirm`), `FilesDropzone.tsx` (+ собственные `isDragOver`/`fileInputRef`), `FilesStates.tsx`, `BulkActionsBar.tsx`, `useFilesSelection.ts`, `useFilesTabActions.ts` (состояние модалок + 10 обработчиков), `FilesModals.tsx` | 522 → **231** (макс. новый — 198) | коммит `23b5c16` — на ревью |
@@ -243,6 +245,10 @@ XL не влезает в одну сессию. Работаем **срезам
 | 2026-07-30 | `files/useFilesData.ts` | `params.dir` стоит в зависимостях трёх `useMemo` (`sharedFiles`, `pinnedFiles`, `currentFiles`), но внутри не используется — направление сортировки применяет бэкенд. Лишняя зависимость, перенесена как есть |
 | 2026-07-30 | `files/useFilesQueries.ts` | На один экран уходит по два запроса к `MY_FILES` и к `MY_FILES_SHARED_WITH_ME`: основной постраничный и «счётный» с `per_page: 100`. Счётчики считаются на клиенте через `Math.max` из четырёх источников — похоже на обход отсутствующего общего счётчика на бэкенде |
 | 2026-07-30 | `files/useFilesData.ts` | `filesPagination` и `sharedFilesPagination` — новые объекты на каждом рендере, уходят вниз пропсами. Кандидат на `useMemo` в перф-проходе |
+| 2026-07-30 | `tabs/ProfileInfoTab.tsx` | `THEMES` тянется из `@widgets/layout/ui/designSettings` — импорт из `features` в `widgets`, да ещё глубокий, в обход публичного API. Нарушение `AGENTS.md` §3, перенесено как есть |
+| 2026-07-30 | `tabs/ProfileInfoTab.tsx` | Тема читается напрямую из `localStorage.getItem("currentTheme")` внутри компонента, ключ — строка без константы (§7) |
+| 2026-07-30 | `tabs/ProfileInfoTab.tsx` | Поля `birth_date`/`birthday`, `address`, `work_email`, `work_phone` читаются через `(userData as any)` — тип `IUser` из `entities/login` не покрывает реальный ответ `auth/me` |
+| 2026-07-30 | `tabs/ProfileInfoTab.tsx` | В блоке «Биография» строка `"Не указано"` захардкожена, хотя рядом используется константа `NOT_SET` с тем же значением |
 | 2026-07-30 | `files/useFilesData.ts` | Хук возвращает 24 поля, потребитель использует ~17: `refetchFiles`, `isLoadingFolders`, `refetchFolders`, `isLoadingMeta`, `refetchMeta`, `refetchSharedFiles`, `isLoadingSharedFolders`, `refetchSharedFolders` нигде не читаются |
 
 ---
