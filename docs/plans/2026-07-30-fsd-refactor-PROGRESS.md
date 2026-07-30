@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 4 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
-- **Последнее обновление:** 2026-07-30 — закрыт `ProfileInfoTab.tsx`, чекпоинт на `FilesUserShares.tsx`.
+- **Прогресс:** 5 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
+- **Последнее обновление:** 2026-07-30 — закрыт `FilesUserShares.tsx`, чекпоинт на `FileCard.tsx`.
 
 ---
 
@@ -69,9 +69,10 @@
 
 - [x] `S` 307 → `features/Profile/ui/tabs/ProfileInfoTab.tsx` → **130**
 
+- [x] `S` 305 → `features/Profile/ui/tabs/files/FilesUserShares.tsx` → **41**
+
 ⏹ **ЧЕКПОИНТ**
 
-- [ ] `S` 305 → `features/Profile/ui/tabs/files/FilesUserShares.tsx`
 - [ ] `S` 272 → `features/Profile/ui/tabs/files/FileCard.tsx`
 - [ ] `S` 269 → `features/Profile/ui/tabs/files/FilesHeader.tsx`
 - [ ] `S` 253 → `features/Profile/ui/tabs/files/ShareFileModal.tsx`
@@ -217,6 +218,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-30 | `features/Profile/ui/tabs/files/FilesUserShares.tsx` | 4 файла: `filesSharesLib.ts` (цвета, стиль тултипа, типы, `buildSharedWithMeData`, `buildSharedFoldersData`), `FilesSharesEmptyBar.tsx`, `SharedWithMeCard.tsx` (левая карточка с диаграммой/списком и пагинацией), `MySharesCard.tsx` (правая карточка) | 305 → **41** (макс. новый — 174) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/ProfileInfoTab.tsx` | новая подпапка `profileInfo/` (по образцу `files/`): `profileInfoLib.ts` (`resolvePhotoUrl`, `orDash`, `formatDate`, константы), `ProfileInfoCards.tsx` (`InfoRow`, `Card`), `useProfileAvatarUpload.ts` (загрузка фото + сброс ошибки аватара), `ProfileAvatarCard.tsx` (левая карточка со своим состоянием) | 307 → **130** (макс. новый — 85) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/files/useFilesData.ts` | 3 файла: `filesDataModel.ts` (типы + `COUNT_FETCH_SIZE`), `filesDataLib.ts` (`buildFolderFileCounts`, `getArrayData`, `sortByManualOrder`, `getFolderIcon`, `buildCategoriesList`), `useFilesQueries.ts` (мемо-параметры + 7 `useGetQuery`) | 313 → **214** (макс. новый — 104) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/files/FileList.tsx` | 5 файлов: `fileRowVisuals.tsx` (`getSmallIcon`, `getTypeBadge`), `fileListLib.ts` (`downloadFile`, `formatFileDate`), `useFileDragReorder.ts` (состояние и обработчики перетаскивания), `FileListHeader.tsx` (`thead`), `FileListRow.tsx` (`tr`) | 395 → **80** (макс. новый — 197) | на ревью |
@@ -245,6 +247,10 @@ XL не влезает в одну сессию. Работаем **срезам
 | 2026-07-30 | `files/useFilesData.ts` | `params.dir` стоит в зависимостях трёх `useMemo` (`sharedFiles`, `pinnedFiles`, `currentFiles`), но внутри не используется — направление сортировки применяет бэкенд. Лишняя зависимость, перенесена как есть |
 | 2026-07-30 | `files/useFilesQueries.ts` | На один экран уходит по два запроса к `MY_FILES` и к `MY_FILES_SHARED_WITH_ME`: основной постраничный и «счётный» с `per_page: 100`. Счётчики считаются на клиенте через `Math.max` из четырёх источников — похоже на обход отсутствующего общего счётчика на бэкенде |
 | 2026-07-30 | `files/useFilesData.ts` | `filesPagination` и `sharedFilesPagination` — новые объекты на каждом рендере, уходят вниз пропсами. Кандидат на `useMemo` в перф-проходе |
+| 2026-07-30 | `files/FilesUserShares.tsx` | `EmptyBar` был объявлен **внутри** тела компонента — новый тип компонента на каждый рендер и полный ремоунт поддерева. Вынесен в отдельный файл; визуально идентичен (без состояния и анимаций), но это была реальная ошибка |
+| 2026-07-30 | `files/MySharesCard.tsx` | Карточка «С кем я делюсь» группирует файлы по **папкам**, а не по получателям, хотя подпись гласит «Файлов по получателям» и вторая строка — «Папка в хранилище». Данные не соответствуют заголовку |
+| 2026-07-30 | `files/SharedWithMeCard.tsx` | Кнопки переключения вида используют нативный атрибут `title` вместо `Tooltip` — расходится с `AGENTS.md` §11 |
+| 2026-07-30 | `files/SharedWithMeCard.tsx` | Пагинация считает `total` по всем общим файлам, а диаграмма строится только по текущей странице (топ-6 владельцев) — при переходе на вторую страницу картина меняется целиком |
 | 2026-07-30 | `tabs/ProfileInfoTab.tsx` | `THEMES` тянется из `@widgets/layout/ui/designSettings` — импорт из `features` в `widgets`, да ещё глубокий, в обход публичного API. Нарушение `AGENTS.md` §3, перенесено как есть |
 | 2026-07-30 | `tabs/ProfileInfoTab.tsx` | Тема читается напрямую из `localStorage.getItem("currentTheme")` внутри компонента, ключ — строка без константы (§7) |
 | 2026-07-30 | `tabs/ProfileInfoTab.tsx` | Поля `birth_date`/`birthday`, `address`, `work_email`, `work_phone` читаются через `(userData as any)` — тип `IUser` из `entities/login` не покрывает реальный ответ `auth/me` |
