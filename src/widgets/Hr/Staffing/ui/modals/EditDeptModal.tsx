@@ -198,10 +198,9 @@ export const EditDeptModal = ({
             >
               Сохранить
             </motion.button>
-          </motion.button>
           </div>
         </div>
-      </div>
+        </div>
       <AnimatePresence>
         <If is={managerPickerOpen}>
           <EmployeePickerModal
