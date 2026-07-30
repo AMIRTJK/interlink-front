@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 8 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
-- **Последнее обновление:** 2026-07-30 — закрыт `ShareFileModal.tsx`; модуль 0 (Профиль) пройден целиком, чекпоинт на модуле 1 (`features/Login/Login.tsx`).
+- **Прогресс:** 9 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
+- **Последнее обновление:** 2026-07-30 — закрыт `Login.tsx`; модули 0 (Профиль) и 1 (Авторизация) пройдены целиком, чекпоинт на модуле 2 (`app/routes/AppRouter.tsx`).
 
 ---
 
@@ -77,11 +77,11 @@
 
 - [x] `S` 253 → `features/Profile/ui/tabs/files/ShareFileModal.tsx` → **148**
 
-⏹ **ЧЕКПОИНТ**
-
 ### Модуль 1 — Авторизация (тренировочный, изолированный)
 
-- [ ] `M` 482 → `features/Login/Login.tsx`
+- [x] `M` 482 → `features/Login/Login.tsx` → **190**
+
+⏹ **ЧЕКПОИНТ**
 
 ### Модуль 2 — Общий каркас (layout, роутинг, shared)
 
@@ -220,6 +220,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-30 | `features/Login/Login.tsx` | 7 файлов: `loginModel.ts` (`TAuthStep`, `OTP_LENGTH`, `PHONE_LENGTHS`, тема antd `LOGIN_ANTD_THEME`), `loginLib.ts` (`normalizePhoneNumber`, `createEmptyOtp`), `PhoneField.tsx` (префикс + номер, опции стран), `PasswordField.tsx` (пароль с глазом), `LoginOptionsRow.tsx` («Запомнить меня» / «Забыли пароль?»), `LoginAltActions.tsx` (разделитель, соц-кнопки, «Регистрация»), `LoginStep.tsx` (форма входа целиком), `VerificationStep.tsx` (экран 2FA с 6 полями). Состояние, мутации и обработчики остались в `Login.tsx` (хуки не выносились) | 482 → **190** (макс. новый — 86) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/files/ShareFileModal.tsx` | 3 файла: `shareFileModalLib.ts` (тип `IShareData`, `getShareName`), `useSharesQuery.ts` (запрос списка выданных доступов + нормализация ответа `data` / `data.data`), `ShareActiveList.tsx` (левый блок «Уже имеют доступ» вместе со своим `shareSearch`, фильтрацией и кнопкой «Закрыть доступ») | 253 → **148** (макс. новый — 82) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/files/FilesHeader.tsx` | 4 файла: `filesHeaderModel.ts` (`SORT_OPTIONS`, `SORT_LABELS`), `FilesHeaderTabs.tsx` (вкладки «Мои файлы / Доступные мне / Аналитика» со счётчиками и подчёркиванием), `FilesHeaderSearch.tsx` (поиск вместе с локальным `localSearch` и синхронизацией с пропом), `FilesHeaderSort.tsx` (дропдаун сортировки со своим `sortOpen`/click-outside + кнопка направления). Локальные union-типы пропсов заменены на существующие `TFilesSort`/`TFilesSortDir`/`TFilesViewMode`/`TFilesViewContext` из `filesTabModel.ts` (те же литералы). Вложенный тернарник подписи сортировки заменён на `SORT_LABELS` | 269 → **140** (макс. новый — 81) | на ревью |
 | 2026-07-30 | `features/Profile/ui/tabs/files/FileCard.tsx` | 2 файла: `FileCardCover.tsx` (обложка карточки целиком — `COVER_STYLES`, `getCoverContent`, оверлеи: чекбокс выделения, кнопка закрепления, ручка перетаскивания), `FileCardActions.tsx` (ряд иконочных кнопок: просмотр, скачать, переместить, поделиться, удалить). Локальный `formatDate` был байт-в-байт равен `formatFileDate` из `fileListLib.ts` — удалён, карточка использует общий хелпер | 272 → **100** (макс. новый — 125) | на ревью |
@@ -260,6 +261,14 @@ XL не влезает в одну сессию. Работаем **срезам
 | 2026-07-30 | `tabs/ProfileInfoTab.tsx` | Тема читается напрямую из `localStorage.getItem("currentTheme")` внутри компонента, ключ — строка без константы (§7) |
 | 2026-07-30 | `tabs/ProfileInfoTab.tsx` | Поля `birth_date`/`birthday`, `address`, `work_email`, `work_phone` читаются через `(userData as any)` — тип `IUser` из `entities/login` не покрывает реальный ответ `auth/me` |
 | 2026-07-30 | `tabs/ProfileInfoTab.tsx` | В блоке «Биография» строка `"Не указано"` захардкожена, хотя рядом используется константа `NOT_SET` с тем же значением |
+| 2026-07-30 | `features/Login/lib.tsx` | Мёртвый файл: `selectBefore` (antd `Form.Item` со списком из 4 стран) нигде не импортируется. Кандидат на удаление |
+| 2026-07-30 | `features/Login/Login.css` | Файл не импортируется ни из одного модуля — мёртвый |
+| 2026-07-30 | `features/Login/LoginOptionsRow.tsx` | Чекбокс «Запомнить меня» ни к чему не подключён: нет ни состояния, ни отправки на бэкенд — декоративный |
+| 2026-07-30 | `features/Login/LoginOptionsRow.tsx` | Кнопки «Забыли пароль?» и «Регистрация» (в `LoginAltActions.tsx`) без обработчиков — нажатие ничего не делает |
+| 2026-07-30 | `features/Login/LoginAltActions.tsx` | Три кнопки «Или войдите через» (две SVG-иконки + отпечаток пальца) без обработчиков и без `aria-label`; в комментарии прямо написано «оставлены без изменений» |
+| 2026-07-30 | `features/Login/PhoneField.tsx` | В `PHONE_LENGTHS` только `+992` и `+7`, а в мёртвом `lib.tsx` фигурируют ещё `+380` и `+1` — списки стран расходятся |
+| 2026-07-30 | `features/Login/VerificationStep.tsx` | Поля OTP не поддерживают вставку кода из буфера: `maxLength={1}` + посимвольный ввод, при `Ctrl+V` шести цифр заполнится одно поле |
+| 2026-07-30 | `features/Login/Login.tsx` | Оба экрана (логин и 2FA) смонтированы одновременно, неактивный скрывается классами (`opacity-0 absolute`) — расходится с §14.2 «скрытое не монтируется». Не трогал: на этом держится анимация перелистывания |
 | 2026-07-30 | `files/useSharesQuery.ts` | При `item === null` в `useGetQuery` уходит пустой `url` (запрос выключен через `enabled`), но ключ кэша всё равно строится по пустой строке. Работает, но выглядит как обход отсутствия ленивого запроса |
 | 2026-07-30 | `files/useSharesQuery.ts` | Ответ приходит в двух формах — массив или `{ data: [...] }`, нормализация с `as any`. Бэкенд отдаёт разный контракт для файлов и папок |
 | 2026-07-30 | `files/ShareFileModal.tsx` | `handleGrantAccess` показывает свой `toast.success` — при переводе `onInvite` на `useMutationQuery` получится дубль тоста (§9) |
