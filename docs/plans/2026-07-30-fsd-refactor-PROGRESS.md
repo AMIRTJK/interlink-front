@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 12 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
-- **Последнее обновление:** 2026-07-30 — закрыт `Header.tsx`; чекпоинт на `shared/ui/UniversalTable/ui.tsx`.
+- **Прогресс:** 13 / 89 шагов закрыто (из них 4 — кандидаты на `⏭️ SKIP`).
+- **Последнее обновление:** 2026-07-30 — закрыт `shared/ui/UniversalTable/ui.tsx`; чекпоинт на `shared/ui/SmartSearchModal/ui.tsx`.
 
 ---
 
@@ -89,9 +89,10 @@
 
 - [x] `M` 432 → `widgets/layout/ui/Header.tsx` → **99**
 
+- [x] `S` 371 → `shared/ui/UniversalTable/ui.tsx` → **99**
+
 ⏹ **ЧЕКПОИНТ**
 
-- [ ] `S` 371 → `shared/ui/UniversalTable/ui.tsx`
 - [ ] `S` 269 → `shared/ui/SmartSearchModal/ui.tsx`
 
 ### Модуль 3 — Администрирование
@@ -223,6 +224,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-30 | `shared/ui/UniversalTable/ui.tsx` | 3 файла: `model.ts` (`IProps`, `DEFAULT_PAGE_SIZE`, `NUMERIC_FIELDS`), `customItemRender.tsx` (отрисовка кастомных стрелок и кнопок пагинации «Назад» / «Дальше»), `useUniversalTableState.ts` (сбор параметров `searchParams`/`activeFilters`, `transformFilterValues`, очистка пустых/числовых значений, `useGetQuery`, реакция на `'correspondence-moved'`) | 371 → **99** (макс. новый — 190) | на ревью |
 | 2026-07-30 | `widgets/layout/ui/Header.tsx` | новая подпапка `header/` (6 файлов): `headerModel.ts` (`IProps`, `resolvePhotoUrl`), `HeaderThemePopover.tsx` (поповер `THEMES`), `HeaderBgPopover.tsx` (поповер `BACKGROUNDS`), `HeaderLayoutPopover.tsx` (поповер макетов и чекбокс `moveHeader`), `HeaderUserBadge.tsx` (аватар, имя, статус), `HeaderActionButtons.tsx` (кнопки уведомлений, чата, режима, выхода), `useHeaderState.ts` (состояние `isDarkMode`, модалок, аватар-ошибки) | 432 → **99** (макс. новый — 190) | на ревью |
 | 2026-07-30 | `widgets/layout/ui/ModuleMenu/ModuleMenu.tsx` | 5 файлов: `moduleMenuModel.ts` (типы, варианты анимирования, константы `SHARED_ROUTES`, `STORAGE_KEY`), `ModuleMenuHeader.tsx` (вариант `header` — top, sidebar, bottom), `ModuleSubMenuBar.tsx` (второстепенные подменю), `ModuleCustomMenu.tsx` (кастомный вид верхнего меню), `useModuleMenuState.ts` (получение ролей, проверка прав доступа, рекурсивная фильтрация `filteredItems`, сохранение и восстановление контекста) | 476 → **73** (макс. новый — 158) | на ревью |
 | 2026-07-30 | `app/routes/AppRouter.tsx` | 2 файла: `routesModel.ts` (константы параметров `incomingParams`, `outgoingParams` и др.), `lazyPages.ts` (вынос lazy-импортов всех страниц и layout). Полностью удалены закомментированные фрагменты роутинга и закомментированная разводка реестров | 499 → **249** (макс. новый — 186) | на ревью |
@@ -242,6 +244,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Находка |
 |---|---|---|
+| 2026-07-30 | `shared/ui/UniversalTable/` | `NUMERIC_FIELDS` содержит хардкод названий доменных полей бэкенда (`creator_id`, `assignee_user_id`, `assignee_department_id`) внутри общего инфраструктурного UI-компонента слоя `shared`; в `customItemRender.tsx` проп `disabled` читается через `(originalElement as any).props.disabled` |
 | 2026-07-30 | `widgets/layout/ui/Header.tsx` | `HeaderUserBadge.tsx` использует `any` в `userData`; в поповерах настроек прямой доступ к `localStorage` по хардкод-ключам `"currentTheme"`, `"currentBg"`, `"layoutMode"` |
 | 2026-07-30 | `widgets/layout/ui/ModuleMenu/` | `ModuleMenu/lib.tsx` содержит закомментированные варианты пунктов меню ("Организация", "Основные документы", "Первичные документы", "Заявки", "CRM"); в `useModuleMenuState.ts` перехват ошибки в `useEffect` молча пишет `console.log(e)` |
 | 2026-07-30 | `app/routes/AppRouter.tsx` | ~~Закомментированная разводка `RegistryTable` / `NewRegistry`~~ — удалена при декомпозиции `AppRouter.tsx` |
