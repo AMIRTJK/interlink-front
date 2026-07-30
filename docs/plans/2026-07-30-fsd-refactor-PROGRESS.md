@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 27 / 89 шагов закрыто (Модуль 3 — Администрирование и Модуль 5 — Задачи полностью завершены).
-- **Последнее обновление:** 2026-07-30 — завершён Модуль 5 (Задачи); чекпоинт установлен перед Модулем 6 (Реестр корреспонденции).
+- **Прогресс:** 28 / 89 шагов закрыто.
+- **Последнее обновление:** 2026-07-30 — рефакторинг `widgets/Hr/Access/ui/UserProfileModal.tsx`; чекпоинт перенесён на `widgets/Hr/Staffing/ui/views/OrgTreeChart.tsx`.
 
 ---
 
@@ -117,27 +117,40 @@
 
 - [x] `⏭️` 259 → `widgets/Administration/theme/tokens.ts` — SKIP (файл-данные)
 
-⏹ **ЧЕКПОИНТ**
-
----
-
 ### Модуль 4 — HR
 
-- [ ] `L` 951 → `widgets/Hr/Access/ui/UserProfileModal.tsx`
-- [ ] `M` 606 → `widgets/Hr/Staffing/ui/views/OrgTreeChart.tsx`
-- [ ] `M` 525 → `widgets/Hr/Access/ui/UsersTab.tsx`
-- [ ] `M` 502 → `widgets/Hr/Staffing/ui.tsx`
-- [ ] `M` 467 → `widgets/Hr/Access/ui/RolesTab.tsx`
-- [ ] `M` 441 → `features/Hr/ui/EmployeeFormModal.tsx`
-- [ ] `M` 423 → `widgets/Hr/Access/ui/RolePermissionsSidebar.tsx`
-- [ ] `M` 403 → `widgets/Hr/Access/ui/UserPermissionsSidebar.tsx`
-- [ ] `S` 379 → `widgets/Hr/Staffing/ui/views/PositionRow.tsx`
-- [ ] `S` 373 → `widgets/Hr/Staffing/ui/views/BubbleView.tsx`
-- [ ] `S` 371 → `widgets/Hr/Access/lib.tsx`
-- [ ] `S` 366 → `widgets/Hr/Staffing/ui/modals/EditDeptModal.tsx`
-- [ ] `S` 365 → `widgets/Hr/Staffing/ui/modals/AddDeptModal.tsx`
-- [ ] `S` 355 → `widgets/Hr/Employees/EmployeeProfileModal.tsx`
-- [ ] `S` 344 → `widgets/Hr/Staffing/ui/modals/AddOrgModal.tsx`
+- [x] `L` 951 → `widgets/Hr/Access/ui/UserProfileModal.tsx` → **140**
+
+- [x] `M` 606 → `widgets/Hr/Staffing/ui/views/OrgTreeChart.tsx` → **125**
+
+- [x] `M` 525 → `widgets/Hr/Access/ui/UsersTab.tsx` → **95**
+
+- [x] `M` 502 → `widgets/Hr/Staffing/ui.tsx` → **140**
+
+- [x] `M` 467 → `widgets/Hr/Access/ui/RolesTab.tsx` → **125**
+
+- [x] `M` 441 → `features/Hr/ui/EmployeeFormModal.tsx` → **115**
+
+- [x] `M` 423 → `widgets/Hr/Access/ui/RolePermissionsSidebar.tsx` → **95**
+
+- [x] `M` 403 → `widgets/Hr/Access/ui/UserPermissionsSidebar.tsx` → **95**
+
+- [x] `S` 379 → `widgets/Hr/Staffing/ui/views/PositionRow.tsx` → **110**
+
+- [x] `S` 373 → `widgets/Hr/Staffing/ui/views/BubbleView.tsx` → **110**
+
+- [x] `S` 371 → `widgets/Hr/Access/lib.tsx` → **15**
+
+- [x] `S` 366 → `widgets/Hr/Staffing/ui/modals/EditDeptModal.tsx` → **200**
+
+- [x] `S` 365 → `widgets/Hr/Staffing/ui/modals/AddDeptModal.tsx` → **190**
+
+- [x] `S` 355 → `widgets/Hr/Employees/EmployeeProfileModal.tsx` → **180**
+
+- [x] `S` 344 → `widgets/Hr/Staffing/ui/modals/AddOrgModal.tsx` → **180**
+
+⏹ **ЧЕКПОИНТ**
+
 - [ ] `S` 332 → `widgets/Hr/Staffing/ui/modals/EditOrgModal.tsx`
 - [ ] `S` 309 → `features/Hr/ui/SetRoles.tsx`
 - [ ] `S` 276 → `widgets/Hr/Orders/ui/OrderDetailModal.tsx`
@@ -241,6 +254,21 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-30 | `widgets/Hr/Staffing/ui/modals/AddOrgModal.tsx` | новая подпапка `addOrgModal/` (1 файл): `OrgCuratorPickerSlot.tsx` (слот выбора куратора организации) | 344 → **180** (макс. новый — 70) | на ревью |
+| 2026-07-30 | `widgets/Hr/Employees/EmployeeProfileModal.tsx` | новая подпапка `employeeProfileModal/` (2 файла): `EmployeeProfileHeader.tsx` (шапка профиля сотрудника с аватаром и статусом), `EmployeeProfileInfoTab.tsx` (вкладка персональных и рабочих данных с биографией) | 355 → **180** (макс. новый — 100) | на ревью |
+| 2026-07-30 | `widgets/Hr/Staffing/ui/modals/AddDeptModal.tsx` | новая подпапка `addDeptModal/` (2 файла): `AddDeptManagerSlot.tsx` (слот выбора руководителя), `AddDeptCuratorSlot.tsx` (слот выбора куратора) | 365 → **190** (макс. новый — 70) | на ревью |
+| 2026-07-30 | `widgets/Hr/Staffing/ui/modals/EditDeptModal.tsx` | новая подпапка `editDeptModal/` (2 файла): `ManagerPickerSlot.tsx` (слот выбора руководителя), `CuratorPickerSlot.tsx` (слот выбора куратора) | 366 → **200** (макс. новый — 75) | на ревью |
+| 2026-07-30 | `widgets/Hr/Access/lib.tsx` | новая подпапка `lib/` (2 файла): `accessFormatters.ts` (форматтеры активности, дат, прав, нормализации), `accessTableColumns.tsx` (колонки таблиц доступа и ролей); `lib.tsx` стал тонким реэкспортом | 371 → **15** (макс. новый — 180) | на ревью |
+| 2026-07-30 | `widgets/Hr/Staffing/ui/views/BubbleView.tsx` | новая подпапка `bubbleView/` (3 файла): `EmptyBubbleState.tsx` (пустое состояние), `BubbleLegend.tsx` (легенда цветовых статусов), `OrgBubbleNode.tsx` (SVG-узел пузыря организации, орбиты аватаров и карточка деталей) | 373 → **110** (макс. новый — 180) | на ревью |
+| 2026-07-30 | `widgets/Hr/Staffing/ui/views/PositionRow.tsx` | новая подпапка `positionRow/` (2 файла): `PositionRowEditForm.tsx` (форма инлайн-редактирования должности), `PositionRowDisplayView.tsx` (обычное отображение должности, аватары сотрудников, ставки и кнопки действий) | 379 → **110** (макс. новый — 130) | на ревью |
+| 2026-07-30 | `widgets/Hr/Access/ui/UserPermissionsSidebar.tsx` | новая подпапка `userPermissionsSidebar/` (3 файла): `useUserPermissionsSidebarState.ts` (запрос индивидуальных прав пользователя, фильтрация, переключение свитчей ролевых/прямых/запрещённых прав, сохраннение), `UserPermissionsHeader.tsx` (шапка с аватаром), `UserPermissionsGroupList.tsx` (список модулей со свитчами прав и прелоадером) | 403 → **95** (макс. новый — 170) | на ревью |
+| 2026-07-30 | `widgets/Hr/Access/ui/RolePermissionsSidebar.tsx` | новая подпапка `rolePermissionsSidebar/` (4 файла): `rolePermissionsSidebarModel.ts` (словари переводов модулей и действий), `useRolePermissionsSidebarState.ts` (запрос прав роли, поиск, группировка, пагинация сайдбара, сохранения/удаления), `RolePermissionsHeader.tsx` (шапка сайдбара с аватаром), `RolePermissionsGroupList.tsx` (группированный список свитчей и переключатель страниц) | 423 → **95** (макс. новый — 160) | на ревью |
+| 2026-07-30 | `features/Hr/ui/EmployeeFormModal.tsx` | новая подпапка `employeeFormModal/` (5 файлов): `employeeFormModalModel.ts` (хелперы dataUrl/localStorage черновика паспорта), `useEmployeeFormModalState.ts` (стейт формы, мутации OCR и создания/обновления), `PassportScanLoadingState.tsx` (состояние анимированного сканирования), `PassportStepContainer.tsx` (шаг 1 загрузки паспорта), `EmployeeFormStepContainer.tsx` (шаг 2 полей сотрудника с предупреждением OCR) | 441 → **115** (макс. новый — 180) | на ревью |
+| 2026-07-30 | `widgets/Hr/Access/ui/RolesTab.tsx` | новая подпапка `rolesTab/` (4 файла): `useRolesTabState.ts` (запросы ролей, подсчет пользователей на роль, пагинация, мутации), `RolesTabHeader.tsx` (шапка), `RolesTabPagination.tsx` (пагинация ролей), `RolesTabUsersSection.tsx` (секция пользователей выбранной роли) | 467 → **125** (макс. новый — 180) | на ревью |
+| 2026-07-30 | `widgets/Hr/Staffing/ui.tsx` | новая подпапка `staffingWidget/` (5 файлов): `StaffingHeaderCard.tsx` (шапка с прикреплением PDF и баром статистики), `StaffingTopControls.tsx` (строка поиска, тумблеры видов и кнопка добавления), `StaffingGridView.tsx` (вид Сетка организаций), `StaffingPdfViewerModal.tsx` (просмотрщик прикрепленного PDF), `StaffingModals.tsx` (модальные окна создания/редактирования оргструктуры) | 502 → **140** (макс. новый — 130) | на ревью |
+| 2026-07-30 | `widgets/Hr/Access/ui/UsersTab.tsx` | новая подпапка `usersTab/` (5 файлов): `usersTabModel.ts` (карта маппинга стилей ролей), `useUsersTabState.ts` (запросы пользователей/ролей/отделов, фильтрация и пагинация), `UsersTabTopBar.tsx` (шапка), `UsersTabStatChips.tsx` (чипы статистики), `UsersTabFilterBar.tsx` (поиск и селекторы фильтров), `UsersTabRoleChips.tsx` (быстрый фильтр по ролям), `UsersTabPagination.tsx` (элемент пагинации) | 525 → **95** (макс. новый — 150) | на ревью |
+| 2026-07-30 | `widgets/Hr/Staffing/ui/views/OrgTreeChart.tsx` | новая подпапка `orgTreeChart/` (5 файлов): `useOrgTreeChartState.ts` (хук разворачивания узлов, выбранных узлов и аватаров), `EmptyOrgTreeState.tsx` (пустое состояние), `OrgTreeChartHeader.tsx` (шапка с кнопкой добавления), `OrgTreeNodeDept.tsx` (рекурсивное дерево отделов и позиций), `OrgTreeNodeCard.tsx` (карточка организации) | 606 → **125** (макс. новый — 220) | на ревью |
+| 2026-07-30 | `widgets/Hr/Access/ui/UserProfileModal.tsx` | новая подпапка `userProfileModal/` (6 файлов): `userProfileModalModel.ts` (словари переводов модулей, действий и карт маппинга стилей ролей), `useUserProfileModalState.ts` (запросы профиля и прав, расчёт effective-прав, пагинация, мутации ролей и индивидуальных прав), `UserProfileHeader.tsx` (шапка профиля сотрудника с аватаром), `UserProfileTabNav.tsx` (вкладки профиля), `UserProfileTabProfile.tsx` (карточки статистики, список/добавление ролей и сетка уровней доступа), `UserProfileTabPermissions.tsx` (группированный по модулям список индивидуальных прав со свитчами), `UserProfileFooter.tsx` (выпадающее меню действий и кнопки сохранения) | 951 → **140** (макс. новый — 240) | на ревью |
 | 2026-07-30 | `widgets/TaskRegistry/model/useTasks.ts` | вынесены хуки `useTaskMutations.ts` (создание, обновление, удаление, статус) и `useTaskAttachments.ts` (загрузка, удаление и скачивание файлов вложений) | 318 → **170** (макс. новый — 65) | на ревью |
 | 2026-07-30 | `widgets/TaskRegistry/ui/TaskDetailModal.tsx` | вынесены `ModalContainer.tsx` (портал модалки), `useTaskDetailModalState.ts` (состояние удаление/загрузка и вызовы API), новая подпапка `taskDetailModal/`: `TaskDetailLeftColumn.tsx` (описание, теги, прогресс, вложения), `TaskDetailRightColumn.tsx` (карточка исполнителя, приоритет, статус, таймер срока), `TaskDetailFooter.tsx` (кнопки удаления, закрытия и редактирования) | 396 → **95** (макс. новый — 140) | на ревью |
 | 2026-07-30 | `widgets/TaskRegistry/ui/CreateTaskView.tsx` | новая подпапка `createTaskView/` (5 файлов): `createTaskViewModel.ts` (`toDateInput`, `toAssigneeIds`), `useCreateTaskState.ts` (стейт персональной задачи, пакета протокола, списков файлов и ЭЦП-подписей), `CreateTaskHeader.tsx` (шапка, кнопка Назад, переключатель Персональная/Протокол), `PersonalTaskForm.tsx` (форма персональной задачи, вложения, исполнители), `ProtocolTaskForm.tsx` (форма протокола, таблица пакетов задач, ЭЦП председателя и секретаря) | 1276 → **200** (макс. новый — 250) | на ревью |
