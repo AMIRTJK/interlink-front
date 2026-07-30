@@ -294,8 +294,7 @@ export const AddOrgModal = ({
             >
               Отмена
             </button>
-            <motion.button
-              whileTap={{ scale: 0.97 }}
+            <button
               onClick={() => {
                 if (!name.trim()) {
                   setError('Введите название');
@@ -310,7 +309,7 @@ export const AddOrgModal = ({
                   curatorId
                 );
               }}
-              className={`flex-1 py-3 rounded-2xl text-sm font-semibold transition-all shadow-lg ${
+              className={`flex-1 py-3 rounded-2xl text-sm font-semibold transition-colors shadow-lg ${
                 name.trim()
                   ? isMain
                     ? 'bg-amber-500 text-white hover:bg-amber-600'
@@ -321,7 +320,7 @@ export const AddOrgModal = ({
               }`}
             >
               Создать
-            </motion.button>
+            </button>
           </div>
         </div>
       </div>

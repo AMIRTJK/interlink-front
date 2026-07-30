@@ -157,17 +157,15 @@ export const StaffingWidget = ({ dark = false }: IStaffingWidgetProps) => {
           <span className={`text-xs hidden sm:block ${countText}`}>
             {state.organizations.length} орг. · {state.allTotals.totalPositions} должн.
           </span>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
+          <button
             onClick={() => state.setAddOrgOpen(true)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-all shadow-md ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-md ${
               dark ? 'shadow-indigo-900/30' : 'shadow-indigo-200'
             }`}
           >
             <Plus size={15} />
             <span>Организация</span>
-          </motion.button>
+          </button>
         </div>
       </div>
 

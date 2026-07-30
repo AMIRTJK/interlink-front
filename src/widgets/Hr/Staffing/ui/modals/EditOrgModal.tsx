@@ -291,8 +291,7 @@ export const EditOrgModal = ({
             >
               Отмена
             </button>
-            <motion.button
-              whileTap={{ scale: 0.97 }}
+            <button
               onClick={() => {
                 if (!name.trim()) {
                   setError('Введите название');
@@ -310,7 +309,7 @@ export const EditOrgModal = ({
               className="flex-1 py-3 rounded-2xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-900/20"
             >
               Сохранить
-            </motion.button>
+            </button>
           </div>
         </div>
       </div>
