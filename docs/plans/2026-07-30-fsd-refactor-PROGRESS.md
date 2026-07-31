@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 37 / 89 шагов закрыто.
-- **Последнее обновление:** 2026-07-31 — закрыт модуль 4 (HR): `AssignEmployeeModal.tsx`, `PassportUploadStep.tsx`, `OrgCard.tsx`, `entities/hr/model.ts` (SKIP). Следующий незакрытый — модуль 6 (реестр корреспонденции), но перед ним нужно решение по `NewRegistry` / `RegistryTable`.
+- **Прогресс:** 40 / 89 шагов закрыто.
+- **Последнее обновление:** 2026-07-31 — модуль 6: снят вопрос `NewRegistry` / `RegistryTable` (это внутренняя и внешняя корреспонденция, обе остаются), закрыты `RegistryTable.tsx`, `getCorrespondenseIncomingColumns.tsx`, `useModuleSidebar.ts`. Дальше — `RegistryLayout.tsx` (XL, срез A) и `NewRegistry.tsx`.
 
 ---
 
@@ -167,7 +167,7 @@
 
 - [x] `⏭️` 335 → `entities/hr/model.ts` — SKIP (файл-данные: 28 `interface`, ни одной функции и константы)
 
-⏹ **ЧЕКПОИНТ** — модуль 4 (HR) закрыт полностью
+Модуль 4 (HR) закрыт полностью.
 
 ### Модуль 5 — Задачи
 
@@ -183,13 +183,26 @@
 
 ### Модуль 6 — Реестр корреспонденции
 
-> ⚠️ **Перед стартом решить:** остаётся `NewRegistry` или `RegistryTable`. Рефакторить обе ветки — выбросить работу. Если старый уходит — шаги по нему заменяются на удаление.
+> ✅ **Вопрос закрыт 2026-07-31 (разбор `AppRouter.tsx` + `lazyPages.ts`):** это не «старый и новый» реестр, а два живых виджета для разных доменов, удалять нечего.
+>
+> - `RegistryTable` → **внешняя** корреспонденция (legacy API): `correspondence/external/incoming`, `.../outgoing` через `CorrespondenceTableWrapper`, плюс верхнеуровневые `archive`, `pinned`, `trashed`.
+> - `NewRegistry` → **внутренняя** корреспонденция: `correspondence/internal/*` (incoming, outgoing, `folder/:id`, drafts) через `NewCorrespondenceTableWrapper`, а также internal `archive`, `pinned`, `trashed`.
+> - Общий сайдбар обоих — `RegistrySidebar`.
+>
+> Рефакторим обе ветки, шаги по `RegistryTable` остаются в силе.
+
+Сделано снизу вверх: сначала три `S`-файла (внешняя корреспонденция и общий сайдбар), тяжёлые `XL`/`M` по внутренней — отдельными сессиями.
+
+- [x] `S` 355 → `widgets/RegistryTable/ui/RegistryTable.tsx` → **152**
+
+- [x] `S` 313 → `widgets/RegistryTable/lib/getCorrespondenseIncomingColumns/getCorrespondenseIncomingColumns.tsx` → **90**
+
+- [x] `S` 260 → `widgets/RegistrySidebar/ui/useModuleSidebar.ts` → **158**
+
+⏹ **ЧЕКПОИНТ**
 
 - [ ] `XL` 1598 → `widgets/NewRegistry/ui/RegistryLayout.tsx` — под-план ниже
 - [ ] `M` 535 → `widgets/NewRegistry/ui/NewRegistry.tsx`
-- [ ] `S` 355 → `widgets/RegistryTable/ui/RegistryTable.tsx` *(отпадает, если модуль удаляется)*
-- [ ] `S` 313 → `widgets/RegistryTable/lib/getCorrespondenseIncomingColumns/getCorrespondenseIncomingColumns.tsx` *(то же)*
-- [ ] `S` 260 → `widgets/RegistrySidebar/ui/useModuleSidebar.ts`
 
 ### Модуль 7 — Резолюции, визы, исполнители
 
@@ -262,6 +275,9 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-31 | `widgets/RegistrySidebar/ui/useModuleSidebar.ts` | новая подпапка `moduleSidebar/` (2 файла): `useSidebarFolderMutations.ts` (создание, переименование, удаление пользовательских папок с обновлением списка), `buildSidebarDefinitions.ts` (сборка системных папок «Входящие/Исходящие/Черновики/Корзина» со счётчиками и маршрутами + `DEFAULT_FOLDER_KEYS`) | 260 → **158** (макс. новый — 78) | на ревью |
+| 2026-07-31 | `widgets/RegistryTable/lib/.../getCorrespondenseIncomingColumns.tsx` | новая подпапка `incomingColumns/` (4 файла): `useIncomingRowMutations.ts` (архив, восстановление, закрепление, удаление), `AcknowledgedUsersCell.tsx` (аватары ознакомившихся), `IncomingStatusCell.tsx` (расчёт подписи и цвета статуса по поручениям), `IncomingRowActionsCell.tsx` (выпадающее меню действий строки) | 313 → **90** (макс. новый — 95) | на ревью |
+| 2026-07-31 | `widgets/RegistryTable/ui/RegistryTable.tsx` | новая подпапка `registryTable/` (2 файла): `useRegistryTableState.ts` (вкладки, права, счётчики, папки, раскрытые строки, `BookModal`, навигация к письму и исполнению, эффект на `location.state`), `ExpandedRowDetails.tsx` (раскрывающийся блок строки с реквизитами и тремя кнопками) | 355 → **152** (макс. новый — 165) | на ревью |
 | 2026-07-31 | `widgets/Hr/Staffing/ui/views/OrgCard.tsx` | новая подпапка `orgCard/` (3 файла): `orgCardTheme.ts` (`getOrgCardTheme(dark)` — 15 наборов классов светлой/тёмной темы), `OrgCardHeader.tsx` (шапка организации: аватар, бейджи, куратор, прогресс-бар занятости, кнопки «Отдел», редактирования, удаления и сворачивания), `OrgCardDepartments.tsx` (раскрывающийся блок отделов: пустое состояние и список `DeptBlock` с кнопкой добавления) | 253 → **89** (макс. новый — 140) | на ревью |
 | 2026-07-31 | `features/Hr/ui/PassportUploadStep.tsx` | новая подпапка `passportUploadStep/` (3 файла): `passportUploadStepModel.ts` (типы `IPassportFile`/`IPassportSides`/`TSide`, `GUIDE_IMAGE_SRC`, `ACCEPT`, `SIDE_LABEL`), `PassportSide.tsx` (зона загрузки одной стороны паспорта с drag&drop и превью), `PassportGuideCard.tsx` (карточка-инструкция с SVG-иллюстрацией и полноэкранным просмотром фото, вместе со своим `guideOpen`). Типы реэкспортируются из `PassportUploadStep.tsx` — потребители не тронуты | 256 → **51** (макс. новый — 106) | на ревью |
 | 2026-07-31 | `widgets/Hr/Staffing/ui/modals/AssignEmployeeModal.tsx` | новая подпапка `assignEmployeeModal/` (3 файла): `assignEmployeeModalModel.ts` (`getAssignModalTheme(dark)` и хук `useBodyScrollLock` со счётчиком вложенных модалок), `AssignedEmployeesBlock.tsx` (блок «Назначены» с анимированным списком и снятием назначения), `EmployeePickList.tsx` (список сотрудников с отметкой назначенных и блокировкой при заполненных ставках) | 257 → **152** (макс. новый — 82) | на ревью |
@@ -319,6 +335,16 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Находка |
 |---|---|---|
+| 2026-07-31 | `widgets/RegistryTable/ui/RegistryTable.tsx` | `handleNavigateToLetter` начинается с отладочного `console.log(type)` — перенесено как есть |
+| 2026-07-31 | `widgets/RegistryTable/ui/RegistryTable.tsx` | `customTabs` для `internal-*` всегда пустой массив, внутри ветки `internal-drafts` — закомментированный `return INTERNAL_OUTGOING_TABS`. Из-за этого импорт `INTERNAL_OUTGOING_TABS` и `InternalCorrespondenceStatus` был мёртвым (при переносе не перенесён) |
+| 2026-07-31 | `widgets/RegistryTable/ui/RegistryTable.tsx` | Виджет внешней корреспонденции содержит развилки по `type.includes("internal")` (папки, маршруты, раскрытие строк) — домены перемешаны, хотя внутреннюю обслуживает `NewRegistry` |
+| 2026-07-31 | `widgets/RegistryTable/ui/registryTable/ExpandedRowDetails.tsx` | Кнопка «Перейти к исполнению» всегда активна: `disabled={!isExecuteButtonActive}` закомментирован, признак используется только для `opacity-50`. Поля «Входящий номер» и «Исходящий номер» жёстко рендерят `null` |
+| 2026-07-31 | `widgets/RegistryTable/lib/.../incomingColumns/` | Колонка «Исх. номер» имеет `dataIndex: "2"` — похоже на заглушку, поле всегда пустое |
+| 2026-07-31 | `widgets/RegistryTable/lib/.../incomingColumns/` | `IncomingStatusCell.tsx`: статусы поручений сравниваются с 10 строковыми литералами прямо в коде (§7 — нужны константы/union) |
+| 2026-07-31 | `widgets/RegistryTable/lib/.../incomingColumns/` | Кнопка меню действий (`MoreOutlined`) без `aria-label`/`Tooltip` (§11) |
+| 2026-07-31 | `widgets/RegistrySidebar/ui/useModuleSidebar.ts` | `const queryClient = useQueryClient()` объявлен и нигде не используется — мёртвый вызов, перенесён как есть |
+| 2026-07-31 | `widgets/RegistrySidebar/ui/useModuleSidebar.ts` | Ключ `"registry-sidebar-collapsed"` для `localStorage` — строка без константы (§7) |
+| 2026-07-31 | `widgets/RegistrySidebar/ui/moduleSidebar/` | Мутации папок обновляют список через `refetchFolders()`, а не через инвалидацию ключей (§9) |
 | 2026-07-31 | `widgets/Hr/Staffing/ui/modals/assignEmployeeModal/` | `AssignedEmployeesBlock.tsx`: `<AnimatePresence>` обёрнут вокруг `<If>`, а не вокруг элемента с `key` — exit-анимация блока «Назначены» при исчезновении не проигрывается (перенесено как есть) |
 | 2026-07-31 | `widgets/Hr/Staffing/ui/modals/assignEmployeeModal/` | Блокировка скролла (`useBodyScrollLock`) дублирует такую же логику в других модалках Staffing — кандидат в `@shared/lib` |
 | 2026-07-31 | `widgets/Hr/Staffing/ui/modals/assignEmployeeModal/` | Строки списка сотрудников — `<div>` с `onClick`, без `role`/`tabIndex`; кнопки-крестики без `aria-label` (§11) |
