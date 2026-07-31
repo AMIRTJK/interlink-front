@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 31 / 89 шагов закрыто.
-- **Последнее обновление:** 2026-07-30 — рефакторинг `widgets/Hr/Orders/ui/OrderDetailModal.tsx`; чекпоинт перенесён на `widgets/Hr/Orders/ui/renderOrderFields.tsx`.
+- **Прогресс:** 37 / 89 шагов закрыто.
+- **Последнее обновление:** 2026-07-31 — закрыт модуль 4 (HR): `AssignEmployeeModal.tsx`, `PassportUploadStep.tsx`, `OrgCard.tsx`, `entities/hr/model.ts` (SKIP). Следующий незакрытый — модуль 6 (реестр корреспонденции), но перед ним нужно решение по `NewRegistry` / `RegistryTable`.
 
 ---
 
@@ -153,18 +153,21 @@
 
 - [x] `S` 309 → `features/Hr/ui/SetRoles.tsx` → **120**
 
-⏹ **ЧЕКПОИНТ**
-
 - [x] `S` 276 → `widgets/Hr/Orders/ui/OrderDetailModal.tsx` → **182**
 
-⏹ **ЧЕКПОИНТ**
+- [x] `S` 263 → `widgets/Hr/Orders/ui/renderOrderFields.tsx` → **21**
 
-- [ ] `S` 263 → `widgets/Hr/Orders/ui/renderOrderFields.tsx`
-- [ ] `S` 258 → `widgets/Hr/Access/ui/RoleUsersTable.tsx`
-- [ ] `S` 257 → `widgets/Hr/Staffing/ui/modals/AssignEmployeeModal.tsx`
-- [ ] `S` 256 → `features/Hr/ui/PassportUploadStep.tsx`
-- [ ] `S` 253 → `widgets/Hr/Staffing/ui/views/OrgCard.tsx`
-- [ ] `⏭️` 335 → `entities/hr/model.ts` — если только типы, закрыть как SKIP; иначе разделить по сущностям
+- [x] `S` 258 → `widgets/Hr/Access/ui/RoleUsersTable.tsx` → **73**
+
+- [x] `S` 257 → `widgets/Hr/Staffing/ui/modals/AssignEmployeeModal.tsx` → **152**
+
+- [x] `S` 256 → `features/Hr/ui/PassportUploadStep.tsx` → **51**
+
+- [x] `S` 253 → `widgets/Hr/Staffing/ui/views/OrgCard.tsx` → **89**
+
+- [x] `⏭️` 335 → `entities/hr/model.ts` — SKIP (файл-данные: 28 `interface`, ни одной функции и константы)
+
+⏹ **ЧЕКПОИНТ** — модуль 4 (HR) закрыт полностью
 
 ### Модуль 5 — Задачи
 
@@ -259,6 +262,11 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-31 | `widgets/Hr/Staffing/ui/views/OrgCard.tsx` | новая подпапка `orgCard/` (3 файла): `orgCardTheme.ts` (`getOrgCardTheme(dark)` — 15 наборов классов светлой/тёмной темы), `OrgCardHeader.tsx` (шапка организации: аватар, бейджи, куратор, прогресс-бар занятости, кнопки «Отдел», редактирования, удаления и сворачивания), `OrgCardDepartments.tsx` (раскрывающийся блок отделов: пустое состояние и список `DeptBlock` с кнопкой добавления) | 253 → **89** (макс. новый — 140) | на ревью |
+| 2026-07-31 | `features/Hr/ui/PassportUploadStep.tsx` | новая подпапка `passportUploadStep/` (3 файла): `passportUploadStepModel.ts` (типы `IPassportFile`/`IPassportSides`/`TSide`, `GUIDE_IMAGE_SRC`, `ACCEPT`, `SIDE_LABEL`), `PassportSide.tsx` (зона загрузки одной стороны паспорта с drag&drop и превью), `PassportGuideCard.tsx` (карточка-инструкция с SVG-иллюстрацией и полноэкранным просмотром фото, вместе со своим `guideOpen`). Типы реэкспортируются из `PassportUploadStep.tsx` — потребители не тронуты | 256 → **51** (макс. новый — 106) | на ревью |
+| 2026-07-31 | `widgets/Hr/Staffing/ui/modals/AssignEmployeeModal.tsx` | новая подпапка `assignEmployeeModal/` (3 файла): `assignEmployeeModalModel.ts` (`getAssignModalTheme(dark)` и хук `useBodyScrollLock` со счётчиком вложенных модалок), `AssignedEmployeesBlock.tsx` (блок «Назначены» с анимированным списком и снятием назначения), `EmployeePickList.tsx` (список сотрудников с отметкой назначенных и блокировкой при заполненных ставках) | 257 → **152** (макс. новый — 82) | на ревью |
+| 2026-07-31 | `widgets/Hr/Access/ui/RoleUsersTable.tsx` | новая подпапка `roleUsersTable/` (2 файла): `roleUsersTableColumns.tsx` (фабрика `buildRoleUsersColumns` — колонки ФИО/должность с инициалами, отдел, роли-теги, статус, дата назначения, меню действий), `RoleUsersPagination.tsx` (кастомная пагинация со стрелками и окном из 5 страниц, константа `PAGE_LIMIT`) | 258 → **73** (макс. новый — 135) | на ревью |
+| 2026-07-31 | `widgets/Hr/Orders/ui/renderOrderFields.tsx` | новая подпапка `renderOrderFields/` (4 файла): `orderFieldsModel.tsx` (`inputCls`, `labelCls`, `selectStyle`, `IOrderFieldsProps`, компонент `SectionTitle` вместо локальной функции `sectionTitle`), `OrderRequisitesCard.tsx` (блок 1 — организация, тип, номер, дата, сотрудник + фильтрация сотрудников по организации), `OrderDocumentCard.tsx` (блок 2 — бланк приказа, основание, пункты, подпись министра), `OrderExecutorCard.tsx` (блоки 3 и 4 — исполнитель, ЭЦП, загрузка и список приложений) | 263 → **21** (макс. новый — 110) | на ревью |
 | 2026-07-30 | `widgets/Hr/Orders/ui/OrderDetailModal.tsx` | новая подпапка `orderDetailModal/` (1 файл): `OrderDetailSidebar.tsx` (правый сайдбар с 3 карточками: реквизиты, исполнитель, приложения) | 276 → **182** (макс. новый — 110) | на ревью |
 | 2026-07-30 | `features/Hr/ui/SetRoles.tsx` | новая подпапка `setRoles/` (3 файла): `setRolesModel.ts` (тип `IOption`, хук `useClickOutside`), `SingleSelect.tsx` (дропдаун выбора одного значения с поиском), `SetRolesMultiSelect.tsx` (дропдаун мультивыбора с чипсами и поиском) | 309 → **120** (макс. новый — 100) | на ревью |
 | 2026-07-30 | `widgets/Hr/Staffing/ui/modals/EditOrgModal.tsx` | новая подпапка `editOrgModal/` (1 файл): `EditOrgCuratorPickerSlot.tsx` (слот выбора куратора с отображением текущего curatorName) | 332 → **253** (макс. новый — 110) | на ревью |
@@ -311,6 +319,22 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Находка |
 |---|---|---|
+| 2026-07-31 | `widgets/Hr/Staffing/ui/modals/assignEmployeeModal/` | `AssignedEmployeesBlock.tsx`: `<AnimatePresence>` обёрнут вокруг `<If>`, а не вокруг элемента с `key` — exit-анимация блока «Назначены» при исчезновении не проигрывается (перенесено как есть) |
+| 2026-07-31 | `widgets/Hr/Staffing/ui/modals/assignEmployeeModal/` | Блокировка скролла (`useBodyScrollLock`) дублирует такую же логику в других модалках Staffing — кандидат в `@shared/lib` |
+| 2026-07-31 | `widgets/Hr/Staffing/ui/modals/assignEmployeeModal/` | Строки списка сотрудников — `<div>` с `onClick`, без `role`/`tabIndex`; кнопки-крестики без `aria-label` (§11) |
+| 2026-07-31 | `features/Hr/ui/passportUploadStep/` | `PassportSide.tsx`: класс `hidden-input` у `<input type="file">` — не Tailwind-утилита; если глобального стиля с таким именем нет, поле реально видно |
+| 2026-07-31 | `features/Hr/ui/passportUploadStep/` | `PassportUploadStep.tsx`: `URL.revokeObjectURL` вызывается только при замене стороны — при закрытии модалки без сохранения превью-URL не освобождаются |
+| 2026-07-31 | `widgets/Hr/Staffing/ui/views/orgCard/` | `OrgCardDepartments.tsx`: та же проблема с `<AnimatePresence>` вокруг `<If>` — свёртывание блока отделов идёт без exit-анимации |
+| 2026-07-31 | `widgets/Hr/Staffing/ui/views/orgCard/` | `OrgCardHeader.tsx`: иконочные кнопки (редактировать, удалить, свернуть) без `aria-label`/`Tooltip` (§11) |
+| 2026-07-31 | `entities/hr/model.ts` | Файл-данные (28 интерфейсов), закрыт как SKIP. Внутри соседствуют типы разных доменов — пользователи, документы, приказы, штатное расписание; деление по сущностям имеет смысл, но только отдельной задачей |
+| 2026-07-31 | `widgets/Hr/Access/ui/RoleUsersTable.tsx` | Чекбоксы выделения строк ведут в `selectedRowKeys`, но `selectedRowKeys` нигде не читается: массовых действий нет — выделение декоративное |
+| 2026-07-31 | `widgets/Hr/Access/ui/roleUsersTable/roleUsersTableColumns.tsx` | Кнопка меню действий (`MoreHorizontal`) без `aria-label`/`Tooltip` (§11) |
+| 2026-07-31 | `widgets/Hr/Access/ui/roleUsersTable/RoleUsersPagination.tsx` | Своя ручная пагинация вместо `pagination` у antd `Table` — дублирует такие же блоки в `RolesTabPagination.tsx` и `UsersTabPagination.tsx`, кандидат на общий компонент |
+| 2026-07-31 | `widgets/Hr/Orders/ui/renderOrderFields/` | `state`, `methods`, `orgs`, `users` типизированы как `any` — контракт формы приказа нигде не описан; перенесено как есть |
+| 2026-07-31 | `widgets/Hr/Orders/ui/renderOrderFields/OrderExecutorCard.tsx` | Кнопка «Подписать ЭЦП» исполнителя не имеет обработчика — декоративная заглушка (у министра обработчик есть) |
+| 2026-07-31 | `widgets/Hr/Orders/ui/renderOrderFields/OrderExecutorCard.tsx` | Зона загрузки файла — `<div>` с `onClick`, без `role`/`tabIndex`/клавиатуры; иконочные кнопки удаления вложения без `aria-label`/`Tooltip` (§11) |
+| 2026-07-31 | `widgets/Hr/Orders/ui/renderOrderFields/OrderDocumentCard.tsx` | Авторазмер textarea основания сделан прямой мутацией `e.target.style.height` в обработчике `onChange` |
+| 2026-07-31 | `widgets/Hr/Orders/ui/renderOrderFields/OrderDocumentCard.tsx` | Шапка бланка (герб «ТЖ», название министерства) захардкожена в разметке, а не берётся из данных организации |
 | 2026-07-30 | `features/Hr/ui/SetRoles.tsx` | `userOptions` и `roleOptions` разбирают ответ `GET_USERS`/`GET_ROLES` через множественные `as any` касты (`(usersData as any)?.data?.data`, `(rolesData as any)?.data`, `arr.map((u: any) =>)`), нет типизации ответа API |
 | 2026-07-30 | `features/Hr/ui/setRoles/setRolesModel.ts` | `useClickOutside` принимает `cb` по ссылке и помещает её в зависимости `useEffect` — при каждом рендере создаётся новая стрелочная функция, пересоздающая обработчик `mousedown`; нужна обёртка `useRef` для `cb` или `useCallback` на стороне вызова |
 | 2026-07-30 | `widgets/TaskRegistry/ui/createTaskView/` | В `ProtocolTaskForm.tsx` подписанные штампы ЭЦП председателя и секретаря вызывают `signTimestamp()`, генерирующий локальную строку с текущей датой без вызова бэкенд-сервиса подписи |
