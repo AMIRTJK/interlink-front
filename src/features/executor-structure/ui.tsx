@@ -1,273 +1,9 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { Input, Avatar, Spin } from "antd";
-import {
-  SearchOutlined,
-  StarFilled,
-  StarOutlined,
-  LoadingOutlined,
-  ApartmentOutlined,
-} from "@ant-design/icons";
-import { useGetQuery } from "@shared/lib";
-import { ApiRoutes } from "@shared/api";
-
-// --- Types ---
-type UserGroup = "management" | "heads" | "specialists";
-
-interface IUser {
-  id: number;
-  name: string;
-  role: string;
-  avatar: string;
-  group: UserGroup;
-}
-
-interface IDepartment {
-  id: number;
-  name: string;
-}
-
-interface IApiUser {
-  id: number;
-  full_name: string;
-  position: string;
-  photo_path: string | null;
-}
-
-interface IApiDepartment {
-  id: number;
-  name: string;
-}
-
-// --- Helper: Определение группы по должности ---
-const getGroupByPosition = (position: string | null): UserGroup => {
-  if (!position) return "specialists";
-  const lower = position.toLowerCase();
-
-  if (
-    lower.includes("директор") ||
-    lower.includes("admin") ||
-    lower.includes("ceo") ||
-    lower.includes("генеральный")
-  ) {
-    return "management";
-  }
-
-  if (
-    lower.includes("руководитель") ||
-    lower.includes("head") ||
-    lower.includes("начальник") ||
-    lower.includes("менеджер")
-  ) {
-    return "heads";
-  }
-
-  return "specialists";
-};
-
-// --- Sub-components ---
-
-// 1. Department Card
-interface DepartmentCardProps {
-  department: IDepartment;
-  isSelected: boolean;
-  onToggleSelection: (id: number) => void;
-}
-
-const DepartmentCard: React.FC<DepartmentCardProps> = ({
-  department,
-  isSelected,
-  onToggleSelection,
-}) => {
-  return (
-    <div
-      onClick={() => onToggleSelection(department.id)}
-      className={`
-        relative w-full flex flex-col items-center justify-center p-4 rounded-2xl cursor-pointer transition-all duration-300 border min-h-[140px]
-        ${
-          isSelected
-            ? "bg-[#F4F8FF] border-blue-100/50 shadow-inner"
-            : "bg-white border-transparent hover:border-blue-200 hover:shadow-[0_12px_40px_rgba(31,38,135,0.1)]!"
-        }
-      `}
-    >
-      <div className="mb-3 transition-transform duration-300">
-        <Avatar
-          size={60}
-          className={`shadow-sm bg-indigo-50 text-indigo-500 flex items-center justify-center transition-all duration-300 ${isSelected ? "ring-4 ring-white" : ""}`}
-          icon={<ApartmentOutlined style={{ fontSize: 28 }} />}
-        />
-      </div>
-
-      <h3 className="text-[14px] font-bold text-gray-900 text-center leading-tight px-1 line-clamp-3">
-        {department.name}
-      </h3>
-    </div>
-  );
-};
-
-// 2. Department Section
-interface DepartmentSectionProps {
-  title: string;
-  departments: IDepartment[];
-  selectedIds: number[];
-  onToggleSelection: (id: number) => void;
-}
-
-const DepartmentSection: React.FC<DepartmentSectionProps> = ({
-  title,
-  departments,
-  selectedIds,
-  onToggleSelection,
-}) => {
-  if (departments.length === 0) return null;
-
-  return (
-    <div className="relative border border-indigo-100 rounded-[32px] pt-8 pb-4 bg-white">
-      <div className="max-h-[420px] overflow-y-auto no-scrollbar px-6 pb-6">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 justify-items-center items-start">
-          {departments.map((dept) => (
-            <div key={dept.id} className="w-full max-w-[180px]">
-              <DepartmentCard
-                department={dept}
-                isSelected={selectedIds.includes(dept.id)}
-                onToggleSelection={onToggleSelection}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-      <span className="absolute -bottom-3 right-8 bg-[#f8fafc] px-3 text-xs md:text-sm text-indigo-300 font-medium rounded-md">
-        {title}
-      </span>
-    </div>
-  );
-};
-
-// 3. User Card
-interface UserCardProps {
-  user: IUser;
-  isSelected: boolean;
-  isMain: boolean;
-  onToggleSelection: (id: number) => void;
-  onToggleMain: (e: React.MouseEvent, id: number) => void;
-}
-
-const UserCard: React.FC<UserCardProps> = ({
-  user,
-  isSelected,
-  isMain,
-  onToggleSelection,
-  onToggleMain,
-}) => {
-  return (
-    <div
-      onClick={() => onToggleSelection(user.id)}
-      className={`
-        relative w-full flex flex-col items-center justify-start p-4 rounded-2xl cursor-pointer transition-all duration-300 border min-h-[180px]
-        ${
-          isSelected
-            ? "bg-[#F4F8FF] border-blue-100/50 shadow-inner"
-            : "bg-white border-transparent hover:border-blue-200 hover:shadow-[0_12px_40px_rgba(31,38,135,0.1)]!"
-        }
-      `}
-    >
-      <div className="mb-3 transition-transform duration-300">
-        <Avatar
-          src={user.avatar}
-          size={80}
-          className={`shadow-sm bg-gray-200 transition-all duration-300 ${isSelected ? "ring-4 ring-white" : ""}`}
-        >
-          {!user.avatar && user.name?.[0]}
-        </Avatar>
-      </div>
-
-      <h3 className="text-[15px] font-bold text-gray-900 text-center leading-tight mb-1 px-1 line-clamp-2">
-        {user.name}
-      </h3>
-
-      <p className="text-[13px] text-[#9AA4C2] text-center leading-tight px-1 mb-2 line-clamp-2">
-        {user.role}
-      </p>
-
-      {/* Блок "Главный исполнитель" доступен только если юзер выбран */}
-      {isSelected && (
-        <div
-          key="main-executor-badge"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleMain(e, user.id);
-          }}
-          className="mt-auto pt-2 flex items-center gap-2 cursor-pointer group/star select-none animate-fade-in-up"
-          style={{ animationDuration: "0.3s" }}
-        >
-          <div className="transform transition-transform duration-300 group-hover/star:scale-125 group-hover/star:rotate-12 active:scale-90 flex items-center justify-center">
-            {isMain ? (
-              <StarFilled
-                style={{ fontSize: "18px", color: "#B4833E" }}
-                className="drop-shadow-sm"
-              />
-            ) : (
-              <StarOutlined
-                style={{ fontSize: "18px", color: "#B4833E" }}
-                className="opacity-70 group-hover/star:opacity-100 transition-opacity"
-              />
-            )}
-          </div>
-
-          <span className="text-[13px] text-[#1A1A1A] font-medium leading-none transition-colors duration-200 group-hover/star:text-[#B4833E]">
-            Главный исполнитель
-          </span>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// 4. User Section
-interface UserSectionProps {
-  title: string;
-  users: IUser[];
-  selectedIds: number[];
-  mainExecutorIds: number[];
-  onToggleSelection: (id: number) => void;
-  onToggleMain: (e: React.MouseEvent, id: number) => void;
-}
-
-const UserSection: React.FC<UserSectionProps> = ({
-  title,
-  users,
-  selectedIds,
-  mainExecutorIds,
-  onToggleSelection,
-  onToggleMain,
-}) => {
-  if (users.length === 0) return null;
-
-  return (
-    <div className="relative border border-blue-100 rounded-[32px] pt-8 pb-4 bg-white">
-      <div className="max-h-[420px] overflow-y-auto no-scrollbar px-6 pb-6">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 justify-items-center items-start">
-          {users.map((user) => (
-            <div key={user.id} className="w-full max-w-[180px]">
-              <UserCard
-                user={user}
-                isSelected={selectedIds.includes(user.id)}
-                isMain={mainExecutorIds.includes(user.id)}
-                onToggleSelection={onToggleSelection}
-                onToggleMain={onToggleMain}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-      <span className="absolute -bottom-3 right-8 bg-[#f8fafc] px-3 text-xs md:text-sm text-[#BCC5DF] font-medium rounded-md">
-        {title}
-      </span>
-    </div>
-  );
-};
-
-// --- Main Component ---
+import React, { useState } from "react";
+import { Input, Spin } from "antd";
+import { SearchOutlined, LoadingOutlined } from "@ant-design/icons";
+import { DepartmentSection } from "./executorStructure/DepartmentSection";
+import { UserSection } from "./executorStructure/UserSection";
+import { useExecutorStructureData } from "./executorStructure/useExecutorStructureData";
 
 interface ExecutorStructureProps {
   onCancel: () => void;
@@ -290,8 +26,14 @@ export const ExecutorStructure: React.FC<ExecutorStructureProps> = ({
   initialSelectedDeptIds = [],
   initialMainExecutorIds = [],
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const {
+    searchTerm,
+    setSearchTerm,
+    mappedDepartments,
+    groupedUsers,
+    isLoading,
+    isEmpty,
+  } = useExecutorStructureData();
 
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>(
     initialSelectedUserIds,
@@ -304,60 +46,6 @@ export const ExecutorStructure: React.FC<ExecutorStructureProps> = ({
   );
 
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-
-  // Debounce logic
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-    }, 500);
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
-
-  const searchParams = useMemo(() => {
-    return debouncedSearch ? { search: debouncedSearch } : {};
-  }, [debouncedSearch]);
-
-  // --- API Request ---
-  const { data: usersData, isLoading: loadingUsers } = useGetQuery({
-    url: ApiRoutes.GET_USERS,
-    useToken: true,
-    params: searchParams,
-  });
-
-  const { data: deptsData, isLoading: loadingDepts } = useGetQuery({
-    url: ApiRoutes.GET_DEPARTMENTS,
-    useToken: true,
-    params: searchParams,
-  });
-
-  // Mappers
-  const mappedUsers: IUser[] = useMemo(() => {
-    const apiUsers = usersData?.data?.data || [];
-    return apiUsers.map((u: IApiUser) => ({
-      id: u.id,
-      name: u.full_name,
-      role: u.position || "Сотрудник",
-      avatar: u.photo_path || `https://i.pravatar.cc/150?u=${u.id}`,
-      group: getGroupByPosition(u.position),
-    }));
-  }, [usersData]);
-
-  const mappedDepartments: IDepartment[] = useMemo(() => {
-    const apiDepts = deptsData?.data?.data || [];
-    return apiDepts.map((d: IApiDepartment) => ({
-      id: d.id,
-      name: d.name,
-    }));
-  }, [deptsData]);
-
-  // Grouping
-  const groupedUsers = useMemo(() => {
-    return {
-      management: mappedUsers.filter((u) => u.group === "management"),
-      heads: mappedUsers.filter((u) => u.group === "heads"),
-      specialists: mappedUsers.filter((u) => u.group === "specialists"),
-    };
-  }, [mappedUsers]);
 
   // --- HANDLERS ---
 
@@ -394,9 +82,6 @@ export const ExecutorStructure: React.FC<ExecutorStructureProps> = ({
       return isMain ? prev.filter((mid) => mid !== id) : [...prev, id];
     });
   };
-
-  const isLoading = loadingUsers || loadingDepts;
-  const isEmpty = mappedUsers.length === 0 && mappedDepartments.length === 0;
 
   return (
     <div className={`flex flex-col h-full bg-white ${className || ""}`}>

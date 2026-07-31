@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 42 / 89 шагов закрыто.
-- **Последнее обновление:** 2026-07-31 — модуль 6 закрыт полностью: `RegistryLayout.tsx` (XL) и `NewRegistry.tsx`. Следующий — модуль 7 (резолюции, визы, исполнители).
+- **Прогресс:** 48 / 89 шагов закрыто.
+- **Последнее обновление:** 2026-07-31 — модуль 7 закрыт полностью (6 файлов). Следующий — модуль 8 (просмотр входящего, начиная с `IncomingPreviewModal.tsx`, XL).
 
 ---
 
@@ -203,16 +203,23 @@
 
 - [x] `M` 535 → `widgets/NewRegistry/ui/NewRegistry.tsx` → **237**
 
-⏹ **ЧЕКПОИНТ** — модуль 6 закрыт полностью
+Модуль 6 закрыт полностью.
 
 ### Модуль 7 — Резолюции, визы, исполнители
 
-- [ ] `M` 514 → `features/executor-structure/ui.tsx`
-- [ ] `M` 514 → `widgets/CorrespondenceForm/ui.tsx`
-- [ ] `M` 494 → `features/visa-form/ui.tsx`
-- [ ] `S` 353 → `features/SelectExecutors/SelectExecutorsModal.tsx`
-- [ ] `S` 283 → `widgets/ResolutionOfLetter/lib/useResolutionOfLetter.ts`
-- [ ] `S` 267 → `widgets/ResolutionOfLetter/ui/ResolutionForm.tsx`
+- [x] `M` 514 → `features/executor-structure/ui.tsx` → **199**
+
+- [x] `M` 514 → `widgets/CorrespondenceForm/ui.tsx` → **146**
+
+- [x] `M` 494 → `features/visa-form/ui.tsx` → **165**
+
+- [x] `S` 353 → `features/SelectExecutors/SelectExecutorsModal.tsx` → **135**
+
+- [x] `S` 283 → `widgets/ResolutionOfLetter/lib/useResolutionOfLetter.ts` → **133**
+
+- [x] `S` 267 → `widgets/ResolutionOfLetter/ui/ResolutionForm.tsx` → **149**
+
+⏹ **ЧЕКПОИНТ** — модуль 7 закрыт полностью
 
 ### Модуль 8 — Просмотр входящего
 
@@ -276,6 +283,12 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-31 | `widgets/ResolutionOfLetter/ui/ResolutionForm.tsx` | новая подпапка `resolutionForm/` (2 файла): `ExecutorPills.tsx` (капсулы выбранных сотрудников и отделов с назначением главного и удалением), `ResolutionUploadZone.tsx` (зона перетаскивания файлов) | 267 → **149** (макс. новый — 115) | на ревью |
+| 2026-07-31 | `widgets/ResolutionOfLetter/lib/useResolutionOfLetter.ts` | новая подпапка `resolutionOfLetter/` (2 файла): `useResolutionAttachments.ts` (запрос вложений письма, пакетная загрузка с дебаунсом 300 мс, удаление), `useResolutionExecutors.ts` (выбранные отделы/сотрудники, главные исполнители, синхронизация со скрытыми полями формы). `correspondenceId = "1"` вынесен в константу `CORRESPONDENCE_ID` | 283 → **133** (макс. новый — 105) | на ревью |
+| 2026-07-31 | `features/SelectExecutors/SelectExecutorsModal.tsx` | новая подпапка `selectExecutors/` (3 файла): `selectExecutorsLib.ts` (`extractData`, `getMeta`, `transformSelectResponse`), `useSelectExecutorsState.ts` (вкладки, запросы сотрудников и отделов, поиск, пагинация, выбор и главные исполнители), `ExecutorsSearchBar.tsx` (панель поиска с фильтрами по отделу и роли). `tabItems` поднят в константу модуля | 353 → **135** (макс. новый — 195) | на ревью |
+| 2026-07-31 | `features/visa-form/ui.tsx` | новая подпапка `visaForm/` (4 файла): `visaFormModel.ts` (`VisaFormProps`, типы ответов API, `VISA_STATUS_OPTIONS`), `useVisaFormState.ts` (списки выбранных исполнителей, валидность формы, мутация создания поручения), `SelectedExecutorsList.tsx` (чипсы исполнителей со звездой главного), `VisaAttachmentsList.tsx` (список файлов со скачиванием). Удалены ~110 строк закомментированного кода загрузки/удаления файлов (§17) | 494 → **165** (макс. новый — 150) | на ревью |
+| 2026-07-31 | `widgets/CorrespondenceForm/ui.tsx` | новая подпапка `correspondenceForm/` (4 файла): `correspondenceFormModel.ts` (типы формы, `STEPS_ITEMS`, колонки и данные истории), `CustomStepper.tsx` (шкала из 6 шагов), `DocumentFieldsSection.tsx` (блок «Данные документа»), `ResolutionSection.tsx` (блок «Резолюция» и таблица истории). Удалены мёртвые переменные внутри `currentStep` и неиспользуемый `stepStatus` | 514 → **146** (макс. новый — 140) | на ревью |
+| 2026-07-31 | `features/executor-structure/ui.tsx` | новая подпапка `executorStructure/` (6 файлов): `executorStructureModel.ts` (типы + `getGroupByPosition`), `DepartmentCard.tsx`, `DepartmentSection.tsx`, `UserCard.tsx`, `UserSection.tsx`, `useExecutorStructureData.ts` (поиск с задержкой 500 мс, запросы сотрудников и отделов, маппинг и группировка по должностям) | 514 → **199** (макс. новый — 90) | на ревью |
 | 2026-07-31 | `widgets/NewRegistry/ui/NewRegistry.tsx` | новая подпапка `newRegistry/` (3 файла): `newRegistryModel.tsx` (файл-данные: `STATUS_CONFIG` со всеми статусами и их API-ручками, `REGISTRY_STATUS_MAP`, `NewRegistryProps`, самодельная иконка `FileSignatureIcon`), `useRegistryBreadcrumbs.ts` (крошки: корневой раздел + подъём по дереву папок с выпадающими списками соседних и вложенных папок), `useRegistryStatusTabs.ts` (вкладки статусов со счётчиками, включая дозапрос «проблемных» счётчиков через `useQueries`) | 535 → **237** (макс. новый — 143) | на ревью |
 | 2026-07-31 | `widgets/NewRegistry/ui/RegistryLayout.tsx` | новая подпапка `registryLayout/` (10 файлов): `registryLayoutModel.ts` (`ViewMode`, `RegistryLayoutProps`), `letterStatus.tsx` (`getLinkTypeInfo`, `getLetterStatusBadge`, `getEffectiveStatusData`), `badgeStyles.ts` (цвета бейджей), `RippleEffect.tsx`, `RegistryHeaderBar.tsx` (кнопка создания, счётчик, переключатель Список/Блоки/Структура, кнопка фильтров, вкладки статусов), `SectionHeader.tsx`, `DocumentCard.tsx` (плиточный вид), `DocumentListItem.tsx` (списочный вид), `FilterDrawer.tsx` (боковая панель фильтров), `FilterField.tsx` (одно поле фильтра: текст/список/дата/диапазон), `Pagination.tsx`. Ранее экспортированные наружу имена реэкспортируются из `RegistryLayout.tsx` | 1598 → **222** (макс. новый — 246) | на ревью |
 | 2026-07-31 | `widgets/RegistrySidebar/ui/useModuleSidebar.ts` | новая подпапка `moduleSidebar/` (2 файла): `useSidebarFolderMutations.ts` (создание, переименование, удаление пользовательских папок с обновлением списка), `buildSidebarDefinitions.ts` (сборка системных папок «Входящие/Исходящие/Черновики/Корзина» со счётчиками и маршрутами + `DEFAULT_FOLDER_KEYS`) | 260 → **158** (макс. новый — 78) | на ревью |
@@ -338,6 +351,21 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Находка |
 |---|---|---|
+| 2026-07-31 | `widgets/ResolutionOfLetter/lib/useResolutionOfLetter.ts` | ID письма захардкожен: `CORRESPONDENCE_ID = "1"` — резолюция всегда запрашивает и обновляет вложения письма №1, а не текущего (в коде так и написано «в реальном приложении получаем из контекста или пропсов») |
+| 2026-07-31 | `widgets/ResolutionOfLetter/lib/useResolutionOfLetter.ts` | `submitResolution` бьёт в `CREATE_RESOLUTION.replace(":id", ...)`, хотя в маршруте нет `:id` — вторая мутация уходит на тот же URL, что и первая |
+| 2026-07-31 | `widgets/ResolutionOfLetter/ui/ResolutionForm.tsx` | Селект «Статус» имеет единственную опцию-заглушку `{ value: "test", label: "test" }` |
+| 2026-07-31 | `widgets/ResolutionOfLetter/ui/resolutionForm/ExecutorPills.tsx` | Аватар сотрудника всегда берётся из локального файла `user-avatar.jpg`, реальное фото пользователя не используется; иконочные кнопки без `aria-label`/`Tooltip` (§11) |
+| 2026-07-31 | `features/SelectExecutors/selectExecutors/useSelectExecutorsState.ts` | `handleClose` сбрасывает главных исполнителей, но не сбрасывает `selectedUsers`/`selectedDepartments` — при повторном открытии их восстанавливает эффект по `open`, поведение неочевидное |
+| 2026-07-31 | `features/SelectExecutors/selectExecutors/selectExecutorsLib.ts` | `extractData` разбирает три разные формы ответа API (массив, `data`, `data.data`) — контракт бэкенда не унифицирован |
+| 2026-07-31 | `features/visa-form/ui.tsx` | Список файлов — это `mockFiles` из `lib`; загрузка и удаление файлов были закомментированы целиком, при переносе комментарии удалены (§17), функциональности не было и нет |
+| 2026-07-31 | `features/visa-form/ui.tsx` | Карточка автора визы («Сайдазимов Сохиб», аватар с `i.pravatar.cc`) захардкожена в разметке |
+| 2026-07-31 | `features/visa-form/visaForm/useVisaFormState.ts` | `payload` типизирован `any`; из `useMutationQuery` не используются `isPending`/`isAllowed` — кнопка «Визировать» не показывает загрузку и не проверяет права |
+| 2026-07-31 | `features/executor-structure/executorStructure/executorStructureModel.ts` | Группа сотрудника определяется эвристикой по подстрокам в должности («директор», «руководитель», «head», …) — при новых формулировках должностей человек молча попадёт в «Рядовые специалисты» |
+| 2026-07-31 | `features/executor-structure/executorStructure/useExecutorStructureData.ts` | При отсутствии фото подставляется внешний аватар с `i.pravatar.cc` — запрос на сторонний сервис из корпоративного портала |
+| 2026-07-31 | `features/executor-structure/executorStructure/UserCard.tsx` | Карточки сотрудника и отдела — `<div>` с `onClick`, без `role`/`tabIndex`, с клавиатуры выбрать нельзя (§11) |
+| 2026-07-31 | `widgets/CorrespondenceForm/correspondenceForm/` | Блок «Резолюция» полностью статичен (ФИО, «Название.pdf», кнопка «Подготовить ответ» без обработчика), таблица «История документа» рендерит захардкоженный `HISTORY_DATA` |
+| 2026-07-31 | `widgets/CorrespondenceForm/ui.tsx` | В `currentStep` были объявлены и нигде не использованы `isEditable`, `canSave`, `canSendToResolution`, `canReject`, `canComplete`, а также переменная `stepStatus` — при переносе удалены как мёртвый код |
+| 2026-07-31 | `widgets/CorrespondenceForm/ui.tsx` | `handleReject` и `handleComplete` показывают уведомления-заглушки («Функционал отклонения в разработке»), реальных запросов нет |
 | 2026-07-31 | `widgets/NewRegistry/ui/registryLayout/` | `DocumentCard` и `DocumentListItem` принимают проп `_index`, а вызывающий код передаёт `index` — параметр никогда не приходит, мёртвый |
 | 2026-07-31 | `widgets/NewRegistry/ui/registryLayout/` | В `RegistryLayout` объект `props` содержит `key` и раскрывается спредом (`<DocumentCard {...props} />`) — `key` внутри спреда React считает ошибкой |
 | 2026-07-31 | `widgets/NewRegistry/ui/registryLayout/badgeStyles.ts` | `getStatusBadgeColor` не используется нигде — мёртвая функция, перенесена как есть |
