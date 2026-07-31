@@ -41,6 +41,16 @@ export function useIncomingPreviewState(props: IncomingPreviewModalProps) {
 
   const [panelSearch, setPanelSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | "signer" | "approver">("all");
+  const [zoomedStampSrc, setZoomedStampSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!zoomedStampSrc) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setZoomedStampSrc(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [zoomedStampSrc]);
 
   const mappedAttachments: AttachedFile[] = useMemo(
     () => (attachments || []).map((att: any) => mapServerAttachment(att, correspondenceId)),
@@ -280,6 +290,8 @@ export function useIncomingPreviewState(props: IncomingPreviewModalProps) {
     setAttachmentsOpen,
     previewAttachment,
     setPreviewAttachment,
+    zoomedStampSrc,
+    setZoomedStampSrc,
     currentPage,
     activeApprover,
     setActiveApprover,

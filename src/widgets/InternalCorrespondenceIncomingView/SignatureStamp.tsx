@@ -51,7 +51,7 @@ export const SignatureStamp = ({
           {zoomOpen && (
             <motion.div
               key="ds-zoom"
-              className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 font-sans"
+              className="fixed inset-0 z-[100001] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 font-sans"
               onClick={() => setZoomOpen(false)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
