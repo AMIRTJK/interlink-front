@@ -4,6 +4,7 @@ import {
   SPACER_ATTR,
   STAMP_ATTR,
 } from "../../lib/constants";
+import { wrapBareTopLevelNodes } from "./editorCaret";
 
 // ===== Цитата пересылаемого письма (как в Outlook) =====
 // При «Перенаправить» тело входящего письма кладётся прямо в холст: сверху

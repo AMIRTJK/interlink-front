@@ -1,3 +1,4 @@
+import { charPosAt } from "./editorCaret";
 import { EDITOR_ATOMIC_TAGS } from "./editorTags";
 
 // Пустые inline-обёртки (<b></b>, <span></span> и т.п.), остающиеся после
