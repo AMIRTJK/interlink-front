@@ -19,6 +19,7 @@ import { ApprovalConfirmModal } from "./workflowParticipantsPanel/ApprovalConfir
 import { FullHistoryModal } from "./workflowParticipantsPanel/FullHistoryModal";
 import { SidebarDocumentRow } from "./workflowParticipantsPanel/SidebarDocumentRow";
 import { SidebarParticipantRow } from "./workflowParticipantsPanel/SidebarParticipantRow";
+import { SidebarVersionRow } from "./workflowParticipantsPanel/SidebarVersionRow";
 import {
   MAX_VISIBLE_APPROVERS,
   MAX_VISIBLE_DOCS,

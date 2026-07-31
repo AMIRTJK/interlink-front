@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 58 / 89 шагов закрыто.
-- **Последнее обновление:** 2026-07-31 — `WorkflowParticipantsPanel.tsx` закрыт.
+- **Прогресс:** 62 / 89 шагов закрыто.
+- **Последнее обновление:** 2026-07-31 — Модуль `InternalCorrespondece` (ui.tsx, Editor.tsx, DocumentHeaderForm.tsx, TopNavigation.tsx) закрыт.
 
 ---
 
@@ -236,11 +236,14 @@
 
 - [x] `XL` 1500 → `widgets/InternalCorrespondece/ui/WorkflowParticipantsPanel.tsx` → **566** (срезы A–E: новая подпапка `workflowParticipantsPanel/`, 9 файлов)
 
+- [x] `M` 680 → `widgets/InternalCorrespondece/ui.tsx` → **194**
+- [x] `M` 677 → `widgets/InternalCorrespondece/ui/Editor.tsx` → **161** — ⚠️ инварианты пагинации, только механический вынос
+- [x] `M` 441 → `widgets/InternalCorrespondece/ui/DocumentHeaderForm.tsx` → **259**
+- [x] `M` 425 → `widgets/InternalCorrespondece/ui/TopNavigation.tsx` → **238**
+
+Модуль 9 (InternalCorrespondece) закрыт полностью.
+
 ⏹ **ЧЕКПОИНТ**
-- [ ] `M` 680 → `widgets/InternalCorrespondece/ui.tsx`
-- [ ] `M` 677 → `widgets/InternalCorrespondece/ui/Editor.tsx` — ⚠️ инварианты пагинации, только механический вынос
-- [ ] `M` 441 → `widgets/InternalCorrespondece/ui/DocumentHeaderForm.tsx`
-- [ ] `M` 425 → `widgets/InternalCorrespondece/ui/TopNavigation.tsx`
 
 ### Модуль 10 — Прочие модалки
 

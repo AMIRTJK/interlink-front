@@ -3,30 +3,21 @@ import {
   InboxOutlined,
   SendOutlined,
   FileTextOutlined,
-  BgColorsOutlined,
   SunOutlined,
   MoonOutlined,
-  ClockCircleOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useGetQuery, useLogout } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { useNavigate, useLocation } from "react-router";
 import { ChevronLeft, LogOut } from "lucide-react";
 import { Avatar, Tooltip } from "antd";
 import UserAvatar from "../../../assets/images/user-avatar.jpg";
-
-interface NavRegistry {
-  label: string;
-  items: {
-    id: string;
-    title: string;
-    date: string;
-    from?: string;
-    status?: string;
-  }[];
-}
+import { NavButton } from "./TopNavigationNavButton";
+import {
+  NavRegistryDropdown,
+  NavRegistry,
+} from "./NavRegistryDropdown";
 
 const softMaterialPresets = [
   { name: "Lavender", primary: "#A78BFA", accent: "#DDD6FE" },
@@ -34,28 +25,6 @@ const softMaterialPresets = [
   { name: "Sky", primary: "#38BDF8", accent: "#BAE6FD" },
 ];
 
-// --- Helper Component ---
-// Antd иконки ведут себя как текст, поэтому используем text-[16px] для размера
-const NavButton = ({ icon, label, active, onClick, isDarkMode }: any) => (
-  <button
-    onClick={onClick}
-    className={`flex items-center cursor-pointer gap-2 px-3 py-2 rounded-lg transition-all text-sm font-medium ${
-      active
-        ? isDarkMode
-          ? "bg-white/10 text-gray-100"
-          : "bg-black/5 text-gray-900"
-        : isDarkMode
-          ? "text-gray-400 hover:bg-white/5"
-          : "text-gray-600 hover:bg-black/5"
-    }`}
-  >
-    {/* Клонируем иконку, чтобы можно было передать стили, если нужно, или просто рендерим */}
-    <span className="text-[16px] flex items-center">{icon}</span>
-    <span>{label}</span>
-  </button>
-);
-
-// --- Main Component ---
 interface TopNavigationProps {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
@@ -65,7 +34,6 @@ interface TopNavigationProps {
 export const TopNavigation: React.FC<TopNavigationProps> = ({
   isDarkMode,
   toggleDarkMode,
-  type,
 }) => {
   const [activeNavRegistry, setActiveNavRegistry] = useState<string | null>(
     null,
@@ -74,7 +42,6 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [showColorPicker, setShowColorPicker] = useState(false);
   const currentPreset = softMaterialPresets[0];
 
   const textPrimary = isDarkMode ? "text-gray-100" : "text-gray-900";
@@ -88,7 +55,6 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   const draftsData = (draftsDataResponse?.data?.data || []).map(
     (item: any) => ({
       id: String(item.id),
-      // 1. Тема
       title: item.subject || "Без темы",
       date: item.created_at
         ? new Date(item.created_at).toLocaleDateString()
@@ -106,7 +72,6 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   const incomingData = (incomingDataResponse?.data?.data || []).map(
     (item: any) => ({
       id: String(item.id),
-      // 1. Тема
       title: item.subject || "Без темы",
       date: item.created_at
         ? new Date(item.created_at).toLocaleDateString()
@@ -124,7 +89,6 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   const outgoingData = (outgoingDataResponse?.data?.data || []).map(
     (item: any) => ({
       id: String(item.id),
-      // 1. Тема
       title: item.subject || "Без темы",
       date: item.created_at
         ? new Date(item.created_at).toLocaleDateString()
@@ -150,23 +114,6 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
       items: draftsData,
     },
   };
-
-  // const handleNavigate = () => {
-  //   if (window.history.state && window.history.state.idx > 0) {
-  //     navigate(-1);
-  //   } else {
-  //     const pathSegments = location.pathname.split("/").filter(Boolean);
-  //     const internalIndex = pathSegments.indexOf("internal");
-
-  //     if (internalIndex !== -1 && pathSegments[internalIndex + 1]) {
-  //       const registryPath =
-  //         "/" + pathSegments.slice(0, internalIndex + 2).join("/");
-  //       navigate(registryPath);
-  //     } else {
-  //       navigate("/modules/correspondence/internal/incoming");
-  //     }
-  //   }
-  // };
 
   const handleNavigate = () => {
     const pathSegments = location.pathname.split("/").filter(Boolean);
@@ -194,13 +141,10 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
             : "rgba(229, 231, 235, 0.5)",
         }}
       >
-        {/* Left - Navigation */}
         <div className="flex items-center gap-6">
           <motion.button
             onClick={handleNavigate}
-            whileHover={{
-              scale: 1.1,
-            }}
+            whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             className={`
                 group relative flex items-center justify-center w-8 h-8 rounded-full 
@@ -258,15 +202,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
           </div>
         </div>
 
-        {/* Right - Actions */}
         <div className="flex items-center gap-4">
-          {/* <button
-            onClick={() => setShowColorPicker(!showColorPicker)}
-            className={`p-2 rounded-lg transition-all cursor-pointer ${textSecondary} hover:bg-black/5 dark:hover:bg-white/5`}
-          >
-            <BgColorsOutlined className="text-[20px]" />
-          </button> */}
-
           <button
             onClick={toggleDarkMode}
             className={`p-2 rounded-lg transition-all cursor-pointer ${textSecondary} hover:bg-black/5 dark:hover:bg-white/5`}
@@ -279,7 +215,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
           </button>
 
           <div
-            className={`p-1.5 flex items-center justify-center rounded-lg transition-all cursor-pointer hover:bg-black/5 dark:hover:bg-white/5`}
+            className="p-1.5 flex items-center justify-center rounded-lg transition-all cursor-pointer hover:bg-black/5 dark:hover:bg-white/5"
           >
             <div className="relative flex">
               <Avatar
@@ -303,123 +239,18 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
               <LogOut size={20} strokeWidth={2} />
             </button>
           </Tooltip>
-
-          {/* <button
-            className={`p-2 rounded-lg transition-all ${textSecondary} hover:bg-black/5 dark:hover:bg-white/5`}
-          >
-            <SettingOutlined className="text-[20px]" />
-          </button> */}
-
-          {/* <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-2" /> */}
-
-          {/* <button
-            className={`px-4 py-2 rounded-lg transition-all ${textSecondary} hover:bg-black/5 dark:hover:bg-white/5 text-sm font-medium`}
-          >
-            <SearchOutlined className="text-[16px]" />
-          </button> */}
         </div>
       </nav>
 
-      {/* DROPDOWN REGISTRY */}
-      <AnimatePresence>
-        {activeNavRegistry && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setActiveNavRegistry(null)}
-              className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40"
-            />
-
-            {/* Panel */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="absolute top-16 left-8 w-96 rounded-2xl shadow-2xl backdrop-blur-2xl overflow-hidden z-50 border max-h-[500px] flex flex-col"
-              style={{
-                backgroundColor: isDarkMode
-                  ? "rgba(31, 41, 55, 0.95)"
-                  : "rgba(255, 255, 255, 0.95)",
-                borderColor: isDarkMode
-                  ? "rgba(75, 85, 99, 0.3)"
-                  : "rgba(229, 231, 235, 0.5)",
-              }}
-            >
-              <div
-                className="px-5 py-4 border-b"
-                style={{
-                  borderColor: isDarkMode
-                    ? "rgba(75, 85, 99, 0.3)"
-                    : "rgba(229, 231, 235, 0.5)",
-                }}
-              >
-                <h3 className={`font-bold text-lg ${textPrimary}`}>
-                  {navRegistries[activeNavRegistry].label}
-                </h3>
-              </div>
-
-              <div
-                className="flex-1 overflow-auto p-3 space-y-2"
-                style={{
-                  scrollbarWidth: "thin",
-                  scrollbarColor: isDarkMode
-                    ? "#4b5563 #111827"
-                    : "#dfdfdf transparent",
-                }}
-              >
-                {navRegistries[activeNavRegistry].items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-3 rounded-xl cursor-pointer border hover:shadow-md transition-all"
-                    style={{
-                      backgroundColor: isDarkMode
-                        ? "rgba(17, 24, 39, 0.4)"
-                        : "rgba(249, 250, 251, 0.8)",
-                      borderColor: isDarkMode
-                        ? "rgba(75, 85, 99, 0.3)"
-                        : "rgba(229, 231, 235, 0.5)",
-                    }}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <p className={`font-semibold text-sm ${textPrimary}`}>
-                        {item.title}
-                      </p>
-                      <span
-                        className="px-2 py-0.5 rounded-full text-xs font-medium"
-                        style={{
-                          backgroundColor: isDarkMode
-                            ? "rgba(255, 255, 255, 0.1)"
-                            : currentPreset.accent,
-                          color: isDarkMode
-                            ? "rgba(255, 255, 255, 0.8)"
-                            : currentPreset.primary,
-                        }}
-                      >
-                        {item.status}
-                      </span>
-                    </div>
-                    <div
-                      className={`flex items-center gap-3 text-xs ${textSecondary}`}
-                    >
-                      <span className="flex items-center gap-1">
-                        <ClockCircleOutlined /> {item.date}
-                      </span>
-                      {item.from && (
-                        <span className="flex items-center gap-1">
-                          <UserOutlined /> {item.from}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <NavRegistryDropdown
+        activeNavRegistry={activeNavRegistry}
+        navRegistries={navRegistries}
+        onClose={() => setActiveNavRegistry(null)}
+        isDarkMode={isDarkMode}
+        textPrimary={textPrimary}
+        textSecondary={textSecondary}
+        currentPreset={currentPreset}
+      />
     </>
   );
 };
