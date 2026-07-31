@@ -104,18 +104,17 @@ export const InternalCorrespondenceIncomingView = ({
 
       {/* Связанные документы */}
       <If is={data.relatedDocs.length > 0}>
-        <div className="px-6 pt-4 flex-shrink-0">
-          <RelatedDocsBlock
-            relatedDocuments={data.relatedDocs}
-            currentDoc={{
-              id: item.id,
-              kind: "incoming",
-              date: item.sent_at || (item as any).doc_date || (item as any).created_at,
-              reg_number: item.reg_number,
-              subject: item.subject,
-            }}
-          />
-        </div>
+        <RelatedDocsBlock
+          variant="fullWidth"
+          relatedDocuments={data.relatedDocs}
+          currentDoc={{
+            id: item.id,
+            kind: "incoming",
+            date: item.sent_at || (item as any).doc_date || (item as any).created_at,
+            reg_number: item.reg_number,
+            subject: item.subject,
+          }}
+        />
       </If>
 
       {/* Тулбар просмотра и панели разделов */}

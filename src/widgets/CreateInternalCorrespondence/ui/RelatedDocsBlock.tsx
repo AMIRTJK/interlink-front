@@ -122,11 +122,13 @@ interface IProps {
     reg_number?: string;
     subject?: string;
   };
+  variant?: "card" | "fullWidth";
 }
 
 export const RelatedDocsAccordion: React.FC<IProps> = ({
   relatedDocuments,
   currentDoc,
+  variant = "card",
 }) => {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(true);
@@ -146,11 +148,22 @@ export const RelatedDocsAccordion: React.FC<IProps> = ({
   };
 
   return (
-    <div className="mb-5 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div
+      className={cn(
+        variant === "fullWidth"
+          ? "flex-shrink-0 flex flex-col bg-white border-b border-slate-200"
+          : "mb-5 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden"
+      )}
+    >
       {/* Шапка аккордеона */}
       <div
         onClick={() => setIsExpanded((v) => !v)}
-        className="px-6 py-3.5 flex items-center justify-between cursor-pointer hover:bg-slate-50/60 select-none transition-colors border-b border-slate-100"
+        className={cn(
+          "flex items-center justify-between cursor-pointer hover:bg-slate-50 select-none transition-colors",
+          variant === "fullWidth"
+            ? "px-6 h-12"
+            : "px-6 py-3.5 border-b border-slate-100"
+        )}
       >
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
@@ -172,7 +185,7 @@ export const RelatedDocsAccordion: React.FC<IProps> = ({
             size={15}
             className={cn(
               "text-slate-400 transition-transform duration-200",
-              isExpanded && "rotate-180",
+              isExpanded && "rotate-180"
             )}
           />
         </div>
@@ -188,7 +201,7 @@ export const RelatedDocsAccordion: React.FC<IProps> = ({
             transition={{ duration: 0.22, ease: "easeOut" }}
             className="overflow-hidden"
           >
-            <div className="p-4 bg-slate-50/40">
+            <div className={cn("p-4 bg-slate-50/40", variant === "fullWidth" && "px-6 border-t border-slate-100")}>
               <div className="flex items-center gap-2 overflow-x-auto py-1 px-1 scrollbar-thin scrollbar-thumb-slate-200">
                 {chain.map((item, index) => {
                   const isCurrent = item.isCurrent;

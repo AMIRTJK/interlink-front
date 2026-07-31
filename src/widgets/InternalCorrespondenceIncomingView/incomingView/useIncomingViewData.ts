@@ -5,8 +5,8 @@ import {
   mapServerAttachment,
   type AttachedFile,
 } from "@widgets/CreateInternalCorrespondence";
-import { normalizeVisors } from "../model";
-import { RegistryItem, ACTION_MENU_ITEMS, VISOR_INVITE_HINT } from "./incomingViewModel";
+import { normalizeVisors, VISOR_INVITE_HINT } from "../model";
+import { RegistryItem, ACTION_MENU_ITEMS } from "./incomingViewModel";
 
 export function useIncomingViewData(
   item: RegistryItem,
@@ -145,7 +145,7 @@ export function useIncomingViewData(
     docVersions.reduce((a, b) => (Number(b?.id) > Number(a?.id) ? b : a), docVersions[0] || {});
   const documentBody = activeVersion?.body || item.body || "";
 
-  const isResolvingBody = !!item?.id && loadingVersions;
+  const isResolvingBody = Boolean(item?.id && loadingVersions);
 
   const getInitials = (fullName: string) => {
     if (!fullName) return "??";
@@ -191,7 +191,7 @@ export function useIncomingViewData(
     canCreateAssignment,
     isVisorsAvailable,
     visors,
-    loadingVisors,
+    loadingVisors: Boolean(loadingVisors),
     seenMutate,
     isAcknowledged,
     visibleActionItems,
