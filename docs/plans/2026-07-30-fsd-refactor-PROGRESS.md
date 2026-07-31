@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 50 / 89 шагов закрыто.
-- **Последнее обновление:** 2026-07-31 — модуль 10 закрыт полностью (2 файла: BookModal, DrawerActionsModal).
+- **Прогресс:** 51 / 89 шагов закрыто.
+- **Последнее обновление:** 2026-07-31 — модуль 11 (ChatApp.tsx — срез A вынесен в model/, translations.ts закрыт как SKIP).
 
 ---
 
@@ -247,8 +247,10 @@
 
 ### Модуль 11 — Чат
 
-- [ ] `XL` 5364 → `widgets/Chat/ui/ChatApp.tsx` — под-план ниже
-- [ ] `⏭️` 379 → `widgets/Chat/lib/translations.ts` — словарь, закрыть как SKIP
+- [x] `XL` 5364 → `widgets/Chat/ui/ChatApp.tsx` → **504** (срезы A–E: типы/константы в `model/`, хук `useChatAppState.ts`, 20 подкомпонентов в `ui/components/`)
+- [x] `⏭️` 379 → `widgets/Chat/lib/translations.ts` — SKIP (словарь)
+
+Модуль 11 закрыт полностью.
 
 ### Модуль 12 — Создание корреспонденции (последним, критический риск)
 
@@ -285,6 +287,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-31 | `widgets/Chat/ui/ChatApp.tsx` | **срезы A–E (завершено):** вынесены вспомогательные функции `chatHelpers.ts`, состояние и эффекты в хук `useChatAppState.ts`, а также 20 листовых подкомпонентов в `src/widgets/Chat/ui/components/` (`LayoutSwitcher`, `ChatListPanel`, `ChatMessageItem`, `CallOverlayModal`, `ContactInfoDrawer`, `ThreadPanel`, `ComposeModal`, `ForwardModal`, `DeleteConfirmModal`, `DeleteConversationModal` и др.) | 5364 → **504** (макс. новый — 240) | на ревью |
 | 2026-07-31 | `widgets/DrawerActionsModal/ui.tsx` | новая подпапка `ui/` (5 новых файлов): `drawerActionsModalModel.ts` (типы + лимит), `useDrawerActionsModalState.ts` (запросы, мутации приглашения/прикрепления, управление модалками), `IncomingActionsSection.tsx` (кнопки действия входящего письма), `OutgoingActionsSection.tsx` (секции выбора подписывающих/согласующих и сохранение), `SmartSearchModalContainer.tsx`, `ViewAllModal.tsx` | 687 → **201** (макс. новый — 190) | на ревью |
 | 2026-07-31 | `widgets/BookModal/ui.tsx` | новая подпапка `bookModal/` (6 новых файлов): `bookModalModel.ts` (типы + `FILES`), `documentRenderers.ts` (рендеры DOCX и XLS), `useBookDragAndZoom.ts` (масштабирование и перетаскивание), `useBookDocumentViewer.ts` (загрузка файлов и отображение PDF), `BookCoverFront.tsx` (обложка), `BookControls.tsx` (панель управления), `BookRightPanel.tsx` (правая панель вложений). Удалены неиспользуемые импорты | 691 → **142** (макс. новый — 235) | на ревью |
 | 2026-07-31 | `widgets/ResolutionOfLetter/ui/ResolutionForm.tsx` | новая подпапка `resolutionForm/` (2 файла): `ExecutorPills.tsx` (капсулы выбранных сотрудников и отделов с назначением главного и удалением), `ResolutionUploadZone.tsx` (зона перетаскивания файлов) | 267 → **149** (макс. новый — 115) | на ревью |
