@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 48 / 89 шагов закрыто.
-- **Последнее обновление:** 2026-07-31 — модуль 7 закрыт полностью (6 файлов). Следующий — модуль 8 (просмотр входящего, начиная с `IncomingPreviewModal.tsx`, XL).
+- **Прогресс:** 50 / 89 шагов закрыто.
+- **Последнее обновление:** 2026-07-31 — модуль 10 закрыт полностью (2 файла: BookModal, DrawerActionsModal).
 
 ---
 
@@ -240,8 +240,10 @@
 
 ### Модуль 10 — Прочие модалки
 
-- [ ] `M` 691 → `widgets/BookModal/ui.tsx`
-- [ ] `M` 687 → `widgets/DrawerActionsModal/ui.tsx`
+- [x] `M` 691 → `widgets/BookModal/ui.tsx` → **142**
+- [x] `M` 687 → `widgets/DrawerActionsModal/ui.tsx` → **201**
+
+Модуль 10 закрыт полностью.
 
 ### Модуль 11 — Чат
 
@@ -283,6 +285,8 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-31 | `widgets/DrawerActionsModal/ui.tsx` | новая подпапка `ui/` (5 новых файлов): `drawerActionsModalModel.ts` (типы + лимит), `useDrawerActionsModalState.ts` (запросы, мутации приглашения/прикрепления, управление модалками), `IncomingActionsSection.tsx` (кнопки действия входящего письма), `OutgoingActionsSection.tsx` (секции выбора подписывающих/согласующих и сохранение), `SmartSearchModalContainer.tsx`, `ViewAllModal.tsx` | 687 → **201** (макс. новый — 190) | на ревью |
+| 2026-07-31 | `widgets/BookModal/ui.tsx` | новая подпапка `bookModal/` (6 новых файлов): `bookModalModel.ts` (типы + `FILES`), `documentRenderers.ts` (рендеры DOCX и XLS), `useBookDragAndZoom.ts` (масштабирование и перетаскивание), `useBookDocumentViewer.ts` (загрузка файлов и отображение PDF), `BookCoverFront.tsx` (обложка), `BookControls.tsx` (панель управления), `BookRightPanel.tsx` (правая панель вложений). Удалены неиспользуемые импорты | 691 → **142** (макс. новый — 235) | на ревью |
 | 2026-07-31 | `widgets/ResolutionOfLetter/ui/ResolutionForm.tsx` | новая подпапка `resolutionForm/` (2 файла): `ExecutorPills.tsx` (капсулы выбранных сотрудников и отделов с назначением главного и удалением), `ResolutionUploadZone.tsx` (зона перетаскивания файлов) | 267 → **149** (макс. новый — 115) | на ревью |
 | 2026-07-31 | `widgets/ResolutionOfLetter/lib/useResolutionOfLetter.ts` | новая подпапка `resolutionOfLetter/` (2 файла): `useResolutionAttachments.ts` (запрос вложений письма, пакетная загрузка с дебаунсом 300 мс, удаление), `useResolutionExecutors.ts` (выбранные отделы/сотрудники, главные исполнители, синхронизация со скрытыми полями формы). `correspondenceId = "1"` вынесен в константу `CORRESPONDENCE_ID` | 283 → **133** (макс. новый — 105) | на ревью |
 | 2026-07-31 | `features/SelectExecutors/SelectExecutorsModal.tsx` | новая подпапка `selectExecutors/` (3 файла): `selectExecutorsLib.ts` (`extractData`, `getMeta`, `transformSelectResponse`), `useSelectExecutorsState.ts` (вкладки, запросы сотрудников и отделов, поиск, пагинация, выбор и главные исполнители), `ExecutorsSearchBar.tsx` (панель поиска с фильтрами по отделу и роли). `tabItems` поднят в константу модуля | 353 → **135** (макс. новый — 195) | на ревью |
