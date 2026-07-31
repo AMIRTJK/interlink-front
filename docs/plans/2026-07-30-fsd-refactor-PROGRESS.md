@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 51 / 89 шагов закрыто.
-- **Последнее обновление:** 2026-07-31 — модуль 11 (ChatApp.tsx — срез A вынесен в model/, translations.ts закрыт как SKIP).
+- **Прогресс:** 52 / 89 шагов закрыто.
+- **Последнее обновление:** 2026-07-31 — модуль 8 (IncomingPreviewModal.tsx декомпозирован по срезам A–E).
 
 ---
 
@@ -223,7 +223,9 @@
 
 ### Модуль 8 — Просмотр входящего
 
-- [ ] `XL` 1795 → `widgets/InternalCorrespondenceIncomingView/IncomingPreviewModal.tsx` — под-план ниже
+- [x] `XL` 1795 → `widgets/InternalCorrespondenceIncomingView/IncomingPreviewModal.tsx` → **382** (срезы A–E: новая подпапка `incomingPreviewModal/`, 10 файлов)
+
+⏹ **ЧЕКПОИНТ**
 - [ ] `L` 1274 → `widgets/InternalCorrespondenceIncomingView/ui.tsx`
 - [ ] `M` 450 → `widgets/InternalCorrespondenceIncomingView/lib.ts`
 - [ ] `S` 345 → `widgets/InternalCorrespondenceIncomingView/ApproversPanel.tsx`
@@ -287,6 +289,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-31 | `widgets/InternalCorrespondenceIncomingView/IncomingPreviewModal.tsx` | **срезы A–E (завершено):** новая подпапка `incomingPreviewModal/` (10 новых файлов): `incomingPreviewModalModel.ts` (типы + `GRADIENTS`), `incomingPreviewModalLib.ts` (хелперы ФИО и сертификатов), `useIncomingPreviewState.ts` (состояние зума, масштаба, панелей, подписей, ResizeObserver, прокрутка страниц), `PreviewHeaderToolbar.tsx` (шапка), `PreviewSectionsToolbarBar.tsx` (верхняя панель разделов), `PreviewApproversQuickBar.tsx` (быстрая полоса согласующих), `PreviewActiveApproverPopover.tsx` (поповер активного согласующего), `PreviewThumbnailsSidebar.tsx` (лента миниатюр), `PreviewFullApproversDrawer.tsx` (правая панель этапов), `PreviewStatusBar.tsx` (подвал) | 1795 → **382** (макс. новый — 240) | на ревью |
 | 2026-07-31 | `widgets/Chat/ui/ChatApp.tsx` | **срезы A–E (завершено):** вынесены вспомогательные функции `chatHelpers.ts`, состояние и эффекты в хук `useChatAppState.ts`, а также 20 листовых подкомпонентов в `src/widgets/Chat/ui/components/` (`LayoutSwitcher`, `ChatListPanel`, `ChatMessageItem`, `CallOverlayModal`, `ContactInfoDrawer`, `ThreadPanel`, `ComposeModal`, `ForwardModal`, `DeleteConfirmModal`, `DeleteConversationModal` и др.) | 5364 → **504** (макс. новый — 240) | на ревью |
 | 2026-07-31 | `widgets/DrawerActionsModal/ui.tsx` | новая подпапка `ui/` (5 новых файлов): `drawerActionsModalModel.ts` (типы + лимит), `useDrawerActionsModalState.ts` (запросы, мутации приглашения/прикрепления, управление модалками), `IncomingActionsSection.tsx` (кнопки действия входящего письма), `OutgoingActionsSection.tsx` (секции выбора подписывающих/согласующих и сохранение), `SmartSearchModalContainer.tsx`, `ViewAllModal.tsx` | 687 → **201** (макс. новый — 190) | на ревью |
 | 2026-07-31 | `widgets/BookModal/ui.tsx` | новая подпапка `bookModal/` (6 новых файлов): `bookModalModel.ts` (типы + `FILES`), `documentRenderers.ts` (рендеры DOCX и XLS), `useBookDragAndZoom.ts` (масштабирование и перетаскивание), `useBookDocumentViewer.ts` (загрузка файлов и отображение PDF), `BookCoverFront.tsx` (обложка), `BookControls.tsx` (панель управления), `BookRightPanel.tsx` (правая панель вложений). Удалены неиспользуемые импорты | 691 → **142** (макс. новый — 235) | на ревью |
@@ -358,6 +361,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Находка |
 |---|---|---|
+| 2026-07-31 | `widgets/InternalCorrespondenceIncomingView/incomingPreviewModal/incomingPreviewModalLib.ts` | `getCertSnippet` генерирует искусственный фиктивный номер сертификата `SN: ...A3F9...C12D` по хешу инициалов; `signatures` и `approvals` не имеют строгой типизации DTO (массивы `any[]`) |
 | 2026-07-31 | `widgets/ResolutionOfLetter/lib/useResolutionOfLetter.ts` | ID письма захардкожен: `CORRESPONDENCE_ID = "1"` — резолюция всегда запрашивает и обновляет вложения письма №1, а не текущего (в коде так и написано «в реальном приложении получаем из контекста или пропсов») |
 | 2026-07-31 | `widgets/ResolutionOfLetter/lib/useResolutionOfLetter.ts` | `submitResolution` бьёт в `CREATE_RESOLUTION.replace(":id", ...)`, хотя в маршруте нет `:id` — вторая мутация уходит на тот же URL, что и первая |
 | 2026-07-31 | `widgets/ResolutionOfLetter/ui/ResolutionForm.tsx` | Селект «Статус» имеет единственную опцию-заглушку `{ value: "test", label: "test" }` |
