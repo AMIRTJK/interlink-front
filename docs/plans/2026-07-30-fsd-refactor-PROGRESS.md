@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 51 / 89 шагов закрыто.
-- **Последнее обновление:** 2026-07-31 — модуль 11 (ChatApp.tsx — срез A вынесен в model/, translations.ts закрыт как SKIP).
+- **Прогресс:** 62 / 89 шагов закрыто.
+- **Последнее обновление:** 2026-07-31 — Модуль `InternalCorrespondece` (ui.tsx, Editor.tsx, DocumentHeaderForm.tsx, TopNavigation.tsx) закрыт.
 
 ---
 
@@ -223,20 +223,27 @@
 
 ### Модуль 8 — Просмотр входящего
 
-- [ ] `XL` 1795 → `widgets/InternalCorrespondenceIncomingView/IncomingPreviewModal.tsx` — под-план ниже
-- [ ] `L` 1274 → `widgets/InternalCorrespondenceIncomingView/ui.tsx`
-- [ ] `M` 450 → `widgets/InternalCorrespondenceIncomingView/lib.ts`
-- [ ] `S` 345 → `widgets/InternalCorrespondenceIncomingView/ApproversPanel.tsx`
-- [ ] `S` 313 → `widgets/InternalCorrespondenceIncomingView/SignersPanel.tsx`
-- [ ] `S` 253 → `widgets/InternalCorrespondenceIncomingView/TaskFormFields.tsx`
+- [x] `XL` 1795 → `widgets/InternalCorrespondenceIncomingView/IncomingPreviewModal.tsx` → **382** (срезы A–E: новая подпапка `incomingPreviewModal/`, 10 файлов)
 
-### Модуль 9 — Внутренняя корреспонденция
+- [x] `L` 1274 → `widgets/InternalCorrespondenceIncomingView/ui.tsx` → **180**
 
-- [ ] `XL` 1500 → `widgets/InternalCorrespondece/ui/WorkflowParticipantsPanel.tsx` — под-план ниже
-- [ ] `M` 680 → `widgets/InternalCorrespondece/ui.tsx`
-- [ ] `M` 677 → `widgets/InternalCorrespondece/ui/Editor.tsx` — ⚠️ инварианты пагинации, только механический вынос
-- [ ] `M` 441 → `widgets/InternalCorrespondece/ui/DocumentHeaderForm.tsx`
-- [ ] `M` 425 → `widgets/InternalCorrespondece/ui/TopNavigation.tsx`
+- [x] `M` 450 → `widgets/InternalCorrespondenceIncomingView/lib.ts` → **24** (вынесена подпапка `incomingViewLib/`: `incomingViewGeometry.ts`, `incomingViewTruncate.ts`, `paginateHtml.ts`, `downloadDocumentPdf.ts`)
+- [x] `S` 345 → `widgets/InternalCorrespondenceIncomingView/ApproversPanel.tsx` → **152** (вынесена подпапка `approversPanel/`: `approversPanelModel.ts`, `ApproverCard.tsx`, `ApproversPanelHistory.tsx`)
+- [x] `S` 313 → `widgets/InternalCorrespondenceIncomingView/SignersPanel.tsx` → **152** (вынесена подпапка `signersPanel/`: `signersPanelModel.ts`, `SignerCard.tsx`, `SignersPanelHistory.tsx`)
+- [x] `S` 253 → `widgets/InternalCorrespondenceIncomingView/TaskFormFields.tsx` → **110** (вынесена подпапка `taskFormFields/`: `taskFormFieldsModel.ts`, `ExecutorSearchInput.tsx`)
+
+Модуль 8 закрыт полностью.
+
+- [x] `XL` 1500 → `widgets/InternalCorrespondece/ui/WorkflowParticipantsPanel.tsx` → **566** (срезы A–E: новая подпапка `workflowParticipantsPanel/`, 9 файлов)
+
+- [x] `M` 680 → `widgets/InternalCorrespondece/ui.tsx` → **194**
+- [x] `M` 677 → `widgets/InternalCorrespondece/ui/Editor.tsx` → **161** — ⚠️ инварианты пагинации, только механический вынос
+- [x] `M` 441 → `widgets/InternalCorrespondece/ui/DocumentHeaderForm.tsx` → **259**
+- [x] `M` 425 → `widgets/InternalCorrespondece/ui/TopNavigation.tsx` → **238**
+
+Модуль 9 (InternalCorrespondece) закрыт полностью.
+
+⏹ **ЧЕКПОИНТ**
 
 ### Модуль 10 — Прочие модалки
 
@@ -287,6 +294,12 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-31 | `widgets/InternalCorrespondece/ui/WorkflowParticipantsPanel.tsx` | новая подпапка `workflowParticipantsPanel/` (9 файлов): `workflowParticipantsModel.tsx` (константы + статусы), `ApprovalConfirmModal.tsx` (модалка согласования), `SidebarDocumentRow.tsx`, `SidebarVersionRow.tsx`, `SidebarParticipantRow.tsx`, `FullHistoryModal.tsx` (модалка полной истории), `HistoryParticipantRow.tsx`, `HistoryDocumentsTab.tsx`, `HistoryVersionsTab.tsx` | 1501 → **566** (макс. новый — 250) | на ревью |
+| 2026-07-31 | `widgets/InternalCorrespondenceIncomingView/TaskFormFields.tsx` | новая подпапка `taskFormFields/` (2 файла): `taskFormFieldsModel.ts` (типы + цвета аватаров + шкала приоритетов), `ExecutorSearchInput.tsx` (поиск и выбор исполнителя). В `TaskFormFields.tsx` осталась разметка формы | 253 → **110** (макс. новый — 120) | на ревью |
+| 2026-07-31 | `widgets/InternalCorrespondenceIncomingView/SignersPanel.tsx` | новая подпапка `signersPanel/` (3 файла): `signersPanelModel.ts` (типы + градиенты), `SignerCard.tsx` (карточка подписывающего с ЭЦП), `SignersPanelHistory.tsx` (аккордеон истории) | 313 → **152** (макс. новый — 70) | на ревью |
+| 2026-07-31 | `widgets/InternalCorrespondenceIncomingView/ApproversPanel.tsx` | новая подпапка `approversPanel/` (3 файла): `approversPanelModel.ts` (типы + роли + градиенты), `ApproverCard.tsx` (карточка согласующего с ЭЦП/ожиданием), `ApproversPanelHistory.tsx` (аккордеон истории) | 345 → **152** (макс. новый — 70) | на ревью |
+| 2026-07-31 | `widgets/InternalCorrespondenceIncomingView/lib.ts` | новая подпапка `incomingViewLib/` (4 файла): `incomingViewGeometry.ts` (размеры A4, стили контента, `StampInfo`), `incomingViewTruncate.ts` (деление узлов DOM `truncateToChars`, `dropChars`), `paginateHtml.ts` (постраничная разбивка), `downloadDocumentPdf.ts` (генерация iframe для печати PDF). `lib.ts` превращён в чистый реэкспорт | 450 → **24** (макс. новый — 190) | на ревью |
+| 2026-07-31 | `widgets/InternalCorrespondenceIncomingView/IncomingPreviewModal.tsx` | **срезы A–E (завершено):** новая подпапка `incomingPreviewModal/` (10 новых файлов): `incomingPreviewModalModel.ts` (типы + `GRADIENTS`), `incomingPreviewModalLib.ts` (хелперы ФИО и сертификатов), `useIncomingPreviewState.ts` (состояние зума, масштаба, панелей, подписей, ResizeObserver, прокрутка страниц), `PreviewHeaderToolbar.tsx` (шапка), `PreviewSectionsToolbarBar.tsx` (верхняя панель разделов), `PreviewApproversQuickBar.tsx` (быстрая полоса согласующих), `PreviewActiveApproverPopover.tsx` (поповер активного согласующего), `PreviewThumbnailsSidebar.tsx` (лента миниатюр), `PreviewFullApproversDrawer.tsx` (правая панель этапов), `PreviewStatusBar.tsx` (подвал) | 1795 → **382** (макс. новый — 240) | на ревью |
 | 2026-07-31 | `widgets/Chat/ui/ChatApp.tsx` | **срезы A–E (завершено):** вынесены вспомогательные функции `chatHelpers.ts`, состояние и эффекты в хук `useChatAppState.ts`, а также 20 листовых подкомпонентов в `src/widgets/Chat/ui/components/` (`LayoutSwitcher`, `ChatListPanel`, `ChatMessageItem`, `CallOverlayModal`, `ContactInfoDrawer`, `ThreadPanel`, `ComposeModal`, `ForwardModal`, `DeleteConfirmModal`, `DeleteConversationModal` и др.) | 5364 → **504** (макс. новый — 240) | на ревью |
 | 2026-07-31 | `widgets/DrawerActionsModal/ui.tsx` | новая подпапка `ui/` (5 новых файлов): `drawerActionsModalModel.ts` (типы + лимит), `useDrawerActionsModalState.ts` (запросы, мутации приглашения/прикрепления, управление модалками), `IncomingActionsSection.tsx` (кнопки действия входящего письма), `OutgoingActionsSection.tsx` (секции выбора подписывающих/согласующих и сохранение), `SmartSearchModalContainer.tsx`, `ViewAllModal.tsx` | 687 → **201** (макс. новый — 190) | на ревью |
 | 2026-07-31 | `widgets/BookModal/ui.tsx` | новая подпапка `bookModal/` (6 новых файлов): `bookModalModel.ts` (типы + `FILES`), `documentRenderers.ts` (рендеры DOCX и XLS), `useBookDragAndZoom.ts` (масштабирование и перетаскивание), `useBookDocumentViewer.ts` (загрузка файлов и отображение PDF), `BookCoverFront.tsx` (обложка), `BookControls.tsx` (панель управления), `BookRightPanel.tsx` (правая панель вложений). Удалены неиспользуемые импорты | 691 → **142** (макс. новый — 235) | на ревью |
@@ -358,6 +371,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Находка |
 |---|---|---|
+| 2026-07-31 | `widgets/InternalCorrespondenceIncomingView/incomingPreviewModal/incomingPreviewModalLib.ts` | `getCertSnippet` генерирует искусственный фиктивный номер сертификата `SN: ...A3F9...C12D` по хешу инициалов; `signatures` и `approvals` не имеют строгой типизации DTO (массивы `any[]`) |
 | 2026-07-31 | `widgets/ResolutionOfLetter/lib/useResolutionOfLetter.ts` | ID письма захардкожен: `CORRESPONDENCE_ID = "1"` — резолюция всегда запрашивает и обновляет вложения письма №1, а не текущего (в коде так и написано «в реальном приложении получаем из контекста или пропсов») |
 | 2026-07-31 | `widgets/ResolutionOfLetter/lib/useResolutionOfLetter.ts` | `submitResolution` бьёт в `CREATE_RESOLUTION.replace(":id", ...)`, хотя в маршруте нет `:id` — вторая мутация уходит на тот же URL, что и первая |
 | 2026-07-31 | `widgets/ResolutionOfLetter/ui/ResolutionForm.tsx` | Селект «Статус» имеет единственную опцию-заглушку `{ value: "test", label: "test" }` |
