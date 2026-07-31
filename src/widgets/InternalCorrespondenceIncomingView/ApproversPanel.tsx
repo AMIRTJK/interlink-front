@@ -1,50 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Clock } from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "@shared/lib";
-import { SignatureStamp } from "./SignatureStamp";
-
-interface DocApproverItem {
-  id: string;
-  name: string;
-  position: string;
-  role: "Согласующий" | "Утверждающий" | "Ознакомлен";
-  initials: string;
-  gradientFrom: string;
-  gradientTo: string;
-  signed: boolean;
-  signedAt: string;
-}
-
-const ROLE_BADGE: Record<
-  DocApproverItem["role"],
-  { bg: string; text: string; border: string }
-> = {
-  Согласующий: {
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    border: "border-blue-200",
-  },
-  Утверждающий: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    border: "border-emerald-200",
-  },
-  Ознакомлен: {
-    bg: "bg-slate-100",
-    text: "text-slate-600",
-    border: "border-slate-200",
-  },
-};
-
-const GRADIENTS = [
-  { from: "#6366f1", to: "#8b5cf6" },
-  { from: "#10b981", to: "#059669" },
-  { from: "#ec4899", to: "#be185d" },
-  { from: "#f59e0b", to: "#d97706" },
-  { from: "#3b82f6", to: "#1d4ed8" },
-];
-
+import {
+  DocApproverItem,
+  GRADIENTS,
+  getInitials,
+} from "./approversPanel/approversPanelModel";
+import { ApproverCard } from "./approversPanel/ApproverCard";
+import { ApproversPanelHistory } from "./approversPanel/ApproversPanelHistory";
 
 export const ApproversPanel = ({
   isOpen,
@@ -59,17 +23,6 @@ export const ApproversPanel = ({
   onClose: () => void;
   approvals?: any[];
 }) => {
-  const [showHistory, setShowHistory] = useState(false);
-
-  const getInitials = (fullName: string) => {
-    if (!fullName) return "??";
-    const parts = fullName.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-    }
-    return parts[0].slice(0, 2).toUpperCase();
-  };
-
   const items: DocApproverItem[] = approvals.map((app: any, idx: number) => {
     const user = app.approver || app.user || {};
     const initials = getInitials(user.full_name || "");
@@ -118,30 +71,19 @@ export const ApproversPanel = ({
 
   const signedCount = items.filter((a) => a.signed).length;
   const totalCount = items.length;
-  const dotColor =
-    totalCount === 0
-      ? "bg-slate-300"
-      : signedCount === totalCount
-        ? "bg-green-400"
-        : signedCount > 0
-          ? "bg-amber-400"
-          : "bg-slate-300";
   const progressPct = totalCount > 0 ? Math.round((signedCount / totalCount) * 100) : 0;
 
   return (
     <>
       {!hideTab && (
-        <div
-          className="absolute z-20"
-          style={{ right: -32, top: 190 }}
-        >
+        <div className="absolute z-20" style={{ right: -32, top: 190 }}>
           <motion.button
             onClick={isOpen ? onClose : onOpen}
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 300, damping: 24 }}
             className={cn(
               "bg-white border border-slate-200 border-l-0 rounded-r-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-              isOpen ? "bg-slate-50" : "hover:bg-slate-50",
+              isOpen ? "bg-slate-50" : "hover:bg-slate-50"
             )}
             aria-label="Согласующие"
           >
@@ -173,7 +115,6 @@ export const ApproversPanel = ({
             exit={{ x: -12, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
             className="absolute top-0 w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl z-[500] flex flex-col"
-
             style={{
               left: "calc(100% + 12px)",
               maxHeight: "var(--icc-panel-max-h, 70vh)",
@@ -214,129 +155,12 @@ export const ApproversPanel = ({
             </p>
 
             <div className="flex-1 overflow-y-auto px-4 py-2 flex flex-col gap-3 min-h-0">
-              {items.map((approver, idx) => {
-                const roleBadge = ROLE_BADGE[approver.role];
-                return (
-                  <motion.div
-                    key={approver.id}
-                    initial={{ opacity: 0, x: 16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{
-                      delay: idx * 0.06,
-                      duration: 0.22,
-                      ease: "easeOut",
-                    }}
-                    className="bg-slate-50 rounded-xl p-3 flex flex-col gap-2 border border-slate-100"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
-                        style={{
-                          background: `linear-gradient(135deg, ${approver.gradientFrom}, ${approver.gradientTo})`,
-                        }}
-                      >
-                        {approver.initials}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-[13px] text-slate-800 leading-tight break-words">
-                          {approver.name}
-                        </p>
-                      </div>
-                      <span
-                        className={cn(
-                          "text-[10px] font-semibold px-2 py-0.5 rounded-full border flex-shrink-0",
-                          roleBadge.bg,
-                          roleBadge.text,
-                          roleBadge.border,
-                        )}
-                      >
-                        {approver.role}
-                      </span>
-                    </div>
-
-                    <p className="text-[11px] text-slate-400 leading-tight">
-                      {approver.position}
-                    </p>
-
-                    {approver.signed && (
-                      <SignatureStamp
-                        name={approver.name}
-                        certSerial={`SN-2026-${approver.initials}-84201`}
-                        signedAt={approver.signedAt.split(" ")[0] || approver.signedAt}
-                        validUntil="аз 20.03.2025 то 20.03.2026"
-                      />
-                    )}
-
-                    {!approver.signed && (
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-4 h-4 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0 border border-amber-200">
-                          <Clock size={9} className="text-amber-500" />
-                        </span>
-                        <span className="text-[11px] font-semibold text-amber-600">
-                          Ожидает подписи
-                        </span>
-                      </div>
-                    )}
-                  </motion.div>
-                );
-              })}
+              {items.map((approver, idx) => (
+                <ApproverCard key={approver.id} approver={approver} idx={idx} />
+              ))}
             </div>
 
-            <div className="px-4 py-3 border-t border-slate-100 flex-shrink-0">
-              <button
-                onClick={() => setShowHistory((v) => !v)}
-                className="w-full text-left flex items-center justify-between text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors py-1"
-              >
-                <span>История согласования</span>
-                <motion.span
-                  animate={{ rotate: showHistory ? 180 : 0 }}
-                  transition={{ duration: 0.18 }}
-                  className="inline-block"
-                >
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </motion.span>
-              </button>
-
-              <AnimatePresence>
-                {showHistory && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="pt-2 flex flex-col gap-2">
-                      {historyEvents.map((event, idx) => (
-                        <div key={idx} className="flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-1.5 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[10px] text-slate-600 leading-tight">
-                              {event.label}
-                            </p>
-                            <p className="text-[10px] text-slate-400">
-                              {event.date}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <ApproversPanelHistory historyEvents={historyEvents} />
           </motion.div>
         )}
       </AnimatePresence>
