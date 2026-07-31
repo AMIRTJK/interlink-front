@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 57 / 89 шагов закрыто.
-- **Последнее обновление:** 2026-07-31 — модуль 8 (InternalCorrespondenceIncomingView) закрыт полностью.
+- **Прогресс:** 58 / 89 шагов закрыто.
+- **Последнее обновление:** 2026-07-31 — `WorkflowParticipantsPanel.tsx` закрыт.
 
 ---
 
@@ -234,11 +234,9 @@
 
 Модуль 8 закрыт полностью.
 
+- [x] `XL` 1500 → `widgets/InternalCorrespondece/ui/WorkflowParticipantsPanel.tsx` → **566** (срезы A–E: новая подпапка `workflowParticipantsPanel/`, 9 файлов)
+
 ⏹ **ЧЕКПОИНТ**
-
-### Модуль 9 — Внутренняя корреспонденция
-
-- [ ] `XL` 1500 → `widgets/InternalCorrespondece/ui/WorkflowParticipantsPanel.tsx` — под-план ниже
 - [ ] `M` 680 → `widgets/InternalCorrespondece/ui.tsx`
 - [ ] `M` 677 → `widgets/InternalCorrespondece/ui/Editor.tsx` — ⚠️ инварианты пагинации, только механический вынос
 - [ ] `M` 441 → `widgets/InternalCorrespondece/ui/DocumentHeaderForm.tsx`
@@ -293,6 +291,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-31 | `widgets/InternalCorrespondece/ui/WorkflowParticipantsPanel.tsx` | новая подпапка `workflowParticipantsPanel/` (9 файлов): `workflowParticipantsModel.tsx` (константы + статусы), `ApprovalConfirmModal.tsx` (модалка согласования), `SidebarDocumentRow.tsx`, `SidebarVersionRow.tsx`, `SidebarParticipantRow.tsx`, `FullHistoryModal.tsx` (модалка полной истории), `HistoryParticipantRow.tsx`, `HistoryDocumentsTab.tsx`, `HistoryVersionsTab.tsx` | 1501 → **566** (макс. новый — 250) | на ревью |
 | 2026-07-31 | `widgets/InternalCorrespondenceIncomingView/TaskFormFields.tsx` | новая подпапка `taskFormFields/` (2 файла): `taskFormFieldsModel.ts` (типы + цвета аватаров + шкала приоритетов), `ExecutorSearchInput.tsx` (поиск и выбор исполнителя). В `TaskFormFields.tsx` осталась разметка формы | 253 → **110** (макс. новый — 120) | на ревью |
 | 2026-07-31 | `widgets/InternalCorrespondenceIncomingView/SignersPanel.tsx` | новая подпапка `signersPanel/` (3 файла): `signersPanelModel.ts` (типы + градиенты), `SignerCard.tsx` (карточка подписывающего с ЭЦП), `SignersPanelHistory.tsx` (аккордеон истории) | 313 → **152** (макс. новый — 70) | на ревью |
 | 2026-07-31 | `widgets/InternalCorrespondenceIncomingView/ApproversPanel.tsx` | новая подпапка `approversPanel/` (3 файла): `approversPanelModel.ts` (типы + роли + градиенты), `ApproverCard.tsx` (карточка согласующего с ЭЦП/ожиданием), `ApproversPanelHistory.tsx` (аккордеон истории) | 345 → **152** (макс. новый — 70) | на ревью |
