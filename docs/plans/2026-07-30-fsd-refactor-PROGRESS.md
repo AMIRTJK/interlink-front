@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 40 / 89 шагов закрыто.
-- **Последнее обновление:** 2026-07-31 — модуль 6: снят вопрос `NewRegistry` / `RegistryTable` (это внутренняя и внешняя корреспонденция, обе остаются), закрыты `RegistryTable.tsx`, `getCorrespondenseIncomingColumns.tsx`, `useModuleSidebar.ts`. Дальше — `RegistryLayout.tsx` (XL, срез A) и `NewRegistry.tsx`.
+- **Прогресс:** 42 / 89 шагов закрыто.
+- **Последнее обновление:** 2026-07-31 — модуль 6 закрыт полностью: `RegistryLayout.tsx` (XL) и `NewRegistry.tsx`. Следующий — модуль 7 (резолюции, визы, исполнители).
 
 ---
 
@@ -199,10 +199,11 @@
 
 - [x] `S` 260 → `widgets/RegistrySidebar/ui/useModuleSidebar.ts` → **158**
 
-⏹ **ЧЕКПОИНТ**
+- [x] `XL` 1598 → `widgets/NewRegistry/ui/RegistryLayout.tsx` → **222** (срезы A–D за один заход: файл оказался набором независимых компонентов, состояние осталось в главном)
 
-- [ ] `XL` 1598 → `widgets/NewRegistry/ui/RegistryLayout.tsx` — под-план ниже
-- [ ] `M` 535 → `widgets/NewRegistry/ui/NewRegistry.tsx`
+- [x] `M` 535 → `widgets/NewRegistry/ui/NewRegistry.tsx` → **237**
+
+⏹ **ЧЕКПОИНТ** — модуль 6 закрыт полностью
 
 ### Модуль 7 — Резолюции, визы, исполнители
 
@@ -275,6 +276,8 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-31 | `widgets/NewRegistry/ui/NewRegistry.tsx` | новая подпапка `newRegistry/` (3 файла): `newRegistryModel.tsx` (файл-данные: `STATUS_CONFIG` со всеми статусами и их API-ручками, `REGISTRY_STATUS_MAP`, `NewRegistryProps`, самодельная иконка `FileSignatureIcon`), `useRegistryBreadcrumbs.ts` (крошки: корневой раздел + подъём по дереву папок с выпадающими списками соседних и вложенных папок), `useRegistryStatusTabs.ts` (вкладки статусов со счётчиками, включая дозапрос «проблемных» счётчиков через `useQueries`) | 535 → **237** (макс. новый — 143) | на ревью |
+| 2026-07-31 | `widgets/NewRegistry/ui/RegistryLayout.tsx` | новая подпапка `registryLayout/` (10 файлов): `registryLayoutModel.ts` (`ViewMode`, `RegistryLayoutProps`), `letterStatus.tsx` (`getLinkTypeInfo`, `getLetterStatusBadge`, `getEffectiveStatusData`), `badgeStyles.ts` (цвета бейджей), `RippleEffect.tsx`, `RegistryHeaderBar.tsx` (кнопка создания, счётчик, переключатель Список/Блоки/Структура, кнопка фильтров, вкладки статусов), `SectionHeader.tsx`, `DocumentCard.tsx` (плиточный вид), `DocumentListItem.tsx` (списочный вид), `FilterDrawer.tsx` (боковая панель фильтров), `FilterField.tsx` (одно поле фильтра: текст/список/дата/диапазон), `Pagination.tsx`. Ранее экспортированные наружу имена реэкспортируются из `RegistryLayout.tsx` | 1598 → **222** (макс. новый — 246) | на ревью |
 | 2026-07-31 | `widgets/RegistrySidebar/ui/useModuleSidebar.ts` | новая подпапка `moduleSidebar/` (2 файла): `useSidebarFolderMutations.ts` (создание, переименование, удаление пользовательских папок с обновлением списка), `buildSidebarDefinitions.ts` (сборка системных папок «Входящие/Исходящие/Черновики/Корзина» со счётчиками и маршрутами + `DEFAULT_FOLDER_KEYS`) | 260 → **158** (макс. новый — 78) | на ревью |
 | 2026-07-31 | `widgets/RegistryTable/lib/.../getCorrespondenseIncomingColumns.tsx` | новая подпапка `incomingColumns/` (4 файла): `useIncomingRowMutations.ts` (архив, восстановление, закрепление, удаление), `AcknowledgedUsersCell.tsx` (аватары ознакомившихся), `IncomingStatusCell.tsx` (расчёт подписи и цвета статуса по поручениям), `IncomingRowActionsCell.tsx` (выпадающее меню действий строки) | 313 → **90** (макс. новый — 95) | на ревью |
 | 2026-07-31 | `widgets/RegistryTable/ui/RegistryTable.tsx` | новая подпапка `registryTable/` (2 файла): `useRegistryTableState.ts` (вкладки, права, счётчики, папки, раскрытые строки, `BookModal`, навигация к письму и исполнению, эффект на `location.state`), `ExpandedRowDetails.tsx` (раскрывающийся блок строки с реквизитами и тремя кнопками) | 355 → **152** (макс. новый — 165) | на ревью |
@@ -335,6 +338,13 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Находка |
 |---|---|---|
+| 2026-07-31 | `widgets/NewRegistry/ui/registryLayout/` | `DocumentCard` и `DocumentListItem` принимают проп `_index`, а вызывающий код передаёт `index` — параметр никогда не приходит, мёртвый |
+| 2026-07-31 | `widgets/NewRegistry/ui/registryLayout/` | В `RegistryLayout` объект `props` содержит `key` и раскрывается спредом (`<DocumentCard {...props} />`) — `key` внутри спреда React считает ошибкой |
+| 2026-07-31 | `widgets/NewRegistry/ui/registryLayout/badgeStyles.ts` | `getStatusBadgeColor` не используется нигде — мёртвая функция, перенесена как есть |
+| 2026-07-31 | `widgets/NewRegistry/ui/registryLayout/FilterDrawer.tsx` | `localFilters` инициализируется пропсом `filters` только при первом монтировании: если фильтры изменятся снаружи (например, сбросом из другого места), панель покажет устаревшие значения |
+| 2026-07-31 | `widgets/NewRegistry/ui/registryLayout/` | Весь файл был построен на `any`: `documents`, `meta`, `tabs`, `statusConfig`, `fieldConfig`, пропсы всех подкомпонентов. Типы не описаны, перенесено как есть |
+| 2026-07-31 | `widgets/NewRegistry/ui/newRegistry/useRegistryStatusTabs.ts` | Счётчики вкладок дозапрашиваются по одному запросу на вкладку прямым `_axios.get` в обход `useGetQuery` (N+1). Для `approved`/`signed`/`sent`/`analysis` запрос делается всегда, даже если бэкенд прислал счётчик |
+| 2026-07-31 | `widgets/NewRegistry/ui/NewRegistry.tsx` | `per_page: 9` и `staleTime: 5000` — магические числа; `handleFilterReset` перечисляет ключи фильтров хардкодом, хотя они уже описаны в конфиге фильтров |
 | 2026-07-31 | `widgets/RegistryTable/ui/RegistryTable.tsx` | `handleNavigateToLetter` начинается с отладочного `console.log(type)` — перенесено как есть |
 | 2026-07-31 | `widgets/RegistryTable/ui/RegistryTable.tsx` | `customTabs` для `internal-*` всегда пустой массив, внутри ветки `internal-drafts` — закомментированный `return INTERNAL_OUTGOING_TABS`. Из-за этого импорт `INTERNAL_OUTGOING_TABS` и `InternalCorrespondenceStatus` был мёртвым (при переносе не перенесён) |
 | 2026-07-31 | `widgets/RegistryTable/ui/RegistryTable.tsx` | Виджет внешней корреспонденции содержит развилки по `type.includes("internal")` (папки, маршруты, раскрытие строк) — домены перемешаны, хотя внутреннюю обслуживает `NewRegistry` |

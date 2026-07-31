@@ -1,156 +1,20 @@
 import React, { useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useGetQuery, useDynamicSearchParams } from "@shared/lib";
-import { ApiRoutes, _axios } from "@shared/api";
-import { useQueries } from "@tanstack/react-query";
-import {
-	Handshake,
-	CheckCheck,
-	XCircle,
-	Signature,
-	Send,
-	Clock,
-	FileEdit,
-	LoaderCircle,
-} from "lucide-react";
+import { ApiRoutes } from "@shared/api";
 import { ConfigProvider, theme } from "antd";
 import { RegistryLayout } from "./RegistryLayout";
 import { AppRoutes } from "@shared/config";
 import { useRegistryConfig } from "../lib";
-import { IBreadcrumbItem } from "@shared/ui";
 import { MoveToFolderModal } from "./MoveToFolderModal";
 import { useIsDarkMode } from "@shared/lib";
-
-// Иконка вкладки «Подписан»: документ с текстом и ручка, ставящая подпись.
-// Собрана в стиле lucide (24×24, stroke=currentColor), поэтому наследует
-// цвет и размер так же, как остальные иконки статусов.
-const FileSignatureIcon = ({
-	size = 24,
-	...props
-}: React.SVGProps<SVGSVGElement> & { size?: number }) => (
-	<svg
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		strokeWidth={2}
-		strokeLinecap="round"
-		strokeLinejoin="round"
-		{...props}
-	>
-		{/* Лист документа со скруглённым отогнутым уголком */}
-		<path d="m18.226 5.226-2.52-2.52A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-.351" />
-		{/* Строки текста */}
-		<path d="M8 8h4" />
-		<path d="M8 12h3" />
-		{/* Росчерк подписи */}
-		<path d="M7 17.5c1-1.3 2-1.3 3 0s2 1.3 3 0" />
-		{/* Ручка, ставящая подпись */}
-		<path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" />
-	</svg>
-);
-
-const STATUS_CONFIG: Record<string, any> = {
-	draft: {
-		label: "Черновик",
-		icon: <Clock size={14} />,
-		gradient: "from-blue-500 to-blue-600",
-	},
-	analysis: {
-		label: "Анализ",
-		icon: <FileEdit size={14} />,
-		gradient: "from-blue-500 to-blue-600",
-	},
-	no_assignment: {
-		label: "Без поручения",
-		icon: <Clock size={14} />,
-		gradient: "from-blue-500 to-blue-600",
-	},
-	submitted: {
-		label: "На проверке",
-		icon: <FileEdit size={14} />,
-		gradient: "from-purple-500 to-purple-600",
-	},
-	returned: {
-		label: "На доработке",
-		icon: <XCircle size={14} />,
-		gradient: "from-rose-500 to-rose-600",
-	},
-
-	["in-progress"]: {
-		label: "В процессе исполнения",
-		icon: <Clock size={14} />,
-		gradient: "from-amber-500 to-amber-600",
-	},
-	to_approve: {
-		label: "На согласование",
-		icon: <LoaderCircle size={14} />,
-		gradient: "from-orange-500 to-orange-600",
-		apiUrl: ApiRoutes.GET_INTERNAL_TO_APPROVE,
-		paramKey: "type",
-		omitStatus: true,
-	},
-	approved: {
-		label: "Согласован",
-		icon: <Handshake size={14} />,
-		gradient: "from-blue-500 to-blue-600",
-		apiUrl: ApiRoutes.GET_INTERNAL_PROCESSED,
-		paramKey: "type",
-		omitStatus: true,
-	},
-	to_sign: {
-		label: "На подпись",
-		icon: <FileSignatureIcon size={14} />,
-		gradient: "from-yellow-400 to-yellow-500",
-		apiUrl: ApiRoutes.GET_INTERNAL_TO_SIGN,
-		paramKey: "type",
-		omitStatus: true,
-	},
-	signed: {
-		label: "Подписан",
-		icon: <Signature size={14} />,
-		gradient: "from-purple-500 to-purple-600",
-		apiUrl: ApiRoutes.GET_INTERNAL_PROCESSED,
-		paramKey: "type",
-		omitStatus: true,
-	},
-	sent: {
-		label: "Отправлено",
-		icon: <Send size={14} />,
-		gradient: "from-green-500 to-green-600",
-		apiUrl: ApiRoutes.GET_INTERNAL_OUTGOING,
-	},
-	completed: {
-		label: "Завершено",
-		icon: <CheckCheck size={14} />,
-		gradient: "from-green-500 to-green-600",
-	},
-	canceled: {
-		label: "Отменено",
-		icon: <XCircle size={14} />,
-		gradient: "from-red-500 to-red-600",
-	},
-	default: {
-		label: "Документ",
-		icon: <FileEdit size={14} />,
-		gradient: "from-gray-500 to-gray-600",
-	},
-};
-
-const REGISTRY_STATUS_MAP: Record<string, string[]> = {
-	incoming: [],
-	outgoing: ["to_approve", "approved", "to_sign", "signed", "sent"],
-	default: ["draft", "in-progress", "completed"],
-};
-
-interface NewRegistryProps {
-	type: string;
-	createButtonText?: string;
-	url?: string;
-	extraParams?: Record<string, unknown>;
-}
+import {
+	STATUS_CONFIG,
+	REGISTRY_STATUS_MAP,
+	type NewRegistryProps,
+} from "./newRegistry/newRegistryModel";
+import { useRegistryBreadcrumbs } from "./newRegistry/useRegistryBreadcrumbs";
+import { useRegistryStatusTabs } from "./newRegistry/useRegistryStatusTabs";
 
 export const NewRegistry = ({
 	type,
@@ -248,88 +112,12 @@ export const NewRegistry = ({
 		params: tableQueryParams,
 	});
 
-	const breadcrumbs = useMemo(() => {
-		const items: IBreadcrumbItem[] = [];
-
-		const rootLabel =
-			type === "internal-incoming"
-				? "Входящие"
-				: type === "internal-outgoing"
-					? "Исходящие"
-					: type === "internal-drafts"
-						? "Черновики"
-						: type === "internal-to-sign"
-							? "На подпись"
-							: type === "internal-to-approve"
-								? "На согласование"
-								: "Реестр";
-
-		items.push({
-			label: rootLabel,
-			onClick: () => {
-				setParams("folder_id", undefined);
-				setParams("status", undefined);
-			},
-		});
-
-		if (searchParams.folder_id && folders.length > 0) {
-			const path: IBreadcrumbItem[] = [];
-			let currentId: number | null = parseInt(searchParams.folder_id, 10);
-
-			while (currentId) {
-				const folder = folders.find((f: any) => f.id === currentId);
-				if (folder) {
-					if (folder.name !== rootLabel) {
-						const siblings = folders
-							.filter(
-								(f: any) =>
-									f.parent_id === folder.parent_id && f.id !== folder.id,
-							)
-							.map((s: any) => ({
-								label: s.name,
-								onClick: () => setParams("folder_id", String(s.id)),
-							}));
-
-						const subfolders = folders
-							.filter((f: any) => f.parent_id === folder.id)
-							.map((s: any) => ({
-								label: s.name,
-								onClick: () => setParams("folder_id", String(s.id)),
-							}));
-
-						const allOptions: any[] = [];
-
-						if (subfolders.length > 0) {
-							allOptions.push({ label: "Вложенные папки", isHeader: true });
-							allOptions.push(...subfolders);
-						}
-
-						if (siblings.length > 0) {
-							if (allOptions.length > 0) allOptions.push({ isDivider: true });
-							allOptions.push({ label: "Другие папки", isHeader: true });
-							allOptions.push(...siblings);
-						}
-
-						path.unshift({
-							label: folder.name,
-							onClick: () => setParams("folder_id", String(folder.id)),
-							options: allOptions.length > 0 ? allOptions : undefined,
-						});
-					}
-					currentId = folder.parent_id;
-				} else {
-					currentId = null;
-				}
-			}
-			items.push(...path);
-		}
-
-		if (items.length > 0) {
-			items[items.length - 1].isActive = true;
-		}
-
-		return items;
-	}, [type, searchParams.folder_id, folders, setParams]);
+	const breadcrumbs = useRegistryBreadcrumbs({
+		type,
+		folderId: searchParams.folder_id,
+		folders,
+		setParams,
+	});
 
 	const documents =
 		(responseData as any)?.data?.data || (responseData as any)?.data || [];
@@ -341,100 +129,14 @@ export const NewRegistry = ({
 		[countersData],
 	);
 
-	// Запрашиваем мета-данные для счетчиков проблемных вкладок (бэкенд может отдавать 0)
-	const tabsToFetch = useMemo(() => {
-		return activeStatusKeys.filter((key) => {
-			// Принудительно запрашиваем мета-данные для счетчиков проблемных вкладок
-			if (["approved", "signed", "sent", "analysis"].includes(key)) {
-				return true;
-			}
-			const existingCount =
-				counts[key] ??
-				counts[key.replace("-", "_")] ??
-				counts[`${key}_total`] ??
-				counts[`${key.replace("-", "_")}_total`] ??
-				counts[`${key}_count`];
-			return existingCount === undefined || existingCount === null;
-		});
-	}, [activeStatusKeys, counts]);
-
-	const fallbackQueries = useQueries({
-		queries: tabsToFetch.map((key) => {
-			const config = STATUS_CONFIG[key] || {};
-			const configUrl = config.apiUrl || fetchUrl;
-			const configParams = config.apiParams || {};
-
-			const queryParams: Record<string, any> = {
-				...extraParams,
-				...configParams,
-				per_page: 1,
-			};
-
-			if (config.paramKey === "type") {
-				queryParams.type = key;
-			} else if (!config.omitStatus) {
-				queryParams.status = key;
-			}
-
-			return {
-				queryKey: [configUrl, queryParams],
-				queryFn: async () => {
-					const res = await _axios.get(configUrl, {
-						params: queryParams,
-					});
-					const serverData = res.data;
-					const fetchedMeta =
-						serverData?.data?.meta ||
-						serverData?.meta ||
-						serverData?.data ||
-						serverData;
-
-					return { key, total: fetchedMeta?.total ?? 0 };
-				},
-				staleTime: 5000,
-				keepPreviousData: true,
-			};
-		}),
+	const statusTabs = useRegistryStatusTabs({
+		activeStatusKeys,
+		counts,
+		currentTab,
+		metaTotal: meta.total,
+		fetchUrl,
+		extraParams,
 	});
-
-	const fallbackCounts = useMemo(() => {
-		const obj: Record<string, number> = {};
-		fallbackQueries.forEach((q) => {
-			if (q.data) {
-				obj[q.data.key] = q.data.total;
-			}
-		});
-		return obj;
-	}, [fallbackQueries]);
-
-	const statusTabs = useMemo(() => {
-		return activeStatusKeys
-			.map((key) => {
-				const config = STATUS_CONFIG[key];
-				if (!config) return null;
-				let count =
-					fallbackCounts[key] ??
-					counts[key] ??
-					counts[key.replace("-", "_")] ??
-					counts[`${key}_total`] ??
-					counts[`${key.replace("-", "_")}_total`] ??
-					counts[`${key}_count`] ??
-					0;
-
-				if (key === currentTab && meta.total !== undefined) {
-					count = meta.total;
-				}
-
-				return {
-					id: key,
-					label: config.label,
-					icon: config.icon,
-					gradient: config.gradient,
-					count,
-				};
-			})
-			.filter(Boolean);
-	}, [counts, activeStatusKeys, currentTab, meta.total, fallbackCounts]);
 
 	const handleTabChange = (statusId: string) => {
 		const config = STATUS_CONFIG[statusId] || {};
