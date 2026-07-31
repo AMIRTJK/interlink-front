@@ -48,8 +48,8 @@
 
 ## 📍 Положение
 
-- **Прогресс:** 52 / 89 шагов закрыто.
-- **Последнее обновление:** 2026-07-31 — модуль 8 (IncomingPreviewModal.tsx декомпозирован по срезам A–E).
+- **Прогресс:** 53 / 89 шагов закрыто.
+- **Последнее обновление:** 2026-07-31 — модуль 8 (InternalCorrespondenceIncomingView/ui.tsx декомпозирован).
 
 ---
 
@@ -225,8 +225,9 @@
 
 - [x] `XL` 1795 → `widgets/InternalCorrespondenceIncomingView/IncomingPreviewModal.tsx` → **382** (срезы A–E: новая подпапка `incomingPreviewModal/`, 10 файлов)
 
+- [x] `L` 1274 → `widgets/InternalCorrespondenceIncomingView/ui.tsx` → **180**
+
 ⏹ **ЧЕКПОИНТ**
-- [ ] `L` 1274 → `widgets/InternalCorrespondenceIncomingView/ui.tsx`
 - [ ] `M` 450 → `widgets/InternalCorrespondenceIncomingView/lib.ts`
 - [ ] `S` 345 → `widgets/InternalCorrespondenceIncomingView/ApproversPanel.tsx`
 - [ ] `S` 313 → `widgets/InternalCorrespondenceIncomingView/SignersPanel.tsx`
@@ -289,6 +290,7 @@ XL не влезает в одну сессию. Работаем **срезам
 
 | Дата | Файл | Что вынесено | Было → стало | Принято |
 |---|---|---|---|---|
+| 2026-07-31 | `widgets/InternalCorrespondenceIncomingView/ui.tsx` | новая подпапка `incomingView/` (7 файлов): `incomingViewModel.ts` (типы + константы), `UserActionCluster.tsx` (кластер аватаров с поповером), `DetailField.tsx` (поле реквизита), `IncomingDetailsAccordion.tsx` (аккордеон деталей письма), `useIncomingViewData.ts` (запросы, версионирование тела, права), `useIncomingViewState.ts` (состояния, рефы, позиционирование панелей), `IncomingViewHeader.tsx` (шапка), `IncomingViewCanvasPanels.tsx` (холст и боковые панели) | 1288 → **180** (макс. новый — 220) | на ревью |
 | 2026-07-31 | `widgets/InternalCorrespondenceIncomingView/IncomingPreviewModal.tsx` | **срезы A–E (завершено):** новая подпапка `incomingPreviewModal/` (10 новых файлов): `incomingPreviewModalModel.ts` (типы + `GRADIENTS`), `incomingPreviewModalLib.ts` (хелперы ФИО и сертификатов), `useIncomingPreviewState.ts` (состояние зума, масштаба, панелей, подписей, ResizeObserver, прокрутка страниц), `PreviewHeaderToolbar.tsx` (шапка), `PreviewSectionsToolbarBar.tsx` (верхняя панель разделов), `PreviewApproversQuickBar.tsx` (быстрая полоса согласующих), `PreviewActiveApproverPopover.tsx` (поповер активного согласующего), `PreviewThumbnailsSidebar.tsx` (лента миниатюр), `PreviewFullApproversDrawer.tsx` (правая панель этапов), `PreviewStatusBar.tsx` (подвал) | 1795 → **382** (макс. новый — 240) | на ревью |
 | 2026-07-31 | `widgets/Chat/ui/ChatApp.tsx` | **срезы A–E (завершено):** вынесены вспомогательные функции `chatHelpers.ts`, состояние и эффекты в хук `useChatAppState.ts`, а также 20 листовых подкомпонентов в `src/widgets/Chat/ui/components/` (`LayoutSwitcher`, `ChatListPanel`, `ChatMessageItem`, `CallOverlayModal`, `ContactInfoDrawer`, `ThreadPanel`, `ComposeModal`, `ForwardModal`, `DeleteConfirmModal`, `DeleteConversationModal` и др.) | 5364 → **504** (макс. новый — 240) | на ревью |
 | 2026-07-31 | `widgets/DrawerActionsModal/ui.tsx` | новая подпапка `ui/` (5 новых файлов): `drawerActionsModalModel.ts` (типы + лимит), `useDrawerActionsModalState.ts` (запросы, мутации приглашения/прикрепления, управление модалками), `IncomingActionsSection.tsx` (кнопки действия входящего письма), `OutgoingActionsSection.tsx` (секции выбора подписывающих/согласующих и сохранение), `SmartSearchModalContainer.tsx`, `ViewAllModal.tsx` | 687 → **201** (макс. новый — 190) | на ревью |
