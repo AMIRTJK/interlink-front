@@ -96,7 +96,7 @@ export const mockContacts: Contact[] = [{
   mutualGroups: ['Engineering', 'Design Team', 'Hackathon 2023'],
   story: STORY_IMAGES[6]
 }];
-const initialMessages: Message[] = [{
+export const initialMessages: Message[] = [{
   id: 'm1',
   senderId: '7',
   text: 'What is Lorem Ipsum dummy text?',

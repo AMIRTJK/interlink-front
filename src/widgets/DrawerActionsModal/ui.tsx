@@ -1,28 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { IActionsModal, TTab, TABS_LIST } from "./model";
-import { DrawerQRCodeSection } from "./ui/QRCodeSection";
-import { SelectedCard } from "./ui/SelectedCard";
-import { ActionSelector } from "./ui/ActionSelector";
+import React from "react";
+import { IActionsModal, TABS_LIST, TTab } from "./model";
 import { SmartTabs } from "@shared/ui/SmartTabs/ui";
 import { CommentCard, If, VisorInviteNoticeModal } from "@shared/ui";
 import { ChatView } from "../../features/chat";
 import { motion, AnimatePresence } from "framer-motion";
-import { Icons, Ui } from "./lib";
+import { Icons } from "./lib";
 import "./style.css";
-import {
-  ISearchItem,
-  SmartSearchUI,
-  ISmartSearchModalProps,
-} from "@shared/ui/SmartSearchModal";
-import { ConfigProvider, theme } from "antd";
-import { ApiRoutes } from "@shared/api";
-import { useModalState } from "@shared/lib/hooks";
-
-type TModalType = "attach" | "signer" | "approvers";
-
-const VISIBLE_ITEMS_LIMIT = 3;
-
-import { useGetQuery, useMutationQuery } from "@shared/lib/hooks";
+import { useDrawerActionsModalState } from "./ui/useDrawerActionsModalState";
+import { IncomingActionsSection } from "./ui/IncomingActionsSection";
+import { OutgoingActionsSection } from "./ui/OutgoingActionsSection";
+import { SmartSearchModalContainer } from "./ui/SmartSearchModalContainer";
+import { ViewAllModal } from "./ui/ViewAllModal";
 
 export const DrawerActionsModal: React.FC<IActionsModal> = ({
   open,
@@ -38,218 +26,34 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
   onForward,
   onOpenAssignment,
 }) => {
-  const [activeTab, setActiveTab] = useState<TTab>("actions");
-
   const {
-    isOpen: isModalOpen,
-    open: openModal,
-    close: closeModal,
-  } = useModalState();
-  const [activeModalType, setActiveModalType] = useState<TModalType | null>(
-    null,
-  );
-
-  const [viewAllSection, setViewAllSection] = useState<string | null>(null);
-
-  const [selectedItems, setSelectedItems] = useState<ISearchItem[]>([]);
-  const [selectedSigners, setSelectedSigners] = useState<ISearchItem[]>([]);
-  const [selectedApprovers, setSelectedApprovers] = useState<ISearchItem[]>([]);
-  const [showVisorNotice, setShowVisorNotice] = useState(false);
-
-  const { data: usersData } = useGetQuery({
-    url: ApiRoutes.GET_USERS,
-    useToken: true,
+    activeTab,
+    setActiveTab,
+    isModalOpen,
+    activeModalType,
+    viewAllSection,
+    setViewAllSection,
+    selectedItems,
+    selectedSigners,
+    selectedApprovers,
+    showVisorNotice,
+    setShowVisorNotice,
+    handleAssignmentClick,
+    handleOpenModal,
+    handleCloseModal,
+    handleConfirm,
+    handleSave,
+    handleRemoveItem,
+    getViewAllItems,
+    getModalConfig,
+  } = useDrawerActionsModalState({
+    docId,
+    onRefresh,
+    onClose,
+    onOpenAssignment,
   });
-
-  const { data: visorsData } = useGetQuery({
-    url: docId ? ApiRoutes.INTERNAL_VISORS.replace(":id", String(docId)) : "",
-    useToken: true,
-    options: { enabled: !!docId },
-  });
-
-  const visorsList: any[] =
-    visorsData?.data?.visors ||
-    visorsData?.data?.data ||
-    (Array.isArray(visorsData?.data) ? visorsData.data : []);
-
-  const handleAssignmentClick = () => {
-    if (docId && visorsList.length === 0) {
-      setShowVisorNotice(true);
-      return;
-    }
-    onOpenAssignment?.();
-  };
-
-  // 2. Мутации для приглашения
-  const { mutate: inviteSigner } = useMutationQuery({
-    url: docId ? ApiRoutes.INTERNAL_INVITE_SIGNER.replace(":id", docId) : "",
-    method: "POST",
-  });
-
-  const { mutate: attachIncoming } = useMutationQuery({
-    url: docId ? ApiRoutes.ATTACH_INTERNAL_INCOMING.replace(":id", docId) : "",
-    method: "POST",
-  });
-
-  const { mutate: inviteApprover } = useMutationQuery({
-    url: docId ? ApiRoutes.INTERNAL_INVITE_APPROVER.replace(":id", docId) : "",
-    method: "POST",
-  });
-
-  const handleOpenModal = (type: TModalType) => {
-    setActiveModalType(type);
-    openModal();
-  };
-
-  const handleCloseModal = () => {
-    closeModal();
-  };
-
-  const handleConfirm = (ids: string[], items: ISearchItem[]) => {
-    const addUniqueItems = (prev: ISearchItem[], newItems: ISearchItem[]) => {
-      const uniqueNew = newItems.filter(
-        (newItem) => !prev.some((existing) => existing.id === newItem.id),
-      );
-      return [...prev, ...uniqueNew];
-    };
-
-    if (activeModalType === "attach") {
-      setSelectedItems((prev) => addUniqueItems(prev, items));
-    } else if (activeModalType === "signer") {
-      // Теперь добавляем в массив, а не перезаписываем первым элементом
-      setSelectedSigners((prev) => addUniqueItems(prev, items));
-    } else if (activeModalType === "approvers") {
-      setSelectedApprovers((prev) => addUniqueItems(prev, items));
-    }
-    closeModal();
-  };
-
-  const handleSave = () => {
-    console.log("handleSave called. docId:", docId);
-    console.log("Selected Signer:", selectedSigners);
-    console.log("Selected Approvers:", selectedApprovers);
-
-    if (docId) {
-      if (selectedSigners) {
-        const payload = {
-          users: selectedSigners.map((s) => s.id),
-        };
-        inviteSigner(payload);
-      }
-
-      if (selectedApprovers.length > 0) {
-        const approverIds = selectedApprovers.map((item) => item.id);
-
-        inviteApprover({ users: approverIds });
-      }
-
-      const incomingId = selectedItems[0]?.id;
-
-      if (incomingId) {
-        attachIncoming({ incoming_id: incomingId });
-      }
-
-      if (onRefresh) {
-        setTimeout(() => {
-          onRefresh();
-        }, 500);
-      }
-
-      // ОЧИЩАЕМ СТЕЙТ ПОСЛЕ ОТПРАВКИ
-      setSelectedSigners([]);
-      setSelectedApprovers([]);
-    } else {
-      alert("Ошибка: ID документа не найден. Сначала сохраните черновик.");
-    }
-    onClose();
-  };
-
-  const handleRemoveItem = (id: string, type: string) => {
-    if (type === "attach")
-      setSelectedItems((prev) => prev.filter((i) => i.id !== id));
-    if (type === "signer")
-      setSelectedSigners((prev) => prev.filter((i) => i.id !== id));
-    if (type === "approvers")
-      setSelectedApprovers((prev) => prev.filter((i) => i.id !== id));
-  };
-
-  const getViewAllItems = () => {
-    if (viewAllSection === "attach") return selectedItems;
-    if (viewAllSection === "signer") return selectedSigners;
-    if (viewAllSection === "approvers") return selectedApprovers;
-    return [];
-  };
 
   const viewAllItems = getViewAllItems();
-
-  const getModalConfig = (): Omit<ISmartSearchModalProps, "onConfirm"> & {
-    mode: "attach" | "select";
-  } => {
-    // Общая функция трансформации для пользователей
-    const transformUser = (items: any[]) =>
-      items.map((item) => ({
-        id: item.id,
-        title: item.full_name || `${item.last_name} ${item.first_name}`,
-        subtitle: item.position || "Сотрудник",
-        tag: item.position || "Сотрудник",
-      }));
-
-    switch (activeModalType) {
-      case "attach":
-        return {
-          title: "Прикрепить письмо",
-          mode: "attach" as const,
-          querySettings: {
-            url: ApiRoutes.GET_INTERNAL_INCOMING_PICKER as string,
-          },
-          transformResponse: (items: any[]) =>
-            items.map((item) => {
-              const creator = usersData?.data?.data.find(
-                (user: any) => user.id === item.creator_id,
-              );
-              return {
-                id: item.id,
-                title: item.subject || "Без темы",
-                subtitle: creator?.full_name || "Не указано",
-                reg_number: item.reg_number
-                  ? item.reg_number.replace(/^[A-Z]+/i, item.my_prefix || "IN")
-                  : "Не указано",
-                date: item.sent_at,
-                tag: "Входящее",
-              };
-            }),
-          multiple: true,
-        };
-      case "signer":
-        return {
-          title: "Выбрать подписывающих",
-          mode: "select" as const,
-          querySettings: {
-            url: ApiRoutes.GET_INTERNAL_RECIPIENTS_USERS as string,
-          },
-          transformResponse: transformUser,
-          multiple: true,
-        };
-      case "approvers":
-        return {
-          title: "Выбрать согласующих",
-          mode: "select" as const,
-          querySettings: {
-            url: ApiRoutes.GET_INTERNAL_RECIPIENTS_USERS as string,
-          },
-          transformResponse: transformUser,
-          multiple: true,
-        };
-      default:
-        return {
-          title: "",
-          mode: "select" as const,
-          querySettings: { url: "" },
-          multiple: false,
-        };
-    }
-  };
-
   const modalConfig = getModalConfig();
 
   return (
@@ -276,11 +80,15 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
             >
               {/* Header */}
               <div
-                className={`flex flex-col ${isDarkMode ? "border-gray-800 bg-gray-900" : "border-gray-50 bg-white"}`}
+                className={`flex flex-col ${
+                  isDarkMode ? "border-gray-800 bg-gray-900" : "border-gray-50 bg-white"
+                }`}
               >
                 <div className="flex justify-between px-6 py-4">
                   <span
-                    className={`text-lg font-semibold ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}
+                    className={`text-lg font-semibold ${
+                      isDarkMode ? "text-gray-100" : "text-gray-800"
+                    }`}
                   >
                     Действия
                   </span>
@@ -306,214 +114,37 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                   </div>
 
                   <div
-                    className={`drawer-content-scroll custom-scrollbar ${isDarkMode ? "is-dark" : ""}`}
+                    className={`drawer-content-scroll custom-scrollbar ${
+                      isDarkMode ? "is-dark" : ""
+                    }`}
                   >
                     <If is={activeTab === "actions"}>
                       {isIncoming === true ? (
-                        <div className="flex flex-col gap-3 mt-5">
-                          <Ui.Button
-                            onClick={onAcknowledge}
-                            disabled={isAcknowledged}
-                            size="large"
-                            className={`w-full! h-14! px-4! py-3! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm! ${
-                              isAcknowledged
-                                ? "bg-emerald-50! border-emerald-200! text-emerald-700!"
-                                : isDarkMode
-                                ? "bg-gray-800! border-gray-700! text-gray-200! hover:bg-gray-700! hover:border-[#8B5CF6]!"
-                                : "bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]!"
-                            }`}
-                            icon={
-                              <Icons.CheckOutlined
-                                style={{
-                                  fontSize: "18px",
-                                  color: isAcknowledged ? "#10B981" : isDarkMode ? "#9CA3AF" : "#6B7280",
-                                }}
-                              />
-                            }
-                          >
-                            <span className="font-medium">
-                              {isAcknowledged ? "Ознакомлен" : "Ознакомиться"}
-                            </span>
-                          </Ui.Button>
-
-                          <Ui.Button
-                            onClick={onReply}
-                            size="large"
-                            className={`w-full! h-14! px-4! py-3! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm! ${
-                              isDarkMode
-                                ? "bg-gray-800! border-gray-700! text-gray-200! hover:bg-gray-700! hover:border-[#8B5CF6]!"
-                                : "bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]!"
-                            }`}
-                            icon={
-                              <Icons.MailOutlined
-                                style={{
-                                  fontSize: "18px",
-                                  color: isDarkMode ? "#9CA3AF" : "#6B7280",
-                                }}
-                              />
-                            }
-                          >
-                            <span className="font-medium">Ответить</span>
-                          </Ui.Button>
-
-                          <Ui.Button
-                            onClick={onForward}
-                            size="large"
-                            className={`w-full! h-14! px-4! py-3! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm! ${
-                              isDarkMode
-                                ? "bg-gray-800! border-gray-700! text-gray-200! hover:bg-gray-700! hover:border-[#8B5CF6]!"
-                                : "bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]!"
-                            }`}
-                            icon={
-                              <Icons.SendOutlined
-                                style={{
-                                  fontSize: "18px",
-                                  color: isDarkMode ? "#9CA3AF" : "#6B7280",
-                                }}
-                              />
-                            }
-                          >
-                            <span className="text-base font-medium">
-                              Переслать
-                            </span>
-                          </Ui.Button>
-
-                          <Ui.Button
-                            onClick={handleAssignmentClick}
-                            size="large"
-                            className={`w-full! h-14! px-4! py-3! rounded-xl! transition-all duration-200 flex items-center justify-start! gap-3! shadow-sm! ${
-                              isDarkMode
-                                ? "bg-gray-800! border-gray-700! text-gray-200! hover:bg-gray-700! hover:border-[#8B5CF6]!"
-                                : "bg-white! border-[#A78BFA]! text-gray-700! hover:bg-gray-50! hover:border-[#8B5CF6]!"
-                            }`}
-                            icon={
-                              <Icons.FileDoneOutlined
-                                style={{
-                                  fontSize: "18px",
-                                  color: isDarkMode ? "#9CA3AF" : "#6B7280",
-                                }}
-                              />
-                            }
-                          >
-                            <span className="text-base font-medium">
-                              Поручение
-                            </span>
-                          </Ui.Button>
-                        </div>
+                        <IncomingActionsSection
+                          isDarkMode={isDarkMode}
+                          isAcknowledged={isAcknowledged}
+                          onAcknowledge={onAcknowledge}
+                          onReply={onReply}
+                          onForward={onForward}
+                          handleAssignmentClick={handleAssignmentClick}
+                        />
                       ) : (
-                        <div className="flex flex-col gap-2">
-                          {[
-                            {
-                              id: "attach" as const,
-                              title: "Прикрепить письмо",
-                              icon: <Icons.MailOutlined />,
-                              label:
-                                selectedItems.length > 0
-                                  ? `Выбрано писем: ${selectedItems.length}`
-                                  : "Выбрать письмо",
-                              items: selectedItems,
-                            },
-                            {
-                              id: "signer" as const,
-                              title: "Подписывающий",
-                              icon: <Icons.UserOutlined />,
-                              label:
-                                selectedSigners.length > 0
-                                  ? `Выбрано: ${selectedSigners.length}`
-                                  : "Выбрать подписывающего",
-                              items: selectedSigners,
-                            },
-                            {
-                              id: "approvers" as const,
-                              title: "Согласующие",
-                              icon: <Icons.TeamOutlined />,
-                              label:
-                                selectedApprovers.length > 0
-                                  ? `Выбрано: ${selectedApprovers.length}`
-                                  : "Выбрать согласующих",
-                              items: selectedApprovers,
-                            },
-                          ].map((section) => {
-                            const visibleItems = section.items.slice(
-                              0,
-                              VISIBLE_ITEMS_LIMIT,
-                            );
-                            const hiddenCount =
-                              section.items.length - VISIBLE_ITEMS_LIMIT;
-                            return (
-                              <div
-                                key={section.id}
-                                className="flex flex-col gap-2"
-                              >
-                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                                  {section.title}
-                                </h4>
-
-                                <ActionSelector
-                                  icon={section.icon}
-                                  label={section.label}
-                                  onClick={() => handleOpenModal(section.id)}
-                                  isDarkMode={isDarkMode}
-                                />
-
-                                <If is={section.items.length > 0}>
-                                  <div className="flex flex-col gap-2">
-                                    {visibleItems.map((item) => (
-                                      <SelectedCard
-                                        key={item.id}
-                                        title={item.title}
-                                        subtitle={item.subtitle}
-                                        onRemove={() =>
-                                          handleRemoveItem(item.id, section.id)
-                                        }
-                                        isDarkMode={isDarkMode}
-                                      />
-                                    ))}
-                                    <If is={hiddenCount > 0}>
-                                      <div
-                                        onClick={() =>
-                                          setViewAllSection(section.id)
-                                        }
-                                        className={`py-2 px-3 text-center text-sm font-medium rounded-lg cursor-pointer transition-all border border-dashed ${
-                                          isDarkMode
-                                            ? "text-gray-400 bg-gray-800/50 hover:bg-gray-800 hover:text-gray-200 border-gray-700"
-                                            : "text-gray-500 bg-gray-50 hover:bg-gray-100 hover:text-gray-700 border-gray-200"
-                                        }`}
-                                      >
-                                        Показать еще (+{hiddenCount})
-                                      </div>
-                                    </If>
-                                  </div>
-                                </If>
-                              </div>
-                            );
-                          })}
-
-                          {/* <div>
-                            <DrawerQRCodeSection />
-                          </div> */}
-                          <div>
-                            <Ui.Button
-                              onClick={handleSave}
-                              type="primary"
-                              className=" w-full!  p-5! font-bold! bg-[#FF6B6B]! hover:bg-[#ff5252]! text-white rounded-xl! transition-colors duration-200 flex items-center justify-center gap-2"
-                              disabled={isReadOnly}
-                            >
-                              Сохранить
-                            </Ui.Button>
-                          </div>
-                        </div>
+                        <OutgoingActionsSection
+                          isDarkMode={isDarkMode}
+                          isReadOnly={isReadOnly}
+                          selectedItems={selectedItems}
+                          selectedSigners={selectedSigners}
+                          selectedApprovers={selectedApprovers}
+                          handleOpenModal={handleOpenModal}
+                          handleRemoveItem={handleRemoveItem}
+                          setViewAllSection={setViewAllSection}
+                          handleSave={handleSave}
+                        />
                       )}
                     </If>
+
                     <If is={activeTab === "comments"}>
                       <div className="flex flex-col gap-3">
-                        {/* Пример использования useGetQuery для получения комментариев */}
-                        {/* 
-                              const { data: comments } = useGetQuery({ 
-                                url: `${ApiRoutes.GET_CORRESPONDENCES}/:id/comments`, 
-                                useToken: true 
-                              });
-                            */}
                         {[
                           {
                             id: 1,
@@ -541,6 +172,7 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
                         ))}
                       </div>
                     </If>
+
                     <If is={activeTab === "chat"}>
                       <div className="h-full">
                         <ChatView isDarkMode={isDarkMode} />
@@ -554,130 +186,23 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
         )}
       </AnimatePresence>
 
-      <ConfigProvider
-        theme={{
-          algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
-        }}
-      >
-        <Ui.Modal
-          open={isModalOpen}
-          onCancel={handleCloseModal}
-          footer={null}
-          title={
-            <div
-              className={`flex items-center gap-3 text-xl font-bold py-3 px-1 ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}
-            >
-              {activeModalType === "attach" && (
-                <div
-                  className={`text-2xl ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
-                >
-                  <Icons.MailOutlined />
-                </div>
-              )}
-              {activeModalType === "signer" && (
-                <div
-                  className={`text-2xl ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
-                >
-                  <Icons.UserOutlined />
-                </div>
-              )}
-              {activeModalType === "approvers" && (
-                <div
-                  className={`text-2xl ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
-                >
-                  <Icons.TeamOutlined />
-                </div>
-              )}
-              <span>{modalConfig.title}</span>
-            </div>
-          }
-          width={modalConfig.mode === "attach" ? 1000 : 500}
-          centered
-          key={activeModalType}
-          zIndex={1100}
-          className="smart-search-modal"
-          transitionName=""
-          maskTransitionName="ant-fade"
-          modalRender={(modal) => (
-            <AnimatePresence mode="wait">
-              {isModalOpen && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                >
-                  {modal}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          )}
-          styles={{
-            header: {
-              borderBottom: isDarkMode
-                ? "1px solid #374151"
-                : "1px solid #f0f0f0",
-              padding: "16px 24px",
-              marginBottom: 0,
-            },
-            body: {
-              padding: 0,
-              borderRadius: "0 0 24px 24px",
-              overflow: "hidden",
-            },
-          }}
-          closeIcon={
-            <Icons.CloseOutlined
-              style={{
-                fontSize: "18px",
-                color: isDarkMode ? "#9CA3AF" : undefined,
-              }}
-            />
-          }
-        >
-          <div className="h-[600px]">
-            <SmartSearchUI
-              {...modalConfig}
-              onConfirm={handleConfirm}
-              isDarkMode={isDarkMode}
-            />
-          </div>
-        </Ui.Modal>
-      </ConfigProvider>
-      <ConfigProvider
-        theme={{
-          algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
-        }}
-      >
-        <Ui.Modal
-          open={!!viewAllSection}
-          onCancel={() => setViewAllSection(null)}
-          footer={null}
-          title="Выбранные элементы"
-          width={500}
-          centered
-          zIndex={1200}
-        >
-          <div className="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar p-1">
-            {viewAllItems.map((item) => (
-              <SelectedCard
-                key={item.id}
-                title={item.title}
-                subtitle={item.subtitle}
-                onRemove={() => {
-                  if (viewAllSection) {
-                    handleRemoveItem(item.id, viewAllSection);
-                  }
-                }}
-                isDarkMode={isDarkMode}
-              />
-            ))}
-            {viewAllItems.length === 0 && (
-              <div className="text-center text-gray-400 py-5">Список пуст</div>
-            )}
-          </div>
-        </Ui.Modal>
-      </ConfigProvider>
+      <SmartSearchModalContainer
+        isModalOpen={isModalOpen}
+        activeModalType={activeModalType}
+        modalConfig={modalConfig}
+        isDarkMode={isDarkMode}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirm}
+      />
+
+      <ViewAllModal
+        viewAllSection={viewAllSection}
+        viewAllItems={viewAllItems}
+        isDarkMode={isDarkMode}
+        onClose={() => setViewAllSection(null)}
+        onRemoveItem={handleRemoveItem}
+      />
+
       <VisorInviteNoticeModal
         open={showVisorNotice}
         onClose={() => setShowVisorNotice(false)}
