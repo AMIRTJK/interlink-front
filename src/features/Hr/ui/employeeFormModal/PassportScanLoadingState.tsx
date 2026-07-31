@@ -23,7 +23,10 @@ export function PassportScanLoadingState() {
 
         <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_15px_3px_rgba(34,211,238,0.8)] animate-scan-beam" />
 
-        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center">
+        {/* rounded-[inherit]: элемент с backdrop-filter не обрезается overflow-hidden
+            родителя по радиусу — без своего скругления он вылезает прямоугольником
+            за скруглённые углы карточки. */}
+        <div className="absolute inset-0 rounded-[inherit] bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center">
           <div className="p-3 rounded-full bg-indigo-600/90 text-white shadow-lg shadow-indigo-500/50">
             <Sparkles className="w-6 h-6 animate-pulse" />
           </div>

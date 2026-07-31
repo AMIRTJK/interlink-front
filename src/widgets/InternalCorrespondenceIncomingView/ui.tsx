@@ -343,7 +343,10 @@ export const InternalCorrespondenceIncomingView = ({
   // при прокрутке страницы группу смещаем через transform, чтобы вкладки и
   // раскрытая панель оставались привязаны к холсту и были видны на любой
   // странице документа. Тот же приём, что в редакторе исходящего письма.
-  const scrollRef = useRef<HTMLDivElement>(null);
+  // Прокрутка — общая для всей страницы (как в редакторе исходящего письма):
+  // скролл-контейнер это корневой div, а не серая область холста.
+  const rootScrollRef = useRef<HTMLDivElement>(null);
+  const stickyHeaderRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const panelsGroupRef = useRef<HTMLDivElement>(null);
 
@@ -559,20 +562,22 @@ export const InternalCorrespondenceIncomingView = ({
   // вниз через transform, чтобы вкладки и раскрытая панель были доступны на
   // любой странице, а высоту раскрытой панели ограничиваем видимой областью
   // (переменная --icc-panel-max-h). CSS position:sticky здесь не работает — его
-  // перехватывает серый контейнер холста с overflow. 1-в-1 как в редакторе
+  // перехватывает серая область холста с overflow. 1-в-1 как в редакторе
   // исходящего письма.
   useEffect(() => {
     if (isResolvingBody) return;
-    const scroller = scrollRef.current;
+    const scroller = rootScrollRef.current;
     const canvas = canvasRef.current;
     const group = panelsGroupRef.current;
     if (!scroller || !canvas || !group) return;
 
-    const TOP_M = 12; // отступ группы от верхнего края видимой области
     const BOT_M = 24; // нижний отступ для раскрытой панели
     const MIN_VISIBLE = 160; // минимум пикселей группы, что держим над холстом
 
     const update = () => {
+      // Прижимаем группу не к самому верху, а ПОД липкую шапку (тулбар +
+      // панель разделов), иначе её содержимое пряталось бы под ней.
+      const TOP_M = (stickyHeaderRef.current?.offsetHeight ?? 0) + 12;
       const canvasTop =
         canvas.getBoundingClientRect().top -
         scroller.getBoundingClientRect().top;
@@ -593,10 +598,12 @@ export const InternalCorrespondenceIncomingView = ({
     scroller.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
     // Высота холста меняется после постраничной разбивки (paginateHtml в
-    // DocumentCanvas выполняется в layout-эффекте уже после первого рендера) —
-    // пересчитываем позицию панелей, когда высота холста устоялась.
+    // DocumentCanvas выполняется в layout-эффекте уже после первого рендера), а
+    // высота липкой шапки — при включении панели разделов и переносе кнопок
+    // тулбара на новую строку. Пересчитываем позицию панелей на оба случая.
     const canvasRO = new ResizeObserver(update);
     canvasRO.observe(canvas);
+    if (stickyHeaderRef.current) canvasRO.observe(stickyHeaderRef.current);
     return () => {
       scroller.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
@@ -748,7 +755,10 @@ export const InternalCorrespondenceIncomingView = ({
   ];
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#F8FAFC] overflow-hidden w-full">
+    <div
+      ref={rootScrollRef}
+      className="flex-1 overflow-y-auto bg-[#F8FAFC] h-screen w-full flex flex-col"
+    >
       {/* Просмотр: окно по макету входящих (тулбар, миниатюры, «Согласующие»,
           статус-бар). Тело письма раскладывается постранично той же логикой
           (paginateHtml), что и холст — со встроенным рисунком ЭЦП. */}
@@ -1058,21 +1068,24 @@ export const InternalCorrespondenceIncomingView = ({
           Инструменты форматирования показаны в неактивном (disabled) виде, т.к.
           входящее письмо не редактируется. Активны только элементы просмотра:
           переключатель «Панель разделов сверху» и, в этом режиме, горизонтальные
-          кнопки разделов (цилиндров). */}
-      <EditorToolbar
-        panelsInToolbar={panelsInToolbar}
-        onTogglePanelsInToolbar={setPanelsInToolbar}
-        sections={sections}
-      />
+          кнопки разделов (цилиндров). Обёртка делает тулбар и панель разделов
+          липкими — они остаются на виду при прокрутке страницы, как в редакторе
+          исходящего письма. */}
+      <div ref={stickyHeaderRef} className="sticky top-0 z-[70] bg-white">
+        <EditorToolbar
+          panelsInToolbar={panelsInToolbar}
+          onTogglePanelsInToolbar={setPanelsInToolbar}
+          sections={sections}
+        />
+      </div>
 
       {/* Основная рабочая область: холст документа + всплывающие панели */}
-      <div className="flex flex-1 min-h-0 overflow-hidden w-full relative">
+      <div className="flex flex-1 w-full relative">
         {/* Холст основного бланка документа: постраничная разбивка (разделение
-            страниц A4) и рисунок ЭЦП — 1-в-1 как в редакторе исходящего письма */}
-        <div
-          ref={scrollRef}
-          className="absolute inset-0 overflow-auto bg-[#E8EAED] flex items-start justify-center py-8 px-8"
-        >
+            страниц A4) и рисунок ЭЦП — 1-в-1 как в редакторе исходящего письма.
+            Своей вертикальной прокрутки нет: страница скроллится целиком,
+            здесь остаётся только горизонтальная — на случай широкого листа. */}
+        <div className="flex-1 overflow-x-auto bg-[#E8EAED] flex items-start justify-center py-8 px-8">
           {isResolvingBody ? (
             <div className="flex flex-col items-center gap-2 text-slate-400 py-20">
               <Loader2 size={22} className="animate-spin text-blue-500" />
