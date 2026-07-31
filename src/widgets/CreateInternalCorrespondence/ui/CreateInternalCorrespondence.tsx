@@ -17,7 +17,7 @@ import {
   // FileBadge,
   FileType,
 } from "lucide-react";
-import { useGetQuery, useMutationQuery, buildFormData, toast, tokenControl } from "@shared/lib";
+import { useGetQuery, useMutationQuery, toast, tokenControl } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { CORRESPONDENCE_INVALIDATE_KEYS } from "@shared/config";
 import { If } from "@shared/ui";
@@ -58,8 +58,6 @@ import {
 import {
   cn,
   sanitizeWordHtml,
-  buildDSStampSvg,
-  dsStampHeightForWidth,
   formatFileSize,
   mapServerAttachment,
   downloadAttachment,
@@ -122,6 +120,7 @@ import {
 import {
   DS_STAMP_DEFAULT_HEIGHT,
   DS_STAMP_DEFAULT_WIDTH,
+  buildEmbeddedStampHtml,
 } from "./createInternalCorrespondence/stampGeometry";
 import { ToolbarFormatGroup } from "./createInternalCorrespondence/toolbar/ToolbarFormatGroup";
 import { ToolbarPageGroup } from "./createInternalCorrespondence/toolbar/ToolbarPageGroup";
@@ -144,6 +143,20 @@ import { useEditorHistory } from "./createInternalCorrespondence/useEditorHistor
 import { printDocumentPages } from "./createInternalCorrespondence/printDocument";
 import { useStampDrag } from "./createInternalCorrespondence/useStampDrag";
 import { useWordImport } from "./createInternalCorrespondence/useWordImport";
+import {
+  useOriginalCanvasScrollFollow,
+  useSideCanvasScrollFollow,
+} from "./createInternalCorrespondence/useCanvasScrollFollow";
+import {
+  useNavPaneScrollFollow,
+  usePanelsGroupScrollFollow,
+} from "./createInternalCorrespondence/usePaneScrollFollow";
+import {
+  buildVersionAuthors,
+  collectRevokedVersionIds,
+  mapDocumentVersions,
+} from "./createInternalCorrespondence/versionsLib";
+import { useDraftMutations } from "./createInternalCorrespondence/useDraftMutations";
 
 import { PreviewModal } from "./PreviewModal";
 import { OriginalLetterPanel } from "./OriginalLetterPanel";
@@ -490,49 +503,6 @@ export const CreateInternalCorrespondence = ({
   const navPaneWrapRef = useRef<HTMLDivElement>(null);
   const versionCompareCanvasWrapRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const activeWrap = showVersionCompareSides
-      ? versionCompareCanvasWrapRef.current
-      : showOriginalLetterSides
-      ? originalCanvasWrapRef.current
-      : null;
-    if (!activeWrap) return;
-    const scroller = rootScrollRef.current;
-    const canvas = pageCanvasRef.current;
-    if (!scroller || !canvas) return;
-
-    const BOT_M = 24;
-    let shift = 0;
-
-    const update = () => {
-      const TOP_M = (stickyHeaderRef.current?.offsetHeight ?? 40) + 12;
-      const viewH = scroller.clientHeight;
-      const wrapH = activeWrap.offsetHeight;
-      const canvasTop =
-        canvas.getBoundingClientRect().top -
-        scroller.getBoundingClientRect().top;
-      const maxShift = Math.max(canvas.offsetHeight - wrapH, 0);
-
-      if (wrapH <= viewH - TOP_M - BOT_M) {
-        shift = TOP_M - canvasTop;
-      } else {
-        const pinTop = TOP_M - canvasTop;
-        const pinBottom = viewH - BOT_M - wrapH - canvasTop;
-        shift = Math.min(Math.max(shift, pinBottom), pinTop);
-      }
-      shift = Math.min(Math.max(shift, 0), maxShift);
-      activeWrap.style.transform = shift > 0 ? `translateY(${shift}px)` : "";
-    };
-
-    update();
-    scroller.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      scroller.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [showOriginalLetterSides, showVersionCompareSides, composeMode, sourceLetter]);
-
   // Обёртка боковых панелей (История версий / Входящие письма / Согласующие /
   // Подписывающий). Прижимаем её к верху видимой области при прокрутке, чтобы
   // вкладки и раскрытая панель были доступны на любой странице документа.
@@ -558,169 +528,59 @@ export const CreateInternalCorrespondence = ({
   const PAGE_GAP = 32; // визуальный отступ между листами
   const PAGE_STRIDE = PAGE_HEIGHT + PAGE_GAP;
 
-  // Sticky-позиционирование левого A4-холста входящего письма: при прокрутке
-  // страницы холст остаётся на виду рядом с редактируемым исходящим письмом.
-  // CSS position:sticky здесь не работает — между холстом и вертикальным
-  // скролл-контейнером страницы стоит серая область с overflow-auto
-  // (горизонтальная прокрутка), которая перехватывает sticky. Поэтому смещаем
-  // холст вручную по scroll/resize через transform. Опорная точка — правый
-  // холст (pageCanvasRef): оба лежат в одном flex-ряду с items-start, их
-  // верхние края совпадают, а сам он не трансформируется.
-  useEffect(() => {
-    if (!showOriginalLetterSides || !composeMode || !sourceLetter) return;
-    const scroller = rootScrollRef.current;
-    const wrap = originalCanvasWrapRef.current;
-    const canvas = pageCanvasRef.current;
-    if (!scroller || !wrap || !canvas) return;
-
-    // Лист прилипает ПОД липкой шапкой редактора (тулбар + панель разделов +
-    // пагинация). Её высота динамическая, поэтому берём её в рантайме. Сам лист
-    // за счёт maxHeight (в OriginalLetterCanvas) помещается в окно целиком — его
-    // содержимое при нехватке высоты прокручивается внутри.
-    const BOT_M = 24;
-    let shift = 0;
-
-    const update = () => {
-      const TOP_M = (stickyHeaderRef.current?.offsetHeight ?? 40) + 12;
-      const viewH = scroller.clientHeight;
-      const wrapH = wrap.offsetHeight;
-      const canvasTop =
-        canvas.getBoundingClientRect().top -
-        scroller.getBoundingClientRect().top;
-      const maxShift = Math.max(canvas.offsetHeight - wrapH, 0);
-
-      if (wrapH <= viewH - TOP_M - BOT_M) {
-        // Холст помещается в окно целиком — прилипает под панелью пагинации.
-        shift = TOP_M - canvasTop;
-      } else {
-        // Страховка на случай расхождения измерений на пару пикселей:
-        // двусторонний sticky (вниз — прилипает нижним краем, вверх — верхним).
-        const pinTop = TOP_M - canvasTop;
-        const pinBottom = viewH - BOT_M - wrapH - canvasTop;
-        shift = Math.min(Math.max(shift, pinBottom), pinTop);
-      }
-      shift = Math.min(Math.max(shift, 0), maxShift);
-      wrap.style.transform = shift > 0 ? `translateY(${shift}px)` : "";
-    };
-
-    update();
-    scroller.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      scroller.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-      wrap.style.transform = "";
-    };
-  }, [
+  // Все «пришвартованные» блоки (боковые холсты, группа панелей, область
+  // навигации) держатся в поле зрения одинаково: CSS position:sticky здесь
+  // перехватывает серая область с overflow, поэтому смещаем их вручную по
+  // scroll/resize через transform. Подробности — в самих хуках.
+  useSideCanvasScrollFollow({
     showOriginalLetterSides,
+    showVersionCompareSides,
+    originalCanvasWrapRef,
+    versionCompareCanvasWrapRef,
+    rootScrollRef,
+    pageCanvasRef,
+    stickyHeaderRef,
+    composeMode,
+    sourceLetter,
+  });
+
+  useOriginalCanvasScrollFollow({
+    showOriginalLetterSides,
+    originalCanvasWrapRef,
+    rootScrollRef,
+    pageCanvasRef,
+    stickyHeaderRef,
     composeMode,
     sourceLetter,
     pageCount,
     orientation,
     formExpanded,
     panelsInToolbar,
-  ]);
+  });
 
-  // Боковые панели (вкладки + раскрытая панель) спозиционированы абсолютно
-  // внутри высокого холста (pageCanvasRef, высотой во все страницы), поэтому
-  // при прокрутке вниз уходили за верх экрана — чтобы выбрать версию/участника,
-  // приходилось скроллить в самое начало. Держим группу в поле зрения: смещаем
-  // её по вертикали за прокруткой через transform (position:sticky здесь не
-  // работает — его перехватывает серая область с overflow), а высоту раскрытой
-  // панели ограничиваем видимой областью (переменная --icc-panel-max-h), чтобы
-  // её внутренний список прокручивался на месте. Тот же приём, что для левого
-  // A4-холста входящего письма выше.
-  useEffect(() => {
-    if (!id) return;
-    const scroller = rootScrollRef.current;
-    const canvas = pageCanvasRef.current;
-    const group = panelsGroupRef.current;
-    if (!scroller || !canvas || !group) return;
+  usePanelsGroupScrollFollow({
+    id,
+    panelsGroupRef,
+    rootScrollRef,
+    pageCanvasRef,
+    stickyHeaderRef,
+    pageCount,
+    orientation,
+    formExpanded,
+    panelsInToolbar,
+  });
 
-    const BOT_M = 24; // нижний отступ для раскрытой панели
-    const MIN_VISIBLE = 160; // минимум пикселей группы, что держим над холстом
-
-    const update = () => {
-      // Прижимаем группу не к самому верху, а ПОД липкую шапку редактора
-      // (тулбар + панель разделов), иначе её содержимое пряталось бы под ней.
-      const headerH = stickyHeaderRef.current?.offsetHeight ?? 0;
-      const TOP_M = headerH + 12;
-      const canvasTop =
-        canvas.getBoundingClientRect().top -
-        scroller.getBoundingClientRect().top;
-      let shift = Math.max(0, TOP_M - canvasTop);
-      shift = Math.min(shift, Math.max(0, canvas.offsetHeight - MIN_VISIBLE));
-      // Верх группы в координатах видимой области: от него отсчитываем
-      // доступную высоту, чтобы низ раскрытой панели не уезжал под экран.
-      const groupViewportTop = canvasTop + shift;
-      const availH = Math.max(
-        200,
-        scroller.clientHeight - groupViewportTop - BOT_M,
-      );
-      group.style.setProperty("--icc-panel-max-h", `${availH}px`);
-      group.style.transform = shift > 0 ? `translateY(${shift}px)` : "";
-    };
-
-    update();
-    scroller.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    // Высота липкой шапки меняется (перенос кнопок на новую строку, включение
-    // панели разделов, пагинация входящего) — пересчитываем позицию панелей.
-    const headerRO = new ResizeObserver(update);
-    if (stickyHeaderRef.current) headerRO.observe(stickyHeaderRef.current);
-    return () => {
-      scroller.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-      headerRO.disconnect();
-      group.style.transform = "";
-    };
-  }, [id, pageCount, orientation, formExpanded, panelsInToolbar]);
-
-  // Область навигации должна оставаться на виду при прокрутке документа, как
-  // пришвартованная панель Word. Тот же приём, что для левого A4-холста и
-  // группы боковых панелей выше: CSS sticky здесь перехватывает серая область
-  // с overflow, поэтому смещаем обёртку сами и заодно отдаём панели доступную
-  // высоту (--icc-nav-max-h), чтобы её списки прокручивались внутри.
-  useEffect(() => {
-    if (!navPaneEnabled) return;
-    const scroller = rootScrollRef.current;
-    const canvas = pageCanvasRef.current;
-    const wrap = navPaneWrapRef.current;
-    if (!scroller || !canvas || !wrap) return;
-
-    const BOT_M = 24;
-    const MIN_VISIBLE = 200;
-
-    const update = () => {
-      const TOP_M = (stickyHeaderRef.current?.offsetHeight ?? 0) + 12;
-      const canvasTop =
-        canvas.getBoundingClientRect().top -
-        scroller.getBoundingClientRect().top;
-      let shift = Math.max(0, TOP_M - canvasTop);
-      shift = Math.min(shift, Math.max(0, canvas.offsetHeight - MIN_VISIBLE));
-      const paneViewportTop = canvasTop + shift;
-      const availH = Math.max(
-        240,
-        scroller.clientHeight - paneViewportTop - BOT_M,
-      );
-      // Отдаём панели всю доступную высоту — распределить её между шапкой,
-      // поиском, вкладками и прокручиваемым списком она умеет сама (flex).
-      wrap.style.setProperty("--icc-nav-max-h", `${availH}px`);
-      wrap.style.transform = shift > 0 ? `translateY(${shift}px)` : "";
-    };
-
-    update();
-    scroller.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    const headerRO = new ResizeObserver(update);
-    if (stickyHeaderRef.current) headerRO.observe(stickyHeaderRef.current);
-    return () => {
-      scroller.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-      headerRO.disconnect();
-      wrap.style.transform = "";
-    };
-  }, [navPaneEnabled, pageCount, orientation, formExpanded, panelsInToolbar]);
+  useNavPaneScrollFollow({
+    navPaneEnabled,
+    navPaneWrapRef,
+    rootScrollRef,
+    pageCanvasRef,
+    stickyHeaderRef,
+    pageCount,
+    orientation,
+    formExpanded,
+    panelsInToolbar,
+  });
 
   const [searchParams, setSearchParams] = useState({ query: "" });
   const handleOpenRecipientModal = () => {
@@ -807,83 +667,27 @@ export const CreateInternalCorrespondence = ({
     return wfSigs.some((sig: any) => sig.status === "signed");
   }, [rawWorkflowData]);
 
-  const revokedVersionIds = useMemo(() => {
-    const ids = new Set<number | string>();
-    const wfSignatures = rawWorkflowData?.data?.signatures || [];
-    wfSignatures.forEach((s: any) => {
-      if (s.status === "revoked") {
-        if (s.version_id) ids.add(s.version_id);
-        if (s.payload_json?.version_id) ids.add(s.payload_json.version_id);
-      }
-    });
-    return ids;
-  }, [rawWorkflowData]);
+  const revokedVersionIds = useMemo(
+    () => collectRevokedVersionIds(rawWorkflowData?.data?.signatures || []),
+    [rawWorkflowData],
+  );
 
   // Массив всех версий с бэкенда
-  const allVersions = useMemo(() => {
-    const rawVersions = versionsResponse?.data?.versions || [];
-    return rawVersions.map((v: any, idx: number) => {
-      const isExplicitRevoked =
-        v.signature_state === "revoked" ||
-        revokedVersionIds.has(v.id) ||
-        (v.parent_id && revokedVersionIds.has(v.parent_id)) ||
-        (!hasSignedWorkflowSignature &&
-          typeof v.body === "string" &&
-          v.body.includes(STAMP_ATTR));
-
-      // Маркер раскладки снимаем здесь, на границе с бэкендом: ниже по коду
-      // `content` уходит и в редактор, и в пагинатор, и в сравнение версий —
-      // везде он должен быть чистым телом письма.
-      const { layout, body } = splitDocLayout(v.body);
-
-      return {
-        id: v.id,
-        parent_id: v.parent_id,
-        versionNumber: v.version || idx + 1,
-        content: body,
-        layout,
-        date: v.created_at,
-        author: v.author
-          ? {
-              id: String(v.author.id),
-              name: v.author.full_name || "Неизвестный автор",
-              position: v.author.position || "Сотрудник",
-              initials: (v.author.full_name || "НА")
-                .split(" ")
-                .map((n: string) => n[0])
-                .slice(0, 2)
-                .join(""),
-            }
-          : {
-              id: "unknown",
-              name: "Неизвестный автор",
-              position: "Сотрудник",
-              initials: "НА",
-            },
-        is_selected: v.is_selected,
-        is_current_signed: v.is_current_signed && !isExplicitRevoked,
-        signature_state: isExplicitRevoked ? "revoked" : v.signature_state,
-        signature_revoked_at: v.signature_revoked_at,
-        signature_signed_at: v.signature_signed_at,
-      };
-    });
-  }, [versionsResponse, revokedVersionIds, hasSignedWorkflowSignature]);
+  const allVersions = useMemo(
+    () =>
+      mapDocumentVersions({
+        rawVersions: versionsResponse?.data?.versions || [],
+        revokedVersionIds,
+        hasSignedWorkflowSignature,
+      }),
+    [versionsResponse, revokedVersionIds, hasSignedWorkflowSignature],
+  );
 
   // Список уникальных авторов для выпадающего фильтра
-  const versionAuthors = useMemo(() => {
-    const authorsMap: Record<string, { name: string; count: number }> = {};
-    allVersions.forEach((v: any) => {
-      if (!authorsMap[v.author.id]) {
-        authorsMap[v.author.id] = { name: v.author.name, count: 0 };
-      }
-      authorsMap[v.author.id].count += 1;
-    });
-    return Object.entries(authorsMap).map(([id, meta]) => ({
-      id,
-      name: meta.name,
-      count: meta.count,
-    }));
-  }, [allVersions]);
+  const versionAuthors = useMemo(
+    () => buildVersionAuthors(allVersions),
+    [allVersions],
+  );
 
   const [selectedAuthorId, setSelectedAuthorId] = useState<
     string | number | null
@@ -1056,165 +860,16 @@ export const CreateInternalCorrespondence = ({
       };
     }) || [];
 
-  // После успешного сохранения файлы уже лежат на бэкенде: заменяем локальную
-  // очередь списком из ответа. Иначе следующее сохранение отправит те же файлы
-  // повторно и в письме появятся дубликаты.
-  const syncAttachmentsAfterSave = useCallback(
-    (data: any) => {
-      const saved = data?.item?.attachments;
-      const docId = id || data?.item?.id;
-      if (Array.isArray(saved))
-        setAttachments(saved.map((a: any) => mapServerAttachment(a, docId)));
-      else setAttachments((prev) => prev.filter((a) => !a.file));
-    },
-    [id],
-  );
-
-  const { mutate: createDraft, isPending: isCreating } = useMutationQuery<any>({
-    url: ApiRoutes.CREATE_INTERNAL,
-    method: "POST",
-    messages: { invalidate: [ApiRoutes.GET_INTERNAL_DRAFTS] },
-    queryOptions: {
-      onSuccess: (data: any) => {
-        syncAttachmentsAfterSave(data);
-        const newId = data?.item?.id;
-        if (newId)
-          navigate(`/modules/correspondence/internal/outgoing/${newId}`, {
-            replace: true,
-            state: location.state,
-          });
-      },
-    },
+  const { saveDraft, isSaving } = useDraftMutations({
+    id,
+    navigate,
+    locationState: location.state,
+    attachments,
+    setAttachments,
+    refetchVersions,
+    selectVersionForSign,
+    setActiveVersionId,
   });
-
-  // Обновление черновика создаёт на бэкенде новую версию письма — общий хвост
-  // для обоих режимов сохранения (JSON и multipart, см. saveDraft ниже).
-  const handleDraftUpdated = useCallback(
-    (data: any) => {
-      syncAttachmentsAfterSave(data);
-      // 1. Сначала стягиваем свежие версии, чтобы узнать ID только что созданной (1.6)
-      refetchVersions().then((updatedResponse) => {
-        const freshVersions = updatedResponse?.data?.data?.versions;
-
-        if (Array.isArray(freshVersions) && freshVersions.length > 0) {
-          const latestVersion = freshVersions[freshVersions.length - 1];
-
-          if (latestVersion?.id) {
-            // 2. Мгновенно меняем активную версию в стейте фронтенда
-            setActiveVersionId(latestVersion.id);
-
-            // 3. Передаем в selectVersionForSign колбэк для повторного рефетча ПОСЛЕ успешного выбора
-            selectVersionForSign(
-              { versionId: latestVersion.id },
-              {
-                onSuccess: () => {
-                  // 4. Перезапрашиваем версии еще раз, когда бэкенд точно проставил галочку в БД
-                  refetchVersions();
-                },
-              },
-            );
-          }
-        }
-      });
-    },
-    [refetchVersions, selectVersionForSign, syncAttachmentsAfterSave],
-  );
-
-  const updateDraftMessages = {
-    invalidate: [
-      ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
-      // Убираем отсюда автоматический инвалейд версий, чтобы контролировать поток вручную
-    ],
-  };
-
-  const { mutate: updateDraft, isPending: isUpdating } = useMutationQuery<any>({
-    url: ApiRoutes.PUT_INTERNAL.replace(":id", String(id || "")),
-    method: "PUT",
-    messages: updateDraftMessages,
-    queryOptions: { onSuccess: handleDraftUpdated },
-  });
-
-  const { mutate: updateDraftSilent } = useMutationQuery<any>({
-    url: ApiRoutes.PUT_INTERNAL.replace(":id", String(id || "")),
-    method: "PUT",
-    messages: {
-      ...updateDraftMessages,
-      suppressSuccessToast: true,
-    },
-    queryOptions: { onSuccess: handleDraftUpdated },
-  });
-
-  // Тот же PUT, но с новыми вложениями в теле. Метод именно POST: PHP не
-  // разбирает файлы в теле настоящего PUT, поэтому реальный метод уезжает
-  // на бэкенд полем `_method` (см. saveDraft).
-  const { mutate: updateDraftWithFiles, isPending: isUpdatingWithFiles } =
-    useMutationQuery<FormData>({
-      url: ApiRoutes.PUT_INTERNAL.replace(":id", String(id || "")),
-      method: "POST",
-      messages: updateDraftMessages,
-      queryOptions: { onSuccess: handleDraftUpdated },
-    });
-
-  const { mutate: updateDraftWithFilesSilent } = useMutationQuery<FormData>({
-    url: ApiRoutes.PUT_INTERNAL.replace(":id", String(id || "")),
-    method: "POST",
-    messages: {
-      ...updateDraftMessages,
-      suppressSuccessToast: true,
-    },
-    queryOptions: { onSuccess: handleDraftUpdated },
-  });
-
-  /**
-   * Сохраняет черновик, сам выбирая формат запроса. Пока новых файлов нет —
-   * шлём привычный JSON. Если есть — тот же payload уходит multipart-ом вместе
-   * с файлами: отдельного эндпоинта для загрузки вложений у внутренней
-   * корреспонденции нет, они принимаются прямо в создании/обновлении письма.
-   */
-  const saveDraft = (
-    requestPayload: Record<string, any>,
-    options?: { suppressToast?: boolean },
-  ) => {
-    const pending = attachments.filter((a) => a.file);
-
-    if (options?.suppressToast) {
-      if (!pending.length) {
-        if (id) updateDraftSilent(requestPayload);
-        else createDraft(requestPayload);
-        return;
-      }
-      const form = buildFormData(requestPayload);
-      pending.forEach((a) => form.append("attachments[]", a.file!));
-      if (id) {
-        form.append("_method", "PUT");
-        updateDraftWithFilesSilent(form);
-      } else {
-        createDraft(form);
-      }
-      return;
-    }
-
-    if (!pending.length) {
-      if (id) updateDraft(requestPayload);
-      else createDraft(requestPayload);
-      return;
-    }
-
-    const form = buildFormData(requestPayload);
-    pending.forEach((a) => form.append("attachments[]", a.file!));
-
-    if (id) {
-      form.append("_method", "PUT");
-      updateDraftWithFiles(form);
-    } else {
-      createDraft(form);
-    }
-  };
-
-
-  // Загрузка файлов идёт тем же запросом, что и сам черновик, поэтому
-  // «Сохранить» ждёт и её тоже.
-  const isSaving = isCreating || isUpdating || isUpdatingWithFiles;
 
   const { mutate: inviteSigner, isPending: isSignerInviting } =
     useMutationQuery<any>({
@@ -1404,36 +1059,16 @@ export const CreateInternalCorrespondence = ({
           if (
             !editorRef.current.innerHTML.includes('data-signature-stamp="true"')
           ) {
-            // 1. Собираем переменные для штампа
-            const stampWidthVal =
-              typeof stampSize.width === "number"
-                ? stampSize.width
-                : DS_STAMP_DEFAULT_WIDTH;
-            // Высоту всегда выводим из ширины по пропорциям макета, чтобы вшитая
-            // картинка не искажалась относительно SVG (viewBox 760×333).
-            const stampHeightVal = dsStampHeightForWidth(stampWidthVal);
-            const widthStr = `${stampWidthVal}px`;
-            const currentSignerName = finalSigner?.name || "Неизвестно";
-            const currentSignerInitials = finalSigner?.initials || "НА";
-            const currentDate = new Date().toLocaleDateString("ru-RU");
-            const certSerial = `SN-2026-${currentSignerInitials}-84201`;
-            const validUntil = "аз 20.03.2025 то 20.03.2026";
-
-            // 2. Единый SVG-рисунок штампа ЭЦП (тот же, что рисует React-
-            //    компонент <DSStamp>) — вшиваем его картинкой в тело письма,
-            //    чтобы экранный, печатный и боковой штампы были идентичны.
-            const fullStampSvg = buildDSStampSvg({
-              name: currentSignerName,
-              certSerial,
-              signedAt: currentDate,
-              validUntil,
+            const stampHTML = buildEmbeddedStampHtml({
+              width:
+                typeof stampSize.width === "number"
+                  ? stampSize.width
+                  : DS_STAMP_DEFAULT_WIDTH,
+              x: stampPos.x,
+              y: stampPos.y,
+              signerName: finalSigner?.name || "Неизвестно",
+              signerInitials: finalSigner?.initials || "НА",
             });
-
-            const encodedSvg = btoa(unescape(encodeURIComponent(fullStampSvg)));
-            const stampDataUri = `data:image/svg+xml;base64,${encodedSvg}`;
-
-            // Использовать строго в одну строку без пробелов внутри тегов, чтобы редактор не вставил текстовые переносы
-            const stampHTML = `<div data-signature-stamp="true" contenteditable="false" style="position:absolute;left:${stampPos.x}px;top:${stampPos.y}px;width:${widthStr};height:${stampHeightVal}px;max-height:${stampHeightVal}px;z-index:99;user-select:none;-webkit-user-select:none;cursor:default;overflow:hidden!important;display:block!important;line-height:0!important;padding:0!important;margin:0!important;border:none!important;"><img src="${stampDataUri}" alt="ЭЦП" style="display:block!important;width:100%!important;height:${stampHeightVal}px!important;max-height:${stampHeightVal}px!important;pointer-events:none!important;-webkit-user-drag:none!important;padding:0!important;margin:0!important;border:none!important;outline:none!important;line-height:0!important;" /></div>`;
 
             editorRef.current.innerHTML += stampHTML;
             // innerHTML-присвоение идёт мимо onInput — синхронизируем стейт,
