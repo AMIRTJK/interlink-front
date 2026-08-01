@@ -4,7 +4,6 @@ import { Layout, PanelTop, ChevronLeft, ChevronRight } from "lucide-react";
 import { AppRoutes } from "@shared/config";
 import { Logo, If } from "@shared/ui";
 import { ModuleMenu } from "./ModuleMenu";
-import { useMoveHeader } from "./useLayoutMode";
 import { SidebarSystemButtons } from "./SidebarSystemButtons";
 import { LayoutMode } from "./designSettings";
 import { useProfileUser } from "./useProfileUser";
@@ -44,7 +43,6 @@ export const Sidebar = ({ side, setLayoutMode, themeGradient }: IProps) => {
     }
     return false;
   });
-  const [moveHeader] = useMoveHeader();
 
   useEffect(() => {
     localStorage.setItem("sidebarCollapsed", String(collapsed));
@@ -121,9 +119,7 @@ export const Sidebar = ({ side, setLayoutMode, themeGradient }: IProps) => {
         </div>
 
         <div className="px-3 pt-4 mt-2 border-t border-white/20 dark:border-zinc-700/30 flex flex-col gap-2">
-          <If is={moveHeader}>
-            <SidebarSystemButtons collapsed={collapsed} />
-          </If>
+          <SidebarSystemButtons collapsed={collapsed} />
           <div
             className={`flex items-center gap-3 px-1 ${
               collapsed ? "justify-center" : ""

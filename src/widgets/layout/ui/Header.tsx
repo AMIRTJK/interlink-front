@@ -19,8 +19,6 @@ export const Header = ({
   setLayoutMode,
 }: IProps) => {
   const {
-    moveHeader,
-    setMoveHeader,
     handleLogout,
     openChat,
     showLogoutConfirm,
@@ -84,8 +82,6 @@ export const Header = ({
         setCurrentBg={setCurrentBg}
         layoutMode={layoutMode}
         setLayoutMode={setLayoutMode}
-        moveHeader={moveHeader}
-        setMoveHeader={setMoveHeader}
         setShowLogoutConfirm={setShowLogoutConfirm}
       />
 

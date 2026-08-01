@@ -5,8 +5,6 @@ import type { LayoutMode } from "../designSettings";
 interface IHeaderLayoutPopoverProps {
   layoutMode: LayoutMode;
   setLayoutMode?: (layout: LayoutMode) => void;
-  moveHeader: boolean;
-  setMoveHeader: (move: boolean) => void;
 }
 
 const LAYOUT_MODES: { mode: LayoutMode; icon: ReactNode; title: string }[] = [
@@ -19,8 +17,6 @@ const LAYOUT_MODES: { mode: LayoutMode; icon: ReactNode; title: string }[] = [
 export const HeaderLayoutPopover = ({
   layoutMode,
   setLayoutMode,
-  moveHeader,
-  setMoveHeader,
 }: IHeaderLayoutPopoverProps) => {
   return (
     <div className="w-[220px] p-5 bg-white dark:bg-zinc-800 rounded-[2.5rem]">
@@ -54,22 +50,6 @@ export const HeaderLayoutPopover = ({
             )}
           </button>
         ))}
-      </div>
-      <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-700/60 px-1">
-        <label className="flex items-center justify-between cursor-pointer">
-          <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 select-none">
-            Переносить элементы Header
-          </span>
-          <div className="relative">
-            <input
-              type="checkbox"
-              checked={moveHeader}
-              onChange={(e) => setMoveHeader(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-8 h-4 bg-zinc-200 dark:bg-zinc-700 rounded-full peer peer-checked:bg-emerald-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4" />
-          </div>
-        </label>
       </div>
     </div>
   );

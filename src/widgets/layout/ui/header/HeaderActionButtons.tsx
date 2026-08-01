@@ -34,8 +34,6 @@ interface IHeaderActionButtonsProps {
   setCurrentBg?: (bg: string) => void;
   layoutMode: LayoutMode;
   setLayoutMode?: (layout: LayoutMode) => void;
-  moveHeader: boolean;
-  setMoveHeader: (move: boolean) => void;
   setShowLogoutConfirm: (show: boolean) => void;
 }
 
@@ -53,8 +51,6 @@ export const HeaderActionButtons = ({
   setCurrentBg,
   layoutMode,
   setLayoutMode,
-  moveHeader,
-  setMoveHeader,
   setShowLogoutConfirm,
 }: IHeaderActionButtonsProps) => {
   return (
@@ -189,8 +185,6 @@ export const HeaderActionButtons = ({
           <HeaderLayoutPopover
             layoutMode={layoutMode}
             setLayoutMode={setLayoutMode}
-            moveHeader={moveHeader}
-            setMoveHeader={setMoveHeader}
           />
         }
         trigger="click"

@@ -3,10 +3,8 @@ import { tokenControl, useLogout } from "@shared/lib";
 import { useNotificationCounters } from "@features/notifications";
 import { useChat } from "@widgets/Chat";
 import { useProfileUser } from "../useProfileUser";
-import { useMoveHeader } from "../useLayoutMode";
 
 export const useHeaderState = () => {
-  const [moveHeader, setMoveHeader] = useMoveHeader();
   const handleLogout = useLogout();
   const { openChat } = useChat();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -42,8 +40,6 @@ export const useHeaderState = () => {
   };
 
   return {
-    moveHeader,
-    setMoveHeader,
     handleLogout,
     openChat,
     showLogoutConfirm,
