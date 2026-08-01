@@ -55,7 +55,7 @@ export const ProfileAvatarCard = ({ userData, onEdit, gradient }: IProps) => {
 						</span>
 					</span>
 				</button>
-				<span className="absolute! bottom-1! right-1! w-4! h-4! rounded-full! border-2! border-white/60! dark:border-zinc-900/60! bg-emerald-500! shadow-lg!" />
+
 				<input
 					type="file"
 					ref={fileInputRef}
