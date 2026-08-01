@@ -4,7 +4,8 @@ import { Form, notification } from "antd";
 import { If } from "@shared/ui";
 import { useModalState } from "@shared/lib";
 import { ExecutionModal } from "@widgets/ExecutionModal";
-import { useLocation } from "react-router";
+import { AppRoutes } from "@shared/config";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   CorrespondenceControlPanel,
   CorrespondenseStatus,
@@ -26,6 +27,7 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
   type,
   initialValues,
   onFinish,
+  onBack,
   isLoading,
   title,
   isAllowed,
@@ -34,9 +36,16 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
 }) => {
   const [form] = Form.useForm();
   const executionModalState = useModalState();
+  const navigate = useNavigate();
 
   const isIncoming = type === "external-incoming";
   const isOutgoing = type === "external-outgoing";
+
+  const defaultBack = () => {
+    if (isIncoming) navigate(AppRoutes.CORRESPONDENCE_EXTERNAL_INCOMING);
+    else if (isOutgoing) navigate(AppRoutes.CORRESPONDENCE_EXTERNAL_OUTGOING);
+    else navigate(AppRoutes.CORRESPONDENCE);
+  };
 
   const location = useLocation();
 
@@ -97,6 +106,7 @@ export const CorrespondenceForm: React.FC<CorrespondenceFormProps> = ({
       <CorrespondenceControlPanel
         isSaving={isLoading}
         isAllowed={isAllowed}
+        onBack={onBack || defaultBack}
         onSave={form.submit}
         onResolution={executionModalState.open}
         onReject={handleReject}

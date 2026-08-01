@@ -9,9 +9,12 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
+import { AppRoutes } from "@shared/config";
+
 interface CorrespondenceControlPanelProps {
   isSaving?: boolean;
   isAllowed?: boolean;
+  onBack?: () => void;
   onSave: () => void;
   onResolution: () => void;
   onReject?: () => void;
@@ -23,6 +26,7 @@ export const CorrespondenceControlPanel: React.FC<
 > = ({
   isSaving,
   isAllowed = true,
+  onBack,
   onSave,
   onResolution,
   onReject,
@@ -30,13 +34,21 @@ export const CorrespondenceControlPanel: React.FC<
 }) => {
   const navigate = useNavigate();
 
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate(AppRoutes.CORRESPONDENCE);
+    }
+  };
+
   return (
     <div className="bg-white border-b border-gray-200 p-6 flex items-center justify-between sticky top-0 z-10 mb-6">
       <div className="flex items-center gap-4">
         <Button
           type="text"
           icon={<ArrowLeftOutlined className="text-lg" />}
-          onClick={() => navigate(-1)}
+          onClick={handleBack}
           className="hover:bg-gray-100 rounded-full w-10 h-10 flex items-center justify-center text-gray-500"
         />
       </div>

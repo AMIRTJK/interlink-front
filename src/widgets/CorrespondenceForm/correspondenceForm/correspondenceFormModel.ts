@@ -21,6 +21,7 @@ export interface CorrespondenceFormProps {
   type: string;
   initialValues?: CorrespondenceResponse;
   onFinish: (values: CorrespondenceFormData) => void;
+  onBack?: () => void;
   isLoading?: boolean;
   title: string;
   isReadOnly?: boolean;
