@@ -45,6 +45,7 @@ import {
   AdminUsersPage,
   AdminRolesPage,
   AdminTabsLayout,
+  ChatModulePage,
 } from "./lazyPages";
 
 export const AppRouter = () => {
@@ -99,6 +100,7 @@ export const AppRouter = () => {
                 <Route path="staffing" element={<HrStaffingPage />} />
               </Route>
               <Route path="tasks" element={<TasksModulePage />} />
+              <Route path="chat" element={<ChatModulePage />} />
               <Route
                 path="administration"
                 element={<AdministrationLayoutPage />}

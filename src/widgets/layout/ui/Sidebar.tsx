@@ -7,6 +7,7 @@ import { ModuleMenu } from "./ModuleMenu";
 import { SidebarSystemButtons } from "./SidebarSystemButtons";
 import { LayoutMode } from "./designSettings";
 import { useProfileUser } from "./useProfileUser";
+import { useSidebarCollapsed } from "./useSidebarCollapsed";
 import { getEnvVar } from "@shared/config";
 import userAvatar from "../../../assets/images/user-avatar.jpg";
 
@@ -37,16 +38,7 @@ interface IProps {
  * (уведомления, чат, тема и т.д.) остаются в верхнем хедере — они здесь не дублируются.
  */
 export const Sidebar = ({ side, setLayoutMode, themeGradient }: IProps) => {
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("sidebarCollapsed") === "true";
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    localStorage.setItem("sidebarCollapsed", String(collapsed));
-  }, [collapsed]);
+  const [collapsed, setCollapsed] = useSidebarCollapsed();
 
   const { userData, userName, userSubtitle } = useProfileUser();
   const [avatarError, setAvatarError] = useState(false);
@@ -72,7 +64,7 @@ export const Sidebar = ({ side, setLayoutMode, themeGradient }: IProps) => {
     >
       <div className="relative bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/20 dark:border-zinc-700/30 shadow-lg flex flex-col h-[calc(100vh-2rem)] py-5 transition-all duration-300 ease-in-out">
         <button
-          onClick={() => setCollapsed((v) => !v)}
+          onClick={() => setCollapsed(!collapsed)}
           title={collapsed ? "Развернуть" : "Свернуть"}
           aria-label={collapsed ? "Развернуть меню" : "Свернуть меню"}
           className={`absolute ${

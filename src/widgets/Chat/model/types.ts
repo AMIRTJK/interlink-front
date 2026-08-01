@@ -64,3 +64,9 @@ export type PendingFile = {
   raw: File;
 };
 export type LayoutPosition = 'left' | 'right' | 'bottom' | 'top';
+/**
+ * Режим отображения чата:
+ * - "page"    — полноценный раздел системы (маршрут /modules/chat), занимает весь экран;
+ * - "overlay" — всплывающее окно поверх текущего модуля (плавающая кнопка).
+ */
+export type TChatVariant = 'page' | 'overlay';

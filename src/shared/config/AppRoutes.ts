@@ -44,6 +44,9 @@ export const AppRoutes = {
 	HR_TIMESHEET: "/modules/hr/timesheet",
 	HR_STAFFING: "/modules/hr/staffing",
 
+	// Chat module
+	CHAT: "/modules/chat",
+
 	// Administration module
 	ADMINISTRATION: "/modules/administration",
 	ADMINISTRATION_USERS: "/modules/administration/users",

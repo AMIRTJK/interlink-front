@@ -143,6 +143,12 @@ export const HrStaffingPage = lazy(() =>
   })),
 );
 
+export const ChatModulePage = lazy(() =>
+  import("@pages/modules/chat/ChatModulePage").then((m) => ({
+    default: m.ChatModulePage,
+  })),
+);
+
 export const AdministrationLayoutPage = lazy(() =>
   import("@pages/modules/administration/Administration").then((m) => ({
     default: m.AdministrationLayoutPage,

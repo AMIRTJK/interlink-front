@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { BottomNav } from "./BottomNav";
+import { ChatFloatingButton } from "./ChatFloatingButton";
 import { THEMES, BACKGROUNDS } from "./designSettings";
 import { useLayoutMode } from "./useLayoutMode";
 import { useDesignSettings } from "./useDesignSettings";
@@ -72,6 +73,8 @@ export const ProfileLayout = () => {
       </div>
 
       {layoutMode === "bottom" && <BottomNav />}
+
+      <ChatFloatingButton layoutMode={layoutMode} />
     </div>
   );
 };

@@ -4,20 +4,32 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChatApp } from "./ChatApp";
 
 // ─── Чат в формате Drawer, выезжающего справа ─────────────────────────────────
-// Чат не является отдельной страницей — это оверлей поверх текущего экрана системы.
+// Быстрый доступ к чату из любого модуля: оверлей поверх текущего экрана системы,
+// без перехода по навигации и смены активного раздела. Полноценный раздел «Чат»
+// живёт на маршруте AppRoutes.CHAT (см. ChatPage).
 // Открывается как Drawer: плавно выезжает справа, при закрытии так же плавно
-// уезжает вправо. Сам чат сохраняет собственные размеры и оформление и прижат
-// вплотную к правому краю (см. ChatApp), а за ним видна сама система — отдельного
-// фона нет. Закрытие — по Esc или кликом по пустому пространству за окном чата.
+// уезжает вправо. В компактном режиме чат прижат вплотную к правому краю (см.
+// ChatApp), а за ним видна сама система — отдельного фона нет; в развёрнутом
+// занимает весь экран. Закрытие — по Esc, кнопкой в шапке или кликом по пустому
+// пространству за окном чата.
 // Рендерится в портал (document.body), чтобы не зависеть от overflow/z-index
 // родителей и всегда быть сверху.
 
 type ChatModalProps = {
   open: boolean;
   onClose: () => void;
+  /** Развёрнут ли чат на весь экран. */
+  isExpanded: boolean;
+  /** Переключение «компактное окно ↔ весь экран». */
+  onToggleExpand: () => void;
 };
 
-export const ChatModal = ({ open, onClose }: ChatModalProps) => {
+export const ChatModal = ({
+  open,
+  onClose,
+  isExpanded,
+  onToggleExpand,
+}: ChatModalProps) => {
   // Esc для закрытия + блокировка прокрутки основной страницы, пока чат открыт.
   useEffect(() => {
     if (!open) return;
@@ -57,7 +69,12 @@ export const ChatModal = ({ open, onClose }: ChatModalProps) => {
           aria-label="Чат"
         >
           <div className="w-full h-full">
-            <ChatApp onRequestClose={onClose} />
+            <ChatApp
+              variant="overlay"
+              onRequestClose={onClose}
+              isExpanded={isExpanded}
+              onToggleExpand={onToggleExpand}
+            />
           </div>
         </motion.div>
       )}

@@ -3,6 +3,7 @@ import { ModuleMenu } from "./ModuleMenu";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { BottomNav } from "./BottomNav";
+import { ChatFloatingButton } from "./ChatFloatingButton";
 import { useCorrespondenceRoute } from "@shared/lib";
 import { Navbar } from "@widgets/Navbar";
 import { useNavbar, useTabs } from "@shared/lib/hooks";
@@ -100,6 +101,8 @@ export const MainLayout = () => {
       </div>
 
       {showBottomNav && <BottomNav />}
+
+      <ChatFloatingButton layoutMode={effectiveLayout} />
     </div>
   );
 };

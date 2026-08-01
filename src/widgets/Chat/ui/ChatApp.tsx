@@ -16,8 +16,11 @@ import {
   Edit3,
   Plus,
   UserPlus,
+  Maximize2,
+  Minimize2,
+  X,
 } from "lucide-react";
-import { mockContacts as contacts } from "../model";
+import { mockContacts as contacts, type TChatVariant } from "../model";
 import { Lang } from "../lib/translations";
 import { useChatAppState } from "../lib/useChatAppState";
 
@@ -59,13 +62,25 @@ const formatRepliesCount = (count: number, currentLang: Lang) => {
 interface IProps {
   onComposeStateChange?: (isOpen: boolean) => void;
   onRequestClose?: () => void;
+  /** Режим отображения: полноценная страница модуля или всплывающее окно. */
+  variant?: TChatVariant;
+  /** Развёрнут ли всплывающий чат на весь экран (только для variant="overlay"). */
+  isExpanded?: boolean;
+  /** Переключение «компактное окно ↔ весь экран». Кнопка появляется, только если передан. */
+  onToggleExpand?: () => void;
 }
 
 export const ChatApp: React.FC<IProps> = ({
   onComposeStateChange,
   onRequestClose,
+  variant = "overlay",
+  isExpanded = false,
+  onToggleExpand,
 }) => {
   const state = useChatAppState(onComposeStateChange);
+  const isPage = variant === "page";
+  // Чат занимает всю доступную площадь: как страница модуля либо как развёрнутое окно.
+  const isFullBleed = isPage || isExpanded;
 
   const {
     isDark,
@@ -589,13 +604,19 @@ export const ChatApp: React.FC<IProps> = ({
 
   return (
     <div
-      className="w-full h-screen flex items-center justify-end py-4 pl-4 font-sans relative overflow-hidden"
+      className={`w-full flex items-center justify-end font-sans relative overflow-hidden ${
+        isPage ? "h-full" : "h-screen"
+      } ${isFullBleed ? "" : "py-4 pl-4"}`}
       onClick={(e) => {
         if (e.target === e.currentTarget) onRequestClose?.();
       }}
     >
       <div
-        className="w-full max-w-7xl h-full max-h-[900px] flex flex-col rounded-l-2xl overflow-hidden shadow-2xl relative"
+        className={`w-full h-full flex flex-col overflow-hidden shadow-2xl relative transition-all duration-300 ease-in-out ${
+          isFullBleed
+            ? "max-w-none max-h-none rounded-none"
+            : "max-w-7xl max-h-[900px] rounded-l-2xl"
+        }`}
         style={{
           background: isDark ? "rgba(10,4,30,0.55)" : "rgba(255,255,255,0.72)",
           backdropFilter: "blur(30px)",
@@ -704,6 +725,28 @@ export const ChatApp: React.FC<IProps> = ({
               <button className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-white/15 hover:scale-110 flex items-center justify-center text-white/70">
                 <MoreVertical className="w-4.5 h-4.5" />
               </button>
+              {onToggleExpand && (
+                <button
+                  onClick={onToggleExpand}
+                  aria-label={isExpanded ? "Свернуть чат в окно" : "Развернуть чат на весь экран"}
+                  className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-white/15 hover:scale-110 flex items-center justify-center text-white/70"
+                >
+                  {isExpanded ? (
+                    <Minimize2 className="w-4.5 h-4.5" />
+                  ) : (
+                    <Maximize2 className="w-4.5 h-4.5" />
+                  )}
+                </button>
+              )}
+              {onRequestClose && (
+                <button
+                  onClick={onRequestClose}
+                  aria-label="Закрыть чат"
+                  className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-white/20 hover:scale-110 flex items-center justify-center text-white/70"
+                >
+                  <X className="w-4.5 h-4.5" />
+                </button>
+              )}
             </div>
           </div>
         </header>
