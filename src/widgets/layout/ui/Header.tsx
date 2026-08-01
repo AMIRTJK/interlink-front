@@ -19,10 +19,7 @@ export const Header = ({
   setLayoutMode,
 }: IProps) => {
   const {
-    moveHeader,
-    setMoveHeader,
     handleLogout,
-    openChat,
     showLogoutConfirm,
     setShowLogoutConfirm,
     isDesktopActive,
@@ -74,7 +71,6 @@ export const Header = ({
         notifOpen={notifOpen}
         setNotifOpen={setNotifOpen}
         unreadCount={unreadCount}
-        openChat={openChat}
         setIsDesktopActive={setIsDesktopActive}
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
@@ -84,8 +80,6 @@ export const Header = ({
         setCurrentBg={setCurrentBg}
         layoutMode={layoutMode}
         setLayoutMode={setLayoutMode}
-        moveHeader={moveHeader}
-        setMoveHeader={setMoveHeader}
         setShowLogoutConfirm={setShowLogoutConfirm}
       />
 

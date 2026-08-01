@@ -36,6 +36,8 @@ export function RoleUsersTable({
       {
         title: "ФИО / Должность",
         key: "employee",
+        onHeaderCell: () => ({ style: { paddingLeft: 20 } }),
+        onCell: () => ({ style: { paddingLeft: 20 } }),
         render: (_, user) => {
           const roleCfg = getRoleColor(user.roles[0]);
           return (
@@ -153,24 +155,27 @@ export function RoleUsersTable({
         ),
       },
       {
-        title: "",
+        title: "Действия",
         key: "actions",
-        width: 36,
+        width: 120,
+        align: "right",
         render: () => (
-          <button
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: T.textSecondary,
-              padding: 4,
-              borderRadius: 6,
-              display: "flex",
-            }}
-          >
-            <MoreHorizontal size={15} />
-          </button>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: T.textSecondary,
+                padding: 4,
+                borderRadius: 6,
+                display: "flex",
+              }}
+            >
+              <MoreHorizontal size={15} />
+            </button>
+          </div>
         ),
       },
     ],
@@ -254,6 +259,7 @@ export function RoleUsersTable({
         </div>
       </div>
       <Table<TableUser>
+        className="admin__users-table"
         rowKey="id"
         columns={userColumns}
         dataSource={displayedUsers}
@@ -275,8 +281,21 @@ export function RoleUsersTable({
           pageSize: PER_PAGE,
           total: totalUsers,
           onChange: (page) => onPageChange(page),
-          showTotal: (total, range) =>
-            `Показано ${range[0]}-${range[1]} из ${total} пользователей`,
+          showSizeChanger: false,
+          style: {
+            padding: "10px 20px",
+            borderTop: `1px solid ${T.border}`,
+            margin: 0,
+            display: "flex",
+            alignItems: "center",
+            width: "100%",
+          },
+          showTotal: (total, range) => (
+            <span style={{ fontSize: 13, color: T.textSecondary, marginRight: "auto" }}>
+              Показано <strong style={{ color: T.textPrimary }}>{range[0]}-{range[1]}</strong> из{" "}
+              <strong style={{ color: T.textPrimary }}>{total}</strong> пользователей
+            </span>
+          ),
         }}
         locale={{ emptyText: "Пользователи не найдены" }}
       />

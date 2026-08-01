@@ -15,6 +15,8 @@ export function UserDrawerFooter({ onSave, isDisabled }: IProps) {
         borderTop: `1px solid ${T.border}`,
         display: "flex",
         gap: 8,
+        flexShrink: 0,
+        background: T.surface,
       }}
     >
       <button

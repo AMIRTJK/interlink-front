@@ -38,7 +38,6 @@ export const EmployeesTable = ({ items, onEdit, onDelete, onRowClick }: IProps) 
               <th className="px-4 py-3 font-semibold hidden sm:table-cell">Статус</th>
               <th className="px-4 py-3 font-semibold hidden lg:table-cell">Email</th>
               <th className="px-4 py-3 font-semibold hidden lg:table-cell">Логин</th>
-              <th className="px-4 py-3 font-semibold text-right">Оклад</th>
               <th className="px-4 py-3 font-semibold text-right">Действия</th>
             </tr>
           </thead>
@@ -74,9 +73,6 @@ export const EmployeesTable = ({ items, onEdit, onDelete, onRowClick }: IProps) 
                 </td>
                 <td className="px-4 py-3 hidden lg:table-cell text-xs text-gray-600">
                   {e.raw.phone || "—"}
-                </td>
-                <td className="px-4 py-3 text-sm font-bold text-gray-800 text-right tabular-nums">
-                  {money(e.salary)}
                 </td>
                 <td className="px-4 py-3" onClick={(ev) => ev.stopPropagation()}>
                   <div className="flex items-center gap-1 justify-end">

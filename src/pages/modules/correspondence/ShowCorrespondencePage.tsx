@@ -6,6 +6,7 @@ import {
 } from "@widgets/CorrespondenceForm";
 import { Spin } from "antd";
 import { ApiRoutes } from "@shared/api";
+import { AppRoutes } from "@shared/config";
 import { useCorrespondenceRoute, useGetQuery } from "@shared/lib";
 import { InternalCorrespondece } from "@widgets/InternalCorrespondece";
 import { CreateInternalCorrespondence } from "@widgets/CreateInternalCorrespondence";
@@ -22,6 +23,20 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  const getRegistryRoute = (t: string) => {
+    if (t.includes("internal-incoming")) return AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING;
+    if (t.includes("internal-outgoing")) return AppRoutes.CORRESPONDENCE_INTERNAL_OUTGOING;
+    if (t.includes("internal-drafts")) return AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS;
+    if (t.includes("external-incoming")) return AppRoutes.CORRESPONDENCE_EXTERNAL_INCOMING;
+    if (t.includes("external-outgoing")) return AppRoutes.CORRESPONDENCE_EXTERNAL_OUTGOING;
+    if (t.includes("internal")) return AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING;
+    return AppRoutes.CORRESPONDENCE;
+  };
+
+  const handleBack = () => {
+    navigate(getRegistryRoute(type));
+  };
 
   const { shouldHideUI } = useCorrespondenceRoute();
 
@@ -91,7 +106,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
       return (
         <InternalCorrespondenceIncomingView
           item={incomingItem}
-          onBack={() => navigate(-1)}
+          onBack={handleBack}
         />
       );
     }
@@ -101,7 +116,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
       <CreateInternalCorrespondence
         id={id}
         initialData={data}
-        onBack={() => navigate(-1)}
+        onBack={handleBack}
       />
     );
   }
@@ -114,6 +129,7 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
           title={title}
           initialValues={data}
           onFinish={handleFinish}
+          onBack={handleBack}
           isReadOnly={false}
           isLoading={isLoading}
           isAllowed={true}

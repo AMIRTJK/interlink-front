@@ -88,6 +88,17 @@ export function ensureStyles() {
       background: #F1F5F9 !important;
       color: #0F172A !important;
     }
+    /* Правый край последней колонки, поиска в шапке и пагинации — на одной вертикали */
+    .admin__users-table .ant-table-thead > tr > th:last-child,
+    .admin__users-table .ant-table-tbody > tr > td:last-child {
+      padding-right: 20px !important;
+    }
+    .admin__users-table .ant-pagination {
+      padding-right: 20px !important;
+    }
+    .admin__users-table .ant-pagination > *:last-child {
+      margin-inline-end: 0 !important;
+    }
   `;
   document.head.appendChild(style);
 }

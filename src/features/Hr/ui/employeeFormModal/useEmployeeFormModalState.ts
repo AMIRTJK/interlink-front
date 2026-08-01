@@ -153,7 +153,7 @@ export function useEmployeeFormModalState({
           passport_ocr_scanned_at: data?.passport_ocr_scanned_at ?? null,
           passport_ocr_data: data?.passport_ocr_data ?? null,
         });
-        setValues((prev) => applyPassportOcr(prev, data?.passport_ocr_data?.fields));
+        setValues((prev) => applyPassportOcr(prev, data?.passport_ocr_data?.fields, true));
         setShowForm(true);
       },
     });

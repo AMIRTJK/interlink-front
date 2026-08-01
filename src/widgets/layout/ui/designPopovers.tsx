@@ -20,8 +20,6 @@ export const ThemeContent = ({ currentTheme, setCurrentTheme }: ThemeContentProp
           onClick={() => {
             if (setCurrentTheme) {
               setCurrentTheme(key);
-              localStorage.setItem("currentTheme", key);
-              window.dispatchEvent(new StorageEvent("storage", { key: "currentTheme", newValue: key }));
             }
           }}
           className={`w-full flex items-center gap-3 p-2.5 rounded-[1.5rem] hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all cursor-pointer ${
@@ -63,7 +61,6 @@ export const BgContent = ({ currentBg, setCurrentBg, isDarkMode }: BgContentProp
           onClick={() => {
             if (setCurrentBg) {
               setCurrentBg(key);
-              localStorage.setItem("currentBg", key);
             }
           }}
           className={`w-full flex items-center gap-3 p-2.5 rounded-[1.5rem] hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all cursor-pointer ${
@@ -90,16 +87,12 @@ export const BgContent = ({ currentBg, setCurrentBg, isDarkMode }: BgContentProp
 interface LayoutContentProps {
   layoutMode?: LayoutMode;
   setLayoutMode?: (layout: LayoutMode) => void;
-  moveHeader: boolean;
-  setMoveHeader: (val: boolean) => void;
   layoutModes: { mode: LayoutMode; icon: React.ReactNode; title: string }[];
 }
 
 export const LayoutContent = ({
   layoutMode,
   setLayoutMode,
-  moveHeader,
-  setMoveHeader,
   layoutModes,
 }: LayoutContentProps) => (
   <div className="w-[220px] p-5 bg-white dark:bg-zinc-800 rounded-[2.5rem]">
@@ -131,22 +124,6 @@ export const LayoutContent = ({
           </If>
         </button>
       ))}
-    </div>
-    <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-700/60 px-1">
-      <label className="flex items-center justify-between cursor-pointer">
-        <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 select-none">
-          Переносить элементы Header
-        </span>
-        <div className="relative">
-          <input
-            type="checkbox"
-            checked={moveHeader}
-            onChange={(e) => setMoveHeader(e.target.checked)}
-            className="sr-only peer"
-          />
-          <div className="w-8 h-4 bg-zinc-200 dark:bg-zinc-700 rounded-full peer peer-checked:bg-emerald-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4" />
-        </div>
-      </label>
     </div>
   </div>
 );

@@ -9,35 +9,54 @@ import {
 import { ChatModal } from "../ui/ChatModal";
 
 // ─── Глобальный доступ к чату ─────────────────────────────────────────────────
-// Провайдер хранит состояние «открыт/закрыт» и сам рендерит полноэкранное модальное
-// окно поверх всей системы. Любой компонент (например, кнопка в хедере) открывает
-// чат через useChat(), не завися от текущей страницы/роутинга.
+// Провайдер хранит состояние всплывающего чата («открыт/закрыт» и «компактное
+// окно/весь экран») и сам рендерит его поверх всей системы. Любой компонент
+// (кнопка в хедере, плавающая кнопка модуля) открывает чат через useChat(),
+// не завися от текущей страницы/роутинга. Полноценный раздел «Чат»
+// (AppRoutes.CHAT) работает независимо от этого состояния.
 
 type ChatContextValue = {
   isOpen: boolean;
+  /** Развёрнут ли всплывающий чат на весь экран. */
+  isExpanded: boolean;
   openChat: () => void;
   closeChat: () => void;
   toggleChat: () => void;
+  toggleExpand: () => void;
 };
 
 const ChatContext = createContext<ChatContextValue | null>(null);
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const openChat = useCallback(() => setIsOpen(true), []);
   const closeChat = useCallback(() => setIsOpen(false), []);
   const toggleChat = useCallback(() => setIsOpen((v) => !v), []);
+  const toggleExpand = useCallback(() => setIsExpanded((v) => !v), []);
 
   const value = useMemo(
-    () => ({ isOpen, openChat, closeChat, toggleChat }),
-    [isOpen, openChat, closeChat, toggleChat],
+    () => ({
+      isOpen,
+      isExpanded,
+      openChat,
+      closeChat,
+      toggleChat,
+      toggleExpand,
+    }),
+    [isOpen, isExpanded, openChat, closeChat, toggleChat, toggleExpand],
   );
 
   return (
     <ChatContext.Provider value={value}>
       {children}
-      <ChatModal open={isOpen} onClose={closeChat} />
+      <ChatModal
+        open={isOpen}
+        onClose={closeChat}
+        isExpanded={isExpanded}
+        onToggleExpand={toggleExpand}
+      />
     </ChatContext.Provider>
   );
 };

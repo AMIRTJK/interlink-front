@@ -10,6 +10,7 @@ import CrmIcon from "../../../../assets/icons/crm-icon.svg";
 import {
 	FileTextOutlined,
 	GlobalOutlined,
+	MessageOutlined,
 	SafetyCertificateOutlined,
 } from "@ant-design/icons";
 
@@ -126,6 +127,16 @@ export const getModuleItems = (
 		icon:
 			variant === "horizontal" || variant === "full" || variant === "ios" ? (
 				<img src={ApplicationsIcon} alt="tasks" />
+			) : null,
+	},
+	// Чат — полноценный раздел системы; быстрый доступ поверх любого модуля
+	// даёт плавающая кнопка (ChatFloatingButton), она навигацию не меняет.
+	{
+		key: AppRoutes.CHAT,
+		label: "Чат",
+		icon:
+			variant === "horizontal" || variant === "full" || variant === "ios" ? (
+				<MessageOutlined />
 			) : null,
 	},
 	// Administration module (подмодули «Пользователи» и «Роли и доступы»

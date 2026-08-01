@@ -6,7 +6,6 @@ import {
   Moon,
   Palette,
   Layers,
-  MessageSquare,
   PanelTop,
   PanelLeft,
   PanelBottom,
@@ -24,7 +23,6 @@ interface IHeaderActionButtonsProps {
   notifOpen: boolean;
   setNotifOpen: (open: boolean) => void;
   unreadCount: number;
-  openChat: () => void;
   setIsDesktopActive: (active: boolean) => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
@@ -34,8 +32,6 @@ interface IHeaderActionButtonsProps {
   setCurrentBg?: (bg: string) => void;
   layoutMode: LayoutMode;
   setLayoutMode?: (layout: LayoutMode) => void;
-  moveHeader: boolean;
-  setMoveHeader: (move: boolean) => void;
   setShowLogoutConfirm: (show: boolean) => void;
 }
 
@@ -43,7 +39,6 @@ export const HeaderActionButtons = ({
   notifOpen,
   setNotifOpen,
   unreadCount,
-  openChat,
   setIsDesktopActive,
   isDarkMode,
   toggleTheme,
@@ -53,8 +48,6 @@ export const HeaderActionButtons = ({
   setCurrentBg,
   layoutMode,
   setLayoutMode,
-  moveHeader,
-  setMoveHeader,
   setShowLogoutConfirm,
 }: IHeaderActionButtonsProps) => {
   return (
@@ -88,16 +81,6 @@ export const HeaderActionButtons = ({
           </Tooltip>
         </Popover>
 
-        <Tooltip title="Чат" placement="bottom">
-          <button
-            onClick={openChat}
-            aria-label="Открыть чат"
-            className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            <MessageSquare size={18} strokeWidth={2.2} />
-          </button>
-        </Tooltip>
-
         <Tooltip title="Рабочий стол" placement="bottom">
           <button
             onClick={() => setIsDesktopActive(true)}
@@ -127,7 +110,7 @@ export const HeaderActionButtons = ({
       </div>
 
       <div
-        className="w-px! h-6! bg-white/30 dark:bg-zinc-700/40 mx-1"
+        className="w-px! h-6! bg-zinc-900/10 dark:bg-zinc-700/40 mx-1"
         aria-hidden="true"
       />
 
@@ -189,8 +172,6 @@ export const HeaderActionButtons = ({
           <HeaderLayoutPopover
             layoutMode={layoutMode}
             setLayoutMode={setLayoutMode}
-            moveHeader={moveHeader}
-            setMoveHeader={setMoveHeader}
           />
         }
         trigger="click"

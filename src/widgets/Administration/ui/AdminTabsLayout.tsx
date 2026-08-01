@@ -20,12 +20,9 @@ export function AdminTabsLayout() {
 
   return (
     <div
+      className="-mx-6 -mt-4 -mb-4 w-[calc(100%+3rem)] flex-1 flex flex-col min-h-0"
       style={{
         fontFamily: T.font,
-        background: T.bg,
-        minHeight: "calc(100vh - 140px)",
-        display: "flex",
-        flexDirection: "column",
       }}
     >
       {/* Tab bar */}
@@ -70,7 +67,7 @@ export function AdminTabsLayout() {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, paddingTop: 24, display: "flex", flexDirection: "column" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
         <Outlet />
       </div>
     </div>

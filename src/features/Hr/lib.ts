@@ -108,33 +108,38 @@ const normalizeOcrGender = (raw?: string | null): string | undefined => {
 
 /**
  * Подставляет распознанные OCR-поля паспорта в значения формы сотрудника.
- * Значение применяется, только если OCR вернул непустое значение И поле формы ещё пустое —
- * так автозаполнение не затирает то, что пользователь уже ввёл вручную.
- * Пока OCR отключён на сервере (fields === null), функция просто возвращает исходные значения,
- * и форма продолжает работать в обычном режиме ручного ввода.
+ * При overwrite = true (по умолчанию) перезаписывает поля распознанными данными из скана.
  */
 export const applyPassportOcr = (
   values: Record<string, any>,
-  fields?: IPassportOcrFields | null
+  fields?: IPassportOcrFields | null,
+  overwrite: boolean = true
 ): Record<string, any> => {
   if (!fields) return values;
   const next = { ...values };
 
-  const setIfEmpty = (key: string, incoming?: string) => {
-    if (incoming == null || incoming === "") return;
+  const setField = (key: string, incoming?: string) => {
+    if (incoming == null || incoming === "") {
+      if (overwrite) {
+        next[key] = "";
+      }
+      return;
+    }
     const current = next[key];
-    if (current == null || current === "") next[key] = incoming;
+    if (overwrite || current == null || current === "") {
+      next[key] = incoming;
+    }
   };
 
-  setIfEmpty("last_name", fields.last_name ?? undefined);
-  setIfEmpty("first_name", fields.first_name ?? undefined);
-  setIfEmpty("middle_name", fields.middle_name ?? undefined);
-  setIfEmpty("passport_series", fields.passport_series ?? undefined);
-  setIfEmpty("passport_number", fields.passport_number ?? undefined);
-  setIfEmpty("inn", fields.inn ?? undefined);
-  setIfEmpty("address", fields.address ?? undefined);
-  setIfEmpty("birth_date", normalizeOcrDate(fields.birth_date));
-  setIfEmpty("gender", normalizeOcrGender(fields.gender));
+  setField("last_name", fields.last_name ?? undefined);
+  setField("first_name", fields.first_name ?? undefined);
+  setField("middle_name", fields.middle_name ?? undefined);
+  setField("passport_series", fields.passport_series ?? undefined);
+  setField("passport_number", fields.passport_number ?? undefined);
+  setField("inn", fields.inn ?? undefined);
+  setField("address", fields.address ?? undefined);
+  setField("birth_date", normalizeOcrDate(fields.birth_date));
+  setField("gender", normalizeOcrGender(fields.gender));
 
   return next;
 };

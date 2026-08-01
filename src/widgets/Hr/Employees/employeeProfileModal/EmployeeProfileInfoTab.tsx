@@ -137,7 +137,7 @@ export function EmployeeProfileInfoTab({
         />
         <Field
           icon={<Wallet size={15} />}
-          label="Заработная плата"
+          label="Оклад"
           value={money(e.salary)}
           accent
         />

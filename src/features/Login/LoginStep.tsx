@@ -3,7 +3,6 @@ import { ArrowRight } from "lucide-react";
 import { PhoneField } from "./PhoneField";
 import { PasswordField } from "./PasswordField";
 import { LoginOptionsRow } from "./LoginOptionsRow";
-import { LoginAltActions } from "./LoginAltActions";
 
 interface IProps {
 	prefix: string;
@@ -63,7 +62,5 @@ export const LoginStep = ({
 				)}
 			</div>
 		</button>
-
-		<LoginAltActions />
 	</form>
 );

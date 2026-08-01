@@ -22,7 +22,7 @@ import { If } from "@shared/ui";
 import { LogoutConfirmModal } from "./LogoutConfirmModal";
 import { DesktopMode } from "../../../features/Profile/ui/DesktopMode";
 import { LayoutMode } from "./designSettings";
-import { useLayoutMode, useMoveHeader } from "./useLayoutMode";
+import { useLayoutMode } from "./useLayoutMode";
 import { useDesignSettings } from "./useDesignSettings";
 import { useProfileUser } from "./useProfileUser";
 import { ThemeContent, BgContent, LayoutContent } from "./designPopovers";
@@ -35,7 +35,6 @@ export const SidebarSystemButtons = ({ collapsed }: IProps) => {
   const { userData } = useProfileUser();
   const { currentTheme, setCurrentTheme, currentBg, setCurrentBg } = useDesignSettings();
   const [layoutMode, setLayoutMode] = useLayoutMode();
-  const [moveHeader, setMoveHeader] = useMoveHeader();
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => tokenControl.getDarkMode());
   const handleLogout = useLogout();
   const { openChat } = useChat();
@@ -166,8 +165,6 @@ export const SidebarSystemButtons = ({ collapsed }: IProps) => {
             <LayoutContent
               layoutMode={layoutMode}
               setLayoutMode={setLayoutMode}
-              moveHeader={moveHeader}
-              setMoveHeader={setMoveHeader}
               layoutModes={layoutModes}
             />
           }

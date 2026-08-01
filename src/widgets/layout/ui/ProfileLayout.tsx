@@ -2,8 +2,9 @@ import { Outlet } from "react-router-dom";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { BottomNav } from "./BottomNav";
+import { ChatFloatingButton } from "./ChatFloatingButton";
 import { THEMES, BACKGROUNDS } from "./designSettings";
-import { useLayoutMode, useMoveHeader } from "./useLayoutMode";
+import { useLayoutMode } from "./useLayoutMode";
 import { useDesignSettings } from "./useDesignSettings";
 import { If } from "@shared/ui";
 
@@ -12,8 +13,7 @@ export const ProfileLayout = () => {
     useDesignSettings();
 
   const [layoutMode, setLayoutMode] = useLayoutMode();
-  const [moveHeader] = useMoveHeader();
-  const hideHeader = moveHeader && layoutMode !== "top";
+  const hideHeader = layoutMode !== "top";
 
   const activeTheme = THEMES[currentTheme] || THEMES.emerald;
   const activeBg = BACKGROUNDS[currentBg] || BACKGROUNDS.arctic;
@@ -46,7 +46,7 @@ export const ProfileLayout = () => {
 
         <div
           className="flex-1 min-w-0 flex flex-col gap-6 transition-all duration-300 ease-in-out"
-          style={layoutMode === "bottom" ? { paddingBottom: moveHeader ? 76 : 56 } : undefined}
+          style={layoutMode === "bottom" ? { paddingBottom: 76 } : undefined}
         >
           <If is={!hideHeader}>
             <Header
@@ -73,6 +73,8 @@ export const ProfileLayout = () => {
       </div>
 
       {layoutMode === "bottom" && <BottomNav />}
+
+      <ChatFloatingButton layoutMode={layoutMode} />
     </div>
   );
 };
