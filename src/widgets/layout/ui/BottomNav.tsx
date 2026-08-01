@@ -123,7 +123,7 @@ export const BottomNav = () => {
             </button>
           </Tooltip>
         </div>
-        <div className="w-px! h-6! bg-white/30 dark:bg-zinc-700/40 mx-1" aria-hidden="true" />
+        <div className="w-px! h-6! bg-zinc-900/10 dark:bg-zinc-700/40 mx-1" aria-hidden="true" />
         <Popover
           content={<ThemeContent currentTheme={currentTheme} setCurrentTheme={setCurrentTheme} />}
           trigger="click"

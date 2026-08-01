@@ -20,7 +20,6 @@ export const Header = ({
 }: IProps) => {
   const {
     handleLogout,
-    openChat,
     showLogoutConfirm,
     setShowLogoutConfirm,
     isDesktopActive,
@@ -72,7 +71,6 @@ export const Header = ({
         notifOpen={notifOpen}
         setNotifOpen={setNotifOpen}
         unreadCount={unreadCount}
-        openChat={openChat}
         setIsDesktopActive={setIsDesktopActive}
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}

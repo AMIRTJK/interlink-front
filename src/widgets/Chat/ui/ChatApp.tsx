@@ -602,30 +602,35 @@ export const ChatApp: React.FC<IProps> = ({
     </main>
   );
 
+  // Рамка и внутренняя светлая подсветка нужны, только когда чат — окно с полями.
+  // Край в край они превращаются в светлую полосу по периметру экрана.
+  const cardBorder = isDark
+    ? "1px solid rgba(167,139,250,0.2)"
+    : "1px solid rgba(167,139,250,0.18)";
+  const cardShadow = isDark
+    ? "0 30px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)"
+    : "0 30px 80px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.9)";
+
   return (
     <div
       className={`w-full flex items-center justify-end font-sans relative overflow-hidden ${
-        isPage ? "h-full" : "h-screen"
+        isPage ? "flex-1 min-h-0" : "h-screen"
       } ${isFullBleed ? "" : "py-4 pl-4"}`}
       onClick={(e) => {
         if (e.target === e.currentTarget) onRequestClose?.();
       }}
     >
       <div
-        className={`w-full h-full flex flex-col overflow-hidden shadow-2xl relative transition-all duration-300 ease-in-out ${
+        className={`w-full h-full flex flex-col overflow-hidden relative transition-all duration-300 ease-in-out ${
           isFullBleed
             ? "max-w-none max-h-none rounded-none"
-            : "max-w-7xl max-h-[900px] rounded-l-2xl"
+            : "max-w-7xl max-h-[900px] rounded-l-2xl shadow-2xl"
         }`}
         style={{
           background: isDark ? "rgba(10,4,30,0.55)" : "rgba(255,255,255,0.72)",
           backdropFilter: "blur(30px)",
-          border: isDark
-            ? "1px solid rgba(167,139,250,0.2)"
-            : "1px solid rgba(167,139,250,0.18)",
-          boxShadow: isDark
-            ? "0 30px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)"
-            : "0 30px 80px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
+          border: isFullBleed ? "none" : cardBorder,
+          boxShadow: isFullBleed ? "none" : cardShadow,
         }}
       >
         {/* Top Header Bar */}

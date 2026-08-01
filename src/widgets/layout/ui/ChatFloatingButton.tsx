@@ -13,7 +13,7 @@ import {
 } from "./useSidebarCollapsed";
 
 // ─── Плавающая кнопка быстрого доступа к чату ─────────────────────────────────
-// Показывается в левом нижнем углу рабочей области во всех модулях, кроме самого
+// Показывается в правом нижнем углу рабочей области во всех модулях, кроме самого
 // раздела «Чат»: открывает чат всплывающим окном поверх текущего экрана, не меняя
 // маршрут и активный пункт навигации. Положение считается от раскладки страницы,
 // чтобы кнопка не перекрывала боковое и нижнее меню.
@@ -44,14 +44,14 @@ export const ChatFloatingButton = ({ layoutMode }: IProps) => {
 
   const gradient = THEMES[currentTheme]?.gradient || THEMES.emerald.gradient;
   const sidebarWidth = collapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH;
-  const left =
-    layoutMode === "left"
+  const right =
+    layoutMode === "right"
       ? PAGE_PADDING + sidebarWidth + LAYOUT_GAP
       : PAGE_PADDING;
   const bottom = layoutMode === "bottom" ? BOTTOM_NAV_OFFSET : PAGE_PADDING;
 
   return (
-    <Tooltip title="Открыть чат" placement="right">
+    <Tooltip title="Открыть чат" placement="left">
       <motion.button
         type="button"
         onClick={openChat}
@@ -61,7 +61,7 @@ export const ChatFloatingButton = ({ layoutMode }: IProps) => {
         transition={{ duration: 0.2, ease: "easeOut" }}
         whileHover={{ scale: 1.06 }}
         whileTap={{ scale: 0.95 }}
-        style={{ left, bottom }}
+        style={{ right, bottom }}
         className={`fixed z-[80] w-14 h-14 rounded-[2.5rem] bg-linear-to-br ${gradient} text-white shadow-xl border border-white/30 dark:border-zinc-700/40 flex items-center justify-center cursor-pointer focus:outline-none transition-shadow duration-300 hover:shadow-2xl`}
       >
         <MessageSquare size={22} strokeWidth={2.2} />

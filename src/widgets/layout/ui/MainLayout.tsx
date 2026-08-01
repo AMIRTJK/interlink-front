@@ -1,4 +1,5 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import { AppRoutes } from "@shared/config";
 import { ModuleMenu } from "./ModuleMenu";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
@@ -13,6 +14,7 @@ import { THEMES, BACKGROUNDS } from "./designSettings";
 import { If } from "@shared/ui";
 
 export const MainLayout = () => {
+  const { pathname } = useLocation();
   const { shouldHideUI } = useCorrespondenceRoute();
   const { variant } = useNavbar();
   const { tabMode } = useTabs();
@@ -49,6 +51,17 @@ export const MainLayout = () => {
   const showSidebarLeft = effectiveLayout === "left";
   const showSidebarRight = effectiveLayout === "right";
   const showBottomNav = effectiveLayout === "bottom";
+
+  // Раздел «Чат» — полноэкранный: навигация остаётся на месте, а сам чат
+  // разворачивается край в край, гася отступы рабочей области. Отступ под нижним
+  // меню не гасим, иначе чат уйдёт под него.
+  const isChatModule =
+    pathname === AppRoutes.CHAT || pathname.startsWith(`${AppRoutes.CHAT}/`);
+  const chatShellClass = isChatModule
+    ? `-mx-6 w-[calc(100%+48px)] ${hideHeader ? "-mt-4" : "-mt-6"} ${
+        showBottomNav ? "" : "-mb-4"
+      }`
+    : "";
 
   return (
     <div
@@ -89,7 +102,7 @@ export const MainLayout = () => {
           <main
             className={`flex-grow min-w-0 flex flex-col ${
               variant === "ios" || tabMode === "on" ? "pb-30" : ""
-            }`}
+            } ${chatShellClass}`}
           >
             <Outlet />
           </main>
