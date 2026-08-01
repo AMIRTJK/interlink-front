@@ -50,7 +50,7 @@ export const LoginStep = ({
 		<button
 			type="submit"
 			disabled={isLoggingIn}
-			className="w-full cursor-pointer relative group h-12 mt-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+			className="w-full cursor-pointer relative group h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
 		>
 			<div className="flex items-center justify-center gap-2">
 				{isLoggingIn ? (
