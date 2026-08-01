@@ -20,6 +20,7 @@ export function RoleDrawerHeader({ role, onClose }: IProps) {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
+        flexShrink: 0,
       }}
     >
       <div>

@@ -56,10 +56,11 @@ export function RolesView() {
     <div
       style={{
         display: "flex",
-        alignItems: "flex-start",
+        alignItems: "stretch",
         gap: 0,
         flex: 1,
-        height: "100%",
+        height: "calc(100vh - 135px)",
+        maxHeight: "calc(100vh - 135px)",
         minHeight: 0,
         overflow: "hidden",
       }}
@@ -68,9 +69,11 @@ export function RolesView() {
         style={{
           flex: 1,
           minWidth: 0,
-          padding: "20px 24px 24px",
+          padding: "20px 24px 20px",
           height: "100%",
-          overflowY: "auto",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <RolesTopBar
@@ -132,11 +135,11 @@ export function RolesView() {
       {profileUser ? (
         <div
           style={{
-            position: "sticky",
-            top: 0,
-            alignSelf: "flex-start",
             height: "100%",
+            maxHeight: "100%",
             flexShrink: 0,
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           <UserDrawer
@@ -153,11 +156,11 @@ export function RolesView() {
         selectedCard && (
           <div
             style={{
-              position: "sticky",
-              top: 0,
-              alignSelf: "flex-start",
               height: "100%",
+              maxHeight: "100%",
               flexShrink: 0,
+              display: "flex",
+              flexDirection: "column",
             }}
           >
             <RoleDrawer

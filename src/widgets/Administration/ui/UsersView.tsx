@@ -49,7 +49,8 @@ export function UsersView() {
     <div
       style={{
         flex: 1,
-        height: "100%",
+        height: "calc(100vh - 135px)",
+        maxHeight: "calc(100vh - 135px)",
         minHeight: 0,
         padding: "20px 24px 24px",
         display: "flex",

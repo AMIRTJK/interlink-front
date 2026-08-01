@@ -59,9 +59,9 @@ export function AdministrationHomeWidget() {
     <div
       style={{
         fontFamily: T.font,
-        background: T.bg,
         flex: 1,
-        height: "100%",
+        height: "calc(100vh - 135px)",
+        maxHeight: "calc(100vh - 135px)",
         minHeight: 0,
         padding: "24px",
         overflowY: "auto",

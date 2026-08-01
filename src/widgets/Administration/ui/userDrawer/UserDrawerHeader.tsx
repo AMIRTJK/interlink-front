@@ -21,6 +21,7 @@ export function UserDrawerHeader({ user, resolvedRoles, onClose }: IProps) {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
+        flexShrink: 0,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>

@@ -1,6 +1,6 @@
 import type { PermModule } from "../../model";
 
-export const PER_PAGE = 10;
+export const PER_PAGE = 7;
 
 export function countTotalPerms(perms: PermModule[]): number {
   let count = 0;
