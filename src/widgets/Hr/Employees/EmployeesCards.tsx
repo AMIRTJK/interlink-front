@@ -1,5 +1,5 @@
-import { Pencil, Trash2, Copy, Mail, Phone, Wallet, Building2 } from "lucide-react";
-import { IEmployee, money } from "./model";
+import { Pencil, Trash2, Copy, Mail, Phone, Building2 } from "lucide-react";
+import { IEmployee } from "./model";
 import { Avatar, StatusChip } from "./parts";
 
 interface IProps {
@@ -38,9 +38,6 @@ export const EmployeesCards = ({ items, onEdit, onDelete, onDuplicate, onCardCli
             </p>
             <p className="flex items-center gap-2">
               <Phone size={14} className="text-slate-400" /> {e.phone || "—"}
-            </p>
-            <p className="flex items-center gap-2 font-semibold text-slate-800">
-              <Wallet size={14} className="text-slate-400" /> {money(e.salary)}
             </p>
           </div>
           <div
