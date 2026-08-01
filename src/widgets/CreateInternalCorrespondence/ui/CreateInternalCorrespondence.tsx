@@ -57,7 +57,6 @@ import {
 } from "../lib/constants";
 import {
   cn,
-  sanitizeWordHtml,
   formatFileSize,
   mapServerAttachment,
   downloadAttachment,
@@ -80,7 +79,6 @@ import { EditorRuler } from "./createInternalCorrespondence/EditorRuler";
 import { PageGrid } from "./createInternalCorrespondence/PageGrid";
 import {
   EDITOR_ATOMIC_TAGS,
-  EDITOR_BLOCK_TAGS,
   PAGE_SPLITTABLE_TAGS,
   isPageBreakNode,
   isSpacerNode,
@@ -105,12 +103,13 @@ import { mergeAcrossBoundary } from "./createInternalCorrespondence/editorMerge"
 import {
   charPosAt,
   cleanEditorArtifacts,
-  getCaretCharOffset,
-  htmlToPlainText,
-  removeSpacerSafely,
-  restoreCaretCharOffset,
   wrapBareTopLevelNodes,
 } from "./createInternalCorrespondence/editorCaret";
+import { paginateEditorDom } from "./createInternalCorrespondence/paginateEditorDom";
+import { nextSplitGroupId } from "./createInternalCorrespondence/editorSplitGroup";
+import { buildFragmentFromHtml } from "./createInternalCorrespondence/editorFragments";
+import { useEditorCommands } from "./createInternalCorrespondence/useEditorCommands";
+import { useEditorClipboard } from "./createInternalCorrespondence/useEditorClipboard";
 import {
   FWD_ATTR,
   buildForwardQuoteNodes,
@@ -164,10 +163,6 @@ import { RelatedDocsAccordion } from "./RelatedDocsBlock";
 import { OriginalLetterCanvas } from "./OriginalLetterCanvas";
 import {
   paginateHtml,
-  truncateToChars,
-  dropChars,
-  brAtCharBoundary,
-  removeLeadingBr,
   type StampInfo,
 } from "../../InternalCorrespondenceIncomingView/lib";
 import { ApproversPanel } from "./ApproversPanel";
@@ -177,8 +172,6 @@ import { VersionsPanel } from "./VersionsPanel";
 import { NavigationPane } from "./NavigationPane";
 import { AttachmentsPanel } from "./AttachmentsPanel";
 
-
-let splitGroupSeq = 0;
 
 export const CreateInternalCorrespondence = ({
   id,
@@ -1630,518 +1623,18 @@ export const CreateInternalCorrespondence = ({
     return cleanEditorArtifacts(el.innerHTML) || "<p></p>";
   }, []);
 
-  // Постраничная разбивка редактора. Абзац, не влезающий до конца страницы,
-  // делится: влезающие строки остаются, хвост уезжает за распорку на следующий
-  // лист (с сохранением разметки; части склеиваются при сохранении). Списки
-  // делятся по пунктам, таблицы — по строкам, атомарные блоки переносятся
-  // целиком. Курсор сохраняется структурно + сверяется по смещению в символах.
+  // Постраничная разбивка редактора: сама раскладка живёт в paginateEditorDom,
+  // здесь остаётся геометрия листа и запоминание высоты для страховки на
+  // ResizeObserver.
   const paginateEditor = useCallback(() => {
     const editor = editorRef.current;
     if (!editor) return 1;
-
-    // --- Функция структурного сохранения курсора ---
-    const saveCaretStructure = () => {
-      const sel = window.getSelection();
-      if (!sel || sel.rangeCount === 0 || !editor.contains(sel.anchorNode))
-        return null;
-
-      const range = sel.getRangeAt(0);
-      const node = range.startContainer;
-      const offset = range.startOffset;
-
-      if (node === editor) {
-        return { blockIndex: 0, path: [], offset: 0 };
-      }
-
-      // Находим родительский блок верхнего уровня (прямой потомок editor)
-      let topBlock = node;
-      while (topBlock && topBlock.parentNode !== editor) {
-        topBlock = topBlock.parentNode!;
-      }
-      if (!topBlock) return null;
-      // «Голый» текстовый узел верхнего уровня (например, сразу после вставки
-      // plain-text): структурный путь не работает — editor.children содержит
-      // только элементы, и индекс блока посчитался бы неверно. Позицию
-      // восстановит символьный fallback (getCaretCharOffset) ниже.
-      if (topBlock.nodeType !== Node.ELEMENT_NODE) return null;
-
-      // Считаем индекс этого блока среди всех детей, игнорируя распорки spacer
-      const children = Array.from(editor.children);
-      let blockIndex = 0;
-      for (const child of children) {
-        if (child === topBlock) break;
-        if (!child.hasAttribute(SPACER_ATTR)) {
-          blockIndex++;
-        }
-      }
-
-      // Запоминаем путь от topBlock до целевого узла (node)
-      const path: number[] = [];
-      let current = node;
-      while (current !== topBlock) {
-        const parent = current.parentNode;
-        if (!parent) break;
-        const index = Array.from(parent.childNodes).indexOf(
-          current as ChildNode,
-        );
-        path.unshift(index);
-        current = parent;
-      }
-
-      return { blockIndex, path, offset };
-    };
-
-    // --- Функция структурного восстановления курсора ---
-    const restoreCaretStructure = (snapshot: any) => {
-      if (!snapshot) return;
-
-      const children = Array.from(editor.children);
-      let currentBlock: Element | null = null;
-      let nonSpacerCount = 0;
-
-      // Ищем блок по индексу, пропуская сервисные распорки spacers
-      for (const child of children) {
-        if (child.hasAttribute(SPACER_ATTR)) continue;
-        if (nonSpacerCount === snapshot.blockIndex) {
-          currentBlock = child;
-          break;
-        }
-        nonSpacerCount++;
-      }
-
-      if (!currentBlock) {
-        const validBlocks = children.filter(
-          (c) => !c.hasAttribute(SPACER_ATTR),
-        );
-        currentBlock = validBlocks[validBlocks.length - 1] || editor;
-      }
-
-      // Спускаемся по сохраненному пути дерева DOM к нужному узлу
-      let targetNode: Node = currentBlock;
-      for (const idx of snapshot.path) {
-        if (targetNode.childNodes[idx]) {
-          targetNode = targetNode.childNodes[idx];
-        } else {
-          targetNode = targetNode.lastChild || targetNode;
-          break;
-        }
-      }
-
-      try {
-        const range = document.createRange();
-        const maxOffset =
-          targetNode.nodeType === Node.TEXT_NODE
-            ? targetNode.textContent?.length || 0
-            : targetNode.childNodes.length;
-
-        range.setStart(targetNode, Math.min(snapshot.offset, maxOffset));
-        range.collapse(true);
-
-        const sel = window.getSelection();
-        sel?.removeAllRanges();
-        sel?.addRange(range);
-      } catch (e) {
-        console.error("Ошибка восстановления каретки:", e);
-      }
-    };
-
-    // Сохраняем положение курсора через структуру
-    const caretSnapshot = saveCaretStructure();
-    // Эталонный символьный снимок: пагинация переставляет/режет/клеит блоки,
-    // НЕ меняя сам текст, поэтому абсолютное смещение в символах инвариантно.
-    // Структурный снимок точнее в пустых блоках, но ломается, когда блоки
-    // сливаются/разрезаются (сдвигаются индексы) — тогда после структурного
-    // восстановления позиция сверяется по символам и чинится fallback'ом.
-    const caretChars = getCaretCharOffset(editor);
-    const restoreCaretHybrid = () => {
-      restoreCaretStructure(caretSnapshot);
-      if (caretChars) {
-        const after = getCaretCharOffset(editor);
-        if (!after || after.offset !== caretChars.offset) {
-          restoreCaretCharOffset(editor, caretChars);
-        }
-      }
-    };
-    let textMutated = false;
-
-    // 1. Убираем старые распорки и собираем ранее разрезанные блоки обратно
-    editor.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => {
-      if (removeSpacerSafely(n)) textMutated = true;
+    const pages = paginateEditorDom(editor, {
+      contentHeight: CONTENT_HEIGHT,
+      pageStride: PAGE_STRIDE,
     });
-
-    const groups = new Map<string, HTMLElement[]>();
-    editor
-      .querySelectorAll<HTMLElement>(`[${AUTOSPLIT_ATTR}]`)
-      .forEach((el) => {
-        const gid = el.getAttribute(AUTOSPLIT_ATTR) || "";
-        const arr = groups.get(gid) || [];
-        arr.push(el);
-        groups.set(gid, arr);
-      });
-    groups.forEach((pieces) => {
-      const first = pieces[0];
-      first.removeAttribute(AUTOSPLIT_ATTR);
-      for (let k = 1; k < pieces.length; k++) {
-        let child = pieces[k].firstChild;
-        while (child) {
-          first.appendChild(child);
-          child = pieces[k].firstChild;
-        }
-        pieces[k].remove();
-      }
-      first.normalize();
-      textMutated = true;
-    });
-
-    // Контент помещается на один лист и нет ручных разрывов
-    if (
-      editor.scrollHeight <= CONTENT_HEIGHT &&
-      !editor.querySelector(`[${PAGE_BREAK_ATTR}]`)
-    ) {
-      if (textMutated) restoreCaretHybrid();
-      lastPaginatedHeightRef.current = editor.scrollHeight;
-      return 1;
-    }
-
-    // 2. «Голый» текст и инлайн-узлы заворачиваем в блок <p>
-    let buf: Node[] = [];
-    const flushBuf = () => {
-      if (!buf.length) return;
-      const div = document.createElement("p");
-      buf[0].parentNode?.insertBefore(div, buf[0]);
-      buf.forEach((n) => div.appendChild(n));
-      buf = [];
-      textMutated = true;
-    };
-    Array.from(editor.childNodes).forEach((node) => {
-      const isBlock =
-        node.nodeType === Node.ELEMENT_NODE &&
-        EDITOR_BLOCK_TAGS.has((node as HTMLElement).tagName);
-      if (isBlock) flushBuf();
-      else buf.push(node);
-    });
-    flushBuf();
-
-    const makeSpacer = (h: number) => {
-      const s = document.createElement("div");
-      s.setAttribute(SPACER_ATTR, "1");
-      s.setAttribute("contenteditable", "false");
-      s.setAttribute("aria-hidden", "true");
-      s.style.height = `${Math.max(0, h)}px`;
-      s.style.width = "100%";
-      s.style.userSelect = "none";
-      s.style.pointerEvents = "none";
-      return s;
-    };
-
-    // Таблицы — атомарные блоки: их нельзя резать по символам, как абзац.
-    // Поэтому таблицу, не помещающуюся на лист, делим по СТРОКАМ: строки, что
-    // не влезают до конца страницы, переезжают в таблицу-продолжение (со всеми
-    // стилями исходной), между ними ставится распорка. Обе части помечаются
-    // AUTOSPLIT_ATTR — при сохранении cleanEditorArtifacts склеит их в одну
-    // таблицу. Без этого высокая таблица «перетекала» через границы листов.
-    const splitTableByRows = (
-      table: HTMLElement,
-      usableBottom: number,
-      page: number,
-      pageStart: number,
-    ): boolean => {
-      const rows = Array.from(table.querySelectorAll("tr")).filter(
-        (tr) => tr.closest("table") === table,
-      ) as HTMLElement[];
-      if (rows.length < 2) return false;
-
-      // offsetTop у <tr> в разных движках считается относительно <table>, а не
-      // редактора — полагаться на него нельзя. Меряем строки через rect и
-      // приводим к системе координат редактора (как у table.offsetTop).
-      const tableRectTop = table.getBoundingClientRect().top;
-      const tableOffsetTop = table.offsetTop;
-      const rowBottom = (tr: HTMLElement) => {
-        const r = tr.getBoundingClientRect();
-        return r.bottom - tableRectTop + tableOffsetTop;
-      };
-
-      const splitIdx = rows.findIndex((tr) => rowBottom(tr) > usableBottom + 1);
-      if (splitIdx === -1) return false;
-
-      // Даже первая строка не влезает в остаток листа — переносим таблицу
-      // целиком на следующую страницу (там доступна полная высота листа).
-      if (splitIdx === 0) {
-        if (table.offsetTop > pageStart + 2) {
-          editor.insertBefore(
-            makeSpacer((page + 1) * PAGE_STRIDE - table.offsetTop),
-            table,
-          );
-          return true;
-        }
-        return false; // одна строка выше целого листа — делить нечем
-      }
-
-      const gid = table.getAttribute(AUTOSPLIT_ATTR) || `g${++splitGroupSeq}`;
-      table.setAttribute(AUTOSPLIT_ATTR, gid);
-
-      const tail = document.createElement("table");
-      Array.from(table.attributes).forEach((a) =>
-        tail.setAttribute(a.name, a.value),
-      );
-      const tbody = document.createElement("tbody");
-      tail.appendChild(tbody);
-      for (let k = splitIdx; k < rows.length; k++) tbody.appendChild(rows[k]);
-
-      // Убираем опустевшие группы строк, чтобы они не копились при повторных
-      // слияниях/разрезаниях на каждой пагинации.
-      table.querySelectorAll("tbody, thead, tfoot").forEach((g) => {
-        if (g.closest("table") === table && !g.querySelector("tr")) g.remove();
-      });
-
-      editor.insertBefore(tail, table.nextSibling);
-      const blockBottom = table.offsetTop + table.offsetHeight;
-      editor.insertBefore(makeSpacer((page + 1) * PAGE_STRIDE - blockBottom), tail);
-      return true;
-    };
-
-    // Списки (UL/OL) делим по пунктам <li>, как таблицы по строкам: пункты, не
-    // влезшие до конца страницы, переезжают в список-продолжение с теми же
-    // атрибутами. Обе части — в одной AUTOSPLIT-группе, при сохранении
-    // склеиваются обратно в один список. Раньше высокий список резался
-    // посимвольно через textContent и терял всю структуру пунктов.
-    const splitListByItems = (
-      list: HTMLElement,
-      usableBottom: number,
-      page: number,
-      pageStart: number,
-    ): boolean => {
-      const items = Array.from(list.children).filter(
-        (n): n is HTMLElement => n.tagName === "LI",
-      );
-
-      const moveWholeToNextPage = (): boolean => {
-        if (list.offsetTop > pageStart + 2) {
-          editor.insertBefore(
-            makeSpacer((page + 1) * PAGE_STRIDE - list.offsetTop),
-            list,
-          );
-          return true;
-        }
-        return false;
-      };
-
-      if (items.length < 2) return moveWholeToNextPage();
-
-      // offsetTop у <li> считается относительно списка — меряем через rect и
-      // приводим к системе координат редактора (как у list.offsetTop).
-      const listRectTop = list.getBoundingClientRect().top;
-      const listOffsetTop = list.offsetTop;
-      const itemBottom = (li: HTMLElement) =>
-        li.getBoundingClientRect().bottom - listRectTop + listOffsetTop;
-
-      const splitIdx = items.findIndex(
-        (li) => itemBottom(li) > usableBottom + 1,
-      );
-      if (splitIdx === -1) return false;
-      // Даже первый пункт не влезает в остаток листа — переносим целиком.
-      if (splitIdx === 0) return moveWholeToNextPage();
-
-      const gid = list.getAttribute(AUTOSPLIT_ATTR) || `g${++splitGroupSeq}`;
-      list.setAttribute(AUTOSPLIT_ATTR, gid);
-
-      const tail = list.cloneNode(false) as HTMLElement;
-      // Нумерация продолжения OL продолжает исходную, а не начинается с 1.
-      if (list.tagName === "OL") {
-        const startBase = parseInt(list.getAttribute("start") || "1", 10);
-        tail.setAttribute("start", String(startBase + splitIdx));
-      }
-      for (let k = splitIdx; k < items.length; k++) tail.appendChild(items[k]);
-
-      editor.insertBefore(tail, list.nextSibling);
-      const blockBottom = list.offsetTop + list.offsetHeight;
-      editor.insertBefore(
-        makeSpacer((page + 1) * PAGE_STRIDE - blockBottom),
-        tail,
-      );
-      return true;
-    };
-
-    // Деление абзаца по вертикальному бюджету (остатку места на текущей
-    // странице) с СОХРАНЕНИЕМ разметки: голова остаётся на месте, хвост уезжает
-    // за распорку на следующий лист. Обе части — в одной AUTOSPLIT-группе и при
-    // сохранении склеиваются обратно. Так текст перетекает между страницами
-    // построчно, как в Word, без больших пустых областей внизу листа. Возвращает
-    // false, если в бюджет не влезает ни одной строки.
-    const splitBlockToBudget = (
-      block: HTMLElement,
-      budgetPx: number,
-      page: number,
-    ): boolean => {
-      const total = (block.textContent || "").length;
-      if (total < 2 || budgetPx <= 0) return false;
-
-      const template = block.cloneNode(true) as HTMLElement;
-      const originalHtml = block.innerHTML;
-
-      const headHtmlFor = (k: number): string => {
-        const probe = template.cloneNode(true) as HTMLElement;
-        truncateToChars(probe, { left: k });
-        return probe.innerHTML;
-      };
-
-      // Бинарный поиск числа символов, влезающих в остаток страницы. Меряем на
-      // живом блоке (та же ширина/шрифт/позиция), подменяя содержимое.
-      let lo = 1;
-      let hi = total - 1;
-      let best = 0;
-      while (lo <= hi) {
-        const mid = (lo + hi) >> 1;
-        block.innerHTML = headHtmlFor(mid);
-        if (block.offsetHeight <= budgetPx) {
-          best = mid;
-          lo = mid + 1;
-        } else {
-          hi = mid - 1;
-        }
-      }
-
-      if (best < 1) {
-        block.innerHTML = originalHtml;
-        return false;
-      }
-
-      const tail = template.cloneNode(true) as HTMLElement;
-      dropChars(tail, { left: best });
-      // <br> ровно на границе разреза принадлежит голове (там он невидим);
-      // в хвосте он дал бы лишнюю пустую строку в начале страницы.
-      if (brAtCharBoundary(template, best)) removeLeadingBr(tail);
-      if (!(tail.textContent || "").trim() && !tail.querySelector("br,img")) {
-        // Хвост пуст — деление не имеет смысла.
-        block.innerHTML = originalHtml;
-        return false;
-      }
-
-      block.innerHTML = headHtmlFor(best);
-
-      const gid = block.getAttribute(AUTOSPLIT_ATTR) || `g${++splitGroupSeq}`;
-      block.setAttribute(AUTOSPLIT_ATTR, gid);
-      tail.setAttribute(AUTOSPLIT_ATTR, gid);
-
-      editor.insertBefore(tail, block.nextSibling);
-      const blockBottom = block.offsetTop + block.offsetHeight;
-      editor.insertBefore(
-        makeSpacer((page + 1) * PAGE_STRIDE - blockBottom),
-        tail,
-      );
-      return true;
-    };
-
-    // 3. Раскладка по страницам
-    let i = 0;
-    let guard = 0;
-    while (i < editor.children.length && guard < 8000) {
-      guard++;
-      const block = editor.children[i] as HTMLElement;
-      if (block.hasAttribute(SPACER_ATTR)) {
-        i++;
-        continue;
-      }
-      if (block.hasAttribute(PAGE_BREAK_ATTR)) {
-        const top = block.offsetTop;
-        const page = Math.floor(top / PAGE_STRIDE);
-        editor.insertBefore(
-          makeSpacer((page + 1) * PAGE_STRIDE - top),
-          block.nextSibling,
-        );
-        i += 2;
-        continue;
-      }
-      if (
-        block.hasAttribute("data-signature-stamp") ||
-        getComputedStyle(block).position === "absolute"
-      ) {
-        i++;
-        continue;
-      }
-      const top = block.offsetTop;
-      const h = block.offsetHeight;
-      const page = Math.floor(top / PAGE_STRIDE);
-      const pageStart = page * PAGE_STRIDE;
-      const usableBottom = pageStart + CONTENT_HEIGHT;
-      const overflows = top >= usableBottom || top + h > usableBottom;
-
-      if (!overflows) {
-        i++;
-        continue;
-      }
-
-      const tag = block.tagName;
-
-      // Таблицы паджинируем по строкам (атомарны для посимвольного деления).
-      if (tag === "TABLE") {
-        // Влезает в лист целиком, но не до конца текущей страницы — переносим.
-        if (h <= CONTENT_HEIGHT && top > pageStart + 2) {
-          editor.insertBefore(
-            makeSpacer((page + 1) * PAGE_STRIDE - top),
-            block,
-          );
-          i++;
-          continue;
-        }
-        // Выше печатной области листа — режем по строкам.
-        if (splitTableByRows(block, usableBottom, page, pageStart)) {
-          textMutated = true;
-        }
-        i++;
-        continue;
-      }
-
-      // Списки делим по пунктам: часть остаётся, хвост уезжает на новый лист.
-      if (tag === "UL" || tag === "OL") {
-        if (splitListByItems(block, usableBottom, page, pageStart)) {
-          textMutated = true;
-        }
-        i++;
-        continue;
-      }
-
-      // Блок начинается уже за печатной областью (в зазоре между листами) —
-      // сдвигаем его на начало следующей страницы.
-      if (top >= usableBottom) {
-        editor.insertBefore(makeSpacer((page + 1) * PAGE_STRIDE - top), block);
-        i++;
-        continue;
-      }
-
-      const splittable =
-        PAGE_SPLITTABLE_TAGS.has(tag) &&
-        !EDITOR_ATOMIC_TAGS.has(tag) &&
-        (block.textContent || "").trim().length > 0;
-
-      // Пробуем отрезать влезающую часть блока в остаток текущей страницы:
-      // абзац перетекает на следующий лист построчно, как в Word. Раньше блок
-      // выше страницы целиком уезжал на следующий лист, оставляя предыдущую
-      // страницу почти пустой (например, после смены размера шрифта).
-      if (splittable && splitBlockToBudget(block, usableBottom - top, page)) {
-        textMutated = true;
-        i++;
-        continue;
-      }
-
-      // Не делится (атомарный, пустой, или в остаток не влезает ни строки) —
-      // переносим целиком на следующую страницу.
-      if (top > pageStart + 2) {
-        editor.insertBefore(makeSpacer((page + 1) * PAGE_STRIDE - top), block);
-        i++;
-        continue;
-      }
-
-      i++;
-    }
-
-    // Восстанавливаем позицию курсора: структурно + сверка по символам
-    if (textMutated || caretSnapshot || caretChars) {
-      restoreCaretHybrid();
-    }
-
     lastPaginatedHeightRef.current = editor.scrollHeight;
-    return Math.max(1, Math.ceil(editor.scrollHeight / PAGE_STRIDE));
+    return pages;
   }, [CONTENT_HEIGHT, PAGE_STRIDE]);
   paginateEditorRef.current = paginateEditor;
 
@@ -2431,7 +1924,7 @@ export const CreateInternalCorrespondence = ({
 
                 // Разводим группы: старый id — по курсорный блок включительно,
                 // новый id — клон next и все нижележащие куски прежней группы.
-                const newGid = `g${++splitGroupSeq}`;
+                const newGid = nextSplitGroupId();
                 next.setAttribute(AUTOSPLIT_ATTR, newGid);
                 for (let j = k + 1; j < pieces.length; j++) {
                   pieces[j].setAttribute(AUTOSPLIT_ATTR, newGid);
@@ -2692,166 +2185,14 @@ export const CreateInternalCorrespondence = ({
     [syncEditorAfterDomEdit, commitHistoryNow, undoEdit, redoEdit, execCmd],
   );
 
-  // Ручной разрыв страницы: текст после курсора начинается с нового листа.
-  // Сам маркер невидим (нулевая высота), break-after — для печати/экспорта.
-  const insertPageBreak = useCallback(() => {
-    const editor = editorRef.current;
-    // contentEditable=false означает режим «только чтение» (подписано/старая версия)
-    if (!editor || !editor.isContentEditable) return;
-    // Набор до разрыва — отдельный шаг истории; сам разрыв зафиксирует
-    // syncEditorAfterDomEdit в конце.
-    commitHistoryNow();
-    editor.focus();
-
-    const breakEl = document.createElement("div");
-    breakEl.setAttribute(PAGE_BREAK_ATTR, "1");
-    breakEl.setAttribute("contenteditable", "false");
-    breakEl.setAttribute("aria-hidden", "true");
-    breakEl.style.cssText =
-      "height:0;line-height:0;font-size:0;break-after:page;page-break-after:always;user-select:none;-webkit-user-select:none;pointer-events:none;";
-
-    const sel = window.getSelection();
-    const range =
-      sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)
-        ? sel.getRangeAt(0)
-        : null;
-    const block = range ? topLevelBlockOf(editor, range.startContainer) : null;
-
-    const makeEmptyPara = () => {
-      const p = document.createElement("p");
-      p.appendChild(document.createElement("br"));
-      return p;
-    };
-
-    let caretNode: Node;
-
-    if (range && block && PAGE_SPLITTABLE_TAGS.has(block.tagName)) {
-      // Блок с курсором делим на «до/после»: хвост уезжает на новую страницу.
-      // Если блок был частью авторазреза — расформировываем группу, иначе
-      // очистка HTML склеит куски обратно поверх ручного разрыва.
-      const gid = block.getAttribute(AUTOSPLIT_ATTR);
-      if (gid) {
-        editor
-          .querySelectorAll(`[${AUTOSPLIT_ATTR}="${gid}"]`)
-          .forEach((el) => el.removeAttribute(AUTOSPLIT_ATTR));
-      }
-      const tail = document.createRange();
-      tail.setStart(range.endContainer, range.endOffset);
-      tail.setEnd(block, block.childNodes.length);
-      const frag = tail.extractContents();
-      const next = block.cloneNode(false) as HTMLElement;
-      next.removeAttribute(AUTOSPLIT_ATTR);
-      next.appendChild(frag);
-      if (!(next.textContent || "").length && !next.querySelector("br,img")) {
-        next.appendChild(document.createElement("br"));
-      }
-      if (!(block.textContent || "").length && !block.querySelector("br,img")) {
-        block.appendChild(document.createElement("br"));
-      }
-      block.after(breakEl, next);
-      caretNode = next;
-    } else if (block) {
-      // Списки/таблицы не делим — разрыв после всего блока + пустой абзац
-      const para = makeEmptyPara();
-      block.after(breakEl, para);
-      caretNode = para;
-    } else if (range) {
-      // «Голый» текст на верхнем уровне (до первого Enter) — делим текстовый узел
-      let topNode: Node | null = range.startContainer;
-      while (topNode && topNode.parentNode !== editor)
-        topNode = topNode.parentNode;
-      if (topNode && topNode.nodeType === Node.TEXT_NODE) {
-        const textNode = topNode as Text;
-        const splitAt =
-          range.startContainer === textNode
-            ? range.startOffset
-            : textNode.length;
-        const tailText = textNode.splitText(splitAt);
-        textNode.after(breakEl);
-        if (tailText.length === 0) {
-          tailText.remove();
-          const para = makeEmptyPara();
-          breakEl.after(para);
-          caretNode = para;
-        } else {
-          caretNode = tailText;
-        }
-      } else {
-        const para = makeEmptyPara();
-        editor.append(breakEl, para);
-        caretNode = para;
-      }
-    } else {
-      const para = makeEmptyPara();
-      editor.append(breakEl, para);
-      caretNode = para;
-    }
-
-    const r = document.createRange();
-    r.setStart(caretNode, 0);
-    r.collapse(true);
-    sel?.removeAllRanges();
-    sel?.addRange(r);
-
-    syncEditorAfterDomEdit();
-  }, [syncEditorAfterDomEdit, commitHistoryNow]);
-
-  // Удаление конкретной страницы: убираем верхнеуровневые блоки, визуально
-  // расположенные на ней, плюс ручной разрыв, который её породил. Так не нужно
-  // вручную стирать весь текст. Операция обратима через собственную историю
-  // изменений (Ctrl+Z), подтверждение оставлено как защита от случайного клика.
-  const deletePage = useCallback(
-    (pageIndex: number) => {
-      const editor = editorRef.current;
-      setPageToDelete(null);
-      if (!editor || !editor.isContentEditable) return;
-      // Правки до удаления страницы — отдельный шаг истории.
-      commitHistoryNow();
-
-      const children = Array.from(editor.children);
-      const removals: Element[] = [];
-      let firstIdx = -1;
-
-      children.forEach((child, idx) => {
-        if (isSpacerNode(child)) return; // распорки пересоздаются при пагинации
-        // печать ЭЦП и прочие абсолютные элементы не трогаем
-        if (
-          isStampNode(child) ||
-          getComputedStyle(child).position === "absolute"
-        )
-          return;
-        const el = child as HTMLElement;
-        const page = Math.floor(
-          (el.offsetTop + el.offsetHeight / 2) / PAGE_STRIDE,
-        );
-        if (page === pageIndex) {
-          removals.push(child);
-          if (firstIdx === -1) firstIdx = idx;
-        }
-      });
-
-      // Ручной разрыв, создавший эту страницу, удаляем вместе с её содержимым
-      if (firstIdx > 0) {
-        let j = firstIdx - 1;
-        while (j >= 0 && isSpacerNode(children[j])) j--;
-        if (j >= 0 && isPageBreakNode(children[j])) removals.push(children[j]);
-      }
-
-      if (!removals.length) return;
-      removals.forEach((n) => n.remove());
-
-      // Не оставляем редактор полностью пустым — иначе ломаются курсор/плейсхолдер
-      if (
-        !editor.textContent?.trim() &&
-        !editor.querySelector("img,table,br")
-      ) {
-        editor.innerHTML = "<div><br></div>";
-      }
-
-      syncEditorAfterDomEdit();
-    },
-    [PAGE_STRIDE, syncEditorAfterDomEdit, commitHistoryNow],
-  );
+  const { insertPageBreak, deletePage, insertFragmentAtCaret } =
+    useEditorCommands({
+      editorRef,
+      pageStride: PAGE_STRIDE,
+      syncEditorAfterDomEdit,
+      commitHistoryNow,
+      setPageToDelete,
+    });
 
   // Закрываем подтверждение удаления, если страниц стало меньше
   useEffect(() => {
@@ -2859,175 +2200,6 @@ export const CreateInternalCorrespondence = ({
       setPageToDelete(null);
     }
   }, [pageCount, pageToDelete]);
-
-  // Вставка готового DOM-фрагмента в позицию курсора (или в конец, если фокуса
-  // нет). Используется и при Ctrl+V, и при импорте Word-файла, чтобы вставка
-  // вела себя одинаково и корректно пересчитывала постраничную разбивку.
-  const insertFragmentAtCaret = useCallback(
-    (fragment: DocumentFragment) => {
-      const editor = editorRef.current;
-      if (!editor) return;
-      // Набор текста до вставки — отдельный шаг истории; сама вставка
-      // зафиксируется в syncEditorAfterDomEdit ниже.
-      commitHistoryNow();
-      editor.focus();
-
-      const selection = window.getSelection();
-      let range: Range;
-      if (
-        selection &&
-        selection.rangeCount > 0 &&
-        editor.contains(selection.anchorNode)
-      ) {
-        range = selection.getRangeAt(0);
-      } else {
-        range = document.createRange();
-        range.selectNodeContents(editor);
-        range.collapse(false);
-      }
-      range.deleteContents();
-
-      // Блочный контент (импорт Word, вставка многостраничного документа) должен
-      // ложиться ВЕРХНЕУРОВНЕВЫМИ блоками редактора. После очистки (CTRL+A+Delete)
-      // редактор сбрасывается в пустой блок-плейсхолдер <div><br></div>, и каретка
-      // стоит ВНУТРИ него. Тогда range.insertNode вложил бы все абзацы документа
-      // в этот один <div>: постраничная разбивка считает его одним «гигантским»
-      // блоком, режет по тексту (теряя форматирование), а печать сваливает всё на
-      // первую страницу и обрезает не влезшее (пропадал нижний текст письма).
-      // Поэтому, если каретка в пустом плейсхолдере, поднимаем точку вставки на
-      // уровень редактора и убираем плейсхолдер.
-      const fragmentHasBlocks = Array.from(fragment.childNodes).some(
-        (n) =>
-          n.nodeType === Node.ELEMENT_NODE &&
-          EDITOR_BLOCK_TAGS.has((n as HTMLElement).tagName),
-      );
-      let placeholder: HTMLElement | null = null;
-      if (fragmentHasBlocks && range.startContainer !== editor) {
-        const topBlock = topLevelBlockOf(editor, range.startContainer);
-        if (
-          topBlock &&
-          !(topBlock.textContent || "").trim() &&
-          !topBlock.querySelector("img,table,hr")
-        ) {
-          placeholder = topBlock;
-          range = document.createRange();
-          range.setStartBefore(topBlock);
-          range.collapse(true);
-        }
-      }
-
-      const lastNode = fragment.lastChild;
-      range.insertNode(fragment);
-      placeholder?.remove();
-
-      // Инлайновые куски вставки, оказавшиеся на верхнем уровне редактора,
-      // сразу заворачиваем в блоки: «голые» узлы ломают структурный снимок
-      // каретки и постраничную разбивку (см. wrapBareTopLevelNodes).
-      wrapBareTopLevelNodes(editor);
-
-      // Курсор после вставленного содержимого
-      if (lastNode && editor.contains(lastNode)) {
-        const after = document.createRange();
-        after.setStartAfter(lastNode);
-        after.collapse(true);
-        selection?.removeAllRanges();
-        selection?.addRange(after);
-      }
-
-      // Пагинация синхронно, а не через rAF: при серии быстрых вставок каждая
-      // следующая ложится в уже разложенный документ с актуальными распорками,
-      // а не в «хвост» с устаревшей разметкой — без случайных пустых
-      // промежутков и лишних отступов.
-      syncEditorAfterDomEdit();
-    },
-    [syncEditorAfterDomEdit, commitHistoryNow],
-  );
-
-  // Превращает очищенный HTML из Word в фрагмент для вставки.
-  // Распорки страниц вырезаем — их редактор расставляет сам при пагинации.
-  const buildFragmentFromHtml = useCallback((html: string) => {
-    const wrapper = document.createElement("div");
-    wrapper.innerHTML = html;
-    wrapper.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => n.remove());
-    const fragment = document.createDocumentFragment();
-    while (wrapper.firstChild) fragment.appendChild(wrapper.firstChild);
-    return fragment;
-  }, []);
-
-  // Инлайновый фрагмент для вставки однострочного форматированного текста: блоки
-  // (p/div/h*/li/…) разворачиваем в их содержимое, чтобы вставка шла В СТРОКУ
-  // рядом с курсором, но сохраняла оформление (жирный/курсив/подчёркивание/цвет/
-  // размер через span style). Иначе одиночное скопированное слово либо уезжало
-  // на новую строку (как блок), либо теряло стили (как голый текст).
-  const buildInlineFragmentFromHtml = useCallback((html: string) => {
-    const wrapper = document.createElement("div");
-    wrapper.innerHTML = html;
-    wrapper.querySelectorAll(`[${SPACER_ATTR}]`).forEach((n) => n.remove());
-    const BLOCK_SEL =
-      "p,div,h1,h2,h3,h4,h5,h6,li,ul,ol,table,thead,tbody,tr,td,th,blockquote,section,header,footer,pre,figure";
-    let guard = 0;
-    let block = wrapper.querySelector(BLOCK_SEL);
-    while (block && guard++ < 2000) {
-      block.replaceWith(...Array.from(block.childNodes));
-      block = wrapper.querySelector(BLOCK_SEL);
-    }
-    const fragment = document.createDocumentFragment();
-    while (wrapper.firstChild) fragment.appendChild(wrapper.firstChild);
-    return fragment;
-  }, []);
-
-  // Очистка HTML при вставке из Word / PDF / других источников: sanitizeWordHtml
-  // убирает служебную разметку Office, переводит размеры pt → px (тот же 96 DPI,
-  // что и у А4-холста) и нормализует пробелы — поэтому форматирование совпадает
-  // с исходным документом, а текст не выходит за границы листа.
-  const handleEditorPaste = useCallback(
-    (e: ClipboardEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const editor = editorRef.current;
-      if (!editor || !e.clipboardData) return;
-
-      const html = e.clipboardData.getData("text/html");
-      const text = e.clipboardData.getData("text/plain");
-      const isMultiline = /\r?\n/.test(text.trim());
-
-      const htmlHasText = !!html && !!html.replace(/<[^>]*>/g, "").trim();
-
-      let fragment: DocumentFragment;
-      if (html && isMultiline) {
-        // Многострочный форматированный контент (документ из Word) — сохраняем
-        // структуру и оформление как есть.
-        fragment = buildFragmentFromHtml(sanitizeWordHtml(html));
-        fragment = buildFragmentFromHtml(sanitizeWordHtml(html));
-      } else if (htmlHasText) {
-        fragment = buildInlineFragmentFromHtml(sanitizeWordHtml(html));
-      } else if (text) {
-        fragment = document.createDocumentFragment();
-        if (!isMultiline) {
-          fragment.appendChild(document.createTextNode(text));
-        } else {
-          const paragraphs = text.replace(/\r\n/g, "\n").split(/\n{2,}/);
-          paragraphs.forEach((para) => {
-            const block = document.createElement("p");
-            const lines = para.split("\n");
-            lines.forEach((line, idx) => {
-              block.appendChild(document.createTextNode(line));
-              if (idx < lines.length - 1)
-                block.appendChild(document.createElement("br"));
-            });
-            if (!block.textContent)
-              block.appendChild(document.createElement("br"));
-            fragment.appendChild(block);
-          });
-        }
-      } else {
-        return;
-      }
-
-      insertFragmentAtCaret(fragment);
-    },
-    [buildFragmentFromHtml, buildInlineFragmentFromHtml, insertFragmentAtCaret],
-  );
 
   const {
     importingWord,
@@ -3038,56 +2210,12 @@ export const CreateInternalCorrespondence = ({
     handleEditorDragLeave,
   } = useWordImport({ buildFragmentFromHtml, insertFragmentAtCaret });
 
-  // Нативный обработчик вставки: гарантированно отменяет стандартную вставку
-  // браузера (иначе контент дублировался — нативная + ручная вставка).
-  useEffect(() => {
-    const editor = editorRef.current;
-    if (!editor) return;
-    editor.addEventListener("paste", handleEditorPaste);
-    return () => editor.removeEventListener("paste", handleEditorPaste);
-  }, [handleEditorPaste]);
-
-  // Копирование/вырезание: в буфер кладём ОЧИЩЕННЫЙ фрагмент — без служебной
-  // разметки пагинации (распорки/разрезы) и без zero-height блоков. Иначе
-  // нативный copy выносил во внешние редакторы/Word внутренние артефакты и
-  // «рваное» форматирование. text/plain формируем с переносами абзацев, чтобы
-  // вставка в обычные поля не «слипалась». Для cut дополнительно удаляем
-  // выделение через собственную логику с фиксацией истории.
-  const handleEditorCopyCut = useCallback(
-    (e: ClipboardEvent, isCut: boolean) => {
-      const editor = editorRef.current;
-      const sel = window.getSelection();
-      if (!editor || !e.clipboardData || !sel || sel.rangeCount === 0) return;
-      const range = sel.getRangeAt(0);
-      if (range.collapsed || !editor.contains(range.commonAncestorContainer))
-        return;
-      e.preventDefault();
-      const holder = document.createElement("div");
-      holder.appendChild(range.cloneContents());
-      const cleanHtml = cleanEditorArtifacts(holder.innerHTML);
-      e.clipboardData.setData("text/html", cleanHtml);
-      e.clipboardData.setData("text/plain", htmlToPlainText(cleanHtml));
-      if (isCut && editor.isContentEditable) {
-        commitHistoryNow();
-        range.deleteContents();
-        syncEditorAfterDomEdit();
-      }
-    },
-    [commitHistoryNow, syncEditorAfterDomEdit],
-  );
-
-  useEffect(() => {
-    const editor = editorRef.current;
-    if (!editor) return;
-    const onCopy = (e: ClipboardEvent) => handleEditorCopyCut(e, false);
-    const onCut = (e: ClipboardEvent) => handleEditorCopyCut(e, true);
-    editor.addEventListener("copy", onCopy);
-    editor.addEventListener("cut", onCut);
-    return () => {
-      editor.removeEventListener("copy", onCopy);
-      editor.removeEventListener("cut", onCut);
-    };
-  }, [handleEditorCopyCut]);
+  useEditorClipboard({
+    editorRef,
+    insertFragmentAtCaret,
+    syncEditorAfterDomEdit,
+    commitHistoryNow,
+  });
 
   useEffect(() => {
     document.execCommand("styleWithCSS", false, "true");
