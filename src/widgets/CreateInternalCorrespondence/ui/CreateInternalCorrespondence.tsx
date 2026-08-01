@@ -57,7 +57,6 @@ import {
 import {
   cn,
   formatFileSize,
-  mapServerAttachment,
   downloadAttachment,
   createApiFileFromAttachedFile,
   CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE,
@@ -69,7 +68,6 @@ import {
   RULER_MIN_MARGIN,
   hasDefaultRulerMargins,
   pageWidthForOrientation,
-  splitDocLayout,
   stripDocLayout,
   withDocLayout,
   type DocLayout,
@@ -83,6 +81,10 @@ import {
 } from "./createInternalCorrespondence/editorCaret";
 import { paginateEditorDom } from "./createInternalCorrespondence/paginateEditorDom";
 import { buildFragmentFromHtml } from "./createInternalCorrespondence/editorFragments";
+import { useLocationStatePrefill } from "./createInternalCorrespondence/useLocationStatePrefill";
+import { useSavedDocumentPrefill } from "./createInternalCorrespondence/useSavedDocumentPrefill";
+import { useComposeReplyPrefill } from "./createInternalCorrespondence/useComposeReplyPrefill";
+import { useWorkflowPrefill } from "./createInternalCorrespondence/useWorkflowPrefill";
 import { useEditorKeyDown } from "./createInternalCorrespondence/useEditorKeyDown";
 import { useEditorCommands } from "./createInternalCorrespondence/useEditorCommands";
 import { useEditorClipboard } from "./createInternalCorrespondence/useEditorClipboard";
@@ -1279,269 +1281,47 @@ export const CreateInternalCorrespondence = ({
     saveDraft(requestPayload);
   };
 
-  useEffect(() => {
-    if (!id && location.state) {
-      if (location.state.subject && !subject) {
-        setSubject(location.state.subject);
-      }
-      if (location.state.body && !editorContent) {
-        // Префилл может прийти из письма, сохранённого этим редактором, —
-        // раскладку из него применяем, а маркер в редактор не пускаем.
-        const { layout, body } = splitDocLayout(location.state.body);
-        if (layout) applyDocLayout(layout);
-        setEditorContent(body);
-        if (editorRef.current) {
-          editorRef.current.innerHTML = body;
-        }
-      }
-    }
-  }, [id, location.state]);
+  useLocationStatePrefill({
+    id,
+    locationState: location.state,
+    subject,
+    editorContent,
+    editorRef,
+    applyDocLayout,
+    setSubject,
+    setEditorContent,
+  });
 
-  useEffect(() => {
-    if (initialData?.item) {
-      const item = initialData.item;
+  useSavedDocumentPrefill({
+    id,
+    initialData,
+    setSubject,
+    setImportance,
+    setLetterType,
+    setTo,
+    setCc,
+    setShowCcField,
+    setApprovers,
+    setAttachments,
+    setDocCreator,
+    setFinalSigner,
+    setStampVisible,
+  });
 
-      if (item.subject) setSubject(item.subject);
+  useComposeReplyPrefill({
+    composeMode,
+    sourceLetter,
+    composeAppliedRef,
+    setSubject,
+    setTo,
+  });
 
-      // ВАЖНО: тело письма в редактор грузит ТОЛЬКО эффект истории версий
-      // (по allVersions). Если дублировать загрузку здесь, этот эффект
-      // срабатывает после пагинации и перезаписывает innerHTML, стирая
-      // распорки между страницами — текст «сползает» в зазор после обновления.
-
-      // priority и document_type приходят уже в ключах бэкенда — кладём как есть
-      if (item.priority) setImportance(item.priority);
-      if (item.document_type) setLetterType(item.document_type);
-
-      if (item.recipients && Array.isArray(item.recipients)) {
-        const toUsers: RecipientOption[] = [];
-        const ccUsers: RecipientOption[] = [];
-        item.recipients.forEach((r: any) => {
-          if (!r.user) return;
-          const mappedUser = {
-            id: String(r.user.id),
-            name: r.user.full_name,
-            org: r.user.position || r.user.department || "Сотрудник",
-            initials: r.user.full_name
-              .split(" ")
-              .map((n: string) => n[0])
-              .slice(0, 2)
-              .join(""),
-            color: "bg-blue-100 text-blue-700",
-          };
-          if (r.type === "to") toUsers.push(mappedUser);
-          if (r.type === "cc") ccUsers.push(mappedUser);
-        });
-        if (toUsers.length > 0) setTo(toUsers);
-        if (ccUsers.length > 0) {
-          setCc(ccUsers);
-          setShowCcField(true);
-        }
-      }
-
-      if (item.approvals && Array.isArray(item.approvals)) {
-        setApprovers(
-          item.approvals.map((a: any) => {
-            const userData = a.approver || a.user;
-
-            return {
-              id: String(userData?.id),
-              approvalRecordId: String(a.id),
-              isInvited: true,
-              name: userData?.full_name || "Неизвестно",
-              role: userData?.position || "Сотрудник",
-              initials: userData?.full_name
-                ? userData.full_name
-                    .split(" ")
-                    .map((n: string) => n[0])
-                    .slice(0, 2)
-                    .join("")
-                : "",
-              color: "bg-slate-100 text-slate-700",
-              approved: a.status === "approved",
-              approving: false,
-              comment: a.note || "",
-              showCommentInput: false,
-              dsApplied: a.status === "approved",
-              dsLoading: false,
-              status: a.status,
-              note: a.note || null,
-              decided_at: a.decided_at || null,
-            };
-          }),
-        );
-      }
-
-      // Уже сохранённые вложения. Файлы, выбранные пользователем прямо сейчас,
-      // оставляем: письмо перезапрашивается и после посторонних действий,
-      // и такой рефетч не должен съедать несохранённый выбор.
-      if (Array.isArray(item.attachments)) {
-        setAttachments((prev) => [
-          ...item.attachments.map((a: any) => mapServerAttachment(a, item.id || id)),
-          ...prev.filter((a) => a.file),
-        ]);
-      }
-
-      if (item.creator) {
-        setDocCreator(item.creator);
-      }
-
-      if (item.signatures && item.signatures.length > 0) {
-        const activeSigs = item.signatures.filter((s: any) => s.status !== "revoked");
-        const s = activeSigs.length > 0 ? activeSigs[activeSigs.length - 1] : item.signatures[item.signatures.length - 1];
-        const isCurrentlySigned = s.status === "signed";
-        const isCurrentlyDeclined = s.status === "declined";
-        setFinalSigner({
-          id: String(s.user.id),
-          isInvited: true,
-          name: s.user.full_name,
-          role: s.user.position || "Сотрудник",
-          initials: s.user.full_name
-            .split(" ")
-            .map((n: string) => n[0])
-            .slice(0, 2)
-            .join(""),
-          color: "bg-purple-100 text-purple-700",
-          dsApplied: isCurrentlySigned,
-          dsDeclined: isCurrentlyDeclined,
-          declineReason: s.decline_reason || s.reason,
-          dsLoading: false,
-        });
-        if (isCurrentlySigned) {
-          setStampVisible(false);
-        }
-      } else if (item.creator) {
-
-        setFinalSigner({
-          id: String(item.creator.id),
-          isInvited: false,
-          name: item.creator.full_name,
-          role: item.creator.position || "Автор документа",
-          initials: item.creator.full_name
-            .split(" ")
-            .map((n: string) => n[0])
-            .slice(0, 2)
-            .join(""),
-          color: "bg-purple-100 text-purple-700",
-          dsApplied: false,
-          dsLoading: false,
-        });
-      }
-    }
-  }, [initialData]);
-
-  // Предзаполнение при «Ответить»/«Перенаправить» (один раз при монтировании).
-  // Ответить → тема «Ответ: …», «Кому» = отправитель входящего письма.
-  // Перенаправить → тема «Перенаправление: …», «Кому» остаётся пустым.
-  useEffect(() => {
-    if (composeAppliedRef.current) return;
-    if (!composeMode || !sourceLetter) return;
-    composeAppliedRef.current = true;
-
-    setSubject(
-      `${composeMode === "reply" ? "Ответ" : "Перенаправление"}: ${
-        sourceLetter.subject || ""
-      }`,
-    );
-
-    if (composeMode === "reply" && sourceLetter.creator?.id != null) {
-      const c = sourceLetter.creator;
-      const initials = (c.full_name || "")
-        .split(/\s+/)
-        .map((n) => n[0])
-        .slice(0, 2)
-        .join("")
-        .toUpperCase();
-      setTo([
-        {
-          id: String(c.id),
-          name: c.full_name || "",
-          org: c.position || c.department || "Сотрудник",
-          initials,
-          color: "bg-blue-100 text-blue-700",
-        },
-      ]);
-    }
-  }, [composeMode, sourceLetter]);
-
-  useEffect(() => {
-    if (rawWorkflowData?.data) {
-      const wfApprovals = rawWorkflowData.data.approvals || [];
-      const wfSignatures = rawWorkflowData.data.signatures || [];
-
-      if (wfApprovals.length > 0) {
-        setApprovers((prev) => {
-          const merged = [...prev];
-          wfApprovals.forEach((wfA: any) => {
-            const user = wfA.approver || wfA.user;
-            if (!user) return;
-            const existingIdx = merged.findIndex(
-              (a) => a.id === String(user.id),
-            );
-            if (existingIdx !== -1) {
-              merged[existingIdx] = {
-                ...merged[existingIdx],
-                approvalRecordId: String(wfA.id),
-                isInvited: true,
-                approved: wfA.status === "approved",
-                dsApplied: wfA.status === "approved",
-              };
-            } else {
-              merged.push({
-                id: String(user.id),
-                approvalRecordId: String(wfA.id),
-                isInvited: true,
-                name: user.full_name,
-                role: user.position || "Сотрудник",
-                initials: user.full_name
-                  .split(" ")
-                  .map((n: string) => n[0])
-                  .slice(0, 2)
-                  .join(""),
-                color: "bg-slate-100 text-slate-700",
-                approved: wfA.status === "approved",
-                approving: false,
-                comment: "",
-                showCommentInput: false,
-                dsApplied: wfA.status === "approved",
-                dsLoading: false,
-              });
-            }
-          });
-          return merged;
-        });
-      }
-
-      if (wfSignatures.length > 0) {
-        const activeSigs = wfSignatures.filter((s: any) => s.status !== "revoked");
-        const wfS = activeSigs.length > 0 ? activeSigs[activeSigs.length - 1] : wfSignatures[wfSignatures.length - 1];
-        const user = wfS.user;
-        const isCurrentlySigned = wfS.status === "signed";
-        const isCurrentlyDeclined = wfS.status === "declined";
-
-        if (user) {
-          setFinalSigner({
-            id: String(user.id),
-            isInvited: true,
-            name: user.full_name,
-            role: user.position || "Сотрудник",
-            initials: user.full_name
-              .split(" ")
-              .map((n: string) => n[0])
-              .slice(0, 2)
-              .join(""),
-            color: "bg-purple-100 text-purple-700",
-            dsApplied: isCurrentlySigned,
-            dsDeclined: isCurrentlyDeclined,
-            declineReason: wfS.decline_reason || wfS.reason,
-            dsLoading: false,
-          });
-          if (isCurrentlySigned) {
-            setStampVisible(false);
-          }
-        }
-      }
-    }
-  }, [rawWorkflowData]);
+  useWorkflowPrefill({
+    rawWorkflowData,
+    setApprovers,
+    setFinalSigner,
+    setStampVisible,
+  });
 
   const handleFontSize = (size: string) => {
     setShowFontSizeDropdown(false);
