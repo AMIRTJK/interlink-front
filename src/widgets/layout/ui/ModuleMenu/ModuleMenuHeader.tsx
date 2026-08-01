@@ -3,6 +3,7 @@ import { Tooltip } from "antd";
 import { AppRoutes } from "@shared/config/AppRoutes";
 import { User, Mail, Users, Layout, ShieldCheck, ClipboardList } from "lucide-react";
 import { THEMES } from "../designSettings";
+import { useDesignSettings } from "../useDesignSettings";
 import type { MenuItem } from "./lib";
 
 interface IHeaderNavProps {
@@ -20,9 +21,7 @@ export const ModuleMenuHeader = ({
   collapsed,
   onNavigate,
 }: IHeaderNavProps) => {
-  const currentTheme =
-    (typeof window !== "undefined" && localStorage.getItem("currentTheme")) ||
-    "emerald";
+  const { currentTheme } = useDesignSettings();
   const activeGradient =
     THEMES[currentTheme]?.gradient || THEMES.emerald.gradient;
 

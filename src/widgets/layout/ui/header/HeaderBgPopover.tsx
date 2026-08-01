@@ -24,7 +24,6 @@ export const HeaderBgPopover = ({
             onClick={() => {
               if (setCurrentBg) {
                 setCurrentBg(key);
-                localStorage.setItem("currentBg", key);
               }
             }}
             className={`w-full flex items-center gap-3 p-2.5 rounded-[1.5rem] hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all cursor-pointer ${
