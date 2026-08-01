@@ -6,10 +6,12 @@ export {
   useMarkNotificationRead,
   useDeleteNotification,
 } from "./api/useNotifications";
+export { useRealtimeNotifications } from "./api/useRealtimeNotifications";
 export type {
   INotification,
   INotificationCounters,
   INotificationsPage,
   INotificationData,
+  IRealtimeNotification,
   NotificationType,
 } from "./model";

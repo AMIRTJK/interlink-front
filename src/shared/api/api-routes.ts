@@ -237,6 +237,9 @@ export const ApiRoutes = {
   NOTIFICATIONS_READ_ALL: "/api/v1/notifications/read-all",
   NOTIFICATION_READ: "/api/v1/notifications/:id/read",
   NOTIFICATION_DELETE: "/api/v1/notifications/:id",
+  // Авторизация приватного канала Reverb (broadcaster вызывает её сам)
+  BROADCASTING_AUTH: "/api/v1/broadcasting/auth",
+
   PERSONAL_TASKS: "/api/v1/personal-tasks",
   PERSONAL_TASKS_BOARD: "/api/v1/personal-tasks/board",
   PERSONAL_TASKS_BY_ID: "/api/v1/personal-tasks/:id",

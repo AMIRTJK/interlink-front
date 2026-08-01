@@ -7,9 +7,13 @@ import {
   CheckCircle2,
   ClipboardCheck,
   ClipboardList,
+  Eye,
+  EyeOff,
   FileSignature,
+  FolderOpen,
   Mail,
   PenLine,
+  Share2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -46,10 +50,21 @@ const TYPE_MAP: Record<string, { Icon: LucideIcon; accent: Accent }> = {
   event_updated: { Icon: CalendarClock, accent: "amber" },
   event_status_changed: { Icon: CalendarCheck, accent: "emerald" },
   event_reminder: { Icon: CalendarClock, accent: "amber" },
+  internal_correspondence_sent: { Icon: Mail, accent: "sky" },
   internal_correspondence_approval_invited: { Icon: Mail, accent: "sky" },
   internal_correspondence_approval_status_changed: { Icon: CheckCircle2, accent: "emerald" },
+  internal_correspondence_approval_completed: { Icon: CheckCircle2, accent: "emerald" },
   internal_correspondence_signer_invited: { Icon: PenLine, accent: "violet" },
   internal_correspondence_signed: { Icon: FileSignature, accent: "emerald" },
+  internal_correspondence_signing_completed: { Icon: FileSignature, accent: "emerald" },
+  internal_correspondence_assignment_created: { Icon: ClipboardList, accent: "indigo" },
+  internal_correspondence_assignment_submitted: { Icon: ClipboardCheck, accent: "blue" },
+  internal_correspondence_assignment_reviewed: { Icon: CheckCircle2, accent: "emerald" },
+  internal_correspondence_visor_invited: { Icon: Eye, accent: "violet" },
+  internal_correspondence_visor_revoked: { Icon: EyeOff, accent: "zinc" },
+  my_file_shared: { Icon: Share2, accent: "sky" },
+  my_files_bulk_shared: { Icon: Share2, accent: "sky" },
+  my_file_folder_shared: { Icon: FolderOpen, accent: "amber" },
 };
 
 /** Возвращает иконку и классы акцента для типа уведомления. */
