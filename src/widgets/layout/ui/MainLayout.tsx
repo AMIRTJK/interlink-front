@@ -86,7 +86,7 @@ export const MainLayout = () => {
             <ModuleMenu variant="modern" hideTopLevel />
           )}
           <main
-            className={`flex-grow min-w-0 ${
+            className={`flex-grow min-w-0 flex flex-col ${
               variant === "ios" || tabMode === "on" ? "pb-30" : ""
             }`}
           >

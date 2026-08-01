@@ -49,11 +49,14 @@ export function UsersView() {
     <div
       style={{
         flex: 1,
-        padding: "0 24px 24px",
+        height: "100%",
+        minHeight: 0,
+        padding: "20px 24px 24px",
         display: "flex",
         flexDirection: "column",
         gap: 16,
         fontFamily: T.font,
+        overflowY: "auto",
       }}
     >
       <UsersViewTopBar onOpenAdd={() => setIsAddOpen(true)} />

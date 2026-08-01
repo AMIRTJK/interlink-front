@@ -60,8 +60,11 @@ export function AdministrationHomeWidget() {
       style={{
         fontFamily: T.font,
         background: T.bg,
-        minHeight: "calc(100vh - 140px)",
-        padding: "32px 24px",
+        flex: 1,
+        height: "100%",
+        minHeight: 0,
+        padding: "24px",
+        overflowY: "auto",
       }}
     >
       <div style={{ maxWidth: 1040, margin: "0 auto" }}>

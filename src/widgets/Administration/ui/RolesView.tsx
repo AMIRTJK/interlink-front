@@ -58,7 +58,9 @@ export function RolesView() {
         display: "flex",
         alignItems: "flex-start",
         gap: 0,
-        height: "calc(100vh - 212px)",
+        flex: 1,
+        height: "100%",
+        minHeight: 0,
         overflow: "hidden",
       }}
     >
@@ -66,7 +68,7 @@ export function RolesView() {
         style={{
           flex: 1,
           minWidth: 0,
-          padding: "0 24px 24px",
+          padding: "20px 24px 24px",
           height: "100%",
           overflowY: "auto",
         }}

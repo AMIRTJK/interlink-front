@@ -23,9 +23,11 @@ export function AdminTabsLayout() {
       style={{
         fontFamily: T.font,
         background: T.bg,
-        minHeight: "calc(100vh - 140px)",
+        flex: 1,
+        width: "100%",
         display: "flex",
         flexDirection: "column",
+        minHeight: 0,
       }}
     >
       {/* Tab bar */}
@@ -70,7 +72,7 @@ export function AdminTabsLayout() {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, paddingTop: 24, display: "flex", flexDirection: "column" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
         <Outlet />
       </div>
     </div>
