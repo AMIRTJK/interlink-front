@@ -9,7 +9,7 @@ export const LoginOptionsRow = () => {
 	const handleClose = () => setIsModalOpen(false);
 
 	return (
-		<div className="flex items-center justify-end mt-4">
+		<div className="flex items-center justify-center">
 			<button
 				type="button"
 				onClick={handleOpen}

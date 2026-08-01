@@ -1,3 +1,3 @@
 export const LoginAltActions = () => (
-	<div className="h-[154px]" />
+	<div className="h-[80px]" />
 );
