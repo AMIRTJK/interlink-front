@@ -1,4 +1,5 @@
 import { Login } from "@features/Login";
+import { Logo } from "@shared/ui";
 
 export const Auth = () => {
   return (
@@ -26,8 +27,8 @@ export const Auth = () => {
       {/* Content Section */}
       <div className="relative z-10 w-full max-w-md px-6">
         <div className="text-center mb-8">
-          <h1 className="text-[32px] font-bold tracking-tight text-white uppercase">
-            I N T E R L I N K
+          <h1 className="text-center">
+            <Logo className="text-[32px] text-white" />
           </h1>
         </div>
 
