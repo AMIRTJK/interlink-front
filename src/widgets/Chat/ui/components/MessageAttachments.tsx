@@ -1,4 +1,6 @@
-import { Download } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Download, Eye, ImageIcon, X } from "lucide-react";
 import { toast } from "@shared/lib";
 import type { MessageAttachment } from "../../model";
 import { chatUrls, downloadPrivateFile } from "../../api";
@@ -11,21 +13,43 @@ interface IProps {
   isDark: boolean;
 }
 
-// Вложения сообщения. Файлы приватные: превью картинок уже разрешено в blob-URL
-// маппером, а всё остальное скачивается запросом с токеном по клику.
+// Вложения сообщения. Файлы приватные: превью картинок разрешено в blob-URL,
+// просмотр полноразмерного фото в модалке и скачивание с токеном.
 
 export const MessageAttachments = ({ attachments, isMe, isDark }: IProps) => {
+  const [selectedImage, setSelectedImage] = useState<MessageAttachment | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedImage(null);
+    };
+    if (selectedImage) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedImage]);
+
   if (!attachments.length) return null;
 
   const handleDownload = async (attachment: MessageAttachment) => {
-    if (!attachment.attachmentId) return;
-    try {
-      await downloadPrivateFile(
-        chatUrls.attachment(attachment.attachmentId),
-        attachment.name,
-      );
-    } catch {
-      toast.error("Не удалось скачать файл");
+    if (attachment.attachmentId) {
+      try {
+        await downloadPrivateFile(
+          chatUrls.attachment(attachment.attachmentId),
+          attachment.name,
+        );
+      } catch {
+        toast.error("Не удалось скачать файл");
+      }
+    } else if (attachment.preview) {
+      const link = document.createElement("a");
+      link.href = attachment.preview;
+      link.download = attachment.name || "image.png";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
@@ -68,12 +92,44 @@ export const MessageAttachments = ({ attachments, isMe, isDark }: IProps) => {
             }}
           >
             {attachment.type === "image" && attachment.preview ? (
-              <img
-                src={attachment.preview}
-                alt={attachment.name}
-                loading="lazy"
-                className="max-w-[220px] max-h-48 object-cover"
-              />
+              <div className="relative group cursor-pointer overflow-hidden rounded-2xl">
+                <img
+                  src={attachment.preview}
+                  alt={attachment.name}
+                  loading="lazy"
+                  onClick={() => setSelectedImage(attachment)}
+                  className="max-w-[260px] max-h-56 object-cover rounded-2xl transition-all duration-300 group-hover:scale-105"
+                />
+                <div
+                  onClick={() => setSelectedImage(attachment)}
+                  className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3.5 backdrop-blur-[2px] rounded-2xl"
+                >
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImage(attachment);
+                    }}
+                    aria-label="Просмотреть изображение"
+                    title="Просмотреть"
+                    className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg cursor-pointer"
+                  >
+                    <Eye className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDownload(attachment);
+                    }}
+                    aria-label="Скачать изображение"
+                    title="Скачать"
+                    className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg cursor-pointer"
+                  >
+                    <Download className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
             ) : (
               <button
                 type="button"
@@ -118,6 +174,64 @@ export const MessageAttachments = ({ attachments, isMe, isDark }: IProps) => {
           </div>
         );
       })}
+
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4"
+            onClick={() => setSelectedImage(null)}
+          >
+            <div
+              className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 px-5 py-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 max-w-4xl mx-auto text-white shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-2.5 min-w-0 pr-4">
+                <ImageIcon className="w-4 h-4 text-violet-400 flex-shrink-0" />
+                <span className="text-sm font-semibold truncate">
+                  {selectedImage.name}
+                </span>
+                {selectedImage.size && (
+                  <span className="text-xs text-white/50 flex-shrink-0">
+                    ({selectedImage.size})
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => handleDownload(selectedImage)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all duration-150 hover:scale-105 cursor-pointer shadow-md"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Скачать</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedImage(null)}
+                  className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <motion.img
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              src={selectedImage.preview}
+              alt={selectedImage.name}
+              className="max-w-[92vw] max-h-[82vh] object-contain rounded-2xl shadow-2xl mt-12 select-none"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

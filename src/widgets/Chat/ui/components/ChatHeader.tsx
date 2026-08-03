@@ -48,15 +48,15 @@ export const ChatHeader = ({
   onRequestClose,
 }: IProps) => (
   <header
-    className="flex-shrink-0"
+    className="flex-shrink-0 relative"
     style={{
       background: isDark
-        ? "linear-gradient(135deg,rgba(76,29,149,0.6),rgba(124,58,237,0.45),rgba(6,182,212,0.3))"
-        : "linear-gradient(135deg,rgba(124,58,237,0.85),rgba(139,92,246,0.8),rgba(6,182,212,0.7))",
+        ? "linear-gradient(135deg, #2e1065, #5b21b6, #0e7490)"
+        : "linear-gradient(135deg, #6d28d9, #8b5cf6, #06b6d4)",
       borderBottom: isDark
-        ? "1px solid rgba(167,139,250,0.2)"
-        : "1px solid rgba(124,58,237,0.25)",
-      backdropFilter: "blur(20px)",
+        ? "1px solid rgba(167,139,250,0.25)"
+        : "1px solid rgba(124,58,237,0.3)",
+      boxShadow: "0 4px 15px rgba(0,0,0,0.15)",
     }}
   >
     <div className="flex items-center justify-between px-5 py-3">
