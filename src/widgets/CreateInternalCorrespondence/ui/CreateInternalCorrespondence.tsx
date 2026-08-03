@@ -76,7 +76,10 @@ import {
   withDocLayout,
   type DocLayout,
 } from "./createInternalCorrespondence/docLayout";
-import { EditorRuler } from "./createInternalCorrespondence/EditorRuler";
+import {
+  EditorRuler,
+  EDITOR_RULER_OFFSET,
+} from "./createInternalCorrespondence/EditorRuler";
 import { PageGrid } from "./createInternalCorrespondence/PageGrid";
 import { WORD_BOUNDARY_RE } from "./createInternalCorrespondence/editorTabs";
 import {
@@ -143,6 +146,7 @@ import { PreviewModal } from "./PreviewModal";
 import { OriginalLetterPanel } from "./OriginalLetterPanel";
 import { RelatedDocsAccordion } from "./RelatedDocsBlock";
 import { OriginalLetterCanvas } from "./OriginalLetterCanvas";
+import { VersionCompareCanvas } from "./VersionCompareCanvas";
 import {
   paginateHtml,
   type StampInfo,
@@ -468,15 +472,12 @@ export const CreateInternalCorrespondence = ({
   const originalTotal = Math.max(originalSheets.pages.length, 1);
   const originalCurrent = Math.min(originalPage, originalTotal - 1);
 
-  const [versionComparePage, setVersionComparePage] = useState(0);
-
   const composeAppliedRef = useRef(false);
   const stampRef = useRef<HTMLDivElement>(null);
   const pageCanvasRef = useRef<HTMLDivElement>(null);
   const rootScrollRef = useRef<HTMLDivElement>(null);
   const originalCanvasWrapRef = useRef<HTMLDivElement>(null);
   const navPaneWrapRef = useRef<HTMLDivElement>(null);
-  const versionCompareCanvasWrapRef = useRef<HTMLDivElement>(null);
 
   // Обёртка боковых панелей (История версий / Входящие письма / Согласующие /
   // Подписывающий). Прижимаем её к верху видимой области при прокрутке, чтобы
@@ -509,9 +510,7 @@ export const CreateInternalCorrespondence = ({
   // scroll/resize через transform. Подробности — в самих хуках.
   useSideCanvasScrollFollow({
     showOriginalLetterSides,
-    showVersionCompareSides,
     originalCanvasWrapRef,
-    versionCompareCanvasWrapRef,
     rootScrollRef,
     pageCanvasRef,
     stickyHeaderRef,
@@ -713,7 +712,6 @@ export const CreateInternalCorrespondence = ({
   }, [showVersionCompareSides, activeVersion, fontSize]);
 
   const versionCompareTotal = Math.max(versionCompareSheets.pages.length, 1);
-  const versionCompareCurrent = Math.min(versionComparePage, versionCompareTotal - 1);
 
   const isActiveVersionForSign = activeVersion ? !!activeVersion.is_selected : false;
 
@@ -2460,9 +2458,7 @@ export const CreateInternalCorrespondence = ({
                   latestVersionNumber={latestVersion?.versionNumber}
                   activeVersionNumber={activeVersion?.versionNumber}
                   activeVersionDate={activeVersion?.date}
-                  versionCompareCurrent={versionCompareCurrent}
                   versionCompareTotal={versionCompareTotal}
-                  setVersionComparePage={setVersionComparePage}
                 />
               </If>
               </div>
@@ -2514,13 +2510,23 @@ export const CreateInternalCorrespondence = ({
                     </div>
                   )}
 
+                  {/* Сравнение версий: колонка листов, выровненная постранично с
+                      основным холстом. Ни sticky, ни собственной прокрутки —
+                      обе колонки едут вместе с прокруткой страницы, поэтому
+                      страница N версии всегда стоит напротив страницы N
+                      актуального документа. */}
                   <If is={Boolean(showVersionCompareSides && activeVersion)}>
-                    <div ref={versionCompareCanvasWrapRef} className="shrink-0 order-2">
-                      <OriginalLetterCanvas
+                    <div
+                      className="shrink-0 order-2"
+                      // Включённая линейка опускает основной холст на свою
+                      // высоту — сдвигаем колонку версии на столько же, иначе
+                      // страницы разъедутся.
+                      style={{ paddingTop: rulerEnabled ? EDITOR_RULER_OFFSET : 0 }}
+                    >
+                      <VersionCompareCanvas
                         sheets={versionCompareSheets.pages}
                         stamp={versionCompareSheets.stamp}
-                        page={versionCompareCurrent}
-                        fitToViewport={pageCount > 1}
+                        fontSize={Number(fontSize) || 14}
                       />
                     </div>
                   </If>
