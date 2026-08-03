@@ -71,6 +71,8 @@ export const useChatUiState = (
   const [showDeleteConversation, setShowDeleteConversation] = useState(false);
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
+  const [targetHighlightedMessageId, setTargetHighlightedMessageId] = useState<string | null>(null);
+  const [returnToMessageId, setReturnToMessageId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -193,5 +195,9 @@ export const useChatUiState = (
     scrollRef,
     messageRefs,
     setMessageRef,
+    targetHighlightedMessageId,
+    setTargetHighlightedMessageId,
+    returnToMessageId,
+    setReturnToMessageId,
   };
 };

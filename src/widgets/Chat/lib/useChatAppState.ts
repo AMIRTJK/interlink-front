@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedCallback } from "@shared/lib";
 import { useChatUiState } from "./useChatUiState";
 import { useCallState } from "./useCallState";
@@ -91,10 +91,37 @@ export const useChatAppState = (
 
   const { scrollRef, messageRefs, searchMatchIndex } = ui;
 
+  const prevConversationIdRef = useRef<number | null>(null);
+  const prevMessagesLengthRef = useRef<number>(0);
+  const firstMessageIdRef = useRef<string | number | undefined>(undefined);
+
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    const node = scrollRef.current;
+    if (!node) return;
+
+    const isChatSwitched = activeConversationId !== prevConversationIdRef.current;
+    const currentFirstId = messages[0]?.id;
+    const isPrepend =
+      !isChatSwitched &&
+      messages.length > prevMessagesLengthRef.current &&
+      currentFirstId !== firstMessageIdRef.current;
+
+    if (isChatSwitched) {
+      node.scrollTop = node.scrollHeight;
+    } else if (isPrepend) {
+      // Сохраняем положение скролла при догрузке старых сообщений вверх
+    } else if (messages.length > prevMessagesLengthRef.current) {
+      const lastMsg = messages[messages.length - 1];
+      const isNearBottom =
+        node.scrollHeight - node.scrollTop - node.clientHeight < 180;
+      if (lastMsg?.senderId === ME || isNearBottom) {
+        node.scrollTop = node.scrollHeight;
+      }
     }
+
+    prevConversationIdRef.current = activeConversationId;
+    prevMessagesLengthRef.current = messages.length;
+    firstMessageIdRef.current = currentFirstId;
   }, [messages, activeConversationId, scrollRef]);
 
   useEffect(() => {
@@ -105,13 +132,100 @@ export const useChatAppState = (
     });
   }, [searchMatchIndex, searchMatches, messageRefs]);
 
-  const { setShowContactDrawer, setOpenThreadMsgId, setSearchMatchIndex } = ui;
+  const {
+    setShowContactDrawer,
+    setOpenThreadMsgId,
+    setSearchMatchIndex,
+    setReturnToMessageId,
+    setTargetHighlightedMessageId,
+  } = ui;
   useEffect(() => {
     setShowContactDrawer(false);
     setOpenThreadMsgId(null);
-  }, [activeConversationId, setShowContactDrawer, setOpenThreadMsgId]);
+    setReturnToMessageId(null);
+    setTargetHighlightedMessageId(null);
+  }, [
+    activeConversationId,
+    setShowContactDrawer,
+    setOpenThreadMsgId,
+    setReturnToMessageId,
+    setTargetHighlightedMessageId,
+  ]);
 
   /* ===================== ПОИСК ПО ЛЕНТЕ И НАВИГАЦИЯ ===================== */
+
+  const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleJumpToMessage = useCallback(
+    (targetId: string | number, returnFromId?: string | number) => {
+      const targetStr = String(targetId);
+      const returnFromStr = returnFromId ? String(returnFromId) : null;
+      console.log("[handleJumpToMessage] EXECUTED", {
+        targetId,
+        returnFromId,
+        targetStr,
+        returnFromStr,
+        messageRefsKeys: Object.keys(messageRefs.current),
+      });
+
+      // Всегда взводим возврат к сообщению и подсветку
+      if (returnFromStr && returnFromStr !== targetStr) {
+        console.log("[handleJumpToMessage] Setting returnToMessageId:", returnFromStr);
+        setReturnToMessageId(returnFromStr);
+      }
+      console.log("[handleJumpToMessage] Setting targetHighlightedMessageId:", targetStr);
+      setTargetHighlightedMessageId(targetStr);
+
+      if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+      highlightTimeoutRef.current = setTimeout(() => {
+        console.log("[handleJumpToMessage] Clearing highlight for", targetStr);
+        setTargetHighlightedMessageId(null);
+      }, 3000);
+
+      // Ищем DOM узел во всех реестрах и селекторах
+      const el =
+        messageRefs.current[targetStr] ||
+        messageRefs.current[Number(targetStr)] ||
+        document.getElementById(`chat-msg-${targetStr}`) ||
+        (scrollRef.current?.querySelector(`[data-msg-id="${targetStr}"]`) as HTMLDivElement | null);
+
+      console.log("[handleJumpToMessage] Found DOM element?", Boolean(el), el);
+
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        console.warn("[handleJumpToMessage] Element NOT found in DOM for ID:", targetStr);
+      }
+    },
+    [messageRefs, scrollRef, setReturnToMessageId, setTargetHighlightedMessageId],
+  );
+
+  const handleReturnToMessage = useCallback(() => {
+    const returnId = ui.returnToMessageId;
+    console.log("[handleReturnToMessage] EXECUTED, returnId:", returnId);
+    if (!returnId) return;
+
+    const returnStr = String(returnId);
+    setTargetHighlightedMessageId(returnStr);
+    setReturnToMessageId(null);
+
+    if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+    highlightTimeoutRef.current = setTimeout(() => {
+      setTargetHighlightedMessageId(null);
+    }, 2000);
+
+    const el =
+      messageRefs.current[returnStr] ||
+      messageRefs.current[Number(returnStr)] ||
+      document.getElementById(`chat-msg-${returnStr}`) ||
+      (scrollRef.current?.querySelector(`[data-msg-id="${returnStr}"]`) as HTMLDivElement | null);
+
+    console.log("[handleReturnToMessage] Found return DOM element?", Boolean(el), el);
+
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [messageRefs, scrollRef, ui.returnToMessageId, setReturnToMessageId, setTargetHighlightedMessageId]);
 
   const handleSearchPrev = () =>
     setSearchMatchIndex(
@@ -123,10 +237,7 @@ export const useChatAppState = (
 
   const handleJumpToPinned = () => {
     if (!pinnedMessage) return;
-    messageRefs.current[pinnedMessage.id]?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
+    handleJumpToMessage(pinnedMessage.id);
   };
 
   const { selectConversation } = data;
@@ -139,11 +250,29 @@ export const useChatAppState = (
     [selectConversation, setShowPinnedBanner],
   );
 
-  /** Догрузка старых сообщений при прокрутке ленты к началу. */
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
+
+  const scrollToBottom = useCallback(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+      setShowScrollBottom(false);
+    }
+  }, [scrollRef]);
+
+  /** Догрузка старых сообщений при прокрутке ленты к началу и проверка кнопки "Вниз". */
   const { hasOlder, isLoadingOlder, loadOlder } = data;
   const handleMessagesScroll = useCallback(() => {
     const node = scrollRef.current;
-    if (!node || !hasOlder || isLoadingOlder) return;
+    if (!node) return;
+
+    const isScrolledUp =
+      node.scrollHeight - node.scrollTop - node.clientHeight > 200;
+    setShowScrollBottom(isScrolledUp);
+
+    if (!hasOlder || isLoadingOlder) return;
     if (node.scrollTop > 80) return;
     void loadOlder();
   }, [scrollRef, hasOlder, isLoadingOlder, loadOlder]);
@@ -174,6 +303,10 @@ export const useChatAppState = (
     handleJumpToPinned,
     handleContactSwitch,
     handleMessagesScroll,
+    handleJumpToMessage,
+    handleReturnToMessage,
+    showScrollBottom,
+    scrollToBottom,
     isHighlighted,
     isCurrentMatch,
   };

@@ -30,6 +30,8 @@ interface ChatMessageItemProps {
   setShowContactDrawer: (show: boolean) => void;
   formatRepliesCount: (count: number, lang: Lang) => string;
   setMessageRef: (id: string, el: HTMLDivElement | null) => void;
+  targetHighlightedMessageId?: string | null;
+  onJumpToMessage?: (targetId: string, returnFromId?: string) => void;
 }
 
 export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
@@ -43,6 +45,8 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
   t,
   highlighted,
   currentMatchMsg,
+  targetHighlightedMessageId,
+  onJumpToMessage,
   setHoveredMessageId,
   setActiveActionMsgId,
   handleReaction,
@@ -57,9 +61,15 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 }) => {
   const isEffectivelyDeleted = msg.deleted || msg.deletedForMe;
 
+  const isTargetHighlighted =
+    Boolean(targetHighlightedMessageId) &&
+    String(targetHighlightedMessageId) === String(msg.id);
+
   return (
     <motion.div
       key={msg.id}
+      id={`chat-msg-${msg.id}`}
+      data-msg-id={msg.id}
       ref={(el) => setMessageRef(msg.id, el)}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -71,9 +81,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           <img
             src={msg.senderAvatar}
             alt={msg.senderName || ""}
-            className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end"
+            className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end overflow-hidden"
             style={{
-              border: "2px solid rgba(167,139,250,0.35)",
+              boxShadow: "inset 0 0 0 2px rgba(167,139,250,0.45)",
             }}
           />
         )}
@@ -81,9 +91,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           <img
             src={msg.senderAvatar || activeContact.avatar}
             alt={msg.senderName || activeContact.name}
-            className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end"
+            className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end overflow-hidden"
             style={{
-              border: "2px solid rgba(167,139,250,0.35)",
+              boxShadow: "inset 0 0 0 2px rgba(167,139,250,0.45)",
             }}
           />
         )}
@@ -102,17 +112,46 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           )}
           {msg.replyTo && !isEffectivelyDeleted && (
             <div
-              className={`flex items-center gap-2 mb-1 px-3 py-1.5 rounded-xl border-l-4 border-violet-400 text-xs max-w-full ${isMe ? "self-end" : "self-start"} ${isDark ? "bg-violet-500/15" : "bg-violet-100/70"}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log("[ChatMessageItem] Clicked replyTo quote box!", {
+                  targetId: msg.replyTo?.id,
+                  currentId: msg.id,
+                  replyToObj: msg.replyTo,
+                });
+                if (msg.replyTo?.id) {
+                  onJumpToMessage?.(msg.replyTo.id, msg.id);
+                } else {
+                  console.warn("[ChatMessageItem] msg.replyTo has no id!", msg.replyTo);
+                }
+              }}
+              title="Перейти к исходному сообщению"
+              className={`flex items-center gap-2 mb-1 px-3 py-1.5 rounded-2xl text-xs max-w-full cursor-pointer transition-all duration-150 hover:scale-[1.01] hover:brightness-110 active:scale-[0.99] ${
+                isMe
+                  ? "bg-white/20 text-white border border-white/30"
+                  : isDark
+                    ? "bg-violet-500/20 border border-violet-400/20"
+                    : "bg-violet-100/80 border border-violet-200"
+              }`}
             >
+              <div
+                className={`w-1 h-6 rounded-full flex-shrink-0 ${
+                  isDark ? "bg-violet-400" : "bg-violet-600"
+                }`}
+              />
               <CornerUpLeft className="w-3 h-3 text-violet-400 flex-shrink-0" />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <span
-                  className={`font-semibold text-[10px] ${isDark ? "text-violet-300" : "text-violet-600"}`}
+                  className={`font-semibold text-[10px] ${
+                    isDark ? "text-violet-300" : "text-violet-600"
+                  }`}
                 >
                   {msg.replyTo.senderName}
                 </span>
                 <p
-                  className={`truncate max-w-[200px] ${isDark ? "text-white/60" : "text-gray-600"}`}
+                  className={`truncate max-w-[200px] ${
+                    isDark ? "text-white/70" : "text-gray-600"
+                  }`}
                 >
                   {msg.replyTo.text}
                 </p>
@@ -238,11 +277,13 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                 )}
               </AnimatePresence>
               <div
-                className={`px-4 py-2.5 text-sm leading-relaxed transition-all duration-200 ease-in-out cursor-default ${
-                  isEffectivelyDeleted
-                    ? isDark
-                      ? "italic text-white/30 rounded-2xl border border-dashed border-white/15 bg-white/4"
-                      : "italic text-black/35 rounded-2xl border border-dashed border-black/10 bg-black/4"
+                className={`px-4 py-2.5 text-sm leading-relaxed transition-all duration-300 ease-in-out cursor-default ${
+                  isTargetHighlighted
+                    ? "rounded-2xl ring-2 ring-violet-500 scale-[1.02] shadow-[0_0_24px_rgba(168,85,247,0.85)] animate-pulse"
+                    : isEffectivelyDeleted
+                      ? isDark
+                        ? "italic text-white/30 rounded-2xl border border-dashed border-white/15 bg-white/4"
+                        : "italic text-black/35 rounded-2xl border border-dashed border-black/10 bg-black/4"
                     : currentMatchMsg
                       ? "rounded-2xl ring-2 ring-amber-400 text-amber-100"
                       : highlighted
@@ -256,8 +297,17 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                             : `rounded-2xl rounded-bl-md ${isDark ? "text-white/90" : "text-gray-800"}`
                 }`}
                 style={
-                  isEffectivelyDeleted
-                    ? {}
+                  isTargetHighlighted
+                    ? {
+                        background:
+                          "linear-gradient(135deg, rgb(236, 72, 153), rgb(168, 85, 247), rgb(59, 130, 246))",
+                        border: "2px solid #ffffff",
+                        boxShadow:
+                          "0 0 28px rgba(236, 72, 153, 0.9), 0 0 12px rgba(168, 85, 247, 0.8)",
+                        color: "#ffffff",
+                      }
+                    : isEffectivelyDeleted
+                      ? {}
                     : currentMatchMsg
                       ? {
                           background: "rgba(251,191,36,0.25)",
@@ -310,11 +360,15 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               >
                 <If is={!!(msg.pinned && !isEffectivelyDeleted)}>
                   <span
-                    className={`inline-flex items-center gap-1 text-[10px] font-semibold mb-1 mr-2 ${
-                      isMe || isDark ? "text-violet-300" : "text-violet-600"
+                    className={`inline-flex items-center gap-1 text-[10px] font-semibold mb-1 mr-2 px-1.5 py-0.5 rounded-md ${
+                      isMe
+                        ? "bg-white/20 text-white border border-white/30"
+                        : isDark
+                          ? "bg-violet-500/25 text-violet-300 border border-violet-400/30"
+                          : "bg-violet-100 text-violet-700 border border-violet-300/60 font-bold"
                     }`}
                   >
-                    <Pin className="w-2.5 h-2.5" />
+                    <Pin className="w-3 h-3 flex-shrink-0" />
                     <span>{t.pinned}</span>
                   </span>
                 </If>

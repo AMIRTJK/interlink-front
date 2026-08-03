@@ -126,8 +126,8 @@ export const ContactInfoDrawer: React.FC<ContactInfoDrawerProps> = ({
                 <img
                   src={contact.avatar}
                   alt={contact.name}
-                  className="w-20 h-20 rounded-full object-cover border-4 shadow-md"
-                  style={{ borderColor: "rgba(167,139,250,0.5)" }}
+                  className="w-20 h-20 rounded-full object-cover shadow-md overflow-hidden"
+                  style={{ boxShadow: "inset 0 0 0 3px rgba(167,139,250,0.6)" }}
                 />
                 {contact.online && (
                   <span className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-green-400 border-2 border-white/20 rounded-full" />
