@@ -102,8 +102,11 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           )}
           {msg.replyTo && !isEffectivelyDeleted && (
             <div
-              className={`flex items-center gap-2 mb-1 px-3 py-1.5 rounded-xl border-l-4 border-violet-400 text-xs max-w-full ${isMe ? "self-end" : "self-start"} ${isDark ? "bg-violet-500/15" : "bg-violet-100/70"}`}
+              className={`flex items-center gap-2 mb-1 px-3 py-1.5 rounded-2xl text-xs max-w-full ${isMe ? "self-end" : "self-start"} ${isDark ? "bg-violet-500/20 border border-violet-400/20" : "bg-violet-100/80 border border-violet-200"}`}
             >
+              <div
+                className={`w-1 h-6 rounded-full flex-shrink-0 ${isDark ? "bg-violet-400" : "bg-violet-600"}`}
+              />
               <CornerUpLeft className="w-3 h-3 text-violet-400 flex-shrink-0" />
               <div className="min-w-0">
                 <span
@@ -112,7 +115,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                   {msg.replyTo.senderName}
                 </span>
                 <p
-                  className={`truncate max-w-[200px] ${isDark ? "text-white/60" : "text-gray-600"}`}
+                  className={`truncate max-w-[200px] ${isDark ? "text-white/70" : "text-gray-600"}`}
                 >
                   {msg.replyTo.text}
                 </p>
@@ -310,11 +313,15 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               >
                 <If is={!!(msg.pinned && !isEffectivelyDeleted)}>
                   <span
-                    className={`inline-flex items-center gap-1 text-[10px] font-semibold mb-1 mr-2 ${
-                      isMe || isDark ? "text-violet-300" : "text-violet-600"
+                    className={`inline-flex items-center gap-1 text-[10px] font-semibold mb-1 mr-2 px-1.5 py-0.5 rounded-md ${
+                      isMe
+                        ? "bg-white/20 text-white border border-white/30"
+                        : isDark
+                          ? "bg-violet-500/25 text-violet-300 border border-violet-400/30"
+                          : "bg-violet-100 text-violet-700 border border-violet-300/60 font-bold"
                     }`}
                   >
-                    <Pin className="w-2.5 h-2.5" />
+                    <Pin className="w-3 h-3 flex-shrink-0" />
                     <span>{t.pinned}</span>
                   </span>
                 </If>
