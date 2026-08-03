@@ -148,6 +148,10 @@ import { RelatedDocsAccordion } from "./RelatedDocsBlock";
 import { OriginalLetterCanvas } from "./OriginalLetterCanvas";
 import { VersionCompareCanvas } from "./VersionCompareCanvas";
 import {
+  AuthorshipHoverLayer,
+  useAuthorship,
+} from "./createInternalCorrespondence/authorship";
+import {
   paginateHtml,
   type StampInfo,
 } from "../../InternalCorrespondenceIncomingView/lib";
@@ -436,11 +440,15 @@ export const CreateInternalCorrespondence = ({
     !!(panelMode && panelSource) && panelMode !== "forward",
   );
   const [showVersionCompareSides, setShowVersionCompareSides] = useState(false);
+  // Подсветка авторов занимает правую колонку вместо сравниваемой версии,
+  // поэтому живёт только внутри режима истории версий.
+  const [showAuthorship, setShowAuthorship] = useState(false);
 
   const toggleOriginalLetterSides = (checked: boolean) => {
     setShowOriginalLetterSides(checked);
     if (checked) {
       setShowVersionCompareSides(false);
+      setShowAuthorship(false);
     }
   };
 
@@ -448,6 +456,8 @@ export const CreateInternalCorrespondence = ({
     setShowVersionCompareSides(checked);
     if (checked) {
       setShowOriginalLetterSides(false);
+    } else {
+      setShowAuthorship(false);
     }
   };
 
@@ -701,15 +711,37 @@ export const CreateInternalCorrespondence = ({
     [allVersions, activeVersionId, latestVersion],
   );
 
+  // Подсветка авторства занимает правую колонку целиком, поэтому включается
+  // только вместе с режимом истории версий. Версию берёт ту же, что и обычное
+  // сравнение, — иначе выбор в панели версий ни на что бы не влиял.
+  const isAuthorshipActive = showVersionCompareSides && showAuthorship;
+  const authorship = useAuthorship(
+    allVersions,
+    isAuthorshipActive,
+    activeVersion?.id ?? null,
+  );
+
   const versionCompareSheets = useMemo((): { pages: string[]; stamp: StampInfo } => {
-    if (!showVersionCompareSides || !activeVersion || !activeVersion.content) {
-      return { pages: [], stamp: null };
-    }
-    const res = paginateHtml(activeVersion.content, Number(fontSize) || 14);
+    if (!showVersionCompareSides) return { pages: [], stamp: null };
+
+    // В режиме авторства справа стоит актуальная версия с разметкой авторов,
+    // в обычном — выбранная версия как есть.
+    const source = isAuthorshipActive
+      ? authorship.markedHtml
+      : activeVersion?.content;
+    if (!source) return { pages: [], stamp: null };
+
+    const res = paginateHtml(source, Number(fontSize) || 14);
     const pages = [...res.pages];
     if (res.stamp) while (pages.length <= res.stamp.pageIndex) pages.push("");
     return { pages, stamp: res.stamp };
-  }, [showVersionCompareSides, activeVersion, fontSize]);
+  }, [
+    showVersionCompareSides,
+    isAuthorshipActive,
+    authorship.markedHtml,
+    activeVersion,
+    fontSize,
+  ]);
 
   const versionCompareTotal = Math.max(versionCompareSheets.pages.length, 1);
 
@@ -2414,6 +2446,8 @@ export const CreateInternalCorrespondence = ({
                   hasVersions={allVersions.length > 0}
                   showVersionCompareSides={showVersionCompareSides}
                   toggleVersionCompareSides={toggleVersionCompareSides}
+                  showAuthorship={showAuthorship}
+                  toggleAuthorship={setShowAuthorship}
                 />
               </div>
 
@@ -2459,6 +2493,8 @@ export const CreateInternalCorrespondence = ({
                   activeVersionNumber={activeVersion?.versionNumber}
                   activeVersionDate={activeVersion?.date}
                   versionCompareTotal={versionCompareTotal}
+                  showAuthorship={isAuthorshipActive}
+                  authorshipLegend={authorship.legend}
                 />
               </If>
               </div>
@@ -2516,7 +2552,9 @@ export const CreateInternalCorrespondence = ({
                       страница N версии всегда стоит напротив страницы N
                       актуального документа. */}
                   <If is={Boolean(showVersionCompareSides && activeVersion)}>
-                    <div
+                    <AuthorshipHoverLayer
+                      enabled={isAuthorshipActive}
+                      fragments={authorship.fragments}
                       className="shrink-0 order-2"
                       // Включённая линейка опускает основной холст на свою
                       // высоту — сдвигаем колонку версии на столько же, иначе
@@ -2528,7 +2566,7 @@ export const CreateInternalCorrespondence = ({
                         stamp={versionCompareSheets.stamp}
                         fontSize={Number(fontSize) || 14}
                       />
-                    </div>
+                    </AuthorshipHoverLayer>
                   </If>
 
                   <If is={Boolean(showOriginalLetterSides && panelMode && panelSource)}>
