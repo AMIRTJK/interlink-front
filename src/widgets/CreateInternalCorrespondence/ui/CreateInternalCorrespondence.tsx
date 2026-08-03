@@ -456,8 +456,29 @@ export const CreateInternalCorrespondence = ({
     setShowVersionCompareSides(checked);
     if (checked) {
       setShowOriginalLetterSides(false);
+      // Каждый вход в режим начинается с версии по умолчанию (предыдущей),
+      // прошлый выбор пользователя не тянем.
+      hasPickedCompareVersionRef.current = false;
     } else {
       setShowAuthorship(false);
+      hasPickedCompareVersionRef.current = false;
+      // Выходя из режима, возвращаемся на актуальную версию: иначе подставленная
+      // справа предыдущая осталась бы выбранной и заблокировала редактор
+      // (isOldVersionSelected).
+      setActiveVersionId(latestVersionId);
+    }
+  };
+
+  const toggleAuthorship = (checked: boolean) => {
+    setShowAuthorship(checked);
+    if (checked) {
+      // У подсветки авторов дефолт обратный сравнению: интересно, кто написал
+      // то, что в документе СЕЙЧАС. Помечаем версию как выбранную, иначе
+      // подстановка предыдущей тут же вернула бы её обратно.
+      hasPickedCompareVersionRef.current = true;
+      setActiveVersionId(latestVersionId);
+    } else {
+      hasPickedCompareVersionRef.current = false;
     }
   };
 
@@ -483,6 +504,9 @@ export const CreateInternalCorrespondence = ({
   const originalCurrent = Math.min(originalPage, originalTotal - 1);
 
   const composeAppliedRef = useRef(false);
+  // Выбирал ли пользователь версию для правой колонки сам. Пока нет — режим
+  // сравнения подставляет предыдущую версию.
+  const hasPickedCompareVersionRef = useRef(false);
   const stampRef = useRef<HTMLDivElement>(null);
   const pageCanvasRef = useRef<HTMLDivElement>(null);
   const rootScrollRef = useRef<HTMLDivElement>(null);
@@ -830,6 +854,9 @@ export const CreateInternalCorrespondence = ({
 
   const handleSelectVersion = (content: string, versionId: string | number) => {
     setActiveVersionId(versionId);
+    // Дальше версию справа выбирает пользователь — подстановка предыдущей по
+    // умолчанию больше не вмешивается.
+    hasPickedCompareVersionRef.current = true;
     if (!showVersionCompareSides) {
       if (editorRef.current) {
         const target = allVersions.find((v: any) => v.id === versionId);
@@ -2047,6 +2074,25 @@ export const CreateInternalCorrespondence = ({
     }
   }, [allVersions]);
 
+  // Слева режим сравнения всегда держит актуальную версию, поэтому справа по
+  // умолчанию ставим предыдущую — иначе обе колонки показывали бы один и тот
+  // же текст и сравнивать было бы нечего.
+  //
+  // Эффект объявлен ПОСЛЕ того, что подтягивает последнюю версию: тот на каждом
+  // обновлении списка версий возвращает activeVersionId к актуальной, и без
+  // поправки после каждого сохранения справа снова оказывался бы тот же текст.
+  useEffect(() => {
+    if (!showVersionCompareSides || allVersions.length < 2) return;
+    if (hasPickedCompareVersionRef.current) return;
+    if (
+      activeVersionId !== null &&
+      String(activeVersionId) !== String(latestVersionId)
+    ) {
+      return;
+    }
+    setActiveVersionId(allVersions[allVersions.length - 2].id);
+  }, [showVersionCompareSides, allVersions, latestVersionId, activeVersionId]);
+
   if (sent) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-[#F8FAFC] p-10 h-screen w-full">
@@ -2447,7 +2493,7 @@ export const CreateInternalCorrespondence = ({
                   showVersionCompareSides={showVersionCompareSides}
                   toggleVersionCompareSides={toggleVersionCompareSides}
                   showAuthorship={showAuthorship}
-                  toggleAuthorship={setShowAuthorship}
+                  toggleAuthorship={toggleAuthorship}
                 />
               </div>
 
