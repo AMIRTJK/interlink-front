@@ -66,11 +66,17 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
       transition={{ duration: 0.25 }}
       className={`flex items-end ${isMe ? "justify-end" : "justify-start"}`}
     >
-      <div
-        className={`inline-flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}
-        onMouseEnter={() => setHoveredMessageId(msg.id)}
-        onMouseLeave={() => setHoveredMessageId(null)}
-      >
+      <div className={`inline-flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+        {isMe && msg.senderAvatar && (
+          <img
+            src={msg.senderAvatar}
+            alt={msg.senderName || ""}
+            className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end"
+            style={{
+              border: "2px solid rgba(167,139,250,0.35)",
+            }}
+          />
+        )}
         {!isMe && (
           <img
             src={msg.senderAvatar || activeContact.avatar}
@@ -136,7 +142,11 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             />
           )}
           {(msg.text || isEffectivelyDeleted) && (
-            <div className="relative">
+            <div
+              className="relative"
+              onMouseEnter={() => setHoveredMessageId(msg.id)}
+              onMouseLeave={() => setHoveredMessageId(null)}
+            >
               <AnimatePresence>
                 {hoveredMessageId === msg.id && !isEffectivelyDeleted && (
                   <ReactionPicker
@@ -278,10 +288,10 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                           : isMe
                             ? {
                                 background:
-                                  "linear-gradient(135deg,rgba(124,58,237,0.65),rgba(168,85,247,0.55),rgba(6,182,212,0.5))",
+                                  "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))",
                                 border: "1px solid rgba(167,139,250,0.4)",
                                 boxShadow:
-                                  "0 4px 20px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.12)",
+                                  "0 0 16px rgba(124, 58, 237, 0.5)",
                                 backgroundClip: "padding-box",
                               }
                             : {
@@ -299,7 +309,11 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                 }
               >
                 <If is={!!(msg.pinned && !isEffectivelyDeleted)}>
-                  <span className="inline-flex items-center gap-1 text-[10px] text-violet-300 font-semibold mb-1 mr-2">
+                  <span
+                    className={`inline-flex items-center gap-1 text-[10px] font-semibold mb-1 mr-2 ${
+                      isMe || isDark ? "text-violet-300" : "text-violet-600"
+                    }`}
+                  >
                     <Pin className="w-2.5 h-2.5" />
                     <span>{t.pinned}</span>
                   </span>
@@ -376,16 +390,6 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             </div>
           </If>
         </div>
-        {isMe && msg.senderAvatar && (
-          <img
-            src={msg.senderAvatar}
-            alt={msg.senderName || ""}
-            className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end"
-            style={{
-              border: "2px solid rgba(167,139,250,0.35)",
-            }}
-          />
-        )}
       </div>
     </motion.div>
   );

@@ -117,7 +117,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
                 className={`px-3 py-2 text-xs rounded-2xl max-w-[80%] transition-all duration-200 ease-in-out hover:brightness-110 ${isTMe ? "rounded-br-md text-white" : `rounded-bl-md ${isDark ? "text-white/80" : "text-gray-800"}`}`}
                 style={{
                   background: isTMe
-                    ? "linear-gradient(135deg,rgba(124,58,237,0.6),rgba(168,85,247,0.5),rgba(6,182,212,0.45))"
+                    ? "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))"
                     : isDark
                       ? "rgba(255,255,255,0.1)"
                       : "rgba(255,255,255,0.85)",
@@ -126,6 +126,9 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
                     : isDark
                       ? "1px solid rgba(255,255,255,0.1)"
                       : "1px solid rgba(0,0,0,0.08)",
+                  boxShadow: isTMe
+                    ? "0 0 16px rgba(124, 58, 237, 0.5)"
+                    : "none",
                 }}
               >
                 {tm.text}
