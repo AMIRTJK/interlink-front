@@ -13,8 +13,8 @@ import {
   getAttachmentPreviewSource,
   mapMediaItem,
   type IChatLabels,
-  type MediaItem,
 } from "../../lib/chatMappers";
+import type { ChatMediaItem as MediaItem } from "../../model";
 import { useAuthorizedMedia } from "../../lib/useAuthorizedMedia";
 import { getAttachmentIcon } from "../../lib/chatHelpers";
 import { Translations } from "../../lib/translations";

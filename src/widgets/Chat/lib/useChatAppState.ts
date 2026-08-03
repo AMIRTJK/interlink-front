@@ -250,11 +250,29 @@ export const useChatAppState = (
     [selectConversation, setShowPinnedBanner],
   );
 
-  /** Догрузка старых сообщений при прокрутке ленты к началу. */
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
+
+  const scrollToBottom = useCallback(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+      setShowScrollBottom(false);
+    }
+  }, [scrollRef]);
+
+  /** Догрузка старых сообщений при прокрутке ленты к началу и проверка кнопки "Вниз". */
   const { hasOlder, isLoadingOlder, loadOlder } = data;
   const handleMessagesScroll = useCallback(() => {
     const node = scrollRef.current;
-    if (!node || !hasOlder || isLoadingOlder) return;
+    if (!node) return;
+
+    const isScrolledUp =
+      node.scrollHeight - node.scrollTop - node.clientHeight > 200;
+    setShowScrollBottom(isScrolledUp);
+
+    if (!hasOlder || isLoadingOlder) return;
     if (node.scrollTop > 80) return;
     void loadOlder();
   }, [scrollRef, hasOlder, isLoadingOlder, loadOlder]);
@@ -287,6 +305,8 @@ export const useChatAppState = (
     handleMessagesScroll,
     handleJumpToMessage,
     handleReturnToMessage,
+    showScrollBottom,
+    scrollToBottom,
     isHighlighted,
     isCurrentMatch,
   };

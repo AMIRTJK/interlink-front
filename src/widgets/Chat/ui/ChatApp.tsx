@@ -180,6 +180,8 @@ export const ChatApp: React.FC<IProps> = ({
     handleReturnToMessage,
     targetHighlightedMessageId,
     returnToMessageId,
+    showScrollBottom,
+    scrollToBottom,
     handleAcceptCall,
     handleDeclineCall,
     handleEndCall,
@@ -315,6 +317,8 @@ export const ChatApp: React.FC<IProps> = ({
             returnToMessageId={returnToMessageId}
             onJumpToMessage={handleJumpToMessage}
             onReturnToMessage={handleReturnToMessage}
+            showScrollBottom={showScrollBottom}
+            onScrollToBottom={scrollToBottom}
           />
 
           <AnimatePresence>
