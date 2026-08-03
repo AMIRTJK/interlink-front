@@ -21,6 +21,8 @@ interface IProps {
   hasVersions: boolean;
   showVersionCompareSides: boolean;
   toggleVersionCompareSides: (checked: boolean) => void;
+  showAuthorship: boolean;
+  toggleAuthorship: (checked: boolean) => void;
 }
 
 export const ToolbarViewToggles = ({
@@ -41,6 +43,8 @@ export const ToolbarViewToggles = ({
   hasVersions,
   showVersionCompareSides,
   toggleVersionCompareSides,
+  showAuthorship,
+  toggleAuthorship,
 }: IProps) => (
   <>
     <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
@@ -127,6 +131,20 @@ export const ToolbarViewToggles = ({
           className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
         />
         <span>Режим просмотра истории версий</span>
+      </label>
+    </If>
+    {/* Подсветка авторов живёт внутри режима истории версий: она занимает
+        правую колонку вместо сравниваемой версии. */}
+    <If is={hasVersions && showVersionCompareSides}>
+      <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
+      <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
+        <input
+          type="checkbox"
+          checked={showAuthorship}
+          onChange={(e) => toggleAuthorship(e.target.checked)}
+          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+        />
+        <span>Авторы правок</span>
       </label>
     </If>
   </>

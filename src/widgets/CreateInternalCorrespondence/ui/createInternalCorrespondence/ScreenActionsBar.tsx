@@ -21,6 +21,10 @@ interface IProps {
   isAlreadySent: boolean;
   isSending: boolean;
   canDecline: boolean;
+  /** Действия, разрешённые динамической ролью пользователя в этом документе */
+  canSave: boolean;
+  canSend: boolean;
+  canCancelSign: boolean;
   allSignaturesSigned: boolean;
   hasDocId: boolean;
 }
@@ -41,6 +45,9 @@ export const ScreenActionsBar = ({
   isAlreadySent,
   isSending,
   canDecline,
+  canSave,
+  canSend,
+  canCancelSign,
   allSignaturesSigned,
   hasDocId,
 }: IProps) => (
@@ -74,35 +81,37 @@ export const ScreenActionsBar = ({
         <span className="hidden sm:inline">Печать</span>
       </button>
 
-      <button
-        onClick={onSaveClick}
-        disabled={
-          !to.length ||
-          !subject.trim() ||
-          isSaving ||
-          isOldVersionSelected ||
-          isSigned ||
-          isAlreadySent
-        }
-        className={cn(
-          "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border",
-          to.length &&
-            subject.trim() &&
-            !isSaving &&
-            !isOldVersionSelected &&
-            !isSigned &&
-            !isAlreadySent
-            ? "bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
-            : "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed",
-        )}
-      >
-        {isSaving ? (
-          <Clock size={15} className="animate-spin" />
-        ) : (
-          <Save size={15} />
-        )}
-        <span>Сохранить</span>
-      </button>
+      <If is={canSave}>
+        <button
+          onClick={onSaveClick}
+          disabled={
+            !to.length ||
+            !subject.trim() ||
+            isSaving ||
+            isOldVersionSelected ||
+            isSigned ||
+            isAlreadySent
+          }
+          className={cn(
+            "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border",
+            to.length &&
+              subject.trim() &&
+              !isSaving &&
+              !isOldVersionSelected &&
+              !isSigned &&
+              !isAlreadySent
+              ? "bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
+              : "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed",
+          )}
+        >
+          {isSaving ? (
+            <Clock size={15} className="animate-spin" />
+          ) : (
+            <Save size={15} />
+          )}
+          <span>Сохранить</span>
+        </button>
+      </If>
 
       <If is={canDecline}>
         <button
@@ -115,7 +124,7 @@ export const ScreenActionsBar = ({
         </button>
       </If>
 
-      <If is={isSigned && !isAlreadySent}>
+      <If is={isSigned && !isAlreadySent && canCancelSign}>
         <button
           type="button"
           onClick={onCancelSign}
@@ -126,7 +135,7 @@ export const ScreenActionsBar = ({
         </button>
       </If>
 
-      {hasDocId && (
+      {hasDocId && canSend && (
         <button
           onClick={onSend}
           disabled={

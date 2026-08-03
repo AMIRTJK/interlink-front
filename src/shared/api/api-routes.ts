@@ -149,6 +149,10 @@ export const ApiRoutes = {
   DELETE_INTERNAL: "/api/v1/internal-correspondences/:id",
   RESTORE_INTERNAL: "/api/v1/internal-correspondences/:id/restore",
   GET_INTERNAL_STRUCTURE: "/api/v1/internal-correspondences/:id/structure",
+  // Контекстные (динамические) роли и разрешённые действия текущего
+  // пользователя внутри конкретного документа. Тот же объект бэкенд кладёт
+  // в current_user_context ответа GET_INTERNAL_BY_ID.
+  GET_INTERNAL_PERMISSIONS: "/api/v1/internal-correspondences/:id/permissions",
 
   // Recipients
   GET_INTERNAL_RECIPIENTS_USERS:

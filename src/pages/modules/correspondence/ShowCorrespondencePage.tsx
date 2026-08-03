@@ -93,6 +93,10 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
               letterItem.can_invite_visor ?? data?.can_invite_visor,
             can_create_assignment:
               letterItem.can_create_assignment ?? data?.can_create_assignment,
+            // Динамическая роль пользователя в этом документе и его список
+            // разрешённых действий — бэкенд кладёт объект и в item, и в корень.
+            current_user_context:
+              letterItem.current_user_context ?? data?.current_user_context,
           }
         : {
             id,

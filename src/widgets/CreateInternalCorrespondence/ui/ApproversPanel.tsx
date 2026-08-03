@@ -22,6 +22,9 @@ interface IProps {
   toggleApproverComment: (id: string) => void;
   updateApproverComment: (id: string, text: string) => void;
   docId?: string | number;
+  /** Разрешает ли роль пользователя в документе согласовывать его */
+  canApprove: boolean;
+  currentUserId?: string | number | null;
 }
 
 export const ApproversPanel = ({
@@ -40,6 +43,8 @@ export const ApproversPanel = ({
   toggleApproverComment,
   updateApproverComment,
   docId,
+  canApprove,
+  currentUserId,
 }: IProps) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [search, setSearch] = useState("");
@@ -207,6 +212,8 @@ export const ApproversPanel = ({
                     toggleApproverComment={toggleApproverComment}
                     updateApproverComment={updateApproverComment}
                     onRemoveApprover={onRemoveApprover}
+                    canApprove={canApprove}
+                    currentUserId={currentUserId}
                   />
                 ))}
               </If>

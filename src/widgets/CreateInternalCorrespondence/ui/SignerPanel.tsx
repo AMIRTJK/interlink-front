@@ -26,6 +26,8 @@ interface IProps {
   isSigned: boolean;
   docCreator: any;
   docId?: string | number;
+  /** Разрешает ли роль пользователя в документе подписывать его */
+  canSign: boolean;
 }
 
 export const SignerPanel = ({
@@ -48,6 +50,7 @@ export const SignerPanel = ({
   isSigned,
   docCreator,
   docId,
+  canSign,
 }: IProps) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [search, setSearch] = useState("");
@@ -222,6 +225,7 @@ export const SignerPanel = ({
                   stampVisible={stampVisible}
                   setStampVisible={setStampVisible}
                   handleInsertStamp={handleInsertStamp}
+                  canSign={canSign}
                 />
               </If>
             </div>

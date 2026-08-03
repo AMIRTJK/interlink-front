@@ -2,11 +2,19 @@ import { useRef, useEffect } from "react";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import {
+  correspondencePermissionsKey,
+  useCorrespondenceUserContext,
+} from "@entities/correspondence";
+import {
   mapServerAttachment,
   type AttachedFile,
 } from "@widgets/CreateInternalCorrespondence";
 import { normalizeVisors, VISOR_INVITE_HINT } from "../model";
-import { RegistryItem, ACTION_MENU_ITEMS } from "./incomingViewModel";
+import {
+  RegistryItem,
+  ACTION_MENU_ITEMS,
+  NO_PERMISSION_HINT,
+} from "./incomingViewModel";
 
 export function useIncomingViewData(
   item: RegistryItem,
@@ -15,6 +23,8 @@ export function useIncomingViewData(
   const mappedAttachments: AttachedFile[] = (item.attachments || []).map(
     (att: any) => mapServerAttachment(att, item.id)
   );
+
+  const userContext = useCorrespondenceUserContext(item?.id, { source: item });
 
   const { data: workflowResponse } = useGetQuery({
     url: item?.id
@@ -57,11 +67,21 @@ export function useIncomingViewData(
   const signatures = workflowResponse?.data?.signatures || [];
   const approvals = workflowResponse?.data?.approvals || [];
 
-  const canInviteVisor = item.can_invite_visor === true;
-  const canCreateAssignment = item.can_create_assignment !== false;
+  // Контекстные права документа главнее плоских флагов письма: они учитывают
+  // роль пользователя именно в этом документе. Флаги остаются запасным
+  // вариантом, пока бэкенд не отдал current_user_context.
+  const canInviteVisor = userContext.isResolved
+    ? userContext.can("invite_visor")
+    : item.can_invite_visor === true;
+  const canCreateAssignment = userContext.isResolved
+    ? userContext.can("create_assignment")
+    : item.can_create_assignment !== false;
   const itemVisors = normalizeVisors({ data: item.visors });
   const isVisorsAvailable =
-    canInviteVisor || item.is_visor === true || itemVisors.length > 0;
+    canInviteVisor ||
+    userContext.isVisor ||
+    item.is_visor === true ||
+    itemVisors.length > 0;
 
   const { data: visorsResponse, isLoading: loadingVisors } = useGetQuery({
     url: item?.id
@@ -107,7 +127,10 @@ export function useIncomingViewData(
       success: "Вы успешно ознакомились с документом",
       error: "Не удалось отметить ознакомление",
       invalidate: item?.id
-        ? [ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", String(item.id))]
+        ? [
+            ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", String(item.id)),
+            correspondencePermissionsKey(item.id),
+          ]
         : [],
     },
   });
@@ -121,14 +144,22 @@ export function useIncomingViewData(
 
   const visibleActionItems = ACTION_MENU_ITEMS.filter(
     (menuItem) => menuItem.id !== "visor" || canInviteVisor
-  ).map((menuItem) => ({
-    ...menuItem,
-    disabled: menuItem.id === "task" && !canCreateAssignment,
-    hint:
-      menuItem.id === "task" && !canCreateAssignment
-        ? VISOR_INVITE_HINT
-        : undefined,
-  }));
+  ).map((menuItem) => {
+    const isTaskBlocked = menuItem.id === "task" && !canCreateAssignment;
+    // Пункт «Поручение» уже объясняет себя подсказкой про визирующего —
+    // общий текст про роль показываем только остальным действиям.
+    const isBlockedByRole = !isTaskBlocked && !userContext.can(menuItem.action);
+
+    let hint: string | undefined;
+    if (isTaskBlocked) hint = VISOR_INVITE_HINT;
+    else if (isBlockedByRole) hint = NO_PERMISSION_HINT;
+
+    return {
+      ...menuItem,
+      disabled: isTaskBlocked || isBlockedByRole,
+      hint,
+    };
+  });
 
   const { data: versionsResponse, isLoading: loadingVersions } = useGetQuery({
     url: item?.id
@@ -182,6 +213,7 @@ export function useIncomingViewData(
   const forwardedUsers = item.forwarded_users || [];
 
   return {
+    userContext,
     mappedAttachments,
     relatedDocs,
     assignmentsCount,
