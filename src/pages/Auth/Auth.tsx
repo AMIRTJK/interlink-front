@@ -33,7 +33,7 @@ export const Auth = () => {
         </div>
 
         {/* Form Feature */}
-        <div className="backdrop-blur-xl bg-slate-900/40 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+        <div className="backdrop-blur-md bg-slate-900/30 border border-white/15 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
           <Login />
         </div>
       </div>
