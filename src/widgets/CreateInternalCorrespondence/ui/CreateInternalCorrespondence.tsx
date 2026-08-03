@@ -63,6 +63,10 @@ import {
 } from "../lib/utils";
 import { FilePreviewModal } from "@features/Profile";
 import {
+  correspondencePermissionsKey,
+  useCorrespondenceUserContext,
+} from "@entities/correspondence";
+import {
   DEFAULT_DOC_LAYOUT,
   RULER_MIN_CONTENT,
   RULER_MIN_MARGIN,
@@ -893,6 +897,7 @@ export const CreateInternalCorrespondence = ({
         invalidate: [
           ApiRoutes.INTERNAL_GET_WORKFLOW,
           ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
+          correspondencePermissionsKey(String(id || "")),
         ],
       },
       queryOptions: {
@@ -905,11 +910,22 @@ export const CreateInternalCorrespondence = ({
   const isAlreadySent = initialData?.item?.status === "sent";
 
   const currentUserId = tokenControl.getUserId() || tokenControl.getUserData()?.id;
+
+  // Динамическая роль пользователя в этом документе: она не зависит от
+  // глобального RBAC и решает, какие действия над письмом ему показывать.
+  const userContext = useCorrespondenceUserContext(id, { source: initialData });
+  const canEditDocument = userContext.can("edit");
+  const canSendDocument = userContext.can("send");
+  const canSignDocument = userContext.can("sign");
+  const canApproveDocument = userContext.can("approve");
+  const canCancelSignature = userContext.can("cancel_signature");
+
   const pendingSignature = rawWorkflowData?.data?.signatures?.find(
     (sig: any) => sig.status === "pending"
   );
   const isCurrentSigner = pendingSignature && currentUserId && String(currentUserId) === String(pendingSignature.user_id || pendingSignature.user?.id);
-  const canDecline = !!pendingSignature && !!isCurrentSigner;
+  const canDecline =
+    !!pendingSignature && !!isCurrentSigner && userContext.can("decline_signature");
 
   const [showDeclineModal, setShowDeclineModal] = useState(false);
   const [isDeclining, setIsDeclining] = useState(false);
@@ -983,6 +999,7 @@ export const CreateInternalCorrespondence = ({
           ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
           ApiRoutes.GET_INTERNAL_VERSIONS?.replace(":id", String(id || "")),
           ApiRoutes.GET_INTERNAL_BY_ID?.replace(":id", String(id || "")),
+          correspondencePermissionsKey(String(id || "")),
           ...CORRESPONDENCE_INVALIDATE_KEYS,
         ],
       },
@@ -1011,6 +1028,7 @@ export const CreateInternalCorrespondence = ({
       suppressSuccessToast: true,
       invalidate: [
         ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+        correspondencePermissionsKey(String(id || "")),
         ...CORRESPONDENCE_INVALIDATE_KEYS,
       ],
     },
@@ -1094,6 +1112,7 @@ export const CreateInternalCorrespondence = ({
       invalidate: [
         ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
         ApiRoutes.GET_INTERNAL_BY_ID?.replace(":id", String(id || "")),
+        correspondencePermissionsKey(String(id || "")),
       ],
     },
     queryOptions: {
@@ -1696,6 +1715,7 @@ export const CreateInternalCorrespondence = ({
 
   const applyFinalDS = async () => {
     if (!id || !finalSigner) return;
+    if (!canSignDocument) return;
     // Подписать можно только версию, выбранную «Для подписи». Иначе ЭЦП ушла бы
     // на одну версию, а штамп остался бы на открытой в редакторе другой версии.
     if (!isActiveVersionForSign) return;
@@ -1725,6 +1745,7 @@ export const CreateInternalCorrespondence = ({
   };
 
   const applyApproverDS = (recordId: string) => {
+    if (!canApproveDocument) return;
     const approverObj = approvers.find((a) => a.approvalRecordId === recordId);
     const rawNote = approverObj?.comment?.trim();
     const note = rawNote && rawNote.length > 0 ? rawNote : null;
@@ -1858,7 +1879,9 @@ export const CreateInternalCorrespondence = ({
     (sig: any) => sig.status === "signed",
   );
 
-  const isReadOnly = isSigned || isOldVersionSelected;
+  // Роль без права edit смотрит документ только на чтение — иначе пользователь
+  // правил бы текст, который всё равно некуда сохранить.
+  const isReadOnly = isSigned || isOldVersionSelected || !canEditDocument;
 
   // ===== Пересылка: цитата исходного письма в холсте =====
   // «Перенаправить» кладёт входящее письмо прямо в холст (сверху остаётся место
@@ -2153,6 +2176,9 @@ export const CreateInternalCorrespondence = ({
           isAlreadySent={isAlreadySent}
           isSending={isSending}
           canDecline={canDecline}
+          canSave={canEditDocument}
+          canSend={canSendDocument}
+          canCancelSign={canCancelSignature}
           allSignaturesSigned={allSignaturesSigned}
           hasDocId={!!id}
         />
@@ -2625,6 +2651,8 @@ export const CreateInternalCorrespondence = ({
                           toggleApproverComment={toggleApproverComment}
                           updateApproverComment={updateApproverComment}
                           docId={id}
+                          canApprove={canApproveDocument}
+                          currentUserId={currentUserId}
                         />
                         <SignerPanel
                           isOpen={signerOpen}
@@ -2657,6 +2685,7 @@ export const CreateInternalCorrespondence = ({
                           isSigned={isSigned}
                           docCreator={docCreator}
                           docId={id}
+                          canSign={canSignDocument}
                         />
                         <IncomingLettersPanel
                           isOpen={incomingOpen}

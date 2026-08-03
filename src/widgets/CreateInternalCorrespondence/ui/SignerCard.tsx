@@ -27,6 +27,8 @@ interface IProps {
   stampVisible: boolean;
   setStampVisible: (v: boolean) => void;
   handleInsertStamp: () => void;
+  /** Подписывать может только тот, кому это разрешает его роль в документе */
+  canSign: boolean;
 }
 
 export const SignerCard = ({
@@ -39,6 +41,7 @@ export const SignerCard = ({
   stampVisible,
   setStampVisible,
   handleInsertStamp,
+  canSign,
 }: IProps) => {
   const [zoomOpen, setZoomOpen] = useState(false);
   const [showSignConfirm, setShowSignConfirm] = useState(false);
@@ -128,7 +131,12 @@ export const SignerCard = ({
               </div>
             </If>
             <If
-              is={!!signer.isInvited && !signer.dsApplied && !signer.dsDeclined}
+              is={
+                !!signer.isInvited &&
+                !signer.dsApplied &&
+                !signer.dsDeclined &&
+                canSign
+              }
             >
               <button
                 onClick={() => setShowSignConfirm(true)}

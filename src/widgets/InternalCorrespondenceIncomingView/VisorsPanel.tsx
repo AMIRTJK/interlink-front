@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ShieldCheck, X, Trash2, Loader2 } from "lucide-react";
 import { cn, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
+import { correspondencePermissionsKey } from "@entities/correspondence";
 import { If } from "@shared/ui";
 import { VisorCandidatePicker } from "./VisorCandidatePicker";
 import { IVisorUser, formatVisorDate, getVisorInitials } from "./model";
@@ -30,6 +31,9 @@ export const VisorsPanel: React.FC<IProps> = ({
     ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", docId),
     ApiRoutes.GET_INTERNAL_INCOMING,
     ApiRoutes.GET_INTERNAL_COUNTERS,
+    // Приглашение визирующего открывает создание поручения — контекстные
+    // права по документу после этого меняются.
+    correspondencePermissionsKey(docId),
   ];
 
   const { mutate: inviteVisor, isPending: isInviting } = useMutationQuery<{

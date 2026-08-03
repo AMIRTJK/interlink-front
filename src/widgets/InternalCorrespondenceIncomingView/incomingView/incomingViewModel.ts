@@ -1,5 +1,6 @@
 import React from "react";
 import { Eye, CornerUpLeft, Forward, ShieldCheck, ClipboardList } from "lucide-react";
+import type { ICorrespondenceUserContext, TCorrespondenceAction } from "@entities/correspondence";
 
 export type TActionId = "seen" | "reply" | "forward" | "visor" | "task";
 
@@ -56,6 +57,7 @@ export interface RegistryItem {
   is_visor?: boolean;
   can_invite_visor?: boolean;
   can_create_assignment?: boolean;
+  current_user_context?: ICorrespondenceUserContext | Record<string, unknown> | null;
 }
 
 export interface InternalCorrespondenceIncomingViewProps {
@@ -123,13 +125,22 @@ export const ACTION_MENU_ITEMS: {
   id: TActionId;
   label: string;
   icon: React.ElementType;
+  /** Действие из current_user_context.allowed_actions, разрешающее пункт меню */
+  action: TCorrespondenceAction;
 }[] = [
-  { id: "seen", label: "Ознакомлен", icon: Eye },
-  { id: "reply", label: "Ответить", icon: CornerUpLeft },
-  { id: "forward", label: "Перенаправить", icon: Forward },
-  { id: "visor", label: "Пригласить визирующего", icon: ShieldCheck },
-  { id: "task", label: "Поручение", icon: ClipboardList },
+  { id: "seen", label: "Ознакомлен", icon: Eye, action: "acknowledge" },
+  { id: "reply", label: "Ответить", icon: CornerUpLeft, action: "reply" },
+  { id: "forward", label: "Перенаправить", icon: Forward, action: "forward" },
+  {
+    id: "visor",
+    label: "Пригласить визирующего",
+    icon: ShieldCheck,
+    action: "invite_visor",
+  },
+  { id: "task", label: "Поручение", icon: ClipboardList, action: "create_assignment" },
 ];
+
+export const NO_PERMISSION_HINT = "Действие недоступно для вашей роли в документе";
 
 export const initialsOf = (fullName?: string) => {
   if (!fullName) return "?";

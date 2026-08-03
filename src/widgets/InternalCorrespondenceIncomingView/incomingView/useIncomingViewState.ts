@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import type { TCorrespondenceAction } from "@entities/correspondence";
 import { type AttachedFile } from "@widgets/CreateInternalCorrespondence";
 import { type ToolbarSection } from "../EditorToolbar";
-import { RegistryItem, TActionId } from "./incomingViewModel";
+import { RegistryItem, TActionId, ACTION_MENU_ITEMS } from "./incomingViewModel";
 
 interface IDataArgs {
   item: RegistryItem;
   canCreateAssignment: boolean;
   canInviteVisor: boolean;
+  can: (action: TCorrespondenceAction) => boolean;
   visors: any[];
   isVisorsAvailable: boolean;
   assignmentsCount: number;
@@ -145,6 +147,12 @@ export function useIncomingViewState(data: IDataArgs) {
 
   const handleAction = (id: TActionId) => {
     setShowActionMenu(false);
+
+    // Страховка от клика по действию, которого нет у роли пользователя в
+    // документе: пункт меню уже задизейблен, но обработчик зовут и по клавише.
+    const menuItem = ACTION_MENU_ITEMS.find((action) => action.id === id);
+    if (menuItem && !data.can(menuItem.action)) return;
+
     if (id === "seen") {
       data.seenMutate({});
       return;
