@@ -47,9 +47,9 @@ interface IProps {
 }
 
 const chatVariants = {
-  enter: (dir: number) => ({ opacity: 0, x: dir * 32 }),
+  enter: (dir: number) => ({ opacity: 0, x: dir * 12 }),
   center: { opacity: 1, x: 0 },
-  exit: (dir: number) => ({ opacity: 0, x: -dir * 32 }),
+  exit: (dir: number) => ({ opacity: 0, x: -dir * 12 }),
 };
 
 export const MessageList = ({
@@ -90,7 +90,8 @@ export const MessageList = ({
       <motion.div
         ref={scrollRef}
         onScroll={onScroll}
-        className="absolute inset-0 overflow-y-auto px-3 sm:px-6 py-4 space-y-3.5 scrollbar-thin scrollbar-thumb-violet-500/20 scrollbar-track-transparent hover:scrollbar-thumb-violet-500/40"
+        className="absolute inset-0 overflow-y-auto overflow-x-hidden px-3 sm:px-6 py-4 space-y-3.5 scrollbar-thin scrollbar-thumb-violet-500/20 scrollbar-track-transparent hover:scrollbar-thumb-violet-500/40"
+        style={{ overflowX: "hidden" }}
       >
         <AnimatePresence mode="wait" custom={switchDirection}>
           <motion.div
@@ -101,7 +102,8 @@ export const MessageList = ({
             animate="center"
             exit="exit"
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="space-y-3.5 min-h-full flex flex-col justify-end"
+            className="space-y-3.5 min-h-full flex flex-col justify-end overflow-x-hidden"
+            style={{ overflowX: "hidden" }}
           >
             <If is={hasOlder}>
               <div className="flex justify-center py-2">
