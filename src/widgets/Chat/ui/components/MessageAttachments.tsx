@@ -48,11 +48,23 @@ export const MessageAttachments = ({ attachments, isMe, isDark }: IProps) => {
         return (
           <div
             key={key}
-            className={`mb-1.5 rounded-2xl overflow-hidden transition-all duration-200 ease-in-out hover:brightness-110 ${isMe ? "rounded-br-md" : "rounded-bl-md"}`}
+            className={`mb-1.5 rounded-2xl overflow-hidden transition-all duration-200 ease-in-out hover:brightness-105 ${isMe ? "rounded-br-md" : "rounded-bl-md"}`}
             style={{
+              background: isMe
+                ? "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))"
+                : isDark
+                  ? "rgba(255,255,255,0.1)"
+                  : "rgba(255,255,255,0.95)",
               border: isMe
-                ? "1px solid rgba(167,139,250,0.35)"
-                : "1px solid rgba(255,255,255,0.12)",
+                ? "1px solid rgba(196,181,253,0.5)"
+                : isDark
+                  ? "1px solid rgba(255,255,255,0.15)"
+                  : "1px solid rgba(124,58,237,0.2)",
+              boxShadow: isMe
+                ? "0 0 16px rgba(124, 58, 237, 0.5)"
+                : isDark
+                  ? "0 2px 10px rgba(0,0,0,0.2)"
+                  : "0 2px 10px rgba(124,58,237,0.08)",
             }}
           >
             {attachment.type === "image" && attachment.preview ? (
@@ -67,18 +79,40 @@ export const MessageAttachments = ({ attachments, isMe, isDark }: IProps) => {
                 type="button"
                 onClick={() => handleDownload(attachment)}
                 aria-label={`Скачать ${attachment.name}`}
-                className="flex items-center gap-2 px-3 py-2.5 min-w-[180px] bg-white/8 text-left w-full"
+                className="flex items-center gap-2.5 px-3.5 py-2.5 min-w-[200px] text-left w-full cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-violet-300 flex-shrink-0 bg-violet-500/20">
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                    isMe
+                      ? "bg-white/20 text-white"
+                      : isDark
+                        ? "bg-violet-500/25 text-violet-300"
+                        : "bg-violet-100 text-violet-600 font-semibold"
+                  }`}
+                >
                   {getAttachmentIcon(attachment.type)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium truncate text-white/80">
+                  <p
+                    className={`text-xs font-semibold truncate ${
+                      isMe || isDark ? "text-white/95" : "text-gray-900"
+                    }`}
+                  >
                     {attachment.name}
                   </p>
-                  <p className="text-[10px] text-white/40">{attachment.size}</p>
+                  <p
+                    className={`text-[10px] ${
+                      isMe || isDark ? "text-white/60" : "text-gray-500"
+                    }`}
+                  >
+                    {attachment.size}
+                  </p>
                 </div>
-                <Download className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
+                <Download
+                  className={`w-4 h-4 flex-shrink-0 ${
+                    isMe || isDark ? "text-white/70" : "text-violet-600"
+                  }`}
+                />
               </button>
             )}
           </div>

@@ -41,7 +41,7 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
       className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl min-w-[160px] transition-all duration-200 ease-in-out hover:brightness-110 ${isMe ? "rounded-br-md" : "rounded-bl-md"}`}
       style={{
         background: isMe
-          ? "linear-gradient(135deg,rgba(124,58,237,0.5),rgba(168,85,247,0.4),rgba(6,182,212,0.35))"
+          ? "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))"
           : isDark
             ? "rgba(255,255,255,0.1)"
             : "rgba(255,255,255,0.85)",
@@ -50,6 +50,9 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
           : isDark
             ? "1px solid rgba(255,255,255,0.15)"
             : "1px solid rgba(0,0,0,0.08)",
+        boxShadow: isMe
+          ? "0 0 16px rgba(124, 58, 237, 0.5)"
+          : "none",
       }}
     >
       <button
