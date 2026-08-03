@@ -1,13 +1,13 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { ArrowDown, Loader2 } from "lucide-react";
 import { If } from "@shared/ui";
 import type { Contact, Message, ReplyPreview } from "../../model";
 import { Lang, Translations } from "../../lib/translations";
 import { ChatMessageItem } from "./ChatMessageItem";
 
 // Лента сообщений: загрузка, пустое состояние, догрузка старых при прокрутке
-// вверх и индикатор набора от собеседников (событие chat.typing.updated).
+// вверх, индикатор набора и плавающая кнопка возврата к ответу.
 
 interface IProps {
   messages: Message[];
@@ -25,6 +25,10 @@ interface IProps {
   isDark: boolean;
   lang: Lang;
   t: Translations;
+  targetHighlightedMessageId?: string | null;
+  returnToMessageId?: string | null;
+  onJumpToMessage?: (targetId: string, returnFromId?: string) => void;
+  onReturnToMessage?: () => void;
   isHighlighted: (msgId: string) => boolean;
   isCurrentMatch: (msgId: string) => boolean;
   setHoveredMessageId: (id: string | null) => void;
@@ -59,9 +63,20 @@ export const MessageList = ({
   switchDirection,
   isDark,
   t,
+  targetHighlightedMessageId,
+  returnToMessageId,
+  onJumpToMessage,
+  onReturnToMessage,
   ...itemProps
 }: IProps) => {
   const isEmpty = !isLoading && !isError && messages.length === 0;
+
+  if (targetHighlightedMessageId || returnToMessageId) {
+    console.log("[MessageList] Render with active reply state:", {
+      targetHighlightedMessageId,
+      returnToMessageId,
+    });
+  }
 
   return (
     <div
@@ -140,6 +155,8 @@ export const MessageList = ({
               t={t}
               highlighted={itemProps.isHighlighted(msg.id)}
               currentMatchMsg={itemProps.isCurrentMatch(msg.id)}
+              targetHighlightedMessageId={targetHighlightedMessageId}
+              onJumpToMessage={onJumpToMessage}
               {...itemProps}
             />
           ))}
@@ -184,6 +201,28 @@ export const MessageList = ({
             )}
           </AnimatePresence>
         </motion.div>
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {returnToMessageId && (
+          <motion.button
+            initial={{ opacity: 0, y: 20, scale: 0.85 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.85 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            onClick={onReturnToMessage}
+            aria-label="Вернуться к сообщению с ответом"
+            title="Вернуться к сообщению с ответом"
+            className="absolute bottom-6 right-8 z-30 flex items-center gap-2.5 px-5 py-3 rounded-full text-white font-semibold text-xs shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer border border-white/30"
+            style={{
+              background: "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))",
+              boxShadow: "0 8px 25px rgba(124, 58, 237, 0.6)",
+            }}
+          >
+            <ArrowDown className="w-4 h-4 animate-bounce text-white flex-shrink-0" />
+            <span>К своему сообщению</span>
+          </motion.button>
+        )}
       </AnimatePresence>
     </div>
   );

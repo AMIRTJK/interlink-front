@@ -132,13 +132,100 @@ export const useChatAppState = (
     });
   }, [searchMatchIndex, searchMatches, messageRefs]);
 
-  const { setShowContactDrawer, setOpenThreadMsgId, setSearchMatchIndex } = ui;
+  const {
+    setShowContactDrawer,
+    setOpenThreadMsgId,
+    setSearchMatchIndex,
+    setReturnToMessageId,
+    setTargetHighlightedMessageId,
+  } = ui;
   useEffect(() => {
     setShowContactDrawer(false);
     setOpenThreadMsgId(null);
-  }, [activeConversationId, setShowContactDrawer, setOpenThreadMsgId]);
+    setReturnToMessageId(null);
+    setTargetHighlightedMessageId(null);
+  }, [
+    activeConversationId,
+    setShowContactDrawer,
+    setOpenThreadMsgId,
+    setReturnToMessageId,
+    setTargetHighlightedMessageId,
+  ]);
 
   /* ===================== ПОИСК ПО ЛЕНТЕ И НАВИГАЦИЯ ===================== */
+
+  const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleJumpToMessage = useCallback(
+    (targetId: string | number, returnFromId?: string | number) => {
+      const targetStr = String(targetId);
+      const returnFromStr = returnFromId ? String(returnFromId) : null;
+      console.log("[handleJumpToMessage] EXECUTED", {
+        targetId,
+        returnFromId,
+        targetStr,
+        returnFromStr,
+        messageRefsKeys: Object.keys(messageRefs.current),
+      });
+
+      // Всегда взводим возврат к сообщению и подсветку
+      if (returnFromStr && returnFromStr !== targetStr) {
+        console.log("[handleJumpToMessage] Setting returnToMessageId:", returnFromStr);
+        setReturnToMessageId(returnFromStr);
+      }
+      console.log("[handleJumpToMessage] Setting targetHighlightedMessageId:", targetStr);
+      setTargetHighlightedMessageId(targetStr);
+
+      if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+      highlightTimeoutRef.current = setTimeout(() => {
+        console.log("[handleJumpToMessage] Clearing highlight for", targetStr);
+        setTargetHighlightedMessageId(null);
+      }, 3000);
+
+      // Ищем DOM узел во всех реестрах и селекторах
+      const el =
+        messageRefs.current[targetStr] ||
+        messageRefs.current[Number(targetStr)] ||
+        document.getElementById(`chat-msg-${targetStr}`) ||
+        (scrollRef.current?.querySelector(`[data-msg-id="${targetStr}"]`) as HTMLDivElement | null);
+
+      console.log("[handleJumpToMessage] Found DOM element?", Boolean(el), el);
+
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        console.warn("[handleJumpToMessage] Element NOT found in DOM for ID:", targetStr);
+      }
+    },
+    [messageRefs, scrollRef, setReturnToMessageId, setTargetHighlightedMessageId],
+  );
+
+  const handleReturnToMessage = useCallback(() => {
+    const returnId = ui.returnToMessageId;
+    console.log("[handleReturnToMessage] EXECUTED, returnId:", returnId);
+    if (!returnId) return;
+
+    const returnStr = String(returnId);
+    setTargetHighlightedMessageId(returnStr);
+    setReturnToMessageId(null);
+
+    if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+    highlightTimeoutRef.current = setTimeout(() => {
+      setTargetHighlightedMessageId(null);
+    }, 2000);
+
+    const el =
+      messageRefs.current[returnStr] ||
+      messageRefs.current[Number(returnStr)] ||
+      document.getElementById(`chat-msg-${returnStr}`) ||
+      (scrollRef.current?.querySelector(`[data-msg-id="${returnStr}"]`) as HTMLDivElement | null);
+
+    console.log("[handleReturnToMessage] Found return DOM element?", Boolean(el), el);
+
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [messageRefs, scrollRef, ui.returnToMessageId, setReturnToMessageId, setTargetHighlightedMessageId]);
 
   const handleSearchPrev = () =>
     setSearchMatchIndex(
@@ -150,10 +237,7 @@ export const useChatAppState = (
 
   const handleJumpToPinned = () => {
     if (!pinnedMessage) return;
-    messageRefs.current[pinnedMessage.id]?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
+    handleJumpToMessage(pinnedMessage.id);
   };
 
   const { selectConversation } = data;
@@ -201,6 +285,8 @@ export const useChatAppState = (
     handleJumpToPinned,
     handleContactSwitch,
     handleMessagesScroll,
+    handleJumpToMessage,
+    handleReturnToMessage,
     isHighlighted,
     isCurrentMatch,
   };
