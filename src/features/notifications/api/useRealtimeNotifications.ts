@@ -1,8 +1,9 @@
 import { useCallback, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  createEcho,
+  acquireEcho,
   getUserChannelName,
+  releaseEcho,
   toast,
   tokenControl,
   useCurrentUser,
@@ -64,15 +65,12 @@ export const useRealtimeNotifications = () => {
     let echo: TEchoClient | null = null;
     let isCancelled = false;
 
-    createEcho(token)
+    acquireEcho(token)
       .then((instance) => {
         if (!instance) return;
 
         // Пользователь успел разлогиниться или сменить токен, пока грузился чанк.
-        if (isCancelled) {
-          instance.disconnect();
-          return;
-        }
+        if (isCancelled) return;
 
         echo = instance;
         instance
@@ -93,10 +91,12 @@ export const useRealtimeNotifications = () => {
 
     return () => {
       isCancelled = true;
-      if (!echo) return;
-      echo.leave(channelName);
-      echo.disconnect();
+      // Канал `user.{id}` слушает ещё и чат, поэтому снимаем только свой
+      // обработчик: `leave` отписал бы соседа. Соединение общее — его закрывает
+      // последний освободивший ссылку.
+      echo?.private(channelName).stopListening(EVENT_NAME, handleNotification);
       echo = null;
+      releaseEcho();
     };
   }, [userId, token, handleNotification]);
 };

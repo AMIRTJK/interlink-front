@@ -108,6 +108,21 @@ export type Translations = {
   recent: string;
   contacts: string;
   add: string;
+  // Данные с бэкенда: превью вложений, пустые состояния, создание группы
+  attachmentLabel: string;
+  voiceMessage: string;
+  noChats: string;
+  noMessages: string;
+  noMessagesHint: string;
+  loadingChats: string;
+  newGroup: string;
+  groupTitlePlaceholder: string;
+  groupAvatarLabel: string;
+  createGroup: string;
+  selectedMembers: string;
+  loadMore: string;
+  you: string;
+  noSendPermission: string;
 };
 export const TRANSLATIONS: Record<Lang, Translations> = {
   en: {
@@ -197,7 +212,21 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     hoursAgo: '2h ago',
     recent: 'Recent',
     contacts: 'Contacts',
-    add: 'Add'
+    add: 'Add',
+    attachmentLabel: 'Attachment',
+    voiceMessage: 'Voice message',
+    noChats: 'No chats yet',
+    noMessages: 'No messages yet',
+    noMessagesHint: 'Send the first message to start the conversation.',
+    loadingChats: 'Loading chats…',
+    newGroup: 'New group',
+    groupTitlePlaceholder: 'Group name',
+    groupAvatarLabel: 'Group avatar',
+    createGroup: 'Create group',
+    selectedMembers: 'selected',
+    loadMore: 'Load earlier messages',
+    you: 'You',
+    noSendPermission: 'You have no permission to send messages in this chat.'
   },
   ru: {
     search: 'Поиск',
@@ -286,7 +315,21 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     hoursAgo: '2ч назад',
     recent: 'Последние',
     contacts: 'Контакты',
-    add: 'Добавить'
+    add: 'Добавить',
+    attachmentLabel: 'Вложение',
+    voiceMessage: 'Голосовое сообщение',
+    noChats: 'Чатов пока нет',
+    noMessages: 'Сообщений пока нет',
+    noMessagesHint: 'Отправьте первое сообщение, чтобы начать переписку.',
+    loadingChats: 'Загружаем чаты…',
+    newGroup: 'Новая группа',
+    groupTitlePlaceholder: 'Название группы',
+    groupAvatarLabel: 'Аватар группы',
+    createGroup: 'Создать группу',
+    selectedMembers: 'выбрано',
+    loadMore: 'Загрузить предыдущие сообщения',
+    you: 'Вы',
+    noSendPermission: 'У вас нет права отправлять сообщения в чате.'
   },
   tg: {
     search: 'Ҷустуҷӯ',
@@ -375,6 +418,20 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     hoursAgo: '2с пеш',
     recent: 'Охирон',
     contacts: 'Тамосҳо',
-    add: 'Илова'
+    add: 'Илова',
+    attachmentLabel: 'Замима',
+    voiceMessage: 'Паёми овозӣ',
+    noChats: 'Ҳоло чат нест',
+    noMessages: 'Ҳоло паём нест',
+    noMessagesHint: 'Барои оғози сӯҳбат паёми аввалро фиристед.',
+    loadingChats: 'Чатҳо бор мешаванд…',
+    newGroup: 'Гурӯҳи нав',
+    groupTitlePlaceholder: 'Номи гурӯҳ',
+    groupAvatarLabel: 'Аватари гурӯҳ',
+    createGroup: 'Сохтани гурӯҳ',
+    selectedMembers: 'интихобшуда',
+    loadMore: 'Паёмҳои пешинаро бор кардан',
+    you: 'Шумо',
+    noSendPermission: 'Шумо ҳуқуқи фиристодани паём надоред.'
   }
 };

@@ -6,7 +6,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { tokenControl } from "@shared/lib";
 import { ChatModal } from "../ui/ChatModal";
+import { usePresenceHeartbeat } from "../api";
 
 // ─── Глобальный доступ к чату ─────────────────────────────────────────────────
 // Провайдер хранит состояние всплывающего чата («открыт/закрыт» и «компактное
@@ -30,6 +32,10 @@ const ChatContext = createContext<ChatContextValue | null>(null);
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Присутствие отмечаем на уровне приложения, а не открытого чата: коллеги
+  // должны видеть пользователя в сети, пока он работает в системе.
+  usePresenceHeartbeat(Boolean(tokenControl.get()));
 
   const openChat = useCallback(() => setIsOpen(true), []);
   const closeChat = useCallback(() => setIsOpen(false), []);

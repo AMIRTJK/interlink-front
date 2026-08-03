@@ -18,7 +18,9 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
     animate={{ opacity: 1, y: 0, scale: 1 }}
     exit={{ opacity: 0, y: 6, scale: 0.9 }}
     transition={{ duration: 0.15 }}
-    className={`absolute -top-10 ${isMe ? "right-0" : "left-0"} flex items-center gap-0.5 rounded-full px-2 py-1 z-30 ${isDark ? "backdrop-blur-2xl bg-white/10 border border-white/20" : "backdrop-blur-2xl bg-white/80 border border-white/30"}`}
+    // -top-12 оставляет зазор до пузыря: на -top-10 панель прилегала вплотную
+    // и перехватывала наведение на само сообщение.
+    className={`absolute -top-12 ${isMe ? "right-0" : "left-0"} flex items-center gap-0.5 rounded-full px-2 py-1 z-30 ${isDark ? "backdrop-blur-2xl bg-white/10 border border-white/20" : "backdrop-blur-2xl bg-white/80 border border-white/30"}`}
     style={{
       boxShadow: isDark
         ? "0 4px 20px rgba(139,92,246,0.4)"

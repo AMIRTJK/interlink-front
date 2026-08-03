@@ -4,8 +4,7 @@ import { Clock3, CornerUpLeft, Forward, MoreHorizontal, Pin, MessageSquare } fro
 import { Contact, Message, ReplyPreview } from "../../model";
 import { Lang, Translations } from "../../lib/translations";
 import { If } from "@shared/ui";
-import { getAttachmentIcon } from "../../lib/chatHelpers";
-import { VoiceBubble } from "./VoiceBubble";
+import { MessageAttachments } from "./MessageAttachments";
 import { ReactionPicker } from "./ReactionPicker";
 import { MessageActionMenu } from "./MessageActionMenu";
 
@@ -74,8 +73,8 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
       >
         {!isMe && (
           <img
-            src={activeContact.avatar}
-            alt={activeContact.name}
+            src={msg.senderAvatar || activeContact.avatar}
+            alt={msg.senderName || activeContact.name}
             className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end"
             style={{
               border: "2px solid rgba(167,139,250,0.35)",
@@ -122,47 +121,20 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               <span>{t.forwarded}</span>
             </div>
           )}
-          {msg.attachment?.type === "voice" && !isEffectivelyDeleted && (
-            <VoiceBubble
-              duration={msg.attachment.duration || 5}
+          <If is={!!(msg.senderName && !isMe && activeContact.isGroup)}>
+            <span
+              className={`text-[10px] font-semibold mb-0.5 ${isDark ? "text-violet-300" : "text-violet-600"}`}
+            >
+              {msg.senderName}
+            </span>
+          </If>
+          {!isEffectivelyDeleted && (
+            <MessageAttachments
+              attachments={msg.attachments ?? (msg.attachment ? [msg.attachment] : [])}
               isMe={isMe}
               isDark={isDark}
             />
           )}
-          {msg.attachment &&
-            msg.attachment.type !== "voice" &&
-            !isEffectivelyDeleted && (
-              <div
-                className={`mb-1.5 rounded-2xl overflow-hidden transition-all duration-200 ease-in-out hover:brightness-110 ${isMe ? "rounded-br-md" : "rounded-bl-md"}`}
-                style={{
-                  border: isMe
-                    ? "1px solid rgba(167,139,250,0.35)"
-                    : "1px solid rgba(255,255,255,0.12)",
-                }}
-              >
-                {msg.attachment.type === "image" && msg.attachment.preview ? (
-                  <img
-                    src={msg.attachment.preview}
-                    alt={msg.attachment.name}
-                    className="max-w-[220px] max-h-48 object-cover"
-                  />
-                ) : (
-                  <div className="flex items-center gap-2 px-3 py-2.5 min-w-[180px] bg-white/8">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center text-violet-300 flex-shrink-0 bg-violet-500/20">
-                      {getAttachmentIcon(msg.attachment.type)}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium truncate text-white/80">
-                        {msg.attachment.name}
-                      </p>
-                      <p className="text-[10px] text-white/40">
-                        {msg.attachment.size}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           {(msg.text || isEffectivelyDeleted) && (
             <div className="relative">
               <AnimatePresence>
@@ -180,7 +152,10 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className={`absolute -top-3.5 ${isMe ? "-left-8" : "-right-8"} flex items-center z-20`}
+                    // Панель реакций занимает полосу над пузырём и шире его,
+                    // поэтому кнопку меню держим сбоку по центру строки —
+                    // иначе они перекрываются и «⋮» перестаёт нажиматься.
+                    className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-9" : "-right-9"} flex items-center z-20`}
                   >
                     <button
                       onClick={(e) => {
@@ -212,7 +187,8 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                     onReply={() => {
                       setReplyingTo({
                         id: msg.id,
-                        senderName: isMe ? "You" : activeContact.name,
+                        senderName:
+                          msg.senderName || (isMe ? t.you : activeContact.name),
                         text: msg.text,
                       });
                       setActiveActionMsgId(null);
@@ -400,10 +376,10 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             </div>
           </If>
         </div>
-        {isMe && (
+        {isMe && msg.senderAvatar && (
           <img
-            src="https://i.pravatar.cc/150?img=5"
-            alt="You"
+            src={msg.senderAvatar}
+            alt={msg.senderName || ""}
             className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end"
             style={{
               border: "2px solid rgba(167,139,250,0.35)",
