@@ -66,11 +66,17 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
       transition={{ duration: 0.25 }}
       className={`flex items-end ${isMe ? "justify-end" : "justify-start"}`}
     >
-      <div
-        className={`inline-flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}
-        onMouseEnter={() => setHoveredMessageId(msg.id)}
-        onMouseLeave={() => setHoveredMessageId(null)}
-      >
+      <div className={`inline-flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+        {isMe && msg.senderAvatar && (
+          <img
+            src={msg.senderAvatar}
+            alt={msg.senderName || ""}
+            className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end"
+            style={{
+              border: "2px solid rgba(167,139,250,0.35)",
+            }}
+          />
+        )}
         {!isMe && (
           <img
             src={msg.senderAvatar || activeContact.avatar}
@@ -136,7 +142,11 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             />
           )}
           {(msg.text || isEffectivelyDeleted) && (
-            <div className="relative">
+            <div
+              className="relative"
+              onMouseEnter={() => setHoveredMessageId(msg.id)}
+              onMouseLeave={() => setHoveredMessageId(null)}
+            >
               <AnimatePresence>
                 {hoveredMessageId === msg.id && !isEffectivelyDeleted && (
                   <ReactionPicker
@@ -376,16 +386,6 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             </div>
           </If>
         </div>
-        {isMe && msg.senderAvatar && (
-          <img
-            src={msg.senderAvatar}
-            alt={msg.senderName || ""}
-            className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end"
-            style={{
-              border: "2px solid rgba(167,139,250,0.35)",
-            }}
-          />
-        )}
       </div>
     </motion.div>
   );
