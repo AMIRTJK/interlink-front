@@ -147,7 +147,8 @@ export const GroupMembersPanel = ({
             <img
               src={avatarOf(member)}
               alt={nameOf(member)}
-              className="w-7 h-7 rounded-full object-cover flex-shrink-0"
+              className="w-7 h-7 rounded-full object-cover flex-shrink-0 overflow-hidden"
+              style={{ boxShadow: "inset 0 0 0 1.5px rgba(167,139,250,0.35)" }}
             />
             <div className="flex-1 min-w-0">
               <p

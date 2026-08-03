@@ -81,9 +81,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           <img
             src={msg.senderAvatar}
             alt={msg.senderName || ""}
-            className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end"
+            className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end overflow-hidden"
             style={{
-              border: "2px solid rgba(167,139,250,0.35)",
+              boxShadow: "inset 0 0 0 2px rgba(167,139,250,0.45)",
             }}
           />
         )}
@@ -91,9 +91,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           <img
             src={msg.senderAvatar || activeContact.avatar}
             alt={msg.senderName || activeContact.name}
-            className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end"
+            className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end overflow-hidden"
             style={{
-              border: "2px solid rgba(167,139,250,0.35)",
+              boxShadow: "inset 0 0 0 2px rgba(167,139,250,0.45)",
             }}
           />
         )}

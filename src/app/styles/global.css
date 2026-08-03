@@ -186,9 +186,50 @@ body {
   min-height: 1.8em;
 }
 
-/* No Animations Mode - REMOVED */
+/* ==========================================================================
+   Custom Scrollbar Styles (Sleek Dark/Light Mode Scrollbars)
+   ========================================================================== */
 
-/* Для скрытия дочерних папок и добавление папки  */
-/* .crtChildrenFolderHidden {
-  display: none !important;
-} */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(167, 139, 250, 0.3);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.7);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, 0.3) transparent;
+}
+
+html.dark ::-webkit-scrollbar-thumb,
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(167, 139, 250, 0.35);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover,
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.75);
+}
+
+html.dark *,
+.dark * {
+  scrollbar-color: rgba(167, 139, 250, 0.35) transparent;
+}

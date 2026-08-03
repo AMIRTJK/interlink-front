@@ -90,7 +90,7 @@ export const MessageList = ({
       <motion.div
         ref={scrollRef}
         onScroll={onScroll}
-        className="absolute inset-0 overflow-y-auto overflow-x-hidden px-3 sm:px-6 py-4 space-y-3.5 scrollbar-thin scrollbar-thumb-violet-500/20 scrollbar-track-transparent hover:scrollbar-thumb-violet-500/40"
+        className="absolute inset-0 overflow-y-auto overflow-x-hidden px-3 sm:px-6 py-4 space-y-3.5"
         style={{ overflowX: "hidden" }}
       >
         <AnimatePresence mode="wait" custom={switchDirection}>
@@ -186,7 +186,8 @@ export const MessageList = ({
                   <img
                     src={activeContact.avatar}
                     alt=""
-                    className="w-6 h-6 rounded-full object-cover border border-violet-400/30"
+                    className="w-6 h-6 rounded-full object-cover overflow-hidden"
+                    style={{ boxShadow: "inset 0 0 0 1.5px rgba(167,139,250,0.4)" }}
                   />
                   <div
                     className="flex items-center gap-1 px-4 py-2.5 rounded-2xl rounded-bl-md"

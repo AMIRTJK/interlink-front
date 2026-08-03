@@ -307,15 +307,15 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                 <img
                   src={contact.avatar}
                   alt={contact.name}
-                  className="w-9 h-9 rounded-full object-cover transition-transform duration-200 group-hover:scale-105"
+                  className="w-9 h-9 rounded-full object-cover transition-transform duration-200 group-hover:scale-105 overflow-hidden"
                   style={{
-                    border: isActive
+                    boxShadow: isActive
                       ? isDark
-                        ? "2px solid rgba(167,139,250,0.6)"
-                        : "2px solid rgba(124,58,237,0.6)"
+                        ? "inset 0 0 0 2px rgba(167,139,250,0.6)"
+                        : "inset 0 0 0 2px rgba(124,58,237,0.6)"
                       : isDark
-                        ? "2px solid rgba(255,255,255,0.1)"
-                        : "2px solid rgba(0,0,0,0.08)",
+                        ? "inset 0 0 0 2px rgba(255,255,255,0.15)"
+                        : "inset 0 0 0 2px rgba(0,0,0,0.1)",
                   }}
                 />
                 {contact.online && (
