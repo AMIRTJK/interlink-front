@@ -1,5 +1,7 @@
-import { useMemo } from "react";
-import { Loader2 } from "lucide-react";
+import React, { useMemo, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { Download, Eye, ImageIcon, Loader2, X } from "lucide-react";
 import { If } from "@shared/ui";
 import { toast } from "@shared/lib";
 import {
@@ -11,14 +13,14 @@ import {
   getAttachmentPreviewSource,
   mapMediaItem,
   type IChatLabels,
+  type MediaItem,
 } from "../../lib/chatMappers";
 import { useAuthorizedMedia } from "../../lib/useAuthorizedMedia";
 import { getAttachmentIcon } from "../../lib/chatHelpers";
 import { Translations } from "../../lib/translations";
 
 // Вкладка «Медиа» панели информации: вложения беседы из GET /conversations/{id}/media.
-// Смонтирована только когда вкладка открыта — иначе запрос и загрузка превью
-// уходили бы вместе с каждым открытием панели.
+// Модалка полноэкранного просмотра рендерится через React Portal в document.body для точного центрирования по экрану.
 
 interface IProps {
   conversationId: number | null;
@@ -33,6 +35,18 @@ export const ConversationMediaTab = ({
   labels,
   t,
 }: IProps) => {
+  const [selectedImage, setSelectedImage] = useState<MediaItem | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedImage(null);
+    };
+    if (selectedImage) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedImage]);
+
   const { attachments, isLoading } = useConversationMedia(
     conversationId,
     null,
@@ -89,11 +103,10 @@ export const ConversationMediaTab = ({
         </p>
         <div className="grid grid-cols-3 gap-1.5">
           {images.map((item) => (
-            <button
+            <div
               key={item.id}
-              onClick={() => handleDownload(item.id, item.name)}
-              aria-label={item.name}
-              className={`aspect-square rounded-xl overflow-hidden group border ${isDark ? "bg-white/10 border-white/10 ring-1 ring-white/10" : "bg-black/5 border-black/5"}`}
+              className={`relative aspect-square rounded-xl overflow-hidden group border cursor-pointer ${isDark ? "bg-white/10 border-white/10 ring-1 ring-white/10" : "bg-black/5 border-black/5"}`}
+              onClick={() => setSelectedImage(item)}
             >
               <If is={!!item.preview}>
                 <img
@@ -103,7 +116,31 @@ export const ConversationMediaTab = ({
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200 ease-in-out"
                 />
               </If>
-            </button>
+              <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-1.5 backdrop-blur-[2px]">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImage(item);
+                  }}
+                  title="Просмотреть"
+                  className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center transition-all hover:scale-110 shadow-md cursor-pointer"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload(item.id, item.name);
+                  }}
+                  title="Скачать"
+                  className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center transition-all hover:scale-110 shadow-md cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       </If>
@@ -122,7 +159,7 @@ export const ConversationMediaTab = ({
               <button
                 key={item.id}
                 onClick={() => handleDownload(item.id, item.name)}
-                className={`w-full flex items-center gap-2.5 p-2 rounded-xl border transition-all duration-200 text-left ${isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-black/5 border-black/5 hover:bg-black/8"}`}
+                className={`w-full flex items-center gap-2.5 p-2 rounded-xl border transition-all duration-200 text-left cursor-pointer ${isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-black/5 border-black/5 hover:bg-black/8"}`}
               >
                 <div
                   className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isDark ? "bg-violet-500/20 text-violet-300" : "bg-violet-500/10 text-violet-600"}`}
@@ -141,11 +178,73 @@ export const ConversationMediaTab = ({
                     {item.size}
                   </p>
                 </div>
+                <Download className={`w-4 h-4 flex-shrink-0 ${isDark ? "text-white/40" : "text-gray-500"}`} />
               </button>
             ))}
           </div>
         </div>
       </If>
+
+      {createPortal(
+        <AnimatePresence>
+          {selectedImage && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-hidden"
+              onClick={() => setSelectedImage(null)}
+            >
+              <div
+                className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 px-5 py-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 max-w-4xl mx-auto text-white shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center gap-2.5 min-w-0 pr-4">
+                  <ImageIcon className="w-4 h-4 text-violet-400 flex-shrink-0" />
+                  <span className="text-sm font-semibold truncate">
+                    {selectedImage.name}
+                  </span>
+                  {selectedImage.size && (
+                    <span className="text-xs text-white/50 flex-shrink-0">
+                      ({selectedImage.size})
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleDownload(selectedImage.id, selectedImage.name)}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all duration-150 hover:scale-105 cursor-pointer shadow-md"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Скачать</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedImage(null)}
+                    className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <motion.img
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                src={selectedImage.preview}
+                alt={selectedImage.name}
+                className="max-w-[92vw] max-h-[82vh] object-contain rounded-2xl shadow-2xl mt-12 select-none"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </div>
   );
 };

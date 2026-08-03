@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Download, Eye, ImageIcon, X } from "lucide-react";
 import { toast } from "@shared/lib";
@@ -14,7 +15,7 @@ interface IProps {
 }
 
 // Вложения сообщения. Файлы приватные: превью картинок разрешено в blob-URL,
-// просмотр полноразмерного фото в модалке и скачивание с токеном.
+// просмотр полноразмерного фото в модалке по центру экрана через React Portal и скачивание с токеном.
 
 export const MessageAttachments = ({ attachments, isMe, isDark }: IProps) => {
   const [selectedImage, setSelectedImage] = useState<MessageAttachment | null>(
@@ -175,63 +176,66 @@ export const MessageAttachments = ({ attachments, isMe, isDark }: IProps) => {
         );
       })}
 
-      <AnimatePresence>
-        {selectedImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4"
-            onClick={() => setSelectedImage(null)}
-          >
-            <div
-              className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 px-5 py-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 max-w-4xl mx-auto text-white shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center gap-2.5 min-w-0 pr-4">
-                <ImageIcon className="w-4 h-4 text-violet-400 flex-shrink-0" />
-                <span className="text-sm font-semibold truncate">
-                  {selectedImage.name}
-                </span>
-                {selectedImage.size && (
-                  <span className="text-xs text-white/50 flex-shrink-0">
-                    ({selectedImage.size})
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  type="button"
-                  onClick={() => handleDownload(selectedImage)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all duration-150 hover:scale-105 cursor-pointer shadow-md"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Скачать</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedImage(null)}
-                  className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-all cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            <motion.img
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+      {createPortal(
+        <AnimatePresence>
+          {selectedImage && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              src={selectedImage.preview}
-              alt={selectedImage.name}
-              className="max-w-[92vw] max-h-[82vh] object-contain rounded-2xl shadow-2xl mt-12 select-none"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+              className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-hidden"
+              onClick={() => setSelectedImage(null)}
+            >
+              <div
+                className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 px-5 py-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 max-w-4xl mx-auto text-white shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center gap-2.5 min-w-0 pr-4">
+                  <ImageIcon className="w-4 h-4 text-violet-400 flex-shrink-0" />
+                  <span className="text-sm font-semibold truncate">
+                    {selectedImage.name}
+                  </span>
+                  {selectedImage.size && (
+                    <span className="text-xs text-white/50 flex-shrink-0">
+                      ({selectedImage.size})
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleDownload(selectedImage)}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all duration-150 hover:scale-105 cursor-pointer shadow-md"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Скачать</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedImage(null)}
+                    className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <motion.img
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                src={selectedImage.preview}
+                alt={selectedImage.name}
+                className="max-w-[92vw] max-h-[82vh] object-contain rounded-2xl shadow-2xl mt-12 select-none"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </>
   );
 };
