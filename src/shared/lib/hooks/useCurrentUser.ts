@@ -30,12 +30,22 @@ export const useCurrentUser = () => {
     },
   });
 
-  const user = (data?.data ?? data) as ICurrentUserPermissions | undefined;
+  // auth/me отдаёт пользователя вложенным (`data.data.user`), а права могут
+  // лежать как внутри пользователя, так и рядом с ним. Читаем оба уровня:
+  // иначе permissions остаются пустыми и <Can> прячет весь интерфейс.
+  const envelope = (data?.data ?? data) as
+    | (Partial<ICurrentUserPermissions> & { user?: ICurrentUserPermissions })
+    | undefined;
+  const user = (envelope?.user ?? envelope) as
+    | ICurrentUserPermissions
+    | undefined;
 
-  const roles = user?.roles ?? [];
-  const permissions = user?.permissions ?? [];
-  const directPermissions = user?.direct_permissions ?? [];
-  const deniedPermissions = user?.denied_permissions ?? [];
+  const roles = user?.roles ?? envelope?.roles ?? [];
+  const permissions = user?.permissions ?? envelope?.permissions ?? [];
+  const directPermissions =
+    user?.direct_permissions ?? envelope?.direct_permissions ?? [];
+  const deniedPermissions =
+    user?.denied_permissions ?? envelope?.denied_permissions ?? [];
 
   const hasPermission = useMemo(
     () => (permission: string) => permissions.includes(permission),

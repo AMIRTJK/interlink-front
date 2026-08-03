@@ -1,30 +1,65 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Edit3, X, Search } from "lucide-react";
-import { mockContacts as contacts } from "../../model";
+import { Edit3, X, Search, Loader2 } from "lucide-react";
+import { If } from "@shared/ui";
+import { useDebouncedCallback } from "@shared/lib";
+import { useChatUsers } from "../../api";
+import {
+  getUserAvatarSource,
+  mapUserToContact,
+  type IChatLabels,
+} from "../../lib/chatMappers";
+import { useAuthorizedMedia } from "../../lib/useAuthorizedMedia";
+
+// Выбор сотрудника для личного чата. Список приходит из GET /chat/users,
+// поиск идёт на бэкенде (ФИО и должность), поэтому строка уходит с debounce.
+
+const SEARCH_DEBOUNCE_MS = 350;
 
 interface ComposeModalProps {
   onClose: () => void;
-  onSelectContact: (id: string) => void;
+  /** Создаёт (или открывает существующий) личный чат с сотрудником. */
+  onSelectUser: (userId: number) => void;
+  isCreating: boolean;
   isDark: boolean;
+  labels: IChatLabels;
   title: string;
   searchPlaceholder: string;
   noResultsLabel: string;
-  groupBadge: string;
 }
 
 export const ComposeModal: React.FC<ComposeModalProps> = ({
   onClose,
-  onSelectContact,
+  onSelectUser,
+  isCreating,
   isDark,
+  labels,
   title,
   searchPlaceholder,
   noResultsLabel,
-  groupBadge,
 }) => {
   const [composeSearch, setComposeSearch] = useState("");
-  const filtered = contacts.filter((c) =>
-    c.name.toLowerCase().includes(composeSearch.toLowerCase()),
+  const [query, setQuery] = useState("");
+
+  const applySearch = useDebouncedCallback(
+    ((value: string) => setQuery(value)) as (...args: unknown[]) => void,
+    SEARCH_DEBOUNCE_MS,
+  );
+
+  const { users, isLoading } = useChatUsers(query, true);
+
+  const avatarSources = useMemo(
+    () => users.map((user) => getUserAvatarSource(user)),
+    [users],
+  );
+  const media = useAuthorizedMedia(avatarSources);
+
+  const contacts = useMemo(
+    () =>
+      users.map((user) =>
+        mapUserToContact(user, { currentUserId: null, media, labels }),
+      ),
+    [users, media, labels],
   );
 
   return (
@@ -84,6 +119,7 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({
           </div>
           <button
             onClick={onClose}
+            aria-label="Закрыть"
             className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "hover:bg-white/15 text-white/50 hover:text-white" : "hover:bg-black/5 text-gray-400 hover:text-gray-605"}`}
           >
             <X className="w-4 h-4" />
@@ -103,27 +139,34 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({
               type="text"
               placeholder={searchPlaceholder}
               value={composeSearch}
-              onChange={(e) => setComposeSearch(e.target.value)}
+              onChange={(e) => {
+                setComposeSearch(e.target.value);
+                applySearch(e.target.value);
+              }}
               className={`flex-1 bg-transparent outline-none text-sm ${isDark ? "placeholder-white/30 text-white" : "placeholder-gray-400 text-gray-850"}`}
             />
+            <If is={isLoading || isCreating}>
+              <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
+            </If>
           </div>
         </div>
         <div className="max-h-72 overflow-y-auto py-2 compose-modal-scroll">
-          {filtered.length === 0 && (
+          <If is={!isLoading && contacts.length === 0}>
             <p
               className={`text-center text-xs py-8 ${isDark ? "text-white/40" : "text-gray-400"}`}
             >
               {noResultsLabel}
             </p>
-          )}
-          {filtered.map((contact) => (
+          </If>
+          {contacts.map((contact) => (
             <button
               key={contact.id}
+              disabled={isCreating}
               onClick={() => {
-                onSelectContact(contact.id);
+                if (contact.peerId) onSelectUser(contact.peerId);
                 onClose();
               }}
-              className={`w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 ease-in-out text-left group ${isDark ? "hover:bg-white/8" : "hover:bg-black/4"}`}
+              className={`w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 ease-in-out text-left group disabled:opacity-60 ${isDark ? "hover:bg-white/8" : "hover:bg-black/4"}`}
             >
               <div className="relative flex-shrink-0">
                 <img
@@ -137,22 +180,15 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p
-                    className={`text-sm font-medium truncate ${isDark ? "text-white/90" : "text-gray-900"}`}
-                  >
-                    {contact.name}
-                  </p>
-                  {contact.isGroup && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-orange-400 text-white">
-                      {groupBadge}
-                    </span>
-                  )}
-                </div>
+                <p
+                  className={`text-sm font-medium truncate ${isDark ? "text-white/90" : "text-gray-900"}`}
+                >
+                  {contact.name}
+                </p>
                 <p
                   className={`text-xs truncate ${isDark ? "text-white/40" : "text-gray-500"}`}
                 >
-                  {contact.lastMessage}
+                  {contact.position ?? ""}
                 </p>
               </div>
               <div

@@ -178,18 +178,6 @@ export const EMOJI_CATEGORIES_KEYS = [
 
 export const QUICK_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
 
-export const SAMPLE_MEDIA_IMAGES = [
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&q=80",
-  "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=200&q=80",
-  "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=200&q=80",
-  "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=200&q=80",
-  "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=200&q=80",
-  "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=200&q=80",
-  "https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=200&q=80",
-  "https://images.unsplash.com/photo-1504700610630-ac6aba3536d3?w=200&q=80",
-  "https://images.unsplash.com/photo-1448375240586-882707db888b?w=200&q=80",
-];
-
 export const AI_SUGGESTIONS = [
   "Sure, that sounds great! Let know when you are free.",
   "Thanks for sharing! I will review it and get back to you soon.",
@@ -198,6 +186,22 @@ export const AI_SUGGESTIONS = [
   "I will take care of it right away!",
   "That makes sense. Let me think about it and respond shortly.",
 ];
+
+/** Подписи ролей участника группы. */
+export const CHAT_ROLE_LABELS = {
+  owner: "Владелец",
+  admin: "Администратор",
+  member: "Участник",
+} as const;
+
+/** Права чата из effective permissions auth/me. Скрывают UI, доступ решает бэкенд. */
+export const CHAT_PERMISSIONS = {
+  VIEW: "chat.view",
+  CREATE: "chat.create",
+  SEND: "chat.send",
+  GROUP_MANAGE: "chat.group.manage",
+  DELETE: "chat.delete",
+} as const;
 
 export const STORY_IMAGES = [
   "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80",

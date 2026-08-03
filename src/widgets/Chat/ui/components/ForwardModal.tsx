@@ -1,11 +1,13 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Forward, X } from "lucide-react";
-import { Message, mockContacts as contacts } from "../../model";
+import { Contact, Message } from "../../model";
 import { Translations } from "../../lib/translations";
 
 interface ForwardModalProps {
   message: Message;
+  /** Беседы, доступные для пересылки, — тот же реестр, что и в списке чатов. */
+  contacts: Contact[];
   isDark: boolean;
   t: Translations;
   onForwardSend: (targetContactId: string) => void;
@@ -14,6 +16,7 @@ interface ForwardModalProps {
 
 export const ForwardModal: React.FC<ForwardModalProps> = ({
   message,
+  contacts,
   isDark,
   t,
   onForwardSend,

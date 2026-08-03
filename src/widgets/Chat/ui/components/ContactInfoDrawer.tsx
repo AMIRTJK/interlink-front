@@ -1,38 +1,68 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Phone, Video, Bell, Star, X, Grid3X3, Mail, MapPin, Calendar, Search, ChevronRight, Shield, Trash } from "lucide-react";
-import { Contact, DrawerTab, SAMPLE_MEDIA_IMAGES } from "../../model";
+import {
+  Contact,
+  DrawerTab,
+  IChatMember,
+  TChatMemberRole,
+} from "../../model";
 import { Translations } from "../../lib/translations";
-import { getAttachmentIcon } from "../../lib/chatHelpers";
+import type { IChatLabels } from "../../lib/chatMappers";
+import { ConversationMediaTab } from "./ConversationMediaTab";
+import { GroupMembersPanel } from "./GroupMembersPanel";
 
 interface ContactInfoDrawerProps {
   contact: Contact;
+  conversationId: number | null;
+  members: IChatMember[];
+  currentUserId: number | null;
   onClose: () => void;
   onDeleteConversation: () => void;
+  /** Избранное и «не беспокоить» — PATCH /conversations/{id}/settings. */
+  onToggleStar: () => void;
+  onToggleMute: () => void;
+  onAddMembers: (userIds: number[]) => void;
+  onRemoveMember: (userId: number) => void;
+  onChangeMemberRole: (userId: number, role: TChatMemberRole) => void;
   isDark: boolean;
+  labels: IChatLabels;
   t: Translations;
 }
 
 export const ContactInfoDrawer: React.FC<ContactInfoDrawerProps> = ({
   contact,
+  conversationId,
+  members,
+  currentUserId,
   onClose,
   onDeleteConversation,
+  onToggleStar,
+  onToggleMute,
+  onAddMembers,
+  onRemoveMember,
+  onChangeMemberRole,
   isDark,
+  labels,
   t,
 }) => {
   const [drawerTab, setDrawerTab] = useState<DrawerTab>("info");
 
-  const sharedFiles = [
-    { name: "Project_Brief.pdf", size: "2.4 MB", type: "file" as const },
-    { name: "Design_Assets.zip", size: "18.7 MB", type: "file" as const },
-    { name: "Meeting_Notes.docx", size: "340 KB", type: "file" as const },
-  ];
-
   const quickActions = [
-    { icon: <Phone className="w-4 h-4" />, label: t.call },
-    { icon: <Video className="w-4 h-4" />, label: t.video },
-    { icon: <Bell className="w-4 h-4" />, label: t.mute },
-    { icon: <Star className="w-4 h-4" />, label: t.star },
+    { icon: <Phone className="w-4 h-4" />, label: t.call, onClick: undefined },
+    { icon: <Video className="w-4 h-4" />, label: t.video, onClick: undefined },
+    {
+      icon: <Bell className="w-4 h-4" />,
+      label: t.mute,
+      onClick: onToggleMute,
+      isActive: contact.isMuted,
+    },
+    {
+      icon: <Star className="w-4 h-4" />,
+      label: t.star,
+      onClick: onToggleStar,
+      isActive: contact.isStarred,
+    },
   ];
 
   return (
@@ -111,8 +141,19 @@ export const ContactInfoDrawer: React.FC<ContactInfoDrawerProps> = ({
               <p
                 className={`text-xs mt-0.5 ${isDark ? "text-white/50" : "text-gray-500"}`}
               >
-                {contact.online ? t.online : "Offline"}
+                {contact.isGroup
+                  ? `${contact.membersCount ?? 0} ${t.contacts}`
+                  : contact.online
+                    ? t.online
+                    : t.lastSeen}
               </p>
+              {contact.position && (
+                <p
+                  className={`text-xs text-center mt-1 ${isDark ? "text-white/45" : "text-gray-500"}`}
+                >
+                  {contact.position}
+                </p>
+              )}
               {contact.bio && (
                 <p
                   className={`text-xs text-center mt-2 leading-relaxed px-2 ${isDark ? "text-white/50" : "text-gray-500"}`}
@@ -125,14 +166,19 @@ export const ContactInfoDrawer: React.FC<ContactInfoDrawerProps> = ({
                 {quickActions.map((action) => (
                   <button
                     key={action.label}
+                    onClick={action.onClick}
+                    aria-label={action.label}
+                    aria-pressed={action.isActive}
                     className="flex flex-col items-center gap-1 group"
                   >
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out group-hover:scale-110 ${isDark ? "text-violet-300 group-hover:text-white" : "text-violet-600 group-hover:text-violet-850"}`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out group-hover:scale-110 ${action.isActive ? "text-white" : isDark ? "text-violet-300 group-hover:text-white" : "text-violet-600 group-hover:text-violet-850"}`}
                       style={{
-                        background: isDark
-                          ? "rgba(124,58,237,0.2)"
-                          : "rgba(124,58,237,0.08)",
+                        background: action.isActive
+                          ? "linear-gradient(135deg,#7c3aed,#06b6d4)"
+                          : isDark
+                            ? "rgba(124,58,237,0.2)"
+                            : "rgba(124,58,237,0.08)",
                         border: isDark
                           ? "1px solid rgba(167,139,250,0.25)"
                           : "1px solid rgba(124,58,237,0.2)",
@@ -220,6 +266,19 @@ export const ContactInfoDrawer: React.FC<ContactInfoDrawerProps> = ({
               className={`mx-5 border-t my-1 ${isDark ? "border-white/10" : "border-black/5"}`}
             />
 
+            {contact.isGroup && (
+              <GroupMembersPanel
+                members={members}
+                myRole={contact.myRole}
+                currentUserId={currentUserId}
+                isDark={isDark}
+                t={t}
+                onAddMembers={onAddMembers}
+                onRemoveMember={onRemoveMember}
+                onChangeRole={onChangeMemberRole}
+              />
+            )}
+
             {contact.mutualGroups && contact.mutualGroups.length > 0 && (
               <div className="px-5 py-3">
                 <p
@@ -279,62 +338,12 @@ export const ContactInfoDrawer: React.FC<ContactInfoDrawerProps> = ({
         )}
 
         {drawerTab === "media" && (
-          <div className="p-4">
-            <p
-              className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? "text-white/35" : "text-gray-400"}`}
-            >
-              {t.sharedMedia} · {SAMPLE_MEDIA_IMAGES.length}
-            </p>
-            <div className="grid grid-cols-3 gap-1.5">
-              {SAMPLE_MEDIA_IMAGES.map((src, idx) => (
-                <div
-                  key={`media-${idx}`}
-                  className={`aspect-square rounded-xl overflow-hidden group cursor-pointer border ${isDark ? "bg-white/10 border-white/10 ring-1 ring-white/10" : "bg-black/5 border-black/5"}`}
-                >
-                  <img
-                    src={src}
-                    alt={`Shared media ${idx + 1}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200 ease-in-out"
-                  />
-                </div>
-              ))}
-            </div>
-            <div
-              className={`mt-4 border-t pt-4 ${isDark ? "border-white/10" : "border-black/5"}`}
-            >
-              <p
-                className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? "text-white/35" : "text-gray-400"}`}
-              >
-                {t.sharedFiles} · 3
-              </p>
-              <div className="space-y-2">
-                {sharedFiles.map((file) => (
-                  <div
-                    key={file.name}
-                    className={`flex items-center gap-2.5 p-2 rounded-xl border transition-all duration-200 cursor-pointer ${isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-black/5 border-black/5 hover:bg-black/8"}`}
-                  >
-                    <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isDark ? "bg-violet-500/20 text-violet-300" : "bg-violet-500/10 text-violet-600"}`}
-                    >
-                      {getAttachmentIcon(file.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className={`text-xs font-medium truncate ${isDark ? "text-white/80" : "text-gray-800"}`}
-                      >
-                        {file.name}
-                      </p>
-                      <p
-                        className={`text-[10px] ${isDark ? "text-white/40" : "text-gray-400"}`}
-                      >
-                        {file.size}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <ConversationMediaTab
+            conversationId={conversationId}
+            isDark={isDark}
+            labels={labels}
+            t={t}
+          />
         )}
       </div>
     </motion.div>

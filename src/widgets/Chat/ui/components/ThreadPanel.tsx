@@ -1,10 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { MessageSquare, X, Send } from "lucide-react";
+import { MessageSquare, X, Send, Loader2 } from "lucide-react";
+import { If } from "@shared/ui";
 import { Contact, Message } from "../../model";
 
 interface ThreadPanelProps {
   parentMsg: Message;
+  /** Ответы треда: GET /chat/messages/{id}/thread. */
+  threadMessages: Message[];
+  isLoading: boolean;
   activeContact: Contact;
   onClose: () => void;
   onSendThread: (msgId: string, text: string) => void;
@@ -16,6 +20,8 @@ interface ThreadPanelProps {
 
 export const ThreadPanel: React.FC<ThreadPanelProps> = ({
   parentMsg,
+  threadMessages,
+  isLoading,
   activeContact,
   onClose,
   onSendThread,
@@ -30,7 +36,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
   useEffect(() => {
     if (threadScrollRef.current)
       threadScrollRef.current.scrollTop = threadScrollRef.current.scrollHeight;
-  }, [parentMsg.threadMessages]);
+  }, [threadMessages]);
 
   return (
     <motion.div
@@ -88,7 +94,12 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
         ref={threadScrollRef}
         className="flex-1 overflow-y-auto px-4 py-3 space-y-3"
       >
-        {(parentMsg.threadMessages || []).map((tm) => {
+        <If is={isLoading}>
+          <div className="flex justify-center py-4">
+            <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
+          </div>
+        </If>
+        {threadMessages.map((tm) => {
           const isTMe = tm.senderId === "me";
           return (
             <div
@@ -97,8 +108,8 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
             >
               {!isTMe && (
                 <img
-                  src={activeContact.avatar}
-                  alt={activeContact.name}
+                  src={tm.senderAvatar || activeContact.avatar}
+                  alt={tm.senderName || activeContact.name}
                   className="w-6 h-6 rounded-full object-cover flex-shrink-0"
                 />
               )}
@@ -119,10 +130,10 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
               >
                 {tm.text}
               </div>
-              {isTMe && (
+              {isTMe && tm.senderAvatar && (
                 <img
-                  src="https://i.pravatar.cc/150?img=5"
-                  alt="You"
+                  src={tm.senderAvatar}
+                  alt={tm.senderName || ""}
                   className="w-6 h-6 rounded-full object-cover flex-shrink-0"
                 />
               )}

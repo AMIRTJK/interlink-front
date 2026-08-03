@@ -1,13 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X, Send } from "lucide-react";
+import { toast } from "@shared/lib";
 import { formatDuration } from "../../lib/chatHelpers";
 
 interface VoiceRecorderProps {
-  onSend: (duration: number) => void;
+  /** Готовая запись: длительность в секундах и сам аудиофайл. */
+  onSend: (duration: number, audio: Blob) => void;
   onCancel: () => void;
   isDark: boolean;
 }
+
+// Запись голосового сообщения через MediaRecorder. Файл уходит в ту же ручку
+// отправки сообщений с kind=voice, поэтому наружу отдаём именно Blob.
 
 export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   onSend,
@@ -19,10 +24,66 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
     Array.from({ length: 24 }, () => Math.random() * 0.7 + 0.3),
   );
 
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const secondsRef = useRef(0);
+
   useEffect(() => {
-    const iv = setInterval(() => setSeconds((s) => s + 1), 1000);
-    return () => clearInterval(iv);
-  }, []);
+    const interval = setInterval(() => {
+      secondsRef.current += 1;
+      setSeconds(secondsRef.current);
+    }, 1000);
+
+    let stream: MediaStream | null = null;
+    let isCancelled = false;
+
+    navigator.mediaDevices
+      ?.getUserMedia({ audio: true })
+      .then((mediaStream) => {
+        if (isCancelled) {
+          mediaStream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+        stream = mediaStream;
+        const recorder = new MediaRecorder(mediaStream);
+        recorder.ondataavailable = (event) => {
+          if (event.data.size > 0) chunksRef.current.push(event.data);
+        };
+        recorder.start();
+        recorderRef.current = recorder;
+      })
+      .catch(() => {
+        toast.error("Нет доступа к микрофону");
+        onCancel();
+      });
+
+    return () => {
+      isCancelled = true;
+      clearInterval(interval);
+      if (recorderRef.current?.state === "recording") recorderRef.current.stop();
+      recorderRef.current = null;
+      stream?.getTracks().forEach((track) => track.stop());
+    };
+  }, [onCancel]);
+
+  const handleSend = () => {
+    const recorder = recorderRef.current;
+    if (!recorder) {
+      onCancel();
+      return;
+    }
+
+    // Последний кусок данных приходит только после stop — отправляем из onstop.
+    recorder.onstop = () => {
+      const audio = new Blob(chunksRef.current, {
+        type: recorder.mimeType || "audio/webm",
+      });
+      chunksRef.current = [];
+      if (audio.size > 0) onSend(secondsRef.current, audio);
+      else onCancel();
+    };
+    recorder.stop();
+  };
 
   return (
     <motion.div
@@ -69,12 +130,14 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
       </span>
       <button
         onClick={onCancel}
+        aria-label="Отменить запись"
         className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0 ${isDark ? "bg-white/15 hover:bg-white/25 text-white/70" : "bg-black/5 hover:bg-black/8 text-gray-655"}`}
       >
         <X className="w-3.5 h-3.5" />
       </button>
       <button
-        onClick={() => onSend(seconds)}
+        onClick={handleSend}
+        aria-label="Отправить голосовое сообщение"
         className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0"
         style={{
           background: "linear-gradient(135deg,#7c3aed,#06b6d4)",
