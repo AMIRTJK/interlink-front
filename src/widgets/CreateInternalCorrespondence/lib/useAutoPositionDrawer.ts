@@ -4,6 +4,9 @@ interface IUseAutoPositionDrawerProps {
   isOpen: boolean;
   drawerRef: RefObject<HTMLDivElement | null>;
   padding?: number;
+  // По горизонтали отступ от края экрана больше вертикального: панель шириной
+  // 320px, упёршись в край окна, выглядит обрезанной.
+  paddingX?: number;
 }
 
 /**
@@ -26,6 +29,7 @@ export function useAutoPositionDrawer({
   isOpen,
   drawerRef,
   padding = 16,
+  paddingX = 40,
 }: IUseAutoPositionDrawerProps) {
   const offsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
@@ -70,15 +74,15 @@ export function useAutoPositionDrawer({
       let shiftX = 0;
       let shiftY = 0;
 
-      if (left < padding) {
-        shiftX = padding - left;
-        if (right + shiftX > vw - padding) {
-          shiftX = Math.min(shiftX, vw - padding - right);
+      if (left < paddingX) {
+        shiftX = paddingX - left;
+        if (right + shiftX > vw - paddingX) {
+          shiftX = Math.min(shiftX, vw - paddingX - right);
         }
-      } else if (right > vw - padding) {
-        shiftX = vw - padding - right;
-        if (left + shiftX < padding) {
-          shiftX = Math.max(shiftX, padding - left);
+      } else if (right > vw - paddingX) {
+        shiftX = vw - paddingX - right;
+        if (left + shiftX < paddingX) {
+          shiftX = Math.max(shiftX, paddingX - left);
         }
       }
 
@@ -106,5 +110,5 @@ export function useAutoPositionDrawer({
       cancelAnimationFrame(frame);
       offsetRef.current = { x: 0, y: 0 };
     };
-  }, [isOpen, drawerRef, padding]);
+  }, [isOpen, drawerRef, padding, paddingX]);
 }
