@@ -2471,7 +2471,7 @@ export const CreateInternalCorrespondence = ({
                   и пагинация входящего письма прилипают к верху экрана при
                   прокрутке — форматирование и разделы всегда под рукой. Общий
                   sticky-контейнер, чтобы полосы не накладывались друг на друга. */}
-              <div ref={stickyHeaderRef} className="sticky top-0 z-[70] bg-white">
+              <div ref={stickyHeaderRef} data-sticky-editor-header className="sticky top-0 z-[70] bg-white">
               <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60 flex flex-wrap items-center gap-0.5">
                 <ToolbarFormatGroup
                   isReadOnly={isReadOnly}
@@ -2753,7 +2753,7 @@ export const CreateInternalCorrespondence = ({
                         <ApproversPanel
                           isOpen={approversOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={showVersionCompareSides || showOriginalLetterSides}
+                          openLeft={false}
                           onOpen={handleOpenApprovers}
                           onClose={() => setApproversOpen(false)}
                           approvers={approvers}
@@ -2774,7 +2774,7 @@ export const CreateInternalCorrespondence = ({
                         <SignerPanel
                           isOpen={signerOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={showVersionCompareSides || showOriginalLetterSides}
+                          openLeft={false}
                           onOpen={handleOpenSigner}
                           onClose={() => setSignerOpen(false)}
                           finalSigner={finalSigner}
