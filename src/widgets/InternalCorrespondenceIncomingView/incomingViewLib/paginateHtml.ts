@@ -10,6 +10,7 @@ import {
   dropChars,
   brAtCharBoundary,
   removeLeadingBr,
+  wordBoundaryBefore,
 } from "./incomingViewTruncate";
 
 const ATOMIC = new Set(["TABLE", "IMG", "FIGURE", "SVG", "VIDEO", "CANVAS"]);
@@ -133,7 +134,8 @@ export const paginateHtml = (
       let rest: HTMLElement | null = el.cloneNode(true) as HTMLElement;
       let guard = 0;
       while (rest && guard++ < 5000) {
-        const total = (rest.textContent || "").length;
+        const text = rest.textContent || "";
+        const total = text.length;
         if (!total) break;
 
         const probeFits = (k: number): boolean => {
@@ -156,6 +158,12 @@ export const paginateHtml = (
             hi = mid - 1;
           }
         }
+
+        // Слово не рвём: отступаем к границе слова, чтобы оно целиком уехало
+        // на следующий лист. Границы нет — слово шире целой страницы, и резать
+        // по буквам приходится: разместить его иначе негде.
+        const wordCut = wordBoundaryBefore(text, best);
+        if (wordCut > 0) best = wordCut;
 
         const head = rest.cloneNode(true) as HTMLElement;
         truncateToChars(head, { left: best });

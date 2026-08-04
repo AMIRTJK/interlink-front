@@ -173,15 +173,23 @@ export const paginateEditorDom = (
     // абзац перетекает на следующий лист построчно, как в Word. Раньше блок
     // выше страницы целиком уезжал на следующий лист, оставляя предыдущую
     // страницу почти пустой (например, после смены размера шрифта).
-    if (splittable && splitBlockToBudget(block, usableBottom - top, page)) {
+    //
+    // Резать слово по буквам разрешаем только блоку, стоящему в начале листа:
+    // в остаток страницы не влезло ни одного слова — блок уедет на следующую
+    // страницу целиком (ветка ниже) и будет поделён уже там, по полному листу.
+    const atPageStart = top <= pageStart + 2;
+    if (
+      splittable &&
+      splitBlockToBudget(block, usableBottom - top, page, atPageStart)
+    ) {
       textMutated = true;
       i++;
       continue;
     }
 
-    // Не делится (атомарный, пустой, или в остаток не влезает ни строки) —
-    // переносим целиком на следующую страницу.
-    if (top > pageStart + 2) {
+    // Не делится (атомарный, пустой, или в остаток не влезло ни одного целого
+    // слова) — переносим целиком на следующую страницу.
+    if (!atPageStart) {
       editor.insertBefore(makeSpacer((page + 1) * pageStride - top), block);
       i++;
       continue;

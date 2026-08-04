@@ -4,6 +4,7 @@ import {
   dropChars,
   removeLeadingBr,
   truncateToChars,
+  wordBoundaryBefore,
 } from "../../../InternalCorrespondenceIncomingView/lib";
 import { nextSplitGroupId } from "./editorSplitGroup";
 
@@ -160,13 +161,20 @@ export const createBlockSplitters = (
   // за распорку на следующий лист. Обе части — в одной AUTOSPLIT-группе и при
   // сохранении склеиваются обратно. Так текст перетекает между страницами
   // построчно, как в Word, без больших пустых областей внизу листа. Возвращает
-  // false, если в бюджет не влезает ни одной строки.
+  // false, если в бюджет не влезает ни одного целого слова.
+  //
+  // `allowMidWord` разрешает резать слово по буквам. Его ставит только тот
+  // вызывающий, у которого блок и так стоит в начале листа: слово шире целой
+  // страницы иначе не разместить нигде. В середине листа деление слова
+  // запрещено — блок целиком уезжает на следующую страницу.
   const splitBlockToBudget = (
     block: HTMLElement,
     budgetPx: number,
     page: number,
+    allowMidWord: boolean,
   ): boolean => {
-    const total = (block.textContent || "").length;
+    const text = block.textContent || "";
+    const total = text.length;
     if (total < 2 || budgetPx <= 0) return false;
 
     const template = block.cloneNode(true) as HTMLElement;
@@ -194,23 +202,28 @@ export const createBlockSplitters = (
       }
     }
 
-    if (best < 1) {
+    // Разрез по бюджету почти всегда приходится на середину слова. Отступаем
+    // назад к границе слова, чтобы слово уехало на следующий лист целиком.
+    const wordCut = wordBoundaryBefore(text, best);
+    const cut = wordCut > 0 ? wordCut : allowMidWord ? best : 0;
+
+    if (cut < 1) {
       block.innerHTML = originalHtml;
       return false;
     }
 
     const tail = template.cloneNode(true) as HTMLElement;
-    dropChars(tail, { left: best });
+    dropChars(tail, { left: cut });
     // <br> ровно на границе разреза принадлежит голове (там он невидим);
     // в хвосте он дал бы лишнюю пустую строку в начале страницы.
-    if (brAtCharBoundary(template, best)) removeLeadingBr(tail);
+    if (brAtCharBoundary(template, cut)) removeLeadingBr(tail);
     if (!(tail.textContent || "").trim() && !tail.querySelector("br,img")) {
       // Хвост пуст — деление не имеет смысла.
       block.innerHTML = originalHtml;
       return false;
     }
 
-    block.innerHTML = headHtmlFor(best);
+    block.innerHTML = headHtmlFor(cut);
 
     const gid = block.getAttribute(AUTOSPLIT_ATTR) || nextSplitGroupId();
     block.setAttribute(AUTOSPLIT_ATTR, gid);
