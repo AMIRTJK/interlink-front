@@ -2753,7 +2753,7 @@ export const CreateInternalCorrespondence = ({
                         <ApproversPanel
                           isOpen={approversOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={showVersionCompareSides || showOriginalLetterSides}
                           onOpen={handleOpenApprovers}
                           onClose={() => setApproversOpen(false)}
                           approvers={approvers}
@@ -2774,7 +2774,7 @@ export const CreateInternalCorrespondence = ({
                         <SignerPanel
                           isOpen={signerOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={showVersionCompareSides || showOriginalLetterSides}
                           onOpen={handleOpenSigner}
                           onClose={() => setSignerOpen(false)}
                           finalSigner={finalSigner}
@@ -2807,7 +2807,7 @@ export const CreateInternalCorrespondence = ({
                         <IncomingLettersPanel
                           isOpen={incomingOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={true}
                           onOpen={handleOpenIncoming}
                           onClose={() => setIncomingOpen(false)}
                           attachedLetters={attachedIncomingLetters}
@@ -2819,7 +2819,7 @@ export const CreateInternalCorrespondence = ({
                         <VersionsPanel
                           isOpen={versionsOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={true}
                           onOpen={handleOpenVersions}
                           onClose={() => setVersionsOpen(false)}
                           versions={allVersions}
@@ -2833,7 +2833,7 @@ export const CreateInternalCorrespondence = ({
                         <AttachmentsPanel
                           isOpen={attachmentsOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={true}
                           onOpen={handleOpenAttachments}
                           onClose={() => setAttachmentsOpen(false)}
                           attachments={attachments}

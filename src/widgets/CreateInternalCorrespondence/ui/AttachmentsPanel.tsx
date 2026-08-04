@@ -35,15 +35,11 @@ export const AttachmentsPanel: React.FC<IProps> = ({
   return (
     <>
       <If is={!hideTab}>
-        <div
-          className="absolute z-20"
-          style={openLeft ? { left: -36, top: 370 } : { right: -36, top: 370 }}
-        >
+        <div className="absolute z-20 left-[-36px] top-[370px]">
           <motion.button
             onClick={isOpen ? onClose : onOpen}
             className={cn(
-              "bg-white border border-slate-200 shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-              openLeft ? "border-r-0 rounded-l-xl" : "border-l-0 rounded-r-xl",
+              "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
               isOpen ? "bg-slate-50" : "hover:bg-slate-50",
             )}
             aria-label="Вложения"
