@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState, RefObject } from "react";
+import { useLayoutEffect, useRef, RefObject } from "react";
 
 interface IUseAutoPositionDrawerProps {
   isOpen: boolean;
@@ -6,34 +6,60 @@ interface IUseAutoPositionDrawerProps {
   padding?: number;
 }
 
+/**
+ * Удерживает раскрытую панель цилиндра в границах видимой области, не отрывая
+ * её от своего цилиндра.
+ *
+ * Группа панелей едет за прокруткой собственным transform
+ * (usePanelsGroupScrollFollow). Обработчик scroll на window в фазе перехвата
+ * срабатывает РАНЬШЕ обработчика на самом скроллере, поэтому панель измерялась
+ * до того, как группа сдвинется, — поправка всегда отставала на один кадр
+ * прокрутки, и панель уезжала за левый край экрана. Пересчитываем в rAF-цикле:
+ * он выполняется после всех обработчиков кадра и до отрисовки, так что панель
+ * и группа всегда сдвигаются одним кадром.
+ *
+ * Смещение пишем прямо в style без CSS-перехода: анимированный transform
+ * означал бы, что панель догоняет свой цилиндр 150 мс и всё это время может
+ * находиться за краем экрана.
+ */
 export function useAutoPositionDrawer({
   isOpen,
   drawerRef,
   padding = 16,
 }: IUseAutoPositionDrawerProps) {
-  const [offset, setOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const offsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   useLayoutEffect(() => {
-    if (!isOpen || !drawerRef.current) {
-      setOffset({ x: 0, y: 0 });
-      return;
-    }
+    const drawer = drawerRef.current;
+    if (!isOpen || !drawer) return;
+
+    offsetRef.current = { x: 0, y: 0 };
+    drawer.style.transform = "";
+
+    let frame = 0;
 
     const updatePosition = () => {
+      frame = requestAnimationFrame(updatePosition);
+
       const el = drawerRef.current;
       if (!el) return;
 
-      const prevTransform = el.style.transform;
-      el.style.transform = "none";
-
+      // Измеряем с уже применённым смещением и вычитаем его — так обходимся
+      // одним чтением геометрии за кадр, без сброса transform и второго reflow.
+      const applied = offsetRef.current;
       const rect = el.getBoundingClientRect();
-      el.style.transform = prevTransform;
+      const left = rect.left - applied.x;
+      const right = rect.right - applied.x;
+      const top = rect.top - applied.y;
+      const bottom = rect.bottom - applied.y;
 
       const vw = document.documentElement.clientWidth || window.innerWidth;
       const vh = document.documentElement.clientHeight || window.innerHeight;
 
       let minTop = padding;
-      const stickyHeader = document.querySelector<HTMLElement>("[data-sticky-editor-header]");
+      const stickyHeader = document.querySelector<HTMLElement>(
+        "[data-sticky-editor-header]",
+      );
       if (stickyHeader) {
         const headerRect = stickyHeader.getBoundingClientRect();
         if (headerRect.bottom > 0 && headerRect.bottom < vh) {
@@ -44,46 +70,41 @@ export function useAutoPositionDrawer({
       let shiftX = 0;
       let shiftY = 0;
 
-      if (rect.left < padding) {
-        shiftX = padding - rect.left;
-        if (rect.right + shiftX > vw - padding) {
-          shiftX = Math.min(shiftX, vw - padding - rect.right);
+      if (left < padding) {
+        shiftX = padding - left;
+        if (right + shiftX > vw - padding) {
+          shiftX = Math.min(shiftX, vw - padding - right);
         }
-      } else if (rect.right > vw - padding) {
-        shiftX = (vw - padding) - rect.right;
-        if (rect.left + shiftX < padding) {
-          shiftX = Math.max(shiftX, padding - rect.left);
-        }
-      }
-
-      if (rect.top < minTop) {
-        shiftY = minTop - rect.top;
-      } else if (rect.bottom > vh - padding) {
-        shiftY = (vh - padding) - rect.bottom;
-        if (rect.top + shiftY < minTop) {
-          shiftY = minTop - rect.top;
+      } else if (right > vw - padding) {
+        shiftX = vw - padding - right;
+        if (left + shiftX < padding) {
+          shiftX = Math.max(shiftX, padding - left);
         }
       }
 
-      setOffset({ x: Math.round(shiftX), y: Math.round(shiftY) });
+      if (top < minTop) {
+        shiftY = minTop - top;
+      } else if (bottom > vh - padding) {
+        shiftY = vh - padding - bottom;
+        if (top + shiftY < minTop) {
+          shiftY = minTop - top;
+        }
+      }
+
+      const nextX = Math.round(shiftX);
+      const nextY = Math.round(shiftY);
+      if (nextX === applied.x && nextY === applied.y) return;
+
+      offsetRef.current = { x: nextX, y: nextY };
+      el.style.transform =
+        nextX || nextY ? `translate3d(${nextX}px, ${nextY}px, 0)` : "";
     };
 
     updatePosition();
 
-    window.addEventListener("resize", updatePosition);
-    window.addEventListener("scroll", updatePosition, true);
-
-    const ro = new ResizeObserver(updatePosition);
-    if (drawerRef.current) {
-      ro.observe(drawerRef.current);
-    }
-
     return () => {
-      window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition, true);
-      ro.disconnect();
+      cancelAnimationFrame(frame);
+      offsetRef.current = { x: 0, y: 0 };
     };
   }, [isOpen, drawerRef, padding]);
-
-  return offset;
 }

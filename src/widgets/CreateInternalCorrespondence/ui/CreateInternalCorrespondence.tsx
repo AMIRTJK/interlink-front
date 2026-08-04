@@ -2593,9 +2593,18 @@ export const CreateInternalCorrespondence = ({
                     </div>
                   </div>
                 )}
+                {/* Вкладки-цилиндры висят абсолютом слева от холста (left: -36px)
+                    и в расчёт центрирования не попадают. В режиме двух колонок
+                    свободного места по бокам почти не остаётся, поэтому они
+                    прижимались к краю экрана — резервируем слева место под них.
+                    Класс padding-left задаём одной веткой: cn() не разрешает
+                    конфликты Tailwind, поэтому pl-8 и pl-28 рядом стоять не могут. */}
                 <div className={cn(
-                  "py-8 px-8 flex justify-center items-start gap-12 w-full",
-                  (showOriginalLetterSides || showVersionCompareSides) && "min-w-max"
+                  "py-8 pr-8 flex justify-center items-start gap-12 w-full",
+                  (showOriginalLetterSides || showVersionCompareSides) && "min-w-max",
+                  (showOriginalLetterSides || showVersionCompareSides) && !panelsInToolbar
+                    ? "pl-28"
+                    : "pl-8"
                 )}>
                   {/* Область навигации пришвартована слева от листа, как в Word.
                       Обёртка нужна для sticky-эмуляции (см. эффект ниже). */}

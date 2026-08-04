@@ -50,7 +50,7 @@ export const ApproversPanel = ({
   const [showDropdown, setShowDropdown] = useState(false);
   const [search, setSearch] = useState("");
   const drawerRef = useRef<HTMLDivElement>(null);
-  const autoOffset = useAutoPositionDrawer({ isOpen, drawerRef });
+  useAutoPositionDrawer({ isOpen, drawerRef });
 
   const availableApprovers = availableUsers.filter(
     (r) =>
@@ -101,8 +101,6 @@ export const ApproversPanel = ({
               ...(openLeft
                 ? { right: "calc(100% + 12px)" }
                 : { left: "calc(100% + 12px)" }),
-              transform: autoOffset.x || autoOffset.y ? `translate3d(${autoOffset.x}px, ${autoOffset.y}px, 0)` : undefined,
-              transition: "transform 0.15s ease-out",
             }}
           >
             <motion.div

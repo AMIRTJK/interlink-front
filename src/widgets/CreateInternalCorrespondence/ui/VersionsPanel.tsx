@@ -38,7 +38,7 @@ export const VersionsPanel = ({
   const [showAuthorDropdown, setShowAuthorDropdown] = useState(false);
   const [selectedAuthorId, setSelectedAuthorId] = useState<string | null>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
-  const autoOffset = useAutoPositionDrawer({ isOpen, drawerRef });
+  useAutoPositionDrawer({ isOpen, drawerRef });
 
   const versionAuthors = useMemo(() => {
     const map = new Map<string, { id: string; name: string; count: number }>();
@@ -100,8 +100,6 @@ export const VersionsPanel = ({
               ...(openLeft
                 ? { right: "calc(100% + 12px)" }
                 : { left: "calc(100% + 12px)" }),
-              transform: autoOffset.x || autoOffset.y ? `translate3d(${autoOffset.x}px, ${autoOffset.y}px, 0)` : undefined,
-              transition: "transform 0.15s ease-out",
             }}
           >
             <motion.div
