@@ -61,6 +61,11 @@ export const VersionsPanel = ({
     return versions.filter((v) => String(v.author?.id) === selectedAuthorId);
   }, [versions, selectedAuthorId]);
 
+  const latestVersionId = useMemo(
+    () => (versions.length > 0 ? versions[versions.length - 1].id : null),
+    [versions],
+  );
+
   return (
     <>
       {!hideTab && (
@@ -244,6 +249,7 @@ export const VersionsPanel = ({
                     key={v.id}
                     version={v}
                     activeVersionId={activeVersionId}
+                    latestVersionId={latestVersionId}
                     signedVersionId={signedVersionId}
                     isSelectingVersion={isSelectingVersion}
                     isSigned={isSigned}

@@ -454,6 +454,13 @@ export const CreateInternalCorrespondence = ({
   };
 
   const toggleVersionCompareSides = (checked: boolean) => {
+    if (checked && allVersions.length < 2) {
+      toast.info(
+        "В документе пока только 1 версия. Режим сравнения станет доступен после появления 2-й версии.",
+      );
+      setShowVersionCompareSides(false);
+      return;
+    }
     setShowVersionCompareSides(checked);
     if (checked) {
       setShowOriginalLetterSides(false);
@@ -2099,6 +2106,12 @@ export const CreateInternalCorrespondence = ({
       selectVersionForSign({ versionId: targetVersion.id });
     }
   }, [allVersions]);
+
+  useEffect(() => {
+    if (showVersionCompareSides && allVersions.length < 2) {
+      setShowVersionCompareSides(false);
+    }
+  }, [showVersionCompareSides, allVersions.length]);
 
   // Слева режим сравнения всегда держит актуальную версию, поэтому справа по
   // умолчанию ставим предыдущую — иначе обе колонки показывали бы один и тот
