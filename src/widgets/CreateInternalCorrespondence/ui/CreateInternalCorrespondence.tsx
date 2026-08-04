@@ -454,6 +454,13 @@ export const CreateInternalCorrespondence = ({
   };
 
   const toggleVersionCompareSides = (checked: boolean) => {
+    if (checked && allVersions.length < 2) {
+      toast.info(
+        "В документе пока только 1 версия. Режим сравнения станет доступен после появления 2-й версии.",
+      );
+      setShowVersionCompareSides(false);
+      return;
+    }
     setShowVersionCompareSides(checked);
     if (checked) {
       setShowOriginalLetterSides(false);
@@ -2064,12 +2071,11 @@ export const CreateInternalCorrespondence = ({
     const targetVersion = allVersions[allVersions.length - 1];
 
     const isNewVersionId = autoLoadedLatestRef.current !== targetVersion.id;
-    autoLoadedLatestRef.current = targetVersion.id;
-    setActiveVersionId(targetVersion.id);
-
-    // Раскладку подтягиваем только вместе с новой версией. На обычном рефетче
-    // (тот же id) её трогать нельзя — затёрли бы несохранённые правки линейки.
-    if (isNewVersionId) applyDocLayout(targetVersion.layout);
+    if (isNewVersionId) {
+      autoLoadedLatestRef.current = targetVersion.id;
+      setActiveVersionId(targetVersion.id);
+      applyDocLayout(targetVersion.layout);
+    }
 
     if (editorRef.current && targetVersion.content) {
       const currentCleanHtml = cleanEditorArtifacts(
@@ -2099,6 +2105,12 @@ export const CreateInternalCorrespondence = ({
       selectVersionForSign({ versionId: targetVersion.id });
     }
   }, [allVersions]);
+
+  useEffect(() => {
+    if (showVersionCompareSides && allVersions.length < 2) {
+      setShowVersionCompareSides(false);
+    }
+  }, [showVersionCompareSides, allVersions.length]);
 
   // Слева режим сравнения всегда держит актуальную версию, поэтому справа по
   // умолчанию ставим предыдущую — иначе обе колонки показывали бы один и тот
@@ -2471,7 +2483,7 @@ export const CreateInternalCorrespondence = ({
                   и пагинация входящего письма прилипают к верху экрана при
                   прокрутке — форматирование и разделы всегда под рукой. Общий
                   sticky-контейнер, чтобы полосы не накладывались друг на друга. */}
-              <div ref={stickyHeaderRef} className="sticky top-0 z-[70] bg-white">
+              <div ref={stickyHeaderRef} data-sticky-editor-header className="sticky top-0 z-[70] bg-white">
               <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60 flex flex-wrap items-center gap-0.5">
                 <ToolbarFormatGroup
                   isReadOnly={isReadOnly}
@@ -2593,9 +2605,18 @@ export const CreateInternalCorrespondence = ({
                     </div>
                   </div>
                 )}
+                {/* Вкладки-цилиндры висят абсолютом слева от холста (left: -36px)
+                    и в расчёт центрирования не попадают. В режиме двух колонок
+                    свободного места по бокам почти не остаётся, поэтому они
+                    прижимались к краю экрана — резервируем слева место под них.
+                    Класс padding-left задаём одной веткой: cn() не разрешает
+                    конфликты Tailwind, поэтому pl-8 и pl-28 рядом стоять не могут. */}
                 <div className={cn(
-                  "py-8 px-8 flex justify-center items-start gap-12 w-full",
-                  (showOriginalLetterSides || showVersionCompareSides) && "min-w-max"
+                  "py-8 pr-8 flex justify-center items-start gap-12 w-full",
+                  (showOriginalLetterSides || showVersionCompareSides) && "min-w-max",
+                  (showOriginalLetterSides || showVersionCompareSides) && !panelsInToolbar
+                    ? "pl-28"
+                    : "pl-8"
                 )}>
                   {/* Область навигации пришвартована слева от листа, как в Word.
                       Обёртка нужна для sticky-эмуляции (см. эффект ниже). */}
@@ -2753,7 +2774,7 @@ export const CreateInternalCorrespondence = ({
                         <ApproversPanel
                           isOpen={approversOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={false}
                           onOpen={handleOpenApprovers}
                           onClose={() => setApproversOpen(false)}
                           approvers={approvers}
@@ -2774,7 +2795,7 @@ export const CreateInternalCorrespondence = ({
                         <SignerPanel
                           isOpen={signerOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={false}
                           onOpen={handleOpenSigner}
                           onClose={() => setSignerOpen(false)}
                           finalSigner={finalSigner}
@@ -2807,7 +2828,7 @@ export const CreateInternalCorrespondence = ({
                         <IncomingLettersPanel
                           isOpen={incomingOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={true}
                           onOpen={handleOpenIncoming}
                           onClose={() => setIncomingOpen(false)}
                           attachedLetters={attachedIncomingLetters}
@@ -2818,8 +2839,9 @@ export const CreateInternalCorrespondence = ({
                         />
                         <VersionsPanel
                           isOpen={versionsOpen}
+                          showVersionCompareSides={showVersionCompareSides}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={true}
                           onOpen={handleOpenVersions}
                           onClose={() => setVersionsOpen(false)}
                           versions={allVersions}
@@ -2833,7 +2855,7 @@ export const CreateInternalCorrespondence = ({
                         <AttachmentsPanel
                           isOpen={attachmentsOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={true}
                           onOpen={handleOpenAttachments}
                           onClose={() => setAttachmentsOpen(false)}
                           attachments={attachments}

@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Paperclip, X, Eye, Download, FileText, AlertCircle } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { AttachedFile } from "../types";
+import { useAutoPositionDrawer } from "../lib/useAutoPositionDrawer";
 
 interface IProps {
   isOpen: boolean;
@@ -32,18 +33,17 @@ export const AttachmentsPanel: React.FC<IProps> = ({
   onRemove,
   isReadOnly,
 }) => {
+  const drawerRef = useRef<HTMLDivElement>(null);
+  useAutoPositionDrawer({ isOpen, drawerRef });
+
   return (
     <>
       <If is={!hideTab}>
-        <div
-          className="absolute z-20"
-          style={openLeft ? { left: -36, top: 370 } : { right: -36, top: 370 }}
-        >
+        <div className="absolute z-20 left-[-36px] top-[370px]">
           <motion.button
             onClick={isOpen ? onClose : onOpen}
             className={cn(
-              "bg-white border border-slate-200 shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-              openLeft ? "border-r-0 rounded-l-xl" : "border-l-0 rounded-r-xl",
+              "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
               isOpen ? "bg-slate-50" : "hover:bg-slate-50",
             )}
             aria-label="Вложения"
@@ -72,20 +72,27 @@ export const AttachmentsPanel: React.FC<IProps> = ({
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ x: openLeft ? 12 : -12, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: openLeft ? 12 : -12, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="absolute top-0 w-80 bg-white rounded-2xl border border-slate-200 shadow-2xl z-[500] flex flex-col"
+          <div
+            ref={drawerRef}
+            className="absolute z-[500]"
             style={{
+              top: 370,
               ...(openLeft
                 ? { right: "calc(100% + 12px)" }
                 : { left: "calc(100% + 12px)" }),
-              maxHeight: "var(--icc-panel-max-h, 70vh)",
             }}
-            onClick={(e) => e.stopPropagation()}
           >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 320, damping: 28 }}
+              className="w-80 bg-white rounded-2xl border border-slate-200 shadow-2xl flex flex-col"
+              style={{
+                maxHeight: "var(--icc-panel-max-h, 70vh)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center">
                 <span className="font-semibold text-sm text-slate-800">
@@ -212,8 +219,9 @@ export const AttachmentsPanel: React.FC<IProps> = ({
               </If>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
+    </AnimatePresence>
     </>
   );
 };

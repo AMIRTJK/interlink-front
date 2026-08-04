@@ -6,6 +6,8 @@ import { If } from "@shared/ui";
 interface IProps {
   version: any;
   activeVersionId: number | string | null;
+  latestVersionId?: number | string | null;
+  showVersionCompareSides?: boolean;
   signedVersionId: number | string | null;
   isSelectingVersion: boolean;
   isSigned: boolean;
@@ -16,6 +18,8 @@ interface IProps {
 export const VersionItem = ({
   version,
   activeVersionId,
+  latestVersionId,
+  showVersionCompareSides = false,
   signedVersionId,
   isSelectingVersion,
   isSigned,
@@ -23,21 +27,34 @@ export const VersionItem = ({
   onSetVersionForSign,
 }: IProps) => {
   const isRevoked = version.signature_state === "revoked";
-  const isCurrentActive = version.id === activeVersionId;
+  const isLatestVersion =
+    latestVersionId != null && String(version.id) === String(latestVersionId);
+  const isViewSelectDisabled = showVersionCompareSides && isLatestVersion;
+  const isCurrentActive =
+    (showVersionCompareSides ? !isLatestVersion : true) &&
+    version.id === activeVersionId;
   const isSignedVersion = !isRevoked && version.id === signedVersionId;
 
   return (
     <div
-      onClick={() => onSelectVersion(version.content, version.id)}
+      onClick={() =>
+        !isViewSelectDisabled && onSelectVersion(version.content, version.id)
+      }
+      title={
+        isViewSelectDisabled
+          ? "Актуальная версия всегда отображается на основном холсте"
+          : undefined
+      }
       className={cn(
-        "flex items-start justify-between p-3 rounded-xl border transition-all cursor-pointer group text-xs gap-3",
+        "flex items-start justify-between p-3 rounded-xl border transition-all group text-xs gap-3",
+        isViewSelectDisabled ? "cursor-default" : "cursor-pointer",
         isSignedVersion
           ? "bg-emerald-50/60 border-emerald-400 shadow-sm ring-1 ring-emerald-200"
           : isRevoked
             ? "bg-rose-50/40 border-rose-200 hover:bg-rose-50 hover:border-rose-300"
             : isCurrentActive
               ? "bg-blue-50/50 border-blue-500 shadow-sm"
-              : "bg-slate-50/40 border-slate-100 hover:bg-slate-50 hover:border-slate-200"
+              : "bg-slate-50/40 border-slate-100 hover:bg-slate-50 hover:border-slate-200",
       )}
     >
       <div
@@ -47,7 +64,7 @@ export const VersionItem = ({
             ? "bg-emerald-500 text-white"
             : isRevoked
               ? "bg-rose-100 text-rose-600 border-rose-200"
-              : "bg-slate-200 text-slate-600"
+              : "bg-slate-200 text-slate-600",
         )}
       >
         <If is={isSignedVersion}>
@@ -72,11 +89,16 @@ export const VersionItem = ({
                   ? "text-rose-700"
                   : isCurrentActive
                     ? "text-blue-600"
-                    : "text-slate-700"
+                    : "text-slate-700",
             )}
           >
             Версия {version.versionNumber}
           </span>
+          <If is={isLatestVersion}>
+            <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 font-medium rounded text-[9px] border border-blue-100 whitespace-nowrap shrink-0">
+              Актуальная
+            </span>
+          </If>
           <If is={isSignedVersion}>
             <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-500 text-white font-semibold rounded text-[9px] whitespace-nowrap shrink-0">
               <Shield size={9} />
