@@ -11,6 +11,11 @@ import { nextSplitGroupId } from "./editorSplitGroup";
 /**
  * Служебная распорка: нередактируемый блок нужной высоты, которым содержимое
  * сдвигается на начало следующего листа. При сохранении распорки вырезаются.
+ *
+ * События мыши распорка ПРИНИМАЕТ (никакого `pointer-events: none`): только так
+ * над ней стоит курсор-стрелка вместо курсора набора, и только так mousedown по
+ * ней виден обработчику редактора, который гасит его и не даёт браузеру
+ * поставить каретку в остаток листа (handleEditorMouseDown).
  */
 export const makeSpacer = (h: number): HTMLElement => {
   const s = document.createElement("div");
@@ -20,7 +25,7 @@ export const makeSpacer = (h: number): HTMLElement => {
   s.style.height = `${Math.max(0, h)}px`;
   s.style.width = "100%";
   s.style.userSelect = "none";
-  s.style.pointerEvents = "none";
+  s.style.cursor = "default";
   return s;
 };
 
