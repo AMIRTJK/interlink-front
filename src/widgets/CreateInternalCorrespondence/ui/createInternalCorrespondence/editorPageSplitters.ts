@@ -3,6 +3,7 @@ import {
   brAtCharBoundary,
   dropChars,
   removeLeadingBr,
+  structuralBreakBefore,
   truncateToChars,
   wordBoundaryBefore,
 } from "../../../InternalCorrespondenceIncomingView/lib";
@@ -208,9 +209,15 @@ export const createBlockSplitters = (
     }
 
     // Разрез по бюджету почти всегда приходится на середину слова. Отступаем
-    // назад к границе слова, чтобы слово уехало на следующий лист целиком.
-    const wordCut = wordBoundaryBefore(text, best);
-    const cut = wordCut > 0 ? wordCut : allowMidWord ? best : 0;
+    // назад к ближайшей законной границе: пробел/дефис в тексте либо
+    // структурный перенос строки (<br>, конец вложенного блока). Без второго
+    // абзац из коротких «слов» без пробелов не делится вовсе — остаток листа
+    // остаётся пустым, а блок целиком уезжает на следующую страницу.
+    const safeCut = Math.max(
+      wordBoundaryBefore(text, best),
+      structuralBreakBefore(template, text, best),
+    );
+    const cut = safeCut > 0 ? safeCut : allowMidWord ? best : 0;
 
     if (cut < 1) {
       block.innerHTML = originalHtml;

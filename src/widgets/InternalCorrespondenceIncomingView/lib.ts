@@ -18,6 +18,7 @@ export {
   brAtCharBoundary,
   removeLeadingBr,
   wordBoundaryBefore,
+  structuralBreakBefore,
 } from "./incomingViewLib/incomingViewTruncate";
 
 export { paginateHtml } from "./incomingViewLib/paginateHtml";
