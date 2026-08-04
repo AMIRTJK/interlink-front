@@ -6,7 +6,11 @@ import {
   PAGE_SPLITTABLE_TAGS,
 } from "./editorTags";
 import { createCaretKeeper } from "./editorCaretKeeper";
-import { createBlockSplitters, makeSpacer } from "./editorPageSplitters";
+import {
+  blockTextFitsBudget,
+  createBlockSplitters,
+  makeSpacer,
+} from "./editorPageSplitters";
 
 interface PaginateGeometry {
   /** Высота печатной области листа без вертикальных полей. */
@@ -178,6 +182,17 @@ export const paginateEditorDom = (
     // в остаток страницы не влезло ни одного слова — блок уедет на следующую
     // страницу целиком (ветка ниже) и будет поделён уже там, по полному листу.
     const atPageStart = top <= pageStart + 2;
+
+    // За печатную область вылезает только пустая разметка в конце блока (пустая
+    // строка после удаления текста на следующей странице): она ничего не рисует,
+    // висит в нижнем поле листа и делить блок из-за неё нельзя — иначе на
+    // следующую страницу обязан уехать хотя бы один символ, и Backspace в её
+    // начале перетаскивал бы туда символы с предыдущей страницы по одному.
+    if (splittable && blockTextFitsBudget(block, usableBottom - top)) {
+      i++;
+      continue;
+    }
+
     if (
       splittable &&
       splitBlockToBudget(block, usableBottom - top, page, atPageStart)

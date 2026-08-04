@@ -219,6 +219,23 @@ export const brAtCharBoundary = (root: HTMLElement, k: number): boolean => {
   return false;
 };
 
+/**
+ * Возвращает в голову `<br>`, стоявший ровно на границе разреза: сам
+ * `truncateToChars` удаляет всё после исчерпания бюджета, включая этот `<br>`, а
+ * `removeLeadingBr` убирает его же из начала хвоста. Без возврата перенос строки
+ * исчезал из документа совсем — в редакторе куски склеиваются обратно при
+ * каждой пагинации, и две строки навсегда становились одной. В конце блока
+ * `<br>` невидим, поэтому высота головы не меняется.
+ */
+export const restoreBoundaryBr = (head: HTMLElement): void => {
+  const walker = document.createTreeWalker(head, NodeFilter.SHOW_TEXT, null);
+  let last: Node | null = null;
+  let n: Node | null;
+  while ((n = walker.nextNode())) last = n;
+  if (!last || !last.parentNode) return;
+  (last as ChildNode).after(document.createElement("br"));
+};
+
 export const removeLeadingBr = (root: HTMLElement): void => {
   const walker = document.createTreeWalker(
     root,

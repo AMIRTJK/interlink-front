@@ -3,6 +3,7 @@ import {
   brAtCharBoundary,
   dropChars,
   removeLeadingBr,
+  restoreBoundaryBr,
   structuralBreakBefore,
   truncateToChars,
   wordBoundaryBefore,
@@ -28,6 +29,39 @@ export const makeSpacer = (h: number): HTMLElement => {
   s.style.userSelect = "none";
   s.style.cursor = "default";
   return s;
+};
+
+/**
+ * Влезает ли в остаток листа ВЕСЬ текст блока — то есть вылезает за печатную
+ * область только пустая разметка в конце: пустая строка, оставшаяся после
+ * удаления текста на следующей странице, или служебный `<br>`. Такой блок делить
+ * нельзя: пустая строка ничего не рисует и просто висит в нижнем поле листа, а
+ * деление ради неё обязано отдать на следующую страницу хотя бы один символ
+ * (бинарный поиск ограничен `total - 1`) — и тогда каждый Backspace в начале
+ * следующей страницы перетаскивал бы туда по одному символу с предыдущей.
+ *
+ * Просмотр входящих и печать так себя ведут и без проверки: их бинарный поиск
+ * допускает разрез по всему тексту (`hi = total`), то есть хвост из одной
+ * пустой разметки просто отбрасывается.
+ */
+export const blockTextFitsBudget = (
+  block: HTMLElement,
+  budgetPx: number,
+): boolean => {
+  const total = (block.textContent || "").length;
+  if (!total) return false;
+
+  const probe = block.cloneNode(true) as HTMLElement;
+  truncateToChars(probe, { left: total });
+  // В конце блока нет ничего, кроме текста — значит и вылезает не пустая
+  // разметка, а сам текст: мерить нечего, блок надо делить как обычно.
+  if (probe.innerHTML === block.innerHTML) return false;
+
+  const originalHtml = block.innerHTML;
+  block.innerHTML = probe.innerHTML;
+  const fits = block.offsetHeight <= budgetPx;
+  block.innerHTML = originalHtml;
+  return fits;
 };
 
 /**
@@ -228,7 +262,8 @@ export const createBlockSplitters = (
     dropChars(tail, { left: cut });
     // <br> ровно на границе разреза принадлежит голове (там он невидим);
     // в хвосте он дал бы лишнюю пустую строку в начале страницы.
-    if (brAtCharBoundary(template, cut)) removeLeadingBr(tail);
+    const boundaryBr = brAtCharBoundary(template, cut);
+    if (boundaryBr) removeLeadingBr(tail);
     if (!(tail.textContent || "").trim() && !tail.querySelector("br,img")) {
       // Хвост пуст — деление не имеет смысла.
       block.innerHTML = originalHtml;
@@ -236,6 +271,10 @@ export const createBlockSplitters = (
     }
 
     block.innerHTML = headHtmlFor(cut);
+    // Обрезка головы этот же <br> отбрасывает (он стоит за исчерпанным
+    // бюджетом), поэтому возвращаем его руками: иначе перенос строки пропадал
+    // из документа совсем и при обратном слиянии кусков строки склеивались.
+    if (boundaryBr) restoreBoundaryBr(block);
 
     const gid = block.getAttribute(AUTOSPLIT_ATTR) || nextSplitGroupId();
     block.setAttribute(AUTOSPLIT_ATTR, gid);

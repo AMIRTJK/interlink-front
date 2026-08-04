@@ -17,6 +17,7 @@ export {
   dropChars,
   brAtCharBoundary,
   removeLeadingBr,
+  restoreBoundaryBr,
   wordBoundaryBefore,
   structuralBreakBefore,
 } from "./incomingViewLib/incomingViewTruncate";
