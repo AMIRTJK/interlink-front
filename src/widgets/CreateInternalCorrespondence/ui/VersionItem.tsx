@@ -7,6 +7,7 @@ interface IProps {
   version: any;
   activeVersionId: number | string | null;
   latestVersionId?: number | string | null;
+  showVersionCompareSides?: boolean;
   signedVersionId: number | string | null;
   isSelectingVersion: boolean;
   isSigned: boolean;
@@ -18,6 +19,7 @@ export const VersionItem = ({
   version,
   activeVersionId,
   latestVersionId,
+  showVersionCompareSides = false,
   signedVersionId,
   isSelectingVersion,
   isSigned,
@@ -27,20 +29,25 @@ export const VersionItem = ({
   const isRevoked = version.signature_state === "revoked";
   const isLatestVersion =
     latestVersionId != null && String(version.id) === String(latestVersionId);
-  const isCurrentActive = version.id === activeVersionId;
+  const isViewSelectDisabled = showVersionCompareSides && isLatestVersion;
+  const isCurrentActive =
+    (showVersionCompareSides ? !isLatestVersion : true) &&
+    version.id === activeVersionId;
   const isSignedVersion = !isRevoked && version.id === signedVersionId;
 
   return (
     <div
-      onClick={() => !isLatestVersion && onSelectVersion(version.content, version.id)}
+      onClick={() =>
+        !isViewSelectDisabled && onSelectVersion(version.content, version.id)
+      }
       title={
-        isLatestVersion
+        isViewSelectDisabled
           ? "Актуальная версия всегда отображается на основном холсте"
           : undefined
       }
       className={cn(
         "flex items-start justify-between p-3 rounded-xl border transition-all group text-xs gap-3",
-        isLatestVersion ? "cursor-default" : "cursor-pointer",
+        isViewSelectDisabled ? "cursor-default" : "cursor-pointer",
         isSignedVersion
           ? "bg-emerald-50/60 border-emerald-400 shadow-sm ring-1 ring-emerald-200"
           : isRevoked

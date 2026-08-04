@@ -2071,12 +2071,11 @@ export const CreateInternalCorrespondence = ({
     const targetVersion = allVersions[allVersions.length - 1];
 
     const isNewVersionId = autoLoadedLatestRef.current !== targetVersion.id;
-    autoLoadedLatestRef.current = targetVersion.id;
-    setActiveVersionId(targetVersion.id);
-
-    // Раскладку подтягиваем только вместе с новой версией. На обычном рефетче
-    // (тот же id) её трогать нельзя — затёрли бы несохранённые правки линейки.
-    if (isNewVersionId) applyDocLayout(targetVersion.layout);
+    if (isNewVersionId) {
+      autoLoadedLatestRef.current = targetVersion.id;
+      setActiveVersionId(targetVersion.id);
+      applyDocLayout(targetVersion.layout);
+    }
 
     if (editorRef.current && targetVersion.content) {
       const currentCleanHtml = cleanEditorArtifacts(
@@ -2840,6 +2839,7 @@ export const CreateInternalCorrespondence = ({
                         />
                         <VersionsPanel
                           isOpen={versionsOpen}
+                          showVersionCompareSides={showVersionCompareSides}
                           hideTab={panelsInToolbar}
                           openLeft={true}
                           onOpen={handleOpenVersions}

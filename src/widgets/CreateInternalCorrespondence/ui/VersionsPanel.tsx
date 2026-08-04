@@ -8,6 +8,7 @@ import { useAutoPositionDrawer } from "../lib/useAutoPositionDrawer";
 
 interface IProps {
   isOpen: boolean;
+  showVersionCompareSides?: boolean;
   hideTab?: boolean;
   openLeft?: boolean;
   onOpen: () => void;
@@ -23,6 +24,7 @@ interface IProps {
 
 export const VersionsPanel = ({
   isOpen,
+  showVersionCompareSides = false,
   hideTab,
   openLeft = true,
   onOpen,
@@ -250,6 +252,7 @@ export const VersionsPanel = ({
                     version={v}
                     activeVersionId={activeVersionId}
                     latestVersionId={latestVersionId}
+                    showVersionCompareSides={showVersionCompareSides}
                     signedVersionId={signedVersionId}
                     isSelectingVersion={isSelectingVersion}
                     isSigned={isSigned}
