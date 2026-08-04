@@ -20,6 +20,7 @@ import {
   CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE,
 } from "../lib/utils";
 import { FilePreviewModal } from "@features/Profile";
+import { wordBoundaryBefore } from "../../InternalCorrespondenceIncomingView/lib";
 import { DSStamp } from "./DSStamp";
 
 const PAGE_PAD_H = 80;
@@ -307,6 +308,12 @@ export const PreviewModal = ({
             hi = mid - 1;
           }
         }
+        // Слово не рвём между листами: отступаем к границе слова. Границы нет
+        // — слово шире целой страницы, тогда режем по буквам, иначе его негде
+        // разместить.
+        const wordCut = wordBoundaryBefore(full, best, start);
+        if (wordCut > start) best = wordCut;
+
         chunk.textContent = full.slice(start, best);
         result.push(measurer.innerHTML);
         measurer.innerHTML = "";
