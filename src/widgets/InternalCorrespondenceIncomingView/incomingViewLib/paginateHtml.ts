@@ -10,6 +10,7 @@ import {
   dropChars,
   brAtCharBoundary,
   removeLeadingBr,
+  structuralBreakBefore,
   wordBoundaryBefore,
 } from "./incomingViewTruncate";
 
@@ -159,11 +160,15 @@ export const paginateHtml = (
           }
         }
 
-        // Слово не рвём: отступаем к границе слова, чтобы оно целиком уехало
-        // на следующий лист. Границы нет — слово шире целой страницы, и резать
-        // по буквам приходится: разместить его иначе негде.
-        const wordCut = wordBoundaryBefore(text, best);
-        if (wordCut > 0) best = wordCut;
+        // Слово не рвём: отступаем к ближайшей законной границе — пробел/дефис
+        // в тексте либо структурный перенос строки (<br>, конец вложенного
+        // блока). Границы нет — слово шире целой страницы, и резать по буквам
+        // приходится: разместить его иначе негде.
+        const safeCut = Math.max(
+          wordBoundaryBefore(text, best),
+          structuralBreakBefore(rest, text, best),
+        );
+        if (safeCut > 0) best = safeCut;
 
         const head = rest.cloneNode(true) as HTMLElement;
         truncateToChars(head, { left: best });

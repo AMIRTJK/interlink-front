@@ -86,6 +86,7 @@ import {
   cleanEditorArtifacts,
   wrapBareTopLevelNodes,
 } from "./createInternalCorrespondence/editorCaret";
+import { snapCaretOutOfPageGap } from "./createInternalCorrespondence/editorClickCaret";
 import { paginateEditorDom } from "./createInternalCorrespondence/paginateEditorDom";
 import { buildFragmentFromHtml } from "./createInternalCorrespondence/editorFragments";
 import { useLocationStatePrefill } from "./createInternalCorrespondence/useLocationStatePrefill";
@@ -1940,6 +1941,31 @@ export const CreateInternalCorrespondence = ({
   // правил бы текст, который всё равно некуда сохранить.
   const isReadOnly = isSigned || isOldVersionSelected || !canEditDocument;
 
+  // Остаток листа под последней строкой (и промежуток до следующего листа) —
+  // служебная распорка, а не область набора: курсор над ней — стрелка, а
+  // mousedown гасим, чтобы браузер не ставил туда каретку даже на мгновение.
+  // Без этого каретка «проваливалась» в пустоту распорки и набранный там символ
+  // оказывался вне печатной области до следующей пагинации.
+  const handleEditorMouseDown = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement | null)?.closest?.(`[${SPACER_ATTR}]`))
+      e.preventDefault();
+  }, []);
+
+  // Клик по холсту: зум вшитого штампа ЭЦП плюс подстраховка каретки на случай,
+  // если браузер всё же оставил её вне текста (см. snapCaretOutOfPageGap).
+  const handleEditorClick = useCallback(
+    (e: React.MouseEvent) => {
+      handleCanvasStampZoom(e);
+      if (isReadOnly) return;
+      // Клик по распорке погашен в mousedown — каретка не двигалась, править
+      // нечего (иначе снап уводил бы её от того места, где она стояла).
+      if ((e.target as HTMLElement | null)?.closest?.(`[${SPACER_ATTR}]`)) return;
+      const editor = editorRef.current;
+      if (editor) snapCaretOutOfPageGap(editor, e.clientY);
+    },
+    [handleCanvasStampZoom, isReadOnly],
+  );
+
   // ===== Пересылка: цитата исходного письма в холсте =====
   // «Перенаправить» кладёт входящее письмо прямо в холст (сверху остаётся место
   // под свой текст, ниже разделитель и само письмо) — как это делает Outlook.
@@ -2689,7 +2715,8 @@ export const CreateInternalCorrespondence = ({
                       fontSize={fontSize}
                       onInput={handleEditorInput}
                       onKeyDown={handleEditorKeyDown}
-                      onClick={handleCanvasStampZoom}
+                      onClick={handleEditorClick}
+                      onMouseDown={handleEditorMouseDown}
                     />
 
                     {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания.
