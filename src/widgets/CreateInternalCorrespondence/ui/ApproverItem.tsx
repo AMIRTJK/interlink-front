@@ -24,6 +24,9 @@ interface IProps {
   toggleApproverComment: (id: string) => void;
   updateApproverComment: (id: string, text: string) => void;
   onRemoveApprover: (id: string) => void;
+  /** Разрешает ли роль пользователя в документе согласовывать его */
+  canApprove: boolean;
+  currentUserId?: string | number | null;
 }
 
 export const ApproverItem = ({
@@ -36,7 +39,14 @@ export const ApproverItem = ({
   toggleApproverComment,
   updateApproverComment,
   onRemoveApprover,
+  canApprove,
+  currentUserId,
 }: IProps) => {
+  // Согласовать можно только за себя: раньше кнопка висела на каждой строке и
+  // клик по чужой приводил к 403 от бэкенда.
+  const isOwnRow =
+    currentUserId != null && String(currentUserId) === String(approver.id);
+
   return (
     <div
       className={cn(
@@ -118,7 +128,15 @@ export const ApproverItem = ({
               <Check size={10} className="text-emerald-500" />
             </div>
           </If>
-          <If is={!!approver.isInvited && !approver.dsApplied && !approver.approved}>
+          <If
+            is={
+              !!approver.isInvited &&
+              !approver.dsApplied &&
+              !approver.approved &&
+              canApprove &&
+              isOwnRow
+            }
+          >
             <button
               onClick={() => {
                 if (approver.approvalRecordId) {

@@ -10,6 +10,8 @@ import {
   dropChars,
   brAtCharBoundary,
   removeLeadingBr,
+  structuralBreakBefore,
+  wordBoundaryBefore,
 } from "./incomingViewTruncate";
 
 const ATOMIC = new Set(["TABLE", "IMG", "FIGURE", "SVG", "VIDEO", "CANVAS"]);
@@ -133,7 +135,8 @@ export const paginateHtml = (
       let rest: HTMLElement | null = el.cloneNode(true) as HTMLElement;
       let guard = 0;
       while (rest && guard++ < 5000) {
-        const total = (rest.textContent || "").length;
+        const text = rest.textContent || "";
+        const total = text.length;
         if (!total) break;
 
         const probeFits = (k: number): boolean => {
@@ -156,6 +159,16 @@ export const paginateHtml = (
             hi = mid - 1;
           }
         }
+
+        // Слово не рвём: отступаем к ближайшей законной границе — пробел/дефис
+        // в тексте либо структурный перенос строки (<br>, конец вложенного
+        // блока). Границы нет — слово шире целой страницы, и резать по буквам
+        // приходится: разместить его иначе негде.
+        const safeCut = Math.max(
+          wordBoundaryBefore(text, best),
+          structuralBreakBefore(rest, text, best),
+        );
+        if (safeCut > 0) best = safeCut;
 
         const head = rest.cloneNode(true) as HTMLElement;
         truncateToChars(head, { left: best });

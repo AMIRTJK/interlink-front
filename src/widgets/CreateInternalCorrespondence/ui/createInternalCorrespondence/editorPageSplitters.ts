@@ -3,13 +3,21 @@ import {
   brAtCharBoundary,
   dropChars,
   removeLeadingBr,
+  restoreBoundaryBr,
+  structuralBreakBefore,
   truncateToChars,
+  wordBoundaryBefore,
 } from "../../../InternalCorrespondenceIncomingView/lib";
 import { nextSplitGroupId } from "./editorSplitGroup";
 
 /**
  * Служебная распорка: нередактируемый блок нужной высоты, которым содержимое
  * сдвигается на начало следующего листа. При сохранении распорки вырезаются.
+ *
+ * События мыши распорка ПРИНИМАЕТ (никакого `pointer-events: none`): только так
+ * над ней стоит курсор-стрелка вместо курсора набора, и только так mousedown по
+ * ней виден обработчику редактора, который гасит его и не даёт браузеру
+ * поставить каретку в остаток листа (handleEditorMouseDown).
  */
 export const makeSpacer = (h: number): HTMLElement => {
   const s = document.createElement("div");
@@ -19,8 +27,41 @@ export const makeSpacer = (h: number): HTMLElement => {
   s.style.height = `${Math.max(0, h)}px`;
   s.style.width = "100%";
   s.style.userSelect = "none";
-  s.style.pointerEvents = "none";
+  s.style.cursor = "default";
   return s;
+};
+
+/**
+ * Влезает ли в остаток листа ВЕСЬ текст блока — то есть вылезает за печатную
+ * область только пустая разметка в конце: пустая строка, оставшаяся после
+ * удаления текста на следующей странице, или служебный `<br>`. Такой блок делить
+ * нельзя: пустая строка ничего не рисует и просто висит в нижнем поле листа, а
+ * деление ради неё обязано отдать на следующую страницу хотя бы один символ
+ * (бинарный поиск ограничен `total - 1`) — и тогда каждый Backspace в начале
+ * следующей страницы перетаскивал бы туда по одному символу с предыдущей.
+ *
+ * Просмотр входящих и печать так себя ведут и без проверки: их бинарный поиск
+ * допускает разрез по всему тексту (`hi = total`), то есть хвост из одной
+ * пустой разметки просто отбрасывается.
+ */
+export const blockTextFitsBudget = (
+  block: HTMLElement,
+  budgetPx: number,
+): boolean => {
+  const total = (block.textContent || "").length;
+  if (!total) return false;
+
+  const probe = block.cloneNode(true) as HTMLElement;
+  truncateToChars(probe, { left: total });
+  // В конце блока нет ничего, кроме текста — значит и вылезает не пустая
+  // разметка, а сам текст: мерить нечего, блок надо делить как обычно.
+  if (probe.innerHTML === block.innerHTML) return false;
+
+  const originalHtml = block.innerHTML;
+  block.innerHTML = probe.innerHTML;
+  const fits = block.offsetHeight <= budgetPx;
+  block.innerHTML = originalHtml;
+  return fits;
 };
 
 /**
@@ -160,13 +201,20 @@ export const createBlockSplitters = (
   // за распорку на следующий лист. Обе части — в одной AUTOSPLIT-группе и при
   // сохранении склеиваются обратно. Так текст перетекает между страницами
   // построчно, как в Word, без больших пустых областей внизу листа. Возвращает
-  // false, если в бюджет не влезает ни одной строки.
+  // false, если в бюджет не влезает ни одного целого слова.
+  //
+  // `allowMidWord` разрешает резать слово по буквам. Его ставит только тот
+  // вызывающий, у которого блок и так стоит в начале листа: слово шире целой
+  // страницы иначе не разместить нигде. В середине листа деление слова
+  // запрещено — блок целиком уезжает на следующую страницу.
   const splitBlockToBudget = (
     block: HTMLElement,
     budgetPx: number,
     page: number,
+    allowMidWord: boolean,
   ): boolean => {
-    const total = (block.textContent || "").length;
+    const text = block.textContent || "";
+    const total = text.length;
     if (total < 2 || budgetPx <= 0) return false;
 
     const template = block.cloneNode(true) as HTMLElement;
@@ -194,23 +242,39 @@ export const createBlockSplitters = (
       }
     }
 
-    if (best < 1) {
+    // Разрез по бюджету почти всегда приходится на середину слова. Отступаем
+    // назад к ближайшей законной границе: пробел/дефис в тексте либо
+    // структурный перенос строки (<br>, конец вложенного блока). Без второго
+    // абзац из коротких «слов» без пробелов не делится вовсе — остаток листа
+    // остаётся пустым, а блок целиком уезжает на следующую страницу.
+    const safeCut = Math.max(
+      wordBoundaryBefore(text, best),
+      structuralBreakBefore(template, text, best),
+    );
+    const cut = safeCut > 0 ? safeCut : allowMidWord ? best : 0;
+
+    if (cut < 1) {
       block.innerHTML = originalHtml;
       return false;
     }
 
     const tail = template.cloneNode(true) as HTMLElement;
-    dropChars(tail, { left: best });
+    dropChars(tail, { left: cut });
     // <br> ровно на границе разреза принадлежит голове (там он невидим);
     // в хвосте он дал бы лишнюю пустую строку в начале страницы.
-    if (brAtCharBoundary(template, best)) removeLeadingBr(tail);
+    const boundaryBr = brAtCharBoundary(template, cut);
+    if (boundaryBr) removeLeadingBr(tail);
     if (!(tail.textContent || "").trim() && !tail.querySelector("br,img")) {
       // Хвост пуст — деление не имеет смысла.
       block.innerHTML = originalHtml;
       return false;
     }
 
-    block.innerHTML = headHtmlFor(best);
+    block.innerHTML = headHtmlFor(cut);
+    // Обрезка головы этот же <br> отбрасывает (он стоит за исчерпанным
+    // бюджетом), поэтому возвращаем его руками: иначе перенос строки пропадал
+    // из документа совсем и при обратном слиянии кусков строки склеивались.
+    if (boundaryBr) restoreBoundaryBr(block);
 
     const gid = block.getAttribute(AUTOSPLIT_ATTR) || nextSplitGroupId();
     block.setAttribute(AUTOSPLIT_ATTR, gid);

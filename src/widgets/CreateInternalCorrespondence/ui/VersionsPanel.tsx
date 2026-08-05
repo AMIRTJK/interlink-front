@@ -1,12 +1,14 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, ChevronDown, Check, X } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import { VersionItem } from "./VersionItem";
+import { useAutoPositionDrawer } from "../lib/useAutoPositionDrawer";
 
 interface IProps {
   isOpen: boolean;
+  showVersionCompareSides?: boolean;
   hideTab?: boolean;
   openLeft?: boolean;
   onOpen: () => void;
@@ -22,6 +24,7 @@ interface IProps {
 
 export const VersionsPanel = ({
   isOpen,
+  showVersionCompareSides = false,
   hideTab,
   openLeft = true,
   onOpen,
@@ -36,6 +39,8 @@ export const VersionsPanel = ({
 }: IProps) => {
   const [showAuthorDropdown, setShowAuthorDropdown] = useState(false);
   const [selectedAuthorId, setSelectedAuthorId] = useState<string | null>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  useAutoPositionDrawer({ isOpen, drawerRef });
 
   const versionAuthors = useMemo(() => {
     const map = new Map<string, { id: string; name: string; count: number }>();
@@ -58,18 +63,19 @@ export const VersionsPanel = ({
     return versions.filter((v) => String(v.author?.id) === selectedAuthorId);
   }, [versions, selectedAuthorId]);
 
+  const latestVersionId = useMemo(
+    () => (versions.length > 0 ? versions[versions.length - 1].id : null),
+    [versions],
+  );
+
   return (
     <>
       {!hideTab && (
-        <div
-          className="absolute z-20"
-          style={openLeft ? { left: -36, top: 190 } : { right: -36, top: 190 }}
-        >
+        <div className="absolute z-20 left-[-36px] top-[190px]">
           <motion.button
             onClick={isOpen ? onClose : onOpen}
             className={cn(
-              "bg-white border border-slate-200 shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-              openLeft ? "border-r-0 rounded-l-xl" : "border-l-0 rounded-r-xl",
+              "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
               isOpen ? "bg-slate-50" : "hover:bg-slate-50",
             )}
             aria-label="История версий"
@@ -93,20 +99,24 @@ export const VersionsPanel = ({
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ x: openLeft ? 12 : -12, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: openLeft ? 12 : -12, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="absolute top-0 w-[320px] h-[520px] bg-white rounded-2xl border border-slate-200 shadow-2xl z-[500] flex flex-col"
-
+          <div
+            ref={drawerRef}
+            className="absolute z-[500]"
             style={{
+              top: 190,
               ...(openLeft
                 ? { right: "calc(100% + 12px)" }
                 : { left: "calc(100% + 12px)" }),
             }}
-            onClick={(e) => e.stopPropagation()}
           >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 320, damping: 28 }}
+              className="w-[320px] h-[520px] bg-white rounded-2xl border border-slate-200 shadow-2xl flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center">
                 <span className="font-semibold text-sm text-slate-800">
@@ -241,6 +251,8 @@ export const VersionsPanel = ({
                     key={v.id}
                     version={v}
                     activeVersionId={activeVersionId}
+                    latestVersionId={latestVersionId}
+                    showVersionCompareSides={showVersionCompareSides}
                     signedVersionId={signedVersionId}
                     isSelectingVersion={isSelectingVersion}
                     isSigned={isSigned}
@@ -251,8 +263,9 @@ export const VersionsPanel = ({
               </If>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
+    </AnimatePresence>
     </>
   );
 };

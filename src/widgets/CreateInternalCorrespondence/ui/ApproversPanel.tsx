@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserPlus, X } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { Approver, RecipientOption } from "../types";
 import { ApproverItem } from "./ApproverItem";
+import { useAutoPositionDrawer } from "../lib/useAutoPositionDrawer";
 
 interface IProps {
   isOpen: boolean;
@@ -22,6 +23,9 @@ interface IProps {
   toggleApproverComment: (id: string) => void;
   updateApproverComment: (id: string, text: string) => void;
   docId?: string | number;
+  /** Разрешает ли роль пользователя в документе согласовывать его */
+  canApprove: boolean;
+  currentUserId?: string | number | null;
 }
 
 export const ApproversPanel = ({
@@ -40,9 +44,13 @@ export const ApproversPanel = ({
   toggleApproverComment,
   updateApproverComment,
   docId,
+  canApprove,
+  currentUserId,
 }: IProps) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [search, setSearch] = useState("");
+  const drawerRef = useRef<HTMLDivElement>(null);
+  useAutoPositionDrawer({ isOpen, drawerRef });
 
   const availableApprovers = availableUsers.filter(
     (r) =>
@@ -85,21 +93,27 @@ export const ApproversPanel = ({
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ x: openLeft ? 12 : -12, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: openLeft ? 12 : -12, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="absolute top-0 w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl z-[500] flex flex-col"
-
+          <div
+            ref={drawerRef}
+            className="absolute z-[500]"
             style={{
+              top: 190,
               ...(openLeft
                 ? { right: "calc(100% + 12px)" }
                 : { left: "calc(100% + 12px)" }),
-              maxHeight: "var(--icc-panel-max-h, 70vh)",
             }}
-            onClick={(e) => e.stopPropagation()}
           >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 320, damping: 28 }}
+              className="w-72 bg-white rounded-2xl border border-slate-200 shadow-2xl flex flex-col"
+              style={{
+                maxHeight: "var(--icc-panel-max-h, 70vh)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center">
                 <span className="font-semibold text-sm text-slate-800">
@@ -207,13 +221,16 @@ export const ApproversPanel = ({
                     toggleApproverComment={toggleApproverComment}
                     updateApproverComment={updateApproverComment}
                     onRemoveApprover={onRemoveApprover}
+                    canApprove={canApprove}
+                    currentUserId={currentUserId}
                   />
                 ))}
               </If>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
+    </AnimatePresence>
     </>
   );
 };

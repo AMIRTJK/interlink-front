@@ -7,20 +7,19 @@ import type {
 
 interface ISideCanvasParams extends IScrollFollowRefs {
   showOriginalLetterSides: boolean;
-  showVersionCompareSides: boolean;
   originalCanvasWrapRef: RefObject<HTMLDivElement | null>;
-  versionCompareCanvasWrapRef: RefObject<HTMLDivElement | null>;
   composeMode?: "reply" | "forward";
   sourceLetter?: unknown;
 }
 
-// Общий скролл-follow для активного бокового холста: либо сравнение версий,
-// либо просмотр входящего письма.
+// Скролл-follow бокового холста просмотра входящего письма.
+//
+// Холст сравнения версий сюда НЕ входит: там листы обязаны стоять напротив
+// страниц основного холста, а любое смещение это выравнивание ломает
+// (см. VersionCompareCanvas).
 export const useSideCanvasScrollFollow = ({
   showOriginalLetterSides,
-  showVersionCompareSides,
   originalCanvasWrapRef,
-  versionCompareCanvasWrapRef,
   rootScrollRef,
   pageCanvasRef,
   stickyHeaderRef,
@@ -28,9 +27,7 @@ export const useSideCanvasScrollFollow = ({
   sourceLetter,
 }: ISideCanvasParams) => {
   useEffect(() => {
-    const activeWrap = showVersionCompareSides
-      ? versionCompareCanvasWrapRef.current
-      : showOriginalLetterSides
+    const activeWrap = showOriginalLetterSides
       ? originalCanvasWrapRef.current
       : null;
     if (!activeWrap) return;
@@ -68,7 +65,7 @@ export const useSideCanvasScrollFollow = ({
       scroller.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, [showOriginalLetterSides, showVersionCompareSides, composeMode, sourceLetter]);
+  }, [showOriginalLetterSides, composeMode, sourceLetter]);
 };
 
 interface IOriginalCanvasParams extends IScrollFollowRefs, IScrollFollowLayout {

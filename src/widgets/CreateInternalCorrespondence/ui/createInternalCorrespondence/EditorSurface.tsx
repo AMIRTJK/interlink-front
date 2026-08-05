@@ -13,6 +13,7 @@ interface IProps {
   onInput: (e?: FormEvent<HTMLDivElement>) => void;
   onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => void;
   onClick: (e: MouseEvent) => void;
+  onMouseDown: (e: MouseEvent) => void;
 }
 
 export const EditorSurface = ({
@@ -23,6 +24,7 @@ export const EditorSurface = ({
   onInput,
   onKeyDown,
   onClick,
+  onMouseDown,
 }: IProps) => (
   <div
     ref={editorRef}
@@ -32,6 +34,7 @@ export const EditorSurface = ({
     onInput={onInput}
     onKeyDown={onKeyDown}
     onClick={onClick}
+    onMouseDown={onMouseDown}
     style={{
       position: "relative",
       zIndex: 1,
@@ -51,6 +54,6 @@ export const EditorSurface = ({
       wordBreak: "break-word",
       overflow: "visible",
     }}
-    className="doc-preview-content focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_pre]:whitespace-pre-wrap [&_p]:!my-0 [&_[data-page-spacer]]:select-none [&_[data-page-spacer]]:pointer-events-none [&_[data-page-break]]:select-none [&_[data-page-break]]:pointer-events-none [&_[data-signature-stamp]]:select-none [&_[data-signature-stamp]]:!cursor-zoom-in"
+    className="doc-preview-content focus:outline-none [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-slate-300 [&:empty]:before:italic [&:empty]:before:pointer-events-none [&_*]:max-w-full [&_*]:!whitespace-pre-wrap [&_*]:break-words [&_img]:h-auto [&_table]:w-full [&_table]:table-auto [&_table]:border-collapse [&_td]:break-words [&_td]:align-top [&_td]:border [&_td]:border-slate-300 [&_td]:px-2 [&_td]:py-1 [&_th]:break-words [&_th]:align-top [&_th]:border [&_th]:border-slate-300 [&_th]:px-2 [&_th]:py-1 [&_pre]:whitespace-pre-wrap [&_p]:!my-0 [&_[data-page-spacer]]:select-none [&_[data-page-spacer]]:cursor-default [&_[data-page-break]]:select-none [&_[data-page-break]]:pointer-events-none [&_[data-signature-stamp]]:select-none [&_[data-signature-stamp]]:!cursor-zoom-in"
   />
 );

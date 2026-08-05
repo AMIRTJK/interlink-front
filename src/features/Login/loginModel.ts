@@ -14,11 +14,11 @@ export const PHONE_LENGTHS: Record<string, number> = {
 export const LOGIN_ANTD_THEME: ThemeConfig = {
 	token: {
 		colorPrimary: "#3b82f6",
-		colorBgContainer: "rgba(15, 23, 42, 0.5)",
-		colorBorder: "rgba(255, 255, 255, 0.1)",
+		colorBgContainer: "rgba(15, 23, 42, 0.2)",
+		colorBorder: "rgba(255, 255, 255, 0.2)",
 		colorText: "#ffffff",
-		colorTextPlaceholder: "#64748b",
-		colorIcon: "#64748b",
+		colorTextPlaceholder: "#94a3b8",
+		colorIcon: "#94a3b8",
 		colorBgElevated: "#0f172a",
 		borderRadius: 12,
 		controlHeight: 48,
@@ -28,12 +28,12 @@ export const LOGIN_ANTD_THEME: ThemeConfig = {
 	components: {
 		Select: {
 			optionSelectedBg: "rgba(59, 130, 246, 0.2)",
-			optionActiveBg: "rgba(255, 255, 255, 0.05)",
-			selectorBg: "rgba(15, 23, 42, 0.5)",
+			optionActiveBg: "rgba(255, 255, 255, 0.08)",
+			selectorBg: "rgba(15, 23, 42, 0.2)",
 		},
 		Input: {
-			activeBg: "rgba(15, 23, 42, 1)",
-			hoverBg: "rgba(15, 23, 42, 0.5)",
+			activeBg: "rgba(15, 23, 42, 0.6)",
+			hoverBg: "rgba(15, 23, 42, 0.3)",
 		},
 	},
 };

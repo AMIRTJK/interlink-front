@@ -6,6 +6,16 @@ import {
   RULER_MIN_MARGIN,
 } from "./docLayout";
 
+const RULER_H = 30;
+const RULER_MARGIN_BOTTOM = 12;
+
+/**
+ * Сколько места линейка занимает над холстом. Нужно соседним колонкам (холст
+ * сравнения версий), чтобы их листы стояли на одной линии со страницами
+ * основного холста, когда линейка включена.
+ */
+export const EDITOR_RULER_OFFSET = RULER_H + RULER_MARGIN_BOTTOM;
+
 export const EditorRuler = ({
   pageWidth,
   marginLeft,
@@ -17,7 +27,7 @@ export const EditorRuler = ({
   marginRight: number;
   onChange: (side: "left" | "right", value: number) => void;
 }) => {
-  const H = 30;
+  const H = RULER_H;
   const baseY = H - 1;
   const contentStart = marginLeft;
   const contentEnd = pageWidth - marginRight;
@@ -108,7 +118,7 @@ export const EditorRuler = ({
         zIndex: 20,
         width: pageWidth,
         height: H,
-        marginBottom: 12,
+        marginBottom: RULER_MARGIN_BOTTOM,
         background: "#fff",
         border: "1px solid rgba(148,163,184,0.35)",
         borderRadius: 8,

@@ -54,7 +54,7 @@ export const VerificationStep = ({
 						value={digit}
 						onChange={(e) => onOtpChange(index, e.target.value)}
 						onKeyDown={(e) => onOtpKeyDown(index, e)}
-						className="w-10 h-12 sm:w-11 sm:h-14 bg-slate-900/50 border border-white/10 rounded-xl text-center text-xl font-bold text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-inner"
+						className="w-10 h-12 sm:w-11 sm:h-14 bg-slate-900/25 border border-white/15 rounded-xl text-center text-xl font-bold text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-inner"
 					/>
 				))}
 			</div>

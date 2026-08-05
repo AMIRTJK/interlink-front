@@ -63,6 +63,10 @@ import {
 } from "../lib/utils";
 import { FilePreviewModal } from "@features/Profile";
 import {
+  correspondencePermissionsKey,
+  useCorrespondenceUserContext,
+} from "@entities/correspondence";
+import {
   DEFAULT_DOC_LAYOUT,
   RULER_MIN_CONTENT,
   RULER_MIN_MARGIN,
@@ -72,13 +76,17 @@ import {
   withDocLayout,
   type DocLayout,
 } from "./createInternalCorrespondence/docLayout";
-import { EditorRuler } from "./createInternalCorrespondence/EditorRuler";
+import {
+  EditorRuler,
+  EDITOR_RULER_OFFSET,
+} from "./createInternalCorrespondence/EditorRuler";
 import { PageGrid } from "./createInternalCorrespondence/PageGrid";
 import { WORD_BOUNDARY_RE } from "./createInternalCorrespondence/editorTabs";
 import {
   cleanEditorArtifacts,
   wrapBareTopLevelNodes,
 } from "./createInternalCorrespondence/editorCaret";
+import { snapCaretOutOfPageGap } from "./createInternalCorrespondence/editorClickCaret";
 import { paginateEditorDom } from "./createInternalCorrespondence/paginateEditorDom";
 import { buildFragmentFromHtml } from "./createInternalCorrespondence/editorFragments";
 import { useLocationStatePrefill } from "./createInternalCorrespondence/useLocationStatePrefill";
@@ -139,6 +147,11 @@ import { PreviewModal } from "./PreviewModal";
 import { OriginalLetterPanel } from "./OriginalLetterPanel";
 import { RelatedDocsAccordion } from "./RelatedDocsBlock";
 import { OriginalLetterCanvas } from "./OriginalLetterCanvas";
+import { VersionCompareCanvas } from "./VersionCompareCanvas";
+import {
+  AuthorshipHoverLayer,
+  useAuthorship,
+} from "./createInternalCorrespondence/authorship";
 import {
   paginateHtml,
   type StampInfo,
@@ -428,18 +441,52 @@ export const CreateInternalCorrespondence = ({
     !!(panelMode && panelSource) && panelMode !== "forward",
   );
   const [showVersionCompareSides, setShowVersionCompareSides] = useState(false);
+  // Подсветка авторов занимает правую колонку вместо сравниваемой версии,
+  // поэтому живёт только внутри режима истории версий.
+  const [showAuthorship, setShowAuthorship] = useState(false);
 
   const toggleOriginalLetterSides = (checked: boolean) => {
     setShowOriginalLetterSides(checked);
     if (checked) {
       setShowVersionCompareSides(false);
+      setShowAuthorship(false);
     }
   };
 
   const toggleVersionCompareSides = (checked: boolean) => {
+    if (checked && allVersions.length < 2) {
+      toast.info(
+        "В документе пока только 1 версия. Режим сравнения станет доступен после появления 2-й версии.",
+      );
+      setShowVersionCompareSides(false);
+      return;
+    }
     setShowVersionCompareSides(checked);
     if (checked) {
       setShowOriginalLetterSides(false);
+      // Каждый вход в режим начинается с версии по умолчанию (предыдущей),
+      // прошлый выбор пользователя не тянем.
+      hasPickedCompareVersionRef.current = false;
+    } else {
+      setShowAuthorship(false);
+      hasPickedCompareVersionRef.current = false;
+      // Выходя из режима, возвращаемся на актуальную версию: иначе подставленная
+      // справа предыдущая осталась бы выбранной и заблокировала редактор
+      // (isOldVersionSelected).
+      setActiveVersionId(latestVersionId);
+    }
+  };
+
+  const toggleAuthorship = (checked: boolean) => {
+    setShowAuthorship(checked);
+    if (checked) {
+      // У подсветки авторов дефолт обратный сравнению: интересно, кто написал
+      // то, что в документе СЕЙЧАС. Помечаем версию как выбранную, иначе
+      // подстановка предыдущей тут же вернула бы её обратно.
+      hasPickedCompareVersionRef.current = true;
+      setActiveVersionId(latestVersionId);
+    } else {
+      hasPickedCompareVersionRef.current = false;
     }
   };
 
@@ -464,15 +511,15 @@ export const CreateInternalCorrespondence = ({
   const originalTotal = Math.max(originalSheets.pages.length, 1);
   const originalCurrent = Math.min(originalPage, originalTotal - 1);
 
-  const [versionComparePage, setVersionComparePage] = useState(0);
-
   const composeAppliedRef = useRef(false);
+  // Выбирал ли пользователь версию для правой колонки сам. Пока нет — режим
+  // сравнения подставляет предыдущую версию.
+  const hasPickedCompareVersionRef = useRef(false);
   const stampRef = useRef<HTMLDivElement>(null);
   const pageCanvasRef = useRef<HTMLDivElement>(null);
   const rootScrollRef = useRef<HTMLDivElement>(null);
   const originalCanvasWrapRef = useRef<HTMLDivElement>(null);
   const navPaneWrapRef = useRef<HTMLDivElement>(null);
-  const versionCompareCanvasWrapRef = useRef<HTMLDivElement>(null);
 
   // Обёртка боковых панелей (История версий / Входящие письма / Согласующие /
   // Подписывающий). Прижимаем её к верху видимой области при прокрутке, чтобы
@@ -505,9 +552,7 @@ export const CreateInternalCorrespondence = ({
   // scroll/resize через transform. Подробности — в самих хуках.
   useSideCanvasScrollFollow({
     showOriginalLetterSides,
-    showVersionCompareSides,
     originalCanvasWrapRef,
-    versionCompareCanvasWrapRef,
     rootScrollRef,
     pageCanvasRef,
     stickyHeaderRef,
@@ -698,18 +743,39 @@ export const CreateInternalCorrespondence = ({
     [allVersions, activeVersionId, latestVersion],
   );
 
+  // Подсветка авторства занимает правую колонку целиком, поэтому включается
+  // только вместе с режимом истории версий. Версию берёт ту же, что и обычное
+  // сравнение, — иначе выбор в панели версий ни на что бы не влиял.
+  const isAuthorshipActive = showVersionCompareSides && showAuthorship;
+  const authorship = useAuthorship(
+    allVersions,
+    isAuthorshipActive,
+    activeVersion?.id ?? null,
+  );
+
   const versionCompareSheets = useMemo((): { pages: string[]; stamp: StampInfo } => {
-    if (!showVersionCompareSides || !activeVersion || !activeVersion.content) {
-      return { pages: [], stamp: null };
-    }
-    const res = paginateHtml(activeVersion.content, Number(fontSize) || 14);
+    if (!showVersionCompareSides) return { pages: [], stamp: null };
+
+    // В режиме авторства справа стоит актуальная версия с разметкой авторов,
+    // в обычном — выбранная версия как есть.
+    const source = isAuthorshipActive
+      ? authorship.markedHtml
+      : activeVersion?.content;
+    if (!source) return { pages: [], stamp: null };
+
+    const res = paginateHtml(source, Number(fontSize) || 14);
     const pages = [...res.pages];
     if (res.stamp) while (pages.length <= res.stamp.pageIndex) pages.push("");
     return { pages, stamp: res.stamp };
-  }, [showVersionCompareSides, activeVersion, fontSize]);
+  }, [
+    showVersionCompareSides,
+    isAuthorshipActive,
+    authorship.markedHtml,
+    activeVersion,
+    fontSize,
+  ]);
 
   const versionCompareTotal = Math.max(versionCompareSheets.pages.length, 1);
-  const versionCompareCurrent = Math.min(versionComparePage, versionCompareTotal - 1);
 
   const isActiveVersionForSign = activeVersion ? !!activeVersion.is_selected : false;
 
@@ -796,6 +862,9 @@ export const CreateInternalCorrespondence = ({
 
   const handleSelectVersion = (content: string, versionId: string | number) => {
     setActiveVersionId(versionId);
+    // Дальше версию справа выбирает пользователь — подстановка предыдущей по
+    // умолчанию больше не вмешивается.
+    hasPickedCompareVersionRef.current = true;
     if (!showVersionCompareSides) {
       if (editorRef.current) {
         const target = allVersions.find((v: any) => v.id === versionId);
@@ -893,6 +962,7 @@ export const CreateInternalCorrespondence = ({
         invalidate: [
           ApiRoutes.INTERNAL_GET_WORKFLOW,
           ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
+          correspondencePermissionsKey(String(id || "")),
         ],
       },
       queryOptions: {
@@ -905,11 +975,22 @@ export const CreateInternalCorrespondence = ({
   const isAlreadySent = initialData?.item?.status === "sent";
 
   const currentUserId = tokenControl.getUserId() || tokenControl.getUserData()?.id;
+
+  // Динамическая роль пользователя в этом документе: она не зависит от
+  // глобального RBAC и решает, какие действия над письмом ему показывать.
+  const userContext = useCorrespondenceUserContext(id, { source: initialData });
+  const canEditDocument = userContext.can("edit");
+  const canSendDocument = userContext.can("send");
+  const canSignDocument = userContext.can("sign");
+  const canApproveDocument = userContext.can("approve");
+  const canCancelSignature = userContext.can("cancel_signature");
+
   const pendingSignature = rawWorkflowData?.data?.signatures?.find(
     (sig: any) => sig.status === "pending"
   );
   const isCurrentSigner = pendingSignature && currentUserId && String(currentUserId) === String(pendingSignature.user_id || pendingSignature.user?.id);
-  const canDecline = !!pendingSignature && !!isCurrentSigner;
+  const canDecline =
+    !!pendingSignature && !!isCurrentSigner && userContext.can("decline_signature");
 
   const [showDeclineModal, setShowDeclineModal] = useState(false);
   const [isDeclining, setIsDeclining] = useState(false);
@@ -983,6 +1064,7 @@ export const CreateInternalCorrespondence = ({
           ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
           ApiRoutes.GET_INTERNAL_VERSIONS?.replace(":id", String(id || "")),
           ApiRoutes.GET_INTERNAL_BY_ID?.replace(":id", String(id || "")),
+          correspondencePermissionsKey(String(id || "")),
           ...CORRESPONDENCE_INVALIDATE_KEYS,
         ],
       },
@@ -1011,6 +1093,7 @@ export const CreateInternalCorrespondence = ({
       suppressSuccessToast: true,
       invalidate: [
         ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+        correspondencePermissionsKey(String(id || "")),
         ...CORRESPONDENCE_INVALIDATE_KEYS,
       ],
     },
@@ -1094,6 +1177,7 @@ export const CreateInternalCorrespondence = ({
       invalidate: [
         ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
         ApiRoutes.GET_INTERNAL_BY_ID?.replace(":id", String(id || "")),
+        correspondencePermissionsKey(String(id || "")),
       ],
     },
     queryOptions: {
@@ -1696,6 +1780,7 @@ export const CreateInternalCorrespondence = ({
 
   const applyFinalDS = async () => {
     if (!id || !finalSigner) return;
+    if (!canSignDocument) return;
     // Подписать можно только версию, выбранную «Для подписи». Иначе ЭЦП ушла бы
     // на одну версию, а штамп остался бы на открытой в редакторе другой версии.
     if (!isActiveVersionForSign) return;
@@ -1725,6 +1810,7 @@ export const CreateInternalCorrespondence = ({
   };
 
   const applyApproverDS = (recordId: string) => {
+    if (!canApproveDocument) return;
     const approverObj = approvers.find((a) => a.approvalRecordId === recordId);
     const rawNote = approverObj?.comment?.trim();
     const note = rawNote && rawNote.length > 0 ? rawNote : null;
@@ -1858,7 +1944,34 @@ export const CreateInternalCorrespondence = ({
     (sig: any) => sig.status === "signed",
   );
 
-  const isReadOnly = isSigned || isOldVersionSelected;
+  // Роль без права edit смотрит документ только на чтение — иначе пользователь
+  // правил бы текст, который всё равно некуда сохранить.
+  const isReadOnly = isSigned || isOldVersionSelected || !canEditDocument;
+
+  // Остаток листа под последней строкой (и промежуток до следующего листа) —
+  // служебная распорка, а не область набора: курсор над ней — стрелка, а
+  // mousedown гасим, чтобы браузер не ставил туда каретку даже на мгновение.
+  // Без этого каретка «проваливалась» в пустоту распорки и набранный там символ
+  // оказывался вне печатной области до следующей пагинации.
+  const handleEditorMouseDown = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement | null)?.closest?.(`[${SPACER_ATTR}]`))
+      e.preventDefault();
+  }, []);
+
+  // Клик по холсту: зум вшитого штампа ЭЦП плюс подстраховка каретки на случай,
+  // если браузер всё же оставил её вне текста (см. snapCaretOutOfPageGap).
+  const handleEditorClick = useCallback(
+    (e: React.MouseEvent) => {
+      handleCanvasStampZoom(e);
+      if (isReadOnly) return;
+      // Клик по распорке погашен в mousedown — каретка не двигалась, править
+      // нечего (иначе снап уводил бы её от того места, где она стояла).
+      if ((e.target as HTMLElement | null)?.closest?.(`[${SPACER_ATTR}]`)) return;
+      const editor = editorRef.current;
+      if (editor) snapCaretOutOfPageGap(editor, e.clientY);
+    },
+    [handleCanvasStampZoom, isReadOnly],
+  );
 
   // ===== Пересылка: цитата исходного письма в холсте =====
   // «Перенаправить» кладёт входящее письмо прямо в холст (сверху остаётся место
@@ -1958,12 +2071,11 @@ export const CreateInternalCorrespondence = ({
     const targetVersion = allVersions[allVersions.length - 1];
 
     const isNewVersionId = autoLoadedLatestRef.current !== targetVersion.id;
-    autoLoadedLatestRef.current = targetVersion.id;
-    setActiveVersionId(targetVersion.id);
-
-    // Раскладку подтягиваем только вместе с новой версией. На обычном рефетче
-    // (тот же id) её трогать нельзя — затёрли бы несохранённые правки линейки.
-    if (isNewVersionId) applyDocLayout(targetVersion.layout);
+    if (isNewVersionId) {
+      autoLoadedLatestRef.current = targetVersion.id;
+      setActiveVersionId(targetVersion.id);
+      applyDocLayout(targetVersion.layout);
+    }
 
     if (editorRef.current && targetVersion.content) {
       const currentCleanHtml = cleanEditorArtifacts(
@@ -1993,6 +2105,31 @@ export const CreateInternalCorrespondence = ({
       selectVersionForSign({ versionId: targetVersion.id });
     }
   }, [allVersions]);
+
+  useEffect(() => {
+    if (showVersionCompareSides && allVersions.length < 2) {
+      setShowVersionCompareSides(false);
+    }
+  }, [showVersionCompareSides, allVersions.length]);
+
+  // Слева режим сравнения всегда держит актуальную версию, поэтому справа по
+  // умолчанию ставим предыдущую — иначе обе колонки показывали бы один и тот
+  // же текст и сравнивать было бы нечего.
+  //
+  // Эффект объявлен ПОСЛЕ того, что подтягивает последнюю версию: тот на каждом
+  // обновлении списка версий возвращает activeVersionId к актуальной, и без
+  // поправки после каждого сохранения справа снова оказывался бы тот же текст.
+  useEffect(() => {
+    if (!showVersionCompareSides || allVersions.length < 2) return;
+    if (hasPickedCompareVersionRef.current) return;
+    if (
+      activeVersionId !== null &&
+      String(activeVersionId) !== String(latestVersionId)
+    ) {
+      return;
+    }
+    setActiveVersionId(allVersions[allVersions.length - 2].id);
+  }, [showVersionCompareSides, allVersions, latestVersionId, activeVersionId]);
 
   if (sent) {
     return (
@@ -2153,6 +2290,9 @@ export const CreateInternalCorrespondence = ({
           isAlreadySent={isAlreadySent}
           isSending={isSending}
           canDecline={canDecline}
+          canSave={canEditDocument}
+          canSend={canSendDocument}
+          canCancelSign={canCancelSignature}
           allSignaturesSigned={allSignaturesSigned}
           hasDocId={!!id}
         />
@@ -2343,7 +2483,7 @@ export const CreateInternalCorrespondence = ({
                   и пагинация входящего письма прилипают к верху экрана при
                   прокрутке — форматирование и разделы всегда под рукой. Общий
                   sticky-контейнер, чтобы полосы не накладывались друг на друга. */}
-              <div ref={stickyHeaderRef} className="sticky top-0 z-[70] bg-white">
+              <div ref={stickyHeaderRef} data-sticky-editor-header className="sticky top-0 z-[70] bg-white">
               <div className="px-3 py-2 border-b border-slate-100 bg-slate-50/60 flex flex-wrap items-center gap-0.5">
                 <ToolbarFormatGroup
                   isReadOnly={isReadOnly}
@@ -2390,6 +2530,8 @@ export const CreateInternalCorrespondence = ({
                   hasVersions={allVersions.length > 0}
                   showVersionCompareSides={showVersionCompareSides}
                   toggleVersionCompareSides={toggleVersionCompareSides}
+                  showAuthorship={showAuthorship}
+                  toggleAuthorship={toggleAuthorship}
                 />
               </div>
 
@@ -2434,9 +2576,9 @@ export const CreateInternalCorrespondence = ({
                   latestVersionNumber={latestVersion?.versionNumber}
                   activeVersionNumber={activeVersion?.versionNumber}
                   activeVersionDate={activeVersion?.date}
-                  versionCompareCurrent={versionCompareCurrent}
                   versionCompareTotal={versionCompareTotal}
-                  setVersionComparePage={setVersionComparePage}
+                  showAuthorship={isAuthorshipActive}
+                  authorshipLegend={authorship.legend}
                 />
               </If>
               </div>
@@ -2463,9 +2605,18 @@ export const CreateInternalCorrespondence = ({
                     </div>
                   </div>
                 )}
+                {/* Вкладки-цилиндры висят абсолютом слева от холста (left: -36px)
+                    и в расчёт центрирования не попадают. В режиме двух колонок
+                    свободного места по бокам почти не остаётся, поэтому они
+                    прижимались к краю экрана — резервируем слева место под них.
+                    Класс padding-left задаём одной веткой: cn() не разрешает
+                    конфликты Tailwind, поэтому pl-8 и pl-28 рядом стоять не могут. */}
                 <div className={cn(
-                  "py-8 px-8 flex justify-center items-start gap-12 w-full",
-                  (showOriginalLetterSides || showVersionCompareSides) && "min-w-max"
+                  "py-8 pr-8 flex justify-center items-start gap-12 w-full",
+                  (showOriginalLetterSides || showVersionCompareSides) && "min-w-max",
+                  (showOriginalLetterSides || showVersionCompareSides) && !panelsInToolbar
+                    ? "pl-28"
+                    : "pl-8"
                 )}>
                   {/* Область навигации пришвартована слева от листа, как в Word.
                       Обёртка нужна для sticky-эмуляции (см. эффект ниже). */}
@@ -2488,15 +2639,27 @@ export const CreateInternalCorrespondence = ({
                     </div>
                   )}
 
+                  {/* Сравнение версий: колонка листов, выровненная постранично с
+                      основным холстом. Ни sticky, ни собственной прокрутки —
+                      обе колонки едут вместе с прокруткой страницы, поэтому
+                      страница N версии всегда стоит напротив страницы N
+                      актуального документа. */}
                   <If is={Boolean(showVersionCompareSides && activeVersion)}>
-                    <div ref={versionCompareCanvasWrapRef} className="shrink-0 order-2">
-                      <OriginalLetterCanvas
+                    <AuthorshipHoverLayer
+                      enabled={isAuthorshipActive}
+                      fragments={authorship.fragments}
+                      className="shrink-0 order-2"
+                      // Включённая линейка опускает основной холст на свою
+                      // высоту — сдвигаем колонку версии на столько же, иначе
+                      // страницы разъедутся.
+                      style={{ paddingTop: rulerEnabled ? EDITOR_RULER_OFFSET : 0 }}
+                    >
+                      <VersionCompareCanvas
                         sheets={versionCompareSheets.pages}
                         stamp={versionCompareSheets.stamp}
-                        page={versionCompareCurrent}
-                        fitToViewport={pageCount > 1}
+                        fontSize={Number(fontSize) || 14}
                       />
-                    </div>
+                    </AuthorshipHoverLayer>
                   </If>
 
                   <If is={Boolean(showOriginalLetterSides && panelMode && panelSource)}>
@@ -2573,7 +2736,8 @@ export const CreateInternalCorrespondence = ({
                       fontSize={fontSize}
                       onInput={handleEditorInput}
                       onKeyDown={handleEditorKeyDown}
-                      onClick={handleCanvasStampZoom}
+                      onClick={handleEditorClick}
+                      onMouseDown={handleEditorMouseDown}
                     />
 
                     {/* Плавающий плейсхолдер ЭЦП - виден ТОЛЬКО ДО подписания.
@@ -2610,7 +2774,7 @@ export const CreateInternalCorrespondence = ({
                         <ApproversPanel
                           isOpen={approversOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={false}
                           onOpen={handleOpenApprovers}
                           onClose={() => setApproversOpen(false)}
                           approvers={approvers}
@@ -2625,11 +2789,13 @@ export const CreateInternalCorrespondence = ({
                           toggleApproverComment={toggleApproverComment}
                           updateApproverComment={updateApproverComment}
                           docId={id}
+                          canApprove={canApproveDocument}
+                          currentUserId={currentUserId}
                         />
                         <SignerPanel
                           isOpen={signerOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={false}
                           onOpen={handleOpenSigner}
                           onClose={() => setSignerOpen(false)}
                           finalSigner={finalSigner}
@@ -2657,11 +2823,12 @@ export const CreateInternalCorrespondence = ({
                           isSigned={isSigned}
                           docCreator={docCreator}
                           docId={id}
+                          canSign={canSignDocument}
                         />
                         <IncomingLettersPanel
                           isOpen={incomingOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={true}
                           onOpen={handleOpenIncoming}
                           onClose={() => setIncomingOpen(false)}
                           attachedLetters={attachedIncomingLetters}
@@ -2672,8 +2839,9 @@ export const CreateInternalCorrespondence = ({
                         />
                         <VersionsPanel
                           isOpen={versionsOpen}
+                          showVersionCompareSides={showVersionCompareSides}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={true}
                           onOpen={handleOpenVersions}
                           onClose={() => setVersionsOpen(false)}
                           versions={allVersions}
@@ -2687,7 +2855,7 @@ export const CreateInternalCorrespondence = ({
                         <AttachmentsPanel
                           isOpen={attachmentsOpen}
                           hideTab={panelsInToolbar}
-                          openLeft={!showVersionCompareSides && !showOriginalLetterSides}
+                          openLeft={true}
                           onOpen={handleOpenAttachments}
                           onClose={() => setAttachmentsOpen(false)}
                           attachments={attachments}

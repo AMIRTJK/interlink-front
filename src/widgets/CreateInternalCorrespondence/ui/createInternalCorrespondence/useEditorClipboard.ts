@@ -47,7 +47,6 @@ export const useEditorClipboard = ({
         // Многострочный форматированный контент (документ из Word) — сохраняем
         // структуру и оформление как есть.
         fragment = buildFragmentFromHtml(sanitizeWordHtml(html));
-        fragment = buildFragmentFromHtml(sanitizeWordHtml(html));
       } else if (htmlHasText) {
         fragment = buildInlineFragmentFromHtml(sanitizeWordHtml(html));
       } else if (text) {

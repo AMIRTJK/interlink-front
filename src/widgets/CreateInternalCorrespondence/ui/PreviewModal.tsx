@@ -20,6 +20,10 @@ import {
   CORRESPONDENCE_ATTACHMENT_PREVIEW_NOTICE,
 } from "../lib/utils";
 import { FilePreviewModal } from "@features/Profile";
+import {
+  structuralBreakBefore,
+  wordBoundaryBefore,
+} from "../../InternalCorrespondenceIncomingView/lib";
 import { DSStamp } from "./DSStamp";
 
 const PAGE_PAD_H = 80;
@@ -307,6 +311,17 @@ export const PreviewModal = ({
             hi = mid - 1;
           }
         }
+        // Слово не рвём между листами: отступаем к ближайшей законной границе —
+        // пробел/дефис в тексте либо структурный перенос строки (<br>, конец
+        // вложенного блока; в тексте они не дают ни одного символа, поэтому
+        // ищутся по исходному блоку). Границы нет — слово шире целой страницы,
+        // тогда режем по буквам, иначе его негде разместить.
+        const safeCut = Math.max(
+          wordBoundaryBefore(full, best, start),
+          structuralBreakBefore(el, full, best, start),
+        );
+        if (safeCut > start) best = safeCut;
+
         chunk.textContent = full.slice(start, best);
         result.push(measurer.innerHTML);
         measurer.innerHTML = "";

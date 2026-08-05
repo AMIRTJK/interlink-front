@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Plus, X, Check } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import { IncomingLetterSelectModal } from "./IncomingLetterSelectModal";
+import { useAutoPositionDrawer } from "../lib/useAutoPositionDrawer";
 
 interface IProps {
   isOpen: boolean;
@@ -31,19 +32,17 @@ export const IncomingLettersPanel = ({
   docId,
 }: IProps) => {
   const [showSelectModal, setShowSelectModal] = useState(false);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  useAutoPositionDrawer({ isOpen, drawerRef });
 
   return (
     <>
       {!hideTab && (
-        <div
-          className="absolute z-20"
-          style={openLeft ? { left: -36, top: 10 } : { right: -36, top: 10 }}
-        >
+        <div className="absolute z-20 left-[-36px] top-[10px]">
           <motion.button
             onClick={isOpen ? onClose : onOpen}
             className={cn(
-              "bg-white border border-slate-200 shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-              openLeft ? "border-r-0 rounded-l-xl" : "border-l-0 rounded-r-xl",
+              "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
               isOpen ? "bg-slate-50" : "hover:bg-slate-50",
             )}
             aria-label="Входящие письма"
@@ -67,21 +66,27 @@ export const IncomingLettersPanel = ({
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ x: openLeft ? 12 : -12, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: openLeft ? 12 : -12, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="absolute top-0 w-[320px] bg-white rounded-2xl border border-slate-200 shadow-2xl z-[500] flex flex-col"
-
+          <div
+            ref={drawerRef}
+            className="absolute z-[500]"
             style={{
+              top: 10,
               ...(openLeft
                 ? { right: "calc(100% + 12px)" }
                 : { left: "calc(100% + 12px)" }),
-              maxHeight: "var(--icc-panel-max-h, 70vh)",
             }}
-            onClick={(e) => e.stopPropagation()}
           >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 320, damping: 28 }}
+              className="w-[320px] bg-white rounded-2xl border border-slate-200 shadow-2xl flex flex-col"
+              style={{
+                maxHeight: "var(--icc-panel-max-h, 70vh)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center">
                 <span className="font-semibold text-sm text-slate-800">
@@ -173,8 +178,9 @@ export const IncomingLettersPanel = ({
               </If>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
+    </AnimatePresence>
 
       <IncomingLetterSelectModal
         open={showSelectModal}

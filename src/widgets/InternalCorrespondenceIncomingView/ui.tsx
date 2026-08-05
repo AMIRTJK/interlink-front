@@ -29,6 +29,7 @@ export const InternalCorrespondenceIncomingView = ({
 
   const state = useIncomingViewState({
     item,
+    can: data.userContext.can,
     canCreateAssignment: data.canCreateAssignment,
     canInviteVisor: data.canInviteVisor,
     visors: data.visors,

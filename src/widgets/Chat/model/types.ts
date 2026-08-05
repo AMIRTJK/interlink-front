@@ -1,5 +1,9 @@
 // Доменные типы чата. Вынесены из дизайн-кода, чтобы их могли переиспользовать
-// сервисный слой (api/chatService) и UI-компоненты.
+// слой данных (api/) и UI-компоненты. Сюда же мапперы (lib/chatMappers) приводят
+// ответы бэкенда: компоненты не знают формата API и работают только с этими типами.
+import type { TChatMemberRole, TChatMediaType } from "./apiTypes";
+
+/** Беседа в терминах UI. `id` — строковый id беседы с бэкенда. */
 export type Contact = {
   id: string;
   name: string;
@@ -15,6 +19,17 @@ export type Contact = {
   bio?: string;
   mutualGroups?: string[];
   story?: string;
+  /** Должность собеседника в личной беседе. */
+  position?: string;
+  /** ISO-время последнего появления собеседника в сети. */
+  lastSeenAt?: string;
+  isStarred?: boolean;
+  isMuted?: boolean;
+  membersCount?: number;
+  /** Роль текущего пользователя в группе — от неё зависят действия с участниками. */
+  myRole?: TChatMemberRole;
+  /** id собеседника личной беседы (для presence и профиля). */
+  peerId?: number;
 };
 export type MessageAttachment = {
   name: string;
@@ -22,6 +37,8 @@ export type MessageAttachment = {
   type: 'image' | 'video' | 'audio' | 'file' | 'voice';
   preview?: string;
   duration?: number;
+  /** id вложения на бэкенде — по нему идёт скачивание приватного файла. */
+  attachmentId?: number;
 };
 export type MessageReaction = {
   emoji: string;
@@ -40,6 +57,8 @@ export type Message = {
   time: string;
   status?: 'sent' | 'delivered' | 'read';
   attachment?: MessageAttachment;
+  /** Все вложения сообщения; `attachment` — первое из них (совместимость). */
+  attachments?: MessageAttachment[];
   reactions?: MessageReaction[];
   pinned?: boolean;
   replyTo?: ReplyPreview;
@@ -50,6 +69,10 @@ export type Message = {
   deletedForMe?: boolean;
   scheduled?: boolean;
   scheduledTime?: string;
+  /** Имя отправителя — показываем в группах над чужим сообщением. */
+  senderName?: string;
+  /** Аватар отправителя (уже разрешённый в blob/data-URL). */
+  senderAvatar?: string;
 };
 export type EmojiCategory = {
   label: string;
@@ -70,3 +93,13 @@ export type LayoutPosition = 'left' | 'right' | 'bottom' | 'top';
  * - "overlay" — всплывающее окно поверх текущего модуля (плавающая кнопка).
  */
 export type TChatVariant = 'page' | 'overlay';
+
+/** Элемент ленты медиа беседы. */
+export type ChatMediaItem = {
+  id: number;
+  name: string;
+  size: string;
+  type: TChatMediaType;
+  /** Разрешённый blob-URL превью (только для изображений). */
+  preview?: string;
+};

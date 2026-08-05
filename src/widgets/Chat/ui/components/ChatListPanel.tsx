@@ -1,14 +1,18 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Plus, Edit3, Search } from "lucide-react";
+import { If } from "@shared/ui";
 import { Contact, LayoutPosition } from "../../model";
 
 interface ChatListPanelProps {
   layout: LayoutPosition;
   contacts: Contact[];
   activeContactId: string;
-  contactUnreads: Record<string, number>;
   searchQuery: string;
+  isLoading: boolean;
+  emptyLabel: string;
+  loadingLabel: string;
+  searchPlaceholder: string;
   onContactSwitch: (id: string) => void;
   onComposeOpen: () => void;
   onSearchChange: (v: string) => void;
@@ -17,19 +21,19 @@ interface ChatListPanelProps {
 
 export const ChatListPanel: React.FC<ChatListPanelProps> = ({
   layout,
-  contacts: contactList,
+  contacts: filteredContacts,
   activeContactId,
-  contactUnreads,
   searchQuery,
+  isLoading,
+  emptyLabel,
+  loadingLabel,
+  searchPlaceholder,
   onContactSwitch,
   onComposeOpen,
   onSearchChange,
   isDark,
 }) => {
   const isHorizontal = layout === "top" || layout === "bottom";
-  const filteredContacts = contactList.filter((c) =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
 
   if (isHorizontal) {
     return (
@@ -81,11 +85,12 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
           />
           {filteredContacts.map((contact) => {
             const isActive = contact.id === activeContactId;
-            const unread = contactUnreads[contact.id] || 0;
+            const unread = contact.unreadCount || 0;
             return (
               <button
                 key={contact.id}
                 onClick={() => onContactSwitch(contact.id)}
+                aria-label={contact.name}
                 className={`relative flex-shrink-0 flex flex-col items-center gap-1 px-1 py-1 rounded-xl transition-all duration-200 ease-in-out group ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
               >
                 <div
@@ -221,7 +226,7 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
           />
           <input
             type="text"
-            placeholder="Search…"
+            placeholder={searchPlaceholder}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className={`flex-1 bg-transparent outline-none text-sm ${isDark ? "placeholder-white/25 text-white" : "placeholder-gray-400 text-gray-800"}`}
@@ -238,9 +243,23 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
             : "rgba(124,58,237,0.2) transparent",
         }}
       >
+        <If is={isLoading && filteredContacts.length === 0}>
+          <p
+            className={`text-center text-xs py-6 ${isDark ? "text-white/40" : "text-gray-400"}`}
+          >
+            {loadingLabel}
+          </p>
+        </If>
+        <If is={!isLoading && filteredContacts.length === 0}>
+          <p
+            className={`text-center text-xs py-6 ${isDark ? "text-white/40" : "text-gray-400"}`}
+          >
+            {emptyLabel}
+          </p>
+        </If>
         {filteredContacts.map((contact) => {
           const isActive = contact.id === activeContactId;
-          const unread = contactUnreads[contact.id] || 0;
+          const unread = contact.unreadCount || 0;
           return (
             <button
               key={contact.id}
@@ -288,15 +307,15 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                 <img
                   src={contact.avatar}
                   alt={contact.name}
-                  className="w-9 h-9 rounded-full object-cover transition-transform duration-200 group-hover:scale-105"
+                  className="w-9 h-9 rounded-full object-cover transition-transform duration-200 group-hover:scale-105 overflow-hidden"
                   style={{
-                    border: isActive
+                    boxShadow: isActive
                       ? isDark
-                        ? "2px solid rgba(167,139,250,0.6)"
-                        : "2px solid rgba(124,58,237,0.6)"
+                        ? "inset 0 0 0 2px rgba(167,139,250,0.6)"
+                        : "inset 0 0 0 2px rgba(124,58,237,0.6)"
                       : isDark
-                        ? "2px solid rgba(255,255,255,0.1)"
-                        : "2px solid rgba(0,0,0,0.08)",
+                        ? "inset 0 0 0 2px rgba(255,255,255,0.15)"
+                        : "inset 0 0 0 2px rgba(0,0,0,0.1)",
                   }}
                 />
                 {contact.online && (

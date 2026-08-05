@@ -14,6 +14,15 @@ export const topLevelBlockOf = (
   return n && n.nodeType === Node.ELEMENT_NODE ? (n as HTMLElement) : null;
 };
 
+// Узел, который при поиске реального содержимого не считается: служебные
+// распорки и разрывы страниц, печать ЭЦП (вне потока) и пробельные текстовые
+// узлы между блоками.
+export const isSkippableSibling = (n: Node): boolean =>
+  isSpacerNode(n) ||
+  isPageBreakNode(n) ||
+  isStampNode(n) ||
+  (n.nodeType === Node.TEXT_NODE && !(n.textContent || "").trim());
+
 // Соседний РЕАЛЬНЫЙ блок за границей страницы: идём по сиблингам, пропуская
 // распорки/разрывы/печати ЭЦП/пустой текст. Возвращаем блок, ТОЛЬКО если по пути
 // пересекли распорку или разрыв страницы (иначе граница страницы ни при чём и
@@ -27,19 +36,9 @@ export const blockAcrossPageBoundary = (
   let n: ChildNode | null = step(block);
   let crossed = false;
   while (n) {
-    if (isSpacerNode(n) || isPageBreakNode(n)) {
-      crossed = true;
-      n = step(n);
-      continue;
-    }
-    if (
-      isStampNode(n) ||
-      (n.nodeType === Node.TEXT_NODE && !(n.textContent || "").trim())
-    ) {
-      n = step(n);
-      continue;
-    }
-    break;
+    if (isSpacerNode(n) || isPageBreakNode(n)) crossed = true;
+    else if (!isSkippableSibling(n)) break;
+    n = step(n);
   }
   if (!crossed || !n || n.nodeType !== Node.ELEMENT_NODE) return null;
   return n as HTMLElement;

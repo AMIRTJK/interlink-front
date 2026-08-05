@@ -1,3 +1,3 @@
 export * from "./types";
-export * from "./mockData";
+export * from "./apiTypes";
 export * from "./constants";

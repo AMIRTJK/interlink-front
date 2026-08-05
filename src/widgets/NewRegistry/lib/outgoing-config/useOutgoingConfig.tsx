@@ -14,6 +14,7 @@ import {
 import { ApiRoutes } from "@shared/api";
 import { useMutationQuery } from "@shared/lib";
 import { CORRESPONDENCE_INVALIDATE_KEYS } from "@shared/config";
+import { FileArrowRight, FileArrowLeft } from "@shared/ui";
 import { RegistryConfig } from "../types";
 import { getOutgoingFilters } from "../filters.config";
 import { RecipientsViewer } from "@widgets/NewRegistry/ui";
@@ -70,12 +71,12 @@ export const useOutgoingConfig = (type: string): RegistryConfig => {
   return {
     primary: {
       label: "Отправитель",
-      icon: <User size={12} />,
+      icon: isInternal ? <FileArrowRight size={12} /> : <User size={12} />,
       render: (d) => d.creator?.full_name || "Я",
     },
     secondary: {
       label: "Получатели",
-      icon: <Loader size={12} />,
+      icon: isInternal ? <FileArrowLeft size={12} /> : <Loader size={12} />,
       render: (d) => <RecipientsViewer data={d} />,
     },
     badges: [

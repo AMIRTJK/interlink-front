@@ -149,6 +149,10 @@ export const ApiRoutes = {
   DELETE_INTERNAL: "/api/v1/internal-correspondences/:id",
   RESTORE_INTERNAL: "/api/v1/internal-correspondences/:id/restore",
   GET_INTERNAL_STRUCTURE: "/api/v1/internal-correspondences/:id/structure",
+  // Контекстные (динамические) роли и разрешённые действия текущего
+  // пользователя внутри конкретного документа. Тот же объект бэкенд кладёт
+  // в current_user_context ответа GET_INTERNAL_BY_ID.
+  GET_INTERNAL_PERMISSIONS: "/api/v1/internal-correspondences/:id/permissions",
 
   // Recipients
   GET_INTERNAL_RECIPIENTS_USERS:
@@ -239,6 +243,34 @@ export const ApiRoutes = {
   NOTIFICATION_DELETE: "/api/v1/notifications/:id",
   // Авторизация приватного канала Reverb (broadcaster вызывает её сам)
   BROADCASTING_AUTH: "/api/v1/broadcasting/auth",
+
+  // ==================== CHAT (корпоративный чат) ====================
+  // Все ручки требуют Bearer-токен; права chat.view / chat.create / chat.send /
+  // chat.group.manage / chat.delete приходят в effective permissions auth/me.
+  // Плейсхолдеры :id / :messageId / :userId / :emoji подставляет chatUrls модуля.
+  CHAT_USERS: "/api/v1/chat/users",
+  CHAT_COUNTERS: "/api/v1/chat/counters",
+  CHAT_CONVERSATIONS: "/api/v1/chat/conversations",
+  CHAT_CONVERSATIONS_DIRECT: "/api/v1/chat/conversations/direct",
+  CHAT_CONVERSATIONS_GROUP: "/api/v1/chat/conversations/group",
+  CHAT_CONVERSATION: "/api/v1/chat/conversations/:id",
+  CHAT_CONVERSATION_SETTINGS: "/api/v1/chat/conversations/:id/settings",
+  CHAT_CONVERSATION_AVATAR: "/api/v1/chat/conversations/:id/avatar",
+  CHAT_CONVERSATION_MEMBERS: "/api/v1/chat/conversations/:id/members",
+  CHAT_CONVERSATION_MEMBER: "/api/v1/chat/conversations/:id/members/:userId",
+  CHAT_CONVERSATION_MESSAGES: "/api/v1/chat/conversations/:id/messages",
+  CHAT_CONVERSATION_MEDIA: "/api/v1/chat/conversations/:id/media",
+  CHAT_CONVERSATION_READ: "/api/v1/chat/conversations/:id/read",
+  CHAT_CONVERSATION_DELIVERED: "/api/v1/chat/conversations/:id/delivered",
+  CHAT_CONVERSATION_TYPING: "/api/v1/chat/conversations/:id/typing",
+  CHAT_MESSAGE: "/api/v1/chat/messages/:messageId",
+  CHAT_MESSAGE_THREAD: "/api/v1/chat/messages/:messageId/thread",
+  CHAT_MESSAGE_FORWARD: "/api/v1/chat/messages/:messageId/forward",
+  CHAT_MESSAGE_REACTIONS: "/api/v1/chat/messages/:messageId/reactions",
+  CHAT_MESSAGE_REACTION: "/api/v1/chat/messages/:messageId/reactions/:emoji",
+  CHAT_MESSAGE_PIN: "/api/v1/chat/messages/:messageId/pin",
+  CHAT_ATTACHMENT_DOWNLOAD: "/api/v1/chat/attachments/:attachmentId/download",
+  CHAT_PRESENCE_HEARTBEAT: "/api/v1/chat/presence/heartbeat",
 
   PERSONAL_TASKS: "/api/v1/personal-tasks",
   PERSONAL_TASKS_BOARD: "/api/v1/personal-tasks/board",
