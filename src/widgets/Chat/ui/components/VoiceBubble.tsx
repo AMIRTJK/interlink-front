@@ -59,20 +59,37 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
   );
 
   const attachAudio = useCallback((element: HTMLAudioElement) => {
-    element.addEventListener("loadedmetadata", () => {
-      // webm из MediaRecorder отдаёт Infinity — тогда остаёмся на длительности
-      // из сообщения, иначе шкала прогресса делится на бесконечность.
-      if (Number.isFinite(element.duration) && element.duration > 0) {
-        setMediaDuration(element.duration);
+    // Пока идёт замер длительности, позиция скачет к концу файла — прогресс в
+    // это время не трогаем, иначе шкала дёргается на полную и обратно.
+    let isProbing = false;
+
+    const applyDuration = () => {
+      if (!Number.isFinite(element.duration) || element.duration <= 0) return false;
+      setMediaDuration(element.duration);
+      if (isProbing) {
+        isProbing = false;
+        element.currentTime = 0;
       }
+      return true;
+    };
+
+    element.addEventListener("loadedmetadata", () => {
+      if (applyDuration()) return;
+      // webm из MediaRecorder не содержит длительности в заголовке: браузер
+      // отдаёт Infinity, пока не дочитает поток до конца. Перемотка в заведомо
+      // недостижимую точку заставляет его досчитать реальное значение.
+      isProbing = true;
+      element.currentTime = 1e101;
     });
+    element.addEventListener("durationchange", applyDuration);
+
     element.addEventListener("timeupdate", () => {
+      if (isProbing) return;
       const total =
         Number.isFinite(element.duration) && element.duration > 0
           ? element.duration
           : 0;
-      if (total > 0) setProgress((element.currentTime / total) * 100);
-      else setProgress((prev) => Math.min(prev + 1, 99));
+      setProgress(total > 0 ? (element.currentTime / total) * 100 : 0);
     });
     element.addEventListener("ended", () => {
       setPlaying(false);
