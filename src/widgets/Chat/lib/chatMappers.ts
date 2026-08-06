@@ -125,6 +125,7 @@ export const mapAttachment = (
     size: formatFileSize(attachment.size),
     type,
     preview: previewSource ? ctx.media[previewSource] : undefined,
+    mimeType: attachment.mime_type ?? undefined,
     duration: msToSeconds(attachment.duration_ms),
   };
 };
