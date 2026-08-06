@@ -64,6 +64,8 @@ export const MessageAttachments = ({ attachments, isMe, isDark }: IProps) => {
             <VoiceBubble
               key={key}
               duration={attachment.duration || 1}
+              attachmentId={attachment.attachmentId}
+              mimeType={attachment.mimeType}
               isMe={isMe}
               isDark={isDark}
             />
