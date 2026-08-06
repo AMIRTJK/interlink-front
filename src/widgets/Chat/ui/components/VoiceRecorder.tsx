@@ -26,14 +26,10 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
 
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const secondsRef = useRef(0);
+  const startedAtRef = useRef(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      secondsRef.current += 1;
-      setSeconds(secondsRef.current);
-    }, 1000);
-
+    let interval: ReturnType<typeof setInterval> | null = null;
     let stream: MediaStream | null = null;
     let isCancelled = false;
 
@@ -51,6 +47,16 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
         };
         recorder.start();
         recorderRef.current = recorder;
+
+        // Отсчёт начинается вместе с записью, а не с открытия панели: запрос
+        // доступа к микрофону и его прогрев занимают время, и эти секунды в
+        // файл не попадают. Считаем по часам, а не по тикам таймера — таймер
+        // отстаёт под нагрузкой и во вкладке в фоне.
+        startedAtRef.current = Date.now();
+        interval = setInterval(
+          () => setSeconds(Math.floor((Date.now() - startedAtRef.current) / 1000)),
+          250,
+        );
       })
       .catch(() => {
         toast.error("Нет доступа к микрофону");
@@ -59,7 +65,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
 
     return () => {
       isCancelled = true;
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
       if (recorderRef.current?.state === "recording") recorderRef.current.stop();
       recorderRef.current = null;
       stream?.getTracks().forEach((track) => track.stop());
@@ -73,13 +79,19 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
       return;
     }
 
+    // Длительность фиксируем на момент остановки: дробные секунды округляет
+    // отправка, поэтому запись на 4,6 с не превращается в четыре.
+    const recordedSeconds = startedAtRef.current
+      ? (Date.now() - startedAtRef.current) / 1000
+      : 0;
+
     // Последний кусок данных приходит только после stop — отправляем из onstop.
     recorder.onstop = () => {
       const audio = new Blob(chunksRef.current, {
         type: recorder.mimeType || "audio/webm",
       });
       chunksRef.current = [];
-      if (audio.size > 0) onSend(secondsRef.current, audio);
+      if (audio.size > 0) onSend(recordedSeconds, audio);
       else onCancel();
     };
     recorder.stop();
