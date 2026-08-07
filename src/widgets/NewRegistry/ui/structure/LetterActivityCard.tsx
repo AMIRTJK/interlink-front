@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, ChevronDown, Pin, User, Loader2 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
@@ -70,6 +70,10 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
     { data: IInternalStructureResponse }
   >({
     url: open && item.id ? ApiRoutes.GET_INTERNAL_STRUCTURE.replace(":id", String(item.id)) : undefined,
+    options: {
+      staleTime: 0,
+      refetchOnMount: true,
+    },
   });
 
   const structureData = responseData?.data;
@@ -84,9 +88,19 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
   // письмом (structure_count). После загрузки структуры уточняем его длиной
   // timeline.
   const countFromItem = getStructureCount(item);
-  const displayCount = responseData?.data?.timeline
-    ? responseData.data.timeline.length
-    : countFromItem;
+  const fetchedCount = responseData?.data?.timeline?.length;
+
+  const [lastCount, setLastCount] = useState<number | undefined>(countFromItem);
+
+  useEffect(() => {
+    if (typeof fetchedCount === "number") {
+      setLastCount(fetchedCount);
+    } else if (typeof countFromItem === "number") {
+      setLastCount(countFromItem);
+    }
+  }, [fetchedCount, countFromItem]);
+
+  const displayCount = lastCount ?? countFromItem;
   const hasCount = displayCount !== undefined;
 
   return (

@@ -672,6 +672,7 @@ export const CreateInternalCorrespondence = ({
     useToken: true,
     options: {
       enabled: !!id,
+      staleTime: 0,
       refetchOnWindowFocus: false,
     },
   });
@@ -808,6 +809,7 @@ export const CreateInternalCorrespondence = ({
         suppressSuccessToast: true,
         invalidate: [
           ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
+          ...CORRESPONDENCE_INVALIDATE_KEYS,
         ],
       },
     });

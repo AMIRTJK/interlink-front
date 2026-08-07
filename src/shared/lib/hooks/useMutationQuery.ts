@@ -175,6 +175,19 @@ export const useMutationQuery = <
         messages.invalidate.forEach((key) => {
           queryClient.invalidateQueries({ queryKey: [key] });
         });
+
+        const hasCorrespondence = messages.invalidate.some(
+          (k) =>
+            typeof k === "string" &&
+            (k.includes("correspondence") || k.includes("internal"))
+        );
+        if (hasCorrespondence) {
+          queryClient.invalidateQueries({
+            predicate: (query) =>
+              typeof query.queryKey[0] === "string" &&
+              query.queryKey[0].includes("/structure"),
+          });
+        }
       }
     },
 
