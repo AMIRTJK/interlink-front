@@ -178,6 +178,7 @@ export const RegistryLayout = ({
                     documents={documents}
                     direction={direction}
                     onCardClick={onCardClick}
+                    highlightedId={highlightedId}
                   />
                 ) : documents && documents.length > 0 ? (
                   documents?.map((doc: any, idx: number) => {

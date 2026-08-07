@@ -20,6 +20,7 @@ interface ILetterActivityCardProps {
   direction: LetterDirection;
   index: number;
   onClick: () => void;
+  isHighlighted?: boolean;
 }
 
 export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
@@ -27,6 +28,7 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
   direction,
   index,
   onClick,
+  isHighlighted,
 }) => {
   const [open, setOpen] = useState<boolean>(() => {
     try {
@@ -95,7 +97,10 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
       transition={{ delay: Math.min(index * 0.03, 0.3), duration: 0.25 }}
       className="group"
     >
-      <div className="rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:border-blue-200 dark:hover:border-slate-600">
+      <div className="rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:border-blue-200 dark:hover:border-slate-600 relative overflow-hidden">
+        <If is={Boolean(isHighlighted)}>
+          <div className="absolute inset-0 rounded-xl ring-2 ring-inset ring-blue-500 border border-blue-500 pointer-events-none z-20 shadow-[0_0_18px_rgba(59,130,246,0.5)] transition-all duration-500" />
+        </If>
         <div className="flex items-start gap-3 px-4 py-3.5">
           <span className="mt-1 w-5 h-5 flex items-center justify-center flex-shrink-0">
             <If is={isUnread}>

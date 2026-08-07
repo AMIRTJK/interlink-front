@@ -8,12 +8,14 @@ interface IStructureViewProps {
   documents: any[];
   direction: LetterDirection;
   onCardClick: (id: number) => void;
+  highlightedId?: string | number | null;
 }
 
 export const StructureView: React.FC<IStructureViewProps> = ({
   documents,
   direction,
   onCardClick,
+  highlightedId,
 }) => {
   const hasDocs = Boolean(documents && documents.length > 0);
 
@@ -47,6 +49,7 @@ export const StructureView: React.FC<IStructureViewProps> = ({
                     direction={direction}
                     index={index}
                     onClick={() => onCardClick(item.id)}
+                    isHighlighted={Boolean(highlightedId && String(item.id) === String(highlightedId))}
                   />
                 ))}
               </div>
