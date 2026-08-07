@@ -104,7 +104,7 @@ export const ToolbarFormatGroup = ({
             : "text-slate-600 hover:bg-slate-100 border-slate-200 bg-white",
         )}
       >
-        <span>{fontSize}px</span>
+        <span>{fontSize ? `${fontSize}px` : "—"}</span>
         <ChevronDown
           size={10}
           className={cn(

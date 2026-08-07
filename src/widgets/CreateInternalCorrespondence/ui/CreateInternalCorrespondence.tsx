@@ -88,6 +88,7 @@ import {
 } from "./createInternalCorrespondence/editorCaret";
 import { snapCaretOutOfPageGap } from "./createInternalCorrespondence/editorClickCaret";
 import { paginateEditorDom } from "./createInternalCorrespondence/paginateEditorDom";
+import { getSelectionFontSize } from "./createInternalCorrespondence/editorFontSize";
 import { buildFragmentFromHtml } from "./createInternalCorrespondence/editorFragments";
 import { useLocationStatePrefill } from "./createInternalCorrespondence/useLocationStatePrefill";
 import { useSavedDocumentPrefill } from "./createInternalCorrespondence/useSavedDocumentPrefill";
@@ -1416,24 +1417,6 @@ export const CreateInternalCorrespondence = ({
     commitHistoryNow();
     editor.focus();
 
-    // Точный размер для выделенного текста. execCommand("fontSize") умеет
-    // только 7 ступеней HTML (small/large/…): 13/14 давали одинаковые 16px, а
-    // «16» реально печатала 18px — измерения пагинации расходились с ожидаемым.
-    // Ставим ступень-маркер 7, затем переписываем её на точный px-размер.
-    const sel = window.getSelection();
-    const hasRangeSelection =
-      !!sel &&
-      sel.rangeCount > 0 &&
-      !sel.isCollapsed &&
-      editor.contains(sel.anchorNode);
-    // Есть выделение → меняем размер ТОЛЬКО выделенного фрагмента (inline-span),
-    // базовый размер листа НЕ трогаем (иначе перекрасился бы весь текст).
-    // Нет выделения → меняем базовый размер всего листа.
-    if (!hasRangeSelection) {
-      setFontSize(size);
-      return;
-    }
-
     document.execCommand("styleWithCSS", false, "true");
     document.execCommand("fontSize", false, "7");
     editor
@@ -1452,8 +1435,10 @@ export const CreateInternalCorrespondence = ({
       f.replaceWith(span);
     });
 
+    setFontSize(size);
     // Немедленная перепагинация с новым размером — без ожидания rAF-цепочки.
     syncEditorAfterDomEdit();
+    refreshActiveFmt();
   };
 
   // HTML без служебных артефактов (распорки/разрезы) — для сохранения и превью
@@ -1511,6 +1496,10 @@ export const CreateInternalCorrespondence = ({
       setActiveFmt((prev) => (Object.keys(prev).length ? {} : prev));
       return;
     }
+
+    const detectedFontSize = getSelectionFontSize(editor);
+    setFontSize((prev) => (prev === detectedFontSize ? prev : detectedFontSize));
+
     const q = (cmd: string) => {
       try {
         return document.queryCommandState(cmd);
@@ -2694,7 +2683,7 @@ export const CreateInternalCorrespondence = ({
                       height: pageCount * PAGE_STRIDE - PAGE_GAP,
                       padding: `${PAGE_PAD_V}px ${marginRight}px ${PAGE_PAD_V}px ${marginLeft}px`,
                       fontFamily: "Times New Roman, serif",
-                      fontSize: `${fontSize}px`,
+                      fontSize: "14px",
                       lineHeight: 1.8,
                       color: "#1e293b",
                       boxSizing: "border-box",

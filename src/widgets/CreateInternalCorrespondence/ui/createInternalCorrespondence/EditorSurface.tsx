@@ -43,7 +43,7 @@ export const EditorSurface = ({
       maxWidth: "100%",
       minHeight: contentHeight,
       fontFamily: "Times New Roman, serif",
-      fontSize: `${fontSize}px`,
+      fontSize: "14px",
       lineHeight: 1.8,
       color: "#1e293b",
       whiteSpace: "pre-wrap",
