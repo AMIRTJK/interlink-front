@@ -46,10 +46,24 @@ const remember = (source: string, objectUrl: string) => {
 export const getCachedMedia = (source: string) => objectUrls.get(source);
 
 /**
+ * Ручка скачивания часто отдаёт `application/octet-stream`. Для `<img>` это
+ * безразлично, а `<audio>`/`<video>` по object-URL берут тип строго из blob и
+ * с таким типом молча не играют — подставляем mime из карточки вложения.
+ */
+const withMimeType = (blob: Blob, fallbackMimeType?: string) => {
+  if (!fallbackMimeType) return blob;
+  if (blob.type && blob.type !== "application/octet-stream") return blob;
+  return new Blob([blob], { type: fallbackMimeType });
+};
+
+/**
  * Загружает приватный файл и возвращает object-URL.
  * `null` — файла нет или доступ закрыт: вызывающий показывает заглушку.
  */
-export const fetchPrivateMedia = async (source: string): Promise<string | null> => {
+export const fetchPrivateMedia = async (
+  source: string,
+  fallbackMimeType?: string,
+): Promise<string | null> => {
   const cached = objectUrls.get(source);
   if (cached) return cached;
 
@@ -59,7 +73,9 @@ export const fetchPrivateMedia = async (source: string): Promise<string | null> 
   const request = _axios
     .get<Blob>(toRequestPath(source), { responseType: "blob" })
     .then((response) => {
-      const objectUrl = URL.createObjectURL(response.data);
+      const objectUrl = URL.createObjectURL(
+        withMimeType(response.data, fallbackMimeType),
+      );
       remember(source, objectUrl);
       return objectUrl;
     })
