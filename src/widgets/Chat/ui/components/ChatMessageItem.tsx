@@ -76,7 +76,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
         id={`chat-msg-${msg.id}`}
         data-msg-id={msg.id}
         ref={(el) => setMessageRef(msg.id, el)}
-        className={`flex items-center ${isMe ? "justify-end" : "justify-start"} py-1 px-2`}
+        className={`w-full flex items-center ${isMe ? "justify-end" : "justify-start"} py-1 px-2`}
       >
         <div className={`inline-flex items-center gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
           {isMe && (
@@ -113,10 +113,10 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
       id={`chat-msg-${msg.id}`}
       data-msg-id={msg.id}
       ref={(el) => setMessageRef(msg.id, el)}
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.15 }}
-      className={`flex items-end ${isMe ? "justify-end" : "justify-start"}`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.1 }}
+      className={`w-full flex items-end ${isMe ? "justify-end" : "justify-start"}`}
     >
       <div className={`inline-flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
         {isMe && (
