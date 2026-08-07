@@ -178,9 +178,11 @@ export const mapAttachment = (
 export const mapMessage = (message: IChatMessage, ctx: IMapContext): Message => {
   const senderId = message.sender_id ?? message.sender?.id ?? null;
   // Своё сообщение определяет бэкенд (`is_mine`); сравнение с текущим id —
-  // запасной вариант на случай, если ручка этот флаг не отдала.
   const isMine =
-    message.is_mine ?? (senderId !== null && senderId === ctx.currentUserId);
+    Boolean(message.is_mine) ||
+    (senderId != null &&
+      ctx.currentUserId != null &&
+      String(senderId) === String(ctx.currentUserId));
   const attachments = (message.attachments ?? []).map((item) =>
     mapAttachment(item, ctx),
   );

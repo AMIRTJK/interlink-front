@@ -320,6 +320,7 @@ export const ChatApp: React.FC<IProps> = ({
             onReturnToMessage={handleReturnToMessage}
             showScrollBottom={showScrollBottom}
             onScrollToBottom={scrollToBottom}
+            currentUserId={currentUserId}
           />
 
           <AnimatePresence>

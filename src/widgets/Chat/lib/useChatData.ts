@@ -12,6 +12,7 @@ import {
   useMessageActions,
 } from "../api";
 import type { Contact, IChatMessageEvent, Message } from "../model";
+import { ME } from "../model";
 import {
   getAttachmentPreviewSource,
   getConversationAvatarSource,
@@ -19,6 +20,7 @@ import {
   mapConversation,
   mapMessage,
   normalizeMembers,
+  resolveMedia,
   type IChatLabels,
   type IMapContext,
 } from "./chatMappers";
@@ -138,10 +140,59 @@ export const useChatData = ({
     return contacts.find((c) => c.id === String(activeConversationId)) ?? null;
   }, [activeDetails, contacts, activeConversationId, mapContext]);
 
-  const messages = useMemo<Message[]>(
-    () => rawMessages.map((message) => mapMessage(message, mapContext)),
-    [rawMessages, mapContext],
+  const [optimisticMessages, setOptimisticMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    setOptimisticMessages([]);
+  }, [activeConversationId]);
+
+  const addOptimisticMessage = useCallback((msg: Message) => {
+    setOptimisticMessages((prev) => [...prev, msg]);
+  }, []);
+
+  const removeOptimisticMessage = useCallback((tempId: string) => {
+    setOptimisticMessages((prev) => prev.filter((m) => m.id !== tempId));
+  }, []);
+
+  const currentUserAvatar = useMemo(
+    () =>
+      resolveMedia(
+        getUserAvatarSource(user as Parameters<typeof getUserAvatarSource>[0]),
+        mapContext,
+        user?.full_name ?? labels.you,
+      ),
+    [user, mapContext, labels.you],
   );
+
+  const messages = useMemo<Message[]>(() => {
+    const serverMsgs = rawMessages.map((message) => mapMessage(message, mapContext));
+    if (!optimisticMessages.length) return serverMsgs;
+
+    const mergedServerMsgs = serverMsgs.map((s) => {
+      if (s.senderId === ME) {
+        const matchingOpt = optimisticMessages.find(
+          (opt) => opt.text && s.text && opt.text.trim() === s.text.trim(),
+        );
+        if (matchingOpt) {
+          return { ...s, id: matchingOpt.id };
+        }
+      }
+      return s;
+    });
+
+    const pendingOptimistic = optimisticMessages.filter(
+      (opt) =>
+        !serverMsgs.some(
+          (s) =>
+            s.senderId === ME &&
+            s.text &&
+            opt.text &&
+            s.text.trim() === opt.text.trim(),
+        ),
+    );
+
+    return [...mergedServerMsgs, ...pendingOptimistic];
+  }, [rawMessages, mapContext, optimisticMessages]);
 
   const threadMessages = useMemo<Message[]>(
     () => rawThread.map((message) => mapMessage(message, mapContext)),
@@ -202,6 +253,10 @@ export const useChatData = ({
     selectConversation,
     setActiveConversationId,
     messages,
+    addOptimisticMessage,
+    removeOptimisticMessage,
+    currentUserAvatar,
+    labels,
     threadMessages,
     counters,
     isLoadingChats,

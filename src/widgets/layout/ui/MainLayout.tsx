@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { AppRoutes } from "@shared/config";
 import { ModuleMenu } from "./ModuleMenu";
@@ -57,15 +58,26 @@ export const MainLayout = () => {
   // меню не гасим, иначе чат уйдёт под него.
   const isChatModule =
     pathname === AppRoutes.CHAT || pathname.startsWith(`${AppRoutes.CHAT}/`);
+
+  useEffect(() => {
+    if (isChatModule) {
+      const origOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = origOverflow;
+      };
+    }
+  }, [isChatModule]);
+
   const chatShellClass = isChatModule
-    ? `-mx-6 w-[calc(100%+48px)] ${hideHeader ? "-mt-4" : "-mt-6"} ${
-        showBottomNav ? "" : "-mb-4"
-      }`
+    ? `-mx-6 w-[calc(100%+48px)] flex-1 min-h-0 overflow-hidden`
     : "";
 
   return (
     <div
-      className={`relative min-h-screen flex flex-col bg-gradient-to-br ${bgClass} ${
+      className={`relative ${
+        isChatModule ? "h-screen max-h-screen overflow-hidden" : "min-h-screen"
+      } flex flex-col bg-gradient-to-br ${bgClass} ${
         isDarkMode ? "text-white" : "text-zinc-900"
       } transition-all duration-300`}
     >
@@ -75,13 +87,13 @@ export const MainLayout = () => {
         <div className={`absolute bottom-0 left-1/3 w-[400px] h-[400px] bg-gradient-to-tr ${themeGradient} opacity-[0.05] blur-[110px] rounded-full`} />
       </div>
 
-      <div className="relative z-10 flex flex-grow gap-6 px-6 py-4 transition-all duration-300 ease-in-out min-w-0">
+      <div className={`relative z-10 flex flex-grow gap-6 px-6 py-4 transition-all duration-300 ease-in-out min-w-0 ${isChatModule ? "h-full overflow-hidden" : ""}`}>
         {showSidebarLeft && (
           <Sidebar side="left" setLayoutMode={setLayoutMode} themeGradient={themeGradient} />
         )}
 
         <div
-          className="flex-1 min-w-0 flex flex-col gap-6 transition-all duration-300 ease-in-out"
+          className={`flex-1 min-w-0 flex flex-col ${isChatModule ? "h-full overflow-hidden" : "gap-6"} transition-all duration-300 ease-in-out`}
           style={showBottomNav ? { paddingBottom: 76 } : undefined}
         >
           <If is={!hideHeader}>

@@ -185,7 +185,7 @@ export const MessageComposer = ({
           </button>
           <button
             onClick={onSend}
-            disabled={(!input.trim() && !hasPendingFiles) || !canSend || isSending}
+            disabled={(!input.trim() && !hasPendingFiles) || !canSend}
             aria-label={t.newMessage}
             className="w-9 h-9 rounded-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:scale-110 hover:brightness-110 flex-shrink-0"
             style={{

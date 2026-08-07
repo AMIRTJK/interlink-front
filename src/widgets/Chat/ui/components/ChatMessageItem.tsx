@@ -73,15 +73,15 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
       id={`chat-msg-${msg.id}`}
       data-msg-id={msg.id}
       ref={(el) => setMessageRef(msg.id, el)}
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: 0.15 }}
       className={`flex items-end ${isMe ? "justify-end" : "justify-start"}`}
     >
       <div className={`inline-flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-        {isMe && msg.senderAvatar && (
+        {isMe && (
           <img
-            src={msg.senderAvatar}
+            src={msg.senderAvatar || buildInitialsAvatar(msg.senderName || "Вы")}
             alt={msg.senderName || "Вы"}
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src =
@@ -219,27 +219,8 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-16" : "-right-16"} flex items-center gap-1 z-20`}
+                    className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-9" : "-right-9"} flex items-center z-20`}
                   >
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowReactionPicker((prev) => !prev);
-                      }}
-                      aria-label="Смайлики"
-                      title="Смайлики"
-                      className={`w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "text-white/60 hover:bg-white/20" : "text-gray-500 hover:bg-black/8"}`}
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,0.1)"
-                          : "rgba(0,0,0,0.05)",
-                        border: isDark
-                          ? "1px solid rgba(255,255,255,0.15)"
-                          : "1px solid rgba(0,0,0,0.08)",
-                      }}
-                    >
-                      <Smile className="w-3.5 h-3.5" />
-                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
