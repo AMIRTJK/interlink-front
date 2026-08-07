@@ -66,7 +66,7 @@ export const CorrespondenceListSidebar = ({
   return (
     <div
       className={cn(
-        "w-full bg-slate-100/80 dark:bg-slate-900/60 rounded-2xl overflow-hidden border border-gray-300/80 dark:border-slate-700/80 shadow-md",
+        "w-full bg-slate-100/80 dark:bg-slate-800 rounded-2xl overflow-hidden border border-gray-300/80 dark:border-slate-700/80 shadow-md",
         variant === "horizontal" ? "flex flex-col" : "flex-1 flex flex-col h-full"
       )}
     >
