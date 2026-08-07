@@ -142,6 +142,7 @@ export const ChatApp: React.FC<IProps> = ({
     fileInputRef,
     scrollRef,
     setMessageRef,
+    addFiles,
     handleFileChange,
     removePendingFile,
     handleEmojiSelect,
@@ -393,6 +394,7 @@ export const ChatApp: React.FC<IProps> = ({
               isRecording={isRecording}
               setIsRecording={setIsRecording}
               onSendVoice={handleSendVoice}
+              onPasteFiles={addFiles}
             />
           </Can>
         </>

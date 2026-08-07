@@ -56,26 +56,7 @@ export const ChatHeader = ({
   >
     <div className="flex items-center justify-between px-5 py-3">
       <div className="flex items-center gap-3">
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{
-            background: "rgba(255,255,255,0.15)",
-            border: "1px solid rgba(255,255,255,0.25)",
-          }}
-        >
-          <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-white">
-            <path
-              d="M12 2C7 2 3 5.5 3 10c0 2.5 1.3 4.7 3.3 6.2L5 21l4.5-2.3c.8.2 1.6.3 2.5.3 5 0 9-3.5 9-8s-4-9-9-9z"
-              fill="currentColor"
-            />
-          </svg>
-        </div>
-        <span
-          className="font-bold text-lg tracking-wider text-white"
-          style={{ textShadow: "0 0 20px rgba(167,139,250,0.5)" }}
-        >
-          TECH
-        </span>
+
         {totalUnread > 0 && (
           <motion.span
             initial={{ scale: 0 }}
