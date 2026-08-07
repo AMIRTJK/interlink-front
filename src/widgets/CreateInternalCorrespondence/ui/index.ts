@@ -1,6 +1,7 @@
 export { QRCodeSVG } from "./QRCodeSVG";
 export { TajikFlag } from "./TajikFlag";
 export { DSStamp } from "./DSStamp";
+export { DSStampPreview } from "./DSStampPreview";
 export { CollapsibleBlock } from "./CollapsibleBlock";
 export { TBtn } from "./TBtn";
 export { OrgStructureNodeItem } from "./OrgStructureNodeItem";
