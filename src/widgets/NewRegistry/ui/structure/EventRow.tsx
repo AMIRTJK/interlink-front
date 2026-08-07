@@ -29,8 +29,7 @@ export const EventRow: React.FC<IEventRowProps> = ({
   const note =
     event.data?.decline_reason ||
     event.data?.reason ||
-    event.data?.note ||
-    event.data?.subject;
+    event.data?.note;
 
   return (
     <motion.div
