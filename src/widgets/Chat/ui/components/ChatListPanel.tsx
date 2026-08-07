@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Plus, Edit3, Search } from "lucide-react";
 import { If } from "@shared/ui";
 import { Contact, LayoutPosition } from "../../model";
+import { buildInitialsAvatar } from "../../lib/chatFormat";
 
 interface ChatListPanelProps {
   layout: LayoutPosition;
@@ -118,6 +119,10 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                   <img
                     src={contact.avatar}
                     alt={contact.name}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src =
+                        buildInitialsAvatar(contact.name);
+                    }}
                     className="w-10 h-10 rounded-full object-cover"
                     style={
                       isActive
@@ -307,6 +312,10 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                 <img
                   src={contact.avatar}
                   alt={contact.name}
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src =
+                      buildInitialsAvatar(contact.name);
+                  }}
                   className="w-9 h-9 rounded-full object-cover transition-transform duration-200 group-hover:scale-105 overflow-hidden"
                   style={{
                     boxShadow: isActive

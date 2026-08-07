@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Search, Phone, Video, UserCog, MoreVertical } from "lucide-react";
 import type { Contact } from "../../model";
 import { Translations } from "../../lib/translations";
+import { buildInitialsAvatar } from "../../lib/chatFormat";
 
 // Шапка открытой беседы: собеседник, его статус и действия над беседой.
 
@@ -46,6 +47,10 @@ export const ChatSubHeader = ({
         <img
           src={activeContact.avatar}
           alt={activeContact.name}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src =
+              buildInitialsAvatar(activeContact.name);
+          }}
           className="w-10 h-10 rounded-full object-cover overflow-hidden"
           style={{ boxShadow: "inset 0 0 0 2px rgba(196,181,253,0.4)" }}
         />

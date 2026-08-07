@@ -8,6 +8,7 @@ import {
   TChatMemberRole,
 } from "../../model";
 import { Translations } from "../../lib/translations";
+import { buildInitialsAvatar } from "../../lib/chatFormat";
 import type { IChatLabels } from "../../lib/chatMappers";
 import { ConversationMediaTab } from "./ConversationMediaTab";
 import { GroupMembersPanel } from "./GroupMembersPanel";
@@ -126,6 +127,10 @@ export const ContactInfoDrawer: React.FC<ContactInfoDrawerProps> = ({
                 <img
                   src={contact.avatar}
                   alt={contact.name}
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src =
+                      buildInitialsAvatar(contact.name);
+                  }}
                   className="w-20 h-20 rounded-full object-cover shadow-md overflow-hidden"
                   style={{ boxShadow: "inset 0 0 0 3px rgba(167,139,250,0.6)" }}
                 />

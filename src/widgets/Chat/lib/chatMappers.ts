@@ -1,3 +1,4 @@
+import { getEnvVar } from "@shared/config";
 import type {
   Contact,
   Message,
@@ -37,13 +38,40 @@ export interface IMapContext {
   labels: IChatLabels;
 }
 
+export const resolvePhotoUrl = (path?: string | null): string => {
+  if (!path) return "";
+  if (
+    path.startsWith("http://") ||
+    path.startsWith("https://") ||
+    path.startsWith("data:") ||
+    path.startsWith("blob:")
+  ) {
+    return path;
+  }
+  const apiHost = getEnvVar("VITE_API_URL") || "";
+  const host = apiHost.endsWith("/") ? apiHost.slice(0, -1) : apiHost;
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${host}${p}`;
+};
+
 const resolveMedia = (
   source: string | null | undefined,
   ctx: IMapContext,
   fallbackName: string,
 ) => {
   if (!source) return buildInitialsAvatar(fallbackName);
-  return ctx.media[source] ?? buildInitialsAvatar(fallbackName);
+  if (ctx.media[source]) return ctx.media[source];
+  const normalized = source.startsWith("/") ? source : `/${source}`;
+  if (ctx.media[normalized]) return ctx.media[normalized];
+  if (
+    source.startsWith("http://") ||
+    source.startsWith("https://") ||
+    source.startsWith("data:") ||
+    source.startsWith("blob:")
+  ) {
+    return source;
+  }
+  return resolvePhotoUrl(source) || buildInitialsAvatar(fallbackName);
 };
 
 /**
@@ -51,8 +79,9 @@ const resolveMedia = (
  * идентификатором участника является id пользователя, а не строки участия.
  */
 export const normalizeMember = (member: IChatMember): IChatMember => {
-  if (!member?.user) return member;
-  return { ...member.user, role: member.role };
+  if (!member) return member;
+  if (!member.user) return member;
+  return { ...member, ...member.user, role: member.role };
 };
 
 export const normalizeMembers = (members?: IChatMember[] | null): IChatMember[] =>
@@ -80,15 +109,31 @@ export const getConversationAvatarSource = (
 ): string | null => {
   if (conversation.type === "direct") {
     const peer = getPeer(conversation, currentUserId);
-    return peer?.photo_url ?? peer?.photo_path ?? null;
+    return getUserAvatarSource(peer);
   }
   if (conversation.avatar_url) return conversation.avatar_url;
+  if (conversation.avatar_path) return conversation.avatar_path;
+  const cAny = conversation as Record<string, unknown>;
+  if (typeof cAny.avatar === "string") return cAny.avatar;
+  if (typeof cAny.photo_url === "string") return cAny.photo_url;
+  if (typeof cAny.photo_path === "string") return cAny.photo_path;
   return conversation.avatar_path ? chatUrls.avatar(conversation.id) : null;
 };
 
 export const getUserAvatarSource = (
-  user: Partial<IChatUser> | null | undefined,
-) => user?.photo_url ?? user?.photo_path ?? null;
+  user: Partial<IChatUser & { avatar?: string | null; avatar_url?: string | null; avatar_path?: string | null; photo?: string | null }> | null | undefined,
+) => {
+  if (!user) return null;
+  return (
+    user.photo_url ??
+    user.photo_path ??
+    user.avatar_url ??
+    user.avatar_path ??
+    user.avatar ??
+    user.photo ??
+    null
+  );
+};
 
 /** Превью вложения в изображении — приватный файл, отданный inline. */
 export const getAttachmentPreviewSource = (attachment: IChatAttachment) =>
