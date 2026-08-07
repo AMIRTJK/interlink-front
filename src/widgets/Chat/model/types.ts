@@ -37,6 +37,8 @@ export type MessageAttachment = {
   type: 'image' | 'video' | 'audio' | 'file' | 'voice';
   preview?: string;
   duration?: number;
+  durationSeconds?: number;
+  url?: string;
   /** MIME из карточки вложения: нужен плееру, ручка отдаёт octet-stream. */
   mimeType?: string;
   /** id вложения на бэкенде — по нему идёт скачивание приватного файла. */

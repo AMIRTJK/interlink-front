@@ -54,7 +54,7 @@ export const resolvePhotoUrl = (path?: string | null): string => {
   return `${host}${p}`;
 };
 
-const resolveMedia = (
+export const resolveMedia = (
   source: string | null | undefined,
   ctx: IMapContext,
   fallbackName: string,
@@ -113,7 +113,7 @@ export const getConversationAvatarSource = (
   }
   if (conversation.avatar_url) return conversation.avatar_url;
   if (conversation.avatar_path) return conversation.avatar_path;
-  const cAny = conversation as Record<string, unknown>;
+  const cAny = conversation as unknown as Record<string, unknown>;
   if (typeof cAny.avatar === "string") return cAny.avatar;
   if (typeof cAny.photo_url === "string") return cAny.photo_url;
   if (typeof cAny.photo_path === "string") return cAny.photo_path;
@@ -226,15 +226,15 @@ export const mapMessage = (message: IChatMessage, ctx: IMapContext): Message => 
       message.forwarded ??
         message.forwarded_from_id ??
         message.forwarded_from ??
-        (message as Record<string, unknown>).forwarded_from_name,
+        (message as unknown as Record<string, unknown>).forwarded_from_name,
     ),
     forwardedSenderName:
       (message.forwarded_from as { sender?: IChatUser } | undefined)?.sender?.full_name ??
       (message.forwarded_from as IChatUser | undefined)?.full_name ??
-      ((message as Record<string, unknown>).forwarded_from_user as IChatUser | undefined)?.full_name ??
-      ((message as Record<string, unknown>).forwarded_from_name as string | undefined) ??
-      ((message as Record<string, unknown>).forwarded_sender_name as string | undefined) ??
-      ((message as Record<string, unknown>).forward_sender_name as string | undefined) ??
+      ((message as unknown as Record<string, unknown>).forwarded_from_user as IChatUser | undefined)?.full_name ??
+      ((message as unknown as Record<string, unknown>).forwarded_from_name as string | undefined) ??
+      ((message as unknown as Record<string, unknown>).forwarded_sender_name as string | undefined) ??
+      ((message as unknown as Record<string, unknown>).forward_sender_name as string | undefined) ??
       undefined,
     threadCount: message.thread_count ?? 0,
     deleted: isDeletedForEveryone,

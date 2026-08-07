@@ -70,7 +70,7 @@ export const MainLayout = () => {
   }, [isChatModule]);
 
   const chatShellClass = isChatModule
-    ? `-mx-6 w-[calc(100%+48px)] flex-1 min-h-0 overflow-hidden`
+    ? "w-full flex-1 min-h-0 overflow-hidden"
     : "";
 
   return (
