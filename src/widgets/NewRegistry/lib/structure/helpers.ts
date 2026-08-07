@@ -218,7 +218,11 @@ export const groupLettersByDate = (documents: any[]): IGroupedStructureLetters[]
   const today = new Date().toDateString();
   const yesterday = new Date(Date.now() - 86400000).toDateString();
 
-  documents.forEach((doc) => {
+  const sortedDocs = Array.isArray(documents)
+    ? [...documents].sort((a, b) => (Number(b?.id) || 0) - (Number(a?.id) || 0))
+    : [];
+
+  sortedDocs.forEach((doc) => {
     const d = doc.created_at ? new Date(doc.created_at) : new Date();
     const dateStr = d.toDateString();
     let label = d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });

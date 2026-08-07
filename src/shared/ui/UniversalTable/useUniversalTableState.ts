@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Form } from "antd";
 import { FilterType, useFilterValues } from "../FiltersContainer";
-import { formatDatesInObject, useDynamicSearchParams, useGetQuery } from "@shared/lib";
+import { formatDatesInObject, useDynamicSearchParams, useGetQuery, sortCorrespondenceById } from "@shared/lib";
 import { transformFilterValues } from "./lib";
 import { DEFAULT_PAGE_SIZE, NUMERIC_FIELDS, IProps } from "./model";
 
@@ -166,11 +166,16 @@ export function useUniversalTableState<RecordType = any, ResponseType = any>(
     }
   }, [filtersSnapshot, autoFilter]);
 
-  const tableData = (
+  const rawTableData = (
     dataSource ??
     getItemsFromResponse(data as ResponseType) ??
     []
   ).map(formatDatesInObject);
+
+  const tableData = useMemo(
+    () => sortCorrespondenceById(rawTableData) as RecordType[],
+    [rawTableData]
+  );
 
   const total = (data as any)?.data?.meta?.total || (data as any)?.data?.total || 0;
 

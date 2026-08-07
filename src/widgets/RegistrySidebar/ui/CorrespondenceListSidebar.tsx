@@ -1,5 +1,5 @@
 import { ApiRoutes } from "@shared/api";
-import { useGetQuery, cn } from "@shared/lib";
+import { useGetQuery, cn, sortCorrespondenceById } from "@shared/lib";
 import { Loader } from "@shared/ui";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppRoutes } from "@shared/config";
@@ -44,18 +44,15 @@ export const CorrespondenceListSidebar = ({
 
   const list = useMemo(() => {
     const responseBody = (data as any)?.data;
-
+    let rawItems: any[] = [];
     if (responseBody?.items && Array.isArray(responseBody.items)) {
-      return responseBody.items;
+      rawItems = responseBody.items;
+    } else if (responseBody?.data && Array.isArray(responseBody.data)) {
+      rawItems = responseBody.data;
+    } else if (Array.isArray(responseBody)) {
+      rawItems = responseBody;
     }
-    if (responseBody?.data && Array.isArray(responseBody.data)) {
-      return responseBody.data;
-    }
-    if (Array.isArray(responseBody)) {
-      return responseBody;
-    }
-
-    return [];
+    return sortCorrespondenceById(rawItems);
   }, [data]);
 
   if (isLoading) {

@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useGetQuery, useDynamicSearchParams } from "@shared/lib";
+import { useGetQuery, useDynamicSearchParams, sortCorrespondenceById } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { ConfigProvider, theme } from "antd";
 import { RegistryLayout } from "./RegistryLayout";
@@ -119,8 +119,12 @@ export const NewRegistry = ({
 		setParams,
 	});
 
-	const documents =
+	const rawDocuments =
 		(responseData as any)?.data?.data || (responseData as any)?.data || [];
+	const documents = useMemo(
+		() => sortCorrespondenceById(rawDocuments),
+		[rawDocuments],
+	);
 	// Laravel часто вкладывает мета-данные в объект meta
 	const meta =
 		(responseData as any)?.data?.meta || (responseData as any)?.data || {};

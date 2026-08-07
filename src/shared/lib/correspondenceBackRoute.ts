@@ -67,3 +67,18 @@ export const determineCorrespondenceBackRoute = ({
 
   return AppRoutes.CORRESPONDENCE;
 };
+
+/**
+ * Сортирует массив писем по ID по убыванию (новые с бóльшим ID идут первыми).
+ */
+export const sortCorrespondenceById = <T extends Record<string, any>>(
+  items: T[] | null | undefined
+): T[] => {
+  if (!Array.isArray(items)) return [];
+  return [...items].sort((a, b) => {
+    const idA = Number(a?.id) || 0;
+    const idB = Number(b?.id) || 0;
+    return idB - idA;
+  });
+};
+
