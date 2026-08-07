@@ -84,11 +84,9 @@ export function useIncomingViewState(data: IDataArgs) {
         scroller.getBoundingClientRect().top;
       let shift = Math.max(0, TOP_M - canvasTop);
       shift = Math.min(shift, Math.max(0, canvas.offsetHeight - MIN_VISIBLE));
-      const groupViewportTop = canvasTop + shift;
-      const availH = Math.max(
-        200,
-        scroller.clientHeight - groupViewportTop - BOT_M
-      );
+      // Высота — от закреплённой позиции группы (TOP_M), а не от текущей:
+      // иначе панель растёт при прокрутке вниз и сжимается при прокрутке вверх.
+      const availH = Math.max(200, scroller.clientHeight - TOP_M - BOT_M);
       group.style.setProperty("--icc-panel-max-h", `${availH}px`);
       group.style.transform = shift > 0 ? `translateY(${shift}px)` : "";
     };
