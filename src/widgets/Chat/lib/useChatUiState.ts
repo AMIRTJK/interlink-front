@@ -82,16 +82,17 @@ export const useChatUiState = (
     onComposeStateChange?.(showComposeModal);
   }, [showComposeModal, onComposeStateChange]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = Array.from(e.target.files || []);
-    const mapped: PendingFile[] = selected.map((file) => {
+  const addFiles = (files: File[]) => {
+    if (!files.length) return;
+    const mapped: PendingFile[] = files.map((file) => {
       let type: MessageAttachment["type"] = "file";
       if (file.type.startsWith("image/")) type = "image";
       else if (file.type.startsWith("video/")) type = "video";
       else if (file.type.startsWith("audio/")) type = "audio";
 
+      const name = file.name || `image-${Date.now()}.${file.type.split("/")[1] || "png"}`;
       const entry: PendingFile = {
-        name: file.name,
+        name,
         size: formatFileSize(file.size),
         type,
         raw: file,
@@ -101,6 +102,11 @@ export const useChatUiState = (
     });
 
     setPendingFiles((prev) => [...prev, ...mapped]);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(e.target.files || []);
+    addFiles(selected);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -187,6 +193,7 @@ export const useChatUiState = (
     hoveredMessageId,
     setHoveredMessageId,
     pendingFiles,
+    addFiles,
     handleFileChange,
     removePendingFile,
     clearPendingFiles,

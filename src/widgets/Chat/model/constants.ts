@@ -1,3 +1,5 @@
+export const ME = "me";
+
 export const EMOJI_CATEGORY_EMOJIS: string[][] = [
   [
     "😀",

@@ -10,6 +10,7 @@ import { ChatMessageItem } from "./ChatMessageItem";
 // вверх, индикатор набора и плавающая кнопка возврата к ответу.
 
 interface IProps {
+  currentUserId?: number | string | null;
   messages: Message[];
   activeContact: Contact;
   isLoading: boolean;
@@ -47,12 +48,13 @@ interface IProps {
 }
 
 const chatVariants = {
-  enter: (dir: number) => ({ opacity: 0, x: dir * 12 }),
-  center: { opacity: 1, x: 0 },
-  exit: (dir: number) => ({ opacity: 0, x: -dir * 12 }),
+  enter: { opacity: 0 },
+  center: { opacity: 1 },
+  exit: { opacity: 0 },
 };
 
 export const MessageList = ({
+  currentUserId,
   messages,
   activeContact,
   isLoading,
@@ -102,9 +104,10 @@ export const MessageList = ({
             animate="center"
             exit="exit"
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="space-y-3.5 min-h-full flex flex-col justify-end overflow-x-hidden"
+            className="space-y-3.5 min-h-full flex flex-col justify-start overflow-x-hidden"
             style={{ overflowX: "hidden" }}
           >
+            <div className="mt-auto" />
             <If is={hasOlder}>
               <div className="flex justify-center py-2">
                 <button
@@ -163,7 +166,11 @@ export const MessageList = ({
               <ChatMessageItem
                 key={msg.id}
                 msg={msg}
-                isMe={msg.senderId === "me"}
+                isMe={
+                  msg.senderId === "me" ||
+                  (currentUserId != null &&
+                    String(msg.senderId) === String(currentUserId))
+                }
                 activeContact={activeContact}
                 isDark={isDark}
                 t={t}

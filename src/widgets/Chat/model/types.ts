@@ -37,6 +37,8 @@ export type MessageAttachment = {
   type: 'image' | 'video' | 'audio' | 'file' | 'voice';
   preview?: string;
   duration?: number;
+  durationSeconds?: number;
+  url?: string;
   /** MIME из карточки вложения: нужен плееру, ручка отдаёт octet-stream. */
   mimeType?: string;
   /** id вложения на бэкенде — по нему идёт скачивание приватного файла. */
@@ -57,7 +59,7 @@ export type Message = {
   senderId: string;
   text: string;
   time: string;
-  status?: 'sent' | 'delivered' | 'read';
+  status?: 'pending' | 'sent' | 'delivered' | 'read';
   attachment?: MessageAttachment;
   /** Все вложения сообщения; `attachment` — первое из них (совместимость). */
   attachments?: MessageAttachment[];
@@ -65,6 +67,7 @@ export type Message = {
   pinned?: boolean;
   replyTo?: ReplyPreview;
   forwarded?: boolean;
+  forwardedSenderName?: string;
   threadCount?: number;
   threadMessages?: Message[];
   deleted?: boolean;

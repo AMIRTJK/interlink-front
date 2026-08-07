@@ -77,7 +77,7 @@ export interface IChatMessage {
   thread_count?: number;
   forwarded?: boolean;
   forwarded_from_id?: number | null;
-  forwarded_from?: IChatUser | null;
+  forwarded_from?: IChatUser | IChatMessage | { sender?: IChatUser; body?: string } | null;
   is_pinned?: boolean;
   is_deleted_for_me?: boolean;
   is_deleted_for_everyone?: boolean;
