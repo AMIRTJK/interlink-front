@@ -44,30 +44,6 @@ export const getModuleItems = (
       variant === "horizontal" || variant === "full" || variant === "ios" ? (
         <img src={CorrespondenceIcon} alt="" />
       ) : null,
-    ...((variant === "compact" ||
-      variant === "modern" ||
-      variant === "ios") && {
-      children: [
-        {
-          key: AppRoutes.CORRESPONDENCE_OUTGOING,
-          label: "Внутренняя корреспонденция",
-          requiredRole: ["internal_correspondence.view"],
-          icon:
-            variant === "modern" || variant === "ios" ? (
-              <FileTextOutlined />
-            ) : null,
-        },
-        // {
-        //   key: AppRoutes.CORRESPONDENCE_INCOMING,
-        //   label: "Внешняя корреспонденция",
-        //   requiredRole: ["correspondence.view"],
-        //   icon:
-        //     variant === "modern" || variant === "ios" ? (
-        //       <GlobalOutlined />
-        //     ) : null,
-        // },
-      ],
-    }),
   },
   // {
   //   key: "/modules/temp-docs_primary",
