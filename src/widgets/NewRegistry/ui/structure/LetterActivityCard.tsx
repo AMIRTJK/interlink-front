@@ -115,6 +115,9 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
           <div className="flex-1 min-w-0 cursor-pointer" onClick={onClick}>
             <div className="flex items-start justify-between gap-3 mb-1">
               <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700/60 border border-slate-200/80 dark:border-slate-600/80 px-2 py-0.5 rounded-md whitespace-nowrap">
+                  № {item.id}
+                </span>
                 <span
                   className={cn(
                     "text-sm text-slate-900 dark:text-slate-100",
