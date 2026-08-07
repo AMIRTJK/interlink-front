@@ -64,6 +64,7 @@ export const RegistryLayout = ({
   useEffect(() => {
     if (rawHighlightedId) {
       setHighlightedId(String(rawHighlightedId));
+      window.history.replaceState(null, "");
       const timer = setTimeout(() => {
         setHighlightedId(null);
       }, 1800);
