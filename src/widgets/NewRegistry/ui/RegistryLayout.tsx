@@ -16,7 +16,6 @@ import type {
 } from "./registryLayout/registryLayoutModel";
 import { getEffectiveStatusData } from "./registryLayout/letterStatus";
 import { RegistryHeaderBar } from "./registryLayout/RegistryHeaderBar";
-import { SectionHeader } from "./registryLayout/SectionHeader";
 import { DocumentCard } from "./registryLayout/DocumentCard";
 import { DocumentListItem } from "./registryLayout/DocumentListItem";
 import { FilterDrawer } from "./registryLayout/FilterDrawer";
@@ -126,6 +125,8 @@ export const RegistryLayout = ({
       <RegistryHeaderBar
         createButtonText={createButtonText}
         totalRecords={totalRecords}
+        showFrom={showFrom}
+        showTo={showTo}
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
         hasActiveFilters={hasActiveFilters}
@@ -147,16 +148,6 @@ export const RegistryLayout = ({
           transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
           className="flex flex-col gap-6"
         >
-          {tabs.length > 0 && (
-            <SectionHeader
-              activeStatusData={activeTab}
-              t={{ total: "Всего", documents: "документов", shown: "Показано" }}
-              currentDocuments={documents}
-              startIndex={showFrom - 1}
-              endIndex={showTo}
-              breadcrumbs={breadcrumbs}
-            />
-          )}
 
           {/* --- CONTENT AREA --- */}
           <div className="flex-1 min-h-0 pr-1 m-0">
