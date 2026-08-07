@@ -15,6 +15,7 @@ export const DocumentCard = ({
   onClick,
   activeStatusData,
   fieldConfig,
+  isHighlighted,
 }: any) => {
   // Получаем действия (меню) для этой записи
   const actionItems = fieldConfig?.getActions
@@ -30,10 +31,13 @@ export const DocumentCard = ({
       whileHover={{ y: -4, boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.15)" }}
       onClick={onClick}
       className={cn(
-        "bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden hover:border-blue-300 dark:hover:border-blue-500 transition-all cursor-pointer group flex flex-col justify-between relative",
+        "bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-500 cursor-pointer group flex flex-col justify-between relative overflow-hidden",
         linkInfo?.borderColor,
       )}
     >
+      <If is={Boolean(isHighlighted)}>
+        <div className="absolute inset-0 rounded-xl ring-2 ring-inset ring-blue-500 border border-blue-500 pointer-events-none z-20 shadow-[0_0_18px_rgba(59,130,246,0.5)] transition-all duration-500" />
+      </If>
       {/* Header */}
       <div
         className={`p-3 bg-gradient-to-r ${

@@ -2,6 +2,7 @@ import { useCallback, type Dispatch, type SetStateAction } from "react";
 import type { NavigateFunction } from "react-router-dom";
 
 import { ApiRoutes } from "@shared/api";
+import { CORRESPONDENCE_INVALIDATE_KEYS } from "@shared/config";
 import { buildFormData, useMutationQuery } from "@shared/lib";
 
 import { mapServerAttachment } from "../../lib/utils";
@@ -48,7 +49,7 @@ export const useDraftMutations = ({
   const { mutate: createDraft, isPending: isCreating } = useMutationQuery<any>({
     url: ApiRoutes.CREATE_INTERNAL,
     method: "POST",
-    messages: { invalidate: [ApiRoutes.GET_INTERNAL_DRAFTS] },
+    messages: { invalidate: [...CORRESPONDENCE_INVALIDATE_KEYS] },
     queryOptions: {
       onSuccess: (data: any) => {
         syncAttachmentsAfterSave(data);
@@ -98,7 +99,7 @@ export const useDraftMutations = ({
   const updateDraftMessages = {
     invalidate: [
       ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
-      // Убираем отсюда автоматический инвалейд версий, чтобы контролировать поток вручную
+      ...CORRESPONDENCE_INVALIDATE_KEYS,
     ],
   };
 

@@ -72,6 +72,8 @@ export const RelatedDocsSection: React.FC<IRelatedDocsSectionProps> = ({
 
                 <div className="flex flex-col min-w-0 flex-1">
                   <div className="flex items-center gap-1 text-[11px] font-bold leading-tight truncate">
+                    <span>№ {item.id}</span>
+                    <span>•</span>
                     <span>{item.typeLabel}</span>
                     {item.dateLabel && (
                       <span

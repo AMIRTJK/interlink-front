@@ -88,6 +88,7 @@ import {
 } from "./createInternalCorrespondence/editorCaret";
 import { snapCaretOutOfPageGap } from "./createInternalCorrespondence/editorClickCaret";
 import { paginateEditorDom } from "./createInternalCorrespondence/paginateEditorDom";
+import { getSelectionFontSize } from "./createInternalCorrespondence/editorFontSize";
 import { buildFragmentFromHtml } from "./createInternalCorrespondence/editorFragments";
 import { useLocationStatePrefill } from "./createInternalCorrespondence/useLocationStatePrefill";
 import { useSavedDocumentPrefill } from "./createInternalCorrespondence/useSavedDocumentPrefill";
@@ -162,6 +163,7 @@ import { IncomingLettersPanel } from "./IncomingLettersPanel";
 import { VersionsPanel } from "./VersionsPanel";
 import { NavigationPane } from "./NavigationPane";
 import { AttachmentsPanel } from "./AttachmentsPanel";
+import { CommentsPanel } from "./CommentsPanel";
 
 
 export const CreateInternalCorrespondence = ({
@@ -276,6 +278,7 @@ export const CreateInternalCorrespondence = ({
   const [incomingOpen, setIncomingOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [attachmentsOpen, setAttachmentsOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
   // Демо-режим (для показа руководству): «цилиндры» разделов выносятся в
   // горизонтальную панель под тулбаром, а боковые вкладки у холста скрываются.
   // Сами панели по-прежнему открываются у холста. По умолчанию выключен —
@@ -288,6 +291,7 @@ export const CreateInternalCorrespondence = ({
     setIncomingOpen(false);
     setVersionsOpen(false);
     setAttachmentsOpen(false);
+    setCommentsOpen(false);
   };
 
   const handleOpenSigner = () => {
@@ -296,6 +300,7 @@ export const CreateInternalCorrespondence = ({
     setIncomingOpen(false);
     setVersionsOpen(false);
     setAttachmentsOpen(false);
+    setCommentsOpen(false);
   };
 
   const handleOpenIncoming = () => {
@@ -304,6 +309,7 @@ export const CreateInternalCorrespondence = ({
     setSignerOpen(false);
     setVersionsOpen(false);
     setAttachmentsOpen(false);
+    setCommentsOpen(false);
   };
 
   const handleOpenVersions = () => {
@@ -312,6 +318,7 @@ export const CreateInternalCorrespondence = ({
     setSignerOpen(false);
     setIncomingOpen(false);
     setAttachmentsOpen(false);
+    setCommentsOpen(false);
   };
 
   const handleOpenAttachments = () => {
@@ -320,6 +327,16 @@ export const CreateInternalCorrespondence = ({
     setSignerOpen(false);
     setIncomingOpen(false);
     setVersionsOpen(false);
+    setCommentsOpen(false);
+  };
+
+  const handleOpenComments = () => {
+    setCommentsOpen(true);
+    setApproversOpen(false);
+    setSignerOpen(false);
+    setIncomingOpen(false);
+    setVersionsOpen(false);
+    setAttachmentsOpen(false);
   };
   const [showCcField, setShowCcField] = useState(false);
   const [sent, setSent] = useState(false);
@@ -671,6 +688,7 @@ export const CreateInternalCorrespondence = ({
     useToken: true,
     options: {
       enabled: !!id,
+      staleTime: 0,
       refetchOnWindowFocus: false,
     },
   });
@@ -743,6 +761,37 @@ export const CreateInternalCorrespondence = ({
     [allVersions, activeVersionId, latestVersion],
   );
 
+  useEffect(() => {
+    const navState = location.state as
+      | {
+          openVersions?: boolean;
+          targetVersionId?: number | string;
+          targetVersionNum?: string;
+        }
+      | undefined;
+
+    if (navState?.openVersions) {
+      setVersionsOpen(true);
+      setApproversOpen(false);
+      setSignerOpen(false);
+      setIncomingOpen(false);
+      setAttachmentsOpen(false);
+      setCommentsOpen(false);
+
+      if (navState.targetVersionId) {
+        setActiveVersionId(Number(navState.targetVersionId));
+      } else if (navState.targetVersionNum && allVersions.length > 0) {
+        const found = allVersions.find(
+          (v: any) =>
+            String(v.version || v.number) === String(navState.targetVersionNum),
+        );
+        if (found) {
+          setActiveVersionId(found.id);
+        }
+      }
+    }
+  }, [location.state, allVersions]);
+
   // Подсветка авторства занимает правую колонку целиком, поэтому включается
   // только вместе с режимом истории версий. Версию берёт ту же, что и обычное
   // сравнение, — иначе выбор в панели версий ни на что бы не влиял.
@@ -807,6 +856,7 @@ export const CreateInternalCorrespondence = ({
         suppressSuccessToast: true,
         invalidate: [
           ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
+          ...CORRESPONDENCE_INVALIDATE_KEYS,
         ],
       },
     });
@@ -1416,24 +1466,6 @@ export const CreateInternalCorrespondence = ({
     commitHistoryNow();
     editor.focus();
 
-    // Точный размер для выделенного текста. execCommand("fontSize") умеет
-    // только 7 ступеней HTML (small/large/…): 13/14 давали одинаковые 16px, а
-    // «16» реально печатала 18px — измерения пагинации расходились с ожидаемым.
-    // Ставим ступень-маркер 7, затем переписываем её на точный px-размер.
-    const sel = window.getSelection();
-    const hasRangeSelection =
-      !!sel &&
-      sel.rangeCount > 0 &&
-      !sel.isCollapsed &&
-      editor.contains(sel.anchorNode);
-    // Есть выделение → меняем размер ТОЛЬКО выделенного фрагмента (inline-span),
-    // базовый размер листа НЕ трогаем (иначе перекрасился бы весь текст).
-    // Нет выделения → меняем базовый размер всего листа.
-    if (!hasRangeSelection) {
-      setFontSize(size);
-      return;
-    }
-
     document.execCommand("styleWithCSS", false, "true");
     document.execCommand("fontSize", false, "7");
     editor
@@ -1452,8 +1484,10 @@ export const CreateInternalCorrespondence = ({
       f.replaceWith(span);
     });
 
+    setFontSize(size);
     // Немедленная перепагинация с новым размером — без ожидания rAF-цепочки.
     syncEditorAfterDomEdit();
+    refreshActiveFmt();
   };
 
   // HTML без служебных артефактов (распорки/разрезы) — для сохранения и превью
@@ -1511,6 +1545,10 @@ export const CreateInternalCorrespondence = ({
       setActiveFmt((prev) => (Object.keys(prev).length ? {} : prev));
       return;
     }
+
+    const detectedFontSize = getSelectionFontSize(editor);
+    setFontSize((prev) => (prev === detectedFontSize ? prev : detectedFontSize));
+
     const q = (cmd: string) => {
       try {
         return document.queryCommandState(cmd);
@@ -2556,6 +2594,9 @@ export const CreateInternalCorrespondence = ({
                   approversOpen={approversOpen}
                   setApproversOpen={setApproversOpen}
                   handleOpenApprovers={handleOpenApprovers}
+                  commentsOpen={commentsOpen}
+                  setCommentsOpen={setCommentsOpen}
+                  handleOpenComments={handleOpenComments}
                 />
               )}
 
@@ -2694,7 +2735,7 @@ export const CreateInternalCorrespondence = ({
                       height: pageCount * PAGE_STRIDE - PAGE_GAP,
                       padding: `${PAGE_PAD_V}px ${marginRight}px ${PAGE_PAD_V}px ${marginLeft}px`,
                       fontFamily: "Times New Roman, serif",
-                      fontSize: `${fontSize}px`,
+                      fontSize: "14px",
                       lineHeight: 1.8,
                       color: "#1e293b",
                       boxSizing: "border-box",
@@ -2790,6 +2831,15 @@ export const CreateInternalCorrespondence = ({
                           updateApproverComment={updateApproverComment}
                           docId={id}
                           canApprove={canApproveDocument}
+                          currentUserId={currentUserId}
+                        />
+                        <CommentsPanel
+                          isOpen={commentsOpen}
+                          hideTab={panelsInToolbar}
+                          openLeft={false}
+                          onOpen={handleOpenComments}
+                          onClose={() => setCommentsOpen(false)}
+                          currentUserName={tokenControl.getUserData()?.full_name || tokenControl.getUserData()?.name || "Admin Super Root"}
                           currentUserId={currentUserId}
                         />
                         <SignerPanel

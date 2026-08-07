@@ -139,7 +139,12 @@ export const useRegistryTableState = ({ type, extraParams }: IParams) => {
           ? AppRoutes.INTERNAL_OUTGOING_SHOW
           : "";
 
-    navigate(route.replace(":id", String(record.id)));
+    navigate(route.replace(":id", String(record.id)), {
+      state: {
+        fromRegistry: `${location.pathname}${location.search}`,
+        lastOpenedId: String(record.id),
+      },
+    });
   };
 
   const showTabs = Array.isArray(customTabs)

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, ChevronDown, Pin, User, Loader2 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
@@ -20,6 +20,8 @@ interface ILetterActivityCardProps {
   direction: LetterDirection;
   index: number;
   onClick: () => void;
+  isHighlighted?: boolean;
+  onVersionClick?: (docId: number, versionId?: number, versionNum?: string) => void;
 }
 
 export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
@@ -27,6 +29,8 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
   direction,
   index,
   onClick,
+  isHighlighted,
+  onVersionClick,
 }) => {
   const [open, setOpen] = useState<boolean>(() => {
     try {
@@ -68,6 +72,10 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
     { data: IInternalStructureResponse }
   >({
     url: open && item.id ? ApiRoutes.GET_INTERNAL_STRUCTURE.replace(":id", String(item.id)) : undefined,
+    options: {
+      staleTime: 0,
+      refetchOnMount: true,
+    },
   });
 
   const structureData = responseData?.data;
@@ -82,9 +90,19 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
   // письмом (structure_count). После загрузки структуры уточняем его длиной
   // timeline.
   const countFromItem = getStructureCount(item);
-  const displayCount = responseData?.data?.timeline
-    ? responseData.data.timeline.length
-    : countFromItem;
+  const fetchedCount = responseData?.data?.timeline?.length;
+
+  const [lastCount, setLastCount] = useState<number | undefined>(countFromItem);
+
+  useEffect(() => {
+    if (typeof fetchedCount === "number") {
+      setLastCount(fetchedCount);
+    } else if (typeof countFromItem === "number") {
+      setLastCount(countFromItem);
+    }
+  }, [fetchedCount, countFromItem]);
+
+  const displayCount = lastCount ?? countFromItem;
   const hasCount = displayCount !== undefined;
 
   return (
@@ -95,7 +113,10 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
       transition={{ delay: Math.min(index * 0.03, 0.3), duration: 0.25 }}
       className="group"
     >
-      <div className="rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:border-blue-200 dark:hover:border-slate-600">
+      <div className="rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:border-blue-200 dark:hover:border-slate-600 relative overflow-hidden">
+        <If is={Boolean(isHighlighted)}>
+          <div className="absolute inset-0 rounded-xl ring-2 ring-inset ring-blue-500 border border-blue-500 pointer-events-none z-20 shadow-[0_0_18px_rgba(59,130,246,0.5)] transition-all duration-500" />
+        </If>
         <div className="flex items-start gap-3 px-4 py-3.5">
           <span className="mt-1 w-5 h-5 flex items-center justify-center flex-shrink-0">
             <If is={isUnread}>
@@ -115,6 +136,9 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
           <div className="flex-1 min-w-0 cursor-pointer" onClick={onClick}>
             <div className="flex items-start justify-between gap-3 mb-1">
               <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700/60 border border-slate-200/80 dark:border-slate-600/80 px-2 py-0.5 rounded-md whitespace-nowrap">
+                  № {item.id}
+                </span>
                 <span
                   className={cn(
                     "text-sm text-slate-900 dark:text-slate-100",
@@ -209,6 +233,7 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
                         event={event}
                         isLast={i === timelineEvents.length - 1}
                         fallbackActorName={creatorName}
+                        onVersionClick={onVersionClick}
                       />
                     ))}
                   </div>

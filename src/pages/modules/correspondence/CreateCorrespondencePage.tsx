@@ -1,26 +1,32 @@
 import { ApiRoutes } from "@shared/api";
 import { AppRoutes } from "@shared/config";
-import { useMutationQuery } from "@shared/lib";
+import { useMutationQuery, determineCorrespondenceBackRoute } from "@shared/lib";
 import {
   CorrespondenceForm,
   CorrespondenceFormData,
 } from "@widgets/CorrespondenceForm";
 import { CreateInternalCorrespondence } from "@widgets/CreateInternalCorrespondence";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export const CreateCorrespondencePage = ({ type }: { type: string }) => {
   const navigate = useNavigate();
-
-  const getRegistryRoute = (t: string) => {
-    if (t.includes("internal-incoming")) return AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING;
-    if (t.includes("internal-outgoing")) return AppRoutes.CORRESPONDENCE_INTERNAL_OUTGOING;
-    if (t.includes("external-incoming")) return AppRoutes.CORRESPONDENCE_EXTERNAL_INCOMING;
-    if (t.includes("external-outgoing")) return AppRoutes.CORRESPONDENCE_EXTERNAL_OUTGOING;
-    return AppRoutes.CORRESPONDENCE;
-  };
+  const location = useLocation();
 
   const handleBack = () => {
-    navigate(getRegistryRoute(type));
+    const locState =
+      (location.state as {
+        fromRegistry?: string;
+        lastOpenedId?: string | number;
+      }) || {};
+    const fromState = locState.fromRegistry;
+    const lastOpenedId = locState.lastOpenedId;
+    const backRoute = determineCorrespondenceBackRoute({
+      type,
+      fromState,
+    });
+    navigate(backRoute, {
+      state: { highlightedId: lastOpenedId ? String(lastOpenedId) : undefined },
+    });
   };
 
   const {

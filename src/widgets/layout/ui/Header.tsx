@@ -40,10 +40,10 @@ export const Header = ({
 
   return (
     <header
-      className={`sticky top-0 z-50 flex items-center justify-between gap-4 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl px-8 sm:px-10 py-4 shadow-lg transition-all duration-300 ease-in-out ${
+      className={`sticky top-0 z-50 flex items-center justify-between gap-4 bg-white/40 dark:bg-slate-800/80 backdrop-blur-3xl px-6 py-4 shadow-lg transition-all duration-300 ease-in-out ${
         isFullWidth
-          ? "w-[calc(100%+48px)] -mx-6 -mt-4 rounded-none border-b border-white/20 dark:border-zinc-700/30"
-          : "w-full rounded-[2.5rem] border border-white/20 dark:border-zinc-700/30"
+          ? "w-[calc(100%+48px)] -mx-6 -mt-4 rounded-none border-b border-white/20 dark:border-slate-700/60"
+          : "w-full rounded-[2.5rem] border border-white/20 dark:border-slate-700/60"
       }`}
     >
       <div className="flex items-center gap-6 min-w-0">

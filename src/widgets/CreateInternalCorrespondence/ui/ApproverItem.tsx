@@ -4,7 +4,6 @@ import {
   X,
   MessageSquarePlus,
   Send,
-  Shield,
   Check,
   Clock,
   MessageSquare,
@@ -12,7 +11,7 @@ import {
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { Approver } from "../types";
-import { DSStamp } from "./DSStamp";
+import { DSStampPreview } from "./DSStampPreview";
 
 interface IProps {
   approver: Approver;
@@ -86,7 +85,9 @@ export const ApproverItem = ({
         </If>
       </div>
 
-      <If is={!approver.approved || !!approver.isInvited}>
+      {/* Условие повторяет объединение условий кнопок внутри: иначе у уже
+          согласовавшего участника оставалась пустая полоса с рамкой. */}
+      <If is={!approver.approved || (!approver.isInvited && !!docId)}>
         <div className="flex items-center justify-end gap-1.5 px-3 pb-2.5 pt-1.5 border-t border-slate-100/60 flex-shrink-0">
           <If is={!approver.approved}>
             <button
@@ -118,15 +119,6 @@ export const ApproverItem = ({
                 {isApproverInviting ? "..." : "Пригласить"}
               </span>
             </button>
-          </If>
-          <If is={!!approver.isInvited && approver.dsApplied}>
-            <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
-              <Shield size={10} className="text-emerald-500" />
-              <span className="text-[10px] font-semibold text-emerald-600">
-                ЭЦП
-              </span>
-              <Check size={10} className="text-emerald-500" />
-            </div>
           </If>
           <If
             is={
@@ -222,7 +214,7 @@ export const ApproverItem = ({
               : "border-purple-100 bg-purple-50/40"
           )}
         >
-          <DSStamp
+          <DSStampPreview
             name={approver.name}
             certSerial={`SN-2026-${approver.initials}-${Math.abs(Number(approver.id) * 317 + 10000)}`}
             signedAt={new Date().toLocaleDateString("ru-RU")}

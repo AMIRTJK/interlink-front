@@ -59,6 +59,67 @@ export const formatTime = (iso?: string | null) =>
       })
     : "";
 
+export const formatDateTime = (iso?: string | null) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  const dateStr = d.toLocaleDateString("ru-RU");
+  const timeStr = d.toLocaleTimeString("ru-RU", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${dateStr} ${timeStr}`;
+};
+
+export const getTargetUserName = (event: ITimelineEvent): string => {
+  const d = event.data;
+  if (!d) return "";
+
+  if (typeof d.approver === "object" && d.approver?.full_name) {
+    return d.approver.full_name;
+  }
+  if (typeof d.signer === "object" && d.signer?.full_name) {
+    return d.signer.full_name;
+  }
+  if (typeof d.target_user === "object" && d.target_user?.full_name) {
+    return d.target_user.full_name;
+  }
+  if (typeof d.invited_user === "object" && d.invited_user?.full_name) {
+    return d.invited_user.full_name;
+  }
+  if (typeof d.user === "object" && d.user?.full_name) {
+    return d.user.full_name;
+  }
+  if (typeof d.recipient === "object" && d.recipient?.full_name) {
+    return d.recipient.full_name;
+  }
+  if (typeof d.recipient === "object" && d.recipient?.user?.full_name) {
+    return d.recipient.user.full_name;
+  }
+  if (typeof d.target_name === "string" && d.target_name.trim()) {
+    return d.target_name.trim();
+  }
+  if (typeof d.user_name === "string" && d.user_name.trim()) {
+    return d.user_name.trim();
+  }
+  if (typeof d.user_full_name === "string" && d.user_full_name.trim()) {
+    return d.user_full_name.trim();
+  }
+  if (typeof d.invited_user_name === "string" && d.invited_user_name.trim()) {
+    return d.invited_user_name.trim();
+  }
+  if (typeof d.recipient_name === "string" && d.recipient_name.trim()) {
+    return d.recipient_name.trim();
+  }
+  if (typeof d.full_name === "string" && d.full_name.trim()) {
+    return d.full_name.trim();
+  }
+  if (typeof d.name === "string" && d.name.trim()) {
+    return d.name.trim();
+  }
+  return "";
+};
+
 export const getEventMeta = (event: ITimelineEvent) => {
   const type = event.type;
   const action = event.action;
@@ -104,12 +165,16 @@ export const getEventMeta = (event: ITimelineEvent) => {
   }
 
   if (type === "approval_invited" || action === "approval_invited") {
+    const targetName = getTargetUserName(event);
+    const title = targetName
+      ? `Пригласил на согласование ${targetName}`
+      : "Пригласил на согласование";
     return {
       icon: UserPlus,
       ring: "bg-violet-100 dark:bg-violet-900/40",
       iconColor: "text-violet-500",
       badge: "bg-violet-100 dark:bg-violet-900/40 border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300",
-      title: "Отправил на согласование",
+      title,
       badgeText: "Согласование",
     };
   }
@@ -129,12 +194,16 @@ export const getEventMeta = (event: ITimelineEvent) => {
   }
 
   if (type === "signer_invited" || action === "signer_invited") {
+    const targetName = getTargetUserName(event);
+    const title = targetName
+      ? `Пригласил на подписание ${targetName}`
+      : "Пригласил на подписание";
     return {
       icon: GitBranch,
       ring: "bg-amber-100 dark:bg-amber-900/40",
       iconColor: "text-amber-500",
       badge: "bg-amber-100 dark:bg-amber-900/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300",
-      title: "Направил на подпись",
+      title,
       badgeText: "На подпись",
     };
   }
@@ -206,7 +275,11 @@ export const groupLettersByDate = (documents: any[]): IGroupedStructureLetters[]
   const today = new Date().toDateString();
   const yesterday = new Date(Date.now() - 86400000).toDateString();
 
-  documents.forEach((doc) => {
+  const sortedDocs = Array.isArray(documents)
+    ? [...documents].sort((a, b) => (Number(b?.id) || 0) - (Number(a?.id) || 0))
+    : [];
+
+  sortedDocs.forEach((doc) => {
     const d = doc.created_at ? new Date(doc.created_at) : new Date();
     const dateStr = d.toDateString();
     let label = d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });

@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import "./style.css";
 import { Button, If, UniversalTable } from "@shared/ui";
 import AddIcon from "../../../assets/icons/add-icon.svg";
@@ -26,6 +28,21 @@ export const RegistryTable = <T extends Record<string, unknown>>({
   extraParams,
   url = ApiRoutes.GET_CORRESPONDENCES,
 }: RegistryTableProps<T>) => {
+  const location = useLocation();
+  const rawHighlightedId = (location.state as any)?.highlightedId;
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (rawHighlightedId) {
+      setHighlightedId(String(rawHighlightedId));
+      window.history.replaceState(null, "");
+      const timer = setTimeout(() => {
+        setHighlightedId(null);
+      }, 1800);
+      return () => clearTimeout(timer);
+    }
+  }, [rawHighlightedId]);
+
   const {
     currentTab,
     setCurrentTab,
@@ -91,11 +108,18 @@ export const RegistryTable = <T extends Record<string, unknown>>({
             columns={columns}
             className="[&_.ant-table-cell]:rounded-none! [&_.ant-pagination]:px-4! [&_.ant-table-row]:cursor-pointer [&_.ant-table-expanded-row.ant-table-expanded-row-level-1>td]:bg-[#F2F5FF]!"
             handleRowClick={handleGetIdCorrespondence}
-            rowClassName={(record: CorrespondenceResponse) =>
-              expandedRowKeys.includes(record.id as number)
-                ? "[&>td]:bg-[#E9F0FF]! hover:[&>td]:bg-[#E9F0FF]!"
-                : ""
-            }
+            rowClassName={(record: CorrespondenceResponse) => {
+              const isExpanded = expandedRowKeys.includes(record.id as number);
+              const isHighlighted =
+                !!highlightedId && String(record.id) === String(highlightedId);
+              if (isHighlighted) {
+                return "row-return-highlight [&>td]:bg-blue-50/70!";
+              }
+              if (isExpanded) {
+                return "[&>td]:bg-[#E9F0FF]! hover:[&>td]:bg-[#E9F0FF]!";
+              }
+              return "";
+            }}
             direction={1}
             autoFilter={true}
             queryParams={{

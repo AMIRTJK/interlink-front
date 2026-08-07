@@ -1,20 +1,23 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { ExternalLink } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import { ITimelineEvent } from "../../lib/structure/types";
-import { getEventMeta, getInitials, formatTime } from "../../lib/structure/helpers";
+import { getEventMeta, getInitials, formatDateTime } from "../../lib/structure/helpers";
 
 interface IEventRowProps {
   event: ITimelineEvent;
   isLast: boolean;
   fallbackActorName?: string;
+  onVersionClick?: (docId: number, versionId?: number, versionNum?: string) => void;
 }
 
 export const EventRow: React.FC<IEventRowProps> = ({
   event,
   isLast,
   fallbackActorName,
+  onVersionClick,
 }) => {
   const meta = getEventMeta(event);
   const Icon = meta.icon;
@@ -29,8 +32,19 @@ export const EventRow: React.FC<IEventRowProps> = ({
   const note =
     event.data?.decline_reason ||
     event.data?.reason ||
-    event.data?.note ||
-    event.data?.subject;
+    event.data?.note;
+
+  const targetVersionId = event.version_id || event.data?.version_id;
+  const targetVersionNum = event.data?.version ? String(event.data.version) : undefined;
+  const isVersionEvent = Boolean(
+    (event.type === "version_created" ||
+      event.action === "version_created" ||
+      event.type === "version_selected_for_signature" ||
+      event.type === "version_selected" ||
+      event.action === "version_selected_for_signing" ||
+      event.action === "version_selected") &&
+      (targetVersionId || targetVersionNum)
+  );
 
   return (
     <motion.div
@@ -48,38 +62,53 @@ export const EventRow: React.FC<IEventRowProps> = ({
         <Icon size={12} className={meta.iconColor} />
       </div>
       <div className="flex-1 min-w-0 pb-0.5">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2 flex-wrap min-w-0">
-            <div
-              className={cn(
-                "w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0",
-                !hasKnownActor
-                  ? "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300"
-                  : "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300",
-              )}
-            >
-              {initials}
-            </div>
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">
-              {actorName}
-            </span>
-            <span className="text-xs text-slate-400 dark:text-slate-400">·</span>
-            <span
-              className={cn(
-                "text-[10px] font-semibold px-1.5 py-0.5 rounded-full border",
-                meta.badge,
-              )}
-            >
-              {meta.badgeText}
-            </span>
+        <div className="flex items-center gap-2 flex-wrap min-w-0">
+          <div
+            className={cn(
+              "w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0",
+              !hasKnownActor
+                ? "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300"
+                : "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300",
+            )}
+          >
+            {initials}
           </div>
-          <span className="text-[10px] text-slate-400 dark:text-slate-400 flex-shrink-0 mt-0.5 font-medium">
-            {formatTime(event.performed_at)}
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">
+            {actorName}
+          </span>
+          <span className="text-xs text-slate-400 dark:text-slate-400">·</span>
+          <span
+            className={cn(
+              "text-[10px] font-semibold px-2 py-0.5 rounded-full border flex items-center gap-1.5",
+              meta.badge,
+            )}
+          >
+            {meta.badgeText}
+          </span>
+          <span className="text-xs text-slate-300 dark:text-slate-600">·</span>
+          <span className="text-[11px] font-mono font-semibold text-slate-400 dark:text-slate-400 flex-shrink-0">
+            {formatDateTime(event.performed_at)}
           </span>
         </div>
-        <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 leading-snug">
-          {meta.title}
-        </p>
+        <If is={isVersionEvent}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onVersionClick?.(event.document_id, targetVersionId, targetVersionNum);
+            }}
+            className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer inline-flex items-center gap-1 mt-0.5 text-left group/vlink"
+            title="Открыть эту версию письма"
+          >
+            <span>{meta.title}</span>
+            <ExternalLink size={11} className="opacity-70 group-hover/vlink:opacity-100 transition-opacity flex-shrink-0" />
+          </button>
+        </If>
+        <If is={!isVersionEvent}>
+          <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 leading-snug">
+            {meta.title}
+          </p>
+        </If>
         <If is={Boolean(note)}>
           <div className="mt-1.5 pl-3 border-l-2 border-amber-200 dark:border-amber-700">
             <p className="text-[11px] text-slate-500 dark:text-slate-400 italic leading-relaxed">

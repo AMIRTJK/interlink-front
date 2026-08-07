@@ -1,6 +1,6 @@
 import "./style.css";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
 
@@ -16,7 +16,6 @@ import type {
 } from "./registryLayout/registryLayoutModel";
 import { getEffectiveStatusData } from "./registryLayout/letterStatus";
 import { RegistryHeaderBar } from "./registryLayout/RegistryHeaderBar";
-import { SectionHeader } from "./registryLayout/SectionHeader";
 import { DocumentCard } from "./registryLayout/DocumentCard";
 import { DocumentListItem } from "./registryLayout/DocumentListItem";
 import { FilterDrawer } from "./registryLayout/FilterDrawer";
@@ -43,6 +42,7 @@ export const RegistryLayout = ({
   onFilterApply,
   onFilterReset,
   onCardClick,
+  onVersionClick,
   onCreate,
   currentFilters,
   statusConfig,
@@ -56,7 +56,21 @@ export const RegistryLayout = ({
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
+  const rawHighlightedId = (location.state as any)?.highlightedId;
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (rawHighlightedId) {
+      setHighlightedId(String(rawHighlightedId));
+      window.history.replaceState(null, "");
+      const timer = setTimeout(() => {
+        setHighlightedId(null);
+      }, 1800);
+      return () => clearTimeout(timer);
+    }
+  }, [rawHighlightedId]);
 
   const isStatusNavActive =
     pathname.includes("incoming") || pathname.includes("outgoing");
@@ -111,6 +125,8 @@ export const RegistryLayout = ({
       <RegistryHeaderBar
         createButtonText={createButtonText}
         totalRecords={totalRecords}
+        showFrom={showFrom}
+        showTo={showTo}
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
         hasActiveFilters={hasActiveFilters}
@@ -132,16 +148,6 @@ export const RegistryLayout = ({
           transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
           className="flex flex-col gap-6"
         >
-          {tabs.length > 0 && (
-            <SectionHeader
-              activeStatusData={activeTab}
-              t={{ total: "Всего", documents: "документов", shown: "Показано" }}
-              currentDocuments={documents}
-              startIndex={showFrom - 1}
-              endIndex={showTo}
-              breadcrumbs={breadcrumbs}
-            />
-          )}
 
           {/* --- CONTENT AREA --- */}
           <div className="flex-1 min-h-0 pr-1 m-0">
@@ -165,6 +171,8 @@ export const RegistryLayout = ({
                     documents={documents}
                     direction={direction}
                     onCardClick={onCardClick}
+                    onVersionClick={onVersionClick}
+                    highlightedId={highlightedId}
                   />
                 ) : documents && documents.length > 0 ? (
                   documents?.map((doc: any, idx: number) => {
@@ -174,6 +182,10 @@ export const RegistryLayout = ({
                       fieldConfig?.isIncoming,
                     );
 
+                    const isHighlighted =
+                      !!highlightedId &&
+                      String(doc.id) === String(highlightedId);
+
                     const props = {
                       key: doc.id,
                       data: doc,
@@ -182,6 +194,7 @@ export const RegistryLayout = ({
                       onClick: () => onCardClick(doc.id),
                       activeStatusData: activeTab,
                       fieldConfig,
+                      isHighlighted,
                     };
                     return viewMode === "block" ? (
                       <DocumentCard {...props} />
