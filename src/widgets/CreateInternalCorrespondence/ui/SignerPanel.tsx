@@ -6,6 +6,7 @@ import { If } from "@shared/ui";
 import type { FinalSigner, RecipientOption } from "../types";
 import { SignerCard } from "./SignerCard";
 import { useAutoPositionDrawer } from "../lib/useAutoPositionDrawer";
+import { PANEL_TAB_TOP, PANEL_DRAWER_TOP_IN_TOOLBAR } from "../lib/constants";
 
 interface IProps {
   isOpen: boolean;
@@ -100,7 +101,7 @@ export const SignerPanel = ({
             ref={drawerRef}
             className="absolute z-[500]"
             style={{
-              top: 10,
+              top: hideTab ? PANEL_DRAWER_TOP_IN_TOOLBAR : PANEL_TAB_TOP.first,
               ...(openLeft
                 ? { right: "calc(100% + 12px)" }
                 : { left: "calc(100% + 12px)" }),

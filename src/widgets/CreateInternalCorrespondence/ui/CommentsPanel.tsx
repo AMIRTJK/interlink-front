@@ -4,6 +4,7 @@ import { MessageSquare, Send, X } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import { useAutoPositionDrawer } from "../lib/useAutoPositionDrawer";
+import { PANEL_TAB_TOP, PANEL_DRAWER_TOP_IN_TOOLBAR } from "../lib/constants";
 
 interface IComment {
   id: string;
@@ -122,7 +123,7 @@ export const CommentsPanel: React.FC<ICommentsPanelProps> = ({
             ref={drawerRef}
             className="absolute z-[500]"
             style={{
-              top: 370,
+              top: hideTab ? PANEL_DRAWER_TOP_IN_TOOLBAR : PANEL_TAB_TOP.third,
               ...(openLeft
                 ? { right: "calc(100% + 12px)" }
                 : { left: "calc(100% + 12px)" }),
