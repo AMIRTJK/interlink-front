@@ -20,6 +20,7 @@ export type Translations = {
   pinned: string;
   pinnedMessage: string;
   forwarded: string;
+  forwardedFrom: string;
   scheduled: string;
   youDeletedThis: string;
   messageDeleted: string;
@@ -143,6 +144,7 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     pinned: 'Pinned',
     pinnedMessage: 'Pinned Message',
     forwarded: 'Forwarded',
+    forwardedFrom: 'Forwarded from',
     scheduled: 'Scheduled',
     youDeletedThis: 'You deleted this message.',
     messageDeleted: 'This message was deleted.',
@@ -246,6 +248,7 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     pinned: 'Закреплено',
     pinnedMessage: 'Закреплённое сообщение',
     forwarded: 'Пересланное',
+    forwardedFrom: 'Переслано от',
     scheduled: 'Запланировано',
     youDeletedThis: 'Вы удалили это сообщение.',
     messageDeleted: 'Сообщение удалено.',
@@ -349,6 +352,7 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     pinned: 'Мустаҳкам',
     pinnedMessage: 'Паёми мустаҳкам',
     forwarded: 'Пешфиристода',
+    forwardedFrom: 'Пешфиристода аз',
     scheduled: 'Банақша',
     youDeletedThis: 'Шумо ин паёмро нест кардед.',
     messageDeleted: 'Паём нест карда шуд.',
