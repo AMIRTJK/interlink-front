@@ -761,6 +761,37 @@ export const CreateInternalCorrespondence = ({
     [allVersions, activeVersionId, latestVersion],
   );
 
+  useEffect(() => {
+    const navState = location.state as
+      | {
+          openVersions?: boolean;
+          targetVersionId?: number | string;
+          targetVersionNum?: string;
+        }
+      | undefined;
+
+    if (navState?.openVersions) {
+      setVersionsOpen(true);
+      setApproversOpen(false);
+      setSignerOpen(false);
+      setIncomingOpen(false);
+      setAttachmentsOpen(false);
+      setCommentsOpen(false);
+
+      if (navState.targetVersionId) {
+        setActiveVersionId(Number(navState.targetVersionId));
+      } else if (navState.targetVersionNum && allVersions.length > 0) {
+        const found = allVersions.find(
+          (v: any) =>
+            String(v.version || v.number) === String(navState.targetVersionNum),
+        );
+        if (found) {
+          setActiveVersionId(found.id);
+        }
+      }
+    }
+  }, [location.state, allVersions]);
+
   // Подсветка авторства занимает правую колонку целиком, поэтому включается
   // только вместе с режимом истории версий. Версию берёт ту же, что и обычное
   // сравнение, — иначе выбор в панели версий ни на что бы не влиял.

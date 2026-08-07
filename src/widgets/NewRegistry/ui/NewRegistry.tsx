@@ -198,6 +198,29 @@ export const NewRegistry = ({
 		});
 	};
 
+	const handleVersionClick = (id: number, versionId?: number, versionNum?: string) => {
+		const route = type.includes("external-incoming")
+			? AppRoutes.CORRESPONDENCE_INCOMING_SHOW
+			: type.includes("internal-incoming")
+				? AppRoutes.INTERNAL_INCOMING_SHOW
+				: type.includes("internal-outgoing") ||
+					  type.includes("internal-drafts") ||
+					  type.includes("internal-to-sign") ||
+					  type.includes("internal-to-approve")
+					? AppRoutes.INTERNAL_OUTGOING_SHOW
+					: "";
+
+		navigate(route.replace(":id", String(id)), {
+			state: {
+				fromRegistry: `${location.pathname}${location.search}`,
+				lastOpenedId: String(id),
+				openVersions: true,
+				targetVersionId: versionId,
+				targetVersionNum: versionNum,
+			},
+		});
+	};
+
 	const handleCreate = () => {
 		navigate(`${location.pathname}/create`);
 	};
@@ -218,6 +241,7 @@ export const NewRegistry = ({
 				onFilterApply={handleFilterApply}
 				onFilterReset={handleFilterReset}
 				onCardClick={handleCardClick}
+				onVersionClick={handleVersionClick}
 				onCreate={handleCreate}
 				currentFilters={{
 					incomingNumber: searchParams.incomingNumber,

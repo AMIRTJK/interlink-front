@@ -21,6 +21,7 @@ interface ILetterActivityCardProps {
   index: number;
   onClick: () => void;
   isHighlighted?: boolean;
+  onVersionClick?: (docId: number, versionId?: number, versionNum?: string) => void;
 }
 
 export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
@@ -29,6 +30,7 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
   index,
   onClick,
   isHighlighted,
+  onVersionClick,
 }) => {
   const [open, setOpen] = useState<boolean>(() => {
     try {
@@ -231,6 +233,7 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
                         event={event}
                         isLast={i === timelineEvents.length - 1}
                         fallbackActorName={creatorName}
+                        onVersionClick={onVersionClick}
                       />
                     ))}
                   </div>

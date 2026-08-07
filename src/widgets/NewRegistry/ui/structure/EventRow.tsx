@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { ExternalLink } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import { ITimelineEvent } from "../../lib/structure/types";
@@ -9,12 +10,14 @@ interface IEventRowProps {
   event: ITimelineEvent;
   isLast: boolean;
   fallbackActorName?: string;
+  onVersionClick?: (docId: number, versionId?: number, versionNum?: string) => void;
 }
 
 export const EventRow: React.FC<IEventRowProps> = ({
   event,
   isLast,
   fallbackActorName,
+  onVersionClick,
 }) => {
   const meta = getEventMeta(event);
   const Icon = meta.icon;
@@ -30,6 +33,18 @@ export const EventRow: React.FC<IEventRowProps> = ({
     event.data?.decline_reason ||
     event.data?.reason ||
     event.data?.note;
+
+  const targetVersionId = event.version_id || event.data?.version_id;
+  const targetVersionNum = event.data?.version ? String(event.data.version) : undefined;
+  const isVersionEvent = Boolean(
+    (event.type === "version_created" ||
+      event.action === "version_created" ||
+      event.type === "version_selected_for_signature" ||
+      event.type === "version_selected" ||
+      event.action === "version_selected_for_signing" ||
+      event.action === "version_selected") &&
+      (targetVersionId || targetVersionNum)
+  );
 
   return (
     <motion.div
@@ -75,9 +90,25 @@ export const EventRow: React.FC<IEventRowProps> = ({
             {formatDateTime(event.performed_at)}
           </span>
         </div>
-        <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 leading-snug">
-          {meta.title}
-        </p>
+        <If is={isVersionEvent}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onVersionClick?.(event.document_id, targetVersionId, targetVersionNum);
+            }}
+            className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer inline-flex items-center gap-1 mt-0.5 text-left group/vlink"
+            title="Открыть эту версию письма"
+          >
+            <span>{meta.title}</span>
+            <ExternalLink size={11} className="opacity-70 group-hover/vlink:opacity-100 transition-opacity flex-shrink-0" />
+          </button>
+        </If>
+        <If is={!isVersionEvent}>
+          <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 leading-snug">
+            {meta.title}
+          </p>
+        </If>
         <If is={Boolean(note)}>
           <div className="mt-1.5 pl-3 border-l-2 border-amber-200 dark:border-amber-700">
             <p className="text-[11px] text-slate-500 dark:text-slate-400 italic leading-relaxed">

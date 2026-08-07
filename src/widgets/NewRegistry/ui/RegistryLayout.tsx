@@ -43,6 +43,7 @@ export const RegistryLayout = ({
   onFilterApply,
   onFilterReset,
   onCardClick,
+  onVersionClick,
   onCreate,
   currentFilters,
   statusConfig,
@@ -179,6 +180,7 @@ export const RegistryLayout = ({
                     documents={documents}
                     direction={direction}
                     onCardClick={onCardClick}
+                    onVersionClick={onVersionClick}
                     highlightedId={highlightedId}
                   />
                 ) : documents && documents.length > 0 ? (

@@ -13,6 +13,7 @@ export interface RegistryLayoutProps {
   onFilterApply: (filters: any) => void;
   onFilterReset: () => void;
   onCardClick: (id: number) => void;
+  onVersionClick?: (docId: number, versionId?: number, versionNum?: string) => void;
   onCreate: () => void;
   currentFilters: any;
   statusConfig: any;
