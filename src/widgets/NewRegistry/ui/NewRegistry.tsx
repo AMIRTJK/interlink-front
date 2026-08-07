@@ -186,7 +186,12 @@ export const NewRegistry = ({
 					? AppRoutes.INTERNAL_OUTGOING_SHOW
 					: "";
 
-		navigate(route.replace(":id", String(id)));
+		navigate(route.replace(":id", String(id)), {
+			state: {
+				fromRegistry: `${location.pathname}${location.search}`,
+				lastOpenedId: String(id),
+			},
+		});
 	};
 
 	const handleCreate = () => {

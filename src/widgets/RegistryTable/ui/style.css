@@ -8,3 +8,26 @@
 .custom-registry-table .ant-table-row:hover {
   cursor: pointer;
 }
+
+@keyframes rowReturnHighlight {
+  0% {
+    outline: 2px solid #3b82f6;
+    outline-offset: -2px;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+  }
+  70% {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: -2px;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  }
+  100% {
+    outline: 2px solid transparent;
+    outline-offset: -2px;
+    box-shadow: none;
+  }
+}
+
+.row-return-highlight {
+  animation: rowReturnHighlight 2s ease-out forwards;
+}
+

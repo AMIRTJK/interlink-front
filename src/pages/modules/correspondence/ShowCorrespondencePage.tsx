@@ -7,7 +7,11 @@ import {
 import { Spin } from "antd";
 import { ApiRoutes } from "@shared/api";
 import { AppRoutes } from "@shared/config";
-import { useCorrespondenceRoute, useGetQuery } from "@shared/lib";
+import {
+  useCorrespondenceRoute,
+  useGetQuery,
+  determineCorrespondenceBackRoute,
+} from "@shared/lib";
 import { InternalCorrespondece } from "@widgets/InternalCorrespondece";
 import { CreateInternalCorrespondence } from "@widgets/CreateInternalCorrespondence";
 import { InternalCorrespondenceIncomingView } from "@widgets/InternalCorrespondenceIncomingView";
@@ -24,20 +28,6 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
 
-  const getRegistryRoute = (t: string) => {
-    if (t.includes("internal-incoming")) return AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING;
-    if (t.includes("internal-outgoing")) return AppRoutes.CORRESPONDENCE_INTERNAL_OUTGOING;
-    if (t.includes("internal-drafts")) return AppRoutes.CORRESPONDENCE_INTERNAL_DRAFTS;
-    if (t.includes("external-incoming")) return AppRoutes.CORRESPONDENCE_EXTERNAL_INCOMING;
-    if (t.includes("external-outgoing")) return AppRoutes.CORRESPONDENCE_EXTERNAL_OUTGOING;
-    if (t.includes("internal")) return AppRoutes.CORRESPONDENCE_INTERNAL_INCOMING;
-    return AppRoutes.CORRESPONDENCE;
-  };
-
-  const handleBack = () => {
-    navigate(getRegistryRoute(type));
-  };
-
   const { shouldHideUI } = useCorrespondenceRoute();
 
   const isInternalView = type === "internal-incoming" || shouldHideUI;
@@ -52,6 +42,24 @@ export const ShowCorrespondencePage: React.FC<ShowCorrespondencePageProps> = ({
     url: currentApi.replace(":id", String(id || "")),
     params: currentParam,
   });
+
+  const handleBack = () => {
+    const locState =
+      (location.state as {
+        fromRegistry?: string;
+        lastOpenedId?: string | number;
+      }) || {};
+    const fromState = locState.fromRegistry;
+    const lastOpenedId = locState.lastOpenedId || id;
+    const backRoute = determineCorrespondenceBackRoute({
+      type,
+      data: correspondenceData?.data,
+      fromState,
+    });
+    navigate(backRoute, {
+      state: { highlightedId: lastOpenedId ? String(lastOpenedId) : undefined },
+    });
+  };
 
   const handleFinish = (values: CorrespondenceFormData) => {
     console.log("Updating:", values);

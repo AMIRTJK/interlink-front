@@ -16,6 +16,7 @@ export const DocumentListItem = ({
   onClick,
   activeStatusData,
   fieldConfig,
+  isHighlighted,
 }: any) => {
   // Получаем действия
   const actionItems = fieldConfig?.getActions
@@ -35,8 +36,9 @@ export const DocumentListItem = ({
       whileHover={{ x: 4, boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.1)" }}
       onClick={onClick}
       className={cn(
-        "bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 transition-all duration-300 cursor-pointer mb-2 overflow-hidden",
+        "bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 transition-all duration-500 cursor-pointer mb-2 overflow-hidden",
         linkInfo?.borderColor,
+        isHighlighted && "border-blue-500! ring-2 ring-inset ring-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.35)]",
       )}
     >
       <div className="p-4">

@@ -1,6 +1,6 @@
 import "./style.css";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
 
@@ -56,7 +56,20 @@ export const RegistryLayout = ({
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
+  const rawHighlightedId = (location.state as any)?.highlightedId;
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (rawHighlightedId) {
+      setHighlightedId(String(rawHighlightedId));
+      const timer = setTimeout(() => {
+        setHighlightedId(null);
+      }, 1800);
+      return () => clearTimeout(timer);
+    }
+  }, [rawHighlightedId]);
 
   const isStatusNavActive =
     pathname.includes("incoming") || pathname.includes("outgoing");
@@ -174,6 +187,10 @@ export const RegistryLayout = ({
                       fieldConfig?.isIncoming,
                     );
 
+                    const isHighlighted =
+                      !!highlightedId &&
+                      String(doc.id) === String(highlightedId);
+
                     const props = {
                       key: doc.id,
                       data: doc,
@@ -182,6 +199,7 @@ export const RegistryLayout = ({
                       onClick: () => onCardClick(doc.id),
                       activeStatusData: activeTab,
                       fieldConfig,
+                      isHighlighted,
                     };
                     return viewMode === "block" ? (
                       <DocumentCard {...props} />
