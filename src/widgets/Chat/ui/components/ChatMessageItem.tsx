@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock3, CornerUpLeft, Forward, MoreHorizontal, Pin, MessageSquare, Smile } from "lucide-react";
+import { Check, CheckCheck, Clock3, CornerUpLeft, Forward, MoreHorizontal, Pin, MessageSquare, Smile } from "lucide-react";
 import { Contact, Message, ReplyPreview } from "../../model";
 import { Lang, Translations } from "../../lib/translations";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
@@ -66,6 +66,46 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
   const isTargetHighlighted =
     Boolean(targetHighlightedMessageId) &&
     String(targetHighlightedMessageId) === String(msg.id);
+
+  const isPending = msg.status === "pending" || msg.id.startsWith("temp-");
+
+  if (isPending) {
+    return (
+      <div
+        key={msg.id}
+        id={`chat-msg-${msg.id}`}
+        data-msg-id={msg.id}
+        ref={(el) => setMessageRef(msg.id, el)}
+        className={`flex items-center ${isMe ? "justify-end" : "justify-start"} py-1 px-2`}
+      >
+        <div className={`inline-flex items-center gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+          {isMe && (
+            <img
+              src={msg.senderAvatar || buildInitialsAvatar(msg.senderName || "Вы")}
+              alt={msg.senderName || "Вы"}
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src =
+                  buildInitialsAvatar(msg.senderName || "Вы");
+              }}
+              className="w-8 h-8 rounded-full object-cover flex-shrink-0 overflow-hidden"
+              style={{
+                boxShadow: "inset 0 0 0 2px rgba(167,139,250,0.45)",
+              }}
+            />
+          )}
+          <div className="flex items-center justify-center w-8 h-8">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+              className="flex items-center justify-center"
+            >
+              <Clock3 className={`w-5 h-5 ${isDark ? "text-violet-300" : "text-violet-600"}`} />
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -392,7 +432,10 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                     <span>{t.pinned}</span>
                   </span>
                 </If>
-                {msg.text}
+                <span>{msg.text}</span>
+                <span className="inline-flex items-center gap-1 float-right mt-1 ml-2.5 select-none text-[10px] opacity-75">
+                  <span>{msg.time}</span>
+                </span>
               </div>
             </div>
           )}

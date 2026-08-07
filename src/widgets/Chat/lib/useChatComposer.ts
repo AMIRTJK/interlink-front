@@ -65,7 +65,7 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
       senderAvatar: currentUserAvatar,
       text: body,
       time: formatMessageTime(new Date().toISOString()),
-      status: "sent",
+      status: "pending",
       attachment: optimisticAttachments[0],
       attachments: optimisticAttachments.length ? optimisticAttachments : undefined,
       replyTo: ui.replyingTo ?? undefined,

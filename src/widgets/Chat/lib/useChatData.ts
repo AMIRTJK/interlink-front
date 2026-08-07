@@ -164,21 +164,26 @@ export const useChatData = ({
     [user, mapContext, labels.you],
   );
 
+  useEffect(() => {
+    if (!optimisticMessages.length || !rawMessages.length) return;
+    const serverMsgs = rawMessages.map((message) => mapMessage(message, mapContext));
+    setOptimisticMessages((prev) =>
+      prev.filter(
+        (opt) =>
+          !serverMsgs.some(
+            (s) =>
+              s.senderId === ME &&
+              s.text &&
+              opt.text &&
+              s.text.trim() === opt.text.trim(),
+          ),
+      ),
+    );
+  }, [rawMessages, mapContext]);
+
   const messages = useMemo<Message[]>(() => {
     const serverMsgs = rawMessages.map((message) => mapMessage(message, mapContext));
     if (!optimisticMessages.length) return serverMsgs;
-
-    const mergedServerMsgs = serverMsgs.map((s) => {
-      if (s.senderId === ME) {
-        const matchingOpt = optimisticMessages.find(
-          (opt) => opt.text && s.text && opt.text.trim() === s.text.trim(),
-        );
-        if (matchingOpt) {
-          return { ...s, id: matchingOpt.id };
-        }
-      }
-      return s;
-    });
 
     const pendingOptimistic = optimisticMessages.filter(
       (opt) =>
@@ -191,7 +196,7 @@ export const useChatData = ({
         ),
     );
 
-    return [...mergedServerMsgs, ...pendingOptimistic];
+    return [...serverMsgs, ...pendingOptimistic];
   }, [rawMessages, mapContext, optimisticMessages]);
 
   const threadMessages = useMemo<Message[]>(

@@ -59,7 +59,7 @@ export type Message = {
   senderId: string;
   text: string;
   time: string;
-  status?: 'sent' | 'delivered' | 'read';
+  status?: 'pending' | 'sent' | 'delivered' | 'read';
   attachment?: MessageAttachment;
   /** Все вложения сообщения; `attachment` — первое из них (совместимость). */
   attachments?: MessageAttachment[];
