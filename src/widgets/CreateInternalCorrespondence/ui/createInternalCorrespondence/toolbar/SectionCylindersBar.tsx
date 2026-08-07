@@ -19,6 +19,9 @@ interface IProps {
   approversOpen: boolean;
   setApproversOpen: (open: boolean) => void;
   handleOpenApprovers: () => void;
+  commentsOpen?: boolean;
+  setCommentsOpen?: (open: boolean) => void;
+  handleOpenComments?: () => void;
 }
 
 export const SectionCylindersBar = ({
@@ -38,6 +41,9 @@ export const SectionCylindersBar = ({
   approversOpen,
   setApproversOpen,
   handleOpenApprovers,
+  commentsOpen = false,
+  setCommentsOpen,
+  handleOpenComments,
 }: IProps) => (
   <div className="px-3 py-2 border-b border-slate-100 bg-white flex flex-wrap items-center gap-2 font-sans">
     <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mr-1 select-none">
@@ -93,6 +99,15 @@ export const SectionCylindersBar = ({
         isOpen: approversOpen,
         onToggle: () =>
           approversOpen ? setApproversOpen(false) : handleOpenApprovers(),
+      },
+      {
+        key: "comments",
+        label: "Комментарии",
+        dotClass: "",
+        dotStyle: { backgroundColor: "oklch(0.65 0.2 240)" },
+        isOpen: commentsOpen,
+        onToggle: () =>
+          commentsOpen ? setCommentsOpen?.(false) : handleOpenComments?.(),
       },
     ].map((p) => (
       <button

@@ -163,6 +163,7 @@ import { IncomingLettersPanel } from "./IncomingLettersPanel";
 import { VersionsPanel } from "./VersionsPanel";
 import { NavigationPane } from "./NavigationPane";
 import { AttachmentsPanel } from "./AttachmentsPanel";
+import { CommentsPanel } from "./CommentsPanel";
 
 
 export const CreateInternalCorrespondence = ({
@@ -277,6 +278,7 @@ export const CreateInternalCorrespondence = ({
   const [incomingOpen, setIncomingOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [attachmentsOpen, setAttachmentsOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
   // Демо-режим (для показа руководству): «цилиндры» разделов выносятся в
   // горизонтальную панель под тулбаром, а боковые вкладки у холста скрываются.
   // Сами панели по-прежнему открываются у холста. По умолчанию выключен —
@@ -289,6 +291,7 @@ export const CreateInternalCorrespondence = ({
     setIncomingOpen(false);
     setVersionsOpen(false);
     setAttachmentsOpen(false);
+    setCommentsOpen(false);
   };
 
   const handleOpenSigner = () => {
@@ -297,6 +300,7 @@ export const CreateInternalCorrespondence = ({
     setIncomingOpen(false);
     setVersionsOpen(false);
     setAttachmentsOpen(false);
+    setCommentsOpen(false);
   };
 
   const handleOpenIncoming = () => {
@@ -305,6 +309,7 @@ export const CreateInternalCorrespondence = ({
     setSignerOpen(false);
     setVersionsOpen(false);
     setAttachmentsOpen(false);
+    setCommentsOpen(false);
   };
 
   const handleOpenVersions = () => {
@@ -313,6 +318,7 @@ export const CreateInternalCorrespondence = ({
     setSignerOpen(false);
     setIncomingOpen(false);
     setAttachmentsOpen(false);
+    setCommentsOpen(false);
   };
 
   const handleOpenAttachments = () => {
@@ -321,6 +327,16 @@ export const CreateInternalCorrespondence = ({
     setSignerOpen(false);
     setIncomingOpen(false);
     setVersionsOpen(false);
+    setCommentsOpen(false);
+  };
+
+  const handleOpenComments = () => {
+    setCommentsOpen(true);
+    setApproversOpen(false);
+    setSignerOpen(false);
+    setIncomingOpen(false);
+    setVersionsOpen(false);
+    setAttachmentsOpen(false);
   };
   const [showCcField, setShowCcField] = useState(false);
   const [sent, setSent] = useState(false);
@@ -2547,6 +2563,9 @@ export const CreateInternalCorrespondence = ({
                   approversOpen={approversOpen}
                   setApproversOpen={setApproversOpen}
                   handleOpenApprovers={handleOpenApprovers}
+                  commentsOpen={commentsOpen}
+                  setCommentsOpen={setCommentsOpen}
+                  handleOpenComments={handleOpenComments}
                 />
               )}
 
@@ -2781,6 +2800,15 @@ export const CreateInternalCorrespondence = ({
                           updateApproverComment={updateApproverComment}
                           docId={id}
                           canApprove={canApproveDocument}
+                          currentUserId={currentUserId}
+                        />
+                        <CommentsPanel
+                          isOpen={commentsOpen}
+                          hideTab={panelsInToolbar}
+                          openLeft={false}
+                          onOpen={handleOpenComments}
+                          onClose={() => setCommentsOpen(false)}
+                          currentUserName={tokenControl.getUserData()?.full_name || tokenControl.getUserData()?.name || "Admin Super Root"}
                           currentUserId={currentUserId}
                         />
                         <SignerPanel
