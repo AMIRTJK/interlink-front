@@ -65,6 +65,7 @@ export type Message = {
   pinned?: boolean;
   replyTo?: ReplyPreview;
   forwarded?: boolean;
+  forwardedSenderName?: string;
   threadCount?: number;
   threadMessages?: Message[];
   deleted?: boolean;

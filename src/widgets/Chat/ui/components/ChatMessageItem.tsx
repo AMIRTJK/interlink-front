@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Clock3, CornerUpLeft, Forward, MoreHorizontal, Pin, MessageSquare } from "lucide-react";
 import { Contact, Message, ReplyPreview } from "../../model";
 import { Lang, Translations } from "../../lib/translations";
+import { buildInitialsAvatar } from "../../lib/chatFormat";
 import { If } from "@shared/ui";
 import { MessageAttachments } from "./MessageAttachments";
 import { ReactionPicker } from "./ReactionPicker";
@@ -80,7 +81,11 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
         {isMe && msg.senderAvatar && (
           <img
             src={msg.senderAvatar}
-            alt={msg.senderName || ""}
+            alt={msg.senderName || "Вы"}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src =
+                buildInitialsAvatar(msg.senderName || "Вы");
+            }}
             className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end overflow-hidden"
             style={{
               boxShadow: "inset 0 0 0 2px rgba(167,139,250,0.45)",
@@ -91,6 +96,10 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           <img
             src={msg.senderAvatar || activeContact.avatar}
             alt={msg.senderName || activeContact.name}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src =
+                buildInitialsAvatar(msg.senderName || activeContact.name);
+            }}
             className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end overflow-hidden"
             style={{
               boxShadow: "inset 0 0 0 2px rgba(167,139,250,0.45)",
@@ -163,7 +172,11 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               className={`flex items-center gap-1 mb-1 text-[10px] ${isDark ? "text-white/40" : "text-gray-400"} ${isMe ? "self-end" : "self-start"}`}
             >
               <Forward className="w-3 h-3" />
-              <span>{t.forwarded}</span>
+              <span>
+                {msg.forwardedSenderName
+                  ? `${t.forwardedFrom} ${msg.forwardedSenderName}`
+                  : t.forwarded}
+              </span>
             </div>
           )}
           <If is={!!(msg.senderName && !isMe && activeContact.isGroup)}>

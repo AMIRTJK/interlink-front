@@ -220,7 +220,20 @@ export const mapMessage = (message: IChatMessage, ctx: IMapContext): Message => 
           text: describeMessage(message.reply_to, ctx.labels),
         }
       : undefined,
-    forwarded: Boolean(message.forwarded ?? message.forwarded_from_id),
+    forwarded: Boolean(
+      message.forwarded ??
+        message.forwarded_from_id ??
+        message.forwarded_from ??
+        (message as Record<string, unknown>).forwarded_from_name,
+    ),
+    forwardedSenderName:
+      (message.forwarded_from as { sender?: IChatUser } | undefined)?.sender?.full_name ??
+      (message.forwarded_from as IChatUser | undefined)?.full_name ??
+      ((message as Record<string, unknown>).forwarded_from_user as IChatUser | undefined)?.full_name ??
+      ((message as Record<string, unknown>).forwarded_from_name as string | undefined) ??
+      ((message as Record<string, unknown>).forwarded_sender_name as string | undefined) ??
+      ((message as Record<string, unknown>).forward_sender_name as string | undefined) ??
+      undefined,
     threadCount: message.thread_count ?? 0,
     deleted: isDeletedForEveryone,
     deletedForMe: isDeletedForMe,
