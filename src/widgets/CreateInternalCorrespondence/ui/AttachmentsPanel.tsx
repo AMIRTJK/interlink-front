@@ -5,6 +5,7 @@ import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { AttachedFile } from "../types";
 import { useAutoPositionDrawer } from "../lib/useAutoPositionDrawer";
+import { PANEL_TAB_TOP, PANEL_DRAWER_TOP_IN_TOOLBAR } from "../lib/constants";
 
 interface IProps {
   isOpen: boolean;
@@ -76,7 +77,7 @@ export const AttachmentsPanel: React.FC<IProps> = ({
             ref={drawerRef}
             className="absolute z-[500]"
             style={{
-              top: 370,
+              top: hideTab ? PANEL_DRAWER_TOP_IN_TOOLBAR : PANEL_TAB_TOP.third,
               ...(openLeft
                 ? { right: "calc(100% + 12px)" }
                 : { left: "calc(100% + 12px)" }),

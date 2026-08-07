@@ -50,13 +50,11 @@ export const usePanelsGroupScrollFollow = ({
         scroller.getBoundingClientRect().top;
       let shift = Math.max(0, TOP_M - canvasTop);
       shift = Math.min(shift, Math.max(0, canvas.offsetHeight - MIN_VISIBLE));
-      // Верх группы в координатах видимой области: от него отсчитываем
-      // доступную высоту, чтобы низ раскрытой панели не уезжал под экран.
-      const groupViewportTop = canvasTop + shift;
-      const availH = Math.max(
-        200,
-        scroller.clientHeight - groupViewportTop - BOT_M,
-      );
+      // Высоту отсчитываем от ЗАКРЕПЛЁННОЙ позиции группы (TOP_M), а не от её
+      // текущей (canvasTop + shift). Текущая зависит от прокрутки, поэтому
+      // панель росла при скролле вниз и сжималась при скролле вверх. Теперь
+      // высота зависит только от размеров окна и липкой шапки.
+      const availH = Math.max(200, scroller.clientHeight - TOP_M - BOT_M);
       group.style.setProperty("--icc-panel-max-h", `${availH}px`);
       group.style.transform = shift > 0 ? `translateY(${shift}px)` : "";
     };
@@ -115,11 +113,9 @@ export const useNavPaneScrollFollow = ({
         scroller.getBoundingClientRect().top;
       let shift = Math.max(0, TOP_M - canvasTop);
       shift = Math.min(shift, Math.max(0, canvas.offsetHeight - MIN_VISIBLE));
-      const paneViewportTop = canvasTop + shift;
-      const availH = Math.max(
-        240,
-        scroller.clientHeight - paneViewportTop - BOT_M,
-      );
+      // Как и у группы панелей выше — от закреплённой позиции, иначе высота
+      // области навигации гуляет вместе с прокруткой.
+      const availH = Math.max(240, scroller.clientHeight - TOP_M - BOT_M);
       // Отдаём панели всю доступную высоту — распределить её между шапкой,
       // поиском, вкладками и прокручиваемым списком она умеет сама (flex).
       wrap.style.setProperty("--icc-nav-max-h", `${availH}px`);

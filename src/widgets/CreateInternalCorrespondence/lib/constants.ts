@@ -278,3 +278,17 @@ export const SPACER_ATTR = "data-page-spacer"; // невидимая распо�
 export const AUTOSPLIT_ATTR = "data-page-split"; // части одного блока, разрезанного по высоте
 export const PAGE_BREAK_ATTR = "data-page-break"; // ручной разрыв страницы (кнопка «Новая страница»)
 export const STAMP_ATTR = "data-signature-stamp"; // печать ЭЦП (вне потока, не трогаем)
+
+// ===== Боковые панели разделов =====
+// Вертикальные отступы «цилиндров» от верха холста. Раскрытая панель встаёт
+// напротив своего цилиндра, поэтому значения общие для вкладки и для панели.
+export const PANEL_TAB_TOP = {
+  first: 10,
+  second: 190,
+  third: 370,
+} as const;
+
+// Когда разделы вынесены в тулбар («Панель разделов сверху»), цилиндров нет и
+// привязываться не к чему: все панели открываются от одной базовой точки —
+// верха холста, по линии линейки.
+export const PANEL_DRAWER_TOP_IN_TOOLBAR = PANEL_TAB_TOP.first;

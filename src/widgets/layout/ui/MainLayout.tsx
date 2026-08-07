@@ -23,6 +23,25 @@ export const MainLayout = () => {
   const { currentTheme, setCurrentTheme, currentBg, setCurrentBg, isDarkMode } =
     useDesignSettings();
 
+  // Раздел «Чат» — полноэкранный: навигация остаётся на месте, а сам чат
+  // разворачивается край в край, гася отступы рабочей области. Отступ под нижним
+  // меню не гасим, иначе чат уйдёт под него.
+  const isChatModule =
+    pathname === AppRoutes.CHAT || pathname.startsWith(`${AppRoutes.CHAT}/`);
+
+  // Эффект обязан стоять до раннего return по shouldHideUI: этот флаг зависит от
+  // pathname и переключается на уже смонтированном layout, а хук после return
+  // менял бы их количество между рендерами.
+  useEffect(() => {
+    if (isChatModule) {
+      const origOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = origOverflow;
+      };
+    }
+  }, [isChatModule]);
+
   const activeTheme = THEMES[currentTheme] || THEMES.emerald;
   const activeBg = BACKGROUNDS[currentBg] || BACKGROUNDS.arctic;
   const themeGradient = activeTheme.gradient;
@@ -52,22 +71,6 @@ export const MainLayout = () => {
   const showSidebarLeft = effectiveLayout === "left";
   const showSidebarRight = effectiveLayout === "right";
   const showBottomNav = effectiveLayout === "bottom";
-
-  // Раздел «Чат» — полноэкранный: навигация остаётся на месте, а сам чат
-  // разворачивается край в край, гася отступы рабочей области. Отступ под нижним
-  // меню не гасим, иначе чат уйдёт под него.
-  const isChatModule =
-    pathname === AppRoutes.CHAT || pathname.startsWith(`${AppRoutes.CHAT}/`);
-
-  useEffect(() => {
-    if (isChatModule) {
-      const origOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = origOverflow;
-      };
-    }
-  }, [isChatModule]);
 
   const chatShellClass = isChatModule
     ? "w-full flex-1 min-h-0 overflow-hidden"
