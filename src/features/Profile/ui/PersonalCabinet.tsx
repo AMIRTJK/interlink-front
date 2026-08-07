@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -14,22 +14,44 @@ import { Loader } from "@shared/ui";
 
 import { ProfileInfoTab } from "./tabs/ProfileInfoTab";
 
+const importAnalyticsTab = () => import("./tabs/AnalyticsTab");
+const importFilesTab = () => import("./tabs/FilesTab");
+const importCalendar = () => import("@widgets/Calendar");
+const importPersonalTasksRegistry = () => import("@widgets/PersonalTasksRegistry");
+
 const AnalyticsTab = lazy(() =>
-  import("./tabs/AnalyticsTab").then((m) => ({ default: m.AnalyticsTab }))
+  importAnalyticsTab().then((m) => ({ default: m.AnalyticsTab }))
 );
 const FilesTab = lazy(() =>
-  import("./tabs/FilesTab").then((m) => ({ default: m.FilesTab }))
+  importFilesTab().then((m) => ({ default: m.FilesTab }))
 );
 const Calendar = lazy(() =>
-  import("@widgets/Calendar").then((m) => ({ default: m.Calendar }))
+  importCalendar().then((m) => ({ default: m.Calendar }))
 );
 const PersonalTasksRegistry = lazy(() =>
-  import("@widgets/PersonalTasksRegistry").then((m) => ({
+  importPersonalTasksRegistry().then((m) => ({
     default: m.PersonalTasksRegistry,
   }))
 );
 
 type TabKey = "profile" | "tasks" | "calendar" | "analytics" | "files";
+
+/**
+ * Прогрев чанка вкладки до перехода: к моменту переключения модуль уже в кэше
+ * загрузчика, поэтому Suspense чаще всего вообще не срабатывает.
+ */
+const TAB_PRELOADERS: Partial<Record<TabKey, () => Promise<unknown>>> = {
+  tasks: importPersonalTasksRegistry,
+  calendar: importCalendar,
+  analytics: importAnalyticsTab,
+  files: importFilesTab,
+};
+
+const TAB_FALLBACK = (
+  <div className="flex justify-center items-center min-h-[350px]">
+    <Loader />
+  </div>
+);
 
 interface ITab {
   key: TabKey;
@@ -73,7 +95,12 @@ export const PersonalCabinet = ({
 
   const activeTab = getTabFromPath(location.pathname);
 
+  const preloadTab = useCallback((key: TabKey) => {
+    TAB_PRELOADERS[key]?.().catch(() => undefined);
+  }, []);
+
   const handleTabChange = (key: TabKey) => {
+    preloadTab(key);
     if (key === "profile") {
       navigate("/profile");
     } else {
@@ -113,6 +140,8 @@ export const PersonalCabinet = ({
             <button
               key={tab.key}
               onClick={() => handleTabChange(tab.key)}
+              onPointerEnter={() => preloadTab(tab.key)}
+              onFocus={() => preloadTab(tab.key)}
               className={`relative flex items-center gap-2 px-5 py-2.5 rounded-[2.5rem] text-sm font-semibold transition-all ${
                 activeTab === tab.key
                   ? "text-white"
@@ -135,25 +164,19 @@ export const PersonalCabinet = ({
         </div>
       </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.2 }}
-        >
-          <Suspense
-            fallback={
-              <div className="flex justify-center items-center min-h-[350px]">
-                <Loader />
-              </div>
-            }
+      <Suspense fallback={TAB_FALLBACK}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
           >
             {renderTabContent()}
-          </Suspense>
-        </motion.div>
-      </AnimatePresence>
+          </motion.div>
+        </AnimatePresence>
+      </Suspense>
     </div>
   );
 };
