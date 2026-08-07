@@ -1,8 +1,6 @@
 import { motion } from "framer-motion";
 import {
-  Languages,
   Edit3,
-  Plus,
   UserPlus,
   Maximize2,
   Minimize2,
@@ -19,9 +17,9 @@ import { LayoutSwitcher } from "./LayoutSwitcher";
 
 interface IProps {
   isDark: boolean;
-  lang: Lang;
-  langLabels: Record<Lang, string>;
-  onCycleLang: () => void;
+  lang?: Lang;
+  langLabels?: Record<Lang, string>;
+  onCycleLang?: () => void;
   layout: LayoutPosition;
   onLayoutChange: (layout: LayoutPosition) => void;
   /** Непрочитанные сообщения по всем беседам (GET /chat/counters). */
@@ -35,9 +33,6 @@ interface IProps {
 
 export const ChatHeader = ({
   isDark,
-  lang,
-  langLabels,
-  onCycleLang,
   layout,
   onLayoutChange,
   totalUnread,
@@ -98,19 +93,7 @@ export const ChatHeader = ({
           onChange={onLayoutChange}
           isDark={isDark}
         />
-        <div className="w-px h-5 bg-white/15" />
-        <button
-          onClick={onCycleLang}
-          aria-label="Сменить язык интерфейса чата"
-          className="h-8 px-3 rounded-full text-white flex items-center gap-1.5 transition-all duration-200 ease-in-out hover:bg-white/20 hover:scale-105 text-xs font-bold"
-          style={{
-            background: "rgba(255,255,255,0.1)",
-            border: "1px solid rgba(255,255,255,0.15)",
-          }}
-        >
-          <Languages className="w-4.5 h-4.5" />
-          <span>{langLabels[lang]}</span>
-        </button>
+
         <Can permission={CHAT_PERMISSIONS.CREATE}>
           <button
             onClick={onComposeOpen}
@@ -122,14 +105,6 @@ export const ChatHeader = ({
             }}
           >
             <Edit3 className="w-4.5 h-4.5" />
-          </button>
-          <button
-            onClick={onComposeOpen}
-            aria-label="Начать переписку"
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:bg-white/18 hover:scale-110"
-            style={{ background: "rgba(255,255,255,0.08)" }}
-          >
-            <Plus className="w-4.5 h-4.5" strokeWidth={2.5} />
           </button>
         </Can>
         <Can permission={CHAT_PERMISSIONS.GROUP_MANAGE}>

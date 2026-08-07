@@ -80,23 +80,26 @@ export const ChatSubHeader = ({
         <Search className="w-4.5 h-4.5" />
       </button>
       <button
-        onClick={onSimulateIncomingCall}
+        disabled
         aria-label={t.simulateCall}
-        className={`w-9 h-9 rounded-full flex items-center justify-center text-amber-500 transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "hover:bg-amber-500/15" : "hover:bg-amber-50"}`}
+        title="Звонки временно недоступны"
+        className={`w-9 h-9 rounded-full flex items-center justify-center opacity-40 cursor-not-allowed ${isDark ? "text-white/40" : "text-gray-400"}`}
       >
         <Phone className="w-4.5 h-4.5" />
       </button>
       <button
-        onClick={() => onStartCall("video")}
+        disabled
         aria-label={t.videoCall}
-        className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "text-white/50 hover:bg-white/10" : "text-gray-500 hover:bg-black/6"}`}
+        title="Видеозвонки временно недоступны"
+        className={`w-9 h-9 rounded-full flex items-center justify-center opacity-40 cursor-not-allowed ${isDark ? "text-white/40" : "text-gray-400"}`}
       >
         <Video className="w-4.5 h-4.5" />
       </button>
       <button
-        onClick={() => onStartCall("audio")}
+        disabled
         aria-label={t.audioCall}
-        className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "text-white/50 hover:bg-white/10" : "text-gray-500 hover:bg-black/6"}`}
+        title="Аудиозвонки временно недоступны"
+        className={`w-9 h-9 rounded-full flex items-center justify-center opacity-40 cursor-not-allowed ${isDark ? "text-white/40" : "text-gray-400"}`}
       >
         <Phone className="w-4.5 h-4.5" />
       </button>

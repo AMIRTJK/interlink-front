@@ -163,36 +163,41 @@ export const ContactInfoDrawer: React.FC<ContactInfoDrawerProps> = ({
               )}
 
               <div className="flex gap-3 mt-4">
-                {quickActions.map((action) => (
-                  <button
-                    key={action.label}
-                    onClick={action.onClick}
-                    aria-label={action.label}
-                    aria-pressed={action.isActive}
-                    className="flex flex-col items-center gap-1 group"
-                  >
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out group-hover:scale-110 ${action.isActive ? "text-white" : isDark ? "text-violet-300 group-hover:text-white" : "text-violet-600 group-hover:text-violet-850"}`}
-                      style={{
-                        background: action.isActive
-                          ? "linear-gradient(135deg,#7c3aed,#06b6d4)"
-                          : isDark
-                            ? "rgba(124,58,237,0.2)"
-                            : "rgba(124,58,237,0.08)",
-                        border: isDark
-                          ? "1px solid rgba(167,139,250,0.25)"
-                          : "1px solid rgba(124,58,237,0.2)",
-                      }}
+                {quickActions.map((action) => {
+                  const isDisabled = !action.onClick;
+                  return (
+                    <button
+                      key={action.label}
+                      disabled={isDisabled}
+                      onClick={action.onClick}
+                      aria-label={action.label}
+                      aria-pressed={action.isActive}
+                      title={isDisabled ? "Звонки временно недоступны" : undefined}
+                      className={`flex flex-col items-center gap-1 group ${isDisabled ? "opacity-40 cursor-not-allowed" : ""}`}
                     >
-                      {action.icon}
-                    </div>
-                    <span
-                      className={`text-[10px] ${isDark ? "text-white/40" : "text-gray-400"}`}
-                    >
-                      {action.label}
-                    </span>
-                  </button>
-                ))}
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out ${isDisabled ? "" : "group-hover:scale-110"} ${action.isActive ? "text-white" : isDark ? "text-violet-300 group-hover:text-white" : "text-violet-600 group-hover:text-violet-850"}`}
+                        style={{
+                          background: action.isActive
+                            ? "linear-gradient(135deg,#7c3aed,#06b6d4)"
+                            : isDark
+                              ? "rgba(124,58,237,0.2)"
+                              : "rgba(124,58,237,0.08)",
+                          border: isDark
+                            ? "1px solid rgba(167,139,250,0.25)"
+                            : "1px solid rgba(124,58,237,0.2)",
+                        }}
+                      >
+                        {action.icon}
+                      </div>
+                      <span
+                        className={`text-[10px] ${isDark ? "text-white/40" : "text-gray-400"}`}
+                      >
+                        {action.label}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
