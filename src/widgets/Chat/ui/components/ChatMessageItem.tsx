@@ -61,6 +61,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
   setMessageRef,
 }) => {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [actionMenuRect, setActionMenuRect] = useState<DOMRect | null>(null);
   const isEffectivelyDeleted = msg.deleted || msg.deletedForMe;
 
   const isTargetHighlighted =
@@ -254,16 +255,18 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                 )}
               </AnimatePresence>
               <AnimatePresence>
-                {hoveredMessageId === msg.id && !isEffectivelyDeleted && (
+                {(hoveredMessageId === msg.id || activeActionMsgId === msg.id) && !isEffectivelyDeleted && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-9" : "-right-9"} flex items-center z-20`}
+                    className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-9" : "-right-9"} flex items-center z-30`}
                   >
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setActionMenuRect(rect);
                         setActiveActionMsgId((prev) =>
                           prev === msg.id ? null : msg.id,
                         );
@@ -281,59 +284,58 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                     >
                       <MoreHorizontal className="w-3.5 h-3.5" />
                     </button>
+                    {activeActionMsgId === msg.id && (
+                      <MessageActionMenu
+                        buttonRect={actionMenuRect}
+                        isMe={isMe}
+                        isDark={isDark}
+                        onReactionClick={() => {
+                          setShowReactionPicker(true);
+                          setActiveActionMsgId(null);
+                        }}
+                        onReply={() => {
+                          setReplyingTo({
+                            id: msg.id,
+                            senderName:
+                              msg.senderName || (isMe ? t.you : activeContact.name),
+                            text: msg.text,
+                          });
+                          setActiveActionMsgId(null);
+                        }}
+                        onForward={() => {
+                          setForwardingMsg(msg);
+                          setActiveActionMsgId(null);
+                        }}
+                        onDelete={() => {
+                          setDeletingMsgId(msg.id);
+                          setActiveActionMsgId(null);
+                        }}
+                        onThread={() => {
+                          setOpenThreadMsgId(msg.id);
+                          setShowContactDrawer(false);
+                          setActiveActionMsgId(null);
+                        }}
+                        onPin={() => {
+                          handlePinMessage(msg.id);
+                          setActiveActionMsgId(null);
+                        }}
+                        pinLabel={
+                          msg.pinned
+                            ? lang === "ru"
+                              ? "Открепить"
+                              : lang === "tg"
+                                ? "Ҷудо кардан"
+                                : "Unpin"
+                            : lang === "ru"
+                              ? "Закрепить"
+                              : lang === "tg"
+                                ? "Маҳкам кардан"
+                                : "Pin"
+                        }
+                        onClose={() => setActiveActionMsgId(null)}
+                      />
+                    )}
                   </motion.div>
-                )}
-              </AnimatePresence>
-              <AnimatePresence>
-                {activeActionMsgId === msg.id && (
-                  <MessageActionMenu
-                    isMe={isMe}
-                    isDark={isDark}
-                    onReactionClick={() => {
-                      setShowReactionPicker(true);
-                      setActiveActionMsgId(null);
-                    }}
-                    onReply={() => {
-                      setReplyingTo({
-                        id: msg.id,
-                        senderName:
-                          msg.senderName || (isMe ? t.you : activeContact.name),
-                        text: msg.text,
-                      });
-                      setActiveActionMsgId(null);
-                    }}
-                    onForward={() => {
-                      setForwardingMsg(msg);
-                      setActiveActionMsgId(null);
-                    }}
-                    onDelete={() => {
-                      setDeletingMsgId(msg.id);
-                      setActiveActionMsgId(null);
-                    }}
-                    onThread={() => {
-                      setOpenThreadMsgId(msg.id);
-                      setShowContactDrawer(false);
-                      setActiveActionMsgId(null);
-                    }}
-                    onPin={() => {
-                      handlePinMessage(msg.id);
-                      setActiveActionMsgId(null);
-                    }}
-                    pinLabel={
-                      msg.pinned
-                        ? lang === "ru"
-                          ? "Открепить"
-                          : lang === "tg"
-                            ? "Ҷудо кардан"
-                            : "Unpin"
-                        : lang === "ru"
-                          ? "Закрепить"
-                          : lang === "tg"
-                            ? "Маҳкам кардан"
-                            : "Pin"
-                    }
-                    onClose={() => setActiveActionMsgId(null)}
-                  />
                 )}
               </AnimatePresence>
               <div
