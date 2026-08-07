@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock3, CornerUpLeft, Forward, MoreHorizontal, Pin, MessageSquare } from "lucide-react";
+import { Clock3, CornerUpLeft, Forward, MoreHorizontal, Pin, MessageSquare, Smile } from "lucide-react";
 import { Contact, Message, ReplyPreview } from "../../model";
 import { Lang, Translations } from "../../lib/translations";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
@@ -60,6 +60,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
   formatRepliesCount,
   setMessageRef,
 }) => {
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
   const isEffectivelyDeleted = msg.deleted || msg.deletedForMe;
 
   const isTargetHighlighted =
@@ -200,10 +201,14 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               onMouseLeave={() => setHoveredMessageId(null)}
             >
               <AnimatePresence>
-                {hoveredMessageId === msg.id && !isEffectivelyDeleted && (
+                {showReactionPicker && !isEffectivelyDeleted && (
                   <ReactionPicker
                     isMe={isMe}
-                    onSelect={(emoji) => handleReaction(msg.id, emoji)}
+                    onSelect={(emoji) => {
+                      handleReaction(msg.id, emoji);
+                      setShowReactionPicker(false);
+                    }}
+                    onClose={() => setShowReactionPicker(false)}
                     isDark={isDark}
                   />
                 )}
@@ -214,11 +219,27 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    // Панель реакций занимает полосу над пузырём и шире его,
-                    // поэтому кнопку меню держим сбоку по центру строки —
-                    // иначе они перекрываются и «⋮» перестаёт нажиматься.
-                    className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-9" : "-right-9"} flex items-center z-20`}
+                    className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-16" : "-right-16"} flex items-center gap-1 z-20`}
                   >
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowReactionPicker((prev) => !prev);
+                      }}
+                      aria-label="Смайлики"
+                      title="Смайлики"
+                      className={`w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "text-white/60 hover:bg-white/20" : "text-gray-500 hover:bg-black/8"}`}
+                      style={{
+                        background: isDark
+                          ? "rgba(255,255,255,0.1)"
+                          : "rgba(0,0,0,0.05)",
+                        border: isDark
+                          ? "1px solid rgba(255,255,255,0.15)"
+                          : "1px solid rgba(0,0,0,0.08)",
+                      }}
+                    >
+                      <Smile className="w-3.5 h-3.5" />
+                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -226,6 +247,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                           prev === msg.id ? null : msg.id,
                         );
                       }}
+                      aria-label="Действия"
                       className={`w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "text-white/60 hover:bg-white/20" : "text-gray-500 hover:bg-black/8"}`}
                       style={{
                         background: isDark
@@ -246,6 +268,10 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                   <MessageActionMenu
                     isMe={isMe}
                     isDark={isDark}
+                    onReactionClick={() => {
+                      setShowReactionPicker(true);
+                      setActiveActionMsgId(null);
+                    }}
                     onReply={() => {
                       setReplyingTo({
                         id: msg.id,

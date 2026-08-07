@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Search, Phone, Video, UserCog, MoreVertical } from "lucide-react";
+import { Search, Phone, Video, UserCog } from "lucide-react";
 import type { Contact } from "../../model";
 import { Translations } from "../../lib/translations";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
@@ -115,20 +115,7 @@ export const ChatSubHeader = ({
       >
         <UserCog className="w-4.5 h-4.5" />
       </button>
-      <div className={`w-px h-5 mx-1 ${isDark ? "bg-white/15" : "bg-black/10"}`} />
-      <button
-        onClick={onToggleDrawer}
-        aria-label={t.contactInfo}
-        className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:scale-110 hover:brightness-110"
-        style={{
-          background: "linear-gradient(135deg,#7c3aed,#06b6d4)",
-          boxShadow: isDark
-            ? "0 0 16px rgba(124,58,237,0.5)"
-            : "0 0 12px rgba(124,58,237,0.35)",
-        }}
-      >
-        <MoreVertical className="w-4.5 h-4.5" />
-      </button>
+
     </div>
   </div>
 );

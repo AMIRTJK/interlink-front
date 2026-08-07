@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { CornerUpLeft, Forward, MessageSquare, Pin, Trash2 } from "lucide-react";
+import { CornerUpLeft, Forward, MessageSquare, Pin, Trash2, Smile } from "lucide-react";
 
 interface MessageActionMenuProps {
   isMe: boolean;
@@ -9,6 +9,7 @@ interface MessageActionMenuProps {
   onDelete: () => void;
   onThread: () => void;
   onPin: () => void;
+  onReactionClick?: () => void;
   pinLabel: string;
   onClose: () => void;
   isDark: boolean;
@@ -21,6 +22,7 @@ export const MessageActionMenu: React.FC<MessageActionMenuProps> = ({
   onDelete,
   onThread,
   onPin,
+  onReactionClick,
   pinLabel,
   onClose,
   isDark,
@@ -36,6 +38,21 @@ export const MessageActionMenu: React.FC<MessageActionMenuProps> = ({
   }, [onClose]);
 
   const actions = [
+    ...(onReactionClick
+      ? [
+          {
+            icon: (
+              <Smile
+                className={`w-3.5 h-3.5 transition-colors duration-200 ${isDark ? "text-amber-400 group-hover:text-amber-300" : "text-amber-500 group-hover:text-amber-600"}`}
+                strokeWidth={1.8}
+              />
+            ),
+            label: "Reaction",
+            fn: onReactionClick,
+            danger: false,
+          },
+        ]
+      : []),
     {
       icon: (
         <CornerUpLeft
