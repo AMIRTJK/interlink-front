@@ -59,6 +59,18 @@ export const formatTime = (iso?: string | null) =>
       })
     : "";
 
+export const formatDateTime = (iso?: string | null) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  const dateStr = d.toLocaleDateString("ru-RU");
+  const timeStr = d.toLocaleTimeString("ru-RU", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${dateStr} ${timeStr}`;
+};
+
 export const getEventMeta = (event: ITimelineEvent) => {
   const type = event.type;
   const action = event.action;
