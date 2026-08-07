@@ -3,6 +3,9 @@ import { motion } from "framer-motion";
 import { MessageSquare, X, Send, Loader2 } from "lucide-react";
 import { If } from "@shared/ui";
 import { Contact, Message } from "../../model";
+import { useAutoResizeTextarea } from "../../lib/useAutoResizeTextarea";
+
+const THREAD_INPUT_MAX_ROWS = 4;
 
 interface ThreadPanelProps {
   parentMsg: Message;
@@ -32,6 +35,16 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
 }) => {
   const [threadInput, setThreadInput] = useState("");
   const threadScrollRef = useRef<HTMLDivElement>(null);
+  const threadInputRef = useAutoResizeTextarea(
+    threadInput,
+    THREAD_INPUT_MAX_ROWS,
+  );
+
+  const handleSendThread = () => {
+    if (!threadInput.trim()) return;
+    onSendThread(parentMsg.id, threadInput.trim());
+    setThreadInput("");
+  };
 
   useEffect(() => {
     if (threadScrollRef.current)
@@ -114,7 +127,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
                 />
               )}
               <div
-                className={`px-3 py-2 text-xs rounded-2xl max-w-[80%] transition-all duration-200 ease-in-out hover:brightness-110 ${isTMe ? "rounded-br-md text-white" : `rounded-bl-md ${isDark ? "text-white/80" : "text-gray-800"}`}`}
+                className={`px-3 py-2 text-xs rounded-2xl max-w-[80%] whitespace-pre-wrap break-words transition-all duration-200 ease-in-out hover:brightness-110 ${isTMe ? "rounded-br-md text-white" : `rounded-bl-md ${isDark ? "text-white/80" : "text-gray-800"}`}`}
                 style={{
                   background: isTMe
                     ? "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))"
@@ -149,28 +162,25 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
         className={`px-4 py-3 border-t flex-shrink-0 ${isDark ? "border-white/10" : "border-black/5"}`}
       >
         <div
-          className={`flex items-center gap-2 px-3 py-2 ${isDark ? "rounded-xl bg-white/10 border border-white/15" : "rounded-full bg-black/5 border border-black/5"}`}
+          className={`flex items-end gap-2 px-3 py-2 rounded-xl ${isDark ? "bg-white/10 border border-white/15" : "bg-black/5 border border-black/5"}`}
         >
-          <input
-            type="text"
+          <textarea
+            ref={threadInputRef}
+            rows={1}
             placeholder={replyPlaceholder}
             value={threadInput}
             onChange={(e) => setThreadInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && threadInput.trim()) {
-                onSendThread(parentMsg.id, threadInput.trim());
-                setThreadInput("");
+              // Enter отправляет, Shift+Enter переносит строку.
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSendThread();
               }
             }}
-            className={`flex-1 bg-transparent outline-none text-xs ${isDark ? "placeholder-white/30 text-white" : "placeholder-gray-400 text-gray-800"}`}
+            className={`flex-1 bg-transparent outline-none text-xs resize-none leading-relaxed py-1 ${isDark ? "placeholder-white/30 text-white" : "placeholder-gray-400 text-gray-800"}`}
           />
           <button
-            onClick={() => {
-              if (threadInput.trim()) {
-                onSendThread(parentMsg.id, threadInput.trim());
-                setThreadInput("");
-              }
-            }}
+            onClick={handleSendThread}
             disabled={!threadInput.trim()}
             className="w-7 h-7 rounded-full disabled:opacity-40 flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:scale-110"
             style={{

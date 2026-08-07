@@ -339,7 +339,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                 )}
               </AnimatePresence>
               <div
-                className={`px-4 py-2.5 text-sm leading-relaxed transition-all duration-300 ease-in-out cursor-default ${
+                className={`px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 ease-in-out cursor-default ${
                   isTargetHighlighted
                     ? "rounded-2xl ring-2 ring-violet-500 scale-[1.02] shadow-[0_0_24px_rgba(168,85,247,0.85)] animate-pulse"
                     : isEffectivelyDeleted
