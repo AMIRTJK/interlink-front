@@ -4,6 +4,7 @@ import { Plus, Search } from "lucide-react";
 import { If } from "@shared/ui";
 import { Contact, LayoutPosition, CHAT_LIST_PANEL_WIDTH } from "../../model";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
+import "../../style.css";
 
 interface ChatListPanelProps {
   layout: LayoutPosition;
@@ -95,51 +96,29 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                 key={contact.id}
                 onClick={() => onContactSwitch(contact.id)}
                 aria-label={contact.name}
-                className={`relative flex-shrink-0 flex flex-col items-center gap-1 px-1 py-1 rounded-xl transition-all duration-200 ease-in-out group ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
+                className={`chat-avatar-button relative flex-shrink-0 flex flex-col items-center gap-1 px-1 py-1 rounded-xl transition-all duration-200 ease-in-out ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
               >
-                <div
-                  className={`relative rounded-full transition-all duration-200 ${isActive ? "scale-110" : "group-hover:scale-105"}`}
-                  style={
-                    isActive
-                      ? {
-                          filter: "drop-shadow(0 0 8px rgba(167,139,250,0.8))",
-                        }
-                      : {}
-                  }
+                <span
+                  className={`chat-avatar${isActive ? " chat-avatar--active" : ""}`}
                 >
-                  {isActive && (
-                    <div
-                      className="absolute inset-0 rounded-full"
-                      style={{
-                        margin: "-3px",
-                        background:
-                          "linear-gradient(135deg,#a78bfa,#f0abfc,#67e8f9)",
-                        borderRadius: "50%",
-                        padding: "2px",
-                      }}
-                    />
-                  )}
+                  {/* Контур и ореол — оформление: скрыты от скринридера. */}
+                  <span aria-hidden="true" className="chat-avatar__ring" />
+                  <span aria-hidden="true" className="chat-avatar__halo" />
                   <img
                     src={contact.avatar}
                     alt={contact.name}
+                    width={40}
+                    height={40}
+                    loading="lazy"
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).src =
                         buildInitialsAvatar(contact.name);
                     }}
-                    className="w-10 h-10 rounded-full object-cover"
-                    style={
-                      isActive
-                        ? {
-                            position: "relative",
-                            zIndex: 1,
-                            margin: "2px",
-                          }
-                        : {}
-                    }
+                    className="chat-avatar__img"
                   />
                   {contact.online && (
                     <span
-                      className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-transparent rounded-full"
+                      className="absolute bottom-0 right-0 z-20 w-2.5 h-2.5 bg-green-400 border-2 border-transparent rounded-full"
                       style={{
                         boxShadow: "0 0 6px rgba(74,222,128,0.8)",
                       }}
@@ -147,7 +126,7 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                   )}
                   {unread > 0 && (
                     <span
-                      className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full text-white text-[9px] font-bold flex items-center justify-center px-0.5 shadow-md"
+                      className="absolute -top-1 -right-1 z-20 min-w-[18px] h-[18px] rounded-full text-white text-[9px] font-bold flex items-center justify-center px-0.5 shadow-md"
                       style={{
                         background: "linear-gradient(135deg,#ef4444,#f97316)",
                       }}
@@ -155,7 +134,7 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                       {unread > 9 ? "9+" : unread}
                     </span>
                   )}
-                </div>
+                </span>
               </button>
             );
           })}
