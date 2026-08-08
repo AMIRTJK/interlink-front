@@ -233,6 +233,8 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           <AnimatePresence>
             {showReactionPicker && !isEffectivelyDeleted && (
               <ReactionPicker
+                msgId={msg.id}
+                buttonRect={actionMenuRect}
                 isMe={isMe}
                 onSelect={(emoji) => {
                   handleReaction(msg.id, emoji);
