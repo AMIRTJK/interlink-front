@@ -199,9 +199,8 @@ export const ChatApp: React.FC<IProps> = ({
   const mainAreaFlexDir = isHorizontalLayout ? "flex-col" : "flex-row";
   const chatListFirst = layout === "left" || layout === "top";
 
-  // Во всплывающем окне панель бесед шире: в её блоке управления есть ещё
-  // «развернуть» и «закрыть», и кнопки обычного размера должны уместиться в один
-  // ряд. В модуле «Чат» этих кнопок нет — там ширина прежняя.
+  // Во всплывающем окне блок управления шире на две кнопки («развернуть» и
+  // «закрыть»), поэтому и панель бесед там шире — иначе ряд не влезает в одну строку.
   const listPanelWidth = isPage
     ? CHAT_LIST_PANEL_WIDTH
     : CHAT_LIST_PANEL_WIDTH_OVERLAY;
