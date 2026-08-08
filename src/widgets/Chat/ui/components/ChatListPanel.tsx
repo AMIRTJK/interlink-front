@@ -1,8 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Plus, Edit3, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { If } from "@shared/ui";
-import { Contact, LayoutPosition } from "../../model";
+import { Contact, LayoutPosition, CHAT_LIST_PANEL_WIDTH } from "../../model";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
 
 interface ChatListPanelProps {
@@ -18,6 +18,8 @@ interface ChatListPanelProps {
   onComposeOpen: () => void;
   onSearchChange: (v: string) => void;
   isDark: boolean;
+  /** Ширина в вертикальных макетах, px. По умолчанию — CHAT_LIST_PANEL_WIDTH. */
+  width?: number;
 }
 
 export const ChatListPanel: React.FC<ChatListPanelProps> = ({
@@ -33,6 +35,7 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
   onComposeOpen,
   onSearchChange,
   isDark,
+  width = CHAT_LIST_PANEL_WIDTH,
 }) => {
   const isHorizontal = layout === "top" || layout === "bottom";
 
@@ -179,7 +182,7 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
       }}
       className="flex-shrink-0 flex flex-col overflow-hidden"
       style={{
-        width: "280px",
+        width,
         background: isDark ? "rgba(15,5,40,0.6)" : "rgba(255,255,255,0.7)",
         borderRight:
           layout === "left"
@@ -205,15 +208,6 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
         >
           Chats
         </span>
-        <button
-          onClick={onComposeOpen}
-          className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "text-white/60 hover:bg-white/15 hover:text-white" : "text-gray-500 hover:bg-black/5 hover:text-gray-800"}`}
-          style={{
-            background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
-          }}
-        >
-          <Edit3 className="w-3.5 h-3.5" />
-        </button>
       </div>
       {/* Search */}
       <div className="px-3 py-2 flex-shrink-0">

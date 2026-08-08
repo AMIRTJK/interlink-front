@@ -4,7 +4,11 @@ import { Can, If } from "@shared/ui";
 import { type TChatVariant } from "../model";
 import { Lang } from "../lib/translations";
 import { useChatAppState } from "../lib/useChatAppState";
-import { CHAT_PERMISSIONS } from "../model/constants";
+import {
+  CHAT_PERMISSIONS,
+  CHAT_LIST_PANEL_WIDTH,
+  CHAT_LIST_PANEL_WIDTH_OVERLAY,
+} from "../model/constants";
 
 // Components
 import { ChatHeader } from "./components/ChatHeader";
@@ -195,6 +199,13 @@ export const ChatApp: React.FC<IProps> = ({
   const mainAreaFlexDir = isHorizontalLayout ? "flex-col" : "flex-row";
   const chatListFirst = layout === "left" || layout === "top";
 
+  // Во всплывающем окне панель бесед шире: в её блоке управления есть ещё
+  // «развернуть» и «закрыть», и кнопки обычного размера должны уместиться в один
+  // ряд. В модуле «Чат» этих кнопок нет — там ширина прежняя.
+  const listPanelWidth = isPage
+    ? CHAT_LIST_PANEL_WIDTH
+    : CHAT_LIST_PANEL_WIDTH_OVERLAY;
+
   const labels = useMemo(
     () => ({
       deleted: t.messageDeleted,
@@ -220,7 +231,46 @@ export const ChatApp: React.FC<IProps> = ({
       onComposeOpen={() => setShowComposeModal(true)}
       onSearchChange={setSearchQuery}
       isDark={isDark}
+      width={listPanelWidth}
     />
+  );
+
+  // Панель бесед и градиентный блок управления — один переезжающий узел: при смене
+  // макета они меняют место вместе, а блок кнопок всегда прилегает к внешнему краю
+  // панели (для макета «снизу» — под ней, поэтому колонка разворачивается).
+  const chatListGroup = (
+    <div
+      className={`flex flex-shrink-0 min-h-0 min-w-0 ${
+        layout === "bottom" ? "flex-col-reverse" : "flex-col"
+      } ${isHorizontalLayout ? "w-full" : ""}`}
+      // Ширину в вертикальных макетах задаёт панель бесед: иначе колонку растянул
+      // бы ряд кнопок по max-content и блок разъехался бы с панелью по краю.
+      style={isHorizontalLayout ? undefined : { width: listPanelWidth }}
+    >
+      <ChatHeader
+        isDark={isDark}
+        lang={lang}
+        langLabels={LANG_LABELS}
+        onCycleLang={cycleLang}
+        layout={layout}
+        onLayoutChange={setLayout}
+        totalUnread={totalUnread}
+        onComposeOpen={() => setShowComposeModal(true)}
+        onGroupOpen={() => setShowGroupModal(true)}
+        isExpanded={isExpanded}
+        onToggleExpand={onToggleExpand}
+        onRequestClose={onRequestClose}
+      />
+      {/* Направление обёртки задаёт, по какой оси панель растягивается: в макетах
+          сверху/снизу — на всю ширину, слева/справа — на всю оставшуюся высоту. */}
+      <div
+        className={`flex min-h-0 ${
+          isHorizontalLayout ? "flex-col w-full" : "flex-1"
+        }`}
+      >
+        {chatListPanel}
+      </div>
+    </div>
   );
 
   const chatWindow = (
@@ -436,26 +486,11 @@ export const ChatApp: React.FC<IProps> = ({
           boxShadow: isFullBleed ? "none" : cardShadow,
         }}
       >
-        <ChatHeader
-          isDark={isDark}
-          lang={lang}
-          langLabels={LANG_LABELS}
-          onCycleLang={cycleLang}
-          layout={layout}
-          onLayoutChange={setLayout}
-          totalUnread={totalUnread}
-          onComposeOpen={() => setShowComposeModal(true)}
-          onGroupOpen={() => setShowGroupModal(true)}
-          isExpanded={isExpanded}
-          onToggleExpand={onToggleExpand}
-          onRequestClose={onRequestClose}
-        />
-
         {/* Main content area with dynamic layout */}
         <div
           className={`flex flex-1 min-h-0 overflow-hidden ${mainAreaFlexDir}`}
         >
-          {chatListFirst && chatListPanel}
+          {chatListFirst && chatListGroup}
 
           <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
             {chatWindow}
@@ -517,7 +552,7 @@ export const ChatApp: React.FC<IProps> = ({
             </AnimatePresence>
           </div>
 
-          {!chatListFirst && chatListPanel}
+          {!chatListFirst && chatListGroup}
         </div>
       </div>
 
