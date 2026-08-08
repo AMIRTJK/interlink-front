@@ -87,6 +87,7 @@ export const ChatApp: React.FC<IProps> = ({
     isLoadingThread,
     hasOlder,
     isLoadingOlder,
+    loadOlder,
     typingNames,
     isSending,
     input,
@@ -292,6 +293,7 @@ export const ChatApp: React.FC<IProps> = ({
             isError={isMessagesError}
             hasOlder={hasOlder}
             isLoadingOlder={isLoadingOlder}
+            onLoadOlder={loadOlder}
             onScroll={handleMessagesScroll}
             scrollRef={scrollRef}
             typingNames={typingNames}

@@ -17,6 +17,7 @@ interface IProps {
   isError: boolean;
   hasOlder: boolean;
   isLoadingOlder: boolean;
+  onLoadOlder?: () => void;
   onScroll: () => void;
   scrollRef: React.RefObject<HTMLDivElement | null>;
   typingNames: string[];
@@ -61,6 +62,7 @@ export const MessageList = ({
   isError,
   hasOlder,
   isLoadingOlder,
+  onLoadOlder,
   onScroll,
   scrollRef,
   typingNames,
@@ -113,6 +115,7 @@ export const MessageList = ({
                 <button
                   type="button"
                   disabled={isLoadingOlder}
+                  onClick={onLoadOlder}
                   className={`text-xs px-3 py-1.5 rounded-full transition-all duration-150 border ${
                     isDark
                       ? "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
