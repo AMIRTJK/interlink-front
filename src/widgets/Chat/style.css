@@ -3,16 +3,52 @@
    контура, а не подложки. Анимируются только transform и opacity — на композитных
    свойствах, без layout- и paint-работы на каждый кадр. */
 
+/* Палитра по умолчанию — светлая тема. Акцент здесь должен быть ТЕМНЕЕ фона:
+   полоса аватарок светлая, и светлый акцент (как в тёмной теме) на ней теряется.
+   Поэтому взяты насыщенные violet-600 / fuchsia-800 / cyan-900 — они дают тот же
+   перепад к фону, что светлые оттенки в тёмной теме (замеры в отчёте к правке).
+   Свечение плотнее и с меньшим радиусом: на белом размытый ореол читается хуже. */
 .chat-avatar {
   --chat-avatar-ring-offset: 3px;
   --chat-avatar-ring-width: 2px;
-  --chat-avatar-accent: 167 139 250; /* violet-400 */
+  --chat-avatar-accent: 124 58 237; /* violet-600 */
+  --chat-avatar-arc-peak: 134 25 143; /* fuchsia-800 */
+  --chat-avatar-arc-tip: 22 78 99; /* cyan-900 */
+  --chat-avatar-ring-flat-alpha: 0.5;
+  --chat-avatar-halo-edge-alpha: 0.45;
+  --chat-avatar-halo-glow-alpha: 0.35;
+  --chat-avatar-halo-blur: 10px;
+  --chat-avatar-halo-spread: 1px;
+  --chat-avatar-ring-hover-opacity: 0.75;
+  --chat-avatar-halo-hover-opacity: 0.85;
+  --chat-avatar-halo-pulse-min: 0.6;
+  --chat-avatar-halo-pulse-max: 1;
+  /* Тонкая тёмная обводка отделяет аватарку от светлой полосы. */
+  --chat-avatar-img-edge: 0 0 0 1px rgb(15 23 42 / 0.08);
   position: relative;
   display: block;
   width: 40px;
   height: 40px;
   border-radius: 50%;
   transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Тёмная тема — палитра, которая уже сложилась: светлый акцент на тёмной полосе,
+   ореол шире и мягче. Значения не меняем, они здесь работают. */
+.chat-avatar--dark {
+  --chat-avatar-accent: 167 139 250; /* violet-400 */
+  --chat-avatar-arc-peak: 240 171 252; /* fuchsia-300 */
+  --chat-avatar-arc-tip: 103 232 249; /* cyan-300 */
+  --chat-avatar-ring-flat-alpha: 0.4;
+  --chat-avatar-halo-edge-alpha: 0.35;
+  --chat-avatar-halo-glow-alpha: 0.4;
+  --chat-avatar-halo-blur: 12px;
+  --chat-avatar-halo-spread: 2px;
+  --chat-avatar-ring-hover-opacity: 0.55;
+  --chat-avatar-halo-hover-opacity: 0.7;
+  --chat-avatar-halo-pulse-min: 0.5;
+  --chat-avatar-halo-pulse-max: 0.95;
+  --chat-avatar-img-edge: none;
 }
 
 .chat-avatar__img {
@@ -22,6 +58,7 @@
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
+  box-shadow: var(--chat-avatar-img-edge);
 }
 
 /* Кольцо и свечение живут снаружи аватарки, поэтому отрицательный inset. */
@@ -43,14 +80,14 @@
       from 0deg,
       rgb(var(--chat-avatar-accent) / 0) 0deg,
       rgb(var(--chat-avatar-accent) / 0) 150deg,
-      rgb(240 171 252 / 0.85) 260deg,
-      rgb(103 232 249 / 1) 310deg,
+      rgb(var(--chat-avatar-arc-peak) / 0.85) 260deg,
+      rgb(var(--chat-avatar-arc-tip) / 1) 310deg,
       rgb(var(--chat-avatar-accent) / 0.25) 350deg,
       rgb(var(--chat-avatar-accent) / 0) 360deg
     ),
     linear-gradient(
-      rgb(var(--chat-avatar-accent) / 0.4),
-      rgb(var(--chat-avatar-accent) / 0.4)
+      rgb(var(--chat-avatar-accent) / var(--chat-avatar-ring-flat-alpha)),
+      rgb(var(--chat-avatar-accent) / var(--chat-avatar-ring-flat-alpha))
     );
   -webkit-mask: radial-gradient(
     farthest-side,
@@ -69,8 +106,9 @@
 .chat-avatar__halo {
   opacity: 0;
   box-shadow:
-    0 0 0 1px rgb(var(--chat-avatar-accent) / 0.35),
-    0 0 12px 2px rgb(var(--chat-avatar-accent) / 0.4);
+    0 0 0 1px rgb(var(--chat-avatar-accent) / var(--chat-avatar-halo-edge-alpha)),
+    0 0 var(--chat-avatar-halo-blur) var(--chat-avatar-halo-spread)
+      rgb(var(--chat-avatar-accent) / var(--chat-avatar-halo-glow-alpha));
   transition: opacity 0.28s ease;
 }
 
@@ -87,14 +125,14 @@
 .chat-avatar-button:focus-visible
   .chat-avatar:not(.chat-avatar--active)
   .chat-avatar__ring {
-  opacity: 0.55;
+  opacity: var(--chat-avatar-ring-hover-opacity);
 }
 
 .chat-avatar-button:hover .chat-avatar:not(.chat-avatar--active) .chat-avatar__halo,
 .chat-avatar-button:focus-visible
   .chat-avatar:not(.chat-avatar--active)
   .chat-avatar__halo {
-  opacity: 0.7;
+  opacity: var(--chat-avatar-halo-hover-opacity);
 }
 
 /* ─── Активная беседа: бегущий по контуру свет + лёгкая пульсация ─────────── */
@@ -119,16 +157,17 @@
   }
 }
 
-/* Пульсация нарочно неглубокая: 6% масштаба и половина прозрачности. */
+/* Пульсация нарочно неглубокая: 6% масштаба и неполный размах прозрачности.
+   Границы размаха задаёт тема — на светлом фоне ореол не должен уходить в ничто. */
 @keyframes chat-avatar-breathe {
   0%,
   100% {
     transform: scale(1);
-    opacity: 0.5;
+    opacity: var(--chat-avatar-halo-pulse-min);
   }
   50% {
     transform: scale(1.06);
-    opacity: 0.95;
+    opacity: var(--chat-avatar-halo-pulse-max);
   }
 }
 
@@ -142,6 +181,6 @@
 
   /* Состояния остаются различимыми и без движения. */
   .chat-avatar--active .chat-avatar__halo {
-    opacity: 0.7;
+    opacity: var(--chat-avatar-halo-pulse-max);
   }
 }
