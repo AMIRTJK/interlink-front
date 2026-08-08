@@ -12,12 +12,18 @@ interface IProps {
   attachments: MessageAttachment[];
   isMe: boolean;
   isDark: boolean;
+  isTargetHighlighted?: boolean;
 }
 
 // Вложения сообщения. Файлы приватные: превью картинок разрешено в blob-URL,
 // просмотр полноразмерного фото в модалке по центру экрана через React Portal и скачивание с токеном.
 
-export const MessageAttachments = ({ attachments, isMe, isDark }: IProps) => {
+export const MessageAttachments = ({
+  attachments,
+  isMe,
+  isDark,
+  isTargetHighlighted,
+}: IProps) => {
   const [selectedImage, setSelectedImage] = useState<MessageAttachment | null>(
     null,
   );
@@ -68,6 +74,7 @@ export const MessageAttachments = ({ attachments, isMe, isDark }: IProps) => {
               mimeType={attachment.mimeType}
               isMe={isMe}
               isDark={isDark}
+              isTargetHighlighted={isTargetHighlighted}
             />
           );
         }
@@ -75,23 +82,35 @@ export const MessageAttachments = ({ attachments, isMe, isDark }: IProps) => {
         return (
           <div
             key={key}
-            className={`mb-1.5 rounded-2xl overflow-hidden transition-all duration-200 ease-in-out hover:brightness-105 ${isMe ? "rounded-br-md" : "rounded-bl-md"}`}
+            className={`mb-1.5 rounded-2xl overflow-hidden transition-all duration-200 ease-in-out hover:brightness-105 ${
+              isMe ? "rounded-br-md" : "rounded-bl-md"
+            } ${
+              isTargetHighlighted
+                ? "ring-2 ring-violet-500 scale-[1.02] shadow-[0_0_24px_rgba(168,85,247,0.85)] animate-pulse"
+                : ""
+            }`}
             style={{
-              background: isMe
-                ? "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))"
-                : isDark
-                  ? "rgba(255,255,255,0.1)"
-                  : "rgba(255,255,255,0.95)",
-              border: isMe
-                ? "1px solid rgba(196,181,253,0.5)"
-                : isDark
-                  ? "1px solid rgba(255,255,255,0.15)"
-                  : "1px solid rgba(124,58,237,0.2)",
-              boxShadow: isMe
-                ? "0 0 16px rgba(124, 58, 237, 0.5)"
-                : isDark
-                  ? "0 2px 10px rgba(0,0,0,0.2)"
-                  : "0 2px 10px rgba(124,58,237,0.08)",
+              background: isTargetHighlighted
+                ? "linear-gradient(135deg, rgb(236, 72, 153), rgb(168, 85, 247), rgb(59, 130, 246))"
+                : isMe
+                  ? "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))"
+                  : isDark
+                    ? "rgba(255,255,255,0.1)"
+                    : "rgba(255,255,255,0.95)",
+              border: isTargetHighlighted
+                ? "2px solid #ffffff"
+                : isMe
+                  ? "1px solid rgba(196,181,253,0.5)"
+                  : isDark
+                    ? "1px solid rgba(255,255,255,0.15)"
+                    : "1px solid rgba(124,58,237,0.2)",
+              boxShadow: isTargetHighlighted
+                ? "0 0 28px rgba(236, 72, 153, 0.9), 0 0 12px rgba(168, 85, 247, 0.8)"
+                : isMe
+                  ? "0 0 16px rgba(124, 58, 237, 0.5)"
+                  : isDark
+                    ? "0 2px 10px rgba(0,0,0,0.2)"
+                    : "0 2px 10px rgba(124,58,237,0.08)",
             }}
           >
             {attachment.type === "image" && attachment.preview ? (

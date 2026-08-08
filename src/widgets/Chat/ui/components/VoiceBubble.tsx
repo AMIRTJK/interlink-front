@@ -13,6 +13,7 @@ interface VoiceBubbleProps {
   mimeType?: string;
   isMe: boolean;
   isDark: boolean;
+  isTargetHighlighted?: boolean;
 }
 
 const BAR_COUNT = 20;
@@ -34,6 +35,7 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
   mimeType,
   isMe,
   isDark,
+  isTargetHighlighted,
 }) => {
   const [playing, setPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -166,19 +168,33 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
 
   return (
     <div
-      className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl min-w-[160px] transition-all duration-200 ease-in-out hover:brightness-110 ${isMe ? "rounded-br-md" : "rounded-bl-md"}`}
+      className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl min-w-[160px] transition-all duration-200 ease-in-out hover:brightness-110 ${
+        isMe ? "rounded-br-md" : "rounded-bl-md"
+      } ${
+        isTargetHighlighted
+          ? "ring-2 ring-violet-500 scale-[1.02] shadow-[0_0_24px_rgba(168,85,247,0.85)] animate-pulse"
+          : ""
+      }`}
       style={{
-        background: isMe
-          ? "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))"
-          : isDark
-            ? "rgba(255,255,255,0.1)"
-            : "rgba(255,255,255,0.85)",
-        border: isMe
-          ? "1px solid rgba(167,139,250,0.4)"
-          : isDark
-            ? "1px solid rgba(255,255,255,0.15)"
-            : "1px solid rgba(0,0,0,0.08)",
-        boxShadow: isMe ? "0 0 16px rgba(124, 58, 237, 0.5)" : "none",
+        background: isTargetHighlighted
+          ? "linear-gradient(135deg, rgb(236, 72, 153), rgb(168, 85, 247), rgb(59, 130, 246))"
+          : isMe
+            ? "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))"
+            : isDark
+              ? "rgba(255,255,255,0.1)"
+              : "rgba(255,255,255,0.85)",
+        border: isTargetHighlighted
+          ? "2px solid #ffffff"
+          : isMe
+            ? "1px solid rgba(167,139,250,0.4)"
+            : isDark
+              ? "1px solid rgba(255,255,255,0.15)"
+              : "1px solid rgba(0,0,0,0.08)",
+        boxShadow: isTargetHighlighted
+          ? "0 0 28px rgba(236, 72, 153, 0.9), 0 0 12px rgba(168, 85, 247, 0.8)"
+          : isMe
+            ? "0 0 16px rgba(124, 58, 237, 0.5)"
+            : "none",
       }}
     >
       <button

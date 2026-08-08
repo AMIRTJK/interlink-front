@@ -283,11 +283,26 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                       setActiveActionMsgId(null);
                     }}
                     onReply={() => {
+                      const attachments = msg.attachments ?? (msg.attachment ? [msg.attachment] : []);
+                      const firstAtt = attachments[0];
+                      const icon = firstAtt
+                        ? firstAtt.type === "image"
+                          ? "📷 "
+                          : firstAtt.type === "voice"
+                            ? "🎤 "
+                            : "📁 "
+                        : "";
+                      const replyText = firstAtt
+                        ? msg.text
+                          ? `${icon}${msg.text}`
+                          : `${icon}${firstAtt.name || t.attachmentLabel || "Вложение"}`
+                        : msg.text;
+
                       setReplyingTo({
                         id: msg.id,
                         senderName:
                           msg.senderName || (isMe ? t.you : activeContact.name),
-                        text: msg.text || (msg.attachments?.length || msg.attachment ? (t.attachmentLabel || "Вложение") : ""),
+                        text: replyText,
                       });
                       setActiveActionMsgId(null);
                     }}
@@ -332,6 +347,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               attachments={msg.attachments ?? (msg.attachment ? [msg.attachment] : [])}
               isMe={isMe}
               isDark={isDark}
+              isTargetHighlighted={isTargetHighlighted}
             />
           )}
           {(msg.text || isEffectivelyDeleted) && (
