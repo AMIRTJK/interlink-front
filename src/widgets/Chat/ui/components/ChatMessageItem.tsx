@@ -149,7 +149,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           />
         )}
         <div
-          className={`flex flex-col max-w-[65vw] sm:max-w-[420px] ${isMe ? "items-end" : "items-start"}`}
+          className={`flex flex-col max-w-[65vw] sm:max-w-[420px] ${isMe ? "items-end" : "items-start"} relative group`}
+          onMouseEnter={() => setHoveredMessageId(msg.id)}
+          onMouseLeave={() => setHoveredMessageId(null)}
         >
           {msg.scheduled && !isEffectivelyDeleted && (
             <div
@@ -228,6 +230,103 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               {msg.senderName}
             </span>
           </If>
+          <AnimatePresence>
+            {showReactionPicker && !isEffectivelyDeleted && (
+              <ReactionPicker
+                isMe={isMe}
+                onSelect={(emoji) => {
+                  handleReaction(msg.id, emoji);
+                  setShowReactionPicker(false);
+                }}
+                onClose={() => setShowReactionPicker(false)}
+                isDark={isDark}
+              />
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {(hoveredMessageId === msg.id || activeActionMsgId === msg.id) && !isEffectivelyDeleted && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-9" : "-right-9"} flex items-center z-30`}
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setActionMenuRect(rect);
+                    setActiveActionMsgId((prev) =>
+                      prev === msg.id ? null : msg.id,
+                    );
+                  }}
+                  aria-label="Действия"
+                  className={`w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "text-white/60 hover:bg-white/20" : "text-gray-500 hover:bg-black/8"}`}
+                  style={{
+                    background: isDark
+                      ? "rgba(255,255,255,0.1)"
+                      : "rgba(0,0,0,0.05)",
+                    border: isDark
+                      ? "1px solid rgba(255,255,255,0.15)"
+                      : "1px solid rgba(0,0,0,0.08)",
+                  }}
+                >
+                  <MoreHorizontal className="w-3.5 h-3.5" />
+                </button>
+                {activeActionMsgId === msg.id && (
+                  <MessageActionMenu
+                    buttonRect={actionMenuRect}
+                    isMe={isMe}
+                    isDark={isDark}
+                    onReactionClick={() => {
+                      setShowReactionPicker(true);
+                      setActiveActionMsgId(null);
+                    }}
+                    onReply={() => {
+                      setReplyingTo({
+                        id: msg.id,
+                        senderName:
+                          msg.senderName || (isMe ? t.you : activeContact.name),
+                        text: msg.text || (msg.attachments?.length || msg.attachment ? (t.attachmentLabel || "Вложение") : ""),
+                      });
+                      setActiveActionMsgId(null);
+                    }}
+                    onForward={() => {
+                      setForwardingMsg(msg);
+                      setActiveActionMsgId(null);
+                    }}
+                    onDelete={() => {
+                      setDeletingMsgId(msg.id);
+                      setActiveActionMsgId(null);
+                    }}
+                    onThread={() => {
+                      setOpenThreadMsgId(msg.id);
+                      setShowContactDrawer(false);
+                      setActiveActionMsgId(null);
+                    }}
+                    onPin={() => {
+                      handlePinMessage(msg.id);
+                      setActiveActionMsgId(null);
+                    }}
+                    pinLabel={
+                      msg.pinned
+                        ? lang === "ru"
+                          ? "Открепить"
+                          : lang === "tg"
+                            ? "Ҷудо кардан"
+                            : "Unpin"
+                        : lang === "ru"
+                          ? "Закрепить"
+                          : lang === "tg"
+                            ? "Маҳкам кардан"
+                            : "Pin"
+                    }
+                    onClose={() => setActiveActionMsgId(null)}
+                  />
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
           {!isEffectivelyDeleted && (
             <MessageAttachments
               attachments={msg.attachments ?? (msg.attachment ? [msg.attachment] : [])}
@@ -237,109 +336,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           )}
           {(msg.text || isEffectivelyDeleted) && (
             <div
-              className="relative"
-              onMouseEnter={() => setHoveredMessageId(msg.id)}
-              onMouseLeave={() => setHoveredMessageId(null)}
-            >
-              <AnimatePresence>
-                {showReactionPicker && !isEffectivelyDeleted && (
-                  <ReactionPicker
-                    isMe={isMe}
-                    onSelect={(emoji) => {
-                      handleReaction(msg.id, emoji);
-                      setShowReactionPicker(false);
-                    }}
-                    onClose={() => setShowReactionPicker(false)}
-                    isDark={isDark}
-                  />
-                )}
-              </AnimatePresence>
-              <AnimatePresence>
-                {(hoveredMessageId === msg.id || activeActionMsgId === msg.id) && !isEffectivelyDeleted && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-9" : "-right-9"} flex items-center z-30`}
-                  >
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        setActionMenuRect(rect);
-                        setActiveActionMsgId((prev) =>
-                          prev === msg.id ? null : msg.id,
-                        );
-                      }}
-                      aria-label="Действия"
-                      className={`w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "text-white/60 hover:bg-white/20" : "text-gray-500 hover:bg-black/8"}`}
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,0.1)"
-                          : "rgba(0,0,0,0.05)",
-                        border: isDark
-                          ? "1px solid rgba(255,255,255,0.15)"
-                          : "1px solid rgba(0,0,0,0.08)",
-                      }}
-                    >
-                      <MoreHorizontal className="w-3.5 h-3.5" />
-                    </button>
-                    {activeActionMsgId === msg.id && (
-                      <MessageActionMenu
-                        buttonRect={actionMenuRect}
-                        isMe={isMe}
-                        isDark={isDark}
-                        onReactionClick={() => {
-                          setShowReactionPicker(true);
-                          setActiveActionMsgId(null);
-                        }}
-                        onReply={() => {
-                          setReplyingTo({
-                            id: msg.id,
-                            senderName:
-                              msg.senderName || (isMe ? t.you : activeContact.name),
-                            text: msg.text,
-                          });
-                          setActiveActionMsgId(null);
-                        }}
-                        onForward={() => {
-                          setForwardingMsg(msg);
-                          setActiveActionMsgId(null);
-                        }}
-                        onDelete={() => {
-                          setDeletingMsgId(msg.id);
-                          setActiveActionMsgId(null);
-                        }}
-                        onThread={() => {
-                          setOpenThreadMsgId(msg.id);
-                          setShowContactDrawer(false);
-                          setActiveActionMsgId(null);
-                        }}
-                        onPin={() => {
-                          handlePinMessage(msg.id);
-                          setActiveActionMsgId(null);
-                        }}
-                        pinLabel={
-                          msg.pinned
-                            ? lang === "ru"
-                              ? "Открепить"
-                              : lang === "tg"
-                                ? "Ҷудо кардан"
-                                : "Unpin"
-                            : lang === "ru"
-                              ? "Закрепить"
-                              : lang === "tg"
-                                ? "Маҳкам кардан"
-                                : "Pin"
-                        }
-                        onClose={() => setActiveActionMsgId(null)}
-                      />
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <div
-                className={`px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 ease-in-out cursor-default ${
+              className={`px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 ease-in-out cursor-default ${
                   isTargetHighlighted
                     ? "rounded-2xl ring-2 ring-violet-500 scale-[1.02] shadow-[0_0_24px_rgba(168,85,247,0.85)] animate-pulse"
                     : isEffectivelyDeleted
@@ -439,7 +436,6 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                   <span>{msg.time}</span>
                 </span>
               </div>
-            </div>
           )}
           <If
             is={
