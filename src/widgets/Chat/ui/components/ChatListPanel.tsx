@@ -79,7 +79,7 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                 : "2px dashed rgba(0,0,0,0.15)",
             }}
           >
-            <Plus className="w-4 h-4 text-white/50" />
+            <Plus className={`w-4 h-4 ${isDark ? "text-white/50" : "text-gray-500"}`} />
           </button>
           <div
             className="w-px h-8 mx-1 flex-shrink-0"
