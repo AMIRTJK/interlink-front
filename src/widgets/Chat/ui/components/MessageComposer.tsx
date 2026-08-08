@@ -1,6 +1,6 @@
 import React from "react";
 import { AnimatePresence } from "framer-motion";
-import { Smile, Paperclip, Sparkles, Clock3, Mic, Send } from "lucide-react";
+import { Smile, Paperclip, Clock3, Mic, Send } from "lucide-react";
 import type { EmojiCategory } from "../../model";
 import { Translations } from "../../lib/translations";
 import { EmojiPicker } from "./EmojiPicker";
@@ -127,13 +127,7 @@ export const MessageComposer = ({
               onChange={onFileChange}
               accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.zip"
             />
-            <button
-              onClick={() => setShowAIPanel((v) => !v)}
-              aria-label={t.aiSuggestions}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0 ${isDark ? "hover:bg-white/8" : "hover:bg-black/5"} ${showAIPanel ? (isDark ? "text-violet-300 bg-white/10" : "text-violet-650 bg-violet-100") : isDark ? "text-white/40 hover:text-violet-300" : "text-gray-400 hover:text-violet-600"}`}
-            >
-              <Sparkles className="w-5 h-5" />
-            </button>
+
             <textarea
               ref={textareaRef}
               rows={1}
