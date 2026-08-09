@@ -5,7 +5,10 @@ import { Download, Eye, ImageIcon, X } from "lucide-react";
 import { toast } from "@shared/lib";
 import type { MessageAttachment } from "../../model";
 import { chatUrls, downloadPrivateFile } from "../../api";
-import { getAttachmentIcon } from "../../lib/chatHelpers";
+import {
+  getAttachmentBubbleStyle,
+  getAttachmentIcon,
+} from "../../lib/chatHelpers";
 import { VoiceBubble } from "./VoiceBubble";
 
 interface IProps {
@@ -79,6 +82,8 @@ export const MessageAttachments = ({
           );
         }
 
+        const isImage = attachment.type === "image" && Boolean(attachment.preview);
+
         return (
           <div
             key={key}
@@ -89,42 +94,27 @@ export const MessageAttachments = ({
                 ? "ring-2 ring-violet-500 scale-[1.02] shadow-[0_0_24px_rgba(168,85,247,0.85)] animate-pulse"
                 : ""
             }`}
-            style={{
-              background: isTargetHighlighted
-                ? "linear-gradient(135deg, rgb(236, 72, 153), rgb(168, 85, 247), rgb(59, 130, 246))"
-                : isMe
-                  ? "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))"
-                  : isDark
-                    ? "rgba(255,255,255,0.1)"
-                    : "rgba(255,255,255,0.95)",
-              border: isTargetHighlighted
-                ? "2px solid #ffffff"
-                : isMe
-                  ? "1px solid rgba(196,181,253,0.5)"
-                  : isDark
-                    ? "1px solid rgba(255,255,255,0.15)"
-                    : "1px solid rgba(124,58,237,0.2)",
-              boxShadow: isTargetHighlighted
-                ? "0 0 28px rgba(236, 72, 153, 0.9), 0 0 12px rgba(168, 85, 247, 0.8)"
-                : isMe
-                  ? "0 0 16px rgba(124, 58, 237, 0.5)"
-                  : isDark
-                    ? "0 2px 10px rgba(0,0,0,0.2)"
-                    : "0 2px 10px rgba(124,58,237,0.08)",
-            }}
+            style={getAttachmentBubbleStyle({
+              isImage,
+              isMe,
+              isDark,
+              isTargetHighlighted,
+            })}
           >
-            {attachment.type === "image" && attachment.preview ? (
-              <div className="relative group cursor-pointer overflow-hidden rounded-2xl">
+            {isImage ? (
+              // Скругления держит только обёртка: свой радиус у картинки не
+              // совпадал с её углом со стороны аватарки и открывал подложку.
+              <div className="relative group cursor-pointer overflow-hidden">
                 <img
                   src={attachment.preview}
                   alt={attachment.name}
                   loading="lazy"
                   onClick={() => setSelectedImage(attachment)}
-                  className="max-w-[260px] max-h-56 object-cover rounded-2xl transition-all duration-300 group-hover:scale-105"
+                  className="block max-w-[260px] max-h-56 object-cover transition-all duration-300 group-hover:scale-105"
                 />
                 <div
                   onClick={() => setSelectedImage(attachment)}
-                  className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3.5 backdrop-blur-[2px] rounded-2xl"
+                  className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3.5 backdrop-blur-[2px]"
                 >
                   <button
                     type="button"
