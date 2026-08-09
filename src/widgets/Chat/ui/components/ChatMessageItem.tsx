@@ -75,44 +75,6 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 
   const isPending = msg.status === "pending" || msg.id.startsWith("temp-");
 
-  if (isPending) {
-    return (
-      <div
-        key={msg.id}
-        id={`chat-msg-${msg.id}`}
-        data-msg-id={msg.id}
-        ref={(el) => setMessageRef(msg.id, el)}
-        className={`w-full flex items-center ${isMe ? "justify-end" : "justify-start"} py-1 px-2`}
-      >
-        <div className={`inline-flex items-center gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-          {isMe && (
-            <img
-              src={msg.senderAvatar || buildInitialsAvatar(msg.senderName || "Вы")}
-              alt={msg.senderName || "Вы"}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src =
-                  buildInitialsAvatar(msg.senderName || "Вы");
-              }}
-              className="w-8 h-8 rounded-full object-cover flex-shrink-0 overflow-hidden"
-              style={{
-                boxShadow: "inset 0 0 0 2px rgba(167,139,250,0.45)",
-              }}
-            />
-          )}
-          <div className="flex items-center justify-center w-8 h-8">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
-              className="flex items-center justify-center"
-            >
-              <Clock3 className={`w-5 h-5 ${isDark ? "text-violet-300" : "text-violet-600"}`} />
-            </motion.div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <motion.div
       key={msg.id}
@@ -457,6 +419,19 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                 <span>{msg.text}</span>
                 <span className="inline-flex items-center gap-1 float-right mt-1 ml-2.5 select-none text-[10px] opacity-75">
                   <span>{msg.time}</span>
+                  {isMe && !isEffectivelyDeleted && (
+                    <span className="inline-flex items-center ml-0.5" title={msg.status}>
+                      {isPending ? (
+                        <Clock3 className="w-3 h-3 text-white/70 animate-pulse" />
+                      ) : msg.status === "read" ? (
+                        <CheckCheck className="w-3.5 h-3.5 text-cyan-300 drop-shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+                      ) : msg.status === "delivered" ? (
+                        <CheckCheck className="w-3.5 h-3.5 text-white/80" />
+                      ) : (
+                        <Check className="w-3.5 h-3.5 text-white/80" />
+                      )}
+                    </span>
+                  )}
                 </span>
               </div>
           )}

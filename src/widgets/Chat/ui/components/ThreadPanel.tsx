@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { MessageSquare, X, Send, Loader2 } from "lucide-react";
+import { MessageSquare, X, Send, Loader2, Check, CheckCheck, Clock3 } from "lucide-react";
 import { If } from "@shared/ui";
 import { Contact, Message } from "../../model";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
@@ -149,7 +149,23 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
                     : "none",
                 }}
               >
-                {tm.text}
+                <span>{tm.text}</span>
+                <span className="inline-flex items-center gap-1 float-right mt-1 ml-2.5 select-none text-[10px] opacity-75">
+                  {tm.time && <span>{tm.time}</span>}
+                  {isTMe && !tm.deleted && (
+                    <span className="inline-flex items-center ml-0.5" title={tm.status}>
+                      {tm.status === "pending" || tm.id.startsWith("temp-") ? (
+                        <Clock3 className="w-3 h-3 text-white/70 animate-pulse" />
+                      ) : tm.status === "read" ? (
+                        <CheckCheck className="w-3.5 h-3.5 text-cyan-300 drop-shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+                      ) : tm.status === "delivered" ? (
+                        <CheckCheck className="w-3.5 h-3.5 text-white/80" />
+                      ) : (
+                        <Check className="w-3.5 h-3.5 text-white/80" />
+                      )}
+                    </span>
+                  )}
+                </span>
               </div>
               {isTMe && (
                 <img
