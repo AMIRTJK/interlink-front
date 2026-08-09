@@ -1,9 +1,10 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { AnimatePresence } from "framer-motion";
 import { Can, If } from "@shared/ui";
 import { type TChatVariant } from "../model";
 import { Lang } from "../lib/translations";
 import { useChatAppState } from "../lib/useChatAppState";
+import { useThreadReadState } from "../lib/useThreadReadState";
 import {
   CHAT_PERMISSIONS,
   CHAT_LIST_PANEL_WIDTH,
@@ -196,6 +197,18 @@ export const ChatApp: React.FC<IProps> = ({
     isCurrentMatch,
   } = state;
 
+  const { markThreadSeen, getUnreadThreadCount } = useThreadReadState();
+
+  // Пока тред открыт, всё пришедшее в него считается прочитанным — и чужие
+  // ответы, и свои. Закрыли панель — следующий ответ снова будет новым.
+  useEffect(() => {
+    if (!openThreadMsg) return;
+    markThreadSeen(
+      openThreadMsg.id,
+      Math.max(openThreadMsg.threadCount ?? 0, threadMessages.length),
+    );
+  }, [openThreadMsg, threadMessages.length, markThreadSeen]);
+
   const isHorizontalLayout = layout === "top" || layout === "bottom";
   const mainAreaFlexDir = isHorizontalLayout ? "flex-col" : "flex-row";
   const chatListFirst = layout === "left" || layout === "top";
@@ -365,6 +378,7 @@ export const ChatApp: React.FC<IProps> = ({
             setOpenThreadMsgId={setOpenThreadMsgId}
             setShowContactDrawer={setShowContactDrawer}
             formatRepliesCount={formatRepliesCount}
+            getUnreadThreadCount={getUnreadThreadCount}
             setMessageRef={setMessageRef}
             targetHighlightedMessageId={targetHighlightedMessageId}
             returnToMessageId={returnToMessageId}

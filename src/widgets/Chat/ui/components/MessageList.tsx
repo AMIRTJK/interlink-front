@@ -45,6 +45,8 @@ interface IProps {
   setOpenThreadMsgId: (id: string | null) => void;
   setShowContactDrawer: (show: boolean) => void;
   formatRepliesCount: (count: number, lang: Lang) => string;
+  /** Сколько ответов треда человек ещё не видел. */
+  getUnreadThreadCount: (msgId: string, repliesCount: number) => number;
   setMessageRef: (id: string, el: HTMLDivElement | null) => void;
 }
 

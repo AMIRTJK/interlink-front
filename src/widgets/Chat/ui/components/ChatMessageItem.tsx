@@ -30,6 +30,8 @@ interface ChatMessageItemProps {
   setOpenThreadMsgId: (id: string | null) => void;
   setShowContactDrawer: (show: boolean) => void;
   formatRepliesCount: (count: number, lang: Lang) => string;
+  /** Сколько ответов треда человек ещё не видел. */
+  getUnreadThreadCount: (msgId: string, repliesCount: number) => number;
   setMessageRef: (id: string, el: HTMLDivElement | null) => void;
   targetHighlightedMessageId?: string | null;
   onJumpToMessage?: (targetId: string, returnFromId?: string) => void;
@@ -58,11 +60,14 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
   setOpenThreadMsgId,
   setShowContactDrawer,
   formatRepliesCount,
+  getUnreadThreadCount,
   setMessageRef,
 }) => {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [actionMenuRect, setActionMenuRect] = useState<DOMRect | null>(null);
   const isEffectivelyDeleted = msg.deleted || msg.deletedForMe;
+  const repliesCount = msg.threadCount || 0;
+  const unreadReplies = getUnreadThreadCount(msg.id, repliesCount);
 
   const isTargetHighlighted =
     Boolean(targetHighlightedMessageId) &&
@@ -495,29 +500,45 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                   ))}
                 </>
               </If>
-              <If is={!!(msg.threadCount && msg.threadCount > 0)}>
+              <If is={repliesCount > 0}>
                 <button
                   onClick={() => {
                     setOpenThreadMsgId(msg.id);
                     setShowContactDrawer(false);
                   }}
+                  aria-label={
+                    unreadReplies > 0
+                      ? `${formatRepliesCount(repliesCount, lang)}, ${t.newReplies}: ${unreadReplies}`
+                      : formatRepliesCount(repliesCount, lang)
+                  }
                   className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer ${isDark ? "text-violet-200" : "text-violet-750"}`}
                   style={{
                     background: isDark
                       ? "rgba(124,58,237,0.25)"
                       : "rgba(124,58,237,0.12)",
-                    border: isDark
-                      ? "1px solid rgba(167,139,250,0.4)"
-                      : "1px solid rgba(124,58,237,0.25)",
-                    boxShadow: isDark
-                      ? "0 2px 10px rgba(124,58,237,0.25)"
-                      : "0 2px 8px rgba(124,58,237,0.08)",
+                    // Непрочитанный тред тянет взгляд контуром и тенью: цвет
+                    // чипа остаётся прежним, меняется только его заметность.
+                    border: unreadReplies
+                      ? "1px solid rgba(244,63,94,0.65)"
+                      : isDark
+                        ? "1px solid rgba(167,139,250,0.4)"
+                        : "1px solid rgba(124,58,237,0.25)",
+                    boxShadow: unreadReplies
+                      ? "0 2px 12px rgba(244,63,94,0.35)"
+                      : isDark
+                        ? "0 2px 10px rgba(124,58,237,0.25)"
+                        : "0 2px 8px rgba(124,58,237,0.08)",
                   }}
                 >
                   <MessageSquare
                     className={`w-3 h-3 ${isDark ? "text-violet-300" : "text-violet-600"}`}
                   />
-                  <span>{formatRepliesCount(msg.threadCount || 0, lang)}</span>
+                  <span>{formatRepliesCount(repliesCount, lang)}</span>
+                  <If is={unreadReplies > 0}>
+                    <span className="min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center">
+                      +{unreadReplies}
+                    </span>
+                  </If>
                 </button>
               </If>
             </div>

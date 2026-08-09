@@ -126,6 +126,7 @@ export type Translations = {
   noSendPermission: string;
   dropFiles: string;
   hideLinkPreview: string;
+  newReplies: string;
 };
 export const TRANSLATIONS: Record<Lang, Translations> = {
   en: {
@@ -232,7 +233,8 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     you: 'You',
     noSendPermission: 'You have no permission to send messages in this chat.',
     dropFiles: 'Drop files to attach',
-    hideLinkPreview: 'Hide link preview'
+    hideLinkPreview: 'Hide link preview',
+    newReplies: 'new replies'
   },
   ru: {
     search: 'Поиск',
@@ -338,7 +340,8 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     you: 'Вы',
     noSendPermission: 'У вас нет права отправлять сообщения в чате.',
     dropFiles: 'Отпустите файлы, чтобы прикрепить',
-    hideLinkPreview: 'Скрыть превью ссылки'
+    hideLinkPreview: 'Скрыть превью ссылки',
+    newReplies: 'новых ответов'
   },
   tg: {
     search: 'Ҷустуҷӯ',
@@ -444,6 +447,7 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     you: 'Шумо',
     noSendPermission: 'Шумо ҳуқуқи фиристодани паём надоред.',
     dropFiles: 'Файлҳоро сар диҳед, то замима шаванд',
-    hideLinkPreview: 'Пешнамоиши истинодро пинҳон кардан'
+    hideLinkPreview: 'Пешнамоиши истинодро пинҳон кардан',
+    newReplies: 'ҷавобҳои нав'
   }
 };
