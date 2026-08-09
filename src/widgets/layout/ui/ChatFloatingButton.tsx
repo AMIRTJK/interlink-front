@@ -117,9 +117,9 @@ export const ChatFloatingButton = ({ layoutMode }: IProps) => {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 450, damping: 22 }}
-                className="absolute -top-1 -right-1 min-w-5.5 h-5.5 px-1.5 rounded-full bg-gradient-to-r from-rose-500 to-orange-500 text-white text-[11px] font-bold flex items-center justify-center shadow-lg border-2 border-white dark:border-white/90 select-none"
+                className="absolute -top-1 -right-1 min-w-5.5 h-5.5 px-1.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-500 text-white text-[11px] font-bold flex items-center justify-center shadow-lg border-2 border-white dark:border-white/90 select-none"
                 style={{
-                  boxShadow: "0 0 12px rgba(244,63,94,0.8)",
+                  boxShadow: "0 0 12px rgba(225,29,72,0.85)",
                 }}
               >
                 {unreadCount > 99 ? "99+" : unreadCount}
