@@ -32,7 +32,7 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
   isHighlighted,
   onVersionClick,
 }) => {
-  const [open, setOpen] = useState<boolean>(() => {
+  const [requested, setRequested] = useState<boolean>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw || !item?.id) return false;
@@ -43,40 +43,55 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
     }
   });
 
-  const handleToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!item?.id) return;
-    setOpen((prev) => {
-      const next = !prev;
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : {};
-        const key = String(item.id);
-        if (next) {
-          parsed[key] = true;
-        } else {
-          delete parsed[key];
-          delete parsed[item.id];
-        }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-      } catch (err) {
-        console.error(err);
-      }
-      return next;
-    });
-  };
-
+  const [open, setOpen] = useState<boolean>(false);
 
   const { data: responseData, isLoading } = useGetQuery<
     Record<string, unknown>,
     { data: IInternalStructureResponse }
   >({
-    url: open && item.id ? ApiRoutes.GET_INTERNAL_STRUCTURE.replace(":id", String(item.id)) : undefined,
+    url: requested && item.id ? ApiRoutes.GET_INTERNAL_STRUCTURE.replace(":id", String(item.id)) : undefined,
     options: {
       staleTime: 0,
       refetchOnMount: true,
     },
   });
+
+  useEffect(() => {
+    if (requested && !isLoading && responseData?.data) {
+      setOpen(true);
+    }
+  }, [requested, isLoading, responseData]);
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!item?.id) return;
+
+    if (open || (requested && isLoading)) {
+      setOpen(false);
+      setRequested(false);
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        delete parsed[String(item.id)];
+        delete parsed[item.id];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      setRequested(true);
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        parsed[String(item.id)] = true;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+  const isPendingLoad = requested && isLoading && !responseData?.data;
 
   const structureData = responseData?.data;
   const timelineEvents = structureData?.timeline || [];
@@ -107,7 +122,6 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
 
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.03, 0.3), duration: 0.25 }}
@@ -178,80 +192,111 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
 
           <Tooltip
             title={
-              hasCount
-                ? `Этапов структуры: ${displayCount}`
-                : "Структура письма"
+              isPendingLoad
+                ? "Загрузка структуры..."
+                : hasCount
+                  ? `Этапов структуры: ${displayCount}`
+                  : "Структура письма"
             }
           >
-          <button
+          <motion.button
             type="button"
             onClick={handleToggle}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
             className={cn(
-              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex-shrink-0 mt-0.5 cursor-pointer",
+              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex-shrink-0 mt-0.5 cursor-pointer select-none border",
               open
-                ? "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200"
-                : "text-slate-400 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-200",
+                ? "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600"
+                : isPendingLoad
+                  ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/80 shadow-xs"
+                  : "text-slate-400 dark:text-slate-400 border-transparent hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-200",
             )}
             aria-label="Показать структуру письма"
           >
-            <Activity size={12} />
+            <If is={isPendingLoad}>
+              <Loader2 size={12} className="animate-spin text-blue-500" />
+            </If>
+            <If is={!isPendingLoad}>
+              <Activity size={12} />
+            </If>
             <If is={hasCount}>
               <span>{displayCount}</span>
             </If>
-            <If is={isLoading}>
-              <Loader2 size={12} className="animate-spin text-blue-500" />
-            </If>
-            <motion.div animate={{ rotate: open ? 180 : 0 }}>
+            <motion.div
+              animate={{ rotate: open ? 180 : 0 }}
+              transition={{ type: "spring", stiffness: 350, damping: 22 }}
+            >
               <ChevronDown size={12} />
             </motion.div>
-          </button>
+          </motion.button>
           </Tooltip>
         </div>
 
         <AnimatePresence initial={false}>
-          <If is={open}>
+          {open && (
             <motion.div
               key="timeline"
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
+              animate={{
+                height: "auto",
+                opacity: 1,
+                transition: {
+                  height: { type: "spring", stiffness: 520, damping: 36, mass: 0.5 },
+                  opacity: { duration: 0.15 },
+                },
+              }}
+              exit={{
+                height: 0,
+                opacity: 0,
+                transition: {
+                  height: { type: "spring", stiffness: 550, damping: 38, mass: 0.5 },
+                  opacity: { duration: 0.12 },
+                },
+              }}
               className="overflow-hidden"
             >
               <div className="mx-4 mb-3 border-t border-slate-100 dark:border-slate-700 pt-3">
-                <If is={isLoading}>
-                  <div className="flex items-center justify-center py-4 text-xs text-slate-400">
-                    <Loader2 size={16} className="animate-spin mr-2 text-blue-500" /> Загрузка структуры...
-                  </div>
-                </If>
-                <If is={!isLoading}>
+                <div>
                   <div className="relative pl-8">
-                    <div className="absolute left-[14px] top-0 bottom-4 w-px bg-slate-100 dark:bg-slate-700" />
+                    <motion.div
+                      initial={{ scaleY: 0 }}
+                      animate={{ scaleY: 1 }}
+                      transition={{ duration: 0.35, ease: "easeOut" }}
+                      className="absolute left-[14px] top-0 bottom-4 w-px bg-slate-200 dark:bg-slate-700 origin-top"
+                    />
                     {timelineEvents.map((event, i) => (
                       <EventRow
                         key={event.performed_at + i}
                         event={event}
+                        index={i}
                         isLast={i === timelineEvents.length - 1}
                         fallbackActorName={creatorName}
                         onVersionClick={onVersionClick}
                       />
                     ))}
                   </div>
-                  <RelatedDocsSection
-                    relatedDocuments={relatedDocs}
-                    currentDoc={{
-                      id: item.id,
-                      kind: item.kind || direction,
-                      date: item.sent_at || item.created_at,
-                      reg_number: item.reg_number,
-                      subject: item.subject,
-                    }}
-                    onDocClick={(_id) => onClick()}
-                  />
-                </If>
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                  >
+                    <RelatedDocsSection
+                      relatedDocuments={relatedDocs}
+                      currentDoc={{
+                        id: item.id,
+                        kind: item.kind || direction,
+                        date: item.sent_at || item.created_at,
+                        reg_number: item.reg_number,
+                        subject: item.subject,
+                      }}
+                      onDocClick={(_id) => onClick()}
+                    />
+                  </motion.div>
+                </div>
               </div>
             </motion.div>
-          </If>
+          )}
         </AnimatePresence>
       </div>
     </motion.div>
