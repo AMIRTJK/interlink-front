@@ -183,6 +183,31 @@
 
 .chat-avatar--shaped {
   --chat-avatar-ring-offset: 4px;
+  --chat-avatar-backdrop-offset: 8px;
+  --chat-avatar-backdrop: rgb(0 0 0 / 0.05);
+}
+
+.chat-avatar--shaped.chat-avatar--dark {
+  --chat-avatar-backdrop: rgb(255 255 255 / 0.1);
+}
+
+/* Подложка наведения повторяет фигуру. Прямоугольная подсветка кнопки вокруг
+   круглой аватарки почти не видна, а вокруг треугольника читается как чужой
+   квадрат, поэтому у фигурных аватарок фон наведения рисует сама аватарка —
+   тем же тоном, что и подсветка кнопки у обычных бесед. */
+.chat-avatar--shaped .chat-avatar__backdrop {
+  position: absolute;
+  inset: calc(-1 * var(--chat-avatar-backdrop-offset));
+  background: var(--chat-avatar-backdrop);
+  clip-path: var(--chat-avatar-clip);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.chat-avatar-button:hover .chat-avatar--shaped .chat-avatar__backdrop,
+.chat-avatar-button:focus-visible .chat-avatar--shaped .chat-avatar__backdrop {
+  opacity: 1;
 }
 
 .chat-avatar--shaped .chat-avatar__img,
@@ -243,7 +268,8 @@
 @media (prefers-reduced-motion: reduce) {
   .chat-avatar,
   .chat-avatar__ring,
-  .chat-avatar__halo {
+  .chat-avatar__halo,
+  .chat-avatar--shaped .chat-avatar__backdrop {
     transition: none;
   }
 
