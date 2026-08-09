@@ -702,14 +702,19 @@ export const ChatApp: React.FC<IProps> = ({
         {showDeleteConversation && activeContact && (
           <DeleteConversationModal
             contactName={activeContact.name}
-            onConfirm={handleDeleteConversation}
+            onDeleteForMe={() => handleDeleteConversation(false)}
+            onDeleteForEveryone={() => handleDeleteConversation(true)}
             onCancel={() => setShowDeleteConversation(false)}
             isDark={isDark}
             title={t.deleteConversationTitle}
             descPrefix={t.deleteConversationDesc}
-            deleteAllLabel={t.deleteAll}
+            deleteForMeLabel={t.deleteConversationForMe}
+            deleteForMeDesc={t.deleteConversationForMeDesc}
+            deleteForEveryoneLabel={t.deleteConversationForEveryone}
+            deleteForEveryoneDesc={t.deleteConversationForEveryoneDesc}
             cancelLabel={t.cancel}
-            shreddingLabel={t.shreddingConversation}
+            deletingForMeLabel={t.deletingForMe}
+            deletingForEveryoneLabel={t.deletingForEveryone}
           />
         )}
       </AnimatePresence>

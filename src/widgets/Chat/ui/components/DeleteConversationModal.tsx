@@ -1,33 +1,62 @@
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Trash, X } from "lucide-react";
+import { Trash, X, MessageCircleOff, AlertTriangle } from "lucide-react";
+import { PaperShredder } from "./PaperShredder";
 
 interface DeleteConversationModalProps {
   contactName: string;
-  onConfirm: () => void;
+  onDeleteForMe: () => void;
+  onDeleteForEveryone: () => void;
   onCancel: () => void;
   isDark: boolean;
   title: string;
   descPrefix: string;
-  deleteAllLabel: string;
+  deleteForMeLabel: string;
+  deleteForMeDesc: string;
+  deleteForEveryoneLabel: string;
+  deleteForEveryoneDesc: string;
   cancelLabel: string;
-  shreddingLabel: string;
+  deletingForMeLabel: string;
+  deletingForEveryoneLabel: string;
 }
 
 export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = ({
   contactName,
-  onConfirm,
+  onDeleteForMe,
+  onDeleteForEveryone,
   onCancel,
   isDark,
   title,
   descPrefix,
-  deleteAllLabel,
+  deleteForMeLabel,
+  deleteForMeDesc,
+  deleteForEveryoneLabel,
+  deleteForEveryoneDesc,
   cancelLabel,
-  shreddingLabel,
+  deletingForMeLabel,
+  deletingForEveryoneLabel,
 }) => {
-  const [shredding, setShredding] = useState(false);
-  const onConfirmRef = useRef(onConfirm);
-  onConfirmRef.current = onConfirm;
+  const [phase, setPhase] = useState<"choice" | "shredding">("choice");
+  const [deleteMode, setDeleteMode] = useState<"me" | "everyone" | null>(null);
+
+  const onDeleteForMeRef = useRef(onDeleteForMe);
+  onDeleteForMeRef.current = onDeleteForMe;
+
+  const onDeleteForEveryoneRef = useRef(onDeleteForEveryone);
+  onDeleteForEveryoneRef.current = onDeleteForEveryone;
+
+  const handleDelete = (mode: "me" | "everyone") => {
+    setDeleteMode(mode);
+    setPhase("shredding");
+  };
+
+  const handleShredComplete = () => {
+    if (deleteMode === "me") {
+      onDeleteForMeRef.current();
+    } else if (deleteMode === "everyone") {
+      onDeleteForEveryoneRef.current();
+    }
+  };
 
   return (
     <motion.div
@@ -55,8 +84,8 @@ export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = (
         <div
           className={`flex items-center gap-3 px-5 py-4 border-b ${isDark ? "border-white/10" : "border-black/5"}`}
         >
-          <div className="w-9 h-9 rounded-full bg-red-500/20 flex items-center justify-center">
-            <Trash className="w-4 h-4 text-red-400" />
+          <div className="w-9 h-9 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
+            <AlertTriangle className="w-4 h-4 text-red-400" />
           </div>
           <div>
             <h3
@@ -65,66 +94,28 @@ export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = (
               {title}
             </h3>
             <p
-              className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}
+              className={`text-xs mt-0.5 ${isDark ? "text-white/50" : "text-gray-500"}`}
             >
               {contactName}
             </p>
           </div>
-          <button
-            onClick={onCancel}
-            className={`ml-auto w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "hover:bg-white/15 text-white/50" : "hover:bg-black/5 text-gray-500"}`}
-          >
-            <X className="w-4 h-4" />
-          </button>
+          {phase === "choice" && (
+            <button
+              onClick={onCancel}
+              className={`ml-auto w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "hover:bg-white/15 text-white/50" : "hover:bg-black/5 text-gray-500"}`}
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
-        <div className="px-5 py-4">
-          {shredding ? (
-            <div className="space-y-3">
-              <div
-                className="flex gap-0.5 overflow-hidden rounded-xl"
-                style={{ height: "64px" }}
-              >
-                {Array.from({ length: 16 }, (_, i) => (
-                  <motion.div
-                    key={`cs-${i}`}
-                    initial={{ y: 0 }}
-                    animate={{
-                      y: 80,
-                      rotate: (i % 2 === 0 ? 1 : -1) * ((i * 3 + 5) % 15),
-                    }}
-                    transition={{
-                      duration: 0.8,
-                      delay: i * 0.03,
-                      ease: [0.36, 0, 0.66, -0.56],
-                    }}
-                    className="flex-1 rounded-b-sm bg-gradient-to-b from-violet-500/40 to-fuchsia-500/30"
-                  />
-                ))}
-              </div>
-              <div className="flex items-center justify-center gap-2 py-2">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    duration: 0.5,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }}
-                  className="w-4 h-4 rounded-full border-2 border-violet-400 border-t-transparent"
-                  onAnimationStart={() =>
-                    setTimeout(() => onConfirmRef.current(), 900)
-                  }
-                />
-                <span
-                  className={`text-xs font-medium ${isDark ? "text-white/50" : "text-gray-500"}`}
-                >
-                  {shreddingLabel}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
+
+        <div className="px-5 py-5 space-y-4">
+          {phase === "choice" && (
+            <div
+              className={`rounded-xl px-4 py-3 border ${isDark ? "bg-white/8 border-white/10" : "bg-black/5 border-black/10"}`}
+            >
               <p
-                className={`text-sm leading-relaxed ${isDark ? "text-white/70" : "text-gray-600"}`}
+                className={`text-xs leading-relaxed ${isDark ? "text-white/60" : "text-gray-600"}`}
               >
                 {descPrefix}{" "}
                 <strong className={isDark ? "text-white" : "text-gray-900"}>
@@ -132,20 +123,74 @@ export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = (
                 </strong>
                 .
               </p>
-              <div className="flex gap-2 pt-1">
-                <button
-                  onClick={onCancel}
-                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ease-in-out ${isDark ? "bg-white/10 text-white/70 hover:bg-white/15" : "bg-black/5 text-gray-600 hover:bg-black/8"}`}
-                >
-                  {cancelLabel}
-                </button>
-                <button
-                  onClick={() => setShredding(true)}
-                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium bg-red-500 hover:bg-red-600 text-white transition-all duration-200 ease-in-out"
-                >
-                  {deleteAllLabel}
-                </button>
-              </div>
+            </div>
+          )}
+
+          {phase === "shredding" && (
+            <div
+              className={`rounded-xl px-4 py-3 border ${isDark ? "bg-white/8 border-white/10" : "bg-black/5 border-black/10"}`}
+            >
+              <PaperShredder onComplete={handleShredComplete} isDark={isDark} />
+            </div>
+          )}
+
+          {phase === "shredding" && (
+            <div
+              className={`flex items-center justify-center gap-2 ${isDark ? "text-white/50" : "text-gray-500"}`}
+            >
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{
+                  duration: 0.6,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                className="w-4 h-4 rounded-full border-2 border-violet-400 border-t-transparent"
+              />
+              <span className="text-xs font-medium">
+                {deleteMode === "everyone"
+                  ? deletingForEveryoneLabel
+                  : deletingForMeLabel}
+              </span>
+            </div>
+          )}
+
+          {phase === "choice" && (
+            <div className="space-y-2">
+              <button
+                onClick={() => handleDelete("me")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ease-in-out border ${isDark ? "bg-white/8 hover:bg-white/15 text-white/80 border-white/10 hover:border-white/20" : "bg-black/5 hover:bg-black/8 text-gray-700 border-black/10 hover:border-black/15"}`}
+              >
+                <MessageCircleOff className="w-4 h-4 text-violet-500 flex-shrink-0" />
+                <div className="text-left">
+                  <p className="font-semibold">{deleteForMeLabel}</p>
+                  <p
+                    className={`text-xs font-normal ${isDark ? "text-white/40" : "text-gray-400"}`}
+                  >
+                    {deleteForMeDesc}
+                  </p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handleDelete("everyone")}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-red-500/15 hover:bg-red-500/25 text-red-600 transition-all duration-200 ease-in-out border border-red-500/30"
+              >
+                <Trash className="w-4 h-4 flex-shrink-0" />
+                <div className="text-left">
+                  <p className="font-semibold">{deleteForEveryoneLabel}</p>
+                  <p className="text-xs font-normal text-red-500/70">
+                    {deleteForEveryoneDesc}
+                  </p>
+                </div>
+              </button>
+
+              <button
+                onClick={onCancel}
+                className={`w-full px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ease-in-out ${isDark ? "text-white/40 hover:bg-white/8" : "text-gray-500 hover:bg-black/5"}`}
+              >
+                {cancelLabel}
+              </button>
             </div>
           )}
         </div>

@@ -79,14 +79,18 @@ export const useChatMessageHandlers = (
     [ui, forwardMessage],
   );
 
-  const handleDeleteConversation = useCallback(() => {
-    ui.setShowDeleteConversation(false);
-    ui.setShowContactDrawer(false);
-    if (!activeConversationId) return;
-    // На бэкенде это очистка истории для текущего пользователя, а не удаление
-    // беседы у всех участников.
-    deleteConversation({ conversationId: activeConversationId });
-  }, [ui, activeConversationId, deleteConversation]);
+  const handleDeleteConversation = useCallback(
+    (forEveryone = false) => {
+      ui.setShowDeleteConversation(false);
+      ui.setShowContactDrawer(false);
+      if (!activeConversationId) return;
+      deleteConversation({
+        conversationId: activeConversationId,
+        forEveryone,
+      });
+    },
+    [ui, activeConversationId, deleteConversation],
+  );
 
   const handleToggleStar = useCallback(() => {
     if (!activeConversationId) return;
