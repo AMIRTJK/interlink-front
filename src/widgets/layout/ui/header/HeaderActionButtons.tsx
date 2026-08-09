@@ -11,8 +11,11 @@ import {
   PanelBottom,
   PanelRight,
   Monitor,
+  Maximize,
+  Minimize,
 } from "lucide-react";
 import { Tooltip } from "@shared/ui";
+import { useFullscreen } from "@shared/lib";
 import { NotificationsPopover } from "@features/notifications";
 import type { LayoutMode } from "../designSettings";
 import { HeaderThemePopover } from "./HeaderThemePopover";
@@ -50,6 +53,14 @@ export const HeaderActionButtons = ({
   setLayoutMode,
   setShowLogoutConfirm,
 }: IHeaderActionButtonsProps) => {
+  // Полноэкранный режим никому, кроме этой кнопки, не нужен — состояние живёт
+  // здесь, а не поднимается в useHeaderState.
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
+
+  const fullscreenLabel = isFullscreen
+    ? "Выйти из полноэкранного режима"
+    : "Полноэкранный режим";
+
   return (
     <div className="flex items-center gap-2 shrink-0">
       <div className="flex items-center gap-2">
@@ -88,6 +99,21 @@ export const HeaderActionButtons = ({
             className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
           >
             <Monitor size={18} strokeWidth={2.2} />
+          </button>
+        </Tooltip>
+
+        <Tooltip title={fullscreenLabel} placement="bottom">
+          <button
+            onClick={toggleFullscreen}
+            aria-label={fullscreenLabel}
+            aria-pressed={isFullscreen}
+            className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+          >
+            {isFullscreen ? (
+              <Minimize size={18} strokeWidth={2.2} />
+            ) : (
+              <Maximize size={18} strokeWidth={2.2} />
+            )}
           </button>
         </Tooltip>
 

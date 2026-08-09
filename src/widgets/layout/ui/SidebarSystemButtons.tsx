@@ -10,12 +10,14 @@ import {
   Layers,
   MessageSquare,
   Monitor,
+  Maximize,
+  Minimize,
   PanelTop,
   PanelLeft,
   PanelBottom,
   PanelRight,
 } from "lucide-react";
-import { tokenControl, useLogout } from "@shared/lib";
+import { tokenControl, useFullscreen, useLogout } from "@shared/lib";
 import { NotificationsPopover, useNotificationCounters } from "@features/notifications";
 import { useChat } from "@widgets/Chat";
 import { If } from "@shared/ui";
@@ -43,6 +45,11 @@ export const SidebarSystemButtons = ({ collapsed }: IProps) => {
   const [notifOpen, setNotifOpen] = useState(false);
   const { counters } = useNotificationCounters();
   const unreadCount = counters.unread;
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
+
+  const fullscreenLabel = isFullscreen
+    ? "Выйти из полноэкранного режима"
+    : "Полноэкранный режим";
 
   const toggleTheme = () => {
     setIsDarkMode((prevMode) => {
@@ -108,6 +115,22 @@ export const SidebarSystemButtons = ({ collapsed }: IProps) => {
             className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
           >
             <Monitor size={18} strokeWidth={2.2} />
+          </button>
+        </Tooltip>
+
+        <Tooltip title={fullscreenLabel} placement={collapsed ? "right" : "top"}>
+          <button
+            onClick={toggleFullscreen}
+            aria-label={fullscreenLabel}
+            aria-pressed={isFullscreen}
+            className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
+          >
+            <If is={isFullscreen}>
+              <Minimize size={18} strokeWidth={2.2} />
+            </If>
+            <If is={!isFullscreen}>
+              <Maximize size={18} strokeWidth={2.2} />
+            </If>
           </button>
         </Tooltip>
 

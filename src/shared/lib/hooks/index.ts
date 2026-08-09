@@ -9,6 +9,7 @@ export * from "./useModalState";
 export * from "./useCorrespondenceRoute";
 export * from "./useTabs";
 export * from "./useIsDarkMode";
+export * from "./useFullscreen";
 
 export * from "./useNavbar";
 export * from "./useMenuLogic";
