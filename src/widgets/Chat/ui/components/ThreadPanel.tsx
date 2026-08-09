@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { MessageSquare, X, Send, Loader2 } from "lucide-react";
 import { If } from "@shared/ui";
 import { Contact, Message } from "../../model";
+import { buildInitialsAvatar } from "../../lib/chatFormat";
 import { useAutoResizeTextarea } from "../../lib/useAutoResizeTextarea";
 
 const THREAD_INPUT_MAX_ROWS = 4;
@@ -121,9 +122,13 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
             >
               {!isTMe && (
                 <img
-                  src={tm.senderAvatar || activeContact.avatar}
+                  src={tm.senderAvatar || activeContact.avatar || buildInitialsAvatar(tm.senderName || activeContact.name)}
                   alt={tm.senderName || activeContact.name}
-                  className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src =
+                      buildInitialsAvatar(tm.senderName || activeContact.name);
+                  }}
+                  className="w-6 h-6 rounded-full object-cover flex-shrink-0 overflow-hidden"
                 />
               )}
               <div
@@ -146,11 +151,15 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
               >
                 {tm.text}
               </div>
-              {isTMe && tm.senderAvatar && (
+              {isTMe && (
                 <img
-                  src={tm.senderAvatar}
-                  alt={tm.senderName || ""}
-                  className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                  src={tm.senderAvatar || buildInitialsAvatar(tm.senderName || "Вы")}
+                  alt={tm.senderName || "Вы"}
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src =
+                      buildInitialsAvatar(tm.senderName || "Вы");
+                  }}
+                  className="w-6 h-6 rounded-full object-cover flex-shrink-0 overflow-hidden"
                 />
               )}
             </div>
