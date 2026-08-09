@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import {
   Edit3,
   UserPlus,
@@ -23,7 +22,7 @@ interface IProps {
   layout: LayoutPosition;
   onLayoutChange: (layout: LayoutPosition) => void;
   /** Непрочитанные сообщения по всем беседам (GET /chat/counters). */
-  totalUnread: number;
+  totalUnread?: number;
   onComposeOpen: () => void;
   onGroupOpen: () => void;
   isExpanded: boolean;
@@ -52,7 +51,6 @@ export const ChatHeader = ({
   isDark,
   layout,
   onLayoutChange,
-  totalUnread,
   onComposeOpen,
   onGroupOpen,
   isExpanded,
@@ -63,21 +61,6 @@ export const ChatHeader = ({
   // центрируется, чтобы отступы слева и справа были одинаковыми. В макетах
   // сверху/снизу блок во всю ширину экрана, и группа остаётся прижатой вправо.
   const isCentered = layout === "left" || layout === "right";
-
-  // При центрировании счётчик едет внутрь группы кнопок: тогда группа — единственный
-  // элемент строки и justify-center ставит её ровно по центру блока. Иначе счётчик
-  // остаётся отдельным элементом слева, а группа прижата вправо.
-  const unreadBadge =
-    totalUnread > 0 ? (
-      <motion.span
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        className="min-w-5 h-5 rounded-full text-white text-[10px] font-bold flex items-center justify-center px-1"
-        style={{ background: "linear-gradient(135deg,#ef4444,#f97316)" }}
-      >
-        {totalUnread > 99 ? "99+" : totalUnread}
-      </motion.span>
-    ) : null;
 
   return (
     <header
@@ -96,15 +79,11 @@ export const ChatHeader = ({
           isCentered ? "justify-center" : "justify-between"
         }`}
       >
-        {!isCentered && (
-          <div className="flex items-center gap-3">{unreadBadge}</div>
-        )}
         <div
           className={`flex items-center flex-wrap gap-2 ${
             isCentered ? "justify-center" : "justify-end"
           }`}
         >
-          {isCentered && unreadBadge}
           <LayoutSwitcher
             layout={layout}
             onChange={onLayoutChange}
