@@ -11,6 +11,7 @@ export const chatUrls = {
   createDirect: ApiRoutes.CHAT_CONVERSATIONS_DIRECT,
   createGroup: ApiRoutes.CHAT_CONVERSATIONS_GROUP,
   presenceHeartbeat: ApiRoutes.CHAT_PRESENCE_HEARTBEAT,
+  linkPreview: ApiRoutes.CHAT_LINK_PREVIEW,
 
   conversation: (id: number) =>
     ApiRoutes.CHAT_CONVERSATION.replace(":id", String(id)),

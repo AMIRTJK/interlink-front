@@ -80,6 +80,10 @@ export type Translations = {
   // Delete conversation modal
   deleteConversationTitle: string;
   deleteConversationDesc: string;
+  deleteConversationForMe: string;
+  deleteConversationForMeDesc: string;
+  deleteConversationForEveryone: string;
+  deleteConversationForEveryoneDesc: string;
   deleteAll: string;
   shreddingConversation: string;
   // Thread
@@ -124,6 +128,9 @@ export type Translations = {
   loadMore: string;
   you: string;
   noSendPermission: string;
+  dropFiles: string;
+  hideLinkPreview: string;
+  newReplies: string;
 };
 export const TRANSLATIONS: Record<Lang, Translations> = {
   en: {
@@ -194,6 +201,10 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     deletingForEveryone: 'Deleting for everyone…',
     deleteConversationTitle: 'Delete Conversation',
     deleteConversationDesc: 'This will permanently delete all messages in your conversation with',
+    deleteConversationForMe: 'Delete for me',
+    deleteConversationForMeDesc: 'This conversation will be deleted only from your chat',
+    deleteConversationForEveryone: 'Delete for everyone',
+    deleteConversationForEveryoneDesc: 'This conversation will be deleted for all participants',
     deleteAll: 'Delete All',
     shreddingConversation: 'Shredding conversation…',
     thread: 'Thread',
@@ -228,7 +239,10 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     selectedMembers: 'selected',
     loadMore: 'Load earlier messages',
     you: 'You',
-    noSendPermission: 'You have no permission to send messages in this chat.'
+    noSendPermission: 'You have no permission to send messages in this chat.',
+    dropFiles: 'Drop files to attach',
+    hideLinkPreview: 'Hide link preview',
+    newReplies: 'new replies'
   },
   ru: {
     search: 'Поиск',
@@ -298,6 +312,10 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     deletingForEveryone: 'Удаляем у всех…',
     deleteConversationTitle: 'Удалить переписку',
     deleteConversationDesc: 'Все сообщения в переписке с',
+    deleteConversationForMe: 'Удалить у себя',
+    deleteConversationForMeDesc: 'Переписка удалится только из вашего чата',
+    deleteConversationForEveryone: 'Удалить у всех',
+    deleteConversationForEveryoneDesc: 'Переписка удалится у всех участников',
     deleteAll: 'Удалить всё',
     shreddingConversation: 'Уничтожаем переписку…',
     thread: 'Ветка',
@@ -332,7 +350,10 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     selectedMembers: 'выбрано',
     loadMore: 'Загрузить предыдущие сообщения',
     you: 'Вы',
-    noSendPermission: 'У вас нет права отправлять сообщения в чате.'
+    noSendPermission: 'У вас нет права отправлять сообщения в чате.',
+    dropFiles: 'Отпустите файлы, чтобы прикрепить',
+    hideLinkPreview: 'Скрыть превью ссылки',
+    newReplies: 'новых ответов'
   },
   tg: {
     search: 'Ҷустуҷӯ',
@@ -402,6 +423,10 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     deletingForEveryone: 'Барои ҳама нест мешавад…',
     deleteConversationTitle: 'Нест кардани суҳбат',
     deleteConversationDesc: 'Ҳамаи паёмҳои суҳбат бо',
+    deleteConversationForMe: 'Барои ман нест кун',
+    deleteConversationForMeDesc: 'Ин суҳбат танҳо аз чати шумо нест мешавад',
+    deleteConversationForEveryone: 'Барои ҳама нест кун',
+    deleteConversationForEveryoneDesc: 'Ин суҳбат барои ҳамаи иштирокчиён нест мешавад',
     deleteAll: 'Ҳамаро нест кун',
     shreddingConversation: 'Суҳбат нест мешавад…',
     thread: 'Риштаи суҳбат',
@@ -436,6 +461,9 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     selectedMembers: 'интихобшуда',
     loadMore: 'Паёмҳои пешинаро бор кардан',
     you: 'Шумо',
-    noSendPermission: 'Шумо ҳуқуқи фиристодани паём надоред.'
+    noSendPermission: 'Шумо ҳуқуқи фиристодани паём надоред.',
+    dropFiles: 'Файлҳоро сар диҳед, то замима шаванд',
+    hideLinkPreview: 'Пешнамоиши истинодро пинҳон кардан',
+    newReplies: 'ҷавобҳои нав'
   }
 };

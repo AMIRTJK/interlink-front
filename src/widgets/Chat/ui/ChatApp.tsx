@@ -1,10 +1,15 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { AnimatePresence } from "framer-motion";
 import { Can, If } from "@shared/ui";
 import { type TChatVariant } from "../model";
 import { Lang } from "../lib/translations";
 import { useChatAppState } from "../lib/useChatAppState";
-import { CHAT_PERMISSIONS } from "../model/constants";
+import { useThreadReadState } from "../lib/useThreadReadState";
+import {
+  CHAT_PERMISSIONS,
+  CHAT_LIST_PANEL_WIDTH,
+  CHAT_LIST_PANEL_WIDTH_OVERLAY,
+} from "../model/constants";
 
 // Components
 import { ChatHeader } from "./components/ChatHeader";
@@ -16,6 +21,7 @@ import { StoryViewer } from "./components/StoryViewer";
 import { PendingFilesBar } from "./components/PendingFilesBar";
 import { AIPanel } from "./components/AIPanel";
 import { ReplyBar } from "./components/ReplyBar";
+import { LinkPreviewBar } from "./components/LinkPreviewBar";
 import { MessageSearchBar } from "./components/MessageSearchBar";
 import { PinnedBanner } from "./components/PinnedBanner";
 import { DeleteConfirmModal } from "./components/DeleteConfirmModal";
@@ -87,6 +93,7 @@ export const ChatApp: React.FC<IProps> = ({
     isLoadingThread,
     hasOlder,
     isLoadingOlder,
+    loadOlder,
     typingNames,
     isSending,
     input,
@@ -190,9 +197,27 @@ export const ChatApp: React.FC<IProps> = ({
     isCurrentMatch,
   } = state;
 
+  const { markThreadSeen, getUnreadThreadCount } = useThreadReadState();
+
+  // Пока тред открыт, всё пришедшее в него считается прочитанным — и чужие
+  // ответы, и свои. Закрыли панель — следующий ответ снова будет новым.
+  useEffect(() => {
+    if (!openThreadMsg) return;
+    markThreadSeen(
+      openThreadMsg.id,
+      Math.max(openThreadMsg.threadCount ?? 0, threadMessages.length),
+    );
+  }, [openThreadMsg, threadMessages.length, markThreadSeen]);
+
   const isHorizontalLayout = layout === "top" || layout === "bottom";
   const mainAreaFlexDir = isHorizontalLayout ? "flex-col" : "flex-row";
   const chatListFirst = layout === "left" || layout === "top";
+
+  // Во всплывающем окне блок управления шире на две кнопки («развернуть» и
+  // «закрыть»), поэтому и панель бесед там шире — иначе ряд не влезает в одну строку.
+  const listPanelWidth = isPage
+    ? CHAT_LIST_PANEL_WIDTH
+    : CHAT_LIST_PANEL_WIDTH_OVERLAY;
 
   const labels = useMemo(
     () => ({
@@ -219,7 +244,46 @@ export const ChatApp: React.FC<IProps> = ({
       onComposeOpen={() => setShowComposeModal(true)}
       onSearchChange={setSearchQuery}
       isDark={isDark}
+      width={listPanelWidth}
     />
+  );
+
+  // Панель бесед и градиентный блок управления — один переезжающий узел: при смене
+  // макета они меняют место вместе, а блок кнопок всегда прилегает к внешнему краю
+  // панели (для макета «снизу» — под ней, поэтому колонка разворачивается).
+  const chatListGroup = (
+    <div
+      className={`flex flex-shrink-0 min-h-0 min-w-0 ${
+        layout === "bottom" ? "flex-col-reverse" : "flex-col"
+      } ${isHorizontalLayout ? "w-full" : ""}`}
+      // Ширину в вертикальных макетах задаёт панель бесед: иначе колонку растянул
+      // бы ряд кнопок по max-content и блок разъехался бы с панелью по краю.
+      style={isHorizontalLayout ? undefined : { width: listPanelWidth }}
+    >
+      <ChatHeader
+        isDark={isDark}
+        lang={lang}
+        langLabels={LANG_LABELS}
+        onCycleLang={cycleLang}
+        layout={layout}
+        onLayoutChange={setLayout}
+        totalUnread={totalUnread}
+        onComposeOpen={() => setShowComposeModal(true)}
+        onGroupOpen={() => setShowGroupModal(true)}
+        isExpanded={isExpanded}
+        onToggleExpand={onToggleExpand}
+        onRequestClose={onRequestClose}
+      />
+      {/* Направление обёртки задаёт, по какой оси панель растягивается: в макетах
+          сверху/снизу — на всю ширину, слева/справа — на всю оставшуюся высоту. */}
+      <div
+        className={`flex min-h-0 ${
+          isHorizontalLayout ? "flex-col w-full" : "flex-1"
+        }`}
+      >
+        {chatListPanel}
+      </div>
+    </div>
   );
 
   const chatWindow = (
@@ -292,6 +356,7 @@ export const ChatApp: React.FC<IProps> = ({
             isError={isMessagesError}
             hasOlder={hasOlder}
             isLoadingOlder={isLoadingOlder}
+            onLoadOlder={loadOlder}
             onScroll={handleMessagesScroll}
             scrollRef={scrollRef}
             typingNames={typingNames}
@@ -313,6 +378,7 @@ export const ChatApp: React.FC<IProps> = ({
             setOpenThreadMsgId={setOpenThreadMsgId}
             setShowContactDrawer={setShowContactDrawer}
             formatRepliesCount={formatRepliesCount}
+            getUnreadThreadCount={getUnreadThreadCount}
             setMessageRef={setMessageRef}
             targetHighlightedMessageId={targetHighlightedMessageId}
             returnToMessageId={returnToMessageId}
@@ -345,6 +411,8 @@ export const ChatApp: React.FC<IProps> = ({
               />
             )}
           </AnimatePresence>
+
+          <LinkPreviewBar text={input} isDark={isDark} t={t} />
 
           <AnimatePresence>
             {pendingFiles.length > 0 && (
@@ -395,7 +463,7 @@ export const ChatApp: React.FC<IProps> = ({
               isRecording={isRecording}
               setIsRecording={setIsRecording}
               onSendVoice={handleSendVoice}
-              onPasteFiles={addFiles}
+              onAttachFiles={addFiles}
             />
           </Can>
         </>
@@ -434,26 +502,11 @@ export const ChatApp: React.FC<IProps> = ({
           boxShadow: isFullBleed ? "none" : cardShadow,
         }}
       >
-        <ChatHeader
-          isDark={isDark}
-          lang={lang}
-          langLabels={LANG_LABELS}
-          onCycleLang={cycleLang}
-          layout={layout}
-          onLayoutChange={setLayout}
-          totalUnread={totalUnread}
-          onComposeOpen={() => setShowComposeModal(true)}
-          onGroupOpen={() => setShowGroupModal(true)}
-          isExpanded={isExpanded}
-          onToggleExpand={onToggleExpand}
-          onRequestClose={onRequestClose}
-        />
-
         {/* Main content area with dynamic layout */}
         <div
           className={`flex flex-1 min-h-0 overflow-hidden ${mainAreaFlexDir}`}
         >
-          {chatListFirst && chatListPanel}
+          {chatListFirst && chatListGroup}
 
           <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
             {chatWindow}
@@ -515,7 +568,7 @@ export const ChatApp: React.FC<IProps> = ({
             </AnimatePresence>
           </div>
 
-          {!chatListFirst && chatListPanel}
+          {!chatListFirst && chatListGroup}
         </div>
       </div>
 
@@ -649,14 +702,19 @@ export const ChatApp: React.FC<IProps> = ({
         {showDeleteConversation && activeContact && (
           <DeleteConversationModal
             contactName={activeContact.name}
-            onConfirm={handleDeleteConversation}
+            onDeleteForMe={() => handleDeleteConversation(false)}
+            onDeleteForEveryone={() => handleDeleteConversation(true)}
             onCancel={() => setShowDeleteConversation(false)}
             isDark={isDark}
             title={t.deleteConversationTitle}
             descPrefix={t.deleteConversationDesc}
-            deleteAllLabel={t.deleteAll}
+            deleteForMeLabel={t.deleteConversationForMe}
+            deleteForMeDesc={t.deleteConversationForMeDesc}
+            deleteForEveryoneLabel={t.deleteConversationForEveryone}
+            deleteForEveryoneDesc={t.deleteConversationForEveryoneDesc}
             cancelLabel={t.cancel}
-            shreddingLabel={t.shreddingConversation}
+            deletingForMeLabel={t.deletingForMe}
+            deletingForEveryoneLabel={t.deletingForEveryone}
           />
         )}
       </AnimatePresence>

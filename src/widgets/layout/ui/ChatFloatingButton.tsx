@@ -1,9 +1,10 @@
 import { useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { MessageSquare } from "lucide-react";
 import { Tooltip } from "@shared/ui";
 import { AppRoutes } from "@shared/config";
-import { useChat } from "@widgets/Chat";
+import { tokenControl } from "@shared/lib";
+import { useChat, useChatCounters } from "@widgets/Chat";
 import { LayoutMode, THEMES } from "./designSettings";
 import { useDesignSettings } from "./useDesignSettings";
 import {
@@ -36,6 +37,10 @@ export const ChatFloatingButton = ({ layoutMode }: IProps) => {
   const [collapsed] = useSidebarCollapsed();
   const { currentTheme } = useDesignSettings();
 
+  const isAuthenticated = Boolean(tokenControl.get());
+  const counters = useChatCounters(!isOpen && isAuthenticated);
+  const unreadCount = counters.unread_messages || counters.unread_conversations || 0;
+
   const isChatModule =
     pathname === AppRoutes.CHAT || pathname.startsWith(`${AppRoutes.CHAT}/`);
 
@@ -50,22 +55,79 @@ export const ChatFloatingButton = ({ layoutMode }: IProps) => {
       : PAGE_PADDING;
   const bottom = layoutMode === "bottom" ? BOTTOM_NAV_OFFSET : PAGE_PADDING;
 
+  const tooltipTitle =
+    unreadCount > 0
+      ? `Чат (${unreadCount} непрочитанн${unreadCount === 1 ? "ое сообщение" : "ых сообщений"})`
+      : "Открыть чат";
+
   return (
-    <Tooltip title="Открыть чат" placement="left">
-      <motion.button
-        type="button"
-        onClick={openChat}
-        aria-label="Открыть чат"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-        whileHover={{ scale: 1.06 }}
-        whileTap={{ scale: 0.95 }}
+    <Tooltip title={tooltipTitle} placement="left">
+      <motion.div
         style={{ right, bottom }}
-        className={`fixed z-[80] w-14 h-14 rounded-[2.5rem] bg-linear-to-br ${gradient} text-white shadow-xl border border-white/30 dark:border-zinc-700/40 flex items-center justify-center cursor-pointer focus:outline-none transition-shadow duration-300 hover:shadow-2xl`}
+        className="fixed z-[80]"
       >
-        <MessageSquare size={22} strokeWidth={2.2} />
-      </motion.button>
+        {/* Анимированный аура-пульс при наличии новых непрочитанных сообщений */}
+        <AnimatePresence>
+          {unreadCount > 0 && (
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{
+                scale: [1, 1.35, 1],
+                opacity: [0.75, 0.2, 0.75],
+              }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{
+                duration: 2.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-tr from-rose-500 via-violet-500 to-cyan-400 blur-md pointer-events-none -z-10"
+            />
+          )}
+        </AnimatePresence>
+
+        <motion.button
+          type="button"
+          onClick={openChat}
+          aria-label={tooltipTitle}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{
+            opacity: 1,
+            scale: unreadCount > 0 ? [1, 1.06, 1] : 1,
+          }}
+          transition={
+            unreadCount > 0
+              ? {
+                  scale: { duration: 2.8, repeat: Infinity, ease: "easeInOut" },
+                  opacity: { duration: 0.2 },
+                }
+              : { duration: 0.2, ease: "easeOut" }
+          }
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className={`relative w-14 h-14 rounded-[2.5rem] bg-linear-to-br ${gradient} text-white shadow-xl border border-white/30 dark:border-zinc-700/40 flex items-center justify-center cursor-pointer focus:outline-none transition-shadow duration-300 hover:shadow-2xl`}
+        >
+          <MessageSquare size={22} strokeWidth={2.2} />
+
+          {/* Яркий бэдж со счётчиком непрочитанных сообщений */}
+          <AnimatePresence>
+            {unreadCount > 0 && (
+              <motion.span
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 450, damping: 22 }}
+                className="absolute -top-1 -right-1 min-w-5.5 h-5.5 px-1.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-500 text-white text-[11px] font-bold flex items-center justify-center shadow-lg border-2 border-white dark:border-white/90 select-none"
+                style={{
+                  boxShadow: "0 0 12px rgba(225,29,72,0.85)",
+                }}
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </motion.button>
+      </motion.div>
     </Tooltip>
   );
 };

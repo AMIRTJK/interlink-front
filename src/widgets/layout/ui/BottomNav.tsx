@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Popover, Tooltip } from "antd";
 import { AnimatePresence } from "framer-motion";
-import { Bell, LogOut, Sun, Moon, Palette, Layers, MessageSquare, Monitor, PanelTop, PanelLeft, PanelBottom, PanelRight } from "lucide-react";
-import { tokenControl, useLogout } from "@shared/lib";
+import { Bell, LogOut, Sun, Moon, Palette, Layers, MessageSquare, Monitor, Maximize, Minimize, PanelTop, PanelLeft, PanelBottom, PanelRight } from "lucide-react";
+import { tokenControl, useFullscreen, useLogout } from "@shared/lib";
 import { NotificationsPopover, useNotificationCounters } from "@features/notifications";
 import { useChat } from "@widgets/Chat";
 import { If, Logo } from "@shared/ui";
@@ -47,6 +47,8 @@ export const BottomNav = () => {
   const [notifOpen, setNotifOpen] = useState(false);
   const { counters } = useNotificationCounters();
   const unreadCount = counters.unread;
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
+  const fullscreenLabel = isFullscreen ? "Выйти из полноэкранного режима" : "Полноэкранный режим";
 
   useEffect(() => { setAvatarError(false); }, [userData?.photo_url, userData?.photo_path]);
 
@@ -114,6 +116,12 @@ export const BottomNav = () => {
           <Tooltip title="Рабочий стол" placement="top">
             <button onClick={() => setIsDesktopActive(true)} aria-label="Рабочий стол" className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
               <Monitor size={18} strokeWidth={2.2} />
+            </button>
+          </Tooltip>
+          <Tooltip title={fullscreenLabel} placement="top">
+            <button onClick={toggleFullscreen} aria-label={fullscreenLabel} aria-pressed={isFullscreen} className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
+              <If is={isFullscreen}><Minimize size={18} strokeWidth={2.2} /></If>
+              <If is={!isFullscreen}><Maximize size={18} strokeWidth={2.2} /></If>
             </button>
           </Tooltip>
           <Tooltip title={isDarkMode ? "Светлая" : "Темная"} placement="top">

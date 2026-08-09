@@ -1,0 +1,250 @@
+/* Аватарки бесед в горизонтальных макетах панели (сверху/снизу).
+   Здесь они именно аватарки, а не вкладки, поэтому состояния строятся вокруг
+   контура, а не подложки. Анимируются только transform и opacity — на композитных
+   свойствах, без layout- и paint-работы на каждый кадр. */
+
+/* Палитра по умолчанию — светлая тема. Акцент здесь должен быть ТЕМНЕЕ фона:
+   полоса аватарок светлая, и светлый акцент (как в тёмной теме) на ней теряется.
+   Поэтому взяты насыщенные violet-600 / fuchsia-800 / cyan-900 — они дают тот же
+   перепад к фону, что светлые оттенки в тёмной теме (замеры в отчёте к правке).
+   Свечение плотнее и с меньшим радиусом: на белом размытый ореол читается хуже. */
+.chat-avatar {
+  --chat-avatar-ring-offset: 3px;
+  /* Форма аватарки. Круг — состояние по умолчанию; групповым беседам сюда
+     приходит многоугольник или знак бесконечности из `chatAvatarShape.ts`.
+     Контур и подложка строятся вокруг этой переменной, поэтому и ведут себя
+     одинаково у любой формы. Слои под картинкой берут `--chat-avatar-clip-
+     outline`, если он задан: у фигуры с дырками увеличенная копия самой формы
+     дала бы рваную кайму, поэтому снизу лежит сплошной силуэт. */
+  --chat-avatar-clip: circle(50%);
+  --chat-avatar-accent: 124 58 237; /* violet-600 */
+  --chat-avatar-arc-peak: 134 25 143; /* fuchsia-800 */
+  --chat-avatar-arc-tip: 22 78 99; /* cyan-900 */
+  --chat-avatar-ring-flat-alpha: 0.5;
+  --chat-avatar-halo-edge-alpha: 0.45;
+  --chat-avatar-halo-glow-alpha: 0.35;
+  --chat-avatar-halo-blur: 10px;
+  --chat-avatar-halo-spread: 1px;
+  --chat-avatar-ring-hover-opacity: 0.75;
+  --chat-avatar-halo-hover-opacity: 0.85;
+  --chat-avatar-halo-pulse-min: 0.6;
+  --chat-avatar-halo-pulse-max: 1;
+  /* Тонкая тёмная обводка отделяет аватарку от светлой полосы. */
+  --chat-avatar-img-edge: 0 0 0 1px rgb(15 23 42 / 0.08);
+  /* Заливка контура: первый слой — бегущий световой сегмент, второй — ровная
+     подсветка всей каймы, чтобы контур читался целиком, а не только под
+     световой точкой. */
+  --chat-avatar-ring-paint:
+    conic-gradient(
+      from 0deg,
+      rgb(var(--chat-avatar-accent) / 0) 0deg,
+      rgb(var(--chat-avatar-accent) / 0) 150deg,
+      rgb(var(--chat-avatar-arc-peak) / 0.85) 260deg,
+      rgb(var(--chat-avatar-arc-tip) / 1) 310deg,
+      rgb(var(--chat-avatar-accent) / 0.25) 350deg,
+      rgb(var(--chat-avatar-accent) / 0) 360deg
+    ),
+    linear-gradient(
+      rgb(var(--chat-avatar-accent) / var(--chat-avatar-ring-flat-alpha)),
+      rgb(var(--chat-avatar-accent) / var(--chat-avatar-ring-flat-alpha))
+    );
+  position: relative;
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Тёмная тема — палитра, которая уже сложилась: светлый акцент на тёмной полосе,
+   ореол шире и мягче. Значения не меняем, они здесь работают. */
+.chat-avatar--dark {
+  --chat-avatar-accent: 167 139 250; /* violet-400 */
+  --chat-avatar-arc-peak: 240 171 252; /* fuchsia-300 */
+  --chat-avatar-arc-tip: 103 232 249; /* cyan-300 */
+  --chat-avatar-ring-flat-alpha: 0.4;
+  --chat-avatar-halo-edge-alpha: 0.35;
+  --chat-avatar-halo-glow-alpha: 0.4;
+  --chat-avatar-halo-blur: 12px;
+  --chat-avatar-halo-spread: 2px;
+  --chat-avatar-ring-hover-opacity: 0.55;
+  --chat-avatar-halo-hover-opacity: 0.7;
+  --chat-avatar-halo-pulse-min: 0.5;
+  --chat-avatar-halo-pulse-max: 0.95;
+  --chat-avatar-img-edge: none;
+}
+
+.chat-avatar__img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: var(--chat-avatar-img-edge);
+}
+
+/* Кольцо и свечение живут снаружи аватарки, поэтому отрицательный inset. */
+.chat-avatar__ring,
+.chat-avatar__halo {
+  position: absolute;
+  inset: calc(-1 * var(--chat-avatar-ring-offset));
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Контур: фигура, обрезанная по форме аватарки и на `--chat-avatar-ring-offset`
+   крупнее картинки, — из-под картинки она видна ровной каймой. Маску-кольцо
+   здесь использовать нельзя: она годится только кругу, а поведение контура
+   должно совпадать у всех форм. */
+.chat-avatar__ring {
+  opacity: 0;
+  clip-path: var(--chat-avatar-clip-outline, var(--chat-avatar-clip));
+  transition: opacity 0.28s ease;
+}
+
+/* Бегущий свет крутится внутри каймы, а не вместе с ней: у круга вращение
+   контура незаметно, у многоугольника это была бы вертящаяся фигура. Запас в
+   25% нужен, чтобы углы прямоугольного слоя не обнажали фигуру при повороте. */
+.chat-avatar__ring::before {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  background: var(--chat-avatar-ring-paint);
+}
+
+/* Свечение: мягкий ореол под кольцом. */
+.chat-avatar__halo {
+  opacity: 0;
+  box-shadow:
+    0 0 0 1px rgb(var(--chat-avatar-accent) / var(--chat-avatar-halo-edge-alpha)),
+    0 0 var(--chat-avatar-halo-blur) var(--chat-avatar-halo-spread)
+      rgb(var(--chat-avatar-accent) / var(--chat-avatar-halo-glow-alpha));
+  transition: opacity 0.28s ease;
+}
+
+/* ─── Hover: ровное свечение по контуру, без движения и пульсации ───────────
+   Наведение ловим на всей кнопке, а не только на круге аватарки: цель больше и
+   состояние не «мигает» на границе круга. Клавиатурный фокус — то же состояние. */
+
+.chat-avatar-button:hover .chat-avatar:not(.chat-avatar--active),
+.chat-avatar-button:focus-visible .chat-avatar:not(.chat-avatar--active) {
+  transform: scale(1.06);
+}
+
+.chat-avatar-button:hover .chat-avatar:not(.chat-avatar--active) .chat-avatar__ring,
+.chat-avatar-button:focus-visible
+  .chat-avatar:not(.chat-avatar--active)
+  .chat-avatar__ring {
+  opacity: var(--chat-avatar-ring-hover-opacity);
+}
+
+.chat-avatar-button:hover .chat-avatar:not(.chat-avatar--active) .chat-avatar__halo,
+.chat-avatar-button:focus-visible
+  .chat-avatar:not(.chat-avatar--active)
+  .chat-avatar__halo {
+  opacity: var(--chat-avatar-halo-hover-opacity);
+}
+
+/* ─── Активная беседа: бегущий по контуру свет + лёгкая пульсация ─────────── */
+
+.chat-avatar--active {
+  transform: scale(1.08);
+}
+
+.chat-avatar--active .chat-avatar__ring {
+  opacity: 1;
+}
+
+.chat-avatar--active .chat-avatar__ring::before {
+  animation: chat-avatar-ring-travel 3.6s linear infinite;
+}
+
+.chat-avatar--active .chat-avatar__halo {
+  opacity: 1;
+  animation: chat-avatar-breathe 2.8s ease-in-out infinite;
+}
+
+@keyframes chat-avatar-ring-travel {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+/* Пульсация нарочно неглубокая: 6% масштаба и неполный размах прозрачности.
+   Границы размаха задаёт тема — на светлом фоне ореол не должен уходить в ничто. */
+@keyframes chat-avatar-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: var(--chat-avatar-halo-pulse-min);
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: var(--chat-avatar-halo-pulse-max);
+  }
+}
+
+/* ─── Групповые аватарки: форма по числу участников ─────────────────────────
+   Сторон у фигуры столько, сколько участников в группе (3…9), с десяти —
+   знак бесконечности. Саму фигуру считает `chatAvatarShape.ts` и кладёт в
+   --chat-avatar-clip; контур и его анимация уже работают от этой переменной и
+   ничего здесь не переопределяют. Ниже — только то, что у круга держалось на
+   border-radius и потому фигуру не повторяет: картинка и ореол. */
+
+.chat-avatar--shaped {
+  /* Отступ задаёт кайму по радиусу, а у многоугольника она видна поперёк
+     стороны — это уже `offset · cos(π/n)`: у треугольника от 3px остаётся
+     полтора. Поэтому фигурам отступ на пиксель больше, чтобы кайма читалась
+     той же толщины, что у круга. */
+  --chat-avatar-ring-offset: 4px;
+}
+
+.chat-avatar--shaped .chat-avatar__img,
+.chat-avatar--shaped .chat-avatar__halo {
+  border-radius: 0;
+}
+
+.chat-avatar--shaped .chat-avatar__img {
+  clip-path: var(--chat-avatar-clip);
+  box-shadow: none;
+}
+
+/* Свечение через box-shadow повторяет border-radius, а не clip-path, — вокруг
+   фигуры оно читалось бы как лишний круг. Берём размытую копию самой фигуры:
+   размытие на родителе, обрезка на потомке, иначе clip-path срежет ореол
+   вместе с размытием. Радиус вдвое меньше: у box-shadow blur — это диаметр. */
+.chat-avatar--shaped .chat-avatar__halo {
+  box-shadow: none;
+  filter: blur(calc(var(--chat-avatar-halo-blur) / 2));
+}
+
+.chat-avatar--shaped .chat-avatar__halo::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: rgb(
+    var(--chat-avatar-accent) / var(--chat-avatar-halo-glow-alpha)
+  );
+  clip-path: var(--chat-avatar-clip-outline, var(--chat-avatar-clip));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-avatar,
+  .chat-avatar__ring,
+  .chat-avatar__halo {
+    transition: none;
+  }
+
+  /* Специфичность повторяет активное состояние: иначе `animation: none`
+     проигрывает правилам `.chat-avatar--active` и движение остаётся. */
+  .chat-avatar--active .chat-avatar__ring::before,
+  .chat-avatar--active .chat-avatar__halo {
+    animation: none;
+  }
+
+  /* Состояния остаются различимыми и без движения. */
+  .chat-avatar--active .chat-avatar__halo {
+    opacity: var(--chat-avatar-halo-pulse-max);
+  }
+}

@@ -148,10 +148,20 @@ export const describeMessage = (
 ): string => {
   if (!message) return "";
   if (message.is_deleted_for_everyone) return labels.deleted;
+
+  const [firstAtt] = message.attachments ?? [];
+  if (firstAtt) {
+    const type = resolveAttachmentType(firstAtt.type, firstAtt.mime_type);
+    const icon = type === "image" ? "📷 " : type === "voice" ? "🎤 " : "📁 ";
+    if (message.body) {
+      return `${icon}${message.body}`;
+    }
+    return `${icon}${firstAtt.original_name ?? firstAtt.name ?? (type === "voice" ? labels.voiceMessage : labels.attachment)}`;
+  }
+
   if (message.body) return message.body;
-  if (message.kind === "voice") return labels.voiceMessage;
-  const [first] = message.attachments ?? [];
-  return first?.original_name ?? first?.name ?? labels.attachment;
+  if (message.kind === "voice") return `🎤 ${labels.voiceMessage}`;
+  return labels.attachment;
 };
 
 export const mapAttachment = (

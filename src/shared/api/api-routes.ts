@@ -270,6 +270,10 @@ export const ApiRoutes = {
   CHAT_MESSAGE_REACTION: "/api/v1/chat/messages/:messageId/reactions/:emoji",
   CHAT_MESSAGE_PIN: "/api/v1/chat/messages/:messageId/pin",
   CHAT_ATTACHMENT_DOWNLOAD: "/api/v1/chat/attachments/:attachmentId/download",
+  // Метаданные ссылки (og:title / og:description / og:image) для превью в поле
+  // ввода. Читать страницу из браузера нельзя — CORS, поэтому её забирает и
+  // разбирает бэкенд: ?url=<ссылка>.
+  CHAT_LINK_PREVIEW: "/api/v1/chat/link-preview",
   CHAT_PRESENCE_HEARTBEAT: "/api/v1/chat/presence/heartbeat",
 
   PERSONAL_TASKS: "/api/v1/personal-tasks",

@@ -1,12 +1,14 @@
 import React from "react";
 import { AnimatePresence } from "framer-motion";
-import { Smile, Paperclip, Sparkles, Clock3, Mic, Send } from "lucide-react";
+import { Smile, Paperclip, Clock3, Mic, Send, Upload } from "lucide-react";
+import { If } from "@shared/ui";
 import type { EmojiCategory } from "../../model";
 import { Translations } from "../../lib/translations";
 import { EmojiPicker } from "./EmojiPicker";
 import { SchedulePicker } from "./SchedulePicker";
 import { VoiceRecorder } from "./VoiceRecorder";
 import { useAutoResizeTextarea } from "../../lib/useAutoResizeTextarea";
+import { useComposerDropzone } from "../../lib/useComposerDropzone";
 
 const INPUT_MAX_ROWS = 5;
 
@@ -37,7 +39,8 @@ interface IProps {
   isRecording: boolean;
   setIsRecording: React.Dispatch<React.SetStateAction<boolean>>;
   onSendVoice: (duration: number, audio: Blob) => void;
-  onPasteFiles?: (files: File[]) => void;
+  /** Вложения из буфера обмена (Ctrl+V) и перетаскиванием — обработчик один. */
+  onAttachFiles?: (files: File[]) => void;
 }
 
 export const MessageComposer = ({
@@ -64,9 +67,10 @@ export const MessageComposer = ({
   isRecording,
   setIsRecording,
   onSendVoice,
-  onPasteFiles,
+  onAttachFiles,
 }: IProps) => {
   const textareaRef = useAutoResizeTextarea(input, INPUT_MAX_ROWS);
+  const { isDraggingOver, dropHandlers } = useComposerDropzone(onAttachFiles);
 
   return (
     <div
@@ -75,6 +79,7 @@ export const MessageComposer = ({
         background: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.4)",
         backdropFilter: "blur(16px)",
       }}
+      {...dropHandlers}
     >
       <div
         className="relative flex items-center gap-2 rounded-3xl px-4 py-2"
@@ -85,6 +90,20 @@ export const MessageComposer = ({
             : "1px solid rgba(167,139,250,0.25)",
         }}
       >
+        {/* Подсказка перетаскивания перекрывает поле, но не события: без
+            pointer-events-none указатель «уходит» с зоны и дроп не случается. */}
+        <If is={isDraggingOver}>
+          <div
+            className={`absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-3xl border-2 border-dashed text-sm font-semibold pointer-events-none ${
+              isDark
+                ? "border-violet-400/70 bg-violet-500/20 text-violet-100"
+                : "border-violet-500/60 bg-violet-100/85 text-violet-700"
+            }`}
+          >
+            <Upload className="w-4 h-4" />
+            <span>{t.dropFiles}</span>
+          </div>
+        </If>
         {isRecording ? (
           <VoiceRecorder
             onSend={onSendVoice}
@@ -127,13 +146,7 @@ export const MessageComposer = ({
               onChange={onFileChange}
               accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.zip"
             />
-            <button
-              onClick={() => setShowAIPanel((v) => !v)}
-              aria-label={t.aiSuggestions}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0 ${isDark ? "hover:bg-white/8" : "hover:bg-black/5"} ${showAIPanel ? (isDark ? "text-violet-300 bg-white/10" : "text-violet-650 bg-violet-100") : isDark ? "text-white/40 hover:text-violet-300" : "text-gray-400 hover:text-violet-600"}`}
-            >
-              <Sparkles className="w-5 h-5" />
-            </button>
+
             <textarea
               ref={textareaRef}
               rows={1}
@@ -148,17 +161,17 @@ export const MessageComposer = ({
                 }
               }}
               onPaste={(e) => {
-                const items = Array.from(e.clipboardData.items || []);
-                const files: File[] = [];
-                items.forEach((item) => {
-                  if (item.kind === "file") {
-                    const file = item.getAsFile();
-                    if (file) files.push(file);
-                  }
-                });
-                if (files.length > 0 && onPasteFiles) {
+                // Картинка из буфера приходит элементом kind: "file". Текст
+                // рядом с ней не трогаем — вставку перехватываем только когда
+                // файлы действительно есть.
+                const files = Array.from(e.clipboardData.items || [])
+                  .filter((item) => item.kind === "file")
+                  .map((item) => item.getAsFile())
+                  .filter((file): file is File => file !== null);
+
+                if (files.length > 0 && onAttachFiles) {
                   e.preventDefault();
-                  onPasteFiles(files);
+                  onAttachFiles(files);
                 }
               }}
               className={`flex-1 bg-transparent outline-none text-sm px-2 py-2 resize-none leading-relaxed ${isDark ? "placeholder-white/25 text-white" : "placeholder-gray-400 text-gray-800"}`}

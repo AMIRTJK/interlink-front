@@ -1,9 +1,16 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Plus, Edit3, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { If } from "@shared/ui";
-import { Contact, LayoutPosition } from "../../model";
+import { Contact, LayoutPosition, CHAT_LIST_PANEL_WIDTH } from "../../model";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
+import {
+  CHAT_AVATAR_CLIP_VAR,
+  CHAT_AVATAR_OUTLINE_CLIP_VAR,
+  getChatAvatarClipPath,
+  getChatAvatarOutlineClipPath,
+} from "../../lib/chatAvatarShape";
+import "../../style.css";
 
 interface ChatListPanelProps {
   layout: LayoutPosition;
@@ -18,6 +25,8 @@ interface ChatListPanelProps {
   onComposeOpen: () => void;
   onSearchChange: (v: string) => void;
   isDark: boolean;
+  /** Ширина в вертикальных макетах, px. По умолчанию — CHAT_LIST_PANEL_WIDTH. */
+  width?: number;
 }
 
 export const ChatListPanel: React.FC<ChatListPanelProps> = ({
@@ -33,6 +42,7 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
   onComposeOpen,
   onSearchChange,
   isDark,
+  width = CHAT_LIST_PANEL_WIDTH,
 }) => {
   const isHorizontal = layout === "top" || layout === "bottom";
 
@@ -41,20 +51,23 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
       <div
         className="flex-shrink-0 flex flex-col border-white/10 overflow-hidden"
         style={{
+          // Светлая полоса взята плотнее и насыщеннее прежней (violet-300 →
+          // violet-100 → cyan-200): на почти белой подложке аватарки и их контуры
+          // теряли контраст. Тёмная палитра не меняется.
           background: isDark
             ? "linear-gradient(135deg,rgba(76,29,149,0.55),rgba(124,58,237,0.4),rgba(6,182,212,0.25))"
-            : "linear-gradient(135deg,rgba(237,233,254,0.65),rgba(243,244,246,0.65),rgba(207,250,254,0.65))",
+            : "linear-gradient(135deg,rgba(196,181,253,0.55),rgba(237,233,254,0.8),rgba(165,243,252,0.6))",
           borderTop:
             layout === "bottom"
               ? isDark
                 ? "1px solid rgba(167,139,250,0.2)"
-                : "1px solid rgba(124,58,237,0.15)"
+                : "1px solid rgba(124,58,237,0.28)"
               : undefined,
           borderBottom:
             layout === "top"
               ? isDark
                 ? "1px solid rgba(167,139,250,0.2)"
-                : "1px solid rgba(124,58,237,0.15)"
+                : "1px solid rgba(124,58,237,0.28)"
               : undefined,
           backdropFilter: "blur(20px)",
           height: "80px",
@@ -68,75 +81,73 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
             onClick={onComposeOpen}
             className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "hover:bg-white/20" : "hover:bg-black/5"}`}
             style={{
+              // В светлой теме нейтральный чёрный на фиолетовой подложке выглядел
+              // грязным и слабым — берём тот же акцент, что у контуров аватарок.
               background: isDark
                 ? "rgba(255,255,255,0.08)"
-                : "rgba(0,0,0,0.03)",
+                : "rgba(124,58,237,0.06)",
               border: isDark
                 ? "2px dashed rgba(255,255,255,0.25)"
-                : "2px dashed rgba(0,0,0,0.15)",
+                : "2px dashed rgba(124,58,237,0.35)",
             }}
           >
-            <Plus className="w-4 h-4 text-white/50" />
+            <Plus
+              className={`w-4 h-4 ${isDark ? "text-white/50" : "text-violet-600"}`}
+            />
           </button>
           <div
             className="w-px h-8 mx-1 flex-shrink-0"
             style={{
-              background: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)",
+              background: isDark
+                ? "rgba(255,255,255,0.15)"
+                : "rgba(124,58,237,0.22)",
             }}
           />
           {filteredContacts.map((contact) => {
             const isActive = contact.id === activeContactId;
             const unread = contact.unreadCount || 0;
+            const clipPath = getChatAvatarClipPath(contact);
             return (
               <button
                 key={contact.id}
                 onClick={() => onContactSwitch(contact.id)}
                 aria-label={contact.name}
-                className={`relative flex-shrink-0 flex flex-col items-center gap-1 px-1 py-1 rounded-xl transition-all duration-200 ease-in-out group ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
+                className="chat-avatar-button relative flex-shrink-0 flex flex-col items-center gap-1 px-1 py-1"
               >
-                <div
-                  className={`relative rounded-full transition-all duration-200 ${isActive ? "scale-110" : "group-hover:scale-105"}`}
+                <span
+                  className={`chat-avatar${isDark ? " chat-avatar--dark" : ""}${
+                    isActive ? " chat-avatar--active" : ""
+                  }${clipPath ? " chat-avatar--shaped" : ""}`}
                   style={
-                    isActive
+                    clipPath
                       ? {
-                          filter: "drop-shadow(0 0 8px rgba(167,139,250,0.8))",
+                          [CHAT_AVATAR_CLIP_VAR as string]: clipPath,
+                          [CHAT_AVATAR_OUTLINE_CLIP_VAR as string]:
+                            getChatAvatarOutlineClipPath(contact) ?? clipPath,
                         }
-                      : {}
+                      : undefined
                   }
                 >
-                  {isActive && (
-                    <div
-                      className="absolute inset-0 rounded-full"
-                      style={{
-                        margin: "-3px",
-                        background:
-                          "linear-gradient(135deg,#a78bfa,#f0abfc,#67e8f9)",
-                        borderRadius: "50%",
-                        padding: "2px",
-                      }}
-                    />
-                  )}
+                  {/* Контур и ореол — оформление: скрыты от скринридера.
+                      Ореол идёт первым: у фигурных аватарок он залит и должен
+                      оказаться под контуром, а не поверх него. */}
+                  <span aria-hidden="true" className="chat-avatar__halo" />
+                  <span aria-hidden="true" className="chat-avatar__ring" />
                   <img
                     src={contact.avatar}
                     alt={contact.name}
+                    width={40}
+                    height={40}
+                    loading="lazy"
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).src =
                         buildInitialsAvatar(contact.name);
                     }}
-                    className="w-10 h-10 rounded-full object-cover"
-                    style={
-                      isActive
-                        ? {
-                            position: "relative",
-                            zIndex: 1,
-                            margin: "2px",
-                          }
-                        : {}
-                    }
+                    className="chat-avatar__img"
                   />
                   {contact.online && (
                     <span
-                      className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-transparent rounded-full"
+                      className="absolute bottom-0 right-0 z-20 w-2.5 h-2.5 bg-green-400 border-2 border-transparent rounded-full"
                       style={{
                         boxShadow: "0 0 6px rgba(74,222,128,0.8)",
                       }}
@@ -144,7 +155,7 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                   )}
                   {unread > 0 && (
                     <span
-                      className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full text-white text-[9px] font-bold flex items-center justify-center px-0.5 shadow-md"
+                      className="absolute -top-1 -right-1 z-20 min-w-[18px] h-[18px] rounded-full text-white text-[9px] font-bold flex items-center justify-center px-0.5 shadow-md"
                       style={{
                         background: "linear-gradient(135deg,#ef4444,#f97316)",
                       }}
@@ -152,7 +163,7 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                       {unread > 9 ? "9+" : unread}
                     </span>
                   )}
-                </div>
+                </span>
               </button>
             );
           })}
@@ -179,7 +190,7 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
       }}
       className="flex-shrink-0 flex flex-col overflow-hidden"
       style={{
-        width: "280px",
+        width,
         background: isDark ? "rgba(15,5,40,0.6)" : "rgba(255,255,255,0.7)",
         borderRight:
           layout === "left"
@@ -205,15 +216,6 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
         >
           Chats
         </span>
-        <button
-          onClick={onComposeOpen}
-          className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "text-white/60 hover:bg-white/15 hover:text-white" : "text-gray-500 hover:bg-black/5 hover:text-gray-800"}`}
-          style={{
-            background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
-          }}
-        >
-          <Edit3 className="w-3.5 h-3.5" />
-        </button>
       </div>
       {/* Search */}
       <div className="px-3 py-2 flex-shrink-0">
@@ -265,6 +267,10 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
         {filteredContacts.map((contact) => {
           const isActive = contact.id === activeContactId;
           const unread = contact.unreadCount || 0;
+          const clipPath = getChatAvatarClipPath(contact);
+          // У фигурной аватарки внутренняя обводка обрезается вместе с углами
+          // и распадается на куски — форму и обводку не совмещаем.
+          const avatarShapeStyle = clipPath ? { clipPath } : undefined;
           return (
             <button
               key={contact.id}
@@ -316,16 +322,18 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                     (e.currentTarget as HTMLImageElement).src =
                       buildInitialsAvatar(contact.name);
                   }}
-                  className="w-9 h-9 rounded-full object-cover transition-transform duration-200 group-hover:scale-105 overflow-hidden"
-                  style={{
-                    boxShadow: isActive
-                      ? isDark
-                        ? "inset 0 0 0 2px rgba(167,139,250,0.6)"
-                        : "inset 0 0 0 2px rgba(124,58,237,0.6)"
-                      : isDark
-                        ? "inset 0 0 0 2px rgba(255,255,255,0.15)"
-                        : "inset 0 0 0 2px rgba(0,0,0,0.1)",
-                  }}
+                  className={`w-9 h-9 object-cover transition-transform duration-200 group-hover:scale-105 overflow-hidden ${clipPath ? "" : "rounded-full"}`}
+                  style={
+                    avatarShapeStyle ?? {
+                      boxShadow: isActive
+                        ? isDark
+                          ? "inset 0 0 0 2px rgba(167,139,250,0.6)"
+                          : "inset 0 0 0 2px rgba(124,58,237,0.6)"
+                        : isDark
+                          ? "inset 0 0 0 2px rgba(255,255,255,0.15)"
+                          : "inset 0 0 0 2px rgba(0,0,0,0.1)",
+                    }
+                  }
                 />
                 {contact.online && (
                   <span

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedCallback } from "@shared/lib";
 import { useChatUiState } from "./useChatUiState";
 import { useCallState } from "./useCallState";
@@ -94,8 +94,9 @@ export const useChatAppState = (
   const prevConversationIdRef = useRef<number | null>(null);
   const prevMessagesLengthRef = useRef<number>(0);
   const firstMessageIdRef = useRef<string | number | undefined>(undefined);
+  const prevScrollHeightRef = useRef<number>(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const node = scrollRef.current;
     if (!node) return;
 
@@ -104,12 +105,16 @@ export const useChatAppState = (
     const isPrepend =
       !isChatSwitched &&
       messages.length > prevMessagesLengthRef.current &&
+      prevMessagesLengthRef.current > 0 &&
       currentFirstId !== firstMessageIdRef.current;
 
     if (isChatSwitched) {
       node.scrollTop = node.scrollHeight;
     } else if (isPrepend) {
-      // Сохраняем положение скролла при догрузке старых сообщений вверх
+      const deltaHeight = node.scrollHeight - prevScrollHeightRef.current;
+      if (deltaHeight > 0) {
+        node.scrollTop = node.scrollTop + deltaHeight;
+      }
     } else if (messages.length > prevMessagesLengthRef.current) {
       const lastMsg = messages[messages.length - 1];
       const isNearBottom =
@@ -122,6 +127,7 @@ export const useChatAppState = (
     prevConversationIdRef.current = activeConversationId;
     prevMessagesLengthRef.current = messages.length;
     firstMessageIdRef.current = currentFirstId;
+    prevScrollHeightRef.current = node.scrollHeight;
   }, [messages, activeConversationId, scrollRef]);
 
   useEffect(() => {

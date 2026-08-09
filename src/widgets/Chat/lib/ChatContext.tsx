@@ -6,9 +6,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { tokenControl } from "@shared/lib";
+import { tokenControl, useCurrentUser } from "@shared/lib";
 import { ChatModal } from "../ui/ChatModal";
-import { usePresenceHeartbeat } from "../api";
+import { useGlobalChatRealtime, usePresenceHeartbeat } from "../api";
 
 // ─── Глобальный доступ к чату ─────────────────────────────────────────────────
 // Провайдер хранит состояние всплывающего чата («открыт/закрыт» и «компактное
@@ -33,9 +33,16 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const { user } = useCurrentUser();
+  const currentUserId = user?.id ?? null;
+
   // Присутствие отмечаем на уровне приложения, а не открытого чата: коллеги
   // должны видеть пользователя в сети, пока он работает в системе.
   usePresenceHeartbeat(Boolean(tokenControl.get()));
+
+  // Глобальная фоновая подписка Reverb (вебсокетов) на сообщения и счётчики:
+  // благодаря ей плавающая кнопка обновляет счётчик непрочитанных в реальном времени.
+  useGlobalChatRealtime(currentUserId);
 
   const openChat = useCallback(() => setIsOpen(true), []);
   const closeChat = useCallback(() => setIsOpen(false), []);

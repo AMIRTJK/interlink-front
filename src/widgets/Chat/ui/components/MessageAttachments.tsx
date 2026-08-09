@@ -5,19 +5,28 @@ import { Download, Eye, ImageIcon, X } from "lucide-react";
 import { toast } from "@shared/lib";
 import type { MessageAttachment } from "../../model";
 import { chatUrls, downloadPrivateFile } from "../../api";
-import { getAttachmentIcon } from "../../lib/chatHelpers";
+import {
+  getAttachmentBubbleStyle,
+  getAttachmentIcon,
+} from "../../lib/chatHelpers";
 import { VoiceBubble } from "./VoiceBubble";
 
 interface IProps {
   attachments: MessageAttachment[];
   isMe: boolean;
   isDark: boolean;
+  isTargetHighlighted?: boolean;
 }
 
 // Вложения сообщения. Файлы приватные: превью картинок разрешено в blob-URL,
 // просмотр полноразмерного фото в модалке по центру экрана через React Portal и скачивание с токеном.
 
-export const MessageAttachments = ({ attachments, isMe, isDark }: IProps) => {
+export const MessageAttachments = ({
+  attachments,
+  isMe,
+  isDark,
+  isTargetHighlighted,
+}: IProps) => {
   const [selectedImage, setSelectedImage] = useState<MessageAttachment | null>(
     null,
   );
@@ -68,44 +77,44 @@ export const MessageAttachments = ({ attachments, isMe, isDark }: IProps) => {
               mimeType={attachment.mimeType}
               isMe={isMe}
               isDark={isDark}
+              isTargetHighlighted={isTargetHighlighted}
             />
           );
         }
 
+        const isImage = attachment.type === "image" && Boolean(attachment.preview);
+
         return (
           <div
             key={key}
-            className={`mb-1.5 rounded-2xl overflow-hidden transition-all duration-200 ease-in-out hover:brightness-105 ${isMe ? "rounded-br-md" : "rounded-bl-md"}`}
-            style={{
-              background: isMe
-                ? "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))"
-                : isDark
-                  ? "rgba(255,255,255,0.1)"
-                  : "rgba(255,255,255,0.95)",
-              border: isMe
-                ? "1px solid rgba(196,181,253,0.5)"
-                : isDark
-                  ? "1px solid rgba(255,255,255,0.15)"
-                  : "1px solid rgba(124,58,237,0.2)",
-              boxShadow: isMe
-                ? "0 0 16px rgba(124, 58, 237, 0.5)"
-                : isDark
-                  ? "0 2px 10px rgba(0,0,0,0.2)"
-                  : "0 2px 10px rgba(124,58,237,0.08)",
-            }}
+            className={`mb-1.5 rounded-2xl overflow-hidden transition-all duration-200 ease-in-out hover:brightness-105 ${
+              isMe ? "rounded-br-md" : "rounded-bl-md"
+            } ${
+              isTargetHighlighted
+                ? "ring-2 ring-violet-500 scale-[1.02] shadow-[0_0_24px_rgba(168,85,247,0.85)] animate-pulse"
+                : ""
+            }`}
+            style={getAttachmentBubbleStyle({
+              isImage,
+              isMe,
+              isDark,
+              isTargetHighlighted,
+            })}
           >
-            {attachment.type === "image" && attachment.preview ? (
-              <div className="relative group cursor-pointer overflow-hidden rounded-2xl">
+            {isImage ? (
+              // Скругления держит только обёртка: свой радиус у картинки не
+              // совпадал с её углом со стороны аватарки и открывал подложку.
+              <div className="relative group cursor-pointer overflow-hidden">
                 <img
                   src={attachment.preview}
                   alt={attachment.name}
                   loading="lazy"
                   onClick={() => setSelectedImage(attachment)}
-                  className="max-w-[260px] max-h-56 object-cover rounded-2xl transition-all duration-300 group-hover:scale-105"
+                  className="block max-w-[260px] max-h-56 object-cover transition-all duration-300 group-hover:scale-105"
                 />
                 <div
                   onClick={() => setSelectedImage(attachment)}
-                  className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3.5 backdrop-blur-[2px] rounded-2xl"
+                  className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3.5 backdrop-blur-[2px]"
                 >
                   <button
                     type="button"

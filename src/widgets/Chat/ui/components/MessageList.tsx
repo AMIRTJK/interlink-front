@@ -17,6 +17,7 @@ interface IProps {
   isError: boolean;
   hasOlder: boolean;
   isLoadingOlder: boolean;
+  onLoadOlder?: () => void;
   onScroll: () => void;
   scrollRef: React.RefObject<HTMLDivElement | null>;
   typingNames: string[];
@@ -44,6 +45,8 @@ interface IProps {
   setOpenThreadMsgId: (id: string | null) => void;
   setShowContactDrawer: (show: boolean) => void;
   formatRepliesCount: (count: number, lang: Lang) => string;
+  /** Сколько ответов треда человек ещё не видел. */
+  getUnreadThreadCount: (msgId: string, repliesCount: number) => number;
   setMessageRef: (id: string, el: HTMLDivElement | null) => void;
 }
 
@@ -61,6 +64,7 @@ export const MessageList = ({
   isError,
   hasOlder,
   isLoadingOlder,
+  onLoadOlder,
   onScroll,
   scrollRef,
   typingNames,
@@ -113,6 +117,7 @@ export const MessageList = ({
                 <button
                   type="button"
                   disabled={isLoadingOlder}
+                  onClick={onLoadOlder}
                   className={`text-xs px-3 py-1.5 rounded-full transition-all duration-150 border ${
                     isDark
                       ? "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"

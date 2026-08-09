@@ -72,8 +72,11 @@ export const MainLayout = () => {
   const showSidebarRight = effectiveLayout === "right";
   const showBottomNav = effectiveLayout === "bottom";
 
+  // Гасим горизонтальные отступы рабочей области (px-6), чтобы чат лёг край в край,
+  // как во всплывающем окне. Нижний отступ снимает сама колонка (pb-0), а не
+  // отрицательный margin: иначе чат вылезал бы за её границу и обрезался.
   const chatShellClass = isChatModule
-    ? "w-full flex-1 min-h-0 overflow-hidden"
+    ? "-mx-6 w-[calc(100%+48px)] flex-1 min-h-0 overflow-hidden"
     : "";
 
   return (
@@ -90,13 +93,19 @@ export const MainLayout = () => {
         <div className={`absolute bottom-0 left-1/3 w-[400px] h-[400px] bg-gradient-to-tr ${themeGradient} opacity-[0.05] blur-[110px] rounded-full`} />
       </div>
 
-      <div className={`relative z-10 flex flex-grow gap-6 px-6 py-4 transition-all duration-300 ease-in-out min-w-0 ${isChatModule ? "h-full overflow-hidden" : ""}`}>
+      {/* Обрезку (overflow-hidden) на рабочей области держать нельзя: она делает
+          контейнер скролл-портом и ломает две вещи сразу — sticky-хедер прижимается
+          не к верху страницы, а к внутренней границе padding (отсюда отступ сверху),
+          и full-bleed элементы с отрицательным margin обрезаются вместе с его фоном.
+          Высоту чата держат h-full/min-h-0 по цепочке и overflow у самого чата, а
+          страницу от прокрутки защищает overflow-hidden на корне. */}
+      <div className={`relative z-10 flex flex-grow gap-6 px-6 pt-4 ${isChatModule && !showBottomNav ? "pb-0" : "pb-4"} transition-all duration-300 ease-in-out min-w-0 ${isChatModule ? "h-full min-h-0" : ""}`}>
         {showSidebarLeft && (
           <Sidebar side="left" setLayoutMode={setLayoutMode} themeGradient={themeGradient} />
         )}
 
         <div
-          className={`flex-1 min-w-0 flex flex-col ${isChatModule ? "h-full overflow-hidden" : "gap-6"} transition-all duration-300 ease-in-out`}
+          className={`flex-1 min-w-0 flex flex-col ${isChatModule ? "h-full min-h-0" : "gap-6"} transition-all duration-300 ease-in-out`}
           style={showBottomNav ? { paddingBottom: 76 } : undefined}
         >
           <If is={!hideHeader}>

@@ -1,8 +1,37 @@
 import React from "react";
+import { motion } from "framer-motion";
 import { EmptyState, If } from "@shared/ui";
+import { useIsDarkMode } from "@shared/lib";
+import { useDesignSettings, THEMES } from "@widgets/layout";
 import { LetterDirection } from "../../lib/structure/types";
 import { groupLettersByDate, pluralizeDocuments } from "../../lib/structure/helpers";
 import { LetterActivityCard } from "./LetterActivityCard";
+
+const AnimatedStructureDivider: React.FC = () => {
+  const { currentTheme } = useDesignSettings();
+  const isDark = useIsDarkMode();
+  const theme = THEMES[currentTheme] || THEMES.blue;
+  const themeColor = isDark ? (theme.dark || "#0A84FF") : (theme.light || "#007AFF");
+
+  return (
+    <div className="flex-1 h-[2px] bg-slate-200/50 dark:bg-slate-700/50 relative overflow-hidden rounded-full my-auto">
+      <motion.div
+        initial={{ x: "-100%" }}
+        animate={{ x: "200%" }}
+        transition={{
+          repeat: Infinity,
+          duration: 3,
+          ease: "linear",
+        }}
+        className="absolute top-0 bottom-0 w-1/2 rounded-full pointer-events-none"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, ${themeColor} 50%, transparent 100%)`,
+          boxShadow: `0 0 10px ${themeColor}`,
+        }}
+      />
+    </div>
+  );
+};
 
 interface IStructureViewProps {
   documents: any[];
@@ -40,7 +69,7 @@ export const StructureView: React.FC<IStructureViewProps> = ({
                     {group.items.length} {pluralizeDocuments(group.items.length)}
                   </span>
                 </div>
-                <div className="flex-1 h-px bg-slate-100 dark:bg-slate-700" />
+                <AnimatedStructureDivider />
               </div>
 
               <div className="space-y-4">

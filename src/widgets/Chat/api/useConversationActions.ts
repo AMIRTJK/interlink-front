@@ -69,9 +69,15 @@ export const useConversationActions = (activeConversationId: number | null) => {
     messages: { suppressSuccessToast: true, invalidate: conversationKeys },
   });
 
-  const deleteConversation = useMutationQuery<{ conversationId: number }>({
+  const deleteConversation = useMutationQuery<{
+    conversationId: number;
+    forEveryone?: boolean;
+  }>({
     url: (payload) => chatUrls.conversation(payload.conversationId),
     method: "DELETE",
+    transformBody: (payload) => ({
+      for_everyone: payload.forEveryone ?? false,
+    }),
     messages: {
       success: "История переписки очищена",
       invalidate: conversationKeys,

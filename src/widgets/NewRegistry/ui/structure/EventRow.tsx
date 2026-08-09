@@ -9,6 +9,7 @@ import { getEventMeta, getInitials, formatDateTime } from "../../lib/structure/h
 interface IEventRowProps {
   event: ITimelineEvent;
   isLast: boolean;
+  index?: number;
   fallbackActorName?: string;
   onVersionClick?: (docId: number, versionId?: number, versionNum?: string) => void;
 }
@@ -16,6 +17,7 @@ interface IEventRowProps {
 export const EventRow: React.FC<IEventRowProps> = ({
   event,
   isLast,
+  index = 0,
   fallbackActorName,
   onVersionClick,
 }) => {
@@ -48,9 +50,9 @@ export const EventRow: React.FC<IEventRowProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       className={cn("flex gap-3 group/event", !isLast && "mb-3")}
     >
       <div

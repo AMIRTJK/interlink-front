@@ -156,3 +156,15 @@ export interface IChatConversationEvent {
   conversation_id?: number;
   conversation?: IChatConversation;
 }
+
+/**
+ * Метаданные ссылки для превью. Заполнено может быть далеко не всё: часть
+ * страниц не отдаёт ни og-разметки, ни описания, поэтому обязателен только url.
+ */
+export interface IChatLinkPreview {
+  url: string;
+  title?: string | null;
+  description?: string | null;
+  image?: string | null;
+  site_name?: string | null;
+}
