@@ -13,7 +13,9 @@
   /* Форма аватарки. Круг — состояние по умолчанию; групповым беседам сюда
      приходит многоугольник или знак бесконечности из `chatAvatarShape.ts`.
      Контур и подложка строятся вокруг этой переменной, поэтому и ведут себя
-     одинаково у любой формы. */
+     одинаково у любой формы. Слои под картинкой берут `--chat-avatar-clip-
+     outline`, если он задан: у фигуры с дырками увеличенная копия самой формы
+     дала бы рваную кайму, поэтому снизу лежит сплошной силуэт. */
   --chat-avatar-clip: circle(50%);
   --chat-avatar-accent: 124 58 237; /* violet-600 */
   --chat-avatar-arc-peak: 134 25 143; /* fuchsia-800 */
@@ -97,7 +99,7 @@
    должно совпадать у всех форм. */
 .chat-avatar__ring {
   opacity: 0;
-  clip-path: var(--chat-avatar-clip);
+  clip-path: var(--chat-avatar-clip-outline, var(--chat-avatar-clip));
   transition: opacity 0.28s ease;
 }
 
@@ -184,11 +186,11 @@
 }
 
 /* ─── Групповые аватарки: форма по числу участников ─────────────────────────
-   Сторон у фигуры столько, сколько участников в группе (3…10), свыше десяти —
+   Сторон у фигуры столько, сколько участников в группе (3…9), с десяти —
    знак бесконечности. Саму фигуру считает `chatAvatarShape.ts` и кладёт в
    --chat-avatar-clip; контур и его анимация уже работают от этой переменной и
    ничего здесь не переопределяют. Ниже — только то, что у круга держалось на
-   border-radius и потому фигуру не повторяет: картинка, ореол и подложка. */
+   border-radius и потому фигуру не повторяет: картинка и ореол. */
 
 .chat-avatar--shaped {
   /* Отступ задаёт кайму по радиусу, а у многоугольника она видна поперёк
@@ -196,31 +198,6 @@
      полтора. Поэтому фигурам отступ на пиксель больше, чтобы кайма читалась
      той же толщины, что у круга. */
   --chat-avatar-ring-offset: 4px;
-  --chat-avatar-backdrop-offset: 8px;
-  --chat-avatar-backdrop: rgb(0 0 0 / 0.05);
-}
-
-.chat-avatar--shaped.chat-avatar--dark {
-  --chat-avatar-backdrop: rgb(255 255 255 / 0.1);
-}
-
-/* Подложка наведения повторяет фигуру. Прямоугольная подсветка кнопки вокруг
-   круглой аватарки почти не видна, а вокруг треугольника читается как чужой
-   квадрат, поэтому у фигурных аватарок фон наведения рисует сама аватарка —
-   тем же тоном, что и подсветка кнопки у обычных бесед. */
-.chat-avatar--shaped .chat-avatar__backdrop {
-  position: absolute;
-  inset: calc(-1 * var(--chat-avatar-backdrop-offset));
-  background: var(--chat-avatar-backdrop);
-  clip-path: var(--chat-avatar-clip);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-}
-
-.chat-avatar-button:hover .chat-avatar--shaped .chat-avatar__backdrop,
-.chat-avatar-button:focus-visible .chat-avatar--shaped .chat-avatar__backdrop {
-  opacity: 1;
 }
 
 .chat-avatar--shaped .chat-avatar__img,
@@ -249,14 +226,13 @@
   background: rgb(
     var(--chat-avatar-accent) / var(--chat-avatar-halo-glow-alpha)
   );
-  clip-path: var(--chat-avatar-clip);
+  clip-path: var(--chat-avatar-clip-outline, var(--chat-avatar-clip));
 }
 
 @media (prefers-reduced-motion: reduce) {
   .chat-avatar,
   .chat-avatar__ring,
-  .chat-avatar__halo,
-  .chat-avatar--shaped .chat-avatar__backdrop {
+  .chat-avatar__halo {
     transition: none;
   }
 

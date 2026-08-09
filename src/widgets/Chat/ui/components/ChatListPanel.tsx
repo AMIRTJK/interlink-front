@@ -6,7 +6,9 @@ import { Contact, LayoutPosition, CHAT_LIST_PANEL_WIDTH } from "../../model";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
 import {
   CHAT_AVATAR_CLIP_VAR,
+  CHAT_AVATAR_OUTLINE_CLIP_VAR,
   getChatAvatarClipPath,
+  getChatAvatarOutlineClipPath,
 } from "../../lib/chatAvatarShape";
 import "../../style.css";
 
@@ -43,9 +45,6 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
   width = CHAT_LIST_PANEL_WIDTH,
 }) => {
   const isHorizontal = layout === "top" || layout === "bottom";
-  // Подсветка кнопки прямоугольная — она годится только круглой аватарке.
-  // Фигурная рисует свою подложку по форме (`.chat-avatar__backdrop`).
-  const hoverBackdropClass = isDark ? "hover:bg-white/10" : "hover:bg-black/5";
 
   if (isHorizontal) {
     return (
@@ -113,7 +112,7 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                 key={contact.id}
                 onClick={() => onContactSwitch(contact.id)}
                 aria-label={contact.name}
-                className={`chat-avatar-button relative flex-shrink-0 flex flex-col items-center gap-1 px-1 py-1 rounded-xl transition-all duration-200 ease-in-out ${clipPath ? "" : hoverBackdropClass}`}
+                className="chat-avatar-button relative flex-shrink-0 flex flex-col items-center gap-1 px-1 py-1"
               >
                 <span
                   className={`chat-avatar${isDark ? " chat-avatar--dark" : ""}${
@@ -121,17 +120,17 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                   }${clipPath ? " chat-avatar--shaped" : ""}`}
                   style={
                     clipPath
-                      ? { [CHAT_AVATAR_CLIP_VAR as string]: clipPath }
+                      ? {
+                          [CHAT_AVATAR_CLIP_VAR as string]: clipPath,
+                          [CHAT_AVATAR_OUTLINE_CLIP_VAR as string]:
+                            getChatAvatarOutlineClipPath(contact) ?? clipPath,
+                        }
                       : undefined
                   }
                 >
-                  {/* Подложка, контур и ореол — оформление: скрыты от
-                      скринридера. Порядок = порядок слоёв: у фигурных аватарок
-                      они залиты, а не нарисованы тенью, и наложатся друг на
-                      друга по документу. */}
-                  <If is={Boolean(clipPath)}>
-                    <span aria-hidden="true" className="chat-avatar__backdrop" />
-                  </If>
+                  {/* Контур и ореол — оформление: скрыты от скринридера.
+                      Ореол идёт первым: у фигурных аватарок он залит и должен
+                      оказаться под контуром, а не поверх него. */}
                   <span aria-hidden="true" className="chat-avatar__halo" />
                   <span aria-hidden="true" className="chat-avatar__ring" />
                   <img
