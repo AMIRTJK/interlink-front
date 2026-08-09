@@ -10,7 +10,11 @@
    Свечение плотнее и с меньшим радиусом: на белом размытый ореол читается хуже. */
 .chat-avatar {
   --chat-avatar-ring-offset: 3px;
-  --chat-avatar-ring-width: 2px;
+  /* Форма аватарки. Круг — состояние по умолчанию; групповым беседам сюда
+     приходит многоугольник или знак бесконечности из `chatAvatarShape.ts`.
+     Контур и подложка строятся вокруг этой переменной, поэтому и ведут себя
+     одинаково у любой формы. */
+  --chat-avatar-clip: circle(50%);
   --chat-avatar-accent: 124 58 237; /* violet-600 */
   --chat-avatar-arc-peak: 134 25 143; /* fuchsia-800 */
   --chat-avatar-arc-tip: 22 78 99; /* cyan-900 */
@@ -25,8 +29,9 @@
   --chat-avatar-halo-pulse-max: 1;
   /* Тонкая тёмная обводка отделяет аватарку от светлой полосы. */
   --chat-avatar-img-edge: 0 0 0 1px rgb(15 23 42 / 0.08);
-  /* Заливка контура вынесена в переменную: её использует и круглое кольцо
-     (через маску), и фигурный контур групп (через вращаемый ::before). */
+  /* Заливка контура: первый слой — бегущий световой сегмент, второй — ровная
+     подсветка всей каймы, чтобы контур читался целиком, а не только под
+     световой точкой. */
   --chat-avatar-ring-paint:
     conic-gradient(
       from 0deg,
@@ -86,23 +91,24 @@
   pointer-events: none;
 }
 
-/* Контур: конический градиент, обрезанный маской в тонкое кольцо. Первый слой —
-   бегущий световой сегмент, второй — ровная подсветка всего контура, чтобы он
-   читался целиком, а не только под световой точкой. */
+/* Контур: фигура, обрезанная по форме аватарки и на `--chat-avatar-ring-offset`
+   крупнее картинки, — из-под картинки она видна ровной каймой. Маску-кольцо
+   здесь использовать нельзя: она годится только кругу, а поведение контура
+   должно совпадать у всех форм. */
 .chat-avatar__ring {
   opacity: 0;
-  background: var(--chat-avatar-ring-paint);
-  -webkit-mask: radial-gradient(
-    farthest-side,
-    transparent calc(100% - var(--chat-avatar-ring-width)),
-    #000 calc(100% - var(--chat-avatar-ring-width))
-  );
-  mask: radial-gradient(
-    farthest-side,
-    transparent calc(100% - var(--chat-avatar-ring-width)),
-    #000 calc(100% - var(--chat-avatar-ring-width))
-  );
+  clip-path: var(--chat-avatar-clip);
   transition: opacity 0.28s ease;
+}
+
+/* Бегущий свет крутится внутри каймы, а не вместе с ней: у круга вращение
+   контура незаметно, у многоугольника это была бы вертящаяся фигура. Запас в
+   25% нужен, чтобы углы прямоугольного слоя не обнажали фигуру при повороте. */
+.chat-avatar__ring::before {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  background: var(--chat-avatar-ring-paint);
 }
 
 /* Свечение: мягкий ореол под кольцом. */
@@ -146,6 +152,9 @@
 
 .chat-avatar--active .chat-avatar__ring {
   opacity: 1;
+}
+
+.chat-avatar--active .chat-avatar__ring::before {
   animation: chat-avatar-ring-travel 3.6s linear infinite;
 }
 
@@ -177,11 +186,15 @@
 /* ─── Групповые аватарки: форма по числу участников ─────────────────────────
    Сторон у фигуры столько, сколько участников в группе (3…10), свыше десяти —
    знак бесконечности. Саму фигуру считает `chatAvatarShape.ts` и кладёт в
-   --chat-avatar-clip. Круглая маска кольца многоугольнику не подходит, поэтому
-   контур здесь — залитая фигура на 4px крупнее картинки: из-под обрезанной
-   аватарки она видна ровной каймой по всем сторонам. */
+   --chat-avatar-clip; контур и его анимация уже работают от этой переменной и
+   ничего здесь не переопределяют. Ниже — только то, что у круга держалось на
+   border-radius и потому фигуру не повторяет: картинка, ореол и подложка. */
 
 .chat-avatar--shaped {
+  /* Отступ задаёт кайму по радиусу, а у многоугольника она видна поперёк
+     стороны — это уже `offset · cos(π/n)`: у треугольника от 3px остаётся
+     полтора. Поэтому фигурам отступ на пиксель больше, чтобы кайма читалась
+     той же толщины, что у круга. */
   --chat-avatar-ring-offset: 4px;
   --chat-avatar-backdrop-offset: 8px;
   --chat-avatar-backdrop: rgb(0 0 0 / 0.05);
@@ -211,7 +224,6 @@
 }
 
 .chat-avatar--shaped .chat-avatar__img,
-.chat-avatar--shaped .chat-avatar__ring,
 .chat-avatar--shaped .chat-avatar__halo {
   border-radius: 0;
 }
@@ -219,23 +231,6 @@
 .chat-avatar--shaped .chat-avatar__img {
   clip-path: var(--chat-avatar-clip);
   box-shadow: none;
-}
-
-.chat-avatar--shaped .chat-avatar__ring {
-  background: none;
-  clip-path: var(--chat-avatar-clip);
-  -webkit-mask: none;
-  mask: none;
-}
-
-/* Бегущий свет крутится внутри фигуры, а не вместе с ней: у круга вращение
-   контура незаметно, у многоугольника это вертящаяся фигура. Запас в 25%
-   нужен, чтобы углы прямоугольного слоя не обнажали фигуру при повороте. */
-.chat-avatar--shaped .chat-avatar__ring::before {
-  content: "";
-  position: absolute;
-  inset: -25%;
-  background: var(--chat-avatar-ring-paint);
 }
 
 /* Свечение через box-shadow повторяет border-radius, а не clip-path, — вокруг
@@ -257,14 +252,6 @@
   clip-path: var(--chat-avatar-clip);
 }
 
-.chat-avatar--shaped.chat-avatar--active .chat-avatar__ring {
-  animation: none;
-}
-
-.chat-avatar--shaped.chat-avatar--active .chat-avatar__ring::before {
-  animation: chat-avatar-ring-travel 3.6s linear infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .chat-avatar,
   .chat-avatar__ring,
@@ -275,9 +262,8 @@
 
   /* Специфичность повторяет активное состояние: иначе `animation: none`
      проигрывает правилам `.chat-avatar--active` и движение остаётся. */
-  .chat-avatar--active .chat-avatar__ring,
-  .chat-avatar--active .chat-avatar__halo,
-  .chat-avatar--shaped.chat-avatar--active .chat-avatar__ring::before {
+  .chat-avatar--active .chat-avatar__ring::before,
+  .chat-avatar--active .chat-avatar__halo {
     animation: none;
   }
 
