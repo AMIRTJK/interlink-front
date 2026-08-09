@@ -85,6 +85,10 @@ export type EmojiCategory = {
 };
 export type DrawerTab = 'info' | 'media';
 export type PendingFile = {
+  /** Ключ вложения в очереди: имена не уникальны — из буфера обмена приходят
+      снимки экрана с одинаковым `image.png`, а одинаковый файл можно выбрать
+      дважды. */
+  id: string;
   name: string;
   size: string;
   type: MessageAttachment['type'];

@@ -6,7 +6,7 @@ import { getAttachmentIcon } from "../../lib/chatHelpers";
 
 interface PendingFilesBarProps {
   files: PendingFile[];
-  onRemove: (name: string) => void;
+  onRemove: (id: string) => void;
   onSend: () => void;
   isDark: boolean;
   countLabel: string;
@@ -45,10 +45,7 @@ export const PendingFilesBar: React.FC<PendingFilesBarProps> = ({
     </div>
     <div className="flex gap-2 overflow-x-auto pb-1">
       {files.map((f) => (
-        <div
-          key={f.name}
-          className="relative flex-shrink-0 group cursor-pointer"
-        >
+        <div key={f.id} className="relative flex-shrink-0 group cursor-pointer">
           {f.type === "image" && f.preview ? (
             <div
               className={`w-20 h-20 rounded-xl overflow-hidden border ${isDark ? "border-white/20" : "border-black/10"}`}
@@ -76,9 +73,13 @@ export const PendingFilesBar: React.FC<PendingFilesBarProps> = ({
               </p>
             </div>
           )}
+          {/* Кнопка живёт внутри плитки: полоса вложений прокручивается по
+              горизонтали, а такой контейнер обрезает и по вертикали — вынос за
+              край срезал бы кнопку сверху. */}
           <button
-            onClick={() => onRemove(f.name)}
-            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow hover:scale-110"
+            onClick={() => onRemove(f.id)}
+            aria-label={`Убрать ${f.name}`}
+            className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-all duration-200 shadow-md ring-1 ring-black/20 hover:scale-110"
           >
             <X className="w-3 h-3" />
           </button>

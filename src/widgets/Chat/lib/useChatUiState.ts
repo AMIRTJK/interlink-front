@@ -82,16 +82,25 @@ export const useChatUiState = (
     onComposeStateChange?.(showComposeModal);
   }, [showComposeModal, onComposeStateChange]);
 
+  /**
+   * Кладёт файлы в очередь вложений. Сюда сходятся все способы прикрепить файл:
+   * выбор через кнопку, вставка из буфера (Ctrl+V) и перетаскивание в поле
+   * ввода — обработка у них одна.
+   */
   const addFiles = (files: File[]) => {
     if (!files.length) return;
-    const mapped: PendingFile[] = files.map((file) => {
+    const mapped: PendingFile[] = files.map((file, index) => {
       let type: MessageAttachment["type"] = "file";
       if (file.type.startsWith("image/")) type = "image";
       else if (file.type.startsWith("video/")) type = "video";
       else if (file.type.startsWith("audio/")) type = "audio";
 
-      const name = file.name || `image-${Date.now()}.${file.type.split("/")[1] || "png"}`;
+      // Из буфера обмена файл приходит без имени — собираем его сами, иначе
+      // вложение нечем подписать и не с чем отправить.
+      const name =
+        file.name || `image-${Date.now()}.${file.type.split("/")[1] || "png"}`;
       const entry: PendingFile = {
+        id: `${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`,
         name,
         size: formatFileSize(file.size),
         type,
@@ -110,11 +119,11 @@ export const useChatUiState = (
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const removePendingFile = (name: string) => {
+  const removePendingFile = (id: string) => {
     setPendingFiles((prev) => {
-      const removed = prev.find((f) => f.name === name);
+      const removed = prev.find((f) => f.id === id);
       if (removed?.preview) URL.revokeObjectURL(removed.preview);
-      return prev.filter((f) => f.name !== name);
+      return prev.filter((f) => f.id !== id);
     });
   };
 

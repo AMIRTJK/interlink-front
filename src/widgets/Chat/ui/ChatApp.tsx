@@ -20,6 +20,7 @@ import { StoryViewer } from "./components/StoryViewer";
 import { PendingFilesBar } from "./components/PendingFilesBar";
 import { AIPanel } from "./components/AIPanel";
 import { ReplyBar } from "./components/ReplyBar";
+import { LinkPreviewBar } from "./components/LinkPreviewBar";
 import { MessageSearchBar } from "./components/MessageSearchBar";
 import { PinnedBanner } from "./components/PinnedBanner";
 import { DeleteConfirmModal } from "./components/DeleteConfirmModal";
@@ -397,6 +398,8 @@ export const ChatApp: React.FC<IProps> = ({
             )}
           </AnimatePresence>
 
+          <LinkPreviewBar text={input} isDark={isDark} t={t} />
+
           <AnimatePresence>
             {pendingFiles.length > 0 && (
               <PendingFilesBar
@@ -446,7 +449,7 @@ export const ChatApp: React.FC<IProps> = ({
               isRecording={isRecording}
               setIsRecording={setIsRecording}
               onSendVoice={handleSendVoice}
-              onPasteFiles={addFiles}
+              onAttachFiles={addFiles}
             />
           </Can>
         </>

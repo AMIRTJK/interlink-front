@@ -16,3 +16,4 @@ export { useMessageActions } from "./useMessageActions";
 export { useConversationActions } from "./useConversationActions";
 export { useChatSignals, usePresenceHeartbeat } from "./useChatSignals";
 export { useChatRealtime } from "./useChatRealtime";
+export { useLinkPreview } from "./useLinkPreview";

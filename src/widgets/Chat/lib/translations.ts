@@ -124,6 +124,8 @@ export type Translations = {
   loadMore: string;
   you: string;
   noSendPermission: string;
+  dropFiles: string;
+  hideLinkPreview: string;
 };
 export const TRANSLATIONS: Record<Lang, Translations> = {
   en: {
@@ -228,7 +230,9 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     selectedMembers: 'selected',
     loadMore: 'Load earlier messages',
     you: 'You',
-    noSendPermission: 'You have no permission to send messages in this chat.'
+    noSendPermission: 'You have no permission to send messages in this chat.',
+    dropFiles: 'Drop files to attach',
+    hideLinkPreview: 'Hide link preview'
   },
   ru: {
     search: 'Поиск',
@@ -332,7 +336,9 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     selectedMembers: 'выбрано',
     loadMore: 'Загрузить предыдущие сообщения',
     you: 'Вы',
-    noSendPermission: 'У вас нет права отправлять сообщения в чате.'
+    noSendPermission: 'У вас нет права отправлять сообщения в чате.',
+    dropFiles: 'Отпустите файлы, чтобы прикрепить',
+    hideLinkPreview: 'Скрыть превью ссылки'
   },
   tg: {
     search: 'Ҷустуҷӯ',
@@ -436,6 +442,8 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     selectedMembers: 'интихобшуда',
     loadMore: 'Паёмҳои пешинаро бор кардан',
     you: 'Шумо',
-    noSendPermission: 'Шумо ҳуқуқи фиристодани паём надоред.'
+    noSendPermission: 'Шумо ҳуқуқи фиристодани паём надоред.',
+    dropFiles: 'Файлҳоро сар диҳед, то замима шаванд',
+    hideLinkPreview: 'Пешнамоиши истинодро пинҳон кардан'
   }
 };
