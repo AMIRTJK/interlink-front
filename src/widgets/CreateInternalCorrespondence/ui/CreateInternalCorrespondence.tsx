@@ -856,6 +856,7 @@ export const CreateInternalCorrespondence = ({
         suppressSuccessToast: true,
         invalidate: [
           ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
+          ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
           ...CORRESPONDENCE_INVALIDATE_KEYS,
         ],
       },
@@ -970,9 +971,17 @@ export const CreateInternalCorrespondence = ({
         success: "Подписывающий назначен",
         invalidate: [
           ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+          ApiRoutes.GET_INTERNAL_BY_ID?.replace(":id", String(id || "")),
+          correspondencePermissionsKey(String(id || "")),
+          ...CORRESPONDENCE_INVALIDATE_KEYS,
         ],
       },
-      queryOptions: { onSuccess: () => refetchWorkflow() },
+      queryOptions: {
+        onSuccess: (_res, variables) => {
+          refetchWorkflow();
+          setFinalSigner((prev) => (prev ? { ...prev, isInvited: true } : null));
+        },
+      },
     });
 
   const { mutate: inviteApprover, isPending: isApproverInviting } =
@@ -984,6 +993,9 @@ export const CreateInternalCorrespondence = ({
         success: "Согласующий приглашен",
         invalidate: [
           ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+          ApiRoutes.GET_INTERNAL_BY_ID?.replace(":id", String(id || "")),
+          correspondencePermissionsKey(String(id || "")),
+          ...CORRESPONDENCE_INVALIDATE_KEYS,
         ],
       },
       queryOptions: { onSuccess: () => refetchWorkflow() },
@@ -998,6 +1010,8 @@ export const CreateInternalCorrespondence = ({
       success: "Письмо прикреплено",
       invalidate: [
         ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+        ApiRoutes.GET_INTERNAL_BY_ID?.replace(":id", String(id || "")),
+        ...CORRESPONDENCE_INVALIDATE_KEYS,
       ],
     },
     queryOptions: { onSuccess: () => refetchWorkflow() },

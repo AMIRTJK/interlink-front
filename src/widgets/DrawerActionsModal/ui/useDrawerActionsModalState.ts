@@ -3,6 +3,8 @@ import { TTab } from "../model";
 import { TModalType, TModalConfig } from "./drawerActionsModalModel";
 import { ISearchItem } from "@shared/ui/SmartSearchModal";
 import { ApiRoutes } from "@shared/api";
+import { CORRESPONDENCE_INVALIDATE_KEYS } from "@shared/config";
+import { correspondencePermissionsKey } from "@entities/correspondence";
 import { useModalState, useGetQuery, useMutationQuery } from "@shared/lib/hooks";
 
 interface UseDrawerActionsModalStateParams {
@@ -61,16 +63,48 @@ export const useDrawerActionsModalState = ({
   const { mutate: inviteSigner } = useMutationQuery({
     url: docId ? ApiRoutes.INTERNAL_INVITE_SIGNER.replace(":id", docId) : "",
     method: "POST",
+    messages: {
+      success: "Подписывающий назначен",
+      invalidate: docId
+        ? [
+            ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", docId),
+            ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", docId),
+            correspondencePermissionsKey(docId),
+            ...CORRESPONDENCE_INVALIDATE_KEYS,
+          ]
+        : [...CORRESPONDENCE_INVALIDATE_KEYS],
+    },
   });
 
   const { mutate: attachIncoming } = useMutationQuery({
     url: docId ? ApiRoutes.ATTACH_INTERNAL_INCOMING.replace(":id", docId) : "",
     method: "POST",
+    messages: {
+      success: "Письмо прикреплено",
+      invalidate: docId
+        ? [
+            ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", docId),
+            ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", docId),
+            ...CORRESPONDENCE_INVALIDATE_KEYS,
+          ]
+        : [...CORRESPONDENCE_INVALIDATE_KEYS],
+    },
   });
 
   const { mutate: inviteApprover } = useMutationQuery({
     url: docId ? ApiRoutes.INTERNAL_INVITE_APPROVER.replace(":id", docId) : "",
     method: "POST",
+    messages: {
+      success: "Согласующий приглашен",
+      invalidate: docId
+        ? [
+            ApiRoutes.INTERNAL_GET_WORKFLOW.replace(":id", docId),
+            ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", docId),
+            correspondencePermissionsKey(docId),
+            ...CORRESPONDENCE_INVALIDATE_KEYS,
+          ]
+        : [...CORRESPONDENCE_INVALIDATE_KEYS],
+    },
   });
 
   const handleOpenModal = (type: TModalType) => {
