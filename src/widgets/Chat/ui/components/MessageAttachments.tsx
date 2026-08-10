@@ -87,13 +87,12 @@ export const MessageAttachments = ({
         }
 
         const isImage = attachment.type === "image" && Boolean(attachment.preview);
+        const cornerRadiusClass = `rounded-2xl ${isMe ? "rounded-br-md" : "rounded-bl-md"}`;
 
         return (
           <div
             key={key}
-            className={`mb-1.5 rounded-2xl overflow-hidden transition-all duration-200 ease-in-out ${
-              isMe ? "rounded-br-md" : "rounded-bl-md"
-            } ${
+            className={`mb-1.5 overflow-hidden transition-all duration-200 ease-in-out ${cornerRadiusClass} ${
               isTargetHighlighted
                 ? "ring-2 ring-[rgb(var(--th-accent-rgb))] scale-[1.02] shadow-[0_0_24px_rgb(var(--th-accent-2-rgb)/0.85)] animate-pulse"
                 : ""
@@ -107,19 +106,17 @@ export const MessageAttachments = ({
             })}
           >
             {isImage ? (
-              // Скругления держит только обёртка: свой радиус у картинки не
-              // совпадал с её углом со стороны аватарки и открывал подложку.
-              <div className="relative group cursor-pointer overflow-hidden">
+              <div className={`relative group cursor-pointer overflow-hidden isolate ${cornerRadiusClass}`}>
                 <img
                   src={attachment.preview}
                   alt={attachment.name}
                   loading="lazy"
                   onClick={() => setSelectedImage(attachment)}
-                  className="block max-w-[260px] max-h-56 object-cover transition-all duration-300 group-hover:scale-105"
+                  className={`block max-w-[260px] max-h-56 object-cover transition-all duration-300 group-hover:scale-105 ${cornerRadiusClass}`}
                 />
                 <div
                   onClick={() => setSelectedImage(attachment)}
-                  className="absolute inset-0 bg-[var(--th-scrim)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3.5 backdrop-blur-[2px]"
+                  className={`absolute inset-0 bg-[var(--th-scrim)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3.5 backdrop-blur-[2px] ${cornerRadiusClass}`}
                 >
                   <button
                     type="button"

@@ -323,7 +323,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             <div
               className={`px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 ease-in-out cursor-default ${
                   isTargetHighlighted
-                    ? "rounded-2xl ring-2 ring-[rgb(var(--th-accent-rgb))] scale-[1.02] shadow-[0_0_24px_rgb(var(--th-accent-2-rgb)/0.85)] animate-pulse"
+                    ? `rounded-2xl ${isMe ? "rounded-br-md text-[var(--th-bubble-out-text)]" : "rounded-bl-md text-[var(--th-bubble-in-text)]"} ring-2 ring-[rgb(var(--th-accent-rgb))] scale-[1.02] shadow-[0_0_24px_rgb(var(--th-accent-2-rgb)/0.85)] animate-pulse`
                     : isEffectivelyDeleted
                       ? "italic rounded-2xl border border-dashed text-[var(--th-text-faint)] border-[var(--th-panel-border)] bg-[rgb(var(--th-overlay-rgb)/0.04)]"
                     : currentMatchMsg

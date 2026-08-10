@@ -53,17 +53,20 @@ export const getAttachmentBubbleStyle = ({
   isTargetHighlighted,
 }: IAttachmentBubbleStyle): React.CSSProperties => {
   const glow = getHoverGlow({ isDark, isHovered, isMe, isTargetHighlighted });
+  const baseBg = isMe ? "var(--th-bubble-out-bg)" : "var(--th-bubble-in-bg)";
 
   if (isTargetHighlighted) {
     return {
-      background: "var(--th-bubble-out-bg)",
-      border: "2px solid rgb(var(--th-on-accent-rgb))",
+      background: baseBg,
+      border: "2px solid rgb(var(--th-accent-rgb))",
       boxShadow:
         "0 0 28px rgb(var(--th-accent-2-rgb) / 0.9), 0 0 12px rgb(var(--th-accent-rgb) / 0.8)",
     };
   }
 
-  if (isImage) return glow ? { boxShadow: glow } : {};
+  if (isImage) {
+    return glow ? { boxShadow: glow } : {};
+  }
 
   if (isMe) {
     return {

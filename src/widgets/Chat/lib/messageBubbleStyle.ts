@@ -28,12 +28,21 @@ const getBaseBubbleStyle = ({
   hasThread,
 }: Omit<IBubbleStyleParams, "isHovered" | "isDark">): CSSProperties => {
   if (isTargetHighlighted) {
+    const baseStyle = isMe
+      ? {
+          background: "var(--th-bubble-out-bg)",
+          color: "var(--th-bubble-out-text)",
+        }
+      : {
+          background: "var(--th-bubble-in-bg)",
+          color: "var(--th-bubble-in-text)",
+        };
     return {
-      background: "var(--th-bubble-out-bg)",
-      border: "2px solid rgb(var(--th-on-accent-rgb))",
+      ...baseStyle,
+      border: "2px solid rgb(var(--th-accent-rgb))",
       boxShadow:
         "0 0 28px rgb(var(--th-accent-2-rgb) / 0.9), 0 0 12px rgb(var(--th-accent-rgb) / 0.8)",
-      color: "var(--th-bubble-out-text)",
+      backgroundClip: "padding-box",
     };
   }
 

@@ -180,12 +180,11 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
           : ""
       }`}
       style={{
-        background:
-          isTargetHighlighted || isMe
-            ? "var(--th-bubble-out-bg)"
-            : "var(--th-bubble-in-bg)",
+        background: isMe
+          ? "var(--th-bubble-out-bg)"
+          : "var(--th-bubble-in-bg)",
         border: isTargetHighlighted
-          ? "2px solid rgb(var(--th-on-accent-rgb))"
+          ? "2px solid rgb(var(--th-accent-rgb))"
           : isMe
             ? "1px solid var(--th-bubble-out-border)"
             : "1px solid var(--th-bubble-in-border)",
