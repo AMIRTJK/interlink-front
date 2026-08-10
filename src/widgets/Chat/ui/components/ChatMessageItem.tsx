@@ -355,9 +355,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                     <span className="inline-flex items-center ml-0.5" title={msg.status}>
                       {isPending ? (
                         <Clock3 className="w-3 h-3 text-[var(--th-on-accent-muted)] animate-pulse" />
-                      ) : msg.status === "read" ? (
-                        <CheckCheck className="w-3.5 h-3.5 text-[rgb(var(--th-accent-3-rgb))] drop-shadow-[0_0_6px_rgb(var(--th-accent-3-rgb)/0.8)]" />
-                      ) : msg.status === "delivered" ? (
+                      ) : msg.status === "read" || msg.status === "delivered" ? (
                         <CheckCheck className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
                       ) : (
                         <Check className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
