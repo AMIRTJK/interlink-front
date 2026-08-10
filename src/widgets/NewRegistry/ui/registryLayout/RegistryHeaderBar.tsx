@@ -46,7 +46,7 @@ export const RegistryHeaderBar = ({
   onTabChange,
 }: IProps) => (
   <motion.div
-    className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-3 space-y-3 shrink-0 m-0"
+    className="ui-glass bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-3 space-y-3 shrink-0 m-0"
     initial={{ opacity: 0, y: -20 }}
     animate={{ opacity: 1, y: 0 }}
   >
@@ -82,7 +82,7 @@ export const RegistryHeaderBar = ({
       )}
 
       <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-slate-300 px-3 py-1.5 bg-gray-50 dark:bg-slate-700/50 rounded-full border border-gray-100 dark:border-slate-700 select-none">
+        <div className="ui-glass-soft flex items-center gap-2 text-xs text-gray-600 dark:text-slate-300 px-3 py-1.5 bg-gray-50 dark:bg-slate-700/50 rounded-full border border-gray-100 dark:border-slate-700 select-none">
           <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
           <span className="font-medium">
             Всего:{" "}
@@ -100,7 +100,7 @@ export const RegistryHeaderBar = ({
           )}
         </div>
 
-        <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-700/50 rounded-lg p-1">
+        <div className="ui-glass-soft flex items-center gap-1 bg-gray-100 dark:bg-slate-700/50 rounded-lg p-1">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

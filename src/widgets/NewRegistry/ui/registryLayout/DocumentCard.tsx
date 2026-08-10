@@ -31,7 +31,7 @@ export const DocumentCard = ({
       whileHover={{ y: -4, boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.15)" }}
       onClick={onClick}
       className={cn(
-        "bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-500 cursor-pointer group flex flex-col justify-between relative overflow-hidden",
+        "ui-glass bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-500 cursor-pointer group flex flex-col justify-between relative overflow-hidden",
         linkInfo?.borderColor,
       )}
     >

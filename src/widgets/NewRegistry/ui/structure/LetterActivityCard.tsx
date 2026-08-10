@@ -127,7 +127,7 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
       transition={{ delay: Math.min(index * 0.03, 0.3), duration: 0.25 }}
       className="group"
     >
-      <div className="rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:border-blue-200 dark:hover:border-slate-600 relative overflow-hidden">
+      <div className="ui-glass rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:border-blue-200 dark:hover:border-slate-600 relative overflow-hidden">
         <If is={Boolean(isHighlighted)}>
           <div className="absolute inset-0 rounded-xl ring-2 ring-inset ring-blue-500 border border-blue-500 pointer-events-none z-20 shadow-[0_0_18px_rgba(59,130,246,0.5)] transition-all duration-500" />
         </If>

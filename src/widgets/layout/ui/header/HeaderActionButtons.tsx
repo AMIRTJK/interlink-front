@@ -18,6 +18,7 @@ import { Tooltip } from "@shared/ui";
 import { useFullscreen } from "@shared/lib";
 import { NotificationsPopover } from "@features/notifications";
 import type { LayoutMode } from "../designSettings";
+import { HeaderGlassButton } from "./HeaderGlassButton";
 import { HeaderThemePopover } from "./HeaderThemePopover";
 import { HeaderBgPopover } from "./HeaderBgPopover";
 import { HeaderLayoutPopover } from "./HeaderLayoutPopover";
@@ -133,6 +134,8 @@ export const HeaderActionButtons = ({
             )}
           </button>
         </Tooltip>
+
+        <HeaderGlassButton />
       </div>
 
       <div

@@ -1,6 +1,14 @@
 /* @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"); */
+
+/* Слой эффекта «стекла» объявлен ДО импорта Tailwind, и это единственное, что
+   заставляет его работать на поверхностях с важными утилитами (`bg-white!`):
+   для важных объявлений порядок слоёв обратный — выигрывает тот, что объявлен
+   раньше. Правила слоя лежат в `glass.css`. */
+@layer ui-glass;
+
 @import "tailwindcss";
 @import "./theme.css";
+@import "./glass.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 

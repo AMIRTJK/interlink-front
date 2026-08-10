@@ -36,7 +36,7 @@ export const DocumentListItem = ({
       whileHover={{ x: 4, boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.1)" }}
       onClick={onClick}
       className={cn(
-        "bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 transition-all duration-500 cursor-pointer mb-2 overflow-hidden relative",
+        "ui-glass bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 transition-all duration-500 cursor-pointer mb-2 overflow-hidden relative",
         linkInfo?.borderColor,
       )}
     >
