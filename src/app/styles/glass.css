@@ -19,7 +19,6 @@
   --ui-glass-bg-soft: rgba(255, 255, 255, 0.38);
   --ui-glass-border: rgba(255, 255, 255, 0.6);
   --ui-glass-blur: 20px;
-  --ui-glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.1);
 }
 
 .glass-ui.dark {
@@ -27,7 +26,6 @@
   --ui-glass-bg: rgba(15, 23, 42, 0.35);
   --ui-glass-bg-soft: rgba(30, 41, 59, 0.45);
   --ui-glass-border: rgba(255, 255, 255, 0.14);
-  --ui-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
 /* Меню корреспонденции задаёт фон важной утилитой (`bg-white!`), и никакая
@@ -47,11 +45,14 @@
 
 /* Остальное оставляем вне слоёв: обычные объявления вне слоя перекрывают любые
    утилиты, но проигрывают inline-стилям — так у карточек сохраняются тени,
-   которые пишет framer-motion на ховере. */
+   которые пишет framer-motion на ховере.
+
+   Собственную тень эффект не добавляет: у поверхностей уже есть своя (`shadow-sm`
+   и подобные), а вторая, широкая и мягкая, ложилась заметной полосой на просвет
+   между панелью «Всего» и списком. */
 .glass-ui .ui-glass {
   background-color: var(--ui-glass-bg);
   border-color: var(--ui-glass-border);
-  box-shadow: var(--ui-glass-shadow);
   backdrop-filter: blur(var(--ui-glass-blur)) saturate(180%);
   -webkit-backdrop-filter: blur(var(--ui-glass-blur)) saturate(180%);
 }
