@@ -29,11 +29,11 @@ export const PaperShredder: React.FC<PaperShredderProps> = ({
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="w-full h-5 rounded-t-lg flex items-center justify-center gap-px bg-white/20">
+      <div className="w-full h-5 rounded-t-lg flex items-center justify-center gap-px bg-[rgb(var(--th-on-accent-rgb)/0.2)]">
         {Array.from({ length: SHRED_STRIP_COUNT }, (_, i) => (
           <div
             key={`tooth-${i}`}
-            className="w-2 h-3 rounded-b-sm bg-white/30"
+            className="w-2 h-3 rounded-b-sm bg-[rgb(var(--th-on-accent-rgb)/0.3)]"
           />
         ))}
       </div>
@@ -63,7 +63,7 @@ export const PaperShredder: React.FC<PaperShredderProps> = ({
               delay: i * 0.05,
               ease: [0.4, 0, 0.6, 1],
             }}
-            className="flex-1 rounded-b-sm bg-gradient-to-b from-violet-400/60 to-fuchsia-400/40"
+            className="flex-1 rounded-b-sm bg-gradient-to-b from-[rgb(var(--th-accent-rgb)/0.6)] to-[rgb(var(--th-accent-2-rgb)/0.4)]"
             style={{
               height: `${SHRED_HEIGHTS[i]}px`,
             }}

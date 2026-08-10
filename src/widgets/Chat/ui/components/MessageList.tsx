@@ -91,7 +91,7 @@ export const MessageList = ({
   return (
     <div
       className="flex-1 relative overflow-hidden"
-      style={{ background: isDark ? "transparent" : "rgba(248,247,255,0.5)" }}
+      style={{ background: "var(--th-chat-canvas)" }}
     >
       <motion.div
         ref={scrollRef}
@@ -118,11 +118,7 @@ export const MessageList = ({
                   type="button"
                   disabled={isLoadingOlder}
                   onClick={onLoadOlder}
-                  className={`text-xs px-3 py-1.5 rounded-full transition-all duration-150 border ${
-                    isDark
-                      ? "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
-                      : "bg-black/5 border-black/10 text-black/60 hover:bg-black/10"
-                  }`}
+                  className="text-xs px-3 py-1.5 rounded-full transition-all duration-150 border bg-[var(--th-chip-bg)] border-[var(--th-chip-border)] text-[var(--th-text-muted)] hover:bg-[var(--th-hover-bg)]"
                 >
                   {isLoadingOlder ? "Загрузка..." : "Загрузить ещё"}
                 </button>
@@ -131,10 +127,8 @@ export const MessageList = ({
 
             <If is={isLoading}>
               <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div className="w-8 h-8 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
-                <span
-                  className={`text-xs ${isDark ? "text-white/40" : "text-gray-400"}`}
-                >
+                <div className="w-8 h-8 rounded-full border-2 border-[rgb(var(--th-accent-rgb))] border-t-transparent animate-spin" />
+                <span className="text-xs text-[var(--th-text-faint)]">
                   {t.loadingChats || "Загрузка сообщений..."}
                 </span>
               </div>
@@ -142,8 +136,8 @@ export const MessageList = ({
 
             <If is={isError}>
               <div className="flex flex-col items-center justify-center py-16 gap-2 text-center">
-                <AlertCircle className="w-8 h-8 text-rose-500" />
-                <p className="text-sm font-medium text-rose-500">
+                <AlertCircle className="w-8 h-8 text-[rgb(var(--th-danger-rgb))]" />
+                <p className="text-sm font-medium text-[rgb(var(--th-danger-rgb))]">
                   Ошибка загрузки сообщений
                 </p>
               </div>
@@ -151,17 +145,11 @@ export const MessageList = ({
 
             <If is={isEmpty}>
               <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
-                <MessageSquare
-                  className={`w-10 h-10 ${isDark ? "text-white/20" : "text-gray-300"}`}
-                />
-                <p
-                  className={`text-sm font-medium ${isDark ? "text-white/60" : "text-gray-500"}`}
-                >
+                <MessageSquare className="w-10 h-10 text-[var(--th-text-faint)] opacity-60" />
+                <p className="text-sm font-medium text-[var(--th-text-muted)]">
                   {t.noMessages}
                 </p>
-                <p
-                  className={`text-xs ${isDark ? "text-white/40" : "text-gray-400"}`}
-                >
+                <p className="text-xs text-[var(--th-text-faint)]">
                   {t.noMessagesHint}
                 </p>
               </div>
@@ -199,17 +187,13 @@ export const MessageList = ({
                     src={activeContact.avatar}
                     alt=""
                     className="w-6 h-6 rounded-full object-cover overflow-hidden"
-                    style={{ boxShadow: "inset 0 0 0 1.5px rgba(167,139,250,0.4)" }}
+                    style={{ boxShadow: "inset 0 0 0 1.5px var(--th-accent-border)" }}
                   />
                   <div
                     className="flex items-center gap-1 px-4 py-2.5 rounded-2xl rounded-bl-md"
-                    style={{
-                      background: isDark
-                        ? "rgba(255,255,255,0.1)"
-                        : "rgba(255,255,255,0.85)",
-                    }}
+                    style={{ background: "var(--th-bubble-in-bg)" }}
                   >
-                    <span className="text-xs text-violet-300 mr-1 font-medium">
+                    <span className="text-xs text-[var(--th-accent-text)] mr-1 font-medium">
                       {typingNames.filter(Boolean).join(", ") || activeContact.name}{" "}
                       {t.typing}
                     </span>
@@ -217,7 +201,7 @@ export const MessageList = ({
                       {[0, 0.2, 0.4].map((delay) => (
                         <motion.span
                           key={delay}
-                          className="w-1 h-1 rounded-full bg-violet-300"
+                          className="w-1 h-1 rounded-full bg-[var(--th-accent-text)]"
                           animate={{ opacity: [0.3, 1, 0.3] }}
                           transition={{ duration: 1, repeat: Infinity, delay }}
                         />
@@ -242,14 +226,13 @@ export const MessageList = ({
             onClick={onReturnToMessage}
             aria-label="Вернуться к сообщению с ответом"
             title="Вернуться к сообщению с ответом"
-            className="absolute bottom-6 right-8 z-30 flex items-center gap-2.5 px-5 py-3 rounded-full text-white font-semibold text-xs shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer border border-white/30"
+            className="absolute bottom-6 right-8 z-30 flex items-center gap-2.5 px-5 py-3 rounded-full text-[var(--th-on-accent)] font-semibold text-xs shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer border border-[rgb(var(--th-on-accent-rgb)/0.3)]"
             style={{
-              background:
-                "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))",
-              boxShadow: "0 8px 25px rgba(124, 58, 237, 0.6)",
+              background: "var(--th-bubble-out-bg)",
+              boxShadow: "0 8px 25px rgb(var(--th-accent-rgb) / 0.6)",
             }}
           >
-            <ArrowDown className="w-4 h-4 animate-bounce text-white flex-shrink-0" />
+            <ArrowDown className="w-4 h-4 animate-bounce text-[var(--th-on-accent)] flex-shrink-0" />
             <span>К своему сообщению</span>
           </motion.button>
         ) : showScrollBottom ? (
@@ -262,14 +245,13 @@ export const MessageList = ({
             onClick={onScrollToBottom}
             aria-label="Прокрутить в самый низ"
             title="Прокрутить в самый низ"
-            className="absolute bottom-6 right-8 z-30 w-11 h-11 rounded-full flex items-center justify-center text-white shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer border border-white/30"
+            className="absolute bottom-6 right-8 z-30 w-11 h-11 rounded-full flex items-center justify-center text-[var(--th-on-accent)] shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer border border-[rgb(var(--th-on-accent-rgb)/0.3)]"
             style={{
-              background:
-                "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))",
-              boxShadow: "0 6px 22px rgba(124, 58, 237, 0.55)",
+              background: "var(--th-bubble-out-bg)",
+              boxShadow: "0 6px 22px rgb(var(--th-accent-rgb) / 0.55)",
             }}
           >
-            <ArrowDown className="w-5 h-5 text-white" />
+            <ArrowDown className="w-5 h-5 text-[var(--th-on-accent)]" />
           </motion.button>
         ) : null}
       </AnimatePresence>

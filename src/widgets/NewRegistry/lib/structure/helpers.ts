@@ -1,16 +1,15 @@
 import {
   Inbox,
-  GitBranch,
-  PenLine,
+  Handshake,
+  Signature,
+  Send,
+  LoaderCircle,
   Clock,
-  Check,
   X,
   FileText,
-  FileCheck,
-  UserPlus,
-  Send,
   Undo,
 } from "lucide-react";
+import { FileSignatureIcon } from "../../ui/newRegistry/newRegistryModel";
 import {
   ITimelineEvent,
   IGroupedStructureLetters,
@@ -155,10 +154,10 @@ export const getEventMeta = (event: ITimelineEvent) => {
   ) {
     const versionNum = event.data?.version ? ` (v${event.data.version})` : "";
     return {
-      icon: FileCheck,
-      ring: "bg-purple-100 dark:bg-purple-900/40",
-      iconColor: "text-purple-500",
-      badge: "bg-purple-100 dark:bg-purple-900/40 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300",
+      icon: FileSignatureIcon,
+      ring: "bg-yellow-100 dark:bg-yellow-900/40",
+      iconColor: "text-yellow-600",
+      badge: "bg-yellow-100 dark:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-300",
       title: `Выбрал версию для подписи${versionNum}`,
       badgeText: "Для подписи",
     };
@@ -170,10 +169,10 @@ export const getEventMeta = (event: ITimelineEvent) => {
       ? `Пригласил на согласование ${targetName}`
       : "Пригласил на согласование";
     return {
-      icon: UserPlus,
-      ring: "bg-violet-100 dark:bg-violet-900/40",
-      iconColor: "text-violet-500",
-      badge: "bg-violet-100 dark:bg-violet-900/40 border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300",
+      icon: LoaderCircle,
+      ring: "bg-orange-100 dark:bg-orange-900/40",
+      iconColor: "text-orange-500",
+      badge: "bg-orange-100 dark:bg-orange-900/40 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300",
       title,
       badgeText: "Согласование",
     };
@@ -182,11 +181,11 @@ export const getEventMeta = (event: ITimelineEvent) => {
   if (type === "approval_result" || action === "approved" || action === "returned") {
     const isApproved = action === "approved";
     return {
-      icon: isApproved ? Check : X,
-      ring: isApproved ? "bg-emerald-100 dark:bg-emerald-900/40" : "bg-rose-100 dark:bg-rose-900/40",
-      iconColor: isApproved ? "text-emerald-500" : "text-rose-500",
+      icon: isApproved ? Handshake : X,
+      ring: isApproved ? "bg-blue-100 dark:bg-blue-900/40" : "bg-rose-100 dark:bg-rose-900/40",
+      iconColor: isApproved ? "text-blue-500" : "text-rose-500",
       badge: isApproved
-        ? "bg-emerald-100 dark:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300"
+        ? "bg-blue-100 dark:bg-blue-900/40 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
         : "bg-rose-100 dark:bg-rose-900/40 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300",
       title: isApproved ? "Согласовал документ" : "Вернул документ",
       badgeText: isApproved ? "Согласовано" : "Возвращено",
@@ -199,10 +198,10 @@ export const getEventMeta = (event: ITimelineEvent) => {
       ? `Пригласил на подписание ${targetName}`
       : "Пригласил на подписание";
     return {
-      icon: GitBranch,
-      ring: "bg-amber-100 dark:bg-amber-900/40",
-      iconColor: "text-amber-500",
-      badge: "bg-amber-100 dark:bg-amber-900/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300",
+      icon: FileSignatureIcon,
+      ring: "bg-yellow-100 dark:bg-yellow-900/40",
+      iconColor: "text-yellow-600",
+      badge: "bg-yellow-100 dark:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-300",
       title,
       badgeText: "На подпись",
     };
@@ -210,7 +209,7 @@ export const getEventMeta = (event: ITimelineEvent) => {
 
   if (type === "document_signed" || action === "signed") {
     return {
-      icon: PenLine,
+      icon: Signature,
       ring: "bg-purple-100 dark:bg-purple-900/40",
       iconColor: "text-purple-500",
       badge: "bg-purple-100 dark:bg-purple-900/40 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300",
@@ -252,9 +251,9 @@ export const getEventMeta = (event: ITimelineEvent) => {
   if (type === "document_sent" || action === "sent") {
     return {
       icon: Send,
-      ring: "bg-emerald-100 dark:bg-emerald-900/40",
-      iconColor: "text-emerald-500",
-      badge: "bg-emerald-100 dark:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300",
+      ring: "bg-green-100 dark:bg-green-900/40",
+      iconColor: "text-green-500",
+      badge: "bg-green-100 dark:bg-green-900/40 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300",
       title: "Отправил документ",
       badgeText: "Отправлено",
     };

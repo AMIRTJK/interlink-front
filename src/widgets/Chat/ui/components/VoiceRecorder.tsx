@@ -102,7 +102,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 8 }}
-      className={`flex items-center gap-3 rounded-full px-4 py-2 flex-1 border ${isDark ? "border-red-400/40 bg-red-500/10" : "border-red-400/30 bg-red-500/5"}`}
+      className="flex items-center gap-3 rounded-full px-4 py-2 flex-1 border border-[rgb(var(--th-danger-rgb)/0.4)] bg-[rgb(var(--th-danger-rgb)/0.1)]"
     >
       <motion.div
         animate={{
@@ -113,7 +113,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
           duration: 1,
           repeat: Infinity,
         }}
-        className="w-3 h-3 rounded-full bg-red-400 flex-shrink-0"
+        className="w-3 h-3 rounded-full bg-[rgb(var(--th-danger-rgb))] flex-shrink-0"
       />
       <div className="flex items-center gap-0.5 flex-1">
         {waveHeights.map((h, i) => (
@@ -127,7 +127,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
               repeat: Infinity,
               delay: i * 0.04,
             }}
-            className="w-1 bg-red-400/70 rounded-full flex-shrink-0"
+            className="w-1 bg-[rgb(var(--th-danger-rgb)/0.7)] rounded-full flex-shrink-0"
             style={{
               height: "20px",
               transformOrigin: "center",
@@ -136,23 +136,24 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
         ))}
       </div>
       <span
-        className={`text-xs font-semibold flex-shrink-0 ${isDark ? "text-red-300" : "text-red-600"}`}
+        className="text-xs font-semibold flex-shrink-0 text-[rgb(var(--th-danger-rgb))]"
       >
         {formatDuration(seconds)}
       </span>
       <button
         onClick={onCancel}
         aria-label="Отменить запись"
-        className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0 ${isDark ? "bg-white/15 hover:bg-white/25 text-white/70" : "bg-black/5 hover:bg-black/8 text-gray-655"}`}
+        className="w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0 bg-[var(--th-chip-bg)] hover:bg-[var(--th-hover-bg-strong)] text-[var(--th-text-muted)]"
       >
         <X className="w-3.5 h-3.5" />
       </button>
       <button
         onClick={handleSend}
         aria-label="Отправить голосовое сообщение"
-        className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0"
+        className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--th-on-accent)] transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0"
         style={{
-          background: "linear-gradient(135deg,#7c3aed,#06b6d4)",
+          background:
+            "linear-gradient(135deg, rgb(var(--th-accent-rgb)), rgb(var(--th-accent-3-rgb)))",
         }}
       >
         <Send className="w-3 h-3" />

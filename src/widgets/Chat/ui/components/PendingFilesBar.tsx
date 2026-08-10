@@ -25,20 +25,16 @@ export const PendingFilesBar: React.FC<PendingFilesBarProps> = ({
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: 10 }}
-    className={`px-6 py-3 border-t backdrop-blur-md ${isDark ? "border-white/10 bg-white/5" : "border-black/5 bg-black/5"}`}
+    className="px-6 py-3 border-t backdrop-blur-md border-[var(--th-divider)] bg-[var(--th-chip-bg)]"
   >
     <div className="flex items-center gap-2 mb-2">
-      <span
-        className={`text-xs font-semibold ${isDark ? "text-white/70" : "text-gray-655"}`}
-      >
+      <span className="text-xs font-semibold text-[var(--th-text-muted)]">
         <span>{countLabel}</span>
       </span>
       <button
         onClick={onSend}
-        className="ml-auto text-xs font-semibold text-white px-3 py-1 rounded-full transition-all duration-200 ease-in-out hover:scale-105 hover:brightness-110"
-        style={{
-          background: "linear-gradient(135deg,#7c3aed,#a855f7,#06b6d4)",
-        }}
+        className="ml-auto text-xs font-semibold text-[var(--th-on-accent)] px-3 py-1 rounded-full transition-all duration-200 ease-in-out hover:scale-105 hover:brightness-110"
+        style={{ background: "var(--th-bubble-out-bg)" }}
       >
         {sendAllLabel}
       </button>
@@ -47,9 +43,7 @@ export const PendingFilesBar: React.FC<PendingFilesBarProps> = ({
       {files.map((f) => (
         <div key={f.id} className="relative flex-shrink-0 group cursor-pointer">
           {f.type === "image" && f.preview ? (
-            <div
-              className={`w-20 h-20 rounded-xl overflow-hidden border ${isDark ? "border-white/20" : "border-black/10"}`}
-            >
+            <div className="w-20 h-20 rounded-xl overflow-hidden border border-[var(--th-panel-border)]">
               <img
                 src={f.preview}
                 alt={f.name}
@@ -57,18 +51,14 @@ export const PendingFilesBar: React.FC<PendingFilesBarProps> = ({
               />
             </div>
           ) : (
-            <div
-              className={`w-20 h-20 rounded-xl border flex flex-col items-center justify-center gap-1 px-1 ${isDark ? "border-white/20 bg-white/10" : "border-black/10 bg-black/5"}`}
-            >
-              <div className="text-violet-300">{getAttachmentIcon(f.type)}</div>
-              <p
-                className={`text-[9px] text-center leading-tight break-all line-clamp-2 ${isDark ? "text-white/50" : "text-gray-500"}`}
-              >
+            <div className="w-20 h-20 rounded-xl border flex flex-col items-center justify-center gap-1 px-1 border-[var(--th-panel-border)] bg-[var(--th-chip-bg)]">
+              <div className="text-[var(--th-accent-text)]">
+                {getAttachmentIcon(f.type)}
+              </div>
+              <p className="text-[9px] text-center leading-tight break-all line-clamp-2 text-[var(--th-text-muted)]">
                 {f.name}
               </p>
-              <p
-                className={`text-[9px] ${isDark ? "text-white/35" : "text-gray-400"}`}
-              >
+              <p className="text-[9px] text-[var(--th-text-faint)]">
                 {f.size}
               </p>
             </div>
@@ -79,7 +69,7 @@ export const PendingFilesBar: React.FC<PendingFilesBarProps> = ({
           <button
             onClick={() => onRemove(f.id)}
             aria-label={`Убрать ${f.name}`}
-            className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-all duration-200 shadow-md ring-1 ring-black/20 hover:scale-110"
+            className="absolute top-1 right-1 w-5 h-5 rounded-full bg-[rgb(var(--th-danger-rgb))] text-[var(--th-on-accent)] flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-all duration-200 shadow-md ring-1 ring-[rgb(var(--th-shadow-rgb)/0.2)] hover:scale-110"
           >
             <X className="w-3 h-3" />
           </button>

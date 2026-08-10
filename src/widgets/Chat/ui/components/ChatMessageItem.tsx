@@ -4,6 +4,7 @@ import { Check, CheckCheck, Clock3, CornerUpLeft, Forward, MoreHorizontal, Pin, 
 import { Contact, Message, ReplyPreview } from "../../model";
 import { Lang, Translations } from "../../lib/translations";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
+import { getMessageBubbleStyle } from "../../lib/messageBubbleStyle";
 import { If } from "@shared/ui";
 import { MessageAttachments } from "./MessageAttachments";
 import { ReactionPicker } from "./ReactionPicker";
@@ -75,6 +76,23 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 
   const isPending = msg.status === "pending" || msg.id.startsWith("temp-");
 
+  // Наведение считаем один раз на сообщение: подсветку получают и текст, и
+  // вложения, и голосовое — иначе у одного сообщения разные части светятся
+  // по-разному.
+  const isHovered =
+    hoveredMessageId === msg.id || activeActionMsgId === msg.id;
+
+  const bubbleStyle = getMessageBubbleStyle({
+    isMe,
+    isDark,
+    isHovered,
+    isEffectivelyDeleted: Boolean(isEffectivelyDeleted),
+    isTargetHighlighted,
+    currentMatchMsg,
+    highlighted,
+    hasThread: repliesCount > 0,
+  });
+
   return (
     <motion.div
       key={msg.id}
@@ -97,7 +115,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             }}
             className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end overflow-hidden"
             style={{
-              boxShadow: "inset 0 0 0 2px rgba(167,139,250,0.45)",
+              boxShadow: "inset 0 0 0 2px var(--th-accent-border)",
             }}
           />
         )}
@@ -111,7 +129,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             }}
             className="w-8 h-8 rounded-full object-cover flex-shrink-0 self-end overflow-hidden"
             style={{
-              boxShadow: "inset 0 0 0 2px rgba(167,139,250,0.45)",
+              boxShadow: "inset 0 0 0 2px var(--th-accent-border)",
             }}
           />
         )}
@@ -122,7 +140,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
         >
           {msg.scheduled && !isEffectivelyDeleted && (
             <div
-              className={`flex items-center gap-1 mb-1 text-[10px] font-medium ${isMe ? "self-end" : "self-start"} ${isDark ? "text-amber-400" : "text-amber-600"}`}
+              className={`flex items-center gap-1 mb-1 text-[10px] font-medium ${isMe ? "self-end" : "self-start"} text-[rgb(var(--th-warning-rgb))]`}
             >
               <Clock3 className="w-3 h-3" />
               <span>
@@ -130,6 +148,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               </span>
             </div>
           )}
+          {/* Цитата и метка пересылки стоят НАД пузырём, на фоне переписки, а не
+              внутри него: цвета берём от поверхности, иначе у своих сообщений
+              белый текст «на акценте» ложится на светлый фон. */}
           {msg.replyTo && !isEffectivelyDeleted && (
             <div
               onClick={(e) => {
@@ -146,33 +167,15 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                 }
               }}
               title="Перейти к исходному сообщению"
-              className={`flex items-center gap-2 mb-1 px-3 py-1.5 rounded-2xl text-xs max-w-full cursor-pointer transition-all duration-150 hover:scale-[1.01] hover:brightness-110 active:scale-[0.99] ${
-                isMe
-                  ? "bg-white/20 text-white border border-white/30"
-                  : isDark
-                    ? "bg-violet-500/20 border border-violet-400/20"
-                    : "bg-violet-100/80 border border-violet-200"
-              }`}
+              className="flex items-center gap-2 mb-1 px-3 py-1.5 rounded-2xl text-xs max-w-full cursor-pointer transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99] bg-[var(--th-accent-soft)] border border-[var(--th-accent-border)]"
             >
-              <div
-                className={`w-1 h-6 rounded-full flex-shrink-0 ${
-                  isDark ? "bg-violet-400" : "bg-violet-600"
-                }`}
-              />
-              <CornerUpLeft className="w-3 h-3 text-violet-400 flex-shrink-0" />
+              <div className="w-1 h-6 rounded-full flex-shrink-0 bg-[var(--th-accent-text)]" />
+              <CornerUpLeft className="w-3 h-3 flex-shrink-0 text-[var(--th-accent-text)]" />
               <div className="min-w-0 flex-1">
-                <span
-                  className={`font-semibold text-[10px] ${
-                    isDark ? "text-violet-300" : "text-violet-600"
-                  }`}
-                >
+                <span className="font-semibold text-[10px] text-[var(--th-accent-text)]">
                   {msg.replyTo.senderName}
                 </span>
-                <p
-                  className={`truncate max-w-[200px] ${
-                    isDark ? "text-white/70" : "text-gray-600"
-                  }`}
-                >
+                <p className="truncate max-w-[200px] text-[var(--th-text-muted)]">
                   {msg.replyTo.text}
                 </p>
               </div>
@@ -180,7 +183,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           )}
           {msg.forwarded && !isEffectivelyDeleted && (
             <div
-              className={`flex items-center gap-1 mb-1 text-[10px] ${isDark ? "text-white/40" : "text-gray-400"} ${isMe ? "self-end" : "self-start"}`}
+              className={`flex items-center gap-1 mb-1 text-[10px] text-[var(--th-text-muted)] ${isMe ? "self-end" : "self-start"}`}
             >
               <Forward className="w-3 h-3" />
               <span>
@@ -192,7 +195,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           )}
           <If is={!!(msg.senderName && !isMe && activeContact.isGroup)}>
             <span
-              className={`text-[10px] font-semibold mb-0.5 ${isDark ? "text-violet-300" : "text-violet-600"}`}
+              className="text-[10px] font-semibold mb-0.5 text-[var(--th-accent-text)]"
             >
               {msg.senderName}
             </span>
@@ -230,14 +233,10 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                     );
                   }}
                   aria-label="Действия"
-                  className={`w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "text-white/60 hover:bg-white/20" : "text-gray-500 hover:bg-black/8"}`}
+                  className="w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 text-[var(--th-text-muted)] hover:bg-[var(--th-hover-bg-strong)]"
                   style={{
-                    background: isDark
-                      ? "rgba(255,255,255,0.1)"
-                      : "rgba(0,0,0,0.05)",
-                    border: isDark
-                      ? "1px solid rgba(255,255,255,0.15)"
-                      : "1px solid rgba(0,0,0,0.08)",
+                    background: "var(--th-chip-bg)",
+                    border: "1px solid var(--th-chip-border)",
                   }}
                 >
                   <MoreHorizontal className="w-3.5 h-3.5" />
@@ -316,6 +315,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               attachments={msg.attachments ?? (msg.attachment ? [msg.attachment] : [])}
               isMe={isMe}
               isDark={isDark}
+              isHovered={isHovered}
               isTargetHighlighted={isTargetHighlighted}
             />
           )}
@@ -323,93 +323,25 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             <div
               className={`px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 ease-in-out cursor-default ${
                   isTargetHighlighted
-                    ? "rounded-2xl ring-2 ring-violet-500 scale-[1.02] shadow-[0_0_24px_rgba(168,85,247,0.85)] animate-pulse"
+                    ? `rounded-2xl ${isMe ? "rounded-br-md text-[var(--th-bubble-out-text)]" : "rounded-bl-md text-[var(--th-bubble-in-text)]"} ring-2 ring-[rgb(var(--th-accent-rgb))] scale-[1.02] shadow-[0_0_24px_rgb(var(--th-accent-2-rgb)/0.85)] animate-pulse`
                     : isEffectivelyDeleted
-                      ? isDark
-                        ? "italic text-white/30 rounded-2xl border border-dashed border-white/15 bg-white/4"
-                        : "italic text-black/35 rounded-2xl border border-dashed border-black/10 bg-black/4"
+                      ? "italic rounded-2xl border border-dashed text-[var(--th-text-faint)] border-[var(--th-panel-border)] bg-[rgb(var(--th-overlay-rgb)/0.04)]"
                     : currentMatchMsg
-                      ? "rounded-2xl ring-2 ring-amber-400 text-amber-100"
+                      ? "rounded-2xl ring-2 ring-[rgb(var(--th-warning-rgb))] text-[var(--th-text)]"
                       : highlighted
-                        ? "rounded-2xl text-amber-200"
-                        : msg.threadCount && msg.threadCount > 0
-                          ? isMe
-                            ? "rounded-2xl rounded-br-md text-white ring-1 ring-violet-300/40 shadow-[0_0_15px_rgba(167,139,250,0.35)]"
-                            : `rounded-2xl rounded-bl-md ring-1 ring-violet-400/50 shadow-[0_0_15px_rgba(124,58,237,0.25)] ${isDark ? "text-white/95" : "text-violet-950 font-medium"}`
-                          : isMe
-                            ? "rounded-2xl rounded-br-md text-white"
-                            : `rounded-2xl rounded-bl-md ${isDark ? "text-white/90" : "text-gray-800"}`
+                        ? "rounded-2xl text-[var(--th-text)]"
+                        : isMe
+                          ? "rounded-2xl rounded-br-md text-[var(--th-bubble-out-text)]"
+                          : "rounded-2xl rounded-bl-md text-[var(--th-bubble-in-text)]"
                 }`}
-                style={
-                  isTargetHighlighted
-                    ? {
-                        background:
-                          "linear-gradient(135deg, rgb(236, 72, 153), rgb(168, 85, 247), rgb(59, 130, 246))",
-                        border: "2px solid #ffffff",
-                        boxShadow:
-                          "0 0 28px rgba(236, 72, 153, 0.9), 0 0 12px rgba(168, 85, 247, 0.8)",
-                        color: "#ffffff",
-                      }
-                    : isEffectivelyDeleted
-                      ? {}
-                    : currentMatchMsg
-                      ? {
-                          background: "rgba(251,191,36,0.25)",
-                          border: "1px solid rgba(251,191,36,0.4)",
-                        }
-                      : highlighted
-                        ? {
-                            background: "rgba(251,191,36,0.15)",
-                            border: "1px solid rgba(251,191,36,0.3)",
-                          }
-                        : msg.threadCount && msg.threadCount > 0
-                          ? isMe
-                            ? {
-                                background:
-                                  "linear-gradient(135deg,rgba(124,58,237,0.75),rgba(168,85,247,0.65),rgba(6,182,212,0.6))",
-                                border: "1.5px solid rgba(196,181,253,0.65)",
-                                boxShadow:
-                                  "0 4px 20px rgba(124,58,237,0.35), inset 0 1px 0 rgba(255,255,255,0.15)",
-                                backgroundClip: "padding-box",
-                              }
-                            : {
-                                background: "rgba(124,58,237,0.15)",
-                                border: "1.5px solid rgba(167,139,250,0.4)",
-                                boxShadow:
-                                  "0 2px 12px rgba(124,58,237,0.15), inset 0 1px 0 rgba(255,255,255,0.08)",
-                                backgroundClip: "padding-box",
-                              }
-                          : isMe
-                            ? {
-                                background:
-                                  "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))",
-                                border: "1px solid rgba(167,139,250,0.4)",
-                                boxShadow:
-                                  "0 0 16px rgba(124, 58, 237, 0.5)",
-                                backgroundClip: "padding-box",
-                              }
-                            : {
-                                background: isDark
-                                  ? "rgba(255,255,255,0.1)"
-                                  : "rgba(255,255,255,0.85)",
-                                border: isDark
-                                  ? "1px solid rgba(255,255,255,0.15)"
-                                  : "1px solid rgba(0,0,0,0.08)",
-                                boxShadow: isDark
-                                  ? "0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)"
-                                  : "0 2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)",
-                                backgroundClip: "padding-box",
-                              }
-                }
+                style={bubbleStyle}
               >
                 <If is={!!(msg.pinned && !isEffectivelyDeleted)}>
                   <span
                     className={`inline-flex items-center gap-1 text-[10px] font-semibold mb-1 mr-2 px-1.5 py-0.5 rounded-md ${
                       isMe
-                        ? "bg-white/20 text-white border border-white/30"
-                        : isDark
-                          ? "bg-violet-500/25 text-violet-300 border border-violet-400/30"
-                          : "bg-violet-100 text-violet-700 border border-violet-300/60 font-bold"
+                        ? "bg-[rgb(var(--th-on-accent-rgb)/0.2)] text-[var(--th-on-accent)] border border-[rgb(var(--th-on-accent-rgb)/0.3)]"
+                        : "bg-[var(--th-accent-soft-strong)] text-[var(--th-accent-text)] border border-[var(--th-accent-border)]"
                     }`}
                   >
                     <Pin className="w-3 h-3 flex-shrink-0" />
@@ -422,13 +354,11 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                   {isMe && !isEffectivelyDeleted && (
                     <span className="inline-flex items-center ml-0.5" title={msg.status}>
                       {isPending ? (
-                        <Clock3 className="w-3 h-3 text-white/70 animate-pulse" />
-                      ) : msg.status === "read" ? (
-                        <CheckCheck className="w-3.5 h-3.5 text-cyan-300 drop-shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
-                      ) : msg.status === "delivered" ? (
-                        <CheckCheck className="w-3.5 h-3.5 text-white/80" />
+                        <Clock3 className="w-3 h-3 text-[var(--th-on-accent-muted)] animate-pulse" />
+                      ) : msg.status === "read" || msg.status === "delivered" ? (
+                        <CheckCheck className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
                       ) : (
-                        <Check className="w-3.5 h-3.5 text-white/80" />
+                        <Check className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
                       )}
                     </span>
                   )}
@@ -454,21 +384,15 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                       className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs transition-all duration-200 ease-in-out hover:scale-110"
                       style={{
                         background: r.reactedByMe
-                          ? "rgba(124,58,237,0.3)"
-                          : isDark
-                            ? "rgba(255,255,255,0.08)"
-                            : "rgba(0,0,0,0.04)",
+                          ? "rgb(var(--th-accent-rgb) / 0.3)"
+                          : "var(--th-chip-bg)",
                         border: r.reactedByMe
-                          ? "1px solid rgba(167,139,250,0.5)"
-                          : isDark
-                            ? "1px solid rgba(255,255,255,0.12)"
-                            : "1px solid rgba(0,0,0,0.08)",
+                          ? "1px solid rgb(var(--th-accent-rgb) / 0.5)"
+                          : "1px solid var(--th-chip-border)",
                       }}
                     >
                       <span>{r.emoji}</span>
-                      <span
-                        className={`text-[10px] font-medium ${isDark ? "text-white/60" : "text-gray-550"}`}
-                      >
+                      <span className="text-[10px] font-medium text-[var(--th-text-muted)]">
                         {r.count}
                       </span>
                     </button>
@@ -486,31 +410,23 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                       ? `${formatRepliesCount(repliesCount, lang)}, ${t.newReplies}: ${unreadReplies}`
                       : formatRepliesCount(repliesCount, lang)
                   }
-                  className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer ${isDark ? "text-violet-200" : "text-violet-750"}`}
+                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer text-[var(--th-accent-text)]"
                   style={{
-                    background: isDark
-                      ? "rgba(124,58,237,0.25)"
-                      : "rgba(124,58,237,0.12)",
+                    background: "var(--th-accent-soft-strong)",
                     // Непрочитанный тред тянет взгляд контуром и тенью: цвет
                     // чипа остаётся прежним, меняется только его заметность.
                     border: unreadReplies
-                      ? "1px solid rgba(244,63,94,0.65)"
-                      : isDark
-                        ? "1px solid rgba(167,139,250,0.4)"
-                        : "1px solid rgba(124,58,237,0.25)",
+                      ? "1px solid rgb(var(--th-danger-rgb) / 0.65)"
+                      : "1px solid var(--th-accent-border)",
                     boxShadow: unreadReplies
-                      ? "0 2px 12px rgba(244,63,94,0.35)"
-                      : isDark
-                        ? "0 2px 10px rgba(124,58,237,0.25)"
-                        : "0 2px 8px rgba(124,58,237,0.08)",
+                      ? "0 2px 12px rgb(var(--th-danger-rgb) / 0.35)"
+                      : "0 2px 10px rgb(var(--th-accent-rgb) / 0.2)",
                   }}
                 >
-                  <MessageSquare
-                    className={`w-3 h-3 ${isDark ? "text-violet-300" : "text-violet-600"}`}
-                  />
+                  <MessageSquare className="w-3 h-3 text-[var(--th-accent-text)]" />
                   <span>{formatRepliesCount(repliesCount, lang)}</span>
                   <If is={unreadReplies > 0}>
-                    <span className="min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center">
+                    <span className="min-w-4 h-4 px-1 rounded-full bg-[rgb(var(--th-danger-rgb))] text-[var(--th-on-accent)] text-[9px] font-bold flex items-center justify-center">
                       +{unreadReplies}
                     </span>
                   </If>

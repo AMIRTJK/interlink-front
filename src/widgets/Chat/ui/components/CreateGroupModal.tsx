@@ -80,7 +80,7 @@ export const CreateGroupModal = ({
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{
-        background: isDark ? "rgba(0,0,0,0.7)" : "rgba(0,0,0,0.25)",
+        background: "var(--th-scrim)",
         backdropFilter: "blur(20px)",
       }}
     >
@@ -90,15 +90,15 @@ export const CreateGroupModal = ({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
         transition={{ type: "spring", stiffness: 280, damping: 26 }}
-        className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? "bg-[#150e28]/95 border border-white/10 backdrop-blur-xl text-white" : "bg-white border border-gray-200 text-gray-800"}`}
+        className="w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl bg-[var(--th-menu-bg)] border border-[var(--th-menu-border)] text-[var(--th-text)]"
       >
         <div
-          className={`flex items-center justify-between px-5 py-4 border-b ${isDark ? "border-white/10" : "border-gray-100"}`}
+          className="flex items-center justify-between px-5 py-4 border-b border-[var(--th-divider)]"
         >
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-violet-300" />
+            <Users className="w-4 h-4 text-[var(--th-accent-text)]" />
             <h3
-              className={`font-semibold text-sm ${isDark ? "text-white" : "text-gray-900"}`}
+              className="font-semibold text-sm text-[var(--th-text)]"
             >
               {t.newGroup}
             </h3>
@@ -106,14 +106,14 @@ export const CreateGroupModal = ({
           <button
             onClick={onClose}
             aria-label="Закрыть"
-            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "hover:bg-white/15 text-white/50" : "hover:bg-black/5 text-gray-400"}`}
+            className="w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 hover:bg-[var(--th-hover-bg-strong)] text-[var(--th-text-muted)]"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         <div
-          className={`px-4 py-3 space-y-2 border-b ${isDark ? "border-white/10" : "border-gray-100"}`}
+          className="px-4 py-3 space-y-2 border-b border-[var(--th-divider)]"
         >
           <input
             autoFocus
@@ -121,10 +121,10 @@ export const CreateGroupModal = ({
             placeholder={t.groupTitlePlaceholder}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className={`w-full rounded-xl px-3 py-2 outline-none text-sm ${isDark ? "bg-white/10 border border-white/15 placeholder-white/30 text-white" : "bg-black/4 border border-black/5 placeholder-gray-400 text-gray-850"}`}
+            className="w-full rounded-xl px-3 py-2 outline-none text-sm bg-[var(--th-input-bg)] border border-[var(--th-input-border)] text-[var(--th-text)] placeholder:text-[var(--th-text-faint)]"
           />
           <label
-            className={`flex items-center gap-2 text-xs cursor-pointer ${isDark ? "text-white/50" : "text-gray-500"}`}
+            className="flex items-center gap-2 text-xs cursor-pointer text-[var(--th-text-muted)]"
           >
             <input
               type="file"
@@ -142,10 +142,10 @@ export const CreateGroupModal = ({
             </If>
           </label>
           <div
-            className={`flex items-center gap-2 rounded-xl px-3 py-2 ${isDark ? "bg-white/10 border border-white/15" : "bg-black/4 border border-black/5"}`}
+            className="flex items-center gap-2 rounded-xl px-3 py-2 bg-[var(--th-input-bg)] border border-[var(--th-input-border)]"
           >
             <Search
-              className={`w-4 h-4 flex-shrink-0 ${isDark ? "text-white/40" : "text-gray-400"}`}
+              className="w-4 h-4 flex-shrink-0 text-[var(--th-text-faint)]"
             />
             <input
               type="text"
@@ -155,10 +155,10 @@ export const CreateGroupModal = ({
                 setSearch(e.target.value);
                 applySearch(e.target.value);
               }}
-              className={`flex-1 bg-transparent outline-none text-sm ${isDark ? "placeholder-white/30 text-white" : "placeholder-gray-400 text-gray-850"}`}
+              className="flex-1 bg-transparent outline-none text-sm text-[var(--th-text)] placeholder:text-[var(--th-text-faint)]"
             />
             <If is={isLoading}>
-              <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
+              <Loader2 className="w-4 h-4 animate-spin text-[var(--th-accent-text)]" />
             </If>
           </div>
         </div>
@@ -166,7 +166,7 @@ export const CreateGroupModal = ({
         <div className="max-h-56 overflow-y-auto py-1 compose-modal-scroll">
           <If is={!isLoading && contacts.length === 0}>
             <p
-              className={`text-center text-xs py-6 ${isDark ? "text-white/40" : "text-gray-400"}`}
+              className="text-center text-xs py-6 text-[var(--th-text-faint)]"
             >
               {t.noContactsFound}
             </p>
@@ -178,7 +178,7 @@ export const CreateGroupModal = ({
               <button
                 key={contact.id}
                 onClick={() => toggleMember(userId)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-all duration-200 ${isDark ? "hover:bg-white/8" : "hover:bg-black/4"}`}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-all duration-200 hover:bg-[var(--th-hover-bg)]"
               >
                 <img
                   src={contact.avatar}
@@ -187,18 +187,18 @@ export const CreateGroupModal = ({
                 />
                 <div className="flex-1 min-w-0">
                   <p
-                    className={`text-sm font-medium truncate ${isDark ? "text-white/90" : "text-gray-900"}`}
+                    className="text-sm font-medium truncate text-[var(--th-text)]"
                   >
                     {contact.name}
                   </p>
                   <p
-                    className={`text-xs truncate ${isDark ? "text-white/40" : "text-gray-500"}`}
+                    className="text-xs truncate text-[var(--th-text-muted)]"
                   >
                     {contact.position ?? ""}
                   </p>
                 </div>
                 <span
-                  className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${isSelected ? "bg-violet-500 text-white" : isDark ? "bg-white/10" : "bg-black/5"}`}
+                  className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${isSelected ? "bg-[rgb(var(--th-accent-rgb))] text-[var(--th-on-accent)]" : "bg-[var(--th-chip-bg)]"}`}
                 >
                   <If is={isSelected}>
                     <Check className="w-3 h-3" />
@@ -210,9 +210,9 @@ export const CreateGroupModal = ({
         </div>
 
         <div
-          className={`flex items-center justify-between gap-3 px-5 py-3 border-t ${isDark ? "border-white/10" : "border-gray-100"}`}
+          className="flex items-center justify-between gap-3 px-5 py-3 border-t border-[var(--th-divider)]"
         >
-          <span className={`text-xs ${isDark ? "text-white/40" : "text-gray-400"}`}>
+          <span className="text-xs text-[var(--th-text-faint)]">
             {selected.length} {t.selectedMembers}
           </span>
           <button
@@ -220,8 +220,8 @@ export const CreateGroupModal = ({
               onCreate({ title: title.trim(), memberIds: selected, avatar })
             }
             disabled={!canCreateGroup}
-            className="px-4 py-2 rounded-full text-white text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:brightness-110 flex items-center gap-2"
-            style={{ background: "linear-gradient(135deg,#7c3aed,#06b6d4)" }}
+            className="px-4 py-2 rounded-full text-[var(--th-on-accent)] text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:brightness-110 flex items-center gap-2"
+            style={{ background: "linear-gradient(135deg, rgb(var(--th-accent-rgb)), rgb(var(--th-accent-3-rgb)))" }}
           >
             <If is={isCreating}>
               <Loader2 className="w-3.5 h-3.5 animate-spin" />

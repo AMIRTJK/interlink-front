@@ -1,6 +1,7 @@
 import React from "react";
 import { FileText, ImageIcon, Film, Music } from "lucide-react";
 import { type MessageAttachment } from "../model";
+import { getHoverGlow, withHoverGlow } from "./messageBubbleStyle";
 
 export const formatTime = (d: Date) => {
   const h = d.getHours();
@@ -24,12 +25,14 @@ export const getAttachmentIcon = (type: MessageAttachment["type"]) => {
   return <FileText className="w-4 h-4" />;
 };
 
-export const GLASS_CARD = "backdrop-blur-2xl bg-white/10 border border-white/20";
+export const GLASS_CARD =
+  "backdrop-blur-2xl bg-[var(--th-panel-bg)] border border-[var(--th-panel-border)]";
 
 interface IAttachmentBubbleStyle {
   isImage: boolean;
   isMe: boolean;
   isDark: boolean;
+  isHovered?: boolean;
   isTargetHighlighted?: boolean;
 }
 
@@ -38,41 +41,44 @@ interface IAttachmentBubbleStyle {
  * пузырь целиком, так что от подложки остаётся только кайма и вылезающий
  * из-под скруглений угол. Подсветка перехода к сообщению остаётся — она несёт
  * смысл, а не оформление.
+ *
+ * Свечение при наведении получают и картинки: `overflow: hidden` обрезает
+ * содержимое, но не собственную тень элемента, поэтому ореол виден снаружи.
  */
 export const getAttachmentBubbleStyle = ({
   isImage,
   isMe,
   isDark,
+  isHovered = false,
   isTargetHighlighted,
 }: IAttachmentBubbleStyle): React.CSSProperties => {
+  const glow = getHoverGlow({ isDark, isHovered, isMe, isTargetHighlighted });
+  const baseBg = isMe ? "var(--th-bubble-out-bg)" : "var(--th-bubble-in-bg)";
+
   if (isTargetHighlighted) {
     return {
-      background:
-        "linear-gradient(135deg, rgb(236, 72, 153), rgb(168, 85, 247), rgb(59, 130, 246))",
-      border: "2px solid #ffffff",
+      background: baseBg,
+      border: "2px solid rgb(var(--th-accent-rgb))",
       boxShadow:
-        "0 0 28px rgba(236, 72, 153, 0.9), 0 0 12px rgba(168, 85, 247, 0.8)",
+        "0 0 28px rgb(var(--th-accent-2-rgb) / 0.9), 0 0 12px rgb(var(--th-accent-rgb) / 0.8)",
     };
   }
 
-  if (isImage) return {};
+  if (isImage) {
+    return glow ? { boxShadow: glow } : {};
+  }
 
   if (isMe) {
     return {
-      background:
-        "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))",
-      border: "1px solid rgba(196,181,253,0.5)",
-      boxShadow: "0 0 16px rgba(124, 58, 237, 0.5)",
+      background: "var(--th-bubble-out-bg)",
+      border: "none",
+      boxShadow: withHoverGlow(isDark ? "var(--th-glow-accent)" : "none", glow),
     };
   }
 
   return {
-    background: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.95)",
-    border: isDark
-      ? "1px solid rgba(255,255,255,0.15)"
-      : "1px solid rgba(124,58,237,0.2)",
-    boxShadow: isDark
-      ? "0 2px 10px rgba(0,0,0,0.2)"
-      : "0 2px 10px rgba(124,58,237,0.08)",
+    background: "var(--th-bubble-in-bg)",
+    border: "1px solid var(--th-bubble-in-border)",
+    boxShadow: withHoverGlow(isDark ? "var(--th-shadow-soft)" : "none", glow),
   };
 };

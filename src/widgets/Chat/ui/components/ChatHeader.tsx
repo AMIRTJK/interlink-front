@@ -32,18 +32,16 @@ interface IProps {
 
 // Блок управления едет вместе с панелью бесед, поэтому при макете «снизу» он
 // оказывается под ней — граница и тень в этом случае смотрят вверх.
-const getEdgeStyle = (layout: LayoutPosition, isDark: boolean) => {
-  const edge = isDark
-    ? "1px solid rgba(167,139,250,0.25)"
-    : "1px solid rgba(124,58,237,0.3)";
+const getEdgeStyle = (layout: LayoutPosition) => {
+  const edge = "1px solid var(--th-header-border)";
   const isBelowPanel = layout === "bottom";
 
   return {
     borderBottom: isBelowPanel ? undefined : edge,
     borderTop: isBelowPanel ? edge : undefined,
     boxShadow: isBelowPanel
-      ? "0 -4px 15px rgba(0,0,0,0.15)"
-      : "0 4px 15px rgba(0,0,0,0.15)",
+      ? "0 -4px 15px rgb(var(--th-shadow-rgb) / 0.15)"
+      : "0 4px 15px rgb(var(--th-shadow-rgb) / 0.15)",
   };
 };
 
@@ -66,10 +64,8 @@ export const ChatHeader = ({
     <header
       className="flex-shrink-0 relative"
       style={{
-        background: isDark
-          ? "linear-gradient(135deg, #2e1065, #5b21b6, #0e7490)"
-          : "linear-gradient(135deg, #6d28d9, #8b5cf6, #06b6d4)",
-        ...getEdgeStyle(layout, isDark),
+        background: "var(--th-header-bg)",
+        ...getEdgeStyle(layout),
       }}
     >
       {/* flex-wrap оставлен страховкой на нештатно узкие раскладки: перенос
@@ -94,10 +90,10 @@ export const ChatHeader = ({
             <button
               onClick={onComposeOpen}
               aria-label="Новый личный чат"
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:bg-white/25 hover:scale-110"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--th-on-accent)] transition-all duration-200 ease-in-out hover:bg-[rgb(var(--th-on-accent-rgb)/0.25)] hover:scale-110"
               style={{
-                background: "rgba(255,255,255,0.15)",
-                border: "1px solid rgba(255,255,255,0.2)",
+                background: "rgb(var(--th-on-accent-rgb) / 0.15)",
+                border: "1px solid rgb(var(--th-on-accent-rgb) / 0.2)",
               }}
             >
               <Edit3 className="w-4.5 h-4.5" />
@@ -107,7 +103,7 @@ export const ChatHeader = ({
             <button
               onClick={onGroupOpen}
               aria-label="Создать группу"
-              className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-white/15 hover:scale-110 flex items-center justify-center text-white/70"
+              className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-[rgb(var(--th-on-accent-rgb)/0.15)] hover:scale-110 flex items-center justify-center text-[var(--th-on-accent-muted)]"
             >
               <UserPlus className="w-4.5 h-4.5" />
             </button>
@@ -120,7 +116,7 @@ export const ChatHeader = ({
                   ? "Свернуть чат в окно"
                   : "Развернуть чат на весь экран"
               }
-              className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-white/15 hover:scale-110 flex items-center justify-center text-white/70"
+              className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-[rgb(var(--th-on-accent-rgb)/0.15)] hover:scale-110 flex items-center justify-center text-[var(--th-on-accent-muted)]"
             >
               {isExpanded ? (
                 <Minimize2 className="w-4.5 h-4.5" />
@@ -133,7 +129,7 @@ export const ChatHeader = ({
             <button
               onClick={onRequestClose}
               aria-label="Закрыть чат"
-              className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-white/20 hover:scale-110 flex items-center justify-center text-white/70"
+              className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-[rgb(var(--th-on-accent-rgb)/0.2)] hover:scale-110 flex items-center justify-center text-[var(--th-on-accent-muted)]"
             >
               <X className="w-4.5 h-4.5" />
             </button>

@@ -18,7 +18,7 @@ interface IProps {
   t: Translations;
 }
 
-export const LinkPreviewBar = ({ text, isDark, t }: IProps) => {
+export const LinkPreviewBar = ({ text, t }: IProps) => {
   const { url, preview } = useLinkPreview(text);
   const [dismissedUrl, setDismissedUrl] = useState<string | null>(null);
 
@@ -28,17 +28,9 @@ export const LinkPreviewBar = ({ text, isDark, t }: IProps) => {
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`mx-6 mb-2 flex items-stretch gap-3 rounded-2xl px-3 py-2 border ${
-        isDark
-          ? "bg-violet-500/15 border-violet-400/20 text-white"
-          : "bg-violet-500/8 border-violet-500/15 text-gray-800"
-      }`}
+      className="mx-6 mb-2 flex items-stretch gap-3 rounded-2xl px-3 py-2 border bg-[var(--th-accent-soft)] border-[var(--th-accent-border)] text-[var(--th-text)]"
     >
-      <div
-        className={`w-1 rounded-full flex-shrink-0 ${
-          isDark ? "bg-violet-400" : "bg-violet-600"
-        }`}
-      />
+      <div className="w-1 rounded-full flex-shrink-0 bg-[var(--th-accent-text)]" />
 
       {preview.image && (
         <img
@@ -52,11 +44,7 @@ export const LinkPreviewBar = ({ text, isDark, t }: IProps) => {
       )}
 
       <div className="flex-1 min-w-0 self-center">
-        <p
-          className={`flex items-center gap-1 text-[10px] font-semibold ${
-            isDark ? "text-violet-300" : "text-violet-600"
-          }`}
-        >
+        <p className="flex items-center gap-1 text-[10px] font-semibold text-[var(--th-accent-text)]">
           <Link2 className="w-3 h-3 flex-shrink-0" />
           <span className="truncate">{preview.site_name || getUrlHost(url)}</span>
         </p>
@@ -64,11 +52,7 @@ export const LinkPreviewBar = ({ text, isDark, t }: IProps) => {
           {preview.title || getUrlHost(url)}
         </p>
         {preview.description && (
-          <p
-            className={`text-[11px] truncate ${
-              isDark ? "text-white/60" : "text-gray-600"
-            }`}
-          >
+          <p className="text-[11px] truncate text-[var(--th-text-muted)]">
             {preview.description}
           </p>
         )}
@@ -78,11 +62,7 @@ export const LinkPreviewBar = ({ text, isDark, t }: IProps) => {
         type="button"
         onClick={() => setDismissedUrl(url)}
         aria-label={t.hideLinkPreview}
-        className={`w-6 h-6 rounded-full flex items-center justify-center self-center flex-shrink-0 transition-all duration-200 ease-in-out hover:scale-110 cursor-pointer ${
-          isDark
-            ? "hover:bg-white/15 text-white/50 hover:text-white"
-            : "hover:bg-black/5 text-gray-400 hover:text-gray-700"
-        }`}
+        className="w-6 h-6 rounded-full flex items-center justify-center self-center flex-shrink-0 transition-all duration-200 ease-in-out hover:scale-110 cursor-pointer hover:bg-[var(--th-hover-bg-strong)] text-[var(--th-text-faint)] hover:text-[var(--th-text)]"
       >
         <X className="w-3.5 h-3.5" />
       </button>
