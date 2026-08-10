@@ -83,7 +83,7 @@ const getBaseBubbleStyle = ({
   if (isMe) {
     return {
       background: "var(--th-bubble-out-bg)",
-      border: "1px solid var(--th-bubble-out-border)",
+      border: "none",
       boxShadow: "var(--th-glow-accent)",
       backgroundClip: "padding-box",
     };

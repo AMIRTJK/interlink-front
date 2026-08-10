@@ -71,7 +71,7 @@ export const getAttachmentBubbleStyle = ({
   if (isMe) {
     return {
       background: "var(--th-bubble-out-bg)",
-      border: "1px solid var(--th-bubble-out-border)",
+      border: "none",
       boxShadow: withHoverGlow("var(--th-glow-accent)", glow),
     };
   }

@@ -186,7 +186,7 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
         border: isTargetHighlighted
           ? "2px solid rgb(var(--th-accent-rgb))"
           : isMe
-            ? "1px solid var(--th-bubble-out-border)"
+            ? "none"
             : "1px solid var(--th-bubble-in-border)",
         boxShadow: isTargetHighlighted
           ? "0 0 28px rgb(var(--th-accent-2-rgb) / 0.9), 0 0 12px rgb(var(--th-accent-rgb) / 0.8)"

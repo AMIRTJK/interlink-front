@@ -125,7 +125,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
                     ? "var(--th-bubble-out-bg)"
                     : "var(--th-bubble-in-bg)",
                   border: isTMe
-                    ? "1px solid var(--th-bubble-out-border)"
+                    ? "none"
                     : "1px solid var(--th-bubble-in-border)",
                   boxShadow: isTMe ? "var(--th-glow-accent)" : "none",
                 }}
