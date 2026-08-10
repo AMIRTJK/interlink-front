@@ -44,6 +44,15 @@
   .glass-ui .ui-glass-soft {
     background-color: var(--ui-glass-bg-soft) !important;
   }
+
+  /* Модификатор для поверхностей, которые задают границу и тень важными
+     утилитами (`border-gray-200/80!`, `shadow-md!`) — это меню корреспонденции.
+     Отдельный класс, а не общее правило: важная граница из этого слоя перебила
+     бы и цветные акценты писем (`border-l-emerald-500!`) в списке реестра. */
+  .glass-ui .ui-glass--forced {
+    border-color: var(--ui-glass-border) !important;
+    box-shadow: none !important;
+  }
 }
 
 /* Остальное оставляем вне слоёв: обычные объявления вне слоя перекрывают любые
