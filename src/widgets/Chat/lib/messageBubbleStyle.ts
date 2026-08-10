@@ -88,6 +88,37 @@ const getBaseBubbleStyle = ({
   };
 };
 
+interface IHoverGlowParams {
+  isDark: boolean;
+  isHovered: boolean;
+  isMe: boolean;
+  /** У подсвеченного перехода своя пульсация — свечение к ней не добавляем. */
+  isTargetHighlighted?: boolean;
+}
+
+/**
+ * Наружное свечение при наведении. Общее для всех видов сообщения — текста,
+ * вложений и голосового, — чтобы подсветка выглядела одинаково.
+ */
+export const getHoverGlow = ({
+  isDark,
+  isHovered,
+  isMe,
+  isTargetHighlighted,
+}: IHoverGlowParams): string | null => {
+  if (!isDark || !isHovered || isTargetHighlighted) return null;
+  return isMe ? "var(--th-glow-out)" : "var(--th-glow-in)";
+};
+
+/** Добавляет свечение к уже собранным теням, не затирая их. */
+export const withHoverGlow = (
+  boxShadow: CSSProperties["boxShadow"],
+  glow: string | null,
+): CSSProperties["boxShadow"] => {
+  if (!glow) return boxShadow;
+  return [boxShadow, glow].filter((value) => value && value !== "none").join(", ");
+};
+
 export const getMessageBubbleStyle = ({
   isHovered,
   isDark,
@@ -95,18 +126,16 @@ export const getMessageBubbleStyle = ({
 }: IBubbleStyleParams): CSSProperties => {
   const style = getBaseBubbleStyle(base);
 
-  const needsGlow =
-    isDark &&
-    isHovered &&
-    !base.isEffectivelyDeleted &&
-    !base.isTargetHighlighted;
+  const glow = base.isEffectivelyDeleted
+    ? null
+    : getHoverGlow({
+        isDark,
+        isHovered,
+        isMe: base.isMe,
+        isTargetHighlighted: base.isTargetHighlighted,
+      });
 
-  if (!needsGlow) return style;
+  if (!glow) return style;
 
-  return {
-    ...style,
-    boxShadow: [style.boxShadow, base.isMe ? "var(--th-glow-out)" : "var(--th-glow-in)"]
-      .filter(Boolean)
-      .join(", "),
-  };
+  return { ...style, boxShadow: withHoverGlow(style.boxShadow, glow) };
 };

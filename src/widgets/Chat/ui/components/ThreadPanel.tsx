@@ -119,7 +119,7 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
                 />
               )}
               <div
-                className={`px-3 py-2 text-xs rounded-2xl max-w-[80%] whitespace-pre-wrap break-words transition-all duration-200 ease-in-out hover:brightness-110 ${isTMe ? "rounded-br-md text-[var(--th-bubble-out-text)]" : "rounded-bl-md text-[var(--th-bubble-in-text)]"}`}
+                className={`px-3 py-2 text-xs rounded-2xl max-w-[80%] whitespace-pre-wrap break-words transition-all duration-200 ease-in-out ${isTMe ? "rounded-br-md text-[var(--th-bubble-out-text)]" : "rounded-bl-md text-[var(--th-bubble-in-text)]"}`}
                 style={{
                   background: isTMe
                     ? "var(--th-bubble-out-bg)"

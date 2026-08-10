@@ -1,6 +1,7 @@
 import React from "react";
 import { FileText, ImageIcon, Film, Music } from "lucide-react";
 import { type MessageAttachment } from "../model";
+import { getHoverGlow, withHoverGlow } from "./messageBubbleStyle";
 
 export const formatTime = (d: Date) => {
   const h = d.getHours();
@@ -31,6 +32,7 @@ interface IAttachmentBubbleStyle {
   isImage: boolean;
   isMe: boolean;
   isDark: boolean;
+  isHovered?: boolean;
   isTargetHighlighted?: boolean;
 }
 
@@ -39,12 +41,19 @@ interface IAttachmentBubbleStyle {
  * пузырь целиком, так что от подложки остаётся только кайма и вылезающий
  * из-под скруглений угол. Подсветка перехода к сообщению остаётся — она несёт
  * смысл, а не оформление.
+ *
+ * Свечение при наведении получают и картинки: `overflow: hidden` обрезает
+ * содержимое, но не собственную тень элемента, поэтому ореол виден снаружи.
  */
 export const getAttachmentBubbleStyle = ({
   isImage,
   isMe,
+  isDark,
+  isHovered = false,
   isTargetHighlighted,
 }: IAttachmentBubbleStyle): React.CSSProperties => {
+  const glow = getHoverGlow({ isDark, isHovered, isMe, isTargetHighlighted });
+
   if (isTargetHighlighted) {
     return {
       background: "var(--th-bubble-out-bg)",
@@ -54,19 +63,19 @@ export const getAttachmentBubbleStyle = ({
     };
   }
 
-  if (isImage) return {};
+  if (isImage) return glow ? { boxShadow: glow } : {};
 
   if (isMe) {
     return {
       background: "var(--th-bubble-out-bg)",
       border: "1px solid var(--th-bubble-out-border)",
-      boxShadow: "var(--th-glow-accent)",
+      boxShadow: withHoverGlow("var(--th-glow-accent)", glow),
     };
   }
 
   return {
     background: "var(--th-bubble-in-bg)",
     border: "1px solid var(--th-bubble-in-border)",
-    boxShadow: "var(--th-shadow-soft)",
+    boxShadow: withHoverGlow("var(--th-shadow-soft)", glow),
   };
 };

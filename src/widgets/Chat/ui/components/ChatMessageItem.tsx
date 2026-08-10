@@ -76,10 +76,16 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 
   const isPending = msg.status === "pending" || msg.id.startsWith("temp-");
 
+  // Наведение считаем один раз на сообщение: подсветку получают и текст, и
+  // вложения, и голосовое — иначе у одного сообщения разные части светятся
+  // по-разному.
+  const isHovered =
+    hoveredMessageId === msg.id || activeActionMsgId === msg.id;
+
   const bubbleStyle = getMessageBubbleStyle({
     isMe,
     isDark,
-    isHovered: hoveredMessageId === msg.id || activeActionMsgId === msg.id,
+    isHovered,
     isEffectivelyDeleted: Boolean(isEffectivelyDeleted),
     isTargetHighlighted,
     currentMatchMsg,
@@ -142,6 +148,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               </span>
             </div>
           )}
+          {/* Цитата и метка пересылки стоят НАД пузырём, на фоне переписки, а не
+              внутри него: цвета берём от поверхности, иначе у своих сообщений
+              белый текст «на акценте» ложится на светлый фон. */}
           {msg.replyTo && !isEffectivelyDeleted && (
             <div
               onClick={(e) => {
@@ -158,37 +167,15 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                 }
               }}
               title="Перейти к исходному сообщению"
-              className={`flex items-center gap-2 mb-1 px-3 py-1.5 rounded-2xl text-xs max-w-full cursor-pointer transition-all duration-150 hover:scale-[1.01] hover:brightness-110 active:scale-[0.99] ${
-                isMe
-                  ? "bg-[rgb(var(--th-on-accent-rgb)/0.2)] text-[var(--th-on-accent)] border border-[rgb(var(--th-on-accent-rgb)/0.3)]"
-                  : "bg-[var(--th-accent-soft)] border border-[var(--th-accent-border)]"
-              }`}
+              className="flex items-center gap-2 mb-1 px-3 py-1.5 rounded-2xl text-xs max-w-full cursor-pointer transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99] bg-[var(--th-accent-soft)] border border-[var(--th-accent-border)]"
             >
-              <div
-                className={`w-1 h-6 rounded-full flex-shrink-0 ${
-                  isMe
-                    ? "bg-[var(--th-on-accent)]"
-                    : "bg-[var(--th-accent-text)]"
-                }`}
-              />
-              <CornerUpLeft
-                className={`w-3 h-3 flex-shrink-0 ${isMe ? "text-[var(--th-on-accent-muted)]" : "text-[var(--th-accent-text)]"}`}
-              />
+              <div className="w-1 h-6 rounded-full flex-shrink-0 bg-[var(--th-accent-text)]" />
+              <CornerUpLeft className="w-3 h-3 flex-shrink-0 text-[var(--th-accent-text)]" />
               <div className="min-w-0 flex-1">
-                <span
-                  className={`font-semibold text-[10px] ${
-                    isMe ? "text-[var(--th-on-accent)]" : "text-[var(--th-accent-text)]"
-                  }`}
-                >
+                <span className="font-semibold text-[10px] text-[var(--th-accent-text)]">
                   {msg.replyTo.senderName}
                 </span>
-                <p
-                  className={`truncate max-w-[200px] ${
-                    isMe
-                      ? "text-[var(--th-on-accent-muted)]"
-                      : "text-[var(--th-text-muted)]"
-                  }`}
-                >
+                <p className="truncate max-w-[200px] text-[var(--th-text-muted)]">
                   {msg.replyTo.text}
                 </p>
               </div>
@@ -196,7 +183,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           )}
           {msg.forwarded && !isEffectivelyDeleted && (
             <div
-              className={`flex items-center gap-1 mb-1 text-[10px] text-[var(--th-text-faint)] ${isMe ? "self-end" : "self-start"}`}
+              className={`flex items-center gap-1 mb-1 text-[10px] text-[var(--th-text-muted)] ${isMe ? "self-end" : "self-start"}`}
             >
               <Forward className="w-3 h-3" />
               <span>
@@ -328,6 +315,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               attachments={msg.attachments ?? (msg.attachment ? [msg.attachment] : [])}
               isMe={isMe}
               isDark={isDark}
+              isHovered={isHovered}
               isTargetHighlighted={isTargetHighlighted}
             />
           )}

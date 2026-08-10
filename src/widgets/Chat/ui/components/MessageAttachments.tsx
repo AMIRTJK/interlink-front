@@ -15,6 +15,8 @@ interface IProps {
   attachments: MessageAttachment[];
   isMe: boolean;
   isDark: boolean;
+  /** Наведение ловит вся группа сообщения — свечение общее для всех вложений. */
+  isHovered?: boolean;
   isTargetHighlighted?: boolean;
 }
 
@@ -25,6 +27,7 @@ export const MessageAttachments = ({
   attachments,
   isMe,
   isDark,
+  isHovered = false,
   isTargetHighlighted,
 }: IProps) => {
   const [selectedImage, setSelectedImage] = useState<MessageAttachment | null>(
@@ -77,6 +80,7 @@ export const MessageAttachments = ({
               mimeType={attachment.mimeType}
               isMe={isMe}
               isDark={isDark}
+              isHovered={isHovered}
               isTargetHighlighted={isTargetHighlighted}
             />
           );
@@ -87,7 +91,7 @@ export const MessageAttachments = ({
         return (
           <div
             key={key}
-            className={`mb-1.5 rounded-2xl overflow-hidden transition-all duration-200 ease-in-out hover:brightness-105 ${
+            className={`mb-1.5 rounded-2xl overflow-hidden transition-all duration-200 ease-in-out ${
               isMe ? "rounded-br-md" : "rounded-bl-md"
             } ${
               isTargetHighlighted
@@ -98,6 +102,7 @@ export const MessageAttachments = ({
               isImage,
               isMe,
               isDark,
+              isHovered,
               isTargetHighlighted,
             })}
           >
