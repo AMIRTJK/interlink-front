@@ -21,12 +21,13 @@ interface IBubbleStyleParams {
 /** Базовое оформление пузыря без учёта наведения. */
 const getBaseBubbleStyle = ({
   isMe,
+  isDark,
   isEffectivelyDeleted,
   isTargetHighlighted,
   currentMatchMsg,
   highlighted,
   hasThread,
-}: Omit<IBubbleStyleParams, "isHovered" | "isDark">): CSSProperties => {
+}: Omit<IBubbleStyleParams, "isHovered">): CSSProperties => {
   if (isTargetHighlighted) {
     const baseStyle = isMe
       ? {
@@ -67,15 +68,17 @@ const getBaseBubbleStyle = ({
       ? {
           background: "var(--th-bubble-out-bg-soft)",
           border: "1.5px solid rgb(var(--th-accent-2-rgb) / 0.65)",
-          boxShadow:
-            "0 4px 20px rgb(var(--th-accent-rgb) / 0.35), var(--th-inset-highlight)",
+          boxShadow: isDark
+            ? "0 4px 20px rgb(var(--th-accent-rgb) / 0.35), var(--th-inset-highlight)"
+            : "none",
           backgroundClip: "padding-box",
         }
       : {
           background: "rgb(var(--th-accent-rgb) / 0.15)",
           border: "1.5px solid var(--th-accent-border)",
-          boxShadow:
-            "0 2px 12px rgb(var(--th-accent-rgb) / 0.15), var(--th-inset-highlight)",
+          boxShadow: isDark
+            ? "0 2px 12px rgb(var(--th-accent-rgb) / 0.15), var(--th-inset-highlight)"
+            : "none",
           backgroundClip: "padding-box",
         };
   }
@@ -84,7 +87,7 @@ const getBaseBubbleStyle = ({
     return {
       background: "var(--th-bubble-out-bg)",
       border: "none",
-      boxShadow: "var(--th-glow-accent)",
+      boxShadow: isDark ? "var(--th-glow-accent)" : "none",
       backgroundClip: "padding-box",
     };
   }
@@ -92,7 +95,9 @@ const getBaseBubbleStyle = ({
   return {
     background: "var(--th-bubble-in-bg)",
     border: "1px solid var(--th-bubble-in-border)",
-    boxShadow: "var(--th-shadow-soft), var(--th-inset-highlight)",
+    boxShadow: isDark
+      ? "var(--th-shadow-soft), var(--th-inset-highlight)"
+      : "none",
     backgroundClip: "padding-box",
   };
 };

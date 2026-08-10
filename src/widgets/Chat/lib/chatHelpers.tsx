@@ -72,13 +72,13 @@ export const getAttachmentBubbleStyle = ({
     return {
       background: "var(--th-bubble-out-bg)",
       border: "none",
-      boxShadow: withHoverGlow("var(--th-glow-accent)", glow),
+      boxShadow: withHoverGlow(isDark ? "var(--th-glow-accent)" : "none", glow),
     };
   }
 
   return {
     background: "var(--th-bubble-in-bg)",
     border: "1px solid var(--th-bubble-in-border)",
-    boxShadow: withHoverGlow("var(--th-shadow-soft)", glow),
+    boxShadow: withHoverGlow(isDark ? "var(--th-shadow-soft)" : "none", glow),
   };
 };

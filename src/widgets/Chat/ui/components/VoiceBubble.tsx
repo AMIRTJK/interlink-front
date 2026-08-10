@@ -191,7 +191,7 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
         boxShadow: isTargetHighlighted
           ? "0 0 28px rgb(var(--th-accent-2-rgb) / 0.9), 0 0 12px rgb(var(--th-accent-rgb) / 0.8)"
           : withHoverGlow(
-              isMe ? "var(--th-glow-accent)" : "none",
+              isMe && isDark ? "var(--th-glow-accent)" : "none",
               getHoverGlow({ isDark, isHovered, isMe }),
             ),
       }}
