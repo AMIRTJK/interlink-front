@@ -4,6 +4,7 @@ import { Check, CheckCheck, Clock3, CornerUpLeft, Forward, MoreHorizontal, Pin, 
 import { Contact, Message, ReplyPreview } from "../../model";
 import { Lang, Translations } from "../../lib/translations";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
+import { getMessageBubbleStyle } from "../../lib/messageBubbleStyle";
 import { If } from "@shared/ui";
 import { MessageAttachments } from "./MessageAttachments";
 import { ReactionPicker } from "./ReactionPicker";
@@ -74,6 +75,17 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
     String(targetHighlightedMessageId) === String(msg.id);
 
   const isPending = msg.status === "pending" || msg.id.startsWith("temp-");
+
+  const bubbleStyle = getMessageBubbleStyle({
+    isMe,
+    isDark,
+    isHovered: hoveredMessageId === msg.id || activeActionMsgId === msg.id,
+    isEffectivelyDeleted: Boolean(isEffectivelyDeleted),
+    isTargetHighlighted,
+    currentMatchMsg,
+    highlighted,
+    hasThread: repliesCount > 0,
+  });
 
   return (
     <motion.div
@@ -340,67 +352,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                             ? "rounded-2xl rounded-br-md text-white"
                             : `rounded-2xl rounded-bl-md ${isDark ? "text-white/90" : "text-gray-800"}`
                 }`}
-                style={
-                  isTargetHighlighted
-                    ? {
-                        background:
-                          "linear-gradient(135deg, rgb(236, 72, 153), rgb(168, 85, 247), rgb(59, 130, 246))",
-                        border: "2px solid #ffffff",
-                        boxShadow:
-                          "0 0 28px rgba(236, 72, 153, 0.9), 0 0 12px rgba(168, 85, 247, 0.8)",
-                        color: "#ffffff",
-                      }
-                    : isEffectivelyDeleted
-                      ? {}
-                    : currentMatchMsg
-                      ? {
-                          background: "rgba(251,191,36,0.25)",
-                          border: "1px solid rgba(251,191,36,0.4)",
-                        }
-                      : highlighted
-                        ? {
-                            background: "rgba(251,191,36,0.15)",
-                            border: "1px solid rgba(251,191,36,0.3)",
-                          }
-                        : msg.threadCount && msg.threadCount > 0
-                          ? isMe
-                            ? {
-                                background:
-                                  "linear-gradient(135deg,rgba(124,58,237,0.75),rgba(168,85,247,0.65),rgba(6,182,212,0.6))",
-                                border: "1.5px solid rgba(196,181,253,0.65)",
-                                boxShadow:
-                                  "0 4px 20px rgba(124,58,237,0.35), inset 0 1px 0 rgba(255,255,255,0.15)",
-                                backgroundClip: "padding-box",
-                              }
-                            : {
-                                background: "rgba(124,58,237,0.15)",
-                                border: "1.5px solid rgba(167,139,250,0.4)",
-                                boxShadow:
-                                  "0 2px 12px rgba(124,58,237,0.15), inset 0 1px 0 rgba(255,255,255,0.08)",
-                                backgroundClip: "padding-box",
-                              }
-                          : isMe
-                            ? {
-                                background:
-                                  "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))",
-                                border: "1px solid rgba(167,139,250,0.4)",
-                                boxShadow:
-                                  "0 0 16px rgba(124, 58, 237, 0.5)",
-                                backgroundClip: "padding-box",
-                              }
-                            : {
-                                background: isDark
-                                  ? "rgba(255,255,255,0.1)"
-                                  : "rgba(255,255,255,0.85)",
-                                border: isDark
-                                  ? "1px solid rgba(255,255,255,0.15)"
-                                  : "1px solid rgba(0,0,0,0.08)",
-                                boxShadow: isDark
-                                  ? "0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)"
-                                  : "0 2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)",
-                                backgroundClip: "padding-box",
-                              }
-                }
+                style={bubbleStyle}
               >
                 <If is={!!(msg.pinned && !isEffectivelyDeleted)}>
                   <span
