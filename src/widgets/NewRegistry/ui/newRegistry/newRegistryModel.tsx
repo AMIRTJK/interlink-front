@@ -127,7 +127,8 @@ export const STATUS_CONFIG: Record<string, any> = {
 	canceled: {
 		label: "Отменено",
 		icon: <XCircle size={14} />,
-		gradient: "from-red-500 to-red-600",
+		gradient: "from-rose-500 to-rose-600",
+		omitStatus: true,
 	},
 	default: {
 		label: "Документ",
@@ -138,6 +139,6 @@ export const STATUS_CONFIG: Record<string, any> = {
 
 export const REGISTRY_STATUS_MAP: Record<string, string[]> = {
 	incoming: [],
-	outgoing: ["to_approve", "approved", "to_sign", "signed", "sent"],
+	outgoing: ["to_approve", "approved", "to_sign", "signed", "sent", "canceled"],
 	default: ["draft", "in-progress", "completed"],
 };

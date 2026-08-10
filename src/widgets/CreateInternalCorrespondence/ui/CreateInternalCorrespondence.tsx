@@ -717,6 +717,27 @@ export const CreateInternalCorrespondence = ({
     [versionsResponse, revokedVersionIds, hasSignedWorkflowSignature],
   );
 
+  const signedVersionId = useMemo(() => {
+    if (!hasSignedWorkflowSignature) return null;
+    const backendSigned = allVersions.find(
+      (v: any) => v.is_current_signed && v.signature_state !== "revoked",
+    );
+    if (backendSigned) return backendSigned.id;
+    const stamped = allVersions.filter(
+      (v: any) =>
+        v.signature_state !== "revoked" &&
+        typeof v.content === "string" &&
+        v.content.includes(STAMP_ATTR),
+    );
+    if (stamped.length) return stamped[stamped.length - 1].id;
+    return null;
+  }, [allVersions, hasSignedWorkflowSignature]);
+
+  const signedVersionObj = useMemo(
+    () => (signedVersionId ? allVersions.find((v: any) => v.id === signedVersionId) : null),
+    [allVersions, signedVersionId],
+  );
+
   // Список уникальных авторов для выпадающего фильтра
   const versionAuthors = useMemo(
     () => buildVersionAuthors(allVersions),
@@ -729,7 +750,8 @@ export const CreateInternalCorrespondence = ({
   const [showAuthorDropdown, setShowAuthorDropdown] = useState(false);
 
   const initialActiveVersion =
-    allVersions.length > 0 ? allVersions[allVersions.length - 1].id : null;
+    signedVersionId ||
+    (allVersions.length > 0 ? allVersions[allVersions.length - 1].id : null);
   const [activeVersionId, setActiveVersionId] = useState<
     string | number | null
   >(initialActiveVersion);
@@ -757,8 +779,12 @@ export const CreateInternalCorrespondence = ({
     activeVersionId !== latestVersionId;
 
   const activeVersion = useMemo(
-    () => allVersions.find((v: any) => v.id === activeVersionId) || latestVersion || null,
-    [allVersions, activeVersionId, latestVersion],
+    () =>
+      allVersions.find((v: any) => v.id === activeVersionId) ||
+      signedVersionObj ||
+      latestVersion ||
+      null,
+    [allVersions, activeVersionId, signedVersionObj, latestVersion],
   );
 
   useEffect(() => {
@@ -828,22 +854,6 @@ export const CreateInternalCorrespondence = ({
 
   const isActiveVersionForSign = activeVersion ? !!activeVersion.is_selected : false;
 
-  const signedVersionId = useMemo(() => {
-    if (!hasSignedWorkflowSignature) return null;
-    const backendSigned = allVersions.find(
-      (v: any) => v.is_current_signed && v.signature_state !== "revoked",
-    );
-    if (backendSigned) return backendSigned.id;
-    const stamped = allVersions.filter(
-      (v: any) =>
-        v.signature_state !== "revoked" &&
-        typeof v.content === "string" &&
-        v.content.includes(STAMP_ATTR),
-    );
-    if (stamped.length) return stamped[stamped.length - 1].id;
-    return null;
-  }, [allVersions, hasSignedWorkflowSignature]);
-
   const { mutate: selectVersionForSign, isPending: isSelectingVersion } =
     useMutationQuery<{ versionId: string | number }, any>({
       url: (requestData) =>
@@ -856,6 +866,7 @@ export const CreateInternalCorrespondence = ({
         suppressSuccessToast: true,
         invalidate: [
           ApiRoutes.GET_INTERNAL_VERSIONS.replace(":id", String(id || "")),
+          ApiRoutes.GET_INTERNAL_BY_ID.replace(":id", String(id || "")),
           ...CORRESPONDENCE_INVALIDATE_KEYS,
         ],
       },
@@ -970,9 +981,17 @@ export const CreateInternalCorrespondence = ({
         success: "Подписывающий назначен",
         invalidate: [
           ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+          ApiRoutes.GET_INTERNAL_BY_ID?.replace(":id", String(id || "")),
+          correspondencePermissionsKey(String(id || "")),
+          ...CORRESPONDENCE_INVALIDATE_KEYS,
         ],
       },
-      queryOptions: { onSuccess: () => refetchWorkflow() },
+      queryOptions: {
+        onSuccess: (_res, variables) => {
+          refetchWorkflow();
+          setFinalSigner((prev) => (prev ? { ...prev, isInvited: true } : null));
+        },
+      },
     });
 
   const { mutate: inviteApprover, isPending: isApproverInviting } =
@@ -984,6 +1003,9 @@ export const CreateInternalCorrespondence = ({
         success: "Согласующий приглашен",
         invalidate: [
           ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+          ApiRoutes.GET_INTERNAL_BY_ID?.replace(":id", String(id || "")),
+          correspondencePermissionsKey(String(id || "")),
+          ...CORRESPONDENCE_INVALIDATE_KEYS,
         ],
       },
       queryOptions: { onSuccess: () => refetchWorkflow() },
@@ -998,6 +1020,8 @@ export const CreateInternalCorrespondence = ({
       success: "Письмо прикреплено",
       invalidate: [
         ApiRoutes.INTERNAL_GET_WORKFLOW?.replace(":id", String(id || "")),
+        ApiRoutes.GET_INTERNAL_BY_ID?.replace(":id", String(id || "")),
+        ...CORRESPONDENCE_INVALIDATE_KEYS,
       ],
     },
     queryOptions: { onSuccess: () => refetchWorkflow() },
@@ -2106,7 +2130,8 @@ export const CreateInternalCorrespondence = ({
 
   useEffect(() => {
     if (allVersions.length === 0) return;
-    const targetVersion = allVersions[allVersions.length - 1];
+    const targetVersion =
+      signedVersionObj || allVersions[allVersions.length - 1];
 
     const isNewVersionId = autoLoadedLatestRef.current !== targetVersion.id;
     if (isNewVersionId) {
@@ -2139,10 +2164,10 @@ export const CreateInternalCorrespondence = ({
     // ХАК: Если документ только открыли и ни одна версия еще не выбрана для подписи
     // (проверяем по ответу, например, если у всех элементов is_selected === false)
     const hasSelected = allVersions.some((v: any) => v.is_selected);
-    if (!hasSelected && targetVersion.id) {
+    if (!hasSelected && !signedVersionId && targetVersion.id) {
       selectVersionForSign({ versionId: targetVersion.id });
     }
-  }, [allVersions]);
+  }, [allVersions, signedVersionObj, signedVersionId]);
 
   useEffect(() => {
     if (showVersionCompareSides && allVersions.length < 2) {

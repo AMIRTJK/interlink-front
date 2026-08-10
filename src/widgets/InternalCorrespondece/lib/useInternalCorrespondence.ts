@@ -12,6 +12,7 @@ import {
 import { CORRESPONDENCE_INVALIDATE_KEYS, AppRoutes } from "@shared/config";
 import { ApiRoutes } from "@shared/api";
 import { CreateInternalRequest } from "@entities/correspondence";
+import { mergeSignedDuplicateVersions } from "@widgets/CreateInternalCorrespondence/ui/createInternalCorrespondence/versionsLib";
 import { generateMockWorkflow } from "./index";
 import { EditorHandle } from "../ui/Editor";
 import { Recipient } from "../ui/DocumentHeaderForm";
@@ -73,7 +74,9 @@ export const useInternalCorrespondence = ({
   });
 
   const versions = useMemo(() => {
-    const rawVersions = versionsResponse?.data?.versions || [];
+    const rawVersions = mergeSignedDuplicateVersions(
+      versionsResponse?.data?.versions || [],
+    );
 
     return rawVersions.map((v: any) => ({
       id: v.id,
@@ -476,7 +479,9 @@ export const useInternalCorrespondence = ({
 
   useEffect(() => {
     if (versions.length > 0 && !isVersionContentInit.current) {
-      const targetVersion = versions[versions.length - 1];
+      const targetVersion =
+        versions.find((v: any) => v.is_current_signed) ||
+        versions[versions.length - 1];
 
       setActiveVersionId(targetVersion.id);
 

@@ -120,14 +120,20 @@ export const NewRegistry = ({
 	});
 
 	const rawDocuments =
-		(responseData as any)?.data?.data || (responseData as any)?.data || [];
+		currentTab === "canceled"
+			? []
+			: (responseData as any)?.data?.data || (responseData as any)?.data || [];
 	const documents = useMemo(
 		() => sortCorrespondenceById(rawDocuments),
 		[rawDocuments],
 	);
 	// Laravel часто вкладывает мета-данные в объект meta
-	const meta =
-		(responseData as any)?.data?.meta || (responseData as any)?.data || {};
+	const meta = useMemo(() => {
+		if (currentTab === "canceled") {
+			return { current_page: 1, last_page: 1, per_page: 9, total: 0 };
+		}
+		return (responseData as any)?.data?.meta || (responseData as any)?.data || {};
+	}, [currentTab, responseData]);
 	const counts = useMemo(
 		() => (countersData as any)?.data || {},
 		[countersData],
