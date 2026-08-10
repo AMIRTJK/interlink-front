@@ -29,7 +29,7 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
     exit={{ opacity: 0 }}
     className="fixed inset-0 z-50 flex items-center justify-center p-4"
     style={{
-      background: isDark ? "rgba(0,0,0,0.7)" : "rgba(0,0,0,0.25)",
+      background: "var(--th-scrim)",
       backdropFilter: "blur(20px)",
     }}
   >
@@ -39,36 +39,32 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
       animate={{ scale: 1, opacity: 1, y: 0 }}
       exit={{ scale: 0.9, opacity: 0, y: 20 }}
       transition={{ type: "spring", stiffness: 280, damping: 26 }}
-      className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? "bg-[#150e28]/95 border border-white/10 backdrop-blur-xl text-white" : "bg-white border border-gray-200 text-gray-800 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.15)]"}`}
-      style={{
-        boxShadow: isDark
-          ? "0 20px 60px rgba(139,92,246,0.4)"
-          : "0 15px 40px rgba(0,0,0,0.08)",
-      }}
+      className="w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl bg-[var(--th-menu-bg)] border border-[var(--th-menu-border)] text-[var(--th-text)]"
+      style={{ boxShadow: "0 20px 60px rgb(var(--th-accent-rgb) / 0.25)" }}
     >
       <div
-        className={`flex items-center justify-between px-5 py-4 border-b ${isDark ? "border-white/10" : "border-gray-100"}`}
+        className="flex items-center justify-between px-5 py-4 border-b border-[var(--th-divider)]"
       >
         <div className="flex items-center gap-2">
-          <Forward className="w-4 h-4 text-violet-300" />
+          <Forward className="w-4 h-4 text-[var(--th-accent-text)]" />
           <h3
-            className={`font-semibold text-sm ${isDark ? "text-white" : "text-gray-900"}`}
+            className="font-semibold text-sm text-[var(--th-text)]"
           >
             {t.forwardMessage}
           </h3>
         </div>
         <button
           onClick={onClose}
-          className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "hover:bg-white/15 text-white/50 hover:text-white" : "hover:bg-black/5 text-gray-400 hover:text-gray-605"}`}
+          className="w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 hover:bg-[var(--th-hover-bg-strong)] text-[var(--th-text-muted)] hover:text-[var(--th-text)]"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
       <div
-        className={`px-5 py-3 border-b ${isDark ? "border-white/10 bg-white/5" : "border-gray-100 bg-gray-50"}`}
+        className="px-5 py-3 border-b border-[var(--th-divider)] bg-[var(--th-chip-bg)]"
       >
         <p
-          className={`text-xs line-clamp-2 italic ${isDark ? "text-white/50" : "text-gray-500"}`}
+          className="text-xs line-clamp-2 italic text-[var(--th-text-muted)]"
         >
           "{message.text}"
         </p>
@@ -78,7 +74,7 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
           <button
             key={contact.id}
             onClick={() => onForwardSend(contact.id)}
-            className={`w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 ease-in-out text-left group ${isDark ? "hover:bg-white/8" : "hover:bg-black/4"}`}
+            className="w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 ease-in-out text-left group hover:bg-[var(--th-hover-bg)]"
           >
             <div className="relative flex-shrink-0">
               <img
@@ -87,24 +83,24 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
                 className="w-10 h-10 rounded-full object-cover transition-transform duration-200 group-hover:scale-105"
               />
               <span
-                className={`absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 rounded-full ${isDark ? "border-[#150e28]" : "border-white"}`}
+                className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[var(--th-online)] border-2 rounded-full border-[var(--th-panel-solid)]"
                 style={{ display: contact.online ? "block" : "none" }}
               />
             </div>
             <div className="flex-1 min-w-0">
               <p
-                className={`text-sm font-medium truncate ${isDark ? "text-white/90" : "text-gray-900"}`}
+                className="text-sm font-medium truncate text-[var(--th-text)]"
               >
                 {contact.name}
               </p>
               <p
-                className={`text-xs truncate ${isDark ? "text-white/40" : "text-gray-500"}`}
+                className="text-xs truncate text-[var(--th-text-muted)]"
               >
                 {contact.lastMessage}
               </p>
             </div>
             <div
-              className={`w-2 h-2 rounded-full flex-shrink-0 ${contact.online ? "bg-green-400" : isDark ? "bg-white/20" : "bg-gray-300"}`}
+              className={`w-2 h-2 rounded-full flex-shrink-0 ${contact.online ? "bg-[var(--th-online)]" : "bg-[var(--th-chip-border)]"}`}
             />
           </button>
         ))}

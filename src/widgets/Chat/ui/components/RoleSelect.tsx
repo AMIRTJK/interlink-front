@@ -53,8 +53,8 @@ export const RoleSelect = ({ value, onChange, isDark, memberName }: IProps) => {
         aria-expanded={isOpen}
         className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-medium transition-all duration-200 ${
           isDark
-            ? "bg-white/10 text-white/70 hover:bg-white/20"
-            : "bg-black/5 text-gray-600 hover:bg-black/10"
+            ? "bg-[var(--th-chip-bg)] text-[var(--th-text-muted)] hover:bg-[var(--th-hover-bg-strong)]"
+            : "bg-[var(--th-chip-bg)] text-[var(--th-text-muted)] hover:bg-[var(--th-hover-bg-strong)]"
         }`}
       >
         <span>{currentLabel}</span>
@@ -73,13 +73,13 @@ export const RoleSelect = ({ value, onChange, isDark, memberName }: IProps) => {
             transition={{ duration: 0.15 }}
             className={`absolute right-0 top-full mt-1 z-40 min-w-[140px] rounded-xl overflow-hidden py-1 ${
               isDark
-                ? "bg-[#1b1236] border border-white/15"
-                : "bg-white border border-black/8"
+                ? "bg-[var(--th-menu-bg)] border border-[var(--th-menu-border)]"
+                : "bg-[var(--th-menu-bg)] border border-[var(--th-menu-border)]"
             }`}
             style={{
               boxShadow: isDark
-                ? "0 12px 32px rgba(0,0,0,0.5)"
-                : "0 12px 32px rgba(124,58,237,0.15)",
+                ? "0 12px 32px rgb(var(--th-shadow-rgb) / 0.5)"
+                : "0 12px 32px rgb(var(--th-accent-rgb) / 0.15)",
             }}
           >
             {ROLE_OPTIONS.map((role) => {
@@ -95,14 +95,14 @@ export const RoleSelect = ({ value, onChange, isDark, memberName }: IProps) => {
                     }}
                     className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-xs text-left transition-colors duration-150 ${
                       isDark
-                        ? "text-white/80 hover:bg-white/10"
-                        : "text-gray-700 hover:bg-black/5"
+                        ? "text-[var(--th-text-muted)] hover:bg-[var(--th-hover-bg-strong)]"
+                        : "text-[var(--th-text-muted)] hover:bg-[var(--th-hover-bg-strong)]"
                     }`}
                   >
                     <span>{label}</span>
                     {isSelected && (
                       <Check
-                        className={`w-3 h-3 ${isDark ? "text-violet-300" : "text-violet-600"}`}
+                        className="w-3 h-3 text-[var(--th-accent-text)]"
                       />
                     )}
                   </button>

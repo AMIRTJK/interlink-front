@@ -38,7 +38,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center"
       style={{
-        background: "rgba(0,0,0,0.92)",
+        background: "rgb(var(--th-shadow-rgb) / 0.92)",
         backdropFilter: "blur(20px)",
       }}
     >
@@ -53,13 +53,13 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           alt={contact.name}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60" />
-        <div className="absolute top-4 left-4 right-4 h-1 bg-white/20 rounded-full overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[rgb(var(--th-shadow-rgb)/0.5)] via-transparent to-[rgb(var(--th-shadow-rgb)/0.6)]" />
+        <div className="absolute top-4 left-4 right-4 h-1 bg-[rgb(var(--th-on-accent-rgb)/0.2)] rounded-full overflow-hidden">
           <motion.div
             className="h-full rounded-full"
             style={{
               width: `${progress}%`,
-              background: "linear-gradient(90deg, #a78bfa, #f0abfc, #67e8f9)",
+              background: "linear-gradient(90deg, rgb(var(--th-accent-rgb)), rgb(var(--th-accent-2-rgb)), rgb(var(--th-accent-3-rgb)))",
             }}
           />
         </div>
@@ -67,15 +67,15 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           <img
             src={contact.avatar}
             alt={contact.name}
-            className="w-8 h-8 rounded-full object-cover border-2 border-white/60"
+            className="w-8 h-8 rounded-full object-cover border-2 border-[rgb(var(--th-on-accent-rgb)/0.6)]"
           />
-          <span className="text-white font-semibold text-sm">
+          <span className="text-[var(--th-on-accent)] font-semibold text-sm">
             {contact.name}
           </span>
-          <span className="text-white/60 text-xs ml-1">{hoursAgo}</span>
+          <span className="text-[var(--th-on-accent-faint)] text-xs ml-1">{hoursAgo}</span>
           <button
             onClick={onClose}
-            className="ml-auto w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:bg-white/30 hover:scale-110"
+            className="ml-auto w-7 h-7 rounded-full bg-[rgb(var(--th-on-accent-rgb)/0.2)] flex items-center justify-center text-[var(--th-on-accent)] transition-all duration-200 ease-in-out hover:bg-[rgb(var(--th-on-accent-rgb)/0.3)] hover:scale-110"
           >
             <X className="w-3.5 h-3.5" />
           </button>

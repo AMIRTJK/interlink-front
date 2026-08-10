@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { tokenControl } from "@shared/lib";
+import {
+  BG_STORAGE_KEY,
+  DESIGN_CHANGE_EVENT,
+  THEME_STORAGE_KEY,
+  readThemeKey,
+} from "@shared/config";
 
-const THEME_KEY = "currentTheme";
-const BG_KEY = "currentBg";
-const CHANGE_EVENT = "designsettingschange";
+const THEME_KEY = THEME_STORAGE_KEY;
+const BG_KEY = BG_STORAGE_KEY;
+const CHANGE_EVENT = DESIGN_CHANGE_EVENT;
 
-const readTheme = (): string => {
-  if (typeof window === "undefined") return "emerald";
-  return localStorage.getItem(THEME_KEY) || "emerald";
-};
+const readTheme = readThemeKey;
 
 const readBg = (): string => {
   if (typeof window === "undefined") return "arctic";

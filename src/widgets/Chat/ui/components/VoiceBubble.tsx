@@ -172,28 +172,23 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
         isMe ? "rounded-br-md" : "rounded-bl-md"
       } ${
         isTargetHighlighted
-          ? "ring-2 ring-violet-500 scale-[1.02] shadow-[0_0_24px_rgba(168,85,247,0.85)] animate-pulse"
+          ? "ring-2 ring-[rgb(var(--th-accent-rgb))] scale-[1.02] shadow-[0_0_24px_rgb(var(--th-accent-2-rgb)/0.85)] animate-pulse"
           : ""
       }`}
       style={{
-        background: isTargetHighlighted
-          ? "linear-gradient(135deg, rgb(236, 72, 153), rgb(168, 85, 247), rgb(59, 130, 246))"
-          : isMe
-            ? "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))"
-            : isDark
-              ? "rgba(255,255,255,0.1)"
-              : "rgba(255,255,255,0.85)",
+        background:
+          isTargetHighlighted || isMe
+            ? "var(--th-bubble-out-bg)"
+            : "var(--th-bubble-in-bg)",
         border: isTargetHighlighted
-          ? "2px solid #ffffff"
+          ? "2px solid rgb(var(--th-on-accent-rgb))"
           : isMe
-            ? "1px solid rgba(167,139,250,0.4)"
-            : isDark
-              ? "1px solid rgba(255,255,255,0.15)"
-              : "1px solid rgba(0,0,0,0.08)",
+            ? "1px solid var(--th-bubble-out-border)"
+            : "1px solid var(--th-bubble-in-border)",
         boxShadow: isTargetHighlighted
-          ? "0 0 28px rgba(236, 72, 153, 0.9), 0 0 12px rgba(168, 85, 247, 0.8)"
+          ? "0 0 28px rgb(var(--th-accent-2-rgb) / 0.9), 0 0 12px rgb(var(--th-accent-rgb) / 0.8)"
           : isMe
-            ? "0 0 16px rgba(124, 58, 237, 0.5)"
+            ? "var(--th-glow-accent)"
             : "none",
       }}
     >
@@ -205,13 +200,11 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
             ? "Остановить голосовое сообщение"
             : "Прослушать голосовое сообщение"
         }
-        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200 ease-in-out hover:scale-110 disabled:opacity-60 disabled:hover:scale-100 cursor-pointer ${isDark || isMe ? "text-white" : "text-gray-500 hover:text-gray-800"}`}
+        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200 ease-in-out hover:scale-110 disabled:opacity-60 disabled:hover:scale-100 cursor-pointer ${isMe ? "text-[var(--th-on-accent)]" : "text-[var(--th-text-muted)] hover:text-[var(--th-text)]"}`}
         style={{
           background: isMe
-            ? "linear-gradient(135deg,#7c3aed,#06b6d4)"
-            : isDark
-              ? "rgba(255,255,255,0.2)"
-              : "rgba(0,0,0,0.05)",
+            ? "linear-gradient(135deg, rgb(var(--th-accent-rgb)), rgb(var(--th-accent-3-rgb)))"
+            : "var(--th-chip-bg)",
         }}
       >
         {isLoading ? (
@@ -234,16 +227,16 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
               height: `${h * 20}px`,
               background:
                 i < playedBars
-                  ? "linear-gradient(180deg,#a78bfa,#67e8f9)"
-                  : isDark || isMe
-                    ? "rgba(255,255,255,0.25)"
-                    : "rgba(0,0,0,0.15)",
+                  ? "linear-gradient(180deg, rgb(var(--th-accent-2-rgb)), rgb(var(--th-accent-3-rgb)))"
+                  : isMe
+                    ? "rgb(var(--th-on-accent-rgb) / 0.25)"
+                    : "rgb(var(--th-overlay-rgb) / 0.2)",
             }}
           />
         ))}
       </div>
       <span
-        className={`text-[10px] flex-shrink-0 ${isDark || isMe ? "text-white/50" : "text-gray-400"}`}
+        className={`text-[10px] flex-shrink-0 ${isMe ? "text-[var(--th-on-accent-faint)]" : "text-[var(--th-text-faint)]"}`}
       >
         {formatDuration(playing || progress > 0 ? playedSeconds : Math.round(totalSeconds))}
       </span>

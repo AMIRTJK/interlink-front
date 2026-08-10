@@ -74,9 +74,9 @@ export const MessageComposer = ({
 
   return (
     <div
-      className={`px-6 py-4 border-t flex-shrink-0 ${isDark ? "border-white/8" : "border-black/5"}`}
+      className="px-6 py-4 border-t flex-shrink-0 border-[var(--th-divider)]"
       style={{
-        background: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.4)",
+        background: "var(--th-composer-bg)",
         backdropFilter: "blur(16px)",
       }}
       {...dropHandlers}
@@ -84,21 +84,15 @@ export const MessageComposer = ({
       <div
         className="relative flex items-center gap-2 rounded-3xl px-4 py-2"
         style={{
-          background: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.95)",
-          border: isDark
-            ? "1px solid rgba(255,255,255,0.15)"
-            : "1px solid rgba(167,139,250,0.25)",
+          background: "var(--th-input-bg)",
+          border: "1px solid var(--th-input-border)",
         }}
       >
         {/* Подсказка перетаскивания перекрывает поле, но не события: без
             pointer-events-none указатель «уходит» с зоны и дроп не случается. */}
         <If is={isDraggingOver}>
           <div
-            className={`absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-3xl border-2 border-dashed text-sm font-semibold pointer-events-none ${
-              isDark
-                ? "border-violet-400/70 bg-violet-500/20 text-violet-100"
-                : "border-violet-500/60 bg-violet-100/85 text-violet-700"
-            }`}
+            className="absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-3xl border-2 border-dashed text-sm font-semibold pointer-events-none border-[rgb(var(--th-accent-rgb)/0.7)] bg-[var(--th-accent-soft-strong)] text-[var(--th-accent-text)]"
           >
             <Upload className="w-4 h-4" />
             <span>{t.dropFiles}</span>
@@ -116,7 +110,7 @@ export const MessageComposer = ({
               <button
                 onClick={() => setShowEmojiPicker((v) => !v)}
                 aria-label={t.smileys}
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "hover:bg-white/8" : "hover:bg-black/5"} ${showEmojiPicker ? (isDark ? "text-violet-300 bg-white/10" : "text-violet-650 bg-violet-100") : isDark ? "text-white/40 hover:text-white/70" : "text-gray-400 hover:text-gray-650"}`}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 hover:bg-[var(--th-hover-bg)] ${showEmojiPicker ? "text-[var(--th-accent-text)] bg-[var(--th-accent-soft)]" : "text-[var(--th-text-faint)] hover:text-[var(--th-text-muted)]"}`}
               >
                 <Smile className="w-5 h-5" />
               </button>
@@ -134,7 +128,7 @@ export const MessageComposer = ({
             <button
               onClick={() => fileInputRef.current?.click()}
               aria-label={t.files}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "hover:bg-white/8 text-white/40 hover:text-white/70" : "hover:bg-black/5 text-gray-400 hover:text-gray-650"}`}
+              className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 hover:bg-[var(--th-hover-bg)] text-[var(--th-text-faint)] hover:text-[var(--th-text-muted)]"
             >
               <Paperclip className="w-5 h-5" />
             </button>
@@ -174,7 +168,7 @@ export const MessageComposer = ({
                   onAttachFiles(files);
                 }
               }}
-              className={`flex-1 bg-transparent outline-none text-sm px-2 py-2 resize-none leading-relaxed ${isDark ? "placeholder-white/25 text-white" : "placeholder-gray-400 text-gray-800"}`}
+              className="flex-1 bg-transparent outline-none text-sm px-2 py-2 resize-none leading-relaxed text-[var(--th-text)] placeholder:text-[var(--th-text-faint)]"
             />
 
             {/* Отложенная отправка сообщений (временное скрытие кнопкой часов):
@@ -182,7 +176,7 @@ export const MessageComposer = ({
               <button
                 onClick={() => setShowSchedulePicker?.((v) => !v)}
                 aria-label={t.scheduleMessage}
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0 ${isDark ? "hover:bg-white/8" : "hover:bg-black/5"} ${showSchedulePicker ? (isDark ? "text-violet-300 bg-white/10" : "text-violet-650 bg-violet-100") : isDark ? "text-white/40 hover:text-amber-400" : "text-gray-400 hover:text-amber-600"}`}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 flex-shrink-0 hover:bg-[var(--th-hover-bg)] ${showSchedulePicker ? "text-[var(--th-accent-text)] bg-[var(--th-accent-soft)]" : "text-[var(--th-text-faint)] hover:text-[rgb(var(--th-warning-rgb))]"}`}
               >
                 <Clock3 className="w-5 h-5" />
               </button>
@@ -203,7 +197,7 @@ export const MessageComposer = ({
             <button
               onClick={() => setIsRecording(true)}
               aria-label={t.recordVoice}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "hover:bg-white/8 text-white/40 hover:text-red-400" : "hover:bg-black/5 text-gray-400 hover:text-red-550"}`}
+              className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 hover:bg-[var(--th-hover-bg)] text-[var(--th-text-faint)] hover:text-[rgb(var(--th-danger-rgb))]"
             >
               <Mic className="w-5 h-5" />
             </button>
@@ -211,10 +205,10 @@ export const MessageComposer = ({
               onClick={onSend}
               disabled={(!input.trim() && !hasPendingFiles) || !canSend}
               aria-label={t.newMessage}
-              className="w-9 h-9 rounded-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-white transition-all duration-200 ease-in-out hover:scale-110 hover:brightness-110 flex-shrink-0"
+              className="w-9 h-9 rounded-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-[var(--th-on-accent)] transition-all duration-200 ease-in-out hover:scale-110 hover:brightness-110 flex-shrink-0"
               style={{
-                background: "linear-gradient(135deg,#7c3aed,#a855f7,#06b6d4)",
-                boxShadow: "0 0 16px rgba(124,58,237,0.5)",
+                background: "var(--th-bubble-out-bg)",
+                boxShadow: "var(--th-glow-accent)",
               }}
             >
               <Send className="w-4 h-4" />

@@ -1,13 +1,11 @@
 import type { CSSProperties } from "react";
 
 /**
- * Наружное свечение пузыря при наведении в тёмной теме: только внешние тени,
- * без spread-кольца — фон и рамка сообщения остаются прежними.
+ * Оформление пузыря сообщения. Все цвета берутся из токенов активной темы
+ * (`--th-*`), поэтому пузыри перекрашиваются вместе с выбранной темой.
+ * При наведении в тёмной теме к теням добавляется внешнее свечение — фон и
+ * рамка при этом не меняются.
  */
-const HOVER_GLOW_OUTGOING =
-  "0 0 22px rgba(139,92,246,0.55), 0 0 52px rgba(124,58,237,0.35)";
-const HOVER_GLOW_INCOMING =
-  "0 0 20px rgba(167,139,250,0.35), 0 0 48px rgba(124,58,237,0.22)";
 
 interface IBubbleStyleParams {
   isMe: boolean;
@@ -20,24 +18,22 @@ interface IBubbleStyleParams {
   hasThread: boolean;
 }
 
-/** Базовое оформление пузыря сообщения без учёта наведения. */
+/** Базовое оформление пузыря без учёта наведения. */
 const getBaseBubbleStyle = ({
   isMe,
-  isDark,
   isEffectivelyDeleted,
   isTargetHighlighted,
   currentMatchMsg,
   highlighted,
   hasThread,
-}: Omit<IBubbleStyleParams, "isHovered">): CSSProperties => {
+}: Omit<IBubbleStyleParams, "isHovered" | "isDark">): CSSProperties => {
   if (isTargetHighlighted) {
     return {
-      background:
-        "linear-gradient(135deg, rgb(236, 72, 153), rgb(168, 85, 247), rgb(59, 130, 246))",
-      border: "2px solid #ffffff",
+      background: "var(--th-bubble-out-bg)",
+      border: "2px solid rgb(var(--th-on-accent-rgb))",
       boxShadow:
-        "0 0 28px rgba(236, 72, 153, 0.9), 0 0 12px rgba(168, 85, 247, 0.8)",
-      color: "#ffffff",
+        "0 0 28px rgb(var(--th-accent-2-rgb) / 0.9), 0 0 12px rgb(var(--th-accent-rgb) / 0.8)",
+      color: "var(--th-bubble-out-text)",
     };
   }
 
@@ -45,81 +41,72 @@ const getBaseBubbleStyle = ({
 
   if (currentMatchMsg) {
     return {
-      background: "rgba(251,191,36,0.25)",
-      border: "1px solid rgba(251,191,36,0.4)",
+      background: "rgb(var(--th-warning-rgb) / 0.25)",
+      border: "1px solid rgb(var(--th-warning-rgb) / 0.4)",
     };
   }
 
   if (highlighted) {
     return {
-      background: "rgba(251,191,36,0.15)",
-      border: "1px solid rgba(251,191,36,0.3)",
+      background: "rgb(var(--th-warning-rgb) / 0.15)",
+      border: "1px solid rgb(var(--th-warning-rgb) / 0.3)",
     };
   }
 
   if (hasThread) {
     return isMe
       ? {
-          background:
-            "linear-gradient(135deg,rgba(124,58,237,0.75),rgba(168,85,247,0.65),rgba(6,182,212,0.6))",
-          border: "1.5px solid rgba(196,181,253,0.65)",
+          background: "var(--th-bubble-out-bg-soft)",
+          border: "1.5px solid rgb(var(--th-accent-2-rgb) / 0.65)",
           boxShadow:
-            "0 4px 20px rgba(124,58,237,0.35), inset 0 1px 0 rgba(255,255,255,0.15)",
+            "0 4px 20px rgb(var(--th-accent-rgb) / 0.35), var(--th-inset-highlight)",
           backgroundClip: "padding-box",
         }
       : {
-          background: "rgba(124,58,237,0.15)",
-          border: "1.5px solid rgba(167,139,250,0.4)",
+          background: "rgb(var(--th-accent-rgb) / 0.15)",
+          border: "1.5px solid var(--th-accent-border)",
           boxShadow:
-            "0 2px 12px rgba(124,58,237,0.15), inset 0 1px 0 rgba(255,255,255,0.08)",
+            "0 2px 12px rgb(var(--th-accent-rgb) / 0.15), var(--th-inset-highlight)",
           backgroundClip: "padding-box",
         };
   }
 
   if (isMe) {
     return {
-      background:
-        "linear-gradient(135deg, rgb(124, 58, 237), rgb(168, 85, 247), rgb(6, 182, 212))",
-      border: "1px solid rgba(167,139,250,0.4)",
-      boxShadow: "0 0 16px rgba(124, 58, 237, 0.5)",
+      background: "var(--th-bubble-out-bg)",
+      border: "1px solid var(--th-bubble-out-border)",
+      boxShadow: "var(--th-glow-accent)",
       backgroundClip: "padding-box",
     };
   }
 
   return {
-    background: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.85)",
-    border: isDark
-      ? "1px solid rgba(255,255,255,0.15)"
-      : "1px solid rgba(0,0,0,0.08)",
-    boxShadow: isDark
-      ? "0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)"
-      : "0 2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)",
+    background: "var(--th-bubble-in-bg)",
+    border: "1px solid var(--th-bubble-in-border)",
+    boxShadow: "var(--th-shadow-soft), var(--th-inset-highlight)",
     backgroundClip: "padding-box",
   };
 };
 
-/**
- * Оформление пузыря сообщения. При наведении в тёмной теме к существующим
- * теням добавляется внешнее свечение — фон и рамка не меняются.
- */
 export const getMessageBubbleStyle = ({
   isHovered,
+  isDark,
   ...base
 }: IBubbleStyleParams): CSSProperties => {
   const style = getBaseBubbleStyle(base);
 
   const needsGlow =
-    base.isDark &&
+    isDark &&
     isHovered &&
     !base.isEffectivelyDeleted &&
     !base.isTargetHighlighted;
 
   if (!needsGlow) return style;
 
-  const glow = base.isMe ? HOVER_GLOW_OUTGOING : HOVER_GLOW_INCOMING;
-
   return {
     ...style,
-    boxShadow: [style.boxShadow, glow].filter(Boolean).join(", "),
+    boxShadow: [style.boxShadow, base.isMe ? "var(--th-glow-out)" : "var(--th-glow-in)"]
+      .filter(Boolean)
+      .join(", "),
   };
 };

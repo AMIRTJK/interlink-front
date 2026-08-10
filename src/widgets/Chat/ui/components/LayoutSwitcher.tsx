@@ -38,13 +38,12 @@ interface LayoutSwitcherProps {
 export const LayoutSwitcher: React.FC<LayoutSwitcherProps> = ({
   layout,
   onChange,
-  isDark,
 }) => (
   <div
     className="flex items-center gap-0.5 rounded-xl p-1"
     style={{
-      background: "rgba(255,255,255,0.08)",
-      border: "1px solid rgba(255,255,255,0.15)",
+      background: "rgb(var(--th-on-accent-rgb) / 0.08)",
+      border: "1px solid rgb(var(--th-on-accent-rgb) / 0.15)",
     }}
   >
     {LAYOUT_BUTTONS.map(({ pos, Icon, label }) => (
@@ -57,13 +56,14 @@ export const LayoutSwitcher: React.FC<LayoutSwitcherProps> = ({
         style={
           layout === pos
             ? {
-                background: "linear-gradient(135deg,#7c3aed,#06b6d4)",
-                color: "white",
-                boxShadow: "0 0 10px rgba(255,255,255,0.25)",
+                background:
+                  "linear-gradient(135deg, rgb(var(--th-accent-rgb)), rgb(var(--th-accent-3-rgb)))",
+                color: "var(--th-on-accent)",
+                boxShadow: "0 0 10px rgb(var(--th-on-accent-rgb) / 0.25)",
               }
             : {
                 background: "transparent",
-                color: "rgba(255,255,255,0.5)",
+                color: "var(--th-on-accent-faint)",
               }
         }
       >

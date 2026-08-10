@@ -83,17 +83,11 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.15 }}
-      className={`fixed flex flex-col rounded-2xl p-1 z-[9999] ${
-        isDark
-          ? "backdrop-blur-2xl bg-zinc-900/95 border border-white/20"
-          : "backdrop-blur-2xl bg-white/95 border border-black/10 shadow-xl"
-      }`}
+      className="fixed flex flex-col rounded-2xl p-1 z-[9999] backdrop-blur-2xl bg-[var(--th-menu-bg)] border border-[var(--th-menu-border)]"
       style={{
         left: pos.left,
         top: pos.top,
-        boxShadow: isDark
-          ? "0 8px 30px rgba(139,92,246,0.4)"
-          : "0 8px 30px rgba(0,0,0,0.12)",
+        boxShadow: "0 8px 30px rgb(var(--th-accent-rgb) / 0.3)",
       }}
     >
       <div className="flex items-center gap-0.5">
@@ -104,9 +98,7 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
               onSelect(emoji);
               onClose?.();
             }}
-            className={`w-8 h-8 flex items-center justify-center text-lg rounded-full transition-all duration-150 ease-in-out hover:scale-125 ${
-              isDark ? "hover:bg-white/20" : "hover:bg-black/5"
-            }`}
+            className="w-8 h-8 flex items-center justify-center text-lg rounded-full transition-all duration-150 ease-in-out hover:scale-125 hover:bg-[var(--th-hover-bg-strong)]"
           >
             <span>{emoji}</span>
           </button>
@@ -114,11 +106,7 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
         <button
           onClick={() => setIsExpanded((prev) => !prev)}
           title={isExpanded ? "Свернуть" : "Все смайлики"}
-          className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-150 ease-in-out ${
-            isDark
-              ? "text-white/60 hover:bg-white/20 hover:text-white"
-              : "text-gray-500 hover:bg-black/5 hover:text-gray-900"
-          }`}
+          className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-150 ease-in-out text-[var(--th-text-muted)] hover:bg-[var(--th-hover-bg-strong)] hover:text-[var(--th-text)]"
         >
           {isExpanded ? (
             <ChevronUp className="w-4 h-4" />
@@ -135,7 +123,7 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden border-t mt-1 pt-1 border-white/10"
+            className="overflow-hidden border-t mt-1 pt-1 border-[var(--th-divider)]"
           >
             <div className="grid grid-cols-7 gap-1 p-1 max-h-40 overflow-y-auto max-w-[240px]">
               {ALL_EMOJIS.map((emoji, idx) => (
@@ -145,9 +133,7 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
                     onSelect(emoji);
                     onClose?.();
                   }}
-                  className={`w-7 h-7 flex items-center justify-center text-base rounded-lg transition-all duration-150 ease-in-out hover:scale-120 ${
-                    isDark ? "hover:bg-white/20" : "hover:bg-black/5"
-                  }`}
+                  className="w-7 h-7 flex items-center justify-center text-base rounded-lg transition-all duration-150 ease-in-out hover:scale-120 hover:bg-[var(--th-hover-bg-strong)]"
                 >
                   <span>{emoji}</span>
                 </button>

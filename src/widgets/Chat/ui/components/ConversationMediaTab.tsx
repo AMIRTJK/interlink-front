@@ -83,13 +83,13 @@ export const ConversationMediaTab = ({
     <div className="p-4">
       <If is={isLoading}>
         <div className="flex justify-center py-6">
-          <Loader2 className="w-5 h-5 animate-spin text-violet-400" />
+          <Loader2 className="w-5 h-5 animate-spin text-[var(--th-accent-text)]" />
         </div>
       </If>
 
       <If is={!isLoading && items.length === 0}>
         <p
-          className={`text-center text-xs py-6 ${isDark ? "text-white/40" : "text-gray-400"}`}
+          className="text-center text-xs py-6 text-[var(--th-text-faint)]"
         >
           {t.noMessages}
         </p>
@@ -97,7 +97,7 @@ export const ConversationMediaTab = ({
 
       <If is={images.length > 0}>
         <p
-          className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? "text-white/35" : "text-gray-400"}`}
+          className="text-[10px] uppercase tracking-wider mb-3 text-[var(--th-text-faint)]"
         >
           {t.sharedMedia} · {images.length}
         </p>
@@ -105,7 +105,7 @@ export const ConversationMediaTab = ({
           {images.map((item) => (
             <div
               key={item.id}
-              className={`relative aspect-square rounded-xl overflow-hidden group border cursor-pointer ${isDark ? "bg-white/10 border-white/10 ring-1 ring-white/10" : "bg-black/5 border-black/5"}`}
+              className="relative aspect-square rounded-xl overflow-hidden group border cursor-pointer bg-[var(--th-chip-bg)] border-[var(--th-panel-border)]"
               onClick={() => setSelectedImage(item)}
             >
               <If is={!!item.preview}>
@@ -116,7 +116,7 @@ export const ConversationMediaTab = ({
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200 ease-in-out"
                 />
               </If>
-              <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-1.5 backdrop-blur-[2px]">
+              <div className="absolute inset-0 bg-[var(--th-scrim)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-1.5 backdrop-blur-[2px]">
                 <button
                   type="button"
                   onClick={(e) => {
@@ -124,7 +124,7 @@ export const ConversationMediaTab = ({
                     setSelectedImage(item);
                   }}
                   title="Просмотреть"
-                  className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center transition-all hover:scale-110 shadow-md cursor-pointer"
+                  className="w-7 h-7 rounded-full bg-[rgb(var(--th-on-accent-rgb)/0.2)] hover:bg-[rgb(var(--th-on-accent-rgb)/0.35)] text-[var(--th-on-accent)] flex items-center justify-center transition-all hover:scale-110 shadow-md cursor-pointer"
                 >
                   <Eye className="w-3.5 h-3.5" />
                 </button>
@@ -135,7 +135,7 @@ export const ConversationMediaTab = ({
                     handleDownload(item.id, item.name);
                   }}
                   title="Скачать"
-                  className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center transition-all hover:scale-110 shadow-md cursor-pointer"
+                  className="w-7 h-7 rounded-full bg-[rgb(var(--th-on-accent-rgb)/0.2)] hover:bg-[rgb(var(--th-on-accent-rgb)/0.35)] text-[var(--th-on-accent)] flex items-center justify-center transition-all hover:scale-110 shadow-md cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
                 </button>
@@ -147,10 +147,10 @@ export const ConversationMediaTab = ({
 
       <If is={files.length > 0}>
         <div
-          className={`mt-4 border-t pt-4 ${isDark ? "border-white/10" : "border-black/5"}`}
+          className="mt-4 border-t pt-4 border-[var(--th-divider)]"
         >
           <p
-            className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? "text-white/35" : "text-gray-400"}`}
+            className="text-[10px] uppercase tracking-wider mb-3 text-[var(--th-text-faint)]"
           >
             {t.sharedFiles} · {files.length}
           </p>
@@ -159,26 +159,26 @@ export const ConversationMediaTab = ({
               <button
                 key={item.id}
                 onClick={() => handleDownload(item.id, item.name)}
-                className={`w-full flex items-center gap-2.5 p-2 rounded-xl border transition-all duration-200 text-left cursor-pointer ${isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-black/5 border-black/5 hover:bg-black/8"}`}
+                className="w-full flex items-center gap-2.5 p-2 rounded-xl border transition-all duration-200 text-left cursor-pointer bg-[var(--th-chip-bg)] border-[var(--th-panel-border)] hover:bg-[var(--th-hover-bg)]"
               >
                 <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isDark ? "bg-violet-500/20 text-violet-300" : "bg-violet-500/10 text-violet-600"}`}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-[var(--th-accent-soft-strong)] text-[var(--th-accent-text)]"
                 >
                   {getAttachmentIcon(item.type)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p
-                    className={`text-xs font-medium truncate ${isDark ? "text-white/80" : "text-gray-800"}`}
+                    className="text-xs font-medium truncate text-[var(--th-text)]"
                   >
                     {item.name}
                   </p>
                   <p
-                    className={`text-[10px] ${isDark ? "text-white/40" : "text-gray-400"}`}
+                    className="text-[10px] text-[var(--th-text-faint)]"
                   >
                     {item.size}
                   </p>
                 </div>
-                <Download className={`w-4 h-4 flex-shrink-0 ${isDark ? "text-white/40" : "text-gray-500"}`} />
+                <Download className="w-4 h-4 flex-shrink-0 text-[var(--th-text-muted)]" />
               </button>
             ))}
           </div>
@@ -193,20 +193,20 @@ export const ConversationMediaTab = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-hidden"
+              className="fixed inset-0 z-[9999] flex items-center justify-center bg-[rgb(var(--th-shadow-rgb)/0.85)] backdrop-blur-md p-4 overflow-hidden"
               onClick={() => setSelectedImage(null)}
             >
               <div
-                className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 px-5 py-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 max-w-4xl mx-auto text-white shadow-2xl"
+                className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 px-5 py-3 rounded-2xl bg-[rgb(var(--th-on-accent-rgb)/0.1)] backdrop-blur-xl border border-[rgb(var(--th-on-accent-rgb)/0.15)] max-w-4xl mx-auto text-[var(--th-on-accent)] shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center gap-2.5 min-w-0 pr-4">
-                  <ImageIcon className="w-4 h-4 text-violet-400 flex-shrink-0" />
+                  <ImageIcon className="w-4 h-4 text-[var(--th-accent-text)] flex-shrink-0" />
                   <span className="text-sm font-semibold truncate">
                     {selectedImage.name}
                   </span>
                   {selectedImage.size && (
-                    <span className="text-xs text-white/50 flex-shrink-0">
+                    <span className="text-xs text-[var(--th-on-accent-faint)] flex-shrink-0">
                       ({selectedImage.size})
                     </span>
                   )}
@@ -215,7 +215,7 @@ export const ConversationMediaTab = ({
                   <button
                     type="button"
                     onClick={() => handleDownload(selectedImage.id, selectedImage.name)}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all duration-150 hover:scale-105 cursor-pointer shadow-md"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[rgb(var(--th-accent-rgb))] hover:bg-[rgb(var(--th-accent-2-rgb))] text-[var(--th-on-accent)] text-xs font-semibold transition-all duration-150 hover:scale-105 cursor-pointer shadow-md"
                   >
                     <Download className="w-4 h-4" />
                     <span>Скачать</span>
@@ -223,7 +223,7 @@ export const ConversationMediaTab = ({
                   <button
                     type="button"
                     onClick={() => setSelectedImage(null)}
-                    className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                    className="w-8 h-8 rounded-xl bg-[rgb(var(--th-on-accent-rgb)/0.1)] hover:bg-[rgb(var(--th-on-accent-rgb)/0.2)] text-[var(--th-on-accent-muted)] hover:text-[var(--th-on-accent)] flex items-center justify-center transition-all cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>

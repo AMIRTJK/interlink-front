@@ -75,7 +75,7 @@ export const GroupMembersPanel = ({
     <div className="px-5 py-3">
       <div className="flex items-center justify-between mb-2">
         <p
-          className={`text-[10px] uppercase tracking-wider ${isDark ? "text-white/35" : "text-gray-400"}`}
+          className="text-[10px] uppercase tracking-wider text-[var(--th-text-faint)]"
         >
           {t.contacts} · {members.length}
         </p>
@@ -84,7 +84,7 @@ export const GroupMembersPanel = ({
             <button
               onClick={() => setIsAdding((v) => !v)}
               aria-label={t.add}
-              className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 ${isDark ? "text-violet-300 bg-white/8" : "text-violet-600 bg-black/5"}`}
+              className="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 text-[var(--th-accent-text)] bg-[var(--th-chip-bg)]"
             >
               <UserPlus className="w-3 h-3" />
             </button>
@@ -103,11 +103,11 @@ export const GroupMembersPanel = ({
               setSearch(e.target.value);
               applySearch(e.target.value);
             }}
-            className={`w-full rounded-xl px-3 py-2 outline-none text-xs ${isDark ? "bg-white/10 border border-white/15 placeholder-white/30 text-white" : "bg-black/4 border border-black/5 placeholder-gray-400 text-gray-850"}`}
+            className="w-full rounded-xl px-3 py-2 outline-none text-xs bg-[var(--th-input-bg)] border border-[var(--th-input-border)] text-[var(--th-text)] placeholder:text-[var(--th-text-faint)]"
           />
           <If is={isLoading}>
             <div className="flex justify-center py-2">
-              <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
+              <Loader2 className="w-4 h-4 animate-spin text-[var(--th-accent-text)]" />
             </div>
           </If>
           <div className="max-h-40 overflow-y-auto mt-1 space-y-1">
@@ -120,7 +120,7 @@ export const GroupMembersPanel = ({
                   setSearch("");
                   setQuery("");
                 }}
-                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-all duration-200 ${isDark ? "hover:bg-white/8" : "hover:bg-black/4"}`}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-all duration-200 hover:bg-[var(--th-hover-bg)]"
               >
                 <img
                   src={avatarOf(user)}
@@ -128,7 +128,7 @@ export const GroupMembersPanel = ({
                   className="w-6 h-6 rounded-full object-cover flex-shrink-0"
                 />
                 <span
-                  className={`text-xs truncate ${isDark ? "text-white/80" : "text-gray-700"}`}
+                  className="text-xs truncate text-[var(--th-text-muted)]"
                 >
                   {nameOf(user)}
                 </span>
@@ -142,22 +142,22 @@ export const GroupMembersPanel = ({
         {members.map((member) => (
           <div
             key={member.id}
-            className={`flex items-center gap-2 px-2 py-1.5 rounded-lg ${isDark ? "hover:bg-white/6" : "hover:bg-black/4"}`}
+            className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--th-hover-bg)]"
           >
             <img
               src={avatarOf(member)}
               alt={nameOf(member)}
               className="w-7 h-7 rounded-full object-cover flex-shrink-0 overflow-hidden"
-              style={{ boxShadow: "inset 0 0 0 1.5px rgba(167,139,250,0.35)" }}
+              style={{ boxShadow: "inset 0 0 0 1.5px var(--th-accent-border)" }}
             />
             <div className="flex-1 min-w-0">
               <p
-                className={`text-xs font-medium truncate ${isDark ? "text-white/80" : "text-gray-800"}`}
+                className="text-xs font-medium truncate text-[var(--th-text)]"
               >
                 {nameOf(member)}
               </p>
               <p
-                className={`text-[10px] ${isDark ? "text-white/35" : "text-gray-400"}`}
+                className="text-[10px] text-[var(--th-text-faint)]"
               >
                 {CHAT_ROLE_LABELS[member.role ?? "member"]}
               </p>
@@ -172,7 +172,7 @@ export const GroupMembersPanel = ({
               <button
                 onClick={() => onRemoveMember(member.id)}
                 aria-label={`Удалить участника ${nameOf(member)}`}
-                className="w-6 h-6 rounded-full flex items-center justify-center text-red-400 hover:bg-red-500/15 transition-all duration-200"
+                className="w-6 h-6 rounded-full flex items-center justify-center text-[rgb(var(--th-danger-rgb))] hover:bg-[rgb(var(--th-danger-rgb)/0.15)] transition-all duration-200"
               >
                 <X className="w-3 h-3" />
               </button>

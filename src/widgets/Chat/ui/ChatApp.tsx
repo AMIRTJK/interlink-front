@@ -290,12 +290,10 @@ export const ChatApp: React.FC<IProps> = ({
     <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-transparent">
       <If is={!activeContact}>
         <div className="flex-1 flex flex-col items-center justify-center gap-1 text-center px-6">
-          <p
-            className={`text-sm font-medium ${isDark ? "text-white/70" : "text-gray-600"}`}
-          >
+          <p className="text-sm font-medium text-[var(--th-text-muted)]">
             {isLoadingChats ? t.loadingChats : t.noChats}
           </p>
-          <p className={`text-xs ${isDark ? "text-white/40" : "text-gray-400"}`}>
+          <p className="text-xs text-[var(--th-text-faint)]">
             {t.noMessagesHint}
           </p>
         </div>
@@ -432,9 +430,7 @@ export const ChatApp: React.FC<IProps> = ({
           <Can
             permission={CHAT_PERMISSIONS.SEND}
             fallback={
-              <div
-                className={`px-6 py-4 border-t text-center text-xs ${isDark ? "border-white/8 text-white/40" : "border-black/5 text-gray-400"}`}
-              >
+              <div className="px-6 py-4 border-t text-center text-xs border-[var(--th-divider)] text-[var(--th-text-faint)]">
                 {t.noSendPermission}
               </div>
             }
@@ -473,12 +469,8 @@ export const ChatApp: React.FC<IProps> = ({
 
   // Рамка и внутренняя светлая подсветка нужны, только когда чат — окно с полями.
   // Край в край они превращаются в светлую полосу по периметру экрана.
-  const cardBorder = isDark
-    ? "1px solid rgba(167,139,250,0.2)"
-    : "1px solid rgba(167,139,250,0.18)";
-  const cardShadow = isDark
-    ? "0 30px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)"
-    : "0 30px 80px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.9)";
+  const cardBorder = "1px solid var(--th-sidebar-border)";
+  const cardShadow = "var(--th-shadow-strong), var(--th-inset-highlight)";
 
   return (
     <div
@@ -496,7 +488,7 @@ export const ChatApp: React.FC<IProps> = ({
             : "max-w-7xl max-h-[900px] rounded-l-2xl shadow-2xl"
         }`}
         style={{
-          background: isDark ? "rgba(10,4,30,0.55)" : "rgba(255,255,255,0.72)",
+          background: "var(--th-chat-shell-bg)",
           backdropFilter: "blur(30px)",
           border: isFullBleed ? "none" : cardBorder,
           boxShadow: isFullBleed ? "none" : cardShadow,

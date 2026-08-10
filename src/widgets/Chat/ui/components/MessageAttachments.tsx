@@ -91,7 +91,7 @@ export const MessageAttachments = ({
               isMe ? "rounded-br-md" : "rounded-bl-md"
             } ${
               isTargetHighlighted
-                ? "ring-2 ring-violet-500 scale-[1.02] shadow-[0_0_24px_rgba(168,85,247,0.85)] animate-pulse"
+                ? "ring-2 ring-[rgb(var(--th-accent-rgb))] scale-[1.02] shadow-[0_0_24px_rgb(var(--th-accent-2-rgb)/0.85)] animate-pulse"
                 : ""
             }`}
             style={getAttachmentBubbleStyle({
@@ -114,7 +114,7 @@ export const MessageAttachments = ({
                 />
                 <div
                   onClick={() => setSelectedImage(attachment)}
-                  className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3.5 backdrop-blur-[2px]"
+                  className="absolute inset-0 bg-[var(--th-scrim)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3.5 backdrop-blur-[2px]"
                 >
                   <button
                     type="button"
@@ -124,7 +124,7 @@ export const MessageAttachments = ({
                     }}
                     aria-label="Просмотреть изображение"
                     title="Просмотреть"
-                    className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg cursor-pointer"
+                    className="w-10 h-10 rounded-full bg-[rgb(var(--th-on-accent-rgb)/0.2)] hover:bg-[rgb(var(--th-on-accent-rgb)/0.35)] text-[var(--th-on-accent)] flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg cursor-pointer"
                   >
                     <Eye className="w-5 h-5" />
                   </button>
@@ -136,7 +136,7 @@ export const MessageAttachments = ({
                     }}
                     aria-label="Скачать изображение"
                     title="Скачать"
-                    className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg cursor-pointer"
+                    className="w-10 h-10 rounded-full bg-[rgb(var(--th-on-accent-rgb)/0.2)] hover:bg-[rgb(var(--th-on-accent-rgb)/0.35)] text-[var(--th-on-accent)] flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg cursor-pointer"
                   >
                     <Download className="w-5 h-5" />
                   </button>
@@ -152,10 +152,8 @@ export const MessageAttachments = ({
                 <div
                   className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
                     isMe
-                      ? "bg-white/20 text-white"
-                      : isDark
-                        ? "bg-violet-500/25 text-violet-300"
-                        : "bg-violet-100 text-violet-600 font-semibold"
+                      ? "bg-[rgb(var(--th-on-accent-rgb)/0.2)] text-[var(--th-on-accent)]"
+                      : "bg-[var(--th-accent-soft-strong)] text-[var(--th-accent-text)]"
                   }`}
                 >
                   {getAttachmentIcon(attachment.type)}
@@ -163,14 +161,16 @@ export const MessageAttachments = ({
                 <div className="min-w-0 flex-1">
                   <p
                     className={`text-xs font-semibold truncate ${
-                      isMe || isDark ? "text-white/95" : "text-gray-900"
+                      isMe ? "text-[var(--th-on-accent)]" : "text-[var(--th-text)]"
                     }`}
                   >
                     {attachment.name}
                   </p>
                   <p
                     className={`text-[10px] ${
-                      isMe || isDark ? "text-white/60" : "text-gray-500"
+                      isMe
+                        ? "text-[var(--th-on-accent-muted)]"
+                        : "text-[var(--th-text-muted)]"
                     }`}
                   >
                     {attachment.size}
@@ -178,7 +178,9 @@ export const MessageAttachments = ({
                 </div>
                 <Download
                   className={`w-4 h-4 flex-shrink-0 ${
-                    isMe || isDark ? "text-white/70" : "text-violet-600"
+                    isMe
+                      ? "text-[var(--th-on-accent-muted)]"
+                      : "text-[var(--th-accent-text)]"
                   }`}
                 />
               </button>
@@ -195,20 +197,20 @@ export const MessageAttachments = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-hidden"
+              className="fixed inset-0 z-[9999] flex items-center justify-center bg-[rgb(var(--th-shadow-rgb)/0.85)] backdrop-blur-md p-4 overflow-hidden"
               onClick={() => setSelectedImage(null)}
             >
               <div
-                className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 px-5 py-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 max-w-4xl mx-auto text-white shadow-2xl"
+                className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 px-5 py-3 rounded-2xl bg-[rgb(var(--th-on-accent-rgb)/0.1)] backdrop-blur-xl border border-[rgb(var(--th-on-accent-rgb)/0.15)] max-w-4xl mx-auto text-[var(--th-on-accent)] shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center gap-2.5 min-w-0 pr-4">
-                  <ImageIcon className="w-4 h-4 text-violet-400 flex-shrink-0" />
+                  <ImageIcon className="w-4 h-4 text-[rgb(var(--th-accent-2-rgb))] flex-shrink-0" />
                   <span className="text-sm font-semibold truncate">
                     {selectedImage.name}
                   </span>
                   {selectedImage.size && (
-                    <span className="text-xs text-white/50 flex-shrink-0">
+                    <span className="text-xs text-[var(--th-on-accent-faint)] flex-shrink-0">
                       ({selectedImage.size})
                     </span>
                   )}
@@ -217,7 +219,7 @@ export const MessageAttachments = ({
                   <button
                     type="button"
                     onClick={() => handleDownload(selectedImage)}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all duration-150 hover:scale-105 cursor-pointer shadow-md"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[rgb(var(--th-accent-rgb))] hover:bg-[rgb(var(--th-accent-2-rgb))] text-[var(--th-on-accent)] text-xs font-semibold transition-all duration-150 hover:scale-105 cursor-pointer shadow-md"
                   >
                     <Download className="w-4 h-4" />
                     <span>Скачать</span>
@@ -225,7 +227,7 @@ export const MessageAttachments = ({
                   <button
                     type="button"
                     onClick={() => setSelectedImage(null)}
-                    className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                    className="w-8 h-8 rounded-xl bg-[rgb(var(--th-on-accent-rgb)/0.1)] hover:bg-[rgb(var(--th-on-accent-rgb)/0.2)] text-[var(--th-on-accent-muted)] hover:text-[var(--th-on-accent)] flex items-center justify-center transition-all cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>

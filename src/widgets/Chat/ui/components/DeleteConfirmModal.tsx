@@ -58,7 +58,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{
-        background: isDark ? "rgba(0,0,0,0.7)" : "rgba(0,0,0,0.45)",
+        background: "var(--th-scrim)",
         backdropFilter: "blur(20px)",
       }}
     >
@@ -67,35 +67,26 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.88, opacity: 0, y: 24 }}
         transition={{ type: "spring", stiffness: 300, damping: 28 }}
-        className={`w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden ${isDark ? "backdrop-blur-2xl bg-white/10 border border-white/20" : "backdrop-blur-2xl bg-white/80 border border-white/30"}`}
-        style={{
-          boxShadow: isDark
-            ? "0 20px 60px rgba(139,92,246,0.4)"
-            : "0 20px 60px rgba(139,92,246,0.1)",
-        }}
+        className="w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl bg-[var(--th-menu-bg)] border border-[var(--th-menu-border)]"
+        style={{ boxShadow: "0 20px 60px rgb(var(--th-accent-rgb) / 0.25)" }}
       >
-        <div
-          className={`flex items-center gap-3 px-5 py-4 border-b ${isDark ? "border-white/10" : "border-black/5"}`}
-        >
-          <div className="w-9 h-9 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
-            <AlertTriangle className="w-4 h-4 text-red-400" />
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--th-divider)]">
+          <div className="w-9 h-9 rounded-full bg-[rgb(var(--th-danger-rgb)/0.2)] flex items-center justify-center flex-shrink-0">
+            <AlertTriangle className="w-4 h-4 text-[rgb(var(--th-danger-rgb))]" />
           </div>
           <div>
-            <h3
-              className={`font-semibold text-sm ${isDark ? "text-white" : "text-gray-900"}`}
-            >
+            <h3 className="font-semibold text-sm text-[var(--th-text)]">
               {title}
             </h3>
-            <p
-              className={`text-xs mt-0.5 ${isDark ? "text-white/50" : "text-gray-500"}`}
-            >
+            <p className="text-xs mt-0.5 text-[var(--th-text-muted)]">
               {subtitle}
             </p>
           </div>
           {phase === "choice" && (
             <button
               onClick={onCancel}
-              className={`ml-auto w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 ${isDark ? "hover:bg-white/15 text-white/50" : "hover:bg-black/5 text-gray-500"}`}
+              aria-label="Закрыть"
+              className="ml-auto w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 hover:bg-[var(--th-hover-bg-strong)] text-[var(--th-text-muted)]"
             >
               <X className="w-4 h-4" />
             </button>
@@ -104,10 +95,10 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
         <div className="px-5 py-5 space-y-4">
           {phase === "choice" && (
             <div
-              className={`rounded-xl px-4 py-3 border ${isDark ? "bg-white/8 border-white/10" : "bg-black/5 border-black/10"}`}
+              className="rounded-xl px-4 py-3 border bg-[var(--th-chip-bg)] border-[var(--th-panel-border)]"
             >
               <p
-                className={`text-xs leading-relaxed line-clamp-3 ${isDark ? "text-white/60" : "text-gray-600"}`}
+                className="text-xs leading-relaxed line-clamp-3 text-[var(--th-text-muted)]"
               >
                 {msgText || "Voice message"}
               </p>
@@ -115,14 +106,14 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
           )}
           {phase === "shredding" && (
             <div
-              className={`rounded-xl px-4 py-3 border ${isDark ? "bg-white/8 border-white/10" : "bg-black/5 border-black/10"}`}
+              className="rounded-xl px-4 py-3 border bg-[var(--th-chip-bg)] border-[var(--th-panel-border)]"
             >
               <PaperShredder onComplete={handleShredComplete} isDark={isDark} />
             </div>
           )}
           {phase === "shredding" && (
             <div
-              className={`flex items-center justify-center gap-2 ${isDark ? "text-white/50" : "text-gray-500"}`}
+              className="flex items-center justify-center gap-2 text-[var(--th-text-muted)]"
             >
               <motion.div
                 animate={{ rotate: 360 }}
@@ -131,7 +122,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
                   repeat: Infinity,
                   ease: "linear",
                 }}
-                className="w-4 h-4 rounded-full border-2 border-violet-400 border-t-transparent"
+                className="w-4 h-4 rounded-full border-2 border-[rgb(var(--th-accent-rgb))] border-t-transparent"
               />
               <span className="text-xs font-medium">
                 {deleteMode === "everyone"
@@ -144,14 +135,12 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
             <div className="space-y-2">
               <button
                 onClick={() => handleDelete("me")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ease-in-out border ${isDark ? "bg-white/8 hover:bg-white/15 text-white/80 border-white/10 hover:border-white/20" : "bg-black/5 hover:bg-black/8 text-gray-700 border-black/10 hover:border-black/15"}`}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ease-in-out border bg-[var(--th-chip-bg)] hover:bg-[var(--th-hover-bg-strong)] text-[var(--th-text)] border-[var(--th-panel-border)]"
               >
-                <MessageCircleOff className="w-4 h-4 text-violet-500 flex-shrink-0" />
+                <MessageCircleOff className="w-4 h-4 text-[var(--th-accent-text)] flex-shrink-0" />
                 <div className="text-left">
                   <p className="font-semibold">{deleteForMeLabel}</p>
-                  <p
-                    className={`text-xs font-normal ${isDark ? "text-white/40" : "text-gray-400"}`}
-                  >
+                  <p className="text-xs font-normal text-[var(--th-text-faint)]">
                     {deleteForMeDesc}
                   </p>
                 </div>
@@ -159,12 +148,12 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
               {isMe && (
                 <button
                   onClick={() => handleDelete("everyone")}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-red-500/15 hover:bg-red-500/25 text-red-600 transition-all duration-200 ease-in-out border border-red-500/30"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-[rgb(var(--th-danger-rgb)/0.15)] hover:bg-[rgb(var(--th-danger-rgb)/0.25)] text-[rgb(var(--th-danger-rgb))] transition-all duration-200 ease-in-out border border-[rgb(var(--th-danger-rgb)/0.3)]"
                 >
                   <Trash className="w-4 h-4 flex-shrink-0" />
                   <div className="text-left">
                     <p className="font-semibold">{deleteForEveryoneLabel}</p>
-                    <p className="text-xs font-normal text-red-500/70">
+                    <p className="text-xs font-normal text-[rgb(var(--th-danger-rgb)/0.75)]">
                       {deleteForEveryoneDesc}
                     </p>
                   </div>
@@ -172,7 +161,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
               )}
               <button
                 onClick={onCancel}
-                className={`w-full px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ease-in-out ${isDark ? "text-white/40 hover:bg-white/8" : "text-gray-500 hover:bg-black/5"}`}
+                className="w-full px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ease-in-out text-[var(--th-text-muted)] hover:bg-[var(--th-hover-bg)]"
               >
                 {cancelLabel}
               </button>
