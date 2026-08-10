@@ -196,13 +196,14 @@ export const RegistryHeaderBar = ({
               </span>
             </span>
             <span className="relative z-10">{tab.label}</span>
-            <Count
-              count={tab.count}
-              showZero
-              animate={false}
-              variant="red"
-              className="absolute -top-1.5 -right-1.5 shadow-xs transition-colors z-20"
-            />
+            <If is={Boolean(tab.count)}>
+              <Count
+                count={tab.count}
+                animate={false}
+                variant="red"
+                className="absolute -top-1.5 -right-1.5 shadow-xs transition-colors z-20"
+              />
+            </If>
           </motion.button>
         ))}
       </div>
