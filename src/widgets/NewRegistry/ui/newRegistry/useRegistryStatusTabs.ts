@@ -28,6 +28,7 @@ export const useRegistryStatusTabs = ({
 	// Запрашиваем мета-данные для счетчиков проблемных вкладок (бэкенд может отдавать 0)
 	const tabsToFetch = useMemo(() => {
 		return activeStatusKeys.filter((key) => {
+			if (key === "canceled") return false;
 			// Принудительно запрашиваем мета-данные для счетчиков проблемных вкладок
 			if (["approved", "signed", "sent", "analysis"].includes(key)) {
 				return true;
@@ -105,7 +106,9 @@ export const useRegistryStatusTabs = ({
 					counts[`${key}_count`] ??
 					0;
 
-				if (key === currentTab && metaTotal !== undefined) {
+				if (key === "canceled") {
+					count = 0;
+				} else if (key === currentTab && metaTotal !== undefined) {
 					count = metaTotal;
 				}
 
