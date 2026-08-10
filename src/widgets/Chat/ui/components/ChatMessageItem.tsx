@@ -330,13 +330,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                       ? "rounded-2xl ring-2 ring-[rgb(var(--th-warning-rgb))] text-[var(--th-text)]"
                       : highlighted
                         ? "rounded-2xl text-[var(--th-text)]"
-                        : msg.threadCount && msg.threadCount > 0
-                          ? isMe
-                            ? `rounded-2xl rounded-br-md text-[var(--th-bubble-out-text)] ring-1 ring-[rgb(var(--th-accent-2-rgb)/0.4)] ${isDark ? "shadow-[0_0_15px_rgb(var(--th-accent-rgb)/0.35)]" : ""}`
-                            : `rounded-2xl rounded-bl-md ring-1 ring-[var(--th-accent-border)] ${isDark ? "shadow-[0_0_15px_rgb(var(--th-accent-rgb)/0.25)]" : ""} text-[var(--th-bubble-in-text)]`
-                          : isMe
-                            ? "rounded-2xl rounded-br-md text-[var(--th-bubble-out-text)]"
-                            : "rounded-2xl rounded-bl-md text-[var(--th-bubble-in-text)]"
+                        : isMe
+                          ? "rounded-2xl rounded-br-md text-[var(--th-bubble-out-text)]"
+                          : "rounded-2xl rounded-bl-md text-[var(--th-bubble-in-text)]"
                 }`}
                 style={bubbleStyle}
               >

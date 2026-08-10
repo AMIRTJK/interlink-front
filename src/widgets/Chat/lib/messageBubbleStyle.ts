@@ -63,26 +63,6 @@ const getBaseBubbleStyle = ({
     };
   }
 
-  if (hasThread) {
-    return isMe
-      ? {
-          background: "var(--th-bubble-out-bg-soft)",
-          border: "1.5px solid rgb(var(--th-accent-2-rgb) / 0.65)",
-          boxShadow: isDark
-            ? "0 4px 20px rgb(var(--th-accent-rgb) / 0.35), var(--th-inset-highlight)"
-            : "none",
-          backgroundClip: "padding-box",
-        }
-      : {
-          background: "rgb(var(--th-accent-rgb) / 0.15)",
-          border: "1.5px solid var(--th-accent-border)",
-          boxShadow: isDark
-            ? "0 2px 12px rgb(var(--th-accent-rgb) / 0.15), var(--th-inset-highlight)"
-            : "none",
-          backgroundClip: "padding-box",
-        };
-  }
-
   if (isMe) {
     return {
       background: "var(--th-bubble-out-bg)",
