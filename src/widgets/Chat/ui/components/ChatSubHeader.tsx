@@ -4,6 +4,7 @@ import type { Contact } from "../../model";
 import { Translations } from "../../lib/translations";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
 import { getChatAvatarClipPath } from "../../lib/chatAvatarShape";
+import { OnlineIndicator } from "./OnlineIndicator";
 
 // Шапка открытой беседы: собеседник, его статус и действия над беседой.
 
@@ -65,12 +66,7 @@ export const ChatSubHeader = ({
                 : { boxShadow: "inset 0 0 0 2px var(--th-accent-border)" }
             }
           />
-          {activeContact.online && (
-            <span
-              className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[var(--th-online)] border-2 border-transparent rounded-full"
-              style={{ boxShadow: "var(--th-online-glow)" }}
-            />
-          )}
+          {activeContact.online && <OnlineIndicator />}
         </div>
         <div>
           <h2 className="font-semibold text-sm text-[var(--th-text)]">

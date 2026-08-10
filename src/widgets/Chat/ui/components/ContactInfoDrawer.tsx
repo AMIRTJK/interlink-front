@@ -13,6 +13,7 @@ import { getChatAvatarClipPath } from "../../lib/chatAvatarShape";
 import type { IChatLabels } from "../../lib/chatMappers";
 import { ConversationMediaTab } from "./ConversationMediaTab";
 import { GroupMembersPanel } from "./GroupMembersPanel";
+import { OnlineIndicator } from "./OnlineIndicator";
 
 interface ContactInfoDrawerProps {
   contact: Contact;
@@ -142,9 +143,7 @@ export const ContactInfoDrawer: React.FC<ContactInfoDrawerProps> = ({
                         }
                   }
                 />
-                {contact.online && (
-                  <span className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-[var(--th-online)] border-2 border-[var(--th-panel-border)] rounded-full" />
-                )}
+                {contact.online && <OnlineIndicator sizeClass="h-4 w-4" />}
               </div>
               <h2 className="font-bold text-lg leading-tight text-center text-[var(--th-text)]">
                 {contact.name}

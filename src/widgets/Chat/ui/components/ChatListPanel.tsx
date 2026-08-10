@@ -10,6 +10,7 @@ import {
   getChatAvatarClipPath,
   getChatAvatarOutlineClipPath,
 } from "../../lib/chatAvatarShape";
+import { OnlineIndicator } from "./OnlineIndicator";
 import "../../style.css";
 
 interface ChatListPanelProps {
@@ -125,12 +126,7 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                     }}
                     className="chat-avatar__img"
                   />
-                  {contact.online && (
-                    <span
-                      className="absolute bottom-0 right-0 z-20 w-2.5 h-2.5 bg-[var(--th-online)] border-2 border-transparent rounded-full"
-                      style={{ boxShadow: "var(--th-online-glow)" }}
-                    />
-                  )}
+                  {contact.online && <OnlineIndicator />}
                   {unread > 0 && (
                     <span
                       className="absolute -top-1 -right-1 z-20 min-w-[18px] h-[18px] rounded-full text-[var(--th-on-accent)] text-[9px] font-bold flex items-center justify-center px-0.5 shadow-md"
@@ -279,12 +275,7 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                     }
                   }
                 />
-                {contact.online && (
-                  <span
-                    className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[var(--th-online)] border-2 border-transparent rounded-full"
-                    style={{ boxShadow: "var(--th-online-glow)" }}
-                  />
-                )}
+                {contact.online && <OnlineIndicator />}
               </div>
               <div className="flex-1 min-w-0 text-left">
                 <div className="flex items-center justify-between gap-1">

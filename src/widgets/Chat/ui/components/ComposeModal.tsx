@@ -10,6 +10,7 @@ import {
   type IChatLabels,
 } from "../../lib/chatMappers";
 import { useAuthorizedMedia } from "../../lib/useAuthorizedMedia";
+import { OnlineIndicator } from "./OnlineIndicator";
 
 // Выбор сотрудника для личного чата. Список приходит из GET /chat/users,
 // поиск идёт на бэкенде (ФИО и должность), поэтому строка уходит с debounce.
@@ -172,10 +173,9 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({
                   alt={contact.name}
                   className="w-10 h-10 rounded-full object-cover transition-transform duration-200 group-hover:scale-105"
                 />
-                <span
-                  className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[var(--th-online)] border-2 rounded-full border-[var(--th-panel-solid)]"
-                  style={{ display: contact.online ? "block" : "none" }}
-                />
+                <If is={contact.online}>
+                  <OnlineIndicator />
+                </If>
               </div>
               <div className="flex-1 min-w-0">
                 <p

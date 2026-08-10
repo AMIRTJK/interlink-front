@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Forward, X } from "lucide-react";
 import { Contact, Message } from "../../model";
 import { Translations } from "../../lib/translations";
+import { OnlineIndicator } from "./OnlineIndicator";
 
 interface ForwardModalProps {
   message: Message;
@@ -82,10 +83,7 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
                 alt={contact.name}
                 className="w-10 h-10 rounded-full object-cover transition-transform duration-200 group-hover:scale-105"
               />
-              <span
-                className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[var(--th-online)] border-2 rounded-full border-[var(--th-panel-solid)]"
-                style={{ display: contact.online ? "block" : "none" }}
-              />
+              {contact.online && <OnlineIndicator />}
             </div>
             <div className="flex-1 min-w-0">
               <p
