@@ -118,7 +118,7 @@ export const getMessageBubbleStyle = ({
   isDark,
   ...base
 }: IBubbleStyleParams): CSSProperties => {
-  const style = getBaseBubbleStyle(base);
+  const style = getBaseBubbleStyle({ ...base, isDark });
 
   const glow = base.isEffectivelyDeleted
     ? null
