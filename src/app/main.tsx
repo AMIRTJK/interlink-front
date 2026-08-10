@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { ConfigProvider } from "antd";
 import ruRU from "antd/locale/ru_RU";
 import { queryClient } from "@shared/lib";
+import { applyGlassClass, readGlassEnabled } from "@shared/config";
 import { App } from "./App";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
@@ -16,6 +17,10 @@ import "@fontsource/inter/800.css";
 import "./styles/global.css";
 import { ErrorBoundary } from "@shared/ui";
 dayjs.locale("ru");
+
+// Восстанавливаем сохранённый выбор до первого кадра: иначе интерфейс успел бы
+// моргнуть обычным оформлением перед тем, как хук в хедере вернёт «стекло».
+applyGlassClass(readGlassEnabled());
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

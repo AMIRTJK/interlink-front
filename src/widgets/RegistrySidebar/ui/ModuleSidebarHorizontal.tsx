@@ -28,7 +28,7 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
   handleAddClick,
 }) => {
   return (
-    <div className="w-full border border-gray-200/80! dark:border-slate-700/80! bg-white! dark:bg-slate-800! shadow-md! transition-colors duration-500 rounded-3xl! py-2.5 px-6">
+    <div className="ui-glass ui-glass--forced w-full border border-gray-200/80! dark:border-slate-700/80! bg-white! dark:bg-slate-800! shadow-md! transition-colors duration-500 rounded-3xl! py-2.5 px-6">
       <div className="flex items-center gap-6 h-full">
         <div className="flex items-center shrink-0 gap-2">
           <Button

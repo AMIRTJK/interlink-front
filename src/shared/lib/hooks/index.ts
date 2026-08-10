@@ -10,6 +10,7 @@ export * from "./useCorrespondenceRoute";
 export * from "./useTabs";
 export * from "./useIsDarkMode";
 export * from "./useFullscreen";
+export * from "./useGlassEffect";
 
 export * from "./useNavbar";
 export * from "./useMenuLogic";

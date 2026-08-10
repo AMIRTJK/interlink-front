@@ -5,6 +5,7 @@ import { If, Tooltip } from "@shared/ui";
 import { cn } from "@shared/lib";
 import { getLetterTypeName } from "@widgets/RegistryTable/lib/getCorrespondenceLinkTypeLabel";
 import { PeopleViewer } from "../PeopleViewer";
+import { HighlightOverlay } from "./HighlightOverlay";
 import { getLinkTypeInfo, getLetterStatusBadge } from "./letterStatus";
 import { getBadgeStyles } from "./badgeStyles";
 
@@ -36,13 +37,11 @@ export const DocumentListItem = ({
       whileHover={{ x: 4, boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.1)" }}
       onClick={onClick}
       className={cn(
-        "bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 transition-all duration-500 cursor-pointer mb-2 overflow-hidden relative",
+        "ui-glass bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 transition-all duration-500 cursor-pointer mb-2 overflow-hidden relative",
         linkInfo?.borderColor,
       )}
     >
-      <If is={Boolean(isHighlighted)}>
-        <div className="absolute inset-0 rounded-lg ring-2 ring-inset ring-blue-500 border border-blue-500 pointer-events-none z-20 shadow-[0_0_15px_rgba(59,130,246,0.45)] transition-all duration-500" />
-      </If>
+      <HighlightOverlay isHighlighted={Boolean(isHighlighted)} />
       <div className="p-4">
         <div className="flex items-center gap-4">
           {/* Status Icon */}
