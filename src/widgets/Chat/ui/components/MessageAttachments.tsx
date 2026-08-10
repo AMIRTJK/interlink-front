@@ -92,7 +92,9 @@ export const MessageAttachments = ({
         return (
           <div
             key={key}
-            className={`mb-1.5 overflow-hidden transition-all duration-200 ease-in-out ${cornerRadiusClass} ${
+            className={`mb-1.5 transition-all duration-200 ease-in-out ${cornerRadiusClass} ${
+              !isImage ? "overflow-hidden" : ""
+            } ${
               isTargetHighlighted
                 ? "ring-2 ring-[rgb(var(--th-accent-rgb))] scale-[1.02] shadow-[0_0_24px_rgb(var(--th-accent-2-rgb)/0.85)] animate-pulse"
                 : ""
@@ -116,7 +118,7 @@ export const MessageAttachments = ({
                 />
                 <div
                   onClick={() => setSelectedImage(attachment)}
-                  className={`absolute inset-0 bg-[var(--th-scrim)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3.5 backdrop-blur-[2px] ${cornerRadiusClass}`}
+                  className={`absolute inset-0 bg-[var(--th-scrim)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3.5 ${cornerRadiusClass}`}
                 >
                   <button
                     type="button"
