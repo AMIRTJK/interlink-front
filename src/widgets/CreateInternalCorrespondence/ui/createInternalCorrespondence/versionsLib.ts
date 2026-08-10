@@ -7,8 +7,16 @@ export const collectRevokedVersionIds = (signatures: any[]) => {
   const ids = new Set<number | string>();
   signatures.forEach((s: any) => {
     if (s.status === "revoked") {
-      if (s.version_id) ids.add(s.version_id);
-      if (s.payload_json?.version_id) ids.add(s.payload_json.version_id);
+      if (s.version_id) {
+        ids.add(s.version_id);
+        ids.add(String(s.version_id));
+        ids.add(Number(s.version_id));
+      }
+      if (s.payload_json?.version_id) {
+        ids.add(s.payload_json.version_id);
+        ids.add(String(s.payload_json.version_id));
+        ids.add(Number(s.payload_json.version_id));
+      }
     }
   });
   return ids;
@@ -30,16 +38,20 @@ export const mergeSignedDuplicateVersions = (rawVersions: any[]): any[] => {
     const parent = rawVersions.find((p: any) => p.id === v.parent_id);
     if (!parent) return;
 
-    const isParentSigned =
+    const isParentSignedOrRevoked =
       parent.is_current_signed ||
       parent.signature_state === "signed" ||
-      Boolean(parent.signature_signed_at);
+      parent.signature_state === "revoked" ||
+      Boolean(parent.signature_signed_at) ||
+      Boolean(parent.signature_revoked_at);
 
-    if (!isParentSigned) return;
+    if (!isParentSignedOrRevoked) return;
 
     const isSameTimestamp =
-      Boolean(parent.signature_signed_at) &&
-      v.created_at === parent.signature_signed_at;
+      (Boolean(parent.signature_signed_at) &&
+        v.created_at === parent.signature_signed_at) ||
+      (Boolean(parent.signature_revoked_at) &&
+        v.created_at === parent.signature_revoked_at);
 
     const hasStampInBody =
       typeof v.body === "string" && v.body.includes(STAMP_ATTR);
@@ -87,10 +99,8 @@ export const mapDocumentVersions = ({
     const isExplicitRevoked =
       v.signature_state === "revoked" ||
       revokedVersionIds.has(v.id) ||
-      (v.parent_id && revokedVersionIds.has(v.parent_id)) ||
-      (!hasSignedWorkflowSignature &&
-        typeof v.body === "string" &&
-        v.body.includes(STAMP_ATTR));
+      revokedVersionIds.has(String(v.id)) ||
+      revokedVersionIds.has(Number(v.id));
 
     // Маркер раскладки снимаем здесь, на границе с бэкендом: ниже по коду
     // `content` уходит и в редактор, и в пагинатор, и в сравнение версий —
