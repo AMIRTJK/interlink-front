@@ -9,6 +9,7 @@ import {
   mapServerAttachment,
   type AttachedFile,
 } from "@widgets/CreateInternalCorrespondence";
+import { mergeSignedDuplicateVersions } from "@widgets/CreateInternalCorrespondence/ui/createInternalCorrespondence/versionsLib";
 import { normalizeVisors, VISOR_INVITE_HINT } from "../model";
 import {
   RegistryItem,
@@ -170,7 +171,7 @@ export function useIncomingViewData(
   });
 
   const docVersions: { id?: number | string; body?: string }[] =
-    versionsResponse?.data?.versions || [];
+    mergeSignedDuplicateVersions(versionsResponse?.data?.versions || []);
   const activeVersion =
     docVersions.find((v) => String(v.id) === String(activeVersionId)) ||
     docVersions.reduce((a, b) => (Number(b?.id) > Number(a?.id) ? b : a), docVersions[0] || {});

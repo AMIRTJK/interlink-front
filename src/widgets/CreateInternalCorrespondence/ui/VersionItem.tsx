@@ -26,6 +26,7 @@ export const VersionItem = ({
   onSelectVersion,
   onSetVersionForSign,
 }: IProps) => {
+  const isDocumentSigned = isSigned || Boolean(signedVersionId);
   const isRevoked = version.signature_state === "revoked";
   const isLatestVersion =
     latestVersionId != null && String(version.id) === String(latestVersionId);
@@ -94,7 +95,7 @@ export const VersionItem = ({
           >
             Версия {version.versionNumber}
           </span>
-          <If is={isLatestVersion}>
+          <If is={isLatestVersion && !isDocumentSigned}>
             <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 font-medium rounded text-[9px] border border-blue-100 whitespace-nowrap shrink-0">
               Актуальная
             </span>
@@ -111,7 +112,7 @@ export const VersionItem = ({
               Подпись отменена
             </span>
           </If>
-          <If is={!isSignedVersion && !isRevoked && version.is_selected}>
+          <If is={!isSignedVersion && !isRevoked && version.is_selected && !isDocumentSigned}>
             <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 font-medium rounded text-[9px] border border-emerald-100 whitespace-nowrap shrink-0">
               Для подписи
             </span>
@@ -130,7 +131,7 @@ export const VersionItem = ({
         className="flex items-center gap-1.5 flex-shrink-0 mt-0.5"
         onClick={(e) => e.stopPropagation()}
       >
-        <If is={!isSignedVersion && !isRevoked}>
+        <If is={!isDocumentSigned && !isSignedVersion && !isRevoked}>
           <input
             type="checkbox"
             id={`version-sign-${version.id}`}

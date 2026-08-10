@@ -8,6 +8,8 @@ import { buildFormData, useMutationQuery } from "@shared/lib";
 import { mapServerAttachment } from "../../lib/utils";
 import type { AttachedFile } from "../../types";
 
+import { mergeSignedDuplicateVersions } from "./versionsLib";
+
 interface IParams {
   id?: string | number;
   navigate: NavigateFunction;
@@ -70,7 +72,8 @@ export const useDraftMutations = ({
       syncAttachmentsAfterSave(data);
       // 1. Сначала стягиваем свежие версии, чтобы узнать ID только что созданной (1.6)
       refetchVersions().then((updatedResponse) => {
-        const freshVersions = updatedResponse?.data?.data?.versions;
+        const rawVersions = updatedResponse?.data?.data?.versions || [];
+        const freshVersions = mergeSignedDuplicateVersions(rawVersions);
 
         if (Array.isArray(freshVersions) && freshVersions.length > 0) {
           const latestVersion = freshVersions[freshVersions.length - 1];

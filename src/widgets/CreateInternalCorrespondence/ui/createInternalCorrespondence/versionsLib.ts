@@ -14,6 +14,60 @@ export const collectRevokedVersionIds = (signatures: any[]) => {
   return ids;
 };
 
+// Функция сливает версии-дубликаты, созданные бэкендом при подписании (например, 1.5 для 1.2),
+// подставляя body с печатью в родительскую подписанную версию (1.2) и скрывая дубликат (1.5).
+export const mergeSignedDuplicateVersions = (rawVersions: any[]): any[] => {
+  if (!Array.isArray(rawVersions) || rawVersions.length === 0) {
+    return rawVersions;
+  }
+
+  const duplicatesToRemove = new Set<number | string>();
+  const parentUpdates = new Map<number | string, Partial<any>>();
+
+  rawVersions.forEach((v: any) => {
+    if (!v.parent_id) return;
+
+    const parent = rawVersions.find((p: any) => p.id === v.parent_id);
+    if (!parent) return;
+
+    const isParentSigned =
+      parent.is_current_signed ||
+      parent.signature_state === "signed" ||
+      Boolean(parent.signature_signed_at);
+
+    if (!isParentSigned) return;
+
+    const isSameTimestamp =
+      Boolean(parent.signature_signed_at) &&
+      v.created_at === parent.signature_signed_at;
+
+    const hasStampInBody =
+      typeof v.body === "string" && v.body.includes(STAMP_ATTR);
+
+    if (isSameTimestamp || hasStampInBody) {
+      duplicatesToRemove.add(v.id);
+
+      const existingUpdate = parentUpdates.get(parent.id) || {};
+      parentUpdates.set(parent.id, {
+        ...existingUpdate,
+        body: v.body || parent.body,
+        ...(v.is_selected ? { is_selected: true } : {}),
+      });
+    }
+  });
+
+  if (duplicatesToRemove.size === 0) {
+    return rawVersions;
+  }
+
+  return rawVersions
+    .filter((v: any) => !duplicatesToRemove.has(v.id))
+    .map((v: any) => {
+      const update = parentUpdates.get(v.id);
+      return update ? { ...v, ...update } : v;
+    });
+};
+
 interface IMapVersionsParams {
   rawVersions: any[];
   revokedVersionIds: Set<number | string>;
@@ -26,8 +80,10 @@ export const mapDocumentVersions = ({
   rawVersions,
   revokedVersionIds,
   hasSignedWorkflowSignature,
-}: IMapVersionsParams) =>
-  rawVersions.map((v: any, idx: number) => {
+}: IMapVersionsParams) => {
+  const mergedVersions = mergeSignedDuplicateVersions(rawVersions);
+
+  return mergedVersions.map((v: any, idx: number) => {
     const isExplicitRevoked =
       v.signature_state === "revoked" ||
       revokedVersionIds.has(v.id) ||
@@ -72,6 +128,7 @@ export const mapDocumentVersions = ({
       signature_signed_at: v.signature_signed_at,
     };
   });
+};
 
 // Уникальные авторы версий со счётчиком — для выпадающего фильтра панели.
 export const buildVersionAuthors = (versions: any[]) => {
