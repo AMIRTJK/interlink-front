@@ -4,6 +4,7 @@ import { MoreHorizontal, FileType } from "lucide-react";
 import { If, Tooltip } from "@shared/ui";
 import { cn } from "@shared/lib";
 import { PeopleViewer } from "../PeopleViewer";
+import { HighlightOverlay } from "./HighlightOverlay";
 import { getLinkTypeInfo } from "./letterStatus";
 import { getBadgeStyles } from "./badgeStyles";
 
@@ -35,9 +36,7 @@ export const DocumentCard = ({
         linkInfo?.borderColor,
       )}
     >
-      <If is={Boolean(isHighlighted)}>
-        <div className="absolute inset-0 rounded-xl ring-2 ring-inset ring-blue-500 border border-blue-500 pointer-events-none z-20 shadow-[0_0_18px_rgba(59,130,246,0.5)] transition-all duration-500" />
-      </If>
+      <HighlightOverlay isHighlighted={Boolean(isHighlighted)} rounded="xl" />
       {/* Header */}
       <div
         className={`p-3 bg-gradient-to-r ${

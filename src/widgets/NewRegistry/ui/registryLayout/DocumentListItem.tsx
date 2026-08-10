@@ -5,6 +5,7 @@ import { If, Tooltip } from "@shared/ui";
 import { cn } from "@shared/lib";
 import { getLetterTypeName } from "@widgets/RegistryTable/lib/getCorrespondenceLinkTypeLabel";
 import { PeopleViewer } from "../PeopleViewer";
+import { HighlightOverlay } from "./HighlightOverlay";
 import { getLinkTypeInfo, getLetterStatusBadge } from "./letterStatus";
 import { getBadgeStyles } from "./badgeStyles";
 
@@ -40,9 +41,7 @@ export const DocumentListItem = ({
         linkInfo?.borderColor,
       )}
     >
-      <If is={Boolean(isHighlighted)}>
-        <div className="absolute inset-0 rounded-lg ring-2 ring-inset ring-blue-500 border border-blue-500 pointer-events-none z-20 shadow-[0_0_15px_rgba(59,130,246,0.45)] transition-all duration-500" />
-      </If>
+      <HighlightOverlay isHighlighted={Boolean(isHighlighted)} />
       <div className="p-4">
         <div className="flex items-center gap-4">
           {/* Status Icon */}
