@@ -96,6 +96,10 @@ import { useComposeReplyPrefill } from "./createInternalCorrespondence/useCompos
 import { useWorkflowPrefill } from "./createInternalCorrespondence/useWorkflowPrefill";
 import { useEditorKeyDown } from "./createInternalCorrespondence/useEditorKeyDown";
 import { useEditorCommands } from "./createInternalCorrespondence/useEditorCommands";
+import {
+  ParagraphSettingsModal,
+  useParagraphSettings,
+} from "./createInternalCorrespondence/paragraphDialog";
 import { useEditorClipboard } from "./createInternalCorrespondence/useEditorClipboard";
 import {
   FWD_ATTR,
@@ -1716,6 +1720,20 @@ export const CreateInternalCorrespondence = ({
       setPageToDelete,
     });
 
+  const {
+    paragraphDialogOpen,
+    paragraphInitialFormat,
+    paragraphLevelDisabled,
+    openParagraphDialog,
+    closeParagraphDialog,
+    applyParagraphFormat,
+  } = useParagraphSettings({
+    editorRef,
+    syncEditorAfterDomEdit,
+    commitHistoryNow,
+    refreshActiveFmt,
+  });
+
   // Закрываем подтверждение удаления, если страниц стало меньше
   useEffect(() => {
     if (pageToDelete !== null && pageToDelete >= pageCount) {
@@ -2565,6 +2583,7 @@ export const CreateInternalCorrespondence = ({
                   isReadOnly={isReadOnly}
                   activeFmt={activeFmt}
                   execCmd={execCmd}
+                  openParagraphDialog={openParagraphDialog}
                 />
                 <ToolbarPageGroup
                   isReadOnly={isReadOnly}
@@ -2977,6 +2996,14 @@ export const CreateInternalCorrespondence = ({
           setShowSendConfirm(false);
         }}
         onCancel={() => setShowSendConfirm(false)}
+      />
+
+      <ParagraphSettingsModal
+        open={paragraphDialogOpen}
+        initial={paragraphInitialFormat}
+        levelDisabled={paragraphLevelDisabled}
+        onApply={applyParagraphFormat}
+        onClose={closeParagraphDialog}
       />
 
       <RecipientSelectModal

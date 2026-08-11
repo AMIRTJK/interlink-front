@@ -6,6 +6,7 @@ import {
   List,
   ListOrdered,
   Minus,
+  Pilcrow,
 } from "lucide-react";
 
 import { TBtn } from "../../TBtn";
@@ -14,12 +15,14 @@ interface IProps {
   isReadOnly: boolean;
   activeFmt: Record<string, boolean>;
   execCmd: (command: string, value?: string) => void;
+  openParagraphDialog: () => void;
 }
 
 export const ToolbarParagraphGroup = ({
   isReadOnly,
   activeFmt,
   execCmd,
+  openParagraphDialog,
 }: IProps) => (
   <>
     <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
@@ -66,6 +69,18 @@ export const ToolbarParagraphGroup = ({
       title="По ширине"
     >
       <AlignJustify size={14} />
+    </TBtn>
+    <TBtn
+      disabled={isReadOnly}
+      onMouseDown={(e) => {
+        // preventDefault сохраняет выделение в редакторе: диалог применяет
+        // настройки именно к нему.
+        e.preventDefault();
+        openParagraphDialog();
+      }}
+      title="Абзац: отступы и интервалы"
+    >
+      <Pilcrow size={14} />
     </TBtn>
     <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
     <TBtn
