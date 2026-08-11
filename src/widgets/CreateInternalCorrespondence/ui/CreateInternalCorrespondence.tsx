@@ -86,6 +86,7 @@ import {
   cleanEditorArtifacts,
   wrapBareTopLevelNodes,
 } from "./createInternalCorrespondence/editorCaret";
+import { syncEditorWhitespace } from "./createInternalCorrespondence/editorWhitespace";
 import { snapCaretOutOfPageGap } from "./createInternalCorrespondence/editorClickCaret";
 import { paginateEditorDom } from "./createInternalCorrespondence/paginateEditorDom";
 import { getSelectionFontSize } from "./createInternalCorrespondence/editorFontSize";
@@ -96,6 +97,10 @@ import { useComposeReplyPrefill } from "./createInternalCorrespondence/useCompos
 import { useWorkflowPrefill } from "./createInternalCorrespondence/useWorkflowPrefill";
 import { useEditorKeyDown } from "./createInternalCorrespondence/useEditorKeyDown";
 import { useEditorCommands } from "./createInternalCorrespondence/useEditorCommands";
+import {
+  ParagraphSettingsModal,
+  useParagraphSettings,
+} from "./createInternalCorrespondence/paragraphDialog";
 import { useEditorClipboard } from "./createInternalCorrespondence/useEditorClipboard";
 import {
   FWD_ATTR,
@@ -1669,6 +1674,11 @@ export const CreateInternalCorrespondence = ({
         sel?.addRange(range);
       }
     }
+    // Ведущий отступ абзаца — в собственной коробке (editorWhitespace): при
+    // выключке «по ширине» браузер иначе растягивает набранные пробелы вместе
+    // со строкой, и очередной Space уезжает на «табуляторное» расстояние.
+    // Во время IME-композиции не трогаем: перестановка курсора её оборвала бы.
+    if (!native?.isComposing) syncEditorWhitespace(editor);
     setEditorContent(getCleanEditorHtml());
 
     // Гранулярность отмены как в Word: обычный набор складывается в один шаг по
@@ -1692,6 +1702,7 @@ export const CreateInternalCorrespondence = ({
   // Важно: setEditorContent может не измениться (clean-HTML тот же), поэтому
   // одной подписки на editorContent здесь недостаточно.
   const syncEditorAfterDomEdit = useCallback(() => {
+    syncEditorWhitespace(editorRef.current);
     setPageCount(paginateEditor());
     setEditorContent(getCleanEditorHtml());
     // Дискретная правка DOM — сразу отдельный шаг истории изменений.
@@ -1715,6 +1726,20 @@ export const CreateInternalCorrespondence = ({
       commitHistoryNow,
       setPageToDelete,
     });
+
+  const {
+    paragraphDialogOpen,
+    paragraphInitialFormat,
+    paragraphLevelDisabled,
+    openParagraphDialog,
+    closeParagraphDialog,
+    applyParagraphFormat,
+  } = useParagraphSettings({
+    editorRef,
+    syncEditorAfterDomEdit,
+    commitHistoryNow,
+    refreshActiveFmt,
+  });
 
   // Закрываем подтверждение удаления, если страниц стало меньше
   useEffect(() => {
@@ -2565,6 +2590,7 @@ export const CreateInternalCorrespondence = ({
                   isReadOnly={isReadOnly}
                   activeFmt={activeFmt}
                   execCmd={execCmd}
+                  openParagraphDialog={openParagraphDialog}
                 />
                 <ToolbarPageGroup
                   isReadOnly={isReadOnly}
@@ -2977,6 +3003,14 @@ export const CreateInternalCorrespondence = ({
           setShowSendConfirm(false);
         }}
         onCancel={() => setShowSendConfirm(false)}
+      />
+
+      <ParagraphSettingsModal
+        open={paragraphDialogOpen}
+        initial={paragraphInitialFormat}
+        levelDisabled={paragraphLevelDisabled}
+        onApply={applyParagraphFormat}
+        onClose={closeParagraphDialog}
       />
 
       <RecipientSelectModal
