@@ -49,6 +49,36 @@ export const makeTabSpacer = (count: number): HTMLElement => {
   return span;
 };
 
+// Табулятор состоит ТОЛЬКО из неразрывных пробелов. Если каретка стояла на его
+// правом краю, браузер печатает следующий символ внутрь спана — и тогда обычный
+// пробел (или буква) становится частью табулятора: Backspace сносил бы его
+// вместе с табуляцией одним нажатием, а выключка «по ширине» растягивала бы
+// такой пробел, ломая ширину шага. Возвращаем чужие символы в поток сразу за
+// табулятором. true — если что-то пришлось вынести.
+export const normalizeTabSpacers = (root: HTMLElement): boolean => {
+  let mutated = false;
+  root.querySelectorAll<HTMLElement>("[data-tab]").forEach((span) => {
+    const text = span.textContent || "";
+    let keep = 0;
+    while (keep < text.length && text[keep] === NBSP) keep++;
+    if (keep === text.length && !span.children.length) return;
+
+    const tail = document.createDocumentFragment();
+    while (span.firstChild) tail.appendChild(span.firstChild);
+    span.textContent = NBSP.repeat(keep);
+    // Из вынесенного хвоста убираем те же keep символов — они остались в спане.
+    const firstText = tail.firstChild;
+    if (firstText && firstText.nodeType === Node.TEXT_NODE) {
+      (firstText as Text).deleteData(0, keep);
+      if (!(firstText as Text).data.length) firstText.remove();
+    }
+    span.after(tail);
+    if (!keep) span.remove();
+    mutated = true;
+  });
+  return mutated;
+};
+
 // Узел непосредственно слева от свёрнутой каретки (или null).
 export const nodeBeforeCaret = (range: Range): Node | null => {
   if (!range.collapsed) return null;

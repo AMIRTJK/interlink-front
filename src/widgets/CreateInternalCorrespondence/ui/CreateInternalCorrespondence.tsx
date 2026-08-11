@@ -86,6 +86,7 @@ import {
   cleanEditorArtifacts,
   wrapBareTopLevelNodes,
 } from "./createInternalCorrespondence/editorCaret";
+import { syncEditorWhitespace } from "./createInternalCorrespondence/editorWhitespace";
 import { snapCaretOutOfPageGap } from "./createInternalCorrespondence/editorClickCaret";
 import { paginateEditorDom } from "./createInternalCorrespondence/paginateEditorDom";
 import { getSelectionFontSize } from "./createInternalCorrespondence/editorFontSize";
@@ -1673,6 +1674,11 @@ export const CreateInternalCorrespondence = ({
         sel?.addRange(range);
       }
     }
+    // Ведущий отступ абзаца — в собственной коробке (editorWhitespace): при
+    // выключке «по ширине» браузер иначе растягивает набранные пробелы вместе
+    // со строкой, и очередной Space уезжает на «табуляторное» расстояние.
+    // Во время IME-композиции не трогаем: перестановка курсора её оборвала бы.
+    if (!native?.isComposing) syncEditorWhitespace(editor);
     setEditorContent(getCleanEditorHtml());
 
     // Гранулярность отмены как в Word: обычный набор складывается в один шаг по
@@ -1696,6 +1702,7 @@ export const CreateInternalCorrespondence = ({
   // Важно: setEditorContent может не измениться (clean-HTML тот же), поэтому
   // одной подписки на editorContent здесь недостаточно.
   const syncEditorAfterDomEdit = useCallback(() => {
+    syncEditorWhitespace(editorRef.current);
     setPageCount(paginateEditor());
     setEditorContent(getCleanEditorHtml());
     // Дискретная правка DOM — сразу отдельный шаг истории изменений.
