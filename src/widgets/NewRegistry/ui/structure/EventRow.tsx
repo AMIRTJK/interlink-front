@@ -31,10 +31,13 @@ export const EventRow: React.FC<IEventRowProps> = ({
       : "Система");
   const hasKnownActor = Boolean(rawActorName || (fallbackActorName && fallbackActorName !== "—"));
   const initials = getInitials(actorName);
+  const isCommentEvent =
+    event.type === "comment_created" || event.action === "comment_created";
   const note =
     event.data?.decline_reason ||
     event.data?.reason ||
-    event.data?.note;
+    event.data?.note ||
+    (isCommentEvent ? event.data?.text : undefined);
 
   const targetVersionId = event.version_id || event.data?.version_id;
   const targetVersionNum = event.data?.version ? String(event.data.version) : undefined;

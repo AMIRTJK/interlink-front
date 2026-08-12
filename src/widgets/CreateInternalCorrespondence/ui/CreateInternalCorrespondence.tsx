@@ -2890,7 +2890,7 @@ export const CreateInternalCorrespondence = ({
                           openLeft={false}
                           onOpen={handleOpenComments}
                           onClose={() => setCommentsOpen(false)}
-                          currentUserName={tokenControl.getUserData()?.full_name || tokenControl.getUserData()?.name || "Admin Super Root"}
+                          docId={id}
                           currentUserId={currentUserId}
                         />
                         <SignerPanel

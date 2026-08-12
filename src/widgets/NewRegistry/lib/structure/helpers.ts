@@ -8,6 +8,7 @@ import {
   X,
   FileText,
   Undo,
+  MessageSquare,
 } from "lucide-react";
 import { FileSignatureIcon } from "../../ui/newRegistry/newRegistryModel";
 import {
@@ -245,6 +246,18 @@ export const getEventMeta = (event: ITimelineEvent) => {
       badge: "bg-amber-100 dark:bg-amber-900/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300",
       title: "Отменил подпись",
       badgeText: "Отменено",
+    };
+  }
+
+  if (type === "comment_created" || action === "comment_created") {
+    return {
+      icon: MessageSquare,
+      ring: "bg-sky-100 dark:bg-sky-900/40",
+      iconColor: "text-sky-500",
+      badge:
+        "bg-sky-100 dark:bg-sky-900/40 border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300",
+      title: "Оставил комментарий",
+      badgeText: "Комментарий",
     };
   }
 
