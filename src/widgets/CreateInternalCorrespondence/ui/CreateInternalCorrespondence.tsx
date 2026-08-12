@@ -20,6 +20,10 @@ import {
 import { useGetQuery, useMutationQuery, toast, tokenControl } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { CORRESPONDENCE_INVALIDATE_KEYS } from "@shared/config";
+import {
+  buildApprovalVersionWarning,
+  extractApprovalVersionSummary,
+} from "@entities/correspondence";
 import { If } from "@shared/ui";
 import { message } from "antd";
 import { ConfirmationModal } from "./ConfirmationModal";
@@ -792,6 +796,24 @@ export const CreateInternalCorrespondence = ({
     [allVersions, activeVersionId, signedVersionObj, latestVersion],
   );
 
+  const approvalVersionSummary = useMemo(
+    () => extractApprovalVersionSummary(rawWorkflowData),
+    [rawWorkflowData],
+  );
+
+  // Версия, открытая в редакторе, — та, которую согласующий видит и одобряет.
+  const approvalVersionWarning = useMemo(
+    () =>
+      buildApprovalVersionWarning(
+        approvalVersionSummary,
+        activeVersion?.id ?? null,
+        activeVersion?.versionNumber
+          ? `Версия ${activeVersion.versionNumber}`
+          : null,
+      ),
+    [approvalVersionSummary, activeVersion],
+  );
+
   useEffect(() => {
     const navState = location.state as
       | {
@@ -1272,6 +1294,10 @@ export const CreateInternalCorrespondence = ({
                   note: item?.note !== undefined ? item.note : req.note,
                   comment: item?.note !== undefined ? (item.note || "") : a.comment,
                   decided_at: item?.decided_at || new Date().toISOString(),
+                  versionId: item?.version_id ?? req.version_id ?? null,
+                  versionLabel: item?.version_number || item?.version
+                    ? `Версия ${item.version_number || item.version}`
+                    : a.versionLabel,
                   dsApplied: (item?.status || req.status) === "approved",
                   dsLoading: false,
                 }
@@ -1912,6 +1938,9 @@ export const CreateInternalCorrespondence = ({
       approvalRecordId: recordId,
       status: "approved",
       note,
+      // Версия, открытая в редакторе: без неё бэкенд зафиксирует выбранную для
+      // подписи, а согласующий мог смотреть другую.
+      ...(activeVersion?.id != null ? { version_id: activeVersion.id } : {}),
     });
   };
 
@@ -2883,6 +2912,8 @@ export const CreateInternalCorrespondence = ({
                           docId={id}
                           canApprove={canApproveDocument}
                           currentUserId={currentUserId}
+                          activeVersionId={activeVersion?.id ?? null}
+                          approvalVersionWarning={approvalVersionWarning}
                         />
                         <CommentsPanel
                           isOpen={commentsOpen}
@@ -2890,7 +2921,7 @@ export const CreateInternalCorrespondence = ({
                           openLeft={false}
                           onOpen={handleOpenComments}
                           onClose={() => setCommentsOpen(false)}
-                          currentUserName={tokenControl.getUserData()?.full_name || tokenControl.getUserData()?.name || "Admin Super Root"}
+                          docId={id}
                           currentUserId={currentUserId}
                         />
                         <SignerPanel

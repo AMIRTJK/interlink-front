@@ -1,19 +1,15 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, Send, X } from "lucide-react";
+import { MessageSquare, RotateCw, Send, X } from "lucide-react";
 import { cn } from "@shared/lib";
-import { If } from "@shared/ui";
+import { If, Loader } from "@shared/ui";
+import {
+  COMMENT_MAX_LENGTH,
+  useCorrespondenceComments,
+} from "../api/useCorrespondenceComments";
+import { CommentItem } from "./CommentItem";
 import { useAutoPositionDrawer } from "../lib/useAutoPositionDrawer";
 import { PANEL_TAB_TOP, PANEL_DRAWER_TOP_IN_TOOLBAR } from "../lib/constants";
-
-interface IComment {
-  id: string;
-  userName: string;
-  userInitials: string;
-  userAvatarBg?: string;
-  createdAt: string;
-  text: string;
-}
 
 interface ICommentsPanelProps {
   isOpen: boolean;
@@ -21,28 +17,9 @@ interface ICommentsPanelProps {
   openLeft?: boolean;
   onOpen: () => void;
   onClose: () => void;
-  currentUserName?: string;
+  docId?: string | number;
   currentUserId?: string | number | null;
 }
-
-const DEFAULT_COMMENTS: IComment[] = [
-  {
-    id: "1",
-    userName: "Admin Super Root",
-    userInitials: "AS",
-    userAvatarBg: "bg-blue-600 text-white",
-    createdAt: "Сегодня, 14:30",
-    text: "Прошу всех участников ознакомиться с последней версией документа.",
-  },
-  {
-    id: "2",
-    userName: "Хасанов Рустам Рустамович",
-    userInitials: "РХ",
-    userAvatarBg: "bg-indigo-600 text-white",
-    createdAt: "Сегодня, 15:10",
-    text: "Версия согласована со всеми ключевыми подразделениями.",
-  },
-];
 
 export const CommentsPanel: React.FC<ICommentsPanelProps> = ({
   isOpen,
@@ -50,35 +27,30 @@ export const CommentsPanel: React.FC<ICommentsPanelProps> = ({
   openLeft = false,
   onOpen,
   onClose,
-  currentUserName = "Пользователь",
+  docId,
+  currentUserId,
 }) => {
-  const [comments, setComments] = useState<IComment[]>(DEFAULT_COMMENTS);
   const [newCommentText, setNewCommentText] = useState("");
   const drawerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   useAutoPositionDrawer({ isOpen, drawerRef });
 
-  const getInitials = (name: string) => {
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-    return name.slice(0, 2).toUpperCase();
-  };
+  const { comments, isLoading, isError, refetch, sendComment, isSending } =
+    useCorrespondenceComments({ docId, isOpen });
+
+  // Свежие комментарии внизу списка — держим прокрутку на них.
+  useEffect(() => {
+    if (!isOpen || !listRef.current) return;
+    listRef.current.scrollTop = listRef.current.scrollHeight;
+  }, [isOpen, comments.length]);
 
   const handleSendComment = (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!newCommentText.trim()) return;
-
-    const newComment: IComment = {
-      id: Date.now().toString(),
-      userName: currentUserName || "Admin Super Root",
-      userInitials: getInitials(currentUserName || "Admin Super Root"),
-      userAvatarBg: "bg-blue-600 text-white",
-      createdAt: "Только что",
-      text: newCommentText.trim(),
-    };
-
-    setComments((prev) => [...prev, newComment]);
-    setNewCommentText("");
+    if (!newCommentText.trim() || isSending) return;
+    sendComment(newCommentText, () => setNewCommentText(""));
   };
+
+  const isSendDisabled = !newCommentText.trim() || isSending;
 
   return (
     <>
@@ -161,42 +133,46 @@ export const CommentsPanel: React.FC<ICommentsPanelProps> = ({
               </div>
 
               {/* Comments List */}
-              <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3.5 min-h-[160px] max-h-[360px]">
-                <If is={comments.length === 0}>
+              <div
+                ref={listRef}
+                className="flex-1 overflow-y-auto p-4 flex flex-col gap-3.5 min-h-[160px] max-h-[360px]"
+              >
+                <If is={isLoading}>
+                  <Loader height={140} minHeight={140} />
+                </If>
+                <If is={!isLoading && isError}>
+                  <div className="py-8 border border-dashed border-rose-200 rounded-xl flex flex-col items-center justify-center gap-2 text-slate-500 text-xs text-center px-4">
+                    <span>Не удалось загрузить комментарии</span>
+                    <button
+                      type="button"
+                      onClick={() => refetch()}
+                      className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
+                      aria-label="Повторить загрузку комментариев"
+                    >
+                      <RotateCw size={12} />
+                      <span>Повторить</span>
+                    </button>
+                  </div>
+                </If>
+                <If is={!isLoading && !isError && comments.length === 0}>
                   <div className="py-8 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs text-center px-4">
                     <MessageSquare size={20} className="text-slate-300" />
                     <span>Пока нет комментариев</span>
-                    <span className="text-[11px] text-slate-400">Напишите первый комментарий ниже</span>
+                    <span className="text-[11px] text-slate-400">
+                      Напишите первый комментарий ниже
+                    </span>
                   </div>
                 </If>
-                <If is={comments.length > 0}>
-                  {comments.map((c) => (
-                    <div
-                      key={c.id}
-                      className="flex gap-2.5 items-start p-3 bg-slate-50/70 hover:bg-slate-50 rounded-xl border border-slate-100 transition-colors"
-                    >
-                      <div
-                        className={cn(
-                          "w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 shadow-2xs mt-0.5",
-                          c.userAvatarBg || "bg-blue-600 text-white",
-                        )}
-                      >
-                        {c.userInitials}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-1 mb-1">
-                          <span className="text-xs font-semibold text-slate-800 truncate">
-                            {c.userName}
-                          </span>
-                          <span className="text-[10px] text-slate-400 font-medium flex-shrink-0">
-                            {c.createdAt}
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-600 leading-relaxed break-words whitespace-pre-wrap">
-                          {c.text}
-                        </p>
-                      </div>
-                    </div>
+                <If is={!isLoading && !isError && comments.length > 0}>
+                  {comments.map((comment) => (
+                    <CommentItem
+                      key={comment.id}
+                      comment={comment}
+                      isOwn={
+                        currentUserId != null &&
+                        String(comment.user_id) === String(currentUserId)
+                      }
+                    />
                   ))}
                 </If>
               </div>
@@ -210,6 +186,8 @@ export const CommentsPanel: React.FC<ICommentsPanelProps> = ({
                   <textarea
                     rows={2}
                     value={newCommentText}
+                    maxLength={COMMENT_MAX_LENGTH}
+                    disabled={isSending}
                     onChange={(e) => setNewCommentText(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
@@ -218,14 +196,14 @@ export const CommentsPanel: React.FC<ICommentsPanelProps> = ({
                       }
                     }}
                     placeholder="Напишите комментарий..."
-                    className="w-full text-xs p-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 resize-none transition-all placeholder:text-slate-400"
+                    className="w-full text-xs p-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 resize-none transition-all placeholder:text-slate-400 disabled:opacity-60"
                   />
                   <button
                     type="submit"
-                    disabled={!newCommentText.trim()}
+                    disabled={isSendDisabled}
                     className={cn(
                       "absolute right-2 bottom-2.5 p-1.5 rounded-lg transition-all cursor-pointer",
-                      newCommentText.trim()
+                      !isSendDisabled
                         ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
                         : "bg-slate-100 text-slate-300 cursor-not-allowed",
                     )}
@@ -235,8 +213,10 @@ export const CommentsPanel: React.FC<ICommentsPanelProps> = ({
                   </button>
                 </div>
                 <div className="flex justify-between items-center text-[10px] text-slate-400 px-1">
-                  <span>Enter для отправки</span>
-                  <span className="font-mono">{newCommentText.length}/500</span>
+                  <span>{isSending ? "Отправка..." : "Enter для отправки"}</span>
+                  <span className="font-mono">
+                    {newCommentText.length}/{COMMENT_MAX_LENGTH}
+                  </span>
                 </div>
               </form>
             </motion.div>

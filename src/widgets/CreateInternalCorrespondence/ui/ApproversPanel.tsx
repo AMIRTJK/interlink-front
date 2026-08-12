@@ -1,6 +1,10 @@
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserPlus, X } from "lucide-react";
+import {
+  ApprovalVersionNotice,
+  IApprovalVersionWarning,
+} from "@entities/correspondence";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { Approver, RecipientOption } from "../types";
@@ -27,6 +31,10 @@ interface IProps {
   /** Разрешает ли роль пользователя в документе согласовывать его */
   canApprove: boolean;
   currentUserId?: string | number | null;
+  /** Версия, открытая в редакторе: её и согласует пользователь. */
+  activeVersionId?: string | number | null;
+  /** Расхождение версии в редакторе с версиями прошлых согласований. */
+  approvalVersionWarning?: IApprovalVersionWarning | null;
 }
 
 export const ApproversPanel = ({
@@ -47,6 +55,8 @@ export const ApproversPanel = ({
   docId,
   canApprove,
   currentUserId,
+  activeVersionId,
+  approvalVersionWarning,
 }: IProps) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [search, setSearch] = useState("");
@@ -203,6 +213,9 @@ export const ApproversPanel = ({
             </div>
 
             <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-3 min-h-0">
+              <If is={canApprove && !!approvalVersionWarning?.hasMismatch}>
+                <ApprovalVersionNotice warning={approvalVersionWarning ?? null} />
+              </If>
               <If is={approvers.length === 0}>
                 <div className="py-8 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs">
                   <UserPlus size={15} />
@@ -224,6 +237,7 @@ export const ApproversPanel = ({
                     onRemoveApprover={onRemoveApprover}
                     canApprove={canApprove}
                     currentUserId={currentUserId}
+                    activeVersionId={activeVersionId}
                   />
                 ))}
               </If>

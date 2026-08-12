@@ -1,4 +1,8 @@
 import { ConfigProvider, Input, Modal, theme } from "antd";
+import {
+  ApprovalVersionNotice,
+  IApprovalVersionWarning,
+} from "@entities/correspondence";
 
 interface ApprovalConfirmModalProps {
   isOpen: boolean;
@@ -7,6 +11,7 @@ interface ApprovalConfirmModalProps {
   isSigning?: boolean;
   approvalNote: string;
   setApprovalNote: (val: string) => void;
+  approvalVersionWarning?: IApprovalVersionWarning | null;
   isDarkMode?: boolean;
 }
 
@@ -17,6 +22,7 @@ export const ApprovalConfirmModal = ({
   isSigning,
   approvalNote,
   setApprovalNote,
+  approvalVersionWarning,
   isDarkMode,
 }: ApprovalConfirmModalProps) => {
   return (
@@ -37,6 +43,10 @@ export const ApprovalConfirmModal = ({
         destroyOnClose
       >
         <div className="flex flex-col gap-3 py-2">
+          <ApprovalVersionNotice
+            warning={approvalVersionWarning ?? null}
+            isDarkMode={isDarkMode}
+          />
           <label
             className={`block text-xs font-semibold ${
               isDarkMode ? "text-gray-300" : "text-gray-700"

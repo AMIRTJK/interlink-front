@@ -1,6 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import { resolveApprovalVersionLabel } from "@entities/correspondence";
 import { cn } from "@shared/lib";
 import {
   DocApproverItem,
@@ -49,6 +50,8 @@ export const ApproversPanel = ({
       gradientTo: grad.to,
       signed: isSigned,
       signedAt: signedDateStr,
+      // Версия решения приходит прямо в записи согласования из /workflow.
+      versionLabel: resolveApprovalVersionLabel(app),
     };
   });
 

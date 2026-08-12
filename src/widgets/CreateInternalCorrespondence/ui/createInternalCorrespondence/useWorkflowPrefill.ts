@@ -1,5 +1,10 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 
+import {
+  extractApprovalVersionSummary,
+  resolveApprovalVersionId,
+  resolveApprovalVersionLabel,
+} from "@entities/correspondence";
 import type { Approver, FinalSigner } from "../../types";
 import {
   approverFromWorkflow,
@@ -31,6 +36,8 @@ export const useWorkflowPrefill = ({
       const wfSignatures = rawWorkflowData.data.signatures || [];
 
       if (wfApprovals.length > 0) {
+        const versionSummary = extractApprovalVersionSummary(rawWorkflowData);
+
         setApprovers((prev) => {
           const merged = [...prev];
           wfApprovals.forEach((wfA: any) => {
@@ -46,9 +53,11 @@ export const useWorkflowPrefill = ({
                 isInvited: true,
                 approved: wfA.status === "approved",
                 dsApplied: wfA.status === "approved",
+                versionId: resolveApprovalVersionId(wfA, versionSummary),
+                versionLabel: resolveApprovalVersionLabel(wfA, versionSummary),
               };
             } else {
-              merged.push(approverFromWorkflow(wfA, user));
+              merged.push(approverFromWorkflow(wfA, user, versionSummary));
             }
           });
           return merged;

@@ -10,6 +10,7 @@ import {
   SafetyCertificateOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import { ApprovalVersionNotice } from "@entities/correspondence";
 import { If, Tooltip } from "@shared/ui";
 import { Avatar, Button, Checkbox, ConfigProvider, Divider, theme } from "antd";
 import { useMemo, useState } from "react";
@@ -47,6 +48,10 @@ export const WorkflowParticipantsPanel = ({
   onSetVersionForSign,
   isSelectingVersion,
   docId,
+  approvalVersionSummary,
+  approvalVersionWarning,
+  signVersionWarning,
+  approvedCountByVersion,
 }: any) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -76,6 +81,13 @@ export const WorkflowParticipantsPanel = ({
     });
     setIsApprovalModalOpen(false);
     setApprovalNote("");
+  };
+
+  // Из полной истории согласование идёт через ту же модалку подтверждения:
+  // иначе предупреждение о расхождении версий проходило бы мимо пользователя.
+  const handleRequestApproveFromHistory = () => {
+    closeModal();
+    handleOpenApproveModal();
   };
 
   const openSignatureModal = (e: React.MouseEvent, item: any) => {
@@ -117,8 +129,9 @@ export const WorkflowParticipantsPanel = ({
     return versions.map((v: any, idx: number) => ({
       ...v,
       displayVersion: v.versionNumber || idx + 1,
+      approvedCount: approvedCountByVersion?.get(String(v.id)) || 0,
     }));
-  }, [versions]);
+  }, [versions, approvedCountByVersion]);
 
   if (!workflowData) return null;
 
@@ -412,6 +425,15 @@ export const WorkflowParticipantsPanel = ({
 
           {signers.length > 0 && (
             <div>
+              <If is={!isCollapsed && !!signVersionWarning?.hasMismatch}>
+                <div className="mb-3">
+                  <ApprovalVersionNotice
+                    warning={signVersionWarning}
+                    isDarkMode={isDarkMode}
+                    isCompact
+                  />
+                </div>
+              </If>
               {!isCollapsed && (
                 <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1 flex justify-between items-center">
                   <span>Подписывающие</span>
@@ -441,6 +463,8 @@ export const WorkflowParticipantsPanel = ({
                   isSigning={isSigning}
                   isReadOnly={isReadOnly}
                   hasQRInSelectedVersion={hasQRInSelectedVersion}
+                  approvalVersionSummary={approvalVersionSummary}
+                  activeVersionId={activeVersionId}
                 />
               ))}
 
@@ -481,6 +505,8 @@ export const WorkflowParticipantsPanel = ({
                   isSigning={isSigning}
                   isReadOnly={isReadOnly}
                   hasQRInSelectedVersion={hasQRInSelectedVersion}
+                  approvalVersionSummary={approvalVersionSummary}
+                  activeVersionId={activeVersionId}
                 />
               ))}
 
@@ -533,7 +559,9 @@ export const WorkflowParticipantsPanel = ({
         isSigning={isSigning}
         currentUserId={currentUserId}
         onShowSignature={openSignatureModal}
-        onApprove={onApprove}
+        onRequestApprove={handleRequestApproveFromHistory}
+        approvalVersionSummary={approvalVersionSummary}
+        approvedCountByVersion={approvedCountByVersion}
         isReadOnly={isReadOnly}
         isSignedDocument={isSignedDocument}
         versions={versions}
@@ -559,6 +587,7 @@ export const WorkflowParticipantsPanel = ({
         isSigning={isSigning}
         approvalNote={approvalNote}
         setApprovalNote={setApprovalNote}
+        approvalVersionWarning={approvalVersionWarning}
         isDarkMode={isDarkMode}
       />
     </>

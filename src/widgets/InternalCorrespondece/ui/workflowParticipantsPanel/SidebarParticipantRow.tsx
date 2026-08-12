@@ -1,4 +1,10 @@
 import { SafetyCertificateOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  ApprovalVersionBadge,
+  IApprovalVersionSummary,
+  resolveApprovalVersionId,
+  resolveApprovalVersionLabel,
+} from "@entities/correspondence";
 import { If, Tooltip } from "@shared/ui";
 import { Avatar, Button } from "antd";
 import { getStatusMeta } from "./workflowParticipantsModel";
@@ -15,6 +21,8 @@ interface SidebarParticipantRowProps {
   isSigning?: boolean;
   isReadOnly?: boolean;
   hasQRInSelectedVersion?: boolean;
+  approvalVersionSummary?: IApprovalVersionSummary | null;
+  activeVersionId?: string | number | null;
 }
 
 export const SidebarParticipantRow = ({
@@ -29,6 +37,8 @@ export const SidebarParticipantRow = ({
   isSigning,
   isReadOnly,
   hasQRInSelectedVersion,
+  approvalVersionSummary,
+  activeVersionId,
 }: SidebarParticipantRowProps) => {
   const user = item.user || {};
   const fullName = user.full_name || "Пользователь";
@@ -41,6 +51,20 @@ export const SidebarParticipantRow = ({
 
   const hasSignature =
     (status === "signed" || status === "approved") && item.payload_hash;
+
+  const approvedVersionLabel =
+    role === "approver"
+      ? resolveApprovalVersionLabel(item, approvalVersionSummary)
+      : null;
+
+  const approvedVersionId = approvedVersionLabel
+    ? resolveApprovalVersionId(item, approvalVersionSummary)
+    : null;
+
+  const isVersionMismatch =
+    approvedVersionId != null &&
+    activeVersionId != null &&
+    String(approvedVersionId) !== String(activeVersionId);
 
   if (isCollapsed) {
     return (
@@ -123,6 +147,16 @@ export const SidebarParticipantRow = ({
         <div className="text-xs text-gray-400 break-words mt-0.5">
           {position}
         </div>
+
+        <If is={!!approvedVersionLabel}>
+          <div className="mt-1">
+            <ApprovalVersionBadge
+              label={approvedVersionLabel}
+              isMismatch={isVersionMismatch}
+              isDarkMode={isDarkMode}
+            />
+          </div>
+        </If>
 
         <If is={status === "declined"}>
           <div className="text-xs text-red-500 font-semibold mt-1">

@@ -8,6 +8,7 @@ import {
   Clock,
   MessageSquare,
 } from "lucide-react";
+import { ApprovalVersionBadge } from "@entities/correspondence";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { Approver } from "../types";
@@ -26,6 +27,8 @@ interface IProps {
   /** Разрешает ли роль пользователя в документе согласовывать его */
   canApprove: boolean;
   currentUserId?: string | number | null;
+  /** Версия, открытая в редакторе: с ней сравнивается версия решения. */
+  activeVersionId?: string | number | null;
 }
 
 export const ApproverItem = ({
@@ -40,11 +43,17 @@ export const ApproverItem = ({
   onRemoveApprover,
   canApprove,
   currentUserId,
+  activeVersionId,
 }: IProps) => {
   // Согласовать можно только за себя: раньше кнопка висела на каждой строке и
   // клик по чужой приводил к 403 от бэкенда.
   const isOwnRow =
     currentUserId != null && String(currentUserId) === String(approver.id);
+
+  const isVersionMismatch =
+    approver.versionId != null &&
+    activeVersionId != null &&
+    String(approver.versionId) !== String(activeVersionId);
 
   return (
     <div
@@ -74,6 +83,14 @@ export const ApproverItem = ({
           <p className="text-[10px] text-slate-500 break-words">
             {approver.role}
           </p>
+          <If is={!!approver.versionLabel}>
+            <div className="mt-1">
+              <ApprovalVersionBadge
+                label={approver.versionLabel ?? null}
+                isMismatch={isVersionMismatch}
+              />
+            </div>
+          </If>
         </div>
         <If is={!approver.approved && !approver.isInvited}>
           <button
