@@ -79,18 +79,12 @@ export const useChatMessageHandlers = (
     [ui, forwardMessage],
   );
 
-  const handleDeleteConversation = useCallback(
-    (forEveryone = false) => {
-      ui.setShowDeleteConversation(false);
-      ui.setShowContactDrawer(false);
-      if (!activeConversationId) return;
-      deleteConversation({
-        conversationId: activeConversationId,
-        forEveryone,
-      });
-    },
-    [ui, activeConversationId, deleteConversation],
-  );
+  const handleDeleteConversation = useCallback(() => {
+    ui.setShowDeleteConversation(false);
+    ui.setShowContactDrawer(false);
+    if (!activeConversationId) return;
+    deleteConversation({ conversationId: activeConversationId });
+  }, [ui, activeConversationId, deleteConversation]);
 
   const handleToggleStar = useCallback(() => {
     if (!activeConversationId) return;

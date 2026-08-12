@@ -9,10 +9,12 @@ import {
 } from "@shared/lib";
 import { REVERB_CONFIG } from "@shared/config";
 import type {
+  IChatMessageDeletedEvent,
   IChatMessageEvent,
   IChatPresenceEvent,
   IChatTypingEvent,
 } from "../model";
+import { markMessageDeletedInCache } from "./chatMessageCache";
 import { chatUrls } from "./chatUrls";
 
 // ─── Realtime-слой чата ──────────────────────────────────────────────────────
@@ -161,7 +163,19 @@ export const useChatRealtime = ({
           if (event?.conversation_id === conversationId) onIncomingMessage(event);
         },
       ],
-      [EVENTS.messageDeleted, () => invalidate(messageKeys)],
+      [
+        // Событие приходит и в канал беседы, и в приватный канал автора запроса,
+        // поэтому обработчик идемпотентен: повторное применение ничего не меняет.
+        EVENTS.messageDeleted,
+        (event: IChatMessageDeletedEvent) => {
+          markMessageDeletedInCache(queryClient, {
+            conversationId: event?.conversation_id,
+            messageId: event?.message_id,
+            scope: event?.scope ?? "everyone",
+          });
+          invalidate(messageKeys);
+        },
+      ],
       [EVENTS.messagePinned, () => invalidate(messageKeys)],
       [EVENTS.reactionUpdated, () => invalidate(messageKeys)],
       [EVENTS.readUpdated, () => invalidate(messageKeys)],
@@ -233,6 +247,7 @@ export const useChatRealtime = ({
     currentUserId,
     organizationId,
     conversationId,
+    queryClient,
     invalidate,
     handleTyping,
     onIncomingMessage,

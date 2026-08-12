@@ -8,6 +8,13 @@ export type TChatMessageKind = "text" | "attachment" | "voice";
 /** Жизненный цикл сообщения на сервере. */
 export type TChatMessageStatus = "scheduled" | "sent" | "delivered" | "read";
 
+/**
+ * Кого касается удаление сообщения:
+ * `me` — сообщение скрывается только у автора запроса,
+ * `everyone` — у всех участников (бэкенд стирает текст и закрывает вложения).
+ */
+export type TChatDeleteScope = "me" | "everyone";
+
 /** Фильтр вложений в ленте медиа и в списке сообщений. */
 export type TChatMediaType = "image" | "video" | "audio" | "voice" | "file";
 
@@ -81,6 +88,15 @@ export interface IChatMessage {
   is_pinned?: boolean;
   is_deleted_for_me?: boolean;
   is_deleted_for_everyone?: boolean;
+  deleted_for_everyone_at?: string | null;
+}
+
+/** Ответ ручки удаления сообщения (`DELETE /chat/messages/:id`). */
+export interface IChatMessageDeleted {
+  conversation_id: number;
+  message_id: number;
+  scope: TChatDeleteScope;
+  deleted_for_everyone_at?: string | null;
 }
 
 /** Ответ ручки треда: родительское сообщение и курсорная страница ответов. */
@@ -138,6 +154,20 @@ export interface IChatMessageEvent {
   message?: IChatMessage;
   message_id?: number;
   user_id?: number;
+}
+
+/**
+ * Событие `.chat.message.deleted`. При `scope: "everyone"` приходит в канал
+ * беседы всем участникам, при `scope: "me"` — только в приватный канал автора
+ * запроса (`private-user.{id}`).
+ */
+export interface IChatMessageDeletedEvent {
+  conversation_id: number;
+  message_id: number;
+  scope: TChatDeleteScope;
+  /** Кто удалил сообщение. */
+  user_id?: number;
+  deleted_for_everyone_at?: string | null;
 }
 
 export interface IChatTypingEvent {

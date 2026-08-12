@@ -158,6 +158,7 @@ export const ChatApp: React.FC<IProps> = ({
     openThreadMsg,
     lastReceivedMessage,
     deletingMsg,
+    canDeleteDeletingMsgForEveryone,
     totalUnread,
     createDirect,
     isCreatingDirect,
@@ -671,7 +672,7 @@ export const ChatApp: React.FC<IProps> = ({
         {deletingMsg && (
           <DeleteConfirmModal
             msgText={deletingMsg.text}
-            isMe={deletingMsg.senderId === "me"}
+            canDeleteForEveryone={canDeleteDeletingMsgForEveryone}
             onDeleteForMe={handleDeleteForMe}
             onDeleteForEveryone={handleDeleteForEveryone}
             onCancel={() => setDeletingMsgId(null)}
@@ -694,19 +695,15 @@ export const ChatApp: React.FC<IProps> = ({
         {showDeleteConversation && activeContact && (
           <DeleteConversationModal
             contactName={activeContact.name}
-            onDeleteForMe={() => handleDeleteConversation(false)}
-            onDeleteForEveryone={() => handleDeleteConversation(true)}
+            onDeleteForMe={handleDeleteConversation}
             onCancel={() => setShowDeleteConversation(false)}
             isDark={isDark}
             title={t.deleteConversationTitle}
             descPrefix={t.deleteConversationDesc}
             deleteForMeLabel={t.deleteConversationForMe}
             deleteForMeDesc={t.deleteConversationForMeDesc}
-            deleteForEveryoneLabel={t.deleteConversationForEveryone}
-            deleteForEveryoneDesc={t.deleteConversationForEveryoneDesc}
             cancelLabel={t.cancel}
             deletingForMeLabel={t.deletingForMe}
-            deletingForEveryoneLabel={t.deletingForEveryone}
           />
         )}
       </AnimatePresence>

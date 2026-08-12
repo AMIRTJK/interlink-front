@@ -5,7 +5,8 @@ import { PaperShredder } from "./PaperShredder";
 
 interface DeleteConfirmModalProps {
   msgText: string;
-  isMe: boolean;
+  /** Доступно ли удаление у всех: в группе обычный участник чужое не удаляет. */
+  canDeleteForEveryone: boolean;
   onDeleteForMe: () => void;
   onDeleteForEveryone: () => void;
   onCancel: () => void;
@@ -23,7 +24,7 @@ interface DeleteConfirmModalProps {
 
 export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   msgText,
-  isMe,
+  canDeleteForEveryone,
   onDeleteForMe,
   onDeleteForEveryone,
   onCancel,
@@ -145,7 +146,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
                   </p>
                 </div>
               </button>
-              {isMe && (
+              {canDeleteForEveryone && (
                 <button
                   onClick={() => handleDelete("everyone")}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-[rgb(var(--th-danger-rgb)/0.15)] hover:bg-[rgb(var(--th-danger-rgb)/0.25)] text-[rgb(var(--th-danger-rgb))] transition-all duration-200 ease-in-out border border-[rgb(var(--th-danger-rgb)/0.3)]"
