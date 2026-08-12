@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link2, X } from "lucide-react";
-import { useLinkPreview } from "../../api";
+import { useComposerLinkPreview } from "../../api";
 import { getUrlHost } from "../../lib/chatLinks";
 import { Translations } from "../../lib/translations";
 
@@ -19,7 +19,7 @@ interface IProps {
 }
 
 export const LinkPreviewBar = ({ text, t }: IProps) => {
-  const { url, preview } = useLinkPreview(text);
+  const { url, preview } = useComposerLinkPreview(text);
   const [dismissedUrl, setDismissedUrl] = useState<string | null>(null);
 
   if (!url || !preview || dismissedUrl === url) return null;
