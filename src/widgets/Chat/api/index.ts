@@ -17,4 +17,4 @@ export { useConversationActions } from "./useConversationActions";
 export { useChatSignals, usePresenceHeartbeat } from "./useChatSignals";
 export { useChatRealtime } from "./useChatRealtime";
 export { useGlobalChatRealtime } from "./useGlobalChatRealtime";
-export { useLinkPreview } from "./useLinkPreview";
+export { useLinkPreview, useComposerLinkPreview } from "./useLinkPreview";

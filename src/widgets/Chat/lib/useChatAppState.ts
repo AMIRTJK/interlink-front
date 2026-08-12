@@ -6,6 +6,7 @@ import { useChatData } from "./useChatData";
 import { useChatComposer, toChatId } from "./useChatComposer";
 import { useChatMessageHandlers } from "./useChatMessageHandlers";
 import { ME, type IChatLabels } from "./chatMappers";
+import { canDeleteForEveryone } from "./chatPermissions";
 
 // Композиция чата: UI-состояние (useChatUiState) + серверные данные (useChatData)
 // + обработчики, связывающие одно с другим. Разметку рисует ChatApp.
@@ -85,6 +86,11 @@ export const useChatAppState = (
   const deletingMsg = useMemo(
     () => messages.find((message) => message.id === ui.deletingMsgId) ?? null,
     [messages, ui.deletingMsgId],
+  );
+
+  const canDeleteDeletingMsgForEveryone = useMemo(
+    () => canDeleteForEveryone(deletingMsg, data.activeContact),
+    [deletingMsg, data.activeContact],
   );
 
   /* ===================== ЭФФЕКТЫ ЛЕНТЫ ===================== */
@@ -303,6 +309,7 @@ export const useChatAppState = (
     openThreadMsg,
     lastReceivedMessage,
     deletingMsg,
+    canDeleteDeletingMsgForEveryone,
     totalUnread: data.counters.unread_messages,
     handleSearchPrev,
     handleSearchNext,

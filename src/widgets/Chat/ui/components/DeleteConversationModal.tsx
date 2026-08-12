@@ -6,18 +6,19 @@ import { PaperShredder } from "./PaperShredder";
 interface DeleteConversationModalProps {
   contactName: string;
   onDeleteForMe: () => void;
-  onDeleteForEveryone: () => void;
+  /** Не передаётся, пока бэкенд чистит историю беседы только у автора запроса. */
+  onDeleteForEveryone?: () => void;
   onCancel: () => void;
   isDark: boolean;
   title: string;
   descPrefix: string;
   deleteForMeLabel: string;
   deleteForMeDesc: string;
-  deleteForEveryoneLabel: string;
-  deleteForEveryoneDesc: string;
+  deleteForEveryoneLabel?: string;
+  deleteForEveryoneDesc?: string;
   cancelLabel: string;
   deletingForMeLabel: string;
-  deletingForEveryoneLabel: string;
+  deletingForEveryoneLabel?: string;
 }
 
 export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = ({
@@ -54,7 +55,7 @@ export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = (
     if (deleteMode === "me") {
       onDeleteForMeRef.current();
     } else if (deleteMode === "everyone") {
-      onDeleteForEveryoneRef.current();
+      onDeleteForEveryoneRef.current?.();
     }
   };
 
@@ -170,18 +171,20 @@ export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = (
                 </div>
               </button>
 
-              <button
-                onClick={() => handleDelete("everyone")}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-[rgb(var(--th-danger-rgb)/0.15)] hover:bg-[rgb(var(--th-danger-rgb)/0.25)] text-[rgb(var(--th-danger-rgb))] transition-all duration-200 ease-in-out border border-[rgb(var(--th-danger-rgb)/0.3)]"
-              >
-                <Trash className="w-4 h-4 flex-shrink-0" />
-                <div className="text-left">
-                  <p className="font-semibold">{deleteForEveryoneLabel}</p>
-                  <p className="text-xs font-normal text-[rgb(var(--th-danger-rgb)/0.75)]">
-                    {deleteForEveryoneDesc}
-                  </p>
-                </div>
-              </button>
+              {onDeleteForEveryone && (
+                <button
+                  onClick={() => handleDelete("everyone")}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-[rgb(var(--th-danger-rgb)/0.15)] hover:bg-[rgb(var(--th-danger-rgb)/0.25)] text-[rgb(var(--th-danger-rgb))] transition-all duration-200 ease-in-out border border-[rgb(var(--th-danger-rgb)/0.3)]"
+                >
+                  <Trash className="w-4 h-4 flex-shrink-0" />
+                  <div className="text-left">
+                    <p className="font-semibold">{deleteForEveryoneLabel}</p>
+                    <p className="text-xs font-normal text-[rgb(var(--th-danger-rgb)/0.75)]">
+                      {deleteForEveryoneDesc}
+                    </p>
+                  </div>
+                </button>
+              )}
 
               <button
                 onClick={onCancel}

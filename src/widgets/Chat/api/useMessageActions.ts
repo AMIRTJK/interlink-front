@@ -1,7 +1,12 @@
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { buildFormData, useMutationQuery } from "@shared/lib";
-import type { IChatMessage } from "../model";
+import type {
+  IChatMessage,
+  IChatMessageDeleted,
+  TChatDeleteScope,
+} from "../model";
+import { markMessageDeletedInCache } from "./chatMessageCache";
 import { chatUrls } from "./chatUrls";
 
 // Действия над сообщениями. Тосты по умолчанию гасим: в чате подтверждением
@@ -25,7 +30,7 @@ export interface ISendMessagePayload {
 
 export interface IDeleteMessagePayload {
   messageId: number;
-  scope: "me" | "everyone";
+  scope: TChatDeleteScope;
 }
 
 export interface IForwardPayload {
@@ -86,11 +91,30 @@ export const useMessageActions = (conversationId: number | null) => {
     },
   });
 
-  const deleteMutation = useMutationQuery<IDeleteMessagePayload>({
+  // Удаление одного сообщения. Права на `scope: "everyone"` решает бэкенд:
+  // обычному участнику группы на чужое сообщение он ответит 403, и мутация
+  // покажет его текст ошибки — гейт в UI (canDeleteForEveryone) только прячет
+  // заведомо недоступную кнопку.
+  const deleteMutation = useMutationQuery<
+    IDeleteMessagePayload,
+    IChatMessageDeleted
+  >({
     url: (payload) => chatUrls.message(payload.messageId),
     method: "DELETE",
     transformBody: (payload) => ({ scope: payload.scope }),
     messages: { suppressSuccessToast: true, invalidate },
+    queryOptions: {
+      // Своё удаление применяем к кэшу сразу: realtime-событие вернётся не
+      // всегда (Reverb может быть выключен), а инвалидация отрабатывает уже
+      // после запроса за лентой.
+      onSuccess: (data: IChatMessageDeleted | undefined, variables) => {
+        markMessageDeletedInCache(queryClient, {
+          conversationId: data?.conversation_id ?? conversationId ?? 0,
+          messageId: data?.message_id ?? variables.messageId,
+          scope: data?.scope ?? variables.scope,
+        });
+      },
+    },
   });
 
   const addReactionMutation = useMutationQuery<IReactionPayload>({

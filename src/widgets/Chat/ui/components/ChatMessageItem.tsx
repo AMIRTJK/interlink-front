@@ -9,6 +9,7 @@ import { If } from "@shared/ui";
 import { MessageAttachments } from "./MessageAttachments";
 import { ReactionPicker } from "./ReactionPicker";
 import { MessageActionMenu } from "./MessageActionMenu";
+import { MessageLinkPreview } from "./MessageLinkPreview";
 
 interface ChatMessageItemProps {
   msg: Message;
@@ -364,6 +365,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                   )}
                 </span>
               </div>
+          )}
+          {!!msg.text && !isEffectivelyDeleted && (
+            <MessageLinkPreview text={msg.text} isMe={isMe} t={t} />
           )}
           <If
             is={
