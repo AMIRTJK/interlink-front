@@ -1,7 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
+import { ApprovalVersionBadge } from "@entities/correspondence";
 import { cn } from "@shared/lib";
+import { If } from "@shared/ui";
 import { SignatureStamp } from "../SignatureStamp";
 import { DocApproverItem, ROLE_BADGE } from "./approversPanelModel";
 
@@ -54,6 +56,10 @@ export const ApproverCard: React.FC<IProps> = ({ approver, idx }) => {
       <p className="text-[11px] text-slate-400 leading-tight">
         {approver.position}
       </p>
+
+      <If is={!!approver.versionLabel}>
+        <ApprovalVersionBadge label={approver.versionLabel} />
+      </If>
 
       {approver.signed && (
         <SignatureStamp

@@ -14,6 +14,7 @@ import { ApiRoutes } from "@shared/api";
 import { CreateInternalRequest } from "@entities/correspondence";
 import { mergeSignedDuplicateVersions } from "@widgets/CreateInternalCorrespondence/ui/createInternalCorrespondence/versionsLib";
 import { generateMockWorkflow } from "./index";
+import { useApprovalVersions } from "./useApprovalVersions";
 import { EditorHandle } from "../ui/Editor";
 import { Recipient } from "../ui/DocumentHeaderForm";
 
@@ -213,6 +214,9 @@ export const useInternalCorrespondence = ({
       approvalsConfirm({
         status,
         note,
+        // Фиксируем версию, которую согласующий видел в редакторе. Без неё
+        // бэкенд подставит выбранную для подписи — она может быть другой.
+        ...(activeVersionId != null ? { version_id: activeVersionId } : {}),
       });
     } catch (error) {
       console.error("Ошибка при процессе согласования:", error);
@@ -330,6 +334,13 @@ export const useInternalCorrespondence = ({
   >(initialActiveVersion);
 
   const isVersionContentInit = useRef(false);
+
+  const {
+    approvalVersionSummary,
+    approvalVersionWarning,
+    signVersionWarning,
+    approvedCountByVersion,
+  } = useApprovalVersions(rawWorkflowData, versions, activeVersionId);
 
   const isSigned = useMemo(() => {
     const signatures = rawWorkflowData?.data?.signatures || [];
@@ -539,6 +550,10 @@ export const useInternalCorrespondence = ({
     isCreating,
     isUpdating,
     activeVersionId,
+    approvalVersionSummary,
+    approvalVersionWarning,
+    signVersionWarning,
+    approvedCountByVersion,
     isSigned,
     isIncoming,
     isReadOnly,

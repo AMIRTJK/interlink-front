@@ -1,4 +1,5 @@
 import { SearchOutlined, UserOutlined } from "@ant-design/icons";
+import type { IApprovalVersionSummary } from "@entities/correspondence";
 import { Avatar, ConfigProvider, Divider, Input, Modal, Tabs, theme } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { HistoryParticipantRow } from "./HistoryParticipantRow";
@@ -11,7 +12,8 @@ interface FullHistoryModalProps {
   workflowData: any;
   initialTab?: string;
   onSign: () => void;
-  onApprove: (payload?: { status?: "approved"; note?: string }) => void;
+  /** Открывает модалку подтверждения согласования вместо мгновенного решения. */
+  onRequestApprove: () => void;
   isSigning: boolean;
   currentUserId: string | number | null;
   onShowSignature: (e: any, item: any) => void;
@@ -24,6 +26,8 @@ interface FullHistoryModalProps {
   isDarkMode?: boolean;
   onSetVersionForSign?: (versionId: string | number) => void;
   isSelectingVersion?: boolean;
+  approvalVersionSummary?: IApprovalVersionSummary | null;
+  approvedCountByVersion?: Map<string, number>;
 }
 
 export const FullHistoryModal = ({
@@ -32,7 +36,7 @@ export const FullHistoryModal = ({
   workflowData,
   initialTab = "participants",
   onSign,
-  onApprove,
+  onRequestApprove,
   isSigning,
   currentUserId,
   onShowSignature,
@@ -45,6 +49,8 @@ export const FullHistoryModal = ({
   isDarkMode,
   onSetVersionForSign,
   isSelectingVersion,
+  approvalVersionSummary,
+  approvedCountByVersion,
 }: FullHistoryModalProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -82,8 +88,9 @@ export const FullHistoryModal = ({
     return versions.map((v, idx) => ({
       ...v,
       versionNumber: v.versionNumber || idx + 1,
+      approvedCount: approvedCountByVersion?.get(String(v.id)) || 0,
     }));
-  }, [versions]);
+  }, [versions, approvedCountByVersion]);
 
   const creatorItem = documentCreator
     ? {
@@ -137,10 +144,6 @@ export const FullHistoryModal = ({
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleOpenApproveModal = () => {
-    onApprove({ status: "approved" });
-  };
-
   const renderParticipantRow = (
     item: any,
     type: "signer" | "approver" | "creator",
@@ -155,10 +158,11 @@ export const FullHistoryModal = ({
       toggleRow={toggleRow}
       onShowSignature={onShowSignature}
       onSign={onSign}
-      handleOpenApproveModal={handleOpenApproveModal}
+      handleOpenApproveModal={onRequestApprove}
       isSigning={isSigning}
       isReadOnly={isReadOnly}
       isDarkMode={isDarkMode}
+      approvalVersionSummary={approvalVersionSummary}
       onSelectVersion={onSelectVersion}
       onClose={onClose}
       activeVersionId={activeVersionId}

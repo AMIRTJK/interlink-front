@@ -7,6 +7,12 @@ import {
   UpOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import {
+  ApprovalVersionBadge,
+  IApprovalVersionSummary,
+  resolveApprovalVersionId,
+  resolveApprovalVersionLabel,
+} from "@entities/correspondence";
 import { If, Tooltip } from "@shared/ui";
 import { Avatar, Button, Checkbox, Tag } from "antd";
 import { getStatusTagConfig } from "./workflowParticipantsModel";
@@ -30,6 +36,7 @@ interface HistoryParticipantRowProps {
   onSetVersionForSign?: (versionId: string | number) => void;
   isSelectingVersion?: boolean;
   isSignedDocument?: boolean;
+  approvalVersionSummary?: IApprovalVersionSummary | null;
 }
 
 export const HistoryParticipantRow = ({
@@ -51,6 +58,7 @@ export const HistoryParticipantRow = ({
   onSetVersionForSign,
   isSelectingVersion,
   isSignedDocument,
+  approvalVersionSummary,
 }: HistoryParticipantRowProps) => {
   const isCurrentUser = String(item.user?.id) === String(currentUserId);
   const isPending = item.status === "pending";
@@ -64,6 +72,20 @@ export const HistoryParticipantRow = ({
   );
 
   const statusConfig = getStatusTagConfig(item.status);
+
+  const approvedVersionLabel =
+    type === "approver"
+      ? resolveApprovalVersionLabel(item, approvalVersionSummary)
+      : null;
+
+  const approvedVersionId = approvedVersionLabel
+    ? resolveApprovalVersionId(item, approvalVersionSummary)
+    : null;
+
+  const isVersionMismatch =
+    approvedVersionId != null &&
+    activeVersionId != null &&
+    String(approvedVersionId) !== String(activeVersionId);
 
   return (
     <div key={item.id} className="mb-2">
@@ -111,6 +133,15 @@ export const HistoryParticipantRow = ({
             >
               {item.user?.position}
             </div>
+            <If is={!!approvedVersionLabel}>
+              <div className="mt-1">
+                <ApprovalVersionBadge
+                  label={approvedVersionLabel}
+                  isMismatch={isVersionMismatch}
+                  isDarkMode={isDarkMode}
+                />
+              </div>
+            </If>
             <If is={userVersions.length > 0}>
               <div
                 className={`mt-1 flex items-center gap-1 text-[11px] font-medium cursor-pointer select-none transition-colors ${

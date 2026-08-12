@@ -86,6 +86,10 @@ export interface Approver {
   status?: string;
   note?: string | null;
   decided_at?: string | null;
+  /** Версия документа, на которой принято решение о согласовании. */
+  versionId?: number | string | null;
+  /** Готовая подпись версии решения, например «Версия 3.0». */
+  versionLabel?: string | null;
 }
 
 export interface FinalSigner {

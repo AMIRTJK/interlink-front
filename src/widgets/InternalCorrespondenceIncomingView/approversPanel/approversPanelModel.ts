@@ -8,6 +8,8 @@ export interface DocApproverItem {
   gradientTo: string;
   signed: boolean;
   signedAt: string;
+  /** Версия, на которой принято решение: «Версия 3.0» либо null. */
+  versionLabel: string | null;
 }
 
 export const ROLE_BADGE: Record<

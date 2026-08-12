@@ -1,3 +1,8 @@
+import {
+  IApprovalVersionSummary,
+  resolveApprovalVersionId,
+  resolveApprovalVersionLabel,
+} from "@entities/correspondence";
 import type { Approver, FinalSigner, RecipientOption } from "../../types";
 
 // Инициалы как их показывает интерфейс: первые буквы первых двух слов ФИО.
@@ -37,7 +42,10 @@ export const recipientFromComposeCreator = (creator: {
 });
 
 // Согласующий из записи согласования сохранённого письма.
-export const approverFromApproval = (a: any): Approver => {
+export const approverFromApproval = (
+  a: any,
+  summary?: IApprovalVersionSummary | null,
+): Approver => {
   const userData = a.approver || a.user;
 
   return {
@@ -57,11 +65,17 @@ export const approverFromApproval = (a: any): Approver => {
     status: a.status,
     note: a.note || null,
     decided_at: a.decided_at || null,
+    versionId: resolveApprovalVersionId(a, summary),
+    versionLabel: resolveApprovalVersionLabel(a, summary),
   };
 };
 
 // Согласующий из маршрута согласования (workflow) — комментарий там не приходит.
-export const approverFromWorkflow = (wfA: any, user: any): Approver => ({
+export const approverFromWorkflow = (
+  wfA: any,
+  user: any,
+  summary?: IApprovalVersionSummary | null,
+): Approver => ({
   id: String(user.id),
   approvalRecordId: String(wfA.id),
   isInvited: true,
@@ -75,6 +89,8 @@ export const approverFromWorkflow = (wfA: any, user: any): Approver => ({
   showCommentInput: false,
   dsApplied: wfA.status === "approved",
   dsLoading: false,
+  versionId: resolveApprovalVersionId(wfA, summary),
+  versionLabel: resolveApprovalVersionLabel(wfA, summary),
 });
 
 // Актуальная подпись: последняя неотозванная, а если отозваны все — последняя.

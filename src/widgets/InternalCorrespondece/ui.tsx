@@ -62,6 +62,10 @@ export const InternalCorrespondece: React.FC<IProps> = ({
     isCreating,
     isUpdating,
     activeVersionId,
+    approvalVersionSummary,
+    approvalVersionWarning,
+    signVersionWarning,
+    approvedCountByVersion,
     isSigned,
     isIncoming,
     isReadOnly,
@@ -151,6 +155,10 @@ export const InternalCorrespondece: React.FC<IProps> = ({
               onSetVersionForSign={handleSetVersionForSign}
               isSelectingVersion={isSelectingVersion}
               activeVersionId={activeVersionId}
+              approvalVersionSummary={approvalVersionSummary}
+              approvalVersionWarning={approvalVersionWarning}
+              signVersionWarning={signVersionWarning}
+              approvedCountByVersion={approvedCountByVersion}
             />
           </div>
         </If>

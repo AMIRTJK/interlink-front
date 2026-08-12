@@ -62,6 +62,19 @@ export const SidebarVersionRow = ({
           }`}
         >
           <p>Версия {v.displayVersion}</p>
+          {v.approvedCount > 0 && (
+            <Tooltip title={`Согласовали эту версию: ${v.approvedCount}`}>
+              <span
+                className={`px-1 rounded text-[9px] font-semibold self-center ${
+                  isDarkMode
+                    ? "bg-emerald-900/40 text-emerald-300"
+                    : "bg-emerald-50 text-emerald-700"
+                }`}
+              >
+                ✓ {v.approvedCount}
+              </span>
+            </Tooltip>
+          )}
           {v.is_selected && (
             <Tooltip title="Выбрана для подписи">
               <CheckCircleFilled className="text-green-500! text-[12px]!" />

@@ -1,6 +1,7 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 
 import { mapServerAttachment } from "../../lib/utils";
+import { extractApprovalVersionSummary } from "@entities/correspondence";
 import type {
   Approver,
   AttachedFile,
@@ -81,7 +82,12 @@ export const useSavedDocumentPrefill = ({
       }
 
       if (item.approvals && Array.isArray(item.approvals)) {
-        setApprovers(item.approvals.map(approverFromApproval));
+        const versionSummary = extractApprovalVersionSummary(initialData);
+        setApprovers(
+          item.approvals.map((approval: any) =>
+            approverFromApproval(approval, versionSummary),
+          ),
+        );
       }
 
       // Уже сохранённые вложения. Файлы, выбранные пользователем прямо сейчас,
