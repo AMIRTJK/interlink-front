@@ -8,7 +8,6 @@ export const DEFAULT_PHONE_LENGTH = 9;
 
 export const PHONE_LENGTHS: Record<string, number> = {
 	"+992": 9,
-	"+7": 10,
 };
 
 export const LOGIN_ANTD_THEME: ThemeConfig = {
