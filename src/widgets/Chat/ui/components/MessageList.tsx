@@ -93,13 +93,24 @@ export const MessageList = ({
       className="flex-1 relative overflow-hidden"
       style={{ background: "var(--th-chat-canvas)" }}
     >
+      {/* Вертикальные отступы держат ореол наведения: это box-shadow, он не
+          увеличивает ни размер элемента, ни прокручиваемую область, поэтому у
+          крайних сообщений его срезал край скролл-контейнера. 32px перекрывают
+          вылет самой широкой тени (blur 52px ≈ 26px наружу). По горизонтали
+          запас дают колонка аватара и отступы, обрезку по X держит этот
+          контейнер — вложенным элементам её ставить нельзя (см. ниже). */}
       <motion.div
         ref={scrollRef}
         onScroll={onScroll}
-        className="absolute inset-0 overflow-y-auto overflow-x-hidden px-3 sm:px-6 py-4 space-y-3.5"
+        className="absolute inset-0 overflow-y-auto overflow-x-hidden px-3 sm:px-6 py-8 space-y-3.5"
         style={{ overflowX: "hidden" }}
       >
         <AnimatePresence mode="wait" custom={switchDirection}>
+          {/* Колонке сообщений overflow ставить нельзя: `overflow-x: hidden` по
+              спецификации переводит вторую ось из visible в auto, колонка
+              становится своим скролл-портом и режет тени детей ровно по нижнему
+              сообщению — свечение обрывалось даже при запасе у скролл-контейнера.
+              Горизонтальный вылет гасит родитель. */}
           <motion.div
             key={activeContact.id}
             custom={switchDirection}
@@ -108,8 +119,7 @@ export const MessageList = ({
             animate="center"
             exit="exit"
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="space-y-3.5 min-h-full flex flex-col justify-start overflow-x-hidden"
-            style={{ overflowX: "hidden" }}
+            className="space-y-3.5 min-h-full flex flex-col justify-start"
           >
             <div className="mt-auto" />
             <If is={hasOlder}>
