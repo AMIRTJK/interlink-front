@@ -63,6 +63,19 @@ const revokeOptimisticPreviews = (msg: Message) => {
   });
 };
 
+const LAST_ACTIVE_CHAT_KEY = "chat:last-active-conversation-id";
+
+const readLastActiveConversationId = (): number | null => {
+  try {
+    const raw = localStorage.getItem(LAST_ACTIVE_CHAT_KEY);
+    if (!raw) return null;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
 export const useChatData = ({
   isEnabled,
   search,
@@ -79,19 +92,35 @@ export const useChatData = ({
       ?.organization_id ?? null;
 
   const [activeConversationId, setActiveConversationId] = useState<number | null>(
-    null,
+    readLastActiveConversationId,
   );
+
+  useEffect(() => {
+    if (activeConversationId) {
+      try {
+        localStorage.setItem(LAST_ACTIVE_CHAT_KEY, String(activeConversationId));
+      } catch (e) {
+        console.error("Не удалось сохранить последний открытый чат:", e);
+      }
+    }
+  }, [activeConversationId]);
 
   const { conversations, isLoading: isLoadingChats, isError: isChatsError } =
     useChatConversations(search, isEnabled);
 
-  // Первая беседа открывается сама: пустой правый экран при непустом списке
-  // выглядит как ошибка. Выбор фиксируется в состоянии, а не вычисляется от
-  // головы списка, — иначе новое сообщение в другой беседе, поднимая её наверх,
-  // переключало бы открытый чат под пользователем.
+  // Восстанавливаем последний открытый чат, либо открываем первый из списка.
+  // Если сохранённый чат больше не существует, переключаемся на первую доступную беседу.
   useEffect(() => {
-    if (activeConversationId || !conversations.length) return;
-    setActiveConversationId(conversations[0].id);
+    if (!conversations.length) return;
+    if (activeConversationId) {
+      const exists = conversations.some((c) => c.id === activeConversationId);
+      if (exists) return;
+    }
+    const savedId = readLastActiveConversationId();
+    const savedExists = savedId
+      ? conversations.some((c) => c.id === savedId)
+      : false;
+    setActiveConversationId(savedExists ? savedId : conversations[0].id);
   }, [activeConversationId, conversations]);
 
   const counters = useChatCounters(isEnabled);
