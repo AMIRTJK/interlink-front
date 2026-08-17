@@ -17,6 +17,7 @@ import {
   getAttachmentPreviewSource,
   getConversationAvatarSource,
   getUserAvatarSource,
+  isOptimisticMatch,
   mapConversation,
   mapMessage,
   normalizeMembers,
@@ -173,16 +174,7 @@ export const useChatData = ({
       )
       .map((message) => mapMessage(message, mapContext));
     setOptimisticMessages((prev) =>
-      prev.filter(
-        (opt) =>
-          !serverMsgs.some(
-            (s) =>
-              s.senderId === ME &&
-              s.text &&
-              opt.text &&
-              s.text.trim() === opt.text.trim(),
-          ),
-      ),
+      prev.filter((opt) => !serverMsgs.some((s) => isOptimisticMatch(opt, s))),
     );
   }, [rawMessages, mapContext]);
 
@@ -196,14 +188,7 @@ export const useChatData = ({
     if (!optimisticMessages.length) return serverMsgs;
 
     const pendingOptimistic = optimisticMessages.filter(
-      (opt) =>
-        !serverMsgs.some(
-          (s) =>
-            s.senderId === ME &&
-            s.text &&
-            opt.text &&
-            s.text.trim() === opt.text.trim(),
-        ),
+      (opt) => !serverMsgs.some((s) => isOptimisticMatch(opt, s)),
     );
 
     return [...serverMsgs, ...pendingOptimistic];

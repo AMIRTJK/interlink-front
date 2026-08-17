@@ -56,6 +56,7 @@ export type ReplyPreview = {
 };
 export type Message = {
   id: string;
+  clientUuid?: string;
   senderId: string;
   text: string;
   time: string;

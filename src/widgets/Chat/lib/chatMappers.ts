@@ -207,6 +207,7 @@ export const mapMessage = (message: IChatMessage, ctx: IMapContext): Message => 
 
   return {
     id: String(message.id),
+    clientUuid: message.client_uuid ?? undefined,
     senderId: isMine ? ME : String(senderId ?? ""),
     senderName: isMine ? ctx.labels.you : (message.sender?.full_name ?? ""),
     senderAvatar: resolveMedia(
@@ -317,3 +318,55 @@ export const mapMediaItem = (
     preview: previewSource ? ctx.media[previewSource] : undefined,
   };
 };
+
+/**
+ * Проверяет, совпадает ли оптимистичное сообщение с реальным сообщением с сервера.
+ * Поддерживает текст, файлы, фото и голосовые сообщения.
+ */
+export const isOptimisticMatch = (opt: Message, server: Message): boolean => {
+  // 1. Прямое совпадение по clientUuid
+  if (opt.clientUuid && server.clientUuid && opt.clientUuid === server.clientUuid) {
+    return true;
+  }
+
+  // 2. Чужие сообщения не могут быть нашими оптимистичными
+  if (server.senderId !== ME) {
+    return false;
+  }
+
+  // 3. Голосовые сообщения (audio / voice)
+  const isOptVoice =
+    opt.attachment?.type === "voice" ||
+    opt.attachments?.some((a) => a.type === "voice");
+  const isServerVoice =
+    server.attachment?.type === "voice" ||
+    server.attachments?.some((a) => a.type === "voice");
+  if (isOptVoice && isServerVoice) {
+    return true;
+  }
+
+  // 4. Вложения (файлы, фото, документы)
+  const optAtts = opt.attachments ?? (opt.attachment ? [opt.attachment] : []);
+  const serverAtts = server.attachments ?? (server.attachment ? [server.attachment] : []);
+  if (optAtts.length > 0 && serverAtts.length > 0) {
+    const hasMatchingName = optAtts.some((oa) =>
+      serverAtts.some((sa) => sa.name && oa.name && sa.name === oa.name),
+    );
+    if (hasMatchingName) return true;
+
+    // Если имена изменены бэкендом, но совпадает текст (или оба без текста)
+    const optText = (opt.text ?? "").trim();
+    const serverText = (server.text ?? "").trim();
+    if (optText === serverText) return true;
+  }
+
+  // 5. Текстовые сообщения
+  const optText = (opt.text ?? "").trim();
+  const serverText = (server.text ?? "").trim();
+  if (optText && serverText && optText === serverText) {
+    return true;
+  }
+
+  return false;
+};
+

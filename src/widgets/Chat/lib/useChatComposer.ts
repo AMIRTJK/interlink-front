@@ -35,9 +35,16 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
   } = data;
 
   const send = useCallback(
-    (payload: Omit<Parameters<typeof sendMessage>[0], "clientUuid">) => {
+    (
+      payload: Omit<Parameters<typeof sendMessage>[0], "clientUuid"> & {
+        clientUuid?: string;
+      },
+    ) => {
       stopTyping();
-      sendMessage({ ...payload, clientUuid: createClientUuid() });
+      sendMessage({
+        ...payload,
+        clientUuid: payload.clientUuid ?? createClientUuid(),
+      });
     },
     [sendMessage, stopTyping],
   );
@@ -48,7 +55,8 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
     const files = ui.pendingFiles.map((file) => file.raw);
     if (!body && !files.length) return;
 
-    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const clientUuid = createClientUuid();
+    const tempId = `temp-${clientUuid}`;
 
     const optimisticAttachments: MessageAttachment[] = ui.pendingFiles.map((pf, idx) => ({
       attachmentId: Date.now() + idx,
@@ -60,6 +68,7 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
 
     const optimisticMsg: Message = {
       id: tempId,
+      clientUuid,
       senderId: ME,
       senderName: labels?.you || "Вы",
       senderAvatar: currentUserAvatar,
@@ -86,6 +95,7 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
       kind: files.length ? "attachment" : "text",
       files: files.length ? files : undefined,
       replyToId: toChatId(ui.replyingTo?.id) ?? undefined,
+      clientUuid,
     });
   }, [activeConversationId, ui, send, addOptimisticMessage, currentUserAvatar, labels]);
 
@@ -112,7 +122,8 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
     (durationSeconds: number, audio: Blob) => {
       if (!activeConversationId) return;
 
-      const tempId = `temp-voice-${Date.now()}`;
+      const clientUuid = createClientUuid();
+      const tempId = `temp-voice-${clientUuid}`;
       const previewUrl = URL.createObjectURL(audio);
       const voiceAttachment: MessageAttachment = {
         attachmentId: Date.now(),
@@ -125,6 +136,7 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
 
       const optimisticMsg: Message = {
         id: tempId,
+        clientUuid,
         senderId: ME,
         senderName: labels?.you || "Вы",
         senderAvatar: currentUserAvatar,
@@ -147,6 +159,7 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
         kind: "voice",
         files: [file],
         durations: [Math.max(1, Math.round(durationSeconds)) * 1000],
+        clientUuid,
       });
     },
     [activeConversationId, send, addOptimisticMessage, currentUserAvatar, labels, ui],
