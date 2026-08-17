@@ -4,7 +4,6 @@ import { Can, If } from "@shared/ui";
 import { type TChatVariant } from "../model";
 import { Lang } from "../lib/translations";
 import { useChatAppState } from "../lib/useChatAppState";
-import { useThreadReadState } from "../lib/useThreadReadState";
 import {
   CHAT_PERMISSIONS,
   CHAT_LIST_PANEL_WIDTH,
@@ -196,9 +195,9 @@ export const ChatApp: React.FC<IProps> = ({
     handleEndCall,
     isHighlighted,
     isCurrentMatch,
+    markThreadSeen,
+    getUnreadThreadCount,
   } = state;
-
-  const { markThreadSeen, getUnreadThreadCount } = useThreadReadState();
 
   // Пока тред открыт, всё пришедшее в него считается прочитанным — и чужие
   // ответы, и свои. Закрыли панель — следующий ответ снова будет новым.

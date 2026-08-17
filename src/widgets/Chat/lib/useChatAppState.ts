@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useDebouncedCallback } from "@shared/lib";
 import { useChatUiState } from "./useChatUiState";
 import { useCallState } from "./useCallState";
 import { useChatData } from "./useChatData";
 import { useChatComposer, toChatId } from "./useChatComposer";
 import { useChatMessageHandlers } from "./useChatMessageHandlers";
+import { useThreadReadState } from "./useThreadReadState";
 import { ME, type IChatLabels } from "./chatMappers";
 import { canDeleteForEveryone } from "./chatPermissions";
+import { chatUrls } from "../api/chatUrls";
+import type { Contact, IChatCursorPage, IChatMessage } from "../model";
 
 // Композиция чата: UI-состояние (useChatUiState) + серверные данные (useChatData)
 // + обработчики, связывающие одно с другим. Разметку рисует ChatApp.
@@ -296,12 +300,82 @@ export const useChatAppState = (
   const isCurrentMatch = (msgId: string) =>
     searchMatches.length > 0 && searchMatches[searchMatchIndex]?.id === msgId;
 
+  const { markThreadSeen, getUnreadThreadCount } = useThreadReadState();
+  const queryClient = useQueryClient();
+
+  // Непрочитанные ответы в ветках суммируются со счётчиком основного тела чата,
+  // чтобы беседа во вкладке чатов подсвечивала новые сообщения в тредах.
+  const contacts = useMemo<Contact[]>(() => {
+    return data.contacts.map((contact) => {
+      const convId = Number(contact.id);
+      let threadUnread = 0;
+
+      if (convId === data.activeConversationId) {
+        data.messages.forEach((msg) => {
+          const tc = msg.threadCount ?? 0;
+          if (tc > 0) {
+            threadUnread += getUnreadThreadCount(msg.id, tc);
+          }
+        });
+      } else {
+        const queryData = queryClient.getQueryData<
+          { pages?: IChatCursorPage<IChatMessage>[] } | IChatCursorPage<IChatMessage>
+        >([chatUrls.messages(convId), { per_page: 40 }, true]);
+
+        if (queryData) {
+          const pages =
+            "pages" in queryData && Array.isArray(queryData.pages)
+              ? queryData.pages
+              : [queryData as IChatCursorPage<IChatMessage>];
+
+          pages.forEach((page) => {
+            page.data?.forEach((msg) => {
+              const tc = msg.thread_count ?? 0;
+              if (tc > 0) {
+                threadUnread += getUnreadThreadCount(String(msg.id), tc);
+              }
+            });
+          });
+        }
+      }
+
+      if (threadUnread === 0) return contact;
+      return {
+        ...contact,
+        unreadCount: (contact.unreadCount ?? 0) + threadUnread,
+      };
+    });
+  }, [
+    data.contacts,
+    data.activeConversationId,
+    data.messages,
+    getUnreadThreadCount,
+    queryClient,
+  ]);
+
+  const activeContact = useMemo<Contact | null>(() => {
+    return (
+      contacts.find((c) => c.id === String(data.activeConversationId)) ??
+      data.activeContact
+    );
+  }, [contacts, data.activeConversationId, data.activeContact]);
+
+  const totalUnread = useMemo(() => {
+    const threadUnreadTotal = contacts.reduce(
+      (sum, c) => sum + (c.unreadCount ?? 0),
+      0,
+    );
+    return Math.max(data.counters.unread_messages, threadUnreadTotal);
+  }, [contacts, data.counters.unread_messages]);
+
   return {
     ...ui,
     ...call,
     ...data,
     ...composer,
     ...handlers,
+    contacts,
+    activeContact,
     setSearchQuery: handleSearchChange,
     setInput: composer.handleInputChange,
     pinnedMessage,
@@ -310,7 +384,9 @@ export const useChatAppState = (
     lastReceivedMessage,
     deletingMsg,
     canDeleteDeletingMsgForEveryone,
-    totalUnread: data.counters.unread_messages,
+    totalUnread,
+    markThreadSeen,
+    getUnreadThreadCount,
     handleSearchPrev,
     handleSearchNext,
     handleJumpToPinned,
