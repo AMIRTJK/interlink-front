@@ -334,7 +334,22 @@ export const isOptimisticMatch = (opt: Message, server: Message): boolean => {
     return false;
   }
 
-  // 3. Голосовые сообщения (audio / voice)
+  // 3. Дальше идут эвристики по содержимому — они нужны, когда бэкенд не вернул
+  //    client_uuid. Сравнивать по ним можно только с сообщениями, появившимися
+  //    ПОСЛЕ отправки: у вложений совпадение слишком широкое (любое своё
+  //    голосовое, любой свой файл без подписи), и новое сообщение схлопывалось
+  //    с давним — то есть исчезало из ленты, не дождавшись ответа бэкенда.
+  //    Id у сообщений возрастающие, поэтому граница считается по ним.
+  const serverId = Number(server.id);
+  if (
+    opt.optimisticAfterId !== undefined &&
+    Number.isFinite(serverId) &&
+    serverId <= opt.optimisticAfterId
+  ) {
+    return false;
+  }
+
+  // 4. Голосовые сообщения (audio / voice)
   const isOptVoice =
     opt.attachment?.type === "voice" ||
     opt.attachments?.some((a) => a.type === "voice");
@@ -345,7 +360,7 @@ export const isOptimisticMatch = (opt: Message, server: Message): boolean => {
     return true;
   }
 
-  // 4. Вложения (файлы, фото, документы)
+  // 5. Вложения (файлы, фото, документы)
   const optAtts = opt.attachments ?? (opt.attachment ? [opt.attachment] : []);
   const serverAtts = server.attachments ?? (server.attachment ? [server.attachment] : []);
   if (optAtts.length > 0 && serverAtts.length > 0) {
@@ -360,7 +375,7 @@ export const isOptimisticMatch = (opt: Message, server: Message): boolean => {
     if (optText === serverText) return true;
   }
 
-  // 5. Текстовые сообщения
+  // 6. Текстовые сообщения
   const optText = (opt.text ?? "").trim();
   const serverText = (server.text ?? "").trim();
   if (optText && serverText && optText === serverText) {

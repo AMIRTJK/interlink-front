@@ -79,6 +79,14 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 
   const isPending = msg.status === "pending" || msg.id.startsWith("temp-");
 
+  // Статус на пузыре вложения: часы, пока сообщение уходит, затем галочка — то
+  // же поведение, что у строки времени текста. У чужих сообщений статуса нет, а
+  // у своих с подписью его несёт эта самая строка, поэтому дубль не рисуем.
+  let attachmentStatus: NonNullable<Message["status"]> | undefined;
+  if (isMe && !msg.text) {
+    attachmentStatus = isPending ? "pending" : msg.status ?? "sent";
+  }
+
   // Наведение считаем один раз на сообщение: подсветку получают и текст, и
   // вложения, и голосовое — иначе у одного сообщения разные части светятся
   // по-разному.
@@ -319,6 +327,8 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             isDark={isDark}
             isHovered={isHovered}
             isTargetHighlighted={isTargetHighlighted}
+            status={attachmentStatus}
+            sendingLabel={t.sending}
           />
           {!!msg.text && (
             <div

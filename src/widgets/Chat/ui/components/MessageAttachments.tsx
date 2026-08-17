@@ -3,13 +3,14 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Download, Eye, ImageIcon, X } from "lucide-react";
 import { toast } from "@shared/lib";
-import type { MessageAttachment } from "../../model";
+import type { Message, MessageAttachment } from "../../model";
 import { chatUrls, downloadPrivateFile } from "../../api";
 import {
   getAttachmentBubbleStyle,
   getAttachmentIcon,
 } from "../../lib/chatHelpers";
 import { VoiceBubble } from "./VoiceBubble";
+import { AttachmentStatusBadge } from "./AttachmentStatusBadge";
 
 interface IProps {
   attachments: MessageAttachment[];
@@ -18,6 +19,13 @@ interface IProps {
   /** Наведение ловит вся группа сообщения — свечение общее для всех вложений. */
   isHovered?: boolean;
   isTargetHighlighted?: boolean;
+  /**
+   * Статус доставки на пузыре вложения. `undefined` — не показывать: у чужих
+   * сообщений его нет, а у своих с подписью он уже стоит в строке времени.
+   */
+  status?: NonNullable<Message["status"]>;
+  /** Локализованная подпись состояния отправки. */
+  sendingLabel: string;
 }
 
 // Вложения сообщения. Файлы приватные: превью картинок разрешено в blob-URL,
@@ -29,6 +37,8 @@ export const MessageAttachments = ({
   isDark,
   isHovered = false,
   isTargetHighlighted,
+  status,
+  sendingLabel,
 }: IProps) => {
   const [selectedImage, setSelectedImage] = useState<MessageAttachment | null>(
     null,
@@ -82,11 +92,17 @@ export const MessageAttachments = ({
               isDark={isDark}
               isHovered={isHovered}
               isTargetHighlighted={isTargetHighlighted}
+              status={status}
+              sendingLabel={sendingLabel}
             />
           );
         }
 
         const isImage = attachment.type === "image" && Boolean(attachment.preview);
+        // Пока сообщение не отправлено, вложения на бэкенде ещё нет: скачивание
+        // ушло бы за несуществующий файл и вернуло ошибку. Просмотр картинки при
+        // этом работает — он идёт из локального превью.
+        const isPending = status === "pending";
         const cornerRadiusClass = `rounded-2xl ${isMe ? "rounded-br-md" : "rounded-bl-md"}`;
 
         return (
@@ -134,24 +150,35 @@ export const MessageAttachments = ({
                   </button>
                   <button
                     type="button"
+                    disabled={isPending}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDownload(attachment);
                     }}
                     aria-label="Скачать изображение"
                     title="Скачать"
-                    className="w-10 h-10 rounded-full bg-[rgb(var(--th-on-accent-rgb)/0.2)] hover:bg-[rgb(var(--th-on-accent-rgb)/0.35)] text-[var(--th-on-accent)] flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg cursor-pointer"
+                    className="w-10 h-10 rounded-full bg-[rgb(var(--th-on-accent-rgb)/0.2)] hover:bg-[rgb(var(--th-on-accent-rgb)/0.35)] text-[var(--th-on-accent)] flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg cursor-pointer disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-default"
                   >
                     <Download className="w-5 h-5" />
                   </button>
                 </div>
+                {/* Статус кладём после слоя с кнопками: тот перекрыл бы его при
+                    наведении, а состояние отправки видно быть должно всегда. */}
+                {status && (
+                  <AttachmentStatusBadge
+                    variant="overlay"
+                    status={status}
+                    sendingLabel={sendingLabel}
+                  />
+                )}
               </div>
             ) : (
               <button
                 type="button"
+                disabled={isPending}
                 onClick={() => handleDownload(attachment)}
                 aria-label={`Скачать ${attachment.name}`}
-                className="flex items-center gap-2.5 px-3.5 py-2.5 min-w-[200px] text-left w-full cursor-pointer"
+                className="flex items-center gap-2.5 px-3.5 py-2.5 min-w-[200px] text-left w-full cursor-pointer disabled:cursor-default"
               >
                 <div
                   className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
@@ -171,13 +198,20 @@ export const MessageAttachments = ({
                     {attachment.name}
                   </p>
                   <p
-                    className={`text-[10px] ${
+                    className={`text-[10px] flex items-center gap-1.5 ${
                       isMe
                         ? "text-[var(--th-on-accent-muted)]"
                         : "text-[var(--th-text-muted)]"
                     }`}
                   >
-                    {attachment.size}
+                    <span className="truncate">{attachment.size}</span>
+                    {status && (
+                      <AttachmentStatusBadge
+                        status={status}
+                        sendingLabel={sendingLabel}
+                        isMe={isMe}
+                      />
+                    )}
                   </p>
                 </div>
                 <Download

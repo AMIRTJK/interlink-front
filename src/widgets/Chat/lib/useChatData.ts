@@ -47,6 +47,22 @@ const toId = (value: string | null) => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 };
 
+/**
+ * Превью и запись оптимистичного сообщения показываются из локального blob-URL:
+ * когда сообщение уходит из списка (пришло с сервера либо отправка не удалась),
+ * ссылку освобождаем, иначе файл остаётся в памяти до перезагрузки страницы.
+ * Повторный вызов безопасен — `revokeObjectURL` на освобождённой ссылке ничего
+ * не делает.
+ */
+const revokeOptimisticPreviews = (msg: Message) => {
+  const attachments = msg.attachments ?? (msg.attachment ? [msg.attachment] : []);
+  attachments.forEach((attachment) => {
+    [attachment.preview, attachment.url].forEach((value) => {
+      if (value?.startsWith("blob:")) URL.revokeObjectURL(value);
+    });
+  });
+};
+
 export const useChatData = ({
   isEnabled,
   search,
@@ -144,15 +160,35 @@ export const useChatData = ({
   const [optimisticMessages, setOptimisticMessages] = useState<Message[]>([]);
 
   useEffect(() => {
-    setOptimisticMessages([]);
+    setOptimisticMessages((prev) => {
+      prev.forEach(revokeOptimisticPreviews);
+      return prev.length ? [] : prev;
+    });
   }, [activeConversationId]);
 
-  const addOptimisticMessage = useCallback((msg: Message) => {
-    setOptimisticMessages((prev) => [...prev, msg]);
-  }, []);
+  // Оптимистичное сообщение помечаем верхней границей уже известной ленты:
+  // сопоставление с сервером (`isOptimisticMatch`) должно смотреть только на то,
+  // что придёт после отправки.
+  const addOptimisticMessage = useCallback(
+    (msg: Message) => {
+      const knownMaxId = rawMessages.reduce(
+        (max, message) => Math.max(max, Number(message.id) || 0),
+        0,
+      );
+      setOptimisticMessages((prev) => [
+        ...prev,
+        { ...msg, optimisticAfterId: knownMaxId },
+      ]);
+    },
+    [rawMessages],
+  );
 
   const removeOptimisticMessage = useCallback((tempId: string) => {
-    setOptimisticMessages((prev) => prev.filter((m) => m.id !== tempId));
+    setOptimisticMessages((prev) => {
+      const target = prev.find((m) => m.id === tempId);
+      if (target) revokeOptimisticPreviews(target);
+      return prev.filter((m) => m.id !== tempId);
+    });
   }, []);
 
   const currentUserAvatar = useMemo(
@@ -165,6 +201,9 @@ export const useChatData = ({
     [user, mapContext, labels.you],
   );
 
+  // Оптимистичное сообщение живёт до своего появления в серверной ленте: как
+  // только бэкенд его вернул, показываем серверную версию — с реальным статусом
+  // вместо часов «отправляется».
   useEffect(() => {
     if (!optimisticMessages.length || !rawMessages.length) return;
     const serverMsgs = rawMessages
@@ -173,10 +212,15 @@ export const useChatData = ({
           !message.is_deleted_for_everyone && !message.is_deleted_for_me,
       )
       .map((message) => mapMessage(message, mapContext));
-    setOptimisticMessages((prev) =>
-      prev.filter((opt) => !serverMsgs.some((s) => isOptimisticMatch(opt, s))),
+    const settled = optimisticMessages.filter((opt) =>
+      serverMsgs.some((s) => isOptimisticMatch(opt, s)),
     );
-  }, [rawMessages, mapContext]);
+    if (!settled.length) return;
+    settled.forEach(revokeOptimisticPreviews);
+    setOptimisticMessages((prev) =>
+      prev.filter((opt) => !settled.includes(opt)),
+    );
+  }, [rawMessages, mapContext, optimisticMessages]);
 
   const messages = useMemo<Message[]>(() => {
     const serverMsgs = rawMessages

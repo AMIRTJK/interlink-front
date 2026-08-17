@@ -30,6 +30,7 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
     notifyTyping,
     stopTyping,
     addOptimisticMessage,
+    removeOptimisticMessage,
     currentUserAvatar,
     labels,
   } = data;
@@ -39,14 +40,22 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
       payload: Omit<Parameters<typeof sendMessage>[0], "clientUuid"> & {
         clientUuid?: string;
       },
+      /** Оптимистичное сообщение этой отправки: при ошибке его нужно убрать,
+          иначе на нём навсегда останутся часы «отправляется». */
+      optimisticId?: string,
     ) => {
       stopTyping();
-      sendMessage({
-        ...payload,
-        clientUuid: payload.clientUuid ?? createClientUuid(),
-      });
+      sendMessage(
+        {
+          ...payload,
+          clientUuid: payload.clientUuid ?? createClientUuid(),
+        },
+        optimisticId
+          ? { onError: () => removeOptimisticMessage(optimisticId) }
+          : undefined,
+      );
     },
-    [sendMessage, stopTyping],
+    [sendMessage, stopTyping, removeOptimisticMessage],
   );
 
   const handleSend = useCallback(() => {
@@ -58,12 +67,15 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
     const clientUuid = createClientUuid();
     const tempId = `temp-${clientUuid}`;
 
+    // Превью берём своей ссылкой на тот же файл: очередь вложений очищается
+    // сразу после отправки и освобождает свои blob-URL, поэтому переданная из
+    // неё ссылка умерла бы до первой отрисовки картинки.
     const optimisticAttachments: MessageAttachment[] = ui.pendingFiles.map((pf, idx) => ({
       attachmentId: Date.now() + idx,
       name: pf.name,
       size: pf.size,
       type: pf.type,
-      preview: pf.preview,
+      preview: pf.preview ? URL.createObjectURL(pf.raw) : undefined,
     }));
 
     const optimisticMsg: Message = {
@@ -89,14 +101,17 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
     ui.clearPendingFiles();
 
     // 3. Запрос к бэкенду отправляется параллельно в фоновом режиме
-    send({
-      conversationId: activeConversationId,
-      body: body || undefined,
-      kind: files.length ? "attachment" : "text",
-      files: files.length ? files : undefined,
-      replyToId: toChatId(ui.replyingTo?.id) ?? undefined,
-      clientUuid,
-    });
+    send(
+      {
+        conversationId: activeConversationId,
+        body: body || undefined,
+        kind: files.length ? "attachment" : "text",
+        files: files.length ? files : undefined,
+        replyToId: toChatId(ui.replyingTo?.id) ?? undefined,
+        clientUuid,
+      },
+      tempId,
+    );
   }, [activeConversationId, ui, send, addOptimisticMessage, currentUserAvatar, labels]);
 
   const handleSchedule = useCallback(
@@ -142,7 +157,9 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
         senderAvatar: currentUserAvatar,
         text: "",
         time: formatMessageTime(new Date().toISOString()),
-        status: "sent",
+        // Запись ещё загружается — статус тот же, что у остальных вложений,
+        // иначе индикатор отправки на пузыре противоречил бы данным сообщения.
+        status: "pending",
         attachment: voiceAttachment,
         attachments: [voiceAttachment],
       };
@@ -154,13 +171,16 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
         type: audio.type || "audio/webm",
       });
 
-      send({
-        conversationId: activeConversationId,
-        kind: "voice",
-        files: [file],
-        durations: [Math.max(1, Math.round(durationSeconds)) * 1000],
-        clientUuid,
-      });
+      send(
+        {
+          conversationId: activeConversationId,
+          kind: "voice",
+          files: [file],
+          durations: [Math.max(1, Math.round(durationSeconds)) * 1000],
+          clientUuid,
+        },
+        tempId,
+      );
     },
     [activeConversationId, send, addOptimisticMessage, currentUserAvatar, labels, ui],
   );

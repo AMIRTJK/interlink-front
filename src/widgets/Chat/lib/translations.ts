@@ -116,6 +116,8 @@ export type Translations = {
   // Данные с бэкенда: превью вложений, пустые состояния, создание группы
   attachmentLabel: string;
   voiceMessage: string;
+  /** Подпись индикатора «сообщение ещё отправляется». */
+  sending: string;
   noChats: string;
   noMessages: string;
   noMessagesHint: string;
@@ -229,6 +231,7 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     add: 'Add',
     attachmentLabel: 'Attachment',
     voiceMessage: 'Voice message',
+    sending: 'Sending…',
     noChats: 'No chats yet',
     noMessages: 'No messages yet',
     noMessagesHint: 'Send the first message to start the conversation.',
@@ -341,6 +344,7 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     add: 'Добавить',
     attachmentLabel: 'Вложение',
     voiceMessage: 'Голосовое сообщение',
+    sending: 'Отправляется…',
     noChats: 'Чатов пока нет',
     noMessages: 'Сообщений пока нет',
     noMessagesHint: 'Отправьте первое сообщение, чтобы начать переписку.',
@@ -453,6 +457,7 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     add: 'Илова',
     attachmentLabel: 'Замима',
     voiceMessage: 'Паёми овозӣ',
+    sending: 'Фиристода мешавад…',
     noChats: 'Ҳоло чат нест',
     noMessages: 'Ҳоло паём нест',
     noMessagesHint: 'Барои оғози сӯҳбат паёми аввалро фиристед.',
