@@ -6,6 +6,18 @@ import {
   CheckCheck,
   XCircle,
 } from "lucide-react";
+import {
+  REJECTED_TAB_KEY,
+  REJECTION_STATUS_LABELS,
+  type TRejectionType,
+} from "../../model";
+
+// Письмо из реестра «Отменено»: бэкенд присылает объект rejection с типом
+// отклонения, по нему и показываем статус вместо «Отправлено» / «Черновик».
+const getRejectionStatusLabel = (doc: any): string | null => {
+  const type = doc?.rejection?.type as TRejectionType | undefined;
+  return type ? REJECTION_STATUS_LABELS[type] || null : null;
+};
 
 export const getLinkTypeInfo = (data: any, isIncoming?: boolean) => {
   if (isIncoming) return null;
@@ -76,6 +88,11 @@ export const getLetterStatusBadge = (
     return { label: "Без поручения", color: "blue" };
   }
 
+  const rejectionLabel = getRejectionStatusLabel(doc);
+  if (rejectionLabel) {
+    return { label: rejectionLabel, color: "rose" };
+  }
+
   const isSent =
     doc?.status === "sent" ||
     doc?.status === "sent_out" ||
@@ -140,6 +157,16 @@ export const getEffectiveStatusData = (
         label: "Без поручения",
         gradient: "from-blue-500 to-blue-600",
         icon: <Clock size={14} />,
+      }
+    );
+  }
+
+  if (getRejectionStatusLabel(doc)) {
+    return (
+      statusConfig[REJECTED_TAB_KEY] || {
+        label: "Отменено",
+        gradient: "from-rose-500 to-rose-600",
+        icon: <XCircle size={14} />,
       }
     );
   }
