@@ -15,24 +15,8 @@ interface IDeletedTarget {
   scope: TChatDeleteScope;
 }
 
-// Удаление у всех бэкенд применяет разрушительно: очищает текст и закрывает
-// доступ к вложениям. В кэше приводим сообщение к тому же виду, иначе после
-// перечитывания ленты текст на мгновение вернулся бы на экран.
-const applyDeletion = (
-  message: IChatMessage,
-  scope: TChatDeleteScope,
-): IChatMessage =>
-  scope === "everyone"
-    ? {
-        ...message,
-        is_deleted_for_everyone: true,
-        body: "",
-        attachments: [],
-      }
-    : { ...message, is_deleted_for_me: true };
-
 /**
- * Помечает сообщение удалённым прямо в кэше ленты.
+ * Удаляет сообщение прямо из кэша ленты.
  *
  * Нужно и своему запросу, и событию `.chat.message.deleted` у остальных
  * участников: инвалидация идёт следом, но перечитывание занимает время, а
@@ -40,7 +24,7 @@ const applyDeletion = (
  */
 export const markMessageDeletedInCache = (
   queryClient: QueryClient,
-  { conversationId, messageId, scope }: IDeletedTarget,
+  { conversationId, messageId }: IDeletedTarget,
 ) => {
   if (!conversationId || !messageId) return;
 
@@ -55,9 +39,7 @@ export const markMessageDeletedInCache = (
         isChanged = true;
         return {
           ...page,
-          data: page.data.map((message) =>
-            message.id === messageId ? applyDeletion(message, scope) : message,
-          ),
+          data: page.data.filter((message) => message.id !== messageId),
         };
       });
 

@@ -166,7 +166,12 @@ export const useChatData = ({
 
   useEffect(() => {
     if (!optimisticMessages.length || !rawMessages.length) return;
-    const serverMsgs = rawMessages.map((message) => mapMessage(message, mapContext));
+    const serverMsgs = rawMessages
+      .filter(
+        (message) =>
+          !message.is_deleted_for_everyone && !message.is_deleted_for_me,
+      )
+      .map((message) => mapMessage(message, mapContext));
     setOptimisticMessages((prev) =>
       prev.filter(
         (opt) =>
@@ -182,7 +187,12 @@ export const useChatData = ({
   }, [rawMessages, mapContext]);
 
   const messages = useMemo<Message[]>(() => {
-    const serverMsgs = rawMessages.map((message) => mapMessage(message, mapContext));
+    const serverMsgs = rawMessages
+      .filter(
+        (message) =>
+          !message.is_deleted_for_everyone && !message.is_deleted_for_me,
+      )
+      .map((message) => mapMessage(message, mapContext));
     if (!optimisticMessages.length) return serverMsgs;
 
     const pendingOptimistic = optimisticMessages.filter(
@@ -200,7 +210,13 @@ export const useChatData = ({
   }, [rawMessages, mapContext, optimisticMessages]);
 
   const threadMessages = useMemo<Message[]>(
-    () => rawThread.map((message) => mapMessage(message, mapContext)),
+    () =>
+      rawThread
+        .filter(
+          (message) =>
+            !message.is_deleted_for_everyone && !message.is_deleted_for_me,
+        )
+        .map((message) => mapMessage(message, mapContext)),
     [rawThread, mapContext],
   );
 

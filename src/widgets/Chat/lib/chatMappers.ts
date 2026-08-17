@@ -147,7 +147,7 @@ export const describeMessage = (
   labels: IChatLabels,
 ): string => {
   if (!message) return "";
-  if (message.is_deleted_for_everyone) return labels.deleted;
+  if (message.is_deleted_for_everyone || message.is_deleted_for_me) return "";
 
   const [firstAtt] = message.attachments ?? [];
   if (firstAtt) {
@@ -225,13 +225,16 @@ export const mapMessage = (message: IChatMessage, ctx: IMapContext): Message => 
       reactedByMe: Boolean(reaction.reacted_by_me),
     })),
     pinned: Boolean(message.is_pinned),
-    replyTo: message.reply_to
-      ? {
-          id: String(message.reply_to.id),
-          senderName: message.reply_to.sender?.full_name ?? "",
-          text: describeMessage(message.reply_to, ctx.labels),
-        }
-      : undefined,
+    replyTo:
+      message.reply_to &&
+      !message.reply_to.is_deleted_for_everyone &&
+      !message.reply_to.is_deleted_for_me
+        ? {
+            id: String(message.reply_to.id),
+            senderName: message.reply_to.sender?.full_name ?? "",
+            text: describeMessage(message.reply_to, ctx.labels),
+          }
+        : undefined,
     forwarded: Boolean(
       message.forwarded ??
         message.forwarded_from_id ??
