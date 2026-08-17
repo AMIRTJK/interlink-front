@@ -67,7 +67,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 }) => {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [actionMenuRect, setActionMenuRect] = useState<DOMRect | null>(null);
-  const isEffectivelyDeleted = msg.deleted || msg.deletedForMe;
+
+  if (msg.deleted || msg.deletedForMe) return null;
+
   const repliesCount = msg.threadCount || 0;
   const unreadReplies = getUnreadThreadCount(msg.id, repliesCount);
 
@@ -87,7 +89,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
     isMe,
     isDark,
     isHovered,
-    isEffectivelyDeleted: Boolean(isEffectivelyDeleted),
+    isEffectivelyDeleted: false,
     isTargetHighlighted,
     currentMatchMsg,
     highlighted,
@@ -139,7 +141,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           onMouseEnter={() => setHoveredMessageId(msg.id)}
           onMouseLeave={() => setHoveredMessageId(null)}
         >
-          {msg.scheduled && !isEffectivelyDeleted && (
+          {msg.scheduled && (
             <div
               className={`flex items-center gap-1 mb-1 text-[10px] font-medium ${isMe ? "self-end" : "self-start"} text-[rgb(var(--th-warning-rgb))]`}
             >
@@ -152,7 +154,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           {/* Цитата и метка пересылки стоят НАД пузырём, на фоне переписки, а не
               внутри него: цвета берём от поверхности, иначе у своих сообщений
               белый текст «на акценте» ложится на светлый фон. */}
-          {msg.replyTo && !isEffectivelyDeleted && (
+          {msg.replyTo && (
             <div
               onClick={(e) => {
                 e.stopPropagation();
@@ -182,7 +184,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               </div>
             </div>
           )}
-          {msg.forwarded && !isEffectivelyDeleted && (
+          {msg.forwarded && (
             <div
               className={`flex items-center gap-1 mb-1 text-[10px] text-[var(--th-text-muted)] ${isMe ? "self-end" : "self-start"}`}
             >
@@ -202,7 +204,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             </span>
           </If>
           <AnimatePresence>
-            {showReactionPicker && !isEffectivelyDeleted && (
+            {showReactionPicker && (
               <ReactionPicker
                 msgId={msg.id}
                 buttonRect={actionMenuRect}
@@ -217,7 +219,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             )}
           </AnimatePresence>
           <AnimatePresence>
-            {(hoveredMessageId === msg.id || activeActionMsgId === msg.id) && !isEffectivelyDeleted && (
+            {(hoveredMessageId === msg.id || activeActionMsgId === msg.id) && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -311,22 +313,18 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               </motion.div>
             )}
           </AnimatePresence>
-          {!isEffectivelyDeleted && (
-            <MessageAttachments
-              attachments={msg.attachments ?? (msg.attachment ? [msg.attachment] : [])}
-              isMe={isMe}
-              isDark={isDark}
-              isHovered={isHovered}
-              isTargetHighlighted={isTargetHighlighted}
-            />
-          )}
-          {(msg.text || isEffectivelyDeleted) && (
+          <MessageAttachments
+            attachments={msg.attachments ?? (msg.attachment ? [msg.attachment] : [])}
+            isMe={isMe}
+            isDark={isDark}
+            isHovered={isHovered}
+            isTargetHighlighted={isTargetHighlighted}
+          />
+          {!!msg.text && (
             <div
               className={`px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 ease-in-out cursor-default ${
                   isTargetHighlighted
                     ? `rounded-2xl ${isMe ? "rounded-br-md text-[var(--th-bubble-out-text)]" : "rounded-bl-md text-[var(--th-bubble-in-text)]"} ring-2 ring-[rgb(var(--th-accent-rgb))] scale-[1.02] shadow-[0_0_24px_rgb(var(--th-accent-2-rgb)/0.85)] animate-pulse`
-                    : isEffectivelyDeleted
-                      ? "italic rounded-2xl border border-dashed text-[var(--th-text-faint)] border-[var(--th-panel-border)] bg-[rgb(var(--th-overlay-rgb)/0.04)]"
                     : currentMatchMsg
                       ? "rounded-2xl ring-2 ring-[rgb(var(--th-warning-rgb))] text-[var(--th-text)]"
                       : highlighted
@@ -335,45 +333,46 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                           ? "rounded-2xl rounded-br-md text-[var(--th-bubble-out-text)]"
                           : "rounded-2xl rounded-bl-md text-[var(--th-bubble-in-text)]"
                 }`}
-                style={bubbleStyle}
-              >
-                <If is={!!(msg.pinned && !isEffectivelyDeleted)}>
-                  <span
-                    className={`inline-flex items-center gap-1 text-[10px] font-semibold mb-1 mr-2 px-1.5 py-0.5 rounded-md ${
-                      isMe
-                        ? "bg-[rgb(var(--th-on-accent-rgb)/0.2)] text-[var(--th-on-accent)] border border-[rgb(var(--th-on-accent-rgb)/0.3)]"
-                        : "bg-[var(--th-accent-soft-strong)] text-[var(--th-accent-text)] border border-[var(--th-accent-border)]"
-                    }`}
-                  >
-                    <Pin className="w-3 h-3 flex-shrink-0" />
-                    <span>{t.pinned}</span>
-                  </span>
-                </If>
-                <span>{msg.text}</span>
-                <span className="inline-flex items-center gap-1 float-right mt-1 ml-2.5 select-none text-[10px] opacity-75">
-                  <span>{msg.time}</span>
-                  {isMe && !isEffectivelyDeleted && (
-                    <span className="inline-flex items-center ml-0.5" title={msg.status}>
-                      {isPending ? (
-                        <Clock3 className="w-3 h-3 text-[var(--th-on-accent-muted)] animate-pulse" />
-                      ) : msg.status === "read" || msg.status === "delivered" ? (
-                        <CheckCheck className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
-                      ) : (
-                        <Check className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
-                      )}
-                    </span>
-                  )}
+              style={bubbleStyle}
+            >
+              <If is={!!msg.pinned}>
+                <span
+                  className={`inline-flex items-center gap-1 text-[10px] font-semibold mb-1 mr-2 px-1.5 py-0.5 rounded-md ${
+                    isMe
+                      ? "bg-[rgb(var(--th-on-accent-rgb)/0.2)] text-[var(--th-on-accent)] border border-[rgb(var(--th-on-accent-rgb)/0.3)]"
+                      : "bg-[var(--th-accent-soft-strong)] text-[var(--th-accent-text)] border border-[var(--th-accent-border)]"
+                  }`}
+                >
+                  <Pin className="w-3 h-3 flex-shrink-0" />
+                  <span>{t.pinned}</span>
                 </span>
-              </div>
+              </If>
+              <span>{msg.text}</span>
+              <span className="inline-flex items-center gap-1 float-right mt-1 ml-2.5 select-none text-[10px] opacity-75">
+                <span>{msg.time}</span>
+                {isMe && (
+                  <span className="inline-flex items-center ml-0.5" title={msg.status}>
+                    {isPending ? (
+                      <Clock3 className="w-3 h-3 text-[var(--th-on-accent-muted)] animate-pulse" />
+                    ) : msg.status === "read" || msg.status === "delivered" ? (
+                      <CheckCheck className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
+                    ) : (
+                      <Check className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
+                    )}
+                  </span>
+                )}
+              </span>
+            </div>
           )}
-          {!!msg.text && !isEffectivelyDeleted && (
+          {!!msg.text && (
             <MessageLinkPreview text={msg.text} isMe={isMe} t={t} />
           )}
           <If
             is={
-              ((msg.reactions && msg.reactions.length > 0) ||
-                (msg.threadCount && msg.threadCount > 0)) &&
-              !isEffectivelyDeleted
+              !!(
+                (msg.reactions && msg.reactions.length > 0) ||
+                (msg.threadCount && msg.threadCount > 0)
+              )
             }
           >
             <div
