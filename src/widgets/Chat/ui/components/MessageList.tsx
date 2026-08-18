@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowDown, Loader2, AlertCircle, MessageSquare } from "lucide-react";
+import { ArrowDown, AlertCircle, MessageSquare } from "lucide-react";
 import { If } from "@shared/ui";
 import type { Contact, Message, ReplyPreview } from "../../model";
 import { Lang, Translations } from "../../lib/translations";
-import { ChatMessageItem } from "./ChatMessageItem";
+import { formatChatDateDivider, getMessageDateKey } from "../../lib/chatFormat";
+import { useFloatingChatDate } from "../../lib/useFloatingChatDate";
+import { DateGroupSection, type IDateGroup } from "./DateGroupSection";
 
 // Лента сообщений: загрузка, пустое состояние, догрузка старых при прокрутке
 // вверх, индикатор набора и плавающая кнопка возврата к ответу.
@@ -70,6 +72,7 @@ export const MessageList = ({
   typingNames,
   switchDirection,
   isDark,
+  lang,
   t,
   targetHighlightedMessageId,
   returnToMessageId,
@@ -80,6 +83,37 @@ export const MessageList = ({
   ...itemProps
 }: IProps) => {
   const isEmpty = !isLoading && !isError && messages.length === 0;
+
+  const { isScrolling, handleScroll: handleFloatingDateScroll } =
+    useFloatingChatDate({
+      activeConversationId: activeContact.id,
+    });
+
+  const handleContainerScroll = React.useCallback(() => {
+    onScroll();
+    handleFloatingDateScroll();
+  }, [onScroll, handleFloatingDateScroll]);
+
+  const messageGroups = useMemo<IDateGroup[]>(() => {
+    const groups: IDateGroup[] = [];
+    let currentGroup: IDateGroup | null = null;
+
+    for (const msg of messages) {
+      const dateKey = getMessageDateKey(msg.createdAt) || "unknown";
+      if (!currentGroup || currentGroup.dateKey !== dateKey) {
+        currentGroup = {
+          dateKey,
+          dateText: formatChatDateDivider(msg.createdAt, lang, t),
+          messages: [msg],
+        };
+        groups.push(currentGroup);
+      } else {
+        currentGroup.messages.push(msg);
+      }
+    }
+
+    return groups;
+  }, [messages, lang, t]);
 
   if (targetHighlightedMessageId || returnToMessageId) {
     console.log("[MessageList] Render with active reply state:", {
@@ -93,13 +127,24 @@ export const MessageList = ({
       className="flex-1 relative overflow-hidden"
       style={{ background: "var(--th-chat-canvas)" }}
     >
+      {/* Вертикальные отступы держат ореол наведения: это box-shadow, он не
+          увеличивает ни размер элемента, ни прокручиваемую область, поэтому у
+          крайних сообщений его срезал край скролл-контейнера. 32px перекрывают
+          вылет самой широкой тени (blur 52px ≈ 26px наружу). По горизонтали
+          запас дают колонка аватара и отступы, обрезку по X держит этот
+          контейнер — вложенным элементам её ставить нельзя (см. ниже). */}
       <motion.div
         ref={scrollRef}
-        onScroll={onScroll}
-        className="absolute inset-0 overflow-y-auto overflow-x-hidden px-3 sm:px-6 py-4 space-y-3.5"
+        onScroll={handleContainerScroll}
+        className="absolute inset-0 overflow-y-auto overflow-x-hidden px-3 sm:px-6 py-8 space-y-3.5"
         style={{ overflowX: "hidden" }}
       >
         <AnimatePresence mode="wait" custom={switchDirection}>
+          {/* Колонке сообщений overflow ставить нельзя: `overflow-x: hidden` по
+              спецификации переводит вторую ось из visible в auto, колонка
+              становится своим скролл-портом и режет тени детей ровно по нижнему
+              сообщению — свечение обрывалось даже при запасе у скролл-контейнера.
+              Горизонтальный вылет гасит родитель. */}
           <motion.div
             key={activeContact.id}
             custom={switchDirection}
@@ -108,8 +153,7 @@ export const MessageList = ({
             animate="center"
             exit="exit"
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="space-y-3.5 min-h-full flex flex-col justify-start overflow-x-hidden"
-            style={{ overflowX: "hidden" }}
+            className="space-y-3.5 min-h-full flex flex-col justify-start"
           >
             <div className="mt-auto" />
             <If is={hasOlder}>
@@ -155,20 +199,17 @@ export const MessageList = ({
               </div>
             </If>
 
-            {messages.map((msg) => (
-              <ChatMessageItem
-                key={msg.id}
-                msg={msg}
-                isMe={
-                  msg.senderId === "me" ||
-                  (currentUserId != null &&
-                    String(msg.senderId) === String(currentUserId))
-                }
+            {messageGroups.map((group) => (
+              <DateGroupSection
+                key={group.dateKey}
+                group={group}
+                isScrolling={isScrolling}
+                scrollRef={scrollRef}
+                currentUserId={currentUserId}
                 activeContact={activeContact}
                 isDark={isDark}
+                lang={lang}
                 t={t}
-                highlighted={itemProps.isHighlighted(msg.id)}
-                currentMatchMsg={itemProps.isCurrentMatch(msg.id)}
                 targetHighlightedMessageId={targetHighlightedMessageId}
                 onJumpToMessage={onJumpToMessage}
                 {...itemProps}

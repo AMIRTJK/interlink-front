@@ -222,7 +222,10 @@ export const RegistryLayout = ({
         </motion.div>
       </AnimatePresence>
 
+      {/* Набор фильтров зависит от вкладки, поэтому пересоздаём панель при её
+          смене — иначе внутреннее состояние полей остаётся от прошлой вкладки. */}
       <FilterDrawer
+        key={activeTabId}
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         filters={currentFilters}

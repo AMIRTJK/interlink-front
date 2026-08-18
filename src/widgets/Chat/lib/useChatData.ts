@@ -17,6 +17,7 @@ import {
   getAttachmentPreviewSource,
   getConversationAvatarSource,
   getUserAvatarSource,
+  isOptimisticMatch,
   mapConversation,
   mapMessage,
   normalizeMembers,
@@ -46,6 +47,35 @@ const toId = (value: string | null) => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 };
 
+/**
+ * Превью и запись оптимистичного сообщения показываются из локального blob-URL:
+ * когда сообщение уходит из списка (пришло с сервера либо отправка не удалась),
+ * ссылку освобождаем, иначе файл остаётся в памяти до перезагрузки страницы.
+ * Повторный вызов безопасен — `revokeObjectURL` на освобождённой ссылке ничего
+ * не делает.
+ */
+const revokeOptimisticPreviews = (msg: Message) => {
+  const attachments = msg.attachments ?? (msg.attachment ? [msg.attachment] : []);
+  attachments.forEach((attachment) => {
+    [attachment.preview, attachment.url].forEach((value) => {
+      if (value?.startsWith("blob:")) URL.revokeObjectURL(value);
+    });
+  });
+};
+
+const LAST_ACTIVE_CHAT_KEY = "chat:last-active-conversation-id";
+
+const readLastActiveConversationId = (): number | null => {
+  try {
+    const raw = localStorage.getItem(LAST_ACTIVE_CHAT_KEY);
+    if (!raw) return null;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
 export const useChatData = ({
   isEnabled,
   search,
@@ -62,19 +92,35 @@ export const useChatData = ({
       ?.organization_id ?? null;
 
   const [activeConversationId, setActiveConversationId] = useState<number | null>(
-    null,
+    readLastActiveConversationId,
   );
+
+  useEffect(() => {
+    if (activeConversationId) {
+      try {
+        localStorage.setItem(LAST_ACTIVE_CHAT_KEY, String(activeConversationId));
+      } catch (e) {
+        console.error("Не удалось сохранить последний открытый чат:", e);
+      }
+    }
+  }, [activeConversationId]);
 
   const { conversations, isLoading: isLoadingChats, isError: isChatsError } =
     useChatConversations(search, isEnabled);
 
-  // Первая беседа открывается сама: пустой правый экран при непустом списке
-  // выглядит как ошибка. Выбор фиксируется в состоянии, а не вычисляется от
-  // головы списка, — иначе новое сообщение в другой беседе, поднимая её наверх,
-  // переключало бы открытый чат под пользователем.
+  // Восстанавливаем последний открытый чат, либо открываем первый из списка.
+  // Если сохранённый чат больше не существует, переключаемся на первую доступную беседу.
   useEffect(() => {
-    if (activeConversationId || !conversations.length) return;
-    setActiveConversationId(conversations[0].id);
+    if (!conversations.length) return;
+    if (activeConversationId) {
+      const exists = conversations.some((c) => c.id === activeConversationId);
+      if (exists) return;
+    }
+    const savedId = readLastActiveConversationId();
+    const savedExists = savedId
+      ? conversations.some((c) => c.id === savedId)
+      : false;
+    setActiveConversationId(savedExists ? savedId : conversations[0].id);
   }, [activeConversationId, conversations]);
 
   const counters = useChatCounters(isEnabled);
@@ -143,15 +189,35 @@ export const useChatData = ({
   const [optimisticMessages, setOptimisticMessages] = useState<Message[]>([]);
 
   useEffect(() => {
-    setOptimisticMessages([]);
+    setOptimisticMessages((prev) => {
+      prev.forEach(revokeOptimisticPreviews);
+      return prev.length ? [] : prev;
+    });
   }, [activeConversationId]);
 
-  const addOptimisticMessage = useCallback((msg: Message) => {
-    setOptimisticMessages((prev) => [...prev, msg]);
-  }, []);
+  // Оптимистичное сообщение помечаем верхней границей уже известной ленты:
+  // сопоставление с сервером (`isOptimisticMatch`) должно смотреть только на то,
+  // что придёт после отправки.
+  const addOptimisticMessage = useCallback(
+    (msg: Message) => {
+      const knownMaxId = rawMessages.reduce(
+        (max, message) => Math.max(max, Number(message.id) || 0),
+        0,
+      );
+      setOptimisticMessages((prev) => [
+        ...prev,
+        { ...msg, optimisticAfterId: knownMaxId },
+      ]);
+    },
+    [rawMessages],
+  );
 
   const removeOptimisticMessage = useCallback((tempId: string) => {
-    setOptimisticMessages((prev) => prev.filter((m) => m.id !== tempId));
+    setOptimisticMessages((prev) => {
+      const target = prev.find((m) => m.id === tempId);
+      if (target) revokeOptimisticPreviews(target);
+      return prev.filter((m) => m.id !== tempId);
+    });
   }, []);
 
   const currentUserAvatar = useMemo(
@@ -164,43 +230,51 @@ export const useChatData = ({
     [user, mapContext, labels.you],
   );
 
+  // Оптимистичное сообщение живёт до своего появления в серверной ленте: как
+  // только бэкенд его вернул, показываем серверную версию — с реальным статусом
+  // вместо часов «отправляется».
   useEffect(() => {
     if (!optimisticMessages.length || !rawMessages.length) return;
-    const serverMsgs = rawMessages.map((message) => mapMessage(message, mapContext));
-    setOptimisticMessages((prev) =>
-      prev.filter(
-        (opt) =>
-          !serverMsgs.some(
-            (s) =>
-              s.senderId === ME &&
-              s.text &&
-              opt.text &&
-              s.text.trim() === opt.text.trim(),
-          ),
-      ),
+    const serverMsgs = rawMessages
+      .filter(
+        (message) =>
+          !message.is_deleted_for_everyone && !message.is_deleted_for_me,
+      )
+      .map((message) => mapMessage(message, mapContext));
+    const settled = optimisticMessages.filter((opt) =>
+      serverMsgs.some((s) => isOptimisticMatch(opt, s)),
     );
-  }, [rawMessages, mapContext]);
+    if (!settled.length) return;
+    settled.forEach(revokeOptimisticPreviews);
+    setOptimisticMessages((prev) =>
+      prev.filter((opt) => !settled.includes(opt)),
+    );
+  }, [rawMessages, mapContext, optimisticMessages]);
 
   const messages = useMemo<Message[]>(() => {
-    const serverMsgs = rawMessages.map((message) => mapMessage(message, mapContext));
+    const serverMsgs = rawMessages
+      .filter(
+        (message) =>
+          !message.is_deleted_for_everyone && !message.is_deleted_for_me,
+      )
+      .map((message) => mapMessage(message, mapContext));
     if (!optimisticMessages.length) return serverMsgs;
 
     const pendingOptimistic = optimisticMessages.filter(
-      (opt) =>
-        !serverMsgs.some(
-          (s) =>
-            s.senderId === ME &&
-            s.text &&
-            opt.text &&
-            s.text.trim() === opt.text.trim(),
-        ),
+      (opt) => !serverMsgs.some((s) => isOptimisticMatch(opt, s)),
     );
 
     return [...serverMsgs, ...pendingOptimistic];
   }, [rawMessages, mapContext, optimisticMessages]);
 
   const threadMessages = useMemo<Message[]>(
-    () => rawThread.map((message) => mapMessage(message, mapContext)),
+    () =>
+      rawThread
+        .filter(
+          (message) =>
+            !message.is_deleted_for_everyone && !message.is_deleted_for_me,
+        )
+        .map((message) => mapMessage(message, mapContext)),
     [rawThread, mapContext],
   );
 

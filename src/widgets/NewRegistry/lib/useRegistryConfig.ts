@@ -1,8 +1,19 @@
+import { REJECTED_TAB_KEY } from "../model";
 import { useIncomingConfig } from "./incoming-config";
 import { useOutgoingConfig } from "./outgoing-config";
+import { REJECTED_FIELDS } from "./rejected-config";
+import { getRejectedFilters } from "./filters.config";
 import { RegistryConfig } from "./types";
 
-export const useRegistryConfig = (type: string): RegistryConfig => {
+/**
+ * Конфиг полей и действий реестра. `activeTab` нужен вкладке «Отменено»:
+ * у неё свои колонки (кто и почему отклонил) и свой набор фильтров, а действия
+ * над письмом остаются те же, что в реестре исходящих.
+ */
+export const useRegistryConfig = (
+  type: string,
+  activeTab?: string,
+): RegistryConfig => {
   const incomingConfig = useIncomingConfig(type);
   const outgoingConfig = useOutgoingConfig(type);
 
@@ -24,6 +35,13 @@ export const useRegistryConfig = (type: string): RegistryConfig => {
     case "internal-to-sign":
     case "internal-to-approve":
     case "internal-trashed":
+      if (activeTab === REJECTED_TAB_KEY) {
+        return {
+          ...outgoingConfig,
+          ...REJECTED_FIELDS,
+          filters: getRejectedFilters(),
+        };
+      }
       return outgoingConfig;
 
     default:

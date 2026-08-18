@@ -56,9 +56,19 @@ export type ReplyPreview = {
 };
 export type Message = {
   id: string;
+  clientUuid?: string;
+  /**
+   * Только у оптимистичного сообщения: наибольший id серверного сообщения,
+   * известный на момент отправки. Сопоставлять оптимистичное сообщение с лентой
+   * можно лишь начиная с этой границы — иначе новое вложение «схлопывается» с
+   * давним письмом того же вида и исчезает с экрана до ответа бэкенда.
+   */
+  optimisticAfterId?: number;
   senderId: string;
   text: string;
   time: string;
+  /** Исходная дата создания сообщения (ISO или дата с сервера) для группировки по дням. */
+  createdAt?: string;
   status?: 'pending' | 'sent' | 'delivered' | 'read';
   attachment?: MessageAttachment;
   /** Все вложения сообщения; `attachment` — первое из них (совместимость). */

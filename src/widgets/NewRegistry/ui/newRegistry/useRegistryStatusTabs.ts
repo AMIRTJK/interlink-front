@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { _axios } from "@shared/api";
+import { REJECTED_TAB_KEY } from "../../model";
 import { STATUS_CONFIG } from "./newRegistryModel";
 
 interface IParams {
@@ -28,9 +29,10 @@ export const useRegistryStatusTabs = ({
 	// Запрашиваем мета-данные для счетчиков проблемных вкладок (бэкенд может отдавать 0)
 	const tabsToFetch = useMemo(() => {
 		return activeStatusKeys.filter((key) => {
-			if (key === "canceled") return false;
 			// Принудительно запрашиваем мета-данные для счетчиков проблемных вкладок
-			if (["approved", "signed", "sent", "analysis"].includes(key)) {
+			if (
+				["approved", "signed", "sent", "analysis", REJECTED_TAB_KEY].includes(key)
+			) {
 				return true;
 			}
 			const existingCount =
@@ -106,9 +108,7 @@ export const useRegistryStatusTabs = ({
 					counts[`${key}_count`] ??
 					0;
 
-				if (key === "canceled") {
-					count = 0;
-				} else if (key === currentTab && metaTotal !== undefined) {
+				if (key === currentTab && metaTotal !== undefined) {
 					count = metaTotal;
 				}
 

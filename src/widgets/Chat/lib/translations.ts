@@ -116,6 +116,8 @@ export type Translations = {
   // Данные с бэкенда: превью вложений, пустые состояния, создание группы
   attachmentLabel: string;
   voiceMessage: string;
+  /** Подпись индикатора «сообщение ещё отправляется». */
+  sending: string;
   noChats: string;
   noMessages: string;
   noMessagesHint: string;
@@ -132,6 +134,8 @@ export type Translations = {
   hideLinkPreview: string;
   openLinkPreview: string;
   newReplies: string;
+  today: string;
+  yesterday: string;
 };
 export const TRANSLATIONS: Record<Lang, Translations> = {
   en: {
@@ -196,7 +200,7 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     deleteForMe: 'Delete for me',
     deleteForMeDesc: "Only you won't see this message",
     deleteForEveryone: 'Delete for everyone',
-    deleteForEveryoneDesc: 'Everyone will see "message deleted"',
+    deleteForEveryoneDesc: 'This message will be deleted for all participants',
     cancel: 'Cancel',
     deletingForMe: 'Deleting for you…',
     deletingForEveryone: 'Deleting for everyone…',
@@ -229,6 +233,7 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     add: 'Add',
     attachmentLabel: 'Attachment',
     voiceMessage: 'Voice message',
+    sending: 'Sending…',
     noChats: 'No chats yet',
     noMessages: 'No messages yet',
     noMessagesHint: 'Send the first message to start the conversation.',
@@ -244,7 +249,9 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     dropFiles: 'Drop files to attach',
     hideLinkPreview: 'Hide link preview',
     openLinkPreview: 'Open link',
-    newReplies: 'new replies'
+    newReplies: 'new replies',
+    today: 'Today',
+    yesterday: 'Yesterday'
   },
   ru: {
     search: 'Поиск',
@@ -308,7 +315,7 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     deleteForMe: 'Удалить у меня',
     deleteForMeDesc: 'Только вы не будете видеть это сообщение',
     deleteForEveryone: 'Удалить у всех',
-    deleteForEveryoneDesc: 'Все увидят «сообщение удалено»',
+    deleteForEveryoneDesc: 'Сообщение удалится у всех участников',
     cancel: 'Отмена',
     deletingForMe: 'Удаляем у вас…',
     deletingForEveryone: 'Удаляем у всех…',
@@ -341,6 +348,7 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     add: 'Добавить',
     attachmentLabel: 'Вложение',
     voiceMessage: 'Голосовое сообщение',
+    sending: 'Отправляется…',
     noChats: 'Чатов пока нет',
     noMessages: 'Сообщений пока нет',
     noMessagesHint: 'Отправьте первое сообщение, чтобы начать переписку.',
@@ -356,7 +364,9 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     dropFiles: 'Отпустите файлы, чтобы прикрепить',
     hideLinkPreview: 'Скрыть превью ссылки',
     openLinkPreview: 'Открыть ссылку',
-    newReplies: 'новых ответов'
+    newReplies: 'новых ответов',
+    today: 'Сегодня',
+    yesterday: 'Вчера'
   },
   tg: {
     search: 'Ҷустуҷӯ',
@@ -420,7 +430,7 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     deleteForMe: 'Барои ман нест кун',
     deleteForMeDesc: 'Танҳо шумо ин паёмро намебинед',
     deleteForEveryone: 'Барои ҳама нест кун',
-    deleteForEveryoneDesc: 'Ҳама «паём нест карда шуд» мебинанд',
+    deleteForEveryoneDesc: 'Паём барои ҳамаи иштирокчиён нест мешавад',
     cancel: 'Бекор кардан',
     deletingForMe: 'Барои шумо нест мешавад…',
     deletingForEveryone: 'Барои ҳама нест мешавад…',
@@ -453,6 +463,7 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     add: 'Илова',
     attachmentLabel: 'Замима',
     voiceMessage: 'Паёми овозӣ',
+    sending: 'Фиристода мешавад…',
     noChats: 'Ҳоло чат нест',
     noMessages: 'Ҳоло паём нест',
     noMessagesHint: 'Барои оғози сӯҳбат паёми аввалро фиристед.',
@@ -468,6 +479,8 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     dropFiles: 'Файлҳоро сар диҳед, то замима шаванд',
     hideLinkPreview: 'Пешнамоиши истинодро пинҳон кардан',
     openLinkPreview: 'Кушодани истинод',
-    newReplies: 'ҷавобҳои нав'
+    newReplies: 'ҷавобҳои нав',
+    today: 'Имрӯз',
+    yesterday: 'Дирӯз'
   }
 };

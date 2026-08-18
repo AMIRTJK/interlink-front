@@ -1,4 +1,5 @@
 import { IFilterItem, FilterType } from "@shared/ui";
+import { REJECTION_TYPE_PARAM, REJECTION_TYPE_LABELS } from "../model";
 
 export const getIncomingFilters = (): IFilterItem[] => [
   {
@@ -73,6 +74,52 @@ export const getIncomingFilters = (): IFilterItem[] => [
     label: "Период создания",
     placeholder: ["С даты", "По дату"],
     rangeNames: ["date_from", "date_to"],
+  },
+];
+
+// Фильтры вкладки «Отменено». Набор соответствует параметрам эндпоинта
+// GET_INTERNAL_REJECTED: type, q, outgoing_number, incoming_number, created_date.
+export const getRejectedFilters = (): IFilterItem[] => [
+  {
+    type: FilterType.SELECT,
+    name: REJECTION_TYPE_PARAM,
+    label: "Тип отклонения",
+    // Пустое значение = все отклонения (бэкенду уходит type=all).
+    placeholder: "Все отклонения",
+    options: [
+      {
+        label: `${REJECTION_TYPE_LABELS.approval} (вернул на доработку)`,
+        value: "approval",
+      },
+      {
+        label: `${REJECTION_TYPE_LABELS.signature} (отказал в подписи)`,
+        value: "signature",
+      },
+    ],
+  },
+  {
+    type: FilterType.INPUT,
+    name: "q",
+    label: "Поиск",
+    placeholder: "Тема, номер, причина...",
+  },
+  {
+    type: FilterType.INPUT,
+    name: "outgoing_number",
+    label: "Исходящий №",
+    placeholder: "Например, OUT-001",
+  },
+  {
+    type: FilterType.INPUT,
+    name: "incoming_number",
+    label: "Входящий №",
+    placeholder: "Например, IN-001",
+  },
+  {
+    type: FilterType.DATE,
+    name: "created_date",
+    label: "Дата создания",
+    placeholder: "Выберите дату",
   },
 ];
 

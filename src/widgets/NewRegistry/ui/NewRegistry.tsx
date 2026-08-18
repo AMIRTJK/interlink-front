@@ -4,7 +4,6 @@ import { useGetQuery, useDynamicSearchParams, sortCorrespondenceById } from "@sh
 import { ApiRoutes } from "@shared/api";
 import { ConfigProvider, theme } from "antd";
 import { RegistryLayout } from "./RegistryLayout";
-import { AppRoutes } from "@shared/config";
 import { useRegistryConfig } from "../lib";
 import { MoveToFolderModal } from "./MoveToFolderModal";
 import { useIsDarkMode } from "@shared/lib";
@@ -15,6 +14,9 @@ import {
 } from "./newRegistry/newRegistryModel";
 import { useRegistryBreadcrumbs } from "./newRegistry/useRegistryBreadcrumbs";
 import { useRegistryStatusTabs } from "./newRegistry/useRegistryStatusTabs";
+import { buildRegistryQueryParams } from "./newRegistry/registryQueryParams";
+import { getRegistryShowRoute } from "./newRegistry/registryShowRoute";
+import { REJECTED_TAB_KEY, REJECTION_TYPE_PARAM } from "../model";
 
 export const NewRegistry = ({
 	type,
@@ -26,7 +28,6 @@ export const NewRegistry = ({
 	const location = useLocation();
 	const isDark = useIsDarkMode();
 
-	const fieldConfig = useRegistryConfig(type);
 	const { params: searchParams, setParams } = useDynamicSearchParams();
 
 	const [isMoveModalOpen, setIsMoveModalOpen] = React.useState(false);
@@ -61,6 +62,8 @@ export const NewRegistry = ({
 		defaultStatus ||
 		activeStatusKeys[0];
 
+	const fieldConfig = useRegistryConfig(type, currentTab);
+
 	const fetchUrl = useMemo(() => {
 		const configUrl = STATUS_CONFIG[currentTab]?.apiUrl;
 		return configUrl || url;
@@ -91,21 +94,12 @@ export const NewRegistry = ({
 
 	const currentConfig = STATUS_CONFIG[currentTab] || {};
 
-	const tableQueryParams: Record<string, any> = {
-		...extraParams,
-		...searchParams,
-		...(currentConfig.apiParams || {}),
-		page: searchParams.page || 1,
-		per_page: searchParams.per_page || 9,
-	};
-
-	if (currentConfig.paramKey === "type") {
-		tableQueryParams.type = currentTab;
-		delete tableQueryParams.status;
-	} else if (!currentConfig.omitStatus) {
-		tableQueryParams.status = currentTab;
-		delete tableQueryParams.type;
-	}
+	const tableQueryParams = buildRegistryQueryParams({
+		currentTab,
+		currentConfig,
+		searchParams,
+		extraParams,
+	});
 
 	const { data: responseData } = useGetQuery({
 		url: fetchUrl,
@@ -120,20 +114,16 @@ export const NewRegistry = ({
 	});
 
 	const rawDocuments =
-		currentTab === "canceled"
-			? []
-			: (responseData as any)?.data?.data || (responseData as any)?.data || [];
+		(responseData as any)?.data?.data || (responseData as any)?.data || [];
 	const documents = useMemo(
 		() => sortCorrespondenceById(rawDocuments),
 		[rawDocuments],
 	);
 	// Laravel часто вкладывает мета-данные в объект meta
-	const meta = useMemo(() => {
-		if (currentTab === "canceled") {
-			return { current_page: 1, last_page: 1, per_page: 9, total: 0 };
-		}
-		return (responseData as any)?.data?.meta || (responseData as any)?.data || {};
-	}, [currentTab, responseData]);
+	const meta = useMemo(
+		() => (responseData as any)?.data?.meta || (responseData as any)?.data || {},
+		[responseData],
+	);
 	const counts = useMemo(
 		() => (countersData as any)?.data || {},
 		[countersData],
@@ -159,6 +149,11 @@ export const NewRegistry = ({
 			setParams("type", undefined);
 		}
 
+		// Фильтр по типу отклонения живёт только на вкладке «Отменено».
+		if (statusId !== REJECTED_TAB_KEY) {
+			setParams(REJECTION_TYPE_PARAM, undefined);
+		}
+
 		setParams("page", 1);
 	};
 
@@ -181,22 +176,14 @@ export const NewRegistry = ({
 		setParams("date", undefined);
 		setParams("date_from", undefined);
 		setParams("date_to", undefined);
+		setParams(REJECTION_TYPE_PARAM, undefined);
 		setParams("page", 1);
 	};
 
-	const handleCardClick = (id: string | number) => {
-		const route = type.includes("external-incoming")
-			? AppRoutes.CORRESPONDENCE_INCOMING_SHOW
-			: type.includes("internal-incoming")
-				? AppRoutes.INTERNAL_INCOMING_SHOW
-				: type.includes("internal-outgoing") ||
-					  type.includes("internal-drafts") ||
-					  type.includes("internal-to-sign") ||
-					  type.includes("internal-to-approve")
-					? AppRoutes.INTERNAL_OUTGOING_SHOW
-					: "";
+	const showRoute = getRegistryShowRoute(type);
 
-		navigate(route.replace(":id", String(id)), {
+	const handleCardClick = (id: string | number) => {
+		navigate(showRoute.replace(":id", String(id)), {
 			state: {
 				fromRegistry: `${location.pathname}${location.search}`,
 				lastOpenedId: String(id),
@@ -205,18 +192,7 @@ export const NewRegistry = ({
 	};
 
 	const handleVersionClick = (id: number, versionId?: number, versionNum?: string) => {
-		const route = type.includes("external-incoming")
-			? AppRoutes.CORRESPONDENCE_INCOMING_SHOW
-			: type.includes("internal-incoming")
-				? AppRoutes.INTERNAL_INCOMING_SHOW
-				: type.includes("internal-outgoing") ||
-					  type.includes("internal-drafts") ||
-					  type.includes("internal-to-sign") ||
-					  type.includes("internal-to-approve")
-					? AppRoutes.INTERNAL_OUTGOING_SHOW
-					: "";
-
-		navigate(route.replace(":id", String(id)), {
+		navigate(showRoute.replace(":id", String(id)), {
 			state: {
 				fromRegistry: `${location.pathname}${location.search}`,
 				lastOpenedId: String(id),
@@ -253,6 +229,11 @@ export const NewRegistry = ({
 					incomingNumber: searchParams.incomingNumber,
 					outgoingNumber: searchParams.outgoingNumber,
 					sender: searchParams.sender,
+					[REJECTION_TYPE_PARAM]: searchParams[REJECTION_TYPE_PARAM],
+					q: searchParams.q,
+					outgoing_number: searchParams.outgoing_number,
+					incoming_number: searchParams.incoming_number,
+					created_date: searchParams.created_date,
 				}}
 				statusConfig={STATUS_CONFIG}
 				fieldConfig={{

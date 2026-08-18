@@ -26,15 +26,6 @@ export const ProfileLayout = () => {
         isDarkMode ? "text-white" : "text-zinc-900"
       } transition-all duration-300`}
     >
-      <div
-        aria-hidden="true"
-        className="fixed inset-0 overflow-hidden pointer-events-none"
-      >
-        <div className={`absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br ${themeGradient} opacity-[0.08] blur-[100px] rounded-full`} />
-        <div className={`absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-gradient-to-br ${themeGradient} opacity-[0.06] blur-[120px] rounded-full`} />
-        <div className={`absolute bottom-0 left-1/3 w-[400px] h-[400px] bg-gradient-to-tr ${themeGradient} opacity-[0.05] blur-[110px] rounded-full`} />
-      </div>
-
       <div className="relative z-10 flex gap-6 px-6 py-4 min-h-screen transition-all duration-300 ease-in-out">
         {layoutMode === "left" && (
           <Sidebar

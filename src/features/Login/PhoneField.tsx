@@ -19,15 +19,6 @@ const PREFIX_OPTIONS = [
 			</div>
 		),
 	},
-	{
-		value: "+7",
-		label: (
-			<div className="flex items-center gap-3">
-				<span className="text-base">🇷🇺</span>
-				<span className="font-medium text-slate-200">+7</span>
-			</div>
-		),
-	},
 ];
 
 export const PhoneField = ({
@@ -59,7 +50,7 @@ export const PhoneField = ({
 				name="phone"
 				autoComplete="tel"
 				required
-				placeholder={prefix === "+7" ? "000 000 0000" : "00 000 0000"}
+				placeholder="00 000 0000"
 				maxLength={PHONE_LENGTHS[prefix]}
 				value={phoneNumber}
 				onChange={(e) => onPhoneNumberChange(e.target.value)}

@@ -147,7 +147,7 @@ export const describeMessage = (
   labels: IChatLabels,
 ): string => {
   if (!message) return "";
-  if (message.is_deleted_for_everyone) return labels.deleted;
+  if (message.is_deleted_for_everyone || message.is_deleted_for_me) return "";
 
   const [firstAtt] = message.attachments ?? [];
   if (firstAtt) {
@@ -207,6 +207,7 @@ export const mapMessage = (message: IChatMessage, ctx: IMapContext): Message => 
 
   return {
     id: String(message.id),
+    clientUuid: message.client_uuid ?? undefined,
     senderId: isMine ? ME : String(senderId ?? ""),
     senderName: isMine ? ctx.labels.you : (message.sender?.full_name ?? ""),
     senderAvatar: resolveMedia(
@@ -216,6 +217,7 @@ export const mapMessage = (message: IChatMessage, ctx: IMapContext): Message => 
     ),
     text,
     time: formatMessageTime(message.created_at),
+    createdAt: message.created_at ?? message.sent_at ?? undefined,
     status: message.status === "scheduled" ? "sent" : (message.status ?? "sent"),
     attachment: attachments[0],
     attachments: attachments.length ? attachments : undefined,
@@ -225,13 +227,16 @@ export const mapMessage = (message: IChatMessage, ctx: IMapContext): Message => 
       reactedByMe: Boolean(reaction.reacted_by_me),
     })),
     pinned: Boolean(message.is_pinned),
-    replyTo: message.reply_to
-      ? {
-          id: String(message.reply_to.id),
-          senderName: message.reply_to.sender?.full_name ?? "",
-          text: describeMessage(message.reply_to, ctx.labels),
-        }
-      : undefined,
+    replyTo:
+      message.reply_to &&
+      !message.reply_to.is_deleted_for_everyone &&
+      !message.reply_to.is_deleted_for_me
+        ? {
+            id: String(message.reply_to.id),
+            senderName: message.reply_to.sender?.full_name ?? "",
+            text: describeMessage(message.reply_to, ctx.labels),
+          }
+        : undefined,
     forwarded: Boolean(
       message.forwarded ??
         message.forwarded_from_id ??
@@ -314,3 +319,70 @@ export const mapMediaItem = (
     preview: previewSource ? ctx.media[previewSource] : undefined,
   };
 };
+
+/**
+ * Проверяет, совпадает ли оптимистичное сообщение с реальным сообщением с сервера.
+ * Поддерживает текст, файлы, фото и голосовые сообщения.
+ */
+export const isOptimisticMatch = (opt: Message, server: Message): boolean => {
+  // 1. Прямое совпадение по clientUuid
+  if (opt.clientUuid && server.clientUuid && opt.clientUuid === server.clientUuid) {
+    return true;
+  }
+
+  // 2. Чужие сообщения не могут быть нашими оптимистичными
+  if (server.senderId !== ME) {
+    return false;
+  }
+
+  // 3. Дальше идут эвристики по содержимому — они нужны, когда бэкенд не вернул
+  //    client_uuid. Сравнивать по ним можно только с сообщениями, появившимися
+  //    ПОСЛЕ отправки: у вложений совпадение слишком широкое (любое своё
+  //    голосовое, любой свой файл без подписи), и новое сообщение схлопывалось
+  //    с давним — то есть исчезало из ленты, не дождавшись ответа бэкенда.
+  //    Id у сообщений возрастающие, поэтому граница считается по ним.
+  const serverId = Number(server.id);
+  if (
+    opt.optimisticAfterId !== undefined &&
+    Number.isFinite(serverId) &&
+    serverId <= opt.optimisticAfterId
+  ) {
+    return false;
+  }
+
+  // 4. Голосовые сообщения (audio / voice)
+  const isOptVoice =
+    opt.attachment?.type === "voice" ||
+    opt.attachments?.some((a) => a.type === "voice");
+  const isServerVoice =
+    server.attachment?.type === "voice" ||
+    server.attachments?.some((a) => a.type === "voice");
+  if (isOptVoice && isServerVoice) {
+    return true;
+  }
+
+  // 5. Вложения (файлы, фото, документы)
+  const optAtts = opt.attachments ?? (opt.attachment ? [opt.attachment] : []);
+  const serverAtts = server.attachments ?? (server.attachment ? [server.attachment] : []);
+  if (optAtts.length > 0 && serverAtts.length > 0) {
+    const hasMatchingName = optAtts.some((oa) =>
+      serverAtts.some((sa) => sa.name && oa.name && sa.name === oa.name),
+    );
+    if (hasMatchingName) return true;
+
+    // Если имена изменены бэкендом, но совпадает текст (или оба без текста)
+    const optText = (opt.text ?? "").trim();
+    const serverText = (server.text ?? "").trim();
+    if (optText === serverText) return true;
+  }
+
+  // 6. Текстовые сообщения
+  const optText = (opt.text ?? "").trim();
+  const serverText = (server.text ?? "").trim();
+  if (optText && serverText && optText === serverText) {
+    return true;
+  }
+
+  return false;
+};
+

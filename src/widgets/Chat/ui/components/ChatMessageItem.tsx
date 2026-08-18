@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, CheckCheck, Clock3, CornerUpLeft, Forward, MoreHorizontal, Pin, MessageSquare, Smile } from "lucide-react";
 import { Contact, Message, ReplyPreview } from "../../model";
@@ -67,7 +67,31 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 }) => {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [actionMenuRect, setActionMenuRect] = useState<DOMRect | null>(null);
-  const isEffectivelyDeleted = msg.deleted || msg.deletedForMe;
+  const bubbleRef = useRef<HTMLDivElement>(null);
+  const [bubbleWidth, setBubbleWidth] = useState<number | null>(null);
+
+  useLayoutEffect(() => {
+    const node = bubbleRef.current;
+    if (!node) return;
+
+    const updateWidth = () => {
+      if (node.offsetWidth > 0) {
+        setBubbleWidth(node.offsetWidth);
+      }
+    };
+
+    updateWidth();
+
+    const ro = new ResizeObserver(() => {
+      updateWidth();
+    });
+    ro.observe(node);
+
+    return () => ro.disconnect();
+  }, []);
+
+  if (msg.deleted || msg.deletedForMe) return null;
+
   const repliesCount = msg.threadCount || 0;
   const unreadReplies = getUnreadThreadCount(msg.id, repliesCount);
 
@@ -76,6 +100,14 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
     String(targetHighlightedMessageId) === String(msg.id);
 
   const isPending = msg.status === "pending" || msg.id.startsWith("temp-");
+
+  // Статус на пузыре вложения: часы, пока сообщение уходит, затем галочка — то
+  // же поведение, что у строки времени текста. У чужих сообщений статуса нет, а
+  // у своих с подписью его несёт эта самая строка, поэтому дубль не рисуем.
+  let attachmentStatus: NonNullable<Message["status"]> | undefined;
+  if (isMe && !msg.text) {
+    attachmentStatus = isPending ? "pending" : msg.status ?? "sent";
+  }
 
   // Наведение считаем один раз на сообщение: подсветку получают и текст, и
   // вложения, и голосовое — иначе у одного сообщения разные части светятся
@@ -87,7 +119,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
     isMe,
     isDark,
     isHovered,
-    isEffectivelyDeleted: Boolean(isEffectivelyDeleted),
+    isEffectivelyDeleted: false,
     isTargetHighlighted,
     currentMatchMsg,
     highlighted,
@@ -139,7 +171,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           onMouseEnter={() => setHoveredMessageId(msg.id)}
           onMouseLeave={() => setHoveredMessageId(null)}
         >
-          {msg.scheduled && !isEffectivelyDeleted && (
+          {msg.scheduled && (
             <div
               className={`flex items-center gap-1 mb-1 text-[10px] font-medium ${isMe ? "self-end" : "self-start"} text-[rgb(var(--th-warning-rgb))]`}
             >
@@ -152,7 +184,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           {/* Цитата и метка пересылки стоят НАД пузырём, на фоне переписки, а не
               внутри него: цвета берём от поверхности, иначе у своих сообщений
               белый текст «на акценте» ложится на светлый фон. */}
-          {msg.replyTo && !isEffectivelyDeleted && (
+          {msg.replyTo && (
             <div
               onClick={(e) => {
                 e.stopPropagation();
@@ -182,7 +214,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               </div>
             </div>
           )}
-          {msg.forwarded && !isEffectivelyDeleted && (
+          {msg.forwarded && (
             <div
               className={`flex items-center gap-1 mb-1 text-[10px] text-[var(--th-text-muted)] ${isMe ? "self-end" : "self-start"}`}
             >
@@ -202,7 +234,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             </span>
           </If>
           <AnimatePresence>
-            {showReactionPicker && !isEffectivelyDeleted && (
+            {showReactionPicker && (
               <ReactionPicker
                 msgId={msg.id}
                 buttonRect={actionMenuRect}
@@ -216,128 +248,130 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               />
             )}
           </AnimatePresence>
-          <AnimatePresence>
-            {(hoveredMessageId === msg.id || activeActionMsgId === msg.id) && !isEffectivelyDeleted && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-9" : "-right-9"} flex items-center z-30`}
-              >
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    setActionMenuRect(rect);
-                    setActiveActionMsgId((prev) =>
-                      prev === msg.id ? null : msg.id,
-                    );
-                  }}
-                  aria-label="Действия"
-                  className="w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 text-[var(--th-text-muted)] hover:bg-[var(--th-hover-bg-strong)]"
-                  style={{
-                    background: "var(--th-chip-bg)",
-                    border: "1px solid var(--th-chip-border)",
-                  }}
+          <div
+            ref={bubbleRef}
+            className={`relative max-w-full ${isMe ? "self-end" : "self-start"}`}
+          >
+            <AnimatePresence>
+              {(hoveredMessageId === msg.id || activeActionMsgId === msg.id) && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-9" : "-right-9"} flex items-center z-30`}
                 >
-                  <MoreHorizontal className="w-3.5 h-3.5" />
-                </button>
-                {activeActionMsgId === msg.id && (
-                  <MessageActionMenu
-                    buttonRect={actionMenuRect}
-                    isMe={isMe}
-                    isDark={isDark}
-                    onReactionClick={() => {
-                      setShowReactionPicker(true);
-                      setActiveActionMsgId(null);
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setActionMenuRect(rect);
+                      setActiveActionMsgId((prev) =>
+                        prev === msg.id ? null : msg.id,
+                      );
                     }}
-                    onReply={() => {
-                      const attachments = msg.attachments ?? (msg.attachment ? [msg.attachment] : []);
-                      const firstAtt = attachments[0];
-                      const icon = firstAtt
-                        ? firstAtt.type === "image"
-                          ? "📷 "
-                          : firstAtt.type === "voice"
-                            ? "🎤 "
-                            : "📁 "
-                        : "";
-                      const replyText = firstAtt
-                        ? msg.text
-                          ? `${icon}${msg.text}`
-                          : `${icon}${firstAtt.name || t.attachmentLabel || "Вложение"}`
-                        : msg.text;
+                    aria-label="Действия"
+                    className="w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 text-[var(--th-text-muted)] hover:bg-[var(--th-hover-bg-strong)]"
+                    style={{
+                      background: "var(--th-chip-bg)",
+                      border: "1px solid var(--th-chip-border)",
+                    }}
+                  >
+                    <MoreHorizontal className="w-3.5 h-3.5" />
+                  </button>
+                  {activeActionMsgId === msg.id && (
+                    <MessageActionMenu
+                      buttonRect={actionMenuRect}
+                      isMe={isMe}
+                      isDark={isDark}
+                      onReactionClick={() => {
+                        setShowReactionPicker(true);
+                        setActiveActionMsgId(null);
+                      }}
+                      onReply={() => {
+                        const attachments = msg.attachments ?? (msg.attachment ? [msg.attachment] : []);
+                        const firstAtt = attachments[0];
+                        const icon = firstAtt
+                          ? firstAtt.type === "image"
+                            ? "📷 "
+                            : firstAtt.type === "voice"
+                              ? "🎤 "
+                              : "📁 "
+                          : "";
+                        const replyText = firstAtt
+                          ? msg.text
+                            ? `${icon}${msg.text}`
+                            : `${icon}${firstAtt.name || t.attachmentLabel || "Вложение"}`
+                          : msg.text;
 
-                      setReplyingTo({
-                        id: msg.id,
-                        senderName:
-                          msg.senderName || (isMe ? t.you : activeContact.name),
-                        text: replyText,
-                      });
-                      setActiveActionMsgId(null);
-                    }}
-                    onForward={() => {
-                      setForwardingMsg(msg);
-                      setActiveActionMsgId(null);
-                    }}
-                    onDelete={() => {
-                      setDeletingMsgId(msg.id);
-                      setActiveActionMsgId(null);
-                    }}
-                    onThread={() => {
-                      setOpenThreadMsgId(msg.id);
-                      setShowContactDrawer(false);
-                      setActiveActionMsgId(null);
-                    }}
-                    onPin={() => {
-                      handlePinMessage(msg.id);
-                      setActiveActionMsgId(null);
-                    }}
-                    pinLabel={
-                      msg.pinned
-                        ? lang === "ru"
-                          ? "Открепить"
-                          : lang === "tg"
-                            ? "Ҷудо кардан"
-                            : "Unpin"
-                        : lang === "ru"
-                          ? "Закрепить"
-                          : lang === "tg"
-                            ? "Маҳкам кардан"
-                            : "Pin"
-                    }
-                    onClose={() => setActiveActionMsgId(null)}
-                  />
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-          {!isEffectivelyDeleted && (
+                        setReplyingTo({
+                          id: msg.id,
+                          senderName:
+                            msg.senderName || (isMe ? t.you : activeContact.name),
+                          text: replyText,
+                        });
+                        setActiveActionMsgId(null);
+                      }}
+                      onForward={() => {
+                        setForwardingMsg(msg);
+                        setActiveActionMsgId(null);
+                      }}
+                      onDelete={() => {
+                        setDeletingMsgId(msg.id);
+                        setActiveActionMsgId(null);
+                      }}
+                      onThread={() => {
+                        setOpenThreadMsgId(msg.id);
+                        setShowContactDrawer(false);
+                        setActiveActionMsgId(null);
+                      }}
+                      onPin={() => {
+                        handlePinMessage(msg.id);
+                        setActiveActionMsgId(null);
+                      }}
+                      pinLabel={
+                        msg.pinned
+                          ? lang === "ru"
+                            ? "Открепить"
+                            : lang === "tg"
+                              ? "Ҷудо кардан"
+                              : "Unpin"
+                          : lang === "ru"
+                            ? "Закрепить"
+                            : lang === "tg"
+                              ? "Маҳкам кардан"
+                              : "Pin"
+                      }
+                      onClose={() => setActiveActionMsgId(null)}
+                    />
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
             <MessageAttachments
               attachments={msg.attachments ?? (msg.attachment ? [msg.attachment] : [])}
               isMe={isMe}
               isDark={isDark}
               isHovered={isHovered}
               isTargetHighlighted={isTargetHighlighted}
+              status={attachmentStatus}
+              sendingLabel={t.sending}
             />
-          )}
-          {(msg.text || isEffectivelyDeleted) && (
-            <div
-              className={`px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 ease-in-out cursor-default ${
-                  isTargetHighlighted
-                    ? `rounded-2xl ${isMe ? "rounded-br-md text-[var(--th-bubble-out-text)]" : "rounded-bl-md text-[var(--th-bubble-in-text)]"} ring-2 ring-[rgb(var(--th-accent-rgb))] scale-[1.02] shadow-[0_0_24px_rgb(var(--th-accent-2-rgb)/0.85)] animate-pulse`
-                    : isEffectivelyDeleted
-                      ? "italic rounded-2xl border border-dashed text-[var(--th-text-faint)] border-[var(--th-panel-border)] bg-[rgb(var(--th-overlay-rgb)/0.04)]"
-                    : currentMatchMsg
-                      ? "rounded-2xl ring-2 ring-[rgb(var(--th-warning-rgb))] text-[var(--th-text)]"
-                      : highlighted
-                        ? "rounded-2xl text-[var(--th-text)]"
-                        : isMe
-                          ? "rounded-2xl rounded-br-md text-[var(--th-bubble-out-text)]"
-                          : "rounded-2xl rounded-bl-md text-[var(--th-bubble-in-text)]"
-                }`}
+            {!!msg.text && (
+              <div
+                className={`px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 ease-in-out cursor-default ${
+                    isTargetHighlighted
+                      ? `rounded-2xl ${isMe ? "rounded-br-md text-[var(--th-bubble-out-text)]" : "rounded-bl-md text-[var(--th-bubble-in-text)]"} ring-2 ring-[rgb(var(--th-accent-rgb))] scale-[1.02] shadow-[0_0_24px_rgb(var(--th-accent-2-rgb)/0.85)] animate-pulse`
+                      : currentMatchMsg
+                        ? "rounded-2xl ring-2 ring-[rgb(var(--th-warning-rgb))] text-[var(--th-text)]"
+                        : highlighted
+                          ? "rounded-2xl text-[var(--th-text)]"
+                          : isMe
+                            ? "rounded-2xl rounded-br-md text-[var(--th-bubble-out-text)]"
+                            : "rounded-2xl rounded-bl-md text-[var(--th-bubble-in-text)]"
+                  }`}
                 style={bubbleStyle}
               >
-                <If is={!!(msg.pinned && !isEffectivelyDeleted)}>
+                <If is={!!msg.pinned}>
                   <span
                     className={`inline-flex items-center gap-1 text-[10px] font-semibold mb-1 mr-2 px-1.5 py-0.5 rounded-md ${
                       isMe
@@ -352,7 +386,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                 <span>{msg.text}</span>
                 <span className="inline-flex items-center gap-1 float-right mt-1 ml-2.5 select-none text-[10px] opacity-75">
                   <span>{msg.time}</span>
-                  {isMe && !isEffectivelyDeleted && (
+                  {isMe && (
                     <span className="inline-flex items-center ml-0.5" title={msg.status}>
                       {isPending ? (
                         <Clock3 className="w-3 h-3 text-[var(--th-on-accent-muted)] animate-pulse" />
@@ -365,19 +399,26 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                   )}
                 </span>
               </div>
-          )}
-          {!!msg.text && !isEffectivelyDeleted && (
-            <MessageLinkPreview text={msg.text} isMe={isMe} t={t} />
-          )}
+            )}
+            {!!msg.text && (
+              <MessageLinkPreview text={msg.text} isMe={isMe} t={t} />
+            )}
+          </div>
           <If
             is={
-              ((msg.reactions && msg.reactions.length > 0) ||
-                (msg.threadCount && msg.threadCount > 0)) &&
-              !isEffectivelyDeleted
+              !!(
+                (msg.reactions && msg.reactions.length > 0) ||
+                (msg.threadCount && msg.threadCount > 0)
+              )
             }
           >
             <div
-              className={`flex flex-wrap gap-1.5 mt-1 ${isMe ? "self-end justify-end" : "self-start justify-start"}`}
+              className={`flex flex-wrap gap-1.5 mt-1.5 ${
+                isMe ? "self-end justify-end" : "self-start justify-start"
+              }`}
+              style={{
+                maxWidth: bubbleWidth ? `${bubbleWidth}px` : "100%",
+              }}
             >
               <If is={!!(msg.reactions && msg.reactions.length > 0)}>
                 <>
@@ -385,18 +426,18 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                     <button
                       key={r.emoji}
                       onClick={() => handleReaction(msg.id, r.emoji)}
-                      className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs transition-all duration-200 ease-in-out hover:scale-110"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-all duration-150 ease-in-out hover:scale-110 active:scale-95 select-none"
                       style={{
                         background: r.reactedByMe
-                          ? "rgb(var(--th-accent-rgb) / 0.3)"
+                          ? "rgb(var(--th-accent-rgb) / 0.25)"
                           : "var(--th-chip-bg)",
                         border: r.reactedByMe
                           ? "1px solid rgb(var(--th-accent-rgb) / 0.5)"
                           : "1px solid var(--th-chip-border)",
                       }}
                     >
-                      <span>{r.emoji}</span>
-                      <span className="text-[10px] font-medium text-[var(--th-text-muted)]">
+                      <span className="text-xs leading-none">{r.emoji}</span>
+                      <span className="text-[10px] font-semibold text-[var(--th-text-muted)]">
                         {r.count}
                       </span>
                     </button>

@@ -3,8 +3,10 @@ import { motion } from "framer-motion";
 import { MessageSquare, X, Send, Loader2, Check, CheckCheck, Clock3 } from "lucide-react";
 import { If } from "@shared/ui";
 import { Contact, Message } from "../../model";
-import { buildInitialsAvatar } from "../../lib/chatFormat";
+import { buildInitialsAvatar, formatChatDateDivider, getMessageDateKey } from "../../lib/chatFormat";
 import { useAutoResizeTextarea } from "../../lib/useAutoResizeTextarea";
+import { Lang, Translations } from "../../lib/translations";
+import { ChatDateDivider } from "./ChatDateDivider";
 
 const THREAD_INPUT_MAX_ROWS = 4;
 
@@ -20,6 +22,8 @@ interface ThreadPanelProps {
   threadLabel: string;
   originalLabel: string;
   replyPlaceholder: string;
+  lang?: Lang;
+  t?: Translations;
 }
 
 export const ThreadPanel: React.FC<ThreadPanelProps> = ({
@@ -33,6 +37,8 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
   threadLabel,
   originalLabel,
   replyPlaceholder,
+  lang = "ru",
+  t,
 }) => {
   const [threadInput, setThreadInput] = useState("");
   const threadScrollRef = useRef<HTMLDivElement>(null);
@@ -100,64 +106,77 @@ export const ThreadPanel: React.FC<ThreadPanelProps> = ({
             <Loader2 className="w-4 h-4 animate-spin text-[var(--th-accent-text)]" />
           </div>
         </If>
-        {threadMessages.map((tm) => {
+        {threadMessages.map((tm, index) => {
+          const prevTm = index > 0 ? threadMessages[index - 1] : null;
+          const currentDateKey = getMessageDateKey(tm.createdAt);
+          const prevDateKey = prevTm ? getMessageDateKey(prevTm.createdAt) : null;
+          const showDateDivider = Boolean(
+            currentDateKey && (!prevDateKey || currentDateKey !== prevDateKey),
+          );
           const isTMe = tm.senderId === "me";
+
           return (
-            <div
-              key={tm.id}
-              className={`flex items-end gap-2 ${isTMe ? "justify-end" : "justify-start"}`}
-            >
-              {!isTMe && (
-                <img
-                  src={tm.senderAvatar || activeContact.avatar || buildInitialsAvatar(tm.senderName || activeContact.name)}
-                  alt={tm.senderName || activeContact.name}
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src =
-                      buildInitialsAvatar(tm.senderName || activeContact.name);
-                  }}
-                  className="w-6 h-6 rounded-full object-cover flex-shrink-0 overflow-hidden"
+            <React.Fragment key={tm.id}>
+              {showDateDivider && (
+                <ChatDateDivider
+                  dateText={formatChatDateDivider(tm.createdAt, lang, t)}
                 />
               )}
               <div
-                className={`px-3 py-2 text-xs rounded-2xl max-w-[80%] whitespace-pre-wrap break-words transition-all duration-200 ease-in-out ${isTMe ? "rounded-br-md text-[var(--th-bubble-out-text)]" : "rounded-bl-md text-[var(--th-bubble-in-text)]"}`}
-                style={{
-                  background: isTMe
-                    ? "var(--th-bubble-out-bg)"
-                    : "var(--th-bubble-in-bg)",
-                  border: isTMe
-                    ? "none"
-                    : "1px solid var(--th-bubble-in-border)",
-                  boxShadow: isTMe ? "var(--th-glow-accent)" : "none",
-                }}
+                className={`flex items-end gap-2 ${isTMe ? "justify-end" : "justify-start"}`}
               >
-                <span>{tm.text}</span>
-                <span className="inline-flex items-center gap-1 float-right mt-1 ml-2.5 select-none text-[10px] opacity-75">
-                  {tm.time && <span>{tm.time}</span>}
-                  {isTMe && !tm.deleted && (
-                    <span className="inline-flex items-center ml-0.5" title={tm.status}>
-                      {tm.status === "pending" || tm.id.startsWith("temp-") ? (
-                        <Clock3 className="w-3 h-3 text-[var(--th-on-accent-muted)] animate-pulse" />
-                      ) : tm.status === "read" || tm.status === "delivered" ? (
-                        <CheckCheck className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
-                      ) : (
-                        <Check className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
-                      )}
-                    </span>
-                  )}
-                </span>
-              </div>
-              {isTMe && (
-                <img
-                  src={tm.senderAvatar || buildInitialsAvatar(tm.senderName || "Вы")}
-                  alt={tm.senderName || "Вы"}
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src =
-                      buildInitialsAvatar(tm.senderName || "Вы");
+                {!isTMe && (
+                  <img
+                    src={tm.senderAvatar || activeContact.avatar || buildInitialsAvatar(tm.senderName || activeContact.name)}
+                    alt={tm.senderName || activeContact.name}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src =
+                        buildInitialsAvatar(tm.senderName || activeContact.name);
+                    }}
+                    className="w-6 h-6 rounded-full object-cover flex-shrink-0 overflow-hidden"
+                  />
+                )}
+                <div
+                  className={`px-3 py-2 text-xs rounded-2xl max-w-[80%] whitespace-pre-wrap break-words transition-all duration-200 ease-in-out ${isTMe ? "rounded-br-md text-[var(--th-bubble-out-text)]" : "rounded-bl-md text-[var(--th-bubble-in-text)]"}`}
+                  style={{
+                    background: isTMe
+                      ? "var(--th-bubble-out-bg)"
+                      : "var(--th-bubble-in-bg)",
+                    border: isTMe
+                      ? "none"
+                      : "1px solid var(--th-bubble-in-border)",
+                    boxShadow: isTMe ? "var(--th-glow-accent)" : "none",
                   }}
-                  className="w-6 h-6 rounded-full object-cover flex-shrink-0 overflow-hidden"
-                />
-              )}
-            </div>
+                >
+                  <span>{tm.text}</span>
+                  <span className="inline-flex items-center gap-1 float-right mt-1 ml-2.5 select-none text-[10px] opacity-75">
+                    {tm.time && <span>{tm.time}</span>}
+                    {isTMe && !tm.deleted && (
+                      <span className="inline-flex items-center ml-0.5" title={tm.status}>
+                        {tm.status === "pending" || tm.id.startsWith("temp-") ? (
+                          <Clock3 className="w-3 h-3 text-[var(--th-on-accent-muted)] animate-pulse" />
+                        ) : tm.status === "read" || tm.status === "delivered" ? (
+                          <CheckCheck className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
+                        ) : (
+                          <Check className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
+                        )}
+                      </span>
+                    )}
+                  </span>
+                </div>
+                {isTMe && (
+                  <img
+                    src={tm.senderAvatar || buildInitialsAvatar(tm.senderName || "Вы")}
+                    alt={tm.senderName || "Вы"}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src =
+                        buildInitialsAvatar(tm.senderName || "Вы");
+                    }}
+                    className="w-6 h-6 rounded-full object-cover flex-shrink-0 overflow-hidden"
+                  />
+                )}
+              </div>
+            </React.Fragment>
           );
         })}
       </div>

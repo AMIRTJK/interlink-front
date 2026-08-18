@@ -10,6 +10,7 @@ import {
 	LoaderCircle,
 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
+import { REJECTION_TYPE_ALL } from "../../model";
 
 export interface NewRegistryProps {
 	type: string;
@@ -128,6 +129,10 @@ export const STATUS_CONFIG: Record<string, any> = {
 		label: "Отменено",
 		icon: <XCircle size={14} />,
 		gradient: "from-rose-500 to-rose-600",
+		apiUrl: ApiRoutes.GET_INTERNAL_REJECTED,
+		// Тип отклонения бэкенд ждёт в параметре type; значение приходит из
+		// фильтра реестра, по умолчанию — все отклонения.
+		apiParams: { type: REJECTION_TYPE_ALL },
 		omitStatus: true,
 	},
 	default: {

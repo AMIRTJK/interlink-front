@@ -4,6 +4,8 @@ import { toast } from "@shared/lib";
 import { chatUrls, fetchPrivateMedia } from "../../api";
 import { formatDuration } from "../../lib/chatHelpers";
 import { getHoverGlow, withHoverGlow } from "../../lib/messageBubbleStyle";
+import { AttachmentStatusBadge } from "./AttachmentStatusBadge";
+import type { Message } from "../../model";
 
 interface VoiceBubbleProps {
   /** Длительность записи в секундах — запасной источник для шкалы. */
@@ -17,6 +19,13 @@ interface VoiceBubbleProps {
   /** Наведение на сообщение целиком — от него зависит свечение пузыря. */
   isHovered?: boolean;
   isTargetHighlighted?: boolean;
+  /**
+   * Статус доставки своей записи. `pending` — файл ещё уходит на бэкенд:
+   * показываем часы и не даём включить плеер. `undefined` — не показывать.
+   */
+  status?: NonNullable<Message["status"]>;
+  /** Локализованная подпись состояния отправки. */
+  sendingLabel: string;
 }
 
 const BAR_COUNT = 20;
@@ -40,7 +49,10 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
   isDark,
   isHovered = false,
   isTargetHighlighted,
+  status,
+  sendingLabel,
 }) => {
+  const isPending = status === "pending";
   const [playing, setPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -196,13 +208,17 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
             ),
       }}
     >
+      {/* Пока запись не загружена, вложения на бэкенде ещё нет: нажатие ушло бы
+          за несуществующий файл и вернуло ошибку, поэтому плеер заблокирован. */}
       <button
         onClick={handleToggle}
-        disabled={isLoading}
+        disabled={isLoading || isPending}
         aria-label={
-          playing
-            ? "Остановить голосовое сообщение"
-            : "Прослушать голосовое сообщение"
+          isPending
+            ? sendingLabel
+            : playing
+              ? "Остановить голосовое сообщение"
+              : "Прослушать голосовое сообщение"
         }
         className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200 ease-in-out hover:scale-110 disabled:opacity-60 disabled:hover:scale-100 cursor-pointer ${isMe ? "text-[var(--th-on-accent)]" : "text-[var(--th-text-muted)] hover:text-[var(--th-text)]"}`}
         style={{
@@ -240,9 +256,18 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
         ))}
       </div>
       <span
-        className={`text-[10px] flex-shrink-0 ${isMe ? "text-[var(--th-on-accent-faint)]" : "text-[var(--th-text-faint)]"}`}
+        className={`text-[10px] flex-shrink-0 inline-flex items-center gap-1.5 ${isMe ? "text-[var(--th-on-accent-faint)]" : "text-[var(--th-text-faint)]"}`}
       >
-        {formatDuration(playing || progress > 0 ? playedSeconds : Math.round(totalSeconds))}
+        <span>
+          {formatDuration(playing || progress > 0 ? playedSeconds : Math.round(totalSeconds))}
+        </span>
+        {status && (
+          <AttachmentStatusBadge
+            status={status}
+            sendingLabel={sendingLabel}
+            isMe={isMe}
+          />
+        )}
       </span>
     </div>
   );

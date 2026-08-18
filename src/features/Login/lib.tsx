@@ -4,9 +4,6 @@ import ArrowBottomSuffix from "../../assets/icons/arrow-bottom-suffix.svg";
 
 const countries = [
   { code: "+992", name: "TJ", flag: FlagTJK },
-  { code: "+7", name: "RU", flag: "https://flagcdn.com/w20/ru.png" },
-  { code: "+380", name: "UA", flag: "https://flagcdn.com/w20/ua.png" },
-  { code: "+1", name: "US", flag: "https://flagcdn.com/w20/us.png" },
 ];
 
 export const selectBefore = (
