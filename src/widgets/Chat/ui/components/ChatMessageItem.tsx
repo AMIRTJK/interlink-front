@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, CheckCheck, Clock3, CornerUpLeft, Forward, MoreHorizontal, Pin, MessageSquare, Smile } from "lucide-react";
 import { Contact, Message, ReplyPreview } from "../../model";
@@ -67,6 +67,28 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 }) => {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [actionMenuRect, setActionMenuRect] = useState<DOMRect | null>(null);
+  const bubbleRef = useRef<HTMLDivElement>(null);
+  const [bubbleWidth, setBubbleWidth] = useState<number | null>(null);
+
+  useLayoutEffect(() => {
+    const node = bubbleRef.current;
+    if (!node) return;
+
+    const updateWidth = () => {
+      if (node.offsetWidth > 0) {
+        setBubbleWidth(node.offsetWidth);
+      }
+    };
+
+    updateWidth();
+
+    const ro = new ResizeObserver(() => {
+      updateWidth();
+    });
+    ro.observe(node);
+
+    return () => ro.disconnect();
+  }, []);
 
   if (msg.deleted || msg.deletedForMe) return null;
 
@@ -226,7 +248,10 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               />
             )}
           </AnimatePresence>
-          <div className={`relative max-w-full ${isMe ? "self-end" : "self-start"}`}>
+          <div
+            ref={bubbleRef}
+            className={`relative max-w-full ${isMe ? "self-end" : "self-start"}`}
+          >
             <AnimatePresence>
               {(hoveredMessageId === msg.id || activeActionMsgId === msg.id) && (
                 <motion.div
@@ -388,7 +413,12 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             }
           >
             <div
-              className={`flex flex-wrap gap-1.5 mt-1 ${isMe ? "self-end justify-end" : "self-start justify-start"}`}
+              className={`flex flex-wrap gap-1.5 mt-1.5 ${
+                isMe ? "self-end justify-end" : "self-start justify-start"
+              }`}
+              style={{
+                maxWidth: bubbleWidth ? `${bubbleWidth}px` : "100%",
+              }}
             >
               <If is={!!(msg.reactions && msg.reactions.length > 0)}>
                 <>
@@ -396,18 +426,18 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                     <button
                       key={r.emoji}
                       onClick={() => handleReaction(msg.id, r.emoji)}
-                      className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs transition-all duration-200 ease-in-out hover:scale-110"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-all duration-150 ease-in-out hover:scale-110 active:scale-95 select-none"
                       style={{
                         background: r.reactedByMe
-                          ? "rgb(var(--th-accent-rgb) / 0.3)"
+                          ? "rgb(var(--th-accent-rgb) / 0.25)"
                           : "var(--th-chip-bg)",
                         border: r.reactedByMe
                           ? "1px solid rgb(var(--th-accent-rgb) / 0.5)"
                           : "1px solid var(--th-chip-border)",
                       }}
                     >
-                      <span>{r.emoji}</span>
-                      <span className="text-[10px] font-medium text-[var(--th-text-muted)]">
+                      <span className="text-xs leading-none">{r.emoji}</span>
+                      <span className="text-[10px] font-semibold text-[var(--th-text-muted)]">
                         {r.count}
                       </span>
                     </button>
