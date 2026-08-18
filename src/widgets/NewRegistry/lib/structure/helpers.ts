@@ -39,6 +39,20 @@ export const getStructureCount = (
     : undefined;
 };
 
+export const estimateStructureCount = (
+  item?: (IStructureCountable & { status?: string }) | null,
+): number | undefined => {
+  const count = getStructureCount(item);
+  if (typeof count !== "number") return undefined;
+  const isSentOrSigned =
+    item?.status === "sent" ||
+    item?.status === "signed" ||
+    item?.status === "processed" ||
+    item?.status === "registered";
+  const hiddenCount = isSentOrSigned ? 2 : 1;
+  return Math.max(1, count - hiddenCount);
+};
+
 export const getInitials = (fullName?: string | null): string => {
   if (!fullName) return "—";
   const parts = fullName
