@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { cn } from "@shared/lib";
+import { normalizeSignatures } from "@widgets/CreateInternalCorrespondence/ui/createInternalCorrespondence/documentPrefillMappers";
 import {
   DocSignerItem,
   GRADIENTS,
@@ -23,7 +24,13 @@ export const SignersPanel = ({
   onClose: () => void;
   signatures?: any[];
 }) => {
-  const items: DocSignerItem[] = signatures.map((sig: any, idx: number) => {
+  const normalizedSignatures = useMemo(
+    () => normalizeSignatures(signatures),
+    [signatures],
+  );
+
+  const items: DocSignerItem[] = normalizedSignatures.map(
+    (sig: any, idx: number) => {
     const user = sig.user || sig.approver || {};
     const initials = getInitials(user.full_name || "");
     const grad = GRADIENTS[idx % GRADIENTS.length];
@@ -52,7 +59,7 @@ export const SignersPanel = ({
     };
   });
 
-  const historyEvents = signatures
+  const historyEvents = normalizedSignatures
     .filter((sig: any) => sig.status === "signed")
     .map((sig: any) => {
       const name = (sig.user || sig.approver)?.full_name || "Сотрудник";

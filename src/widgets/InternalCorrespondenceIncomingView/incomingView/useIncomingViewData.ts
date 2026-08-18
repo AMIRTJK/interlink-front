@@ -13,6 +13,7 @@ import {
   mapDocumentVersions,
   collectRevokedVersionIds,
 } from "@widgets/CreateInternalCorrespondence/ui/createInternalCorrespondence/versionsLib";
+import { normalizeSignatures } from "@widgets/CreateInternalCorrespondence/ui/createInternalCorrespondence/documentPrefillMappers";
 import { STAMP_ATTR } from "@widgets/CreateInternalCorrespondence/lib/constants";
 import { normalizeVisors, VISOR_INVITE_HINT } from "../model";
 import {
@@ -69,7 +70,11 @@ export function useIncomingViewData(
         assignmentsData?.items?.length ||
         (Array.isArray(assignmentsData?.data) ? assignmentsData.data.length : 0);
 
-  const signatures = workflowResponse?.data?.signatures || [];
+  const rawSignatures = workflowResponse?.data?.signatures || [];
+  const signatures = useMemo(
+    () => normalizeSignatures(rawSignatures),
+    [rawSignatures],
+  );
   const approvals = workflowResponse?.data?.approvals || [];
 
   // Контекстные права документа главнее плоских флагов письма: они учитывают
