@@ -1,14 +1,12 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowDown, Loader2, AlertCircle, MessageSquare } from "lucide-react";
+import { ArrowDown, AlertCircle, MessageSquare } from "lucide-react";
 import { If } from "@shared/ui";
 import type { Contact, Message, ReplyPreview } from "../../model";
 import { Lang, Translations } from "../../lib/translations";
 import { formatChatDateDivider, getMessageDateKey } from "../../lib/chatFormat";
 import { useFloatingChatDate } from "../../lib/useFloatingChatDate";
-import { ChatMessageItem } from "./ChatMessageItem";
-import { ChatDateDivider } from "./ChatDateDivider";
-import { ChatFloatingDate } from "./ChatFloatingDate";
+import { DateGroupSection, type IDateGroup } from "./DateGroupSection";
 
 // Лента сообщений: загрузка, пустое состояние, догрузка старых при прокрутке
 // вверх, индикатор набора и плавающая кнопка возврата к ответу.
@@ -86,19 +84,36 @@ export const MessageList = ({
 }: IProps) => {
   const isEmpty = !isLoading && !isError && messages.length === 0;
 
-  const {
-    isVisible: isFloatingDateVisible,
-    floatingDate,
-    handleScroll: handleFloatingDateScroll,
-  } = useFloatingChatDate({
-    scrollRef,
-    activeConversationId: activeContact.id,
-  });
+  const { isScrolling, handleScroll: handleFloatingDateScroll } =
+    useFloatingChatDate({
+      activeConversationId: activeContact.id,
+    });
 
   const handleContainerScroll = React.useCallback(() => {
     onScroll();
     handleFloatingDateScroll();
   }, [onScroll, handleFloatingDateScroll]);
+
+  const messageGroups = useMemo<IDateGroup[]>(() => {
+    const groups: IDateGroup[] = [];
+    let currentGroup: IDateGroup | null = null;
+
+    for (const msg of messages) {
+      const dateKey = getMessageDateKey(msg.createdAt) || "unknown";
+      if (!currentGroup || currentGroup.dateKey !== dateKey) {
+        currentGroup = {
+          dateKey,
+          dateText: formatChatDateDivider(msg.createdAt, lang, t),
+          messages: [msg],
+        };
+        groups.push(currentGroup);
+      } else {
+        currentGroup.messages.push(msg);
+      }
+    }
+
+    return groups;
+  }, [messages, lang, t]);
 
   if (targetHighlightedMessageId || returnToMessageId) {
     console.log("[MessageList] Render with active reply state:", {
@@ -112,10 +127,6 @@ export const MessageList = ({
       className="flex-1 relative overflow-hidden"
       style={{ background: "var(--th-chat-canvas)" }}
     >
-      <ChatFloatingDate
-        isVisible={isFloatingDateVisible}
-        dateText={floatingDate}
-      />
       {/* Вертикальные отступы держат ореол наведения: это box-shadow, он не
           увеличивает ни размер элемента, ни прокручиваемую область, поэтому у
           крайних сообщений его срезал край скролл-контейнера. 32px перекрывают
@@ -188,41 +199,22 @@ export const MessageList = ({
               </div>
             </If>
 
-            {messages.map((msg, index) => {
-              const prevMsg = index > 0 ? messages[index - 1] : null;
-              const currentDateKey = getMessageDateKey(msg.createdAt);
-              const prevDateKey = prevMsg ? getMessageDateKey(prevMsg.createdAt) : null;
-              const showDateDivider = Boolean(
-                currentDateKey && (!prevDateKey || currentDateKey !== prevDateKey),
-              );
-
-              return (
-                <React.Fragment key={msg.id}>
-                  {showDateDivider && (
-                    <ChatDateDivider
-                      dateText={formatChatDateDivider(msg.createdAt, lang, t)}
-                    />
-                  )}
-                  <ChatMessageItem
-                    msg={msg}
-                    isMe={
-                      msg.senderId === "me" ||
-                      (currentUserId != null &&
-                        String(msg.senderId) === String(currentUserId))
-                    }
-                    activeContact={activeContact}
-                    isDark={isDark}
-                    lang={lang}
-                    t={t}
-                    highlighted={itemProps.isHighlighted(msg.id)}
-                    currentMatchMsg={itemProps.isCurrentMatch(msg.id)}
-                    targetHighlightedMessageId={targetHighlightedMessageId}
-                    onJumpToMessage={onJumpToMessage}
-                    {...itemProps}
-                  />
-                </React.Fragment>
-              );
-            })}
+            {messageGroups.map((group) => (
+              <DateGroupSection
+                key={group.dateKey}
+                group={group}
+                isScrolling={isScrolling}
+                scrollRef={scrollRef}
+                currentUserId={currentUserId}
+                activeContact={activeContact}
+                isDark={isDark}
+                lang={lang}
+                t={t}
+                targetHighlightedMessageId={targetHighlightedMessageId}
+                onJumpToMessage={onJumpToMessage}
+                {...itemProps}
+              />
+            ))}
 
             <AnimatePresence>
               {typingNames.length > 0 && (
