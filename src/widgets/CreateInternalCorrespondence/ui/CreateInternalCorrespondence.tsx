@@ -994,7 +994,6 @@ export const CreateInternalCorrespondence = ({
     attachments,
     setAttachments,
     refetchVersions,
-    selectVersionForSign,
     setActiveVersionId,
   });
 
@@ -2213,13 +2212,6 @@ export const CreateInternalCorrespondence = ({
         // Загружено другое содержимое — прежняя история изменений неприменима.
         resetHistory();
       }
-    }
-
-    // ХАК: Если документ только открыли и ни одна версия еще не выбрана для подписи
-    // (проверяем по ответу, например, если у всех элементов is_selected === false)
-    const hasSelected = allVersions.some((v: any) => v.is_selected);
-    if (!hasSelected && !signedVersionId && targetVersion.id) {
-      selectVersionForSign({ versionId: targetVersion.id });
     }
   }, [allVersions, signedVersionObj, signedVersionId]);
 
