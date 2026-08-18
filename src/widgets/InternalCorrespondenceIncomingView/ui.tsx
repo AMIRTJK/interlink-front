@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { If, VisorInviteNoticeModal } from "@shared/ui";
 import { downloadDocumentPdf } from "./lib";
 import { EditorToolbar } from "./EditorToolbar";
@@ -25,7 +25,11 @@ export const InternalCorrespondenceIncomingView = ({
   item: RegistryItem;
   onBack: () => void;
 }) => {
-  const data = useIncomingViewData(item, null);
+  const [activeVersionId, setActiveVersionId] = useState<
+    number | string | null
+  >(null);
+
+  const data = useIncomingViewData(item, activeVersionId);
 
   const state = useIncomingViewState({
     item,
@@ -42,6 +46,8 @@ export const InternalCorrespondenceIncomingView = ({
     formattedSentDate: data.formattedSentDate,
     inboundNumber: data.inboundNumber,
     seenMutate: data.seenMutate,
+    activeVersionId,
+    setActiveVersionId,
   });
 
   return (

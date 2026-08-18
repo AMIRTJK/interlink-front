@@ -16,6 +16,8 @@ interface IProps {
   scrollRef: React.RefObject<HTMLDivElement | null>;
   currentUserId?: number | string | null;
   activeContact: Contact;
+  hoveredMessageId: string | null;
+  activeActionMsgId: string | null;
   isDark: boolean;
   lang: Lang;
   t: Translations;
