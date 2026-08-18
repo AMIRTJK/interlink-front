@@ -134,6 +134,8 @@ export type Translations = {
   hideLinkPreview: string;
   openLinkPreview: string;
   newReplies: string;
+  today: string;
+  yesterday: string;
 };
 export const TRANSLATIONS: Record<Lang, Translations> = {
   en: {
@@ -247,7 +249,9 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     dropFiles: 'Drop files to attach',
     hideLinkPreview: 'Hide link preview',
     openLinkPreview: 'Open link',
-    newReplies: 'new replies'
+    newReplies: 'new replies',
+    today: 'Today',
+    yesterday: 'Yesterday'
   },
   ru: {
     search: 'Поиск',
@@ -360,7 +364,9 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     dropFiles: 'Отпустите файлы, чтобы прикрепить',
     hideLinkPreview: 'Скрыть превью ссылки',
     openLinkPreview: 'Открыть ссылку',
-    newReplies: 'новых ответов'
+    newReplies: 'новых ответов',
+    today: 'Сегодня',
+    yesterday: 'Вчера'
   },
   tg: {
     search: 'Ҷустуҷӯ',
@@ -473,6 +479,8 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     dropFiles: 'Файлҳоро сар диҳед, то замима шаванд',
     hideLinkPreview: 'Пешнамоиши истинодро пинҳон кардан',
     openLinkPreview: 'Кушодани истинод',
-    newReplies: 'ҷавобҳои нав'
+    newReplies: 'ҷавобҳои нав',
+    today: 'Имрӯз',
+    yesterday: 'Дирӯз'
   }
 };

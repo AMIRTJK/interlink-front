@@ -1,4 +1,6 @@
+import dayjs from "dayjs";
 import type { MessageAttachment } from "../model";
+import type { Lang, Translations } from "./translations";
 
 /** Человекочитаемый размер файла: бэкенд отдаёт байты, UI показывает KB/MB. */
 export const formatFileSize = (bytes?: number | null) => {
@@ -67,3 +69,46 @@ export const buildInitialsAvatar = (name?: string | null) => {
 /** Секунды из длительности голосового (бэкенд хранит миллисекунды). */
 export const msToSeconds = (ms?: number | null) =>
   ms && ms > 0 ? Math.round(ms / 1000) : 0;
+
+/** Ключ дня (YYYY-MM-DD) для группировки сообщений по датам. */
+export const getMessageDateKey = (dateInput?: string | Date | null): string => {
+  if (!dateInput) return "";
+  const d = dayjs(dateInput);
+  if (!d.isValid()) return "";
+  return d.format("YYYY-MM-DD");
+};
+
+/**
+ * Дата для разделителя в ленте сообщений (стиль Telegram):
+ * - Если сегодня: "Сегодня"
+ * - Если вчера: "Вчера"
+ * - Если текущий год: "18 февраля"
+ * - Если другой год: "18 февраля 2025"
+ */
+export const formatChatDateDivider = (
+  dateInput?: string | Date | null,
+  lang: Lang = "ru",
+  t?: Pick<Translations, "today" | "yesterday">,
+): string => {
+  if (!dateInput) return "";
+  const d = dayjs(dateInput);
+  if (!d.isValid()) return "";
+
+  const now = dayjs();
+  if (d.isSame(now, "day")) {
+    return t?.today ?? (lang === "ru" ? "Сегодня" : lang === "tg" ? "Имрӯз" : "Today");
+  }
+  if (d.isSame(now.subtract(1, "day"), "day")) {
+    return (
+      t?.yesterday ??
+      (lang === "ru" ? "Вчера" : lang === "tg" ? "Дирӯз" : "Yesterday")
+    );
+  }
+
+  const locale = lang === "tg" ? "ru" : lang;
+  if (d.isSame(now, "year")) {
+    return d.locale(locale).format("D MMMM");
+  }
+
+  return d.locale(locale).format("D MMMM YYYY");
+};

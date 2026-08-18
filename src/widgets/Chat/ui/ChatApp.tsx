@@ -555,6 +555,8 @@ export const ChatApp: React.FC<IProps> = ({
                   threadLabel={t.thread}
                   originalLabel={t.originalMessage}
                   replyPlaceholder={t.replyInThread}
+                  lang={lang}
+                  t={t}
                 />
               )}
             </AnimatePresence>

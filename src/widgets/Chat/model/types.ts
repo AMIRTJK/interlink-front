@@ -67,6 +67,8 @@ export type Message = {
   senderId: string;
   text: string;
   time: string;
+  /** Исходная дата создания сообщения (ISO или дата с сервера) для группировки по дням. */
+  createdAt?: string;
   status?: 'pending' | 'sent' | 'delivered' | 'read';
   attachment?: MessageAttachment;
   /** Все вложения сообщения; `attachment` — первое из них (совместимость). */

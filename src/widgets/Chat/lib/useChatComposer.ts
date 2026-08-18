@@ -78,6 +78,7 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
       preview: pf.preview ? URL.createObjectURL(pf.raw) : undefined,
     }));
 
+      const nowIso = new Date().toISOString();
     const optimisticMsg: Message = {
       id: tempId,
       clientUuid,
@@ -85,7 +86,8 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
       senderName: labels?.you || "Вы",
       senderAvatar: currentUserAvatar,
       text: body,
-      time: formatMessageTime(new Date().toISOString()),
+      time: formatMessageTime(nowIso),
+      createdAt: nowIso,
       status: "pending",
       attachment: optimisticAttachments[0],
       attachments: optimisticAttachments.length ? optimisticAttachments : undefined,
@@ -149,6 +151,7 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
         durationSeconds,
       };
 
+      const nowIso = new Date().toISOString();
       const optimisticMsg: Message = {
         id: tempId,
         clientUuid,
@@ -156,7 +159,8 @@ export const useChatComposer = (ui: TChatUi, data: TChatData) => {
         senderName: labels?.you || "Вы",
         senderAvatar: currentUserAvatar,
         text: "",
-        time: formatMessageTime(new Date().toISOString()),
+        time: formatMessageTime(nowIso),
+        createdAt: nowIso,
         // Запись ещё загружается — статус тот же, что у остальных вложений,
         // иначе индикатор отправки на пузыре противоречил бы данным сообщения.
         status: "pending",

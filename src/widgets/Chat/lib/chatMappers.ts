@@ -217,6 +217,7 @@ export const mapMessage = (message: IChatMessage, ctx: IMapContext): Message => 
     ),
     text,
     time: formatMessageTime(message.created_at),
+    createdAt: message.created_at ?? message.sent_at ?? undefined,
     status: message.status === "scheduled" ? "sent" : (message.status ?? "sent"),
     attachment: attachments[0],
     attachments: attachments.length ? attachments : undefined,

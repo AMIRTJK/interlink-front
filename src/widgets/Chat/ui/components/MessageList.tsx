@@ -4,7 +4,9 @@ import { ArrowDown, Loader2, AlertCircle, MessageSquare } from "lucide-react";
 import { If } from "@shared/ui";
 import type { Contact, Message, ReplyPreview } from "../../model";
 import { Lang, Translations } from "../../lib/translations";
+import { formatChatDateDivider, getMessageDateKey } from "../../lib/chatFormat";
 import { ChatMessageItem } from "./ChatMessageItem";
+import { ChatDateDivider } from "./ChatDateDivider";
 
 // Лента сообщений: загрузка, пустое состояние, догрузка старых при прокрутке
 // вверх, индикатор набора и плавающая кнопка возврата к ответу.
@@ -70,6 +72,7 @@ export const MessageList = ({
   typingNames,
   switchDirection,
   isDark,
+  lang,
   t,
   targetHighlightedMessageId,
   returnToMessageId,
@@ -165,25 +168,41 @@ export const MessageList = ({
               </div>
             </If>
 
-            {messages.map((msg) => (
-              <ChatMessageItem
-                key={msg.id}
-                msg={msg}
-                isMe={
-                  msg.senderId === "me" ||
-                  (currentUserId != null &&
-                    String(msg.senderId) === String(currentUserId))
-                }
-                activeContact={activeContact}
-                isDark={isDark}
-                t={t}
-                highlighted={itemProps.isHighlighted(msg.id)}
-                currentMatchMsg={itemProps.isCurrentMatch(msg.id)}
-                targetHighlightedMessageId={targetHighlightedMessageId}
-                onJumpToMessage={onJumpToMessage}
-                {...itemProps}
-              />
-            ))}
+            {messages.map((msg, index) => {
+              const prevMsg = index > 0 ? messages[index - 1] : null;
+              const currentDateKey = getMessageDateKey(msg.createdAt);
+              const prevDateKey = prevMsg ? getMessageDateKey(prevMsg.createdAt) : null;
+              const showDateDivider = Boolean(
+                currentDateKey && (!prevDateKey || currentDateKey !== prevDateKey),
+              );
+
+              return (
+                <React.Fragment key={msg.id}>
+                  {showDateDivider && (
+                    <ChatDateDivider
+                      dateText={formatChatDateDivider(msg.createdAt, lang, t)}
+                    />
+                  )}
+                  <ChatMessageItem
+                    msg={msg}
+                    isMe={
+                      msg.senderId === "me" ||
+                      (currentUserId != null &&
+                        String(msg.senderId) === String(currentUserId))
+                    }
+                    activeContact={activeContact}
+                    isDark={isDark}
+                    lang={lang}
+                    t={t}
+                    highlighted={itemProps.isHighlighted(msg.id)}
+                    currentMatchMsg={itemProps.isCurrentMatch(msg.id)}
+                    targetHighlightedMessageId={targetHighlightedMessageId}
+                    onJumpToMessage={onJumpToMessage}
+                    {...itemProps}
+                  />
+                </React.Fragment>
+              );
+            })}
 
             <AnimatePresence>
               {typingNames.length > 0 && (
