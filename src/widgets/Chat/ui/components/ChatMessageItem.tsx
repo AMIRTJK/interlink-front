@@ -226,157 +226,159 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               />
             )}
           </AnimatePresence>
-          <AnimatePresence>
-            {(hoveredMessageId === msg.id || activeActionMsgId === msg.id) && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-9" : "-right-9"} flex items-center z-30`}
-              >
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    setActionMenuRect(rect);
-                    setActiveActionMsgId((prev) =>
-                      prev === msg.id ? null : msg.id,
-                    );
-                  }}
-                  aria-label="Действия"
-                  className="w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 text-[var(--th-text-muted)] hover:bg-[var(--th-hover-bg-strong)]"
-                  style={{
-                    background: "var(--th-chip-bg)",
-                    border: "1px solid var(--th-chip-border)",
-                  }}
+          <div className={`relative max-w-full ${isMe ? "self-end" : "self-start"}`}>
+            <AnimatePresence>
+              {(hoveredMessageId === msg.id || activeActionMsgId === msg.id) && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-9" : "-right-9"} flex items-center z-30`}
                 >
-                  <MoreHorizontal className="w-3.5 h-3.5" />
-                </button>
-                {activeActionMsgId === msg.id && (
-                  <MessageActionMenu
-                    buttonRect={actionMenuRect}
-                    isMe={isMe}
-                    isDark={isDark}
-                    onReactionClick={() => {
-                      setShowReactionPicker(true);
-                      setActiveActionMsgId(null);
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setActionMenuRect(rect);
+                      setActiveActionMsgId((prev) =>
+                        prev === msg.id ? null : msg.id,
+                      );
                     }}
-                    onReply={() => {
-                      const attachments = msg.attachments ?? (msg.attachment ? [msg.attachment] : []);
-                      const firstAtt = attachments[0];
-                      const icon = firstAtt
-                        ? firstAtt.type === "image"
-                          ? "📷 "
-                          : firstAtt.type === "voice"
-                            ? "🎤 "
-                            : "📁 "
-                        : "";
-                      const replyText = firstAtt
-                        ? msg.text
-                          ? `${icon}${msg.text}`
-                          : `${icon}${firstAtt.name || t.attachmentLabel || "Вложение"}`
-                        : msg.text;
+                    aria-label="Действия"
+                    className="w-6 h-6 rounded-full shadow-md flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-110 text-[var(--th-text-muted)] hover:bg-[var(--th-hover-bg-strong)]"
+                    style={{
+                      background: "var(--th-chip-bg)",
+                      border: "1px solid var(--th-chip-border)",
+                    }}
+                  >
+                    <MoreHorizontal className="w-3.5 h-3.5" />
+                  </button>
+                  {activeActionMsgId === msg.id && (
+                    <MessageActionMenu
+                      buttonRect={actionMenuRect}
+                      isMe={isMe}
+                      isDark={isDark}
+                      onReactionClick={() => {
+                        setShowReactionPicker(true);
+                        setActiveActionMsgId(null);
+                      }}
+                      onReply={() => {
+                        const attachments = msg.attachments ?? (msg.attachment ? [msg.attachment] : []);
+                        const firstAtt = attachments[0];
+                        const icon = firstAtt
+                          ? firstAtt.type === "image"
+                            ? "📷 "
+                            : firstAtt.type === "voice"
+                              ? "🎤 "
+                              : "📁 "
+                          : "";
+                        const replyText = firstAtt
+                          ? msg.text
+                            ? `${icon}${msg.text}`
+                            : `${icon}${firstAtt.name || t.attachmentLabel || "Вложение"}`
+                          : msg.text;
 
-                      setReplyingTo({
-                        id: msg.id,
-                        senderName:
-                          msg.senderName || (isMe ? t.you : activeContact.name),
-                        text: replyText,
-                      });
-                      setActiveActionMsgId(null);
-                    }}
-                    onForward={() => {
-                      setForwardingMsg(msg);
-                      setActiveActionMsgId(null);
-                    }}
-                    onDelete={() => {
-                      setDeletingMsgId(msg.id);
-                      setActiveActionMsgId(null);
-                    }}
-                    onThread={() => {
-                      setOpenThreadMsgId(msg.id);
-                      setShowContactDrawer(false);
-                      setActiveActionMsgId(null);
-                    }}
-                    onPin={() => {
-                      handlePinMessage(msg.id);
-                      setActiveActionMsgId(null);
-                    }}
-                    pinLabel={
-                      msg.pinned
-                        ? lang === "ru"
-                          ? "Открепить"
-                          : lang === "tg"
-                            ? "Ҷудо кардан"
-                            : "Unpin"
-                        : lang === "ru"
-                          ? "Закрепить"
-                          : lang === "tg"
-                            ? "Маҳкам кардан"
-                            : "Pin"
-                    }
-                    onClose={() => setActiveActionMsgId(null)}
-                  />
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <MessageAttachments
-            attachments={msg.attachments ?? (msg.attachment ? [msg.attachment] : [])}
-            isMe={isMe}
-            isDark={isDark}
-            isHovered={isHovered}
-            isTargetHighlighted={isTargetHighlighted}
-            status={attachmentStatus}
-            sendingLabel={t.sending}
-          />
-          {!!msg.text && (
-            <div
-              className={`px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 ease-in-out cursor-default ${
-                  isTargetHighlighted
-                    ? `rounded-2xl ${isMe ? "rounded-br-md text-[var(--th-bubble-out-text)]" : "rounded-bl-md text-[var(--th-bubble-in-text)]"} ring-2 ring-[rgb(var(--th-accent-rgb))] scale-[1.02] shadow-[0_0_24px_rgb(var(--th-accent-2-rgb)/0.85)] animate-pulse`
-                    : currentMatchMsg
-                      ? "rounded-2xl ring-2 ring-[rgb(var(--th-warning-rgb))] text-[var(--th-text)]"
-                      : highlighted
-                        ? "rounded-2xl text-[var(--th-text)]"
-                        : isMe
-                          ? "rounded-2xl rounded-br-md text-[var(--th-bubble-out-text)]"
-                          : "rounded-2xl rounded-bl-md text-[var(--th-bubble-in-text)]"
-                }`}
-              style={bubbleStyle}
-            >
-              <If is={!!msg.pinned}>
-                <span
-                  className={`inline-flex items-center gap-1 text-[10px] font-semibold mb-1 mr-2 px-1.5 py-0.5 rounded-md ${
-                    isMe
-                      ? "bg-[rgb(var(--th-on-accent-rgb)/0.2)] text-[var(--th-on-accent)] border border-[rgb(var(--th-on-accent-rgb)/0.3)]"
-                      : "bg-[var(--th-accent-soft-strong)] text-[var(--th-accent-text)] border border-[var(--th-accent-border)]"
+                        setReplyingTo({
+                          id: msg.id,
+                          senderName:
+                            msg.senderName || (isMe ? t.you : activeContact.name),
+                          text: replyText,
+                        });
+                        setActiveActionMsgId(null);
+                      }}
+                      onForward={() => {
+                        setForwardingMsg(msg);
+                        setActiveActionMsgId(null);
+                      }}
+                      onDelete={() => {
+                        setDeletingMsgId(msg.id);
+                        setActiveActionMsgId(null);
+                      }}
+                      onThread={() => {
+                        setOpenThreadMsgId(msg.id);
+                        setShowContactDrawer(false);
+                        setActiveActionMsgId(null);
+                      }}
+                      onPin={() => {
+                        handlePinMessage(msg.id);
+                        setActiveActionMsgId(null);
+                      }}
+                      pinLabel={
+                        msg.pinned
+                          ? lang === "ru"
+                            ? "Открепить"
+                            : lang === "tg"
+                              ? "Ҷудо кардан"
+                              : "Unpin"
+                          : lang === "ru"
+                            ? "Закрепить"
+                            : lang === "tg"
+                              ? "Маҳкам кардан"
+                              : "Pin"
+                      }
+                      onClose={() => setActiveActionMsgId(null)}
+                    />
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <MessageAttachments
+              attachments={msg.attachments ?? (msg.attachment ? [msg.attachment] : [])}
+              isMe={isMe}
+              isDark={isDark}
+              isHovered={isHovered}
+              isTargetHighlighted={isTargetHighlighted}
+              status={attachmentStatus}
+              sendingLabel={t.sending}
+            />
+            {!!msg.text && (
+              <div
+                className={`px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 ease-in-out cursor-default ${
+                    isTargetHighlighted
+                      ? `rounded-2xl ${isMe ? "rounded-br-md text-[var(--th-bubble-out-text)]" : "rounded-bl-md text-[var(--th-bubble-in-text)]"} ring-2 ring-[rgb(var(--th-accent-rgb))] scale-[1.02] shadow-[0_0_24px_rgb(var(--th-accent-2-rgb)/0.85)] animate-pulse`
+                      : currentMatchMsg
+                        ? "rounded-2xl ring-2 ring-[rgb(var(--th-warning-rgb))] text-[var(--th-text)]"
+                        : highlighted
+                          ? "rounded-2xl text-[var(--th-text)]"
+                          : isMe
+                            ? "rounded-2xl rounded-br-md text-[var(--th-bubble-out-text)]"
+                            : "rounded-2xl rounded-bl-md text-[var(--th-bubble-in-text)]"
                   }`}
-                >
-                  <Pin className="w-3 h-3 flex-shrink-0" />
-                  <span>{t.pinned}</span>
-                </span>
-              </If>
-              <span>{msg.text}</span>
-              <span className="inline-flex items-center gap-1 float-right mt-1 ml-2.5 select-none text-[10px] opacity-75">
-                <span>{msg.time}</span>
-                {isMe && (
-                  <span className="inline-flex items-center ml-0.5" title={msg.status}>
-                    {isPending ? (
-                      <Clock3 className="w-3 h-3 text-[var(--th-on-accent-muted)] animate-pulse" />
-                    ) : msg.status === "read" || msg.status === "delivered" ? (
-                      <CheckCheck className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
-                    ) : (
-                      <Check className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
-                    )}
+                style={bubbleStyle}
+              >
+                <If is={!!msg.pinned}>
+                  <span
+                    className={`inline-flex items-center gap-1 text-[10px] font-semibold mb-1 mr-2 px-1.5 py-0.5 rounded-md ${
+                      isMe
+                        ? "bg-[rgb(var(--th-on-accent-rgb)/0.2)] text-[var(--th-on-accent)] border border-[rgb(var(--th-on-accent-rgb)/0.3)]"
+                        : "bg-[var(--th-accent-soft-strong)] text-[var(--th-accent-text)] border border-[var(--th-accent-border)]"
+                    }`}
+                  >
+                    <Pin className="w-3 h-3 flex-shrink-0" />
+                    <span>{t.pinned}</span>
                   </span>
-                )}
-              </span>
-            </div>
-          )}
-          {!!msg.text && (
-            <MessageLinkPreview text={msg.text} isMe={isMe} t={t} />
-          )}
+                </If>
+                <span>{msg.text}</span>
+                <span className="inline-flex items-center gap-1 float-right mt-1 ml-2.5 select-none text-[10px] opacity-75">
+                  <span>{msg.time}</span>
+                  {isMe && (
+                    <span className="inline-flex items-center ml-0.5" title={msg.status}>
+                      {isPending ? (
+                        <Clock3 className="w-3 h-3 text-[var(--th-on-accent-muted)] animate-pulse" />
+                      ) : msg.status === "read" || msg.status === "delivered" ? (
+                        <CheckCheck className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
+                      ) : (
+                        <Check className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
+                      )}
+                    </span>
+                  )}
+                </span>
+              </div>
+            )}
+            {!!msg.text && (
+              <MessageLinkPreview text={msg.text} isMe={isMe} t={t} />
+            )}
+          </div>
           <If
             is={
               !!(
