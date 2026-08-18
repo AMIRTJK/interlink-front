@@ -291,7 +291,7 @@ export const CreateInternalCorrespondence = ({
   // горизонтальную панель под тулбаром, а боковые вкладки у холста скрываются.
   // Сами панели по-прежнему открываются у холста. По умолчанию выключен —
   // текущий функционал не меняется.
-  const [panelsInToolbar, setPanelsInToolbar] = useState(true);
+  const [panelsInToolbar, setPanelsInToolbar] = useState(false);
 
   const handleOpenApprovers = () => {
     setApproversOpen(true);

@@ -39,7 +39,7 @@ export function useIncomingViewState(data: IDataArgs) {
   const [previewAttachment, setPreviewAttachment] = useState<AttachedFile | null>(null);
   const [showVisorNotice, setShowVisorNotice] = useState(false);
 
-  const [panelsInToolbar, setPanelsInToolbar] = useState(true);
+  const [panelsInToolbar, setPanelsInToolbar] = useState(false);
 
   const rootScrollRef = useRef<HTMLDivElement>(null);
   const stickyHeaderRef = useRef<HTMLDivElement>(null);
