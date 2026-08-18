@@ -9,6 +9,10 @@ import {
   FileText,
   Undo,
   MessageSquare,
+  Eye,
+  ClipboardList,
+  ClipboardCheck,
+  CheckCircle2,
 } from "lucide-react";
 import { FileSignatureIcon } from "../../ui/newRegistry/newRegistryModel";
 import {
@@ -81,6 +85,9 @@ export const getTargetUserName = (event: ITimelineEvent): string => {
   if (typeof d.signer === "object" && d.signer?.full_name) {
     return d.signer.full_name;
   }
+  if (typeof d.visor === "object" && d.visor?.full_name) {
+    return d.visor.full_name;
+  }
   if (typeof d.target_user === "object" && d.target_user?.full_name) {
     return d.target_user.full_name;
   }
@@ -108,6 +115,9 @@ export const getTargetUserName = (event: ITimelineEvent): string => {
   if (typeof d.invited_user_name === "string" && d.invited_user_name.trim()) {
     return d.invited_user_name.trim();
   }
+  if (typeof d.visor_name === "string" && d.visor_name.trim()) {
+    return d.visor_name.trim();
+  }
   if (typeof d.recipient_name === "string" && d.recipient_name.trim()) {
     return d.recipient_name.trim();
   }
@@ -118,6 +128,19 @@ export const getTargetUserName = (event: ITimelineEvent): string => {
     return d.name.trim();
   }
   return "";
+};
+
+export const formatVersionLabel = (
+  version?: string | number | null,
+): string => {
+  if (version === null || version === undefined) return "";
+  const str = String(version).trim();
+  if (!str) return "";
+  if (/^версия\s*/i.test(str)) {
+    return str.replace(/^версия\s*/i, "Версия ");
+  }
+  const cleaned = str.replace(/^v\.?\s*/i, "").trim();
+  return cleaned ? `Версия ${cleaned}` : "Версия";
 };
 
 export const getEventMeta = (event: ITimelineEvent) => {
@@ -136,14 +159,15 @@ export const getEventMeta = (event: ITimelineEvent) => {
   }
 
   if (type === "version_created" || action === "version_created") {
-    const versionNum = event.data?.version ? ` v${event.data.version}` : "";
+    const rawVersion = event.data?.version ?? event.data?.version_number;
+    const versionLabel = formatVersionLabel(rawVersion);
     return {
       icon: FileText,
       ring: "bg-slate-100 dark:bg-slate-700",
       iconColor: "text-slate-500",
       badge: "bg-slate-100 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300",
-      title: `Создал новую версию${versionNum}`.trim(),
-      badgeText: versionNum.trim() || "Версия",
+      title: versionLabel ? `Создал новую версию (${versionLabel})` : "Создал новую версию",
+      badgeText: versionLabel || "Версия",
     };
   }
 
@@ -153,13 +177,16 @@ export const getEventMeta = (event: ITimelineEvent) => {
     action === "version_selected_for_signing" ||
     action === "version_selected"
   ) {
-    const versionNum = event.data?.version ? ` (v${event.data.version})` : "";
+    const rawVersion = event.data?.version ?? event.data?.version_number;
+    const versionLabel = formatVersionLabel(rawVersion);
     return {
       icon: FileSignatureIcon,
       ring: "bg-yellow-100 dark:bg-yellow-900/40",
       iconColor: "text-yellow-600",
       badge: "bg-yellow-100 dark:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-300",
-      title: `Выбрал версию для подписи${versionNum}`,
+      title: versionLabel
+        ? `Выбрал версию для подписи (${versionLabel})`
+        : "Выбрал версию для подписи",
       badgeText: "Для подписи",
     };
   }
@@ -246,6 +273,98 @@ export const getEventMeta = (event: ITimelineEvent) => {
       badge: "bg-amber-100 dark:bg-amber-900/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300",
       title: "Отменил подпись",
       badgeText: "Отменено",
+    };
+  }
+
+  if (
+    type === "visor_invited" ||
+    action === "visor_invited" ||
+    type === "internal_correspondence.visor_invited" ||
+    action === "internal_correspondence.visor_invited" ||
+    type === "internal_correspondence_visor_invited" ||
+    action === "internal_correspondence_visor_invited"
+  ) {
+    const targetName = getTargetUserName(event);
+    const title = targetName
+      ? `Пригласил визирующего ${targetName}`
+      : "Пригласил визирующего";
+    return {
+      icon: Eye,
+      ring: "bg-violet-100 dark:bg-violet-900/40",
+      iconColor: "text-violet-500",
+      badge:
+        "bg-violet-100 dark:bg-violet-900/40 border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300",
+      title,
+      badgeText: "Визирующий",
+    };
+  }
+
+  if (type === "resolution_created" || action === "resolution_created") {
+    return {
+      icon: FileText,
+      ring: "bg-indigo-100 dark:bg-indigo-900/40",
+      iconColor: "text-indigo-500",
+      badge:
+        "bg-indigo-100 dark:bg-indigo-900/40 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300",
+      title: "Создал резолюцию",
+      badgeText: "Резолюция",
+    };
+  }
+
+  if (
+    type === "assignment_created" ||
+    action === "assignment_created" ||
+    type === "internal_correspondence.assignment_created" ||
+    action === "internal_correspondence.assignment_created" ||
+    type === "internal_correspondence_assignment_created" ||
+    action === "internal_correspondence_assignment_created"
+  ) {
+    const targetName = getTargetUserName(event);
+    const title = targetName
+      ? `Создал поручение для ${targetName}`
+      : "Создал поручение";
+    return {
+      icon: ClipboardList,
+      ring: "bg-indigo-100 dark:bg-indigo-900/40",
+      iconColor: "text-indigo-500",
+      badge:
+        "bg-indigo-100 dark:bg-indigo-900/40 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300",
+      title,
+      badgeText: "Поручение",
+    };
+  }
+
+  if (
+    type === "assignment_submitted" ||
+    action === "assignment_submitted" ||
+    type === "internal_correspondence_assignment_submitted" ||
+    action === "internal_correspondence_assignment_submitted"
+  ) {
+    return {
+      icon: ClipboardCheck,
+      ring: "bg-blue-100 dark:bg-blue-900/40",
+      iconColor: "text-blue-500",
+      badge:
+        "bg-blue-100 dark:bg-blue-900/40 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300",
+      title: "Исполнил поручение",
+      badgeText: "Исполнено",
+    };
+  }
+
+  if (
+    type === "assignment_reviewed" ||
+    action === "assignment_reviewed" ||
+    type === "internal_correspondence_assignment_reviewed" ||
+    action === "internal_correspondence_assignment_reviewed"
+  ) {
+    return {
+      icon: CheckCircle2,
+      ring: "bg-emerald-100 dark:bg-emerald-900/40",
+      iconColor: "text-emerald-500",
+      badge:
+        "bg-emerald-100 dark:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300",
+      title: "Проверил поручение",
+      badgeText: "Проверено",
     };
   }
 
