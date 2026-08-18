@@ -9,7 +9,7 @@ import { LetterDirection, IInternalStructureResponse } from "../../lib/structure
 import {
   getInitials,
   formatDate,
-  getStructureCount,
+  estimateStructureCount,
   filterTimelineEvents,
 } from "../../lib/structure/helpers";
 import { EventRow } from "./EventRow";
@@ -34,7 +34,7 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
   isHighlighted,
   onVersionClick,
 }) => {
-  const [requested, setRequested] = useState<boolean>(() => {
+  const [open, setOpen] = useState<boolean>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw || !item?.id) return false;
@@ -45,55 +45,38 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
     }
   });
 
-  const [open, setOpen] = useState<boolean>(false);
-
   const { data: responseData, isLoading } = useGetQuery<
     Record<string, unknown>,
     { data: IInternalStructureResponse }
   >({
-    url: requested && item.id ? ApiRoutes.GET_INTERNAL_STRUCTURE.replace(":id", String(item.id)) : undefined,
+    url: item.id ? ApiRoutes.GET_INTERNAL_STRUCTURE.replace(":id", String(item.id)) : undefined,
     options: {
-      staleTime: 0,
-      refetchOnMount: true,
+      staleTime: 60 * 1000,
     },
   });
-
-  useEffect(() => {
-    if (requested && !isLoading && responseData?.data) {
-      setOpen(true);
-    }
-  }, [requested, isLoading, responseData]);
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!item?.id) return;
 
-    if (open || (requested && isLoading)) {
-      setOpen(false);
-      setRequested(false);
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : {};
+    const next = !open;
+    setOpen(next);
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      if (next) {
+        parsed[String(item.id)] = true;
+      } else {
         delete parsed[String(item.id)];
         delete parsed[item.id];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-      } catch (err) {
-        console.error(err);
       }
-    } else {
-      setRequested(true);
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : {};
-        parsed[String(item.id)] = true;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-      } catch (err) {
-        console.error(err);
-      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  const isPendingLoad = requested && isLoading && !responseData?.data;
+  const isPendingLoad = open && isLoading && !responseData?.data;
 
   const structureData = responseData?.data;
   const rawTimeline = structureData?.timeline;
@@ -107,23 +90,10 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
     item.recipients?.find((r: any) => r.type === "to")?.user?.full_name ||
     item.recipients?.[0]?.user?.full_name;
   const isUnread = Boolean(item.is_unread);
-  // Счётчик этапов виден сразу, до раскрытия: значение приходит вместе с
-  // письмом (structure_count). После загрузки структуры уточняем его длиной
-  // отфильтрованного timeline.
-  const countFromItem = getStructureCount(item);
-  const fetchedCount = rawTimeline ? timelineEvents.length : undefined;
-
-  const [lastCount, setLastCount] = useState<number | undefined>(countFromItem);
-
-  useEffect(() => {
-    if (typeof fetchedCount === "number") {
-      setLastCount(fetchedCount);
-    } else if (typeof countFromItem === "number") {
-      setLastCount(countFromItem);
-    }
-  }, [fetchedCount, countFromItem]);
-
-  const displayCount = lastCount ?? countFromItem;
+  // Счётчик этапов структуры: берём точное число отфильтрованных этапов,
+  // либо рассчитываем оценку из structure_count реестра с учётом скрываемых этапов.
+  const countFromItem = estimateStructureCount(item);
+  const displayCount = rawTimeline ? timelineEvents.length : countFromItem;
   const hasCount = displayCount !== undefined;
 
   return (
