@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, ChevronDown, Pin, User, Loader2 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
@@ -10,6 +10,7 @@ import {
   getInitials,
   formatDate,
   getStructureCount,
+  filterTimelineEvents,
 } from "../../lib/structure/helpers";
 import { EventRow } from "./EventRow";
 import { RelatedDocsSection } from "./RelatedDocsSection";
@@ -95,7 +96,11 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
   const isPendingLoad = requested && isLoading && !responseData?.data;
 
   const structureData = responseData?.data;
-  const timelineEvents = structureData?.timeline || [];
+  const rawTimeline = structureData?.timeline;
+  const timelineEvents = useMemo(
+    () => filterTimelineEvents(rawTimeline),
+    [rawTimeline],
+  );
   const relatedDocs = structureData?.related_documents || [];
   const creatorName = item.creator?.full_name || structureData?.document?.creator?.full_name || "—";
   const primaryRecipient =
@@ -104,9 +109,9 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
   const isUnread = Boolean(item.is_unread);
   // Счётчик этапов виден сразу, до раскрытия: значение приходит вместе с
   // письмом (structure_count). После загрузки структуры уточняем его длиной
-  // timeline.
+  // отфильтрованного timeline.
   const countFromItem = getStructureCount(item);
-  const fetchedCount = responseData?.data?.timeline?.length;
+  const fetchedCount = rawTimeline ? timelineEvents.length : undefined;
 
   const [lastCount, setLastCount] = useState<number | undefined>(countFromItem);
 

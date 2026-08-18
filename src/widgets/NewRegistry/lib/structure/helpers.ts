@@ -143,6 +143,61 @@ export const formatVersionLabel = (
   return cleaned ? `Версия ${cleaned}` : "Версия";
 };
 
+export const isInitialVersionEvent = (event: ITimelineEvent): boolean => {
+  const isVersionCreated =
+    event.type === "version_created" || event.action === "version_created";
+  if (!isVersionCreated) return false;
+
+  const raw = event.data?.version ?? event.data?.version_number;
+  if (raw === null || raw === undefined || raw === "") return false;
+  const str = String(raw).trim().toLowerCase().replace(/^v\.?\s*/i, "").trim();
+  return str === "1" || str === "1.0" || str === "1.0.0" || /^1\.0+$/.test(str);
+};
+
+export const isDocumentSentEvent = (event: ITimelineEvent): boolean => {
+  const type = event.type;
+  const action = event.action;
+  return (
+    type === "document_sent" ||
+    action === "sent" ||
+    type === "internal_correspondence_sent" ||
+    action === "internal_correspondence_sent" ||
+    type === "internal_correspondence.sent" ||
+    action === "internal_correspondence.sent"
+  );
+};
+
+export const isVersionSelectedEvent = (event: ITimelineEvent): boolean => {
+  const type = event.type;
+  const action = event.action;
+  return (
+    type === "version_selected_for_signature" ||
+    type === "version_selected" ||
+    action === "version_selected_for_signing" ||
+    action === "version_selected"
+  );
+};
+
+export const filterTimelineEvents = (
+  events?: ITimelineEvent[] | null,
+): ITimelineEvent[] => {
+  if (!Array.isArray(events)) return [];
+  let hasBeenSent = false;
+  return events.filter((e) => {
+    // 1. Никогда не показываем авто-созданную начальную версию 1.0
+    if (isInitialVersionEvent(e)) return false;
+
+    // 2. После отправки документа выбор версии для подписи не имеет смысла и скрывается
+    if (hasBeenSent && isVersionSelectedEvent(e)) return false;
+
+    if (isDocumentSentEvent(e)) {
+      hasBeenSent = true;
+    }
+
+    return true;
+  });
+};
+
 export const getEventMeta = (event: ITimelineEvent) => {
   const type = event.type;
   const action = event.action;
