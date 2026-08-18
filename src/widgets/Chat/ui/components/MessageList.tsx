@@ -5,8 +5,10 @@ import { If } from "@shared/ui";
 import type { Contact, Message, ReplyPreview } from "../../model";
 import { Lang, Translations } from "../../lib/translations";
 import { formatChatDateDivider, getMessageDateKey } from "../../lib/chatFormat";
+import { useFloatingChatDate } from "../../lib/useFloatingChatDate";
 import { ChatMessageItem } from "./ChatMessageItem";
 import { ChatDateDivider } from "./ChatDateDivider";
+import { ChatFloatingDate } from "./ChatFloatingDate";
 
 // Лента сообщений: загрузка, пустое состояние, догрузка старых при прокрутке
 // вверх, индикатор набора и плавающая кнопка возврата к ответу.
@@ -84,6 +86,20 @@ export const MessageList = ({
 }: IProps) => {
   const isEmpty = !isLoading && !isError && messages.length === 0;
 
+  const {
+    isVisible: isFloatingDateVisible,
+    floatingDate,
+    handleScroll: handleFloatingDateScroll,
+  } = useFloatingChatDate({
+    scrollRef,
+    activeConversationId: activeContact.id,
+  });
+
+  const handleContainerScroll = React.useCallback(() => {
+    onScroll();
+    handleFloatingDateScroll();
+  }, [onScroll, handleFloatingDateScroll]);
+
   if (targetHighlightedMessageId || returnToMessageId) {
     console.log("[MessageList] Render with active reply state:", {
       targetHighlightedMessageId,
@@ -96,6 +112,10 @@ export const MessageList = ({
       className="flex-1 relative overflow-hidden"
       style={{ background: "var(--th-chat-canvas)" }}
     >
+      <ChatFloatingDate
+        isVisible={isFloatingDateVisible}
+        dateText={floatingDate}
+      />
       {/* Вертикальные отступы держат ореол наведения: это box-shadow, он не
           увеличивает ни размер элемента, ни прокручиваемую область, поэтому у
           крайних сообщений его срезал край скролл-контейнера. 32px перекрывают
@@ -104,7 +124,7 @@ export const MessageList = ({
           контейнер — вложенным элементам её ставить нельзя (см. ниже). */}
       <motion.div
         ref={scrollRef}
-        onScroll={onScroll}
+        onScroll={handleContainerScroll}
         className="absolute inset-0 overflow-y-auto overflow-x-hidden px-3 sm:px-6 py-8 space-y-3.5"
         style={{ overflowX: "hidden" }}
       >
