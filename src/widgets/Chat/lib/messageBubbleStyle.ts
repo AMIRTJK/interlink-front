@@ -83,7 +83,7 @@ const getBaseBubbleStyle = ({
 };
 
 interface IHoverGlowParams {
-  isDark: boolean;
+  isDark?: boolean;
   isHovered: boolean;
   isMe: boolean;
   /** У подсвеченного перехода своя пульсация — свечение к ней не добавляем. */
@@ -92,15 +92,14 @@ interface IHoverGlowParams {
 
 /**
  * Наружное свечение при наведении. Общее для всех видов сообщения — текста,
- * вложений и голосового, — чтобы подсветка выглядела одинаково.
+ * вложений и голосового, — чтобы подсветка выглядела одинаково как в темной, так и в светлой теме.
  */
 export const getHoverGlow = ({
-  isDark,
   isHovered,
   isMe,
   isTargetHighlighted,
 }: IHoverGlowParams): string | null => {
-  if (!isDark || !isHovered || isTargetHighlighted) return null;
+  if (!isHovered || isTargetHighlighted) return null;
   return isMe ? "var(--th-glow-out)" : "var(--th-glow-in)";
 };
 
