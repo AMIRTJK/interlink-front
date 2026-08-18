@@ -813,6 +813,21 @@ export const CreateInternalCorrespondence = ({
     [approvalVersionSummary, activeVersion],
   );
 
+  // Список согласующих, привязанный к текущей активной версии документа
+  const currentVersionApprovers = useMemo(() => {
+    if (!activeVersionId) return approvers;
+    return approvers.filter((a) => {
+      if (a.versionId != null) {
+        return String(a.versionId) === String(activeVersionId);
+      }
+      if (allVersions.length <= 1) return true;
+      if (latestVersionId != null && String(activeVersionId) === String(latestVersionId)) {
+        return true;
+      }
+      return false;
+    });
+  }, [approvers, activeVersionId, allVersions.length, latestVersionId]);
+
   useEffect(() => {
     const navState = location.state as
       | {
@@ -1973,6 +1988,10 @@ export const CreateInternalCorrespondence = ({
         showCommentInput: false,
         dsApplied: false,
         dsLoading: false,
+        versionId: activeVersion?.id ?? null,
+        versionLabel: activeVersion?.versionNumber
+          ? `Версия ${activeVersion.versionNumber}`
+          : null,
       },
     ]);
   };
@@ -2890,10 +2909,18 @@ export const CreateInternalCorrespondence = ({
                           openLeft={false}
                           onOpen={handleOpenApprovers}
                           onClose={() => setApproversOpen(false)}
-                          approvers={approvers}
+                          approvers={currentVersionApprovers}
                           onAddApprover={addApprover}
                           onRemoveApprover={(approverId) =>
-                            setApprovers((prev) => prev.filter((a) => a.id !== approverId))
+                            setApprovers((prev) =>
+                              prev.filter((a) => {
+                                if (a.id !== approverId) return true;
+                                if (a.versionId != null && activeVersionId != null) {
+                                  return String(a.versionId) !== String(activeVersionId);
+                                }
+                                return false;
+                              }),
+                            )
                           }
                           availableUsers={availableUsers}
                           inviteApprover={inviteApprover}

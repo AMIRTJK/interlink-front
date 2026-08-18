@@ -137,6 +137,7 @@ export const IncomingViewCanvasPanels: React.FC<IProps> = ({
                 onOpen={openApprovers}
                 onClose={() => setApproversOpen(false)}
                 approvals={approvals}
+                activeVersionId={activeVersionId}
               />
               {!panelsInToolbar && (
                 <div className="absolute z-20" style={{ left: -33, top: 10 }}>

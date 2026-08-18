@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { resolveApprovalVersionLabel } from "@entities/correspondence";
+import {
+  resolveApprovalVersionId,
+  resolveApprovalVersionLabel,
+} from "@entities/correspondence";
 import { cn } from "@shared/lib";
 import {
   DocApproverItem,
@@ -17,14 +20,27 @@ export const ApproversPanel = ({
   onOpen,
   onClose,
   approvals = [],
+  activeVersionId,
 }: {
   isOpen: boolean;
   hideTab?: boolean;
   onOpen: () => void;
   onClose: () => void;
   approvals?: any[];
+  activeVersionId?: string | number | null;
 }) => {
-  const items: DocApproverItem[] = approvals.map((app: any, idx: number) => {
+  const filteredApprovals = useMemo(() => {
+    if (!activeVersionId) return approvals;
+    return approvals.filter((app: any) => {
+      const vId = resolveApprovalVersionId(app);
+      if (vId != null) {
+        return String(vId) === String(activeVersionId);
+      }
+      return true;
+    });
+  }, [approvals, activeVersionId]);
+
+  const items: DocApproverItem[] = filteredApprovals.map((app: any, idx: number) => {
     const user = app.approver || app.user || {};
     const initials = getInitials(user.full_name || "");
     const grad = GRADIENTS[idx % GRADIENTS.length];
@@ -55,7 +71,7 @@ export const ApproversPanel = ({
     };
   });
 
-  const historyEvents = approvals
+  const historyEvents = filteredApprovals
     .filter((app: any) => app.status === "approved")
     .map((app: any) => {
       const name = (app.approver || app.user)?.full_name || "Сотрудник";
@@ -158,9 +174,15 @@ export const ApproversPanel = ({
             </p>
 
             <div className="flex-1 overflow-y-auto px-4 py-2 flex flex-col gap-3 min-h-0">
-              {items.map((approver, idx) => (
-                <ApproverCard key={approver.id} approver={approver} idx={idx} />
-              ))}
+              {items.length === 0 ? (
+                <div className="py-8 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs text-center px-4">
+                  <span>Нет согласующих для этой версии</span>
+                </div>
+              ) : (
+                items.map((approver, idx) => (
+                  <ApproverCard key={approver.id} approver={approver} idx={idx} />
+                ))
+              )}
             </div>
 
             <ApproversPanelHistory historyEvents={historyEvents} />
