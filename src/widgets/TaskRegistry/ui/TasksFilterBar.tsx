@@ -198,9 +198,12 @@ export const TasksFilterBar = ({
         {/* Create Button */}
         <button
           onClick={onCreate}
-          className="flex items-center gap-1.5 px-5 py-2 bg-blue-500 hover:bg-blue-600 rounded-xl text-xs font-bold text-white shadow-md shadow-blue-200 dark:shadow-blue-900/30 transition-all cursor-pointer active:scale-95"
+          className="flex items-center gap-2 px-4 py-1.5 bg-gradient-to-b from-white to-slate-50/90 dark:from-slate-800 dark:to-slate-800/90 border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-xs hover:shadow-md transition-all cursor-pointer active:scale-95"
         >
-          <Plus size={15} /> Создать
+          <div className="w-5 h-5 rounded-md bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <Plus size={13} strokeWidth={3} />
+          </div>
+          <span className="text-xs font-extrabold text-blue-500 dark:text-blue-400">Создать</span>
         </button>
       </div>
 
