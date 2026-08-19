@@ -1,8 +1,9 @@
 import { useMemo, memo } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import type { Task } from "@features/tasks";
-import { getEventStyle, getDayWeather } from "../model";
+import { getEventStyle } from "../model";
 import { WeatherIcon } from "./WeatherIcon";
+import { useWeather } from "../lib/useWeather";
 
 interface IDayViewProps {
   currentDate: Dayjs;
@@ -44,26 +45,28 @@ export const DayView = memo(({
   onDayClick,
   onEventClick,
 }: IDayViewProps) => {
+  const weather = useWeather();
+
   const dayTasks = useMemo(() => {
     const targetDate = currentDate.format("YYYY-MM-DD");
     return tasks.filter((task) => task.date === targetDate);
   }, [currentDate, tasks]);
-
-  const weather = getDayWeather(currentDate);
 
   return (
     <div className="w-full! flex! flex-col! gap-3!">
       {/* Top Focus Day Banner */}
       <div className="w-full! py-2.5! px-5! rounded-xl! bg-[#f5f3ff]! dark:bg-purple-950/40! border! border-[#e9d5ff]! dark:border-purple-800/50! text-[#6b21a8]! dark:text-purple-200! font-extrabold! text-[11px]! tracking-widest! uppercase! flex! items-center! justify-center! gap-2! shadow-2xs!">
         <span>{currentDate.format("dddd D FOCUS DAY").toUpperCase()}</span>
-        <WeatherIcon type={weather} size={14} />
+        <WeatherIcon type={weather.weatherType} size={14} />
       </div>
 
-      {/* Weather info header */}
+      {/* Real-time Weather info header */}
       <div className="flex! items-center! gap-2! px-1! text-xs! font-bold! text-slate-700! dark:text-slate-200!">
-        <WeatherIcon type={weather} size={14} />
-        <span className="font-extrabold!">72°F</span>
-        <span className="text-slate-400! dark:text-slate-500! font-semibold!">Partly Cloudy</span>
+        <WeatherIcon type={weather.weatherType} size={14} />
+        <span className="font-extrabold!">{weather.temp}</span>
+        <span className="text-slate-400! dark:text-slate-500! font-semibold!">
+          {weather.description}
+        </span>
       </div>
 
       {/* Hourly Grid Container */}

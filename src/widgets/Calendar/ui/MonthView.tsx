@@ -3,6 +3,7 @@ import dayjs, { Dayjs } from "dayjs";
 import type { Task } from "@features/tasks";
 import { getEventStyle, getDayWeather, WeatherType } from "../model";
 import { WeatherIcon } from "./WeatherIcon";
+import { useWeather } from "../lib/useWeather";
 
 interface IMonthViewProps {
   daysToShow: Dayjs[];
@@ -36,7 +37,6 @@ const getMonthCardStyle = (weather: WeatherType, isPreviousOrNextMonth: boolean)
 
   switch (weather) {
     case "sun":
-      // Warm yellow/peach card with amber bottom glow
       return {
         className: "text-[#1e293b]",
         style: {
@@ -45,7 +45,6 @@ const getMonthCardStyle = (weather: WeatherType, isPreviousOrNextMonth: boolean)
         },
       };
     case "sun-cloud":
-      // Soft lavender/purple card with purple bottom glow
       return {
         className: "text-[#1e293b]",
         style: {
@@ -54,7 +53,6 @@ const getMonthCardStyle = (weather: WeatherType, isPreviousOrNextMonth: boolean)
         },
       };
     case "rain":
-      // Soft sky blue/cyan card with blue bottom glow
       return {
         className: "text-[#1e293b]",
         style: {
@@ -63,7 +61,6 @@ const getMonthCardStyle = (weather: WeatherType, isPreviousOrNextMonth: boolean)
         },
       };
     case "snow":
-      // Soft pale lavender/white card with soft glow
       return {
         className: "text-[#1e293b]",
         style: {
@@ -73,7 +70,6 @@ const getMonthCardStyle = (weather: WeatherType, isPreviousOrNextMonth: boolean)
       };
     case "cloud":
     default:
-      // Neutral smooth slate card with gray glow
       return {
         className: "text-[#1e293b]",
         style: {
@@ -91,6 +87,8 @@ export const MonthView = memo(({
   onDayClick,
   onEventClick,
 }: IMonthViewProps) => {
+  const liveWeather = useWeather();
+
   const tasksMap = useMemo(() => {
     const map: Record<string, Task[]> = {};
     tasks.forEach((task) => {
@@ -125,7 +123,7 @@ export const MonthView = memo(({
           const dayTasks = tasksMap[dateStr] || [];
           const inMonth = day.month() === currentDate.month();
           const isTodayHighlight = day.date() === 17 && inMonth;
-          const weather = getDayWeather(day);
+          const weather = isTodayHighlight ? liveWeather.weatherType : getDayWeather(day);
           const cardConfig = getMonthCardStyle(weather, !inMonth);
 
           return (
@@ -153,7 +151,7 @@ export const MonthView = memo(({
                 </div>
               </div>
 
-              {/* Cell Events List: White Pill Chips with Colored Dot */}
+              {/* Cell Events List */}
               <div className="flex-1! flex! flex-col! gap-1.5! overflow-y-auto! no-scrollbar!">
                 {dayTasks.map((task) => {
                   const style = getEventStyle(task.color);
