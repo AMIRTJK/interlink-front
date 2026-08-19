@@ -106,10 +106,10 @@ export function PersonalTaskForm({
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left container */}
-        <div className="lg:col-span-2 bg-[#f8f9ff]/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-[#eaedff] dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-15px_rgba(100,105,240,0.14)] dark:shadow-none space-y-5">
+        <div className="lg:col-span-2 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-5">
           {/* TASK TITLE */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-wider text-[#7e85b0] dark:text-purple-300/60 block">
+            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
               НАЗВАНИЕ ЗАДАЧИ <span className="text-red-500">*</span>
             </label>
             <input
@@ -120,7 +120,7 @@ export function PersonalTaskForm({
                 if (e.target.value.trim()) onClearTitleError();
               }}
               className={cn(
-                "w-full px-5 py-3.5 bg-[#f4f6fe] dark:bg-slate-800/90 border border-[#e4e8fc] dark:border-white/10 rounded-2xl outline-none transition-all text-xs font-semibold text-[#333962] dark:text-slate-100 placeholder:text-[#9aa2c8] focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-indigo-500/20 shadow-2xs",
+                "w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none transition-all text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] focus:bg-white focus:border-[#3373e5]/40 focus:ring-2 focus:ring-[#3373e5]/15 shadow-[0_4px_16px_rgba(100,105,240,0.06)]",
                 titleError
                   ? "border-red-500 ring-1 ring-red-200"
                   : "",
@@ -136,13 +136,13 @@ export function PersonalTaskForm({
 
           {/* DESCRIPTION */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-wider text-[#7e85b0] dark:text-purple-300/60 block">
+            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
               ОПИСАНИЕ
             </label>
             <textarea
               value={formDescription}
               onChange={(e) => onFormDescriptionChange(e.target.value)}
-              className="w-full h-36 px-5 py-3.5 bg-[#f4f6fe] dark:bg-slate-800/90 border border-[#e4e8fc] dark:border-white/10 rounded-2xl outline-none transition-all text-xs font-semibold text-[#333962] dark:text-slate-100 placeholder:text-[#9aa2c8] resize-none focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-indigo-500/20 shadow-2xs"
+              className="w-full h-36 px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none transition-all text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] resize-none focus:bg-white focus:border-[#3373e5]/40 focus:ring-2 focus:ring-[#3373e5]/15 shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
               placeholder="Подробно опишите задачу..."
             />
           </div>
@@ -162,16 +162,16 @@ export function PersonalTaskForm({
         </div>
 
         {/* Right container */}
-        <div className="lg:col-span-1 bg-[#f8f9ff]/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-[#eaedff] dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-15px_rgba(100,105,240,0.14)] dark:shadow-none space-y-4">
+        <div className="lg:col-span-1 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-4">
           {/* PRIORITY */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-wider text-[#7e85b0] dark:text-purple-300/60 block">
+            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
               ПРИОРИТЕТ
             </label>
             <select
               value={formPriority}
               onChange={(e) => onFormPriorityChange(e.target.value as Priority)}
-              className="w-full px-5 py-3.5 bg-[#f4f6fe] dark:bg-slate-800/90 border border-[#e4e8fc] dark:border-white/10 rounded-2xl outline-none text-xs font-semibold text-[#333962] dark:text-slate-100 cursor-pointer shadow-2xs"
+              className="w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 cursor-pointer shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
             >
               {PRIORITY_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -183,13 +183,13 @@ export function PersonalTaskForm({
 
           {/* STATUS */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-wider text-[#7e85b0] dark:text-purple-300/60 block">
+            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
               СТАТУС
             </label>
             <select
               value={formStatus}
               onChange={(e) => onFormStatusChange(e.target.value as TaskStatus)}
-              className="w-full px-5 py-3.5 bg-[#f4f6fe] dark:bg-slate-800/90 border border-[#e4e8fc] dark:border-white/10 rounded-2xl outline-none text-xs font-semibold text-[#333962] dark:text-slate-100 cursor-pointer shadow-2xs"
+              className="w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 cursor-pointer shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
             >
               {STATUS_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -201,7 +201,7 @@ export function PersonalTaskForm({
 
           {/* DUE DATE */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-wider text-[#7e85b0] dark:text-purple-300/60 block">
+            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
               СРОК ВЫПОЛНЕНИЯ
             </label>
             <div className="relative">
@@ -210,19 +210,19 @@ export function PersonalTaskForm({
                 type="date"
                 value={formDueDate}
                 onChange={(e) => onFormDueDateChange(e.target.value)}
-                className="w-full pl-10 pr-4 py-3.5 bg-[#f4f6fe] dark:bg-slate-800/90 border border-[#e4e8fc] dark:border-white/10 rounded-2xl outline-none text-xs font-semibold text-[#333962] dark:text-slate-100 shadow-2xs"
+                className="w-full pl-10 pr-4 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
               />
             </div>
           </div>
 
           {/* FORMAT */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-wider text-[#7e85b0] dark:text-purple-300/60 block">
+            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
               ФОРМАТ
             </label>
             <select
               defaultValue="normal"
-              className="w-full px-5 py-3.5 bg-[#f4f6fe] dark:bg-slate-800/90 border border-[#e4e8fc] dark:border-white/10 rounded-2xl outline-none text-xs font-semibold text-[#333962] dark:text-slate-100 cursor-pointer shadow-2xs"
+              className="w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 cursor-pointer shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
             >
               <option value="normal">Обычный</option>
               <option value="urgent">Срочный</option>
@@ -232,7 +232,7 @@ export function PersonalTaskForm({
 
           {/* ASSIGNEES */}
           <div className="space-y-2 relative">
-            <label className="text-[10px] font-black uppercase tracking-wider text-[#7e85b0] dark:text-purple-300/60 block">
+            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
               ИСПОЛНИТЕЛИ
             </label>
 
@@ -244,7 +244,7 @@ export function PersonalTaskForm({
                   return (
                     <span
                       key={id}
-                      className="inline-flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 bg-white dark:bg-slate-800 border border-[#e4e8fc] dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#333962] dark:text-slate-100"
+                      className="inline-flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 bg-white dark:bg-slate-800 border border-[#3373e5]/20 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100"
                     >
                       <span className="w-5 h-5 rounded-full bg-[#ec4899] text-white flex items-center justify-center text-[9px] font-black shrink-0">
                         {col.initials || "AS"}
@@ -273,7 +273,7 @@ export function PersonalTaskForm({
                 }}
                 onFocus={() => onAssigneeOpenChange(true)}
                 onBlur={() => setTimeout(() => onAssigneeOpenChange(false), 150)}
-                className="w-full pl-5 pr-10 py-3.5 bg-[#f4f6fe] dark:bg-slate-800/90 border border-[#e4e8fc] dark:border-white/10 rounded-2xl outline-none text-xs font-semibold text-[#333962] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-2xs"
+                className="w-full pl-5 pr-10 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
                 placeholder="Поиск коллеги..."
               />
               <Search size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9aa2c8] pointer-events-none" />
