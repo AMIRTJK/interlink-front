@@ -50,7 +50,7 @@ const getWeekColumnConfig = (colIdx: number) => {
       className: "border border-[#fed7aa]/80",
     };
   }
-  if (colIdx === 1 || colIdx === 2) {
+  if (colIdx === 1 || colIdx === 2 || colIdx === 4 || colIdx === 5) {
     return {
       style: {
         background: "linear-gradient(180deg, #FAF5FF 0%, #F3E8FF 100%)",
@@ -59,21 +59,12 @@ const getWeekColumnConfig = (colIdx: number) => {
       className: "border border-[#e9d5ff]/80",
     };
   }
-  if (colIdx === 3 || colIdx === 6) {
-    return {
-      style: {
-        background: "linear-gradient(180deg, #F0F9FF 0%, #E0F2FE 100%)",
-        boxShadow: "0 14px 30px -4px rgba(186, 230, 253, 0.7)",
-      },
-      className: "border border-[#bae6fd]/80",
-    };
-  }
   return {
     style: {
-      background: "linear-gradient(180deg, #F8FAFC 0%, #E2E8F0 100%)",
-      boxShadow: "0 14px 30px -4px rgba(226, 232, 240, 0.8)",
+      background: "linear-gradient(180deg, #F0F9FF 0%, #E0F2FE 100%)",
+      boxShadow: "0 14px 30px -4px rgba(186, 230, 253, 0.7)",
     },
-    className: "border border-[#e2e8f0]/80",
+    className: "border border-[#bae6fd]/80",
   };
 };
 
@@ -128,8 +119,8 @@ export const WeekView = memo(({
         })}
       </div>
 
-      {/* Main Grid Area */}
-      <div className="flex! relative! max-h-[580px]! overflow-y-auto! no-scrollbar!">
+      {/* Main Grid Area: Single natural height without nested internal scrollbar */}
+      <div className="flex! relative! w-full!">
         {/* Time Axis */}
         <div className="w-14! flex-shrink-0! relative!">
           {HOURS.map((h) => (
@@ -149,7 +140,7 @@ export const WeekView = memo(({
           {HOURS.map((h) => (
             <div
               key={h}
-              className="absolute! left-0! right-0! border-b! border-slate-200/40! dark:border-slate-700/30! pointer-events-none!"
+              className="absolute! left-0! right-0! border-b! border-slate-200/30! dark:border-slate-700/20! pointer-events-none!"
               style={{ top: h * HOUR_HEIGHT, height: HOUR_HEIGHT }}
             />
           ))}
@@ -172,7 +163,6 @@ export const WeekView = memo(({
             return (
               <div
                 key={dateStr}
-                style={colConfig.style}
                 className={`relative! rounded-[1.8rem]! backdrop-blur-md! cursor-pointer! transition-colors! ${colConfig.className}`}
                 style={{ height: HOUR_HEIGHT * HOURS.length, gridColumn: colIdx + 1, ...colConfig.style }}
                 onClick={(e) => {

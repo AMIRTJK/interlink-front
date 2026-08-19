@@ -67,7 +67,7 @@ export const DayView = memo(({
       </div>
 
       {/* Hourly Grid Container */}
-      <div className="flex! relative! max-h-[560px]! overflow-y-auto! no-scrollbar! border-t! border-slate-100/80! dark:border-slate-800/50! pt-2!">
+      <div className="flex! relative! w-full! border-t! border-slate-100/80! dark:border-slate-800/50! pt-2!">
         {/* Time Labels */}
         <div className="w-14! flex-shrink-0! relative!">
           {HOURS.map((h) => (
