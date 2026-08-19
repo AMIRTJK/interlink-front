@@ -1,6 +1,7 @@
 import { useState, useCallback, memo } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { CalendarHeader } from "./CalendarHeader";
+import { CalendarSidebar } from "./CalendarSidebar";
 import { MonthView } from "./MonthView";
 import { WeekView } from "./WeekView";
 import { DayView } from "./DayView";
@@ -13,15 +14,12 @@ import { useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 
 export const Calendar = memo(() => {
-  const { tasks, currentDate, setCurrentDate, fetchEvents } = useCalendarEvents();
+  const { tasks: serverTasks, currentDate, setCurrentDate, fetchEvents } = useCalendarEvents();
 
   const {
     viewMode,
     setViewMode,
     daysToShow,
-    goToPrev,
-    goToNext,
-    formatDateRange,
   } = useCalendarView({ currentDate, onDateChange: setCurrentDate });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,6 +28,9 @@ export const Calendar = memo(() => {
     date: Dayjs;
     time: Dayjs;
   } | null>(null);
+
+  // Use only real tasks from the server (no mock data)
+  const allTasks: Task[] = serverTasks || [];
 
   const { mutate: deleteEvent } = useMutationQuery<string>({
     method: "DELETE",
@@ -45,7 +46,7 @@ export const Calendar = memo(() => {
     (eventId: string) => {
       deleteEvent(eventId);
     },
-    [deleteEvent],
+    [deleteEvent]
   );
 
   const handleEventClick = useCallback((task: Task) => {
@@ -88,23 +89,12 @@ export const Calendar = memo(() => {
     setSelectedDateTime(null);
   }, [fetchEvents]);
 
-  const handleHeaderClick = useCallback(
-    (date: Dayjs) => {
-      setCurrentDate(date);
-    },
-    [setCurrentDate],
-  );
-
-  const handleTodayClick = useCallback(() => {
-    setCurrentDate(dayjs());
-  }, [setCurrentDate]);
-
   const renderActiveView = () => {
     if (viewMode === "month") {
       return (
         <MonthView
           daysToShow={daysToShow}
-          tasks={tasks}
+          tasks={allTasks}
           currentDate={currentDate}
           onDeleteEvent={handleDeleteEvent}
           onDayClick={handleDayClick}
@@ -116,11 +106,11 @@ export const Calendar = memo(() => {
       return (
         <WeekView
           daysToShow={daysToShow}
-          tasks={tasks}
+          tasks={allTasks}
           currentDate={currentDate}
           onDeleteEvent={handleDeleteEvent}
           onDayClick={handleDayClick}
-          onHeaderClick={handleHeaderClick}
+          onHeaderClick={setCurrentDate}
           onEventClick={handleEventClick}
         />
       );
@@ -128,7 +118,7 @@ export const Calendar = memo(() => {
     return (
       <DayView
         currentDate={currentDate}
-        tasks={tasks}
+        tasks={allTasks}
         onDeleteEvent={handleDeleteEvent}
         onDayClick={handleDayClick}
         onEventClick={handleEventClick}
@@ -137,19 +127,27 @@ export const Calendar = memo(() => {
   };
 
   return (
-    <div className="w-full! flex! flex-col! gap-4!">
-      <CalendarHeader
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        onPrev={goToPrev}
-        onNext={goToNext}
-        dateRange={formatDateRange()}
-        onToday={handleTodayClick}
+    <div className="w-full! flex! flex-col! lg:flex-row! gap-6! p-1!">
+      {/* Left Sidebar */}
+      <CalendarSidebar
+        currentDate={currentDate}
+        onDateChange={setCurrentDate}
+        tasks={allTasks}
         onCreateEvent={handleCreateClick}
+        onEventClick={handleEventClick}
       />
 
-      <div className="w-full! transition-all! duration-300!">
-        {renderActiveView()}
+      {/* Main Calendar View Area */}
+      <div className="flex-1! flex! flex-col! gap-2! min-w-0!">
+        <CalendarHeader
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          currentDate={currentDate}
+        />
+
+        <div className="w-full! transition-all! duration-300!">
+          {renderActiveView()}
+        </div>
       </div>
 
       <CreateTaskModal

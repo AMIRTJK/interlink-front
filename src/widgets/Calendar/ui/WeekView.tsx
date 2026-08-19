@@ -1,8 +1,10 @@
 import React, { useMemo, memo } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import { If } from "@shared/ui";
+import "dayjs/locale/ru";
 import type { Task } from "@features/tasks";
-import { useCalendarTheme } from "../lib/useCalendarTheme";
+import { getEventStyle } from "../model";
+import { WeatherIcon } from "./WeatherIcon";
+import { useWeather } from "../lib/useWeather";
 
 interface IWeekViewProps {
   daysToShow: Dayjs[];
@@ -14,30 +16,55 @@ interface IWeekViewProps {
   onEventClick: (task: Task) => void;
 }
 
-const HOUR_HEIGHT = 64;
+const HOUR_HEIGHT = 50;
 const START_HOUR = 0;
 const END_HOUR = 24;
 const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
-const WEEKDAYS = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
-
-const getEventBgStyle = (color?: string): React.CSSProperties => ({
-  backgroundColor: color ? `${color}22` : "#10B98122",
-  borderLeft: `3px solid ${color || "#10B981"}`,
-  color: color || "#10B981",
-});
 
 const timeToMinutes = (time?: string): number => {
   if (!time) return 0;
   const [h, m] = time.split(":").map(Number);
-  return h * 60 + (m || 0);
+  return (h || 0) * 60 + (m || 0);
 };
 
 const getEventPosition = (task: Task) => {
   const startMin = timeToMinutes(task.time);
   const endMin = task.endTime ? timeToMinutes(task.endTime) : startMin + 60;
-  const top = ((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT;
-  const height = Math.max(((endMin - startMin) / 60) * HOUR_HEIGHT, HOUR_HEIGHT * 0.5);
+  const top = (startMin / 60) * HOUR_HEIGHT;
+  const height = Math.max(((endMin - startMin) / 60) * HOUR_HEIGHT, HOUR_HEIGHT * 0.7);
   return { top, height };
+};
+
+const formatHourLabel = (h: number) => {
+  return `${String(h).padStart(2, "0")}:00`;
+};
+
+const getWeekColumnConfig = (colIdx: number) => {
+  if (colIdx === 0) {
+    return {
+      style: {
+        background: "linear-gradient(180deg, #FFF7ED 0%, #FFEDD5 100%)",
+        boxShadow: "0 14px 30px -4px rgba(254, 215, 170, 0.7)",
+      },
+      className: "border border-[#fed7aa]/80",
+    };
+  }
+  if (colIdx === 1 || colIdx === 2 || colIdx === 4 || colIdx === 5) {
+    return {
+      style: {
+        background: "linear-gradient(180deg, #FAF5FF 0%, #F3E8FF 100%)",
+        boxShadow: "0 14px 30px -4px rgba(233, 213, 255, 0.7)",
+      },
+      className: "border border-[#e9d5ff]/80",
+    };
+  }
+  return {
+    style: {
+      background: "linear-gradient(180deg, #F0F9FF 0%, #E0F2FE 100%)",
+      boxShadow: "0 14px 30px -4px rgba(186, 230, 253, 0.7)",
+    },
+    className: "border border-[#bae6fd]/80",
+  };
 };
 
 export const WeekView = memo(({
@@ -48,8 +75,7 @@ export const WeekView = memo(({
   onHeaderClick,
   onEventClick,
 }: IWeekViewProps) => {
-  const { theme } = useCalendarTheme();
-  const isSelected = (day: Dayjs) => day.isSame(currentDate, "day");
+  const { getWeatherForDate } = useWeather();
 
   const tasksMap = useMemo(() => {
     const map: Record<string, Task[]> = {};
@@ -60,77 +86,101 @@ export const WeekView = memo(({
     return map;
   }, [tasks]);
 
+  const currentMinutes = useMemo(() => {
+    const now = dayjs();
+    return now.hour() * 60 + now.minute();
+  }, []);
+
+  const redLineTop = (currentMinutes / 60) * HOUR_HEIGHT;
+
   return (
-    <div className="w-full! bg-white! dark:bg-slate-800/40! rounded-2xl! overflow-hidden! border! border-zinc-100! dark:border-slate-700/30! shadow-sm!">
-      <div className="flex! sticky! top-0! z-10! bg-white! dark:bg-slate-900/90! backdrop-blur-sm! border-b! border-zinc-100! dark:border-slate-700/30!">
-        <div className="w-16! flex-shrink-0! border-r! border-zinc-100! dark:border-slate-700/30!" />
-        {daysToShow.map((day, i) => {
-          const selected = isSelected(day);
+    <div className="w-full! flex! flex-col! gap-3!">
+      {/* Header Day Columns in Russian */}
+      <div className="flex! items-center! gap-3! pl-14! mb-1!">
+        {daysToShow.map((day) => {
+          const isToday = day.isSame(dayjs(), "day");
+          const dayWeather = getWeatherForDate(day);
+
           return (
             <div
               key={day.format("YYYY-MM-DD")}
-              className={`flex-1! flex! flex-col! items-center! py-3! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! hover:bg-zinc-50! dark:hover:bg-slate-800/40! transition-colors!`}
-              onClick={() => onHeaderClick ? onHeaderClick(day) : onDayClick(day)}
+              onClick={() => (onHeaderClick ? onHeaderClick(day) : onDayClick(day))}
+              className={`flex-1! py-2! px-2! rounded-[1.25rem]! flex! items-center! justify-center! gap-1.5! cursor-pointer! transition-all! ${
+                isToday
+                  ? "bg-[#fff7ed]! border-2! border-[#fed7aa]! text-[#c2410c]! shadow-xs!"
+                  : "bg-white/80! dark:bg-slate-800/80! border! border-slate-100! dark:border-slate-700! text-slate-700! dark:text-slate-200! shadow-xs!"
+              }`}
             >
-              <span className={`text-[11px]! font-bold! uppercase! tracking-wider! mb-1! ${selected ? "text-zinc-700! dark:text-zinc-200!" : "text-zinc-400! dark:text-zinc-500!"}`}>
-                {WEEKDAYS[i]}
+              <span className="text-[11px]! font-black! tracking-wider! uppercase!">
+                {day.locale("ru").format("ddd").toUpperCase()} {day.date()}
               </span>
-              <span
-                className={`text-lg! font-bold! w-9! h-9! flex! items-center! justify-center! rounded-full! ${
-                  selected ? `bg-gradient-to-r! ${theme.gradient} text-white!` : "text-zinc-700! dark:text-zinc-300!"
-                }`}
-                style={selected ? { color: "white" } : undefined}
-              >
-                {day.date()}
-              </span>
+              <WeatherIcon type={dayWeather.weatherType} size={13} />
             </div>
           );
         })}
       </div>
 
-      <div className="flex!">
-        <div className="w-16! flex-shrink-0! border-r! border-zinc-100! dark:border-slate-700/30! relative!">
+      {/* Main Grid Area */}
+      <div className="flex! relative! w-full!">
+        {/* Time Axis */}
+        <div className="w-14! flex-shrink-0! relative!">
           {HOURS.map((h) => (
             <div
               key={h}
-              className="flex! items-start! justify-end! pr-3! text-[11px]! font-medium! text-zinc-400! dark:text-zinc-500!"
+              className="flex! items-start! justify-end! pr-2.5! text-[9px]! font-extrabold! text-slate-400! dark:text-slate-500!"
               style={{ height: HOUR_HEIGHT }}
             >
-              <span className="-translate-y-2!">{h === 0 ? "" : `${String(h).padStart(2, "0")}:00`}</span>
+              <span className="-translate-y-2!">{formatHourLabel(h)}</span>
             </div>
           ))}
         </div>
 
-        <div className="flex-1! grid! relative!" style={{ gridTemplateColumns: `repeat(${daysToShow.length}, 1fr)` }}>
+        {/* 7 Vertical Columns Grid */}
+        <div className="flex-1! grid! grid-cols-7! gap-3! relative!">
+          {/* Horizontal Grid lines */}
           {HOURS.map((h) => (
             <div
               key={h}
-              className="absolute! left-0! right-0! border-b! border-zinc-100! dark:border-slate-700/20! pointer-events-none!"
-              style={{ top: (h - START_HOUR) * HOUR_HEIGHT, height: HOUR_HEIGHT }}
+              className="absolute! left-0! right-0! border-b! border-slate-200/30! dark:border-slate-700/20! pointer-events-none!"
+              style={{ top: h * HOUR_HEIGHT, height: HOUR_HEIGHT }}
             />
           ))}
 
+          {/* Red current time indicator line */}
+          <div
+            className="absolute! left-0! right-0! z-30! flex! items-center! pointer-events-none!"
+            style={{ top: redLineTop }}
+          >
+            <div className="w-2.5! h-2.5! rounded-full! bg-rose-500! -ml-1! shadow-xs!" />
+            <div className="flex-1! h-[2px]! bg-rose-500!" />
+          </div>
+
+          {/* Individual Column Capsules */}
           {daysToShow.map((day, colIdx) => {
             const dateStr = day.format("YYYY-MM-DD");
             const dayTasks = tasksMap[dateStr] || [];
+            const colConfig = getWeekColumnConfig(colIdx);
+
             return (
               <div
                 key={dateStr}
-                className="relative! border-r! border-zinc-100! dark:border-slate-700/30! last:border-r-0! cursor-pointer! transition-colors! hover:bg-zinc-50/50! dark:hover:bg-slate-900/20!"
-                style={{ height: HOUR_HEIGHT * HOURS.length, gridColumn: colIdx + 1 }}
+                className={`relative! rounded-[1.8rem]! backdrop-blur-md! cursor-pointer! transition-colors! ${colConfig.className}`}
+                style={{ height: HOUR_HEIGHT * HOURS.length, gridColumn: colIdx + 1, ...colConfig.style }}
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const y = e.clientY - rect.top;
-                  const clickedHour = START_HOUR + Math.floor((y + 16) / HOUR_HEIGHT);
+                  const clickedHour = Math.floor(y / HOUR_HEIGHT);
                   onDayClick(day, clickedHour);
                 }}
               >
                 {dayTasks.map((task) => {
                   const { top, height } = getEventPosition(task);
+                  const style = getEventStyle(task.color);
+
                   return (
                     <div
                       key={task.id}
-                      className="absolute! left-1! right-1! z-10!"
+                      className="absolute! left-1.5! right-1.5! z-20!"
                       style={{ top, height }}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -138,13 +188,14 @@ export const WeekView = memo(({
                       }}
                     >
                       <div
-                        className="h-full! w-full! rounded-lg! px-2! py-1! overflow-hidden! cursor-pointer! transition-opacity! hover:opacity-90! text-xs! font-medium!"
-                        style={getEventBgStyle(task.color)}
+                        className={`h-full! w-full! rounded-xl! p-2.5! ${style.bg} ${style.border} overflow-hidden! shadow-xs! hover:shadow-md! transition-all! cursor-pointer! flex! flex-col! justify-center!`}
                       >
-                        <div className="font-semibold! truncate!">{task.time} {task.title}</div>
-                        <If is={!!task.endTime}>
-                          <div className="opacity-70! truncate! text-[10px]!">{task.endTime}</div>
-                        </If>
+                        <div className={`font-black! text-[11px]! ${style.text} truncate!`}>
+                          {task.title}
+                        </div>
+                        <div className="text-[9px]! font-bold! opacity-80! truncate!">
+                          {task.time} {task.endTime ? `- ${task.endTime}` : ""}
+                        </div>
                       </div>
                     </div>
                   );
