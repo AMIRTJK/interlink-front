@@ -139,7 +139,7 @@ export const useWeather = () => {
       }
     };
 
-    // Default directly to Dushanbe coordinates to prevent intrusive browser location permission popups
+    //Душанбе по умолчанию
     fetchWeather(38.56, 68.78);
 
     return () => {
