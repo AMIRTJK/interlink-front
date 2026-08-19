@@ -93,12 +93,37 @@ export const approverFromWorkflow = (
   versionLabel: resolveApprovalVersionLabel(wfA, summary),
 });
 
-// Актуальная подпись: последняя неотозванная, а если отозваны все — последняя.
+// Актуальная подпись: подписанная, а если нет — последняя неотозванная (или последняя).
 export const pickActiveSignature = (signatures: any[]) => {
+  if (!Array.isArray(signatures) || signatures.length === 0) return null;
+  const signedSigs = signatures.filter((s: any) => s.status === "signed");
+  if (signedSigs.length > 0) {
+    return signedSigs[signedSigs.length - 1];
+  }
   const activeSigs = signatures.filter((s: any) => s.status !== "revoked");
   return activeSigs.length > 0
     ? activeSigs[activeSigs.length - 1]
     : signatures[signatures.length - 1];
+};
+
+// Нормализация подписей: для каждого подписанта оставляем только 1 актуальную запись (подписанную > ожидающую).
+export const normalizeSignatures = (signatures: any[]): any[] => {
+  if (!Array.isArray(signatures) || signatures.length === 0) return [];
+  const userGroups = new Map<string | number, any[]>();
+  signatures.forEach((sig: any) => {
+    const userId = sig.user?.id || sig.user_id || sig.approver?.id || "default";
+    const existing = userGroups.get(userId) || [];
+    existing.push(sig);
+    userGroups.set(userId, existing);
+  });
+
+  const result: any[] = [];
+  userGroups.forEach((userSigs) => {
+    const active = pickActiveSignature(userSigs);
+    if (active) result.push(active);
+  });
+
+  return result;
 };
 
 export const finalSignerFromSignature = (s: any): FinalSigner => ({

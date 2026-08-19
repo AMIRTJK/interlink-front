@@ -217,9 +217,9 @@ export const ApproversPanel = ({
                 <ApprovalVersionNotice warning={approvalVersionWarning ?? null} />
               </If>
               <If is={approvers.length === 0}>
-                <div className="py-8 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs">
+                <div className="py-8 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-400 text-xs text-center px-4">
                   <UserPlus size={15} />
-                  <span>Нажмите «Добавить»</span>
+                  <span>Нет согласующих для этой версии</span>
                 </div>
               </If>
               <If is={approvers.length > 0}>

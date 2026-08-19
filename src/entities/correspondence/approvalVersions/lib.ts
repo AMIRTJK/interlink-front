@@ -65,6 +65,12 @@ export const resolveApprovalVersionLabel = (
   const inline = formatApprovalVersionLabel(approval);
   if (inline) return inline;
 
+  const asAny = approval as any;
+  if (asAny?.payload_json) {
+    const payloadLabel = formatApprovalVersionLabel(asAny.payload_json);
+    if (payloadLabel) return payloadLabel;
+  }
+
   const approvalId = approval.approval_id ?? approval.id;
   const decision = (summary?.approvers || []).find((item) =>
     sameVersion(item.approval_id, approvalId),
@@ -78,9 +84,14 @@ export const resolveApprovalVersionId = (
   approval: IApprovalVersionSource | null | undefined,
   summary?: IApprovalVersionSummary | null,
 ): number | string | null => {
-  if (approval?.version_id != null) return approval.version_id;
+  if (!approval) return null;
+  if (approval.version_id != null) return approval.version_id;
 
-  const approvalId = approval?.approval_id ?? approval?.id;
+  const asAny = approval as any;
+  if (asAny?.payload_json?.version_id != null) return asAny.payload_json.version_id;
+  if (asAny?.decision?.version_id != null) return asAny.decision.version_id;
+
+  const approvalId = approval.approval_id ?? approval.id;
   const decision = (summary?.approvers || []).find((item) =>
     sameVersion(item.approval_id, approvalId),
   );

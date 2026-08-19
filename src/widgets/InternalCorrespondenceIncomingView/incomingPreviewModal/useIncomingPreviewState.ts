@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { resolveApprovalVersionId } from "@entities/correspondence";
 import {
   mapServerAttachment,
   type AttachedFile,
@@ -21,6 +22,7 @@ export function useIncomingPreviewState(props: IncomingPreviewModalProps) {
     attachments = [],
     correspondenceId,
     canCreateAssignment = true,
+    activeVersionId,
     onClose,
   } = props;
 
@@ -216,10 +218,18 @@ export function useIncomingPreviewState(props: IncomingPreviewModalProps) {
     }
   };
 
-  const previewApproversList = useMemo(
-    () => buildPreviewApproversList(signatures, approvals),
-    [signatures, approvals]
-  );
+  const previewApproversList = useMemo(() => {
+    const filteredApprovals = activeVersionId
+      ? approvals.filter((app: any) => {
+          const vId = resolveApprovalVersionId(app);
+          if (vId != null) {
+            return String(vId) === String(activeVersionId);
+          }
+          return true;
+        })
+      : approvals;
+    return buildPreviewApproversList(signatures, filteredApprovals);
+  }, [signatures, approvals, activeVersionId]);
 
   const previewSigners = useMemo(
     () => previewApproversList.filter((a) => a.role === "Подписывающий"),
