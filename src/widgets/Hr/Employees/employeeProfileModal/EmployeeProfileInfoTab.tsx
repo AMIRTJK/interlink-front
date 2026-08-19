@@ -15,9 +15,10 @@ import {
   Users,
   Shield,
   FileText,
+  Copy,
 } from "lucide-react";
 import { If } from "@shared/ui";
-import { IEmployee, money } from "../model";
+import { IEmployee, copyLogin, money } from "../model";
 import { Field, Section } from "../parts";
 
 interface IProps {
@@ -134,6 +135,19 @@ export function EmployeeProfileInfoTab({
           icon={<Phone size={15} />}
           label="Логин"
           value={r.phone}
+          action={
+            r.phone ? (
+              <button
+                type="button"
+                onClick={(ev) => copyLogin(r.phone, ev)}
+                className="p-1 rounded-md text-gray-400 hover:text-indigo-600 hover:bg-indigo-100/60 transition-colors cursor-pointer shrink-0"
+                title="Копировать логин"
+                aria-label="Копировать логин"
+              >
+                <Copy size={13} />
+              </button>
+            ) : null
+          }
         />
         <Field
           icon={<Wallet size={15} />}

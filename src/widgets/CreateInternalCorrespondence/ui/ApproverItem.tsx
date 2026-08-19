@@ -1,13 +1,5 @@
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  X,
-  MessageSquarePlus,
-  Send,
-  Check,
-  Clock,
-  MessageSquare,
-} from "lucide-react";
+import { X, Send } from "lucide-react";
 import { ApprovalVersionBadge } from "@entities/correspondence";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
@@ -20,13 +12,7 @@ interface IProps {
   docId?: string | number;
   isApproverInviting: boolean;
   inviteApprover: (vars: { docId: string | number; users: number[] }) => void;
-  applyApproverDS: (recordId: string) => void;
-  toggleApproverComment: (id: string) => void;
-  updateApproverComment: (id: string, text: string) => void;
   onRemoveApprover: (id: string) => void;
-  /** Разрешает ли роль пользователя в документе согласовывать его */
-  canApprove: boolean;
-  currentUserId?: string | number | null;
   /** Версия, открытая в редакторе: с ней сравнивается версия решения. */
   activeVersionId?: string | number | null;
 }
@@ -37,19 +23,9 @@ export const ApproverItem = ({
   docId,
   isApproverInviting,
   inviteApprover,
-  applyApproverDS,
-  toggleApproverComment,
-  updateApproverComment,
   onRemoveApprover,
-  canApprove,
-  currentUserId,
   activeVersionId,
 }: IProps) => {
-  // Согласовать можно только за себя: раньше кнопка висела на каждой строке и
-  // клик по чужой приводил к 403 от бэкенда.
-  const isOwnRow =
-    currentUserId != null && String(currentUserId) === String(approver.id);
-
   const isVersionMismatch =
     approver.versionId != null &&
     activeVersionId != null &&
@@ -61,7 +37,7 @@ export const ApproverItem = ({
         "rounded-xl border transition-all overflow-hidden flex flex-col",
         approver.approved
           ? "border-emerald-100 bg-emerald-50/40"
-          : "border-slate-100 bg-slate-50/40"
+          : "border-slate-100 bg-slate-50/40",
       )}
     >
       <div className="flex items-center gap-2.5 px-3 py-2.5">
@@ -71,7 +47,7 @@ export const ApproverItem = ({
         <div
           className={cn(
             "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0",
-            approver.color
+            approver.color,
           )}
         >
           {approver.initials}
@@ -83,7 +59,7 @@ export const ApproverItem = ({
           <p className="text-[10px] text-slate-500 break-words">
             {approver.role}
           </p>
-          <If is={!!approver.versionLabel}>
+          <If is={Boolean(approver.approved && approver.versionLabel)}>
             <div className="mt-1">
               <ApprovalVersionBadge
                 label={approver.versionLabel ?? null}
@@ -102,75 +78,23 @@ export const ApproverItem = ({
         </If>
       </div>
 
-      {/* Условие повторяет объединение условий кнопок внутри: иначе у уже
-          согласовавшего участника оставалась пустая полоса с рамкой. */}
-      <If is={!approver.approved || (!approver.isInvited && !!docId)}>
+      <If is={!approver.isInvited && !!docId}>
         <div className="flex items-center justify-end gap-1.5 px-3 pb-2.5 pt-1.5 border-t border-slate-100/60 flex-shrink-0">
-          <If is={!approver.approved}>
-            <button
-              onClick={() => toggleApproverComment(approver.id)}
-              className={cn(
-                "p-1.5 rounded-lg text-xs transition-all border",
-                approver.showCommentInput || approver.comment
-                  ? "bg-amber-50 border-amber-200 text-amber-600"
-                  : "bg-white border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600"
-              )}
-              title="Добавить комментарий"
-            >
-              <MessageSquarePlus size={12} />
-            </button>
-          </If>
-          <If is={!approver.isInvited && !!docId}>
-            <button
-              onClick={() =>
-                inviteApprover({
-                  docId: docId!,
-                  users: [Number(approver.id)],
-                })
-              }
-              disabled={isApproverInviting}
-              className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-            >
-              <Send size={11} />
-              <span>
-                {isApproverInviting ? "..." : "Пригласить"}
-              </span>
-            </button>
-          </If>
-          <If
-            is={
-              !!approver.isInvited &&
-              !approver.dsApplied &&
-              !approver.approved &&
-              canApprove &&
-              isOwnRow
+          <button
+            onClick={() =>
+              inviteApprover({
+                docId: docId!,
+                users: [Number(approver.id)],
+              })
             }
+            disabled={isApproverInviting}
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
           >
-            <button
-              onClick={() => {
-                if (approver.approvalRecordId) {
-                  applyApproverDS(approver.approvalRecordId);
-                }
-              }}
-              disabled={approver.dsLoading}
-              className={cn(
-                "flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border",
-                approver.dsLoading
-                  ? "bg-slate-100 text-slate-400 border-slate-200 cursor-wait"
-                  : "bg-white border-slate-200 text-slate-600 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-700 shadow-sm"
-              )}
-            >
-              <If is={approver.dsLoading}>
-                <Clock size={11} className="animate-spin" />
-              </If>
-              <If is={!approver.dsLoading}>
-                <Check size={11} />
-              </If>
-              <span>
-                {approver.dsLoading ? "Согласую..." : "Согласовать"}
-              </span>
-            </button>
-          </If>
+            <Send size={11} />
+            <span>
+              {isApproverInviting ? "..." : "Пригласить"}
+            </span>
+          </button>
         </div>
       </If>
 
@@ -190,45 +114,13 @@ export const ApproverItem = ({
         </div>
       </If>
 
-      <AnimatePresence>
-        {approver.showCommentInput && !approver.approved && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            className="overflow-hidden"
-          >
-            <div className="px-3 pb-3 pt-1 border-t border-slate-100 bg-white/60">
-              <div className="flex items-start gap-2">
-                <MessageSquare
-                  size={12}
-                  className="text-amber-500 mt-0.5 flex-shrink-0"
-                />
-                <textarea
-                  placeholder="Комментарий к согласованию..."
-                  className="flex-1 text-[11px] text-slate-700 placeholder-slate-400 bg-amber-50/60 border border-amber-100 rounded-lg px-2.5 py-2 resize-none outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-300 transition-all min-h-[54px] leading-relaxed"
-                  value={approver.comment}
-                  onChange={(e) =>
-                    updateApproverComment(
-                      approver.id,
-                      e.target.value
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <If is={approver.dsApplied}>
         <div
           className={cn(
             "px-3 py-2 border-t",
             approver.approved
               ? "border-emerald-100 bg-emerald-50/60"
-              : "border-purple-100 bg-purple-50/40"
+              : "border-purple-100 bg-purple-50/40",
           )}
         >
           <DSStampPreview

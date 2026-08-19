@@ -43,24 +43,51 @@ export const StatusChip = ({ status }: { status: string }) => {
   );
 };
 
-export const Field = ({ icon, label, value, accent }: {
-  icon: React.ReactNode; label: string; value: React.ReactNode; accent?: boolean;
+export const Field = ({
+  icon,
+  label,
+  value,
+  accent,
+  action,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+  accent?: boolean;
+  action?: React.ReactNode;
 }) => (
   <div
     className={`flex items-center gap-3 p-4 rounded-xl transition-colors ${
-      accent ? "border bg-indigo-50 border-indigo-100" : "bg-gray-50 hover:bg-indigo-50/60"
+      accent
+        ? "border bg-indigo-50 border-indigo-100"
+        : "bg-gray-50 hover:bg-indigo-50/60"
     }`}
   >
     <div className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0">
-      <span className={accent ? "text-indigo-500" : "text-indigo-400"}>{icon}</span>
+      <span className={accent ? "text-indigo-500" : "text-indigo-400"}>
+        {icon}
+      </span>
     </div>
-    <div className="min-w-0">
-      <p className={`text-[11px] font-medium uppercase tracking-wide ${accent ? "text-indigo-400" : "text-gray-500"}`}>
+    <div className="min-w-0 flex-1">
+      <p
+        className={`text-[11px] font-medium uppercase tracking-wide ${
+          accent ? "text-indigo-400" : "text-gray-500"
+        }`}
+      >
         {label}
       </p>
-      <p className={`text-sm mt-0.5 break-words ${accent ? "font-bold text-indigo-700" : "font-semibold text-gray-800"}`}>
-        {value || "—"}
-      </p>
+      <div className="flex items-center gap-2 mt-0.5">
+        <p
+          className={`text-sm break-words ${
+            accent
+              ? "font-bold text-indigo-700"
+              : "font-semibold text-gray-800"
+          }`}
+        >
+          {value || "—"}
+        </p>
+        {action}
+      </div>
     </div>
   </div>
 );

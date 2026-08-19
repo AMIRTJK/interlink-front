@@ -1,5 +1,5 @@
 import { Pencil, Trash2, Copy, Mail, Phone, Building2 } from "lucide-react";
-import { IEmployee } from "./model";
+import { IEmployee, copyLogin } from "./model";
 import { Avatar, StatusChip } from "./parts";
 
 interface IProps {
@@ -36,9 +36,22 @@ export const EmployeesCards = ({ items, onEdit, onDelete, onDuplicate, onCardCli
             <p className="flex items-center gap-2">
               <Mail size={14} className="text-slate-400" /> {e.email || "—"}
             </p>
-            <p className="flex items-center gap-2">
-              <Phone size={14} className="text-slate-400" /> {e.phone || "—"}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="flex items-center gap-2 truncate">
+                <Phone size={14} className="text-slate-400 shrink-0" /> {e.phone || "—"}
+              </p>
+              {e.phone && (
+                <button
+                  type="button"
+                  onClick={(ev) => copyLogin(e.phone, ev)}
+                  className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors shrink-0"
+                  title="Копировать логин"
+                  aria-label="Копировать логин"
+                >
+                  <Copy size={13} />
+                </button>
+              )}
+            </div>
           </div>
           <div
             className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-3"

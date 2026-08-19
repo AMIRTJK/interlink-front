@@ -30,6 +30,7 @@ import { ConfirmationModal } from "./ConfirmationModal";
 import { RecipientSelectModal } from "./RecipientSelectModal";
 import { DeclineReasonModal } from "./DeclineReasonModal";
 import { CancelSignatureModal } from "./CancelSignatureModal";
+import { ApprovalConfirmModal } from "./ApprovalConfirmModal";
 import type {
   // Status,
   ImportanceLevel,
@@ -1936,10 +1937,61 @@ export const CreateInternalCorrespondence = ({
     }
   };
 
-  const applyApproverDS = (recordId: string) => {
+  const [approvingVersionId, setApprovingVersionId] = useState<
+    number | string | null
+  >(null);
+
+  const [pendingApprovalVersion, setPendingApprovalVersion] = useState<{
+    id: number | string;
+    versionNumber?: number | string;
+  } | null>(null);
+
+  const pendingApprovalVersionWarning = useMemo(() => {
+    if (!pendingApprovalVersion) return null;
+    return buildApprovalVersionWarning(
+      approvalVersionSummary,
+      pendingApprovalVersion.id,
+      pendingApprovalVersion.versionNumber
+        ? `Версия ${pendingApprovalVersion.versionNumber}`
+        : null,
+    );
+  }, [approvalVersionSummary, pendingApprovalVersion]);
+
+  const myApproverRecord = useMemo(() => {
+    if (!currentUserId) return null;
+    return (
+      approvers.find(
+        (a) =>
+          String(a.id) === String(currentUserId) &&
+          Boolean(a.approvalRecordId || a.isInvited),
+      ) ?? null
+    );
+  }, [approvers, currentUserId]);
+
+  const handleApproveVersion = (versionId: number | string) => {
     if (!canApproveDocument) return;
-    const approverObj = approvers.find((a) => a.approvalRecordId === recordId);
-    const rawNote = approverObj?.comment?.trim();
+    const recordId = myApproverRecord?.approvalRecordId;
+    if (!recordId) return;
+
+    const targetVer = allVersions.find(
+      (v: any) => String(v.id) === String(versionId),
+    );
+    setPendingApprovalVersion({
+      id: versionId,
+      versionNumber:
+        targetVer?.versionNumber ?? (targetVer as any)?.version,
+    });
+  };
+
+  const handleConfirmApproval = (comment: string) => {
+    if (!canApproveDocument || !pendingApprovalVersion) return;
+    const recordId = myApproverRecord?.approvalRecordId;
+    if (!recordId) return;
+
+    const versionId = pendingApprovalVersion.id;
+    setApprovingVersionId(versionId);
+
+    const rawNote = comment?.trim();
     const note = rawNote && rawNote.length > 0 ? rawNote : null;
 
     setApprovers((prev) =>
@@ -1948,27 +2000,21 @@ export const CreateInternalCorrespondence = ({
       ),
     );
 
-    approvalsConfirm({
-      approvalRecordId: recordId,
-      status: "approved",
-      note,
-      // Версия, открытая в редакторе: без неё бэкенд зафиксирует выбранную для
-      // подписи, а согласующий мог смотреть другую.
-      ...(activeVersion?.id != null ? { version_id: activeVersion.id } : {}),
-    });
-  };
-
-  const toggleApproverComment = (id: string) => {
-    setApprovers((prev) =>
-      prev.map((a) =>
-        a.id === id ? { ...a, showCommentInput: !a.showCommentInput } : a,
-      ),
-    );
-  };
-
-  const updateApproverComment = (id: string, comment: string) => {
-    setApprovers((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, comment } : a)),
+    approvalsConfirm(
+      {
+        approvalRecordId: recordId,
+        status: "approved",
+        note,
+        version_id: versionId,
+      },
+      {
+        onSuccess: () => {
+          setPendingApprovalVersion(null);
+        },
+        onSettled: () => {
+          setApprovingVersionId(null);
+        },
+      },
     );
   };
 
@@ -1988,10 +2034,8 @@ export const CreateInternalCorrespondence = ({
         showCommentInput: false,
         dsApplied: false,
         dsLoading: false,
-        versionId: activeVersion?.id ?? null,
-        versionLabel: activeVersion?.versionNumber
-          ? `Версия ${activeVersion.versionNumber}`
-          : null,
+        versionId: null,
+        versionLabel: null,
       },
     ]);
   };
@@ -2925,12 +2969,8 @@ export const CreateInternalCorrespondence = ({
                           availableUsers={availableUsers}
                           inviteApprover={inviteApprover}
                           isApproverInviting={isApproverInviting}
-                          applyApproverDS={applyApproverDS}
-                          toggleApproverComment={toggleApproverComment}
-                          updateApproverComment={updateApproverComment}
                           docId={id}
                           canApprove={canApproveDocument}
-                          currentUserId={currentUserId}
                           activeVersionId={activeVersion?.id ?? null}
                           approvalVersionWarning={approvalVersionWarning}
                         />
@@ -3000,6 +3040,11 @@ export const CreateInternalCorrespondence = ({
                           signedVersionId={signedVersionId}
                           onSelectVersion={handleSelectVersion}
                           onSetVersionForSign={handleSetVersionForSign}
+                          onApproveVersion={handleApproveVersion}
+                          canApprove={Boolean(
+                            canApproveDocument && myApproverRecord?.approvalRecordId,
+                          )}
+                          approvingVersionId={approvingVersionId}
                           isSelectingVersion={isSelectingVersion}
                           isSigned={isSigned}
                         />
@@ -3092,6 +3137,14 @@ export const CreateInternalCorrespondence = ({
         onClose={() => setShowDeclineModal(false)}
         onConfirm={handleConfirmDecline}
         isLoading={isDeclining}
+      />
+      <ApprovalConfirmModal
+        isOpen={Boolean(pendingApprovalVersion)}
+        onClose={() => setPendingApprovalVersion(null)}
+        onConfirm={handleConfirmApproval}
+        isLoading={approvingVersionId !== null}
+        versionNumber={pendingApprovalVersion?.versionNumber}
+        approvalVersionWarning={pendingApprovalVersionWarning}
       />
     </div>
   );
