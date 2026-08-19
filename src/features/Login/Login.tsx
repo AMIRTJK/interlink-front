@@ -17,6 +17,7 @@ import { LOGIN_ANTD_THEME, OTP_LENGTH, type TAuthStep } from "./loginModel";
 import { createEmptyOtp, normalizePhoneNumber } from "./loginLib";
 import { LoginStep } from "./LoginStep";
 import { VerificationStep } from "./VerificationStep";
+import { DevTestAccountsModal, extractTestPhoneLocal } from "./devTestAccounts";
 
 export const Login = () => {
 	const navigate = useNavigate();
@@ -27,6 +28,7 @@ export const Login = () => {
 	const [prefix, setPrefix] = useState("+992");
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [password, setPassword] = useState("");
+	const [isTestAccountsModalOpen, setIsTestAccountsModalOpen] = useState(false);
 
 	const handlePrefixChange = (value: string) => {
 		setPrefix(value);
@@ -35,6 +37,13 @@ export const Login = () => {
 
 	const handlePhoneNumberChange = (value: string) => {
 		setPhoneNumber(normalizePhoneNumber(value, prefix));
+	};
+
+	const handleSelectTestAccount = (phone: string) => {
+		const localPhone = extractTestPhoneLocal(phone);
+		setPrefix("+992");
+		setPhoneNumber(normalizePhoneNumber(localPhone, "+992"));
+		toast.info(`Подставлен тестовый номер: ${localPhone}`);
 	};
 
 	const [otp, setOtp] = useState(createEmptyOtp);
@@ -162,6 +171,7 @@ export const Login = () => {
 						onPhoneNumberChange={handlePhoneNumberChange}
 						onPasswordChange={setPassword}
 						onToggleShowPassword={() => setShowPassword(!showPassword)}
+						onOpenTestAccounts={() => setIsTestAccountsModalOpen(true)}
 						onSubmit={handleLoginSubmit}
 					/>
 				</div>
@@ -185,6 +195,12 @@ export const Login = () => {
 					/>
 				</div>
 			</div>
+
+			<DevTestAccountsModal
+				isOpen={isTestAccountsModalOpen}
+				onClose={() => setIsTestAccountsModalOpen(false)}
+				onSelectAccount={handleSelectTestAccount}
+			/>
 		</ConfigProvider>
 	);
 };

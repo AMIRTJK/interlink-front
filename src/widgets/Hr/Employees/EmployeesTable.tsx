@@ -1,5 +1,5 @@
-import { Pencil, Trash2 } from "lucide-react";
-import { IEmployee, money, statusMeta } from "./model";
+import { Copy, Pencil, Trash2 } from "lucide-react";
+import { IEmployee, copyLogin, money, statusMeta } from "./model";
 import { Avatar } from "./parts";
 
 interface IProps {
@@ -72,7 +72,22 @@ export const EmployeesTable = ({ items, onEdit, onDelete, onRowClick }: IProps) 
                   <span className="truncate block">{e.email || "—"}</span>
                 </td>
                 <td className="px-4 py-3 hidden lg:table-cell text-xs text-gray-600">
-                  {e.raw.phone || "—"}
+                  {e.raw.phone ? (
+                    <div className="inline-flex items-center gap-1.5 group/login">
+                      <span className="truncate">{e.raw.phone}</span>
+                      <button
+                        type="button"
+                        onClick={(ev) => copyLogin(e.raw.phone, ev)}
+                        className="p-1 rounded-md text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors shrink-0 cursor-pointer"
+                        title="Копировать логин"
+                        aria-label="Копировать логин"
+                      >
+                        <Copy size={13} />
+                      </button>
+                    </div>
+                  ) : (
+                    "—"
+                  )}
                 </td>
                 <td className="px-4 py-3" onClick={(ev) => ev.stopPropagation()}>
                   <div className="flex items-center gap-1 justify-end">

@@ -737,3 +737,85 @@ export function generateQRMatrix(seed: string, size: number = 21): boolean[][] {
   }
   return matrix;
 }
+
+export function unescapeXml(str: string): string {
+  return str
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'");
+}
+
+export function parseDSStampFromDataUri(
+  src: string | null,
+): {
+  name: string;
+  certSerial: string;
+  signedAt: string;
+  validUntil: string;
+  defaultLang?: DSStampLang;
+} | null {
+  if (!src) return null;
+
+  let svg = "";
+  if (src.startsWith("data:image/svg+xml;base64,")) {
+    const base64 = src.slice("data:image/svg+xml;base64,".length);
+    try {
+      svg = decodeURIComponent(escape(atob(base64)));
+    } catch {
+      try {
+        svg = atob(base64);
+      } catch {
+        return null;
+      }
+    }
+  } else if (src.startsWith("data:image/svg+xml")) {
+    const commaIdx = src.indexOf(",");
+    if (commaIdx !== -1) {
+      try {
+        svg = decodeURIComponent(src.slice(commaIdx + 1));
+      } catch {
+        return null;
+      }
+    }
+  } else if (src.includes("<svg")) {
+    svg = src;
+  }
+
+  if (!svg || !svg.includes("INFRATECH")) return null;
+
+  const nameMatch = svg.match(/<text[^>]*y=["']104["'][^>]*>([\s\S]*?)<\/text>/i);
+  const serialMatch = svg.match(/<text[^>]*y=["']208["'][^>]*>([\s\S]*?)<\/text>/i);
+  const signedAtMatch = svg.match(/<text[^>]*y=["']269["'][^>]*>([\s\S]*?)<\/text>/i);
+  const fromMatch = svg.match(/<text[^>]*x=["']454["'][^>]*y=["']212["'][^>]*>([\s\S]*?)<\/text>/i);
+  const toMatch = svg.match(/<text[^>]*x=["']686["'][^>]*y=["']212["'][^>]*>([\s\S]*?)<\/text>/i);
+
+  if (!nameMatch || !serialMatch) return null;
+
+  const name = unescapeXml(nameMatch[1].trim());
+  const certSerial = unescapeXml(serialMatch[1].trim());
+  const signedAt = signedAtMatch ? unescapeXml(signedAtMatch[1].trim()) : "";
+  const fromDate = fromMatch ? unescapeXml(fromMatch[1].trim()) : "";
+  const toDate = toMatch ? unescapeXml(toMatch[1].trim()) : "";
+  const validUntil =
+    fromDate && toDate
+      ? `аз ${fromDate} то ${toDate}`
+      : fromDate || toDate || "аз 20.03.2025 то 20.03.2026";
+
+  let defaultLang: DSStampLang = "TJ";
+  if (/<rect[^>]*x=["']628["'][^>]*fill=["']url\(#[^)]+pg\)["']/i.test(svg)) {
+    defaultLang = "EN";
+  } else if (/<rect[^>]*x=["']664["'][^>]*fill=["']url\(#[^)]+pg\)["']/i.test(svg)) {
+    defaultLang = "RU";
+  }
+
+  return {
+    name,
+    certSerial,
+    signedAt,
+    validUntil,
+    defaultLang,
+  };
+}
+
