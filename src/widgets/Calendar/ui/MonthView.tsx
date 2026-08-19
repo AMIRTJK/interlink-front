@@ -15,13 +15,13 @@ interface IMonthViewProps {
 }
 
 const WEEKDAYS = [
-  { label: "MON", isWeekend: false },
-  { label: "TUE", isWeekend: false },
-  { label: "WED", isWeekend: false },
-  { label: "THU", isWeekend: false },
-  { label: "FRI", isWeekend: false },
-  { label: "SAT", isWeekend: true },
-  { label: "SUN", isWeekend: true },
+  { label: "ПН", isWeekend: false },
+  { label: "ВТ", isWeekend: false },
+  { label: "СР", isWeekend: false },
+  { label: "ЧТ", isWeekend: false },
+  { label: "ПТ", isWeekend: false },
+  { label: "СБ", isWeekend: true },
+  { label: "ВС", isWeekend: true },
 ];
 
 const getMonthCardStyle = (weather: WeatherType, isPreviousOrNextMonth: boolean) => {
@@ -100,7 +100,7 @@ export const MonthView = memo(({
 
   return (
     <div className="w-full! flex! flex-col! gap-3!">
-      {/* Header Weekdays */}
+      {/* Header Weekdays in Russian */}
       <div className="grid! grid-cols-7! gap-3! text-center! mb-1!">
         {WEEKDAYS.map((day) => (
           <div
@@ -122,8 +122,8 @@ export const MonthView = memo(({
           const dateStr = day.format("YYYY-MM-DD");
           const dayTasks = tasksMap[dateStr] || [];
           const inMonth = day.month() === currentDate.month();
-          const isTodayHighlight = day.date() === 17 && inMonth;
-          const weather = isTodayHighlight ? liveWeather.weatherType : getDayWeather(day);
+          const isToday = day.isSame(dayjs(), "day");
+          const weather = isToday ? liveWeather.weatherType : getDayWeather(day);
           const cardConfig = getMonthCardStyle(weather, !inMonth);
 
           return (
@@ -135,7 +135,7 @@ export const MonthView = memo(({
             >
               {/* Cell Header: Date on left & White circular weather badge on right */}
               <div className="flex! items-center! justify-between! mb-1.5!">
-                {isTodayHighlight ? (
+                {isToday ? (
                   <div className="w-6! h-6! flex! items-center! justify-center! text-xs! font-extrabold! rounded-full! bg-[#00897b]! text-white! shadow-xs!">
                     {day.date()}
                   </div>
@@ -165,7 +165,10 @@ export const MonthView = memo(({
                       className="w-fit! max-w-full! py-1! px-2.5! rounded-full! bg-white/90! dark:bg-slate-800/90! shadow-[0_2px_8px_rgba(0,0,0,0.04)]! text-[10px]! font-black! flex! items-center! gap-1.5! truncate! transition-all!"
                     >
                       <span className={`w-1.5! h-1.5! rounded-full! ${style.dot} flex-shrink-0!`} />
-                      <span className={`${style.text} truncate!`}>{task.title}</span>
+                      <span className={`${style.text} truncate!`}>
+                        {task.time ? `${task.time} ` : ""}
+                        {task.title}
+                      </span>
                     </div>
                   );
                 })}

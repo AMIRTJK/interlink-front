@@ -1,5 +1,6 @@
 import { useMemo, memo } from "react";
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
+import "dayjs/locale/ru";
 import type { Task } from "@features/tasks";
 import { getEventStyle } from "../model";
 import { WeatherIcon } from "./WeatherIcon";
@@ -33,10 +34,7 @@ const getEventPosition = (task: Task) => {
 };
 
 const formatHourLabel = (h: number) => {
-  if (h === 0) return "12 AM";
-  if (h === 12) return "12 PM";
-  if (h < 12) return `${h} AM`;
-  return `${h - 12} PM`;
+  return `${String(h).padStart(2, "0")}:00`;
 };
 
 export const DayView = memo(({
@@ -54,13 +52,13 @@ export const DayView = memo(({
 
   return (
     <div className="w-full! flex! flex-col! gap-3!">
-      {/* Top Focus Day Banner */}
+      {/* Top Focus Day Banner in Russian */}
       <div className="w-full! py-2.5! px-5! rounded-xl! bg-[#f5f3ff]! dark:bg-purple-950/40! border! border-[#e9d5ff]! dark:border-purple-800/50! text-[#6b21a8]! dark:text-purple-200! font-extrabold! text-[11px]! tracking-widest! uppercase! flex! items-center! justify-center! gap-2! shadow-2xs!">
-        <span>{currentDate.format("dddd D FOCUS DAY").toUpperCase()}</span>
+        <span>{currentDate.locale("ru").format("dddd, D MMMM").toUpperCase()} • ДЕНЬ В ФОКУСЕ</span>
         <WeatherIcon type={weather.weatherType} size={14} />
       </div>
 
-      {/* Real-time Weather info header */}
+      {/* Real-time Weather info header in Russian */}
       <div className="flex! items-center! gap-2! px-1! text-xs! font-bold! text-slate-700! dark:text-slate-200!">
         <WeatherIcon type={weather.weatherType} size={14} />
         <span className="font-extrabold!">{weather.temp}</span>
@@ -71,7 +69,7 @@ export const DayView = memo(({
 
       {/* Hourly Grid Container */}
       <div className="flex! relative! w-full! border-t! border-slate-100/80! dark:border-slate-800/50! pt-2!">
-        {/* Time Labels */}
+        {/* Time Labels in 24h format */}
         <div className="w-14! flex-shrink-0! relative!">
           {HOURS.map((h) => (
             <div
@@ -130,17 +128,12 @@ export const DayView = memo(({
                     <span className="text-[11px]! font-bold! opacity-80!">
                       {task.time} {task.endTime ? `– ${task.endTime}` : ""}
                     </span>
-                    {task.description && !task.description.includes("Discuss") && (
+                    {task.description && (
                       <span className="text-[11px]! font-medium! opacity-70!">
                         • {task.description}
                       </span>
                     )}
                   </div>
-                  {task.description && task.description.includes("Discuss") && (
-                    <p className="text-[10px]! font-medium! opacity-80! m-0! pl-4!">
-                      {task.description}
-                    </p>
-                  )}
                 </div>
               </div>
             );

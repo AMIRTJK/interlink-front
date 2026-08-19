@@ -1,8 +1,11 @@
 import { useMemo, memo } from "react";
 import dayjs, { Dayjs } from "dayjs";
+import "dayjs/locale/ru";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Task } from "@features/tasks";
-import { EVENT_COLOR_STYLES, SIDEBAR_UPCOMING_MOCK } from "../model";
+import { EVENT_COLOR_STYLES } from "../model";
+
+dayjs.locale("ru");
 
 interface ICalendarSidebarProps {
   currentDate: Dayjs;
@@ -13,19 +16,21 @@ interface ICalendarSidebarProps {
 }
 
 const WEEKDAY_INITIALS = [
-  { label: "M", isWeekend: false },
-  { label: "T", isWeekend: false },
-  { label: "W", isWeekend: false },
-  { label: "T", isWeekend: false },
-  { label: "F", isWeekend: false },
-  { label: "S", isWeekend: true },
-  { label: "S", isWeekend: true },
+  { label: "П", isWeekend: false },
+  { label: "В", isWeekend: false },
+  { label: "С", isWeekend: false },
+  { label: "Ч", isWeekend: false },
+  { label: "П", isWeekend: false },
+  { label: "С", isWeekend: true },
+  { label: "В", isWeekend: true },
 ];
 
 export const CalendarSidebar = memo(({
   currentDate,
   onDateChange,
+  tasks,
   onCreateEvent,
+  onEventClick,
 }: ICalendarSidebarProps) => {
   const startOfMonth = currentDate.startOf("month");
   const gridStart = startOfMonth.startOf("isoWeek");
@@ -34,16 +39,42 @@ export const CalendarSidebar = memo(({
     return Array.from({ length: 42 }, (_, i) => gridStart.add(i, "day"));
   }, [gridStart]);
 
+  // Group real server tasks by date for the upcoming section
+  const upcomingGroups = useMemo(() => {
+    const todayStr = dayjs().format("YYYY-MM-DD");
+    const futureTasks = (tasks || [])
+      .filter((t) => t.date >= todayStr)
+      .sort((a, b) => {
+        const dDiff = a.date.localeCompare(b.date);
+        if (dDiff !== 0) return dDiff;
+        return (a.time || "").localeCompare(b.time || "");
+      });
+
+    const groups: { dateLabel: string; items: Task[] }[] = [];
+    const map: Record<string, Task[]> = {};
+
+    futureTasks.forEach((t) => {
+      if (!map[t.date]) {
+        map[t.date] = [];
+        const label = dayjs(t.date).locale("ru").format("dddd, D MMMM").toUpperCase();
+        groups.push({ dateLabel: label, items: map[t.date] });
+      }
+      map[t.date].push(t);
+    });
+
+    return groups.slice(0, 4);
+  }, [tasks]);
+
   return (
-    <aside className="w-full! lg:w-[230px]! flex-shrink-0! flex! flex-col! gap-4! p-0.5!">
+    <aside className="w-full! lg:w-[240px]! flex-shrink-0! flex! flex-col! gap-4! p-0.5!">
       {/* Create Event Button */}
       <button
         type="button"
         onClick={onCreateEvent}
         className="w-full! py-2.5! px-4! rounded-full! bg-[#0d9488]! hover:bg-[#0f766e]! text-white! font-extrabold! text-xs! tracking-wide! flex! items-center! justify-center! gap-2! shadow-md! shadow-teal-500/20! transition-all! cursor-pointer! border-0!"
       >
-        <Plus size={15} strokeWidth={3} />
-        <span>Create Event</span>
+        <Plus size={16} strokeWidth={3} />
+        <span>Создать событие</span>
       </button>
 
       {/* Mini Month Picker Widget */}
@@ -57,8 +88,8 @@ export const CalendarSidebar = memo(({
           >
             <ChevronLeft size={13} />
           </button>
-          <span className="font-extrabold! text-[11px]! text-slate-800! dark:text-slate-100!">
-            {currentDate.format("MMMM YYYY")}
+          <span className="font-extrabold! text-[11px]! text-slate-800! dark:text-slate-100! capitalize!">
+            {currentDate.locale("ru").format("MMMM YYYY")}
           </span>
           <button
             type="button"
@@ -112,36 +143,46 @@ export const CalendarSidebar = memo(({
       {/* Upcoming Events */}
       <div className="flex! flex-col! gap-2.5!">
         <h4 className="text-[9px]! font-extrabold! tracking-widest! text-slate-400! uppercase! px-0.5! m-0!">
-          UPCOMING EVENTS
+          ПРЕДСТОЯЩИЕ СОБЫТИЯ
         </h4>
 
-        {SIDEBAR_UPCOMING_MOCK.map((group) => (
-          <div key={group.dateLabel} className="flex! flex-col! gap-1.5!">
-            <span className="text-[8px]! font-extrabold! tracking-wider! text-slate-400! uppercase! px-0.5!">
-              {group.dateLabel}
-            </span>
+        {upcomingGroups.length > 0 ? (
+          upcomingGroups.map((group) => (
+            <div key={group.dateLabel} className="flex! flex-col! gap-1.5!">
+              <span className="text-[8px]! font-extrabold! tracking-wider! text-slate-400! uppercase! px-0.5!">
+                {group.dateLabel}
+              </span>
 
-            {group.items.map((item) => {
-              const colorStyle = EVENT_COLOR_STYLES[item.color] || EVENT_COLOR_STYLES.purple;
-              return (
-                <div
-                  key={item.id}
-                  className={`p-2.5! rounded-xl! ${colorStyle.sidebarCard} border! backdrop-blur-md! shadow-[0_4px_15px_rgba(0,0,0,0.02)]! hover:shadow-md! transition-all! cursor-pointer! flex! flex-col! gap-0.5!`}
-                >
-                  <div className="flex! items-center! gap-1.5!">
-                    <span className={`w-1.5! h-1.5! rounded-full! ${colorStyle.dot} flex-shrink-0!`} />
-                    <span className="font-extrabold! text-[11px]! truncate!">
-                      {item.title}
-                    </span>
+              {group.items.map((item) => {
+                const colorStyle = EVENT_COLOR_STYLES[item.color] || EVENT_COLOR_STYLES.purple;
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => onEventClick(item)}
+                    className={`p-2.5! rounded-xl! ${colorStyle.sidebarCard} border! backdrop-blur-md! shadow-[0_4px_15px_rgba(0,0,0,0.02)]! hover:shadow-md! transition-all! cursor-pointer! flex! flex-col! gap-0.5!`}
+                  >
+                    <div className="flex! items-center! gap-1.5!">
+                      <span className={`w-1.5! h-1.5! rounded-full! ${colorStyle.dot} flex-shrink-0!`} />
+                      <span className="font-extrabold! text-[11px]! truncate!">
+                        {item.title}
+                      </span>
+                    </div>
+                    {item.time && (
+                      <span className="text-[9px]! font-semibold! opacity-80! pl-3!">
+                        {item.time} {item.endTime ? `– ${item.endTime}` : ""}
+                        {item.description ? ` • ${item.description}` : ""}
+                      </span>
+                    )}
                   </div>
-                  <span className="text-[9px]! font-semibold! opacity-80! pl-3!">
-                    {item.timeLocation}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+          ))
+        ) : (
+          <div className="p-3! rounded-xl! bg-slate-50! dark:bg-slate-900/40! border! border-slate-100! dark:border-slate-800! text-center! text-[10px]! font-semibold! text-slate-400!">
+            Нет запланированных событий
           </div>
-        ))}
+        )}
       </div>
     </aside>
   );

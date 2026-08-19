@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { Dayjs } from "dayjs";
+import "dayjs/locale/ru";
 import type { ViewMode } from "../model";
 import { useWeather } from "../lib/useWeather";
 import { WeatherIcon } from "./WeatherIcon";
@@ -11,9 +12,9 @@ interface CalendarHeaderProps {
 }
 
 const VIEW_MODES: { key: ViewMode; label: string }[] = [
-  { key: "day", label: "Day" },
-  { key: "week", label: "Week" },
-  { key: "month", label: "Month" },
+  { key: "day", label: "День" },
+  { key: "week", label: "Неделя" },
+  { key: "month", label: "Месяц" },
 ];
 
 export const CalendarHeader = memo(({
@@ -25,14 +26,14 @@ export const CalendarHeader = memo(({
 
   const formatHeaderTitle = () => {
     if (viewMode === "month") {
-      return currentDate.format("dddd, MMMM D");
+      return currentDate.locale("ru").format("MMMM YYYY");
     }
     if (viewMode === "week") {
       const start = currentDate.startOf("isoWeek");
       const end = start.add(6, "day");
-      return `${start.format("MMMM D")} – ${end.format("D, YYYY")}`;
+      return `${start.locale("ru").format("D MMMM")} – ${end.locale("ru").format("D MMMM YYYY")}`;
     }
-    return currentDate.format("dddd, MMMM D, YYYY");
+    return currentDate.locale("ru").format("dddd, D MMMM YYYY");
   };
 
   const weekNumber = currentDate.isoWeek();
@@ -42,17 +43,17 @@ export const CalendarHeader = memo(({
       {/* Left / Center Section: Date Title & Live Weather Badge */}
       <div className="flex! items-center! gap-3! flex-wrap!">
         <div className="flex! flex-col!">
-          <h2 className="text-2xl! font-black! text-slate-800! dark:text-slate-100! m-0! tracking-tight!">
+          <h2 className="text-2xl! font-black! text-slate-800! dark:text-slate-100! m-0! tracking-tight! capitalize!">
             {formatHeaderTitle()}
           </h2>
           {viewMode !== "month" && (
             <span className="text-xs! font-bold! text-slate-400! dark:text-slate-500! mt-0.5!">
-              Week {weekNumber} • Summer Schedule
+              Неделя {weekNumber}
             </span>
           )}
         </div>
 
-        {/* Live Real-Time Weather Badge (Visible in Day, Week, and Month) */}
+        {/* Live Real-Time Weather Badge (Day, Week, Month) */}
         <div className="flex! items-center! gap-2! py-1.5! px-3.5! rounded-full! bg-white/90! dark:bg-slate-800/90! border! border-slate-200/60! dark:border-slate-700/60! shadow-xs! backdrop-blur-md!">
           <WeatherIcon type={weather.weatherType} size={15} />
           <span className="text-xs! font-extrabold! text-slate-800! dark:text-slate-100!">

@@ -1,5 +1,6 @@
 import React, { useMemo, memo } from "react";
 import dayjs, { Dayjs } from "dayjs";
+import "dayjs/locale/ru";
 import type { Task } from "@features/tasks";
 import { getEventStyle, getDayWeather } from "../model";
 import { WeatherIcon } from "./WeatherIcon";
@@ -34,10 +35,7 @@ const getEventPosition = (task: Task) => {
 };
 
 const formatHourLabel = (h: number) => {
-  if (h === 0) return "12 AM";
-  if (h === 12) return "12 PM";
-  if (h < 12) return `${h} AM`;
-  return `${h - 12} PM`;
+  return `${String(h).padStart(2, "0")}:00`;
 };
 
 const getWeekColumnConfig = (colIdx: number) => {
@@ -94,10 +92,10 @@ export const WeekView = memo(({
 
   return (
     <div className="w-full! flex! flex-col! gap-3!">
-      {/* Header Day Columns */}
+      {/* Header Day Columns in Russian */}
       <div className="flex! items-center! gap-3! pl-14! mb-1!">
         {daysToShow.map((day) => {
-          const isTodayHighlight = day.date() === 17;
+          const isToday = day.isSame(dayjs(), "day");
           const weather = getDayWeather(day);
 
           return (
@@ -105,13 +103,13 @@ export const WeekView = memo(({
               key={day.format("YYYY-MM-DD")}
               onClick={() => (onHeaderClick ? onHeaderClick(day) : onDayClick(day))}
               className={`flex-1! py-2! px-2! rounded-[1.25rem]! flex! items-center! justify-center! gap-1.5! cursor-pointer! transition-all! ${
-                isTodayHighlight
+                isToday
                   ? "bg-[#fff7ed]! border-2! border-[#fed7aa]! text-[#c2410c]! shadow-xs!"
                   : "bg-white/80! dark:bg-slate-800/80! border! border-slate-100! dark:border-slate-700! text-slate-700! dark:text-slate-200! shadow-xs!"
               }`}
             >
               <span className="text-[11px]! font-black! tracking-wider! uppercase!">
-                {day.format("ddd").toUpperCase()} {day.date()}
+                {day.locale("ru").format("ddd").toUpperCase()} {day.date()}
               </span>
               <WeatherIcon type={weather} size={13} />
             </div>
@@ -119,7 +117,7 @@ export const WeekView = memo(({
         })}
       </div>
 
-      {/* Main Grid Area: Single natural height without nested internal scrollbar */}
+      {/* Main Grid Area */}
       <div className="flex! relative! w-full!">
         {/* Time Axis */}
         <div className="w-14! flex-shrink-0! relative!">

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, memo } from "react";
+import { useState, useCallback, memo } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { CalendarHeader } from "./CalendarHeader";
 import { CalendarSidebar } from "./CalendarSidebar";
@@ -12,7 +12,6 @@ import { useCalendarEvents } from "@shared/lib/hooks/useCalendarEvents";
 import { useCalendarView } from "@shared/lib/hooks/useCalendarView";
 import { useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { getSampleEventsForDate } from "../model";
 
 export const Calendar = memo(() => {
   const { tasks: serverTasks, currentDate, setCurrentDate, fetchEvents } = useCalendarEvents();
@@ -30,24 +29,8 @@ export const Calendar = memo(() => {
     time: Dayjs;
   } | null>(null);
 
-  // Merge server events with sample demo events matching screenshot 2
-  const allTasks = useMemo(() => {
-    const combinedMap: Record<string, Task> = {};
-
-    daysToShow.forEach((d) => {
-      const dateStr = d.format("YYYY-MM-DD");
-      const samples = getSampleEventsForDate(dateStr);
-      samples.forEach((st) => {
-        combinedMap[st.id] = st;
-      });
-    });
-
-    (serverTasks || []).forEach((st) => {
-      combinedMap[st.id] = st;
-    });
-
-    return Object.values(combinedMap);
-  }, [daysToShow, serverTasks]);
+  // Use only real tasks from the server (no mock data)
+  const allTasks: Task[] = serverTasks || [];
 
   const { mutate: deleteEvent } = useMutationQuery<string>({
     method: "DELETE",
