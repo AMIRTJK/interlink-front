@@ -1,7 +1,9 @@
 import { useMemo, memo } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import type { Task } from "@features/tasks";
-import { useCalendarTheme } from "../lib/useCalendarTheme";
+import { getEventStyle, WeatherType } from "../model";
+import { WeatherIcon } from "./WeatherIcon";
+import { useWeather } from "../lib/useWeather";
 
 interface IMonthViewProps {
   daysToShow: Dayjs[];
@@ -12,35 +14,70 @@ interface IMonthViewProps {
   onEventClick: (task: Task) => void;
 }
 
-const WEEKDAYS = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
+const WEEKDAYS = [
+  { label: "ПН", isWeekend: false },
+  { label: "ВТ", isWeekend: false },
+  { label: "СР", isWeekend: false },
+  { label: "ЧТ", isWeekend: false },
+  { label: "ПТ", isWeekend: false },
+  { label: "СБ", isWeekend: true },
+  { label: "ВС", isWeekend: true },
+];
 
-const getEventColorClasses = (color?: string) => {
-  const lowerColor = color?.toLowerCase();
-  if (lowerColor === "#29cc39" || lowerColor === "green" || lowerColor === "#166534") {
-    return "bg-emerald-500! text-white! hover:bg-emerald-600!";
+const getMonthCardStyle = (weather: WeatherType, isPreviousOrNextMonth: boolean) => {
+  if (isPreviousOrNextMonth) {
+    return {
+      className: "bg-[#fcfdfe] dark:bg-slate-900/40 opacity-40 shadow-[0_8px_20px_rgba(0,0,0,0.02)]",
+      style: {
+        background: "linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)",
+        boxShadow: "0 10px 24px -4px rgba(226, 232, 240, 0.6)",
+      },
+    };
   }
-  if (lowerColor === "#ffcb33" || lowerColor === "yellow") {
-    return "bg-yellow-500! text-white! hover:bg-yellow-600!";
+
+  switch (weather) {
+    case "sun":
+      return {
+        className: "text-[#1e293b]",
+        style: {
+          background: "linear-gradient(180deg, #FFF7ED 0%, #FFEDD5 100%)",
+          boxShadow: "0 14px 30px -4px rgba(254, 215, 170, 0.7), 0 6px 14px -2px rgba(249, 115, 22, 0.12)",
+        },
+      };
+    case "sun-cloud":
+      return {
+        className: "text-[#1e293b]",
+        style: {
+          background: "linear-gradient(180deg, #FAF5FF 0%, #F3E8FF 100%)",
+          boxShadow: "0 14px 30px -4px rgba(233, 213, 255, 0.7), 0 6px 14px -2px rgba(168, 85, 247, 0.12)",
+        },
+      };
+    case "rain":
+      return {
+        className: "text-[#1e293b]",
+        style: {
+          background: "linear-gradient(180deg, #F0F9FF 0%, #E0F2FE 100%)",
+          boxShadow: "0 14px 30px -4px rgba(186, 230, 253, 0.7), 0 6px 14px -2px rgba(14, 165, 233, 0.12)",
+        },
+      };
+    case "snow":
+      return {
+        className: "text-[#1e293b]",
+        style: {
+          background: "linear-gradient(180deg, #FAF5FF 0%, #EEF2FF 100%)",
+          boxShadow: "0 14px 30px -4px rgba(224, 231, 255, 0.7), 0 6px 14px -2px rgba(99, 102, 241, 0.12)",
+        },
+      };
+    case "cloud":
+    default:
+      return {
+        className: "text-[#1e293b]",
+        style: {
+          background: "linear-gradient(180deg, #F8FAFC 0%, #E2E8F0 100%)",
+          boxShadow: "0 14px 30px -4px rgba(226, 232, 240, 0.8), 0 6px 14px -2px rgba(100, 116, 139, 0.1)",
+        },
+      };
   }
-  if (lowerColor === "#ff6633" || lowerColor === "orange") {
-    return "bg-orange-500! text-white! hover:bg-orange-600!";
-  }
-  if (lowerColor === "#cc7429" || lowerColor === "bronze") {
-    return "bg-amber-600! text-white! hover:bg-amber-700!";
-  }
-  if (lowerColor === "#8833ff" || lowerColor === "purple" || lowerColor === "#af52de") {
-    return "bg-indigo-500! text-white! hover:bg-indigo-600!";
-  }
-  if (lowerColor === "#33bfff" || lowerColor === "blue") {
-    return "bg-sky-500! text-white! hover:bg-sky-600!";
-  }
-  if (lowerColor === "#e62e7b" || lowerColor === "pink" || lowerColor === "#f43f5e") {
-    return "bg-rose-500! text-white! hover:bg-rose-600!";
-  }
-  if (lowerColor === "#2ee6ca" || lowerColor === "tiffany" || lowerColor === "#10b981") {
-    return "bg-teal-500! text-white! hover:bg-teal-600!";
-  }
-  return "bg-emerald-500! text-white! hover:bg-emerald-600!";
 };
 
 export const MonthView = memo(({
@@ -50,7 +87,7 @@ export const MonthView = memo(({
   onDayClick,
   onEventClick,
 }: IMonthViewProps) => {
-  const { theme } = useCalendarTheme();
+  const { getWeatherForDate } = useWeather();
 
   const tasksMap = useMemo(() => {
     const map: Record<string, Task[]> = {};
@@ -62,55 +99,79 @@ export const MonthView = memo(({
   }, [tasks]);
 
   return (
-    <div className="w-full! bg-white/40! dark:bg-slate-800/40! rounded-3xl! p-4! border! border-white/20! dark:border-slate-700/30! shadow-sm!">
-      <div className="grid! grid-cols-7! gap-2! text-center! mb-4!">
+    <div className="w-full! flex! flex-col! gap-3!">
+      {/* Header Weekdays in Russian */}
+      <div className="grid! grid-cols-7! gap-3! text-center! mb-1!">
         {WEEKDAYS.map((day) => (
-          <div key={day} className="text-sm! font-bold! text-zinc-400! uppercase! py-2!">
-            {day}
+          <div
+            key={day.label}
+            className={`py-2! text-[11px]! font-black! tracking-wider! transition-all! flex! items-center! justify-center! ${
+              day.isWeekend
+                ? "border-2! border-[#fed7aa]! bg-[#fff7ed]! dark:bg-amber-950/40! text-[#ea580c]! dark:text-amber-400! rounded-[1.25rem]! shadow-xs!"
+                : "text-slate-400! dark:text-slate-500!"
+            }`}
+          >
+            {day.label}
           </div>
         ))}
       </div>
 
-      <div className="grid! grid-cols-7! gap-2! auto-rows-[120px]!">
+      {/* Grid of Days */}
+      <div className="grid! grid-cols-7! gap-3.5! auto-rows-[108px]">
         {daysToShow.map((day) => {
           const dateStr = day.format("YYYY-MM-DD");
           const dayTasks = tasksMap[dateStr] || [];
           const inMonth = day.month() === currentDate.month();
-          const current = day.isSame(dayjs(), "day");
+          const isToday = day.isSame(dayjs(), "day");
+          const dayWeather = getWeatherForDate(day);
+          const cardConfig = getMonthCardStyle(dayWeather.weatherType, !inMonth);
 
           return (
             <div
               key={dateStr}
               onClick={() => onDayClick(day)}
-              className={`flex! flex-col! p-2! rounded-2xl! border! border-zinc-100/50! dark:border-slate-700/20! bg-white/30! dark:bg-slate-900/30! cursor-pointer! transition-all! hover:bg-white/70! dark:hover:bg-slate-900/70! overflow-hidden! ${
-                inMonth ? "" : "opacity-30!"
-              }`}
+              style={cardConfig.style}
+              className={`flex! flex-col! p-2.5! rounded-[1.6rem]! cursor-pointer! transition-all! duration-200! overflow-hidden! ${cardConfig.className}`}
             >
-              <div className="flex! justify-end! mb-1!">
-                <div
-                  className={`flex! items-center! justify-center! w-7! h-7! text-xs! font-bold! rounded-full! ${
-                    current ? `bg-gradient-to-r! ${theme.gradient} text-white!` : "text-zinc-500! dark:text-zinc-400!"
-                  }`}
-                >
-                  {day.date()}
+              {/* Cell Header: Date on left & White circular weather badge on right */}
+              <div className="flex! items-center! justify-between! mb-1.5!">
+                {isToday ? (
+                  <div className="w-6! h-6! flex! items-center! justify-center! text-xs! font-extrabold! rounded-full! bg-[#00897b]! text-white! shadow-xs!">
+                    {day.date()}
+                  </div>
+                ) : (
+                  <span className="text-xs! font-black! text-slate-800! dark:text-slate-200! pl-1!">
+                    {day.date()}
+                  </span>
+                )}
+
+                {/* Pure White Circular Weather Badge */}
+                <div className="w-6! h-6! rounded-full! bg-white! dark:bg-slate-800! shadow-[0_2px_8px_rgba(0,0,0,0.06)]! flex! items-center! justify-center!">
+                  <WeatherIcon type={dayWeather.weatherType} size={13} />
                 </div>
               </div>
 
-              <div className="flex-1! space-y-1! overflow-y-auto! no-scrollbar!">
-                {dayTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEventClick(task);
-                    }}
-                    className={`text-[10px]! font-medium! py-1! px-2! rounded-lg! truncate! transition-all! shadow-sm! cursor-pointer! ${getEventColorClasses(
-                      task.color
-                    )}`}
-                  >
-                    {task.time} {task.title}
-                  </div>
-                ))}
+              {/* Cell Events List */}
+              <div className="flex-1! flex! flex-col! gap-1.5! overflow-y-auto! no-scrollbar!">
+                {dayTasks.map((task) => {
+                  const style = getEventStyle(task.color);
+                  return (
+                    <div
+                      key={task.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEventClick(task);
+                      }}
+                      className="w-fit! max-w-full! py-1! px-2.5! rounded-full! bg-white/90! dark:bg-slate-800/90! shadow-[0_2px_8px_rgba(0,0,0,0.04)]! text-[10px]! font-black! flex! items-center! gap-1.5! truncate! transition-all!"
+                    >
+                      <span className={`w-1.5! h-1.5! rounded-full! ${style.dot} flex-shrink-0!`} />
+                      <span className={`${style.text} truncate!`}>
+                        {task.time ? `${task.time} ` : ""}
+                        {task.title}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );

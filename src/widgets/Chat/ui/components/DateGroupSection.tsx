@@ -25,6 +25,8 @@ interface IProps {
   onJumpToMessage?: (targetId: string, returnFromId?: string) => void;
   isHighlighted: (msgId: string) => boolean;
   isCurrentMatch: (msgId: string) => boolean;
+  hoveredMessageId?: string | null;
+  activeActionMsgId?: string | null;
   setHoveredMessageId: (id: string | null) => void;
   setActiveActionMsgId: React.Dispatch<React.SetStateAction<string | null>>;
   handleReaction: (msgId: string, emoji: string) => void;
