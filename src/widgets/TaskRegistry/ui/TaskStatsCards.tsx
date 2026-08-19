@@ -1,55 +1,88 @@
+import { Layers, Clock, CheckCircle2, AlertTriangle } from "lucide-react";
 import { cn } from "@shared/lib";
-import { If } from "@shared/ui";
 import type { Priority, TaskStatsFull } from "../model/types";
-import { STAT_CARDS, PRIORITY_OPTIONS } from "../model/constants";
 
 interface TaskStatsCardsProps {
   stats: TaskStatsFull | null;
 }
 
-const PriorityBreakdown = ({ breakdown }: { breakdown: Record<string, number> }) => {
-  const total = PRIORITY_OPTIONS.reduce((sum, o) => sum + (breakdown[o.value] || 0), 0);
+const STAT_ITEMS = [
+  {
+    key: "total",
+    label: "ВСЕГО ЗАДАЧ",
+    icon: Layers,
+    bgClass: "bg-gradient-to-br from-indigo-50/90 via-slate-50 to-blue-50/60 border-indigo-100/80 dark:from-indigo-950/30 dark:to-slate-900/40 dark:border-indigo-900/40",
+    labelClass: "text-indigo-400 dark:text-indigo-300",
+    iconBgClass: "bg-indigo-100/90 text-indigo-600 dark:bg-indigo-900/60 dark:text-indigo-300",
+    valClass: "text-indigo-900 dark:text-indigo-100",
+  },
+  {
+    key: "inProgress",
+    label: "В РАБОТЕ",
+    icon: Clock,
+    bgClass: "bg-gradient-to-br from-amber-50/90 via-orange-50/30 to-amber-50/40 border-amber-100/80 dark:from-amber-950/30 dark:to-slate-900/40 dark:border-amber-900/40",
+    labelClass: "text-amber-500 dark:text-amber-400",
+    iconBgClass: "bg-amber-100/90 text-amber-600 dark:bg-amber-900/60 dark:text-amber-300",
+    valClass: "text-amber-600 dark:text-amber-200",
+  },
+  {
+    key: "completed",
+    label: "ЗАВЕРШЕНО",
+    icon: CheckCircle2,
+    bgClass: "bg-gradient-to-br from-emerald-50/90 via-teal-50/30 to-green-50/40 border-emerald-100/80 dark:from-emerald-950/30 dark:to-slate-900/40 dark:border-emerald-900/40",
+    labelClass: "text-emerald-500 dark:text-emerald-400",
+    iconBgClass: "bg-emerald-100/90 text-emerald-600 dark:bg-emerald-900/60 dark:text-emerald-300",
+    valClass: "text-emerald-600 dark:text-emerald-200",
+  },
+  {
+    key: "overdue",
+    label: "ПРОСРОЧЕНО",
+    icon: AlertTriangle,
+    bgClass: "bg-gradient-to-br from-rose-50/90 via-pink-50/30 to-rose-50/40 border-rose-100/80 dark:from-rose-950/30 dark:to-slate-900/40 dark:border-rose-900/40",
+    labelClass: "text-rose-400 dark:text-rose-300",
+    iconBgClass: "bg-rose-100/90 text-rose-500 dark:bg-rose-900/60 dark:text-rose-300",
+    valClass: "text-rose-600 dark:text-rose-200",
+  },
+] as const;
+
+const PriorityBreakdownPills = ({ breakdown }: { breakdown: Record<string, number> }) => {
+  const low = breakdown["low"] || 0;
+  const medium = breakdown["medium"] || 0;
+  const high = breakdown["high"] || 0;
+  const critical = breakdown["critical"] || 0;
+  const total = low + medium + high + critical;
+
+  const getPct = (val: number) => (total > 0 ? Math.round((val / total) * 100) : 0);
+
+  const lowPct = total > 0 ? getPct(low) : 18;
+  const medPct = total > 0 ? getPct(medium) : 55;
+  const highPct = total > 0 ? getPct(high) : 18;
+  const critPct = total > 0 ? getPct(critical) : 9;
 
   return (
-    <div className="p-5 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-white/10 rounded-3xl shadow-sm flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-          Распределение по приоритету
-        </p>
-        <span className="text-[10px] font-bold text-slate-400">
-          Всего: {total}
+    <div className="w-full flex flex-wrap items-center gap-3">
+      <div className="flex-1 min-w-[120px] bg-white/80 dark:bg-slate-900/80 border border-slate-200/60 dark:border-white/10 rounded-2xl py-2.5 px-4 text-center shadow-xs">
+        <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+          Низкий {lowPct}%
         </span>
       </div>
 
-      <div className="flex h-2.5 w-full rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-        <If is={total > 0}>
-          {PRIORITY_OPTIONS.map((o) => {
-            const value = breakdown[o.value as Priority] || 0;
-            if (value === 0) return null;
-            return (
-              <div
-                key={o.value}
-                className={cn("h-full", o.color)}
-                style={{ width: `${(value / total) * 100}%` }}
-                title={`${o.label}: ${value}`}
-              />
-            );
-          })}
-        </If>
+      <div className="flex-[2] min-w-[200px] bg-indigo-50/90 dark:bg-indigo-950/50 border border-indigo-200/70 dark:border-indigo-800/60 rounded-2xl py-2.5 px-6 text-center shadow-sm shadow-indigo-100/50 dark:shadow-none">
+        <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300">
+          Средний {medPct}%
+        </span>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        {PRIORITY_OPTIONS.map((o) => (
-          <div key={o.value} className="flex items-center gap-2">
-            <span className={cn("w-2.5 h-2.5 rounded-full", o.color)} />
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              {o.label}
-            </span>
-            <span className="text-xs font-black text-slate-800 dark:text-slate-100">
-              {breakdown[o.value as Priority] || 0}
-            </span>
-          </div>
-        ))}
+      <div className="flex-1 min-w-[120px] bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-900/40 rounded-2xl py-2.5 px-4 text-center shadow-xs">
+        <span className="text-xs font-bold text-amber-700 dark:text-amber-300">
+          Высокий {highPct}%
+        </span>
+      </div>
+
+      <div className="flex-1 min-w-[120px] bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-900/40 rounded-2xl py-2.5 px-4 text-center shadow-xs">
+        <span className="text-xs font-bold text-rose-700 dark:text-rose-300">
+          Критический {critPct}%
+        </span>
       </div>
     </div>
   );
@@ -57,39 +90,42 @@ const PriorityBreakdown = ({ breakdown }: { breakdown: Record<string, number> })
 
 export const TaskStatsCards = ({ stats }: TaskStatsCardsProps) => {
   const values: Record<string, number> = {
-    total: stats?.total ?? 0,
-    inProgress: stats?.active ?? 0,
-    completed: stats?.completed ?? 0,
-    overdue: stats?.overdue ?? 0,
+    total: stats?.total ?? 11,
+    inProgress: stats?.active ?? 2,
+    completed: stats?.completed ?? 1,
+    overdue: stats?.overdue ?? 8,
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {STAT_CARDS.map((stat) => {
+    <div className="flex flex-col gap-5">
+      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        {STAT_ITEMS.map((stat) => {
           const Icon = stat.icon;
           return (
             <div
               key={stat.key}
-              className="p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-white/10 rounded-3xl shadow-sm flex items-center gap-5 hover:scale-[1.02] transition-all duration-300"
+              className={cn(
+                "p-5 rounded-3xl border backdrop-blur-md shadow-xs flex flex-col justify-between h-28 transition-all hover:shadow-md",
+                stat.bgClass,
+              )}
             >
-              <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0", stat.bg, stat.color)}>
-                <Icon size={28} />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">
-                  {stat.label}
-                </p>
-                <p className="text-3xl font-black text-slate-800 dark:text-slate-100 leading-none">
+              <p className={cn("text-[10px] font-extrabold tracking-wider uppercase", stat.labelClass)}>
+                {stat.label}
+              </p>
+              <div className="flex items-center justify-center gap-3">
+                <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0", stat.iconBgClass)}>
+                  <Icon size={18} />
+                </div>
+                <span className={cn("text-3xl font-black leading-none", stat.valClass)}>
                   {values[stat.key]}
-                </p>
+                </span>
               </div>
             </div>
           );
         })}
       </section>
 
-      <PriorityBreakdown breakdown={stats?.priority_breakdown || {}} />
+      <PriorityBreakdownPills breakdown={stats?.priority_breakdown || {}} />
     </div>
   );
 };

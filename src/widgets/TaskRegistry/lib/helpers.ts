@@ -34,15 +34,28 @@ export const getFullCountdown = (dueDate: string) => {
   const target = new Date(dueDate);
   target.setHours(23, 59, 59, 999);
   const diff = target.getTime() - new Date().getTime();
+  const absDiff = Math.abs(diff);
+  const days = Math.floor(absDiff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((absDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((absDiff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((absDiff % (1000 * 60)) / 1000);
+
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const timeStr = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+
   if (diff <= 0) {
-    return { type: "overdue" as const, days: 0, hours: 0, minutes: 0, seconds: 0 };
+    return {
+      type: "overdue" as const,
+      days,
+      hours,
+      minutes,
+      seconds,
+      text: `-${days}д ${timeStr}`,
+    };
   }
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
   const type = diff < 1000 * 60 * 60 * 24 ? ("urgent" as const) : ("future" as const);
-  return { type, days, hours, minutes, seconds };
+  return { type, days, hours, minutes, seconds, text: `${days}д ${timeStr}` };
 };
 
 export const signTimestamp = () =>

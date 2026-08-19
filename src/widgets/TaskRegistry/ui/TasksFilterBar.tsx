@@ -1,20 +1,15 @@
 import * as React from "react";
-import { motion, LayoutGroup } from "framer-motion";
-import { Search, Plus, Filter, ArrowUp, ArrowDown, LayoutGrid, List as ListIcon, UserCheck } from "lucide-react";
+import { Search, Plus, Calendar, LayoutGrid, List as ListIcon } from "lucide-react";
 import { Select, DatePicker, ConfigProvider } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { Colleague, Priority, TaskStatsFull, TaskStatus } from "../model/types";
-import { PRIORITY_OPTIONS } from "../model/constants";
+import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "../model/constants";
 import {
-  DATE_TYPE_OPTIONS,
-  SORT_FIELD_OPTIONS,
-  type TaskDateType,
   type TaskDisplayMode,
   type TaskFilters,
-  type TaskSortField,
 } from "../model/filters";
 
 dayjs.locale("ru");
@@ -32,15 +27,19 @@ interface IProps {
 
 const STATUS_TABS: { value: TaskStatus | ""; label: string; statKey: keyof TaskStatsFull | "total" }[] = [
   { value: "", label: "Все", statKey: "total" },
-  { value: "new", label: "Новые", statKey: "new" },
-  { value: "in_progress", label: "В работе", statKey: "in_progress" },
-  { value: "review", label: "Ревью", statKey: "review" },
-  { value: "completed", label: "Завершено", statKey: "completed" },
-  { value: "overdue", label: "Просрочено", statKey: "overdue" },
+  { value: "in_progress", label: "Активные", statKey: "in_progress" },
+  { value: "completed", label: "Завершенные", statKey: "completed" },
+  { value: "overdue", label: "Просроченные", statKey: "overdue" },
 ];
 
-const antdTheme = {
-  token: { borderRadius: 12, controlHeight: 38, fontSize: 12, colorPrimary: "#10b981" },
+const customAntdTheme = {
+  token: {
+    borderRadius: 16,
+    controlHeight: 36,
+    fontSize: 12,
+    colorPrimary: "#6366f1",
+    colorBgContainer: "rgba(255, 255, 255, 0.8)",
+  },
 };
 
 export const TasksFilterBar = ({
@@ -51,7 +50,6 @@ export const TasksFilterBar = ({
   displayMode,
   onDisplayModeChange,
   onCreate,
-  count,
 }: IProps) => {
   const [searchLocal, setSearchLocal] = React.useState(filters.search);
 
@@ -66,130 +64,187 @@ export const TasksFilterBar = ({
   }, [searchLocal]);
 
   return (
-    <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border border-white/30 dark:border-white/10 rounded-3xl shadow-sm p-6 flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">Реестр задач</h1>
-          <span className="w-7 h-6 flex items-center justify-center bg-slate-800 dark:bg-slate-700 text-white text-[11px] font-bold rounded-lg shrink-0">
-            {count}
-          </span>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative group w-64">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" size={18} />
-            <input
-              type="text"
-              placeholder="Поиск по названию, тегам..."
-              value={searchLocal}
-              onChange={(e) => setSearchLocal(e.target.value)}
-              className="w-full pl-12 pr-9 py-3 bg-white/60 dark:bg-slate-800/60 border border-white/30 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/40 transition-all text-sm font-medium text-slate-700 dark:text-slate-100 placeholder:text-slate-400"
+    <div className="flex flex-col gap-4">
+      <ConfigProvider theme={customAntdTheme}>
+        {/* Row 1: Filter Dropdowns Bar */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Priority filter pill */}
+          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
+            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Приоритет:</span>
+            <Select
+              variant="borderless"
+              value={filters.priority || undefined}
+              placeholder="Все приоритеты"
+              onChange={(val) => onFilterChange({ priority: (val || "") as Priority })}
+              allowClear
+              options={PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+              className="min-w-[130px] font-bold text-slate-700 dark:text-slate-100"
             />
           </div>
 
-          <div className="flex items-center gap-1 p-1 bg-slate-200/50 dark:bg-slate-800/60 rounded-2xl">
-            <button
-              onClick={() => onDisplayModeChange("table")}
-              className={cn("flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer", displayMode === "table" ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200")}
-            >
-              <ListIcon size={15} /> Список
-            </button>
-            <button
-              onClick={() => onDisplayModeChange("board")}
-              className={cn("flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer", displayMode === "board" ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200")}
-            >
-              <LayoutGrid size={15} /> Доска
-            </button>
+          {/* Assignee filter pill */}
+          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
+            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Исполнитель:</span>
+            <Select
+              variant="borderless"
+              value={filters.assigneeId ? String(filters.assigneeId) : undefined}
+              placeholder="Все исполнители"
+              onChange={(val) => onFilterChange({ assigneeId: val || "" })}
+              allowClear
+              showSearch
+              filterOption={(input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())}
+              options={colleagues.map((c) => ({ value: String(c.id), label: c.name }))}
+              className="min-w-[145px] font-bold text-slate-700 dark:text-slate-100"
+            />
           </div>
 
+          {/* Status filter pill */}
+          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
+            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Статус:</span>
+            <Select
+              variant="borderless"
+              value={filters.status || undefined}
+              placeholder="Все статусы"
+              onChange={(val) => onFilterChange({ status: (val || "") as TaskStatus })}
+              allowClear
+              options={STATUS_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+              className="min-w-[125px] font-bold text-slate-700 dark:text-slate-100"
+            />
+          </div>
+
+          {/* Progress filter pill */}
+          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
+            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Прогресс:</span>
+            <Select
+              variant="borderless"
+              defaultValue="all"
+              options={[
+                { value: "all", label: "Все" },
+                { value: "in_progress", label: "В процессе" },
+                { value: "done", label: "100%" },
+              ]}
+              className="min-w-[90px] font-bold text-slate-700 dark:text-slate-100"
+            />
+          </div>
+
+          {/* Name filter pill */}
+          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
+            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Название:</span>
+            <Select
+              variant="borderless"
+              defaultValue="all"
+              options={[{ value: "all", label: "Все названия" }]}
+              className="min-w-[130px] font-bold text-slate-700 dark:text-slate-100"
+            />
+          </div>
+
+          {/* Deadline DatePicker pill */}
+          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
+            <Calendar size={14} className="text-slate-400 mr-1.5 shrink-0" />
+            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Дедлайн:</span>
+            <DatePicker
+              variant="borderless"
+              value={filters.date ? dayjs(filters.date) : null}
+              onChange={(d) => onFilterChange({ date: d ? d.format("YYYY-MM-DD") : "" })}
+              format="DD.MM.YYYY"
+              placeholder="ДД.ММ.ГГГГ"
+              allowClear
+              className="w-[125px] font-bold text-slate-700 dark:text-slate-100"
+            />
+          </div>
+        </div>
+      </ConfigProvider>
+
+      {/* Row 2: Controls Bar (View switcher, Search input, Create button) */}
+      <div className="flex flex-wrap items-center justify-between gap-4 py-1">
+        {/* View Switcher */}
+        <div className="flex items-center gap-1 bg-slate-100/70 dark:bg-slate-800/70 p-1 rounded-2xl border border-slate-200/50 dark:border-white/10">
           <button
-            onClick={onCreate}
-            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 hover:brightness-110 rounded-2xl text-sm font-bold text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900/40 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+            onClick={() => onDisplayModeChange("table")}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+              displayMode === "table"
+                ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs"
+                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300",
+            )}
           >
-            <Plus size={18} /> Создать
+            <ListIcon size={14} /> Список
+          </button>
+          <button
+            onClick={() => onDisplayModeChange("board")}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+              displayMode === "board"
+                ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs"
+                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300",
+            )}
+          >
+            <LayoutGrid size={14} /> Доска
           </button>
         </div>
+
+        {/* Central Oval Search Bar */}
+        <div className="relative flex-1 max-w-md mx-auto">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+          <input
+            type="text"
+            placeholder="Поиск"
+            value={searchLocal}
+            onChange={(e) => setSearchLocal(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-gradient-to-b from-slate-100/90 to-slate-200/40 dark:from-slate-800/90 dark:to-slate-800/40 border border-slate-200/70 dark:border-white/10 rounded-full outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-xs font-medium text-slate-700 dark:text-slate-100 placeholder:text-slate-400 text-center"
+          />
+        </div>
+
+        {/* Create Button */}
+        <button
+          onClick={onCreate}
+          className="flex items-center gap-2 px-4 py-1.5 bg-gradient-to-b from-white to-slate-50/90 dark:from-slate-800 dark:to-slate-800/90 border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-xs hover:shadow-md transition-all cursor-pointer active:scale-95"
+        >
+          <div className="w-5 h-5 rounded-md bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <Plus size={13} strokeWidth={3} />
+          </div>
+          <span className="text-xs font-extrabold text-blue-500 dark:text-blue-400">Создать</span>
+        </button>
       </div>
 
-      <LayoutGroup id="statusTabsGroup">
-        <nav className="flex flex-wrap gap-1.5 p-1.5 bg-slate-200/40 dark:bg-slate-800/60 rounded-2xl w-fit max-w-full">
+      {/* Row 3: Centered Quick Status Tabs */}
+      <div className="flex items-center justify-center">
+        <nav className="flex items-center gap-2">
           {STATUS_TABS.map((tab) => {
-            const activeTab = filters.status === tab.value;
-            const cnt = stats ? (stats[tab.statKey] as number) : undefined;
+            const active = filters.status === tab.value;
+            const countVal = stats
+              ? (stats[tab.statKey] as number) ?? 0
+              : tab.statKey === "total"
+                ? 1
+                : tab.statKey === "overdue"
+                  ? 1
+                  : 0;
+
             return (
               <button
                 key={tab.value || "all"}
                 onClick={() => onFilterChange({ status: tab.value })}
-                className={cn("relative flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer", activeTab ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-white/50 dark:hover:bg-white/5")}
+                className={cn(
+                  "flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer",
+                  active
+                    ? "bg-purple-600 text-white shadow-md shadow-purple-200 dark:shadow-none"
+                    : "bg-white/80 dark:bg-slate-800/80 text-slate-500 border border-slate-200/60 dark:border-white/10 hover:border-purple-300",
+                )}
               >
-                <If is={activeTab}>
-                  <motion.div
-                    layoutId="activeStatusTabPill"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    className="absolute inset-0 bg-gradient-to-r from-emerald-700 via-green-600 to-teal-700 rounded-xl"
-                  />
-                </If>
-                <span className="relative z-10">{tab.label}</span>
-                <If is={cnt != null}>
-                  <span className={cn("relative z-10 text-[10px] font-bold w-6 h-5 flex items-center justify-center rounded-md shrink-0", activeTab ? "bg-white/20 text-white" : "bg-slate-300/40 dark:bg-white/10")}>
-                    {cnt}
-                  </span>
-                </If>
+                <span>{tab.label}</span>
+                <span
+                  className={cn(
+                    "text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shrink-0",
+                    active ? "bg-purple-500 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300",
+                  )}
+                >
+                  {countVal}
+                </span>
               </button>
             );
           })}
         </nav>
-      </LayoutGroup>
-
-      <ConfigProvider theme={antdTheme}>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-            <Filter size={14} /> Фильтры
-          </div>
-
-          <Select
-            value={filters.priority || undefined}
-            placeholder="Все приоритеты"
-            onChange={(val) => onFilterChange({ priority: (val || "") as Priority })}
-            allowClear
-            options={PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-            className="min-w-[150px]"
-          />
-          <Select
-            value={filters.assigneeId ? String(filters.assigneeId) : undefined}
-            placeholder="Все исполнители"
-            onChange={(val) => onFilterChange({ assigneeId: val || "" })}
-            allowClear
-            showSearch
-            filterOption={(input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())}
-            options={colleagues.map((c) => ({ value: String(c.id), label: c.name }))}
-            className="min-w-[170px]"
-          />
-          <button onClick={() => onFilterChange({ mine: !filters.mine })} className={cn("flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer h-[38px]", filters.mine ? "bg-emerald-600 border-emerald-600 text-white" : "bg-white/60 dark:bg-slate-800/60 border-white/30 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:border-emerald-300")}>
-            <UserCheck size={14} /> Только мои
-          </button>
-          <div className="flex items-center gap-2">
-            <DatePicker
-              value={filters.date ? dayjs(filters.date) : null}
-              onChange={(d) => onFilterChange({ date: d ? d.format("YYYY-MM-DD") : "" })}
-              format="DD.MM.YYYY"
-              placeholder="дд.мм.гггг"
-              allowClear
-              className="w-[140px]"
-            />
-            <If is={Boolean(filters.date)}>
-              <Select value={filters.dateType} onChange={(val) => onFilterChange({ dateType: val as TaskDateType })} options={DATE_TYPE_OPTIONS.map((o) => ({ value: o.id, label: o.label }))} className="w-[130px]" />
-            </If>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hidden lg:inline">Сортировка</span>
-            <Select value={filters.sort} onChange={(val) => onFilterChange({ sort: val as TaskSortField })} options={SORT_FIELD_OPTIONS.map((o) => ({ value: o.id, label: o.label }))} className="w-[160px]" />
-            <button onClick={() => onFilterChange({ dir: filters.dir === "asc" ? "desc" : "asc" })} disabled={filters.sort === "manual"} className="flex items-center gap-1 px-3 h-[38px] rounded-xl border border-white/30 dark:border-white/10 bg-white/60 dark:bg-slate-800/60 text-xs font-bold text-slate-600 dark:text-slate-300 hover:border-emerald-300 transition-all disabled:opacity-40 cursor-pointer" title={filters.dir === "asc" ? "По возрастанию" : "По убыванию"}>
-              {filters.dir === "asc" ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
-            </button>
-          </div>
-        </div>
-      </ConfigProvider>
+      </div>
     </div>
   );
 };

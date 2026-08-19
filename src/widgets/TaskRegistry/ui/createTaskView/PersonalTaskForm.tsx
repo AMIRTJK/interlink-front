@@ -1,8 +1,7 @@
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Upload, Download, Trash2, Paperclip, FileIcon } from "lucide-react";
+import { X, Search, Calendar } from "lucide-react";
 import { cn } from "@shared/lib";
-import { If } from "@shared/ui";
 import type {
   Attachment,
   Colleague,
@@ -12,6 +11,7 @@ import type {
 } from "../../model/types";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "../../model/constants";
 import { Avatar } from "../Avatar";
+import { TaskAttachmentsDropzone } from "./TaskAttachmentsDropzone";
 
 interface IProps {
   formTitle: string;
@@ -53,6 +53,8 @@ interface IProps {
   assigneeOpen: boolean;
   onAssigneeOpenChange: (open: boolean) => void;
   colleagues: Colleague[];
+  onSave?: () => void;
+  isSaving?: boolean;
 }
 
 export function PersonalTaskForm({
@@ -62,8 +64,6 @@ export function PersonalTaskForm({
   onClearTitleError,
   formDescription,
   onFormDescriptionChange,
-  formTags,
-  onFormTagsChange,
   attachments,
   onRemoveAttachment,
   newFiles,
@@ -79,8 +79,6 @@ export function PersonalTaskForm({
   onFormStatusChange,
   formDueDate,
   onFormDueDateChange,
-  formProgress,
-  onFormProgressChange,
   formAssignees,
   onToggleAssignee,
   assigneeQuery,
@@ -88,6 +86,8 @@ export function PersonalTaskForm({
   assigneeOpen,
   onAssigneeOpenChange,
   colleagues,
+  onSave,
+  isSaving,
 }: IProps) {
   const filteredColleagues = colleagues.filter(
     (c) =>
@@ -98,328 +98,232 @@ export function PersonalTaskForm({
   return (
     <motion.div
       key="personal-form"
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 16 }}
-      transition={{ duration: 0.25 }}
-      className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+      exit={{ opacity: 0, y: 12 }}
+      transition={{ duration: 0.2 }}
+      className="flex flex-col gap-6"
     >
-      {/* Left two columns */}
-      <div className="lg:col-span-2 bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-3xl shadow-2xl p-8 space-y-6">
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Название задачи <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={formTitle}
-            onChange={(e) => {
-              onFormTitleChange(e.target.value);
-              if (e.target.value.trim()) onClearTitleError();
-            }}
-            className={cn(
-              "w-full px-4 py-3 bg-white/60 dark:bg-slate-800/60 border rounded-2xl focus:ring-2 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-slate-800 outline-none transition-all font-medium text-slate-700 dark:text-slate-100",
-              titleError
-                ? "border-red-500 ring-1 ring-red-200"
-                : "border-white/30 dark:border-white/10",
-            )}
-            placeholder="Напр: Оптимизация процесса деплоя"
-          />
-          {titleError && (
-            <p className="text-[10px] font-bold text-red-500 uppercase">
-              Название обязательно
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Описание
-          </label>
-          <textarea
-            value={formDescription}
-            onChange={(e) => onFormDescriptionChange(e.target.value)}
-            className="w-full h-40 px-4 py-3 bg-white/60 dark:bg-slate-800/60 border border-white/30 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-slate-800 outline-none transition-all font-medium text-slate-700 dark:text-slate-100 resize-none"
-            placeholder="Подробно опишите задачу..."
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Теги (через запятую)
-          </label>
-          <input
-            type="text"
-            value={formTags}
-            onChange={(e) => onFormTagsChange(e.target.value)}
-            className="w-full px-4 py-3 bg-white/60 dark:bg-slate-800/60 border border-white/30 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-slate-800 outline-none transition-all font-medium text-slate-700 dark:text-slate-100"
-            placeholder="Backend, API, High Priority"
-          />
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between border-t border-white/20 dark:border-white/10 pt-4">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-              Вложения
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        {/* Left container */}
+        <div className="lg:col-span-2 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-5">
+          {/* TASK TITLE */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
+              НАЗВАНИЕ ЗАДАЧИ <span className="text-red-500">*</span>
             </label>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
-            >
-              <Upload size={13} />
-              Выбрать файлы
-            </button>
             <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className="hidden"
+              type="text"
+              value={formTitle}
               onChange={(e) => {
-                const files = Array.from(e.target.files || []);
-                e.target.value = "";
-                if (files.length) {
-                  onAddNewFiles(files);
-                }
+                onFormTitleChange(e.target.value);
+                if (e.target.value.trim()) onClearTitleError();
               }}
+              className={cn(
+                "w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none transition-all text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] focus:bg-white focus:border-[#3373e5]/40 focus:ring-2 focus:ring-[#3373e5]/15 shadow-[0_4px_16px_rgba(100,105,240,0.06)]",
+                titleError
+                  ? "border-red-500 ring-1 ring-red-200"
+                  : "",
+              )}
+              placeholder="Напр: Оптимизация процесса деплоя"
+            />
+            {titleError && (
+              <p className="text-[10px] font-bold text-red-500">
+                Название обязательно
+              </p>
+            )}
+          </div>
+
+          {/* DESCRIPTION */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
+              ОПИСАНИЕ
+            </label>
+            <textarea
+              value={formDescription}
+              onChange={(e) => onFormDescriptionChange(e.target.value)}
+              className="w-full h-36 px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none transition-all text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] resize-none focus:bg-white focus:border-[#3373e5]/40 focus:ring-2 focus:ring-[#3373e5]/15 shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+              placeholder="Подробно опишите задачу..."
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <If is={attachments.length > 0 || newFiles.length > 0}>
-              {attachments.map((file) => (
-                <div
-                  key={file.id}
-                  className="group flex items-center gap-3 p-3 bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 rounded-xl hover:border-emerald-300 transition-colors"
-                >
-                  <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-600">
-                    <FileIcon size={20} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                      {file.name}
-                    </p>
-                    <p className="text-[10px] text-slate-400">{file.size}</p>
-                  </div>
-                  <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (editTask?.rawId != null && file.rawId != null) {
-                          onDownloadAttachment?.(
-                            editTask.rawId,
-                            file.rawId,
-                            file.name,
-                          );
-                        }
-                      }}
-                      className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all text-slate-400 hover:text-emerald-600"
-                    >
-                      <Download size={16} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (editTask?.rawId != null && file.rawId != null) {
-                          await onDeleteAttachment?.(
-                            editTask.rawId,
-                            file.rawId,
-                          );
-                          onRemoveAttachment(file.id);
-                        }
-                      }}
-                      className="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all text-slate-400 hover:text-rose-600"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-              ))}
+          {/* ATTACHMENTS DROPZONE */}
+          <TaskAttachmentsDropzone
+            attachments={attachments}
+            onRemoveAttachment={onRemoveAttachment}
+            newFiles={newFiles}
+            onRemoveNewFile={onRemoveNewFile}
+            onAddNewFiles={onAddNewFiles}
+            fileInputRef={fileInputRef}
+            editTask={editTask}
+            onDownloadAttachment={onDownloadAttachment}
+            onDeleteAttachment={onDeleteAttachment}
+          />
+        </div>
 
-              {newFiles.map((file, index) => (
-                <div
-                  key={`new-${index}-${file.name}`}
-                  className="group flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-850/40 border border-white/20 dark:border-white/5 rounded-xl hover:border-emerald-300 transition-colors"
-                >
-                  <div className="w-10 h-10 bg-amber-50 dark:bg-amber-900/30 rounded-lg flex items-center justify-center text-amber-600">
-                    <FileIcon size={20} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                      {file.name}
-                    </p>
-                    <p className="text-[10px] text-slate-400">
-                      {(file.size / 1024).toFixed(0)} KB
-                    </p>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-[9px] font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded mr-1">
-                      Очередь
+        {/* Right container */}
+        <div className="lg:col-span-1 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-4">
+          {/* PRIORITY */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
+              ПРИОРИТЕТ
+            </label>
+            <select
+              value={formPriority}
+              onChange={(e) => onFormPriorityChange(e.target.value as Priority)}
+              className="w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 cursor-pointer shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+            >
+              {PRIORITY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* STATUS */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
+              СТАТУС
+            </label>
+            <select
+              value={formStatus}
+              onChange={(e) => onFormStatusChange(e.target.value as TaskStatus)}
+              className="w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 cursor-pointer shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+            >
+              {STATUS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* DUE DATE */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
+              СРОК ВЫПОЛНЕНИЯ
+            </label>
+            <div className="relative">
+              <Calendar size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9aa2c8] pointer-events-none" />
+              <input
+                type="date"
+                value={formDueDate}
+                onChange={(e) => onFormDueDateChange(e.target.value)}
+                className="w-full pl-10 pr-4 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+              />
+            </div>
+          </div>
+
+          {/* FORMAT */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
+              ФОРМАТ
+            </label>
+            <select
+              defaultValue="normal"
+              className="w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 cursor-pointer shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+            >
+              <option value="normal">Обычный</option>
+              <option value="urgent">Срочный</option>
+              <option value="important">Важный</option>
+            </select>
+          </div>
+
+          {/* ASSIGNEES */}
+          <div className="space-y-2 relative">
+            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
+              ИСПОЛНИТЕЛИ
+            </label>
+
+            {formAssignees.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {formAssignees.map((id) => {
+                  const col = colleagues.find((c) => c.id === id);
+                  if (!col) return null;
+                  return (
+                    <span
+                      key={id}
+                      className="inline-flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 bg-white dark:bg-slate-800 border border-[#3373e5]/20 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100"
+                    >
+                      <span className="w-5 h-5 rounded-full bg-[#ec4899] text-white flex items-center justify-center text-[9px] font-black shrink-0">
+                        {col.initials || "AS"}
+                      </span>
+                      <span>{col.name.split(" ")[0]}</span>
+                      <button
+                        type="button"
+                        onClick={() => onToggleAssignee(id)}
+                        className="text-[#9aa2c8] hover:text-rose-500 transition-colors"
+                      >
+                        <X size={12} />
+                      </button>
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => onRemoveNewFile(index)}
-                      className="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all text-slate-400 hover:text-rose-600"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </If>
-
-            <If is={attachments.length === 0 && newFiles.length === 0}>
-              <div className="col-span-2 py-8 text-center border-2 border-dashed border-slate-100 dark:border-white/10 rounded-2xl">
-                <Paperclip className="mx-auto text-slate-300 mb-2" size={24} />
-                <p className="text-sm text-slate-400 font-medium">
-                  Нет прикрепленных файлов
-                </p>
+                  );
+                })}
               </div>
-            </If>
+            )}
+
+            <div className="relative">
+              <input
+                type="text"
+                value={assigneeQuery}
+                onChange={(e) => {
+                  onAssigneeQueryChange(e.target.value);
+                  onAssigneeOpenChange(true);
+                }}
+                onFocus={() => onAssigneeOpenChange(true)}
+                onBlur={() => setTimeout(() => onAssigneeOpenChange(false), 150)}
+                className="w-full pl-5 pr-10 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+                placeholder="Поиск коллеги..."
+              />
+              <Search size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9aa2c8] pointer-events-none" />
+            </div>
+
+            <AnimatePresence>
+              {assigneeOpen && filteredColleagues.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  className="absolute z-30 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden max-h-48 overflow-y-auto"
+                >
+                  {filteredColleagues.map((col) => (
+                    <button
+                      key={col.id}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        onToggleAssignee(col.id);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left cursor-pointer"
+                    >
+                      <Avatar colleague={col} className="w-6 h-6 text-[9px]" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                          {col.name}
+                        </p>
+                        <p className="text-[10px] text-slate-400 truncate">
+                          {col.role}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
 
-      {/* Right column */}
-      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-3xl shadow-2xl p-8 space-y-6">
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Приоритет
-          </label>
-          <select
-            value={formPriority}
-            onChange={(e) => onFormPriorityChange(e.target.value as Priority)}
-            className="w-full px-4 py-3 bg-white/60 dark:bg-slate-800/60 border border-white/30 dark:border-white/10 rounded-2xl outline-none font-medium text-slate-700 dark:text-slate-100"
-          >
-            {PRIORITY_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Статус
-          </label>
-          <select
-            value={formStatus}
-            onChange={(e) => onFormStatusChange(e.target.value as TaskStatus)}
-            className="w-full px-4 py-3 bg-white/60 dark:bg-slate-800/60 border border-white/30 dark:border-white/10 rounded-2xl outline-none font-medium text-slate-700 dark:text-slate-100"
-          >
-            {STATUS_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Срок выполнения
-          </label>
-          <input
-            type="date"
-            value={formDueDate}
-            onChange={(e) => onFormDueDateChange(e.target.value)}
-            className="w-full px-4 py-3 bg-white/60 dark:bg-slate-800/60 border border-white/30 dark:border-white/10 rounded-2xl outline-none font-medium text-slate-700 dark:text-slate-100"
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-              Прогресс
-            </label>
-            <span className="text-xs font-bold text-emerald-600">
-              {formProgress}%
-            </span>
-          </div>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            step={5}
-            value={formProgress}
-            onChange={(e) => onFormProgressChange(Number(e.target.value))}
-            className="w-full accent-emerald-600 cursor-pointer"
-          />
-        </div>
-
-        <div className="space-y-1.5 relative">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Исполнители
-          </label>
-          {formAssignees.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-2">
-              {formAssignees.map((id) => {
-                const col = colleagues.find((c) => c.id === id)!;
-                return (
-                  <span
-                    key={id}
-                    className="inline-flex items-center gap-2 pl-1.5 pr-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-full shadow-sm"
-                  >
-                    <Avatar colleague={col} className="w-6 h-6 text-[9px]" />
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                      {col.name.split(" ")[0]}
-                    </span>
-                    <button
-                      onClick={() => onToggleAssignee(id)}
-                      className="text-slate-300 hover:text-red-500 transition-colors"
-                    >
-                      <X size={13} />
-                    </button>
-                  </span>
-                );
-              })}
-            </div>
-          )}
-          <input
-            type="text"
-            value={assigneeQuery}
-            onChange={(e) => {
-              onAssigneeQueryChange(e.target.value);
-              onAssigneeOpenChange(true);
-            }}
-            onFocus={() => onAssigneeOpenChange(true)}
-            onBlur={() => setTimeout(() => onAssigneeOpenChange(false), 150)}
-            className="w-full px-4 py-3 bg-white/60 dark:bg-slate-800/60 border border-white/30 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-emerald-500/30 focus:bg-white dark:focus:bg-slate-800 outline-none transition-all font-medium text-slate-700 dark:text-slate-100"
-            placeholder="Поиск коллеги..."
-          />
-          <AnimatePresence>
-            {assigneeOpen && filteredColleagues.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                className="absolute z-20 left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
-              >
-                {filteredColleagues.map((col) => (
-                  <button
-                    key={col.id}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      onToggleAssignee(col.id);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left"
-                  >
-                    <Avatar colleague={col} className="w-8 h-8 text-[10px]" />
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                        {col.name}
-                      </p>
-                      <p className="text-[10px] text-slate-400 truncate">
-                        {col.role}
-                      </p>
-                    </div>
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+      {/* Bottom Action Button matching screenshot */}
+      <div className="flex items-center justify-start pt-1">
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={isSaving}
+          className="px-7 py-3 bg-[#10b981] hover:bg-[#059669] disabled:opacity-50 text-white font-extrabold rounded-xl text-xs shadow-[0_8px_25px_rgba(16,185,129,0.35)] dark:shadow-none transition-all cursor-pointer active:scale-95"
+        >
+          {isSaving ? "Сохранение..." : "Сохранить"}
+        </button>
       </div>
     </motion.div>
   );

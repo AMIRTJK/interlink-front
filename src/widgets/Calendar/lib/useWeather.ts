@@ -139,19 +139,8 @@ export const useWeather = () => {
       }
     };
 
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          fetchWeather(pos.coords.latitude, pos.coords.longitude);
-        },
-        () => {
-          fetchWeather(38.56, 68.78); // Dushanbe default coordinates
-        },
-        { timeout: 5000 }
-      );
-    } else {
-      fetchWeather(38.56, 68.78);
-    }
+    //Душанбе по умолчанию
+    fetchWeather(38.56, 68.78);
 
     return () => {
       isMounted = false;

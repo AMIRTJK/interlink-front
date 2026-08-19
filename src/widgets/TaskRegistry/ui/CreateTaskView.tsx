@@ -170,6 +170,8 @@ export const CreateTaskView = ({
             assigneeOpen={assigneeOpen}
             onAssigneeOpenChange={setAssigneeOpen}
             colleagues={colleagues}
+            onSave={handleCreateTask}
+            isSaving={isSaving}
           />
         ) : (
           <ProtocolTaskForm
