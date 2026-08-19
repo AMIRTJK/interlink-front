@@ -114,7 +114,7 @@ export const WeekView = memo(({
               <span className="text-[11px]! font-black! tracking-wider! uppercase!">
                 {day.locale("ru").format("ddd").toUpperCase()} {day.date()}
               </span>
-              <WeatherIcon type={dayWeather.weatherType} size={13} />
+              {dayWeather && <WeatherIcon type={dayWeather.weatherType} size={13} />}
             </div>
           );
         })}
