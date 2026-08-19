@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { PhoneField } from "./PhoneField";
 import { PasswordField } from "./PasswordField";
 import { LoginOptionsRow } from "./LoginOptionsRow";
+import { DevTestAccountsButton } from "./devTestAccounts";
 
 interface IProps {
 	prefix: string;
@@ -14,6 +15,7 @@ interface IProps {
 	onPhoneNumberChange: (value: string) => void;
 	onPasswordChange: (value: string) => void;
 	onToggleShowPassword: () => void;
+	onOpenTestAccounts: () => void;
 	onSubmit: (e: React.FormEvent) => void;
 }
 
@@ -27,9 +29,17 @@ export const LoginStep = ({
 	onPhoneNumberChange,
 	onPasswordChange,
 	onToggleShowPassword,
+	onOpenTestAccounts,
 	onSubmit,
 }: IProps) => (
 	<form className="space-y-5" onSubmit={onSubmit}>
+		<div className="flex items-center justify-between pb-0.5">
+			<span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+				Вход в систему
+			</span>
+			<DevTestAccountsButton onClick={onOpenTestAccounts} />
+		</div>
+
 		<PhoneField
 			prefix={prefix}
 			phoneNumber={phoneNumber}

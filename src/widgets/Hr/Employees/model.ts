@@ -1,6 +1,7 @@
 import type { IAdminUser } from "@entities/hr";
 import { _axios, ApiRoutes } from "@shared/api";
 import { getEnvVar } from "@shared/config";
+import { toast } from "@shared/lib/toast";
 
 export const resolvePhotoUrl = (path?: string | null): string => {
   if (!path) return "";
@@ -124,6 +125,28 @@ export interface IEmployeesFilters {
   salaryMin: string;
   salaryMax: string;
 }
+
+export const formatLoginForCopy = (login?: string | null): string => {
+  if (!login) return "";
+  return login.replace(/^\+?992\s*-?\s*/, "").trim();
+};
+
+export const copyLogin = (login?: string | null, e?: React.MouseEvent) => {
+  if (e) {
+    e.stopPropagation();
+  }
+  const textToCopy = formatLoginForCopy(login);
+  if (!textToCopy) return;
+
+  navigator.clipboard
+    .writeText(textToCopy)
+    .then(() => {
+      toast.success("Логин скопирован");
+    })
+    .catch(() => {
+      toast.error("Не удалось скопировать логин");
+    });
+};
 
 export const exportUsersExcel = async (params?: Record<string, unknown>) => {
   const res = await _axios(ApiRoutes.EXPORT_USERS_EXCEL, {

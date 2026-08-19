@@ -1,5 +1,5 @@
 import React from "react";
-import { Check, Shield, Undo } from "lucide-react";
+import { Check, Clock, Shield, Undo } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 
@@ -13,6 +13,9 @@ interface IProps {
   isSigned: boolean;
   onSelectVersion: (content: string, id: number) => void;
   onSetVersionForSign: (id: number) => void;
+  onApproveVersion?: (versionId: number | string) => void;
+  canApprove?: boolean;
+  isApproving?: boolean;
 }
 
 export const VersionItem = ({
@@ -25,6 +28,9 @@ export const VersionItem = ({
   isSigned,
   onSelectVersion,
   onSetVersionForSign,
+  onApproveVersion,
+  canApprove = false,
+  isApproving = false,
 }: IProps) => {
   const isDocumentSigned = isSigned || Boolean(signedVersionId);
   const isRevoked = version.signature_state === "revoked";
@@ -47,7 +53,7 @@ export const VersionItem = ({
           : undefined
       }
       className={cn(
-        "flex items-start justify-between p-3 rounded-xl border transition-all group text-xs gap-3",
+        "flex flex-col p-3 rounded-xl border transition-all group text-xs gap-2",
         isViewSelectDisabled ? "cursor-default" : "cursor-pointer",
         isSignedVersion
           ? "bg-emerald-50/60 border-emerald-400 shadow-sm ring-1 ring-emerald-200"
@@ -58,96 +64,126 @@ export const VersionItem = ({
               : "bg-slate-50/40 border-slate-100 hover:bg-slate-50 hover:border-slate-200",
       )}
     >
-      <div
-        className={cn(
-          "w-7 h-7 rounded-full font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5 border border-white shadow-sm",
-          isSignedVersion
-            ? "bg-emerald-500 text-white"
-            : isRevoked
-              ? "bg-rose-100 text-rose-600 border-rose-200"
-              : "bg-slate-200 text-slate-600",
-        )}
-      >
-        <If is={isSignedVersion}>
-          <Check size={14} />
-        </If>
-        <If is={isRevoked}>
-          <Undo size={12} />
-        </If>
-        <If is={!isSignedVersion && !isRevoked}>
-          {version.author.initials}
-        </If>
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span
-            className={cn(
-              "font-bold",
-              isSignedVersion
-                ? "text-emerald-700"
-                : isRevoked
-                  ? "text-rose-700"
-                  : isCurrentActive
-                    ? "text-blue-600"
-                    : "text-slate-700",
-            )}
-          >
-            Версия {version.versionNumber}
-          </span>
-          <If is={isLatestVersion && !isDocumentSigned}>
-            <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 font-medium rounded text-[9px] border border-blue-100 whitespace-nowrap shrink-0">
-              Актуальная
-            </span>
-          </If>
+      <div className="flex items-start justify-between gap-3 w-full">
+        <div
+          className={cn(
+            "w-7 h-7 rounded-full font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5 border border-white shadow-sm",
+            isSignedVersion
+              ? "bg-emerald-500 text-white"
+              : isRevoked
+                ? "bg-rose-100 text-rose-600 border-rose-200"
+                : "bg-slate-200 text-slate-600",
+          )}
+        >
           <If is={isSignedVersion}>
-            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-500 text-white font-semibold rounded text-[9px] whitespace-nowrap shrink-0">
-              <Shield size={9} />
-              Подписано
-            </span>
+            <Check size={14} />
           </If>
           <If is={isRevoked}>
-            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-rose-50 text-rose-600 font-semibold rounded text-[9px] border border-rose-200 whitespace-nowrap shrink-0">
-              <Undo size={9} />
-              Подпись отменена
-            </span>
+            <Undo size={12} />
           </If>
-          <If is={!isSignedVersion && !isRevoked && version.is_selected && !isDocumentSigned}>
-            <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 font-medium rounded text-[9px] border border-emerald-100 whitespace-nowrap shrink-0">
-              Для подписи
-            </span>
+          <If is={!isSignedVersion && !isRevoked}>
+            {version.author.initials}
           </If>
         </div>
 
-        <p className="text-[11px] text-slate-600 font-medium mt-0.5 truncate">
-          {version.author.name}
-        </p>
-        <p className="text-[10px] text-slate-400 truncate">
-          {version.author.position} • {new Date(version.date).toLocaleString("ru-RU")}
-        </p>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span
+              className={cn(
+                "font-bold",
+                isSignedVersion
+                  ? "text-emerald-700"
+                  : isRevoked
+                    ? "text-rose-700"
+                    : isCurrentActive
+                      ? "text-blue-600"
+                      : "text-slate-700",
+              )}
+            >
+              Версия {version.versionNumber}
+            </span>
+            <If is={isLatestVersion && !isDocumentSigned}>
+              <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 font-medium rounded text-[9px] border border-blue-100 whitespace-nowrap shrink-0">
+                Актуальная
+              </span>
+            </If>
+            <If is={isSignedVersion}>
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-500 text-white font-semibold rounded text-[9px] whitespace-nowrap shrink-0">
+                <Shield size={9} />
+                Подписано
+              </span>
+            </If>
+            <If is={isRevoked}>
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-rose-50 text-rose-600 font-semibold rounded text-[9px] border border-rose-200 whitespace-nowrap shrink-0">
+                <Undo size={9} />
+                Подпись отменена
+              </span>
+            </If>
+            <If is={!isSignedVersion && !isRevoked && version.is_selected && !isDocumentSigned}>
+              <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 font-medium rounded text-[9px] border border-emerald-100 whitespace-nowrap shrink-0">
+                Для подписи
+              </span>
+            </If>
+          </div>
+
+          <p className="text-[11px] text-slate-600 font-medium mt-0.5 truncate">
+            {version.author.name}
+          </p>
+          <p className="text-[10px] text-slate-400 truncate">
+            {version.author.position} • {new Date(version.date).toLocaleString("ru-RU")}
+          </p>
+        </div>
+
+        <div
+          className="flex items-center gap-1.5 flex-shrink-0 mt-0.5"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <If is={!isDocumentSigned && !isSignedVersion && !isRevoked}>
+            <input
+              type="checkbox"
+              id={`version-sign-${version.id}`}
+              className="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+              checked={version.is_selected}
+              disabled={isSelectingVersion || isSigned}
+              onChange={() => onSetVersionForSign(version.id)}
+            />
+            <label
+              htmlFor={`version-sign-${version.id}`}
+              className="text-[10px] text-slate-400 select-none cursor-pointer group-hover:text-slate-500"
+            >
+              Выбрать
+            </label>
+          </If>
+        </div>
       </div>
 
-      <div
-        className="flex items-center gap-1.5 flex-shrink-0 mt-0.5"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <If is={!isDocumentSigned && !isSignedVersion && !isRevoked}>
-          <input
-            type="checkbox"
-            id={`version-sign-${version.id}`}
-            className="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
-            checked={version.is_selected}
-            disabled={isSelectingVersion || isSigned}
-            onChange={() => onSetVersionForSign(version.id)}
-          />
-          <label
-            htmlFor={`version-sign-${version.id}`}
-            className="text-[10px] text-slate-400 select-none cursor-pointer group-hover:text-slate-500"
+      <If is={Boolean(canApprove && onApproveVersion && !isRevoked)}>
+        <div className="flex items-center justify-end pt-2 border-t border-slate-100/80 w-full">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onApproveVersion?.(version.id);
+            }}
+            disabled={isApproving}
+            className={cn(
+              "flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border cursor-pointer",
+              isApproving
+                ? "bg-slate-100 text-slate-400 border-slate-200 cursor-wait"
+                : "bg-white border-slate-200 text-slate-700 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-700 shadow-sm",
+            )}
           >
-            Выбрать
-          </label>
-        </If>
-      </div>
+            <If is={isApproving}>
+              <Clock size={11} className="animate-spin" />
+              <span>Согласую...</span>
+            </If>
+            <If is={!isApproving}>
+              <Check size={11} />
+              <span>Согласовать</span>
+            </If>
+          </button>
+        </div>
+      </If>
     </div>
   );
 };

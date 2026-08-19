@@ -57,7 +57,7 @@ export const ApproverCard: React.FC<IProps> = ({ approver, idx }) => {
         {approver.position}
       </p>
 
-      <If is={!!approver.versionLabel}>
+      <If is={Boolean(approver.signed && approver.versionLabel)}>
         <ApprovalVersionBadge label={approver.versionLabel} />
       </If>
 

@@ -19,6 +19,9 @@ interface IProps {
   signedVersionId: number | string | null;
   onSelectVersion: (content: string, id: number) => void;
   onSetVersionForSign: (id: number) => void;
+  onApproveVersion?: (versionId: number | string) => void;
+  canApprove?: boolean;
+  approvingVersionId?: number | string | null;
   isSelectingVersion: boolean;
   isSigned: boolean;
 }
@@ -35,6 +38,9 @@ export const VersionsPanel = ({
   signedVersionId,
   onSelectVersion,
   onSetVersionForSign,
+  onApproveVersion,
+  canApprove = false,
+  approvingVersionId = null,
   isSelectingVersion,
   isSigned,
 }: IProps) => {
@@ -259,6 +265,9 @@ export const VersionsPanel = ({
                     isSigned={isSigned}
                     onSelectVersion={onSelectVersion}
                     onSetVersionForSign={onSetVersionForSign}
+                    onApproveVersion={onApproveVersion}
+                    canApprove={canApprove}
+                    isApproving={approvingVersionId != null && String(approvingVersionId) === String(v.id)}
                   />
                 ))}
               </If>

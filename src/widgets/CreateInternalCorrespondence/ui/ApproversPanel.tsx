@@ -24,14 +24,10 @@ interface IProps {
   availableUsers: RecipientOption[];
   inviteApprover: (vars: { docId: string | number; users: number[] }) => void;
   isApproverInviting: boolean;
-  applyApproverDS: (recordId: string) => void;
-  toggleApproverComment: (id: string) => void;
-  updateApproverComment: (id: string, text: string) => void;
   docId?: string | number;
   /** Разрешает ли роль пользователя в документе согласовывать его */
-  canApprove: boolean;
-  currentUserId?: string | number | null;
-  /** Версия, открытая в редакторе: её и согласует пользователь. */
+  canApprove?: boolean;
+  /** Версия, открытая в редакторе: с ней сравнивается версия решения. */
   activeVersionId?: string | number | null;
   /** Расхождение версии в редакторе с версиями прошлых согласований. */
   approvalVersionWarning?: IApprovalVersionWarning | null;
@@ -49,12 +45,8 @@ export const ApproversPanel = ({
   availableUsers,
   inviteApprover,
   isApproverInviting,
-  applyApproverDS,
-  toggleApproverComment,
-  updateApproverComment,
   docId,
   canApprove,
-  currentUserId,
   activeVersionId,
   approvalVersionWarning,
 }: IProps) => {
@@ -231,12 +223,7 @@ export const ApproversPanel = ({
                     docId={docId}
                     isApproverInviting={isApproverInviting}
                     inviteApprover={inviteApprover}
-                    applyApproverDS={applyApproverDS}
-                    toggleApproverComment={toggleApproverComment}
-                    updateApproverComment={updateApproverComment}
                     onRemoveApprover={onRemoveApprover}
-                    canApprove={canApprove}
-                    currentUserId={currentUserId}
                     activeVersionId={activeVersionId}
                   />
                 ))}

@@ -1,14 +1,19 @@
+import { useMemo } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Shield, X } from "lucide-react";
+import { DSStamp } from "../DSStamp";
+import { parseDSStampFromDataUri } from "../../lib/utils";
 
 interface IProps {
   src: string | null;
   onClose: () => void;
 }
 
-export const StampZoomOverlay = ({ src, onClose }: IProps) =>
-  createPortal(
+export const StampZoomOverlay = ({ src, onClose }: IProps) => {
+  const parsedStamp = useMemo(() => parseDSStampFromDataUri(src), [src]);
+
+  return createPortal(
     <AnimatePresence>
       {src && (
         <motion.div
@@ -38,20 +43,32 @@ export const StampZoomOverlay = ({ src, onClose }: IProps) =>
                 type="button"
                 onClick={onClose}
                 aria-label="Закрыть"
-                className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
-            <img
-              src={src}
-              alt="Электронная подпись"
-              className="block w-full h-auto select-none"
-              draggable={false}
-            />
+            {parsedStamp ? (
+              <DSStamp
+                name={parsedStamp.name}
+                certSerial={parsedStamp.certSerial}
+                signedAt={parsedStamp.signedAt}
+                validUntil={parsedStamp.validUntil}
+                defaultLang={parsedStamp.defaultLang}
+                interactiveLang={true}
+              />
+            ) : (
+              <img
+                src={src}
+                alt="Электронная подпись"
+                className="block w-full h-auto select-none"
+                draggable={false}
+              />
+            )}
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>,
     document.body,
   );
+};
