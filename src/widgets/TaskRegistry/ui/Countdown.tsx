@@ -39,25 +39,20 @@ export const LiveCountdown = ({ dueDate }: { dueDate: string }) => {
     return () => clearInterval(interval);
   }, [dueDate]);
 
-  if (t.type === "overdue") {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 text-[11px] font-bold uppercase tracking-wider border border-red-200 dark:border-red-800 animate-pulse">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-        </span>
-        Просрочено
-      </span>
-    );
-  }
+  const isOverdue = t.type === "overdue";
+
   return (
     <span
       className={cn(
-        "inline-flex items-center font-bold text-sm tabular-nums tracking-tight",
-        t.type === "urgent" ? "text-amber-600" : "text-emerald-600",
+        "inline-flex items-center justify-center px-3 py-1 rounded-full border text-[11px] font-bold tracking-tight tabular-nums shadow-xs whitespace-nowrap",
+        isOverdue
+          ? "bg-rose-50 dark:bg-rose-950/40 border-rose-200/80 dark:border-rose-800/60 text-rose-600 dark:text-rose-400"
+          : t.type === "urgent"
+            ? "bg-amber-50 dark:bg-amber-950/40 border-amber-200/80 dark:border-amber-800/60 text-amber-600 dark:text-amber-400"
+            : "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200/80 dark:border-emerald-800/60 text-emerald-600 dark:text-emerald-400",
       )}
     >
-      {t.days}д {t.hours}ч {t.minutes}м {t.seconds}с
+      {t.text}
     </span>
   );
 };

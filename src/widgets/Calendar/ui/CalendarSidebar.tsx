@@ -154,7 +154,7 @@ export const CalendarSidebar = memo(({
               </span>
 
               {group.items.map((item) => {
-                const colorStyle = EVENT_COLOR_STYLES[item.color] || EVENT_COLOR_STYLES.purple;
+                const colorStyle = (item.color && EVENT_COLOR_STYLES[item.color]) || EVENT_COLOR_STYLES.purple;
                 return (
                   <div
                     key={item.id}

@@ -1,12 +1,12 @@
 import * as React from "react";
-import { Search, ChevronUp, MoreVertical, Paperclip, FileText } from "lucide-react";
+import { Search, ChevronUp } from "lucide-react";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
-import type { Task } from "../model/types";
+import type { Task, Priority, TaskStatus } from "../model/types";
 import type { Pagination } from "../model/api";
-import { formatDueDate, getPriorityMeta, getStatusMeta, getCountdown } from "../lib/helpers";
+import { formatDueDate } from "../lib/helpers";
 import { Avatar } from "./Avatar";
-import { CountdownTimer, LiveCountdown } from "./Countdown";
+import { LiveCountdown } from "./Countdown";
 
 interface TaskListViewProps {
   tasks: Task[];
@@ -17,123 +17,195 @@ interface TaskListViewProps {
   onOpenTask: (task: Task) => void;
 }
 
-export const TaskListView = ({ tasks, pagination, page, onPageChange, isLoading, onOpenTask }: TaskListViewProps) => {
-  const [selectedTasks, setSelectedTasks] = React.useState<string[]>([]);
+const getPriorityBadge = (priority: Priority) => {
+  switch (priority) {
+    case "critical":
+      return {
+        label: "Критический",
+        dotBg: "bg-rose-500",
+        pillClass: "bg-rose-50 dark:bg-rose-950/40 border-rose-200/70 dark:border-rose-900/50 text-rose-700 dark:text-rose-300",
+      };
+    case "high":
+      return {
+        label: "Высокий",
+        dotBg: "bg-amber-500",
+        pillClass: "bg-amber-50 dark:bg-amber-950/40 border-amber-200/70 dark:border-amber-900/50 text-amber-700 dark:text-amber-300",
+      };
+    case "medium":
+      return {
+        label: "Средний",
+        dotBg: "bg-blue-500",
+        pillClass: "bg-blue-50 dark:bg-blue-950/40 border-blue-200/70 dark:border-blue-900/50 text-blue-700 dark:text-blue-300",
+      };
+    case "low":
+    default:
+      return {
+        label: "Низкий",
+        dotBg: "bg-slate-400",
+        pillClass: "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300",
+      };
+  }
+};
+
+const getStatusBadge = (status: TaskStatus) => {
+  switch (status) {
+    case "overdue":
+      return {
+        label: "Просрочена",
+        dotBg: "bg-rose-500",
+        pillClass: "bg-rose-50 dark:bg-rose-950/40 border-rose-200/70 dark:border-rose-900/50 text-rose-600 dark:text-rose-400",
+      };
+    case "completed":
+      return {
+        label: "Завершена",
+        dotBg: "bg-emerald-500",
+        pillClass: "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200/70 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400",
+      };
+    case "review":
+      return {
+        label: "Ревью",
+        dotBg: "bg-amber-600",
+        pillClass: "bg-amber-50 dark:bg-amber-950/40 border-amber-200/70 dark:border-amber-900/50 text-amber-700 dark:text-amber-400",
+      };
+    case "in_progress":
+      return {
+        label: "В работе",
+        dotBg: "bg-blue-500",
+        pillClass: "bg-blue-50 dark:bg-blue-950/40 border-blue-200/70 dark:border-blue-900/50 text-blue-600 dark:text-blue-400",
+      };
+    case "new":
+    default:
+      return {
+        label: "Новая",
+        dotBg: "bg-sky-500",
+        pillClass: "bg-sky-50 dark:bg-sky-950/40 border-sky-200/70 dark:border-sky-900/50 text-sky-600 dark:text-sky-400",
+      };
+  }
+};
+
+export const TaskListView = ({
+  tasks,
+  pagination,
+  page,
+  onPageChange,
+  isLoading,
+  onOpenTask,
+}: TaskListViewProps) => {
   const totalPages = Math.max(1, pagination.lastPage);
   const safePage = Math.min(Math.max(1, page), totalPages);
   const rangeStart = pagination.total === 0 ? 0 : (safePage - 1) * pagination.perPage + 1;
   const rangeEnd = (safePage - 1) * pagination.perPage + tasks.length;
 
-  const toggleSelectAll = () => setSelectedTasks((prev) => (prev.length === tasks.length ? [] : tasks.map((t) => t.id)));
-  const toggleSelect = (id: string) => setSelectedTasks((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
-
   return (
-    <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-[2.5rem] shadow-none overflow-hidden flex flex-col min-h-[500px]">
+    <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-slate-100 dark:border-white/10 rounded-3xl p-5 shadow-xl shadow-purple-100/40 dark:shadow-none flex flex-col min-h-[500px]">
       <div className="flex-1 overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[1000px]">
+        <table className="w-full text-center border-separate border-spacing-y-2.5 min-w-[1000px]">
           <thead>
-            <tr className="bg-slate-800/5 dark:bg-white/5 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 border-b border-white/20 dark:border-white/10">
-              <th className="px-8 py-5 w-16"><input type="checkbox" checked={selectedTasks.length > 0 && selectedTasks.length === tasks.length} onChange={toggleSelectAll} className="w-4 h-4 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all cursor-pointer" /></th>
-              <th className="px-6 py-5 w-24">ID</th>
-              <th className="px-6 py-5">Название задачи</th>
-              <th className="px-6 py-5 w-40">Приоритет</th>
-              <th className="px-6 py-5 w-40">Статус</th>
-              <th className="px-6 py-5 w-48">Исполнитель</th>
-              <th className="px-6 py-5 w-40">Срок</th>
-              <th className="px-6 py-5 w-32">Прогресс</th>
-              <th className="px-6 py-5 w-44">Обратный отсчёт</th>
-              <th className="px-6 py-5 w-16"></th>
+            <tr className="text-[11px] font-black uppercase tracking-wider text-purple-900 dark:text-purple-300">
+              <th className="px-4 py-2 w-28 text-center">КОД</th>
+              <th className="px-4 py-2 text-center">НАЗВАНИЕ</th>
+              <th className="px-4 py-2 w-52 text-left">ИСПОЛНИТЕЛЬ</th>
+              <th className="px-4 py-2 w-40 text-center">ПРИОРИТЕТ</th>
+              <th className="px-4 py-2 w-40 text-center">СТАТУС</th>
+              <th className="px-4 py-2 w-32 text-center">СРОК</th>
+              <th className="px-4 py-2 w-48 text-center">ОБРАТНЫЙ ОТСЧЁТ</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200/30 dark:divide-white/5">
+          <tbody>
             <If is={tasks.length > 0}>
-              {tasks.map((task, index) => {
-                const pMeta = getPriorityMeta(task.priority);
-                const sMeta = getStatusMeta(task.status);
-                const isSelected = selectedTasks.includes(task.id);
-                const nameParts = task.assignee.name.split(" ");
+              {tasks.map((task) => {
+                const priorityBadge = getPriorityBadge(task.priority);
+                const statusBadge = getStatusBadge(task.status);
+
                 return (
                   <tr
                     key={task.id}
-                    className={cn(
-                      "group transition-all duration-150 cursor-pointer relative",
-                      isSelected ? "bg-emerald-50/50 dark:bg-emerald-900/20 hover:bg-emerald-50/80" : index % 2 === 0 ? "bg-white/20 dark:bg-white/[0.02] hover:bg-white/60 dark:hover:bg-white/5" : "bg-transparent hover:bg-white/60 dark:hover:bg-white/5",
-                    )}
                     onClick={() => onOpenTask(task)}
+                    className="bg-white dark:bg-slate-800/80 hover:bg-slate-50/90 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-white/10 rounded-2xl shadow-xs transition-all duration-150 cursor-pointer group"
                   >
-                    <td className="px-8 py-5" onClick={(e) => { e.stopPropagation(); toggleSelect(task.id); }}>
-                      <input type="checkbox" checked={isSelected} readOnly className="w-4 h-4 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500 transition-all cursor-pointer" />
+                    {/* CODE */}
+                    <td className="px-4 py-3.5 rounded-l-2xl text-center">
+                      <span className="text-xs font-bold text-blue-600 dark:text-blue-400 group-hover:underline">
+                        {task.id}
+                      </span>
                     </td>
-                    <td className="px-6 py-5 text-xs font-mono font-black text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">{task.id}</td>
-                    <td className="px-6 py-5">
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors inline-flex items-center gap-2">
-                          <If is={task.tags.includes("протокол")}>
-                            <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-violet-100 dark:bg-violet-900/40 text-violet-600 shrink-0"><FileText size={13} /></span>
-                          </If>
-                          {task.title}
-                        </span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {task.tags.slice(0, 3).map((tag) => (
-                            <span key={tag} className={cn("text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border", tag === "протокол" ? "bg-violet-100 dark:bg-violet-900/40 text-violet-600 border-violet-200/60 dark:border-violet-800" : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200/50 dark:border-white/10")}>{tag}</span>
-                          ))}
-                          <If is={task.tags.length > 3}><span className="text-[9px] font-bold text-slate-400">+{task.tags.length - 3}</span></If>
-                          <If is={task.attachments.length > 0}><div className="flex items-center gap-1 text-[9px] font-bold text-emerald-600"><Paperclip size={10} /> {task.attachments.length}</div></If>
-                        </div>
+
+                    {/* TITLE */}
+                    <td className="px-4 py-3.5 text-center">
+                      <div className="inline-block max-w-xs bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-white/10 rounded-2xl px-6 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 truncate">
+                        {task.title}
                       </div>
                     </td>
-                    <td className="px-6 py-5">
-                      <div className={cn("inline-flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-sm bg-white dark:bg-slate-800 border-slate-200/50 dark:border-white/10", pMeta.textColor)}>
-                        <div className={cn("w-2 h-2 rounded-full", pMeta.color, "animate-pulse")} />
-                        <span className="text-[11px] font-black uppercase tracking-tight">{pMeta.label}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5">
-                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-sm bg-white dark:bg-slate-800 border-slate-200/50 dark:border-white/10">
-                        <div className={cn("w-2 h-2 rounded-full", sMeta.color)} />
-                        <span className="text-[11px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">{sMeta.label}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5">
+
+                    {/* ASSIGNEE */}
+                    <td className="px-4 py-3.5 text-left">
                       <div className="flex items-center gap-3">
-                        <Avatar colleague={task.assignee} />
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-100">{nameParts[0]} {nameParts[1]?.[0]}{nameParts[1] ? "." : ""}</span>
-                          <span className="text-[10px] text-slate-400 font-medium">{task.assignee.role}</span>
+                        <Avatar colleague={task.assignee} className="w-8 h-8 text-xs font-bold" />
+                        <div className="flex flex-col leading-tight">
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-100">
+                            {task.assignee.name}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-medium">
+                            {task.assignee.role}
+                          </span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-5">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-xs font-bold text-slate-800 dark:text-slate-100">{task.dueDate ? formatDueDate(task.dueDate) : "—"}</span>
-                        <If is={Boolean(task.dueDate) && task.status !== "completed" && getCountdown(task.dueDate!).type !== "overdue"}>
-                          <CountdownTimer dueDate={task.dueDate!} />
-                        </If>
+
+                    {/* PRIORITY */}
+                    <td className="px-4 py-3.5 text-center">
+                      <div
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl border text-xs font-bold shadow-2xs",
+                          priorityBadge.pillClass,
+                        )}
+                      >
+                        <span className={cn("w-2 h-2 rounded-full", priorityBadge.dotBg)} />
+                        <span>{priorityBadge.label}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-5">
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">{task.progress}%</span>
-                        <div className="w-24 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden shadow-inner">
-                          <div className={cn("h-full rounded-full transition-all duration-500", task.progress === 100 ? "bg-emerald-500" : task.progress > 70 ? "bg-blue-500" : "bg-emerald-400")} style={{ width: `${task.progress}%` }} />
-                        </div>
+
+                    {/* STATUS */}
+                    <td className="px-4 py-3.5 text-center">
+                      <div
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl border text-xs font-bold shadow-2xs",
+                          statusBadge.pillClass,
+                        )}
+                      >
+                        <span className={cn("w-2 h-2 rounded-full", statusBadge.dotBg)} />
+                        <span>{statusBadge.label}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-5"><If is={Boolean(task.dueDate)}><LiveCountdown dueDate={task.dueDate!} /></If></td>
-                    <td className="px-6 py-5 text-right" onClick={(e) => e.stopPropagation()}>
-                      <button className="p-2 text-slate-300 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"><MoreVertical size={18} /></button>
+
+                    {/* DUE DATE */}
+                    <td className="px-4 py-3.5 text-center">
+                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-300">
+                        {task.dueDate ? formatDueDate(task.dueDate) : "—"}
+                      </span>
+                    </td>
+
+                    {/* COUNTDOWN */}
+                    <td className="px-4 py-3.5 rounded-r-2xl text-center">
+                      <If is={Boolean(task.dueDate)}>
+                        <LiveCountdown dueDate={task.dueDate!} />
+                      </If>
                     </td>
                   </tr>
                 );
               })}
             </If>
+
             <If is={tasks.length === 0}>
               <tr>
-                <td colSpan={10} className="py-20 text-center">
+                <td colSpan={7} className="py-16 text-center">
                   <div className="flex flex-col items-center gap-2">
-                    <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-300"><Search size={24} /></div>
-                    <p className="text-slate-500 dark:text-slate-400 font-bold text-sm">{isLoading ? "Загрузка задач..." : "Ничего не найдено"}</p>
-                    <p className="text-slate-400 text-xs">{isLoading ? "Пожалуйста, подождите" : "Попробуйте изменить параметры поиска или фильтры"}</p>
+                    <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-300">
+                      <Search size={24} />
+                    </div>
+                    <p className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+                      {isLoading ? "Загрузка задач..." : "Ничего не найдено"}
+                    </p>
                   </div>
                 </td>
               </tr>
@@ -142,29 +214,40 @@ export const TaskListView = ({ tasks, pagination, page, onPageChange, isLoading,
         </table>
       </div>
 
-      <div className="p-6 bg-slate-800/5 dark:bg-white/5 flex items-center justify-between text-xs font-bold text-slate-400 border-t border-white/20 dark:border-white/10">
-        <div className="flex items-center gap-6">
-          <p>Показано {rangeStart}–{rangeEnd} из {pagination.total} задач</p>
-          <If is={selectedTasks.length > 0}>
-            <div className="flex items-center gap-3">
-              <div className="w-px h-4 bg-slate-300 dark:bg-white/10" />
-              <p className="text-emerald-600">Выбрано: {selectedTasks.length}</p>
-              <button onClick={() => setSelectedTasks([])} className="hover:text-red-500">Сбросить</button>
-            </div>
-          </If>
-        </div>
+      {/* Pagination Footer */}
+      <div className="pt-4 px-2 flex items-center justify-between text-xs font-bold text-slate-400 border-t border-slate-100 dark:border-white/10 mt-2">
+        <p>
+          Показано {rangeStart}–{rangeEnd} из {pagination.total} задач
+        </p>
         <div className="flex items-center gap-2">
-          <button onClick={() => onPageChange(Math.max(1, safePage - 1))} disabled={safePage === 1} className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-colors border border-transparent hover:border-slate-200 dark:hover:border-white/10 disabled:opacity-30 cursor-pointer">
+          <button
+            onClick={() => onPageChange(Math.max(1, safePage - 1))}
+            disabled={safePage === 1}
+            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-30 cursor-pointer"
+          >
             <ChevronUp className="-rotate-90" size={16} />
           </button>
           <div className="flex gap-1">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <button key={p} onClick={() => onPageChange(p)} className={cn("w-8 h-8 flex items-center justify-center rounded-lg transition-colors cursor-pointer", p === safePage ? "bg-slate-800 dark:bg-slate-700 text-white" : "text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-white/10")}>
+              <button
+                key={p}
+                onClick={() => onPageChange(p)}
+                className={cn(
+                  "w-7 h-7 flex items-center justify-center rounded-lg transition-colors cursor-pointer text-xs",
+                  p === safePage
+                    ? "bg-purple-600 text-white font-bold"
+                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800",
+                )}
+              >
                 {p}
               </button>
             ))}
           </div>
-          <button onClick={() => onPageChange(Math.min(totalPages, safePage + 1))} disabled={safePage === totalPages} className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-colors border border-transparent hover:border-slate-200 dark:hover:border-white/10 disabled:opacity-30 cursor-pointer">
+          <button
+            onClick={() => onPageChange(Math.min(totalPages, safePage + 1))}
+            disabled={safePage === totalPages}
+            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-30 cursor-pointer"
+          >
             <ChevronUp className="rotate-90" size={16} />
           </button>
         </div>
