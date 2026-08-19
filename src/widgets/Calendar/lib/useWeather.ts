@@ -36,38 +36,6 @@ export const mapWeatherCode = (code: number): { description: string; weatherType
   return { description: "Облачно", weatherType: "cloud" };
 };
 
-// Deterministic seasonal weather fallback for dates outside forecast window
-const getSeasonalFallback = (date: Dayjs): IDayWeatherInfo => {
-  const d = date.date();
-  const m = date.month(); // 0-11
-
-  // Winter months (Dec, Jan, Feb)
-  if (m === 11 || m === 0 || m === 1) {
-    if (d % 4 === 0) return { temp: "-2°C", description: "Снег", weatherType: "snow" };
-    if (d % 4 === 1) return { temp: "+1°C", description: "Переменная облачность", weatherType: "sun-cloud" };
-    if (d % 4 === 2) return { temp: "-4°C", description: "Пасмурно", weatherType: "cloud" };
-    return { temp: "-1°C", description: "Снегопад", weatherType: "snow" };
-  }
-
-  // Spring & Autumn
-  if ([2, 3, 4, 8, 9, 10].includes(m)) {
-    if (d % 5 === 0) return { temp: "+16°C", description: "Дождь", weatherType: "rain" };
-    if (d % 5 === 1) return { temp: "+19°C", description: "Переменная облачность", weatherType: "sun-cloud" };
-    if (d % 5 === 2) return { temp: "+15°C", description: "Пасмурно", weatherType: "cloud" };
-    if (d % 5 === 3) return { temp: "+22°C", description: "Ясно", weatherType: "sun" };
-    return { temp: "+17°C", description: "Кратковременный дождь", weatherType: "rain" };
-  }
-
-  // Summer (Jun, Jul, Aug)
-  if (d % 6 === 0) return { temp: "+26°C", description: "Гроза", weatherType: "rain" };
-  if (d % 6 === 1) return { temp: "+29°C", description: "Переменная облачность", weatherType: "sun-cloud" };
-  if (d % 6 === 2) return { temp: "+27°C", description: "Облачно", weatherType: "cloud" };
-  if (d % 6 === 3) return { temp: "+33°C", description: "Ясно", weatherType: "sun" };
-  if (d % 6 === 4) return { temp: "+25°C", description: "Дождь", weatherType: "rain" };
-  return { temp: "+31°C", description: "Солнечно", weatherType: "sun" };
-};
-
-// Module-level in-memory cache and promise deduplicator
 let cachedWeather: IWeatherState | null = null;
 let activeWeatherPromise: Promise<IWeatherState> | null = null;
 const listeners = new Set<(state: IWeatherState) => void>();
@@ -78,7 +46,8 @@ const notifyListeners = (state: IWeatherState) => {
 
 const executeWeatherFetch = async (lat: number, lon: number): Promise<IWeatherState> => {
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&past_days=7&forecast_days=16`;
+    // past_days=92 covers the maximum 3 months of historical data supported by Open-Meteo
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&past_days=92&forecast_days=16`;
     const res = await fetch(url);
     if (!res.ok) throw new Error("Weather request failed");
     const json = await res.json();
@@ -201,7 +170,7 @@ export const useWeather = () => {
   }, []);
 
   const getWeatherForDate = useCallback(
-    (date: Dayjs): IDayWeatherInfo => {
+    (date: Dayjs): IDayWeatherInfo | null => {
       const dateStr = date.format("YYYY-MM-DD");
       if (weatherState.dailyMap[dateStr]) {
         return weatherState.dailyMap[dateStr];
@@ -209,7 +178,7 @@ export const useWeather = () => {
       if (date.isSame(dayjs(), "day")) {
         return weatherState.current;
       }
-      return getSeasonalFallback(date);
+      return null;
     },
     [weatherState]
   );

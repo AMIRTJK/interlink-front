@@ -24,13 +24,23 @@ const WEEKDAYS = [
   { label: "ВС", isWeekend: true },
 ];
 
-const getMonthCardStyle = (weather: WeatherType, isPreviousOrNextMonth: boolean) => {
+const getMonthCardStyle = (weather: WeatherType | null, isPreviousOrNextMonth: boolean) => {
   if (isPreviousOrNextMonth) {
     return {
       className: "bg-[#fcfdfe] dark:bg-slate-900/40 opacity-40 shadow-[0_8px_20px_rgba(0,0,0,0.02)]",
       style: {
         background: "linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)",
         boxShadow: "0 10px 24px -4px rgba(226, 232, 240, 0.6)",
+      },
+    };
+  }
+
+  if (!weather) {
+    return {
+      className: "text-[#1e293b]",
+      style: {
+        background: "linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)",
+        boxShadow: "0 10px 24px -4px rgba(226, 232, 240, 0.7), 0 4px 10px -2px rgba(100, 116, 139, 0.06)",
       },
     };
   }
@@ -124,7 +134,7 @@ export const MonthView = memo(({
           const inMonth = day.month() === currentDate.month();
           const isToday = day.isSame(dayjs(), "day");
           const dayWeather = getWeatherForDate(day);
-          const cardConfig = getMonthCardStyle(dayWeather.weatherType, !inMonth);
+          const cardConfig = getMonthCardStyle(dayWeather?.weatherType ?? null, !inMonth);
 
           return (
             <div
@@ -133,7 +143,7 @@ export const MonthView = memo(({
               style={cardConfig.style}
               className={`flex! flex-col! p-2.5! rounded-[1.6rem]! cursor-pointer! transition-all! duration-200! overflow-hidden! ${cardConfig.className}`}
             >
-              {/* Cell Header: Date on left & White circular weather badge on right */}
+              {/* Cell Header: Date on left & White circular weather badge on right (if real weather exists) */}
               <div className="flex! items-center! justify-between! mb-1.5!">
                 {isToday ? (
                   <div className="w-6! h-6! flex! items-center! justify-center! text-xs! font-extrabold! rounded-full! bg-[#00897b]! text-white! shadow-xs!">
@@ -145,10 +155,14 @@ export const MonthView = memo(({
                   </span>
                 )}
 
-                {/* Pure White Circular Weather Badge */}
-                <div className="w-6! h-6! rounded-full! bg-white! dark:bg-slate-800! shadow-[0_2px_8px_rgba(0,0,0,0.06)]! flex! items-center! justify-center!">
-                  <WeatherIcon type={dayWeather.weatherType} size={13} />
-                </div>
+                {/* Render weather badge only if real weather data exists */}
+                {dayWeather ? (
+                  <div className="w-6! h-6! rounded-full! bg-white! dark:bg-slate-800! shadow-[0_2px_8px_rgba(0,0,0,0.06)]! flex! items-center! justify-center!">
+                    <WeatherIcon type={dayWeather.weatherType} size={13} />
+                  </div>
+                ) : (
+                  <div className="w-6! h-6!" />
+                )}
               </div>
 
               {/* Cell Events List */}
