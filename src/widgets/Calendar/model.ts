@@ -16,51 +16,51 @@ export const EVENT_COLOR_STYLES: Record<string, IEventColorStyle> = {
   emerald: {
     bg: "bg-[#ecfdf5] dark:bg-emerald-950/60",
     border: "border-2 border-[#10b981] dark:border-emerald-600",
-    text: "text-[#047857] dark:text-emerald-200",
-    dot: "bg-[#10b981]",
-    sidebarCard: "bg-[#ecfdf5]/90 dark:bg-emerald-950/40 border-[#a7f3d0] text-[#047857]",
+    text: "text-[#059669] dark:text-emerald-300",
+    dot: "bg-[#059669]",
+    sidebarCard: "bg-[#ecfdf5]/90 dark:bg-emerald-950/40 border-[#a7f3d0] text-[#059669]",
   },
   purple: {
     bg: "bg-[#f3e8ff] dark:bg-purple-950/60",
     border: "border-2 border-[#a855f7] dark:border-purple-600",
-    text: "text-[#6b21a8] dark:text-purple-200",
-    dot: "bg-[#a855f7]",
-    sidebarCard: "bg-[#f3e8ff]/90 dark:bg-purple-950/40 border-[#e9d5ff] text-[#6b21a8]",
+    text: "text-[#9333ea] dark:text-purple-300",
+    dot: "bg-[#9333ea]",
+    sidebarCard: "bg-[#f3e8ff]/90 dark:bg-purple-950/40 border-[#e9d5ff] text-[#9333ea]",
   },
   pink: {
     bg: "bg-[#fce7f3] dark:bg-pink-950/60",
     border: "border-2 border-[#ec4899] dark:border-pink-600",
-    text: "text-[#9d174d] dark:text-pink-200",
+    text: "text-[#db2777] dark:text-pink-300",
     dot: "bg-[#ec4899]",
-    sidebarCard: "bg-[#fce7f3]/90 dark:bg-pink-950/40 border-[#fbcfe8] text-[#9d174d]",
+    sidebarCard: "bg-[#fce7f3]/90 dark:bg-pink-950/40 border-[#fbcfe8] text-[#db2777]",
   },
   rose: {
     bg: "bg-[#ffe4e6] dark:bg-rose-950/60",
     border: "border-2 border-[#f43f5e] dark:border-rose-600",
-    text: "text-[#9f1239] dark:text-rose-200",
+    text: "text-[#e11d48] dark:text-rose-300",
     dot: "bg-[#f43f5e]",
-    sidebarCard: "bg-[#ffe4e6]/90 dark:bg-rose-950/40 border-[#fecdd3] text-[#9f1239]",
+    sidebarCard: "bg-[#ffe4e6]/90 dark:bg-rose-950/40 border-[#fecdd3] text-[#e11d48]",
   },
   blue: {
     bg: "bg-[#eff6ff] dark:bg-blue-950/60",
     border: "border-2 border-[#3b82f6] dark:border-blue-600",
-    text: "text-[#1d4ed8] dark:text-blue-200",
+    text: "text-[#2563eb] dark:text-blue-300",
     dot: "bg-[#3b82f6]",
-    sidebarCard: "bg-[#eff6ff]/90 dark:bg-blue-950/40 border-[#bfdbfe] text-[#1d4ed8]",
+    sidebarCard: "bg-[#eff6ff]/90 dark:bg-blue-950/40 border-[#bfdbfe] text-[#2563eb]",
   },
   cyan: {
     bg: "bg-[#ecfeff] dark:bg-cyan-950/60",
     border: "border-2 border-[#06b6d4] dark:border-cyan-600",
-    text: "text-[#0e7490] dark:text-cyan-200",
+    text: "text-[#0891b2] dark:text-cyan-300",
     dot: "bg-[#06b6d4]",
-    sidebarCard: "bg-[#ecfeff]/90 dark:bg-cyan-950/40 border-[#a5f3fc] text-[#0e7490]",
+    sidebarCard: "bg-[#ecfeff]/90 dark:bg-cyan-950/40 border-[#a5f3fc] text-[#0891b2]",
   },
   amber: {
     bg: "bg-[#fffbeb] dark:bg-amber-950/60",
     border: "border-2 border-[#f59e0b] dark:border-amber-600",
-    text: "text-[#92400e] dark:text-amber-200",
+    text: "text-[#b45309] dark:text-amber-300",
     dot: "bg-[#f59e0b]",
-    sidebarCard: "bg-[#fffbeb]/90 dark:bg-amber-950/40 border-[#fde68a] text-[#92400e]",
+    sidebarCard: "bg-[#fffbeb]/90 dark:bg-amber-950/40 border-[#fde68a] text-[#b45309]",
   },
 };
 
@@ -90,11 +90,11 @@ export const getEventStyle = (color?: string): IEventColorStyle => {
 
 export const getDayWeather = (day: Dayjs): WeatherType => {
   const d = day.date();
-  if (d === 1 || d === 17) return "sun-cloud";
-  if (d % 4 === 0) return "sun";
-  if (d % 4 === 1) return "sun-cloud";
-  if (d % 4 === 2) return "cloud";
-  return "snow";
+  if (d === 1) return "sun";
+  if (d === 2 || d === 17) return "sun-cloud";
+  if (d === 3 || d === 10 || d === 11) return "snow";
+  if ([4, 5, 6, 13, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30].includes(d)) return "rain";
+  return "cloud";
 };
 
 export const getSampleEventsForDate = (dateStr: string): Task[] => {
@@ -124,7 +124,7 @@ export const getSampleEventsForDate = (dateStr: string): Task[] => {
         time: "09:00",
         endTime: "10:00",
         category: "work",
-        color: "purple",
+        color: "blue",
         description: "Room 101",
       },
     ];
@@ -139,7 +139,7 @@ export const getSampleEventsForDate = (dateStr: string): Task[] => {
         time: "14:00",
         endTime: "15:00",
         category: "work",
-        color: "cyan",
+        color: "purple",
         description: "Miro Board",
       },
     ];
@@ -149,7 +149,7 @@ export const getSampleEventsForDate = (dateStr: string): Task[] => {
     return [
       {
         id: `demo-11-1`,
-        title: "11am Design Align...",
+        title: "11am Design Alig...",
         date: dateStr,
         time: "11:00",
         endTime: "12:00",
