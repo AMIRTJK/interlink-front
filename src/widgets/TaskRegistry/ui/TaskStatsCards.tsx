@@ -54,10 +54,10 @@ const PriorityBreakdownPills = ({ breakdown }: { breakdown: Record<string, numbe
 
   const getPct = (val: number) => (total > 0 ? Math.round((val / total) * 100) : 0);
 
-  const lowPct = total > 0 ? getPct(low) : 18;
-  const medPct = total > 0 ? getPct(medium) : 55;
-  const highPct = total > 0 ? getPct(high) : 18;
-  const critPct = total > 0 ? getPct(critical) : 9;
+  const lowPct = getPct(low);
+  const medPct = getPct(medium);
+  const highPct = getPct(high);
+  const critPct = getPct(critical);
 
   return (
     <div className="w-full flex flex-wrap items-center gap-3">
