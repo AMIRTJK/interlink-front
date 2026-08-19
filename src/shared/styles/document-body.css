@@ -1,0 +1,130 @@
+/* Тело документа корреспонденции: холст редактора, предпросмотр письма,
+   просмотр входящего, печать и выгрузка PDF. ЕДИНЫЙ ИСТОЧНИК ПРАВДЫ.
+
+   Файл подключается двумя способами:
+     • приложением — через @import в app/styles/global.css;
+     • печатью и выгрузкой PDF — через ?inline в их iframe (printDocument.ts,
+       downloadDocumentPdf.ts).
+
+   Отсюда главное требование: правила должны быть САМОДОСТАТОЧНЫМИ. В iframe
+   печати нет ни preflight Tailwind, ни утилитарных классов холста — там
+   работает только этот файл плюс стили самого листа. Пока часть оформления
+   жила лишь на холсте, браузер добавлял в печати свои поля абзацам и
+   заголовкам, и напечатанный текст съезжал относительно холста.
+
+   Слой `base` обязателен: правила должны перебивать preflight Tailwind (он в
+   том же слое, но объявлен раньше) и при этом проигрывать утилитам холста из
+   слоя `utilities` (`[&_td]:px-2` и соседи). Внутри слоя нулевая специфичность
+   `:where()` у базовой линии — чтобы её перебивало любое предметное правило. */
+
+@layer base {
+  /* 1. Базовая линия документа = preflight Tailwind, который есть на холсте,
+        но отсутствует в iframe печати. */
+  .doc-preview-content :where(*) {
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+    box-sizing: border-box;
+  }
+
+  .doc-preview-content :where(h1, h2, h3, h4, h5, h6) {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  .doc-preview-content :where(a) {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  .doc-preview-content :where(b, strong) {
+    font-weight: bolder;
+  }
+
+  .doc-preview-content :where(pre, code, kbd, samp) {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 1em;
+  }
+
+  .doc-preview-content :where(img, svg, video, canvas) {
+    display: block;
+    vertical-align: middle;
+    max-width: 100%;
+  }
+
+  .doc-preview-content :where(img, video) {
+    height: auto;
+  }
+
+  .doc-preview-content :where(table) {
+    border-collapse: collapse;
+    border-color: inherit;
+    text-indent: 0;
+  }
+
+  /* 2. Позиции табуляции документа. Символ табуляции при white-space: pre-wrap
+        выравнивается по сетке шага ≈ 1.27 см — как в Word. Правило наследуемое,
+        поэтому достаточно объявить его на теле документа. Пока оно жило только
+        в inline-стиле холста, предпросмотр и печать разбивали строки с
+        табуляцией по-своему, и текст расходился с холстом. */
+  .doc-preview-content {
+    tab-size: 1.27cm;
+  }
+
+  /* 3. Пустой абзац занимает ровно одну строку. 1.8em — базовый межстрочный
+        интервал холста; там, где браузер знает единицу lh, берём высоту строки
+        самого абзаца, иначе абзац с уменьшенным междустрочным (диалог «Абзац»)
+        не смог бы стать ниже 1.8em. */
+  .doc-preview-content div:not([data-signature-stamp]):not([data-page-spacer]),
+  .doc-preview-content p {
+    min-height: 1.8em;
+    min-height: 1lh;
+  }
+
+  /* 4. Списки. Preflight Tailwind гасит маркеры (`list-style: none`) и обнуляет
+        отступы, поэтому без этих правил вставленный из буфера (или созданный
+        кнопкой панели) список выглядел на холсте обычными строками — при том,
+        что разметка <ul>/<ol>/<li> в документе есть и печать её показывала. */
+  .doc-preview-content ul,
+  .doc-preview-content ol {
+    padding-left: 1.5em;
+    list-style-position: outside;
+  }
+
+  .doc-preview-content li {
+    display: list-item;
+  }
+
+  .doc-preview-content ul {
+    list-style-type: disc;
+  }
+
+  .doc-preview-content ul ul {
+    list-style-type: circle;
+  }
+
+  .doc-preview-content ul ul ul {
+    list-style-type: square;
+  }
+
+  .doc-preview-content ol {
+    list-style-type: decimal;
+  }
+
+  .doc-preview-content ol ol {
+    list-style-type: lower-alpha;
+  }
+
+  .doc-preview-content ol ol ol {
+    list-style-type: lower-roman;
+  }
+
+  /* 5. «Не добавлять интервал между абзацами одного стиля» — флажок диалога
+        «Абзац». Интервал «перед» приходит inline-стилем, поэтому перебиваем
+        его !important. */
+  .doc-preview-content
+    [data-contextual-spacing]
+    + [data-contextual-spacing] {
+    margin-top: 0 !important;
+  }
+}

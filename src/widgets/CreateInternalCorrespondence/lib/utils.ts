@@ -4,6 +4,7 @@ import { _axios, ApiRoutes } from "@shared/api";
 import { getEnvVar } from "@shared/config";
 import { toast } from "@shared/lib";
 import type { AttachedFile } from "../types";
+import { isKeptAttribute, listStyleTypeFromAttr } from "./listMarkup";
 import { TJK_EMBLEM_DATA_URI } from "./tjkEmblem";
 import { ORBITRON_WOFF2_BASE64 } from "./orbitronFont";
 
@@ -333,18 +334,20 @@ export function sanitizeWordHtml(html: string): string {
       el.style.textAlign = alignAttr;
     }
 
+    // Вид маркера из атрибута type=... переносим в inline-стиль (см.
+    // listStyleTypeFromAttr) — иначе его перебьют правила документа.
+    const listStyle = listStyleTypeFromAttr(el.tagName, el.getAttribute("type"));
+    if (listStyle && !/list-style-type/i.test(el.getAttribute("style") || "")) {
+      el.style.listStyleType = listStyle;
+    }
+
     Array.from(el.attributes).forEach((attr) => {
       const name = attr.name.toLowerCase();
       if (name === "style") {
         const cleaned = sanitizeStyle(attr.value);
         if (cleaned) el.setAttribute("style", cleaned);
         else el.removeAttribute("style");
-      } else if (
-        name !== "href" &&
-        name !== "src" &&
-        name !== "colspan" &&
-        name !== "rowspan"
-      ) {
+      } else if (!isKeptAttribute(el.tagName, name)) {
         el.removeAttribute(name);
       }
     });

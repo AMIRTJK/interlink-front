@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, ChevronDown, Pin, User, Loader2 } from "lucide-react";
 import { ApiRoutes } from "@shared/api";
@@ -12,8 +12,7 @@ import {
   estimateStructureCount,
   filterTimelineEvents,
 } from "../../lib/structure/helpers";
-import { EventRow } from "./EventRow";
-import { RelatedDocsSection } from "./RelatedDocsSection";
+import { StructureTimelinePanel } from "./StructureTimelinePanel";
 
 const STORAGE_KEY = "correspondence_open_structures";
 
@@ -84,7 +83,10 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
     () => filterTimelineEvents(rawTimeline),
     [rawTimeline],
   );
-  const relatedDocs = structureData?.related_documents || [];
+  const relatedDocs = useMemo(
+    () => structureData?.related_documents || [],
+    [structureData?.related_documents],
+  );
   const creatorName = item.creator?.full_name || structureData?.document?.creator?.full_name || "—";
   const primaryRecipient =
     item.recipients?.find((r: any) => r.type === "to")?.user?.full_name ||
@@ -231,43 +233,15 @@ export const LetterActivityCard: React.FC<ILetterActivityCardProps> = ({
               className="overflow-hidden"
             >
               <div className="mx-4 mb-3 border-t border-slate-100 dark:border-slate-700 pt-3">
-                <div>
-                  <div className="relative pl-8">
-                    <motion.div
-                      initial={{ scaleY: 0 }}
-                      animate={{ scaleY: 1 }}
-                      transition={{ duration: 0.35, ease: "easeOut" }}
-                      className="absolute left-[14px] top-0 bottom-4 w-px bg-slate-200 dark:bg-slate-700 origin-top"
-                    />
-                    {timelineEvents.map((event, i) => (
-                      <EventRow
-                        key={event.performed_at + i}
-                        event={event}
-                        index={i}
-                        isLast={i === timelineEvents.length - 1}
-                        fallbackActorName={creatorName}
-                        onVersionClick={onVersionClick}
-                      />
-                    ))}
-                  </div>
-                  <motion.div
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                  >
-                    <RelatedDocsSection
-                      relatedDocuments={relatedDocs}
-                      currentDoc={{
-                        id: item.id,
-                        kind: item.kind || direction,
-                        date: item.sent_at || item.created_at,
-                        reg_number: item.reg_number,
-                        subject: item.subject,
-                      }}
-                      onDocClick={(_id) => onClick()}
-                    />
-                  </motion.div>
-                </div>
+                <StructureTimelinePanel
+                  item={item}
+                  direction={direction}
+                  timelineEvents={timelineEvents}
+                  relatedDocs={relatedDocs}
+                  creatorName={creatorName}
+                  onClick={onClick}
+                  onVersionClick={onVersionClick}
+                />
               </div>
             </motion.div>
           )}

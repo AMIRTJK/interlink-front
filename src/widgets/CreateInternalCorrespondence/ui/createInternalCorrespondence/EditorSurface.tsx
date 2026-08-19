@@ -1,3 +1,5 @@
+import { EDITOR_BASE_FONT_SIZE } from "../../lib/constants";
+
 import type {
   FormEvent,
   KeyboardEvent,
@@ -9,7 +11,6 @@ interface IProps {
   editorRef: RefObject<HTMLDivElement | null>;
   isReadOnly: boolean;
   contentHeight: number;
-  fontSize: string;
   onInput: (e?: FormEvent<HTMLDivElement>) => void;
   onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => void;
   onClick: (e: MouseEvent) => void;
@@ -23,7 +24,6 @@ export const EditorSurface = ({
   editorRef,
   isReadOnly,
   contentHeight,
-  fontSize,
   onInput,
   onKeyDown,
   onClick,
@@ -46,13 +46,10 @@ export const EditorSurface = ({
       maxWidth: "100%",
       minHeight: contentHeight,
       fontFamily: "Times New Roman, serif",
-      fontSize: "14px",
+      fontSize: `${EDITOR_BASE_FONT_SIZE}px`,
       lineHeight: 1.8,
       color: "#1e293b",
       whiteSpace: "pre-wrap",
-      // Символ табуляции (\t) при pre-wrap выравнивается по
-      // сетке шага ≈ 1.27 см — как позиции табуляции Word.
-      tabSize: "1.27cm",
       overflowWrap: "break-word",
       wordBreak: "break-word",
       overflow: "visible",

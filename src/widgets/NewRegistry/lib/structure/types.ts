@@ -106,6 +106,17 @@ export interface IInternalStructureResponse {
   related_documents: IRelatedDocumentLink[];
 }
 
+// Поля письма из реестра, которые нужны блоку структуры: реестр отдаёт
+// документы нетипизированными, здесь фиксируем только используемый минимум.
+export interface IStructureLetterRef {
+  id: number;
+  kind?: string;
+  subject?: string;
+  reg_number?: string | null;
+  created_at?: string | null;
+  sent_at?: string | null;
+}
+
 export interface IGroupedStructureLetters {
   label: string;
   items: any[];

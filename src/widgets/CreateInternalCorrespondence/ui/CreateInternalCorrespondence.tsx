@@ -53,6 +53,7 @@ import {
   SPACER_ATTR,
   PAGE_BREAK_ATTR,
   STAMP_ATTR,
+  EDITOR_BASE_FONT_SIZE,
   // INBOX_DOC_TYPES,
   // INBOX_DOC_TYPE_STYLE,
   // MOCK_CONTENT_LINES,
@@ -880,7 +881,7 @@ export const CreateInternalCorrespondence = ({
       : activeVersion?.content;
     if (!source) return { pages: [], stamp: null };
 
-    const res = paginateHtml(source, Number(fontSize) || 14);
+    const res = paginateHtml(source, EDITOR_BASE_FONT_SIZE);
     const pages = [...res.pages];
     if (res.stamp) while (pages.length <= res.stamp.pageIndex) pages.push("");
     return { pages, stamp: res.stamp };
@@ -889,7 +890,6 @@ export const CreateInternalCorrespondence = ({
     isAuthorshipActive,
     authorship.markedHtml,
     activeVersion,
-    fontSize,
   ]);
 
   const versionCompareTotal = Math.max(versionCompareSheets.pages.length, 1);
@@ -1449,7 +1449,7 @@ export const CreateInternalCorrespondence = ({
       isLandscape: orientation === "landscape",
       pageWidth: PAGE_WIDTH,
       pageHeight: PAGE_HEIGHT,
-      fontSize,
+      fontSize: String(EDITOR_BASE_FONT_SIZE),
       marginLeft,
       pagePadV: PAGE_PAD_V,
     });
@@ -2402,7 +2402,7 @@ export const CreateInternalCorrespondence = ({
           pages={previewPages}
           stamp={previewStamp}
           orientation={orientation}
-          fontSize={Number(fontSize) || 14}
+          fontSize={EDITOR_BASE_FONT_SIZE}
           onClose={() => setShowPreview(false)}
           stampVisible={stampVisible && !!finalSigner?.dsApplied}
           stampPos={stampPos}
@@ -2809,7 +2809,7 @@ export const CreateInternalCorrespondence = ({
                         pageStride={PAGE_STRIDE}
                         pageWidth={PAGE_WIDTH}
                         pageHeight={PAGE_HEIGHT}
-                        fontSize={Number(fontSize) || 14}
+                        fontSize={EDITOR_BASE_FONT_SIZE}
                         getPages={getEditorPagesReadOnly}
                       />
                     </div>
@@ -2833,7 +2833,7 @@ export const CreateInternalCorrespondence = ({
                       <VersionCompareCanvas
                         sheets={versionCompareSheets.pages}
                         stamp={versionCompareSheets.stamp}
-                        fontSize={Number(fontSize) || 14}
+                        fontSize={EDITOR_BASE_FONT_SIZE}
                       />
                     </AuthorshipHoverLayer>
                   </If>
@@ -2909,7 +2909,6 @@ export const CreateInternalCorrespondence = ({
                       editorRef={editorRef}
                       isReadOnly={isReadOnly}
                       contentHeight={CONTENT_HEIGHT}
-                      fontSize={fontSize}
                       onInput={handleEditorInput}
                       onKeyDown={handleEditorKeyDown}
                       onClick={handleEditorClick}

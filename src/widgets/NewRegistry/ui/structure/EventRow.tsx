@@ -5,6 +5,7 @@ import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import { ITimelineEvent } from "../../lib/structure/types";
 import { getEventMeta, getInitials, formatDateTime } from "../../lib/structure/helpers";
+import { TIMELINE_ROW_MARKER } from "../../lib/structure/compact";
 
 interface IEventRowProps {
   event: ITimelineEvent;
@@ -57,6 +58,7 @@ export const EventRow: React.FC<IEventRowProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
       className={cn("flex gap-3 group/event", !isLast && "mb-3")}
+      {...TIMELINE_ROW_MARKER}
     >
       <div
         className={cn(
