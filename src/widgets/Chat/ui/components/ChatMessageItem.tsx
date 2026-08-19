@@ -15,8 +15,8 @@ interface ChatMessageItemProps {
   msg: Message;
   isMe: boolean;
   activeContact: Contact;
-  hoveredMessageId: string | null;
-  activeActionMsgId: string | null;
+  hoveredMessageId?: string | null;
+  activeActionMsgId?: string | null;
   isDark: boolean;
   lang: Lang;
   t: Translations;

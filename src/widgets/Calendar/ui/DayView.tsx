@@ -1,7 +1,8 @@
-import React, { useMemo, memo } from "react";
+import { useMemo, memo } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import { If } from "@shared/ui";
 import type { Task } from "@features/tasks";
+import { getEventStyle, getDayWeather } from "../model";
+import { WeatherIcon } from "./WeatherIcon";
 
 interface IDayViewProps {
   currentDate: Dayjs;
@@ -11,29 +12,30 @@ interface IDayViewProps {
   onEventClick: (task: Task) => void;
 }
 
-const HOUR_HEIGHT = 64;
+const HOUR_HEIGHT = 48;
 const START_HOUR = 0;
 const END_HOUR = 24;
 const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
 
-const getEventBgStyle = (color?: string): React.CSSProperties => ({
-  backgroundColor: color ? `${color}22` : "#10B98122",
-  borderLeft: `3px solid ${color || "#10B981"}`,
-  color: color || "#10B981",
-});
-
 const timeToMinutes = (time?: string): number => {
   if (!time) return 0;
   const [h, m] = time.split(":").map(Number);
-  return h * 60 + (m || 0);
+  return (h || 0) * 60 + (m || 0);
 };
 
 const getEventPosition = (task: Task) => {
   const startMin = timeToMinutes(task.time);
   const endMin = task.endTime ? timeToMinutes(task.endTime) : startMin + 60;
-  const top = ((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT;
-  const height = Math.max(((endMin - startMin) / 60) * HOUR_HEIGHT, HOUR_HEIGHT * 0.5);
+  const top = (startMin / 60) * HOUR_HEIGHT;
+  const height = Math.max(((endMin - startMin) / 60) * HOUR_HEIGHT, HOUR_HEIGHT * 0.75);
   return { top, height };
+};
+
+const formatHourLabel = (h: number) => {
+  if (h === 0) return "12 AM";
+  if (h === 12) return "12 PM";
+  if (h < 12) return `${h} AM`;
+  return `${h - 12} PM`;
 };
 
 export const DayView = memo(({
@@ -47,74 +49,99 @@ export const DayView = memo(({
     return tasks.filter((task) => task.date === targetDate);
   }, [currentDate, tasks]);
 
-  const dayName = currentDate.format("dd").toUpperCase();
-  const monthYear = currentDate.format("MMMM YYYY");
+  const weather = getDayWeather(currentDate);
 
   return (
-    <div className="w-full! bg-white! dark:bg-slate-800/40! rounded-2xl! overflow-hidden! border! border-zinc-100! dark:border-slate-700/30! shadow-sm!">
-      <div className="flex!">
-        <div className="w-24! flex-shrink-0! border-r! border-zinc-100! dark:border-slate-700/30! p-4! flex! flex-col! gap-0.5!">
-          <span className="text-5xl! font-black! text-zinc-800! dark:text-zinc-200! leading-none!">{currentDate.date()}</span>
-          <span className="text-sm! font-bold! text-zinc-500! dark:text-zinc-400!">{dayName}</span>
-          <span className="text-xs! text-zinc-400! dark:text-zinc-500!">{monthYear}</span>
+    <div className="w-full! flex! flex-col! gap-3!">
+      {/* Top Focus Day Banner */}
+      <div className="w-full! py-2.5! px-5! rounded-xl! bg-[#f5f3ff]! dark:bg-purple-950/40! border! border-[#e9d5ff]! dark:border-purple-800/50! text-[#6b21a8]! dark:text-purple-200! font-extrabold! text-[11px]! tracking-widest! uppercase! flex! items-center! justify-center! gap-2! shadow-2xs!">
+        <span>{currentDate.format("dddd D FOCUS DAY").toUpperCase()}</span>
+        <WeatherIcon type={weather} size={14} />
+      </div>
+
+      {/* Weather info header */}
+      <div className="flex! items-center! gap-2! px-1! text-xs! font-bold! text-slate-700! dark:text-slate-200!">
+        <WeatherIcon type={weather} size={14} />
+        <span className="font-extrabold!">72°F</span>
+        <span className="text-slate-400! dark:text-slate-500! font-semibold!">Partly Cloudy</span>
+      </div>
+
+      {/* Hourly Grid Container */}
+      <div className="flex! relative! max-h-[560px]! overflow-y-auto! no-scrollbar! border-t! border-slate-100/80! dark:border-slate-800/50! pt-2!">
+        {/* Time Labels */}
+        <div className="w-14! flex-shrink-0! relative!">
+          {HOURS.map((h) => (
+            <div
+              key={h}
+              className="flex! items-start! justify-end! pr-2.5! text-[9px]! font-extrabold! text-slate-400! dark:text-slate-500!"
+              style={{ height: HOUR_HEIGHT }}
+            >
+              <span className="-translate-y-2!">{formatHourLabel(h)}</span>
+            </div>
+          ))}
         </div>
 
-        <div className="flex-1! flex!">
-          <div className="w-16! flex-shrink-0! border-r! border-zinc-100! dark:border-slate-700/30! relative!">
-            {HOURS.map((h) => (
+        {/* Day Column Grid */}
+        <div
+          className="flex-1! relative! cursor-pointer! rounded-2xl! bg-white/70! dark:bg-slate-900/50! border! border-white/80! dark:border-slate-800/60! backdrop-blur-md! shadow-[0_8px_20px_rgba(0,0,0,0.03)]!"
+          style={{ height: HOUR_HEIGHT * HOURS.length }}
+          onClick={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const y = e.clientY - rect.top;
+            const clickedHour = Math.floor(y / HOUR_HEIGHT);
+            onDayClick(currentDate, clickedHour);
+          }}
+        >
+          {/* Horizontal lines */}
+          {HOURS.map((h) => (
+            <div
+              key={h}
+              className="w-full! border-b! border-slate-100/70! dark:border-slate-800/40! absolute! left-0! right-0!"
+              style={{ top: h * HOUR_HEIGHT, height: HOUR_HEIGHT }}
+            />
+          ))}
+
+          {/* Event Bars */}
+          {dayTasks.map((task) => {
+            const { top, height } = getEventPosition(task);
+            const style = getEventStyle(task.color);
+
+            return (
               <div
-                key={h}
-                className="flex! items-start! justify-end! pr-3! text-[11px]! font-medium! text-zinc-400! dark:text-zinc-500!"
-                style={{ height: HOUR_HEIGHT }}
+                key={task.id}
+                className="absolute! left-2! right-2! z-10!"
+                style={{ top, height }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEventClick(task);
+                }}
               >
-                <span className="-translate-y-2!">{h === 0 ? "" : `${String(h).padStart(2, "0")}:00`}</span>
-              </div>
-            ))}
-          </div>
-
-          <div
-            className="flex-1! relative! cursor-pointer!"
-            style={{ height: HOUR_HEIGHT * HOURS.length }}
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const y = e.clientY - rect.top;
-              const clickedHour = START_HOUR + Math.floor(y / HOUR_HEIGHT);
-              onDayClick(currentDate, clickedHour);
-            }}
-          >
-            {HOURS.map((h) => (
-              <div
-                key={h}
-                className="w-full! border-b! border-zinc-100! dark:border-slate-700/20! absolute! left-0! right-0!"
-                style={{ top: (h - START_HOUR) * HOUR_HEIGHT, height: HOUR_HEIGHT }}
-              />
-            ))}
-
-            {dayTasks.map((task) => {
-              const { top, height } = getEventPosition(task);
-              return (
                 <div
-                  key={task.id}
-                  className="absolute! left-2! right-2! z-10!"
-                  style={{ top, height }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEventClick(task);
-                  }}
+                  className={`h-full! w-full! rounded-xl! p-3! ${style.bg} ${style.border} shadow-xs! hover:shadow-md! transition-all! cursor-pointer! flex! flex-col! justify-center! gap-1!`}
                 >
-                  <div
-                    className="h-full! w-full! rounded-lg! px-2! py-1! overflow-hidden! cursor-pointer! transition-opacity! hover:opacity-90! text-xs! font-medium!"
-                    style={getEventBgStyle(task.color)}
-                  >
-                    <div className="font-semibold! truncate!">{task.time} {task.title}</div>
-                    <If is={!!task.endTime}>
-                      <div className="opacity-70! truncate! text-[10px]!">{task.endTime}</div>
-                    </If>
+                  <div className="flex! items-center! gap-2! flex-wrap!">
+                    <span className={`w-2! h-2! rounded-full! ${style.dot}`} />
+                    <span className={`font-extrabold! text-[11px]! ${style.text}`}>
+                      {task.title}
+                    </span>
+                    <span className="text-[11px]! font-bold! opacity-80!">
+                      {task.time} {task.endTime ? `– ${task.endTime}` : ""}
+                    </span>
+                    {task.description && !task.description.includes("Discuss") && (
+                      <span className="text-[11px]! font-medium! opacity-70!">
+                        • {task.description}
+                      </span>
+                    )}
                   </div>
+                  {task.description && task.description.includes("Discuss") && (
+                    <p className="text-[10px]! font-medium! opacity-80! m-0! pl-4!">
+                      {task.description}
+                    </p>
+                  )}
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
