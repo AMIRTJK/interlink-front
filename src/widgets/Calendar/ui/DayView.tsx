@@ -43,7 +43,8 @@ export const DayView = memo(({
   onDayClick,
   onEventClick,
 }: IDayViewProps) => {
-  const weather = useWeather();
+  const { getWeatherForDate } = useWeather();
+  const dayWeather = useMemo(() => getWeatherForDate(currentDate), [getWeatherForDate, currentDate]);
 
   const dayTasks = useMemo(() => {
     const targetDate = currentDate.format("YYYY-MM-DD");
@@ -55,15 +56,15 @@ export const DayView = memo(({
       {/* Top Focus Day Banner in Russian */}
       <div className="w-full! py-2.5! px-5! rounded-xl! bg-[#f5f3ff]! dark:bg-purple-950/40! border! border-[#e9d5ff]! dark:border-purple-800/50! text-[#6b21a8]! dark:text-purple-200! font-extrabold! text-[11px]! tracking-widest! uppercase! flex! items-center! justify-center! gap-2! shadow-2xs!">
         <span>{currentDate.locale("ru").format("dddd, D MMMM").toUpperCase()} • ДЕНЬ В ФОКУСЕ</span>
-        <WeatherIcon type={weather.weatherType} size={14} />
+        <WeatherIcon type={dayWeather.weatherType} size={14} />
       </div>
 
-      {/* Real-time Weather info header in Russian */}
+      {/* Real-time / Daily Weather info header */}
       <div className="flex! items-center! gap-2! px-1! text-xs! font-bold! text-slate-700! dark:text-slate-200!">
-        <WeatherIcon type={weather.weatherType} size={14} />
-        <span className="font-extrabold!">{weather.temp}</span>
+        <WeatherIcon type={dayWeather.weatherType} size={14} />
+        <span className="font-extrabold!">{dayWeather.temp}</span>
         <span className="text-slate-400! dark:text-slate-500! font-semibold!">
-          {weather.description}
+          {dayWeather.description}
         </span>
       </div>
 

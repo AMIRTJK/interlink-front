@@ -2,8 +2,9 @@ import React, { useMemo, memo } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/ru";
 import type { Task } from "@features/tasks";
-import { getEventStyle, getDayWeather } from "../model";
+import { getEventStyle } from "../model";
 import { WeatherIcon } from "./WeatherIcon";
+import { useWeather } from "../lib/useWeather";
 
 interface IWeekViewProps {
   daysToShow: Dayjs[];
@@ -74,6 +75,8 @@ export const WeekView = memo(({
   onHeaderClick,
   onEventClick,
 }: IWeekViewProps) => {
+  const { getWeatherForDate } = useWeather();
+
   const tasksMap = useMemo(() => {
     const map: Record<string, Task[]> = {};
     tasks.forEach((task) => {
@@ -96,7 +99,7 @@ export const WeekView = memo(({
       <div className="flex! items-center! gap-3! pl-14! mb-1!">
         {daysToShow.map((day) => {
           const isToday = day.isSame(dayjs(), "day");
-          const weather = getDayWeather(day);
+          const dayWeather = getWeatherForDate(day);
 
           return (
             <div
@@ -111,7 +114,7 @@ export const WeekView = memo(({
               <span className="text-[11px]! font-black! tracking-wider! uppercase!">
                 {day.locale("ru").format("ddd").toUpperCase()} {day.date()}
               </span>
-              <WeatherIcon type={weather} size={13} />
+              <WeatherIcon type={dayWeather.weatherType} size={13} />
             </div>
           );
         })}

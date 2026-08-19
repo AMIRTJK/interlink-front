@@ -22,11 +22,14 @@ export const CalendarHeader = memo(({
   setViewMode,
   currentDate,
 }: CalendarHeaderProps) => {
-  const weather = useWeather();
+  const { getWeatherForDate } = useWeather();
+  const dayWeather = getWeatherForDate(currentDate);
 
   const formatHeaderTitle = () => {
     if (viewMode === "month") {
-      return currentDate.locale("ru").format("MMMM YYYY");
+      const monthName = currentDate.locale("ru").format("MMMM");
+      const year = currentDate.format("YYYY");
+      return `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}`;
     }
     if (viewMode === "week") {
       const start = currentDate.startOf("isoWeek");
@@ -40,29 +43,31 @@ export const CalendarHeader = memo(({
 
   return (
     <div className="flex! items-center! justify-between! mb-4! w-full! gap-4! flex-wrap!">
-      {/* Left / Center Section: Date Title & Live Weather Badge */}
+      {/* Left Section: Title and Weather (Weather badge shown only for single Day view) */}
       <div className="flex! items-center! gap-3! flex-wrap!">
         <div className="flex! flex-col!">
           <h2 className="text-2xl! font-black! text-slate-800! dark:text-slate-100! m-0! tracking-tight! capitalize!">
             {formatHeaderTitle()}
           </h2>
-          {viewMode !== "month" && (
+          {viewMode === "week" && (
             <span className="text-xs! font-bold! text-slate-400! dark:text-slate-500! mt-0.5!">
               Неделя {weekNumber}
             </span>
           )}
         </div>
 
-        {/* Live Real-Time Weather Badge (Day, Week, Month) */}
-        <div className="flex! items-center! gap-2! py-1.5! px-3.5! rounded-full! bg-white/90! dark:bg-slate-800/90! border! border-slate-200/60! dark:border-slate-700/60! shadow-xs! backdrop-blur-md!">
-          <WeatherIcon type={weather.weatherType} size={15} />
-          <span className="text-xs! font-extrabold! text-slate-800! dark:text-slate-100!">
-            {weather.temp}
-          </span>
-          <span className="text-xs! font-semibold! text-slate-400! dark:text-slate-400!">
-            • {weather.description}
-          </span>
-        </div>
+        {/* Show weather badge in header only in Day mode where it represents a specific single day */}
+        {viewMode === "day" && (
+          <div className="flex! items-center! gap-2! py-1.5! px-3.5! rounded-full! bg-white/90! dark:bg-slate-800/90! border! border-slate-200/60! dark:border-slate-700/60! shadow-xs! backdrop-blur-md!">
+            <WeatherIcon type={dayWeather.weatherType} size={15} />
+            <span className="text-xs! font-extrabold! text-slate-800! dark:text-slate-100!">
+              {dayWeather.temp}
+            </span>
+            <span className="text-xs! font-semibold! text-slate-400! dark:text-slate-400!">
+              • {dayWeather.description}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Right Mode Switcher Segmented Control */}

@@ -1,7 +1,7 @@
 import { useMemo, memo } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import type { Task } from "@features/tasks";
-import { getEventStyle, getDayWeather, WeatherType } from "../model";
+import { getEventStyle, WeatherType } from "../model";
 import { WeatherIcon } from "./WeatherIcon";
 import { useWeather } from "../lib/useWeather";
 
@@ -87,7 +87,7 @@ export const MonthView = memo(({
   onDayClick,
   onEventClick,
 }: IMonthViewProps) => {
-  const liveWeather = useWeather();
+  const { getWeatherForDate } = useWeather();
 
   const tasksMap = useMemo(() => {
     const map: Record<string, Task[]> = {};
@@ -123,8 +123,8 @@ export const MonthView = memo(({
           const dayTasks = tasksMap[dateStr] || [];
           const inMonth = day.month() === currentDate.month();
           const isToday = day.isSame(dayjs(), "day");
-          const weather = isToday ? liveWeather.weatherType : getDayWeather(day);
-          const cardConfig = getMonthCardStyle(weather, !inMonth);
+          const dayWeather = getWeatherForDate(day);
+          const cardConfig = getMonthCardStyle(dayWeather.weatherType, !inMonth);
 
           return (
             <div
@@ -147,7 +147,7 @@ export const MonthView = memo(({
 
                 {/* Pure White Circular Weather Badge */}
                 <div className="w-6! h-6! rounded-full! bg-white! dark:bg-slate-800! shadow-[0_2px_8px_rgba(0,0,0,0.06)]! flex! items-center! justify-center!">
-                  <WeatherIcon type={weather} size={13} />
+                  <WeatherIcon type={dayWeather.weatherType} size={13} />
                 </div>
               </div>
 
