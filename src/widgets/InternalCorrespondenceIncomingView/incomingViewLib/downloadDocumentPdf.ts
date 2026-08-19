@@ -1,3 +1,8 @@
+// Тот же файл, что подключает приложение (app/styles/global.css): в iframe
+// нет ни preflight Tailwind, ни утилитарных классов холста, поэтому
+// оформление тела документа приезжает сюда целиком.
+import documentBodyCss from "@shared/styles/document-body.css?inline";
+
 import {
   PAGE_WIDTH,
   PAGE_HEIGHT,
@@ -7,6 +12,7 @@ import {
 import { paginateHtml } from "./paginateHtml";
 
 const printPageCss = (fontSize: number) => `
+  ${documentBodyCss}
   @page { size: A4 portrait; margin: 0; }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -21,13 +27,10 @@ const printPageCss = (fontSize: number) => `
   .page:last-child { break-after: auto; page-break-after: auto; }
   .content { height: 100%; }
   .page * { max-width: 100%; white-space: pre-wrap; overflow-wrap: break-word; word-break: break-word; }
-  .content div:not([data-signature-stamp]) { min-height: 1.8em; }
   .stamp, .stamp * { white-space: normal; min-height: 0; }
   img { max-width: 100%; height: auto; }
   table { width: 100%; table-layout: auto; border-collapse: collapse; }
   td, th { border: 1px solid #cbd5e1; padding: 4px 8px; vertical-align: top; word-break: break-word; }
-  ul { list-style: disc; padding-left: 1.5em; }
-  ol { list-style: decimal; padding-left: 1.5em; }
   [data-page-spacer] { display: none !important; }`;
 
 export const downloadDocumentPdf = (
@@ -46,7 +49,7 @@ export const downloadDocumentPdf = (
         stamp && stamp.pageIndex === idx && stamp.html
           ? `<div class="stamp" style="position:absolute;left:${PAGE_PAD_H + stamp.x}px;top:${PAGE_PAD_V + stamp.y}px;width:${stamp.width};overflow:hidden;pointer-events:none;">${stamp.html}</div>`
           : "";
-      return `<div class="page"><div class="content">${pageHtml}</div>${stampHtml}</div>`;
+      return `<div class="page"><div class="content doc-preview-content">${pageHtml}</div>${stampHtml}</div>`;
     })
     .join("");
 

@@ -1,3 +1,9 @@
+// Тот же файл, что подключает приложение (app/styles/global.css). В iframe
+// печати нет ни preflight Tailwind, ни утилитарных классов холста, поэтому
+// оформление тела документа приезжает сюда целиком — иначе браузер добавит
+// свои поля абзацам и заголовкам и напечатанный текст съедет.
+import documentBodyCss from "@shared/styles/document-body.css?inline";
+
 export interface IPrintStampInfo {
   pageIndex: number;
   x: number;
@@ -13,8 +19,9 @@ interface IPageCssParams {
   fontSize: string;
 }
 
-// CSS, дублирующий оформление холста редактора (классы Tailwind редактора в
-// iframe печати недоступны) — чтобы напечатанное совпадало с холстом 1-в-1.
+// Стили листа печати. Оформление ТЕЛА документа целиком берётся из общего
+// document-body.css (см. импорт выше) — здесь остаётся только геометрия листа
+// и зеркало утилитарных классов холста, которых в iframe нет.
 export const buildPrintPageCss = ({
   isLandscape,
   pageWidth,
@@ -24,6 +31,7 @@ export const buildPrintPageCss = ({
   const pageW = isLandscape ? pageHeight : pageWidth;
   const pageH = isLandscape ? pageWidth : pageHeight;
   return `
+  ${documentBodyCss}
   @page { size: A4 ${isLandscape ? "landscape" : "portrait"}; margin: 0; }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -42,8 +50,6 @@ export const buildPrintPageCss = ({
   img { max-width: 100%; height: auto; }
   table { width: 100%; table-layout: auto; border-collapse: collapse; }
   td, th { border: 1px solid #cbd5e1; padding: 4px 8px; vertical-align: top; word-break: break-word; }
-  ul { list-style: disc; padding-left: 1.5em; }
-  ol { list-style: decimal; padding-left: 1.5em; }
   [data-page-spacer] { display: none !important; }`;
 };
 
@@ -69,7 +75,7 @@ export const printDocumentPages = ({
         stamp && stamp.pageIndex === idx
           ? `<div style="position:absolute;left:${marginLeft + stamp.x}px;top:${pagePadV + stamp.y}px;width:${stamp.width};overflow:hidden;pointer-events:none;">${stamp.html}</div>`
           : "";
-      return `<div class="page">${html}${stampHtml}</div>`;
+      return `<div class="page doc-preview-content">${html}${stampHtml}</div>`;
     })
     .join("");
 
