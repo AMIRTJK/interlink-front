@@ -52,18 +52,38 @@ export interface ITimelineEvent {
   data?: Record<string, any>;
 }
 
+export interface IRelatedDocCreator {
+  id?: number | string;
+  first_name?: string;
+  last_name?: string;
+  middle_name?: string | null;
+  full_name?: string;
+  phone?: string;
+  position?: string | null;
+  photo_path?: string | null;
+  photo_url?: string | null;
+}
+
 export interface IRelatedDocItem {
   id: number;
-  role: string;
-  channel: string;
-  kind: string;
-  status: string;
-  subject: string;
+  role?: string;
+  channel?: string;
+  kind?: string;
+  status?: string;
+  subject?: string;
   reg_number?: string;
+  tracking_number?: string | null;
+  created_at?: string;
+  sent_at?: string | null;
+  doc_date?: string;
+  date?: string;
+  creator?: IRelatedDocCreator | null;
 }
 
 export interface IRelatedDocumentLink {
-  type: string;
+  type?: string;
+  link_type?: string;
+  link_label?: string;
   incoming?: IRelatedDocItem;
   outgoing?: IRelatedDocItem;
 }

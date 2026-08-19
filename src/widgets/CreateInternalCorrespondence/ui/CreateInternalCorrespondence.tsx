@@ -85,7 +85,6 @@ import {
   EDITOR_RULER_OFFSET,
 } from "./createInternalCorrespondence/EditorRuler";
 import { PageGrid } from "./createInternalCorrespondence/PageGrid";
-import { WORD_BOUNDARY_RE } from "./createInternalCorrespondence/editorTabs";
 import {
   cleanEditorArtifacts,
   wrapBareTopLevelNodes,
@@ -292,7 +291,7 @@ export const CreateInternalCorrespondence = ({
   // горизонтальную панель под тулбаром, а боковые вкладки у холста скрываются.
   // Сами панели по-прежнему открываются у холста. По умолчанию выключен —
   // текущий функционал не меняется.
-  const [panelsInToolbar, setPanelsInToolbar] = useState(true);
+  const [panelsInToolbar, setPanelsInToolbar] = useState(false);
 
   const handleOpenApprovers = () => {
     setApproversOpen(true);
@@ -814,6 +813,21 @@ export const CreateInternalCorrespondence = ({
     [approvalVersionSummary, activeVersion],
   );
 
+  // Список согласующих, привязанный к текущей активной версии документа
+  const currentVersionApprovers = useMemo(() => {
+    if (!activeVersionId) return approvers;
+    return approvers.filter((a) => {
+      if (a.versionId != null) {
+        return String(a.versionId) === String(activeVersionId);
+      }
+      if (allVersions.length <= 1) return true;
+      if (latestVersionId != null && String(activeVersionId) === String(latestVersionId)) {
+        return true;
+      }
+      return false;
+    });
+  }, [approvers, activeVersionId, allVersions.length, latestVersionId]);
+
   useEffect(() => {
     const navState = location.state as
       | {
@@ -995,7 +1009,6 @@ export const CreateInternalCorrespondence = ({
     attachments,
     setAttachments,
     refetchVersions,
-    selectVersionForSign,
     setActiveVersionId,
   });
 
@@ -1521,22 +1534,27 @@ export const CreateInternalCorrespondence = ({
     commitHistoryNow();
     editor.focus();
 
-    document.execCommand("styleWithCSS", false, "true");
-    document.execCommand("fontSize", false, "7");
-    editor
-      .querySelectorAll<HTMLElement>('span[style*="font-size"]')
-      .forEach((s) => {
-        const fs = s.style.fontSize;
-        if (fs === "xxx-large" || fs === "-webkit-xxx-large") {
-          s.style.fontSize = `${size}px`;
-        }
+    // execCommand и доводка полученной разметки — ОДНА правка: промежуточное
+    // состояние (xxx-large из-под execCommand) в историю не пишем, иначе первый
+    // Ctrl+Z показывал бы «гигантский» текст вместо исходного размера.
+    runWithoutHistory(() => {
+      document.execCommand("styleWithCSS", false, "true");
+      document.execCommand("fontSize", false, "7");
+      editor
+        .querySelectorAll<HTMLElement>('span[style*="font-size"]')
+        .forEach((s) => {
+          const fs = s.style.fontSize;
+          if (fs === "xxx-large" || fs === "-webkit-xxx-large") {
+            s.style.fontSize = `${size}px`;
+          }
+        });
+      // Fallback: некоторые движки вместо span со стилем вставляют <font size="7">
+      editor.querySelectorAll<HTMLElement>('font[size="7"]').forEach((f) => {
+        const span = document.createElement("span");
+        span.style.fontSize = `${size}px`;
+        while (f.firstChild) span.appendChild(f.firstChild);
+        f.replaceWith(span);
       });
-    // Fallback: некоторые движки вместо span со стилем вставляют <font size="7">
-    editor.querySelectorAll<HTMLElement>('font[size="7"]').forEach((f) => {
-      const span = document.createElement("span");
-      span.style.fontSize = `${size}px`;
-      while (f.firstChild) span.appendChild(f.firstChild);
-      f.replaceWith(span);
     });
 
     setFontSize(size);
@@ -1574,7 +1592,7 @@ export const CreateInternalCorrespondence = ({
     redoEdit,
     resetHistory,
     commitHistoryNow,
-    scheduleHistoryCommit,
+    runWithoutHistory,
   } = useEditorHistory({
     editorRef,
     paginateEditorRef,
@@ -1672,7 +1690,6 @@ export const CreateInternalCorrespondence = ({
     (e?: React.FormEvent<HTMLDivElement>) => {
     const native = e?.nativeEvent as InputEvent | undefined;
     const inputType = native?.inputType || "";
-    const data = native?.data ?? "";
     const isParaBoundary =
       inputType === "insertParagraph" || inputType === "insertLineBreak";
 
@@ -1705,22 +1722,18 @@ export const CreateInternalCorrespondence = ({
     // со строкой, и очередной Space уезжает на «табуляторное» расстояние.
     // Во время IME-композиции не трогаем: перестановка курсора её оборвала бы.
     if (!native?.isComposing) syncEditorWhitespace(editor);
-    setEditorContent(getCleanEditorHtml());
+    const cleanHtml = getCleanEditorHtml();
+    setEditorContent(cleanHtml);
 
-    // Гранулярность отмены как в Word: обычный набор складывается в один шаг по
-    // паузам (scheduleHistoryCommit), но граница слова/абзаца немедленно фиксирует
-    // набранное — тогда Ctrl+Z откатывает по словам, а не всю фразу целиком.
-    // Enter/Shift+Enter (insertParagraph/insertLineBreak) — тоже граница шага.
-    const isWordBoundary =
-      inputType === "insertText" && !!data && WORD_BOUNDARY_RE.test(data);
-    if (isWordBoundary || isParaBoundary) {
-      commitHistoryNow();
-    } else {
-      // Набор текста складывается в шаги истории по паузам.
-      scheduleHistoryCommit();
-    }
+    // Пошаговая отмена: каждое изменение содержимого — отдельный шаг истории.
+    // Символ, пробел, табуляция, удаление одного знака, вставка, перевод строки
+    // откатываются по одному нажатию Ctrl+Z; склейки набора по паузам или по
+    // границам слов нет.
+    // Исключение — IME-композиция: её промежуточные состояния не шаги, готовый
+    // результат фиксируется по compositionend (см. useEditorHistory).
+    if (!native?.isComposing) commitHistoryNow(cleanHtml);
     },
-    [getCleanEditorHtml, scheduleHistoryCommit, commitHistoryNow],
+    [getCleanEditorHtml, commitHistoryNow],
   );
 
   // После ручной правки DOM (слияние через границу, вставка разрыва) сразу
@@ -1730,9 +1743,10 @@ export const CreateInternalCorrespondence = ({
   const syncEditorAfterDomEdit = useCallback(() => {
     syncEditorWhitespace(editorRef.current);
     setPageCount(paginateEditor());
-    setEditorContent(getCleanEditorHtml());
+    const cleanHtml = getCleanEditorHtml();
+    setEditorContent(cleanHtml);
     // Дискретная правка DOM — сразу отдельный шаг истории изменений.
-    commitHistoryNow();
+    commitHistoryNow(cleanHtml);
   }, [paginateEditor, getCleanEditorHtml, commitHistoryNow]);
 
   const handleEditorKeyDown = useEditorKeyDown({
@@ -1974,6 +1988,10 @@ export const CreateInternalCorrespondence = ({
         showCommentInput: false,
         dsApplied: false,
         dsLoading: false,
+        versionId: activeVersion?.id ?? null,
+        versionLabel: activeVersion?.versionNumber
+          ? `Версия ${activeVersion.versionNumber}`
+          : null,
       },
     ]);
   };
@@ -2213,13 +2231,6 @@ export const CreateInternalCorrespondence = ({
         // Загружено другое содержимое — прежняя история изменений неприменима.
         resetHistory();
       }
-    }
-
-    // ХАК: Если документ только открыли и ни одна версия еще не выбрана для подписи
-    // (проверяем по ответу, например, если у всех элементов is_selected === false)
-    const hasSelected = allVersions.some((v: any) => v.is_selected);
-    if (!hasSelected && !signedVersionId && targetVersion.id) {
-      selectVersionForSign({ versionId: targetVersion.id });
     }
   }, [allVersions, signedVersionObj, signedVersionId]);
 
@@ -2898,10 +2909,18 @@ export const CreateInternalCorrespondence = ({
                           openLeft={false}
                           onOpen={handleOpenApprovers}
                           onClose={() => setApproversOpen(false)}
-                          approvers={approvers}
+                          approvers={currentVersionApprovers}
                           onAddApprover={addApprover}
                           onRemoveApprover={(approverId) =>
-                            setApprovers((prev) => prev.filter((a) => a.id !== approverId))
+                            setApprovers((prev) =>
+                              prev.filter((a) => {
+                                if (a.id !== approverId) return true;
+                                if (a.versionId != null && activeVersionId != null) {
+                                  return String(a.versionId) !== String(activeVersionId);
+                                }
+                                return false;
+                              }),
+                            )
                           }
                           availableUsers={availableUsers}
                           inviteApprover={inviteApprover}

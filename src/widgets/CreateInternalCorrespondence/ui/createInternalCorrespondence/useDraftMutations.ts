@@ -17,10 +17,6 @@ interface IParams {
   attachments: AttachedFile[];
   setAttachments: Dispatch<SetStateAction<AttachedFile[]>>;
   refetchVersions: () => Promise<any>;
-  selectVersionForSign: (
-    variables: { versionId: string | number },
-    options?: { onSuccess?: () => void },
-  ) => void;
   setActiveVersionId: Dispatch<SetStateAction<string | number | null>>;
 }
 
@@ -31,7 +27,6 @@ export const useDraftMutations = ({
   attachments,
   setAttachments,
   refetchVersions,
-  selectVersionForSign,
   setActiveVersionId,
 }: IParams) => {
   // После успешного сохранения файлы уже лежат на бэкенде: заменяем локальную
@@ -70,7 +65,7 @@ export const useDraftMutations = ({
   const handleDraftUpdated = useCallback(
     (data: any) => {
       syncAttachmentsAfterSave(data);
-      // 1. Сначала стягиваем свежие версии, чтобы узнать ID только что созданной (1.6)
+      // 1. Сначала стягиваем свежие версии, чтобы узнать ID только что созданной
       refetchVersions().then((updatedResponse) => {
         const rawVersions = updatedResponse?.data?.data?.versions || [];
         const freshVersions = mergeSignedDuplicateVersions(rawVersions);
@@ -79,24 +74,13 @@ export const useDraftMutations = ({
           const latestVersion = freshVersions[freshVersions.length - 1];
 
           if (latestVersion?.id) {
-            // 2. Мгновенно меняем активную версию в стейте фронтенда
+            // 2. Меняем активную версию в стейте фронтенда
             setActiveVersionId(latestVersion.id);
-
-            // 3. Передаем в selectVersionForSign колбэк для повторного рефетча ПОСЛЕ успешного выбора
-            selectVersionForSign(
-              { versionId: latestVersion.id },
-              {
-                onSuccess: () => {
-                  // 4. Перезапрашиваем версии еще раз, когда бэкенд точно проставил галочку в БД
-                  refetchVersions();
-                },
-              },
-            );
           }
         }
       });
     },
-    [refetchVersions, selectVersionForSign, syncAttachmentsAfterSave],
+    [refetchVersions, syncAttachmentsAfterSave, setActiveVersionId],
   );
 
   const updateDraftMessages = {

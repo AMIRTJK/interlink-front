@@ -137,6 +137,7 @@ export const IncomingViewCanvasPanels: React.FC<IProps> = ({
                 onOpen={openApprovers}
                 onClose={() => setApproversOpen(false)}
                 approvals={approvals}
+                activeVersionId={activeVersionId}
               />
               {!panelsInToolbar && (
                 <div className="absolute z-20" style={{ left: -33, top: 10 }}>
@@ -192,50 +193,10 @@ export const IncomingViewCanvasPanels: React.FC<IProps> = ({
                 </div>
               )}
 
-              {!panelsInToolbar && isVisorsAvailable && (
-                <div className="absolute z-20" style={{ left: -33, top: 190 }}>
-                  <motion.button
-                    onClick={() =>
-                      visorsOpen ? setVisorsOpen(false) : openVisors()
-                    }
-                    whileHover={{ scale: 1.02 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 24,
-                    }}
-                    className={cn(
-                      "bg-white border border-slate-200 border-r-0 rounded-l-xl shadow-md px-2 py-3 h-[160px] cursor-pointer flex flex-col items-center gap-1.5 select-none transition-all duration-200",
-                      visorsOpen ? "bg-slate-50" : "hover:bg-slate-50"
-                    )}
-                    aria-label="Визирующие"
-                  >
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-violet-500" />
-                      <If is={visors.length > 0}>
-                        <span className="w-4 h-4 rounded-full bg-violet-500 text-white text-[9px] font-bold flex items-center justify-center">
-                          {visors.length}
-                        </span>
-                      </If>
-                    </div>
-                    <span
-                      style={{
-                        writingMode: "vertical-rl",
-                        textOrientation: "mixed",
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: "#475569",
-                        letterSpacing: "0.08em",
-                      }}
-                    >
-                      Визирующие
-                    </span>
-                  </motion.button>
-                </div>
-              )}
               <AttachmentsPanel
                 isOpen={attachmentsOpen}
                 hideTab={panelsInToolbar}
+                openLeft={true}
                 onOpen={openAttachments}
                 onClose={() => setAttachmentsOpen(false)}
                 attachments={mappedAttachments}

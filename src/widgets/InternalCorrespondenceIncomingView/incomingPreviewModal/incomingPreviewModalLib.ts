@@ -1,3 +1,4 @@
+import { normalizeSignatures } from "@widgets/CreateInternalCorrespondence/ui/createInternalCorrespondence/documentPrefillMappers";
 import { PreviewApprover, GRADIENTS } from "./incomingPreviewModalModel";
 
 export const getInitials = (fullName: string): string => {
@@ -31,8 +32,9 @@ export const buildPreviewApproversList = (
   approvals: any[] = []
 ): PreviewApprover[] => {
   const list: PreviewApprover[] = [];
+  const normalizedSignatures = normalizeSignatures(signatures || []);
 
-  (signatures || []).forEach((sig: any, idx: number) => {
+  normalizedSignatures.forEach((sig: any, idx: number) => {
     const user = sig.user || sig.approver || {};
     const name = user.full_name || "Неизвестно";
     const initials = getInitials(name);

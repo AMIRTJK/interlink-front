@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import {
@@ -9,7 +9,12 @@ import {
   mapServerAttachment,
   type AttachedFile,
 } from "@widgets/CreateInternalCorrespondence";
-import { mergeSignedDuplicateVersions } from "@widgets/CreateInternalCorrespondence/ui/createInternalCorrespondence/versionsLib";
+import {
+  mapDocumentVersions,
+  collectRevokedVersionIds,
+} from "@widgets/CreateInternalCorrespondence/ui/createInternalCorrespondence/versionsLib";
+import { normalizeSignatures } from "@widgets/CreateInternalCorrespondence/ui/createInternalCorrespondence/documentPrefillMappers";
+import { STAMP_ATTR } from "@widgets/CreateInternalCorrespondence/lib/constants";
 import { normalizeVisors, VISOR_INVITE_HINT } from "../model";
 import {
   RegistryItem,
@@ -65,7 +70,11 @@ export function useIncomingViewData(
         assignmentsData?.items?.length ||
         (Array.isArray(assignmentsData?.data) ? assignmentsData.data.length : 0);
 
-  const signatures = workflowResponse?.data?.signatures || [];
+  const rawSignatures = workflowResponse?.data?.signatures || [];
+  const signatures = useMemo(
+    () => normalizeSignatures(rawSignatures),
+    [rawSignatures],
+  );
   const approvals = workflowResponse?.data?.approvals || [];
 
   // Контекстные права документа главнее плоских флагов письма: они учитывают
@@ -170,12 +179,64 @@ export function useIncomingViewData(
     options: { enabled: !!item?.id, refetchOnWindowFocus: false },
   });
 
-  const docVersions: { id?: number | string; body?: string }[] =
-    mergeSignedDuplicateVersions(versionsResponse?.data?.versions || []);
-  const activeVersion =
-    docVersions.find((v) => String(v.id) === String(activeVersionId)) ||
-    docVersions.reduce((a, b) => (Number(b?.id) > Number(a?.id) ? b : a), docVersions[0] || {});
-  const documentBody = activeVersion?.body || item.body || "";
+  const hasSignedWorkflowSignature = useMemo(() => {
+    const wfSigs = workflowResponse?.data?.signatures || [];
+    return wfSigs.some((sig: any) => sig.status === "signed");
+  }, [workflowResponse]);
+
+  const revokedVersionIds = useMemo(
+    () => collectRevokedVersionIds(workflowResponse?.data?.signatures || []),
+    [workflowResponse],
+  );
+
+  const docVersions = useMemo(
+    () =>
+      mapDocumentVersions({
+        rawVersions: versionsResponse?.data?.versions || [],
+        revokedVersionIds,
+        hasSignedWorkflowSignature,
+      }),
+    [versionsResponse, revokedVersionIds, hasSignedWorkflowSignature],
+  );
+
+  const signedVersionId = useMemo(() => {
+    if (!hasSignedWorkflowSignature) return null;
+    const backendSigned = docVersions.find(
+      (v: any) => v.is_current_signed && v.signature_state !== "revoked",
+    );
+    if (backendSigned) return backendSigned.id;
+    const stamped = docVersions.filter(
+      (v: any) =>
+        v.signature_state !== "revoked" &&
+        typeof v.content === "string" &&
+        v.content.includes(STAMP_ATTR),
+    );
+    if (stamped.length) return stamped[stamped.length - 1].id;
+    return null;
+  }, [docVersions, hasSignedWorkflowSignature]);
+
+  const latestVersion = useMemo(
+    () => (docVersions.length > 0 ? docVersions[docVersions.length - 1] : null),
+    [docVersions],
+  );
+
+  const activeVersion = useMemo(() => {
+    if (activeVersionId != null) {
+      const found = docVersions.find(
+        (v: any) => String(v.id) === String(activeVersionId),
+      );
+      if (found) return found;
+    }
+    if (signedVersionId != null) {
+      const signed = docVersions.find(
+        (v: any) => String(v.id) === String(signedVersionId),
+      );
+      if (signed) return signed;
+    }
+    return latestVersion || null;
+  }, [docVersions, activeVersionId, signedVersionId, latestVersion]);
+
+  const documentBody = activeVersion?.content || item.body || "";
 
   const isResolvingBody = Boolean(item?.id && loadingVersions);
 
@@ -229,6 +290,8 @@ export function useIncomingViewData(
     isAcknowledged,
     visibleActionItems,
     docVersions,
+    signedVersionId,
+    activeVersion,
     documentBody,
     isResolvingBody,
     senderName,

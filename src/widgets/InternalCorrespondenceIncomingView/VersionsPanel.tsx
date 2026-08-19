@@ -89,13 +89,19 @@ export const VersionsPanel = ({
             <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-3 min-h-0">
               {versions.map((v, idx) => {
                 const author = v.author || {};
-                const authorName = author.full_name || "Неизвестный автор";
-                const isActive = String(v.id) === String(activeVersionId) 
-                  || (activeVersionId === null && idx === versions.length - 1);
-                
-                const d = new Date(v.created_at);
-                const pad = (n: number) => String(n).padStart(2, "0");
-                const dateStr = `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                const authorName =
+                  author.full_name || author.name || "Неизвестный автор";
+                const isActive =
+                  String(v.id) === String(activeVersionId) ||
+                  (activeVersionId === null && idx === versions.length - 1);
+
+                const dateVal = v.created_at || v.date;
+                let dateStr = "—";
+                if (dateVal) {
+                  const d = new Date(dateVal);
+                  const pad = (n: number) => String(n).padStart(2, "0");
+                  dateStr = `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                }
 
                 return (
                   <motion.div
@@ -112,15 +118,17 @@ export const VersionsPanel = ({
                       "rounded-xl p-3 flex flex-col gap-1.5 border transition-all cursor-pointer",
                       isActive
                         ? "bg-blue-50/50 border-blue-200 shadow-sm"
-                        : "bg-slate-50 border-slate-100 hover:bg-slate-100/75 hover:border-slate-200"
+                        : "bg-slate-50 border-slate-100 hover:bg-slate-100/75 hover:border-slate-200",
                     )}
                   >
                     <div className="flex items-center justify-between">
-                      <span className={cn(
-                        "text-xs font-bold",
-                        isActive ? "text-blue-700" : "text-slate-700"
-                      )}>
-                        Версия {v.version}
+                      <span
+                        className={cn(
+                          "text-xs font-bold",
+                          isActive ? "text-blue-700" : "text-slate-700",
+                        )}
+                      >
+                        Версия {v.versionNumber || v.version || idx + 1}
                       </span>
                       {isActive && (
                         <span className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center">

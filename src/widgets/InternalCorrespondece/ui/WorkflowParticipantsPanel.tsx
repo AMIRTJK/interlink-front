@@ -10,7 +10,10 @@ import {
   SafetyCertificateOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { ApprovalVersionNotice } from "@entities/correspondence";
+import {
+  ApprovalVersionNotice,
+  resolveApprovalVersionId,
+} from "@entities/correspondence";
 import { If, Tooltip } from "@shared/ui";
 import { Avatar, Button, Checkbox, ConfigProvider, Divider, theme } from "antd";
 import { useMemo, useState } from "react";
@@ -152,11 +155,29 @@ export const WorkflowParticipantsPanel = ({
 
   const hiddenSignersCount = signers.length - visibleSigners.length;
 
+  const currentVersionApprovers = useMemo(() => {
+    if (!activeVersionId) return approvers;
+    return approvers.filter((a: any) => {
+      const vId = resolveApprovalVersionId(a, approvalVersionSummary);
+      if (vId != null) {
+        return String(vId) === String(activeVersionId);
+      }
+      if (versions.length <= 1) return true;
+      const latest =
+        versions.length > 0 ? versions[versions.length - 1].id : null;
+      if (latest != null && String(activeVersionId) === String(latest)) {
+        return true;
+      }
+      return false;
+    });
+  }, [approvers, activeVersionId, approvalVersionSummary, versions]);
+
   const visibleApprovers = isCollapsed
     ? []
-    : approvers.slice(0, MAX_VISIBLE_APPROVERS);
+    : currentVersionApprovers.slice(0, MAX_VISIBLE_APPROVERS);
 
-  const hiddenApproversCount = approvers.length - visibleApprovers.length;
+  const hiddenApproversCount =
+    currentVersionApprovers.length - visibleApprovers.length;
 
   const renderShowMoreParticipants = (count: number) => (
     <div
@@ -474,47 +495,72 @@ export const WorkflowParticipantsPanel = ({
             </div>
           )}
 
-          {approvers.length > 0 && (
-            <div>
-              {!isCollapsed && (
-                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1 flex justify-between items-center">
-                  <span>Согласующие</span>
-                  <span
-                    className={`px-1.5 rounded text-[9px] ${
-                      isDarkMode
-                        ? "bg-gray-800 text-gray-400"
-                        : "bg-gray-100 text-gray-500"
-                    }`}
-                  >
-                    {approvers.length}
-                  </span>
+          {!isCollapsed && (
+            <div className="mb-4">
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 pl-1 flex justify-between items-center">
+                <span>Согласующие</span>
+                <span
+                  className={`px-1.5 rounded text-[9px] ${
+                    isDarkMode
+                      ? "bg-gray-800 text-gray-400"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
+                >
+                  {currentVersionApprovers.length}
+                </span>
+              </div>
+
+              {currentVersionApprovers.length === 0 ? (
+                <div className="text-[11px] text-gray-400 py-3 text-center border border-dashed rounded-xl border-gray-200 dark:border-gray-800 mb-3">
+                  Нет согласующих для этой версии
                 </div>
+              ) : (
+                <>
+                  {visibleApprovers.map((a: any) => (
+                    <SidebarParticipantRow
+                      key={a.id}
+                      item={a}
+                      role="approver"
+                      isCollapsed={isCollapsed}
+                      isDarkMode={isDarkMode}
+                      currentUserId={currentUserId}
+                      openSignatureModal={openSignatureModal}
+                      onSign={onSign}
+                      handleOpenApproveModal={handleOpenApproveModal}
+                      isSigning={isSigning}
+                      isReadOnly={isReadOnly}
+                      hasQRInSelectedVersion={hasQRInSelectedVersion}
+                      approvalVersionSummary={approvalVersionSummary}
+                      activeVersionId={activeVersionId}
+                    />
+                  ))}
+
+                  {hiddenApproversCount > 0 &&
+                    renderShowMoreParticipants(hiddenApproversCount)}
+                </>
               )}
-
-              {(isCollapsed ? approvers : visibleApprovers).map((a: any) => (
-                <SidebarParticipantRow
-                  key={a.id}
-                  item={a}
-                  role="approver"
-                  isCollapsed={isCollapsed}
-                  isDarkMode={isDarkMode}
-                  currentUserId={currentUserId}
-                  openSignatureModal={openSignatureModal}
-                  onSign={onSign}
-                  handleOpenApproveModal={handleOpenApproveModal}
-                  isSigning={isSigning}
-                  isReadOnly={isReadOnly}
-                  hasQRInSelectedVersion={hasQRInSelectedVersion}
-                  approvalVersionSummary={approvalVersionSummary}
-                  activeVersionId={activeVersionId}
-                />
-              ))}
-
-              {!isCollapsed &&
-                hiddenApproversCount > 0 &&
-                renderShowMoreParticipants(hiddenApproversCount)}
             </div>
           )}
+
+          {isCollapsed &&
+            currentVersionApprovers.map((a: any) => (
+              <SidebarParticipantRow
+                key={a.id}
+                item={a}
+                role="approver"
+                isCollapsed={isCollapsed}
+                isDarkMode={isDarkMode}
+                currentUserId={currentUserId}
+                openSignatureModal={openSignatureModal}
+                onSign={onSign}
+                handleOpenApproveModal={handleOpenApproveModal}
+                isSigning={isSigning}
+                isReadOnly={isReadOnly}
+                hasQRInSelectedVersion={hasQRInSelectedVersion}
+                approvalVersionSummary={approvalVersionSummary}
+                activeVersionId={activeVersionId}
+              />
+            ))}
 
           {!isCollapsed && docId && (
             <div className="p-3 border-t border-gray-100 dark:border-gray-800">

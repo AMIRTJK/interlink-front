@@ -22,7 +22,7 @@ interface IProps {
 export const AttachmentsPanel: React.FC<IProps> = ({
   isOpen,
   hideTab,
-  openLeft = false,
+  openLeft = true,
   onOpen,
   onClose,
   attachments,
@@ -37,7 +37,7 @@ export const AttachmentsPanel: React.FC<IProps> = ({
       <If is={!hideTab}>
         <div
           className="absolute z-20"
-          style={openLeft ? { left: -36, top: 370 } : { right: -32, top: 370 }}
+          style={openLeft ? { left: -33, top: 370 } : { right: -32, top: 370 }}
         >
           <motion.button
             onClick={isOpen ? onClose : onOpen}
@@ -48,7 +48,7 @@ export const AttachmentsPanel: React.FC<IProps> = ({
             )}
             aria-label="Вложения"
           >
-            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
+            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-teal-500" />
             <span
               style={{
                 writingMode: "vertical-rl",
@@ -62,7 +62,7 @@ export const AttachmentsPanel: React.FC<IProps> = ({
               Вложения
             </span>
             <If is={attachments.length > 0}>
-              <span className="bg-indigo-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">
+              <span className="bg-teal-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">
                 {attachments.length}
               </span>
             </If>

@@ -20,6 +20,8 @@ interface IDataArgs {
   formattedSentDate: string;
   inboundNumber: string;
   seenMutate: (variables: any) => void;
+  activeVersionId?: number | string | null;
+  setActiveVersionId?: (id: number | string | null) => void;
 }
 
 export function useIncomingViewState(data: IDataArgs) {
@@ -35,11 +37,19 @@ export function useIncomingViewState(data: IDataArgs) {
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [attachmentsOpen, setAttachmentsOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [activeVersionId, setActiveVersionId] = useState<number | string | null>(null);
+  const [internalActiveVersionId, setInternalActiveVersionId] = useState<
+    number | string | null
+  >(null);
+  const activeVersionId =
+    data.activeVersionId !== undefined
+      ? data.activeVersionId
+      : internalActiveVersionId;
+  const setActiveVersionId =
+    data.setActiveVersionId || setInternalActiveVersionId;
   const [previewAttachment, setPreviewAttachment] = useState<AttachedFile | null>(null);
   const [showVisorNotice, setShowVisorNotice] = useState(false);
 
-  const [panelsInToolbar, setPanelsInToolbar] = useState(true);
+  const [panelsInToolbar, setPanelsInToolbar] = useState(false);
 
   const rootScrollRef = useRef<HTMLDivElement>(null);
   const stickyHeaderRef = useRef<HTMLDivElement>(null);

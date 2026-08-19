@@ -199,6 +199,7 @@ export const IncomingPreviewModal: React.FC<IncomingPreviewModalProps> = (props)
                       onOpen={state.openApprovers}
                       onClose={() => state.setApproversOpen(false)}
                       approvals={approvals}
+                      activeVersionId={activeVersionId}
                     />
                     <If is={!panelsInToolbar}>
                       <div className="absolute z-20" style={{ left: -33, top: 10 }}>

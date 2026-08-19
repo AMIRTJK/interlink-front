@@ -43,8 +43,13 @@ export const useWorkflowPrefill = ({
           wfApprovals.forEach((wfA: any) => {
             const user = wfA.approver || wfA.user;
             if (!user) return;
+            const versionId = resolveApprovalVersionId(wfA, versionSummary);
             const existingIdx = merged.findIndex(
-              (a) => a.id === String(user.id),
+              (a) =>
+                (a.approvalRecordId && String(a.approvalRecordId) === String(wfA.id)) ||
+                (!a.approvalRecordId &&
+                  a.id === String(user.id) &&
+                  (versionId == null || a.versionId == null || String(a.versionId) === String(versionId))),
             );
             if (existingIdx !== -1) {
               merged[existingIdx] = {
@@ -53,7 +58,7 @@ export const useWorkflowPrefill = ({
                 isInvited: true,
                 approved: wfA.status === "approved",
                 dsApplied: wfA.status === "approved",
-                versionId: resolveApprovalVersionId(wfA, versionSummary),
+                versionId,
                 versionLabel: resolveApprovalVersionLabel(wfA, versionSummary),
               };
             } else {
