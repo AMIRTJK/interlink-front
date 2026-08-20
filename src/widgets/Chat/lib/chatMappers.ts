@@ -281,6 +281,8 @@ export const mapConversation = (
       name,
     ),
     lastMessage: describeMessage(conversation.last_message, ctx.labels),
+    lastMessageAt:
+      conversation.last_message?.created_at ?? conversation.updated_at ?? undefined,
     online: Boolean(peer?.is_online),
     isGroup: conversation.type === "group",
     unreadCount: conversation.unread_count ?? 0,

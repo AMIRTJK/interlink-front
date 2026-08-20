@@ -8,8 +8,9 @@ import {
 import { Can } from "@shared/ui";
 import type { LayoutPosition } from "../../model";
 import { CHAT_PERMISSIONS } from "../../model/constants";
-import { Lang } from "../../lib/translations";
+import { Lang, Translations } from "../../lib/translations";
 import { LayoutSwitcher } from "./LayoutSwitcher";
+import { ChatThemeMenu } from "./ChatThemeMenu";
 
 // Верхняя панель окна чата: счётчик непрочитанного, раскладка, язык и создание
 // бесед. Кнопки создания скрыты без права chat.create.
@@ -19,6 +20,7 @@ interface IProps {
   lang?: Lang;
   langLabels?: Record<Lang, string>;
   onCycleLang?: () => void;
+  t: Translations;
   layout: LayoutPosition;
   onLayoutChange: (layout: LayoutPosition) => void;
   /** Непрочитанные сообщения по всем беседам (GET /chat/counters). */
@@ -47,6 +49,7 @@ const getEdgeStyle = (layout: LayoutPosition) => {
 
 export const ChatHeader = ({
   isDark,
+  t,
   layout,
   onLayoutChange,
   onComposeOpen,
@@ -84,6 +87,14 @@ export const ChatHeader = ({
             layout={layout}
             onChange={onLayoutChange}
             isDark={isDark}
+          />
+
+          {/* Оформление стоит рядом с раскладкой: обе настройки про вид окна,
+              и пользователь ищет их в одном месте. */}
+          <ChatThemeMenu
+            t={t}
+            tone="accent"
+            placement={layout === "bottom" ? "top" : "bottom"}
           />
 
           <Can permission={CHAT_PERMISSIONS.CREATE}>

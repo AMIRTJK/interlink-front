@@ -21,13 +21,12 @@ interface IBubbleStyleParams {
 /** Базовое оформление пузыря без учёта наведения. */
 const getBaseBubbleStyle = ({
   isMe,
-  isDark,
   isEffectivelyDeleted,
   isTargetHighlighted,
   currentMatchMsg,
   highlighted,
   hasThread,
-}: Omit<IBubbleStyleParams, "isHovered">): CSSProperties => {
+}: Omit<IBubbleStyleParams, "isHovered" | "isDark">): CSSProperties => {
   if (isTargetHighlighted) {
     const baseStyle = isMe
       ? {
@@ -67,7 +66,7 @@ const getBaseBubbleStyle = ({
     return {
       background: "var(--th-bubble-out-bg)",
       border: "none",
-      boxShadow: isDark ? "var(--th-glow-accent)" : "none",
+      boxShadow: "var(--th-bubble-out-shadow)",
       backgroundClip: "padding-box",
     };
   }
@@ -75,9 +74,7 @@ const getBaseBubbleStyle = ({
   return {
     background: "var(--th-bubble-in-bg)",
     border: "1px solid var(--th-bubble-in-border)",
-    boxShadow: isDark
-      ? "var(--th-shadow-soft), var(--th-inset-highlight)"
-      : "none",
+    boxShadow: "var(--th-bubble-in-shadow)",
     backgroundClip: "padding-box",
   };
 };
@@ -117,7 +114,7 @@ export const getMessageBubbleStyle = ({
   isDark,
   ...base
 }: IBubbleStyleParams): CSSProperties => {
-  const style = getBaseBubbleStyle({ ...base, isDark });
+  const style = getBaseBubbleStyle(base);
 
   const glow = base.isEffectivelyDeleted
     ? null

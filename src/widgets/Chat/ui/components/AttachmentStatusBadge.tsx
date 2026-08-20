@@ -41,7 +41,7 @@ export const AttachmentStatusBadge = ({
             ? "absolute bottom-2 right-2 z-20 w-6 h-6 rounded-full flex items-center justify-center bg-[var(--th-scrim)] backdrop-blur-sm text-[var(--th-on-accent)]"
             : `inline-flex items-center flex-shrink-0 ${
                 isMe
-                  ? "text-[var(--th-on-accent-muted)]"
+                  ? "text-[var(--th-bubble-out-text-muted)]"
                   : "text-[var(--th-text-muted)]"
               }`
         }

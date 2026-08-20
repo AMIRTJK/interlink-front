@@ -84,10 +84,32 @@
     rgb(var(--th-accent-3-rgb) / 0.6)
   );
   --th-bubble-out-border: rgb(var(--th-accent-2-rgb) / 0.4);
-  --th-bubble-out-text: rgb(var(--th-on-accent-rgb));
+  /* Цвет содержимого своего пузыря. Отдельно от --th-on-accent-rgb: пузырь
+     красит оформление, и в светлом пузыре белый текст не читается, а кнопки на
+     акценте остаются белыми. */
+  --th-bubble-out-on-rgb: var(--th-on-accent-rgb);
+  --th-bubble-out-text: rgb(var(--th-bubble-out-on-rgb));
+  --th-bubble-out-text-muted: rgb(var(--th-bubble-out-on-rgb) / 0.75);
+  --th-bubble-out-text-faint: rgb(var(--th-bubble-out-on-rgb) / 0.55);
   --th-bubble-in-bg: rgb(var(--th-surface-rgb) / 0.85);
   --th-bubble-in-border: rgb(var(--th-overlay-rgb) / 0.08);
   --th-bubble-in-text: rgb(var(--th-text-rgb));
+
+  /* Собственная тень пузыря (без ореола наведения — он добавляется поверх).
+     «Пустое» значение пишем прозрачной тенью, а не none: none нельзя поставить
+     в один список с ореолом, всё правило станет недействительным. */
+  --th-bubble-out-shadow: 0 0 0 0 transparent;
+  --th-bubble-in-shadow: 0 0 0 0 transparent;
+
+  /* Заливка круглого основного действия: отправить, к последним сообщениям,
+     экран звонка. Раньше её брали у своего пузыря — у оформлений с пастельным
+     пузырём действие переставало быть акцентным. */
+  --th-action-bg: linear-gradient(
+    135deg,
+    rgb(var(--th-accent-rgb)),
+    rgb(var(--th-accent-2-rgb)),
+    rgb(var(--th-accent-3-rgb))
+  );
 
   /* Списки бесед и полоса аватарок */
   --th-rail-bg: linear-gradient(
@@ -178,6 +200,8 @@
   --th-bubble-in-bg: rgb(var(--th-overlay-rgb) / 0.1);
   --th-bubble-in-border: rgb(var(--th-overlay-rgb) / 0.15);
   --th-bubble-in-text: rgb(var(--th-text-rgb) / 0.9);
+  --th-bubble-out-shadow: var(--th-glow-accent);
+  --th-bubble-in-shadow: var(--th-shadow-soft), var(--th-inset-highlight);
 
   --th-rail-bg: linear-gradient(
     135deg,

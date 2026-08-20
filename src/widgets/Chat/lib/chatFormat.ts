@@ -112,3 +112,45 @@ export const formatChatDateDivider = (
 
   return d.locale(locale).format("D MMMM YYYY");
 };
+
+/** Подпись счётчика ответов в ветке: у русского и таджикского свои формы числа. */
+export const formatRepliesCount = (count: number, lang: Lang) => {
+  if (lang === "ru") {
+    const mod10 = count % 10;
+    const mod100 = count % 100;
+    if (mod10 === 1 && mod100 !== 11) return `${count} ответ`;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20))
+      return `${count} ответа`;
+    return `${count} ответов`;
+  }
+  if (lang === "tg") return `${count} ҷавоб`;
+  return `${count} ${count === 1 ? "reply" : "replies"}`;
+};
+
+/**
+ * Время беседы в списке: сегодня — часы и минуты, вчера — «Вчера», раньше —
+ * день и месяц. Тот же принцип, что у разделителя дат, но короче: строка стоит
+ * в углу карточки и не должна её разъезжать.
+ */
+export const formatConversationTime = (
+  dateInput?: string | Date | null,
+  lang: Lang = "ru",
+  t?: Pick<Translations, "yesterday">,
+): string => {
+  if (!dateInput) return "";
+  const d = dayjs(dateInput);
+  if (!d.isValid()) return "";
+
+  const now = dayjs();
+  if (d.isSame(now, "day")) return d.format("HH:mm");
+  if (d.isSame(now.subtract(1, "day"), "day")) {
+    return (
+      t?.yesterday ??
+      (lang === "ru" ? "Вчера" : lang === "tg" ? "Дирӯз" : "Yesterday")
+    );
+  }
+
+  const locale = lang === "tg" ? "ru" : lang;
+  if (d.isSame(now, "year")) return d.locale(locale).format("D MMM");
+  return d.locale(locale).format("DD.MM.YY");
+};

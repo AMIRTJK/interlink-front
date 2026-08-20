@@ -78,7 +78,7 @@ export const ContactInfoDrawer: React.FC<ContactInfoDrawerProps> = ({
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: "100%", opacity: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="w-72 flex-shrink-0 border-l flex flex-col overflow-hidden border-[var(--th-divider)]"
+      className="chat-side-panel w-72 flex-shrink-0 border-l flex flex-col overflow-hidden border-[var(--th-divider)]"
       style={{
         background: "var(--th-sidebar-bg)",
         backdropFilter: "blur(24px)",

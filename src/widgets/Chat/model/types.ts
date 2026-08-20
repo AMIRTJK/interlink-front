@@ -9,6 +9,8 @@ export type Contact = {
   name: string;
   avatar: string;
   lastMessage: string;
+  /** ISO-время последнего сообщения беседы — подпись времени в списке бесед. */
+  lastMessageAt?: string;
   online: boolean;
   isGroup?: boolean;
   recent?: boolean;

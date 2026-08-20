@@ -207,7 +207,7 @@ export const MessageComposer = ({
               aria-label={t.newMessage}
               className="w-9 h-9 rounded-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-[var(--th-on-accent)] transition-all duration-200 ease-in-out hover:scale-110 hover:brightness-110 flex-shrink-0"
               style={{
-                background: "var(--th-bubble-out-bg)",
+                background: "var(--th-action-bg)",
                 boxShadow: "var(--th-glow-accent)",
               }}
             >
