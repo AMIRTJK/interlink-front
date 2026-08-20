@@ -57,7 +57,7 @@ export const CalendarHeader = memo(({
         </div>
 
         {/* Show weather badge in header only in Day mode where it represents a specific single day */}
-        {viewMode === "day" && (
+        {viewMode === "day" && dayWeather && (
           <div className="flex! items-center! gap-2! py-1.5! px-3.5! rounded-full! bg-white/90! dark:bg-slate-800/90! border! border-slate-200/60! dark:border-slate-700/60! shadow-xs! backdrop-blur-md!">
             <WeatherIcon type={dayWeather.weatherType} size={15} />
             <span className="text-xs! font-extrabold! text-slate-800! dark:text-slate-100!">

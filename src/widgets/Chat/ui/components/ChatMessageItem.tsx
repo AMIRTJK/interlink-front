@@ -1,6 +1,6 @@
 import React, { useState, useRef, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CornerUpLeft, Forward, MoreHorizontal, Pin, MessageSquare } from "lucide-react";
+import { Clock3, CornerUpLeft, Forward, MoreHorizontal, Pin, MessageSquare } from "lucide-react";
 import { Contact, Message, ReplyPreview } from "../../model";
 import { Lang, Translations } from "../../lib/translations";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
