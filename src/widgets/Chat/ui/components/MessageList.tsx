@@ -269,7 +269,7 @@ export const MessageList = ({
             title="Вернуться к сообщению с ответом"
             className="absolute bottom-6 right-8 z-30 flex items-center gap-2.5 px-5 py-3 rounded-full text-[var(--th-on-accent)] font-semibold text-xs shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer border border-[rgb(var(--th-on-accent-rgb)/0.3)]"
             style={{
-              background: "var(--th-bubble-out-bg)",
+              background: "var(--th-action-bg)",
               boxShadow: "0 8px 25px rgb(var(--th-accent-rgb) / 0.6)",
             }}
           >
@@ -288,7 +288,7 @@ export const MessageList = ({
             title="Прокрутить в самый низ"
             className="absolute bottom-6 right-8 z-30 w-11 h-11 rounded-full flex items-center justify-center text-[var(--th-on-accent)] shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer border border-[rgb(var(--th-on-accent-rgb)/0.3)]"
             style={{
-              background: "var(--th-bubble-out-bg)",
+              background: "var(--th-action-bg)",
               boxShadow: "0 6px 22px rgb(var(--th-accent-rgb) / 0.55)",
             }}
           >

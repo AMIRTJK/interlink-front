@@ -42,7 +42,7 @@ export const IncomingCallScreen: React.FC<IncomingCallScreenProps> = ({
       className="w-80 rounded-3xl overflow-hidden shadow-2xl"
       style={{
         background:
-          "var(--th-bubble-out-bg)",
+          "var(--th-action-bg)",
         border: "1px solid var(--th-bubble-out-border)",
         backdropFilter: "blur(24px)",
         boxShadow: "0 30px 80px rgb(var(--th-accent-rgb) / 0.5)",

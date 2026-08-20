@@ -1,0 +1,221 @@
+/* Токены современного оформления чата.
+
+   Живут на <html data-chat-theme="modern">, а не на корне окна: меню действий,
+   палитра реакций и просмотр вложений рендерятся порталами в body, и внутри
+   окна их было бы не достать.
+
+   Переопределяются только те токены, которыми пользуется чат. Палитра
+   приложения (--th-accent-*) остаётся нетронутой: её задаёт общая тема системы,
+   и оформление чата не вправе её подменять. */
+
+:root[data-chat-theme="modern"] {
+  /* Оболочка и поверхности */
+  --th-chat-shell-bg: #eef0f6;
+  --th-chat-canvas: transparent;
+  --th-panel-bg: #ffffff;
+  --th-panel-solid: #ffffff;
+  --th-panel-border: rgb(15 23 42 / 0.06);
+  --th-sidebar-bg: #ffffff;
+  --th-sidebar-border: rgb(15 23 42 / 0.06);
+  --th-rail-bg: #ffffff;
+  --th-rail-border: rgb(15 23 42 / 0.06);
+  --th-composer-bg: #ffffff;
+  --th-menu-bg: rgb(255 255 255 / 0.98);
+  --th-menu-border: rgb(15 23 42 / 0.08);
+  --th-surface-2: #f4f5f9;
+  --th-input-bg: #f2f3f7;
+  --th-input-border: transparent;
+  --th-scrim: rgb(15 23 42 / 0.45);
+
+  /* Текст */
+  --th-text: #1f2937;
+  --th-text-muted: #5b6472;
+  --th-text-faint: #98a1b0;
+
+  /* Состояния и мелочи */
+  --th-divider: rgb(15 23 42 / 0.06);
+  --th-hover-bg: rgb(15 23 42 / 0.035);
+  --th-hover-bg-strong: rgb(15 23 42 / 0.06);
+  --th-chip-bg: #eceef3;
+  --th-chip-border: rgb(15 23 42 / 0.05);
+  --th-badge-unread: #4f46e5;
+
+  /* Пузыри: пастельные заливки с тёмным текстом — «на заливке» здесь тёмное,
+     поэтому цвет содержимого считается от пузыря, а не от акцента. */
+  --th-bubble-in-bg: linear-gradient(135deg, #fbe6ea 0%, #f6dce3 100%);
+  --th-bubble-in-border: transparent;
+  --th-bubble-in-text: #26303d;
+  --th-bubble-out-bg: linear-gradient(135deg, #e3e7f9 0%, #d6dcf3 100%);
+  --th-bubble-out-border: transparent;
+  --th-bubble-out-on-rgb: 38 48 61;
+
+  /* Пузырь выпуклый: светлая грань сверху, тонкая опора снизу и мягкая тень
+     под ним. Три слоя вместе дают объём — одна тень читается как плоская
+     карточка, а не как приподнятый пузырь. */
+  --th-bubble-out-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55),
+    inset 0 -1px 0 rgb(15 23 42 / 0.04), 0 1px 1px rgb(15 23 42 / 0.05),
+    0 6px 14px -5px rgb(15 23 42 / 0.16);
+  --th-bubble-in-shadow: var(--th-bubble-out-shadow);
+
+  /* Тени: мягкие и невысокие — карточки лежат на светлом фоне, а не светятся. */
+  --th-shadow-soft: 0 1px 2px rgb(15 23 42 / 0.05);
+  --th-shadow-strong: 0 10px 40px rgb(15 23 42 / 0.08);
+  /* «Пусто» здесь — прозрачная тень, а не none: значение попадает в список
+     рядом с ореолом наведения, и none обнулило бы всё правило. */
+  --th-inset-highlight: 0 0 0 0 transparent;
+  --th-glow-accent: 0 0 0 0 transparent;
+  --th-glow-out: 0 6px 20px rgb(79 70 229 / 0.18);
+  --th-glow-in: 0 6px 20px rgb(15 23 42 / 0.1);
+
+  /* Собственные токены оформления: карточки и цветные круглые действия. */
+  --chat-modern-card: #ffffff;
+  --chat-modern-card-shadow: 0 6px 24px rgb(15 23 42 / 0.06),
+    0 1px 2px rgb(15 23 42 / 0.04);
+  --chat-modern-card-border: 1px solid rgb(15 23 42 / 0.05);
+  --chat-modern-radius: 20px;
+  --chat-modern-soft: #f2f3f7;
+  --chat-modern-active: linear-gradient(135deg, #e9e3fb 0%, #ddd6f8 100%);
+  --chat-modern-blue: #3b82f6;
+  --chat-modern-indigo: #4f46e5;
+  --chat-modern-purple: #8b5cf6;
+  --chat-modern-green: #22c55e;
+  --chat-modern-orange: #f59e0b;
+  --chat-modern-yellow: #fbbf24;
+  --chat-modern-red: #f43f5e;
+  --chat-modern-on-color: #ffffff;
+}
+
+/* Тёмный режим. Переопределяем ровно тот же набор: селектор оформления
+   специфичнее `.dark`, поэтому неупомянутый токен остался бы светлым. */
+:root.dark[data-chat-theme="modern"] {
+  --th-chat-shell-bg: #0e1016;
+  --th-chat-canvas: transparent;
+  --th-panel-bg: #171a22;
+  --th-panel-solid: #171a22;
+  --th-panel-border: rgb(255 255 255 / 0.07);
+  --th-sidebar-bg: #171a22;
+  --th-sidebar-border: rgb(255 255 255 / 0.07);
+  --th-rail-bg: #171a22;
+  --th-rail-border: rgb(255 255 255 / 0.07);
+  --th-composer-bg: #171a22;
+  --th-menu-bg: rgb(23 26 34 / 0.98);
+  --th-menu-border: rgb(255 255 255 / 0.1);
+  --th-surface-2: #1e222c;
+  --th-input-bg: #1e222c;
+  --th-input-border: transparent;
+  --th-scrim: rgb(0 0 0 / 0.65);
+
+  --th-text: #e8eaf0;
+  --th-text-muted: #a4acbb;
+  --th-text-faint: #6f7889;
+
+  --th-divider: rgb(255 255 255 / 0.07);
+  --th-hover-bg: rgb(255 255 255 / 0.05);
+  --th-hover-bg-strong: rgb(255 255 255 / 0.09);
+  --th-chip-bg: #232833;
+  --th-chip-border: rgb(255 255 255 / 0.07);
+  --th-badge-unread: #6366f1;
+
+  --th-bubble-in-bg: linear-gradient(135deg, #3b2b33 0%, #33262e 100%);
+  --th-bubble-in-border: transparent;
+  --th-bubble-in-text: #eceef4;
+  --th-bubble-out-bg: linear-gradient(135deg, #2c3152 0%, #262b47 100%);
+  --th-bubble-out-border: transparent;
+  --th-bubble-out-on-rgb: 236 238 244;
+
+  /* На тёмном фоне объём держится не тенью, а светлой гранью сверху: тень под
+     пузырём там почти не видна. */
+  --th-bubble-out-shadow: inset 0 1px 0 rgb(255 255 255 / 0.09),
+    inset 0 -1px 0 rgb(0 0 0 / 0.2), 0 2px 6px rgb(0 0 0 / 0.35);
+  --th-bubble-in-shadow: var(--th-bubble-out-shadow);
+
+  --th-shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4);
+  --th-shadow-strong: 0 10px 40px rgb(0 0 0 / 0.55);
+  --th-inset-highlight: 0 0 0 0 transparent;
+  --th-glow-accent: 0 0 0 0 transparent;
+  --th-glow-out: 0 6px 20px rgb(99 102 241 / 0.3);
+  --th-glow-in: 0 6px 20px rgb(0 0 0 / 0.45);
+
+  --chat-modern-card: #171a22;
+  --chat-modern-card-shadow: 0 6px 24px rgb(0 0 0 / 0.4);
+  --chat-modern-card-border: 1px solid rgb(255 255 255 / 0.06);
+  --chat-modern-radius: 20px;
+  --chat-modern-soft: #1e222c;
+  --chat-modern-active: linear-gradient(135deg, #2e2a52 0%, #272348 100%);
+  --chat-modern-blue: #3b82f6;
+  --chat-modern-indigo: #6366f1;
+  --chat-modern-purple: #8b5cf6;
+  --chat-modern-green: #22c55e;
+  --chat-modern-orange: #f59e0b;
+  --chat-modern-yellow: #fbbf24;
+  --chat-modern-red: #f43f5e;
+  --chat-modern-on-color: #ffffff;
+}
+
+/* Скругление у пузыря одинаковое со всех сторон — «хвоста» к отправителю в
+   этом оформлении нет. Селектор с атрибутом специфичнее утилитарного класса
+   Tailwind, поэтому !important не нужен. Тень задаётся токенами выше: её
+   ставит инлайновый стиль пузыря, и отсюда её было бы не перебить. */
+:root[data-chat-theme="modern"] .chat-bubble {
+  border-radius: 14px;
+}
+
+/* Колонка сообщения шире классической — реплики читаются строкой, а не
+   колонкой. Проценты здесь брать нельзя: родитель — inline-flex по содержимому,
+   его ширина сама зависит от ширины пузыря, и процент схлопывает сообщение до
+   нескольких символов. Меряем от окна, как и классическое оформление. */
+:root[data-chat-theme="modern"] .chat-bubble-column {
+  max-width: min(62vw, 560px);
+}
+
+/* Панель сведений и панель ветки прилегали к беседе вплотную и держались на
+   разделительной линии. Здесь они такие же плитки, как и всё остальное. */
+:root[data-chat-theme="modern"] .chat-side-panel {
+  border-left: none;
+  border-radius: var(--chat-modern-radius);
+  box-shadow: var(--chat-modern-card-shadow);
+}
+
+/* Карточка современного оформления: шапка, лента, поле ввода и панель бесед —
+   отдельные плитки на общем фоне. */
+.chat-modern-card {
+  background: var(--chat-modern-card);
+  border: var(--chat-modern-card-border);
+  border-radius: var(--chat-modern-radius);
+  box-shadow: var(--chat-modern-card-shadow);
+}
+
+/* Круглое цветное действие в шапке и поле ввода. Цвет приходит инлайном —
+   он у каждой кнопки свой и вычисляется из данных оформления. */
+.chat-modern-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  color: var(--chat-modern-on-color);
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.chat-modern-action:hover:not(:disabled) {
+  transform: scale(1.08);
+  filter: brightness(1.06);
+}
+
+.chat-modern-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-modern-action {
+    transition: none;
+  }
+
+  .chat-modern-action:hover:not(:disabled) {
+    transform: none;
+  }
+}

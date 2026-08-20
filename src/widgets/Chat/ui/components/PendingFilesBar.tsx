@@ -34,7 +34,7 @@ export const PendingFilesBar: React.FC<PendingFilesBarProps> = ({
       <button
         onClick={onSend}
         className="ml-auto text-xs font-semibold text-[var(--th-on-accent)] px-3 py-1 rounded-full transition-all duration-200 ease-in-out hover:scale-105 hover:brightness-110"
-        style={{ background: "var(--th-bubble-out-bg)" }}
+        style={{ background: "var(--th-action-bg)" }}
       >
         {sendAllLabel}
       </button>

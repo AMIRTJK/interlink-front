@@ -184,7 +184,7 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
 
   return (
     <div
-      className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl min-w-[160px] transition-all duration-200 ease-in-out ${
+      className={`chat-bubble flex items-center gap-2 px-3 py-2.5 rounded-2xl min-w-[160px] transition-all duration-200 ease-in-out ${
         isMe ? "rounded-br-md" : "rounded-bl-md"
       } ${
         isTargetHighlighted
@@ -203,7 +203,7 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
         boxShadow: isTargetHighlighted
           ? "0 0 28px rgb(var(--th-accent-2-rgb) / 0.9), 0 0 12px rgb(var(--th-accent-rgb) / 0.8)"
           : withHoverGlow(
-              isMe && isDark ? "var(--th-glow-accent)" : "none",
+              isMe ? "var(--th-bubble-out-shadow)" : "var(--th-bubble-in-shadow)",
               getHoverGlow({ isDark, isHovered, isMe }),
             ),
       }}
@@ -220,7 +220,7 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
               ? "Остановить голосовое сообщение"
               : "Прослушать голосовое сообщение"
         }
-        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200 ease-in-out hover:scale-110 disabled:opacity-60 disabled:hover:scale-100 cursor-pointer ${isMe ? "text-[var(--th-on-accent)]" : "text-[var(--th-text-muted)] hover:text-[var(--th-text)]"}`}
+        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200 ease-in-out hover:scale-110 disabled:opacity-60 disabled:hover:scale-100 cursor-pointer ${isMe ? "text-[var(--th-bubble-out-text)]" : "text-[var(--th-text-muted)] hover:text-[var(--th-text)]"}`}
         style={{
           background: isMe
             ? "linear-gradient(135deg, rgb(var(--th-accent-rgb)), rgb(var(--th-accent-3-rgb)))"
@@ -249,14 +249,14 @@ export const VoiceBubble: React.FC<VoiceBubbleProps> = ({
                 i < playedBars
                   ? "linear-gradient(180deg, rgb(var(--th-accent-2-rgb)), rgb(var(--th-accent-3-rgb)))"
                   : isMe
-                    ? "rgb(var(--th-on-accent-rgb) / 0.25)"
+                    ? "rgb(var(--th-bubble-out-on-rgb) / 0.25)"
                     : "rgb(var(--th-overlay-rgb) / 0.2)",
             }}
           />
         ))}
       </div>
       <span
-        className={`text-[10px] flex-shrink-0 inline-flex items-center gap-1.5 ${isMe ? "text-[var(--th-on-accent-faint)]" : "text-[var(--th-text-faint)]"}`}
+        className={`text-[10px] flex-shrink-0 inline-flex items-center gap-1.5 ${isMe ? "text-[var(--th-bubble-out-text-faint)]" : "text-[var(--th-text-faint)]"}`}
       >
         <span>
           {formatDuration(playing || progress > 0 ? playedSeconds : Math.round(totalSeconds))}

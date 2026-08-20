@@ -400,3 +400,9 @@ export const useChatAppState = (
     isCurrentMatch,
   };
 };
+
+/**
+ * Полное состояние чата: данные, UI-состояние и обработчики. Оболочки
+ * оформлений получают его целиком и различаются только разметкой.
+ */
+export type TChatAppState = ReturnType<typeof useChatAppState>;

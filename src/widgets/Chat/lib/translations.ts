@@ -136,6 +136,13 @@ export type Translations = {
   newReplies: string;
   today: string;
   yesterday: string;
+  // Оформление чата
+  allChats: string;
+  appearance: string;
+  themeClassic: string;
+  themeClassicDesc: string;
+  themeModern: string;
+  themeModernDesc: string;
 };
 export const TRANSLATIONS: Record<Lang, Translations> = {
   en: {
@@ -251,7 +258,13 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     openLinkPreview: 'Open link',
     newReplies: 'new replies',
     today: 'Today',
-    yesterday: 'Yesterday'
+    yesterday: 'Yesterday',
+    allChats: 'All chats',
+    appearance: 'Appearance',
+    themeClassic: 'Classic',
+    themeClassicDesc: 'Current chat design',
+    themeModern: 'Modern',
+    themeModernDesc: 'Light cards and soft bubbles'
   },
   ru: {
     search: 'Поиск',
@@ -366,7 +379,13 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     openLinkPreview: 'Открыть ссылку',
     newReplies: 'новых ответов',
     today: 'Сегодня',
-    yesterday: 'Вчера'
+    yesterday: 'Вчера',
+    allChats: 'Все чаты',
+    appearance: 'Оформление',
+    themeClassic: 'Классическое',
+    themeClassicDesc: 'Текущий дизайн чата',
+    themeModern: 'Современное',
+    themeModernDesc: 'Светлые карточки и мягкие пузыри'
   },
   tg: {
     search: 'Ҷустуҷӯ',
@@ -481,6 +500,12 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     openLinkPreview: 'Кушодани истинод',
     newReplies: 'ҷавобҳои нав',
     today: 'Имрӯз',
-    yesterday: 'Дирӯз'
+    yesterday: 'Дирӯз',
+    allChats: 'Ҳамаи чатҳо',
+    appearance: 'Тарҳбандӣ',
+    themeClassic: 'Классикӣ',
+    themeClassicDesc: 'Тарҳи ҷории чат',
+    themeModern: 'Муосир',
+    themeModernDesc: 'Кортҳои равшан ва пуфакҳои мулоим'
   }
 };

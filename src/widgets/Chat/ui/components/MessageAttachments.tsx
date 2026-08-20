@@ -103,7 +103,7 @@ export const MessageAttachments = ({
         // ушло бы за несуществующий файл и вернуло ошибку. Просмотр картинки при
         // этом работает — он идёт из локального превью.
         const isPending = status === "pending";
-        const cornerRadiusClass = `rounded-2xl ${isMe ? "rounded-br-md" : "rounded-bl-md"}`;
+        const cornerRadiusClass = `chat-bubble rounded-2xl ${isMe ? "rounded-br-md" : "rounded-bl-md"}`;
 
         return (
           <div
@@ -183,7 +183,7 @@ export const MessageAttachments = ({
                 <div
                   className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
                     isMe
-                      ? "bg-[rgb(var(--th-on-accent-rgb)/0.2)] text-[var(--th-on-accent)]"
+                      ? "bg-[rgb(var(--th-bubble-out-on-rgb)/0.2)] text-[var(--th-bubble-out-text)]"
                       : "bg-[var(--th-accent-soft-strong)] text-[var(--th-accent-text)]"
                   }`}
                 >
@@ -192,7 +192,7 @@ export const MessageAttachments = ({
                 <div className="min-w-0 flex-1">
                   <p
                     className={`text-xs font-semibold truncate ${
-                      isMe ? "text-[var(--th-on-accent)]" : "text-[var(--th-text)]"
+                      isMe ? "text-[var(--th-bubble-out-text)]" : "text-[var(--th-text)]"
                     }`}
                   >
                     {attachment.name}
@@ -200,7 +200,7 @@ export const MessageAttachments = ({
                   <p
                     className={`text-[10px] flex items-center gap-1.5 ${
                       isMe
-                        ? "text-[var(--th-on-accent-muted)]"
+                        ? "text-[var(--th-bubble-out-text-muted)]"
                         : "text-[var(--th-text-muted)]"
                     }`}
                   >
@@ -217,7 +217,7 @@ export const MessageAttachments = ({
                 <Download
                   className={`w-4 h-4 flex-shrink-0 ${
                     isMe
-                      ? "text-[var(--th-on-accent-muted)]"
+                      ? "text-[var(--th-bubble-out-text-muted)]"
                       : "text-[var(--th-accent-text)]"
                   }`}
                 />

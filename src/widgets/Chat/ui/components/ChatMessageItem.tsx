@@ -1,6 +1,6 @@
 import React, { useState, useRef, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, CheckCheck, Clock3, CornerUpLeft, Forward, MoreHorizontal, Pin, MessageSquare, Smile } from "lucide-react";
+import { CornerUpLeft, Forward, MoreHorizontal, Pin, MessageSquare } from "lucide-react";
 import { Contact, Message, ReplyPreview } from "../../model";
 import { Lang, Translations } from "../../lib/translations";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
@@ -10,6 +10,8 @@ import { MessageAttachments } from "./MessageAttachments";
 import { ReactionPicker } from "./ReactionPicker";
 import { MessageActionMenu } from "./MessageActionMenu";
 import { MessageLinkPreview } from "./MessageLinkPreview";
+import { MessageMeta } from "./MessageMeta";
+import { useChatThemePresentation } from "../../lib/chatThemeStore";
 
 interface ChatMessageItemProps {
   msg: Message;
@@ -65,6 +67,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
   getUnreadThreadCount,
   setMessageRef,
 }) => {
+  const { messageMeta, bubbleAvatars } = useChatThemePresentation();
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [actionMenuRect, setActionMenuRect] = useState<DOMRect | null>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
@@ -138,7 +141,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
       className={`w-full flex items-end ${isMe ? "justify-end" : "justify-start"}`}
     >
       <div className={`inline-flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-        {isMe && (
+        {isMe && bubbleAvatars && (
           <img
             src={msg.senderAvatar || buildInitialsAvatar(msg.senderName || "Вы")}
             alt={msg.senderName || "Вы"}
@@ -152,7 +155,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             }}
           />
         )}
-        {!isMe && (
+        {!isMe && bubbleAvatars && (
           <img
             src={msg.senderAvatar || activeContact.avatar}
             alt={msg.senderName || activeContact.name}
@@ -167,7 +170,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           />
         )}
         <div
-          className={`flex flex-col max-w-[65vw] sm:max-w-[420px] ${isMe ? "items-end" : "items-start"} relative group`}
+          className={`chat-bubble-column flex flex-col max-w-[65vw] sm:max-w-[420px] ${isMe ? "items-end" : "items-start"} relative group`}
           onMouseEnter={() => setHoveredMessageId(msg.id)}
           onMouseLeave={() => setHoveredMessageId(null)}
         >
@@ -358,7 +361,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             />
             {!!msg.text && (
               <div
-                className={`px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 ease-in-out cursor-default ${
+                className={`chat-bubble px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 ease-in-out cursor-default ${
                     isTargetHighlighted
                       ? `rounded-2xl ${isMe ? "rounded-br-md text-[var(--th-bubble-out-text)]" : "rounded-bl-md text-[var(--th-bubble-in-text)]"} ring-2 ring-[rgb(var(--th-accent-rgb))] scale-[1.02] shadow-[0_0_24px_rgb(var(--th-accent-2-rgb)/0.85)] animate-pulse`
                       : currentMatchMsg
@@ -375,7 +378,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                   <span
                     className={`inline-flex items-center gap-1 text-[10px] font-semibold mb-1 mr-2 px-1.5 py-0.5 rounded-md ${
                       isMe
-                        ? "bg-[rgb(var(--th-on-accent-rgb)/0.2)] text-[var(--th-on-accent)] border border-[rgb(var(--th-on-accent-rgb)/0.3)]"
+                        ? "bg-[rgb(var(--th-bubble-out-on-rgb)/0.2)] text-[var(--th-bubble-out-text)] border border-[rgb(var(--th-bubble-out-on-rgb)/0.3)]"
                         : "bg-[var(--th-accent-soft-strong)] text-[var(--th-accent-text)] border border-[var(--th-accent-border)]"
                     }`}
                   >
@@ -384,26 +387,30 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                   </span>
                 </If>
                 <span>{msg.text}</span>
-                <span className="inline-flex items-center gap-1 float-right mt-1 ml-2.5 select-none text-[10px] opacity-75">
-                  <span>{msg.time}</span>
-                  {isMe && (
-                    <span className="inline-flex items-center ml-0.5" title={msg.status}>
-                      {isPending ? (
-                        <Clock3 className="w-3 h-3 text-[var(--th-on-accent-muted)] animate-pulse" />
-                      ) : msg.status === "read" || msg.status === "delivered" ? (
-                        <CheckCheck className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
-                      ) : (
-                        <Check className="w-3.5 h-3.5 text-[var(--th-on-accent-muted)]" />
-                      )}
-                    </span>
-                  )}
-                </span>
+                <If is={messageMeta === "inside"}>
+                  <MessageMeta
+                    time={msg.time}
+                    isMe={isMe}
+                    isPending={isPending}
+                    status={msg.status}
+                    placement="inside"
+                  />
+                </If>
               </div>
             )}
             {!!msg.text && (
               <MessageLinkPreview text={msg.text} isMe={isMe} t={t} />
             )}
           </div>
+          <If is={messageMeta === "below" && !!msg.text}>
+            <MessageMeta
+              time={msg.time}
+              isMe={isMe}
+              isPending={isPending}
+              status={msg.status}
+              placement="below"
+            />
+          </If>
           <If
             is={
               !!(
