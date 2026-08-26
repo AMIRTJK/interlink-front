@@ -76,7 +76,8 @@ export const EmployeePickerModal = ({
   const displayEmployees = activeSearch ? serverEmployees : employees;
 
   const handleSearchSubmit = () => {
-    setActiveSearch(search);
+    const term = search.trim();
+    setActiveSearch(term);
   };
 
   const handleClear = () => {
@@ -143,16 +144,18 @@ export const EmployeePickerModal = ({
                 <button
                   type="button"
                   onClick={handleSearchSubmit}
-                  className="p-1 rounded-lg text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
-                  title="Поиск"
+                  className="p-1 rounded-lg text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors cursor-pointer"
+                  title="Искать"
+                  aria-label="Искать"
                 >
-                  <Check size={14} />
+                  <Search size={14} />
                 </button>
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                  className="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
                   title="Очистить"
+                  aria-label="Очистить"
                 >
                   <X size={14} />
                 </button>
