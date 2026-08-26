@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, memo } from "react";
 import userAvatar from "../../../../assets/images/user-avatar.jpg";
 import { resolvePhotoUrl } from "./headerModel";
 
@@ -9,7 +9,7 @@ interface IHeaderUserBadgeProps {
   showLogo: boolean;
 }
 
-export const HeaderUserBadge = ({
+export const HeaderUserBadge = memo(({
   userData,
   userName,
   userSubtitle,
@@ -21,9 +21,14 @@ export const HeaderUserBadge = ({
     setAvatarError(false);
   }, [userData?.photo_url, userData?.photo_path]);
 
-  const photoUrl = avatarError
-    ? userAvatar
-    : userData?.photo_url || resolvePhotoUrl(userData?.photo_path) || userAvatar;
+  const photoUrl = useMemo(() => {
+    if (avatarError) return userAvatar;
+    return (
+      userData?.photo_url ||
+      resolvePhotoUrl(userData?.photo_path) ||
+      userAvatar
+    );
+  }, [avatarError, userData?.photo_url, userData?.photo_path]);
 
   return (
     <div
@@ -55,4 +60,4 @@ export const HeaderUserBadge = ({
       </div>
     </div>
   );
-};
+});

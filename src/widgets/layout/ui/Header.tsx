@@ -46,7 +46,7 @@ export const Header = ({
           : "w-full rounded-[2.5rem] border border-white/20 dark:border-slate-700/60"
       }`}
     >
-      <div className="flex items-center gap-6 min-w-0">
+      <div className="flex-1 flex items-center gap-6 min-w-0">
         {showLogo && (
           <Link
             to={AppRoutes.PROFILE}
@@ -65,23 +65,29 @@ export const Header = ({
         />
       </div>
 
-      {showModuleNav && <ModuleMenu variant="header" navLayout="top" />}
+      {showModuleNav && (
+        <div className="flex items-center justify-center shrink-0">
+          <ModuleMenu variant="header" navLayout="top" />
+        </div>
+      )}
 
-      <HeaderActionButtons
-        notifOpen={notifOpen}
-        setNotifOpen={setNotifOpen}
-        unreadCount={unreadCount}
-        setIsDesktopActive={setIsDesktopActive}
-        isDarkMode={isDarkMode}
-        toggleTheme={toggleTheme}
-        currentTheme={currentTheme}
-        setCurrentTheme={setCurrentTheme}
-        currentBg={currentBg}
-        setCurrentBg={setCurrentBg}
-        layoutMode={layoutMode}
-        setLayoutMode={setLayoutMode}
-        setShowLogoutConfirm={setShowLogoutConfirm}
-      />
+      <div className="flex-1 flex items-center justify-end shrink-0">
+        <HeaderActionButtons
+          notifOpen={notifOpen}
+          setNotifOpen={setNotifOpen}
+          unreadCount={unreadCount}
+          setIsDesktopActive={setIsDesktopActive}
+          isDarkMode={isDarkMode}
+          toggleTheme={toggleTheme}
+          currentTheme={currentTheme}
+          setCurrentTheme={setCurrentTheme}
+          currentBg={currentBg}
+          setCurrentBg={setCurrentBg}
+          layoutMode={layoutMode}
+          setLayoutMode={setLayoutMode}
+          setShowLogoutConfirm={setShowLogoutConfirm}
+        />
+      </div>
 
       <LogoutConfirmModal
         open={showLogoutConfirm}
