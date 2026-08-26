@@ -158,26 +158,23 @@ export const EmployeePickerModal = ({
             </If>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto p-2">
+        <div className="flex-1 overflow-y-auto p-2 [scrollbar-gutter:stable]">
           <If is={displayEmployees.length === 0}>
             <div className={`flex flex-col items-center justify-center py-10 ${subText}`}>
               <Users size={28} className="mb-2 opacity-40" />
               <p className="text-sm">Не найдено</p>
             </div>
           </If>
-          {displayEmployees.map((emp, i) => {
+          {displayEmployees.map((emp) => {
             const isSelected = emp.id === selectedId;
             return (
-              <motion.div
+              <div
                 key={emp.id}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.02 }}
                 onClick={() => {
                   onSelect(emp);
                   onClose();
                 }}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl mb-1 cursor-pointer transition-all ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl mb-1 cursor-pointer transition-colors ${
                   isSelected
                     ? dark
                       ? 'bg-indigo-900/20 ring-1 ring-indigo-600/50'
@@ -204,7 +201,7 @@ export const EmployeePickerModal = ({
                     <Check size={11} className="text-white" />
                   </div>
                 </If>
-              </motion.div>
+              </div>
             );
           })}
         </div>

@@ -24,7 +24,7 @@ export const MiniAvatar = ({
   if (err || !photo) {
     return (
       <div
-        className={`${cls} rounded-full flex items-center justify-center text-white font-bold shrink-0`}
+        className={`${cls} aspect-square rounded-full flex items-center justify-center text-white font-bold shrink-0`}
         style={{ backgroundColor: color }}
       >
         {initials}
@@ -37,7 +37,7 @@ export const MiniAvatar = ({
       src={photo}
       alt={initials}
       onError={() => setErr(true)}
-      className={`${cls} rounded-full object-cover shrink-0`}
+      className={`${cls} aspect-square rounded-full object-cover shrink-0`}
     />
   );
 };
