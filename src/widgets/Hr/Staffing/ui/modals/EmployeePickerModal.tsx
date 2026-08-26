@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { X, Search, Users, Check } from 'lucide-react';
-import { IEmployee } from '../../model';
+import { IEmployee, resolvePhotoUrl } from '../../model';
 import { MiniAvatar } from '../components/MiniAvatar';
 import { If } from '@shared/ui/If';
 import { ApiRoutes } from '@shared/api';
@@ -66,7 +66,7 @@ export const EmployeePickerModal = ({
       salary: u.salary ? Number(u.salary) : 0,
       avatarColor: '#6366f1',
       avatarInitials: `${u.last_name?.[0] || ''}${u.first_name?.[0] || ''}`.toUpperCase() || '??',
-      avatarPhoto: u.photo_path ? (u.photo_path.startsWith('http') ? u.photo_path : `/storage/${u.photo_path}`) : null,
+      avatarPhoto: u.photo_url || resolvePhotoUrl(u.photo_path),
       rating: u.rating || 0,
     }));
   }, [searchRes]);
