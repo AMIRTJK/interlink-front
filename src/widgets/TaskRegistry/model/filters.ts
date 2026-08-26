@@ -1,5 +1,4 @@
-// Состояние серверной фильтрации/сортировки модуля «Задачи» и сборка query-параметров
-// для GET /api/v1/tasks и GET /api/v1/tasks/board.
+
 
 import type { Priority, TaskStatus } from "./types";
 
@@ -11,8 +10,9 @@ export type TaskSortField =
   | "created_at";
 export type SortDir = "asc" | "desc";
 export type TaskDateType = "created" | "planned" | "started" | "completed";
-/** Режим отображения реестра: таблица или канбан-доска. */
 export type TaskDisplayMode = "table" | "board";
+
+export const TASKS_DISPLAY_MODE_STORAGE_KEY = "tasks_display_mode";
 
 export interface TaskFilters {
   search: string;
@@ -38,10 +38,8 @@ export const DEFAULT_FILTERS: TaskFilters = {
   dateType: "planned",
 };
 
-/** Размер страницы серверной пагинации списка. */
 export const LIST_PAGE_SIZE = 10;
 
-/** Собирает query-параметры фильтрации/сортировки (без пагинации; пустые значения опускаются). */
 export const buildTaskParams = (
   f: TaskFilters,
 ): Record<string, string | number> => {
