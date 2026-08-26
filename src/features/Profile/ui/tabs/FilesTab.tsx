@@ -11,11 +11,12 @@ import { FilesModals } from "./files/FilesModals";
 import { FilesAnalytics } from "./files/lazyModals";
 import { useFilesSelection } from "./files/useFilesSelection";
 import { useFilesTabActions } from "./files/useFilesTabActions";
-import type {
-	TFilesSort,
-	TFilesSortDir,
-	TFilesViewContext,
-	TFilesViewMode,
+import {
+	PROFILE_FILES_VIEW_MODE_STORAGE_KEY,
+	type TFilesSort,
+	type TFilesSortDir,
+	type TFilesViewContext,
+	type TFilesViewMode,
 } from "./files/filesTabModel";
 import { If } from "@shared/ui";
 import "./FilesTab.css";
@@ -26,8 +27,21 @@ export const FilesTab = () => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [sortBy, setSortBy] = useState<TFilesSort>("manual");
 	const [sortDir, setSortDir] = useState<TFilesSortDir>("desc");
-	const [viewMode, setViewMode] = useState<TFilesViewMode>("grid");
+	const [viewMode, setViewMode] = useState<TFilesViewMode>(() => {
+		try {
+			const saved = localStorage.getItem(PROFILE_FILES_VIEW_MODE_STORAGE_KEY);
+			if (saved === "grid" || saved === "list") return saved;
+		} catch {}
+		return "grid";
+	});
 	const [filesPage, setFilesPage] = useState(1);
+
+	const handleViewModeChange = (mode: TFilesViewMode) => {
+		setViewMode(mode);
+		try {
+			localStorage.setItem(PROFILE_FILES_VIEW_MODE_STORAGE_KEY, mode);
+		} catch {}
+	};
 
 	const filesParams = useMemo(
 		() => ({
@@ -89,7 +103,7 @@ export const FilesTab = () => {
 					setSortDir((prev) => (prev === "asc" ? "desc" : "asc"))
 				}
 				viewMode={viewMode}
-				onViewModeChange={setViewMode}
+				onViewModeChange={handleViewModeChange}
 				onUpload={actions.handleUpload}
 				personalCount={folders.length}
 				sharedCount={sharedFolders.length}

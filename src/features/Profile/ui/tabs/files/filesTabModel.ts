@@ -9,6 +9,8 @@ export type TFilesSortDir = "asc" | "desc";
 
 export type TFilesViewMode = "grid" | "list";
 
+export const PROFILE_FILES_VIEW_MODE_STORAGE_KEY = "profile_files_view_mode";
+
 export type TFilesShareItem = {
 	item: IApiFile | IApiFolder;
 	type: "file" | "folder";
