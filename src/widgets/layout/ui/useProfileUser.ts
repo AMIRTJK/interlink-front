@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { tokenControl, useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { IUser } from "@entities/login";
@@ -19,15 +20,18 @@ export const useProfileUser = () => {
   });
 
   const userData = (userResponse as { data?: IUser } | undefined)?.data ?? null;
-  const userSubtitle =
-    [userData?.position, userData?.organization?.name]
-      .filter(Boolean)
-      .join(" • ") || "—";
 
-  return {
-    userData,
-    userName: userData?.full_name || "—",
-    userSubtitle,
-    userPhoto: userData?.photo_url || userData?.photo_path || undefined,
-  };
+  return useMemo(() => {
+    const userSubtitle =
+      [userData?.position, userData?.organization?.name]
+        .filter(Boolean)
+        .join(" • ") || "—";
+
+    return {
+      userData,
+      userName: userData?.full_name || "—",
+      userSubtitle,
+      userPhoto: userData?.photo_url || userData?.photo_path || undefined,
+    };
+  }, [userData]);
 };

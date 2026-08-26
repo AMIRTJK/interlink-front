@@ -112,7 +112,7 @@ export const ModuleMenuHeader = ({
             <button
               onClick={() => onNavigate(itemKey)}
               aria-label={labelText}
-              className={`p-2.5 rounded-[2.5rem] transition-all ${
+              className={`w-10 h-10 flex items-center justify-center rounded-[2.5rem] transition-all cursor-pointer ${
                 isActive
                   ? `bg-linear-to-r ${activeGradient} text-white shadow-md`
                   : "text-zinc-600 dark:text-zinc-400 hover:bg-white/30 dark:hover:bg-zinc-800/30"
