@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { X, Search, Users, Check } from 'lucide-react';
+import { X, Search, Users, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { IEmployee, resolvePhotoUrl } from '../../model';
 import { MiniAvatar } from '../components/MiniAvatar';
 import { If } from '@shared/ui/If';
@@ -26,6 +25,7 @@ export const EmployeePickerModal = ({
 }: IEmployeePickerModalProps) => {
   const [search, setSearch] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
+  const [page, setPage] = useState(1);
 
   React.useEffect(() => {
     const currentCount = Number(document.body.getAttribute('data-modal-count') || 0);
@@ -41,13 +41,17 @@ export const EmployeePickerModal = ({
     };
   }, []);
 
+  const queryParams = useMemo(() => {
+    const p: Record<string, unknown> = { page, per_page: 15 };
+    if (activeSearch.trim()) p.search = activeSearch.trim();
+    return p;
+  }, [page, activeSearch]);
+
   const { data: searchRes, isLoading: isSearchLoading } = useGetQuery({
     url: ApiRoutes.GET_USERS,
     method: 'GET',
-    params: { search: activeSearch },
-    options: {
-      enabled: activeSearch.trim().length > 0,
-    },
+    params: queryParams,
+    useToken: true,
   });
 
   const serverEmployees = useMemo<IEmployee[]>(() => {
@@ -71,17 +75,27 @@ export const EmployeePickerModal = ({
     }));
   }, [searchRes]);
 
-  const isInitialLoading = !activeSearch && employees.length === 0;
-  const isLoading = (!!activeSearch && isSearchLoading) || isInitialLoading;
-  const displayEmployees = activeSearch ? serverEmployees : employees;
+  const paginationMeta = useMemo(() => {
+    const pData = (searchRes as any)?.data;
+    return {
+      currentPage: pData?.current_page ?? page,
+      lastPage: pData?.last_page ?? 1,
+      total: pData?.total ?? 0,
+    };
+  }, [searchRes, page]);
+
+  const isLoading = isSearchLoading;
+  const displayEmployees = serverEmployees.length > 0 || activeSearch ? serverEmployees : employees;
 
   const handleSearchSubmit = () => {
     const term = search.trim();
+    setPage(1);
     setActiveSearch(term);
   };
 
   const handleClear = () => {
     setSearch('');
+    setPage(1);
     setActiveSearch('');
   };
 
@@ -242,7 +256,39 @@ export const EmployeePickerModal = ({
             })}
           </If>
         </div>
-        <div className={`px-4 py-3 border-t ${headerBorder} shrink-0 flex justify-end`}>
+        <div className={`px-4 py-3 border-t ${headerBorder} shrink-0 flex items-center justify-between`}>
+          <div className="flex items-center gap-2">
+            <If is={paginationMeta.lastPage > 1}>
+              <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                <button
+                  type="button"
+                  disabled={paginationMeta.currentPage <= 1 || isSearchLoading}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="p-1 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  title="Предыдущая страница"
+                  aria-label="Предыдущая страница"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                <span className="font-semibold text-gray-700 dark:text-gray-300 px-1">
+                  {paginationMeta.currentPage} / {paginationMeta.lastPage}
+                </span>
+                <button
+                  type="button"
+                  disabled={paginationMeta.currentPage >= paginationMeta.lastPage || isSearchLoading}
+                  onClick={() => setPage((p) => Math.min(paginationMeta.lastPage, p + 1))}
+                  className="p-1 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  title="Следующая страница"
+                  aria-label="Следующая страница"
+                >
+                  <ChevronRight size={14} />
+                </button>
+                <span className="text-[11px] text-gray-400 ml-1">
+                  (всего {paginationMeta.total})
+                </span>
+              </div>
+            </If>
+          </div>
           <button
             onClick={onClose}
             className={`px-4 py-2 rounded-xl border text-sm font-medium transition-colors ${
