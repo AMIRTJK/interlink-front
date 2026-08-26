@@ -94,7 +94,11 @@ export const EmployeesToolbar = ({
                 onApplyFilters(draft);
                 setShowFilter(false);
               }}
-              onReset={() => setDraft(emptyFilters)}
+              onReset={() => {
+                setDraft(emptyFilters);
+                onApplyFilters(emptyFilters);
+                setShowFilter(false);
+              }}
             />
           </If>
         </div>
