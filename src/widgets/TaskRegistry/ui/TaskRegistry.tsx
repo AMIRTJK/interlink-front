@@ -4,6 +4,7 @@ import { useTasks } from "../model/useTasks";
 import type { Task, TaskPayload, TaskStatus, ViewState } from "../model/types";
 import {
   DEFAULT_FILTERS,
+  TASKS_DISPLAY_MODE_STORAGE_KEY,
   type TaskDisplayMode,
   type TaskFilters,
 } from "../model/filters";
@@ -16,7 +17,13 @@ import { TaskDetailModal } from "./TaskDetailModal";
 
 export const TaskRegistry = () => {
   const [view, setView] = React.useState<ViewState>("list");
-  const [displayMode, setDisplayMode] = React.useState<TaskDisplayMode>("table");
+  const [displayMode, setDisplayMode] = React.useState<TaskDisplayMode>(() => {
+    try {
+      const saved = localStorage.getItem(TASKS_DISPLAY_MODE_STORAGE_KEY);
+      if (saved === "table" || saved === "board") return saved;
+    } catch {}
+    return "table";
+  });
   const [filters, setFilters] = React.useState<TaskFilters>(DEFAULT_FILTERS);
   const [page, setPage] = React.useState(1);
   const [detailTask, setDetailTask] = React.useState<Task | null>(null);
@@ -77,6 +84,9 @@ export const TaskRegistry = () => {
   const handleDisplayMode = (mode: TaskDisplayMode) => {
     setDisplayMode(mode);
     setPage(1);
+    try {
+      localStorage.setItem(TASKS_DISPLAY_MODE_STORAGE_KEY, mode);
+    } catch {}
   };
 
   const handleCreate = async (payloads: TaskPayload[], files?: File[]) => {

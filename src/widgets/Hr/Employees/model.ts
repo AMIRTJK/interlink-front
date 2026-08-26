@@ -119,6 +119,8 @@ export const normalizeUsers = (raw: IAdminUser[]): IEmployee[] =>
 
 export type TEmployeesView = "table" | "cards";
 
+export const EMPLOYEES_VIEW_STORAGE_KEY = "employees_view_mode";
+
 export interface IEmployeesFilters {
   status: string;
   department: string;
