@@ -1,11 +1,13 @@
 import { useState, useMemo, useCallback } from "react";
-import { useGetQuery, useMutationQuery } from "@shared/lib";
+import { useGetQuery, useMutationQuery, useDebouncedCallback } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import type { IAdminUser } from "@entities/hr";
 import { toast } from "@shared/lib/toast";
 import {
   IEmployeesFilters,
   IEmployee,
+  TEmployeesView,
+  EMPLOYEES_VIEW_STORAGE_KEY,
   normalizeUsers,
   exportUsersExcel,
   PAGE_SIZE,
@@ -36,8 +38,23 @@ const buildQueryParams = (
 };
 
 export const useEmployeesLogic = () => {
-  const [view, setView] = useState<"table" | "cards">("table");
+  const [view, setView] = useState<TEmployeesView>(() => {
+    try {
+      const saved = localStorage.getItem(EMPLOYEES_VIEW_STORAGE_KEY);
+      if (saved === "table" || saved === "cards") return saved;
+    } catch {}
+    return "table";
+  });
+
+  const handleSetView = useCallback((newView: TEmployeesView) => {
+    setView(newView);
+    try {
+      localStorage.setItem(EMPLOYEES_VIEW_STORAGE_KEY, newView);
+    } catch {}
+  }, []);
+
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filters, setFilters] = useState<IEmployeesFilters>(emptyFilters);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(PAGE_SIZE);
@@ -47,9 +64,22 @@ export const useEmployeesLogic = () => {
   const [viewing, setViewing] = useState<IEmployee | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
+  const updateDebouncedSearch = useDebouncedCallback((val: unknown) => {
+    setDebouncedSearch(String(val ?? ""));
+  }, 350);
+
+  const handleSearch = useCallback(
+    (val: string) => {
+      setSearch(val);
+      setPage(1);
+      updateDebouncedSearch(val);
+    },
+    [updateDebouncedSearch]
+  );
+
   const queryParams = useMemo(
-    () => buildQueryParams(search, filters),
-    [search, filters]
+    () => buildQueryParams(debouncedSearch, filters),
+    [debouncedSearch, filters]
   );
 
   const { data, isLoading } = useGetQuery({
@@ -124,8 +154,8 @@ export const useEmployeesLogic = () => {
   };
 
   return {
-    view, setView,
-    search, setSearch,
+    view, setView: handleSetView,
+    search, setSearch: handleSearch,
     filters, setFilters,
     page, setPage,
     pageSize, setPageSize,
