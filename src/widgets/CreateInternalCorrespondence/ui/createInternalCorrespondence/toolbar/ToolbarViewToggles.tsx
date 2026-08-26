@@ -133,9 +133,10 @@ export const ToolbarViewToggles = ({
         <span>Режим просмотра истории версий</span>
       </label>
     </If>
-    {/* Подсветка авторов живёт внутри режима истории версий: она занимает
-        правую колонку вместо сравниваемой версии. */}
-    <If is={hasVersions && showVersionCompareSides}>
+    {/* Рецензирование — самостоятельный режим со своей колонкой подсветки
+        авторов. От истории версий и просмотра входящего не зависит, поэтому
+        переключатель доступен всегда, когда у документа есть версии. */}
+    <If is={hasVersions}>
       <div className="w-px h-5 bg-slate-200 mx-1 flex-shrink-0" />
       <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 ml-1">
         <input
@@ -144,7 +145,7 @@ export const ToolbarViewToggles = ({
           onChange={(e) => toggleAuthorship(e.target.checked)}
           className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
         />
-        <span>Авторы правок</span>
+        <span>Рецензирование</span>
       </label>
     </If>
   </>

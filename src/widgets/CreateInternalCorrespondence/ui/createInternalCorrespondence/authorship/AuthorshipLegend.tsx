@@ -5,7 +5,7 @@ interface IProps {
   authors: IAuthorshipLegendItem[];
 }
 
-/** Кто есть кто по цветам подсветки — в шапке режима авторства. */
+/** Кто есть кто по цветам подсветки — в шапке режима «Рецензирование». */
 export const AuthorshipLegend = ({ authors }: IProps) => (
   <div className="flex items-center gap-3 flex-wrap min-w-0">
     {authors.map((author) => (
