@@ -6,6 +6,8 @@ import { toast } from "@shared/lib/toast";
 import {
   IEmployeesFilters,
   IEmployee,
+  TEmployeesView,
+  EMPLOYEES_VIEW_STORAGE_KEY,
   normalizeUsers,
   exportUsersExcel,
   PAGE_SIZE,
@@ -36,7 +38,21 @@ const buildQueryParams = (
 };
 
 export const useEmployeesLogic = () => {
-  const [view, setView] = useState<"table" | "cards">("table");
+  const [view, setView] = useState<TEmployeesView>(() => {
+    try {
+      const saved = localStorage.getItem(EMPLOYEES_VIEW_STORAGE_KEY);
+      if (saved === "table" || saved === "cards") return saved;
+    } catch {}
+    return "table";
+  });
+
+  const handleSetView = useCallback((newView: TEmployeesView) => {
+    setView(newView);
+    try {
+      localStorage.setItem(EMPLOYEES_VIEW_STORAGE_KEY, newView);
+    } catch {}
+  }, []);
+
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filters, setFilters] = useState<IEmployeesFilters>(emptyFilters);
@@ -138,7 +154,7 @@ export const useEmployeesLogic = () => {
   };
 
   return {
-    view, setView,
+    view, setView: handleSetView,
     search, setSearch: handleSearch,
     filters, setFilters,
     page, setPage,
