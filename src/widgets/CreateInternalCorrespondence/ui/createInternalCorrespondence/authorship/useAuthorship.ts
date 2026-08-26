@@ -13,7 +13,7 @@ export interface IAuthorshipLegendItem {
 const EMPTY_MARKED = { html: "", fragments: [] as IAuthorshipFragment[] };
 
 /**
- * Подсветка авторства для правого холста режима истории версий.
+ * Подсветка авторства для режима «Рецензирование».
  *
  * Размечает тело выбранной версии: кто написал каждое её слово. Историю
  * обрезаем по выбранной версии — авторство считается по тем правкам, которые к
@@ -25,7 +25,7 @@ const EMPTY_MARKED = { html: "", fragments: [] as IAuthorshipFragment[] };
  *
  * Состояние наведения тут намеренно не живёт: оно меняется на каждое движение
  * мыши и перерисовывало бы весь экран редактора. Им владеет
- * AuthorshipHoverLayer.
+ * AuthorshipOverlay.
  */
 export const useAuthorship = (
   versions: IAuthorshipVersion[],

@@ -125,6 +125,7 @@ import { ToolbarViewToggles } from "./createInternalCorrespondence/toolbar/Toolb
 import { SectionCylindersBar } from "./createInternalCorrespondence/toolbar/SectionCylindersBar";
 import { IncomingPagerBar } from "./createInternalCorrespondence/toolbar/IncomingPagerBar";
 import { VersionComparePagerBar } from "./createInternalCorrespondence/toolbar/VersionComparePagerBar";
+import { ReviewBar } from "./createInternalCorrespondence/toolbar/ReviewBar";
 import { EditorPageSheet } from "./createInternalCorrespondence/EditorPageSheet";
 import { StampPlaceholder } from "./createInternalCorrespondence/StampPlaceholder";
 import { ScreenActionsBar } from "./createInternalCorrespondence/ScreenActionsBar";
@@ -161,6 +162,7 @@ import { OriginalLetterCanvas } from "./OriginalLetterCanvas";
 import { VersionCompareCanvas } from "./VersionCompareCanvas";
 import {
   AuthorshipHoverLayer,
+  AuthorshipOverlay,
   useAuthorship,
 } from "./createInternalCorrespondence/authorship";
 import {
@@ -468,15 +470,15 @@ export const CreateInternalCorrespondence = ({
     !!(panelMode && panelSource) && panelMode !== "forward",
   );
   const [showVersionCompareSides, setShowVersionCompareSides] = useState(false);
-  // Подсветка авторов занимает правую колонку вместо сравниваемой версии,
-  // поэтому живёт только внутри режима истории версий.
-  const [showAuthorship, setShowAuthorship] = useState(false);
+  // Рецензирование — самостоятельный режим: своя колонка с подсветкой авторов
+  // рядом с холстом. От истории версий и просмотра входящего письма не зависит,
+  // включается в любой момент и по умолчанию включён.
+  const [showAuthorship, setShowAuthorship] = useState(true);
 
   const toggleOriginalLetterSides = (checked: boolean) => {
     setShowOriginalLetterSides(checked);
     if (checked) {
       setShowVersionCompareSides(false);
-      setShowAuthorship(false);
     }
   };
 
@@ -495,25 +497,11 @@ export const CreateInternalCorrespondence = ({
       // прошлый выбор пользователя не тянем.
       hasPickedCompareVersionRef.current = false;
     } else {
-      setShowAuthorship(false);
       hasPickedCompareVersionRef.current = false;
       // Выходя из режима, возвращаемся на актуальную версию: иначе подставленная
       // справа предыдущая осталась бы выбранной и заблокировала редактор
       // (isOldVersionSelected).
       setActiveVersionId(latestVersionId);
-    }
-  };
-
-  const toggleAuthorship = (checked: boolean) => {
-    setShowAuthorship(checked);
-    if (checked) {
-      // У подсветки авторов дефолт обратный сравнению: интересно, кто написал
-      // то, что в документе СЕЙЧАС. Помечаем версию как выбранную, иначе
-      // подстановка предыдущей тут же вернула бы её обратно.
-      hasPickedCompareVersionRef.current = true;
-      setActiveVersionId(latestVersionId);
-    } else {
-      hasPickedCompareVersionRef.current = false;
     }
   };
 
@@ -861,22 +849,40 @@ export const CreateInternalCorrespondence = ({
     }
   }, [location.state, allVersions]);
 
-  // Подсветка авторства занимает правую колонку целиком, поэтому включается
-  // только вместе с режимом истории версий. Версию берёт ту же, что и обычное
-  // сравнение, — иначе выбор в панели версий ни на что бы не влиял.
-  const isAuthorshipActive = showVersionCompareSides && showAuthorship;
+  // Рецензирование подсвечивает выбранную версию — тот холст, в котором она
+  // показана: в режиме истории версий это правая колонка, вне его — основной
+  // холст. От самого режима истории включение режима не зависит, нужны только
+  // версии.
+  const isAuthorshipActive = showAuthorship && allVersions.length > 0;
+  const authorshipVersion = activeVersion;
+
+  // Правки в холсте, которых ещё нет ни в одной версии. Взводится на вводе,
+  // сбрасывается, когда в холст кладут тело версии, и здесь — когда с бэкенда
+  // приходит обновлённый список версий, то есть после сохранения.
+  const [hasLocalEdits, setHasLocalEdits] = useState(false);
+  useEffect(() => {
+    setHasLocalEdits(false);
+  }, [allVersions]);
+
   const authorship = useAuthorship(
     allVersions,
     isAuthorshipActive,
-    activeVersion?.id ?? null,
+    authorshipVersion?.id ?? null,
   );
+
+  // В режиме истории версий подсветка уезжает в правую колонку — она рисует
+  // сохранённую версию и правкам в основном холсте не подвержена. Вне режима
+  // подсветка ложится слоем на основной холст, и там она описывает последнее
+  // сохранённое состояние: как только в холсте появляются свои правки, текст и
+  // подложки разъезжаются, поэтому слой убираем до сохранения.
+  const showAuthorshipInCompare = isAuthorshipActive && showVersionCompareSides;
+  const showAuthorshipMarks =
+    isAuthorshipActive && !showVersionCompareSides && !hasLocalEdits;
 
   const versionCompareSheets = useMemo((): { pages: string[]; stamp: StampInfo } => {
     if (!showVersionCompareSides) return { pages: [], stamp: null };
 
-    // В режиме авторства справа стоит актуальная версия с разметкой авторов,
-    // в обычном — выбранная версия как есть.
-    const source = isAuthorshipActive
+    const source = showAuthorshipInCompare
       ? authorship.markedHtml
       : activeVersion?.content;
     if (!source) return { pages: [], stamp: null };
@@ -887,7 +893,7 @@ export const CreateInternalCorrespondence = ({
     return { pages, stamp: res.stamp };
   }, [
     showVersionCompareSides,
-    isAuthorshipActive,
+    showAuthorshipInCompare,
     authorship.markedHtml,
     activeVersion,
   ]);
@@ -934,6 +940,7 @@ export const CreateInternalCorrespondence = ({
         applyDocLayout(latestVersion.layout);
         editorRef.current.innerHTML = latestVersion.content;
         setEditorContent(latestVersion.content);
+        setHasLocalEdits(false);
         if (paginateEditorRef.current) {
           const nextPageCount = paginateEditorRef.current();
           setPageCount(nextPageCount);
@@ -948,6 +955,7 @@ export const CreateInternalCorrespondence = ({
           applyDocLayout(activeVersion.layout);
           editorRef.current.innerHTML = activeVersion.content;
           setEditorContent(activeVersion.content);
+          setHasLocalEdits(false);
           if (paginateEditorRef.current) {
             const nextPageCount = paginateEditorRef.current();
             setPageCount(nextPageCount);
@@ -976,6 +984,7 @@ export const CreateInternalCorrespondence = ({
         applyDocLayout(target?.layout ?? null);
         editorRef.current.innerHTML = content;
         setEditorContent(content);
+        setHasLocalEdits(false);
         if (!target?.is_selected && !finalSigner?.dsApplied) {
           setStampVisible(false);
         }
@@ -1689,6 +1698,10 @@ export const CreateInternalCorrespondence = ({
 
   const handleEditorInput = useCallback(
     (e?: React.FormEvent<HTMLDivElement>) => {
+    // Подсветка авторов считается по сохранённым версиям и с этого момента
+    // отстаёт от холста — прячем её до следующего сохранения.
+    setHasLocalEdits(true);
+
     const native = e?.nativeEvent as InputEvent | undefined;
     const inputType = native?.inputType || "";
     const isParaBoundary =
@@ -2265,6 +2278,7 @@ export const CreateInternalCorrespondence = ({
       if (isNewVersionId && currentCleanHtml !== incomingCleanHtml) {
         editorRef.current.innerHTML = targetVersion.content;
         setEditorContent(targetVersion.content);
+        setHasLocalEdits(false);
         // Пагинируем синхронно, не дожидаясь rAF-цепочки от setEditorContent:
         // она может не сработать (React пропускает рендер при равном значении
         // стейта), а в свежезагруженном теле нет распорок — без немедленной
@@ -2704,7 +2718,7 @@ export const CreateInternalCorrespondence = ({
                   showVersionCompareSides={showVersionCompareSides}
                   toggleVersionCompareSides={toggleVersionCompareSides}
                   showAuthorship={showAuthorship}
-                  toggleAuthorship={toggleAuthorship}
+                  toggleAuthorship={setShowAuthorship}
                 />
               </div>
 
@@ -2753,7 +2767,14 @@ export const CreateInternalCorrespondence = ({
                   activeVersionNumber={activeVersion?.versionNumber}
                   activeVersionDate={activeVersion?.date}
                   versionCompareTotal={versionCompareTotal}
-                  showAuthorship={isAuthorshipActive}
+                />
+              </If>
+
+              <If is={isAuthorshipActive}>
+                <ReviewBar
+                  versionNumber={authorshipVersion?.versionNumber}
+                  isLatestVersion={authorshipVersion?.id === latestVersionId}
+                  isStale={hasLocalEdits && !showVersionCompareSides}
                   authorshipLegend={authorship.legend}
                 />
               </If>
@@ -2822,7 +2843,7 @@ export const CreateInternalCorrespondence = ({
                       актуального документа. */}
                   <If is={Boolean(showVersionCompareSides && activeVersion)}>
                     <AuthorshipHoverLayer
-                      enabled={isAuthorshipActive}
+                      enabled={showAuthorshipInCompare}
                       fragments={authorship.fragments}
                       className="shrink-0 order-2"
                       // Включённая линейка опускает основной холст на свою
@@ -2905,6 +2926,21 @@ export const CreateInternalCorrespondence = ({
                           height={CONTENT_HEIGHT}
                         />
                       ))}
+                    {/* Рецензирование: подложки авторов ложатся под текст того
+                        же холста. Отдельного холста режим не открывает —
+                        сравнение версий живёт своей жизнью. */}
+                    <If is={showAuthorshipMarks}>
+                      <AuthorshipOverlay
+                        html={authorship.markedHtml}
+                        fragments={authorship.fragments}
+                        hostRef={pageCanvasRef}
+                        marginLeft={marginLeft}
+                        marginRight={marginRight}
+                        pagePadV={PAGE_PAD_V}
+                        contentHeight={CONTENT_HEIGHT}
+                      />
+                    </If>
+
                     <EditorSurface
                       editorRef={editorRef}
                       isReadOnly={isReadOnly}

@@ -13,7 +13,9 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
 
 const WIDGET = "src/widgets/CreateInternalCorrespondence";
 const SCREEN = `${WIDGET}/ui/CreateInternalCorrespondence.tsx`;
-const SURFACE = `${WIDGET}/ui/createInternalCorrespondence/EditorSurface.tsx`;
+// Оформление холста живёт отдельно от компонента: файл компонента с
+// посторонними экспортами перестаёт быть границей Fast Refresh.
+const SURFACE = `${WIDGET}/ui/createInternalCorrespondence/editorSurfaceStyle.ts`;
 
 const { EDITOR_BASE_FONT_SIZE } = await import(`../${WIDGET}/lib/constants.ts`);
 

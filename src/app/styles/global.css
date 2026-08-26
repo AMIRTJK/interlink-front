@@ -54,10 +54,6 @@
   src: url("/fonts/Orbitron-Variable.woff2") format("woff2");
 }
 
-html {
-  scrollbar-gutter: stable;
-}
-
 html,
 body,
 #root {
@@ -73,6 +69,13 @@ body,
   --color-profile-title: #0037af;
   --color-bg-main: #e5e9f5;
   --color-bg-card-task: #f2f5ff;
+}
+
+.dark {
+  --color-bg-primary: #090d16;
+  --color-text-primary: #f4f4f5;
+  --color-bg-secondary: #18181b;
+  --color-border: #27272a;
 }
 
 /* Сохраняем прозрачный фон при автозаполнении */
