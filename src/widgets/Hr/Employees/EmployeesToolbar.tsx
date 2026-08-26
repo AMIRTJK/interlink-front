@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, SlidersHorizontal, BarChart3, LayoutGrid, Table as TableIcon, Plus } from "lucide-react";
+import { Search, SlidersHorizontal, BarChart3, LayoutGrid, Table as TableIcon, Plus, X } from "lucide-react";
 import { If } from "@shared/ui";
 import { EmployeesFilter } from "./EmployeesFilter";
 import { IEmployeesFilters, TEmployeesView } from "./model";
@@ -62,8 +62,19 @@ export const EmployeesToolbar = ({
             value={search}
             onChange={(e) => onSearch(e.target.value)}
             placeholder="Поиск..."
-            className="pl-9 pr-4 py-2.5 w-56 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-colors bg-white border-gray-200 text-gray-700 placeholder:text-gray-300 focus:border-indigo-400"
+            className={`pl-9 ${search ? 'pr-8' : 'pr-4'} py-2.5 w-56 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-colors bg-white border-gray-200 text-gray-700 placeholder:text-gray-300 focus:border-indigo-400`}
           />
+          <If is={!!search}>
+            <button
+              type="button"
+              onClick={() => onSearch("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+              title="Очистить поиск"
+              aria-label="Очистить поиск"
+            >
+              <X size={14} />
+            </button>
+          </If>
         </div>
 
         <div className="relative" ref={ref}>
