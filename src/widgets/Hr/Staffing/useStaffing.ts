@@ -50,7 +50,7 @@ export const useStaffing = () => {
       avatarInitials:
         `${u.last_name?.[0] || ""}${u.first_name?.[0] || ""}`.toUpperCase() ||
         "??",
-      avatarPhoto: resolvePhotoUrl(u.photo_path),
+      avatarPhoto: u.photo_url || resolvePhotoUrl(u.photo_path),
       rating: u.rating || 0,
     }));
   }, [usersData]);

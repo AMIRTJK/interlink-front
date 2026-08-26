@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { X, Search, Users, Check } from 'lucide-react';
-import { IEmployee } from '../../model';
+import { X, Search, Users, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { IEmployee, resolvePhotoUrl } from '../../model';
 import { MiniAvatar } from '../components/MiniAvatar';
 import { If } from '@shared/ui/If';
 import { ApiRoutes } from '@shared/api';
@@ -26,6 +25,7 @@ export const EmployeePickerModal = ({
 }: IEmployeePickerModalProps) => {
   const [search, setSearch] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
+  const [page, setPage] = useState(1);
 
   React.useEffect(() => {
     const currentCount = Number(document.body.getAttribute('data-modal-count') || 0);
@@ -41,13 +41,17 @@ export const EmployeePickerModal = ({
     };
   }, []);
 
-  const { data: searchRes } = useGetQuery({
+  const queryParams = useMemo(() => {
+    const p: Record<string, unknown> = { page, per_page: 15 };
+    if (activeSearch.trim()) p.search = activeSearch.trim();
+    return p;
+  }, [page, activeSearch]);
+
+  const { data: searchRes, isLoading: isSearchLoading } = useGetQuery({
     url: ApiRoutes.GET_USERS,
     method: 'GET',
-    params: { search: activeSearch },
-    options: {
-      enabled: activeSearch.trim().length > 0,
-    },
+    params: queryParams,
+    useToken: true,
   });
 
   const serverEmployees = useMemo<IEmployee[]>(() => {
@@ -66,19 +70,32 @@ export const EmployeePickerModal = ({
       salary: u.salary ? Number(u.salary) : 0,
       avatarColor: '#6366f1',
       avatarInitials: `${u.last_name?.[0] || ''}${u.first_name?.[0] || ''}`.toUpperCase() || '??',
-      avatarPhoto: u.photo_path ? (u.photo_path.startsWith('http') ? u.photo_path : `/storage/${u.photo_path}`) : null,
+      avatarPhoto: u.photo_url || resolvePhotoUrl(u.photo_path),
       rating: u.rating || 0,
     }));
   }, [searchRes]);
 
-  const displayEmployees = activeSearch ? serverEmployees : employees;
+  const paginationMeta = useMemo(() => {
+    const pData = (searchRes as any)?.data;
+    return {
+      currentPage: pData?.current_page ?? page,
+      lastPage: pData?.last_page ?? 1,
+      total: pData?.total ?? 0,
+    };
+  }, [searchRes, page]);
+
+  const isLoading = isSearchLoading;
+  const displayEmployees = serverEmployees.length > 0 || activeSearch ? serverEmployees : employees;
 
   const handleSearchSubmit = () => {
-    setActiveSearch(search);
+    const term = search.trim();
+    setPage(1);
+    setActiveSearch(term);
   };
 
   const handleClear = () => {
     setSearch('');
+    setPage(1);
     setActiveSearch('');
   };
 
@@ -141,16 +158,18 @@ export const EmployeePickerModal = ({
                 <button
                   type="button"
                   onClick={handleSearchSubmit}
-                  className="p-1 rounded-lg text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
-                  title="Поиск"
+                  className="p-1 rounded-lg text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors cursor-pointer"
+                  title="Искать"
+                  aria-label="Искать"
                 >
-                  <Check size={14} />
+                  <Search size={14} />
                 </button>
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                  className="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
                   title="Очистить"
+                  aria-label="Очистить"
                 >
                   <X size={14} />
                 </button>
@@ -158,57 +177,118 @@ export const EmployeePickerModal = ({
             </If>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto p-2">
-          <If is={displayEmployees.length === 0}>
+        <div className="flex-1 overflow-y-auto p-2 [scrollbar-gutter:stable]">
+          <If is={isLoading}>
+            <div className="space-y-1">
+              {Array.from({ length: 5 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-2xl animate-pulse"
+                >
+                  <div
+                    className={`w-9 h-9 aspect-square rounded-full shrink-0 ${
+                      dark ? 'bg-gray-800' : 'bg-gray-200'
+                    }`}
+                  />
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div
+                      className={`h-3.5 rounded-md ${
+                        dark ? 'bg-gray-800' : 'bg-gray-200'
+                      }`}
+                      style={{ width: `${55 + (idx % 3) * 15}%` }}
+                    />
+                    <div
+                      className={`h-2.5 rounded-md ${
+                        dark ? 'bg-gray-800/60' : 'bg-gray-200/70'
+                      }`}
+                      style={{ width: `${35 + (idx % 2) * 20}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </If>
+          <If is={!isLoading && displayEmployees.length === 0}>
             <div className={`flex flex-col items-center justify-center py-10 ${subText}`}>
               <Users size={28} className="mb-2 opacity-40" />
               <p className="text-sm">Не найдено</p>
             </div>
           </If>
-          {displayEmployees.map((emp, i) => {
-            const isSelected = emp.id === selectedId;
-            return (
-              <motion.div
-                key={emp.id}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.02 }}
-                onClick={() => {
-                  onSelect(emp);
-                  onClose();
-                }}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl mb-1 cursor-pointer transition-all ${
-                  isSelected
-                    ? dark
-                      ? 'bg-indigo-900/20 ring-1 ring-indigo-600/50'
-                      : 'bg-indigo-50 ring-1 ring-indigo-200'
-                    : rowHover
-                }`}
-              >
-                <MiniAvatar
-                  photo={emp.avatarPhoto}
-                  initials={emp.avatarInitials}
-                  color={emp.avatarColor}
-                  size="md"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-semibold truncate ${nameText}`}>
-                    {emp.lastName} {emp.firstName}
-                  </p>
-                  <p className={`text-xs truncate mt-0.5 ${subText}`}>
-                    {emp.position} · {emp.department}
-                  </p>
-                </div>
-                <If is={isSelected}>
-                  <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center shrink-0">
-                    <Check size={11} className="text-white" />
+          <If is={!isLoading}>
+            {displayEmployees.map((emp) => {
+              const isSelected = emp.id === selectedId;
+              return (
+                <div
+                  key={emp.id}
+                  onClick={() => {
+                    onSelect(emp);
+                    onClose();
+                  }}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl mb-1 cursor-pointer transition-colors ${
+                    isSelected
+                      ? dark
+                        ? 'bg-indigo-900/20 ring-1 ring-indigo-600/50'
+                        : 'bg-indigo-50 ring-1 ring-indigo-200'
+                      : rowHover
+                  }`}
+                >
+                  <MiniAvatar
+                    photo={emp.avatarPhoto}
+                    initials={emp.avatarInitials}
+                    color={emp.avatarColor}
+                    size="md"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-semibold truncate ${nameText}`}>
+                      {emp.lastName} {emp.firstName}
+                    </p>
+                    <p className={`text-xs truncate mt-0.5 ${subText}`}>
+                      {emp.position} · {emp.department}
+                    </p>
                   </div>
-                </If>
-              </motion.div>
-            );
-          })}
+                  <If is={isSelected}>
+                    <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center shrink-0">
+                      <Check size={11} className="text-white" />
+                    </div>
+                  </If>
+                </div>
+              );
+            })}
+          </If>
         </div>
-        <div className={`px-4 py-3 border-t ${headerBorder} shrink-0 flex justify-end`}>
+        <div className={`px-4 py-3 border-t ${headerBorder} shrink-0 flex items-center justify-between`}>
+          <div className="flex items-center gap-2">
+            <If is={paginationMeta.lastPage > 1}>
+              <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                <button
+                  type="button"
+                  disabled={paginationMeta.currentPage <= 1 || isSearchLoading}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="p-1 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  title="Предыдущая страница"
+                  aria-label="Предыдущая страница"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                <span className="font-semibold text-gray-700 dark:text-gray-300 px-1">
+                  {paginationMeta.currentPage} / {paginationMeta.lastPage}
+                </span>
+                <button
+                  type="button"
+                  disabled={paginationMeta.currentPage >= paginationMeta.lastPage || isSearchLoading}
+                  onClick={() => setPage((p) => Math.min(paginationMeta.lastPage, p + 1))}
+                  className="p-1 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  title="Следующая страница"
+                  aria-label="Следующая страница"
+                >
+                  <ChevronRight size={14} />
+                </button>
+                <span className="text-[11px] text-gray-400 ml-1">
+                  (всего {paginationMeta.total})
+                </span>
+              </div>
+            </If>
+          </div>
           <button
             onClick={onClose}
             className={`px-4 py-2 rounded-xl border text-sm font-medium transition-colors ${
