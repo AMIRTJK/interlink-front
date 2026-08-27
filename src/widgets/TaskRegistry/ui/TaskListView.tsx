@@ -1,5 +1,5 @@
-import * as React from "react";
-import { Search, ChevronUp } from "lucide-react";
+import { Search } from "lucide-react";
+import { Pagination as AntPagination, ConfigProvider } from "antd";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { Task, Priority, TaskStatus } from "../model/types";
@@ -215,42 +215,30 @@ export const TaskListView = ({
       </div>
 
       {/* Pagination Footer */}
-      <div className="pt-4 px-2 flex items-center justify-between text-xs font-bold text-slate-400 border-t border-slate-100 dark:border-white/10 mt-2">
+      <div className="pt-4 px-2 flex flex-wrap items-center justify-between gap-3 text-xs font-bold text-slate-400 border-t border-slate-100 dark:border-white/10 mt-2">
         <p>
           Показано {rangeStart}–{rangeEnd} из {pagination.total} задач
         </p>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => onPageChange(Math.max(1, safePage - 1))}
-            disabled={safePage === 1}
-            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-30 cursor-pointer"
+        <If is={pagination.total > 0}>
+          <ConfigProvider
+            theme={{
+              token: {
+                colorPrimary: "#9333ea",
+                borderRadius: 8,
+                fontSize: 12,
+              },
+            }}
           >
-            <ChevronUp className="-rotate-90" size={16} />
-          </button>
-          <div className="flex gap-1">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <button
-                key={p}
-                onClick={() => onPageChange(p)}
-                className={cn(
-                  "w-7 h-7 flex items-center justify-center rounded-lg transition-colors cursor-pointer text-xs",
-                  p === safePage
-                    ? "bg-purple-600 text-white font-bold"
-                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800",
-                )}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => onPageChange(Math.min(totalPages, safePage + 1))}
-            disabled={safePage === totalPages}
-            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-30 cursor-pointer"
-          >
-            <ChevronUp className="rotate-90" size={16} />
-          </button>
-        </div>
+            <AntPagination
+              current={safePage}
+              total={pagination.total}
+              pageSize={pagination.perPage}
+              onChange={onPageChange}
+              showSizeChanger={false}
+              size="small"
+            />
+          </ConfigProvider>
+        </If>
       </div>
     </div>
   );

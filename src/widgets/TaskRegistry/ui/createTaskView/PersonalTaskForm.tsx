@@ -107,7 +107,7 @@ export function PersonalTaskForm({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 12 }}
       transition={{ duration: 0.2 }}
-      className="flex flex-col gap-6"
+      className="flex flex-col gap-6 pb-28"
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left container */}
@@ -327,7 +327,7 @@ export function PersonalTaskForm({
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
-                  className="absolute z-30 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden max-h-56 overflow-y-auto"
+                  className="absolute z-50 left-0 right-0 mt-1 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto"
                 >
                   {filteredColleagues.map((col) => (
                     <button
@@ -336,9 +336,9 @@ export function PersonalTaskForm({
                         e.preventDefault();
                         onToggleAssignee(col.id);
                       }}
-                      className="w-full flex items-center gap-3 px-3.5 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-3 px-3.5 py-2 hover:bg-indigo-50/70 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
                     >
-                      <Avatar colleague={col} className="w-8 h-8 text-[11px]" />
+                      <Avatar colleague={col} className="w-7 h-7 text-[10px]" />
                       <div className="min-w-0 flex-1">
                         <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
                           {col.name}

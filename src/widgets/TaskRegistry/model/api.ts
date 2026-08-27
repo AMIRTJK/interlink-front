@@ -274,15 +274,19 @@ export const extractPagination = (
     (r.meta as Record<string, unknown> | undefined) ??
     (dataField && !Array.isArray(dataField)
       ? ((dataField.meta as Record<string, unknown> | undefined) ?? dataField)
-      : undefined);
+      : undefined) ??
+    r;
   const meta = (metaCandidate ?? {}) as Record<string, unknown>;
   const num = (v: unknown, d: number) => {
     const n = Number(v);
     return Number.isFinite(n) && n > 0 ? n : d;
   };
-  const perPage = num(meta.per_page, defaultPerPage);
-  const total = num(meta.total, fallbackCount);
-  const currentPage = num(meta.current_page, 1);
-  const lastPage = num(meta.last_page, Math.max(1, Math.ceil(total / perPage)));
+  const perPage = num(meta.per_page ?? r.per_page, defaultPerPage);
+  const total = num(meta.total ?? r.total, fallbackCount);
+  const currentPage = num(meta.current_page ?? r.current_page ?? meta.page ?? r.page, 1);
+  const lastPage = num(
+    meta.last_page ?? r.last_page,
+    Math.max(1, Math.ceil(total / perPage)),
+  );
   return { total, lastPage, currentPage, perPage };
 };

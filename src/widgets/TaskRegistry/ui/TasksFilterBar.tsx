@@ -3,7 +3,7 @@ import { Search, Plus, Calendar, LayoutGrid, List as ListIcon } from "lucide-rea
 import { Select, DatePicker, ConfigProvider } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
-import { cn } from "@shared/lib";
+import { cn, useDebouncedCallback } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { Colleague, Priority, TaskStatsFull, TaskStatus } from "../model/types";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "../model/constants";
@@ -57,11 +57,15 @@ export const TasksFilterBar = ({
     setSearchLocal(filters.search);
   }, [filters.search]);
 
-  React.useEffect(() => {
-    if (searchLocal === filters.search) return;
-    const t = setTimeout(() => onFilterChange({ search: searchLocal }), 400);
-    return () => clearTimeout(t);
-  }, [searchLocal]);
+  const debouncedSearch = useDebouncedCallback((val: unknown) => {
+    onFilterChange({ search: String(val ?? "") });
+  }, 400);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setSearchLocal(val);
+    debouncedSearch(val);
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -190,7 +194,7 @@ export const TasksFilterBar = ({
             type="text"
             placeholder="Поиск"
             value={searchLocal}
-            onChange={(e) => setSearchLocal(e.target.value)}
+            onChange={handleSearchChange}
             className="w-full pl-10 pr-4 py-2 bg-gradient-to-b from-slate-100/90 to-slate-200/40 dark:from-slate-800/90 dark:to-slate-800/40 border border-slate-200/70 dark:border-white/10 rounded-full outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-xs font-medium text-slate-700 dark:text-slate-100 placeholder:text-slate-400 text-center"
           />
         </div>

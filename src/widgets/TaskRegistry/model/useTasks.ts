@@ -101,9 +101,13 @@ export const useTasks = ({
   const board = useMemo(() => mapBoard(boardRes), [boardRes]);
 
   /* ---------- ASSIGNEES ---------- */
+  const assigneeParams = useMemo(() => ({ per_page: 100 }), []);
+
   const { data: assigneesRes } = useGetQuery({
     url: ApiRoutes.GET_ASSIGNEES,
+    params: assigneeParams,
     useToken: true,
+    options: { staleTime: 5 * 60 * 1000 },
   });
 
   const colleagues: Colleague[] = useMemo(
