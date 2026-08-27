@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Pen, Plus, CheckCircle2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@shared/lib";
 import { Tooltip } from "@shared/ui";
 import type { Colleague } from "../../../model/types";
 import { signTimestamp } from "../../../lib/helpers";
@@ -64,9 +65,9 @@ export function ProtocolSignatures({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
       {/* Card 3: ЭЦП Руководителя */}
-      <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-5">
+      <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-5 relative z-10">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-[#10b981] flex items-center justify-center text-white shadow-md shadow-emerald-200 shrink-0">
@@ -91,7 +92,7 @@ export function ProtocolSignatures({
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] block">
             ПРЕДСЕДАТЕЛЬ
           </label>
@@ -164,7 +165,10 @@ export function ProtocolSignatures({
       </div>
 
       {/* Card 4: ЭЦП Секретаря */}
-      <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-5">
+      <div className={cn(
+        "bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-5 relative",
+        secretaryOpen ? "z-30" : "z-10"
+      )}>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-[#10b981] flex items-center justify-center text-white shadow-md shadow-emerald-200 shrink-0">
@@ -203,7 +207,7 @@ export function ProtocolSignatures({
                   }}
                   onFocus={() => onSecretaryOpenChange(true)}
                   onClick={() => onSecretaryOpenChange(true)}
-                  className="w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+                  className="w-full h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
                   placeholder="Выберите секретаря..."
                 />
                 <AnimatePresence>
@@ -290,7 +294,7 @@ export function ProtocolSignatures({
             </div>
           ) : (
             <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-5 text-center text-xs font-bold text-[#9aa2c8] uppercase tracking-wider shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
-              ЭЦП ПРЕДСЕДАТЕЛЯ
+              ЭЦП СЕКРЕТАРЯ
             </div>
           )}
 

@@ -156,7 +156,7 @@ export function ProtocolTaskForm({
       />
 
       {/* Bottom Action Section */}
-      <div className="flex flex-col gap-2 pt-2">
+      <div className="flex flex-col gap-2 pt-4 pb-8">
         <div className="flex items-center justify-start">
           <button
             type="button"
