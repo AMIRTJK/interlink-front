@@ -7,8 +7,6 @@ import { formatDueDate, getCountdown } from "../lib/helpers";
 
 interface IProps {
   task: IPersonalTask;
-  isSelected: boolean;
-  onSelectToggle: (id: number) => void;
   onOpen: (task: IPersonalTask) => void;
   onEdit: (task: IPersonalTask) => void;
   onDelete: (id: number) => void;
@@ -16,21 +14,21 @@ interface IProps {
 }
 
 const PRIORITY_BADGES = {
-  critical: { bg: "bg-red-100 dark:bg-red-950/30 text-red-750 dark:text-red-400", dot: "bg-red-500", label: "Критичный" },
-  high: { bg: "bg-orange-100 dark:bg-orange-950/30 text-orange-755 dark:text-orange-400", dot: "bg-orange-500", label: "Высокий" },
-  medium: { bg: "bg-blue-100 dark:bg-blue-950/30 text-blue-755 dark:text-blue-400", dot: "bg-blue-500", label: "Средний" },
-  low: { bg: "bg-green-100 dark:bg-green-950/30 text-green-755 dark:text-green-400", dot: "bg-green-500", label: "Низкий" },
+  critical: { bg: "bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400", dot: "bg-red-500", label: "Критичный" },
+  high: { bg: "bg-orange-100 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400", dot: "bg-orange-500", label: "Высокий" },
+  medium: { bg: "bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400", dot: "bg-amber-500", label: "Средний" },
+  low: { bg: "bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400", dot: "bg-green-500", label: "Низкий" },
 };
 
 const STATUS_BADGES = {
-  new: { bg: "bg-blue-100 dark:bg-blue-950/30 text-blue-755 dark:text-blue-400", dot: "bg-blue-500", label: "Новая" },
-  in_progress: { bg: "bg-blue-100 dark:bg-blue-950/30 text-blue-755 dark:text-blue-400", dot: "bg-blue-500", label: "В работе" },
-  review: { bg: "bg-violet-100 dark:bg-violet-950/30 text-violet-755 dark:text-violet-400", dot: "bg-violet-500", label: "На ревью" },
-  completed: { bg: "bg-emerald-100 dark:bg-emerald-950/30 text-emerald-755 dark:text-emerald-400", dot: "bg-emerald-500", label: "Завершена" },
-  overdue: { bg: "bg-red-100 dark:bg-red-950/30 text-red-755 dark:text-red-400", dot: "bg-red-500", label: "Просрочена" },
+  new: { bg: "bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400", dot: "bg-blue-500", label: "Новая" },
+  in_progress: { bg: "bg-indigo-100 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400", dot: "bg-indigo-500", label: "В работе" },
+  review: { bg: "bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400", dot: "bg-purple-500", label: "На ревью" },
+  completed: { bg: "bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400", dot: "bg-emerald-500", label: "Завершена" },
+  overdue: { bg: "bg-rose-100 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400", dot: "bg-rose-500", label: "Просрочена" },
 };
 
-export const TaskRow = ({ task, isSelected, onSelectToggle, onOpen, onEdit, onDelete, userName }: IProps) => {
+export const TaskRow = ({ task, onOpen, onEdit, onDelete, userName }: IProps) => {
   const pBadge = PRIORITY_BADGES[task.priority] || PRIORITY_BADGES.medium;
   const sBadge = STATUS_BADGES[task.status] || STATUS_BADGES.new;
   const countMeta = getCountdown(task.due_date);
@@ -51,19 +49,6 @@ export const TaskRow = ({ task, isSelected, onSelectToggle, onOpen, onEdit, onDe
       onClick={() => onOpen(task)}
       className="group border-b border-zinc-100 dark:border-zinc-800 hover:bg-indigo-50/40 dark:hover:bg-indigo-900/10 transition-all duration-150 cursor-pointer"
     >
-      <td className="px-4 py-3.5 align-top" onClick={(e) => { e.stopPropagation(); onSelectToggle(task.id); }}>
-        <button
-          type="button"
-          className={`w-4 h-4 rounded border flex items-center justify-center transition-colors border-zinc-300 dark:border-zinc-600 text-transparent hover:border-zinc-400 cursor-pointer bg-transparent ${
-            isSelected ? "bg-indigo-650! border-indigo-655! text-white!" : ""
-          }`}
-          aria-label={`Выбрать ${task.title}`}
-        >
-          <If is={isSelected}>
-            <span className="text-[10px] font-black leading-none">✓</span>
-          </If>
-        </button>
-      </td>
 
       <td className="px-4 py-3.5 align-top">
         <span className="text-xs font-mono font-semibold text-zinc-400 dark:text-zinc-500">TSK-{task.id}</span>
@@ -90,13 +75,6 @@ export const TaskRow = ({ task, isSelected, onSelectToggle, onOpen, onEdit, onDe
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${sBadge.bg}`}>
           <span className={`w-1.5 h-1.5 rounded-full ${sBadge.dot}`} /> {sBadge.label}
         </span>
-      </td>
-
-      <td className="px-4 py-3.5 align-top">
-        <div className="flex items-center gap-2">
-          <span className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 bg-zinc-500">{getInitials(userName)}</span>
-          <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300 truncate max-w-[120px]">{userName}</span>
-        </div>
       </td>
 
       <td className="px-4 py-3.5 align-top min-w-[140px]">

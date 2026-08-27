@@ -25,7 +25,6 @@ export function useCreateTaskState({
   editTask,
   onUpdate,
 }: IUseCreateTaskStateProps) {
-  const firstId = colleagues[0]?.id ?? "";
   const isEdit = Boolean(editTask);
   const [isSaving, setIsSaving] = React.useState(false);
 
@@ -46,9 +45,12 @@ export function useCreateTaskState({
   const [formPriority, setFormPriority] = React.useState<Priority>(
     editTask?.priority ?? "medium",
   );
-  const [formStatus, setFormStatus] = React.useState<TaskStatus>(
-    editTask?.status ?? "new",
-  );
+  const initialStatus: TaskStatus =
+    editTask?.status === "overdue"
+      ? "in_progress"
+      : editTask?.status ?? "new";
+
+  const [formStatus, setFormStatus] = React.useState<TaskStatus>(initialStatus);
   const [formDueDate, setFormDueDate] = React.useState(
     editTask ? toDateInput(editTask.dueDate) : new Date().toISOString().split("T")[0],
   );
@@ -58,7 +60,7 @@ export function useCreateTaskState({
   const [formAssignees, setFormAssignees] = React.useState<string[]>(
     editTask
       ? editTask.assignees.map((a) => a.id).filter(Boolean)
-      : [firstId],
+      : [],
   );
   const [assigneeQuery, setAssigneeQuery] = React.useState("");
   const [assigneeOpen, setAssigneeOpen] = React.useState(false);
@@ -67,7 +69,7 @@ export function useCreateTaskState({
 
   // Protocol state
   const [batchGlobal, setBatchGlobal] = React.useState({
-    chairmanId: firstId,
+    chairmanId: "",
     participants: [] as string[],
     date: new Date().toISOString().split("T")[0],
     number: "",
@@ -75,7 +77,7 @@ export function useCreateTaskState({
   const [participantsQuery, setParticipantsQuery] = React.useState("");
   const [participantsOpen, setParticipantsOpen] = React.useState(false);
   const [batchRows, setBatchRows] = React.useState<BatchRow[]>([
-    { id: 1, title: "", priority: "medium", status: "new", assigneeId: firstId },
+    { id: 1, title: "", priority: "medium", status: "new", assigneeId: "" },
   ]);
   const [subRowsMap, setSubRowsMap] = React.useState<Record<number, SubRow[]>>({});
   const [expandedRows, setExpandedRows] = React.useState<number[]>([]);
@@ -93,11 +95,12 @@ export function useCreateTaskState({
       return;
     }
     if (isSaving) return;
+    const safeStatus = formStatus === "overdue" ? "in_progress" : formStatus;
     const payload: TaskPayload = {
       title: formTitle.trim(),
       description: formDescription,
       priority: formPriority,
-      status: formStatus,
+      status: safeStatus,
       due_date: formDueDate || null,
       tags: formTags.split(",").map((t) => t.trim()).filter((t) => t !== ""),
       progress: formProgress,
@@ -132,7 +135,7 @@ export function useCreateTaskState({
           title: "",
           priority: "medium",
           status: "new",
-          assigneeId: batchGlobal.chairmanId,
+          assigneeId: "",
         },
       ]);
     }

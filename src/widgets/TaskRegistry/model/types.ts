@@ -18,6 +18,7 @@ export interface Colleague {
   initials: string;
   /** Tailwind-класс фона аватара, напр. "bg-blue-500". */
   color: string;
+  photo?: string | null;
 }
 
 export interface Attachment {

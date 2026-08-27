@@ -1,45 +1,58 @@
 import * as React from "react";
 import { Calendar } from "lucide-react";
 import { cn } from "@shared/lib";
-import { If } from "@shared/ui";
-import type { Task, TaskStatus } from "../../model/types";
-import { STATUS_OPTIONS } from "../../model/constants";
+import { If, Tooltip } from "@shared/ui";
+import type { Task } from "../../model/types";
 import { formatDueDate, getPriorityMeta, getStatusMeta, getCountdown } from "../../lib/helpers";
 import { Avatar } from "../Avatar";
 import { CountdownTimer } from "../Countdown";
 
-interface IProps {
-  task: Task;
-  busy: boolean;
-  onStatusChange?: (task: Task, status: TaskStatus) => Promise<void> | void;
-  onHandleStatus: (status: TaskStatus) => void;
-}
-
 export function TaskDetailRightColumn({
   task,
-  busy,
-  onStatusChange,
-  onHandleStatus,
-}: IProps) {
+}: {
+  task: Task;
+}) {
   const pMeta = getPriorityMeta(task.priority);
+  const sMeta = getStatusMeta(task.status);
 
   return (
-    <div className="w-80 p-8 space-y-6 bg-slate-50/50 dark:bg-slate-800/40">
+    <div className="w-80 p-8 space-y-6 bg-slate-50/50 dark:bg-slate-800/40 overflow-y-auto max-h-[calc(90vh-140px)]">
       <div className="space-y-4">
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Исполнитель
+            {(task.assignees && task.assignees.length > 1) ? "Исполнители" : "Исполнитель"}
           </label>
-          <div className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
-            <Avatar colleague={task.assignee} className="w-10 h-10 text-xs" />
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                {task.assignee.name}
-              </p>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                {task.assignee.role}
-              </p>
-            </div>
+          <div className="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
+            {((task.assignees && task.assignees.length > 0) ? task.assignees : [task.assignee]).map((col, idx) => (
+              <div
+                key={col.id || idx}
+                className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm shrink-0"
+              >
+                <Avatar colleague={col} className="w-10 h-10 text-xs shrink-0" />
+                <Tooltip
+                  title={
+                    <div className="p-0.5 max-w-xs">
+                      <p className="font-bold text-xs text-white">{col.name}</p>
+                      {col.role && (
+                        <p className="text-[10px] text-slate-300 mt-0.5 font-normal">
+                          {col.role}
+                        </p>
+                      )}
+                    </div>
+                  }
+                  placement="topLeft"
+                >
+                  <div className="min-w-0 flex-1 cursor-default">
+                    <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                      {col.name}
+                    </p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                      {col.role}
+                    </p>
+                  </div>
+                </Tooltip>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -60,24 +73,10 @@ export function TaskDetailRightColumn({
               Статус
             </label>
             <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10">
-              <div
-                className={cn(
-                  "w-2 h-2 rounded-full shrink-0",
-                  getStatusMeta(task.status).color,
-                )}
-              />
-              <select
-                value={task.status}
-                disabled={busy || !onStatusChange}
-                onChange={(e) => onHandleStatus(e.target.value as TaskStatus)}
-                className="flex-1 min-w-0 bg-transparent border-none outline-none text-xs font-bold text-slate-700 dark:text-slate-200 focus:ring-0 cursor-pointer disabled:cursor-default"
-              >
-                {STATUS_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+              <div className={cn("w-2 h-2 rounded-full", sMeta.color)} />
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                {sMeta.label}
+              </span>
             </div>
           </div>
         </div>

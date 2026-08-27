@@ -87,14 +87,19 @@ export const SharedAccessCell = ({ fileId }: IProps) => {
   const shown = users.slice(0, 3);
   const extra = users.length - shown.length;
 
-  const accessSummary = users
-    .map((u) => `${getUserFullName(u)} — ${getUserPosition(u)}`)
-    .join("\n");
-
   return (
     <>
       <Tooltip
-        title={<span className="whitespace-pre-line">{accessSummary}</span>}
+        title={
+          <div className="max-h-[165px] overflow-y-auto pr-1.5 space-y-2 text-xs [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.3)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+            {users.map((u) => (
+              <div key={u.id} className="leading-snug">
+                <span className="font-medium text-white">{getUserFullName(u)}</span>
+                <span className="text-zinc-300"> — {getUserPosition(u)}</span>
+              </div>
+            ))}
+          </div>
+        }
       >
       <button
         ref={anchorRef}

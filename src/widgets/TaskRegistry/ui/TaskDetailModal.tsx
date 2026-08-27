@@ -37,16 +37,12 @@ export const TaskDetailModal = ({
     busy,
     confirmDelete,
     setConfirmDelete,
-    uploading,
-    fileInputRef,
-    handleUpload,
     handleStatus,
     handleDelete,
   } = useTaskDetailModalState({
     task,
     onStatusChange,
     onDelete,
-    onUploadAttachments,
   });
 
   return (
@@ -71,19 +67,11 @@ export const TaskDetailModal = ({
       <div className="flex flex-1 overflow-y-auto">
         <TaskDetailLeftColumn
           task={task}
-          uploading={uploading}
-          fileInputRef={fileInputRef}
-          onUpload={handleUpload}
-          onUploadAttachments={onUploadAttachments}
           onDownloadAttachment={onDownloadAttachment}
-          onDeleteAttachment={onDeleteAttachment}
         />
 
         <TaskDetailRightColumn
           task={task}
-          busy={busy}
-          onStatusChange={onStatusChange}
-          onHandleStatus={handleStatus}
         />
       </div>
 

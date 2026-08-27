@@ -72,9 +72,27 @@ export const useTasks = ({
     },
   });
 
+  const filterByProgress = useCallback(
+    (item: Task) => {
+      const val = filters.progress;
+      if (!val || val === "all") return true;
+      const prog = Number(item.progress) || 0;
+      if (val === "done" || val === "100") return prog === 100;
+      if (val === "not_started" || val === "0") return prog === 0;
+      if (val === "in_progress") return prog > 0 && prog < 100;
+      const numVal = Number(val);
+      if (!Number.isNaN(numVal)) return prog === numVal;
+      return true;
+    },
+    [filters.progress],
+  );
+
   const tasks: Task[] = useMemo(
-    () => extractList<IApiTask>(tasksRes).map(mapApiTaskToTask),
-    [tasksRes],
+    () =>
+      extractList<IApiTask>(tasksRes)
+        .map(mapApiTaskToTask)
+        .filter(filterByProgress),
+    [tasksRes, filterByProgress],
   );
 
   const pagination = useMemo(
@@ -98,12 +116,26 @@ export const useTasks = ({
     },
   });
 
-  const board = useMemo(() => mapBoard(boardRes), [boardRes]);
+  const board = useMemo(() => {
+    const raw = mapBoard(boardRes);
+    if (!filters.progress || filters.progress === "all") return raw;
+    return {
+      new: raw.new.filter(filterByProgress),
+      in_progress: raw.in_progress.filter(filterByProgress),
+      review: raw.review.filter(filterByProgress),
+      completed: raw.completed.filter(filterByProgress),
+      overdue: raw.overdue.filter(filterByProgress),
+    };
+  }, [boardRes, filterByProgress, filters.progress]);
 
   /* ---------- ASSIGNEES ---------- */
+  const assigneeParams = useMemo(() => ({ per_page: 100 }), []);
+
   const { data: assigneesRes } = useGetQuery({
     url: ApiRoutes.GET_ASSIGNEES,
+    params: assigneeParams,
     useToken: true,
+    options: { staleTime: 5 * 60 * 1000 },
   });
 
   const colleagues: Colleague[] = useMemo(
