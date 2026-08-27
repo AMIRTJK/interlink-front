@@ -1,6 +1,9 @@
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Search, Calendar } from "lucide-react";
+import { X, Search, Tag } from "lucide-react";
+import { DatePicker, ConfigProvider } from "antd";
+import dayjs from "dayjs";
+import "dayjs/locale/ru";
 import { cn } from "@shared/lib";
 import type {
   Attachment,
@@ -64,6 +67,8 @@ export function PersonalTaskForm({
   onClearTitleError,
   formDescription,
   onFormDescriptionChange,
+  formTags,
+  onFormTagsChange,
   attachments,
   onRemoveAttachment,
   newFiles,
@@ -204,30 +209,69 @@ export function PersonalTaskForm({
             <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
               СРОК ВЫПОЛНЕНИЯ
             </label>
-            <div className="relative">
-              <Calendar size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9aa2c8] pointer-events-none" />
-              <input
-                type="date"
-                value={formDueDate}
-                onChange={(e) => onFormDueDateChange(e.target.value)}
-                className="w-full pl-10 pr-4 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+            <ConfigProvider
+              theme={{
+                token: {
+                  borderRadius: 16,
+                  controlHeight: 46,
+                  fontSize: 12,
+                  colorPrimary: "#3373e5",
+                  colorBgContainer: "transparent",
+                },
+                components: {
+                  DatePicker: {
+                    cellWidth: 24,
+                    cellHeight: 18,
+                    cellFontSize: 10,
+                    headerMarginBottom: 0,
+                  },
+                },
+              }}
+            >
+              <DatePicker
+                value={formDueDate ? dayjs(formDueDate) : null}
+                onChange={(d) => onFormDueDateChange(d ? d.format("YYYY-MM-DD") : "")}
+                format="DD.MM.YYYY"
+                placeholder="Выберите срок"
+                allowClear
+                placement="bottomLeft"
+                getPopupContainer={(trigger) => (trigger.parentElement as HTMLElement) || document.body}
+                className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
               />
-            </div>
+            </ConfigProvider>
           </div>
 
-          {/* FORMAT */}
+          {/* TAGS */}
           <div className="space-y-1.5">
             <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
-              ФОРМАТ
+              ТЕГИ
             </label>
-            <select
-              defaultValue="normal"
-              className="w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 cursor-pointer shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
-            >
-              <option value="normal">Обычный</option>
-              <option value="urgent">Срочный</option>
-              <option value="important">Важный</option>
-            </select>
+            <div className="relative">
+              <Tag size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9aa2c8] pointer-events-none" />
+              <input
+                type="text"
+                value={formTags}
+                onChange={(e) => onFormTagsChange(e.target.value)}
+                placeholder="frontend, дизайн, срочно"
+                className="w-full pl-10 pr-4 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)] focus:bg-white focus:border-[#3373e5]/40 focus:ring-2 focus:ring-[#3373e5]/15 transition-all"
+              />
+            </div>
+            {formTags.trim() && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {formTags
+                  .split(",")
+                  .map((t) => t.trim())
+                  .filter(Boolean)
+                  .map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+              </div>
+            )}
           </div>
 
           {/* ASSIGNEES */}
