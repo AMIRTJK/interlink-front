@@ -14,18 +14,18 @@ interface IProps {
 }
 
 const PRIORITY_BADGES = {
-  critical: { bg: "bg-red-100 dark:bg-red-950/30 text-red-750 dark:text-red-400", dot: "bg-red-500", label: "Критичный" },
-  high: { bg: "bg-orange-100 dark:bg-orange-950/30 text-orange-755 dark:text-orange-400", dot: "bg-orange-500", label: "Высокий" },
-  medium: { bg: "bg-blue-100 dark:bg-blue-950/30 text-blue-755 dark:text-blue-400", dot: "bg-blue-500", label: "Средний" },
-  low: { bg: "bg-green-100 dark:bg-green-950/30 text-green-755 dark:text-green-400", dot: "bg-green-500", label: "Низкий" },
+  critical: { bg: "bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400", dot: "bg-red-500", label: "Критичный" },
+  high: { bg: "bg-orange-100 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400", dot: "bg-orange-500", label: "Высокий" },
+  medium: { bg: "bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400", dot: "bg-amber-500", label: "Средний" },
+  low: { bg: "bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400", dot: "bg-green-500", label: "Низкий" },
 };
 
 const STATUS_BADGES = {
-  new: { bg: "bg-blue-100 dark:bg-blue-950/30 text-blue-755 dark:text-blue-400", dot: "bg-blue-500", label: "Новая" },
-  in_progress: { bg: "bg-blue-100 dark:bg-blue-950/30 text-blue-755 dark:text-blue-400", dot: "bg-blue-500", label: "В работе" },
-  review: { bg: "bg-violet-100 dark:bg-violet-950/30 text-violet-755 dark:text-violet-400", dot: "bg-violet-500", label: "На ревью" },
-  completed: { bg: "bg-emerald-100 dark:bg-emerald-950/30 text-emerald-755 dark:text-emerald-400", dot: "bg-emerald-500", label: "Завершена" },
-  overdue: { bg: "bg-red-100 dark:bg-red-950/30 text-red-755 dark:text-red-400", dot: "bg-red-500", label: "Просрочена" },
+  new: { bg: "bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400", dot: "bg-blue-500", label: "Новая" },
+  in_progress: { bg: "bg-indigo-100 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400", dot: "bg-indigo-500", label: "В работе" },
+  review: { bg: "bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400", dot: "bg-purple-500", label: "На ревью" },
+  completed: { bg: "bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400", dot: "bg-emerald-500", label: "Завершена" },
+  overdue: { bg: "bg-rose-100 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400", dot: "bg-rose-500", label: "Просрочена" },
 };
 
 export const TaskRow = ({ task, onOpen, onEdit, onDelete, userName }: IProps) => {
