@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Search, Plus, Calendar, LayoutGrid, List as ListIcon } from "lucide-react";
+import { Search, Plus, Calendar, LayoutGrid, List as ListIcon, X } from "lucide-react";
 import { Select, DatePicker, ConfigProvider } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
@@ -189,14 +189,27 @@ export const TasksFilterBar = React.memo(({
 
         {/* Central Oval Search Bar */}
         <div className="relative flex-1 max-w-md mx-auto">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={15} />
           <input
             type="text"
             placeholder="Поиск"
             value={searchLocal}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-2 bg-gradient-to-b from-slate-100/90 to-slate-200/40 dark:from-slate-800/90 dark:to-slate-800/40 border border-slate-200/70 dark:border-white/10 rounded-full outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-xs font-medium text-slate-700 dark:text-slate-100 placeholder:text-slate-400 text-center"
+            className="w-full pl-10 pr-10 py-2 bg-gradient-to-b from-slate-100/90 to-slate-200/40 dark:from-slate-800/90 dark:to-slate-800/40 border border-slate-200/70 dark:border-white/10 rounded-full outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-xs font-medium text-slate-700 dark:text-slate-100 placeholder:text-slate-400 text-center"
           />
+          {searchLocal ? (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchLocal("");
+                onFilterChange({ search: "" });
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer p-0.5"
+              title="Очистить"
+            >
+              <X size={14} />
+            </button>
+          ) : null}
         </div>
 
         {/* Create Button */}

@@ -280,8 +280,18 @@ export function PersonalTaskForm({
                 value={formTags}
                 onChange={(e) => onFormTagsChange(e.target.value)}
                 placeholder="frontend, дизайн, срочно"
-                className="w-full pl-10 pr-4 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)] focus:bg-white focus:border-[#3373e5]/40 focus:ring-2 focus:ring-[#3373e5]/15 transition-colors"
+                className="w-full pl-10 pr-10 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)] focus:bg-white focus:border-[#3373e5]/40 focus:ring-2 focus:ring-[#3373e5]/15 transition-colors"
               />
+              {formTags ? (
+                <button
+                  type="button"
+                  onClick={() => onFormTagsChange("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9aa2c8] hover:text-rose-500 transition-colors cursor-pointer p-0.5"
+                  title="Очистить"
+                >
+                  <X size={14} />
+                </button>
+              ) : null}
             </div>
             <div className="h-6 flex items-center">
               {formTags.trim() ? (() => {
@@ -348,7 +358,18 @@ export function PersonalTaskForm({
                 className="w-full pl-5 pr-10 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
                 placeholder="Поиск коллеги..."
               />
-              <Search size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9aa2c8] pointer-events-none" />
+              {assigneeQuery ? (
+                <button
+                  type="button"
+                  onClick={() => onAssigneeQueryChange("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9aa2c8] hover:text-rose-500 transition-colors cursor-pointer p-0.5"
+                  title="Очистить"
+                >
+                  <X size={14} />
+                </button>
+              ) : (
+                <Search size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9aa2c8] pointer-events-none" />
+              )}
 
               <AnimatePresence>
                 {assigneeOpen && (
