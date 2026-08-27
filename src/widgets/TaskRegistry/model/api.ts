@@ -127,16 +127,44 @@ const normalizePriority = (priority?: string | null): Priority =>
     ? (priority as Priority)
     : "medium";
 
+const API_HOST = (import.meta.env.VITE_API_URL || "").replace(/\/api\/v1\/?$/, "");
+
+export const resolveTaskPhotoUrl = (path?: string | null): string => {
+  if (!path) return "";
+  if (
+    path.startsWith("http://") ||
+    path.startsWith("https://") ||
+    path.startsWith("blob:") ||
+    path.startsWith("data:")
+  ) {
+    return path;
+  }
+  const clean = path.replace(/^\/+/, "");
+  if (clean.startsWith("storage/")) {
+    return `${API_HOST}/${clean}`;
+  }
+  if (clean.startsWith("user-photos/")) {
+    return `${API_HOST}/storage/${clean}`;
+  }
+  return `${API_HOST}/${clean}`;
+};
+
 /* ===================== MAPPERS ===================== */
 
 export const mapAssigneeToColleague = (a: IApiAssignee): Colleague => {
   const name = String(a.full_name || a.name || "Без имени");
+  const rawPhoto =
+    a.photo_path ||
+    a.photo_url ||
+    (a as any).avatar ||
+    (a as any).photo;
   return {
     id: String(a.id),
     name,
     role: String(a.position || a.role || ""),
     initials: initialsFromName(name),
     color: colorFromId(a.id),
+    photo: resolveTaskPhotoUrl(rawPhoto),
   };
 };
 

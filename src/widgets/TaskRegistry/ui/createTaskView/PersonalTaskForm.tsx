@@ -288,11 +288,9 @@ export function PersonalTaskForm({
                   return (
                     <span
                       key={id}
-                      className="inline-flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 bg-white dark:bg-slate-800 border border-[#3373e5]/20 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100"
+                      className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-white dark:bg-slate-800 border border-[#3373e5]/20 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100"
                     >
-                      <span className="w-5 h-5 rounded-full bg-[#ec4899] text-white flex items-center justify-center text-[9px] font-black shrink-0">
-                        {col.initials || "AS"}
-                      </span>
+                      <Avatar colleague={col} className="w-5 h-5 text-[8px]" allowPreview={false} />
                       <span>{col.name.split(" ")[0]}</span>
                       <button
                         type="button"
@@ -329,7 +327,7 @@ export function PersonalTaskForm({
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
-                  className="absolute z-30 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden max-h-48 overflow-y-auto"
+                  className="absolute z-30 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden max-h-56 overflow-y-auto"
                 >
                   {filteredColleagues.map((col) => (
                     <button
@@ -338,10 +336,10 @@ export function PersonalTaskForm({
                         e.preventDefault();
                         onToggleAssignee(col.id);
                       }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-3 px-3.5 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
                     >
-                      <Avatar colleague={col} className="w-6 h-6 text-[9px]" />
-                      <div className="min-w-0">
+                      <Avatar colleague={col} className="w-8 h-8 text-[11px]" />
+                      <div className="min-w-0 flex-1">
                         <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
                           {col.name}
                         </p>
