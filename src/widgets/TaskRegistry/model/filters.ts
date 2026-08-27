@@ -38,7 +38,7 @@ export const DEFAULT_FILTERS: TaskFilters = {
   dateType: "planned",
 };
 
-export const LIST_PAGE_SIZE = 10;
+export const LIST_PAGE_SIZE = 7;
 
 export const buildTaskParams = (
   f: TaskFilters,
