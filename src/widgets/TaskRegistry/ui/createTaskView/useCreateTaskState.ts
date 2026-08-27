@@ -25,7 +25,6 @@ export function useCreateTaskState({
   editTask,
   onUpdate,
 }: IUseCreateTaskStateProps) {
-  const firstId = colleagues[0]?.id ?? "";
   const isEdit = Boolean(editTask);
   const [isSaving, setIsSaving] = React.useState(false);
 
@@ -70,7 +69,7 @@ export function useCreateTaskState({
 
   // Protocol state
   const [batchGlobal, setBatchGlobal] = React.useState({
-    chairmanId: firstId,
+    chairmanId: "",
     participants: [] as string[],
     date: new Date().toISOString().split("T")[0],
     number: "",
@@ -78,7 +77,7 @@ export function useCreateTaskState({
   const [participantsQuery, setParticipantsQuery] = React.useState("");
   const [participantsOpen, setParticipantsOpen] = React.useState(false);
   const [batchRows, setBatchRows] = React.useState<BatchRow[]>([
-    { id: 1, title: "", priority: "medium", status: "new", assigneeId: firstId },
+    { id: 1, title: "", priority: "medium", status: "new", assigneeId: "" },
   ]);
   const [subRowsMap, setSubRowsMap] = React.useState<Record<number, SubRow[]>>({});
   const [expandedRows, setExpandedRows] = React.useState<number[]>([]);
@@ -136,7 +135,7 @@ export function useCreateTaskState({
           title: "",
           priority: "medium",
           status: "new",
-          assigneeId: batchGlobal.chairmanId,
+          assigneeId: "",
         },
       ]);
     }

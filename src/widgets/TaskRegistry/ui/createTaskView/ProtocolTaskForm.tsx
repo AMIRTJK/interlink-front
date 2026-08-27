@@ -138,6 +138,10 @@ export function ProtocolTaskForm({
         chairmanColleague={chairmanColleague}
         chairmanSigned={chairmanSigned}
         onChairmanSignedChange={onChairmanSignedChange}
+        onChairmanIdChange={(id) =>
+          onBatchGlobalChange({ ...batchGlobal, chairmanId: id })
+        }
+        onChairmanSelectOpenChange={onChairmanSelectOpenChange}
         secretaryColleague={secretaryColleague}
         secretarySigned={secretarySigned}
         onSecretarySignedChange={onSecretarySignedChange}

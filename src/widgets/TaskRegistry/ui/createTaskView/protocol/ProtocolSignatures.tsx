@@ -11,6 +11,8 @@ interface IProps {
   chairmanColleague: Colleague | null;
   chairmanSigned: string | null;
   onChairmanSignedChange: (val: string | null) => void;
+  onChairmanIdChange?: (id: string) => void;
+  onChairmanSelectOpenChange?: (open: boolean) => void;
   secretaryColleague: Colleague | null;
   secretarySigned: string | null;
   onSecretarySignedChange: (val: string | null) => void;
@@ -29,6 +31,8 @@ export function ProtocolSignatures({
   chairmanColleague,
   chairmanSigned,
   onChairmanSignedChange,
+  onChairmanIdChange,
+  onChairmanSelectOpenChange,
   secretaryColleague,
   secretarySigned,
   onSecretarySignedChange,
@@ -76,9 +80,13 @@ export function ProtocolSignatures({
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 font-extrabold text-[9px] uppercase tracking-wider">
               <CheckCircle2 size={12} /> Подписано
             </span>
-          ) : (
+          ) : chairmanColleague ? (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-600 font-extrabold text-[9px] uppercase tracking-wider">
               Ожидает подписи
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-400 font-extrabold text-[9px] uppercase tracking-wider">
+              Не выбран
             </span>
           )}
         </div>
@@ -90,18 +98,42 @@ export function ProtocolSignatures({
 
           {chairmanColleague ? (
             <Tooltip title={`${chairmanColleague.name} — ${chairmanColleague.role || "Сотрудник"}`}>
-              <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-4 flex items-center gap-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
-                <Avatar colleague={chairmanColleague} className="w-6 h-6 text-[10px]" allowPreview={false} />
-                <span className="text-xs font-bold text-[#1e2548] dark:text-slate-100 truncate">
-                  {chairmanColleague.name}
-                </span>
+              <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar colleague={chairmanColleague} className="w-7 h-7 text-[10px]" allowPreview={false} />
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-[#1e2548] dark:text-slate-100 truncate">
+                      {chairmanColleague.name}
+                    </p>
+                    <p className="text-[10px] text-slate-400 truncate">
+                      {chairmanColleague.role || "Сотрудник"}
+                    </p>
+                  </div>
+                </div>
+                {onChairmanIdChange && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onChairmanIdChange("");
+                      onChairmanSignedChange(null);
+                    }}
+                    className="text-slate-400 hover:text-rose-500 transition-colors shrink-0 cursor-pointer"
+                    title="Удалить выбор"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
               </div>
             </Tooltip>
           ) : (
-            <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-5 text-center text-xs font-bold text-[#636e9c] shadow-[0_4px_16px_rgba(100,105,240,0.06)] cursor-pointer hover:bg-white flex items-center justify-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => onChairmanSelectOpenChange?.(true)}
+              className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-5 text-center text-xs font-bold text-[#636e9c] shadow-[0_4px_16px_rgba(100,105,240,0.06)] cursor-pointer hover:bg-white flex items-center justify-center gap-1.5"
+            >
               <Plus size={14} />
               <span>Добавить</span>
-            </div>
+            </button>
           )}
 
           {chairmanSigned ? (
