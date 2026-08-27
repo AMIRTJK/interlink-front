@@ -1,5 +1,6 @@
 import { Plus, Trash2, Paperclip, ChevronDown, ChevronRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Select } from "antd";
 import type { BatchRow, Colleague, SubRow } from "../../../model/types";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "../../../model/constants";
 
@@ -97,56 +98,53 @@ export function ProtocolAgendaTable({
                 </div>
 
                 {/* Priority Badge Select */}
-                <div className="w-32 shrink-0">
-                  <select
+                <div className="w-36 shrink-0">
+                  <Select
                     value={row.priority}
-                    onChange={(e) =>
-                      onUpdateBatchRow(row.id, "priority", e.target.value)
+                    onChange={(val) =>
+                      onUpdateBatchRow(row.id, "priority", val)
                     }
-                    className="w-full px-3 py-1 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-700 dark:text-amber-400 font-extrabold text-xs rounded-full outline-none cursor-pointer text-center"
-                  >
-                    {PRIORITY_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
+                    options={PRIORITY_OPTIONS.map((o) => ({
+                      value: o.value,
+                      label: o.label,
+                    }))}
+                    size="small"
+                    className="w-full text-xs font-bold [&_.ant-select-selector]:bg-amber-50! dark:[&_.ant-select-selector]:bg-amber-950/40! [&_.ant-select-selector]:border-amber-200! dark:[&_.ant-select-selector]:border-amber-800/60! [&_.ant-select-selection-item]:text-amber-700! dark:[&_.ant-select-selection-item]:text-amber-400! [&_.ant-select-selector]:rounded-full!"
+                  />
                 </div>
 
                 {/* Status Badge Select */}
-                <div className="w-28 shrink-0">
-                  <select
+                <div className="w-32 shrink-0">
+                  <Select
                     value={row.status}
-                    onChange={(e) =>
-                      onUpdateBatchRow(row.id, "status", e.target.value)
+                    onChange={(val) =>
+                      onUpdateBatchRow(row.id, "status", val)
                     }
-                    className="w-full px-3 py-1 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 text-blue-600 dark:text-blue-400 font-extrabold text-xs rounded-full outline-none cursor-pointer text-center"
-                  >
-                    {STATUS_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
+                    options={STATUS_OPTIONS.map((o) => ({
+                      value: o.value,
+                      label: o.label,
+                    }))}
+                    size="small"
+                    className="w-full text-xs font-bold [&_.ant-select-selector]:bg-blue-50! dark:[&_.ant-select-selector]:bg-blue-950/40! [&_.ant-select-selector]:border-blue-200! dark:[&_.ant-select-selector]:border-blue-800/60! [&_.ant-select-selection-item]:text-blue-600! dark:[&_.ant-select-selection-item]:text-blue-400! [&_.ant-select-selector]:rounded-full!"
+                  />
                 </div>
 
                 {/* Assignee Badge Select */}
-                <div className="w-44 shrink-0">
+                <div className="w-48 shrink-0">
                   <div className="relative flex items-center">
-                    <select
+                    <Select
                       value={row.assigneeId}
-                      onChange={(e) =>
-                        onUpdateBatchRow(row.id, "assigneeId", e.target.value)
+                      onChange={(val) =>
+                        onUpdateBatchRow(row.id, "assigneeId", val)
                       }
-                      className="w-full pl-7 pr-3 py-1 bg-white dark:bg-slate-800 border border-[#3373e5]/20 dark:border-white/10 text-[#1e2548] dark:text-slate-100 font-bold text-xs rounded-full outline-none cursor-pointer truncate"
-                    >
-                      {colleagues.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="absolute left-1.5 w-4 h-4 rounded-full bg-[#ec4899] text-white flex items-center justify-center text-[8px] font-black pointer-events-none">
+                      options={colleagues.map((c) => ({
+                        value: c.id,
+                        label: c.name,
+                      }))}
+                      size="small"
+                      className="w-full pl-6 text-xs font-bold [&_.ant-select-selector]:bg-white! dark:[&_.ant-select-selector]:bg-slate-800! [&_.ant-select-selector]:border-[#3373e5]/20! dark:[&_.ant-select-selector]:border-white/10! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100! [&_.ant-select-selector]:rounded-full!"
+                    />
+                    <span className="absolute left-1.5 w-4 h-4 rounded-full bg-[#ec4899] text-white flex items-center justify-center text-[8px] font-black pointer-events-none z-10">
                       {assignedCol?.initials || "AS"}
                     </span>
                   </div>

@@ -10,7 +10,7 @@ export const PRIORITY_OPTIONS = [
 export const STATUS_OPTIONS = [
   { value: "new", label: "Новая", color: "bg-sky-400", rank: 1 },
   { value: "in_progress", label: "В работе", color: "bg-blue-500", rank: 2 },
-  { value: "review", label: "Ревью", color: "bg-purple-400", rank: 3 },
+  { value: "review", label: "На проверке", color: "bg-purple-400", rank: 3 },
   { value: "completed", label: "Завершена", color: "bg-emerald-500", rank: 4 },
   { value: "overdue", label: "Просрочена", color: "bg-red-500", rank: 0 },
 ] as const;

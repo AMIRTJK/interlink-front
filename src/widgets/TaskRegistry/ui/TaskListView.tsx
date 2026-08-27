@@ -63,7 +63,7 @@ const getStatusBadge = (status: TaskStatus) => {
       };
     case "review":
       return {
-        label: "Ревью",
+        label: "На проверке",
         dotBg: "bg-amber-600",
         pillClass: "bg-amber-50 dark:bg-amber-950/40 border-amber-200/70 dark:border-amber-900/50 text-amber-700 dark:text-amber-400",
       };

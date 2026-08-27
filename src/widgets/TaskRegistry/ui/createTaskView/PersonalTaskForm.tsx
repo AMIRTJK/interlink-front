@@ -12,7 +12,7 @@ import type {
   Task,
   TaskStatus,
 } from "../../model/types";
-import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "../../model/constants";
+import { PRIORITY_OPTIONS, FORM_STATUS_OPTIONS } from "../../model/constants";
 import { Avatar } from "../Avatar";
 import { TaskAttachmentsDropzone } from "./TaskAttachmentsDropzone";
 
@@ -212,7 +212,7 @@ export function PersonalTaskForm({
               <Select
                 value={formStatus}
                 onChange={(val) => onFormStatusChange(val as TaskStatus)}
-                options={STATUS_OPTIONS.map((opt) => ({
+                options={FORM_STATUS_OPTIONS.map((opt) => ({
                   value: opt.value,
                   label: opt.label,
                 }))}

@@ -4,7 +4,7 @@ import { Select, ConfigProvider } from "antd";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { Task, TaskStatus } from "../../model/types";
-import { STATUS_OPTIONS } from "../../model/constants";
+import { FORM_STATUS_OPTIONS } from "../../model/constants";
 import { formatDueDate, getPriorityMeta, getStatusMeta, getCountdown } from "../../lib/helpers";
 import { Avatar } from "../Avatar";
 import { CountdownTimer } from "../Countdown";
@@ -79,7 +79,7 @@ export function TaskDetailRightColumn({
                   value={task.status}
                   disabled={busy || !onStatusChange}
                   onChange={(val) => onHandleStatus(val as TaskStatus)}
-                  options={STATUS_OPTIONS.map((opt) => ({
+                  options={FORM_STATUS_OPTIONS.map((opt) => ({
                     value: opt.value,
                     label: opt.label,
                   }))}
