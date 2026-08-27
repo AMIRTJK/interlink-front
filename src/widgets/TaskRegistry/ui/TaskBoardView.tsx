@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Paperclip, Calendar, GripVertical } from "lucide-react";
 import { cn } from "@shared/lib";
+import { Tooltip } from "@shared/ui";
 import type { Task, TaskStatus } from "../model/types";
 import { STATUS_OPTIONS } from "../model/constants";
 import { formatDueDate, getPriorityMeta } from "../lib/helpers";
@@ -108,16 +109,40 @@ const BoardCard = ({
               {task.attachments.length}
             </span>
           )}
-          <div className="flex items-center -space-x-1.5 shrink-0">
-            {((task.assignees && task.assignees.length > 0) ? task.assignees.slice(0, 2) : [task.assignee]).map((a, i) => (
-              <Avatar key={a.id || i} colleague={a} className="w-6 h-6 text-[9px] ring-1.5 ring-white dark:ring-slate-800" />
-            ))}
-            {task.assignees && task.assignees.length > 2 && (
-              <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-extrabold text-[8px] flex items-center justify-center ring-1.5 ring-white dark:ring-slate-800">
-                +{task.assignees.length - 2}
-              </span>
-            )}
-          </div>
+          {task.assignees && task.assignees.length > 1 ? (
+            <Tooltip
+              title={
+                <div className="flex flex-col gap-2 p-1.5 max-w-xs max-h-56 overflow-y-auto">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">
+                    Исполнители ({task.assignees.length})
+                  </span>
+                  {task.assignees.map((col, idx) => (
+                    <div key={col.id || idx} className="flex items-center gap-2.5">
+                      <Avatar colleague={col} className="w-6 h-6 text-[9px] shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-bold text-white truncate">{col.name}</p>
+                        {col.role && <p className="text-[10px] text-slate-300 truncate">{col.role}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              }
+              placement="top"
+            >
+              <div className="flex items-center -space-x-1.5 shrink-0 cursor-pointer">
+                {task.assignees.slice(0, 2).map((a, i) => (
+                  <Avatar key={a.id || i} colleague={a} className="w-6 h-6 text-[9px] ring-1.5 ring-white dark:ring-slate-800" />
+                ))}
+                {task.assignees.length > 2 && (
+                  <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-extrabold text-[8px] flex items-center justify-center ring-1.5 ring-white dark:ring-slate-800">
+                    +{task.assignees.length - 2}
+                  </span>
+                )}
+              </div>
+            </Tooltip>
+          ) : (
+            <Avatar colleague={task.assignee} className="w-6 h-6 text-[9px]" />
+          )}
         </div>
       </div>
     </div>

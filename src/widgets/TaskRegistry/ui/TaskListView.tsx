@@ -1,8 +1,8 @@
 import { Search } from "lucide-react";
 import { Pagination as AntPagination, ConfigProvider } from "antd";
 import { cn } from "@shared/lib";
-import { If } from "@shared/ui";
-import type { Task, Priority, TaskStatus } from "../model/types";
+import { If, Tooltip } from "@shared/ui";
+import type { Colleague, Task, Priority, TaskStatus } from "../model/types";
 import type { Pagination } from "../model/api";
 import { formatDueDate } from "../lib/helpers";
 import { Avatar } from "./Avatar";
@@ -139,30 +139,60 @@ export const TaskListView = ({
 
                     {/* ASSIGNEE */}
                     <td className="px-4 py-3.5 text-left">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center -space-x-2 shrink-0">
-                          {((task.assignees && task.assignees.length > 0) ? task.assignees.slice(0, 2) : [task.assignee]).map((a, i) => (
-                            <Avatar key={a.id || i} colleague={a} className="w-8 h-8 text-xs font-bold ring-2 ring-white dark:ring-slate-800" />
-                          ))}
-                          {task.assignees && task.assignees.length > 2 && (
-                            <span className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-extrabold text-[10px] flex items-center justify-center ring-2 ring-white dark:ring-slate-800 shadow-xs">
-                              +{task.assignees.length - 2}
+                      {task.assignees && task.assignees.length > 1 ? (
+                        <Tooltip
+                          title={
+                            <div className="flex flex-col gap-2 p-1.5 max-w-xs max-h-56 overflow-y-auto">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">
+                                Исполнители ({task.assignees.length})
+                              </span>
+                              {task.assignees.map((col, idx) => (
+                                <div key={col.id || idx} className="flex items-center gap-2.5">
+                                  <Avatar colleague={col} className="w-6 h-6 text-[9px] shrink-0" />
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-xs font-bold text-white truncate">{col.name}</p>
+                                    {col.role && <p className="text-[10px] text-slate-300 truncate">{col.role}</p>}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          }
+                          placement="top"
+                        >
+                          <div className="flex items-center gap-3 cursor-pointer">
+                            <div className="flex items-center -space-x-2 shrink-0">
+                              {task.assignees.slice(0, 2).map((a, i) => (
+                                <Avatar key={a.id || i} colleague={a} className="w-8 h-8 text-xs font-bold ring-2 ring-white dark:ring-slate-800" />
+                              ))}
+                              {task.assignees.length > 2 && (
+                                <span className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-extrabold text-[10px] flex items-center justify-center ring-2 ring-white dark:ring-slate-800 shadow-xs">
+                                  +{task.assignees.length - 2}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-col leading-tight min-w-0">
+                              <span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate max-w-[150px]">
+                                {`${task.assignees[0].name.split(" ")[0]} +${task.assignees.length - 1}`}
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-medium truncate max-w-[150px]">
+                                {`${task.assignees.length} исполнителя`}
+                              </span>
+                            </div>
+                          </div>
+                        </Tooltip>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <Avatar colleague={task.assignee} className="w-8 h-8 text-xs font-bold shrink-0" />
+                          <div className="flex flex-col leading-tight min-w-0">
+                            <span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate max-w-[150px]">
+                              {task.assignee.name}
                             </span>
-                          )}
+                            <span className="text-[10px] text-slate-400 font-medium truncate max-w-[150px]">
+                              {task.assignee.role}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex flex-col leading-tight min-w-0">
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate max-w-[150px]">
-                            {task.assignees && task.assignees.length > 1
-                              ? `${task.assignees[0].name.split(" ")[0]} +${task.assignees.length - 1}`
-                              : task.assignee.name}
-                          </span>
-                          <span className="text-[10px] text-slate-400 font-medium truncate max-w-[150px]">
-                            {task.assignees && task.assignees.length > 1
-                              ? `${task.assignees.length} исполнителя`
-                              : task.assignee.role}
-                          </span>
-                        </div>
-                      </div>
+                      )}
                     </td>
 
                     {/* PRIORITY */}

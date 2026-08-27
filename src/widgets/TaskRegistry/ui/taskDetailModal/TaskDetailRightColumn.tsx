@@ -16,17 +16,17 @@ export function TaskDetailRightColumn({
   const sMeta = getStatusMeta(task.status);
 
   return (
-    <div className="w-80 p-8 space-y-6 bg-slate-50/50 dark:bg-slate-800/40">
+    <div className="w-80 p-8 space-y-6 bg-slate-50/50 dark:bg-slate-800/40 overflow-y-auto max-h-[calc(90vh-140px)]">
       <div className="space-y-4">
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
             {(task.assignees && task.assignees.length > 1) ? "Исполнители" : "Исполнитель"}
           </label>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
             {((task.assignees && task.assignees.length > 0) ? task.assignees : [task.assignee]).map((col, idx) => (
               <div
                 key={col.id || idx}
-                className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm"
+                className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm shrink-0"
               >
                 <Avatar colleague={col} className="w-10 h-10 text-xs" />
                 <div className="min-w-0">
