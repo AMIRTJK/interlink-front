@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Search } from "lucide-react";
 import { Pagination as AntPagination, ConfigProvider } from "antd";
 import { cn } from "@shared/lib";
@@ -93,8 +94,21 @@ export const TaskListView = ({
 }: TaskListViewProps) => {
   const totalPages = Math.max(1, pagination.lastPage);
   const safePage = Math.min(Math.max(1, page), totalPages);
+
+  // Поддержка как серверной пагинации, так и клиентской (если бэкенд вернул общий список):
+  const displayedTasks = React.useMemo(() => {
+    if (tasks.length > pagination.perPage) {
+      const start = (safePage - 1) * pagination.perPage;
+      return tasks.slice(start, start + pagination.perPage);
+    }
+    return tasks;
+  }, [tasks, pagination.perPage, safePage]);
+
   const rangeStart = pagination.total === 0 ? 0 : (safePage - 1) * pagination.perPage + 1;
-  const rangeEnd = (safePage - 1) * pagination.perPage + tasks.length;
+  const rangeEnd = Math.min(
+    pagination.total,
+    (safePage - 1) * pagination.perPage + displayedTasks.length,
+  );
 
   return (
     <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-slate-100 dark:border-white/10 rounded-3xl p-5 shadow-xl shadow-purple-100/40 dark:shadow-none flex flex-col min-h-[500px]">
@@ -112,8 +126,8 @@ export const TaskListView = ({
             </tr>
           </thead>
           <tbody>
-            <If is={tasks.length > 0}>
-              {tasks.map((task) => {
+            <If is={displayedTasks.length > 0}>
+              {displayedTasks.map((task) => {
                 const priorityBadge = getPriorityBadge(task.priority);
                 const statusBadge = getStatusBadge(task.status);
 
@@ -239,7 +253,7 @@ export const TaskListView = ({
               })}
             </If>
 
-            <If is={tasks.length === 0}>
+            <If is={displayedTasks.length === 0}>
               <tr>
                 <td colSpan={7} className="py-16 text-center">
                   <div className="flex flex-col items-center gap-2">
