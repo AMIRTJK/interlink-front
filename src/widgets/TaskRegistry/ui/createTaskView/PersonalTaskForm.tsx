@@ -351,41 +351,52 @@ export function PersonalTaskForm({
               <Search size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9aa2c8] pointer-events-none" />
 
               <AnimatePresence>
-                {assigneeOpen && filteredColleagues.length > 0 && (
+                {assigneeOpen && (
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto"
                   >
-                    {filteredColleagues.map((col) => (
-                      <div
-                        key={col.id}
-                        className="w-full flex items-center gap-3 px-3.5 py-2 hover:bg-indigo-50/70 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
-                      >
+                    {filteredColleagues.length > 0 ? (
+                      filteredColleagues.map((col) => (
                         <div
-                          onMouseDown={(e) => {
-                            e.stopPropagation();
-                          }}
+                          key={col.id}
+                          className="w-full flex items-center gap-3 px-3.5 py-2 hover:bg-indigo-50/70 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
                         >
-                          <Avatar colleague={col} className="w-7 h-7 text-[10px]" />
+                          <div
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                            }}
+                          >
+                            <Avatar colleague={col} className="w-7 h-7 text-[10px]" />
+                          </div>
+                          <div
+                            className="min-w-0 flex-1"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              onToggleAssignee(col.id);
+                            }}
+                          >
+                            <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                              {col.name}
+                            </p>
+                            <p className="text-[10px] text-slate-400 truncate">
+                              {col.role}
+                            </p>
+                          </div>
                         </div>
-                        <div
-                          className="min-w-0 flex-1"
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            onToggleAssignee(col.id);
-                          }}
-                        >
-                          <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                            {col.name}
-                          </p>
-                          <p className="text-[10px] text-slate-400 truncate">
-                            {col.role}
-                          </p>
-                        </div>
+                      ))
+                    ) : (
+                      <div className="py-5 px-4 text-center">
+                        <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                          Не найдено
+                        </p>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+                          По вашему запросу сотрудники не найдены
+                        </p>
                       </div>
-                    ))}
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
