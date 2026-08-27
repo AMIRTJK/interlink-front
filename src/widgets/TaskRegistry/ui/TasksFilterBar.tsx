@@ -27,7 +27,7 @@ interface IProps {
 
 const STATUS_TABS: { value: TaskStatus | ""; label: string; statKey: keyof TaskStatsFull | "total" }[] = [
   { value: "", label: "Все", statKey: "total" },
-  { value: "in_progress", label: "Активные", statKey: "in_progress" },
+  { value: "in_progress", label: "Активные", statKey: "active" },
   { value: "completed", label: "Завершенные", statKey: "completed" },
   { value: "overdue", label: "Просроченные", statKey: "overdue" },
 ];
@@ -214,11 +214,7 @@ export const TasksFilterBar = ({
             const active = filters.status === tab.value;
             const countVal = stats
               ? (stats[tab.statKey] as number) ?? 0
-              : tab.statKey === "total"
-                ? 1
-                : tab.statKey === "overdue"
-                  ? 1
-                  : 0;
+              : 0;
 
             return (
               <button
