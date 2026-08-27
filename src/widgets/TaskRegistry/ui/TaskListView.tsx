@@ -1,9 +1,8 @@
-import * as React from "react";
 import { Search } from "lucide-react";
 import { Pagination as AntPagination, ConfigProvider } from "antd";
 import { cn } from "@shared/lib";
 import { If, Tooltip } from "@shared/ui";
-import type { Colleague, Task, Priority, TaskStatus } from "../model/types";
+import type { Task, Priority, TaskStatus } from "../model/types";
 import type { Pagination } from "../model/api";
 import { formatDueDate } from "../lib/helpers";
 import { Avatar } from "./Avatar";

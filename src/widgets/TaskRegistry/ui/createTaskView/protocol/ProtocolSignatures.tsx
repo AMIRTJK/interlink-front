@@ -153,7 +153,7 @@ export function ProtocolSignatures({
           )}
         </div>
 
-        <div ref={secretaryRef} className="space-y-3 relative">
+        <div ref={secretaryRef} className="flex flex-col gap-3">
           <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] block">
             СЕКРЕТАРЬ
           </label>
@@ -177,10 +177,11 @@ export function ProtocolSignatures({
                 <AnimatePresence>
                   {secretaryOpen && filteredSecretaryOptions.length > 0 && (
                     <motion.div
-                      initial={{ opacity: 0, y: -6 }}
+                      initial={{ opacity: 0, y: -4 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      className="absolute z-50 left-0 right-0 mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100/60 dark:divide-white/5"
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.12 }}
+                      className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100/60 dark:divide-white/5"
                     >
                       {filteredSecretaryOptions.map((col) => (
                         <button
