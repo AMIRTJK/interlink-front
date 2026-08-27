@@ -409,27 +409,41 @@ export function PersonalTaskForm({
                               >
                                 <Avatar colleague={col} className="w-7 h-7 text-[10px]" />
                               </div>
-                              <div
-                                className="min-w-0 flex-1"
-                                onMouseDown={(e) => {
-                                  e.preventDefault();
-                                  onToggleAssignee(col.id);
-                                }}
+                              <Tooltip
+                                title={
+                                  <div className="p-0.5 max-w-xs">
+                                    <p className="font-bold text-xs text-white">{col.name}</p>
+                                    {col.role && (
+                                      <p className="text-[10px] text-slate-300 mt-0.5 font-normal">
+                                        {col.role}
+                                      </p>
+                                    )}
+                                  </div>
+                                }
+                                placement="right"
                               >
-                                <p
-                                  className={cn(
-                                    "text-xs font-bold truncate",
-                                    isSelected
-                                      ? "text-blue-700 dark:text-blue-300"
-                                      : "text-slate-800 dark:text-slate-100",
-                                  )}
+                                <div
+                                  className="min-w-0 flex-1 cursor-pointer"
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    onToggleAssignee(col.id);
+                                  }}
                                 >
-                                  {col.name}
-                                </p>
-                                <p className="text-[10px] text-slate-400 truncate">
-                                  {col.role}
-                                </p>
-                              </div>
+                                  <p
+                                    className={cn(
+                                      "text-xs font-bold truncate",
+                                      isSelected
+                                        ? "text-blue-700 dark:text-blue-300"
+                                        : "text-slate-800 dark:text-slate-100",
+                                    )}
+                                  >
+                                    {col.name}
+                                  </p>
+                                  <p className="text-[10px] text-slate-400 truncate">
+                                    {col.role}
+                                  </p>
+                                </div>
+                              </Tooltip>
                             </div>
 
                             {/* Checkbox indicator */}
