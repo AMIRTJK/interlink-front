@@ -94,20 +94,10 @@ export const TaskListView = ({
 }: TaskListViewProps) => {
   const totalPages = Math.max(1, pagination.lastPage);
   const safePage = Math.min(Math.max(1, page), totalPages);
-
-  // Поддержка как серверной пагинации, так и клиентской (если бэкенд вернул общий список):
-  const displayedTasks = React.useMemo(() => {
-    if (tasks.length > pagination.perPage) {
-      const start = (safePage - 1) * pagination.perPage;
-      return tasks.slice(start, start + pagination.perPage);
-    }
-    return tasks;
-  }, [tasks, pagination.perPage, safePage]);
-
   const rangeStart = pagination.total === 0 ? 0 : (safePage - 1) * pagination.perPage + 1;
   const rangeEnd = Math.min(
     pagination.total,
-    (safePage - 1) * pagination.perPage + displayedTasks.length,
+    (safePage - 1) * pagination.perPage + tasks.length,
   );
 
   return (
@@ -126,8 +116,8 @@ export const TaskListView = ({
             </tr>
           </thead>
           <tbody>
-            <If is={displayedTasks.length > 0}>
-              {displayedTasks.map((task) => {
+            <If is={tasks.length > 0}>
+              {tasks.map((task) => {
                 const priorityBadge = getPriorityBadge(task.priority);
                 const statusBadge = getStatusBadge(task.status);
 
@@ -253,7 +243,7 @@ export const TaskListView = ({
               })}
             </If>
 
-            <If is={displayedTasks.length === 0}>
+            <If is={tasks.length === 0}>
               <tr>
                 <td colSpan={7} className="py-16 text-center">
                   <div className="flex flex-col items-center gap-2">

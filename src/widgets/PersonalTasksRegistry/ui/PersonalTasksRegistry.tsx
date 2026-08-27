@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { AnimatePresence } from "framer-motion";
 import { If } from "@shared/ui/If";
-import { useGetQuery, useMutationQuery, tokenControl } from "@shared/lib";
+import { useGetQuery, useMutationQuery, tokenControl, useCurrentUser } from "@shared/lib";
 import { ApiRoutes } from "@shared/api/api-routes";
 import { StatsCards } from "./StatsCards";
 import { RegistryHeader } from "./RegistryHeader";
@@ -66,8 +66,9 @@ export const PersonalTasksRegistry = memo(() => {
     messages: { success: "Задача успешно удалена", invalidate: [ApiRoutes.PERSONAL_TASKS] },
   });
 
+  const { user: currentUser } = useCurrentUser();
   const userData = tokenControl.getUserData();
-  const userName = getUserName(userData?.data?.user || userData?.user || userData?.data || userData);
+  const userName = getUserName(currentUser || userData?.data?.user || userData?.user || userData?.data || userData);
   const tasks: IPersonalTask[] = rawTasks?.data || [];
   const stats = useMemo(() => calculateStats(tasks), [tasks]);
   const filteredTasks = useMemo(() => getFilteredTasks(tasks, searchQuery, filterTab, sortConfig), [tasks, searchQuery, filterTab, sortConfig]);
