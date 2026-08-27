@@ -46,9 +46,12 @@ export function useCreateTaskState({
   const [formPriority, setFormPriority] = React.useState<Priority>(
     editTask?.priority ?? "medium",
   );
-  const [formStatus, setFormStatus] = React.useState<TaskStatus>(
-    editTask?.status ?? "new",
-  );
+  const initialStatus: TaskStatus =
+    editTask?.status === "overdue"
+      ? "in_progress"
+      : editTask?.status ?? "new";
+
+  const [formStatus, setFormStatus] = React.useState<TaskStatus>(initialStatus);
   const [formDueDate, setFormDueDate] = React.useState(
     editTask ? toDateInput(editTask.dueDate) : new Date().toISOString().split("T")[0],
   );
@@ -93,11 +96,12 @@ export function useCreateTaskState({
       return;
     }
     if (isSaving) return;
+    const safeStatus = formStatus === "overdue" ? "in_progress" : formStatus;
     const payload: TaskPayload = {
       title: formTitle.trim(),
       description: formDescription,
       priority: formPriority,
-      status: formStatus,
+      status: safeStatus,
       due_date: formDueDate || null,
       tags: formTags.split(",").map((t) => t.trim()).filter((t) => t !== ""),
       progress: formProgress,
