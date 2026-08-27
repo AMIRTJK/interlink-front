@@ -2,6 +2,7 @@ import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FileText, ChevronDown, CheckCircle2, X, Search, Calendar } from "lucide-react";
 import { cn } from "@shared/lib";
+import { Tooltip } from "@shared/ui";
 import type { Colleague } from "../../../model/types";
 import { Avatar } from "../../Avatar";
 
@@ -40,17 +41,31 @@ export function ProtocolHeaderDetails({
   chairmanSelectOpen,
   onChairmanSelectOpenChange,
 }: IProps) {
+  const [chairmanSearch, setChairmanSearch] = React.useState("");
+
   const chairmanColleague =
     colleagues.find((c) => c.id === batchGlobal.chairmanId) || null;
+
+  const filteredChairmanOptions = colleagues.filter(
+    (c) =>
+      c.name.toLowerCase().includes(chairmanSearch.toLowerCase()) ||
+      (c.role && c.role.toLowerCase().includes(chairmanSearch.toLowerCase())),
+  );
 
   const filteredParticipantOptions = colleagues.filter(
     (c) =>
       !batchGlobal.participants.includes(c.id) &&
-      c.name.toLowerCase().includes(participantsQuery.toLowerCase()),
+      (c.name.toLowerCase().includes(participantsQuery.toLowerCase()) ||
+        (c.role && c.role.toLowerCase().includes(participantsQuery.toLowerCase()))),
   );
 
   return (
-    <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-6">
+    <div
+      className={cn(
+        "bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-6 relative",
+        chairmanSelectOpen || participantsOpen ? "z-30" : "z-10",
+      )}
+    >
       {/* Title Header */}
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-xl bg-[#10b981] flex items-center justify-center text-white shadow-md shadow-emerald-200 shrink-0">
@@ -62,39 +77,39 @@ export function ProtocolHeaderDetails({
       </div>
 
       {/* 2x2 Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         {/* ПРЕДСЕДАТЕЛЬ */}
         <div className="space-y-1.5 relative">
-          <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
+          <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block h-3.5">
             ПРЕДСЕДАТЕЛЬ <span className="text-red-500">*</span>
           </label>
-          <button
-            type="button"
-            onClick={() => onChairmanSelectOpenChange(!chairmanSelectOpen)}
-            className="w-full flex items-center justify-between gap-2 px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl shadow-[0_4px_16px_rgba(100,105,240,0.06)] outline-none text-left cursor-pointer"
-          >
-            {chairmanColleague ? (
-              <span className="inline-flex items-center gap-2.5 min-w-0">
-                <span className="w-5 h-5 rounded-full bg-[#ec4899] text-white flex items-center justify-center text-[9px] font-black shrink-0">
-                  {chairmanColleague.initials || "AS"}
+          <Tooltip title={chairmanColleague ? `${chairmanColleague.name} — ${chairmanColleague.role || "Сотрудник"}` : undefined}>
+            <button
+              type="button"
+              onClick={() => onChairmanSelectOpenChange(!chairmanSelectOpen)}
+              className="w-full h-12 flex items-center justify-between gap-2 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl shadow-[0_4px_16px_rgba(100,105,240,0.06)] outline-none text-left cursor-pointer"
+            >
+              {chairmanColleague ? (
+                <span className="inline-flex items-center gap-2.5 min-w-0 flex-1">
+                  <Avatar colleague={chairmanColleague} className="w-6 h-6 text-[9px]" allowPreview={false} />
+                  <span className="text-xs font-bold text-[#1e2548] dark:text-slate-100 truncate">
+                    {chairmanColleague.name}
+                  </span>
                 </span>
-                <span className="text-xs font-bold text-[#1e2548] dark:text-slate-100 truncate">
-                  {chairmanColleague.name}
+              ) : (
+                <span className="text-xs font-medium text-[#9aa2c8]">
+                  Выберите председателя...
                 </span>
-              </span>
-            ) : (
-              <span className="text-xs font-medium text-[#9aa2c8]">
-                Выберите председателя...
-              </span>
-            )}
-            <ChevronDown
-              size={15}
-              className={cn(
-                "text-[#9aa2c8] shrink-0 transition-transform",
-                chairmanSelectOpen && "rotate-180",
               )}
-            />
-          </button>
+              <ChevronDown
+                size={15}
+                className={cn(
+                  "text-[#9aa2c8] shrink-0 transition-transform",
+                  chairmanSelectOpen && "rotate-180",
+                )}
+              />
+            </button>
+          </Tooltip>
 
           <AnimatePresence>
             {chairmanSelectOpen && (
@@ -102,41 +117,62 @@ export function ProtocolHeaderDetails({
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                className="absolute z-30 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden max-h-56 overflow-y-auto"
+                className="absolute z-50 left-0 right-0 mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-64 flex flex-col"
               >
-                {colleagues.map((col) => (
-                  <button
-                    key={col.id}
-                    type="button"
-                    onClick={() => {
-                      onBatchGlobalChange({
-                        ...batchGlobal,
-                        chairmanId: col.id,
-                      });
-                      onChairmanSelectOpenChange(false);
-                    }}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left cursor-pointer",
-                      col.id === batchGlobal.chairmanId && "bg-emerald-50/60",
-                    )}
-                  >
-                    <Avatar colleague={col} className="w-6 h-6 text-[9px]" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                        {col.name}
-                      </p>
-                      <p className="text-[10px] text-slate-400 truncate">
-                        {col.role}
-                      </p>
-                    </div>
-                    {col.id === batchGlobal.chairmanId && (
-                      <CheckCircle2
-                        size={16}
-                        className="text-emerald-500 shrink-0"
-                      />
-                    )}
-                  </button>
-                ))}
+                <div className="p-2 border-b border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-slate-800/70">
+                  <div className="relative">
+                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder="Поиск председателя..."
+                      value={chairmanSearch}
+                      onChange={(e) => setChairmanSearch(e.target.value)}
+                      className="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200/80 dark:border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-800 dark:text-slate-100"
+                    />
+                  </div>
+                </div>
+
+                <div className="overflow-y-auto flex-1 divide-y divide-slate-100/60 dark:divide-white/5">
+                  {filteredChairmanOptions.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-slate-400">Сотрудник не найден</div>
+                  ) : (
+                    filteredChairmanOptions.map((col) => (
+                      <button
+                        key={col.id}
+                        type="button"
+                        onClick={() => {
+                          onBatchGlobalChange({
+                            ...batchGlobal,
+                            chairmanId: col.id,
+                          });
+                          onChairmanSelectOpenChange(false);
+                          setChairmanSearch("");
+                        }}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer",
+                          col.id === batchGlobal.chairmanId && "bg-emerald-50/70 dark:bg-emerald-950/20",
+                        )}
+                      >
+                        <Avatar colleague={col} className="w-7 h-7 text-[10px]" allowPreview={false} />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                            {col.name}
+                          </p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                            {col.role || "Сотрудник"}
+                          </p>
+                        </div>
+                        {col.id === batchGlobal.chairmanId && (
+                          <CheckCircle2
+                            size={16}
+                            className="text-emerald-500 shrink-0"
+                          />
+                        )}
+                      </button>
+                    ))
+                  )}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -144,35 +180,9 @@ export function ProtocolHeaderDetails({
 
         {/* УЧАСТНИКИ */}
         <div className="space-y-1.5 relative">
-          <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
-            УЧАСТНИКИ
+          <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block h-3.5">
+            УЧАСТНИКИ ({batchGlobal.participants.length})
           </label>
-          {batchGlobal.participants.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {batchGlobal.participants.map((id) => {
-                const col = colleagues.find((c) => c.id === id);
-                if (!col) return null;
-                return (
-                  <span
-                    key={id}
-                    className="inline-flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 bg-white dark:bg-slate-800 border border-[#3373e5]/20 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548]"
-                  >
-                    <span className="w-5 h-5 rounded-full bg-[#ec4899] text-white flex items-center justify-center text-[9px] font-black shrink-0">
-                      {col.initials || "AS"}
-                    </span>
-                    <span>{col.name.split(" ")[0]}</span>
-                    <button
-                      type="button"
-                      onClick={() => onToggleParticipant(id)}
-                      className="text-[#9aa2c8] hover:text-rose-500 transition-colors"
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                );
-              })}
-            </div>
-          )}
           <div className="relative">
             <input
               type="text"
@@ -183,9 +193,9 @@ export function ProtocolHeaderDetails({
               }}
               onFocus={() => onParticipantsOpenChange(true)}
               onBlur={() =>
-                setTimeout(() => onParticipantsOpenChange(false), 150)
+                setTimeout(() => onParticipantsOpenChange(false), 200)
               }
-              className="w-full pl-5 pr-10 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+              className="w-full h-12 pl-4 pr-10 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
               placeholder="Добавить участника..."
             />
             <Search
@@ -194,35 +204,73 @@ export function ProtocolHeaderDetails({
             />
           </div>
 
+          {/* Selected participants badges placed below input */}
+          {batchGlobal.participants.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 pt-1.5">
+              {batchGlobal.participants.map((id) => {
+                const col = colleagues.find((c) => c.id === id);
+                if (!col) return null;
+                return (
+                  <Tooltip key={id} title={`${col.name} — ${col.role || "Сотрудник"}`}>
+                    <span className="inline-flex items-center gap-2 pl-1.5 pr-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100">
+                      <Avatar colleague={col} className="w-5 h-5 text-[8px]" allowPreview={false} />
+                      <span className="truncate max-w-[140px]">{col.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => onToggleParticipant(id)}
+                        className="text-slate-400 hover:text-rose-500 transition-colors cursor-pointer p-0.5 rounded-full"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          )}
+
           <AnimatePresence>
-            {participantsOpen && filteredParticipantOptions.length > 0 && (
+            {participantsOpen && (
               <motion.div
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                className="absolute z-30 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden max-h-48 overflow-y-auto"
+                className="absolute z-50 left-0 right-0 mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-64 flex flex-col"
               >
-                {filteredParticipantOptions.map((col) => (
-                  <button
-                    key={col.id}
-                    type="button"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      onToggleParticipant(col.id);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left cursor-pointer"
-                  >
-                    <Avatar colleague={col} className="w-6 h-6 text-[9px]" />
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                        {col.name}
-                      </p>
-                      <p className="text-[10px] text-slate-400 truncate">
-                        {col.role}
-                      </p>
+                <div className="overflow-y-auto flex-1 divide-y divide-slate-100/60 dark:divide-white/5">
+                  {filteredParticipantOptions.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-slate-400">
+                      {participantsQuery.trim()
+                        ? "Сотрудник не найден"
+                        : "Все доступные сотрудники уже добавлены"}
                     </div>
-                  </button>
-                ))}
+                  ) : (
+                    filteredParticipantOptions.map((col) => (
+                      <button
+                        key={col.id}
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          onToggleParticipant(col.id);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+                      >
+                        <Avatar colleague={col} className="w-7 h-7 text-[10px]" allowPreview={false} />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                            {col.name}
+                          </p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                            {col.role || "Сотрудник"}
+                          </p>
+                        </div>
+                        <span className="text-[11px] font-extrabold text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100">
+                          + Добавить
+                        </span>
+                      </button>
+                    ))
+                  )}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -230,7 +278,7 @@ export function ProtocolHeaderDetails({
 
         {/* ДАТА */}
         <div className="space-y-1.5">
-          <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
+          <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block h-3.5">
             ДАТА <span className="text-red-500">*</span>
           </label>
           <div className="relative">
@@ -244,14 +292,14 @@ export function ProtocolHeaderDetails({
               onChange={(e) =>
                 onBatchGlobalChange({ ...batchGlobal, date: e.target.value })
               }
-              className="w-full pl-10 pr-4 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+              className="w-full h-12 pl-10 pr-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
             />
           </div>
         </div>
 
         {/* НОМЕР */}
         <div className="space-y-1.5">
-          <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
+          <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block h-3.5">
             НОМЕР
           </label>
           <input
@@ -260,7 +308,7 @@ export function ProtocolHeaderDetails({
             onChange={(e) =>
               onBatchGlobalChange({ ...batchGlobal, number: e.target.value })
             }
-            className="w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+            className="w-full h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
             placeholder="№ протокола"
           />
         </div>

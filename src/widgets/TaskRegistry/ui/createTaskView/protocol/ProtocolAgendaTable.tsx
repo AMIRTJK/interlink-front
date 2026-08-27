@@ -1,8 +1,11 @@
+import * as React from "react";
 import { Plus, Trash2, Paperclip, ChevronDown, ChevronRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Select } from "antd";
+import { Tooltip } from "@shared/ui";
 import type { BatchRow, Colleague, SubRow } from "../../../model/types";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "../../../model/constants";
+import { Avatar } from "../../Avatar";
 
 interface IProps {
   colleagues: Colleague[];
@@ -31,6 +34,28 @@ export function ProtocolAgendaTable({
   onUpdateSubRow,
   onRemoveSubRow,
 }: IProps) {
+  const colleagueOptions = React.useMemo(() => {
+    return colleagues.map((c) => ({
+      value: c.id,
+      label: (
+        <div className="flex items-center gap-2 py-0.5">
+          <Avatar colleague={c} className="w-5 h-5 text-[8px]" allowPreview={false} />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">{c.name}</p>
+            <p className="text-[10px] text-slate-400 truncate">{c.role || "Сотрудник"}</p>
+          </div>
+        </div>
+      ),
+      shortLabel: (
+        <span className="inline-flex items-center gap-1.5 min-w-0">
+          <Avatar colleague={c} className="w-4 h-4 text-[7px]" allowPreview={false} />
+          <span className="truncate max-w-[95px]">{c.name.split(" ")[0]}</span>
+        </span>
+      ),
+      searchStr: `${c.name} ${c.role || ""}`.toLowerCase(),
+    }));
+  }, [colleagues]);
+
   return (
     <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-5">
       {/* Title Header with Add Row Button */}
@@ -57,7 +82,7 @@ export function ProtocolAgendaTable({
           <div className="flex-1">ПОСТАВЛЕННАЯ ЗАДАЧА / ВОПРОС</div>
           <div className="w-32 shrink-0 text-center">ПРИОРИТЕТ</div>
           <div className="w-28 shrink-0 text-center">СТАТУС</div>
-          <div className="w-44 shrink-0 text-center">ИСПОЛНИТЕЛЬ</div>
+          <div className="w-40 shrink-0 text-center">ИСПОЛНИТЕЛЬ</div>
           <div className="w-16 shrink-0 text-center">ДЕЙСТВИЯ</div>
         </div>
 
@@ -130,24 +155,30 @@ export function ProtocolAgendaTable({
                 </div>
 
                 {/* Assignee Badge Select */}
-                <div className="w-48 shrink-0">
-                  <div className="relative flex items-center">
+                <div className="w-40 shrink-0">
+                  <Tooltip
+                    title={
+                      assignedCol
+                        ? `${assignedCol.name} — ${assignedCol.role || "Сотрудник"}`
+                        : undefined
+                    }
+                  >
                     <Select
-                      value={row.assigneeId}
+                      value={row.assigneeId || undefined}
+                      placeholder="Исполнитель"
                       onChange={(val) =>
                         onUpdateBatchRow(row.id, "assigneeId", val)
                       }
-                      options={colleagues.map((c) => ({
-                        value: c.id,
-                        label: c.name,
-                      }))}
+                      showSearch
+                      optionLabelProp="shortLabel"
+                      filterOption={(input, option) =>
+                        Boolean((option as any)?.searchStr?.includes(input.toLowerCase()))
+                      }
+                      options={colleagueOptions}
                       size="small"
-                      className="w-full pl-6 text-xs font-bold [&_.ant-select-selector]:bg-white! dark:[&_.ant-select-selector]:bg-slate-800! [&_.ant-select-selector]:border-[#3373e5]/20! dark:[&_.ant-select-selector]:border-white/10! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100! [&_.ant-select-selector]:rounded-full!"
+                      className="w-full text-xs font-bold [&_.ant-select-selector]:bg-white! dark:[&_.ant-select-selector]:bg-slate-800! [&_.ant-select-selector]:border-[#3373e5]/20! dark:[&_.ant-select-selector]:border-white/10! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100! [&_.ant-select-selector]:rounded-full!"
                     />
-                    <span className="absolute left-1.5 w-4 h-4 rounded-full bg-[#ec4899] text-white flex items-center justify-center text-[8px] font-black pointer-events-none z-10">
-                      {assignedCol?.initials || "AS"}
-                    </span>
-                  </div>
+                  </Tooltip>
                 </div>
 
                 {/* Action Icons */}

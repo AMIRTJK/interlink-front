@@ -1,7 +1,9 @@
 import { Pen, Plus, CheckCircle2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Tooltip } from "@shared/ui";
 import type { Colleague } from "../../../model/types";
 import { signTimestamp } from "../../../lib/helpers";
+import { Avatar } from "../../Avatar";
 
 interface IProps {
   colleagues: Colleague[];
@@ -74,14 +76,14 @@ export function ProtocolSignatures({
           </label>
 
           {chairmanColleague ? (
-            <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-4 flex items-center gap-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
-              <span className="w-6 h-6 rounded-full bg-[#ec4899] text-white flex items-center justify-center text-[10px] font-black shrink-0">
-                {chairmanColleague.initials || "AS"}
-              </span>
-              <span className="text-xs font-bold text-[#1e2548] dark:text-slate-100">
-                {chairmanColleague.name}
-              </span>
-            </div>
+            <Tooltip title={`${chairmanColleague.name} — ${chairmanColleague.role || "Сотрудник"}`}>
+              <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-4 flex items-center gap-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
+                <Avatar colleague={chairmanColleague} className="w-6 h-6 text-[10px]" allowPreview={false} />
+                <span className="text-xs font-bold text-[#1e2548] dark:text-slate-100 truncate">
+                  {chairmanColleague.name}
+                </span>
+              </div>
+            </Tooltip>
           ) : (
             <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-5 text-center text-xs font-bold text-[#636e9c] shadow-[0_4px_16px_rgba(100,105,240,0.06)] cursor-pointer hover:bg-white flex items-center justify-center gap-1.5">
               <Plus size={14} />
@@ -167,7 +169,7 @@ export function ProtocolSignatures({
                       initial={{ opacity: 0, y: -6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -6 }}
-                      className="absolute z-30 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 rounded-2xl shadow-xl overflow-hidden max-h-48 overflow-y-auto"
+                      className="absolute z-50 left-0 right-0 mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100/60 dark:divide-white/5"
                     >
                       {filteredSecretaryOptions.map((col) => (
                         <button
@@ -180,14 +182,17 @@ export function ProtocolSignatures({
                             onSecretaryQueryChange("");
                             onSecretaryOpenChange(false);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-left cursor-pointer"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
                         >
-                          <span className="w-5 h-5 rounded-full bg-[#ec4899] text-white flex items-center justify-center text-[9px] font-black shrink-0">
-                            {col.initials || "AS"}
-                          </span>
-                          <span className="text-xs font-bold text-[#1e2548]">
-                            {col.name}
-                          </span>
+                          <Avatar colleague={col} className="w-7 h-7 text-[10px]" allowPreview={false} />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                              {col.name}
+                            </p>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                              {col.role || "Сотрудник"}
+                            </p>
+                          </div>
                         </button>
                       ))}
                     </motion.div>
@@ -205,26 +210,31 @@ export function ProtocolSignatures({
               </button>
             )
           ) : (
-            <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
-              <div className="flex items-center gap-3">
-                <span className="w-6 h-6 rounded-full bg-[#ec4899] text-white flex items-center justify-center text-[10px] font-black shrink-0">
-                  {secretaryColleague.initials || "AS"}
-                </span>
-                <span className="text-xs font-bold text-[#1e2548]">
-                  {secretaryColleague.name}
-                </span>
+            <Tooltip title={`${secretaryColleague.name} — ${secretaryColleague.role || "Сотрудник"}`}>
+              <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar colleague={secretaryColleague} className="w-7 h-7 text-[10px]" allowPreview={false} />
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-[#1e2548] dark:text-slate-100 truncate">
+                      {secretaryColleague.name}
+                    </p>
+                    <p className="text-[10px] text-slate-400 truncate">
+                      {secretaryColleague.role || "Сотрудник"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSecretaryIdChange("");
+                    onSecretarySignedChange(null);
+                  }}
+                  className="text-slate-400 hover:text-rose-500 transition-colors shrink-0"
+                >
+                  <X size={14} />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  onSecretaryIdChange("");
-                  onSecretarySignedChange(null);
-                }}
-                className="text-slate-400 hover:text-rose-500 transition-colors"
-              >
-                <X size={14} />
-              </button>
-            </div>
+            </Tooltip>
           )}
 
           {secretarySigned ? (
