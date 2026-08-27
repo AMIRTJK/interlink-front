@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Calendar } from "lucide-react";
 import { cn } from "@shared/lib";
-import { If } from "@shared/ui";
+import { If, Tooltip } from "@shared/ui";
 import type { Task } from "../../model/types";
 import { formatDueDate, getPriorityMeta, getStatusMeta, getCountdown } from "../../lib/helpers";
 import { Avatar } from "../Avatar";
@@ -28,15 +28,29 @@ export function TaskDetailRightColumn({
                 key={col.id || idx}
                 className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm shrink-0"
               >
-                <Avatar colleague={col} className="w-10 h-10 text-xs" />
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                    {col.name}
-                  </p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                    {col.role}
-                  </p>
-                </div>
+                <Avatar colleague={col} className="w-10 h-10 text-xs shrink-0" />
+                <Tooltip
+                  title={
+                    <div className="p-0.5 max-w-xs">
+                      <p className="font-bold text-xs text-white">{col.name}</p>
+                      {col.role && (
+                        <p className="text-[10px] text-slate-300 mt-0.5 font-normal">
+                          {col.role}
+                        </p>
+                      )}
+                    </div>
+                  }
+                  placement="topLeft"
+                >
+                  <div className="min-w-0 flex-1 cursor-default">
+                    <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                      {col.name}
+                    </p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                      {col.role}
+                    </p>
+                  </div>
+                </Tooltip>
               </div>
             ))}
           </div>
