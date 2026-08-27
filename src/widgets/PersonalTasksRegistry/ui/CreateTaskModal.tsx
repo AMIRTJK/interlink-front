@@ -192,15 +192,6 @@ export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving, act
             </div>
 
             <div>
-              <label className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5"><Lock size={12} /> Исполнитель</label>
-              <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-zinc-100/80 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-700 opacity-80 cursor-not-allowed select-none">
-                <span className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0 bg-zinc-500">{getInitials(userName)}</span>
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200 flex-1 truncate">{userName}</span>
-                <Lock size={14} className="text-zinc-400 flex-shrink-0" />
-              </div>
-            </div>
-
-            <div>
               <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">Теги (через запятую)</label>
               <input type="text" placeholder="backend, security" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} className="w-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-800 dark:text-slate-200" />
             </div>

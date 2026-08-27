@@ -105,14 +105,6 @@ export const TaskDetailsModal = ({ onClose, task, userName, onEditClick, activeT
             </div>
 
             <div className="space-y-4">
-              <div>
-                <h4 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5 m-0">Исполнитель</h4>
-                <div className="flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 bg-zinc-500">{getInitials(userName)}</span>
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">{userName}</span>
-                </div>
-              </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h4 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5 m-0">Срок</h4>

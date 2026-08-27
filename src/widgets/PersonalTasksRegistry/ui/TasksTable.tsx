@@ -66,7 +66,6 @@ export const TasksTable = ({ tasks, onOpen, onEdit, onDelete, userName }: IProps
               <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 min-w-[240px]">Название</th>
               <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 w-32">Приоритет</th>
               <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 w-32">Статус</th>
-              <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 w-44">Исполнитель</th>
               <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 min-w-[140px]">Прогресс</th>
               <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 min-w-[160px]">Обратный отсчёт</th>
               <th className="px-4 py-3 w-12"></th>

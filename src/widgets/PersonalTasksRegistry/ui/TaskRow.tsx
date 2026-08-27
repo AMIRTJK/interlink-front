@@ -92,13 +92,6 @@ export const TaskRow = ({ task, isSelected, onSelectToggle, onOpen, onEdit, onDe
         </span>
       </td>
 
-      <td className="px-4 py-3.5 align-top">
-        <div className="flex items-center gap-2">
-          <span className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 bg-zinc-500">{getInitials(userName)}</span>
-          <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300 truncate max-w-[120px]">{userName}</span>
-        </div>
-      </td>
-
       <td className="px-4 py-3.5 align-top min-w-[140px]">
         <div className="flex items-center gap-2">
           <div className="flex-1 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
