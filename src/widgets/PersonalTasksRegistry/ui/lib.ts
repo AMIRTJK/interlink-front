@@ -8,9 +8,18 @@ export const getUserName = (rawUser: any): string => {
 
 export const calculateStats = (tasks: IPersonalTask[]) => {
   const now = new Date().getTime();
-  const inProgress = tasks.filter((t) => ["new", "in_progress", "review"].includes(t.status) && !(t.is_overdue || (new Date(t.due_date).getTime() < now && t.status !== "completed"))).length;
+  const isTaskOverdue = (t: IPersonalTask) =>
+    t.status !== "completed" &&
+    (t.status === "overdue" ||
+      Boolean(t.is_overdue) ||
+      (Boolean(t.due_date) && new Date(t.due_date).getTime() < now));
+
+  const overdue = tasks.filter(isTaskOverdue).length;
   const completed = tasks.filter((t) => t.status === "completed").length;
-  const overdue = tasks.filter((t) => t.status === "overdue" || t.is_overdue || (new Date(t.due_date).getTime() < now && t.status !== "completed")).length;
+  const inProgress = tasks.filter(
+    (t) => ["new", "in_progress", "review"].includes(t.status) && !isTaskOverdue(t),
+  ).length;
+
   return { total: tasks.length, inProgress, completed, overdue };
 };
 
@@ -18,17 +27,26 @@ export const getFilteredTasks = (
   tasks: IPersonalTask[],
   searchQuery: string,
   filterTab: TFilterTab,
-  sortConfig: ISortConfig
+  sortConfig: ISortConfig,
 ): IPersonalTask[] => {
   const now = new Date().getTime();
   return tasks
     .filter((t) => {
       const q = searchQuery.toLowerCase();
-      const matchesSearch = t.title.toLowerCase().includes(q) || t.tags?.some((tag) => tag.toLowerCase().includes(q));
-      const isOverdue = t.status === "overdue" || t.is_overdue || (new Date(t.due_date).getTime() < now && t.status !== "completed");
+      const matchesSearch =
+        t.title.toLowerCase().includes(q) ||
+        t.tags?.some((tag) => tag.toLowerCase().includes(q));
+      const isOverdue =
+        t.status !== "completed" &&
+        (t.status === "overdue" ||
+          Boolean(t.is_overdue) ||
+          (Boolean(t.due_date) && new Date(t.due_date).getTime() < now));
+
       const matchesTab =
         filterTab === "all" ||
-        (filterTab === "active" && ["new", "in_progress", "review"].includes(t.status) && !isOverdue) ||
+        (filterTab === "active" &&
+          ["new", "in_progress", "review"].includes(t.status) &&
+          !isOverdue) ||
         (filterTab === "completed" && t.status === "completed") ||
         (filterTab === "overdue" && isOverdue);
       return matchesSearch && matchesTab;
@@ -44,8 +62,8 @@ export const getFilteredTasks = (
         const diff = (ranks[a.status] || 1) - (ranks[b.status] || 1);
         return sortConfig.order === "asc" ? diff : -diff;
       }
-      const valA = new Date(a.due_date).getTime();
-      const valB = new Date(b.due_date).getTime();
+      const valA = a.due_date ? new Date(a.due_date).getTime() : 0;
+      const valB = b.due_date ? new Date(b.due_date).getTime() : 0;
       return sortConfig.order === "asc" ? valA - valB : valB - valA;
     });
 };
