@@ -1,7 +1,7 @@
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Search, Tag } from "lucide-react";
-import { DatePicker, ConfigProvider } from "antd";
+import { DatePicker, Select, ConfigProvider } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
 import { cn } from "@shared/lib";
@@ -168,66 +168,64 @@ export function PersonalTaskForm({
 
         {/* Right container */}
         <div className="lg:col-span-1 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-4">
-          {/* PRIORITY */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
-              ПРИОРИТЕТ
-            </label>
-            <select
-              value={formPriority}
-              onChange={(e) => onFormPriorityChange(e.target.value as Priority)}
-              className="w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 cursor-pointer shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
-            >
-              {PRIORITY_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* STATUS */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
-              СТАТУС
-            </label>
-            <select
-              value={formStatus}
-              onChange={(e) => onFormStatusChange(e.target.value as TaskStatus)}
-              className="w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 cursor-pointer shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
-            >
-              {STATUS_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* DUE DATE */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
-              СРОК ВЫПОЛНЕНИЯ
-            </label>
-            <ConfigProvider
-              theme={{
-                token: {
-                  borderRadius: 16,
-                  controlHeight: 46,
-                  fontSize: 12,
-                  colorPrimary: "#3373e5",
-                  colorBgContainer: "transparent",
+          <ConfigProvider
+            theme={{
+              token: {
+                borderRadius: 16,
+                controlHeight: 46,
+                fontSize: 12,
+                colorPrimary: "#3373e5",
+                colorBgContainer: "transparent",
+              },
+              components: {
+                DatePicker: {
+                  cellWidth: 24,
+                  cellHeight: 18,
+                  cellFontSize: 10,
+                  headerMarginBottom: 0,
                 },
-                components: {
-                  DatePicker: {
-                    cellWidth: 24,
-                    cellHeight: 18,
-                    cellFontSize: 10,
-                    headerMarginBottom: 0,
-                  },
-                },
-              }}
-            >
+              },
+            }}
+          >
+            {/* PRIORITY */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
+                ПРИОРИТЕТ
+              </label>
+              <Select
+                value={formPriority}
+                onChange={(val) => onFormPriorityChange(val as Priority)}
+                options={PRIORITY_OPTIONS.map((opt) => ({
+                  value: opt.value,
+                  label: opt.label,
+                }))}
+                className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)] [&_.ant-select-selector]:border-none! [&_.ant-select-selector]:bg-transparent! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100!"
+                getPopupContainer={(trigger) => (trigger.parentElement as HTMLElement) || document.body}
+              />
+            </div>
+
+            {/* STATUS */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
+                СТАТУС
+              </label>
+              <Select
+                value={formStatus}
+                onChange={(val) => onFormStatusChange(val as TaskStatus)}
+                options={STATUS_OPTIONS.map((opt) => ({
+                  value: opt.value,
+                  label: opt.label,
+                }))}
+                className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)] [&_.ant-select-selector]:border-none! [&_.ant-select-selector]:bg-transparent! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100!"
+                getPopupContainer={(trigger) => (trigger.parentElement as HTMLElement) || document.body}
+              />
+            </div>
+
+            {/* DUE DATE */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
+                СРОК ВЫПОЛНЕНИЯ
+              </label>
               <DatePicker
                 value={formDueDate ? dayjs(formDueDate) : null}
                 onChange={(d) => onFormDueDateChange(d ? d.format("YYYY-MM-DD") : "")}
@@ -238,8 +236,8 @@ export function PersonalTaskForm({
                 getPopupContainer={(trigger) => (trigger.parentElement as HTMLElement) || document.body}
                 className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
               />
-            </ConfigProvider>
-          </div>
+            </div>
+          </ConfigProvider>
 
           {/* TAGS */}
           <div className="space-y-1.5">

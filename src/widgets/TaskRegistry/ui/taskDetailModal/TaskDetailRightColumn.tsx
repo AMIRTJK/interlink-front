@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Calendar } from "lucide-react";
+import { Select, ConfigProvider } from "antd";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
 import type { Task, TaskStatus } from "../../model/types";
@@ -59,25 +60,34 @@ export function TaskDetailRightColumn({
             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
               Статус
             </label>
-            <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10">
+            <div className="flex items-center gap-2 px-3 py-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10">
               <div
                 className={cn(
                   "w-2 h-2 rounded-full shrink-0",
                   getStatusMeta(task.status).color,
                 )}
               />
-              <select
-                value={task.status}
-                disabled={busy || !onStatusChange}
-                onChange={(e) => onHandleStatus(e.target.value as TaskStatus)}
-                className="flex-1 min-w-0 bg-transparent border-none outline-none text-xs font-bold text-slate-700 dark:text-slate-200 focus:ring-0 cursor-pointer disabled:cursor-default"
+              <ConfigProvider
+                theme={{
+                  token: {
+                    fontSize: 12,
+                    colorPrimary: "#3373e5",
+                  },
+                }}
               >
-                {STATUS_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+                <Select
+                  value={task.status}
+                  disabled={busy || !onStatusChange}
+                  onChange={(val) => onHandleStatus(val as TaskStatus)}
+                  options={STATUS_OPTIONS.map((opt) => ({
+                    value: opt.value,
+                    label: opt.label,
+                  }))}
+                  variant="borderless"
+                  className="flex-1 min-w-0 font-bold text-xs [&_.ant-select-selection-item]:font-bold! [&_.ant-select-selection-item]:text-slate-700! dark:[&_.ant-select-selection-item]:text-slate-200!"
+                  getPopupContainer={(trigger) => (trigger.parentElement as HTMLElement) || document.body}
+                />
+              </ConfigProvider>
             </div>
           </div>
         </div>
