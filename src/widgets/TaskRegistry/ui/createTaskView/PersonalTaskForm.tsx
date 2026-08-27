@@ -232,7 +232,6 @@ export function PersonalTaskForm({
                   label: opt.label,
                 }))}
                 className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)] [&_.ant-select-selector]:border-none! [&_.ant-select-selector]:bg-transparent! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100!"
-                getPopupContainer={(trigger) => (trigger.parentElement as HTMLElement) || document.body}
               />
             </div>
 
@@ -249,7 +248,6 @@ export function PersonalTaskForm({
                   label: opt.label,
                 }))}
                 className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)] [&_.ant-select-selector]:border-none! [&_.ant-select-selector]:bg-transparent! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100!"
-                getPopupContainer={(trigger) => (trigger.parentElement as HTMLElement) || document.body}
               />
             </div>
 
@@ -265,7 +263,6 @@ export function PersonalTaskForm({
                 placeholder="Выберите срок"
                 allowClear
                 placement="bottomLeft"
-                getPopupContainer={(trigger) => (trigger.parentElement as HTMLElement) || document.body}
                 className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
               />
             </div>
@@ -352,6 +349,46 @@ export function PersonalTaskForm({
                 placeholder="Поиск коллеги..."
               />
               <Search size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9aa2c8] pointer-events-none" />
+
+              <AnimatePresence>
+                {assigneeOpen && filteredColleagues.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto"
+                  >
+                    {filteredColleagues.map((col) => (
+                      <div
+                        key={col.id}
+                        className="w-full flex items-center gap-3 px-3.5 py-2 hover:bg-indigo-50/70 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+                      >
+                        <div
+                          onMouseDown={(e) => {
+                            e.stopPropagation();
+                          }}
+                        >
+                          <Avatar colleague={col} className="w-7 h-7 text-[10px]" />
+                        </div>
+                        <div
+                          className="min-w-0 flex-1"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            onToggleAssignee(col.id);
+                          }}
+                        >
+                          <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                            {col.name}
+                          </p>
+                          <p className="text-[10px] text-slate-400 truncate">
+                            {col.role}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <div className="min-h-[28px] flex items-center">
@@ -420,46 +457,6 @@ export function PersonalTaskForm({
                 );
               })() : null}
             </div>
-
-            <AnimatePresence>
-              {assigneeOpen && filteredColleagues.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: -6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  className="absolute z-50 left-0 right-0 mt-1 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto"
-                >
-                  {filteredColleagues.map((col) => (
-                    <div
-                      key={col.id}
-                      className="w-full flex items-center gap-3 px-3.5 py-2 hover:bg-indigo-50/70 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
-                    >
-                      <div
-                        onMouseDown={(e) => {
-                          e.stopPropagation();
-                        }}
-                      >
-                        <Avatar colleague={col} className="w-7 h-7 text-[10px]" />
-                      </div>
-                      <div
-                        className="min-w-0 flex-1"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          onToggleAssignee(col.id);
-                        }}
-                      >
-                        <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                          {col.name}
-                        </p>
-                        <p className="text-[10px] text-slate-400 truncate">
-                          {col.role}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
         </div>
       </div>
