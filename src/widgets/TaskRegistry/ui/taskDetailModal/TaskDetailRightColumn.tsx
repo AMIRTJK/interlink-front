@@ -1,28 +1,19 @@
 import * as React from "react";
 import { Calendar } from "lucide-react";
-import { Select, ConfigProvider } from "antd";
 import { cn } from "@shared/lib";
 import { If } from "@shared/ui";
-import type { Task, TaskStatus } from "../../model/types";
-import { FORM_STATUS_OPTIONS } from "../../model/constants";
+import type { Task } from "../../model/types";
 import { formatDueDate, getPriorityMeta, getStatusMeta, getCountdown } from "../../lib/helpers";
 import { Avatar } from "../Avatar";
 import { CountdownTimer } from "../Countdown";
 
-interface IProps {
-  task: Task;
-  busy: boolean;
-  onStatusChange?: (task: Task, status: TaskStatus) => Promise<void> | void;
-  onHandleStatus: (status: TaskStatus) => void;
-}
-
 export function TaskDetailRightColumn({
   task,
-  busy,
-  onStatusChange,
-  onHandleStatus,
-}: IProps) {
+}: {
+  task: Task;
+}) {
   const pMeta = getPriorityMeta(task.priority);
+  const sMeta = getStatusMeta(task.status);
 
   return (
     <div className="w-80 p-8 space-y-6 bg-slate-50/50 dark:bg-slate-800/40">
@@ -60,39 +51,11 @@ export function TaskDetailRightColumn({
             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
               Статус
             </label>
-            <div className="flex items-center gap-2 px-3 py-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10">
-              <div
-                className={cn(
-                  "w-2 h-2 rounded-full shrink-0",
-                  getStatusMeta(task.status).color,
-                )}
-              />
-              <ConfigProvider
-                theme={{
-                  token: {
-                    fontSize: 12,
-                    colorPrimary: "#3373e5",
-                  },
-                }}
-              >
-                <Select
-                  value={task.status}
-                  disabled={busy || !onStatusChange}
-                  onChange={(val) => onHandleStatus(val as TaskStatus)}
-                  options={FORM_STATUS_OPTIONS.map((opt) => ({
-                    value: opt.value,
-                    label: (
-                      <div className="flex items-center gap-2">
-                        <span className={cn("w-2 h-2 rounded-full shrink-0", opt.dotBg)} />
-                        <span className="font-semibold">{opt.label}</span>
-                      </div>
-                    ),
-                  }))}
-                  variant="borderless"
-                  className="flex-1 min-w-0 font-bold text-xs [&_.ant-select-selection-item]:font-bold! [&_.ant-select-selection-item]:text-slate-700! dark:[&_.ant-select-selection-item]:text-slate-200!"
-                  getPopupContainer={(trigger) => (trigger.parentElement as HTMLElement) || document.body}
-                />
-              </ConfigProvider>
+            <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10">
+              <div className={cn("w-2 h-2 rounded-full", sMeta.color)} />
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                {sMeta.label}
+              </span>
             </div>
           </div>
         </div>

@@ -16,12 +16,13 @@ export const STATUS_OPTIONS = [
   { value: "overdue", label: "Просрочена", color: "bg-red-500", dotBg: "bg-red-500", rank: 0 },
 ] as const;
 
-/** Статусы для выбора в формах и карточках (без автоматического 'Просрочена') */
+/** Статусы для выбора в формах и карточках */
 export const FORM_STATUS_OPTIONS = [
   { value: "new", label: "Новая", dotBg: "bg-sky-500", color: "bg-sky-500", textColor: "text-sky-600 dark:text-sky-400" },
   { value: "in_progress", label: "В работе", dotBg: "bg-indigo-500", color: "bg-indigo-500", textColor: "text-indigo-600 dark:text-indigo-400" },
   { value: "review", label: "На проверке", dotBg: "bg-purple-500", color: "bg-purple-500", textColor: "text-purple-600 dark:text-purple-400" },
   { value: "completed", label: "Завершена", dotBg: "bg-emerald-500", color: "bg-emerald-500", textColor: "text-emerald-600 dark:text-emerald-400" },
+  { value: "overdue", label: "Просрочена", dotBg: "bg-rose-500", color: "bg-rose-500", textColor: "text-rose-600 dark:text-rose-400" },
 ] as const;
 
 export const STAT_CARDS = [
