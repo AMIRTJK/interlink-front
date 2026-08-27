@@ -30,10 +30,18 @@ export const UserAvatar = ({
   allowPreview = true,
 }: IProps) => {
   const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [scale, setScale] = useState(1);
 
-  const photo = user?.photo_url || resolveFilePhotoUrl(user?.photo_path);
+  const rawPhoto =
+    user?.photo_url ||
+    user?.photo_path ||
+    (user as any)?.avatar ||
+    (user as any)?.photo ||
+    (user as any)?.avatar_url ||
+    (user as any)?.profile_photo_url;
+  const photo = resolveFilePhotoUrl(rawPhoto);
   const colorClass = AVATAR_COLORS[(user?.id ?? 0) % AVATAR_COLORS.length];
   const ringClass = ring ? "ring-2 ring-white dark:ring-slate-900" : "";
   const initials = getUserInitials(user);
@@ -86,13 +94,24 @@ export const UserAvatar = ({
           allowPreview ? "cursor-pointer" : ""
         } ${className}`}
       >
+        {!loaded && (
+          <div
+            className="absolute inset-0 rounded-full animate-pulse bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-400 dark:text-zinc-500"
+            style={{ fontSize: Math.round(size * 0.38) }}
+          >
+            {initials}
+          </div>
+        )}
         <img
           src={photo}
           alt={initials}
+          onLoad={() => setLoaded(true)}
           onError={() => setFailed(true)}
-          className="w-full h-full rounded-full object-cover"
+          className={`w-full h-full rounded-full object-cover transition-opacity duration-200 ${
+            loaded ? "opacity-100" : "opacity-0"
+          }`}
         />
-        {allowPreview && (
+        {allowPreview && loaded && (
           <div className="absolute inset-0 bg-black/45 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-150">
             <Search
               size={Math.max(12, Math.round(size * 0.35))}

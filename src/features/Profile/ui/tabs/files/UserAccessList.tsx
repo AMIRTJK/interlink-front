@@ -71,8 +71,28 @@ export const UserAccessList = ({ selectedUsers, onToggleUser, excludeUserIds }: 
 
       <div className="space-y-1 max-h-[460px]! overflow-y-auto pr-1">
         <If is={isLoading}>
-          <div className="flex items-center justify-center py-8 text-xs text-slate-400">
-            Загрузка...
+          <div className="space-y-1">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between p-3 rounded-2xl animate-pulse"
+              >
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 shrink-0" />
+                  <div className="space-y-2 flex-1 min-w-0">
+                    <div
+                      className="h-3.5 bg-slate-200 dark:bg-slate-800 rounded-md"
+                      style={{ width: `${45 + (idx % 4) * 15}%` }}
+                    />
+                    <div
+                      className="h-2.5 bg-slate-200/70 dark:bg-slate-800/70 rounded-md"
+                      style={{ width: `${25 + (idx % 3) * 18}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="w-5 h-5 rounded-full bg-slate-200/70 dark:bg-slate-800/70 shrink-0 ml-3" />
+              </div>
+            ))}
           </div>
         </If>
 
