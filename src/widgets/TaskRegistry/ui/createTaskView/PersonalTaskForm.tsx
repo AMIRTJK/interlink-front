@@ -211,7 +211,6 @@ export function PersonalTaskForm({
                 DatePicker: {
                   cellWidth: 24,
                   cellHeight: 18,
-                  cellFontSize: 10,
                   headerMarginBottom: 0,
                 },
               },
