@@ -58,7 +58,7 @@ export function useCreateTaskState({
   const [formAssignees, setFormAssignees] = React.useState<string[]>(
     editTask
       ? editTask.assignees.map((a) => a.id).filter(Boolean)
-      : [firstId],
+      : [],
   );
   const [assigneeQuery, setAssigneeQuery] = React.useState("");
   const [assigneeOpen, setAssigneeOpen] = React.useState(false);
