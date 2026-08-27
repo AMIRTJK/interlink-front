@@ -229,7 +229,12 @@ export function PersonalTaskForm({
                 onChange={(val) => onFormPriorityChange(val as Priority)}
                 options={PRIORITY_OPTIONS.map((opt) => ({
                   value: opt.value,
-                  label: opt.label,
+                  label: (
+                    <div className="flex items-center gap-2">
+                      <span className={cn("w-2 h-2 rounded-full shrink-0", opt.dotBg)} />
+                      <span className="font-semibold">{opt.label}</span>
+                    </div>
+                  ),
                 }))}
                 className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)] [&_.ant-select-selector]:border-none! [&_.ant-select-selector]:bg-transparent! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100!"
               />
@@ -245,7 +250,12 @@ export function PersonalTaskForm({
                 onChange={(val) => onFormStatusChange(val as TaskStatus)}
                 options={FORM_STATUS_OPTIONS.map((opt) => ({
                   value: opt.value,
-                  label: opt.label,
+                  label: (
+                    <div className="flex items-center gap-2">
+                      <span className={cn("w-2 h-2 rounded-full shrink-0", opt.dotBg)} />
+                      <span className="font-semibold">{opt.label}</span>
+                    </div>
+                  ),
                 }))}
                 className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)] [&_.ant-select-selector]:border-none! [&_.ant-select-selector]:bg-transparent! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100!"
               />

@@ -81,7 +81,12 @@ export function TaskDetailRightColumn({
                   onChange={(val) => onHandleStatus(val as TaskStatus)}
                   options={FORM_STATUS_OPTIONS.map((opt) => ({
                     value: opt.value,
-                    label: opt.label,
+                    label: (
+                      <div className="flex items-center gap-2">
+                        <span className={cn("w-2 h-2 rounded-full shrink-0", opt.dotBg)} />
+                        <span className="font-semibold">{opt.label}</span>
+                      </div>
+                    ),
                   }))}
                   variant="borderless"
                   className="flex-1 min-w-0 font-bold text-xs [&_.ant-select-selection-item]:font-bold! [&_.ant-select-selection-item]:text-slate-700! dark:[&_.ant-select-selection-item]:text-slate-200!"
