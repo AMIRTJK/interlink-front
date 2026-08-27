@@ -95,6 +95,28 @@ export function PersonalTaskForm({
   onSave,
   isSaving,
 }: IProps) {
+  const assigneeDropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!assigneeOpen) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        assigneeDropdownRef.current?.contains(target) ||
+        target?.closest("[data-avatar-preview-portal]")
+      ) {
+        return;
+      }
+      onAssigneeOpenChange(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [assigneeOpen, onAssigneeOpenChange]);
+
   const filteredColleagues = React.useMemo(() => {
     const q = assigneeQuery.trim().toLowerCase();
     const result: Colleague[] = [];
@@ -311,7 +333,7 @@ export function PersonalTaskForm({
           </div>
 
           {/* ASSIGNEES */}
-          <div className="space-y-2 relative">
+          <div ref={assigneeDropdownRef} className="space-y-2 relative">
             <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
               ИСПОЛНИТЕЛИ
             </label>
@@ -325,7 +347,7 @@ export function PersonalTaskForm({
                   onAssigneeOpenChange(true);
                 }}
                 onFocus={() => onAssigneeOpenChange(true)}
-                onBlur={() => setTimeout(() => onAssigneeOpenChange(false), 150)}
+                onClick={() => onAssigneeOpenChange(true)}
                 className="w-full pl-5 pr-10 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
                 placeholder="Поиск коллеги..."
               />
@@ -348,7 +370,7 @@ export function PersonalTaskForm({
                           key={id}
                           className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-white dark:bg-slate-800 border border-[#3373e5]/20 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100 shrink-0"
                         >
-                          <Avatar colleague={col} className="w-5 h-5 text-[8px]" allowPreview={false} />
+                          <Avatar colleague={col} className="w-5 h-5 text-[8px]" />
                           <span className="truncate max-w-[80px]">{col.name.split(" ")[0]}</span>
                           <button
                             type="button"
@@ -373,7 +395,7 @@ export function PersonalTaskForm({
                                   className="flex items-center justify-between gap-3 text-xs p-1 rounded-lg hover:bg-white/10 transition-colors"
                                 >
                                   <div className="flex items-center gap-2 min-w-0">
-                                    <Avatar colleague={col} className="w-5 h-5 text-[8px]" allowPreview={false} />
+                                    <Avatar colleague={col} className="w-5 h-5 text-[8px]" />
                                     <span className="truncate font-medium text-white">{col.name}</span>
                                   </div>
                                   <button
@@ -408,16 +430,24 @@ export function PersonalTaskForm({
                   className="absolute z-50 left-0 right-0 mt-1 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto"
                 >
                   {filteredColleagues.map((col) => (
-                    <button
+                    <div
                       key={col.id}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        onToggleAssignee(col.id);
-                      }}
                       className="w-full flex items-center gap-3 px-3.5 py-2 hover:bg-indigo-50/70 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
                     >
-                      <Avatar colleague={col} className="w-7 h-7 text-[10px]" allowPreview={false} />
-                      <div className="min-w-0 flex-1">
+                      <div
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                        }}
+                      >
+                        <Avatar colleague={col} className="w-7 h-7 text-[10px]" />
+                      </div>
+                      <div
+                        className="min-w-0 flex-1"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          onToggleAssignee(col.id);
+                        }}
+                      >
                         <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
                           {col.name}
                         </p>
@@ -425,7 +455,7 @@ export function PersonalTaskForm({
                           {col.role}
                         </p>
                       </div>
-                    </button>
+                    </div>
                   ))}
                 </motion.div>
               )}

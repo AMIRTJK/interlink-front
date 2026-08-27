@@ -56,6 +56,7 @@ export const Avatar = ({
 
   const handleAvatarClick = (e: MouseEvent) => {
     if (!allowPreview) return;
+    e.preventDefault();
     e.stopPropagation();
     setScale(1);
     setShowPreview(true);
@@ -86,6 +87,12 @@ export const Avatar = ({
     <>
       <div
         onClick={handleAvatarClick}
+        onMouseDown={(e) => {
+          if (allowPreview) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
         className={cn(
           "group/taskavatar relative aspect-square rounded-full shrink-0 select-none overflow-hidden",
           className || "w-8 h-8",
@@ -122,7 +129,8 @@ export const Avatar = ({
         typeof document !== "undefined" &&
         createPortal(
           <div
-            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center p-4 bg-black/75 backdrop-blur-md select-none"
+            data-avatar-preview-portal="true"
+            className="fixed inset-0 z-[99999] flex flex-col items-center justify-center p-4 bg-black/75 backdrop-blur-md select-none animate-in fade-in duration-150"
             onClick={(e) => {
               e.stopPropagation();
               setShowPreview(false);
@@ -143,7 +151,7 @@ export const Avatar = ({
 
             {/* Панель управления масштабом */}
             <div
-              className="fixed bottom-6 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-2 rounded-2xl border border-white/20 shadow-2xl z-[10000]"
+              className="fixed bottom-6 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-2 rounded-2xl border border-white/20 shadow-2xl z-[100000]"
               onClick={(e) => e.stopPropagation()}
             >
               <button
