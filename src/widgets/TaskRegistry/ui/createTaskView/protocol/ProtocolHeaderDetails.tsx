@@ -42,6 +42,22 @@ export function ProtocolHeaderDetails({
   onChairmanSelectOpenChange,
 }: IProps) {
   const [chairmanSearch, setChairmanSearch] = React.useState("");
+  const chairmanRef = React.useRef<HTMLDivElement>(null);
+  const participantsRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (chairmanRef.current && !chairmanRef.current.contains(target)) {
+        onChairmanSelectOpenChange(false);
+      }
+      if (participantsRef.current && !participantsRef.current.contains(target)) {
+        onParticipantsOpenChange(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onChairmanSelectOpenChange, onParticipantsOpenChange]);
 
   const chairmanColleague =
     colleagues.find((c) => c.id === batchGlobal.chairmanId) || null;
@@ -79,7 +95,7 @@ export function ProtocolHeaderDetails({
       {/* 2x2 Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         {/* ПРЕДСЕДАТЕЛЬ */}
-        <div className="space-y-1.5 relative">
+        <div ref={chairmanRef} className="space-y-1.5 relative">
           <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block h-3.5">
             ПРЕДСЕДАТЕЛЬ <span className="text-red-500">*</span>
           </label>
@@ -179,7 +195,7 @@ export function ProtocolHeaderDetails({
         </div>
 
         {/* УЧАСТНИКИ */}
-        <div className="space-y-1.5 relative">
+        <div ref={participantsRef} className="space-y-1.5 relative">
           <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block h-3.5">
             УЧАСТНИКИ ({batchGlobal.participants.length})
           </label>
@@ -192,9 +208,7 @@ export function ProtocolHeaderDetails({
                 onParticipantsOpenChange(true);
               }}
               onFocus={() => onParticipantsOpenChange(true)}
-              onBlur={() =>
-                setTimeout(() => onParticipantsOpenChange(false), 200)
-              }
+              onClick={() => onParticipantsOpenChange(true)}
               className="w-full h-12 pl-4 pr-10 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
               placeholder="Добавить участника..."
             />

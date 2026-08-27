@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Pen, Plus, CheckCircle2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip } from "@shared/ui";
@@ -40,6 +41,18 @@ export function ProtocolSignatures({
   secretaryOpen,
   onSecretaryOpenChange,
 }: IProps) {
+  const secretaryRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (secretaryRef.current && !secretaryRef.current.contains(e.target as Node)) {
+        onSecretaryOpenChange(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onSecretaryOpenChange]);
+
   const filteredSecretaryOptions = colleagues.filter(
     (c) =>
       c.id !== secretaryId &&
@@ -140,7 +153,7 @@ export function ProtocolSignatures({
           )}
         </div>
 
-        <div className="space-y-3 relative">
+        <div ref={secretaryRef} className="space-y-3 relative">
           <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] block">
             СЕКРЕТАРЬ
           </label>
@@ -157,9 +170,7 @@ export function ProtocolSignatures({
                     onSecretaryOpenChange(true);
                   }}
                   onFocus={() => onSecretaryOpenChange(true)}
-                  onBlur={() =>
-                    setTimeout(() => onSecretaryOpenChange(false), 150)
-                  }
+                  onClick={() => onSecretaryOpenChange(true)}
                   className="w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
                   placeholder="Выберите секретаря..."
                 />
