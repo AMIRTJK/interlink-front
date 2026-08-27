@@ -108,7 +108,16 @@ const BoardCard = ({
               {task.attachments.length}
             </span>
           )}
-          <Avatar colleague={task.assignee} className="w-6 h-6 text-[9px]" />
+          <div className="flex items-center -space-x-1.5 shrink-0">
+            {((task.assignees && task.assignees.length > 0) ? task.assignees.slice(0, 2) : [task.assignee]).map((a, i) => (
+              <Avatar key={a.id || i} colleague={a} className="w-6 h-6 text-[9px] ring-1.5 ring-white dark:ring-slate-800" />
+            ))}
+            {task.assignees && task.assignees.length > 2 && (
+              <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-extrabold text-[8px] flex items-center justify-center ring-1.5 ring-white dark:ring-slate-800">
+                +{task.assignees.length - 2}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </div>

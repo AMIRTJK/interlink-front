@@ -140,13 +140,26 @@ export const TaskListView = ({
                     {/* ASSIGNEE */}
                     <td className="px-4 py-3.5 text-left">
                       <div className="flex items-center gap-3">
-                        <Avatar colleague={task.assignee} className="w-8 h-8 text-xs font-bold" />
-                        <div className="flex flex-col leading-tight">
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-100">
-                            {task.assignee.name}
+                        <div className="flex items-center -space-x-2 shrink-0">
+                          {((task.assignees && task.assignees.length > 0) ? task.assignees.slice(0, 2) : [task.assignee]).map((a, i) => (
+                            <Avatar key={a.id || i} colleague={a} className="w-8 h-8 text-xs font-bold ring-2 ring-white dark:ring-slate-800" />
+                          ))}
+                          {task.assignees && task.assignees.length > 2 && (
+                            <span className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-extrabold text-[10px] flex items-center justify-center ring-2 ring-white dark:ring-slate-800 shadow-xs">
+                              +{task.assignees.length - 2}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-col leading-tight min-w-0">
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate max-w-[150px]">
+                            {task.assignees && task.assignees.length > 1
+                              ? `${task.assignees[0].name.split(" ")[0]} +${task.assignees.length - 1}`
+                              : task.assignee.name}
                           </span>
-                          <span className="text-[10px] text-slate-400 font-medium">
-                            {task.assignee.role}
+                          <span className="text-[10px] text-slate-400 font-medium truncate max-w-[150px]">
+                            {task.assignees && task.assignees.length > 1
+                              ? `${task.assignees.length} исполнителя`
+                              : task.assignee.role}
                           </span>
                         </div>
                       </div>

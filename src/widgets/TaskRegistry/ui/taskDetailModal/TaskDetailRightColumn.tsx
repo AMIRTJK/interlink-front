@@ -20,18 +20,25 @@ export function TaskDetailRightColumn({
       <div className="space-y-4">
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Исполнитель
+            {(task.assignees && task.assignees.length > 1) ? "Исполнители" : "Исполнитель"}
           </label>
-          <div className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
-            <Avatar colleague={task.assignee} className="w-10 h-10 text-xs" />
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                {task.assignee.name}
-              </p>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                {task.assignee.role}
-              </p>
-            </div>
+          <div className="flex flex-col gap-2">
+            {((task.assignees && task.assignees.length > 0) ? task.assignees : [task.assignee]).map((col, idx) => (
+              <div
+                key={col.id || idx}
+                className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm"
+              >
+                <Avatar colleague={col} className="w-10 h-10 text-xs" />
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                    {col.name}
+                  </p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                    {col.role}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
