@@ -101,8 +101,9 @@ export const resolveFilePhotoUrl = (path?: string | null): string => {
   }
   const apiHost = getEnvVar("VITE_API_URL") || "";
   const host = apiHost.endsWith("/") ? apiHost.slice(0, -1) : apiHost;
-  const p = path.startsWith("/") ? path : `/${path}`;
-  return `${host}${p}`;
+  let p = path.replace(/^\/+/, "");
+  if (!p.startsWith("storage/")) p = `storage/${p}`;
+  return `${host}/${p}`;
 };
 
 export const getUserFullName = (user?: IFileUser | null): string => {

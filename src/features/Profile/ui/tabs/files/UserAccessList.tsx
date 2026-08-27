@@ -4,6 +4,7 @@ import { If } from "@shared/ui";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { IAdminUser } from "@entities/hr/model";
+import { UserAvatar } from "./UserAvatar";
 
 interface IApiUsersResponse {
   success: boolean;
@@ -20,27 +21,8 @@ interface IProps {
   excludeUserIds?: number[];
 }
 
-const getInitials = (user: IAdminUser): string => {
-  const first = user.first_name?.[0] ?? "";
-  const last = user.last_name?.[0] ?? "";
-  return (first + last).toUpperCase() || "?";
-};
-
 const getFullName = (user: IAdminUser): string =>
   [user.last_name, user.first_name].filter(Boolean).join(" ") || user.full_name || "—";
-
-const AVATAR_COLORS = [
-  "bg-indigo-500!",
-  "bg-emerald-500!",
-  "bg-rose-500!",
-  "bg-amber-500!",
-  "bg-sky-500!",
-  "bg-purple-500!",
-  "bg-teal-500!",
-  "bg-pink-500!",
-];
-
-const getAvatarColor = (id: number): string => AVATAR_COLORS[id % AVATAR_COLORS.length];
 
 export const UserAccessList = ({ selectedUsers, onToggleUser, excludeUserIds }: IProps) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -111,11 +93,7 @@ export const UserAccessList = ({ selectedUsers, onToggleUser, excludeUserIds }: 
                   className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <div
-                      className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold text-white! ${getAvatarColor(user.id)}`}
-                    >
-                      {getInitials(user)}
-                    </div>
+                    <UserAvatar user={user} size={40} />
                     <div className="min-w-0">
                       <div className="text-sm font-bold text-slate-700 dark:text-zinc-300 truncate">
                         {getFullName(user)}
