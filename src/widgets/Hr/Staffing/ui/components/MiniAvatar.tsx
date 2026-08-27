@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Search, X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { resolvePhotoUrl } from '../../model';
 
 export interface IMiniAvatarProps {
   photo?: string;
@@ -22,6 +23,8 @@ export const MiniAvatar = ({
   const [showPreview, setShowPreview] = useState(false);
   const [scale, setScale] = useState(1);
 
+  const resolvedPhoto = resolvePhotoUrl(photo);
+
   const cls =
     size === 'xs'
       ? 'w-5 h-5 text-[9px]'
@@ -29,11 +32,11 @@ export const MiniAvatar = ({
       ? 'w-9 h-9 text-sm'
       : 'w-7 h-7 text-xs';
 
-  if (err || !photo) {
+  if (err || !resolvedPhoto) {
     return (
       <div
         className={`${cls} aspect-square rounded-full flex items-center justify-center text-white font-bold shrink-0 select-none`}
-        style={{ backgroundColor: color }}
+        style={{ backgroundColor: color || '#6366f1' }}
       >
         {initials}
       </div>
@@ -72,20 +75,19 @@ export const MiniAvatar = ({
     <>
       <div
         onClick={handleAvatarClick}
-        className={`group/avatar relative ${cls} aspect-square rounded-full shrink-0 overflow-hidden ${
+        className={`group/avatar relative ${cls} aspect-square rounded-full shrink-0 select-none overflow-hidden ${
           allowPreview ? 'cursor-pointer' : ''
         }`}
       >
         {!loaded && (
           <div
-            className="absolute inset-0 rounded-full animate-pulse flex items-center justify-center text-white/80 font-bold"
-            style={{ backgroundColor: color || '#6366f1' }}
+            className={`absolute inset-0 rounded-full animate-pulse bg-gray-200 dark:bg-gray-800 flex items-center justify-center font-bold text-gray-400 dark:text-gray-500`}
           >
             {initials}
           </div>
         )}
         <img
-          src={photo}
+          src={resolvedPhoto}
           alt={initials}
           onLoad={() => setLoaded(true)}
           onError={() => setErr(true)}
