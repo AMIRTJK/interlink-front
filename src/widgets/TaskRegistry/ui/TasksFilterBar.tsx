@@ -42,7 +42,7 @@ const customAntdTheme = {
   },
 };
 
-export const TasksFilterBar = ({
+export const TasksFilterBar = React.memo(({
   filters,
   onFilterChange,
   stats,
@@ -247,4 +247,4 @@ export const TasksFilterBar = ({
       </div>
     </div>
   );
-};
+});
