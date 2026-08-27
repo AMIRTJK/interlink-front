@@ -4,7 +4,7 @@ import { Select, DatePicker, ConfigProvider } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
 import { cn, useDebouncedCallback } from "@shared/lib";
-import { If } from "@shared/ui";
+import { If, Tooltip } from "@shared/ui";
 import type { Colleague, Priority, TaskStatsFull, TaskStatus } from "../model/types";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "../model/constants";
 import {
@@ -75,50 +75,54 @@ export const TasksFilterBar = React.memo(({
         {/* Row 1: Filter Dropdowns Bar */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Priority filter pill */}
-          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
-            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Приоритет:</span>
-            <Select
-              variant="borderless"
-              value={filters.priority || undefined}
-              placeholder="Все приоритеты"
-              onChange={(val) => onFilterChange({ priority: (val || "") as Priority })}
-              allowClear
-              options={PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-              className="min-w-[130px] font-bold text-slate-700 dark:text-slate-100"
-            />
-          </div>
+          <Tooltip title={PRIORITY_OPTIONS.find((o) => o.value === filters.priority)?.label}>
+            <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
+              <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Приоритет:</span>
+              <Select
+                variant="borderless"
+                value={filters.priority || undefined}
+                placeholder="Все приоритеты"
+                onChange={(val) => onFilterChange({ priority: (val || "") as Priority })}
+                allowClear
+                options={PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                className="w-[130px] font-bold text-slate-700 dark:text-slate-100"
+              />
+            </div>
+          </Tooltip>
 
           {/* Assignee filter pill */}
-          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
-            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Исполнитель:</span>
-            <Select
-              variant="borderless"
-              value={filters.assigneeId ? String(filters.assigneeId) : undefined}
-              placeholder="Все исполнители"
-              onChange={(val) => onFilterChange({ assigneeId: val || "" })}
-              allowClear
-              showSearch
-              filterOption={(input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())}
-              options={colleagues.map((c) => ({ value: String(c.id), label: c.name }))}
-              className="min-w-[145px] font-bold text-slate-700 dark:text-slate-100"
-            />
-          </div>
+          <Tooltip title={colleagues.find((c) => String(c.id) === String(filters.assigneeId))?.name}>
+            <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
+              <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Исполнитель:</span>
+              <Select
+                variant="borderless"
+                value={filters.assigneeId ? String(filters.assigneeId) : undefined}
+                placeholder="Все исполнители"
+                onChange={(val) => onFilterChange({ assigneeId: val || "" })}
+                allowClear
+                showSearch
+                filterOption={(input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())}
+                options={colleagues.map((c) => ({ value: String(c.id), label: c.name }))}
+                className="w-[155px] font-bold text-slate-700 dark:text-slate-100"
+              />
+            </div>
+          </Tooltip>
 
           {/* Status filter pill */}
-          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
-            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Статус:</span>
-            <Select
-              variant="borderless"
-              value={filters.status || undefined}
-              placeholder="Все статусы"
-              onChange={(val) => onFilterChange({ status: (val || "") as TaskStatus })}
-              allowClear
-              options={STATUS_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-              className="min-w-[125px] font-bold text-slate-700 dark:text-slate-100"
-            />
-          </div>
-
-
+          <Tooltip title={STATUS_OPTIONS.find((o) => o.value === filters.status)?.label}>
+            <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
+              <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Статус:</span>
+              <Select
+                variant="borderless"
+                value={filters.status || undefined}
+                placeholder="Все статусы"
+                onChange={(val) => onFilterChange({ status: (val || "") as TaskStatus })}
+                allowClear
+                options={STATUS_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                className="w-[125px] font-bold text-slate-700 dark:text-slate-100"
+              />
+            </div>
+          </Tooltip>
 
           {/* Deadline DatePicker pill */}
           <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
@@ -131,7 +135,7 @@ export const TasksFilterBar = React.memo(({
               format="DD.MM.YYYY"
               placeholder="ДД.ММ.ГГГГ"
               allowClear
-              className="w-[125px] font-bold text-slate-700 dark:text-slate-100"
+              className="w-[115px] font-bold text-slate-700 dark:text-slate-100"
             />
           </div>
         </div>
