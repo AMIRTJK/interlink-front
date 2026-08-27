@@ -112,10 +112,10 @@ export const CreateTaskView = ({
   return (
     <motion.main
       key="create"
-      initial={{ opacity: 0, x: 60 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 60 }}
-      transition={{ type: "spring", stiffness: 260, damping: 30 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
       className="w-full pb-10 relative z-10 flex flex-col gap-8 min-h-screen"
     >
       <CreateTaskHeader

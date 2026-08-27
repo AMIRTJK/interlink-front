@@ -103,10 +103,10 @@ export function PersonalTaskForm({
   return (
     <motion.div
       key="personal-form"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 12 }}
-      transition={{ duration: 0.2 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
       className="flex flex-col gap-6 pb-28"
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
