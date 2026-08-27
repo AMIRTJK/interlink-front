@@ -314,12 +314,13 @@ export function PersonalTaskForm({
                 return (
                   <div className="flex items-center gap-1 flex-nowrap overflow-hidden">
                     {visibleTags.map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40 truncate max-w-[85px] shrink-0"
-                      >
-                        #{tag}
-                      </span>
+                      <Tooltip key={idx} title={`#${tag}`} placement="top">
+                        <span
+                          className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40 truncate max-w-[85px] shrink-0 cursor-default"
+                        >
+                          #{tag}
+                        </span>
+                      </Tooltip>
                     ))}
                     {hiddenTags.length > 0 && (
                       <Tooltip
@@ -481,11 +482,28 @@ export function PersonalTaskForm({
                           className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-white dark:bg-slate-800 border border-[#3373e5]/20 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100 shrink-0"
                         >
                           <Avatar colleague={col} className="w-5 h-5 text-[8px]" />
-                          <span className="truncate max-w-[80px]">{col.name.split(" ")[0]}</span>
+                          <Tooltip
+                            title={
+                              <div className="p-0.5 max-w-xs">
+                                <p className="font-bold text-xs text-white">{col.name}</p>
+                                {col.role && (
+                                  <p className="text-[10px] text-slate-300 mt-0.5 font-normal">
+                                    {col.role}
+                                  </p>
+                                )}
+                              </div>
+                            }
+                            placement="top"
+                          >
+                            <span className="truncate max-w-[85px] cursor-default">
+                              {col.name.split(" ")[0]}
+                            </span>
+                          </Tooltip>
                           <button
                             type="button"
                             onClick={() => onToggleAssignee(id)}
                             className="text-[#9aa2c8] hover:text-rose-500 transition-colors cursor-pointer"
+                            title="Удалить"
                           >
                             <X size={12} />
                           </button>
