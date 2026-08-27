@@ -34,4 +34,4 @@ export interface ISortConfig {
   order: "asc" | "desc";
 }
 
-export type TFilterTab = "all" | "active" | "completed" | "overdue";
+export type TFilterTab = "all" | "new" | "in_progress" | "review" | "completed" | "overdue" | "active";

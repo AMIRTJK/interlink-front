@@ -27,9 +27,11 @@ interface IProps {
 
 const STATUS_TABS: { value: TaskStatus | ""; label: string; statKey: keyof TaskStatsFull | "total" }[] = [
   { value: "", label: "Все", statKey: "total" },
-  { value: "in_progress", label: "Активные", statKey: "active" },
-  { value: "completed", label: "Завершенные", statKey: "completed" },
-  { value: "overdue", label: "Просроченные", statKey: "overdue" },
+  { value: "new", label: "Новая", statKey: "new" },
+  { value: "in_progress", label: "В работе", statKey: "in_progress" },
+  { value: "review", label: "На проверке", statKey: "review" },
+  { value: "completed", label: "Завершена", statKey: "completed" },
+  { value: "overdue", label: "Просрочена", statKey: "overdue" },
 ];
 
 const customAntdTheme = {
@@ -116,31 +118,7 @@ export const TasksFilterBar = React.memo(({
             />
           </div>
 
-          {/* Progress filter pill */}
-          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
-            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Прогресс:</span>
-            <Select
-              variant="borderless"
-              defaultValue="all"
-              options={[
-                { value: "all", label: "Все" },
-                { value: "in_progress", label: "В процессе" },
-                { value: "done", label: "100%" },
-              ]}
-              className="min-w-[90px] font-bold text-slate-700 dark:text-slate-100"
-            />
-          </div>
 
-          {/* Name filter pill */}
-          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
-            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Название:</span>
-            <Select
-              variant="borderless"
-              defaultValue="all"
-              options={[{ value: "all", label: "Все названия" }]}
-              className="min-w-[130px] font-bold text-slate-700 dark:text-slate-100"
-            />
-          </div>
 
           {/* Deadline DatePicker pill */}
           <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">

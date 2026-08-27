@@ -3,7 +3,9 @@ import type { TFilterTab } from "../model/types";
 
 interface IStats {
   total: number;
+  new: number;
   inProgress: number;
+  review: number;
   completed: number;
   overdue: number;
 }
@@ -18,7 +20,9 @@ interface IProps {
 export const FilterTabs = memo(({ activeTab, onTabChange, stats, activeTheme }: IProps) => {
   const tabs = [
     { id: "all" as const, label: "Все", count: stats.total },
-    { id: "active" as const, label: "Активные", count: stats.inProgress },
+    { id: "new" as const, label: "Новые", count: stats.new },
+    { id: "in_progress" as const, label: "В работе", count: stats.inProgress },
+    { id: "review" as const, label: "На проверке", count: stats.review },
     { id: "completed" as const, label: "Завершенные", count: stats.completed },
     { id: "overdue" as const, label: "Просроченные", count: stats.overdue },
   ];

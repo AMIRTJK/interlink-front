@@ -196,7 +196,11 @@ export const mapApiTaskToTask = (item: IApiTask): Task => {
     rawId: item.id,
     title: item.title || "",
     description: item.description || "",
-    status: normalizeStatus(item.status),
+    status:
+      (item.is_overdue || item.status === "overdue") &&
+      item.status !== "completed"
+        ? "overdue"
+        : normalizeStatus(item.status),
     priority: normalizePriority(item.priority),
     assignee: assignees[0] || EMPTY_ASSIGNEE,
     assignees,

@@ -24,7 +24,7 @@ export const PersonalTasksRegistry = memo(() => {
   const [subTab, setSubTab] = useState<"registry" | "analytics">("registry");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTab, setFilterTab] = useState<TFilterTab>("all");
-  const [sortConfig, setSortConfig] = useState<ISortConfig>({ field: "dueDate", order: "asc" });
+  const [sortConfig, setSortConfig] = useState<ISortConfig>({ field: "dueDate", order: "desc" });
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [activeTask, setActiveTask] = useState<IPersonalTask | null>(null);

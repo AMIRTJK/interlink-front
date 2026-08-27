@@ -16,11 +16,11 @@ export const calculateStats = (tasks: IPersonalTask[]) => {
 
   const overdue = tasks.filter(isTaskOverdue).length;
   const completed = tasks.filter((t) => t.status === "completed").length;
-  const inProgress = tasks.filter(
-    (t) => ["new", "in_progress", "review"].includes(t.status) && !isTaskOverdue(t),
-  ).length;
+  const newCount = tasks.filter((t) => t.status === "new" && !isTaskOverdue(t)).length;
+  const inProgress = tasks.filter((t) => t.status === "in_progress" && !isTaskOverdue(t)).length;
+  const review = tasks.filter((t) => t.status === "review" && !isTaskOverdue(t)).length;
 
-  return { total: tasks.length, inProgress, completed, overdue };
+  return { total: tasks.length, new: newCount, inProgress, review, completed, overdue };
 };
 
 export const getFilteredTasks = (
@@ -44,11 +44,12 @@ export const getFilteredTasks = (
 
       const matchesTab =
         filterTab === "all" ||
-        (filterTab === "active" &&
-          ["new", "in_progress", "review"].includes(t.status) &&
-          !isOverdue) ||
+        (filterTab === "new" && t.status === "new" && !isOverdue) ||
+        (filterTab === "in_progress" && t.status === "in_progress" && !isOverdue) ||
+        (filterTab === "review" && t.status === "review" && !isOverdue) ||
         (filterTab === "completed" && t.status === "completed") ||
-        (filterTab === "overdue" && isOverdue);
+        (filterTab === "overdue" && isOverdue) ||
+        (filterTab === "active" && ["new", "in_progress", "review"].includes(t.status) && !isOverdue);
       return matchesSearch && matchesTab;
     })
     .sort((a, b) => {
