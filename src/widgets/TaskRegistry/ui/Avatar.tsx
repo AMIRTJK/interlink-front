@@ -1,6 +1,6 @@
 import { useState, type MouseEvent, type WheelEvent } from "react";
 import { createPortal } from "react-dom";
-import { Search, X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { Search, X, ZoomIn, ZoomOut, RotateCcw, User } from "lucide-react";
 import { cn } from "@shared/lib";
 import type { Colleague } from "../model/types";
 import { resolveTaskPhotoUrl } from "../model/api";
@@ -23,16 +23,33 @@ export const Avatar = ({
 
   const photo = resolveTaskPhotoUrl(colleague.photo);
 
+  const hasValidInitials = Boolean(
+    colleague.initials &&
+      colleague.initials !== "—" &&
+      colleague.initials !== "–" &&
+      colleague.initials !== "-" &&
+      colleague.initials !== "?" &&
+      colleague.name !== "Не назначен" &&
+      colleague.id !== "",
+  );
+
+  const renderFallback = () => {
+    if (hasValidInitials) {
+      return <span>{colleague.initials}</span>;
+    }
+    return <User className="w-[55%] h-[55%] text-white/90" strokeWidth={2.2} />;
+  };
+
   if (err || !photo) {
     return (
       <div
         className={cn(
           "relative flex items-center justify-center rounded-full text-[10px] font-bold text-white shrink-0 select-none",
-          colleague.color,
+          colleague.color || "bg-slate-400 dark:bg-slate-600",
           className || "w-8 h-8",
         )}
       >
-        <span>{colleague.initials}</span>
+        {renderFallback()}
       </div>
     );
   }
@@ -79,10 +96,10 @@ export const Avatar = ({
           <div
             className={cn(
               "absolute inset-0 rounded-full animate-pulse flex items-center justify-center text-[10px] font-bold text-white shrink-0",
-              colleague.color,
+              colleague.color || "bg-slate-400 dark:bg-slate-600",
             )}
           >
-            {colleague.initials}
+            {renderFallback()}
           </div>
         )}
         <img
