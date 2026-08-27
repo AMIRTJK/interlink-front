@@ -79,7 +79,7 @@ export const CreateTaskModal = ({ onClose, task, userName, onSave, isSaving, act
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-lg bg-white dark:bg-zinc-800 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden flex flex-col z-10"
+        className="relative w-full max-w-lg bg-white dark:bg-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10"
       >
         <form onSubmit={handleSubmit} className="w-full flex flex-col">
           <div className={`px-6 py-5 bg-gradient-to-r ${activeTheme.gradient} text-white flex items-center justify-between`}>
