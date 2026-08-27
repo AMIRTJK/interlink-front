@@ -5,6 +5,7 @@ import { DatePicker, Select, ConfigProvider } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
 import { cn } from "@shared/lib";
+import { Tooltip } from "@shared/ui";
 import type {
   Attachment,
   Colleague,
@@ -109,9 +110,9 @@ export function PersonalTaskForm({
       transition={{ duration: 0.15 }}
       className="flex flex-col gap-6 pb-28"
     >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         {/* Left container */}
-        <div className="lg:col-span-2 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-5">
+        <div className="lg:col-span-2 h-full flex flex-col justify-between bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-5">
           {/* TASK TITLE */}
           <div className="space-y-1.5">
             <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
@@ -167,7 +168,7 @@ export function PersonalTaskForm({
         </div>
 
         {/* Right container */}
-        <div className="lg:col-span-1 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-4">
+        <div className="lg:col-span-1 h-full flex flex-col justify-between bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-4">
           <ConfigProvider
             theme={{
               token: {
@@ -254,22 +255,48 @@ export function PersonalTaskForm({
                 className="w-full pl-10 pr-4 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)] focus:bg-white focus:border-[#3373e5]/40 focus:ring-2 focus:ring-[#3373e5]/15 transition-all"
               />
             </div>
-            {formTags.trim() && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {formTags
-                  .split(",")
-                  .map((t) => t.trim())
-                  .filter(Boolean)
-                  .map((tag, idx) => (
+            {formTags.trim() ? (() => {
+              const tagsList = formTags
+                .split(",")
+                .map((t) => t.trim())
+                .filter(Boolean);
+              const MAX_VISIBLE_TAGS = 4;
+              const visibleTags = tagsList.slice(0, MAX_VISIBLE_TAGS);
+              const hiddenTags = tagsList.slice(MAX_VISIBLE_TAGS);
+
+              return (
+                <div className="flex items-center gap-1 mt-1 flex-nowrap overflow-hidden">
+                  {visibleTags.map((tag, idx) => (
                     <span
                       key={idx}
-                      className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40"
+                      className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40 truncate max-w-[85px] shrink-0"
                     >
                       #{tag}
                     </span>
                   ))}
-              </div>
-            )}
+                  {hiddenTags.length > 0 && (
+                    <Tooltip
+                      title={
+                        <div className="flex flex-wrap gap-1 p-1.5 max-w-xs max-h-40 overflow-y-auto">
+                          {hiddenTags.map((tag, idx) => (
+                            <span
+                              key={idx}
+                              className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-purple-100 dark:bg-purple-900/80 text-purple-800 dark:text-purple-200 border border-purple-200 dark:border-purple-700"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      }
+                    >
+                      <span className="px-2 py-0.5 text-[10px] font-black rounded-md bg-purple-100 hover:bg-purple-200 text-purple-700 dark:bg-purple-950/80 dark:hover:bg-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-700 cursor-pointer shrink-0 transition-colors shadow-2xs">
+                        +{hiddenTags.length}
+                      </span>
+                    </Tooltip>
+                  )}
+                </div>
+              );
+            })() : null}
           </div>
 
           {/* ASSIGNEES */}
@@ -277,31 +304,6 @@ export function PersonalTaskForm({
             <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
               ИСПОЛНИТЕЛИ
             </label>
-
-            {formAssignees.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                {formAssignees.map((id) => {
-                  const col = colleagues.find((c) => c.id === id);
-                  if (!col) return null;
-                  return (
-                    <span
-                      key={id}
-                      className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-white dark:bg-slate-800 border border-[#3373e5]/20 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100"
-                    >
-                      <Avatar colleague={col} className="w-5 h-5 text-[8px]" allowPreview={false} />
-                      <span>{col.name.split(" ")[0]}</span>
-                      <button
-                        type="button"
-                        onClick={() => onToggleAssignee(id)}
-                        className="text-[#9aa2c8] hover:text-rose-500 transition-colors"
-                      >
-                        <X size={12} />
-                      </button>
-                    </span>
-                  );
-                })}
-              </div>
-            )}
 
             <div className="relative">
               <input
@@ -318,6 +320,71 @@ export function PersonalTaskForm({
               />
               <Search size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9aa2c8] pointer-events-none" />
             </div>
+
+            {formAssignees.length > 0 ? (() => {
+              const MAX_VISIBLE_ASSIGNEES = 2;
+              const visibleAssignees = formAssignees.slice(0, MAX_VISIBLE_ASSIGNEES);
+              const hiddenAssignees = formAssignees.slice(MAX_VISIBLE_ASSIGNEES);
+
+              return (
+                <div className="flex items-center gap-1.5 mt-1.5 flex-nowrap overflow-hidden">
+                  {visibleAssignees.map((id) => {
+                    const col = colleagues.find((c) => c.id === id);
+                    if (!col) return null;
+                    return (
+                      <span
+                        key={id}
+                        className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-white dark:bg-slate-800 border border-[#3373e5]/20 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100 shrink-0"
+                      >
+                        <Avatar colleague={col} className="w-5 h-5 text-[8px]" allowPreview={false} />
+                        <span className="truncate max-w-[80px]">{col.name.split(" ")[0]}</span>
+                        <button
+                          type="button"
+                          onClick={() => onToggleAssignee(id)}
+                          className="text-[#9aa2c8] hover:text-rose-500 transition-colors cursor-pointer"
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    );
+                  })}
+                  {hiddenAssignees.length > 0 && (
+                    <Tooltip
+                      title={
+                        <div className="flex flex-col gap-1.5 p-1.5 max-w-xs max-h-48 overflow-y-auto">
+                          {hiddenAssignees.map((id) => {
+                            const col = colleagues.find((c) => c.id === id);
+                            if (!col) return null;
+                            return (
+                              <div
+                                key={id}
+                                className="flex items-center justify-between gap-3 text-xs p-1 rounded-lg hover:bg-white/10 transition-colors"
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <Avatar colleague={col} className="w-5 h-5 text-[8px]" allowPreview={false} />
+                                  <span className="truncate font-medium text-white">{col.name}</span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => onToggleAssignee(id)}
+                                  className="text-slate-400 hover:text-rose-400 cursor-pointer ml-2 transition-colors"
+                                >
+                                  <X size={12} />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      }
+                    >
+                      <span className="px-2.5 py-1 text-xs font-black rounded-full bg-purple-100 hover:bg-purple-200 text-purple-700 dark:bg-purple-950/80 dark:hover:bg-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-700 cursor-pointer shrink-0 transition-colors shadow-2xs">
+                        +{hiddenAssignees.length}
+                      </span>
+                    </Tooltip>
+                  )}
+                </div>
+              );
+            })() : null}
 
             <AnimatePresence>
               {assigneeOpen && filteredColleagues.length > 0 && (
