@@ -313,7 +313,7 @@ export function ProtocolSignatures({
 							<p className="text-[10px] text-slate-400">{secretarySigned}</p>
 						</div>
 					) : (
-						<div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-5 text-center text-xs font-bold text-[#9aa2c8] uppercase tracking-wider shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
+						<div className="bg-linear-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-5 text-center text-xs font-bold text-[#9aa2c8] uppercase tracking-wider shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
 							ЭЦП СЕКРЕТАРЯ
 						</div>
 					)}
