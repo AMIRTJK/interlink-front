@@ -4,12 +4,6 @@ import { Plus, Search } from "lucide-react";
 import { If } from "@shared/ui";
 import { Contact, LayoutPosition, CHAT_LIST_PANEL_WIDTH } from "../../model";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
-import {
-  CHAT_AVATAR_CLIP_VAR,
-  CHAT_AVATAR_OUTLINE_CLIP_VAR,
-  getChatAvatarClipPath,
-  getChatAvatarOutlineClipPath,
-} from "../../lib/chatAvatarShape";
 import { OnlineIndicator } from "./OnlineIndicator";
 import "../../style.css";
 
@@ -87,7 +81,6 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
           {filteredContacts.map((contact) => {
             const isActive = contact.id === activeContactId;
             const unread = contact.unreadCount || 0;
-            const clipPath = getChatAvatarClipPath(contact);
             return (
               <button
                 key={contact.id}
@@ -98,20 +91,9 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                 <span
                   className={`chat-avatar${isDark ? " chat-avatar--dark" : ""}${
                     isActive ? " chat-avatar--active" : ""
-                  }${clipPath ? " chat-avatar--shaped" : ""}`}
-                  style={
-                    clipPath
-                      ? {
-                          [CHAT_AVATAR_CLIP_VAR as string]: clipPath,
-                          [CHAT_AVATAR_OUTLINE_CLIP_VAR as string]:
-                            getChatAvatarOutlineClipPath(contact) ?? clipPath,
-                        }
-                      : undefined
-                  }
+                  }`}
                 >
-                  {/* Контур и ореол — оформление: скрыты от скринридера.
-                      Ореол идёт первым: у фигурных аватарок он залит и должен
-                      оказаться под контуром, а не поверх него. */}
+                  {/* Контур и ореол — оформление: скрыты от скринридера. */}
                   <span aria-hidden="true" className="chat-avatar__halo" />
                   <span aria-hidden="true" className="chat-avatar__ring" />
                   <img
@@ -217,10 +199,6 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
         {filteredContacts.map((contact) => {
           const isActive = contact.id === activeContactId;
           const unread = contact.unreadCount || 0;
-          const clipPath = getChatAvatarClipPath(contact);
-          // У фигурной аватарки внутренняя обводка обрезается вместе с углами
-          // и распадается на куски — форму и обводку не совмещаем.
-          const avatarShapeStyle = clipPath ? { clipPath } : undefined;
           return (
             <button
               key={contact.id}
@@ -266,14 +244,12 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                     (e.currentTarget as HTMLImageElement).src =
                       buildInitialsAvatar(contact.name);
                   }}
-                  className={`w-9 h-9 object-cover transition-transform duration-200 group-hover:scale-105 overflow-hidden ${clipPath ? "" : "rounded-full"}`}
-                  style={
-                    avatarShapeStyle ?? {
-                      boxShadow: isActive
-                        ? "inset 0 0 0 2px rgb(var(--th-accent-rgb) / 0.6)"
-                        : "inset 0 0 0 2px var(--th-chip-border)",
-                    }
-                  }
+                  className="w-9 h-9 object-cover transition-transform duration-200 group-hover:scale-105 overflow-hidden rounded-full"
+                  style={{
+                    boxShadow: isActive
+                      ? "inset 0 0 0 2px rgb(var(--th-accent-rgb) / 0.6)"
+                      : "inset 0 0 0 2px var(--th-chip-border)",
+                  }}
                 />
                 {contact.online && <OnlineIndicator />}
               </div>

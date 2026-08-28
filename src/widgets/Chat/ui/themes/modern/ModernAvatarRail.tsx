@@ -3,7 +3,6 @@ import { If } from "@shared/ui";
 import type { Contact } from "../../../model";
 import type { Translations } from "../../../lib/translations";
 import { buildInitialsAvatar } from "../../../lib/chatFormat";
-import { getChatAvatarClipPath } from "../../../lib/chatAvatarShape";
 import { OnlineIndicator } from "../../components/OnlineIndicator";
 import { ModernCounters } from "./ModernCounters";
 
@@ -59,7 +58,6 @@ export const ModernAvatarRail = ({
         {contacts.map((contact) => {
           const isActive = contact.id === activeContactId;
           const unread = contact.unreadCount ?? 0;
-          const clipPath = getChatAvatarClipPath(contact);
           return (
             <button
               key={contact.id}
@@ -89,8 +87,7 @@ export const ModernAvatarRail = ({
                     (e.currentTarget as HTMLImageElement).src =
                       buildInitialsAvatar(contact.name);
                   }}
-                  className={`w-11 h-11 object-cover overflow-hidden ${clipPath ? "" : "rounded-full"}`}
-                  style={clipPath ? { clipPath } : undefined}
+                  className="w-11 h-11 object-cover overflow-hidden rounded-full"
                 />
                 {contact.online && (
                   <OnlineIndicator className="absolute bottom-0 right-0 z-20" />

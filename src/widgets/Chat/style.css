@@ -9,13 +9,6 @@
    ореол виден хуже, чем на тёмном. */
 .chat-avatar {
   --chat-avatar-ring-offset: 3px;
-  /* Форма аватарки. Круг — состояние по умолчанию; групповым беседам сюда
-     приходит многоугольник или знак бесконечности из `chatAvatarShape.ts`.
-     Контур и подложка строятся вокруг этой переменной, поэтому и ведут себя
-     одинаково у любой формы. Слои под картинкой берут `--chat-avatar-clip-
-     outline`, если он задан: у фигуры с дырками увеличенная копия самой формы
-     дала бы рваную кайму, поэтому снизу лежит сплошной силуэт. */
-  --chat-avatar-clip: circle(50%);
   --chat-avatar-accent: var(--th-accent-rgb);
   --chat-avatar-arc-peak: var(--th-accent-2-rgb);
   --chat-avatar-arc-tip: var(--th-accent-3-rgb);
@@ -89,19 +82,16 @@
   pointer-events: none;
 }
 
-/* Контур: фигура, обрезанная по форме аватарки и на `--chat-avatar-ring-offset`
-   крупнее картинки, — из-под картинки она видна ровной каймой. Маску-кольцо
-   здесь использовать нельзя: она годится только кругу, а поведение контура
-   должно совпадать у всех форм. */
+/* Контур: круг на `--chat-avatar-ring-offset` крупнее картинки, — из-под неё
+   он виден ровной каймой. */
 .chat-avatar__ring {
   opacity: 0;
-  clip-path: var(--chat-avatar-clip-outline, var(--chat-avatar-clip));
   transition: opacity 0.28s ease;
 }
 
 /* Бегущий свет крутится внутри каймы, а не вместе с ней: у круга вращение
-   контура незаметно, у многоугольника это была бы вертящаяся фигура. Запас в
-   25% нужен, чтобы углы прямоугольного слоя не обнажали фигуру при повороте. */
+   самого контура было бы незаметно. Запас в 25% нужен, чтобы углы
+   прямоугольного слоя не обнажали кайму при повороте. */
 .chat-avatar__ring::before {
   content: "";
   position: absolute;
@@ -179,50 +169,6 @@
     transform: scale(1.06);
     opacity: var(--chat-avatar-halo-pulse-max);
   }
-}
-
-/* ─── Групповые аватарки: форма по числу участников ─────────────────────────
-   Сторон у фигуры столько, сколько участников в группе (3…9), с десяти —
-   знак бесконечности. Саму фигуру считает `chatAvatarShape.ts` и кладёт в
-   --chat-avatar-clip; контур и его анимация уже работают от этой переменной и
-   ничего здесь не переопределяют. Ниже — только то, что у круга держалось на
-   border-radius и потому фигуру не повторяет: картинка и ореол. */
-
-.chat-avatar--shaped {
-  /* Отступ задаёт кайму по радиусу, а у многоугольника она видна поперёк
-     стороны — это уже `offset · cos(π/n)`: у треугольника от 3px остаётся
-     полтора. Поэтому фигурам отступ на пиксель больше, чтобы кайма читалась
-     той же толщины, что у круга. */
-  --chat-avatar-ring-offset: 4px;
-}
-
-.chat-avatar--shaped .chat-avatar__img,
-.chat-avatar--shaped .chat-avatar__halo {
-  border-radius: 0;
-}
-
-.chat-avatar--shaped .chat-avatar__img {
-  clip-path: var(--chat-avatar-clip);
-  box-shadow: none;
-}
-
-/* Свечение через box-shadow повторяет border-radius, а не clip-path, — вокруг
-   фигуры оно читалось бы как лишний круг. Берём размытую копию самой фигуры:
-   размытие на родителе, обрезка на потомке, иначе clip-path срежет ореол
-   вместе с размытием. Радиус вдвое меньше: у box-shadow blur — это диаметр. */
-.chat-avatar--shaped .chat-avatar__halo {
-  box-shadow: none;
-  filter: blur(calc(var(--chat-avatar-halo-blur) / 2));
-}
-
-.chat-avatar--shaped .chat-avatar__halo::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  background: rgb(
-    var(--chat-avatar-accent) / var(--chat-avatar-halo-glow-alpha)
-  );
-  clip-path: var(--chat-avatar-clip-outline, var(--chat-avatar-clip));
 }
 
 @media (prefers-reduced-motion: reduce) {

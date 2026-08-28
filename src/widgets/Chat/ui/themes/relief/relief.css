@@ -1,0 +1,770 @@
+/* Токены объёмного оформления чата.
+
+   Живут на <html data-chat-theme="relief">, а не на корне окна: меню действий,
+   палитра реакций и просмотр вложений рендерятся порталами в body, и внутри
+   окна их было бы не достать.
+
+   Переопределяются только те токены, которыми пользуется чат. Палитра
+   приложения (--th-accent-*) остаётся нетронутой: её задаёт общая тема системы,
+   и оформление чата не вправе её подменять.
+
+   Значения перенесены из макетов `messenger-redesign`: матовые панели со
+   скруглением 36px, объёмные цветные кнопки с бликом сверху и опорой снизу,
+   пастельные пузыри и подпись отдельной строкой под пузырём. */
+
+:root[data-chat-theme="relief"] {
+  /* ─── Оболочка и поверхности ─────────────────────────────────────────── */
+  --th-chat-shell-bg: #ffffff;
+  --th-chat-canvas: transparent;
+  --th-panel-bg: #ffffff;
+  --th-panel-solid: #ffffff;
+  --th-panel-border: rgb(229 231 235 / 1);
+  --th-sidebar-bg: #ffffff;
+  --th-sidebar-border: rgb(229 231 235 / 1);
+  --th-rail-bg: #ffffff;
+  --th-rail-border: rgb(229 231 235 / 1);
+  --th-composer-bg: #ffffff;
+  --th-menu-bg: rgb(255 255 255 / 0.97);
+  --th-menu-border: rgb(217 217 222 / 0.55);
+  --th-surface-2: #f3f4f6;
+  --th-input-bg: #f3f4f6;
+  --th-input-border: transparent;
+  --th-scrim: rgb(17 24 39 / 0.45);
+
+  /* ─── Текст ──────────────────────────────────────────────────────────── */
+  --th-text: #1a1a1f;
+  --th-text-muted: #4b5563;
+  --th-text-faint: #9ca3af;
+
+  /* ─── Состояния и мелочи ─────────────────────────────────────────────── */
+  --th-divider: rgb(217 217 224 / 0.5);
+  --th-hover-bg: rgb(97 84 245 / 0.075);
+  --th-hover-bg-strong: rgb(97 84 245 / 0.12);
+  --th-chip-bg: #e5e7eb;
+  --th-chip-border: transparent;
+  --th-badge-unread: #6154f5;
+
+  /* ─── Пузыри ─────────────────────────────────────────────────────────────
+     Входящий — тёплый розовый, исходящий — холодный синий. Оба собраны
+     одинаково: вертикальный блик поверх заливки, тонкая кайма градиентом и
+     четыре тени (падающая, контактная и две внутренние). Отсюда объём. */
+  --th-bubble-in-bg:
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.3) 0%,
+      rgb(255 255 255 / 0.03) 40%,
+      rgb(0 0 0 / 0) 60%,
+      rgb(235 209 219 / 0.1) 100%
+    ),
+    rgb(247 232 237 / 0.5);
+  --th-bubble-in-border: rgb(235 209 219 / 0.45);
+  --th-bubble-in-text: #111827;
+  --th-bubble-in-shadow:
+    0 4px 10px -2px rgb(217 140 166 / 0.2), 0 1px 3px rgb(0 0 0 / 0.06),
+    inset 0 1.5px 3px rgb(255 255 255 / 0.55),
+    inset 0 -1.5px 4px rgb(0 0 0 / 0.06);
+
+  --th-bubble-out-bg:
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.35) 0%,
+      rgb(255 255 255 / 0.05) 40%,
+      rgb(0 0 0 / 0) 55%,
+      rgb(0 0 0 / 0.05) 100%
+    ),
+    rgb(99 102 242 / 0.06);
+  --th-bubble-out-border: rgb(89 92 217 / 0.35);
+  --th-bubble-out-on-rgb: 17 24 39;
+  --th-bubble-out-shadow:
+    0 4px 10px -2px rgb(38 102 178 / 0.2), 0 1px 3px rgb(0 0 0 / 0.06),
+    inset 0 1.5px 3px rgb(255 255 255 / 0.55),
+    inset 0 -1.5px 4px rgb(0 0 0 / 0.06);
+
+  /* ─── Тени ───────────────────────────────────────────────────────────── */
+  --th-shadow-soft: 0 2px 4px rgb(0 0 0 / 0.05);
+  --th-shadow-strong: 0 4px 24px rgb(0 0 0 / 0.08);
+  /* «Пусто» здесь — прозрачная тень, а не none: значение попадает в список
+     рядом с ореолом наведения, и none обнулило бы всё правило. */
+  --th-inset-highlight: 0 0 0 0 transparent;
+  --th-glow-accent: 0 0 0 0 transparent;
+  --th-glow-out: 0 6px 18px -6px rgb(56 120 247 / 0.35);
+  --th-glow-in: 0 6px 18px -6px rgb(217 140 166 / 0.4);
+
+  /* ─── Собственные токены оформления ──────────────────────────────────── */
+
+  /* Матовая панель — основная поверхность макета. */
+  --chat-relief-panel: #ffffff;
+  --chat-relief-panel-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.25), 0 4px 24px rgb(0 0 0 / 0.08);
+  --chat-relief-radius: 36px;
+  --chat-relief-radius-sm: 20px;
+
+  /* Карточка беседы в списке. */
+  --chat-relief-card-bg:
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.35) 0%,
+      rgb(255 255 255 / 0.05) 40%,
+      rgb(0 0 0 / 0) 60%,
+      rgb(0 0 0 / 0.04) 100%
+    ),
+    rgb(255 255 255 / 0.95);
+  --chat-relief-card-border: rgb(217 217 222 / 0.4);
+  --chat-relief-card-shadow:
+    0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 4px rgb(0 0 0 / 0.05),
+    inset 0 2px 4px rgb(255 255 255 / 0.6), inset 0 -2px 6px rgb(0 0 0 / 0.06);
+
+  /* Открытая беседа: сиреневая заливка с более заметной каймой. */
+  --chat-relief-card-active-bg:
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.3) 0%,
+      rgb(255 255 255 / 0.03) 40%,
+      rgb(0 0 0 / 0) 60%,
+      rgb(97 84 245 / 0.08) 100%
+    ),
+    rgb(97 84 245 / 0.12);
+  --chat-relief-card-active-border: rgb(97 84 245 / 0.45);
+  --chat-relief-card-active-shadow:
+    0 6px 18px -8px rgb(97 84 245 / 0.28), 0 2px 4px rgb(0 0 0 / 0.05),
+    inset 0 2px 4px rgb(255 255 255 / 0.62), inset 0 -2px 6px rgb(0 0 0 / 0.055);
+
+  /* Поле поиска и другие «утопленные» поверхности. */
+  --chat-relief-well-bg:
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.4) 0%,
+      rgb(255 255 255 / 0.05) 40%,
+      rgb(0 0 0 / 0) 55%,
+      rgb(0 0 0 / 0.04) 100%
+    ),
+    rgb(255 255 255 / 0.85);
+  --chat-relief-well-border: rgb(217 217 229 / 0.5);
+  --chat-relief-well-shadow:
+    0 4px 10px -2px rgb(0 0 0 / 0.08), 0 1px 3px rgb(0 0 0 / 0.04),
+    inset 0 2px 3px rgb(255 255 255 / 0.6), inset 0 -1.5px 4px rgb(0 0 0 / 0.05);
+
+  /* Строка ввода сообщения. */
+  --chat-relief-composer-well: #f3f4f6;
+  /* Группа переключателей края панели. */
+  --chat-relief-switch-bg: #f2f2f7;
+  --chat-relief-switch-shadow:
+    0 3px 8px -1px rgb(26 102 115 / 0.2), 0 1px 2px rgb(0 0 0 / 0.06),
+    inset 0 1.5px 2px rgb(255 255 255 / 0.5),
+    inset 0 -1.5px 4px rgb(26 102 115 / 0.15);
+  --chat-relief-switch-thumb: rgb(255 255 255 / 0.92);
+  --chat-relief-switch-thumb-shadow:
+    0 1px 3px rgb(0 0 0 / 0.12), inset 0 0.5px 1px rgb(255 255 255 / 0.6);
+  --chat-relief-switch-frame: rgb(31 128 140 / 0.45);
+  --chat-relief-switch-frame-active: rgb(31 128 140 / 0.9);
+  --chat-relief-switch-bar: #6155f5;
+
+  /* Разделительная линия над полем ввода. */
+  --chat-relief-composer-line: linear-gradient(
+    90deg,
+    rgb(97 84 245 / 0) 0%,
+    rgb(97 84 245 / 0.4) 30%,
+    rgb(178 84 245 / 0.4) 70%,
+    rgb(178 84 245 / 0) 100%
+  );
+
+  /* Блик и кайма объёмной кнопки — одинаковые у всех цветов. */
+  --chat-relief-btn-gloss: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.5) 0%,
+    rgb(255 255 255 / 0.05) 45%,
+    rgb(255 255 255 / 0) 55%,
+    rgb(0 0 0 / 0.1) 100%
+  );
+  --chat-relief-btn-edge: rgb(255 255 255 / 0.45);
+  --chat-relief-on-color: #ffffff;
+
+  /* Палитра действий макета. */
+  --chat-relief-blue: 56 120 247;
+  --chat-relief-green: 46 184 97;
+  --chat-relief-purple: 140 92 229;
+  --chat-relief-orange: 242 140 38;
+  --chat-relief-amber: 242 178 51;
+  --chat-relief-red: 217 77 89;
+  --chat-relief-grey: 128 133 143;
+  --chat-relief-mint: 51 199 140;
+  --chat-relief-indigo: 97 84 245;
+  --chat-relief-status: 46 184 97;
+
+  /* Заливка объёмных кнопок: сплошнее в светлом режиме — они лежат на белом. */
+  --chat-relief-btn-alpha: 0.72;
+  --chat-relief-tab-alpha: 1;
+  --chat-relief-online: #10b981;
+  --chat-relief-offline: #9ca3af;
+  --chat-relief-online-ring: #ffffff;
+
+  /* Засечковый шрифт текста сообщений — подпись макета. */
+  --chat-relief-message-font: "Tinos", "Times New Roman", Georgia, serif;
+}
+
+/* Тёмный режим. Переопределяем ровно тот же набор: селектор оформления
+   специфичнее `.dark`, поэтому неупомянутый токен остался бы светлым.
+
+   Макеты нарисованы только в светлой теме, поэтому тёмная выведена из них по
+   правилу: оттенок сохраняется, светлота инвертируется. Блики сверху слабее
+   (на тёмном они читаются как засветка), опорные тени — плотнее. */
+:root.dark[data-chat-theme="relief"] {
+  --th-chat-shell-bg: #0b0d12;
+  --th-chat-canvas: transparent;
+  --th-panel-bg: #14171f;
+  --th-panel-solid: #14171f;
+  --th-panel-border: rgb(255 255 255 / 0.08);
+  --th-sidebar-bg: #14171f;
+  --th-sidebar-border: rgb(255 255 255 / 0.08);
+  --th-rail-bg: #14171f;
+  --th-rail-border: rgb(255 255 255 / 0.08);
+  --th-composer-bg: #14171f;
+  --th-menu-bg: rgb(20 23 31 / 0.98);
+  --th-menu-border: rgb(255 255 255 / 0.1);
+  --th-surface-2: #1c2029;
+  --th-input-bg: #1c2029;
+  --th-input-border: transparent;
+  --th-scrim: rgb(0 0 0 / 0.65);
+
+  --th-text: #e9ebf1;
+  --th-text-muted: #a3abba;
+  --th-text-faint: #6e7789;
+
+  --th-divider: rgb(255 255 255 / 0.09);
+  --th-hover-bg: rgb(140 128 255 / 0.12);
+  --th-hover-bg-strong: rgb(140 128 255 / 0.18);
+  --th-chip-bg: #242936;
+  --th-chip-border: rgb(255 255 255 / 0.07);
+  --th-badge-unread: #7c6ff7;
+
+  --th-bubble-in-bg:
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.07) 0%,
+      rgb(255 255 255 / 0.01) 40%,
+      rgb(0 0 0 / 0) 60%,
+      rgb(0 0 0 / 0.14) 100%
+    ),
+    #3a2b33;
+  --th-bubble-in-border: rgb(235 209 219 / 0.18);
+  --th-bubble-in-text: #f2ecef;
+  --th-bubble-in-shadow:
+    0 4px 12px -3px rgb(0 0 0 / 0.5), 0 1px 2px rgb(0 0 0 / 0.35),
+    inset 0 1.5px 2px rgb(255 255 255 / 0.1),
+    inset 0 -1.5px 4px rgb(0 0 0 / 0.28);
+
+  --th-bubble-out-bg:
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.08) 0%,
+      rgb(255 255 255 / 0.01) 40%,
+      rgb(0 0 0 / 0) 55%,
+      rgb(0 0 0 / 0.16) 100%
+    ),
+    #2b3055;
+  --th-bubble-out-border: rgb(140 145 255 / 0.24);
+  --th-bubble-out-on-rgb: 233 235 241;
+  --th-bubble-out-shadow:
+    0 4px 12px -3px rgb(0 0 0 / 0.5), 0 1px 2px rgb(0 0 0 / 0.35),
+    inset 0 1.5px 2px rgb(255 255 255 / 0.12),
+    inset 0 -1.5px 4px rgb(0 0 0 / 0.3);
+
+  --th-shadow-soft: 0 2px 4px rgb(0 0 0 / 0.4);
+  --th-shadow-strong: 0 4px 24px rgb(0 0 0 / 0.55);
+  --th-inset-highlight: 0 0 0 0 transparent;
+  --th-glow-accent: 0 0 0 0 transparent;
+  --th-glow-out: 0 6px 18px -6px rgb(99 102 241 / 0.45);
+  --th-glow-in: 0 6px 18px -6px rgb(0 0 0 / 0.6);
+
+  --chat-relief-panel: #14171f;
+  --chat-relief-panel-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.05), 0 4px 24px rgb(0 0 0 / 0.5);
+  --chat-relief-radius: 36px;
+  --chat-relief-radius-sm: 20px;
+
+  --chat-relief-card-bg:
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.06) 0%,
+      rgb(255 255 255 / 0.01) 40%,
+      rgb(0 0 0 / 0) 60%,
+      rgb(0 0 0 / 0.16) 100%
+    ),
+    #1c2029;
+  --chat-relief-card-border: rgb(255 255 255 / 0.08);
+  --chat-relief-card-shadow:
+    0 4px 12px -2px rgb(0 0 0 / 0.45), 0 2px 4px rgb(0 0 0 / 0.3),
+    inset 0 2px 4px rgb(255 255 255 / 0.06),
+    inset 0 -2px 6px rgb(0 0 0 / 0.3);
+
+  --chat-relief-card-active-bg:
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.07) 0%,
+      rgb(255 255 255 / 0.01) 40%,
+      rgb(0 0 0 / 0) 60%,
+      rgb(97 84 245 / 0.16) 100%
+    ),
+    rgb(97 84 245 / 0.24);
+  --chat-relief-card-active-border: rgb(140 128 255 / 0.5);
+  --chat-relief-card-active-shadow:
+    0 6px 18px -8px rgb(97 84 245 / 0.5), 0 2px 4px rgb(0 0 0 / 0.3),
+    inset 0 2px 4px rgb(255 255 255 / 0.08),
+    inset 0 -2px 6px rgb(0 0 0 / 0.3);
+
+  --chat-relief-well-bg:
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.06) 0%,
+      rgb(255 255 255 / 0.01) 40%,
+      rgb(0 0 0 / 0) 55%,
+      rgb(0 0 0 / 0.16) 100%
+    ),
+    #1c2029;
+  --chat-relief-well-border: rgb(255 255 255 / 0.09);
+  --chat-relief-well-shadow:
+    0 4px 10px -2px rgb(0 0 0 / 0.45), 0 1px 3px rgb(0 0 0 / 0.3),
+    inset 0 2px 3px rgb(255 255 255 / 0.06),
+    inset 0 -1.5px 4px rgb(0 0 0 / 0.3);
+
+  --chat-relief-composer-well: #1c2029;
+  --chat-relief-switch-bg: #232936;
+  --chat-relief-switch-shadow:
+    0 3px 8px -1px rgb(0 0 0 / 0.45), 0 1px 2px rgb(0 0 0 / 0.3),
+    inset 0 1.5px 2px rgb(255 255 255 / 0.06),
+    inset 0 -1.5px 4px rgb(0 0 0 / 0.3);
+  --chat-relief-switch-thumb: rgb(255 255 255 / 0.16);
+  --chat-relief-switch-thumb-shadow:
+    0 1px 3px rgb(0 0 0 / 0.4), inset 0 0.5px 1px rgb(255 255 255 / 0.14);
+  --chat-relief-switch-frame: rgb(122 214 226 / 0.4);
+  --chat-relief-switch-frame-active: rgb(122 214 226 / 0.85);
+  --chat-relief-switch-bar: #8c80ff;
+
+  --chat-relief-composer-line: linear-gradient(
+    90deg,
+    rgb(140 128 255 / 0) 0%,
+    rgb(140 128 255 / 0.45) 30%,
+    rgb(196 128 255 / 0.45) 70%,
+    rgb(196 128 255 / 0) 100%
+  );
+
+  --chat-relief-btn-gloss: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.24) 0%,
+    rgb(255 255 255 / 0.03) 45%,
+    rgb(255 255 255 / 0) 55%,
+    rgb(0 0 0 / 0.22) 100%
+  );
+  --chat-relief-btn-edge: rgb(255 255 255 / 0.18);
+  --chat-relief-on-color: #ffffff;
+
+  /* Оттенки те же, светлее на пару ступеней — на тёмном фоне исходные
+     проваливаются. */
+  --chat-relief-blue: 96 150 255;
+  --chat-relief-green: 62 200 114;
+  --chat-relief-purple: 163 120 240;
+  --chat-relief-orange: 247 163 74;
+  --chat-relief-amber: 247 195 88;
+  --chat-relief-red: 232 103 114;
+  --chat-relief-grey: 150 156 168;
+  --chat-relief-mint: 74 214 158;
+  --chat-relief-indigo: 132 120 255;
+  --chat-relief-status: 62 200 114;
+
+  --chat-relief-btn-alpha: 0.85;
+  --chat-relief-tab-alpha: 0.92;
+  --chat-relief-online: #10b981;
+  --chat-relief-offline: #6b7280;
+  --chat-relief-online-ring: #14171f;
+
+  --chat-relief-message-font: "Tinos", "Times New Roman", Georgia, serif;
+}
+
+/* ─── Переопределения общих компонентов ленты ────────────────────────────────
+   Селектор с атрибутом специфичнее утилитарного класса Tailwind, поэтому
+   !important не нужен. */
+
+/* Пузырь макета: скругление 16px и «хвост» срезанным углом со стороны
+   отправителя — так нарисованы первые сообщения в группе. Текст засечковый. */
+:root[data-chat-theme="relief"] .chat-bubble {
+  border-radius: 16px;
+  font-family: var(--chat-relief-message-font);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* Срезанный угол со стороны отправителя — «хвост» пузыря в макете. Сторону
+   даёт data-mine на самом пузыре: из утилитарных классов её не достать. */
+:root[data-chat-theme="relief"] .chat-bubble[data-mine="true"] {
+  border-top-right-radius: 4px;
+}
+
+:root[data-chat-theme="relief"] .chat-bubble[data-mine="false"] {
+  border-top-left-radius: 4px;
+}
+
+/* Колонка сообщения: 480px из макета, но не шире экрана на узких окнах. */
+:root[data-chat-theme="relief"] .chat-bubble-column {
+  max-width: min(86vw, 480px);
+}
+
+/* Панель сведений и панель ветки — такие же матовые плитки, как и всё
+   остальное, а не приклеенные к беседе колонки. */
+:root[data-chat-theme="relief"] .chat-side-panel {
+  border-left: none;
+  border-radius: var(--chat-relief-radius-sm);
+  box-shadow: var(--chat-relief-panel-shadow);
+  background: var(--chat-relief-panel);
+}
+
+/* ─── Матовая панель ─────────────────────────────────────────────────────── */
+
+.chat-relief-panel {
+  background: var(--chat-relief-panel);
+  border-radius: var(--chat-relief-radius);
+  box-shadow: var(--chat-relief-panel-shadow);
+  /* Размытие из макета (80px) ставим только там, где под панелью что-то есть:
+     на сплошном фоне оно стоит кадра и ничего не даёт. */
+  backdrop-filter: blur(80px);
+}
+
+.chat-relief-panel--sm {
+  border-radius: var(--chat-relief-radius-sm);
+  backdrop-filter: blur(40px);
+}
+
+/* ─── Объёмная кнопка ────────────────────────────────────────────────────────
+   Цвет приходит инлайном через --chat-relief-btn-rgb: у каждой кнопки он свой.
+   Собрана как в макете: блик-градиент поверх цветной заливки, кайма светлеет
+   сверху и уходит в цвет снизу, тени — падающая, контактная и две внутренние. */
+
+.chat-relief-action {
+  --chat-relief-btn-rgb: var(--chat-relief-blue);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  color: var(--chat-relief-on-color);
+  background:
+    var(--chat-relief-btn-gloss),
+    rgb(var(--chat-relief-btn-rgb) / var(--chat-relief-btn-alpha));
+  background-clip: padding-box;
+  box-shadow:
+    0 3px 8px -1px rgb(var(--chat-relief-btn-rgb) / 0.45),
+    0 1px 2px rgb(0 0 0 / 0.12),
+    inset 0 1.5px 2px rgb(255 255 255 / 0.55),
+    inset 0 -2px 4px rgb(0 0 0 / 0.22);
+  cursor: pointer;
+  transition:
+    transform 150ms ease-out,
+    filter 150ms ease-out,
+    box-shadow 150ms ease-out,
+    opacity 150ms ease-out;
+}
+
+.chat-relief-action:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-2px) scale(1.06);
+}
+
+.chat-relief-action:active:not(:disabled) {
+  transform: translateY(0) scale(0.95);
+}
+
+.chat-relief-action:focus-visible {
+  outline: 2px solid rgb(var(--chat-relief-btn-rgb));
+  outline-offset: 2px;
+}
+
+.chat-relief-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Нажатое состояние (открытый поиск, раскрытая панель сведений) — вдавленная
+   кнопка: блик уходит вниз, тень становится внутренней. */
+.chat-relief-action[aria-pressed="true"]:not(:disabled) {
+  box-shadow:
+    inset 0 2px 5px rgb(0 0 0 / 0.35),
+    inset 0 -1px 2px rgb(255 255 255 / 0.2),
+    0 0 0 2px rgb(var(--chat-relief-btn-rgb) / 0.35);
+  filter: brightness(0.95);
+}
+
+/* Иконка-действие без заливки: та же механика наведения, но на прозрачном
+   фоне — для кнопок «свернуть», «закрыть», «создать беседу». */
+.chat-relief-ghost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  color: var(--th-text-muted);
+  cursor: pointer;
+  /* Переход только по transform: цвет и фон здесь приходят из токенов темы, и
+     их анимация оставляет кнопку в старом цвете после переключения темы. */
+  transition: transform 150ms ease-out;
+}
+
+.chat-relief-ghost:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.1);
+  background: var(--th-hover-bg);
+  color: var(--th-text);
+}
+
+.chat-relief-ghost:active:not(:disabled) {
+  transform: translateY(0) scale(0.95);
+}
+
+.chat-relief-ghost:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ─── Вкладка-пилюля в шапке беседы ──────────────────────────────────────── */
+
+.chat-relief-tab {
+  --chat-relief-btn-rgb: var(--chat-relief-blue);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 17px;
+  color: var(--chat-relief-on-color);
+  background: rgb(var(--chat-relief-btn-rgb) / var(--chat-relief-tab-alpha));
+  cursor: pointer;
+  transition:
+    transform 150ms ease-out,
+    filter 150ms ease-out,
+    box-shadow 150ms ease-out,
+    opacity 150ms ease-out;
+}
+
+.chat-relief-tab:hover:not(:disabled) {
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+}
+
+.chat-relief-tab:active:not(:disabled) {
+  transform: translateY(0) scale(0.95);
+}
+
+.chat-relief-tab:focus-visible {
+  outline: 2px solid rgb(var(--chat-relief-btn-rgb));
+  outline-offset: 2px;
+}
+
+.chat-relief-tab:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Подчёркивание активной вкладки: полоска выезжает из центра. */
+.chat-relief-tab::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 38%;
+  height: 2px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.9);
+  opacity: 0;
+  transform: translateX(-50%) scaleX(0.35);
+  transition:
+    opacity 180ms ease-out,
+    transform 180ms ease-out;
+}
+
+.chat-relief-tab[aria-pressed="true"]::after {
+  opacity: 1;
+  transform: translateX(-50%) scaleX(1);
+}
+
+.chat-relief-tab[aria-pressed="true"] {
+  box-shadow:
+    inset 0 -2px 0 rgb(255 255 255 / 0.85),
+    0 5px 14px -8px rgb(0 0 0 / 0.45);
+}
+
+/* ─── Карточка беседы ────────────────────────────────────────────────────── */
+
+.chat-relief-card {
+  position: relative;
+  /* Своя область наложения: подсветка наведения лежит слоем с z-index: -1 и
+     без неё ушла бы за собственный фон карточки. */
+  isolation: isolate;
+  background: var(--chat-relief-card-bg);
+  border: 1px solid var(--chat-relief-card-border);
+  border-radius: 14px;
+  box-shadow: var(--chat-relief-card-shadow);
+  background-clip: padding-box;
+  cursor: pointer;
+  transition:
+    transform 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+
+/* Подсветка наведения — отдельный слой с анимацией прозрачности, а не переход
+   background-color. Так она стоит ноль на кадре (композитное свойство) и, что
+   важнее, переключение светлой и тёмной темы не оставляет карточку в
+   недоигранном переходе со старым цветом. */
+.chat-relief-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--th-hover-bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease-out;
+}
+
+.chat-relief-card:hover::after,
+.chat-relief-card:focus-visible::after {
+  opacity: 1;
+}
+
+.chat-relief-card:hover {
+  transform: translateX(3px);
+}
+
+.chat-relief-card:active {
+  transform: translateX(3px) scale(0.98);
+}
+
+.chat-relief-card:focus-visible {
+  outline: 2px solid rgb(var(--chat-relief-indigo));
+  outline-offset: 2px;
+}
+
+.chat-relief-card[aria-current="true"] {
+  background: var(--chat-relief-card-active-bg);
+  border-color: var(--chat-relief-card-active-border);
+  box-shadow: var(--chat-relief-card-active-shadow);
+}
+
+/* ─── Утопленная поверхность: поиск, сводка ──────────────────────────────── */
+
+.chat-relief-well {
+  background: var(--chat-relief-well-bg);
+  border: 1px solid var(--chat-relief-well-border);
+  border-radius: 12px;
+  box-shadow: var(--chat-relief-well-shadow);
+  background-clip: padding-box;
+  /* Переход только по тени: background-color здесь приходит из токена темы, и
+     его анимация оставляла бы поле в старом цвете после смены темы. */
+  transition: box-shadow 150ms ease-out;
+}
+
+.chat-relief-well:focus-within {
+  box-shadow:
+    0 4px 14px -2px rgb(var(--chat-relief-blue) / 0.2),
+    0 0 0 2px rgb(var(--chat-relief-blue) / 0.35);
+}
+
+/* ─── Полоса прокрутки внутри оформления ─────────────────────────────────── */
+
+:root[data-chat-theme="relief"] .chat-relief-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--chat-relief-indigo) / 0.35) transparent;
+}
+
+:root[data-chat-theme="relief"] .chat-relief-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+:root[data-chat-theme="relief"] .chat-relief-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:root[data-chat-theme="relief"] .chat-relief-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(var(--chat-relief-indigo) / 0.35);
+  /* Прозрачная кайма делает ползунок тоньше дорожки, не сужая саму дорожку. */
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+:root[data-chat-theme="relief"]
+  .chat-relief-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--chat-relief-indigo) / 0.55);
+  background-clip: content-box;
+}
+
+/* ─── Кружок статуса сообщения ───────────────────────────────────────────── */
+
+.chat-relief-tick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgb(var(--chat-relief-status));
+  color: #ffffff;
+}
+
+/* Ожидание отправки: тот же кружок, но приглушённый и без заливки цветом. */
+.chat-relief-tick--pending {
+  background: rgb(var(--chat-relief-grey) / 0.75);
+}
+
+/* ─── Отправка: короткий отскок кнопки ───────────────────────────────────── */
+
+@keyframes chat-relief-send-bounce {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(0.9);
+  }
+  70% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.chat-relief-action--sending {
+  animation: chat-relief-send-bounce 260ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-relief-action,
+  .chat-relief-ghost,
+  .chat-relief-tab,
+  .chat-relief-tab::after,
+  .chat-relief-card,
+  .chat-relief-card::after,
+  .chat-relief-well {
+    transition: none;
+  }
+
+  .chat-relief-action:hover:not(:disabled),
+  .chat-relief-action:active:not(:disabled),
+  .chat-relief-ghost:hover:not(:disabled),
+  .chat-relief-ghost:active:not(:disabled),
+  .chat-relief-tab:hover:not(:disabled),
+  .chat-relief-tab:active:not(:disabled),
+  .chat-relief-card:hover,
+  .chat-relief-card:active {
+    transform: none;
+  }
+
+  .chat-relief-action--sending {
+    animation: none;
+  }
+}

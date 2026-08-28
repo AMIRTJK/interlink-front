@@ -9,7 +9,6 @@ import {
 } from "../../model";
 import { Translations } from "../../lib/translations";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
-import { getChatAvatarClipPath } from "../../lib/chatAvatarShape";
 import type { IChatLabels } from "../../lib/chatMappers";
 import { ConversationMediaTab } from "./ConversationMediaTab";
 import { GroupMembersPanel } from "./GroupMembersPanel";
@@ -53,7 +52,6 @@ export const ContactInfoDrawer: React.FC<ContactInfoDrawerProps> = ({
 
   // Форма аватарки группы = число участников; внутренняя обводка на фигуре
   // распадается на куски, поэтому в этом случае остаётся только форма.
-  const clipPath = getChatAvatarClipPath(contact);
 
   const quickActions = [
     { icon: <Phone className="w-4 h-4" />, label: t.call, onClick: undefined },
@@ -133,15 +131,10 @@ export const ContactInfoDrawer: React.FC<ContactInfoDrawerProps> = ({
                     (e.currentTarget as HTMLImageElement).src =
                       buildInitialsAvatar(contact.name);
                   }}
-                  className={`w-20 h-20 object-cover shadow-md overflow-hidden ${clipPath ? "" : "rounded-full"}`}
-                  style={
-                    clipPath
-                      ? { clipPath }
-                      : {
-                          boxShadow:
-                            "inset 0 0 0 3px rgb(var(--th-accent-rgb) / 0.6)",
-                        }
-                  }
+                  className="w-20 h-20 object-cover shadow-md overflow-hidden rounded-full"
+                  style={{
+                    boxShadow: "inset 0 0 0 3px rgb(var(--th-accent-rgb) / 0.6)",
+                  }}
                 />
                 {contact.online && <OnlineIndicator sizeClass="h-4 w-4" />}
               </div>

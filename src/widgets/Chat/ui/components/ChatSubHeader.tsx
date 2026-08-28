@@ -3,7 +3,6 @@ import { Search, Phone, Video, UserCog } from "lucide-react";
 import type { Contact } from "../../model";
 import { Translations } from "../../lib/translations";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
-import { getChatAvatarClipPath } from "../../lib/chatAvatarShape";
 import { OnlineIndicator } from "./OnlineIndicator";
 
 // Шапка открытой беседы: собеседник, его статус и действия над беседой.
@@ -33,7 +32,6 @@ export const ChatSubHeader = ({
 }: IProps) => {
   // Форма аватарки группы = число участников; внутренняя обводка на фигуре
   // распадается на куски, поэтому в этом случае остаётся только форма.
-  const clipPath = getChatAvatarClipPath(activeContact);
 
   return (
     <div
@@ -59,12 +57,8 @@ export const ChatSubHeader = ({
                 activeContact.name,
               );
             }}
-            className={`w-10 h-10 object-cover overflow-hidden ${clipPath ? "" : "rounded-full"}`}
-            style={
-              clipPath
-                ? { clipPath }
-                : { boxShadow: "inset 0 0 0 2px var(--th-accent-border)" }
-            }
+            className="w-10 h-10 object-cover overflow-hidden rounded-full"
+            style={{ boxShadow: "inset 0 0 0 2px var(--th-accent-border)" }}
           />
           {activeContact.online && <OnlineIndicator />}
         </div>

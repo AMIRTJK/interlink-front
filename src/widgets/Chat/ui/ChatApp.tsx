@@ -7,7 +7,9 @@ import { ChatOverlays } from "./ChatOverlays";
 import type { IChatShellProps } from "./themes/types";
 import { ClassicShell } from "./themes/classic/ClassicShell";
 import { ModernShell } from "./themes/modern/ModernShell";
+import { ReliefShell } from "./themes/relief/ReliefShell";
 import "./themes/modern/modern.css";
+import "./themes/relief/relief.css";
 
 // ─── Точка сборки чата ────────────────────────────────────────────────────────
 // Состояние, серверные данные и обработчики живут в useChatAppState и считаются
@@ -19,6 +21,7 @@ import "./themes/modern/modern.css";
 const SHELLS: Record<TChatThemeId, ComponentType<IChatShellProps>> = {
   classic: ClassicShell,
   modern: ModernShell,
+  relief: ReliefShell,
 };
 
 interface IProps {
