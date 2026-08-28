@@ -143,6 +143,8 @@ export type Translations = {
   themeClassicDesc: string;
   themeModern: string;
   themeModernDesc: string;
+  themeRelief: string;
+  themeReliefDesc: string;
 };
 export const TRANSLATIONS: Record<Lang, Translations> = {
   en: {
@@ -264,7 +266,9 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     themeClassic: 'Classic',
     themeClassicDesc: 'Current chat design',
     themeModern: 'Modern',
-    themeModernDesc: 'Light cards and soft bubbles'
+    themeModernDesc: 'Light cards and soft bubbles',
+    themeRelief: 'Relief',
+    themeReliefDesc: 'Frosted panels and embossed controls'
   },
   ru: {
     search: 'Поиск',
@@ -385,7 +389,9 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     themeClassic: 'Классическое',
     themeClassicDesc: 'Текущий дизайн чата',
     themeModern: 'Современное',
-    themeModernDesc: 'Светлые карточки и мягкие пузыри'
+    themeModernDesc: 'Светлые карточки и мягкие пузыри',
+    themeRelief: 'Объёмное',
+    themeReliefDesc: 'Матовые панели и объёмные кнопки'
   },
   tg: {
     search: 'Ҷустуҷӯ',
@@ -506,6 +512,8 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     themeClassic: 'Классикӣ',
     themeClassicDesc: 'Тарҳи ҷории чат',
     themeModern: 'Муосир',
-    themeModernDesc: 'Кортҳои равшан ва пуфакҳои мулоим'
+    themeModernDesc: 'Кортҳои равшан ва пуфакҳои мулоим',
+    themeRelief: 'Барҷаста',
+    themeReliefDesc: 'Панелҳои матӣ ва тугмаҳои барҷаста'
   }
 };

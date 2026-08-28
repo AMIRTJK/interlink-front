@@ -6,7 +6,7 @@ import type { Translations } from "../lib/translations";
 // поэтому добавление нового сводится к записи в этом реестре, набору токенов в
 // CSS и одному компоненту-оболочке в `ui/themes/<id>`.
 
-export type TChatThemeId = "classic" | "modern";
+export type TChatThemeId = "classic" | "modern" | "relief";
 
 /**
  * Различия представления, которые нужны компонентам вглубь ленты и не
@@ -18,6 +18,12 @@ export interface IChatThemePresentation {
   messageMeta: "inside" | "below";
   /** Аватарка отправителя рядом с пузырём. */
   bubbleAvatars: boolean;
+  /**
+   * Вид статуса отправки: галочки-иконки либо кружок с галочкой внутри (один —
+   * доставлено, два — прочитано). Это форма значка, а не его цвет, поэтому
+   * переопределением токенов такое не выражается.
+   */
+  messageStatus: "icon" | "badge";
 }
 
 export interface IChatThemeMeta {
@@ -33,13 +39,31 @@ export const CHAT_THEMES: readonly IChatThemeMeta[] = [
     id: "classic",
     labelKey: "themeClassic",
     descriptionKey: "themeClassicDesc",
-    presentation: { messageMeta: "inside", bubbleAvatars: true },
+    presentation: {
+      messageMeta: "inside",
+      bubbleAvatars: true,
+      messageStatus: "icon",
+    },
   },
   {
     id: "modern",
     labelKey: "themeModern",
     descriptionKey: "themeModernDesc",
-    presentation: { messageMeta: "below", bubbleAvatars: false },
+    presentation: {
+      messageMeta: "below",
+      bubbleAvatars: false,
+      messageStatus: "icon",
+    },
+  },
+  {
+    id: "relief",
+    labelKey: "themeRelief",
+    descriptionKey: "themeReliefDesc",
+    presentation: {
+      messageMeta: "below",
+      bubbleAvatars: false,
+      messageStatus: "badge",
+    },
   },
 ] as const;
 

@@ -16,7 +16,6 @@ import type { Contact } from "../../../model";
 import { CHAT_PERMISSIONS } from "../../../model/constants";
 import type { Translations } from "../../../lib/translations";
 import { buildInitialsAvatar } from "../../../lib/chatFormat";
-import { getChatAvatarClipPath } from "../../../lib/chatAvatarShape";
 import { OnlineIndicator } from "../../components/OnlineIndicator";
 
 // Шапка открытой беседы: собеседник слева, быстрые действия над перепиской по
@@ -73,8 +72,6 @@ export const ModernTopBar = ({
   onToggleExpand,
   onRequestClose,
 }: IProps) => {
-  const clipPath = activeContact ? getChatAvatarClipPath(activeContact) : null;
-
   const actions: IWindowAction[] = [
     {
       key: "search",
@@ -125,8 +122,7 @@ export const ModernTopBar = ({
                   (e.currentTarget as HTMLImageElement).src =
                     buildInitialsAvatar(activeContact.name);
                 }}
-                className={`w-10 h-10 object-cover overflow-hidden ${clipPath ? "" : "rounded-full"}`}
-                style={clipPath ? { clipPath } : undefined}
+                className="w-10 h-10 object-cover overflow-hidden rounded-full"
               />
               {activeContact.online && (
                 <OnlineIndicator className="absolute bottom-0 right-0 z-20" />

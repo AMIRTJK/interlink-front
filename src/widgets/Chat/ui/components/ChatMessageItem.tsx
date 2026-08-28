@@ -67,7 +67,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
   getUnreadThreadCount,
   setMessageRef,
 }) => {
-  const { messageMeta, bubbleAvatars } = useChatThemePresentation();
+  const { messageMeta, bubbleAvatars, messageStatus } = useChatThemePresentation();
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [actionMenuRect, setActionMenuRect] = useState<DOMRect | null>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
@@ -372,6 +372,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                             ? "rounded-2xl rounded-br-md text-[var(--th-bubble-out-text)]"
                             : "rounded-2xl rounded-bl-md text-[var(--th-bubble-in-text)]"
                   }`}
+                // Оформление вправе срезать угол пузыря со стороны отправителя:
+                // из классов Tailwind сторону не достать, из атрибута — можно.
+                data-mine={isMe}
                 style={bubbleStyle}
               >
                 <If is={!!msg.pinned}>
@@ -394,6 +397,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                     isPending={isPending}
                     status={msg.status}
                     placement="inside"
+                    statusStyle={messageStatus}
                   />
                 </If>
               </div>
@@ -409,6 +413,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               isPending={isPending}
               status={msg.status}
               placement="below"
+              statusStyle={messageStatus}
             />
           </If>
           <If

@@ -4,7 +4,6 @@ import {
   buildInitialsAvatar,
   formatConversationTime,
 } from "../../../lib/chatFormat";
-import { getChatAvatarClipPath } from "../../../lib/chatAvatarShape";
 import { OnlineIndicator } from "../../components/OnlineIndicator";
 
 // Карточка беседы в списке современного оформления: аватар, имя, время и
@@ -27,7 +26,6 @@ export const ModernChatCard = ({
   onSelect,
 }: IProps) => {
   const unread = contact.unreadCount ?? 0;
-  const clipPath = getChatAvatarClipPath(contact);
   const time = formatConversationTime(contact.lastMessageAt, lang, t);
 
   return (
@@ -63,8 +61,7 @@ export const ModernChatCard = ({
               contact.name,
             );
           }}
-          className={`w-10 h-10 object-cover overflow-hidden ${clipPath ? "" : "rounded-full"}`}
-          style={clipPath ? { clipPath } : undefined}
+          className="w-10 h-10 object-cover overflow-hidden rounded-full"
         />
         {contact.online && <OnlineIndicator className="absolute bottom-0 right-0 z-20" />}
       </span>
