@@ -2,9 +2,9 @@ import React, { useMemo, useEffect, useState } from "react";
 import { Modal, Form, ConfigProvider } from "antd";
 import { useGetQuery, useMutationQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
-import { transformAssigneesResponse } from "../tasks/lib/utils";
 import { THEMES } from "@widgets/layout/ui/designSettings";
 import { EventFormFields } from "./ui/EventFormFields";
+import type { IParticipantUser } from "./ui/EventParticipantsSelect";
 import dayjs, { Dayjs } from "dayjs";
 import "./create-event-modal.css";
 
@@ -58,9 +58,37 @@ export const CreateTaskModal = ({
 		options: cacheOptions,
 	});
 
-	const assigneesOptions = useMemo(() => {
+	const usersList = useMemo<IParticipantUser[]>(() => {
 		if (!usersData) return [];
-		return transformAssigneesResponse(usersData);
+		const items = Array.isArray(usersData?.data?.data)
+			? usersData.data.data
+			: Array.isArray(usersData?.data)
+				? usersData.data
+				: Array.isArray(usersData)
+					? usersData
+					: [];
+
+		return items.map((user: any) => {
+			const name = String(user.full_name || user.name || "Без имени");
+			const rawPhoto =
+				user.photo_path || user.photo_url || user.avatar || user.photo;
+			return {
+				id: user.id,
+				name,
+				role: String(
+					user.position || user.role || user.organization?.short_name || "",
+				),
+				initials: (
+					name
+						.split(/\s+/)
+						.filter(Boolean)
+						.map((p: string) => p[0])
+						.slice(0, 2)
+						.join("") || "?"
+				).toUpperCase(),
+				photo: rawPhoto,
+			};
+		});
 	}, [usersData]);
 
 	const { mutate: addEventMutate } = useMutationQuery({
@@ -181,7 +209,7 @@ export const CreateTaskModal = ({
 						form={form}
 						activeColor={activeColor}
 						isFetchingUsers={!!isFetchingUsers}
-						assigneesOptions={assigneesOptions}
+						users={usersList}
 					/>
 
 					<div className="border-t! border-zinc-100! mt-2! pt-3! pb-2! flex! items-center! justify-end! gap-3!">
