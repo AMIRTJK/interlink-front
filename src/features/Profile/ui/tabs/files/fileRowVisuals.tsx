@@ -37,7 +37,7 @@ export const getSmallIcon = (file: IApiFile) => {
 				</div>
 			);
 		case "document":
-		default:
+		default: {
 			const isMarkdown = file.original_name.endsWith(".md");
 			const bg = isMarkdown ? "bg-slate-500!" : "bg-blue-500!";
 			return (
@@ -45,6 +45,7 @@ export const getSmallIcon = (file: IApiFile) => {
 					<FileText size={13} />
 				</div>
 			);
+		}
 	}
 };
 
@@ -54,41 +55,33 @@ export const getTypeBadge = (file: IApiFile) => {
 	switch (fileType) {
 		case "archive":
 			return (
-				<div className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-zinc-300">
-					<span className="w-1.5 h-1.5 rounded-full bg-amber-500!" />
-					<span>Архив</span>
+				<div className="inline-flex items-center text-amber-600 dark:text-amber-400">
+					<Archive size={14} className="shrink-0" />
 				</div>
 			);
 		case "spreadsheet":
 			return (
-				<div className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-zinc-300">
-					<span className="w-1.5 h-1.5 rounded-full bg-emerald-500!" />
-					<span>Таблица</span>
+				<div className="inline-flex items-center text-emerald-600 dark:text-emerald-400">
+					<FileSpreadsheet size={14} className="shrink-0" />
 				</div>
 			);
 		case "pdf":
 			return (
-				<div className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-zinc-300">
-					<span className="w-1.5 h-1.5 rounded-full bg-indigo-500!" />
-					<span>PDF</span>
+				<div className="inline-flex items-center text-red-500 dark:text-red-400">
+					<FileText size={14} className="shrink-0" />
 				</div>
 			);
 		case "image":
 			return (
-				<div className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-zinc-300">
-					<span className="w-1.5 h-1.5 rounded-full bg-rose-500!" />
-					<span>Изображение</span>
+				<div className="inline-flex items-center text-rose-500 dark:text-rose-400">
+					<ImageIcon size={14} className="shrink-0" />
 				</div>
 			);
 		case "document":
 		default:
-			const isMarkdown = file.original_name.endsWith(".md");
 			return (
-				<div className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-zinc-300">
-					<span
-						className={`w-1.5 h-1.5 rounded-full ${isMarkdown ? "bg-slate-400!" : "bg-blue-500!"}`}
-					/>
-					<span>{isMarkdown ? "Файл" : "Документ"}</span>
+				<div className="inline-flex items-center text-blue-600 dark:text-blue-400">
+					<FileText size={14} className="shrink-0" />
 				</div>
 			);
 	}

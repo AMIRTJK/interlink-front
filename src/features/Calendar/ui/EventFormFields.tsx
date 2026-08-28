@@ -1,14 +1,18 @@
 import React from "react";
-import { Form, Input, DatePicker, TimePicker, Select } from "antd";
+import { Form, Input, DatePicker, TimePicker } from "antd";
 import { CheckOutlined, TeamOutlined } from "@ant-design/icons";
 import { If } from "@shared/ui";
 import type { FormInstance } from "antd";
+import {
+	EventParticipantsSelect,
+	type IParticipantUser,
+} from "./EventParticipantsSelect";
 
 interface IEventFormFieldsProps {
 	form: FormInstance;
 	activeColor?: string;
 	isFetchingUsers: boolean;
-	assigneesOptions: { value: number; label: string }[];
+	users: IParticipantUser[];
 }
 
 const colors = [
@@ -23,7 +27,7 @@ export const EventFormFields = ({
 	form,
 	activeColor,
 	isFetchingUsers,
-	assigneesOptions,
+	users,
 }: IEventFormFieldsProps) => {
 	return (
 		<>
@@ -140,19 +144,9 @@ export const EventFormFields = ({
 				name="assignees"
 				className="mb-3!"
 			>
-				<Select
-					mode="multiple"
-					placeholder="Добавить участника..."
-					loading={isFetchingUsers}
-					options={assigneesOptions}
-					variant="outlined"
-					className="w-full! bg-zinc-100! hover:bg-zinc-200/70! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! min-h-[40px]! px-1! transition-all! duration-200! text-sm!"
-					filterOption={(input, option) =>
-						(option?.label ?? "")
-							.toString()
-							.toLowerCase()
-							.includes(input.toLowerCase())
-					}
+				<EventParticipantsSelect
+					users={users}
+					isLoading={isFetchingUsers}
 				/>
 			</Form.Item>
 
