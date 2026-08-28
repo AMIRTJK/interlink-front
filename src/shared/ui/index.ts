@@ -22,3 +22,4 @@ export * from "./VisorInviteNoticeModal";
 export * from "./ToastContainer";
 export * from "./ErrorBoundary";
 export * from "./Icons";
+export * from "./Avatar";

@@ -4,6 +4,8 @@ import { If } from "@shared/ui";
 import { useGetQuery } from "@shared/lib";
 import { ApiRoutes } from "@shared/api";
 import { IAdminUser } from "@entities/hr/model";
+import { UserAvatar } from "./UserAvatar";
+import { resolveFilePhotoUrl } from "./lib";
 
 interface IApiUsersResponse {
   success: boolean;
@@ -20,27 +22,77 @@ interface IProps {
   excludeUserIds?: number[];
 }
 
-const getInitials = (user: IAdminUser): string => {
-  const first = user.first_name?.[0] ?? "";
-  const last = user.last_name?.[0] ?? "";
-  return (first + last).toUpperCase() || "?";
-};
-
 const getFullName = (user: IAdminUser): string =>
   [user.last_name, user.first_name].filter(Boolean).join(" ") || user.full_name || "—";
 
-const AVATAR_COLORS = [
-  "bg-indigo-500!",
-  "bg-emerald-500!",
-  "bg-rose-500!",
-  "bg-amber-500!",
-  "bg-sky-500!",
-  "bg-purple-500!",
-  "bg-teal-500!",
-  "bg-pink-500!",
-];
+interface IUserAccessRowProps {
+  user: IAdminUser;
+  isChecked: boolean;
+  onToggle: () => void;
+}
 
-const getAvatarColor = (id: number): string => AVATAR_COLORS[id % AVATAR_COLORS.length];
+const UserAccessRow = ({ user, isChecked, onToggle }: IUserAccessRowProps) => {
+  const rawPhoto =
+    user.photo_url ||
+    user.photo_path ||
+    (user as any)?.avatar ||
+    (user as any)?.photo;
+  const photo = resolveFilePhotoUrl(rawPhoto);
+  const [isLoaded, setIsLoaded] = useState(!photo);
+
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-between p-3 rounded-2xl animate-pulse">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 shrink-0" />
+          <div className="space-y-2 flex-1 min-w-0">
+            <div className="h-3.5 bg-slate-200 dark:bg-slate-800 rounded-md w-3/5" />
+            <div className="h-2.5 bg-slate-200/70 dark:bg-slate-800/70 rounded-md w-2/5" />
+          </div>
+        </div>
+        <div className="w-5 h-5 rounded-full bg-slate-200/70 dark:bg-slate-800/70 shrink-0 ml-3" />
+        <img
+          src={photo}
+          alt=""
+          className="hidden"
+          onLoad={() => setIsLoaded(true)}
+          onError={() => setIsLoaded(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      onClick={onToggle}
+      className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer animate-in fade-in duration-150"
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <UserAvatar user={user} size={40} />
+        <div className="min-w-0">
+          <div className="text-sm font-bold text-slate-700 dark:text-zinc-300 truncate">
+            {getFullName(user)}
+          </div>
+          <div className="text-xs text-slate-400 dark:text-zinc-500 truncate">
+            {user.position ?? user.department?.name ?? ""}
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={`w-5 h-5 rounded-full border flex-shrink-0 flex items-center justify-center transition-all ml-3 ${
+          isChecked
+            ? "bg-indigo-600! border-indigo-600!"
+            : "border-slate-300 dark:border-slate-700 bg-transparent"
+        }`}
+      >
+        <If is={isChecked}>
+          <span className="w-1.5 h-1.5 rounded-full bg-white!" />
+        </If>
+      </div>
+    </div>
+  );
+};
 
 export const UserAccessList = ({ selectedUsers, onToggleUser, excludeUserIds }: IProps) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -89,8 +141,28 @@ export const UserAccessList = ({ selectedUsers, onToggleUser, excludeUserIds }: 
 
       <div className="space-y-1 max-h-[460px]! overflow-y-auto pr-1">
         <If is={isLoading}>
-          <div className="flex items-center justify-center py-8 text-xs text-slate-400">
-            Загрузка...
+          <div className="space-y-1">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between p-3 rounded-2xl animate-pulse"
+              >
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 shrink-0" />
+                  <div className="space-y-2 flex-1 min-w-0">
+                    <div
+                      className="h-3.5 bg-slate-200 dark:bg-slate-800 rounded-md"
+                      style={{ width: `${45 + (idx % 4) * 15}%` }}
+                    />
+                    <div
+                      className="h-2.5 bg-slate-200/70 dark:bg-slate-800/70 rounded-md"
+                      style={{ width: `${25 + (idx % 3) * 18}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="w-5 h-5 rounded-full bg-slate-200/70 dark:bg-slate-800/70 shrink-0 ml-3" />
+              </div>
+            ))}
           </div>
         </If>
 
@@ -102,44 +174,14 @@ export const UserAccessList = ({ selectedUsers, onToggleUser, excludeUserIds }: 
 
         <If is={!isLoading && filteredUsers.length > 0}>
           <>
-            {filteredUsers.map((user) => {
-              const isChecked = selectedUsers.includes(user.id);
-              return (
-                <div
-                  key={user.id}
-                  onClick={() => onToggleUser(user.id)}
-                  className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold text-white! ${getAvatarColor(user.id)}`}
-                    >
-                      {getInitials(user)}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-sm font-bold text-slate-700 dark:text-zinc-300 truncate">
-                        {getFullName(user)}
-                      </div>
-                      <div className="text-xs text-slate-400 dark:text-zinc-500 truncate">
-                        {user.position ?? user.department?.name ?? ""}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    className={`w-5 h-5 rounded-full border flex-shrink-0 flex items-center justify-center transition-all ml-3 ${
-                      isChecked
-                        ? "bg-indigo-600! border-indigo-600!"
-                        : "border-slate-300 dark:border-slate-700 bg-transparent"
-                    }`}
-                  >
-                    <If is={isChecked}>
-                      <span className="w-1.5 h-1.5 rounded-full bg-white!" />
-                    </If>
-                  </div>
-                </div>
-              );
-            })}
+            {filteredUsers.map((user) => (
+              <UserAccessRow
+                key={user.id}
+                user={user}
+                isChecked={selectedUsers.includes(user.id)}
+                onToggle={() => onToggleUser(user.id)}
+              />
+            ))}
           </>
         </If>
       </div>

@@ -1,10 +1,10 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { X, File, Download, Clock, Paperclip, SquarePen } from "lucide-react";
+import { X, Clock, SquarePen } from "lucide-react";
 import { If } from "@shared/ui/If";
 import type { IPersonalTask } from "../model/types";
-import { formatDueDate, getPriorityMeta, getStatusMeta, getCountdown } from "../lib/helpers";
+import { formatDueDate, getCountdown } from "../lib/helpers";
 
 interface IProps {
   onClose: () => void;
@@ -34,22 +34,13 @@ export const TaskDetailsModal = ({ onClose, task, userName, onEditClick, activeT
   const pBadge = PRIORITY_BADGES[task.priority] || PRIORITY_BADGES.medium;
   const sBadge = STATUS_BADGES[task.status] || STATUS_BADGES.new;
   const countMeta = getCountdown(task.due_date);
-  const getInitials = (name: string) => {
-    const parts = name.split(" ");
-    return ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).toUpperCase();
-  };
-  const mockAttachments = [
-    { name: "Техническое_задание.pdf", size: "2.4 МБ" },
-    { name: "Макет_интерфейса.png", size: "845 КБ" },
-    { name: "Спецификация_API.docx", size: "128 КБ" },
-  ];
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-2xl bg-white dark:bg-zinc-800 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden flex flex-col z-10"
+        className="relative w-full max-w-2xl bg-white dark:bg-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10"
       >
         <div className="px-6 py-5 border-b border-zinc-200 dark:border-zinc-700 flex items-start justify-between gap-4">
           <div className="min-w-0">
@@ -105,14 +96,6 @@ export const TaskDetailsModal = ({ onClose, task, userName, onEditClick, activeT
             </div>
 
             <div className="space-y-4">
-              <div>
-                <h4 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5 m-0">Исполнитель</h4>
-                <div className="flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 bg-zinc-500">{getInitials(userName)}</span>
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">{userName}</span>
-                </div>
-              </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h4 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5 m-0">Срок</h4>
@@ -133,28 +116,6 @@ export const TaskDetailsModal = ({ onClose, task, userName, onEditClick, activeT
                   </span>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div className="mt-6 pt-5 border-t border-zinc-200 dark:border-zinc-700">
-            <h4 className="flex items-center gap-1.5 text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 m-0">
-              <Paperclip size={13} /> Вложения
-            </h4>
-            <div className="space-y-2">
-              {mockAttachments.map((file) => (
-                <div key={file.name} className="flex items-center gap-3 px-3 py-2.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700">
-                  <span className="w-9 h-9 rounded-xl bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0 text-zinc-500 dark:text-zinc-300">
-                    <File size={16} />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold text-zinc-800 dark:text-zinc-100 truncate">{file.name}</div>
-                    <div className="text-xs text-zinc-400">{file.size}</div>
-                  </div>
-                  <button className="p-2 rounded-xl text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors flex-shrink-0 border-0 bg-transparent cursor-pointer flex items-center justify-center">
-                    <Download size={16} />
-                  </button>
-                </div>
-              ))}
             </div>
           </div>
         </div>

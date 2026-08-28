@@ -1,64 +1,110 @@
 import { useState, type MouseEvent, type WheelEvent } from "react";
 import { createPortal } from "react-dom";
-import { Search, X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
-import { IFileUser, resolveFilePhotoUrl, getUserInitials } from "./lib";
+import { Search, X, ZoomIn, ZoomOut, RotateCcw, User } from "lucide-react";
+import { cn } from "@shared/lib";
 
-const AVATAR_COLORS = [
-  "bg-indigo-500!",
-  "bg-emerald-500!",
-  "bg-rose-500!",
-  "bg-amber-500!",
-  "bg-sky-500!",
-  "bg-purple-500!",
-  "bg-teal-500!",
-  "bg-pink-500!",
-];
+const API_HOST = (
+  (typeof import.meta !== "undefined" &&
+    (import.meta as any).env?.VITE_API_URL) ||
+  ""
+).replace(/\/+$/, "");
 
-interface IProps {
-  user?: IFileUser | null;
-  size?: number;
-  ring?: boolean;
+export const resolvePhotoUrl = (raw?: string | null): string => {
+  if (!raw || typeof raw !== "string") return "";
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("blob:") ||
+    trimmed.startsWith("data:")
+  ) {
+    return trimmed;
+  }
+  const clean = trimmed.replace(/^\/+/, "");
+  if (clean.startsWith("storage/")) {
+    return `${API_HOST}/${clean}`;
+  }
+  if (clean.startsWith("user-photos/")) {
+    return `${API_HOST}/storage/${clean}`;
+  }
+  return `${API_HOST}/${clean}`;
+};
+
+export interface IUserAvatarItem {
+  id?: string | number;
+  name?: string;
+  role?: string;
+  initials?: string;
+  color?: string;
+  photo?: string | null;
+}
+
+interface IAvatarProps {
+  colleague?: IUserAvatarItem | null;
   className?: string;
   allowPreview?: boolean;
 }
 
-export const UserAvatar = ({
-  user,
-  size = 32,
-  ring = false,
-  className = "",
+export const Avatar = ({
+  colleague,
+  className,
   allowPreview = true,
-}: IProps) => {
-  const [failed, setFailed] = useState(false);
+}: IAvatarProps) => {
+  const [err, setErr] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [scale, setScale] = useState(1);
 
-  const rawPhoto =
-    user?.photo_url ||
-    user?.photo_path ||
-    (user as any)?.avatar ||
-    (user as any)?.photo ||
-    (user as any)?.avatar_url ||
-    (user as any)?.profile_photo_url;
-  const photo = resolveFilePhotoUrl(rawPhoto);
-  const colorClass = AVATAR_COLORS[(user?.id ?? 0) % AVATAR_COLORS.length];
-  const ringClass = ring ? "ring-2 ring-white dark:ring-slate-900" : "";
-  const initials = getUserInitials(user);
-
-  if (!photo || failed) {
+  if (!colleague) {
     return (
       <div
-        style={{ width: size, height: size, fontSize: Math.round(size * 0.38) }}
-        className={`rounded-full flex-shrink-0 flex items-center justify-center font-bold text-white! select-none ${colorClass} ${ringClass} ${className}`}
+        className={cn(
+          "relative flex items-center justify-center rounded-full text-[10px] font-bold text-white shrink-0 select-none bg-slate-400 dark:bg-slate-600",
+          className || "w-8 h-8",
+        )}
       >
-        {initials}
+        <User className="w-[55%] h-[55%] text-white/90" strokeWidth={2.2} />
+      </div>
+    );
+  }
+
+  const photo = resolvePhotoUrl(colleague.photo);
+
+  const hasValidInitials = Boolean(
+    colleague.initials &&
+      colleague.initials !== "—" &&
+      colleague.initials !== "–" &&
+      colleague.initials !== "-" &&
+      colleague.initials !== "?" &&
+      colleague.name !== "Не назначен" &&
+      colleague.id !== "",
+  );
+
+  const renderFallback = () => {
+    if (hasValidInitials) {
+      return <span>{colleague.initials}</span>;
+    }
+    return <User className="w-[55%] h-[55%] text-white/90" strokeWidth={2.2} />;
+  };
+
+  if (err || !photo) {
+    return (
+      <div
+        className={cn(
+          "relative flex items-center justify-center rounded-full text-[10px] font-bold text-white shrink-0 select-none",
+          colleague.color || "bg-slate-400 dark:bg-slate-600",
+          className || "w-8 h-8",
+        )}
+      >
+        {renderFallback()}
       </div>
     );
   }
 
   const handleAvatarClick = (e: MouseEvent) => {
     if (!allowPreview) return;
+    e.preventDefault();
     e.stopPropagation();
     setScale(1);
     setShowPreview(true);
@@ -89,35 +135,40 @@ export const UserAvatar = ({
     <>
       <div
         onClick={handleAvatarClick}
-        style={{ width: size, height: size }}
-        className={`group/avatar relative rounded-full flex-shrink-0 select-none overflow-hidden ${ringClass} ${
-          allowPreview ? "cursor-pointer" : ""
-        } ${className}`}
+        onMouseDown={(e) => {
+          if (allowPreview) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
+        className={cn(
+          "group/taskavatar relative aspect-square rounded-full shrink-0 select-none overflow-hidden",
+          className || "w-8 h-8",
+          allowPreview ? "cursor-pointer" : "",
+        )}
       >
         {!loaded && (
           <div
-            className="absolute inset-0 rounded-full animate-pulse bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-400 dark:text-zinc-500"
-            style={{ fontSize: Math.round(size * 0.38) }}
+            className={cn(
+              "absolute inset-0 rounded-full animate-pulse flex items-center justify-center text-[10px] font-bold text-white shrink-0",
+              colleague.color || "bg-slate-400 dark:bg-slate-600",
+            )}
           >
-            {initials}
+            {renderFallback()}
           </div>
         )}
         <img
           src={photo}
-          alt={initials}
+          alt={colleague.name || "Пользователь"}
           onLoad={() => setLoaded(true)}
-          onError={() => setFailed(true)}
+          onError={() => setErr(true)}
           className={`w-full h-full rounded-full object-cover transition-opacity duration-200 ${
             loaded ? "opacity-100" : "opacity-0"
           }`}
         />
         {allowPreview && loaded && (
-          <div className="absolute inset-0 bg-black/45 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-150">
-            <Search
-              size={Math.max(12, Math.round(size * 0.35))}
-              className="text-white drop-shadow-sm"
-              strokeWidth={2.5}
-            />
+          <div className="absolute inset-0 bg-black/45 rounded-full flex items-center justify-center opacity-0 group-hover/taskavatar:opacity-100 transition-opacity duration-150">
+            <Search size={12} className="text-white drop-shadow-sm" strokeWidth={2.5} />
           </div>
         )}
       </div>
@@ -126,6 +177,7 @@ export const UserAvatar = ({
         typeof document !== "undefined" &&
         createPortal(
           <div
+            data-avatar-preview-portal="true"
             className="fixed inset-0 z-[99999] flex flex-col items-center justify-center p-4 bg-black/75 backdrop-blur-md select-none animate-in fade-in duration-150"
             onClick={(e) => {
               e.stopPropagation();
@@ -140,12 +192,12 @@ export const UserAvatar = ({
             >
               <img
                 src={photo}
-                alt={initials}
+                alt={colleague.name || "Пользователь"}
                 className="w-full h-full rounded-full object-cover shadow-2xl"
               />
             </div>
 
-            {/* Панель управления масштабом и кнопка закрытия */}
+            {/* Панель управления масштабом */}
             <div
               className="fixed bottom-6 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-2 rounded-2xl border border-white/20 shadow-2xl z-[100000]"
               onClick={(e) => e.stopPropagation()}
@@ -199,7 +251,7 @@ export const UserAvatar = ({
               </button>
             </div>
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );

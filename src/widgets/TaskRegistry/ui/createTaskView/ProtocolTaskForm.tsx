@@ -97,10 +97,10 @@ export function ProtocolTaskForm({
   return (
     <motion.div
       key="protocol-form"
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 16 }}
-      transition={{ duration: 0.2 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
       className="space-y-6"
     >
       {/* Card 1: Детальная информация */}
@@ -138,6 +138,10 @@ export function ProtocolTaskForm({
         chairmanColleague={chairmanColleague}
         chairmanSigned={chairmanSigned}
         onChairmanSignedChange={onChairmanSignedChange}
+        onChairmanIdChange={(id) =>
+          onBatchGlobalChange({ ...batchGlobal, chairmanId: id })
+        }
+        onChairmanSelectOpenChange={onChairmanSelectOpenChange}
         secretaryColleague={secretaryColleague}
         secretarySigned={secretarySigned}
         onSecretarySignedChange={onSecretarySignedChange}
@@ -152,7 +156,7 @@ export function ProtocolTaskForm({
       />
 
       {/* Bottom Action Section */}
-      <div className="flex flex-col gap-2 pt-2">
+      <div className="flex flex-col gap-2 pt-4 pb-8">
         <div className="flex items-center justify-start">
           <button
             type="button"

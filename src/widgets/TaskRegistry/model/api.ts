@@ -127,16 +127,44 @@ const normalizePriority = (priority?: string | null): Priority =>
     ? (priority as Priority)
     : "medium";
 
+const API_HOST = (import.meta.env.VITE_API_URL || "").replace(/\/api\/v1\/?$/, "");
+
+export const resolveTaskPhotoUrl = (path?: string | null): string => {
+  if (!path) return "";
+  if (
+    path.startsWith("http://") ||
+    path.startsWith("https://") ||
+    path.startsWith("blob:") ||
+    path.startsWith("data:")
+  ) {
+    return path;
+  }
+  const clean = path.replace(/^\/+/, "");
+  if (clean.startsWith("storage/")) {
+    return `${API_HOST}/${clean}`;
+  }
+  if (clean.startsWith("user-photos/")) {
+    return `${API_HOST}/storage/${clean}`;
+  }
+  return `${API_HOST}/${clean}`;
+};
+
 /* ===================== MAPPERS ===================== */
 
 export const mapAssigneeToColleague = (a: IApiAssignee): Colleague => {
   const name = String(a.full_name || a.name || "Без имени");
+  const rawPhoto =
+    a.photo_path ||
+    a.photo_url ||
+    (a as any).avatar ||
+    (a as any).photo;
   return {
     id: String(a.id),
     name,
     role: String(a.position || a.role || ""),
     initials: initialsFromName(name),
     color: colorFromId(a.id),
+    photo: resolveTaskPhotoUrl(rawPhoto),
   };
 };
 
@@ -168,7 +196,11 @@ export const mapApiTaskToTask = (item: IApiTask): Task => {
     rawId: item.id,
     title: item.title || "",
     description: item.description || "",
-    status: normalizeStatus(item.status),
+    status:
+      (item.is_overdue || item.status === "overdue") &&
+      item.status !== "completed"
+        ? "overdue"
+        : normalizeStatus(item.status),
     priority: normalizePriority(item.priority),
     assignee: assignees[0] || EMPTY_ASSIGNEE,
     assignees,
@@ -246,15 +278,19 @@ export const extractPagination = (
     (r.meta as Record<string, unknown> | undefined) ??
     (dataField && !Array.isArray(dataField)
       ? ((dataField.meta as Record<string, unknown> | undefined) ?? dataField)
-      : undefined);
+      : undefined) ??
+    r;
   const meta = (metaCandidate ?? {}) as Record<string, unknown>;
   const num = (v: unknown, d: number) => {
     const n = Number(v);
     return Number.isFinite(n) && n > 0 ? n : d;
   };
-  const perPage = num(meta.per_page, defaultPerPage);
-  const total = num(meta.total, fallbackCount);
-  const currentPage = num(meta.current_page, 1);
-  const lastPage = num(meta.last_page, Math.max(1, Math.ceil(total / perPage)));
+  const perPage = num(meta.per_page ?? r.per_page, defaultPerPage);
+  const total = num(meta.total ?? r.total, fallbackCount);
+  const currentPage = num(meta.current_page ?? r.current_page ?? meta.page ?? r.page, 1);
+  const lastPage = num(
+    meta.last_page ?? r.last_page,
+    Math.max(1, Math.ceil(total / perPage)),
+  );
   return { total, lastPage, currentPage, perPage };
 };

@@ -1,34 +1,20 @@
 import * as React from "react";
 import { motion } from "framer-motion";
-import { FileIcon, Download, Paperclip, Trash2, Upload } from "lucide-react";
-import { If } from "@shared/ui";
+import { FileIcon, Download, Paperclip } from "lucide-react";
 import type { Task } from "../../model/types";
 
 interface IProps {
   task: Task;
-  uploading: boolean;
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
-  onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onUploadAttachments?: (taskId: number, files: File[]) => Promise<void> | void;
   onDownloadAttachment?: (
     taskId: number,
     attachmentId: number,
     fileName: string,
   ) => Promise<void> | void;
-  onDeleteAttachment?: (
-    taskId: number,
-    attachmentId: number,
-  ) => Promise<void> | void;
 }
 
 export function TaskDetailLeftColumn({
   task,
-  uploading,
-  fileInputRef,
-  onUpload,
-  onUploadAttachments,
   onDownloadAttachment,
-  onDeleteAttachment,
 }: IProps) {
   return (
     <div className="flex-1 p-8 space-y-8 border-r border-slate-100 dark:border-white/10">
@@ -80,23 +66,6 @@ export function TaskDetailLeftColumn({
           <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
             Вложения
           </h3>
-          <If is={Boolean(onUploadAttachments) && task.rawId != null}>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors disabled:opacity-60"
-            >
-              <Upload size={13} />
-              {uploading ? "Загрузка..." : "Загрузить"}
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              hidden
-              onChange={onUpload}
-            />
-          </If>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {task.attachments.length > 0 ? (
@@ -127,20 +96,6 @@ export function TaskDetailLeftColumn({
                   >
                     <Download size={16} />
                   </button>
-                  <If is={Boolean(onDeleteAttachment)}>
-                    <button
-                      onClick={() => {
-                        if (task.rawId != null && file.rawId != null) {
-                          onDeleteAttachment?.(task.rawId, file.rawId);
-                        }
-                      }}
-                      disabled={task.rawId == null || file.rawId == null}
-                      className="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all text-slate-400 hover:text-rose-600 disabled:opacity-40"
-                      title="Удалить"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </If>
                 </div>
               </div>
             ))

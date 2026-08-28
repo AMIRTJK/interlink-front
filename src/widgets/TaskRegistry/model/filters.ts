@@ -14,11 +14,24 @@ export type TaskDisplayMode = "table" | "board";
 
 export const TASKS_DISPLAY_MODE_STORAGE_KEY = "tasks_display_mode";
 
+export type TaskProgressFilter =
+  | ""
+  | "all"
+  | "0"
+  | "25"
+  | "50"
+  | "75"
+  | "100"
+  | "in_progress"
+  | "done"
+  | "not_started";
+
 export interface TaskFilters {
   search: string;
   status: TaskStatus | "";
   priority: Priority | "";
   assigneeId: string; // "" = все
+  progress: TaskProgressFilter;
   mine: boolean;
   sort: TaskSortField;
   dir: SortDir;
@@ -31,23 +44,40 @@ export const DEFAULT_FILTERS: TaskFilters = {
   status: "",
   priority: "",
   assigneeId: "",
+  progress: "",
   mine: false,
   sort: "due_date",
-  dir: "asc",
+  dir: "desc",
   date: "",
   dateType: "planned",
 };
 
-export const LIST_PAGE_SIZE = 10;
+export const LIST_PAGE_SIZE = 7;
 
 export const buildTaskParams = (
   f: TaskFilters,
 ): Record<string, string | number> => {
   const p: Record<string, string | number> = {};
   if (f.search.trim()) p.search = f.search.trim();
-  if (f.status) p.status = f.status;
+  if (f.status === "overdue") {
+    p.status = "overdue";
+    p.is_overdue = 1;
+  } else if (f.status) {
+    p.status = f.status;
+  }
   if (f.priority) p.priority = f.priority;
   if (f.assigneeId) p.assignee_id = f.assigneeId;
+  if (f.progress && f.progress !== "all") {
+    if (f.progress === "done" || f.progress === "100") {
+      p.progress = 100;
+    } else if (f.progress === "not_started" || f.progress === "0") {
+      p.progress = 0;
+    } else if (!Number.isNaN(Number(f.progress))) {
+      p.progress = Number(f.progress);
+    } else {
+      p.progress = f.progress;
+    }
+  }
   if (f.mine) p.mine = 1;
   if (f.sort) p.sort = f.sort;
   if (f.dir) p.dir = f.dir;

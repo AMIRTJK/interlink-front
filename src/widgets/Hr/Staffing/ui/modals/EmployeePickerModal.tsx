@@ -15,6 +15,93 @@ export interface IEmployeePickerModalProps {
   dark?: boolean;
 }
 
+interface IEmployeeRowProps {
+  emp: IEmployee;
+  isSelected: boolean;
+  onSelect: () => void;
+  dark?: boolean;
+  rowHover: string;
+  nameText: string;
+  subText: string;
+}
+
+const EmployeePickerRow = ({
+  emp,
+  isSelected,
+  onSelect,
+  dark,
+  rowHover,
+  nameText,
+  subText,
+}: IEmployeeRowProps) => {
+  const photo = resolvePhotoUrl(emp.avatarPhoto);
+  const [isLoaded, setIsLoaded] = useState(!photo);
+
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl mb-1 animate-pulse">
+        <div
+          className={`w-9 h-9 aspect-square rounded-full shrink-0 ${
+            dark ? 'bg-gray-800' : 'bg-gray-200'
+          }`}
+        />
+        <div className="flex-1 min-w-0 space-y-2">
+          <div
+            className={`h-3.5 rounded-md w-3/5 ${
+              dark ? 'bg-gray-800' : 'bg-gray-200'
+            }`}
+          />
+          <div
+            className={`h-2.5 rounded-md w-2/5 ${
+              dark ? 'bg-gray-800/60' : 'bg-gray-200/70'
+            }`}
+          />
+        </div>
+        <img
+          src={photo}
+          alt=""
+          className="hidden"
+          onLoad={() => setIsLoaded(true)}
+          onError={() => setIsLoaded(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      onClick={onSelect}
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl mb-1 cursor-pointer transition-colors animate-in fade-in duration-150 ${
+        isSelected
+          ? dark
+            ? 'bg-indigo-900/20 ring-1 ring-indigo-600/50'
+            : 'bg-indigo-50 ring-1 ring-indigo-200'
+          : rowHover
+      }`}
+    >
+      <MiniAvatar
+        photo={emp.avatarPhoto}
+        initials={emp.avatarInitials}
+        color={emp.avatarColor}
+        size="md"
+      />
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm font-semibold truncate ${nameText}`}>
+          {emp.lastName} {emp.firstName}
+        </p>
+        <p className={`text-xs truncate mt-0.5 ${subText}`}>
+          {emp.position} · {emp.department}
+        </p>
+      </div>
+      <If is={isSelected}>
+        <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center shrink-0">
+          <Check size={11} className="text-white" />
+        </div>
+      </If>
+    </div>
+  );
+};
+
 export const EmployeePickerModal = ({
   employees,
   selectedId,
@@ -215,45 +302,21 @@ export const EmployeePickerModal = ({
             </div>
           </If>
           <If is={!isLoading}>
-            {displayEmployees.map((emp) => {
-              const isSelected = emp.id === selectedId;
-              return (
-                <div
-                  key={emp.id}
-                  onClick={() => {
-                    onSelect(emp);
-                    onClose();
-                  }}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl mb-1 cursor-pointer transition-colors ${
-                    isSelected
-                      ? dark
-                        ? 'bg-indigo-900/20 ring-1 ring-indigo-600/50'
-                        : 'bg-indigo-50 ring-1 ring-indigo-200'
-                      : rowHover
-                  }`}
-                >
-                  <MiniAvatar
-                    photo={emp.avatarPhoto}
-                    initials={emp.avatarInitials}
-                    color={emp.avatarColor}
-                    size="md"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-semibold truncate ${nameText}`}>
-                      {emp.lastName} {emp.firstName}
-                    </p>
-                    <p className={`text-xs truncate mt-0.5 ${subText}`}>
-                      {emp.position} · {emp.department}
-                    </p>
-                  </div>
-                  <If is={isSelected}>
-                    <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center shrink-0">
-                      <Check size={11} className="text-white" />
-                    </div>
-                  </If>
-                </div>
-              );
-            })}
+            {displayEmployees.map((emp) => (
+              <EmployeePickerRow
+                key={emp.id}
+                emp={emp}
+                isSelected={emp.id === selectedId}
+                onSelect={() => {
+                  onSelect(emp);
+                  onClose();
+                }}
+                dark={dark}
+                rowHover={rowHover}
+                nameText={nameText}
+                subText={subText}
+              />
+            ))}
           </If>
         </div>
         <div className={`px-4 py-3 border-t ${headerBorder} shrink-0 flex items-center justify-between`}>

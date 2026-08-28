@@ -1,10 +1,10 @@
 import * as React from "react";
-import { Search, Plus, Calendar, LayoutGrid, List as ListIcon } from "lucide-react";
+import { Search, Plus, Calendar, LayoutGrid, List as ListIcon, X } from "lucide-react";
 import { Select, DatePicker, ConfigProvider } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
-import { cn } from "@shared/lib";
-import { If } from "@shared/ui";
+import { cn, useDebouncedCallback } from "@shared/lib";
+import { If, Tooltip } from "@shared/ui";
 import type { Colleague, Priority, TaskStatsFull, TaskStatus } from "../model/types";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "../model/constants";
 import {
@@ -27,9 +27,11 @@ interface IProps {
 
 const STATUS_TABS: { value: TaskStatus | ""; label: string; statKey: keyof TaskStatsFull | "total" }[] = [
   { value: "", label: "Все", statKey: "total" },
-  { value: "in_progress", label: "Активные", statKey: "in_progress" },
-  { value: "completed", label: "Завершенные", statKey: "completed" },
-  { value: "overdue", label: "Просроченные", statKey: "overdue" },
+  { value: "new", label: "Новая", statKey: "new" },
+  { value: "in_progress", label: "В работе", statKey: "in_progress" },
+  { value: "review", label: "На проверке", statKey: "review" },
+  { value: "completed", label: "Завершена", statKey: "completed" },
+  { value: "overdue", label: "Просрочена", statKey: "overdue" },
 ];
 
 const customAntdTheme = {
@@ -42,7 +44,7 @@ const customAntdTheme = {
   },
 };
 
-export const TasksFilterBar = ({
+export const TasksFilterBar = React.memo(({
   filters,
   onFilterChange,
   stats,
@@ -57,11 +59,15 @@ export const TasksFilterBar = ({
     setSearchLocal(filters.search);
   }, [filters.search]);
 
-  React.useEffect(() => {
-    if (searchLocal === filters.search) return;
-    const t = setTimeout(() => onFilterChange({ search: searchLocal }), 400);
-    return () => clearTimeout(t);
-  }, [searchLocal]);
+  const debouncedSearch = useDebouncedCallback((val: unknown) => {
+    onFilterChange({ search: String(val ?? "") });
+  }, 400);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setSearchLocal(val);
+    debouncedSearch(val);
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -69,74 +75,54 @@ export const TasksFilterBar = ({
         {/* Row 1: Filter Dropdowns Bar */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Priority filter pill */}
-          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
-            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Приоритет:</span>
-            <Select
-              variant="borderless"
-              value={filters.priority || undefined}
-              placeholder="Все приоритеты"
-              onChange={(val) => onFilterChange({ priority: (val || "") as Priority })}
-              allowClear
-              options={PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-              className="min-w-[130px] font-bold text-slate-700 dark:text-slate-100"
-            />
-          </div>
+          <Tooltip title={PRIORITY_OPTIONS.find((o) => o.value === filters.priority)?.label}>
+            <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
+              <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Приоритет:</span>
+              <Select
+                variant="borderless"
+                value={filters.priority || undefined}
+                placeholder="Все приоритеты"
+                onChange={(val) => onFilterChange({ priority: (val || "") as Priority })}
+                allowClear
+                options={PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                className="w-[130px] font-bold text-slate-700 dark:text-slate-100"
+              />
+            </div>
+          </Tooltip>
 
           {/* Assignee filter pill */}
-          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
-            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Исполнитель:</span>
-            <Select
-              variant="borderless"
-              value={filters.assigneeId ? String(filters.assigneeId) : undefined}
-              placeholder="Все исполнители"
-              onChange={(val) => onFilterChange({ assigneeId: val || "" })}
-              allowClear
-              showSearch
-              filterOption={(input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())}
-              options={colleagues.map((c) => ({ value: String(c.id), label: c.name }))}
-              className="min-w-[145px] font-bold text-slate-700 dark:text-slate-100"
-            />
-          </div>
+          <Tooltip title={colleagues.find((c) => String(c.id) === String(filters.assigneeId))?.name}>
+            <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
+              <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Исполнитель:</span>
+              <Select
+                variant="borderless"
+                value={filters.assigneeId ? String(filters.assigneeId) : undefined}
+                placeholder="Все исполнители"
+                onChange={(val) => onFilterChange({ assigneeId: val || "" })}
+                allowClear
+                showSearch
+                filterOption={(input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())}
+                options={colleagues.map((c) => ({ value: String(c.id), label: c.name }))}
+                className="w-[155px] font-bold text-slate-700 dark:text-slate-100"
+              />
+            </div>
+          </Tooltip>
 
           {/* Status filter pill */}
-          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
-            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Статус:</span>
-            <Select
-              variant="borderless"
-              value={filters.status || undefined}
-              placeholder="Все статусы"
-              onChange={(val) => onFilterChange({ status: (val || "") as TaskStatus })}
-              allowClear
-              options={STATUS_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-              className="min-w-[125px] font-bold text-slate-700 dark:text-slate-100"
-            />
-          </div>
-
-          {/* Progress filter pill */}
-          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
-            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Прогресс:</span>
-            <Select
-              variant="borderless"
-              defaultValue="all"
-              options={[
-                { value: "all", label: "Все" },
-                { value: "in_progress", label: "В процессе" },
-                { value: "done", label: "100%" },
-              ]}
-              className="min-w-[90px] font-bold text-slate-700 dark:text-slate-100"
-            />
-          </div>
-
-          {/* Name filter pill */}
-          <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
-            <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Название:</span>
-            <Select
-              variant="borderless"
-              defaultValue="all"
-              options={[{ value: "all", label: "Все названия" }]}
-              className="min-w-[130px] font-bold text-slate-700 dark:text-slate-100"
-            />
-          </div>
+          <Tooltip title={STATUS_OPTIONS.find((o) => o.value === filters.status)?.label}>
+            <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
+              <span className="text-slate-400 font-medium mr-1 whitespace-nowrap">Статус:</span>
+              <Select
+                variant="borderless"
+                value={filters.status || undefined}
+                placeholder="Все статусы"
+                onChange={(val) => onFilterChange({ status: (val || "") as TaskStatus })}
+                allowClear
+                options={STATUS_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                className="w-[125px] font-bold text-slate-700 dark:text-slate-100"
+              />
+            </div>
+          </Tooltip>
 
           {/* Deadline DatePicker pill */}
           <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 rounded-2xl px-3 py-1 text-xs">
@@ -149,7 +135,7 @@ export const TasksFilterBar = ({
               format="DD.MM.YYYY"
               placeholder="ДД.ММ.ГГГГ"
               allowClear
-              className="w-[125px] font-bold text-slate-700 dark:text-slate-100"
+              className="w-[115px] font-bold text-slate-700 dark:text-slate-100"
             />
           </div>
         </div>
@@ -185,14 +171,27 @@ export const TasksFilterBar = ({
 
         {/* Central Oval Search Bar */}
         <div className="relative flex-1 max-w-md mx-auto">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={15} />
           <input
             type="text"
             placeholder="Поиск"
             value={searchLocal}
-            onChange={(e) => setSearchLocal(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gradient-to-b from-slate-100/90 to-slate-200/40 dark:from-slate-800/90 dark:to-slate-800/40 border border-slate-200/70 dark:border-white/10 rounded-full outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-xs font-medium text-slate-700 dark:text-slate-100 placeholder:text-slate-400 text-center"
+            onChange={handleSearchChange}
+            className="w-full pl-10 pr-10 py-2 bg-gradient-to-b from-slate-100/90 to-slate-200/40 dark:from-slate-800/90 dark:to-slate-800/40 border border-slate-200/70 dark:border-white/10 rounded-full outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-xs font-medium text-slate-700 dark:text-slate-100 placeholder:text-slate-400 text-center"
           />
+          {searchLocal ? (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchLocal("");
+                onFilterChange({ search: "" });
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer p-0.5"
+              title="Очистить"
+            >
+              <X size={14} />
+            </button>
+          ) : null}
         </div>
 
         {/* Create Button */}
@@ -214,11 +213,7 @@ export const TasksFilterBar = ({
             const active = filters.status === tab.value;
             const countVal = stats
               ? (stats[tab.statKey] as number) ?? 0
-              : tab.statKey === "total"
-                ? 1
-                : tab.statKey === "overdue"
-                  ? 1
-                  : 0;
+              : 0;
 
             return (
               <button
@@ -247,4 +242,4 @@ export const TasksFilterBar = ({
       </div>
     </div>
   );
-};
+});

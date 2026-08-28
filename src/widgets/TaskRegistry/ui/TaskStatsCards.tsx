@@ -90,10 +90,10 @@ const PriorityBreakdownPills = ({ breakdown }: { breakdown: Record<string, numbe
 
 export const TaskStatsCards = ({ stats }: TaskStatsCardsProps) => {
   const values: Record<string, number> = {
-    total: stats?.total ?? 11,
-    inProgress: stats?.active ?? 2,
-    completed: stats?.completed ?? 1,
-    overdue: stats?.overdue ?? 8,
+    total: stats?.total ?? 0,
+    inProgress: stats?.active ?? 0,
+    completed: stats?.completed ?? 0,
+    overdue: stats?.overdue ?? 0,
   };
 
   return (
