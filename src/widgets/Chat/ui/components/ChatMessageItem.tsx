@@ -428,8 +428,14 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               className={`flex flex-wrap gap-1.5 mt-1.5 ${
                 isMe ? "self-end justify-end" : "self-start justify-start"
               }`}
+              // Ширина пузыря ограничивает строку чипов, чтобы реакции
+              // переносились под сообщением, а не тянулись за него. Но у
+              // короткого сообщения пузырь уже самого чипа, поэтому нижняя
+              // граница — содержимое: min-width по спецификации сильнее
+              // max-width, и строка расширяется ровно до самого широкого чипа.
               style={{
                 maxWidth: bubbleWidth ? `${bubbleWidth}px` : "100%",
+                minWidth: "min-content",
               }}
             >
               <If is={!!(msg.reactions && msg.reactions.length > 0)}>
@@ -467,7 +473,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                       ? `${formatRepliesCount(repliesCount, lang)}, ${t.newReplies}: ${unreadReplies}`
                       : formatRepliesCount(repliesCount, lang)
                   }
-                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer text-[var(--th-accent-text)]"
+                  className="flex flex-shrink-0 items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer text-[var(--th-accent-text)]"
                   style={{
                     background: "var(--th-accent-soft-strong)",
                     // Непрочитанный тред тянет взгляд контуром и тенью: цвет
@@ -480,10 +486,10 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                       : "0 2px 10px rgb(var(--th-accent-rgb) / 0.2)",
                   }}
                 >
-                  <MessageSquare className="w-3 h-3 text-[var(--th-accent-text)]" />
+                  <MessageSquare className="w-3 h-3 flex-shrink-0 text-[var(--th-accent-text)]" />
                   <span>{formatRepliesCount(repliesCount, lang)}</span>
                   <If is={unreadReplies > 0}>
-                    <span className="min-w-4 h-4 px-1 rounded-full bg-[rgb(var(--th-danger-rgb))] text-[var(--th-on-accent)] text-[9px] font-bold flex items-center justify-center">
+                    <span className="min-w-4 h-4 px-1 flex-shrink-0 rounded-full bg-[rgb(var(--th-danger-rgb))] text-[var(--th-on-accent)] text-[9px] font-bold flex items-center justify-center">
                       +{unreadReplies}
                     </span>
                   </If>
