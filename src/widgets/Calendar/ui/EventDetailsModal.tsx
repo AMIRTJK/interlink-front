@@ -1,6 +1,6 @@
 import { useState, useEffect, memo } from "react";
 import { X, Clock, Calendar, Trash2, Check, XCircle, AlignLeft, Users } from "lucide-react";
-import { If, Avatar } from "@shared/ui";
+import { If, Avatar, Tooltip } from "@shared/ui";
 import type { Task } from "@features/tasks";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
