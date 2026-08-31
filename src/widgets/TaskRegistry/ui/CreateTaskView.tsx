@@ -127,7 +127,7 @@ export const CreateTaskView = ({
         onTaskTypeChange={setTaskType}
       />
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence initial={false}>
         {taskType === "personal" ? (
           <PersonalTaskForm
             formTitle={formTitle}

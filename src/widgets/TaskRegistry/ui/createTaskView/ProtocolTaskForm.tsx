@@ -26,7 +26,7 @@ interface IProps {
   batchRows: BatchRow[];
   onAddBatchRow: () => void;
   onRemoveBatchRow: (id: number) => void;
-  onUpdateBatchRow: (id: number, field: keyof BatchRow, value: string) => void;
+  onUpdateBatchRow: (id: number, field: keyof BatchRow, value: any) => void;
   subRowsMap: Record<number, SubRow[]>;
   expandedRows: number[];
   onToggleRowExpand: (id: number) => void;
@@ -101,7 +101,7 @@ export function ProtocolTaskForm({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
-      className="space-y-6"
+      className="space-y-6 pb-28"
     >
       {/* Card 1: Детальная информация */}
       <ProtocolHeaderDetails

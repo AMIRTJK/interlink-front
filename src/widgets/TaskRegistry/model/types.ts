@@ -76,6 +76,7 @@ export interface BatchRow {
   priority: Priority;
   status: TaskStatus;
   assigneeId: string;
+  assigneeIds?: string[];
 }
 
 /** Подпункт строки протокола. */

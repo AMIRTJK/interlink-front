@@ -77,7 +77,14 @@ export function useCreateTaskState({
   const [participantsQuery, setParticipantsQuery] = React.useState("");
   const [participantsOpen, setParticipantsOpen] = React.useState(false);
   const [batchRows, setBatchRows] = React.useState<BatchRow[]>([
-    { id: 1, title: "", priority: "medium", status: "new", assigneeId: "" },
+    {
+      id: 1,
+      title: "",
+      priority: "medium",
+      status: "new",
+      assigneeId: "",
+      assigneeIds: [],
+    },
   ]);
   const [subRowsMap, setSubRowsMap] = React.useState<Record<number, SubRow[]>>({});
   const [expandedRows, setExpandedRows] = React.useState<number[]>([]);
@@ -136,6 +143,7 @@ export function useCreateTaskState({
           priority: "medium",
           status: "new",
           assigneeId: "",
+          assigneeIds: [],
         },
       ]);
     }
@@ -145,7 +153,7 @@ export function useCreateTaskState({
       setBatchRows((prev) => prev.filter((r) => r.id !== id));
     }
   };
-  const updateBatchRow = (id: number, field: keyof BatchRow, value: string) => {
+  const updateBatchRow = (id: number, field: keyof BatchRow, value: any) => {
     setBatchRows((prev) =>
       prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)),
     );
@@ -165,6 +173,12 @@ export function useCreateTaskState({
       const description = subs.length
         ? `Подпункты:\n${subs.map((s) => `• ${s}`).join("\n")}`
         : "";
+      const rowAssignees =
+        row.assigneeIds && row.assigneeIds.length > 0
+          ? row.assigneeIds
+          : row.assigneeId
+          ? [row.assigneeId]
+          : [];
       return {
         title: row.title.trim(),
         description,
@@ -175,7 +189,7 @@ export function useCreateTaskState({
           (t, i, arr) => arr.indexOf(t) === i,
         ),
         progress: 0,
-        assignees: toAssigneeIds([row.assigneeId]),
+        assignees: toAssigneeIds(rowAssignees),
       };
     });
     setIsSaving(true);
