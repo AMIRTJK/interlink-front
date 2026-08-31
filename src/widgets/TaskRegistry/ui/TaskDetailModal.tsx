@@ -64,7 +64,7 @@ export const TaskDetailModal = ({
         </button>
       </div>
 
-      <div className="flex flex-1 overflow-y-auto">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         <TaskDetailLeftColumn
           task={task}
           onDownloadAttachment={onDownloadAttachment}

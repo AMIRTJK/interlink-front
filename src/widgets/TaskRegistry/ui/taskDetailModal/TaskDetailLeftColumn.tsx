@@ -17,7 +17,7 @@ export function TaskDetailLeftColumn({
   onDownloadAttachment,
 }: IProps) {
   return (
-    <div className="flex-1 p-8 space-y-8 border-r border-slate-100 dark:border-white/10">
+    <div className="flex-1 p-8 space-y-8 border-r border-slate-100 dark:border-white/10 overflow-y-auto">
       <section>
         <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">
           Описание

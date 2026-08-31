@@ -3,113 +3,113 @@
 
 export type Priority = "low" | "medium" | "high" | "critical";
 export type TaskStatus =
-  | "new"
-  | "in_progress"
-  | "review"
-  | "completed"
-  | "overdue";
+	| "new"
+	| "in_progress"
+	| "review"
+	| "completed"
+	| "overdue";
 export type ViewState = "list" | "create";
 export type TaskType = "personal" | "protocol";
 
 export interface Colleague {
-  id: string;
-  name: string;
-  role: string;
-  initials: string;
-  /** Tailwind-класс фона аватара, напр. "bg-blue-500". */
-  color: string;
-  photo?: string | null;
+	id: string;
+	name: string;
+	role: string;
+	initials: string;
+	/** Tailwind-класс фона аватара, напр. "bg-blue-500". */
+	color: string;
+	photo?: string | null;
 }
 
 export interface Attachment {
-  id: string;
-  /** Числовой ID вложения на бэкенде — для скачивания/удаления. */
-  rawId?: number;
-  name: string;
-  type: string;
-  size: string;
+	id: string;
+	/** Числовой ID вложения на бэкенде — для скачивания/удаления. */
+	rawId?: number;
+	name: string;
+	type: string;
+	size: string;
 }
 
 export interface Task {
-  /** Человекочитаемый ID для отображения/поиска, напр. "TSK-1024". */
-  id: string;
-  /** Числовой ID задачи с бэкенда — для запросов к API. */
-  rawId?: number;
-  title: string;
-  description: string;
-  status: TaskStatus;
-  priority: Priority;
-  /** Основной исполнитель (первый из assignees) — для карточки/строки. */
-  assignee: Colleague;
-  /** Полный список исполнителей задачи. */
-  assignees: Colleague[];
-  dueDate: string; // ISO
-  createdAt: string; // ISO
-  tags: string[];
-  progress: number;
-  attachments: Attachment[];
+	/** Человекочитаемый ID для отображения/поиска, напр. "TSK-1024". */
+	id: string;
+	/** Числовой ID задачи с бэкенда — для запросов к API. */
+	rawId?: number;
+	title: string;
+	description: string;
+	status: TaskStatus;
+	priority: Priority;
+	/** Основной исполнитель (первый из assignees) — для карточки/строки. */
+	assignee: Colleague;
+	/** Полный список исполнителей задачи. */
+	assignees: Colleague[];
+	dueDate: string; // ISO
+	createdAt: string; // ISO
+	tags: string[];
+	progress: number;
+	attachments: Attachment[];
 }
 
 /** Тело запроса на создание/обновление задачи (POST/PUT /api/v1/tasks). */
 export interface TaskPayload {
-  title: string;
-  description: string;
-  status: TaskStatus;
-  priority: Priority;
-  tags: string[];
-  progress?: number;
-  /** Срок в формате YYYY-MM-DD. */
-  due_date: string | null;
-  /** ID исполнителей. */
-  assignees: number[];
+	title: string;
+	description: string;
+	status: TaskStatus;
+	priority: Priority;
+	tags: string[];
+	progress?: number;
+	/** Срок в формате YYYY-MM-DD. */
+	due_date: string | null;
+	/** ID исполнителей. */
+	assignees: number[];
 }
 
 export interface SortConfig {
-  key: "dueDate" | "priority" | "status";
-  direction: "asc" | "desc";
+	key: "dueDate" | "priority" | "status";
+	direction: "asc" | "desc";
 }
 
 /** Строка протокольного (пакетного) создания задач. */
 export interface BatchRow {
-  id: number;
-  title: string;
-  priority: Priority;
-  status: TaskStatus;
-  assigneeId: string;
-  assigneeIds?: string[];
+	id: number;
+	title: string;
+	priority: Priority;
+	status: TaskStatus;
+	assigneeId: string;
+	assigneeIds?: string[];
 }
 
 /** Подпункт строки протокола. */
 export interface SubRow {
-  id: number;
-  title: string;
+	id: number;
+	title: string;
 }
 
 export interface IBatchGlobal {
-  chairmanId: string;
-  chairmanIds?: string[];
-  participants: string[];
-  date: string;
-  number: string;
+	chairmanId: string;
+	chairmanIds?: string[];
+	participants: string[];
+	date: string;
+	number: string;
 }
 
 export type FilterTabId = "all" | "active" | "completed" | "overdue";
 export type StatKey = "total" | "inProgress" | "completed" | "overdue";
 
 export interface TaskStats {
-  total: number;
-  inProgress: number;
-  completed: number;
-  overdue: number;
+	total: number;
+	inProgress: number;
+	completed: number;
+	overdue: number;
 }
 
 export interface TaskStatsFull {
-  total: number;
-  new: number;
-  in_progress: number;
-  review: number;
-  completed: number;
-  overdue: number;
-  active: number;
-  priority_breakdown?: Record<string, number>;
+	total: number;
+	new: number;
+	in_progress: number;
+	review: number;
+	completed: number;
+	overdue: number;
+	active: number;
+	priority_breakdown?: Record<string, number>;
 }
