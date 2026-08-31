@@ -2,6 +2,7 @@ import React, { useMemo, memo } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/ru";
 import type { Task } from "@features/tasks";
+import { Tooltip } from "@shared/ui";
 import { getEventStyle } from "../model";
 import { WeatherIcon } from "./WeatherIcon";
 import { useWeather } from "../lib/useWeather";
@@ -86,12 +87,18 @@ export const WeekView = memo(({
     return map;
   }, [tasks]);
 
+  const now = dayjs();
   const currentMinutes = useMemo(() => {
-    const now = dayjs();
-    return now.hour() * 60 + now.minute();
+    const n = dayjs();
+    return n.hour() * 60 + n.minute();
   }, []);
 
-  const redLineTop = (currentMinutes / 60) * HOUR_HEIGHT;
+  const currentTimeTop = (currentMinutes / 60) * HOUR_HEIGHT;
+  const currentTimeLabel = now.format("HH:mm");
+  const hasTodayInView = useMemo(
+    () => daysToShow.some((d) => d.isSame(dayjs(), "day")),
+    [daysToShow],
+  );
 
   return (
     <div className="w-full! flex! flex-col! gap-3!">
@@ -146,17 +153,9 @@ export const WeekView = memo(({
             />
           ))}
 
-          {/* Red current time indicator line */}
-          <div
-            className="absolute! left-0! right-0! z-30! flex! items-center! pointer-events-none!"
-            style={{ top: redLineTop }}
-          >
-            <div className="w-2.5! h-2.5! rounded-full! bg-rose-500! -ml-1! shadow-xs!" />
-            <div className="flex-1! h-[2px]! bg-rose-500!" />
-          </div>
-
           {/* Individual Column Capsules */}
           {daysToShow.map((day, colIdx) => {
+            const isToday = day.isSame(dayjs(), "day");
             const dateStr = day.format("YYYY-MM-DD");
             const dayTasks = tasksMap[dateStr] || [];
             const colConfig = getWeekColumnConfig(colIdx);
@@ -173,6 +172,19 @@ export const WeekView = memo(({
                   onDayClick(day, clickedHour);
                 }}
               >
+                {/* Modern Current Time Indicator with Tooltip on hover */}
+                {isToday && (
+                  <Tooltip title={`Текущее время: ${currentTimeLabel}`} placement="top">
+                    <div
+                      className="group/timeline absolute! left-0! right-0! z-30! flex! items-center! cursor-pointer! py-1! -my-1!"
+                      style={{ top: currentTimeTop }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span className="w-2.5! h-2.5! rounded-full! bg-teal-500! -ml-1! ring-4! ring-teal-500/25! shadow-sm! group-hover/timeline:scale-125! transition-transform!" />
+                      <div className="flex-1! h-[2px]! bg-gradient-to-r! from-teal-500! via-teal-500/80! to-teal-500/20! rounded-full! group-hover/timeline:h-[3px]! transition-all!" />
+                    </div>
+                  </Tooltip>
+                )}
                 {dayTasks.map((task) => {
                   const { top, height } = getEventPosition(task);
                   const style = getEventStyle(task.color);
