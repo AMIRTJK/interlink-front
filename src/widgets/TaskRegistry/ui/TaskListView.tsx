@@ -145,9 +145,13 @@ export const TaskListView = ({
 
 										{/* TITLE */}
 										<td className="px-4 py-3.5 text-center">
-											<div className="inline-block max-w-xs bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-white/10 rounded-2xl px-6 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 truncate">
-												{task.title}
-											</div>
+											<Tooltip title={task.title} placement="top">
+												<div className="inline-flex items-center justify-center w-[125px] h-[34px] bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-white/10 rounded-2xl px-2.5 text-xs font-medium text-slate-700 dark:text-slate-200 cursor-default">
+													<span className="truncate w-full text-center">
+														{task.title}
+													</span>
+												</div>
+											</Tooltip>
 										</td>
 
 										{/* ASSIGNEE */}
