@@ -101,7 +101,19 @@ export function ProtocolSignatures({
 
 					{chairmanColleague ? (
 						<Tooltip
-							title={`${chairmanColleague.name} — ${chairmanColleague.role || "Сотрудник"}`}
+							title={
+								<div className="flex flex-col gap-0.5 py-0.5 text-left max-w-xs">
+									<span className="font-bold text-white text-xs leading-tight">
+										{chairmanColleague.name}
+									</span>
+									{chairmanColleague.role && (
+										<span className="text-emerald-300 font-medium text-[11px] leading-tight">
+											{chairmanColleague.role}
+										</span>
+									)}
+								</div>
+							}
+							placement="topLeft"
 						>
 							<div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
 								<div className="flex items-center gap-3 min-w-0">
@@ -230,32 +242,49 @@ export function ProtocolSignatures({
 											className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100/60 dark:divide-white/5"
 										>
 											{filteredSecretaryOptions.map((col) => (
-												<button
+												<Tooltip
 													key={col.id}
-													type="button"
-													onMouseDown={(e) => {
-														e.preventDefault();
-														onSecretaryIdChange(col.id);
-														onSecretaryAddingChange(false);
-														onSecretaryQueryChange("");
-														onSecretaryOpenChange(false);
-													}}
-													className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+													title={
+														<div className="flex flex-col gap-0.5 py-0.5 text-left max-w-xs">
+															<span className="font-bold text-white text-xs leading-tight">
+																{col.name}
+															</span>
+															{col.role && (
+																<span className="text-emerald-300 font-medium text-[11px] leading-tight">
+																	{col.role}
+																</span>
+															)}
+														</div>
+													}
+													placement="topLeft"
+													mouseEnterDelay={0.1}
 												>
-													<Avatar
-														colleague={col}
-														className="w-7 h-7 text-[10px]"
-														allowPreview={false}
-													/>
-													<div className="min-w-0 flex-1">
-														<p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-															{col.name}
-														</p>
-														<p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-															{col.role || "Сотрудник"}
-														</p>
-													</div>
-												</button>
+													<button
+														type="button"
+														onMouseDown={(e) => {
+															e.preventDefault();
+															onSecretaryIdChange(col.id);
+															onSecretaryAddingChange(false);
+															onSecretaryQueryChange("");
+															onSecretaryOpenChange(false);
+														}}
+														className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+													>
+														<Avatar
+															colleague={col}
+															className="w-7 h-7 text-[10px]"
+															allowPreview={false}
+														/>
+														<div className="min-w-0 flex-1">
+															<p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+																{col.name}
+															</p>
+															<p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+																{col.role || "Сотрудник"}
+															</p>
+														</div>
+													</button>
+												</Tooltip>
 											))}
 										</motion.div>
 									)}
@@ -273,7 +302,19 @@ export function ProtocolSignatures({
 						)
 					) : (
 						<Tooltip
-							title={`${secretaryColleague.name} — ${secretaryColleague.role || "Сотрудник"}`}
+							title={
+								<div className="flex flex-col gap-0.5 py-0.5 text-left max-w-xs">
+									<span className="font-bold text-white text-xs leading-tight">
+										{secretaryColleague.name}
+									</span>
+									{secretaryColleague.role && (
+										<span className="text-emerald-300 font-medium text-[11px] leading-tight">
+											{secretaryColleague.role}
+										</span>
+									)}
+								</div>
+							}
+							placement="topLeft"
 						>
 							<div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
 								<div className="flex items-center gap-3 min-w-0">

@@ -158,38 +158,55 @@ export function ProtocolHeaderDetails({
                       <div className="p-4 text-center text-xs text-slate-400">Сотрудник не найден</div>
                     ) : (
                       filteredChairmanOptions.map((col) => (
-                        <button
+                        <Tooltip
                           key={col.id}
-                          type="button"
-                          onClick={() => {
-                            onBatchGlobalChange({
-                              ...batchGlobal,
-                              chairmanId: col.id,
-                            });
-                            onChairmanSelectOpenChange(false);
-                            setChairmanSearch("");
-                          }}
-                          className={cn(
-                            "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer",
-                            col.id === batchGlobal.chairmanId && "bg-emerald-50/70 dark:bg-emerald-950/20",
-                          )}
+                          title={
+                            <div className="flex flex-col gap-0.5 py-0.5 text-left max-w-xs">
+                              <span className="font-bold text-white text-xs leading-tight">
+                                {col.name}
+                              </span>
+                              {col.role && (
+                                <span className="text-emerald-300 font-medium text-[11px] leading-tight">
+                                  {col.role}
+                                </span>
+                              )}
+                            </div>
+                          }
+                          placement="topLeft"
+                          mouseEnterDelay={0.1}
                         >
-                          <Avatar colleague={col} className="w-7 h-7 text-[10px]" allowPreview={false} />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                              {col.name}
-                            </p>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                              {col.role || "Сотрудник"}
-                            </p>
-                          </div>
-                          {col.id === batchGlobal.chairmanId && (
-                            <CheckCircle2
-                              size={16}
-                              className="text-emerald-500 shrink-0"
-                            />
-                          )}
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onBatchGlobalChange({
+                                ...batchGlobal,
+                                chairmanId: col.id,
+                              });
+                              onChairmanSelectOpenChange(false);
+                              setChairmanSearch("");
+                            }}
+                            className={cn(
+                              "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer",
+                              col.id === batchGlobal.chairmanId && "bg-emerald-50/70 dark:bg-emerald-950/20",
+                            )}
+                          >
+                            <Avatar colleague={col} className="w-7 h-7 text-[10px]" allowPreview={false} />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                                {col.name}
+                              </p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                                {col.role || "Сотрудник"}
+                              </p>
+                            </div>
+                            {col.id === batchGlobal.chairmanId && (
+                              <CheckCircle2
+                                size={16}
+                                className="text-emerald-500 shrink-0"
+                              />
+                            )}
+                          </button>
+                        </Tooltip>
                       ))
                     )}
                   </div>
@@ -240,28 +257,45 @@ export function ProtocolHeaderDetails({
                       </div>
                     ) : (
                       filteredParticipantOptions.map((col) => (
-                        <button
+                        <Tooltip
                           key={col.id}
-                          type="button"
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            onToggleParticipant(col.id);
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+                          title={
+                            <div className="flex flex-col gap-0.5 py-0.5 text-left max-w-xs">
+                              <span className="font-bold text-white text-xs leading-tight">
+                                {col.name}
+                              </span>
+                              {col.role && (
+                                <span className="text-emerald-300 font-medium text-[11px] leading-tight">
+                                  {col.role}
+                                </span>
+                              )}
+                            </div>
+                          }
+                          placement="topLeft"
+                          mouseEnterDelay={0.1}
                         >
-                          <Avatar colleague={col} className="w-7 h-7 text-[10px]" allowPreview={false} />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                              {col.name}
-                            </p>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                              {col.role || "Сотрудник"}
-                            </p>
-                          </div>
-                          <span className="text-[11px] font-extrabold text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100">
-                            + Добавить
-                          </span>
-                        </button>
+                          <button
+                            type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              onToggleParticipant(col.id);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+                          >
+                            <Avatar colleague={col} className="w-7 h-7 text-[10px]" allowPreview={false} />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                                {col.name}
+                              </p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                                {col.role || "Сотрудник"}
+                              </p>
+                            </div>
+                            <span className="text-[11px] font-extrabold text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100">
+                              + Добавить
+                            </span>
+                          </button>
+                        </Tooltip>
                       ))
                     )}
                   </div>
