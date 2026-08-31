@@ -1,23 +1,13 @@
 import { motion } from "framer-motion";
-import type { BatchRow, Colleague, SubRow } from "../../model/types";
+import type { BatchRow, Colleague, SubRow, IBatchGlobal } from "../../model/types";
 import { ProtocolHeaderDetails } from "./protocol/ProtocolHeaderDetails";
 import { ProtocolAgendaTable } from "./protocol/ProtocolAgendaTable";
 import { ProtocolSignatures } from "./protocol/ProtocolSignatures";
 
 interface IProps {
   colleagues: Colleague[];
-  batchGlobal: {
-    chairmanId: string;
-    participants: string[];
-    date: string;
-    number: string;
-  };
-  onBatchGlobalChange: (val: {
-    chairmanId: string;
-    participants: string[];
-    date: string;
-    number: string;
-  }) => void;
+  batchGlobal: IBatchGlobal;
+  onBatchGlobalChange: (val: IBatchGlobal) => void;
   participantsQuery: string;
   onParticipantsQueryChange: (val: string) => void;
   participantsOpen: boolean;

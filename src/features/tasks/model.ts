@@ -29,6 +29,7 @@ export interface IParticipant {
   id: number;
   full_name: string;
   photo_path: string | null;
+  photo_url?: string | null;
   permission_names?: string[];
 }
 
@@ -68,6 +69,8 @@ export interface ITask {
     id: string;
     name: string;
     avatar?: string;
+    photo?: string;
+    initials?: string;
   }>;
 }
 
