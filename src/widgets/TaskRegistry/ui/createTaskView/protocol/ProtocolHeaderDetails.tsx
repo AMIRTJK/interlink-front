@@ -61,14 +61,36 @@ export function ProtocolHeaderDetails({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onChairmanSelectOpenChange, onParticipantsOpenChange]);
 
-  const chairmanColleague =
-    colleagues.find((c) => c.id === batchGlobal.chairmanId) || null;
+  const effectiveChairmanIds =
+    batchGlobal.chairmanIds && batchGlobal.chairmanIds.length > 0
+      ? batchGlobal.chairmanIds
+      : batchGlobal.chairmanId
+      ? [batchGlobal.chairmanId]
+      : [];
+
+  const selectedChairmanColleagues = effectiveChairmanIds
+    .map((id) => colleagues.find((c) => c.id === id))
+    .filter(Boolean) as Colleague[];
+
+  const firstChairman = selectedChairmanColleagues[0] || null;
 
   const filteredChairmanOptions = colleagues.filter(
     (c) =>
       c.name.toLowerCase().includes(chairmanSearch.toLowerCase()) ||
       (c.role && c.role.toLowerCase().includes(chairmanSearch.toLowerCase())),
   );
+
+  const handleToggleChairman = (colId: string) => {
+    const isSelected = effectiveChairmanIds.includes(colId);
+    const nextIds = isSelected
+      ? effectiveChairmanIds.filter((id) => id !== colId)
+      : [...effectiveChairmanIds, colId];
+    onBatchGlobalChange({
+      ...batchGlobal,
+      chairmanId: nextIds[0] || "",
+      chairmanIds: nextIds,
+    });
+  };
 
   const filteredParticipantOptions = colleagues.filter(
     (c) =>
@@ -99,21 +121,43 @@ export function ProtocolHeaderDetails({
         {/* ПРЕДСЕДАТЕЛЬ */}
         <div ref={chairmanRef} className="flex flex-col gap-1.5">
           <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block h-3.5">
-            ПРЕДСЕДАТЕЛЬ <span className="text-red-500">*</span>
+            ПРЕДСЕДАТЕЛЬ {selectedChairmanColleagues.length > 0 && `(${selectedChairmanColleagues.length})`} <span className="text-red-500">*</span>
           </label>
           <div className="relative">
-            <Tooltip title={!chairmanSelectOpen && chairmanColleague ? `${chairmanColleague.name} — ${chairmanColleague.role || "Сотрудник"}` : undefined}>
+            <Tooltip
+              title={
+                !chairmanSelectOpen && selectedChairmanColleagues.length > 0 ? (
+                  <div className="flex flex-col gap-1 py-0.5 max-w-xs">
+                    {selectedChairmanColleagues.map((c) => (
+                      <div key={c.id} className="text-xs">
+                        <span className="font-bold text-white">{c.name}</span>
+                        {c.role && (
+                          <span className="text-emerald-300 font-medium text-[11px] block">
+                            {c.role}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : undefined
+              }
+            >
               <button
                 type="button"
                 onClick={() => onChairmanSelectOpenChange(!chairmanSelectOpen)}
                 className="w-full h-12 flex items-center justify-between gap-2 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl shadow-[0_4px_16px_rgba(100,105,240,0.06)] outline-none text-left cursor-pointer"
               >
-                {chairmanColleague ? (
+                {firstChairman ? (
                   <span className="inline-flex items-center gap-2.5 min-w-0 flex-1">
-                    <Avatar colleague={chairmanColleague} className="w-6 h-6 text-[9px]" allowPreview={false} />
+                    <Avatar colleague={firstChairman} className="w-6 h-6 text-[9px]" allowPreview={false} />
                     <span className="text-xs font-bold text-[#1e2548] dark:text-slate-100 truncate">
-                      {chairmanColleague.name}
+                      {firstChairman.name}
                     </span>
+                    {selectedChairmanColleagues.length > 1 && (
+                      <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-black text-[10px]">
+                        +{selectedChairmanColleagues.length - 1}
+                      </span>
+                    )}
                   </span>
                 ) : (
                   <span className="text-xs font-medium text-[#9aa2c8]">
@@ -157,40 +201,53 @@ export function ProtocolHeaderDetails({
                     {filteredChairmanOptions.length === 0 ? (
                       <div className="p-4 text-center text-xs text-slate-400">Сотрудник не найден</div>
                     ) : (
-                      filteredChairmanOptions.map((col) => (
-                        <button
-                          key={col.id}
-                          type="button"
-                          onClick={() => {
-                            onBatchGlobalChange({
-                              ...batchGlobal,
-                              chairmanId: col.id,
-                            });
-                            onChairmanSelectOpenChange(false);
-                            setChairmanSearch("");
-                          }}
-                          className={cn(
-                            "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer",
-                            col.id === batchGlobal.chairmanId && "bg-emerald-50/70 dark:bg-emerald-950/20",
-                          )}
-                        >
-                          <Avatar colleague={col} className="w-7 h-7 text-[10px]" allowPreview={false} />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                              {col.name}
-                            </p>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                              {col.role || "Сотрудник"}
-                            </p>
-                          </div>
-                          {col.id === batchGlobal.chairmanId && (
-                            <CheckCircle2
-                              size={16}
-                              className="text-emerald-500 shrink-0"
-                            />
-                          )}
-                        </button>
-                      ))
+                      filteredChairmanOptions.map((col) => {
+                        const isSelected = effectiveChairmanIds.includes(col.id);
+                        return (
+                          <Tooltip
+                            key={col.id}
+                            title={
+                              <div className="flex flex-col gap-0.5 py-0.5 text-left max-w-xs">
+                                <span className="font-bold text-white text-xs leading-tight">
+                                  {col.name}
+                                </span>
+                                {col.role && (
+                                  <span className="text-emerald-300 font-medium text-[11px] leading-tight">
+                                    {col.role}
+                                  </span>
+                                )}
+                              </div>
+                            }
+                            placement="topLeft"
+                            mouseEnterDelay={0.1}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => handleToggleChairman(col.id)}
+                              className={cn(
+                                "w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer",
+                                isSelected && "bg-emerald-50/70 dark:bg-emerald-950/20",
+                              )}
+                            >
+                              <Avatar colleague={col} className="w-7 h-7 text-[10px]" allowPreview={false} />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                                  {col.name}
+                                </p>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                                  {col.role || "Сотрудник"}
+                                </p>
+                              </div>
+                              {isSelected && (
+                                <CheckCircle2
+                                  size={16}
+                                  className="text-emerald-500 shrink-0"
+                                />
+                              )}
+                            </button>
+                          </Tooltip>
+                        );
+                      })
                     )}
                   </div>
                 </motion.div>
@@ -240,28 +297,45 @@ export function ProtocolHeaderDetails({
                       </div>
                     ) : (
                       filteredParticipantOptions.map((col) => (
-                        <button
+                        <Tooltip
                           key={col.id}
-                          type="button"
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            onToggleParticipant(col.id);
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+                          title={
+                            <div className="flex flex-col gap-0.5 py-0.5 text-left max-w-xs">
+                              <span className="font-bold text-white text-xs leading-tight">
+                                {col.name}
+                              </span>
+                              {col.role && (
+                                <span className="text-emerald-300 font-medium text-[11px] leading-tight">
+                                  {col.role}
+                                </span>
+                              )}
+                            </div>
+                          }
+                          placement="topLeft"
+                          mouseEnterDelay={0.1}
                         >
-                          <Avatar colleague={col} className="w-7 h-7 text-[10px]" allowPreview={false} />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                              {col.name}
-                            </p>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                              {col.role || "Сотрудник"}
-                            </p>
-                          </div>
-                          <span className="text-[11px] font-extrabold text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100">
-                            + Добавить
-                          </span>
-                        </button>
+                          <button
+                            type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              onToggleParticipant(col.id);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+                          >
+                            <Avatar colleague={col} className="w-7 h-7 text-[10px]" allowPreview={false} />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                                {col.name}
+                              </p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                                {col.role || "Сотрудник"}
+                              </p>
+                            </div>
+                            <span className="text-[11px] font-extrabold text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100">
+                              + Добавить
+                            </span>
+                          </button>
+                        </Tooltip>
                       ))
                     )}
                   </div>

@@ -78,8 +78,13 @@ export const CreateTaskView = ({
     expandedRows,
     chairmanSelectOpen,
     setChairmanSelectOpen,
+    toggleChairman,
+    removeChairman,
     secretaryId,
     setSecretaryId,
+    secretaryIds,
+    toggleSecretary,
+    removeSecretary,
     secretaryAdding,
     setSecretaryAdding,
     secretaryQuery,
@@ -195,8 +200,13 @@ export const CreateTaskView = ({
             onRemoveSubRow={removeSubRow}
             chairmanSelectOpen={chairmanSelectOpen}
             onChairmanSelectOpenChange={setChairmanSelectOpen}
+            onToggleChairman={toggleChairman}
+            onRemoveChairman={removeChairman}
             secretaryId={secretaryId}
             onSecretaryIdChange={setSecretaryId}
+            secretaryIds={secretaryIds}
+            onToggleSecretary={toggleSecretary}
+            onRemoveSecretary={removeSecretary}
             secretaryAdding={secretaryAdding}
             onSecretaryAddingChange={setSecretaryAdding}
             secretaryQuery={secretaryQuery}
