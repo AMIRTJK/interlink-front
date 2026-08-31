@@ -70,6 +70,7 @@ export function useCreateTaskState({
   // Protocol state
   const [batchGlobal, setBatchGlobal] = React.useState({
     chairmanId: "",
+    chairmanIds: [] as string[],
     participants: [] as string[],
     date: new Date().toISOString().split("T")[0],
     number: "",
@@ -90,11 +91,65 @@ export function useCreateTaskState({
   const [expandedRows, setExpandedRows] = React.useState<number[]>([]);
   const [chairmanSelectOpen, setChairmanSelectOpen] = React.useState(false);
   const [secretaryId, setSecretaryId] = React.useState<string>("");
+  const [secretaryIds, setSecretaryIds] = React.useState<string[]>([]);
   const [secretaryAdding, setSecretaryAdding] = React.useState(false);
   const [secretaryQuery, setSecretaryQuery] = React.useState("");
   const [secretaryOpen, setSecretaryOpen] = React.useState(false);
   const [chairmanSigned, setChairmanSigned] = React.useState<string | null>(null);
   const [secretarySigned, setSecretarySigned] = React.useState<string | null>(null);
+
+  const toggleChairman = (id: string) => {
+    setBatchGlobal((prev) => {
+      const current =
+        prev.chairmanIds && prev.chairmanIds.length > 0
+          ? prev.chairmanIds
+          : prev.chairmanId
+          ? [prev.chairmanId]
+          : [];
+      const next = current.includes(id)
+        ? current.filter((c) => c !== id)
+        : [...current, id];
+      return {
+        ...prev,
+        chairmanId: next[0] || "",
+        chairmanIds: next,
+      };
+    });
+  };
+
+  const removeChairman = (id: string) => {
+    setBatchGlobal((prev) => {
+      const current =
+        prev.chairmanIds && prev.chairmanIds.length > 0
+          ? prev.chairmanIds
+          : prev.chairmanId
+          ? [prev.chairmanId]
+          : [];
+      const next = current.filter((c) => c !== id);
+      return {
+        ...prev,
+        chairmanId: next[0] || "",
+        chairmanIds: next,
+      };
+    });
+  };
+
+  const toggleSecretary = (id: string) => {
+    setSecretaryIds((prev) => {
+      const next = prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id];
+      setSecretaryId(next[0] || "");
+      return next;
+    });
+    setSecretaryQuery("");
+  };
+
+  const removeSecretary = (id: string) => {
+    setSecretaryIds((prev) => {
+      const next = prev.filter((s) => s !== id);
+      setSecretaryId(next[0] || "");
+      return next;
+    });
+  };
 
   const handleCreateTask = async () => {
     if (!formTitle.trim()) {
@@ -279,8 +334,14 @@ export function useCreateTaskState({
     expandedRows,
     chairmanSelectOpen,
     setChairmanSelectOpen,
+    toggleChairman,
+    removeChairman,
     secretaryId,
     setSecretaryId,
+    secretaryIds,
+    setSecretaryIds,
+    toggleSecretary,
+    removeSecretary,
     secretaryAdding,
     setSecretaryAdding,
     secretaryQuery,

@@ -35,8 +35,13 @@ interface IProps {
   onRemoveSubRow: (rowId: number, subId: number) => void;
   chairmanSelectOpen: boolean;
   onChairmanSelectOpenChange: (open: boolean) => void;
+  onToggleChairman?: (id: string) => void;
+  onRemoveChairman?: (id: string) => void;
   secretaryId: string;
   onSecretaryIdChange: (id: string) => void;
+  secretaryIds?: string[];
+  onToggleSecretary?: (id: string) => void;
+  onRemoveSecretary?: (id: string) => void;
   secretaryAdding: boolean;
   onSecretaryAddingChange: (adding: boolean) => void;
   secretaryQuery: string;
@@ -73,8 +78,13 @@ export function ProtocolTaskForm({
   onRemoveSubRow,
   chairmanSelectOpen,
   onChairmanSelectOpenChange,
+  onToggleChairman,
+  onRemoveChairman,
   secretaryId,
   onSecretaryIdChange,
+  secretaryIds = [],
+  onToggleSecretary,
+  onRemoveSecretary,
   secretaryAdding,
   onSecretaryAddingChange,
   secretaryQuery,
@@ -138,6 +148,9 @@ export function ProtocolTaskForm({
         chairmanColleague={chairmanColleague}
         chairmanSigned={chairmanSigned}
         onChairmanSignedChange={onChairmanSignedChange}
+        chairmanIds={batchGlobal.chairmanIds}
+        onToggleChairman={onToggleChairman}
+        onRemoveChairman={onRemoveChairman}
         onChairmanIdChange={(id) =>
           onBatchGlobalChange({ ...batchGlobal, chairmanId: id })
         }
@@ -147,6 +160,9 @@ export function ProtocolTaskForm({
         onSecretarySignedChange={onSecretarySignedChange}
         secretaryId={secretaryId}
         onSecretaryIdChange={onSecretaryIdChange}
+        secretaryIds={secretaryIds}
+        onToggleSecretary={onToggleSecretary}
+        onRemoveSecretary={onRemoveSecretary}
         secretaryAdding={secretaryAdding}
         onSecretaryAddingChange={onSecretaryAddingChange}
         secretaryQuery={secretaryQuery}
