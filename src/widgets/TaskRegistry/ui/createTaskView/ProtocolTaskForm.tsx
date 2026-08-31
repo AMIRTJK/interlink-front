@@ -26,7 +26,7 @@ interface IProps {
   batchRows: BatchRow[];
   onAddBatchRow: () => void;
   onRemoveBatchRow: (id: number) => void;
-  onUpdateBatchRow: (id: number, field: keyof BatchRow, value: string) => void;
+  onUpdateBatchRow: (id: number, field: keyof BatchRow, value: any) => void;
   subRowsMap: Record<number, SubRow[]>;
   expandedRows: number[];
   onToggleRowExpand: (id: number) => void;

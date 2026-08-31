@@ -12,7 +12,7 @@ interface IProps {
   batchRows: BatchRow[];
   onAddBatchRow: () => void;
   onRemoveBatchRow: (id: number) => void;
-  onUpdateBatchRow: (id: number, field: keyof BatchRow, value: string) => void;
+  onUpdateBatchRow: (id: number, field: keyof BatchRow, value: any) => void;
   subRowsMap: Record<number, SubRow[]>;
   expandedRows: number[];
   onToggleRowExpand: (id: number) => void;
@@ -38,13 +38,34 @@ export function ProtocolAgendaTable({
     return colleagues.map((c) => ({
       value: c.id,
       label: (
-        <div className="flex items-center gap-2 py-0.5">
-          <Avatar colleague={c} className="w-5 h-5 text-[8px]" allowPreview={false} />
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">{c.name}</p>
-            <p className="text-[10px] text-slate-400 truncate">{c.role || "Сотрудник"}</p>
+        <Tooltip
+          title={
+            <div className="flex flex-col gap-0.5 py-0.5 text-left max-w-xs">
+              <span className="font-bold text-white text-xs leading-tight">
+                {c.name}
+              </span>
+              {c.role && (
+                <span className="text-emerald-300 font-medium text-[11px] leading-tight">
+                  {c.role}
+                </span>
+              )}
+            </div>
+          }
+          placement="topLeft"
+          mouseEnterDelay={0.1}
+        >
+          <div className="flex items-center gap-2 py-0.5 w-full">
+            <Avatar colleague={c} className="w-5 h-5 text-[8px]" allowPreview={false} />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                {c.name}
+              </p>
+              <p className="text-[10px] text-slate-400 truncate">
+                {c.role || "Сотрудник"}
+              </p>
+            </div>
           </div>
-        </div>
+        </Tooltip>
       ),
       shortLabel: (
         <span className="inline-flex items-center gap-1.5 min-w-0">
@@ -82,7 +103,7 @@ export function ProtocolAgendaTable({
           <div className="flex-1">ПОСТАВЛЕННАЯ ЗАДАЧА / ВОПРОС</div>
           <div className="w-32 shrink-0 text-center">ПРИОРИТЕТ</div>
           <div className="w-28 shrink-0 text-center">СТАТУС</div>
-          <div className="w-40 shrink-0 text-center">ИСПОЛНИТЕЛЬ</div>
+          <div className="w-44 shrink-0 text-center">ИСПОЛНИТЕЛЬ</div>
           <div className="w-16 shrink-0 text-center">ДЕЙСТВИЯ</div>
         </div>
 
@@ -155,28 +176,48 @@ export function ProtocolAgendaTable({
                 </div>
 
                 {/* Assignee Badge Select */}
-                <div className="w-40 shrink-0">
+                <div className="w-44 shrink-0">
                   <Tooltip
                     title={
-                      assignedCol
+                      (row.assigneeIds && row.assigneeIds.length > 0)
+                        ? row.assigneeIds
+                            .map((id) => {
+                              const col = colleagues.find((c) => c.id === id);
+                              return col ? `${col.name}${col.role ? ` (${col.role})` : ""}` : "";
+                            })
+                            .filter(Boolean)
+                            .join(", ")
+                        : assignedCol
                         ? `${assignedCol.name} — ${assignedCol.role || "Сотрудник"}`
                         : undefined
                     }
                   >
                     <Select
-                      value={row.assigneeId || undefined}
-                      placeholder="Исполнитель"
-                      onChange={(val) =>
-                        onUpdateBatchRow(row.id, "assigneeId", val)
+                      mode="multiple"
+                      value={
+                        row.assigneeIds && row.assigneeIds.length > 0
+                          ? row.assigneeIds
+                          : row.assigneeId
+                          ? [row.assigneeId]
+                          : []
                       }
+                      placeholder="Исполнители"
+                      onChange={(vals: string[]) => {
+                        onUpdateBatchRow(row.id, "assigneeIds", vals);
+                        onUpdateBatchRow(row.id, "assigneeId", vals[0] || "");
+                      }}
                       showSearch
+                      maxTagCount={1}
+                      maxTagPlaceholder={(omitted) => `+${omitted.length}`}
+                      popupMatchSelectWidth={false}
+                      dropdownStyle={{ minWidth: 280 }}
                       optionLabelProp="shortLabel"
                       filterOption={(input, option) =>
                         Boolean((option as any)?.searchStr?.includes(input.toLowerCase()))
                       }
                       options={colleagueOptions}
                       size="small"
-                      className="w-full text-xs font-bold [&_.ant-select-selector]:bg-white! dark:[&_.ant-select-selector]:bg-slate-800! [&_.ant-select-selector]:border-[#3373e5]/20! dark:[&_.ant-select-selector]:border-white/10! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100! [&_.ant-select-selector]:rounded-full!"
+                      className="w-full text-xs font-bold [&_.ant-select-selector]:bg-white! dark:[&_.ant-select-selector]:bg-slate-800! [&_.ant-select-selector]:border-[#3373e5]/20! dark:[&_.ant-select-selector]:border-white/10! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100! [&_.ant-select-selector]:rounded-2xl!"
                     />
                   </Tooltip>
                 </div>
