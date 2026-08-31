@@ -1,6 +1,6 @@
 import { useState, useEffect, memo } from "react";
 import { X, Clock, Calendar, Trash2, Check, XCircle, AlignLeft, Users } from "lucide-react";
-import { If } from "@shared/ui";
+import { If, Avatar } from "@shared/ui";
 import type { Task } from "@features/tasks";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
@@ -107,16 +107,64 @@ export const EventDetailsModal = memo(({ event, onClose, onDelete }: IProps) => 
 
             <If is={!!event?.participants?.length}>
               <div className="flex! items-start! gap-3! text-sm! text-slate-500! dark:text-zinc-400!">
-                <Users size={15} className="flex-shrink-0! text-slate-400! mt-0.5!" />
-                <div className="flex! flex-wrap! gap-1.5!">
-                  {event?.participants?.map((p) => (
-                    <span
+                <Users size={15} className="flex-shrink-0! text-slate-400! mt-1!" />
+                <div className="flex! flex-wrap! items-center! gap-1.5!">
+                  {(event?.participants || []).slice(0, 3).map((p) => (
+                    <div
                       key={p.id}
-                      className="px-2.5! py-0.5! bg-slate-100! dark:bg-slate-800! text-slate-600! dark:text-zinc-300! text-xs! font-medium! rounded-full!"
+                      className="inline-flex! items-center! gap-1.5! pl-1! pr-2.5! py-0.5! bg-slate-100! dark:bg-slate-800! text-slate-700! dark:text-zinc-200! text-xs! font-medium! rounded-full! border! border-slate-200/60! dark:border-slate-700/60!"
                     >
-                      {p.name}
-                    </span>
+                      <Avatar
+                        colleague={{
+                          id: p.id,
+                          name: p.name,
+                          photo: p.photo || p.avatar,
+                          initials: p.initials,
+                        }}
+                        className="w-5! h-5! text-[9px]!"
+                        allowPreview={true}
+                      />
+                      <span className="max-w-[120px]! truncate!">{p.name}</span>
+                    </div>
                   ))}
+
+                  <If is={(event?.participants?.length || 0) > 3}>
+                    <Tooltip
+                      title={
+                        <div className="flex! flex-col! gap-1.5! p-1! max-h-40! overflow-y-auto! min-w-[160px]!">
+                          <div className="text-[11px]! font-semibold! text-slate-400! mb-1! border-b! border-slate-700/50! pb-1!">
+                            Остальные участники ({(event?.participants?.length || 0) - 3})
+                          </div>
+                          {(event?.participants || []).slice(3).map((p) => (
+                            <div key={p.id} className="flex! items-center! gap-2! py-0.5!">
+                              <Avatar
+                                colleague={{
+                                  id: p.id,
+                                  name: p.name,
+                                  photo: p.photo || p.avatar,
+                                  initials: p.initials,
+                                }}
+                                className="w-5! h-5! text-[9px]!"
+                                allowPreview={false}
+                              />
+                              <span className="text-xs! text-slate-100! font-medium! truncate!">
+                                {p.name}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      }
+                      placement="bottom"
+                      color="#1e293b"
+                    >
+                      <button
+                        type="button"
+                        className="inline-flex! items-center! justify-center! px-2! py-0.5! bg-slate-200/80! dark:bg-slate-700/80! hover:bg-slate-300! dark:hover:bg-slate-600! text-slate-700! dark:text-zinc-200! text-xs! font-bold! rounded-full! border! border-slate-300/60! dark:border-slate-600/60! transition-colors! cursor-pointer!"
+                      >
+                        +{(event?.participants?.length || 0) - 3}
+                      </button>
+                    </Tooltip>
+                  </If>
                 </div>
               </div>
             </If>

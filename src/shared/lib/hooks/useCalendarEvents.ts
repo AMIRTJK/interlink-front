@@ -20,11 +20,26 @@ const mapEventToTask = (event: EventResponse): Task => {
     endTime: endTimePart,
     category: "work",
     color: event.color,
-    participants: (event.participants || []).map((p) => ({
-      id: String(p.id),
-      name: p.full_name,
-      avatar: p.photo_path || undefined,
-    })),
+    participants: (event.participants || []).map((p) => {
+      const name = p.full_name || "Без имени";
+      const photo = p.photo_url || p.photo_path || undefined;
+      const initials = (
+        name
+          .split(/\s+/)
+          .filter(Boolean)
+          .map((part) => part[0])
+          .slice(0, 2)
+          .join("") || "?"
+      ).toUpperCase();
+
+      return {
+        id: String(p.id),
+        name,
+        avatar: photo,
+        photo,
+        initials,
+      };
+    }),
   };
 };
 
