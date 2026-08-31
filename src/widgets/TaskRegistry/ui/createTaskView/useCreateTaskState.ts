@@ -9,6 +9,7 @@ import type {
   TaskPayload,
   TaskStatus,
   TaskType,
+  IBatchGlobal,
 } from "../../model/types";
 import { toDateInput, toAssigneeIds } from "./createTaskViewModel";
 
@@ -68,10 +69,10 @@ export function useCreateTaskState({
   const [taskType, setTaskType] = React.useState<TaskType>("personal");
 
   // Protocol state
-  const [batchGlobal, setBatchGlobal] = React.useState({
+  const [batchGlobal, setBatchGlobal] = React.useState<IBatchGlobal>({
     chairmanId: "",
-    chairmanIds: [] as string[],
-    participants: [] as string[],
+    chairmanIds: [],
+    participants: [],
     date: new Date().toISOString().split("T")[0],
     number: "",
   });

@@ -85,6 +85,14 @@ export interface SubRow {
   title: string;
 }
 
+export interface IBatchGlobal {
+  chairmanId: string;
+  chairmanIds?: string[];
+  participants: string[];
+  date: string;
+  number: string;
+}
+
 export type FilterTabId = "all" | "active" | "completed" | "overdue";
 export type StatKey = "total" | "inProgress" | "completed" | "overdue";
 
@@ -95,7 +103,6 @@ export interface TaskStats {
   overdue: number;
 }
 
-/** Полная статистика с /api/v1/tasks/stats (по каждому статусу). */
 export interface TaskStatsFull {
   total: number;
   new: number;

@@ -5,23 +5,13 @@ import { DatePicker, ConfigProvider } from "antd";
 import dayjs from "dayjs";
 import { cn } from "@shared/lib";
 import { Tooltip } from "@shared/ui";
-import type { Colleague } from "../../../model/types";
+import type { Colleague, IBatchGlobal } from "../../../model/types";
 import { Avatar } from "../../Avatar";
 
 interface IProps {
   colleagues: Colleague[];
-  batchGlobal: {
-    chairmanId: string;
-    participants: string[];
-    date: string;
-    number: string;
-  };
-  onBatchGlobalChange: (val: {
-    chairmanId: string;
-    participants: string[];
-    date: string;
-    number: string;
-  }) => void;
+  batchGlobal: IBatchGlobal;
+  onBatchGlobalChange: (val: IBatchGlobal) => void;
   participantsQuery: string;
   onParticipantsQueryChange: (val: string) => void;
   participantsOpen: boolean;
@@ -68,8 +58,8 @@ export function ProtocolHeaderDetails({
       ? [batchGlobal.chairmanId]
       : [];
 
-  const selectedChairmanColleagues = effectiveChairmanIds
-    .map((id) => colleagues.find((c) => c.id === id))
+  const selectedChairmanColleagues = (effectiveChairmanIds || [])
+    .map((id: string) => colleagues.find((c) => c.id === id))
     .filter(Boolean) as Colleague[];
 
   const firstChairman = selectedChairmanColleagues[0] || null;
@@ -83,7 +73,7 @@ export function ProtocolHeaderDetails({
   const handleToggleChairman = (colId: string) => {
     const isSelected = effectiveChairmanIds.includes(colId);
     const nextIds = isSelected
-      ? effectiveChairmanIds.filter((id) => id !== colId)
+      ? effectiveChairmanIds.filter((id: string) => id !== colId)
       : [...effectiveChairmanIds, colId];
     onBatchGlobalChange({
       ...batchGlobal,
