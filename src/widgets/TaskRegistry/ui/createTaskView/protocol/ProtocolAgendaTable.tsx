@@ -75,9 +75,9 @@ export function ProtocolAgendaTable({
       </div>
 
       {/* Table Section */}
-      <div className="space-y-3">
+      <div className="space-y-3 overflow-x-auto min-w-0">
         {/* Table Sub-Header Bar */}
-        <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl px-5 py-2.5 flex items-center text-[10px] font-black uppercase text-[#636e9c] dark:text-slate-400 tracking-wider shadow-[0_4px_16px_rgba(100,105,240,0.04)]">
+        <div className="min-w-[700px] bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl px-5 py-2.5 flex items-center text-[10px] font-black uppercase text-[#636e9c] dark:text-slate-400 tracking-wider shadow-[0_4px_16px_rgba(100,105,240,0.04)]">
           <div className="w-10 shrink-0">№</div>
           <div className="flex-1">ПОСТАВЛЕННАЯ ЗАДАЧА / ВОПРОС</div>
           <div className="w-32 shrink-0 text-center">ПРИОРИТЕТ</div>
@@ -94,7 +94,7 @@ export function ProtocolAgendaTable({
 
           return (
             <div key={row.id} className="space-y-2">
-              <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl px-4 py-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)] flex items-center gap-3 text-xs font-semibold text-[#1e2548]">
+              <div className="min-w-[700px] bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl px-4 py-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)] flex items-center gap-3 text-xs font-semibold text-[#1e2548]">
                 {/* Expand Toggle */}
                 <button
                   type="button"

@@ -19,7 +19,6 @@ export function CreateTaskHeader({
 }: IProps) {
   return (
     <div className="flex flex-col gap-4">
-      {/* Top Title Bar */}
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
@@ -33,25 +32,26 @@ export function CreateTaskHeader({
         </h1>
       </div>
 
-      {/* Task type pills (только при создании) */}
       <div className={cn("flex items-center gap-2", isEdit && "hidden")}>
         <button
+          type="button"
           onClick={() => onTaskTypeChange("personal")}
           className={cn(
             "px-5 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer border",
             taskType === "personal"
-              ? "bg-white dark:bg-slate-800 border-[#10b981] text-[#10b981] dark:text-emerald-400 shadow-[0_4px_12px_rgba(16,185,129,0.12)] font-extrabold"
+              ? "bg-white dark:bg-slate-800 border-[#10b981] text-[#10b981] dark:text-emerald-400 shadow-[0_4px_12px_rgba(16,185,129,0.12)]"
               : "bg-[rgba(51,115,229,0.0588)] dark:bg-slate-800/50 border-[#3373e5]/15 dark:border-white/10 text-[#7e85b0] hover:text-[#3373e5]",
           )}
         >
           Персональная задача
         </button>
         <button
+          type="button"
           onClick={() => onTaskTypeChange("protocol")}
           className={cn(
             "px-5 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer border",
             taskType === "protocol"
-              ? "bg-white dark:bg-slate-800 border-[#10b981] text-[#10b981] dark:text-emerald-400 shadow-[0_4px_12px_rgba(16,185,129,0.12)] font-extrabold"
+              ? "bg-white dark:bg-slate-800 border-[#10b981] text-[#10b981] dark:text-emerald-400 shadow-[0_4px_12px_rgba(16,185,129,0.12)]"
               : "bg-[rgba(51,115,229,0.0588)] dark:bg-slate-800/50 border-[#3373e5]/15 dark:border-white/10 text-[#7e85b0] hover:text-[#3373e5]",
           )}
         >
