@@ -112,16 +112,16 @@ export const TaskListView = ({
 	return (
 		<div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-slate-100 dark:border-white/10 rounded-3xl p-5 shadow-xl shadow-purple-100/40 dark:shadow-none flex flex-col min-h-[500px]">
 			<div className="flex-1 overflow-x-auto">
-				<table className="w-full text-center border-separate border-spacing-y-2.5 min-w-[1000px]">
+				<table className="w-full text-center border-separate border-spacing-y-2.5 min-w-[960px]">
 					<thead>
 						<tr className="text-[11px] font-black uppercase tracking-wider text-purple-900 dark:text-purple-300">
-							<th className="px-4 py-2 w-28 text-center">КОД</th>
-							<th className="px-4 py-2 text-center">НАЗВАНИЕ</th>
-							<th className="px-4 py-2 w-52 text-left">ИСПОЛНИТЕЛЬ</th>
-							<th className="px-4 py-2 w-40 text-center">ПРИОРИТЕТ</th>
-							<th className="px-4 py-2 w-40 text-center">СТАТУС</th>
-							<th className="px-4 py-2 w-32 text-center">СРОК</th>
-							<th className="px-4 py-2 w-48 text-center">ОБРАТНЫЙ ОТСЧЁТ</th>
+							<th className="px-3 py-2 w-[10%] text-center">КОД</th>
+							<th className="px-3 py-2 w-[22%] text-center">НАЗВАНИЕ</th>
+							<th className="px-3 py-2 w-[24%] text-left">ИСПОЛНИТЕЛЬ</th>
+							<th className="px-3 py-2 w-[12%] text-center">ПРИОРИТЕТ</th>
+							<th className="px-3 py-2 w-[12%] text-center">СТАТУС</th>
+							<th className="px-3 py-2 w-[10%] text-center">СРОК</th>
+							<th className="px-3 py-2 w-[10%] text-center">ОБРАТНЫЙ ОТСЧЁТ</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -129,6 +129,7 @@ export const TaskListView = ({
 							{tasks?.map((task) => {
 								const priorityBadge = getPriorityBadge(task.priority);
 								const statusBadge = getStatusBadge(task.status);
+								const formattedDate = task.dueDate ? formatDueDate(task.dueDate) : "—";
 
 								return (
 									<tr
@@ -137,17 +138,19 @@ export const TaskListView = ({
 										className="bg-white dark:bg-slate-800/80 hover:bg-slate-50/90 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-white/10 rounded-2xl shadow-xs transition-all duration-150 cursor-pointer group"
 									>
 										{/* CODE */}
-										<td className="px-4 py-3.5 rounded-l-2xl text-center">
-											<span className="text-xs font-bold text-blue-600 dark:text-blue-400 group-hover:underline">
-												{task.id}
-											</span>
+										<td className="px-3 py-3.5 rounded-l-2xl text-center">
+											<Tooltip title={task.id} placement="top">
+												<span className="text-xs font-bold text-blue-600 dark:text-blue-400 group-hover:underline truncate block">
+													{task.id}
+												</span>
+											</Tooltip>
 										</td>
 
 										{/* TITLE */}
-										<td className="px-4 py-3.5 text-center">
+										<td className="px-3 py-3.5 text-center">
 											<Tooltip title={task.title} placement="top">
-												<div className="inline-flex items-center justify-center w-[125px] h-[34px] bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-white/10 rounded-2xl px-2.5 text-xs font-medium text-slate-700 dark:text-slate-200 cursor-default">
-													<span className="truncate w-full text-center">
+												<div className="inline-flex items-center justify-center min-w-[125px] max-w-[220px] h-[34px] bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-white/10 rounded-2xl px-3 text-xs font-medium text-slate-700 dark:text-slate-200 cursor-default">
+													<span className="truncate">
 														{task.title}
 													</span>
 												</div>
@@ -155,7 +158,7 @@ export const TaskListView = ({
 										</td>
 
 										{/* ASSIGNEE */}
-										<td className="px-4 py-3.5 text-left">
+										<td className="px-3 py-3.5 text-left">
 											{task.assignees && task.assignees.length > 1 ? (
 												<Tooltip
 													title={
@@ -188,7 +191,7 @@ export const TaskListView = ({
 													}
 													placement="top"
 												>
-													<div className="flex items-center gap-3 cursor-pointer">
+													<div className="flex items-center gap-2.5 cursor-pointer">
 														<div className="flex items-center -space-x-2 shrink-0">
 															{task.assignees.slice(0, 2).map((a, i) => (
 																<Avatar
@@ -204,78 +207,90 @@ export const TaskListView = ({
 															)}
 														</div>
 														<div className="flex flex-col leading-tight min-w-0">
-															<span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate max-w-[150px]">
+															<span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate max-w-[180px]">
 																{`${task.assignees[0].name.split(" ")[0]} +${task.assignees.length - 1}`}
 															</span>
-															<span className="text-[10px] text-slate-400 font-medium truncate max-w-[150px]">
+															<span className="text-[10px] text-slate-400 font-medium truncate max-w-[180px]">
 																{`${task.assignees.length} исполнителя`}
 															</span>
 														</div>
 													</div>
 												</Tooltip>
 											) : (
-												<div className="flex items-center gap-3">
+												<div className="flex items-center gap-2.5 min-w-0">
 													<Avatar
 														colleague={task.assignee}
 														className="w-8 h-8 text-xs font-bold shrink-0"
 													/>
-													<div className="flex flex-col leading-tight min-w-0">
-														<span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate max-w-[150px]">
-															{task.assignee.name}
-														</span>
-														<span className="text-[10px] text-slate-400 font-medium truncate max-w-[150px]">
-															{task.assignee.role}
-														</span>
+													<div className="flex flex-col leading-tight min-w-0 flex-1">
+														<Tooltip title={task.assignee?.name} placement="topLeft">
+															<span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate block max-w-[190px] cursor-default">
+																{task.assignee?.name || "—"}
+															</span>
+														</Tooltip>
+														<Tooltip title={task.assignee?.role} placement="topLeft">
+															<span className="text-[10px] text-slate-400 font-medium truncate block max-w-[190px] cursor-default">
+																{task.assignee?.role || "—"}
+															</span>
+														</Tooltip>
 													</div>
 												</div>
 											)}
 										</td>
 
 										{/* PRIORITY */}
-										<td className="px-4 py-3.5 text-center">
-											<div
-												className={cn(
-													"inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl border text-xs font-bold shadow-2xs",
-													priorityBadge.pillClass,
-												)}
-											>
-												<span
+										<td className="px-3 py-3.5 text-center">
+											<Tooltip title={priorityBadge.label} placement="top">
+												<div
 													className={cn(
-														"w-2 h-2 rounded-full",
-														priorityBadge.dotBg,
+														"inline-flex items-center justify-center gap-1.5 min-w-[115px] h-[32px] rounded-2xl border text-xs font-bold shadow-2xs cursor-default px-3",
+														priorityBadge.pillClass,
 													)}
-												/>
-												<span>{priorityBadge.label}</span>
-											</div>
+												>
+													<span
+														className={cn(
+															"w-2 h-2 rounded-full shrink-0",
+															priorityBadge.dotBg,
+														)}
+													/>
+													<span className="truncate">{priorityBadge.label}</span>
+												</div>
+											</Tooltip>
 										</td>
 
 										{/* STATUS */}
-										<td className="px-4 py-3.5 text-center">
-											<div
-												className={cn(
-													"inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl border text-xs font-bold shadow-2xs",
-													statusBadge.pillClass,
-												)}
-											>
-												<span
+										<td className="px-3 py-3.5 text-center">
+											<Tooltip title={statusBadge.label} placement="top">
+												<div
 													className={cn(
-														"w-2 h-2 rounded-full",
-														statusBadge.dotBg,
+														"inline-flex items-center justify-center gap-1.5 min-w-[115px] h-[32px] rounded-2xl border text-xs font-bold shadow-2xs cursor-default px-3",
+														statusBadge.pillClass,
 													)}
-												/>
-												<span>{statusBadge.label}</span>
-											</div>
+												>
+													<span
+														className={cn(
+															"w-2 h-2 rounded-full shrink-0",
+															statusBadge.dotBg,
+														)}
+													/>
+													<span className="truncate">{statusBadge.label}</span>
+												</div>
+											</Tooltip>
 										</td>
 
 										{/* DUE DATE */}
-										<td className="px-4 py-3.5 text-center">
-											<span className="text-xs font-semibold text-slate-500 dark:text-slate-300">
-												{task.dueDate ? formatDueDate(task.dueDate) : "—"}
-											</span>
+										<td className="px-3 py-3.5 text-center">
+											<Tooltip title={task.dueDate ? formattedDate : "Срок не указан"} placement="top">
+												<div className="inline-flex items-center justify-center min-w-[110px] h-[32px] bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-white/10 rounded-2xl px-2.5 text-xs font-semibold text-slate-600 dark:text-slate-300 cursor-default">
+													<span className="truncate">
+														{formattedDate}
+													</span>
+												</div>
+											</Tooltip>
 										</td>
 
 										{/* COUNTDOWN */}
-										<td className="px-4 py-3.5 rounded-r-2xl text-center">
+										<td className="px-3 py-3.5 rounded-r-2xl text-center">
 											<If is={Boolean(task.dueDate)}>
 												<LiveCountdown dueDate={task.dueDate!} />
 											</If>
