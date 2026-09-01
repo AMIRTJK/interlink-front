@@ -31,6 +31,7 @@ interface IProps {
 	onSecretaryQueryChange: (val: string) => void;
 	secretaryOpen: boolean;
 	onSecretaryOpenChange: (open: boolean) => void;
+	mode?: "create" | "edit" | "view";
 }
 
 export function ProtocolSignatures({
@@ -57,7 +58,9 @@ export function ProtocolSignatures({
 	onSecretaryQueryChange,
 	secretaryOpen,
 	onSecretaryOpenChange,
+	mode = "create",
 }: IProps) {
+	const isView = mode === "view";
 	const chairmanRef = React.useRef<HTMLDivElement>(null);
 	const secretaryRef = React.useRef<HTMLDivElement>(null);
 
@@ -233,102 +236,106 @@ export function ProtocolSignatures({
 										</p>
 									</div>
 								</div>
-								<button
-									type="button"
-									onClick={() => handleRemoveChairman(chair.id)}
-									className="text-slate-400 hover:text-rose-500 transition-colors shrink-0 cursor-pointer"
-									title="Удалить"
-								>
-									<X size={14} />
-								</button>
+								{!isView && (
+									<button
+										type="button"
+										onClick={() => handleRemoveChairman(chair.id)}
+										className="text-slate-400 hover:text-rose-500 transition-colors shrink-0 cursor-pointer"
+										title="Удалить"
+									>
+										<X size={14} />
+									</button>
+								)}
 							</div>
 						</Tooltip>
 					))}
 
 					{/* Add Chairman Input or Button */}
-					{chairmanAdding || selectedChairmen.length === 0 ? (
-						<div className="relative">
-							<input
-								type="text"
-								autoFocus={chairmanAdding}
-								value={chairmanQuery}
-								onChange={(e) => {
-									setChairmanQuery(e.target.value);
-									setChairmanOpen(true);
-								}}
-								onFocus={() => setChairmanOpen(true)}
-								onClick={() => setChairmanOpen(true)}
-								className="w-full h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
-								placeholder={
-									selectedChairmen.length === 0
-										? "Выберите председателя..."
-										: "Добавить ещё руководителя..."
-								}
-							/>
-							<AnimatePresence>
-								{chairmanOpen && filteredChairmanOptions.length > 0 && (
-									<motion.div
-										initial={{ opacity: 0, y: -4 }}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{ opacity: 0, y: -4 }}
-										transition={{ duration: 0.12 }}
-										className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100/60 dark:divide-white/5"
-									>
-										{filteredChairmanOptions.map((col) => (
-											<Tooltip
-												key={col.id}
-												title={
-													<div className="flex flex-col gap-0.5 py-0.5 text-left max-w-xs">
-														<span className="font-bold text-white text-xs leading-tight">
-															{col.name}
-														</span>
-														{col.role && (
-															<span className="text-emerald-300 font-medium text-[11px] leading-tight">
-																{col.role}
+					{!isView && (
+						chairmanAdding || selectedChairmen.length === 0 ? (
+							<div className="relative">
+								<input
+									type="text"
+									autoFocus={chairmanAdding}
+									value={chairmanQuery}
+									onChange={(e) => {
+										setChairmanQuery(e.target.value);
+										setChairmanOpen(true);
+									}}
+									onFocus={() => setChairmanOpen(true)}
+									onClick={() => setChairmanOpen(true)}
+									className="w-full h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+									placeholder={
+										selectedChairmen.length === 0
+											? "Выберите председателя..."
+											: "Добавить ещё руководителя..."
+									}
+								/>
+								<AnimatePresence>
+									{chairmanOpen && filteredChairmanOptions.length > 0 && (
+										<motion.div
+											initial={{ opacity: 0, y: -4 }}
+											animate={{ opacity: 1, y: 0 }}
+											exit={{ opacity: 0, y: -4 }}
+											transition={{ duration: 0.12 }}
+											className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100/60 dark:divide-white/5"
+										>
+											{filteredChairmanOptions.map((col) => (
+												<Tooltip
+													key={col.id}
+													title={
+														<div className="flex flex-col gap-0.5 py-0.5 text-left max-w-xs">
+															<span className="font-bold text-white text-xs leading-tight">
+																{col.name}
 															</span>
-														)}
-													</div>
-												}
-												placement="topLeft"
-												mouseEnterDelay={0.1}
-											>
-												<button
-													type="button"
-													onMouseDown={(e) => {
-														e.preventDefault();
-														handleAddChairman(col.id);
-													}}
-													className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+															{col.role && (
+																<span className="text-emerald-300 font-medium text-[11px] leading-tight">
+																	{col.role}
+																</span>
+															)}
+														</div>
+													}
+													placement="topLeft"
+													mouseEnterDelay={0.1}
 												>
-													<Avatar
-														colleague={col}
-														className="w-7 h-7 text-[10px]"
-														allowPreview={false}
-													/>
-													<div className="min-w-0 flex-1">
-														<p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-															{col.name}
-														</p>
-														<p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-															{col.role || "Сотрудник"}
-														</p>
-													</div>
-												</button>
-											</Tooltip>
-										))}
-									</motion.div>
-								)}
-							</AnimatePresence>
-						</div>
-					) : (
-						<button
-							type="button"
-							onClick={() => setChairmanAdding(true)}
-							className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-dashed border-[#3373e5]/30 hover:border-[#3373e5] rounded-2xl p-3.5 text-center text-xs font-bold text-[#3373e5] shadow-2xs cursor-pointer hover:bg-white flex items-center justify-center gap-1.5 transition-all"
-						>
-							<Plus size={14} />
-							<span>Добавить ещё руководителя</span>
-						</button>
+													<button
+														type="button"
+														onMouseDown={(e) => {
+															e.preventDefault();
+															handleAddChairman(col.id);
+														}}
+														className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+													>
+														<Avatar
+															colleague={col}
+															className="w-7 h-7 text-[10px]"
+															allowPreview={false}
+														/>
+														<div className="min-w-0 flex-1">
+															<p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+																{col.name}
+															</p>
+															<p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+																{col.role || "Сотрудник"}
+															</p>
+														</div>
+													</button>
+												</Tooltip>
+											))}
+										</motion.div>
+									)}
+								</AnimatePresence>
+							</div>
+						) : (
+							<button
+								type="button"
+								onClick={() => setChairmanAdding(true)}
+								className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-dashed border-[#3373e5]/30 hover:border-[#3373e5] rounded-2xl p-3.5 text-center text-xs font-bold text-[#3373e5] shadow-2xs cursor-pointer hover:bg-white flex items-center justify-center gap-1.5 transition-all"
+							>
+								<Plus size={14} />
+								<span>Добавить ещё руководителя</span>
+							</button>
+						)
 					)}
 
 					{chairmanSigned ? (
@@ -344,7 +351,7 @@ export function ProtocolSignatures({
 						</div>
 					)}
 
-					{selectedChairmen.length > 0 && !chairmanSigned && (
+					{!isView && selectedChairmen.length > 0 && !chairmanSigned && (
 						<button
 							type="button"
 							onClick={() => onChairmanSignedChange(signTimestamp())}
@@ -427,102 +434,106 @@ export function ProtocolSignatures({
 										</p>
 									</div>
 								</div>
-								<button
-									type="button"
-									onClick={() => handleRemoveSecretary(sec.id)}
-									className="text-slate-400 hover:text-rose-500 transition-colors shrink-0 cursor-pointer"
-									title="Удалить"
-								>
-									<X size={14} />
-								</button>
+								{!isView && (
+									<button
+										type="button"
+										onClick={() => handleRemoveSecretary(sec.id)}
+										className="text-slate-400 hover:text-rose-500 transition-colors shrink-0 cursor-pointer"
+										title="Удалить"
+									>
+										<X size={14} />
+									</button>
+								)}
 							</div>
 						</Tooltip>
 					))}
 
 					{/* Add Secretary Input or Button */}
-					{secretaryAdding || selectedSecretaries.length === 0 ? (
-						<div className="relative">
-							<input
-								type="text"
-								autoFocus={secretaryAdding}
-								value={secretaryQuery}
-								onChange={(e) => {
-									onSecretaryQueryChange(e.target.value);
-									onSecretaryOpenChange(true);
-								}}
-								onFocus={() => onSecretaryOpenChange(true)}
-								onClick={() => onSecretaryOpenChange(true)}
-								className="w-full h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
-								placeholder={
-									selectedSecretaries.length === 0
-										? "Выберите секретаря..."
-										: "Добавить ещё секретаря..."
-								}
-							/>
-							<AnimatePresence>
-								{secretaryOpen && filteredSecretaryOptions.length > 0 && (
-									<motion.div
-										initial={{ opacity: 0, y: -4 }}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{ opacity: 0, y: -4 }}
-										transition={{ duration: 0.12 }}
-										className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100/60 dark:divide-white/5"
-									>
-										{filteredSecretaryOptions.map((col) => (
-											<Tooltip
-												key={col.id}
-												title={
-													<div className="flex flex-col gap-0.5 py-0.5 text-left max-w-xs">
-														<span className="font-bold text-white text-xs leading-tight">
-															{col.name}
-														</span>
-														{col.role && (
-															<span className="text-emerald-300 font-medium text-[11px] leading-tight">
-																{col.role}
+					{!isView && (
+						secretaryAdding || selectedSecretaries.length === 0 ? (
+							<div className="relative">
+								<input
+									type="text"
+									autoFocus={secretaryAdding}
+									value={secretaryQuery}
+									onChange={(e) => {
+										onSecretaryQueryChange(e.target.value);
+										onSecretaryOpenChange(true);
+									}}
+									onFocus={() => onSecretaryOpenChange(true)}
+									onClick={() => onSecretaryOpenChange(true)}
+									className="w-full h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+									placeholder={
+										selectedSecretaries.length === 0
+											? "Выберите секретаря..."
+											: "Добавить ещё секретаря..."
+									}
+								/>
+								<AnimatePresence>
+									{secretaryOpen && filteredSecretaryOptions.length > 0 && (
+										<motion.div
+											initial={{ opacity: 0, y: -4 }}
+											animate={{ opacity: 1, y: 0 }}
+											exit={{ opacity: 0, y: -4 }}
+											transition={{ duration: 0.12 }}
+											className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100/60 dark:divide-white/5"
+										>
+											{filteredSecretaryOptions.map((col) => (
+												<Tooltip
+													key={col.id}
+													title={
+														<div className="flex flex-col gap-0.5 py-0.5 text-left max-w-xs">
+															<span className="font-bold text-white text-xs leading-tight">
+																{col.name}
 															</span>
-														)}
-													</div>
-												}
-												placement="topLeft"
-												mouseEnterDelay={0.1}
-											>
-												<button
-													type="button"
-													onMouseDown={(e) => {
-														e.preventDefault();
-														handleAddSecretary(col.id);
-													}}
-													className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+															{col.role && (
+																<span className="text-emerald-300 font-medium text-[11px] leading-tight">
+																	{col.role}
+																</span>
+															)}
+														</div>
+													}
+													placement="topLeft"
+													mouseEnterDelay={0.1}
 												>
-													<Avatar
-														colleague={col}
-														className="w-7 h-7 text-[10px]"
-														allowPreview={false}
-													/>
-													<div className="min-w-0 flex-1">
-														<p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-															{col.name}
-														</p>
-														<p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-															{col.role || "Сотрудник"}
-														</p>
-													</div>
-												</button>
-											</Tooltip>
-										))}
-									</motion.div>
-								)}
-							</AnimatePresence>
-						</div>
-					) : (
-						<button
-							type="button"
-							onClick={() => onSecretaryAddingChange(true)}
-							className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-dashed border-[#3373e5]/30 hover:border-[#3373e5] rounded-2xl p-3.5 text-center text-xs font-bold text-[#3373e5] shadow-2xs cursor-pointer hover:bg-white flex items-center justify-center gap-1.5 transition-all"
-						>
-							<Plus size={14} />
-							<span>Добавить ещё секретаря</span>
-						</button>
+													<button
+														type="button"
+														onMouseDown={(e) => {
+															e.preventDefault();
+															handleAddSecretary(col.id);
+														}}
+														className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+													>
+														<Avatar
+															colleague={col}
+															className="w-7 h-7 text-[10px]"
+															allowPreview={false}
+														/>
+														<div className="min-w-0 flex-1">
+															<p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+																{col.name}
+															</p>
+															<p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+																{col.role || "Сотрудник"}
+															</p>
+														</div>
+													</button>
+												</Tooltip>
+											))}
+										</motion.div>
+									)}
+								</AnimatePresence>
+							</div>
+						) : (
+							<button
+								type="button"
+								onClick={() => onSecretaryAddingChange(true)}
+								className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-dashed border-[#3373e5]/30 hover:border-[#3373e5] rounded-2xl p-3.5 text-center text-xs font-bold text-[#3373e5] shadow-2xs cursor-pointer hover:bg-white flex items-center justify-center gap-1.5 transition-all"
+							>
+								<Plus size={14} />
+								<span>Добавить ещё секретаря</span>
+							</button>
+						)
 					)}
 
 					{secretarySigned ? (
@@ -533,12 +544,12 @@ export function ProtocolSignatures({
 							<p className="text-[10px] text-slate-400">{secretarySigned}</p>
 						</div>
 					) : (
-						<div className="bg-linear-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-5 text-center text-xs font-bold text-[#9aa2c8] uppercase tracking-wider shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
+						<div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-5 text-center text-xs font-bold text-[#9aa2c8] uppercase tracking-wider shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
 							ЭЦП СЕКРЕТАРЯ
 						</div>
 					)}
 
-					{selectedSecretaries.length > 0 && !secretarySigned && (
+					{!isView && selectedSecretaries.length > 0 && !secretarySigned && (
 						<button
 							type="button"
 							onClick={() => onSecretarySignedChange(signTimestamp())}
