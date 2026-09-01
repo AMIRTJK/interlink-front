@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Plus, Trash2, Paperclip, ChevronDown, ChevronRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Select } from "antd";
+import { Select, Input } from "antd";
 import { Tooltip } from "@shared/ui";
 import type { BatchRow, Colleague, SubRow } from "../../../model/types";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "../../../model/constants";
@@ -19,6 +19,7 @@ interface IProps {
   onAddSubRow: (rowId: number) => void;
   onUpdateSubRow: (rowId: number, subId: number, title: string) => void;
   onRemoveSubRow: (rowId: number, subId: number) => void;
+  mode?: "create" | "edit" | "view";
 }
 
 export function ProtocolAgendaTable({
@@ -33,7 +34,10 @@ export function ProtocolAgendaTable({
   onAddSubRow,
   onUpdateSubRow,
   onRemoveSubRow,
+  mode = "create",
 }: IProps) {
+  const isView = mode === "view";
+
   const colleagueOptions = React.useMemo(() => {
     return colleagues.map((c) => ({
       value: c.id,
@@ -84,15 +88,17 @@ export function ProtocolAgendaTable({
         <h2 className="text-lg font-black text-[#1e2548] dark:text-slate-100 tracking-tight">
           ПОВЕСТКА ДНЯ И РЕШЕНИЯ
         </h2>
-        <button
-          type="button"
-          onClick={onAddBatchRow}
-          disabled={batchRows.length >= 20}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#e6f4ea] hover:bg-[#d2ebd7] dark:bg-emerald-950/40 border border-[#10b981]/30 text-[#10b981] dark:text-emerald-400 font-extrabold text-xs rounded-2xl transition-all cursor-pointer shadow-2xs disabled:opacity-50"
-        >
-          <Plus size={14} />
-          <span>Добавить строку</span>
-        </button>
+        {!isView && (
+          <button
+            type="button"
+            onClick={onAddBatchRow}
+            disabled={batchRows.length >= 20}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#e6f4ea] hover:bg-[#d2ebd7] dark:bg-emerald-950/40 border border-[#10b981]/30 text-[#10b981] dark:text-emerald-400 font-extrabold text-xs rounded-2xl transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+          >
+            <Plus size={14} />
+            <span>Добавить строку</span>
+          </button>
+        )}
       </div>
 
       {/* Table Section */}
@@ -104,7 +110,7 @@ export function ProtocolAgendaTable({
           <div className="w-32 shrink-0 text-center">ПРИОРИТЕТ</div>
           <div className="w-28 shrink-0 text-center">СТАТУС</div>
           <div className="w-44 shrink-0 text-center">ИСПОЛНИТЕЛЬ</div>
-          <div className="w-16 shrink-0 text-center">ДЕЙСТВИЯ</div>
+          {!isView && <div className="w-16 shrink-0 text-center">ДЕЙСТВИЯ</div>}
         </div>
 
         {/* Rows */}
@@ -112,134 +118,182 @@ export function ProtocolAgendaTable({
           const isOpen = expandedRows.includes(row.id);
           const subs = subRowsMap[row.id] || [];
           const assignedCol = colleagues.find((c) => c.id === row.assigneeId);
+          const priorityOpt = PRIORITY_OPTIONS.find((p) => p.value === row.priority);
+          const statusOpt = STATUS_OPTIONS.find((s) => s.value === row.status);
+
+          const assigneeList = (row.assigneeIds && row.assigneeIds.length > 0)
+            ? row.assigneeIds.map((id) => colleagues.find((c) => c.id === id)).filter(Boolean) as Colleague[]
+            : assignedCol
+            ? [assignedCol]
+            : [];
 
           return (
             <div key={row.id} className="space-y-2">
-              <div className="min-w-[700px] bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl px-4 py-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)] flex items-center gap-3 text-xs font-semibold text-[#1e2548]">
+              <div className="min-w-[700px] bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl px-4 py-3.5 shadow-[0_4px_16px_rgba(100,105,240,0.06)] flex items-start gap-3 text-xs font-semibold text-[#1e2548]">
                 {/* Expand Toggle */}
                 <button
                   type="button"
                   onClick={() => onToggleRowExpand(row.id)}
-                  className="text-[#9aa2c8] hover:text-[#3373e5] transition-colors cursor-pointer"
+                  className="text-[#9aa2c8] hover:text-[#3373e5] transition-colors cursor-pointer pt-1"
                 >
                   {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 </button>
 
                 {/* Index */}
-                <div className="w-6 shrink-0 font-bold text-[#636e9c]">
+                <div className="w-6 shrink-0 font-bold text-[#636e9c] pt-1">
                   {idx + 1}
                 </div>
 
-                {/* Title Input */}
+                {/* Title Input / Textarea */}
                 <div className="flex-1 min-w-0">
-                  <input
-                    type="text"
-                    value={row.title}
-                    onChange={(e) =>
-                      onUpdateBatchRow(row.id, "title", e.target.value)
-                    }
-                    className="w-full bg-transparent border-none outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8]"
-                    placeholder="Что нужно сделать?"
-                  />
+                  {isView ? (
+                    <div className="text-xs font-bold text-slate-800 dark:text-slate-100 whitespace-pre-wrap leading-relaxed py-1">
+                      {row.title || <span className="text-slate-400 font-normal italic">Без названия</span>}
+                    </div>
+                  ) : (
+                    <div className="bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-white/10 rounded-xl p-2.5 shadow-2xs focus-within:border-[#3373e5] focus-within:ring-2 focus-within:ring-[#3373e5]/15 transition-all">
+                      <Input.TextArea
+                        variant="borderless"
+                        autoSize={{ minRows: 1, maxRows: 6 }}
+                        value={row.title}
+                        onChange={(e) =>
+                          onUpdateBatchRow(row.id, "title", e.target.value)
+                        }
+                        className="w-full bg-transparent border-none! shadow-none! resize-none! text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] p-0! leading-relaxed"
+                        placeholder="Что нужно сделать?"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Priority Badge Select */}
-                <div className="w-36 shrink-0">
-                  <Select
-                    value={row.priority}
-                    onChange={(val) =>
-                      onUpdateBatchRow(row.id, "priority", val)
-                    }
-                    options={PRIORITY_OPTIONS.map((o) => ({
-                      value: o.value,
-                      label: o.label,
-                    }))}
-                    size="small"
-                    className="w-full text-xs font-bold [&_.ant-select-selector]:bg-amber-50! dark:[&_.ant-select-selector]:bg-amber-950/40! [&_.ant-select-selector]:border-amber-200! dark:[&_.ant-select-selector]:border-amber-800/60! [&_.ant-select-selection-item]:text-amber-700! dark:[&_.ant-select-selection-item]:text-amber-400! [&_.ant-select-selector]:rounded-full!"
-                  />
+                <div className="w-36 shrink-0 pt-0.5">
+                  {isView ? (
+                    <div className="px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-700 dark:text-amber-400 font-extrabold text-xs text-center">
+                      {priorityOpt?.label || row.priority}
+                    </div>
+                  ) : (
+                    <Select
+                      value={row.priority}
+                      onChange={(val) =>
+                        onUpdateBatchRow(row.id, "priority", val)
+                      }
+                      options={PRIORITY_OPTIONS.map((o) => ({
+                        value: o.value,
+                        label: o.label,
+                      }))}
+                      size="small"
+                      className="w-full text-xs font-bold [&_.ant-select-selector]:bg-amber-50! dark:[&_.ant-select-selector]:bg-amber-950/40! [&_.ant-select-selector]:border-amber-200! dark:[&_.ant-select-selector]:border-amber-800/60! [&_.ant-select-selection-item]:text-amber-700! dark:[&_.ant-select-selection-item]:text-amber-400! [&_.ant-select-selector]:rounded-full!"
+                    />
+                  )}
                 </div>
 
                 {/* Status Badge Select */}
-                <div className="w-32 shrink-0">
-                  <Select
-                    value={row.status}
-                    onChange={(val) =>
-                      onUpdateBatchRow(row.id, "status", val)
-                    }
-                    options={STATUS_OPTIONS.map((o) => ({
-                      value: o.value,
-                      label: o.label,
-                    }))}
-                    size="small"
-                    className="w-full text-xs font-bold [&_.ant-select-selector]:bg-blue-50! dark:[&_.ant-select-selector]:bg-blue-950/40! [&_.ant-select-selector]:border-blue-200! dark:[&_.ant-select-selector]:border-blue-800/60! [&_.ant-select-selection-item]:text-blue-600! dark:[&_.ant-select-selection-item]:text-blue-400! [&_.ant-select-selector]:rounded-full!"
-                  />
+                <div className="w-32 shrink-0 pt-0.5">
+                  {isView ? (
+                    <div className="px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 text-blue-600 dark:text-blue-400 font-extrabold text-xs text-center">
+                      {statusOpt?.label || row.status}
+                    </div>
+                  ) : (
+                    <Select
+                      value={row.status}
+                      onChange={(val) =>
+                        onUpdateBatchRow(row.id, "status", val)
+                      }
+                      options={STATUS_OPTIONS.map((o) => ({
+                        value: o.value,
+                        label: o.label,
+                      }))}
+                      size="small"
+                      className="w-full text-xs font-bold [&_.ant-select-selector]:bg-blue-50! dark:[&_.ant-select-selector]:bg-blue-950/40! [&_.ant-select-selector]:border-blue-200! dark:[&_.ant-select-selector]:border-blue-800/60! [&_.ant-select-selection-item]:text-blue-600! dark:[&_.ant-select-selection-item]:text-blue-400! [&_.ant-select-selector]:rounded-full!"
+                    />
+                  )}
                 </div>
 
                 {/* Assignee Badge Select */}
-                <div className="w-44 shrink-0">
-                  <Tooltip
-                    title={
-                      (row.assigneeIds && row.assigneeIds.length > 0)
-                        ? row.assigneeIds
-                            .map((id) => {
-                              const col = colleagues.find((c) => c.id === id);
-                              return col ? `${col.name}${col.role ? ` (${col.role})` : ""}` : "";
-                            })
-                            .filter(Boolean)
-                            .join(", ")
-                        : assignedCol
-                        ? `${assignedCol.name} — ${assignedCol.role || "Сотрудник"}`
-                        : undefined
-                    }
-                  >
-                    <Select
-                      mode="multiple"
-                      value={
-                        row.assigneeIds && row.assigneeIds.length > 0
+                <div className="w-44 shrink-0 pt-0.5">
+                  {isView ? (
+                    <div className="flex flex-wrap gap-1 items-center">
+                      {assigneeList.length > 0 ? (
+                        assigneeList.map((c) => (
+                          <Tooltip key={c.id} title={`${c.name} — ${c.role || "Сотрудник"}`}>
+                            <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 shadow-2xs">
+                              <Avatar colleague={c} className="w-4 h-4 text-[7px]" allowPreview={false} />
+                              <span className="truncate max-w-[85px]">{c.name.split(" ")[0]}</span>
+                            </span>
+                          </Tooltip>
+                        ))
+                      ) : (
+                        <span className="text-xs text-slate-400 italic">Не назначен</span>
+                      )}
+                    </div>
+                  ) : (
+                    <Tooltip
+                      title={
+                        (row.assigneeIds && row.assigneeIds.length > 0)
                           ? row.assigneeIds
-                          : row.assigneeId
-                          ? [row.assigneeId]
-                          : []
+                              .map((id) => {
+                                const col = colleagues.find((c) => c.id === id);
+                                return col ? `${col.name}${col.role ? ` (${col.role})` : ""}` : "";
+                              })
+                              .filter(Boolean)
+                              .join(", ")
+                          : assignedCol
+                          ? `${assignedCol.name} — ${assignedCol.role || "Сотрудник"}`
+                          : undefined
                       }
-                      placeholder="Исполнители"
-                      onChange={(vals: string[]) => {
-                        onUpdateBatchRow(row.id, "assigneeIds", vals);
-                        onUpdateBatchRow(row.id, "assigneeId", vals[0] || "");
-                      }}
-                      showSearch
-                      maxTagCount={1}
-                      maxTagPlaceholder={(omitted) => `+${omitted.length}`}
-                      popupMatchSelectWidth={false}
-                      dropdownStyle={{ minWidth: 280 }}
-                      optionLabelProp="shortLabel"
-                      filterOption={(input, option) =>
-                        Boolean((option as any)?.searchStr?.includes(input.toLowerCase()))
-                      }
-                      options={colleagueOptions}
-                      size="small"
-                      className="w-full text-xs font-bold [&_.ant-select-selector]:bg-white! dark:[&_.ant-select-selector]:bg-slate-800! [&_.ant-select-selector]:border-[#3373e5]/20! dark:[&_.ant-select-selector]:border-white/10! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100! [&_.ant-select-selector]:rounded-2xl!"
-                    />
-                  </Tooltip>
+                    >
+                      <Select
+                        mode="multiple"
+                        value={
+                          row.assigneeIds && row.assigneeIds.length > 0
+                            ? row.assigneeIds
+                            : row.assigneeId
+                            ? [row.assigneeId]
+                            : []
+                        }
+                        placeholder="Исполнители"
+                        onChange={(vals: string[]) => {
+                          onUpdateBatchRow(row.id, "assigneeIds", vals);
+                          onUpdateBatchRow(row.id, "assigneeId", vals[0] || "");
+                        }}
+                        showSearch
+                        maxTagCount={1}
+                        maxTagPlaceholder={(omitted) => `+${omitted.length}`}
+                        popupMatchSelectWidth={false}
+                        dropdownStyle={{ minWidth: 280 }}
+                        optionLabelProp="shortLabel"
+                        filterOption={(input, option) =>
+                          Boolean((option as any)?.searchStr?.includes(input.toLowerCase()))
+                        }
+                        options={colleagueOptions}
+                        size="small"
+                        className="w-full text-xs font-bold [&_.ant-select-selector]:bg-white! dark:[&_.ant-select-selector]:bg-slate-800! [&_.ant-select-selector]:border-[#3373e5]/20! dark:[&_.ant-select-selector]:border-white/10! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100! [&_.ant-select-selector]:rounded-2xl!"
+                      />
+                    </Tooltip>
+                  )}
                 </div>
 
                 {/* Action Icons */}
-                <div className="w-16 shrink-0 flex items-center justify-center gap-2 text-[#9aa2c8]">
-                  <button
-                    type="button"
-                    className="hover:text-[#3373e5] transition-colors cursor-pointer"
-                    title="Прикрепить файл"
-                  >
-                    <Paperclip size={14} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onRemoveBatchRow(row.id)}
-                    className="hover:text-rose-600 transition-colors cursor-pointer text-rose-400"
-                    title="Удалить строку"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
+                {!isView && (
+                  <div className="w-16 shrink-0 flex items-center justify-center gap-2 text-[#9aa2c8] pt-1">
+                    <button
+                      type="button"
+                      className="hover:text-[#3373e5] transition-colors cursor-pointer"
+                      title="Прикрепить файл"
+                    >
+                      <Paperclip size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onRemoveBatchRow(row.id)}
+                      className="hover:text-rose-600 transition-colors cursor-pointer text-rose-400"
+                      title="Удалить строку"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Sub-rows */}
@@ -249,39 +303,52 @@ export function ProtocolAgendaTable({
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="pl-10 space-y-2"
+                    className="pl-9 space-y-2"
                   >
                     {subs.map((sub) => (
                       <div
                         key={sub.id}
-                        className="flex items-center gap-2 p-2 bg-white/70 dark:bg-slate-800/70 border border-[#3373e5]/15 rounded-xl text-xs"
+                        className="flex items-start gap-2 p-2 bg-white/90 dark:bg-slate-800/90 border border-slate-200/70 dark:border-white/10 rounded-xl text-xs max-w-3xl shadow-2xs"
                       >
-                        <input
-                          type="text"
-                          value={sub.title}
-                          onChange={(e) =>
-                            onUpdateSubRow(row.id, sub.id, e.target.value)
-                          }
-                          className="flex-1 bg-transparent outline-none text-xs font-semibold text-[#1e2548]"
-                          placeholder="Подпункт..."
-                        />
-                        <button
-                          type="button"
-                          onClick={() => onRemoveSubRow(row.id, sub.id)}
-                          className="text-rose-400 hover:text-rose-600 transition-colors"
-                        >
-                          <X size={14} />
-                        </button>
+                        <span className="text-emerald-500 font-bold text-xs pt-0.5">•</span>
+                        {isView ? (
+                          <div className="flex-1 text-xs font-semibold text-slate-800 dark:text-slate-100 whitespace-pre-wrap leading-relaxed py-0.5">
+                            {sub.title || <span className="text-slate-400 font-normal italic">Пустой подпункт</span>}
+                          </div>
+                        ) : (
+                          <>
+                            <Input.TextArea
+                              variant="borderless"
+                              autoSize={{ minRows: 1, maxRows: 4 }}
+                              value={sub.title}
+                              onChange={(e) =>
+                                onUpdateSubRow(row.id, sub.id, e.target.value)
+                              }
+                              className="flex-1 bg-transparent border-none! shadow-none! resize-none! text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] p-0! leading-relaxed"
+                              placeholder="Подпункт..."
+                            />
+                            <button
+                              type="button"
+                              onClick={() => onRemoveSubRow(row.id, sub.id)}
+                              className="text-slate-400 hover:text-rose-600 transition-colors pt-0.5 p-1 rounded-md"
+                              title="Удалить подпункт"
+                            >
+                              <X size={13} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     ))}
-                    <button
-                      type="button"
-                      onClick={() => onAddSubRow(row.id)}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-[#10b981] hover:underline"
-                    >
-                      <Plus size={13} />
-                      <span>Добавить подпункт</span>
-                    </button>
+                    {!isView && (
+                      <button
+                        type="button"
+                        onClick={() => onAddSubRow(row.id)}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#10b981] hover:text-[#059669] transition-colors"
+                      >
+                        <Plus size={13} />
+                        <span>Добавить подпункт</span>
+                      </button>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -292,3 +359,4 @@ export function ProtocolAgendaTable({
     </div>
   );
 }
+

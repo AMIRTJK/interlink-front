@@ -114,6 +114,10 @@ export const CreateTaskView = ({
     onUpdate,
   });
 
+  const [protocolMode, setProtocolMode] = React.useState<"create" | "edit" | "view">(
+    isEdit ? "edit" : "create"
+  );
+
   return (
     <motion.main
       key="create"
@@ -220,6 +224,8 @@ export const CreateTaskView = ({
             filledBatchCount={filledBatchCount}
             isSaving={isSaving}
             onBatchCreate={handleBatchCreate}
+            mode={protocolMode}
+            onModeChange={setProtocolMode}
           />
         )}
       </AnimatePresence>
