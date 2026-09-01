@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Plus, Trash2, Paperclip, ChevronDown, ChevronRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Select } from "antd";
+import { Select, Input } from "antd";
 import { Tooltip } from "@shared/ui";
 import type { BatchRow, Colleague, SubRow } from "../../../model/types";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "../../../model/constants";
@@ -115,30 +115,31 @@ export function ProtocolAgendaTable({
 
           return (
             <div key={row.id} className="space-y-2">
-              <div className="min-w-[700px] bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl px-4 py-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)] flex items-center gap-3 text-xs font-semibold text-[#1e2548]">
+              <div className="min-w-[700px] bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl px-4 py-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)] flex items-start gap-3 text-xs font-semibold text-[#1e2548]">
                 {/* Expand Toggle */}
                 <button
                   type="button"
                   onClick={() => onToggleRowExpand(row.id)}
-                  className="text-[#9aa2c8] hover:text-[#3373e5] transition-colors cursor-pointer"
+                  className="text-[#9aa2c8] hover:text-[#3373e5] transition-colors cursor-pointer pt-0.5"
                 >
                   {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 </button>
 
                 {/* Index */}
-                <div className="w-6 shrink-0 font-bold text-[#636e9c]">
+                <div className="w-6 shrink-0 font-bold text-[#636e9c] pt-0.5">
                   {idx + 1}
                 </div>
 
                 {/* Title Input */}
                 <div className="flex-1 min-w-0">
-                  <input
-                    type="text"
+                  <Input.TextArea
+                    variant="borderless"
+                    autoSize={{ minRows: 1, maxRows: 6 }}
                     value={row.title}
                     onChange={(e) =>
                       onUpdateBatchRow(row.id, "title", e.target.value)
                     }
-                    className="w-full bg-transparent border-none outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8]"
+                    className="w-full bg-transparent border-none! shadow-none! resize-none! text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] p-0! leading-relaxed"
                     placeholder="Что нужно сделать?"
                   />
                 </div>
@@ -223,7 +224,7 @@ export function ProtocolAgendaTable({
                 </div>
 
                 {/* Action Icons */}
-                <div className="w-16 shrink-0 flex items-center justify-center gap-2 text-[#9aa2c8]">
+                <div className="w-16 shrink-0 flex items-center justify-center gap-2 text-[#9aa2c8] pt-0.5">
                   <button
                     type="button"
                     className="hover:text-[#3373e5] transition-colors cursor-pointer"
@@ -254,21 +255,22 @@ export function ProtocolAgendaTable({
                     {subs.map((sub) => (
                       <div
                         key={sub.id}
-                        className="flex items-center gap-2 p-2 bg-white/70 dark:bg-slate-800/70 border border-[#3373e5]/15 rounded-xl text-xs"
+                        className="flex items-start gap-2 p-2 bg-white/70 dark:bg-slate-800/70 border border-[#3373e5]/15 rounded-xl text-xs"
                       >
-                        <input
-                          type="text"
+                        <Input.TextArea
+                          variant="borderless"
+                          autoSize={{ minRows: 1, maxRows: 4 }}
                           value={sub.title}
                           onChange={(e) =>
                             onUpdateSubRow(row.id, sub.id, e.target.value)
                           }
-                          className="flex-1 bg-transparent outline-none text-xs font-semibold text-[#1e2548]"
+                          className="flex-1 bg-transparent border-none! shadow-none! resize-none! text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] p-0! leading-relaxed"
                           placeholder="Подпункт..."
                         />
                         <button
                           type="button"
                           onClick={() => onRemoveSubRow(row.id, sub.id)}
-                          className="text-rose-400 hover:text-rose-600 transition-colors"
+                          className="text-rose-400 hover:text-rose-600 transition-colors pt-0.5"
                         >
                           <X size={14} />
                         </button>
