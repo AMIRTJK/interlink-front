@@ -1,6 +1,7 @@
 import * as React from "react";
 import { TableColumnsType } from "antd";
 import { MoreHorizontal } from "lucide-react";
+import { Avatar } from "@shared/ui";
 import { T, getRoleColor, EXT_STATUS_CFG } from "../theme/tokens";
 import type { ExtUser } from "../model";
 
@@ -40,37 +41,16 @@ export const getUsersColumns = (
       const roleCfg = getRoleColor(primaryRole);
       return (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {user.photoUrl ? (
-            <img
-              src={user.photoUrl}
-              alt={user.fio}
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: "50%",
-                objectFit: "cover",
-                flexShrink: 0,
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: "50%",
-                background: roleCfg.bg,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 11,
-                fontWeight: 700,
-                color: roleCfg.text,
-                flexShrink: 0,
-              }}
-            >
-              {user.avatarInitials}
-            </div>
-          )}
+          <Avatar
+            colleague={{
+              id: user.id,
+              name: user.fio,
+              initials: user.avatarInitials,
+              photo: user.photoUrl,
+            }}
+            className="w-8 h-8 rounded-full"
+            allowPreview={true}
+          />
           <div>
             <div style={{ fontSize: 14, fontWeight: 600, color: T.textPrimary }}>
               {user.fio}

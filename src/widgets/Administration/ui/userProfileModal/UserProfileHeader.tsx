@@ -1,5 +1,6 @@
 import * as React from "react";
 import { X, Users, ShieldAlert, Monitor, Activity } from "lucide-react";
+import { Avatar } from "@shared/ui";
 import { T } from "../../theme/tokens";
 import type { ExtUser, ProfileTab } from "../../model";
 
@@ -44,39 +45,16 @@ export function UserProfileHeader({
           marginBottom: 16,
         }}
       >
-        {user.photoUrl ? (
-          <img
-            src={user.photoUrl}
-            alt={user.fio}
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: "50%",
-              objectFit: "cover",
-              flexShrink: 0,
-              border: `1.5px solid ${roleCfg.text}25`,
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: "50%",
-              background: roleCfg.bg,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 18,
-              fontWeight: 800,
-              color: roleCfg.text,
-              flexShrink: 0,
-              border: `1.5px solid ${roleCfg.text}25`,
-            }}
-          >
-            {user.avatarInitials}
-          </div>
-        )}
+        <Avatar
+          colleague={{
+            id: user.id,
+            name: user.fio,
+            initials: user.avatarInitials,
+            photo: user.photoUrl,
+          }}
+          className="w-14 h-14 rounded-full text-lg font-extrabold"
+          allowPreview={true}
+        />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
