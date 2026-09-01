@@ -60,6 +60,7 @@ export interface TableUser {
   status: UserStatus;
   assignedDate: string;
   avatarInitials: string;
+  photoUrl?: string | null;
 }
 
 export interface ExtUser {
@@ -72,6 +73,7 @@ export interface ExtUser {
   status: ExtUserStatus;
   lastActivity: string;
   avatarInitials: string;
+  photoUrl?: string | null;
   joinedDate: string;
 }
 

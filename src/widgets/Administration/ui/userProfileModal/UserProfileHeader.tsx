@@ -44,24 +44,39 @@ export function UserProfileHeader({
           marginBottom: 16,
         }}
       >
-        <div
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: "50%",
-            background: roleCfg.bg,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 18,
-            fontWeight: 800,
-            color: roleCfg.text,
-            flexShrink: 0,
-            border: `1.5px solid ${roleCfg.text}25`,
-          }}
-        >
-          {user.avatarInitials}
-        </div>
+        {user.photoUrl ? (
+          <img
+            src={user.photoUrl}
+            alt={user.fio}
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              objectFit: "cover",
+              flexShrink: 0,
+              border: `1.5px solid ${roleCfg.text}25`,
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              background: roleCfg.bg,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 18,
+              fontWeight: 800,
+              color: roleCfg.text,
+              flexShrink: 0,
+              border: `1.5px solid ${roleCfg.text}25`,
+            }}
+          >
+            {user.avatarInitials}
+          </div>
+        )}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
@@ -121,10 +136,14 @@ export function UserProfileHeader({
               flexWrap: "wrap",
             }}
           >
-            <span style={{ fontSize: 12, color: "#94A3B8" }}>
-              {user.email}
-            </span>
-            <span style={{ color: T.border }}>·</span>
+            {user.email && (
+              <>
+                <span style={{ fontSize: 12, color: "#94A3B8" }}>
+                  {user.email}
+                </span>
+                <span style={{ color: T.border }}>·</span>
+              </>
+            )}
             <span style={{ fontSize: 12, color: "#94A3B8" }}>
               {user.department}
             </span>

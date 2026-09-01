@@ -25,24 +25,39 @@ export function UserDrawerHeader({ user, resolvedRoles, onClose }: IProps) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            background: roleCfg.bg,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 11,
-            fontWeight: 700,
-            color: roleCfg.text,
-            flexShrink: 0,
-            border: `1px solid ${roleCfg.text}25`,
-          }}
-        >
-          {user.avatarInitials}
-        </div>
+        {user.photoUrl ? (
+          <img
+            src={user.photoUrl}
+            alt={user.fio}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              objectFit: "cover",
+              flexShrink: 0,
+              border: `1px solid ${roleCfg.text}25`,
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              background: roleCfg.bg,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 11,
+              fontWeight: 700,
+              color: roleCfg.text,
+              flexShrink: 0,
+              border: `1px solid ${roleCfg.text}25`,
+            }}
+          >
+            {user.avatarInitials}
+          </div>
+        )}
         <div style={{ minWidth: 0 }}>
           <div
             style={{

@@ -42,23 +42,37 @@ export function RoleUsersTable({
           const roleCfg = getRoleColor(user.roles[0]);
           return (
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  background: roleCfg.bg,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: roleCfg.text,
-                  flexShrink: 0,
-                }}
-              >
-                {user.avatarInitials}
-              </div>
+              {user.photoUrl ? (
+                <img
+                  src={user.photoUrl}
+                  alt={user.fio}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    objectFit: "cover",
+                    flexShrink: 0,
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    background: roleCfg.bg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: roleCfg.text,
+                    flexShrink: 0,
+                  }}
+                >
+                  {user.avatarInitials}
+                </div>
+              )}
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: T.textPrimary }}>
                   {user.fio}

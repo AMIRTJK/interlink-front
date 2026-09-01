@@ -40,30 +40,46 @@ export const getUsersColumns = (
       const roleCfg = getRoleColor(primaryRole);
       return (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: "50%",
-              background: roleCfg.bg,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 11,
-              fontWeight: 700,
-              color: roleCfg.text,
-              flexShrink: 0,
-            }}
-          >
-            {user.avatarInitials}
-          </div>
+          {user.photoUrl ? (
+            <img
+              src={user.photoUrl}
+              alt={user.fio}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                objectFit: "cover",
+                flexShrink: 0,
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                background: roleCfg.bg,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 11,
+                fontWeight: 700,
+                color: roleCfg.text,
+                flexShrink: 0,
+              }}
+            >
+              {user.avatarInitials}
+            </div>
+          )}
           <div>
             <div style={{ fontSize: 14, fontWeight: 600, color: T.textPrimary }}>
               {user.fio}
             </div>
-            <div style={{ fontSize: 12, color: T.textSecondary, marginTop: 1 }}>
-              {user.email}
-            </div>
+            {user.email && (
+              <div style={{ fontSize: 12, color: T.textSecondary, marginTop: 1 }}>
+                {user.email}
+              </div>
+            )}
           </div>
         </div>
       );
@@ -73,7 +89,9 @@ export const getUsersColumns = (
     title: "Email",
     dataIndex: "email",
     key: "email",
-    render: (text) => <span style={{ fontSize: 12, color: T.textSecondary }}>{text}</span>,
+    render: (text) => (
+      <span style={{ fontSize: 12, color: T.textSecondary }}>{text || ""}</span>
+    ),
   },
   {
     title: "Отдел",
