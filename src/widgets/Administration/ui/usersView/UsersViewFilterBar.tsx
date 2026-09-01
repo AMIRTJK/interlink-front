@@ -176,7 +176,7 @@ export function UsersViewFilterBar({
                 background: isActive ? cfg?.bg ?? "#EFF6FF" : "transparent",
                 color: isActive ? cfg?.text ?? T.accent : T.textSecondary,
                 fontSize: 12,
-                fontWeight: isActive ? 600 : 500,
+                fontWeight: 500,
                 cursor: "pointer",
                 fontFamily: T.font,
                 whiteSpace: "nowrap",
@@ -184,7 +184,7 @@ export function UsersViewFilterBar({
                 transition: "all 0.15s",
               }}
             >
-              {cfg && isActive && (
+              {cfg && (
                 <span
                   style={{
                     width: 6,
