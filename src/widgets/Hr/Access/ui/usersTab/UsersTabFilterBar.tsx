@@ -57,9 +57,9 @@ export function UsersTabFilterBar({
         value={filters.status}
         onChange={(status) => onFilterChange("status", status)}
         className="w-40 h-[38px] rounded-xl text-sm"
-        placeholder="Статус"
+        placeholder="Все статусы"
         options={[
-          { value: "all", label: "Статус" },
+          { value: "all", label: "Все статусы" },
           { value: "active", label: "Активен" },
           { value: "inactive", label: "Неактивен" },
           { value: "blocked", label: "Заблокирован" },

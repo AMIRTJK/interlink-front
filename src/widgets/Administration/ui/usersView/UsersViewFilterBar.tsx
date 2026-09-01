@@ -137,7 +137,7 @@ export function UsersViewFilterBar({
           onChange={(v) => onStatusFilterChange(v || null)}
           style={{ width: 160, height: 36 }}
           options={[
-            { value: "", label: "Статус" },
+            { value: "", label: "Все статусы" },
             { value: "active", label: "Активен" },
             { value: "inactive", label: "Неактивен" },
             { value: "blocked", label: "Заблокирован" },
