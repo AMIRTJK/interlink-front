@@ -12,7 +12,11 @@ import {
   extractPermNames,
   unwrapList,
 } from "../../lib/adapters";
-import { PER_PAGE } from "./rolesViewModel";
+import {
+  PER_PAGE,
+  ROLES_VIEW_MODE_STORAGE_KEY,
+  type RolesViewMode,
+} from "./rolesViewModel";
 
 export function useRolesViewState() {
   const { toasts, addToast, removeToast } = useToasts();
@@ -22,7 +26,17 @@ export function useRolesViewState() {
   const [drawerOpen, setDrawerOpen] = React.useState(true);
   const [isFirstOpen, setIsFirstOpen] = React.useState(false);
   const [pulsingCardId, setPulsingCardId] = React.useState<string | null>(null);
-  const [viewMode, setViewMode] = React.useState<"block" | "registry">("block");
+  const [viewMode, setViewMode] = React.useState<RolesViewMode>(() => {
+    try {
+      const saved = localStorage.getItem(ROLES_VIEW_MODE_STORAGE_KEY);
+      if (saved === "block" || saved === "registry") {
+        return saved;
+      }
+    } catch {
+      // ignore
+    }
+    return "block";
+  });
   const [viewTransitioning, setViewTransitioning] = React.useState(false);
   const [checkedUsers, setCheckedUsers] = React.useState<Set<string>>(
     new Set(),
@@ -167,9 +181,14 @@ export function useRolesViewState() {
     [displayedUsers],
   );
 
-  const switchView = (mode: "block" | "registry") => {
+  const switchView = (mode: RolesViewMode) => {
     if (mode === viewMode) return;
     setViewTransitioning(true);
+    try {
+      localStorage.setItem(ROLES_VIEW_MODE_STORAGE_KEY, mode);
+    } catch {
+      // ignore
+    }
     setTimeout(() => {
       setViewMode(mode);
       setViewTransitioning(false);

@@ -1,6 +1,8 @@
 import type { PermModule } from "../../model";
 
 export const PER_PAGE = 7;
+export const ROLES_VIEW_MODE_STORAGE_KEY = "interlink/admin_roles_view_mode";
+export type RolesViewMode = "block" | "registry";
 
 export function countTotalPerms(perms: PermModule[]): number {
   let count = 0;
