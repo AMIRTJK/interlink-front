@@ -137,7 +137,7 @@ export function UsersViewFilterBar({
           onChange={(v) => onStatusFilterChange(v || null)}
           style={{ width: 160, height: 36 }}
           options={[
-            { value: "", label: "Статус" },
+            { value: "", label: "Все статусы" },
             { value: "active", label: "Активен" },
             { value: "inactive", label: "Неактивен" },
             { value: "blocked", label: "Заблокирован" },
@@ -176,7 +176,7 @@ export function UsersViewFilterBar({
                 background: isActive ? cfg?.bg ?? "#EFF6FF" : "transparent",
                 color: isActive ? cfg?.text ?? T.accent : T.textSecondary,
                 fontSize: 12,
-                fontWeight: isActive ? 600 : 500,
+                fontWeight: 500,
                 cursor: "pointer",
                 fontFamily: T.font,
                 whiteSpace: "nowrap",
@@ -184,7 +184,7 @@ export function UsersViewFilterBar({
                 transition: "all 0.15s",
               }}
             >
-              {cfg && isActive && (
+              {cfg && (
                 <span
                   style={{
                     width: 6,

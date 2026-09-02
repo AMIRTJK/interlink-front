@@ -1,6 +1,7 @@
 import * as React from "react";
 import { TableColumnsType } from "antd";
 import { MoreHorizontal } from "lucide-react";
+import { Avatar } from "@shared/ui";
 import { T, getRoleColor, EXT_STATUS_CFG } from "../theme/tokens";
 import type { ExtUser } from "../model";
 
@@ -40,30 +41,25 @@ export const getUsersColumns = (
       const roleCfg = getRoleColor(primaryRole);
       return (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: "50%",
-              background: roleCfg.bg,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 11,
-              fontWeight: 700,
-              color: roleCfg.text,
-              flexShrink: 0,
+          <Avatar
+            colleague={{
+              id: user.id,
+              name: user.fio,
+              initials: user.avatarInitials,
+              photo: user.photoUrl,
             }}
-          >
-            {user.avatarInitials}
-          </div>
+            className="w-8 h-8 rounded-full"
+            allowPreview={true}
+          />
           <div>
             <div style={{ fontSize: 14, fontWeight: 600, color: T.textPrimary }}>
               {user.fio}
             </div>
-            <div style={{ fontSize: 12, color: T.textSecondary, marginTop: 1 }}>
-              {user.email}
-            </div>
+            {user.email && (
+              <div style={{ fontSize: 12, color: T.textSecondary, marginTop: 1 }}>
+                {user.email}
+              </div>
+            )}
           </div>
         </div>
       );
@@ -73,7 +69,9 @@ export const getUsersColumns = (
     title: "Email",
     dataIndex: "email",
     key: "email",
-    render: (text) => <span style={{ fontSize: 12, color: T.textSecondary }}>{text}</span>,
+    render: (text) => (
+      <span style={{ fontSize: 12, color: T.textSecondary }}>{text || ""}</span>
+    ),
   },
   {
     title: "Отдел",

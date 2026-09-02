@@ -2,6 +2,7 @@ import * as React from "react";
 import { Search, MoreHorizontal } from "lucide-react";
 import { Table } from "antd";
 import type { ColumnsType, TableRowSelection } from "antd/es/table/interface";
+import { Avatar } from "@shared/ui";
 import { T, getRoleColor, STATUS_CFG } from "../../theme/tokens";
 import type { TableUser } from "../../model";
 import { PER_PAGE } from "./rolesViewModel";
@@ -39,26 +40,18 @@ export function RoleUsersTable({
         onHeaderCell: () => ({ style: { paddingLeft: 20 } }),
         onCell: () => ({ style: { paddingLeft: 20 } }),
         render: (_, user) => {
-          const roleCfg = getRoleColor(user.roles[0]);
           return (
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  background: roleCfg.bg,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: roleCfg.text,
-                  flexShrink: 0,
+              <Avatar
+                colleague={{
+                  id: user.id,
+                  name: user.fio,
+                  initials: user.avatarInitials,
+                  photo: user.photoUrl,
                 }}
-              >
-                {user.avatarInitials}
-              </div>
+                className="w-8 h-8 rounded-lg"
+                allowPreview={true}
+              />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: T.textPrimary }}>
                   {user.fio}

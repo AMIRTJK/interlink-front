@@ -1,10 +1,11 @@
 import * as React from "react";
 import { Plus, LayoutGrid, List, ShieldPlus } from "lucide-react";
 import { T } from "../../theme/tokens";
+import type { RolesViewMode } from "./rolesViewModel";
 
 interface IProps {
-  viewMode: "block" | "registry";
-  onSwitchView: (mode: "block" | "registry") => void;
+  viewMode: RolesViewMode;
+  onSwitchView: (mode: RolesViewMode) => void;
   onCreateUiPerm: () => void;
   onCreateRole: () => void;
 }

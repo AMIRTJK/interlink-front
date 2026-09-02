@@ -60,14 +60,12 @@ export function AdministrationHomeWidget() {
       style={{
         fontFamily: T.font,
         flex: 1,
-        height: "calc(100vh - 135px)",
-        maxHeight: "calc(100vh - 135px)",
+        width: "100%",
         minHeight: 0,
-        padding: "24px",
-        overflowY: "auto",
+        padding: "8px 0 24px",
       }}
     >
-      <div style={{ maxWidth: 1040, margin: "0 auto" }}>
+      <div style={{ maxWidth: 1040, width: "100%", margin: "0 auto" }}>
         {/* Hero */}
         <div
           style={{

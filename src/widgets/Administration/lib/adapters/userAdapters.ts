@@ -16,18 +16,28 @@ function department(u: IAdminUser): string {
   return u.department?.name || u.departments?.[0]?.name || "—";
 }
 
+function userEmail(u: IAdminUser): string {
+  return (
+    u.corporate_email?.trim() ||
+    u.personal_email?.trim() ||
+    u.email?.trim() ||
+    ""
+  );
+}
+
 export function adaptExtUser(u: IAdminUser): ExtUser {
   const fio = fullName(u);
   return {
     id: String(u.id),
     fio,
-    email: u.email || "—",
+    email: userEmail(u),
     position: u.position || "—",
     department: department(u),
     roles: extractPermNames(u.roles),
-    status: mapStatus(u.status),
+    status: mapStatus(u.status || u.hr_status),
     lastActivity: mockLastActivity(u.id), // MOCK: нет API last_activity
     avatarInitials: getInitials(fio) || "—",
+    photoUrl: u.photo_url || null,
     joinedDate: formatJoinedDate(u.created_at),
   };
 }
@@ -40,9 +50,10 @@ export function adaptTableUser(u: IAdminUser): TableUser {
     position: u.position || "—",
     department: department(u),
     roles: extractPermNames(u.roles),
-    status: mapStatus(u.status),
+    status: mapStatus(u.status || u.hr_status),
     // MOCK: нет даты назначения роли — используем дату создания пользователя
     assignedDate: formatJoinedDate(u.created_at),
     avatarInitials: getInitials(fio) || "—",
+    photoUrl: u.photo_url || null,
   };
 }

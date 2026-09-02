@@ -1,6 +1,7 @@
 import * as React from "react";
 import { X } from "lucide-react";
-import { T, getRoleColor } from "../../theme/tokens";
+import { Avatar } from "@shared/ui";
+import { T } from "../../theme/tokens";
 import type { ExtUser } from "../../model";
 
 interface IProps {
@@ -10,9 +11,6 @@ interface IProps {
 }
 
 export function UserDrawerHeader({ user, resolvedRoles, onClose }: IProps) {
-  const primaryRole = resolvedRoles[0] ?? "";
-  const roleCfg = getRoleColor(primaryRole);
-
   return (
     <div
       style={{
@@ -25,24 +23,16 @@ export function UserDrawerHeader({ user, resolvedRoles, onClose }: IProps) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            background: roleCfg.bg,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 11,
-            fontWeight: 700,
-            color: roleCfg.text,
-            flexShrink: 0,
-            border: `1px solid ${roleCfg.text}25`,
+        <Avatar
+          colleague={{
+            id: user.id,
+            name: user.fio,
+            initials: user.avatarInitials,
+            photo: user.photoUrl,
           }}
-        >
-          {user.avatarInitials}
-        </div>
+          className="w-8 h-8 rounded-full"
+          allowPreview={true}
+        />
         <div style={{ minWidth: 0 }}>
           <div
             style={{
