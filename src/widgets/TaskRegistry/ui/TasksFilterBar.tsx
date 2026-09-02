@@ -220,16 +220,16 @@ export const TasksFilterBar = React.memo(({
                 key={tab.value || "all"}
                 onClick={() => onFilterChange({ status: tab.value })}
                 className={cn(
-                  "flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer",
+                  "flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border",
                   active
-                    ? "bg-purple-600 text-white shadow-md shadow-purple-200 dark:shadow-none"
-                    : "bg-white/80 dark:bg-slate-800/80 text-slate-500 border border-slate-200/60 dark:border-white/10 hover:border-purple-300",
+                    ? "bg-purple-600 border-purple-600 text-white shadow-md shadow-purple-200 dark:shadow-none"
+                    : "bg-white/80 dark:bg-slate-800/80 text-slate-500 border-slate-200/60 dark:border-white/10 hover:border-purple-300",
                 )}
               >
                 <span>{tab.label}</span>
                 <span
                   className={cn(
-                    "text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shrink-0",
+                    "text-[10px] font-extrabold min-w-4 h-4 px-1 rounded-full flex items-center justify-center shrink-0",
                     active ? "bg-purple-500 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300",
                   )}
                 >
