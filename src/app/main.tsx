@@ -1,11 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { ConfigProvider } from "antd";
-import ruRU from "antd/locale/ru_RU";
 import { queryClient } from "@shared/lib";
 import { applyGlassClass, readGlassEnabled } from "@shared/config";
 import { App } from "./App";
+import { AntdThemeProvider } from "./providers";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
 import "@fontsource/inter/300.css";
@@ -26,9 +25,9 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <ConfigProvider locale={ruRU}>
+        <AntdThemeProvider>
           <App />
-        </ConfigProvider>
+        </AntdThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   </StrictMode>

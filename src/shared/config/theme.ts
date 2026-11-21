@@ -265,6 +265,15 @@ export const buildThemeTokens = (
   };
 };
 
+/**
+ * Основной акцент темы в формате `rgb(r, g, b)` — для библиотек, которые не
+ * читают CSS-переменные (antd считает производные оттенки в JS).
+ */
+export const getThemeAccentColor = (themeKey: string, isDark: boolean): string => {
+  const [r, g, b] = buildThemeTokens(themeKey, isDark)["--th-accent-rgb"].split(" ");
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
 /** Записывает токены активной темы в корень документа. */
 export const applyThemeTokens = (themeKey: string, isDark: boolean) => {
   if (typeof document === "undefined") return;
