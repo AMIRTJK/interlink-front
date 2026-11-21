@@ -1,16 +1,13 @@
 import * as React from "react";
 import { Search, Plus, Calendar, LayoutGrid, List as ListIcon, X } from "lucide-react";
-import { Select, DatePicker, ConfigProvider } from "antd";
+import { Select, DatePicker, ConfigProvider, theme } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
-import { cn, useDebouncedCallback } from "@shared/lib";
+import { cn, useDebouncedCallback, useIsDarkMode } from "@shared/lib";
 import { If, Tooltip } from "@shared/ui";
 import type { Colleague, Priority, TaskStatsFull, TaskStatus } from "../model/types";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "../model/constants";
-import {
-  type TaskDisplayMode,
-  type TaskFilters,
-} from "../model/filters";
+import type { TaskDisplayMode, TaskFilters } from "../model/filters";
 
 dayjs.locale("ru");
 
@@ -34,15 +31,18 @@ const STATUS_TABS: { value: TaskStatus | ""; label: string; statKey: keyof TaskS
   { value: "overdue", label: "Просрочена", statKey: "overdue" },
 ];
 
-const customAntdTheme = {
+const getAntdTheme = (isDark: boolean) => ({
+  algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
   token: {
     borderRadius: 16,
     controlHeight: 36,
     fontSize: 12,
     colorPrimary: "#6366f1",
-    colorBgContainer: "rgba(255, 255, 255, 0.8)",
+    colorTextPlaceholder: isDark ? "rgba(255, 255, 255, 0.45)" : "#94a3b8",
+    colorText: isDark ? "#f1f5f9" : "#334155",
+    colorBgContainer: isDark ? "rgba(30, 41, 59, 0.8)" : "rgba(255, 255, 255, 0.8)",
   },
-};
+});
 
 export const TasksFilterBar = React.memo(({
   filters,
@@ -53,6 +53,8 @@ export const TasksFilterBar = React.memo(({
   onDisplayModeChange,
   onCreate,
 }: IProps) => {
+  const isDark = useIsDarkMode();
+  const antdTheme = React.useMemo(() => getAntdTheme(isDark), [isDark]);
   const [searchLocal, setSearchLocal] = React.useState(filters.search);
 
   React.useEffect(() => {
@@ -71,7 +73,7 @@ export const TasksFilterBar = React.memo(({
 
   return (
     <div className="flex flex-col gap-4">
-      <ConfigProvider theme={customAntdTheme}>
+      <ConfigProvider theme={antdTheme}>
         {/* Row 1: Filter Dropdowns Bar */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Priority filter pill */}
@@ -85,7 +87,7 @@ export const TasksFilterBar = React.memo(({
                 onChange={(val) => onFilterChange({ priority: (val || "") as Priority })}
                 allowClear
                 options={PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-                className="w-[130px] font-bold text-slate-700 dark:text-slate-100"
+                className="w-[130px] font-bold text-slate-700 dark:text-slate-100 [&_.ant-select-selection-placeholder]:text-slate-400! dark:[&_.ant-select-selection-placeholder]:text-slate-400!"
               />
             </div>
           </Tooltip>
@@ -103,7 +105,7 @@ export const TasksFilterBar = React.memo(({
                 showSearch
                 filterOption={(input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())}
                 options={colleagues.map((c) => ({ value: String(c.id), label: c.name }))}
-                className="w-[155px] font-bold text-slate-700 dark:text-slate-100"
+                className="w-[155px] font-bold text-slate-700 dark:text-slate-100 [&_.ant-select-selection-placeholder]:text-slate-400! dark:[&_.ant-select-selection-placeholder]:text-slate-400!"
               />
             </div>
           </Tooltip>
@@ -119,7 +121,7 @@ export const TasksFilterBar = React.memo(({
                 onChange={(val) => onFilterChange({ status: (val || "") as TaskStatus })}
                 allowClear
                 options={STATUS_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-                className="w-[125px] font-bold text-slate-700 dark:text-slate-100"
+                className="w-[125px] font-bold text-slate-700 dark:text-slate-100 [&_.ant-select-selection-placeholder]:text-slate-400! dark:[&_.ant-select-selection-placeholder]:text-slate-400!"
               />
             </div>
           </Tooltip>
@@ -135,7 +137,7 @@ export const TasksFilterBar = React.memo(({
               format="DD.MM.YYYY"
               placeholder="ДД.ММ.ГГГГ"
               allowClear
-              className="w-[115px] font-bold text-slate-700 dark:text-slate-100"
+              className="w-[115px] font-bold text-slate-700 dark:text-slate-100 [&_input::placeholder]:text-slate-400! dark:[&_input::placeholder]:text-slate-400!"
             />
           </div>
         </div>
