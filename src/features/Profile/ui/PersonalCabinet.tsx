@@ -61,7 +61,7 @@ interface ITab {
 
 const TABS: ITab[] = [
   { key: "profile", label: "Профиль", icon: <User size={16} /> },
-  { key: "tasks", label: "Задачи", icon: <ClipboardList size={16} /> },
+  { key: "tasks", label: "Мои задачи", icon: <ClipboardList size={16} /> },
   { key: "calendar", label: "Календарь", icon: <CalendarIcon size={16} /> },
   { key: "analytics", label: "Аналитика", icon: <BarChart2 size={16} /> },
   { key: "files", label: "Файлы", icon: <FolderOpen size={16} /> },
