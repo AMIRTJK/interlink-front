@@ -1,4 +1,3 @@
-import React from "react";
 import { Plus, Edit2, Trash2, Share2 } from "lucide-react";
 import { If } from "@shared/ui";
 
