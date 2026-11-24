@@ -254,3 +254,15 @@ html.dark *,
 .dark * {
   scrollbar-color: rgb(var(--th-accent-rgb) / 0.35) transparent;
 }
+
+/* ==========================================================================
+   Recharts focus outline reset
+   Убирает черный контур фокуса браузера при клике на графики Recharts
+   ========================================================================== */
+.recharts-wrapper,
+.recharts-wrapper:focus,
+.recharts-wrapper *:focus,
+.recharts-surface:focus {
+  outline: none !important;
+}
+

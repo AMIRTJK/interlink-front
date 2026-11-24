@@ -24,13 +24,27 @@ const WEEKDAYS = [
   { label: "ВС", isWeekend: true },
 ];
 
-const getMonthCardStyle = (weather: WeatherType | null, isPreviousOrNextMonth: boolean) => {
+const getMonthCardStyle = (
+  weather: WeatherType | null,
+  isPreviousOrNextMonth: boolean,
+  isPast: boolean = false,
+) => {
   if (isPreviousOrNextMonth) {
     return {
       className: "bg-[#fcfdfe] dark:bg-slate-900/40 opacity-40 shadow-[0_8px_20px_rgba(0,0,0,0.02)]",
       style: {
         background: "linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)",
         boxShadow: "0 10px 24px -4px rgba(226, 232, 240, 0.6)",
+      },
+    };
+  }
+
+  if (isPast) {
+    return {
+      className: "text-[#1e293b] dark:text-slate-200",
+      style: {
+        background: "linear-gradient(180deg, #F0F9FF 0%, #E0F2FE 100%)",
+        boxShadow: "0 10px 24px -4px rgba(186, 230, 253, 0.6), 0 4px 10px -2px rgba(14, 165, 233, 0.08)",
       },
     };
   }
@@ -133,8 +147,13 @@ export const MonthView = memo(({
           const dayTasks = tasksMap[dateStr] || [];
           const inMonth = day.month() === currentDate.month();
           const isToday = day.isSame(dayjs(), "day");
+          const isPast = day.isBefore(dayjs(), "day");
           const dayWeather = getWeatherForDate(day);
-          const cardConfig = getMonthCardStyle(dayWeather?.weatherType ?? null, !inMonth);
+          const cardConfig = getMonthCardStyle(
+            dayWeather?.weatherType ?? null,
+            !inMonth,
+            isPast && inMonth,
+          );
 
           return (
             <div
@@ -176,7 +195,8 @@ export const MonthView = memo(({
                         e.stopPropagation();
                         onEventClick(task);
                       }}
-                      className="w-fit! max-w-full! py-1! px-2.5! rounded-full! bg-white/90! dark:bg-slate-800/90! shadow-[0_2px_8px_rgba(0,0,0,0.04)]! text-[10px]! font-black! flex! items-center! gap-1.5! truncate! transition-all!"
+                      title={`${task.time ? task.time + " " : ""}${task.title}`}
+                      className="w-full! py-1! px-2! rounded-full! bg-white/90! dark:bg-slate-800/90! shadow-[0_2px_8px_rgba(0,0,0,0.04)]! text-[10px]! font-bold! flex! items-center! gap-1.5! truncate! transition-all!"
                     >
                       <span className={`w-1.5! h-1.5! rounded-full! ${style.dot} flex-shrink-0!`} />
                       <span className={`${style.text} truncate!`}>
