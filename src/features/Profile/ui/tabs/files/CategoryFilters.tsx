@@ -53,33 +53,68 @@ export const CategoryFilters = ({
               </span>
             </If>
             <If is={!!(isActive && cat.id !== "all" && onRenameCategory && onDeleteCategory)}>
-              <div className="flex items-center gap-1.5 ml-1.5 pl-1.5 border-l border-white/20">
-                <Edit2
-                  size={11}
-                  className="hover:text-amber-250 transition-colors"
+              <div className="flex items-center gap-1 ml-1.5 pl-1.5 border-l border-white/20">
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Редактировать"
                   onClick={(e) => {
                     e.stopPropagation();
                     onRenameCategory?.(cat);
                   }}
-                />
-                {onShareCategory && (
-                  <Share2
-                    size={11}
-                    className="hover:text-indigo-200 transition-colors"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      onRenameCategory?.(cat);
+                    }
+                  }}
+                  className="p-1 rounded-md text-white/75 hover:text-amber-200 hover:bg-white/20 active:scale-95 transition-all cursor-pointer flex items-center justify-center"
+                >
+                  <Edit2 size={12} />
+                </span>
+
+                <If is={Boolean(onShareCategory)}>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Поделиться"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onShareCategory(cat);
+                      onShareCategory?.(cat);
                     }}
-                  />
-                )}
-                <Trash2
-                  size={11}
-                  className="hover:text-red-300 transition-colors"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        onShareCategory?.(cat);
+                      }
+                    }}
+                    className="p-1 rounded-md text-white/75 hover:text-sky-200 hover:bg-white/20 active:scale-95 transition-all cursor-pointer flex items-center justify-center"
+                  >
+                    <Share2 size={12} />
+                  </span>
+                </If>
+
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Удалить"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteCategory?.(Number(cat.id));
                   }}
-                />
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      onDeleteCategory?.(Number(cat.id));
+                    }
+                  }}
+                  className="p-1 rounded-md text-white/75 hover:text-red-200 hover:bg-red-500/30 active:scale-95 transition-all cursor-pointer flex items-center justify-center"
+                >
+                  <Trash2 size={12} />
+                </span>
               </div>
             </If>
           </button>
