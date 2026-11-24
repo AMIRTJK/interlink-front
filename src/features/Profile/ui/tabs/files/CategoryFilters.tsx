@@ -5,7 +5,6 @@ export interface ICategoryItem {
   id: number | "all";
   name: string;
   icon: string;
-  /** File count shown as a badge next to the chip. */
   count?: number;
 }
 
