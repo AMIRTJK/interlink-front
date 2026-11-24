@@ -45,6 +45,7 @@ const mapEventToTask = (event: EventResponse): Task => {
 
 const cacheOptions = {
   staleTime: 5 * 60 * 1000,
+  keepPreviousData: true,
   refetchOnWindowFocus: false,
 };
 

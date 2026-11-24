@@ -9,7 +9,7 @@ export interface IDayWeatherInfo {
 }
 
 export interface IWeatherState {
-	current: IDayWeatherInfo;
+	current: IDayWeatherInfo | null;
 	dailyMap: Record<string, IDayWeatherInfo>;
 	isLoading: boolean;
 }
@@ -38,7 +38,33 @@ export const mapWeatherCode = (
 	return { description: "Облачно", weatherType: "cloud" };
 };
 
-let cachedWeather: IWeatherState | null = null;
+const DUSHANBE_LAT = 38.56;
+const DUSHANBE_LON = 68.78;
+const WEATHER_CACHE_KEY = "calendar_weather_cache_v3";
+const WEATHER_CACHE_TTL_MS = 60 * 60 * 1000; // 1 час
+
+const loadWeatherStorage = (): IWeatherState | null => {
+	try {
+		const raw = localStorage.getItem(WEATHER_CACHE_KEY);
+		if (!raw) return null;
+		const parsed = JSON.parse(raw);
+		if (Date.now() - parsed.savedAt < WEATHER_CACHE_TTL_MS && parsed.state) {
+			return parsed.state;
+		}
+	} catch {}
+	return null;
+};
+
+const saveWeatherStorage = (state: IWeatherState) => {
+	try {
+		localStorage.setItem(
+			WEATHER_CACHE_KEY,
+			JSON.stringify({ savedAt: Date.now(), state }),
+		);
+	} catch {}
+};
+
+let cachedWeather: IWeatherState | null = loadWeatherStorage();
 let activeWeatherPromise: Promise<IWeatherState> | null = null;
 const listeners = new Set<(state: IWeatherState) => void>();
 
@@ -51,7 +77,7 @@ const executeWeatherFetch = async (
 	lon: number,
 ): Promise<IWeatherState> => {
 	try {
-		const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&past_days=92&forecast_days=16`;
+		const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&past_days=14&forecast_days=16`;
 		const res = await fetch(url);
 		if (!res.ok) throw new Error("Weather request failed");
 		const json = await res.json();
@@ -75,11 +101,7 @@ const executeWeatherFetch = async (
 			});
 		}
 
-		let currentInfo: IDayWeatherInfo = {
-			temp: "+24°C",
-			description: "Ясно",
-			weatherType: "sun",
-		};
+		let currentInfo: IDayWeatherInfo | null = null;
 
 		if (json?.current) {
 			const rawTemp = Math.round(json.current.temperature_2m);
@@ -101,15 +123,12 @@ const executeWeatherFetch = async (
 		};
 
 		cachedWeather = finalState;
+		saveWeatherStorage(finalState);
 		notifyListeners(finalState);
 		return finalState;
 	} catch {
 		const fallbackState: IWeatherState = {
-			current: {
-				temp: "+24°C",
-				description: "Ясно",
-				weatherType: "sun",
-			},
+			current: null,
 			dailyMap: {},
 			isLoading: false,
 		};
@@ -130,20 +149,19 @@ const getOrFetchWeather = (): Promise<IWeatherState> => {
 	}
 
 	activeWeatherPromise = new Promise<IWeatherState>((resolve) => {
-		if ("geolocation" in navigator) {
+		if (typeof navigator !== "undefined" && "geolocation" in navigator) {
 			navigator.geolocation.getCurrentPosition(
 				(pos) => {
-					executeWeatherFetch(pos.coords.latitude, pos.coords.longitude).then(
-						resolve,
-					);
+					executeWeatherFetch(pos.coords.latitude, pos.coords.longitude).then(resolve);
 				},
 				() => {
-					executeWeatherFetch(38.56, 68.78).then(resolve); // Dushanbe
+					// Fallback только если геопозиция отклонена пользователем
+					executeWeatherFetch(DUSHANBE_LAT, DUSHANBE_LON).then(resolve);
 				},
-				{ timeout: 4000 },
+				{ timeout: 5000, maximumAge: 600000 },
 			);
 		} else {
-			executeWeatherFetch(38.56, 68.78).then(resolve);
+			executeWeatherFetch(DUSHANBE_LAT, DUSHANBE_LON).then(resolve);
 		}
 	});
 
@@ -154,11 +172,7 @@ export const useWeather = () => {
 	const [weatherState, setWeatherState] = useState<IWeatherState>(() => {
 		return (
 			cachedWeather || {
-				current: {
-					temp: "+24°C",
-					description: "Ясно",
-					weatherType: "sun",
-				},
+				current: null,
 				dailyMap: {},
 				isLoading: true,
 			}
