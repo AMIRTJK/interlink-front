@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Upload, LayoutGrid, List, FolderPlus } from "lucide-react";
+import { Upload, LayoutGrid, List, FolderPlus, Loader2 } from "lucide-react";
 import { If } from "@shared/ui";
 import { THEMES } from "@widgets/layout/ui/designSettings";
 import { useDesignSettings } from "@widgets/layout/ui/useDesignSettings";
@@ -22,7 +22,8 @@ interface IProps {
 	onSortDirToggle: () => void;
 	viewMode: TFilesViewMode;
 	onViewModeChange: (val: TFilesViewMode) => void;
-	onUpload: (file: File) => void;
+	onUpload: (files: File[]) => void;
+	isUploading: boolean;
 	personalCount: number;
 	sharedCount: number;
 	onCreateFolderClick: () => void;
@@ -40,6 +41,7 @@ export const FilesHeader = ({
 	viewMode,
 	onViewModeChange,
 	onUpload,
+	isUploading,
 	personalCount,
 	sharedCount,
 	onCreateFolderClick,
@@ -64,12 +66,12 @@ export const FilesHeader = ({
 			<div className="flex flex-wrap items-center gap-3">
 				<input
 					type="file"
+					multiple
 					ref={fileInputRef}
 					onChange={(e) => {
-						if (e.target.files?.[0]) {
-							onUpload(e.target.files[0]);
-							e.target.value = "";
-						}
+						const files = Array.from(e.target.files ?? []);
+						e.target.value = "";
+						if (files.length > 0) onUpload(files);
 					}}
 					className="hidden!"
 				/>
@@ -127,10 +129,21 @@ export const FilesHeader = ({
 
 				<If is={viewContext === "personal"}>
 					<button
+						type="button"
 						onClick={() => fileInputRef.current?.click()}
-						className={`bg-gradient-to-r ${theme.gradient} flex items-center gap-2 px-5 py-2 text-white font-semibold rounded-full text-sm shadow-md cursor-pointer hover:shadow-lg hover:brightness-105 transition-all`}
+						disabled={isUploading}
+						aria-busy={isUploading}
+						className={`bg-gradient-to-r ${theme.gradient} flex items-center gap-2 px-5 py-2 text-white font-semibold rounded-full text-sm shadow-md transition-all ${
+							isUploading
+								? "opacity-70 cursor-not-allowed"
+								: "cursor-pointer hover:shadow-lg hover:brightness-105"
+						}`}
 					>
-						<Upload size={16} />
+						{isUploading ? (
+							<Loader2 size={16} className="animate-spin" />
+						) : (
+							<Upload size={16} />
+						)}
 						<span>Загрузить</span>
 					</button>
 				</If>

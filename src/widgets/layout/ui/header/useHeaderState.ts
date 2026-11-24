@@ -1,12 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { tokenControl, useLogout } from "@shared/lib";
 import { useNotificationCounters } from "@features/notifications";
+import { useSessionLock } from "@features/Profile/ui/DesktopMode";
 import { useProfileUser } from "../useProfileUser";
 
 export const useHeaderState = () => {
   const handleLogout = useLogout();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [isDesktopActive, setIsDesktopActive] = useState(false);
+  const { lock } = useSessionLock();
+  // Экран блокировки монтирует SessionLockGate в MainLayout; здесь только
+  // включение. Имя сохранено под контракт пропа HeaderActionButtons.
+  const setIsDesktopActive = useCallback(
+    (isActive: boolean) => {
+      if (isActive) lock();
+    },
+    [lock],
+  );
   const [notifOpen, setNotifOpen] = useState(false);
   const { counters } = useNotificationCounters();
   const unreadCount = counters.unread;
@@ -41,7 +50,6 @@ export const useHeaderState = () => {
     handleLogout,
     showLogoutConfirm,
     setShowLogoutConfirm,
-    isDesktopActive,
     setIsDesktopActive,
     notifOpen,
     setNotifOpen,

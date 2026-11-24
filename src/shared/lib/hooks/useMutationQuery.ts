@@ -43,6 +43,12 @@ interface IUseMutationQueryOptions<TRequest = TBaseRequest, TData = any, TSecond
     onErrorCb?: () => void;
   };
   transformBody?: (data: TRequest) => any;
+  /**
+   * Доп. настройки axios для основного запроса, вычисляемые по данным вызова.
+   * Нужны, когда настройка своя у каждого mutate (например, onUploadProgress
+   * отдельного файла), поэтому это функция, а не статичный объект.
+   */
+  requestConfig?: (data: TRequest) => Pick<AxiosRequestConfig, "onUploadProgress" | "signal">;
   queryParams?: Record<string, unknown>;
   queryOptions?: UseMutationOptions<any, AxiosError, TRequest, unknown>;
   secondQuery?: ISecondMutationQuery<TData, TSecondData>;
@@ -68,7 +74,8 @@ export const useMutationQuery = <
     preload,
     preloadConditional,
     queryParams,
-    transformBody
+    transformBody,
+    requestConfig
   } = options;
   
   const queryClient = useQueryClient();
@@ -112,6 +119,7 @@ export const useMutationQuery = <
       const firstUrl = typeof url === "function" ? url(requestData) : url;
       
       const firstResponse = await _axios<IApiResponse<TData>>({
+        ...requestConfig?.(requestData),
         url: firstUrl,
         method,
         data: transformBody ? transformBody(requestData) : requestData,
@@ -156,7 +164,7 @@ export const useMutationQuery = <
 
       return firstData;
     },
-    [url, method, skipAuth, messages, secondQuery, preload, isAllowedResult, queryParams, transformBody]
+    [url, method, skipAuth, messages, secondQuery, preload, isAllowedResult, queryParams, transformBody, requestConfig]
   );
 
   const mutation = useMutation({

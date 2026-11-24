@@ -26,7 +26,7 @@ export const SharedWithMeCard = ({ data, pagination, onPageChange }: IProps) => 
 			initial={{ opacity: 0, y: 16 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.3, delay: 0.12 }}
-			className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm border border-white/40 dark:border-slate-700/50 shadow-md p-5 flex flex-col justify-between min-h-[340px]"
+			className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-slate-700/50 p-5 flex flex-col justify-between min-h-[340px]"
 		>
 			<div>
 				<div className="flex items-center justify-between mb-1">

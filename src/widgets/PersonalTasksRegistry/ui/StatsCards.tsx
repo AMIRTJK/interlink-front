@@ -59,7 +59,7 @@ export const StatsCards = memo(({ stats }: IProps) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.15 }}
-            className="rounded-2xl! p-3.5! bg-white/60! dark:bg-zinc-900/60! backdrop-blur-xl! border! border-white/30! dark:border-zinc-700/30! shadow-none! flex! items-center! gap-3!"
+            className="rounded-2xl! p-3.5! bg-white/60! dark:bg-zinc-900/60! backdrop-blur-xl! ui-glass ui-glass--forced border! border-zinc-200! dark:border-zinc-700/30! shadow-none! flex! items-center! gap-3!"
           >
             <div className={`p-2.5! rounded-xl! ${card.color}`}>
               <Icon size={18} />

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import type { Message } from "../model";
+import type { Contact, Message } from "../model";
 import { toChatId } from "./useChatComposer";
 import type { useChatData } from "./useChatData";
 import type { useChatUiState } from "./useChatUiState";
@@ -94,6 +94,17 @@ export const useChatMessageHandlers = (
     });
   }, [activeConversationId, activeContact, updateSettings]);
 
+  // Звёздочка в строке списка: беседа не обязательно открыта, поэтому id берём
+  // из самой строки (id контакта — это id беседы), а не из activeConversationId.
+  const handleToggleContactStar = useCallback(
+    (contact: Contact) => {
+      const conversationId = toChatId(contact.id);
+      if (!conversationId) return;
+      updateSettings({ conversationId, is_starred: !contact.isStarred });
+    },
+    [updateSettings],
+  );
+
   const handleToggleMute = useCallback(() => {
     if (!activeConversationId) return;
     updateSettings({
@@ -115,6 +126,7 @@ export const useChatMessageHandlers = (
     handleForwardSend,
     handleDeleteConversation,
     handleToggleStar,
+    handleToggleContactStar,
     handleToggleMute,
   };
 };

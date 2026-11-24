@@ -49,6 +49,7 @@ export const ReliefShell = ({
     handleContactSwitch,
     handleSendThread,
     handleToggleStar,
+    handleToggleContactStar,
     handleToggleMute,
     addMembers,
     removeMember,
@@ -113,6 +114,7 @@ export const ReliefShell = ({
             lang={lang}
             t={t}
             onContactSwitch={handleContactSwitch}
+            onToggleFavorite={handleToggleContactStar}
           />
         </>
       )}

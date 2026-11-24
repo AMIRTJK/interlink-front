@@ -30,7 +30,6 @@ export const useFilesTabActions = ({
 		deleteFolder,
 		updateFile,
 		deleteFile,
-		uploadFile,
 		reorderFiles,
 		bulkDeleteFiles,
 	} = data;
@@ -43,18 +42,6 @@ export const useFilesTabActions = ({
 	const [addCategoryOpen, setAddCategoryOpen] = useState(false);
 	const [shareItem, setShareItem] = useState<TFilesShareItem | null>(null);
 	const [isBulkShareOpen, setIsBulkShareOpen] = useState(false);
-
-	const handleUpload = useCallback(
-		(file: File) => {
-			const formData = new FormData();
-			formData.append("files[]", file);
-			if (typeof activeFolderId === "number") {
-				formData.append("folder_id", String(activeFolderId));
-			}
-			uploadFile.mutate(formData);
-		},
-		[activeFolderId, uploadFile],
-	);
 
 	const handleCreateFolderSubmit = useCallback(
 		(name: string, emoji: string | null) => {
@@ -182,7 +169,6 @@ export const useFilesTabActions = ({
 		setShareItem,
 		isBulkShareOpen,
 		setIsBulkShareOpen,
-		handleUpload,
 		handleCreateFolderSubmit,
 		handleAddCategorySubmit,
 		handleOpenRenameFolder,

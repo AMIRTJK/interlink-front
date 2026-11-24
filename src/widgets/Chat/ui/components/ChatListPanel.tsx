@@ -5,6 +5,7 @@ import { If } from "@shared/ui";
 import { Contact, LayoutPosition, CHAT_LIST_PANEL_WIDTH } from "../../model";
 import { buildInitialsAvatar } from "../../lib/chatFormat";
 import { OnlineIndicator } from "./OnlineIndicator";
+import { FavoriteToggleButton } from "./FavoriteToggleButton";
 import "../../style.css";
 
 interface ChatListPanelProps {
@@ -22,6 +23,9 @@ interface ChatListPanelProps {
   isDark: boolean;
   /** Ширина в вертикальных макетах, px. По умолчанию — CHAT_LIST_PANEL_WIDTH. */
   width?: number;
+  addFavoriteLabel: string;
+  removeFavoriteLabel: string;
+  onToggleFavorite: (contact: Contact) => void;
 }
 
 export const ChatListPanel: React.FC<ChatListPanelProps> = ({
@@ -38,6 +42,9 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
   onSearchChange,
   isDark,
   width = CHAT_LIST_PANEL_WIDTH,
+  addFavoriteLabel,
+  removeFavoriteLabel,
+  onToggleFavorite,
 }) => {
   const isHorizontal = layout === "top" || layout === "bottom";
 
@@ -200,10 +207,10 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
           const isActive = contact.id === activeContactId;
           const unread = contact.unreadCount || 0;
           return (
+            <div key={contact.id} className="relative group/row">
             <button
-              key={contact.id}
               onClick={() => onContactSwitch(contact.id)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 transition-all duration-200 ease-in-out group"
+              className="w-full flex items-center gap-3 pl-3 pr-10 py-2.5 transition-all duration-200 ease-in-out group"
               style={
                 isActive
                   ? {
@@ -274,6 +281,14 @@ export const ChatListPanel: React.FC<ChatListPanelProps> = ({
                 </p>
               </div>
             </button>
+            <FavoriteToggleButton
+              isStarred={Boolean(contact.isStarred)}
+              addLabel={addFavoriteLabel}
+              removeLabel={removeFavoriteLabel}
+              onToggle={() => onToggleFavorite(contact)}
+              className="absolute right-2 top-1/2 -translate-y-1/2"
+            />
+            </div>
           );
         })}
       </div>

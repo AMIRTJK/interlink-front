@@ -117,7 +117,7 @@ export const FilesVolumeChart = ({ uploadActivity = [] }: IProps) => {
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			transition={{ duration: 0.3 }}
-			className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm border border-white/40 dark:border-slate-700/50 shadow-md p-5 min-h-[320px] flex flex-col justify-between"
+			className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-slate-700/50 p-5 min-h-[320px] flex flex-col justify-between"
 		>
 			{chartData.length === 0 ? (
 				<div className="flex flex-col items-center justify-center h-full min-h-[260px]">

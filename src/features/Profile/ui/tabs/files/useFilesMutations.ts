@@ -80,15 +80,6 @@ export const useFilesMutations = (
     },
   });
 
-  const uploadFile = useMutationQuery<FormData, IApiFile>({
-    url: ApiRoutes.MY_FILES_UPLOAD,
-    method: "POST",
-    messages: {
-      success: "Файл успешно загружен",
-      invalidate: [ApiRoutes.MY_FILES, ApiRoutes.MY_FILES_META],
-    },
-  });
-
   const reorderFilesMutation = useMutationQuery<
     { folder_id: number | null; file_ids: number[] },
     { success: boolean; message: string; data: any }
@@ -217,7 +208,6 @@ export const useFilesMutations = (
     deleteFolder,
     updateFile,
     deleteFile,
-    uploadFile,
     reorderFiles,
     inviteToFile,
     inviteToFolder,

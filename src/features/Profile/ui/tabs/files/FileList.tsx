@@ -42,7 +42,7 @@ export const FileList = memo(({
 	} = useFileDragReorder(files, onReorderFiles);
 
 	return (
-		<div className="overflow-x-auto bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm p-4">
+		<div className="overflow-x-auto bg-white dark:bg-slate-900 rounded-[2rem] ui-glass border border-zinc-200 dark:border-slate-800 p-4">
 			<table className="w-full text-left border-collapse min-w-[700px]">
 				<FileListHeader
 					files={files}

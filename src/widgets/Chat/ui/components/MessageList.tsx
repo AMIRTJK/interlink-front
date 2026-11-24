@@ -50,6 +50,8 @@ interface IProps {
   /** Сколько ответов треда человек ещё не видел. */
   getUnreadThreadCount: (msgId: string, repliesCount: number) => number;
   setMessageRef: (id: string, el: HTMLDivElement | null) => void;
+  /** Своё пустое состояние вместо общего «Нет сообщений» (например, у топика). */
+  emptyState?: React.ReactNode;
 }
 
 const chatVariants = {
@@ -80,6 +82,7 @@ export const MessageList = ({
   onScrollToBottom,
   onJumpToMessage,
   onReturnToMessage,
+  emptyState,
   ...itemProps
 }: IProps) => {
   const isEmpty = !isLoading && !isError && messages.length === 0;
@@ -187,7 +190,9 @@ export const MessageList = ({
               </div>
             </If>
 
-            <If is={isEmpty}>
+            <If is={isEmpty && !!emptyState}>{emptyState}</If>
+
+            <If is={isEmpty && !emptyState}>
               <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
                 <MessageSquare className="w-10 h-10 text-[var(--th-text-faint)] opacity-60" />
                 <p className="text-sm font-medium text-[var(--th-text-muted)]">

@@ -7,6 +7,7 @@ import { useChatData } from "./useChatData";
 import { useChatComposer, toChatId } from "./useChatComposer";
 import { useChatMessageHandlers } from "./useChatMessageHandlers";
 import { useThreadReadState } from "./useThreadReadState";
+import { useConversationTopics } from "./useConversationTopics";
 import { ME, type IChatLabels } from "./chatMappers";
 import { canDeleteForEveryone } from "./chatPermissions";
 import { chatUrls } from "../api/chatUrls";
@@ -58,7 +59,15 @@ export const useChatAppState = (
     threadMessageId: toChatId(ui.openThreadMsgId),
   });
 
-  const { messages, activeConversationId } = data;
+  const { activeConversationId } = data;
+  const topics = useConversationTopics({
+    conversationId: activeConversationId,
+    isDirect: data.activeContact ? !data.activeContact.isGroup : false,
+    messages: data.messages,
+    scrollRef: ui.scrollRef,
+  });
+  // Всё, что ниже работает с лентой, видит только сообщения выбранного топика.
+  const messages = topics.topicMessages;
   const composer = useChatComposer(ui, data);
   const handlers = useChatMessageHandlers(ui, data, messages);
 
@@ -374,6 +383,8 @@ export const useChatAppState = (
     ...data,
     ...composer,
     ...handlers,
+    messages,
+    topics,
     contacts,
     activeContact,
     setSearchQuery: handleSearchChange,

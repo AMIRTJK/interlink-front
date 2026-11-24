@@ -1,9 +1,14 @@
 import { Blend } from "lucide-react";
 import { Tooltip } from "@shared/ui";
 import { cn, useGlassEffect } from "@shared/lib";
+import type { TPopupPlacement } from "./headerModel";
+
+interface IProps {
+  tooltipPlacement?: TPopupPlacement;
+}
 
 const BUTTON_CLASS =
-  "relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] backdrop-blur-xl border transition-colors cursor-pointer focus:outline-none";
+  "relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] backdrop-blur-xl border transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 shrink-0";
 
 const OFF_CLASS =
   "bg-white/30 dark:bg-zinc-800/30 border-white/20 dark:border-zinc-700/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50";
@@ -17,7 +22,7 @@ const ON_CLASS =
  * Переключатель эффекта «стекла»: лёгкая прозрачность и размытие фона у хедера,
  * панели «Всего», списка реестра и меню корреспонденции.
  */
-export const HeaderGlassButton = () => {
+export const HeaderGlassButton = ({ tooltipPlacement = "bottom" }: IProps) => {
   const { isGlassEnabled, toggleGlass } = useGlassEffect();
 
   const label = isGlassEnabled
@@ -25,7 +30,7 @@ export const HeaderGlassButton = () => {
     : "Эффект стекла выключен";
 
   return (
-    <Tooltip title={label} placement="bottom">
+    <Tooltip title={label} placement={tooltipPlacement}>
       <button
         onClick={toggleGlass}
         aria-label={label}

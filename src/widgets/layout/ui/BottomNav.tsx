@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Popover, Tooltip } from "antd";
-import { AnimatePresence } from "framer-motion";
-import { Bell, LogOut, Sun, Moon, Palette, Layers, MessageSquare, Monitor, Maximize, Minimize, PanelTop, PanelLeft, PanelBottom, PanelRight } from "lucide-react";
-import { tokenControl, useFullscreen, useLogout } from "@shared/lib";
+import { Bell, Lock, LogOut, MessageSquare } from "lucide-react";
+import { tokenControl, useLogout } from "@shared/lib";
 import { NotificationsPopover, useNotificationCounters } from "@features/notifications";
 import { useChat } from "@widgets/Chat";
 import { If, Logo } from "@shared/ui";
 import { LogoutConfirmModal } from "./LogoutConfirmModal";
-import { DesktopMode } from "../../../features/Profile/ui/DesktopMode";
-import { LayoutMode } from "./designSettings";
+import { useSessionLock } from "@features/Profile/ui/DesktopMode";
 import { useLayoutMode } from "./useLayoutMode";
 import { useDesignSettings } from "./useDesignSettings";
 import { useProfileUser } from "./useProfileUser";
-import { ThemeContent, BgContent, LayoutContent } from "./designPopovers";
+import { HeaderButtonGroup } from "./header/HeaderButtonGroup";
+import { HeaderDesignGroup } from "./header/HeaderDesignGroup";
+import { HEADER_GROUP_LABELS } from "./header/headerModel";
 import { ModuleMenu } from "./ModuleMenu";
 import { getEnvVar } from "@shared/config";
 import userAvatar from "../../../assets/images/user-avatar.jpg";
@@ -27,13 +27,6 @@ const resolvePhotoUrl = (path?: string | null): string => {
   return `${host}${path.startsWith("/") ? path : `/${path}`}`;
 };
 
-const layoutModes: { mode: LayoutMode; icon: React.ReactNode; title: string }[] = [
-  { mode: "top", icon: <PanelTop size={16} />, title: "Верхнее меню" },
-  { mode: "left", icon: <PanelLeft size={16} />, title: "Левое меню" },
-  { mode: "bottom", icon: <PanelBottom size={16} />, title: "Нижнее меню" },
-  { mode: "right", icon: <PanelRight size={16} />, title: "Правое меню" }
-];
-
 export const BottomNav = () => {
   const { userData, userName, userSubtitle } = useProfileUser();
   const [avatarError, setAvatarError] = useState(false);
@@ -43,12 +36,10 @@ export const BottomNav = () => {
   const handleLogout = useLogout();
   const { openChat } = useChat();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [isDesktopActive, setIsDesktopActive] = useState(false);
+  const { lock } = useSessionLock();
   const [notifOpen, setNotifOpen] = useState(false);
   const { counters } = useNotificationCounters();
   const unreadCount = counters.unread;
-  const { isFullscreen, toggleFullscreen } = useFullscreen();
-  const fullscreenLabel = isFullscreen ? "Выйти из полноэкранного режима" : "Полноэкранный режим";
 
   useEffect(() => { setAvatarError(false); }, [userData?.photo_url, userData?.photo_path]);
 
@@ -89,7 +80,7 @@ export const BottomNav = () => {
       </div>
       <ModuleMenu variant="header" navLayout="top" />
       <div className="flex items-center gap-2 shrink-0">
-        <div className="flex items-center gap-2">
+        <HeaderButtonGroup label={HEADER_GROUP_LABELS.communications}>
           <Popover
             content={<NotificationsPopover open={notifOpen} />}
             open={notifOpen}
@@ -113,80 +104,35 @@ export const BottomNav = () => {
               <MessageSquare size={18} strokeWidth={2.2} />
             </button>
           </Tooltip>
-          <Tooltip title="Рабочий стол" placement="top">
-            <button onClick={() => setIsDesktopActive(true)} aria-label="Рабочий стол" className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
-              <Monitor size={18} strokeWidth={2.2} />
+        </HeaderButtonGroup>
+        <HeaderDesignGroup
+          label={HEADER_GROUP_LABELS.design}
+          tooltipPlacement="top"
+          popoverPlacement="topRight"
+          isDarkMode={isDarkMode}
+          toggleTheme={toggleTheme}
+          currentTheme={currentTheme}
+          setCurrentTheme={setCurrentTheme}
+          currentBg={currentBg}
+          setCurrentBg={setCurrentBg}
+          layoutMode={layoutMode}
+          setLayoutMode={setLayoutMode}
+        />
+        <HeaderButtonGroup label={HEADER_GROUP_LABELS.session}>
+          <Tooltip title="Блокирование" placement="top">
+            <button onClick={lock} aria-label="Блокирование" className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
+              <Lock size={18} strokeWidth={2.2} />
             </button>
           </Tooltip>
-          <Tooltip title={fullscreenLabel} placement="top">
-            <button onClick={toggleFullscreen} aria-label={fullscreenLabel} aria-pressed={isFullscreen} className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
-              <If is={isFullscreen}><Minimize size={18} strokeWidth={2.2} /></If>
-              <If is={!isFullscreen}><Maximize size={18} strokeWidth={2.2} /></If>
+          <Tooltip title="Выйти" placement="topRight">
+            <button onClick={() => setShowLogoutConfirm(true)} aria-label="Выход" className="flex items-center gap-2 py-2 px-4 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 border border-white/20 dark:border-zinc-700/30 text-zinc-600 dark:text-zinc-300 font-semibold text-sm hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer focus:outline-none">
+              <LogOut size={16} strokeWidth={2.2} />
+              <span className="hidden sm:inline">Выход</span>
             </button>
           </Tooltip>
-          <Tooltip title={isDarkMode ? "Светлая" : "Темная"} placement="top">
-            <button onClick={toggleTheme} aria-label="Смена темы" className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
-              <If is={isDarkMode}><Sun size={18} strokeWidth={2.2} /></If>
-              <If is={!isDarkMode}><Moon size={18} strokeWidth={2.2} /></If>
-            </button>
-          </Tooltip>
-        </div>
-        <div className="w-px! h-6! bg-zinc-900/10 dark:bg-zinc-700/40 mx-1" aria-hidden="true" />
-        <Popover
-          content={<ThemeContent currentTheme={currentTheme} setCurrentTheme={setCurrentTheme} />}
-          trigger="click"
-          placement="topRight"
-          arrow={false}
-          overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
-        >
-          <Tooltip title="Выберите тему" placement="top">
-            <button aria-label="Тема" className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
-              <Palette size={18} strokeWidth={2.2} />
-            </button>
-          </Tooltip>
-        </Popover>
-        <Popover
-          content={<BgContent currentBg={currentBg} setCurrentBg={setCurrentBg} isDarkMode={isDarkMode} />}
-          trigger="click"
-          placement="topRight"
-          arrow={false}
-          overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
-        >
-          <Tooltip title="Фон страницы" placement="top">
-            <button aria-label="Фон" className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
-              <Layers size={18} strokeWidth={2.2} />
-            </button>
-          </Tooltip>
-        </Popover>
-        <Popover
-          content={<LayoutContent layoutMode={layoutMode} setLayoutMode={setLayoutMode} layoutModes={layoutModes} />}
-          trigger="click"
-          placement="topRight"
-          arrow={false}
-          overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
-        >
-          <Tooltip title="Макет страницы" placement="top">
-            <button aria-label="Макет" className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
-              <If is={layoutMode === "top"}><PanelTop size={18} strokeWidth={2.2} /></If>
-              <If is={layoutMode === "left"}><PanelLeft size={18} strokeWidth={2.2} /></If>
-              <If is={layoutMode === "bottom"}><PanelBottom size={18} strokeWidth={2.2} /></If>
-              <If is={layoutMode === "right"}><PanelRight size={18} strokeWidth={2.2} /></If>
-            </button>
-          </Tooltip>
-        </Popover>
-        <Tooltip title="Выйти" placement="topRight">
-          <button onClick={() => setShowLogoutConfirm(true)} aria-label="Выход" className="flex items-center gap-2 py-2 px-4 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 border border-white/20 dark:border-zinc-700/30 text-zinc-600 dark:text-zinc-300 font-semibold text-sm hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer focus:outline-none">
-            <LogOut size={16} strokeWidth={2.2} />
-            <span className="hidden sm:inline">Выход</span>
-          </button>
-        </Tooltip>
+        </HeaderButtonGroup>
       </div>
       <LogoutConfirmModal open={showLogoutConfirm} onCancel={() => setShowLogoutConfirm(false)} onConfirm={handleLogout} />
-      <AnimatePresence>
-        <If is={isDesktopActive}>
-          <DesktopMode userData={userData} onClose={() => setIsDesktopActive(false)} isDark={isDarkMode} />
-        </If>
-      </AnimatePresence>
     </div>
   );
 };

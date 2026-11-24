@@ -2,14 +2,11 @@ import { Link } from "react-router-dom";
 import { AppRoutes } from "@shared/config";
 import { Logo } from "@shared/ui";
 import { ModuleMenu } from "./ModuleMenu";
-import { AnimatePresence } from "framer-motion";
 import { LogoutConfirmModal } from "./LogoutConfirmModal";
-import { DesktopMode } from "../../../features/Profile/ui/DesktopMode";
 import { IProps } from "./header/headerModel";
 import { HeaderUserBadge } from "./header/HeaderUserBadge";
 import { HeaderActionButtons } from "./header/HeaderActionButtons";
 import { useHeaderState } from "./header/useHeaderState";
-
 export const Header = ({
   currentTheme,
   setCurrentTheme,
@@ -22,7 +19,6 @@ export const Header = ({
     handleLogout,
     showLogoutConfirm,
     setShowLogoutConfirm,
-    isDesktopActive,
     setIsDesktopActive,
     notifOpen,
     setNotifOpen,
@@ -40,10 +36,10 @@ export const Header = ({
 
   return (
     <header
-      className={`ui-glass sticky top-0 z-50 flex items-center justify-between gap-4 bg-white/40 dark:bg-slate-800/80 backdrop-blur-3xl px-6 py-4 shadow-lg transition-all duration-300 ease-in-out ${
+      className={`ui-glass sticky top-0 z-50 flex items-center justify-between gap-4 bg-white/40 dark:bg-slate-800/80 backdrop-blur-3xl px-6 py-4 border-zinc-200 dark:border-slate-700/60 transition-all duration-300 ease-in-out ${
         isFullWidth
-          ? "w-[calc(100%+48px)] -mx-6 -mt-4 rounded-none border-b border-white/20 dark:border-slate-700/60"
-          : "w-full rounded-[2.5rem] border border-white/20 dark:border-slate-700/60"
+          ? "w-[calc(100%+48px)] -mx-6 -mt-4 rounded-none border-b"
+          : "w-full rounded-[2.5rem] border"
       }`}
     >
       <div className="flex-1 flex items-center gap-6 min-w-0">
@@ -94,16 +90,6 @@ export const Header = ({
         onCancel={() => setShowLogoutConfirm(false)}
         onConfirm={handleLogout}
       />
-
-      <AnimatePresence>
-        {isDesktopActive && (
-          <DesktopMode
-            userData={userData}
-            onClose={() => setIsDesktopActive(false)}
-            isDark={isDarkMode}
-          />
-        )}
-      </AnimatePresence>
     </header>
   );
 };

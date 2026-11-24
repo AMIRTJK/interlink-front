@@ -26,6 +26,7 @@ import {
   type IMapContext,
 } from "./chatMappers";
 import { useAuthorizedMedia } from "./useAuthorizedMedia";
+import { sortFavoritesFirst } from "./favoriteContacts";
 
 // ─── Владелец серверных данных чата ──────────────────────────────────────────
 // Собирает беседы, ленту сообщений и действия над ними, приводит ответы к
@@ -175,8 +176,10 @@ export const useChatData = ({
 
   const contacts = useMemo<Contact[]>(
     () =>
-      conversations.map((conversation) =>
-        mapConversation(conversation, mapContext),
+      sortFavoritesFirst(
+        conversations.map((conversation) =>
+          mapConversation(conversation, mapContext),
+        ),
       ),
     [conversations, mapContext],
   );

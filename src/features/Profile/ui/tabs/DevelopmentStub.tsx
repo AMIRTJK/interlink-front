@@ -14,7 +14,7 @@ export const DevelopmentStub = ({ title }: IProps) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/40 dark:bg-slate-800/90 backdrop-blur-3xl rounded-[2.5rem] border border-white/20 dark:border-slate-700/50 shadow-sm p-16 flex flex-col items-center justify-center text-center min-h-[440px]"
+      className="bg-white/40 dark:bg-slate-800/90 backdrop-blur-3xl rounded-[2.5rem] ui-glass border border-zinc-200 dark:border-slate-700/50 p-16 flex flex-col items-center justify-center text-center min-h-[440px]"
     >
       <div className={`w-20 h-20 rounded-[2rem] bg-gradient-to-br ${activeTheme.gradient} flex items-center justify-center shadow-lg mb-6`}>
         <Construction className="text-white" size={34} />

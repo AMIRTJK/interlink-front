@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { If } from "@shared/ui";
 import type { Contact } from "../../../model";
 import type { Lang, Translations } from "../../../lib/translations";
+import { splitFavorites } from "../../../lib/favoriteContacts";
 import { ReliefCounters } from "./ReliefCounters";
 import { ReliefChatCard } from "./ReliefChatCard";
 
@@ -16,6 +17,7 @@ interface IProps {
   lang: Lang;
   t: Translations;
   onContactSwitch: (id: string) => void;
+  onToggleFavorite: (contact: Contact) => void;
 }
 
 export const ReliefChatList = ({
@@ -26,14 +28,18 @@ export const ReliefChatList = ({
   lang,
   t,
   onContactSwitch,
+  onToggleFavorite,
 }: IProps) => {
   const activeContact = useMemo(
     () => contacts.find((contact) => contact.id === activeContactId) ?? null,
     [contacts, activeContactId],
   );
 
-  const restContacts = useMemo(
-    () => contacts.filter((contact) => contact.id !== activeContactId),
+  const { favorites: favoriteContacts, rest: restContacts } = useMemo(
+    () =>
+      splitFavorites(
+        contacts.filter((contact) => contact.id !== activeContactId),
+      ),
     [contacts, activeContactId],
   );
 
@@ -69,8 +75,27 @@ export const ReliefChatList = ({
             lang={lang}
             t={t}
             onSelect={onContactSwitch}
+            onToggleFavorite={onToggleFavorite}
           />
         )}
+
+        <If is={favoriteContacts.length > 0}>
+          <p className="px-2 pt-1 text-[11px] font-semibold leading-[13px] text-[var(--th-text-faint)]">
+            {`⭐ ${t.favorites}`}
+          </p>
+        </If>
+
+        {favoriteContacts.map((contact) => (
+          <ReliefChatCard
+            key={contact.id}
+            contact={contact}
+            isActive={false}
+            lang={lang}
+            t={t}
+            onSelect={onContactSwitch}
+            onToggleFavorite={onToggleFavorite}
+          />
+        ))}
 
         <If is={restContacts.length > 0}>
           <p className="px-2 pt-1 text-[11px] font-semibold leading-[13px] text-[var(--th-text-faint)]">
@@ -86,6 +111,7 @@ export const ReliefChatList = ({
             lang={lang}
             t={t}
             onSelect={onContactSwitch}
+            onToggleFavorite={onToggleFavorite}
           />
         ))}
       </div>

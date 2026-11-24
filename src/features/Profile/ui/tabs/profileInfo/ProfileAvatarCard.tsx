@@ -24,7 +24,7 @@ export const ProfileAvatarCard = ({ userData, onEdit, gradient }: IProps) => {
 	});
 
 	return (
-		<div className="bg-white/40! dark:bg-slate-800/90! backdrop-blur-3xl! p-6! rounded-[2.5rem]! border! border-white/20! dark:border-slate-700/50! shadow-sm! flex! flex-col! items-center!">
+		<div className="bg-white/40! dark:bg-slate-800/90! backdrop-blur-3xl! p-6! rounded-[2.5rem]! ui-glass ui-glass--forced border! border-zinc-200! dark:border-slate-700/50! flex! flex-col! items-center!">
 			<div className="relative! mb-4!">
 				<button
 					type="button"

@@ -61,7 +61,7 @@ export const AnalyticsTab = memo(() => {
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
 							transition={{ duration: 0.2 }}
-							className="rounded-3xl! bg-white/70! dark:bg-slate-800/90! backdrop-blur-sm! border! border-white/40! dark:border-slate-700/50! shadow-md! p-5!"
+							className="rounded-3xl! bg-white/70! dark:bg-slate-800/90! backdrop-blur-sm! ui-glass ui-glass--forced border! border-zinc-200! dark:border-slate-700/50! p-5!"
 						>
 							<div className="flex! items-center! justify-between! mb-4!">
 								<h3 className="text-sm! font-bold! text-zinc-700! dark:text-zinc-200!">
@@ -91,7 +91,7 @@ export const AnalyticsTab = memo(() => {
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
 							transition={{ duration: 0.2 }}
-							className="rounded-3xl! bg-white/70! dark:bg-slate-800/90! backdrop-blur-sm! border! border-white/40! dark:border-slate-700/50! shadow-md! p-5!"
+							className="rounded-3xl! bg-white/70! dark:bg-slate-800/90! backdrop-blur-sm! ui-glass ui-glass--forced border! border-zinc-200! dark:border-slate-700/50! p-5!"
 						>
 							<div className="flex! items-center! justify-between! mb-4!">
 								<h3 className="text-sm! font-bold! text-zinc-700! dark:text-zinc-200!">
@@ -122,7 +122,7 @@ export const AnalyticsTab = memo(() => {
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						transition={{ duration: 0.2 }}
-						className="rounded-3xl! bg-white/70! dark:bg-slate-800/90! backdrop-blur-sm! border! border-white/40! dark:border-slate-700/50! shadow-md! p-5!"
+						className="rounded-3xl! bg-white/70! dark:bg-slate-800/90! backdrop-blur-sm! ui-glass ui-glass--forced border! border-zinc-200! dark:border-slate-700/50! p-5!"
 					>
 						<div className="flex! items-center! justify-between! mb-4!">
 							<h3 className="text-sm! font-bold! text-zinc-700! dark:text-zinc-200!">
@@ -143,7 +143,7 @@ export const AnalyticsTab = memo(() => {
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						transition={{ duration: 0.2 }}
-						className="rounded-3xl! bg-white/70! dark:bg-slate-800/90! backdrop-blur-sm! border! border-white/40! dark:border-slate-700/50! shadow-md! p-5!"
+						className="rounded-3xl! bg-white/70! dark:bg-slate-800/90! backdrop-blur-sm! ui-glass ui-glass--forced border! border-zinc-200! dark:border-slate-700/50! p-5!"
 					>
 						<div className="flex! items-center! justify-between! mb-4!">
 							<h3 className="text-sm! font-bold! text-zinc-700! dark:text-zinc-200!">

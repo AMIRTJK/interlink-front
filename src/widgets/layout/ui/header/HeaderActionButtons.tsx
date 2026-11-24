@@ -1,27 +1,12 @@
 import { Popover } from "antd";
-import {
-  Bell,
-  LogOut,
-  Sun,
-  Moon,
-  Palette,
-  Layers,
-  PanelTop,
-  PanelLeft,
-  PanelBottom,
-  PanelRight,
-  Monitor,
-  Maximize,
-  Minimize,
-} from "lucide-react";
+import { Bell } from "lucide-react";
 import { Tooltip } from "@shared/ui";
-import { useFullscreen } from "@shared/lib";
 import { NotificationsPopover } from "@features/notifications";
 import type { LayoutMode } from "../designSettings";
-import { HeaderGlassButton } from "./HeaderGlassButton";
-import { HeaderThemePopover } from "./HeaderThemePopover";
-import { HeaderBgPopover } from "./HeaderBgPopover";
-import { HeaderLayoutPopover } from "./HeaderLayoutPopover";
+import { HeaderAppearanceMenu } from "./HeaderAppearanceMenu";
+import { HeaderPageMenu } from "./HeaderPageMenu";
+import { HeaderSessionMenu } from "./HeaderSessionMenu";
+import { HEADER_ICON_BUTTON_CLASS, HEADER_POPOVER_INNER_STYLE } from "./headerModel";
 
 interface IHeaderActionButtonsProps {
   notifOpen: boolean;
@@ -39,6 +24,8 @@ interface IHeaderActionButtonsProps {
   setShowLogoutConfirm: (show: boolean) => void;
 }
 
+// Уведомления остаются отдельной кнопкой: счётчик непрочитанных должен быть на
+// виду, а поповер со списком у неё и так свой.
 export const HeaderActionButtons = ({
   notifOpen,
   setNotifOpen,
@@ -53,188 +40,47 @@ export const HeaderActionButtons = ({
   layoutMode,
   setLayoutMode,
   setShowLogoutConfirm,
-}: IHeaderActionButtonsProps) => {
-  // Полноэкранный режим никому, кроме этой кнопки, не нужен — состояние живёт
-  // здесь, а не поднимается в useHeaderState.
-  const { isFullscreen, toggleFullscreen } = useFullscreen();
+}: IHeaderActionButtonsProps) => (
+  <div className="flex items-center gap-2 shrink-0">
+    <HeaderAppearanceMenu
+      isDarkMode={isDarkMode}
+      toggleTheme={toggleTheme}
+      currentTheme={currentTheme}
+      setCurrentTheme={setCurrentTheme}
+    />
 
-  const fullscreenLabel = isFullscreen
-    ? "Выйти из полноэкранного режима"
-    : "Полноэкранный режим";
+    <HeaderPageMenu
+      isDarkMode={isDarkMode}
+      currentBg={currentBg}
+      setCurrentBg={setCurrentBg}
+      layoutMode={layoutMode}
+      setLayoutMode={setLayoutMode}
+    />
 
-  return (
-    <div className="flex items-center gap-2 shrink-0">
-      <div className="flex items-center gap-2">
-        <Popover
-          content={<NotificationsPopover open={notifOpen} />}
-          open={notifOpen}
-          onOpenChange={setNotifOpen}
-          trigger="click"
-          placement="bottomRight"
-          arrow={false}
-          overlayInnerStyle={{
-            borderRadius: "2.5rem",
-            padding: 0,
-            backgroundColor: "transparent",
-          }}
-        >
-          <Tooltip title="Уведомления" placement="bottom">
-            <button
-              aria-label="Уведомления"
-              className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-            >
-              <Bell size={18} strokeWidth={2.2} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose-500 text-[9px] text-white flex items-center justify-center rounded-full font-bold shadow-lg">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </button>
-          </Tooltip>
-        </Popover>
-
-        <Tooltip title="Рабочий стол" placement="bottom">
-          <button
-            onClick={() => setIsDesktopActive(true)}
-            aria-label="Рабочий стол"
-            className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            <Monitor size={18} strokeWidth={2.2} />
-          </button>
-        </Tooltip>
-
-        <Tooltip title={fullscreenLabel} placement="bottom">
-          <button
-            onClick={toggleFullscreen}
-            aria-label={fullscreenLabel}
-            aria-pressed={isFullscreen}
-            className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            {isFullscreen ? (
-              <Minimize size={18} strokeWidth={2.2} />
-            ) : (
-              <Maximize size={18} strokeWidth={2.2} />
-            )}
-          </button>
-        </Tooltip>
-
-        <Tooltip
-          title={isDarkMode ? "Светлая тема" : "Темная тема"}
-          placement="bottom"
-        >
-          <button
-            onClick={toggleTheme}
-            aria-label="Смена темы"
-            className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            {isDarkMode ? (
-              <Sun size={18} strokeWidth={2.2} />
-            ) : (
-              <Moon size={18} strokeWidth={2.2} />
-            )}
-          </button>
-        </Tooltip>
-
-        <HeaderGlassButton />
-      </div>
-
-      <div
-        className="w-px! h-6! bg-zinc-900/10 dark:bg-zinc-700/40 mx-1"
-        aria-hidden="true"
-      />
-
-      <Popover
-        content={
-          <HeaderThemePopover
-            currentTheme={currentTheme}
-            setCurrentTheme={setCurrentTheme}
-          />
-        }
-        trigger="click"
-        placement="bottomRight"
-        arrow={false}
-        overlayInnerStyle={{
-          borderRadius: "2.5rem",
-          padding: 0,
-          backgroundColor: "transparent",
-        }}
-      >
-        <Tooltip title="Выберите тему" placement="bottom">
-          <button
-            aria-label="Выбор темы"
-            className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            <Palette size={18} strokeWidth={2.2} />
-          </button>
-        </Tooltip>
-      </Popover>
-
-      <Popover
-        content={
-          <HeaderBgPopover
-            currentBg={currentBg}
-            setCurrentBg={setCurrentBg}
-            isDarkMode={isDarkMode}
-          />
-        }
-        trigger="click"
-        placement="bottomRight"
-        arrow={false}
-        overlayInnerStyle={{
-          borderRadius: "2.5rem",
-          padding: 0,
-          backgroundColor: "transparent",
-        }}
-      >
-        <Tooltip title="Фон страницы" placement="bottom">
-          <button
-            aria-label="Фон страницы"
-            className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            <Layers size={18} strokeWidth={2.2} />
-          </button>
-        </Tooltip>
-      </Popover>
-
-      <Popover
-        content={
-          <HeaderLayoutPopover
-            layoutMode={layoutMode}
-            setLayoutMode={setLayoutMode}
-          />
-        }
-        trigger="click"
-        placement="bottomRight"
-        arrow={false}
-        overlayInnerStyle={{
-          borderRadius: "2.5rem",
-          padding: 0,
-          backgroundColor: "transparent",
-        }}
-      >
-        <Tooltip title="Макет страницы" placement="bottom">
-          <button
-            aria-label="Макет страницы"
-            className="p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none"
-          >
-            {layoutMode === "top" && <PanelTop size={18} strokeWidth={2.2} />}
-            {layoutMode === "left" && <PanelLeft size={18} strokeWidth={2.2} />}
-            {layoutMode === "bottom" && <PanelBottom size={18} strokeWidth={2.2} />}
-            {layoutMode === "right" && <PanelRight size={18} strokeWidth={2.2} />}
-          </button>
-        </Tooltip>
-      </Popover>
-
-      <Tooltip title="Выйти" placement="bottomRight">
-        <button
-          onClick={() => setShowLogoutConfirm(true)}
-          aria-label="Выход"
-          className="flex items-center gap-2 py-2 px-4 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 backdrop-blur-xl border border-white/20 dark:border-zinc-700/30 text-zinc-600 dark:text-zinc-300 font-semibold text-sm hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer focus:outline-none"
-        >
-          <LogOut size={16} strokeWidth={2.2} />
-          <span className="hidden sm:inline">Выход</span>
+    <Popover
+      content={<NotificationsPopover open={notifOpen} />}
+      open={notifOpen}
+      onOpenChange={setNotifOpen}
+      trigger="click"
+      placement="bottomRight"
+      arrow={false}
+      overlayInnerStyle={HEADER_POPOVER_INNER_STYLE}
+    >
+      <Tooltip title="Уведомления" placement="bottom">
+        <button type="button" aria-label="Уведомления" className={HEADER_ICON_BUTTON_CLASS}>
+          <Bell size={18} strokeWidth={2.2} />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose-500 text-[9px] text-white flex items-center justify-center rounded-full font-bold shadow-lg">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
         </button>
       </Tooltip>
-    </div>
-  );
-};
+    </Popover>
+
+    <HeaderSessionMenu
+      onLock={() => setIsDesktopActive(true)}
+      onLogout={() => setShowLogoutConfirm(true)}
+    />
+  </div>
+);

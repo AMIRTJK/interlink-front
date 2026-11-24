@@ -64,7 +64,7 @@ export const ContactInfoDrawer: React.FC<ContactInfoDrawerProps> = ({
     },
     {
       icon: <Star className="w-4 h-4" />,
-      label: t.star,
+      label: contact.isStarred ? t.removeFromFavorites : t.addToFavorites,
       onClick: onToggleStar,
       isActive: contact.isStarred,
     },
@@ -183,7 +183,7 @@ export const ContactInfoDrawer: React.FC<ContactInfoDrawerProps> = ({
                       >
                         {action.icon}
                       </div>
-                      <span className="text-[10px] text-[var(--th-text-faint)]">
+                      <span className="max-w-16 text-center leading-tight text-[10px] text-[var(--th-text-faint)]">
                         {action.label}
                       </span>
                     </button>

@@ -138,6 +138,9 @@ export type Translations = {
   yesterday: string;
   // Оформление чата
   allChats: string;
+  favorites: string;
+  addToFavorites: string;
+  removeFromFavorites: string;
   appearance: string;
   themeClassic: string;
   themeClassicDesc: string;
@@ -262,6 +265,9 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     today: 'Today',
     yesterday: 'Yesterday',
     allChats: 'All chats',
+    favorites: 'Favorites',
+    addToFavorites: 'Add to favorites',
+    removeFromFavorites: 'Remove from favorites',
     appearance: 'Appearance',
     themeClassic: 'Classic',
     themeClassicDesc: 'Current chat design',
@@ -385,6 +391,9 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     today: 'Сегодня',
     yesterday: 'Вчера',
     allChats: 'Все чаты',
+    favorites: 'Избранное',
+    addToFavorites: 'В избранное',
+    removeFromFavorites: 'Убрать из избранного',
     appearance: 'Оформление',
     themeClassic: 'Классическое',
     themeClassicDesc: 'Текущий дизайн чата',
@@ -508,6 +517,9 @@ export const TRANSLATIONS: Record<Lang, Translations> = {
     today: 'Имрӯз',
     yesterday: 'Дирӯз',
     allChats: 'Ҳамаи чатҳо',
+    favorites: 'Дӯстдошта',
+    addToFavorites: 'Ба дӯстдошта',
+    removeFromFavorites: 'Аз дӯстдошта хориҷ кардан',
     appearance: 'Тарҳбандӣ',
     themeClassic: 'Классикӣ',
     themeClassicDesc: 'Тарҳи ҷории чат',

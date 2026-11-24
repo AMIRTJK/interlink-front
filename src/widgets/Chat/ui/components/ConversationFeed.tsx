@@ -9,6 +9,7 @@ import { AIPanel } from "./AIPanel";
 import { ReplyBar } from "./ReplyBar";
 import { LinkPreviewBar } from "./LinkPreviewBar";
 import { PendingFilesBar } from "./PendingFilesBar";
+import { ChatTopicsBar, TopicEmptyState } from "./topics";
 
 // Лента беседы со всем, что к ней прилегает: поиск по сообщениям, закреплённое,
 // сами сообщения, подсказки ИИ, цитата ответа, превью ссылки и очередь вложений.
@@ -77,10 +78,19 @@ export const ConversationFeed = ({ state, activeContact }: IProps) => {
     isHighlighted,
     isCurrentMatch,
     getUnreadThreadCount,
+    topics,
   } = state;
+
+  const { activeTopic } = topics;
+  const topicEmptyState =
+    topics.isEnabled && activeTopic && !activeTopic.is_default ? (
+      <TopicEmptyState title={activeTopic.title} />
+    ) : undefined;
 
   return (
     <>
+      {topics.isEnabled && <ChatTopicsBar key={activeContact.id} topicsState={topics} />}
+
       <AnimatePresence>
         {showMsgSearch && (
           <MessageSearchBar
@@ -150,6 +160,7 @@ export const ConversationFeed = ({ state, activeContact }: IProps) => {
         showScrollBottom={showScrollBottom}
         onScrollToBottom={scrollToBottom}
         currentUserId={currentUserId}
+        emptyState={topicEmptyState}
       />
 
       <AnimatePresence>

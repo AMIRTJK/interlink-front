@@ -78,7 +78,7 @@ export const CalendarSidebar = memo(({
       </button>
 
       {/* Mini Month Picker Widget */}
-      <div className="bg-white/85! dark:bg-slate-900/85! backdrop-blur-xl! rounded-2xl! p-3.5! border! border-white/60! dark:border-slate-800/60! shadow-[0_6px_20px_rgba(0,0,0,0.03)]!">
+      <div className="bg-white/85! dark:bg-slate-900/85! backdrop-blur-xl! rounded-2xl! p-3.5! ui-glass ui-glass--forced border! border-zinc-200! dark:border-slate-800/60!">
         {/* Month Navigation Header */}
         <div className="flex! items-center! justify-between! mb-2.5! px-0.5!">
           <button

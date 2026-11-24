@@ -11,6 +11,8 @@ import { FilesModals } from "./files/FilesModals";
 import { FilesAnalytics } from "./files/lazyModals";
 import { useFilesSelection } from "./files/useFilesSelection";
 import { useFilesTabActions } from "./files/useFilesTabActions";
+import { useFileUpload } from "./files/useFileUpload";
+import { UploadingFiles } from "./files/UploadingFiles";
 import {
 	PROFILE_FILES_VIEW_MODE_STORAGE_KEY,
 	type TFilesSort,
@@ -90,6 +92,8 @@ export const FilesTab = () => {
 		clearSelection: selection.clear,
 	});
 
+	const { uploads, isUploading, uploadFiles } = useFileUpload(activeFolderId);
+
 	return (
 		<div className="files-tab-container space-y-6">
 			{/* Header */}
@@ -104,7 +108,8 @@ export const FilesTab = () => {
 				}
 				viewMode={viewMode}
 				onViewModeChange={handleViewModeChange}
-				onUpload={actions.handleUpload}
+				onUpload={uploadFiles}
+				isUploading={isUploading}
 				personalCount={folders.length}
 				sharedCount={sharedFolders.length}
 				onCreateFolderClick={() => actions.setAddCategoryOpen(true)}
@@ -175,7 +180,11 @@ export const FilesTab = () => {
 
 					{/* Drag & Drop Zone */}
 					<If is={viewContext === "personal"}>
-						<FilesDropzone onUpload={actions.handleUpload} />
+						<FilesDropzone onUpload={uploadFiles} isUploading={isUploading} />
+					</If>
+
+					<If is={viewContext === "personal"}>
+						<UploadingFiles uploads={uploads} viewMode={viewMode} />
 					</If>
 
 					{/* Files & Subfolders Display */}

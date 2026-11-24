@@ -1,7 +1,7 @@
 /**
  * Эффект «стекла» (glassmorphism) для ключевых поверхностей интерфейса.
  *
- * По умолчанию выключен: пользователь включает его кнопкой в хедере. Состояние
+ * По умолчанию включён: пользователь может выключить его в меню хедера. Состояние
  * хранится одним классом на <html> — сами стили лежат в `app/styles/glass.css`
  * и применяются только при этом классе, поэтому переключение не требует
  * ререндера разметки, ровно как смена темы.
@@ -17,9 +17,11 @@ export const GLASS_CHANGE_EVENT = "glasseffectchange";
 const GLASS_ON = "on";
 const GLASS_OFF = "off";
 
+// Включён, пока пользователь явно не выключил: пустое хранилище (первый вход,
+// очищенные данные) тоже означает «включён».
 export const readGlassEnabled = (): boolean => {
-  if (typeof window === "undefined") return false;
-  return localStorage.getItem(GLASS_STORAGE_KEY) === GLASS_ON;
+  if (typeof window === "undefined") return true;
+  return localStorage.getItem(GLASS_STORAGE_KEY) !== GLASS_OFF;
 };
 
 export const writeGlassEnabled = (enabled: boolean) => {

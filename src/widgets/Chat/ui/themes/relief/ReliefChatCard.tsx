@@ -1,13 +1,16 @@
-import { BellOff, Star } from "lucide-react";
+import { BellOff } from "lucide-react";
 import type { Contact } from "../../../model";
 import type { Lang, Translations } from "../../../lib/translations";
 import { formatConversationTime } from "../../../lib/chatFormat";
+import { FavoriteToggleButton } from "../../components/FavoriteToggleButton";
 import { ReliefAvatar } from "./ReliefAvatar";
 import { AVATAR_SIZE } from "./model";
 
 // Карточка беседы в списке: аватарка, имя, время последнего сообщения и превью.
 // Открытая беседа отличается сиреневой заливкой и более заметной каймой —
 // состояния строятся в CSS (.chat-relief-card), здесь только содержимое.
+// Звёздочка «В избранное» — отдельная кнопка в своей колонке справа (pr-11 у
+// карточки), чтобы не наезжать на время и счётчик непрочитанных.
 
 interface IProps {
   contact: Contact;
@@ -15,6 +18,7 @@ interface IProps {
   lang: Lang;
   t: Translations;
   onSelect: (id: string) => void;
+  onToggleFavorite: (contact: Contact) => void;
 }
 
 export const ReliefChatCard = ({
@@ -23,6 +27,7 @@ export const ReliefChatCard = ({
   lang,
   t,
   onSelect,
+  onToggleFavorite,
 }: IProps) => {
   const unread = contact.unreadCount ?? 0;
   const time = formatConversationTime(contact.lastMessageAt, lang, t);
@@ -31,11 +36,12 @@ export const ReliefChatCard = ({
   const isDimmed = unread === 0 && !isActive;
 
   return (
+    <div className="relative group/row">
     <button
       type="button"
       onClick={() => onSelect(contact.id)}
       aria-current={isActive}
-      className="chat-relief-card w-full flex items-center gap-3 p-3 text-left"
+      className="chat-relief-card w-full flex items-center gap-3 pl-3 pr-11 py-3 text-left"
     >
       <ReliefAvatar contact={contact} size={AVATAR_SIZE} />
 
@@ -54,12 +60,6 @@ export const ReliefChatCard = ({
               <BellOff
                 className="w-3 h-3 text-[var(--th-text-faint)]"
                 aria-label={t.mute}
-              />
-            )}
-            {contact.isStarred && (
-              <Star
-                className="w-3 h-3 fill-current text-[rgb(var(--chat-relief-amber))]"
-                aria-label={t.star}
               />
             )}
             {!!time && (
@@ -99,5 +99,13 @@ export const ReliefChatCard = ({
         </span>
       </span>
     </button>
+    <FavoriteToggleButton
+      isStarred={Boolean(contact.isStarred)}
+      addLabel={t.addToFavorites}
+      removeLabel={t.removeFromFavorites}
+      onToggle={() => onToggleFavorite(contact)}
+      className="absolute right-2 top-1/2 -translate-y-1/2"
+    />
+    </div>
   );
 };

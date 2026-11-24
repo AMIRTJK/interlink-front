@@ -50,6 +50,7 @@ export const ModernShell = ({
     handleContactSwitch,
     handleSendThread,
     handleToggleStar,
+    handleToggleContactStar,
     handleToggleMute,
     addMembers,
     removeMember,
@@ -107,6 +108,7 @@ export const ModernShell = ({
             lang={lang}
             t={t}
             onContactSwitch={handleContactSwitch}
+            onToggleFavorite={handleToggleContactStar}
           />
         </>
       )}

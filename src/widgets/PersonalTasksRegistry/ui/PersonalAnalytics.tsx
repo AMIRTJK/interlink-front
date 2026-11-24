@@ -153,7 +153,7 @@ export const PersonalAnalytics = memo(({ tasks, activeTheme }: IProps) => {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
       <div className="grid grid-cols-4 gap-3">
-        <div className="rounded-2xl p-4 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm border border-white/40 dark:border-zinc-700/40 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="rounded-2xl p-4 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-zinc-700/40 transition-all duration-200">
           <div className="flex items-start justify-between mb-2">
             <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Выполнено</span>
             <span className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-emerald-100 text-emerald-600"><CheckCircle2 size={18} /></span>
@@ -162,7 +162,7 @@ export const PersonalAnalytics = memo(({ tasks, activeTheme }: IProps) => {
           <div className="text-xs text-zinc-400 mt-1">{stats.completed} из {stats.total}</div>
         </div>
 
-        <div className="rounded-2xl p-4 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm border border-white/40 dark:border-zinc-700/40 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="rounded-2xl p-4 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-zinc-700/40 transition-all duration-200">
           <div className="flex items-start justify-between mb-2">
             <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Средний прогресс</span>
             <span className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-blue-100 text-blue-600"><TrendingUp size={18} /></span>
@@ -171,7 +171,7 @@ export const PersonalAnalytics = memo(({ tasks, activeTheme }: IProps) => {
           <div className="text-xs text-zinc-400 mt-1">по всем задачам</div>
         </div>
 
-        <div className="rounded-2xl p-4 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm border border-white/40 dark:border-zinc-700/40 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="rounded-2xl p-4 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-zinc-700/40 transition-all duration-200">
           <div className="flex items-start justify-between mb-2">
             <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Просрочено</span>
             <span className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-red-100 text-red-600"><X size={18} /></span>
@@ -180,7 +180,7 @@ export const PersonalAnalytics = memo(({ tasks, activeTheme }: IProps) => {
           <div className="text-xs text-zinc-400 mt-1">задач</div>
         </div>
 
-        <div className="rounded-2xl p-4 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm border border-white/40 dark:border-zinc-700/40 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="rounded-2xl p-4 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-zinc-700/40 transition-all duration-200">
           <div className="flex items-start justify-between mb-2">
             <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">В работе</span>
             <span className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-indigo-100 text-indigo-600"><Clock size={18} /></span>
@@ -191,7 +191,7 @@ export const PersonalAnalytics = memo(({ tasks, activeTheme }: IProps) => {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-3xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm border border-white/40 dark:border-zinc-700/30 shadow-md p-5">
+        <div className="rounded-3xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-zinc-700/30 p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100 m-0">Статус задач</h3>
             <ChartSwitcher current={statusChart} onChange={setStatusChart} />
@@ -203,7 +203,7 @@ export const PersonalAnalytics = memo(({ tasks, activeTheme }: IProps) => {
           </div>
         </div>
 
-        <div className="rounded-3xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm border border-white/40 dark:border-zinc-700/30 shadow-md p-5">
+        <div className="rounded-3xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-zinc-700/30 p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100 m-0">Приоритет задач</h3>
             <ChartSwitcher current={priorityChart} onChange={setPriorityChart} />
@@ -215,7 +215,7 @@ export const PersonalAnalytics = memo(({ tasks, activeTheme }: IProps) => {
           </div>
         </div>
 
-        <div className="col-span-2 rounded-3xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm border border-white/40 dark:border-zinc-700/30 shadow-md p-5">
+        <div className="col-span-2 rounded-3xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-zinc-700/30 p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100 m-0">Прогресс выполнения</h3>
             <ChartSwitcher current={progressChart} onChange={setProgressChart} />

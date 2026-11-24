@@ -19,7 +19,7 @@ const StorageCard = ({ storage }: { storage: IFilesAnalyticsStorage }) => {
 	const free = storage.free_bytes_human || formatBytes(storage.free_bytes);
 
 	return (
-		<div className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm border border-white/40 dark:border-slate-700/50 shadow-md p-5 flex flex-col justify-between min-h-[320px]">
+		<div className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-slate-700/50 p-5 flex flex-col justify-between min-h-[320px]">
 			<div>
 				<h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200 mb-2">
 					Использование диска
@@ -104,7 +104,7 @@ export const FilesAnalytics = () => {
 			animate={{ opacity: 1 }}
 			className="flex flex-col gap-5 pb-6 animate-in fade-in duration-200"
 		>
-			<div className="flex flex-wrap items-center justify-end gap-3 bg-white/40 dark:bg-slate-800/40 p-3 rounded-2xl border border-white/20 dark:border-slate-700/30">
+			<div className="flex flex-wrap items-center justify-end gap-3 bg-white/40 dark:bg-slate-800/40 p-3 rounded-2xl ui-glass border border-zinc-200 dark:border-slate-700/30">
 				<div className="flex items-center gap-2">
 					<span className="text-xs font-semibold text-slate-500 dark:text-zinc-400">Период:</span>
 					<Select

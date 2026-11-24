@@ -55,6 +55,7 @@ export const ClassicShell = ({
     handleContactSwitch,
     handleSendThread,
     handleToggleStar,
+    handleToggleContactStar,
     handleToggleMute,
     addMembers,
     removeMember,
@@ -120,6 +121,9 @@ export const ClassicShell = ({
           onSearchChange={setSearchQuery}
           isDark={isDark}
           width={listPanelWidth}
+          addFavoriteLabel={t.addToFavorites}
+          removeFavoriteLabel={t.removeFromFavorites}
+          onToggleFavorite={handleToggleContactStar}
         />
       </div>
     </div>

@@ -55,12 +55,12 @@ export const FileCard = React.memo(({
 			onDragOver={(e) => handleDragOver(e, index)}
 			onDrop={(e) => handleDrop(e, index)}
 			onDragEnd={handleDragEnd}
-			className={`group bg-white dark:bg-slate-800 rounded-[2rem] border shadow-sm transition-all duration-200 overflow-hidden ${
+			className={`group bg-white dark:bg-slate-800 rounded-[2rem] border transition-all duration-200 overflow-hidden ${
 				isDragging ? "opacity-30 border-indigo-400" : ""
 			} ${
 				isOver
 					? "border-2 border-indigo-500 scale-[1.02] shadow-indigo-100"
-					: "border-slate-100 dark:border-slate-700 hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600"
+					: "border-zinc-200 dark:border-slate-700 hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600"
 			}`}
 		>
 			<FileCardCover

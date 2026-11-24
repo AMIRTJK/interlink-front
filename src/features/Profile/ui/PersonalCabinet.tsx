@@ -134,7 +134,7 @@ export const PersonalCabinet = ({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white/40 dark:bg-slate-800/90 backdrop-blur-3xl p-2 rounded-[2.5rem] border border-white/20 dark:border-slate-700/50 shadow-sm flex flex-wrap items-center justify-between gap-2">
+      <div className="bg-white/40 dark:bg-slate-800/90 backdrop-blur-3xl p-2 rounded-[2.5rem] ui-glass border border-zinc-200 dark:border-slate-700/50 flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           {TABS.map((tab) => (
             <button

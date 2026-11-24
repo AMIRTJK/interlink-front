@@ -97,7 +97,7 @@ export const DayView = memo(({
 
         {/* Day Column Grid */}
         <div
-          className="flex-1! relative! cursor-pointer! rounded-2xl! bg-white/70! dark:bg-slate-900/50! border! border-white/80! dark:border-slate-800/60! backdrop-blur-md! shadow-[0_8px_20px_rgba(0,0,0,0.03)]!"
+          className="flex-1! relative! cursor-pointer! rounded-2xl! bg-white/70! dark:bg-slate-900/50! ui-glass ui-glass--forced border! border-zinc-200! dark:border-slate-800/60! backdrop-blur-md!"
           style={{ height: HOUR_HEIGHT * HOURS.length }}
           onClick={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();

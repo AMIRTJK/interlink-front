@@ -1,8 +1,9 @@
 import { useMemo } from "react";
-import { MessagesSquare } from "lucide-react";
+import { MessagesSquare, Star } from "lucide-react";
 import { If } from "@shared/ui";
 import type { Contact } from "../../../model";
 import type { Lang, Translations } from "../../../lib/translations";
+import { splitFavorites } from "../../../lib/favoriteContacts";
 import { ModernCounters } from "./ModernCounters";
 import { ModernChatCard } from "./ModernChatCard";
 
@@ -17,6 +18,7 @@ interface IProps {
   lang: Lang;
   t: Translations;
   onContactSwitch: (id: string) => void;
+  onToggleFavorite: (contact: Contact) => void;
 }
 
 export const ModernChatList = ({
@@ -27,14 +29,18 @@ export const ModernChatList = ({
   lang,
   t,
   onContactSwitch,
+  onToggleFavorite,
 }: IProps) => {
   const activeContact = useMemo(
     () => contacts.find((contact) => contact.id === activeContactId) ?? null,
     [contacts, activeContactId],
   );
 
-  const restContacts = useMemo(
-    () => contacts.filter((contact) => contact.id !== activeContactId),
+  const { favorites: favoriteContacts, rest: restContacts } = useMemo(
+    () =>
+      splitFavorites(
+        contacts.filter((contact) => contact.id !== activeContactId),
+      ),
     [contacts, activeContactId],
   );
 
@@ -73,8 +79,28 @@ export const ModernChatList = ({
             lang={lang}
             t={t}
             onSelect={onContactSwitch}
+            onToggleFavorite={onToggleFavorite}
           />
         )}
+
+        <If is={favoriteContacts.length > 0}>
+          <p className="flex items-center gap-1.5 px-1 pt-1 text-[11px] font-semibold text-[var(--th-text-faint)]">
+            <Star className="w-3.5 h-3.5" />
+            <span>{t.favorites}</span>
+          </p>
+        </If>
+
+        {favoriteContacts.map((contact) => (
+          <ModernChatCard
+            key={contact.id}
+            contact={contact}
+            isActive={false}
+            lang={lang}
+            t={t}
+            onSelect={onContactSwitch}
+            onToggleFavorite={onToggleFavorite}
+          />
+        ))}
 
         <If is={restContacts.length > 0}>
           <p className="flex items-center gap-1.5 px-1 pt-1 text-[11px] font-semibold text-[var(--th-text-faint)]">
@@ -91,6 +117,7 @@ export const ModernChatList = ({
             lang={lang}
             t={t}
             onSelect={onContactSwitch}
+            onToggleFavorite={onToggleFavorite}
           />
         ))}
       </div>
