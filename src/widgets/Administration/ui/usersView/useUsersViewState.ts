@@ -109,6 +109,13 @@ export function useUsersViewState() {
     return d?.data?.total ?? d?.total ?? rawUsers.length;
   }, [usersData, rawUsers.length]);
 
+  const perPage = React.useMemo(() => {
+    const d = usersData as
+      | { data?: { per_page?: number }; per_page?: number }
+      | undefined;
+    return d?.data?.per_page ?? d?.per_page ?? PER_PAGE;
+  }, [usersData]);
+
   const users = React.useMemo(
     () => rawUsers.map(adaptExtUser),
     [rawUsers],
@@ -189,6 +196,7 @@ export function useUsersViewState() {
     departments,
     users,
     totalUsers,
+    perPage,
     allRoleNames,
     roleCards,
     chipFilters,

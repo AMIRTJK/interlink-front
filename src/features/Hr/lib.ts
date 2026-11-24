@@ -53,6 +53,20 @@ export const GENDER_OPTIONS = [
 ];
 
 export const mapEmployeeToForm = (employee: IAdminUser) => {
+  const cleanPhone = (v?: string) =>
+    (v || "").replace(/\D/g, "").replace(/^992/, "").slice(0, 9);
+
+  const deptIds = employee.departments?.length
+    ? employee.departments.map((d) => String(d.id))
+    : employee.department?.id
+      ? [String(employee.department.id)]
+      : undefined;
+
+  const rawRoles = employee.roles || [];
+  const roles = rawRoles
+    .map((r: any) => (typeof r === "string" ? r : r?.name))
+    .filter(Boolean);
+
   return {
     first_name: employee.first_name,
     last_name: employee.last_name,
@@ -62,10 +76,14 @@ export const mapEmployeeToForm = (employee: IAdminUser) => {
     personal_email: employee.personal_email,
     hr_status: employee.hr_status || employee.status,
     salary: employee.salary ? Number(employee.salary) : undefined,
-    phone: (employee.phone || "").replace(/^\+992/, ""),
-    personal_phone: (employee.personal_phone || "").replace(/^\+992/, ""),
-    corporate_phone: (employee.corporate_phone || "").replace(/^\+992/, ""),
-    birth_date: employee.birth_date ? (employee.birth_date.includes("T") ? employee.birth_date.split("T")[0] : employee.birth_date.split(" ")[0]) : undefined,
+    phone: cleanPhone(employee.phone),
+    personal_phone: cleanPhone(employee.personal_phone),
+    corporate_phone: cleanPhone(employee.corporate_phone),
+    birth_date: employee.birth_date
+      ? employee.birth_date.includes("T")
+        ? employee.birth_date.split("T")[0]
+        : employee.birth_date.split(" ")[0]
+      : undefined,
     gender: employee.gender,
     passport_series: employee.passport_series,
     passport_number: employee.passport_number,
@@ -80,8 +98,8 @@ export const mapEmployeeToForm = (employee: IAdminUser) => {
       : employee.organization?.id
         ? String(employee.organization.id)
         : undefined,
-    department_ids: employee.departments?.map((d) => String(d.id)),
-    roles: employee.roles?.map((r) => r.name),
+    department_ids: deptIds,
+    roles: roles.length ? roles : undefined,
     bio: employee.bio || "",
   };
 };
@@ -146,7 +164,7 @@ export const applyPassportOcr = (
 
 export const prepareEmployeePayload = (values: Record<string, unknown>) => {
   const withCode = (v: unknown) => {
-    const s = String(v || "");
+    const s = String(v || "").trim();
     if (!s) return undefined;
     return s.startsWith("+") ? s : `+992${s}`;
   };
@@ -160,7 +178,7 @@ export const prepareEmployeePayload = (values: Record<string, unknown>) => {
     phone: withCode(values.phone),
     personal_phone: withCode(values.personal_phone),
     corporate_phone: withCode(values.corporate_phone),
-    organization_id: Number(values.organization_id),
+    organization_id: values.organization_id ? Number(values.organization_id) : undefined,
     supervisor_id: values.supervisor_id
       ? Number(values.supervisor_id)
       : undefined,
@@ -193,8 +211,9 @@ export const validateEmployee = (values: Record<string, any>, isEdit: boolean) =
   if (!values.passport_series) errs.passport_series = "Введите серию паспорта";
   else if (!/^[A-ZА-ЯЁ]{1}$/i.test(values.passport_series)) errs.passport_series = "1 заглавная буква";
   if (!values.passport_number) errs.passport_number = "Введите номер паспорта";
-  else if (!/^\d{9}$/.test(values.passport_number)) errs.passport_number = "Введите 9 цифр";
+  else if (!/^\d{8}$/.test(values.passport_number)) errs.passport_number = "Введите 8 цифр";
   if (!values.inn) errs.inn = "Введите ИНН";
+  else if (!/^\d{9}$/.test(values.inn)) errs.inn = "Введите 9 цифр";
   if (!values.address) errs.address = "Введите адрес";
 
   if (!isEdit) {

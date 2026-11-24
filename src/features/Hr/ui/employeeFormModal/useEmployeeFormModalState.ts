@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { IAdminUser, IPassportOcrResponse } from "@entities/hr";
 import { ApiRoutes } from "@shared/api";
-import { useMutationQuery, tokenControl } from "@shared/lib";
+import { useMutationQuery, tokenControl, toast } from "@shared/lib";
 import type { IPassportSides } from "../PassportUploadStep";
 import {
   applyPassportOcr,
@@ -163,7 +163,15 @@ export function useEmployeeFormModalState({
     e.preventDefault();
     const errs = validateEmployee(values, isEdit);
     setErrors(errs);
-    if (Object.keys(errs).length > 0) return;
+    const errKeys = Object.keys(errs);
+    if (errKeys.length > 0) {
+      toast.error(`Проверьте форму: ${errs[errKeys[0]]}`);
+      setTimeout(() => {
+        const errorEl = document.querySelector(".hr-create-form .text-red-500");
+        errorEl?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
+      return;
+    }
 
     const payload: Record<string, any> = {
       ...prepareEmployeePayload(values),

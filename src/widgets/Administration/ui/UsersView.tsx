@@ -10,7 +10,6 @@ import { useUsersViewState } from "./usersView/useUsersViewState";
 import { UsersViewTopBar } from "./usersView/UsersViewTopBar";
 import { UsersViewStatChips } from "./usersView/UsersViewStatChips";
 import { UsersViewFilterBar } from "./usersView/UsersViewFilterBar";
-import { PER_PAGE } from "./usersView/usersViewModel";
 
 export function UsersView() {
   const {
@@ -39,6 +38,7 @@ export function UsersView() {
     departments,
     users,
     totalUsers,
+    perPage,
     allRoleNames,
     roleCards,
     chipFilters,
@@ -110,7 +110,7 @@ export function UsersView() {
           }}
           pagination={{
             current: currentPage,
-            pageSize: PER_PAGE,
+            pageSize: perPage,
             total: totalUsers,
             onChange: (page) => setCurrentPage(page),
             showSizeChanger: false,

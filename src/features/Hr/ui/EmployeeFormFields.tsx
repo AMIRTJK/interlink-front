@@ -126,18 +126,28 @@ export const EmployeeFormFields = ({ values, errors, handleChange, organizationI
           </FormItem>
           <FormItem label="Номер паспорта" error={errors.passport_number} required>
             <IconInput
-              placeholder="123456789"
-              maxLength={9}
+              placeholder="02545453"
+              maxLength={8}
               value={values.passport_number}
               onChange={(e) => {
-                const val = e.target.value.replace(/\D/g, "").slice(0, 9);
+                const val = e.target.value.replace(/\D/g, "").slice(0, 8);
                 handleChange("passport_number", val);
               }}
               hasError={!!errors.passport_number}
             />
           </FormItem>
           <FormItem label="ИНН" error={errors.inn} required>
-            <IconInput placeholder="040012345" maxLength={12} icon={iconEl(Hash)} value={values.inn} onChange={(e) => handleChange("inn", e.target.value)} hasError={!!errors.inn} />
+            <IconInput
+              placeholder="046935671"
+              maxLength={9}
+              icon={iconEl(Hash)}
+              value={values.inn}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, "").slice(0, 9);
+                handleChange("inn", val);
+              }}
+              hasError={!!errors.inn}
+            />
           </FormItem>
           <FormItem label="Адрес" error={errors.address} className="sm:col-span-3" required>
             <IconInput placeholder="Душанбе" icon={iconEl(MapPin)} value={values.address} onChange={(e) => handleChange("address", e.target.value)} hasError={!!errors.address} />
