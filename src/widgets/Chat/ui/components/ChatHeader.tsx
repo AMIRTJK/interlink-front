@@ -35,15 +35,19 @@ interface IProps {
 // Блок управления едет вместе с панелью бесед, поэтому при макете «снизу» он
 // оказывается под ней — граница и тень в этом случае смотрят вверх.
 const getEdgeStyle = (layout: LayoutPosition) => {
-  const edge = "1px solid var(--th-header-border)";
+  const edge = "1px solid var(--th-sidebar-border)";
   const isBelowPanel = layout === "bottom";
 
+  // Боковой край продолжает границу панели бесед вверх: блок стоит над ней на
+  // нейтральном фоне, и без него линия обрывалась бы на заголовке «Chats».
   return {
     borderBottom: isBelowPanel ? undefined : edge,
     borderTop: isBelowPanel ? edge : undefined,
+    borderRight: layout === "left" ? edge : undefined,
+    borderLeft: layout === "right" ? edge : undefined,
     boxShadow: isBelowPanel
-      ? "0 -4px 15px rgb(var(--th-shadow-rgb) / 0.15)"
-      : "0 4px 15px rgb(var(--th-shadow-rgb) / 0.15)",
+      ? "0 -4px 15px rgb(var(--th-shadow-rgb) / 0.08)"
+      : "0 4px 15px rgb(var(--th-shadow-rgb) / 0.08)",
   };
 };
 
@@ -63,11 +67,14 @@ export const ChatHeader = ({
   // сверху/снизу блок во всю ширину экрана, и группа остаётся прижатой вправо.
   const isCentered = layout === "left" || layout === "right";
 
+  // Фон — как у панели бесед, а не заливка акцента: блок прилегает к списку,
+  // и цветная полоса над нейтральным списком выглядела чужеродно. Акцент
+  // остаётся только на выбранной раскладке.
   return (
     <header
       className="flex-shrink-0 relative"
       style={{
-        background: "var(--th-header-bg)",
+        background: "var(--th-sidebar-bg)",
         ...getEdgeStyle(layout),
       }}
     >
@@ -93,7 +100,7 @@ export const ChatHeader = ({
               и пользователь ищет их в одном месте. */}
           <ChatThemeMenu
             t={t}
-            tone="accent"
+            tone="surface"
             placement={layout === "bottom" ? "top" : "bottom"}
           />
 
@@ -101,11 +108,7 @@ export const ChatHeader = ({
             <button
               onClick={onComposeOpen}
               aria-label="Новый личный чат"
-              className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--th-on-accent)] transition-all duration-200 ease-in-out hover:bg-[rgb(var(--th-on-accent-rgb)/0.25)] hover:scale-110"
-              style={{
-                background: "rgb(var(--th-on-accent-rgb) / 0.15)",
-                border: "1px solid rgb(var(--th-on-accent-rgb) / 0.2)",
-              }}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--th-accent-text)] bg-[var(--th-active-bg)] transition-all duration-200 ease-in-out hover:scale-110"
             >
               <Edit3 className="w-4.5 h-4.5" />
             </button>
@@ -114,7 +117,7 @@ export const ChatHeader = ({
             <button
               onClick={onGroupOpen}
               aria-label="Создать группу"
-              className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-[rgb(var(--th-on-accent-rgb)/0.15)] hover:scale-110 flex items-center justify-center text-[var(--th-on-accent-muted)]"
+              className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-[var(--th-hover-bg)] hover:scale-110 flex items-center justify-center text-[var(--th-text-muted)] hover:text-[var(--th-text)]"
             >
               <UserPlus className="w-4.5 h-4.5" />
             </button>
@@ -127,7 +130,7 @@ export const ChatHeader = ({
                   ? "Свернуть чат в окно"
                   : "Развернуть чат на весь экран"
               }
-              className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-[rgb(var(--th-on-accent-rgb)/0.15)] hover:scale-110 flex items-center justify-center text-[var(--th-on-accent-muted)]"
+              className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-[var(--th-hover-bg)] hover:scale-110 flex items-center justify-center text-[var(--th-text-muted)] hover:text-[var(--th-text)]"
             >
               {isExpanded ? (
                 <Minimize2 className="w-4.5 h-4.5" />
@@ -140,7 +143,7 @@ export const ChatHeader = ({
             <button
               onClick={onRequestClose}
               aria-label="Закрыть чат"
-              className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-[rgb(var(--th-on-accent-rgb)/0.2)] hover:scale-110 flex items-center justify-center text-[var(--th-on-accent-muted)]"
+              className="w-8 h-8 rounded-full transition-all duration-200 ease-in-out hover:bg-[var(--th-hover-bg)] hover:scale-110 flex items-center justify-center text-[var(--th-text-muted)] hover:text-[var(--th-text)]"
             >
               <X className="w-4.5 h-4.5" />
             </button>

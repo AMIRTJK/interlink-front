@@ -42,8 +42,8 @@ export const LayoutSwitcher: React.FC<LayoutSwitcherProps> = ({
   <div
     className="flex items-center gap-0.5 rounded-xl p-1"
     style={{
-      background: "rgb(var(--th-on-accent-rgb) / 0.08)",
-      border: "1px solid rgb(var(--th-on-accent-rgb) / 0.15)",
+      background: "var(--th-hover-bg)",
+      border: "1px solid var(--th-sidebar-border)",
     }}
   >
     {LAYOUT_BUTTONS.map(({ pos, Icon, label }) => (
@@ -59,11 +59,11 @@ export const LayoutSwitcher: React.FC<LayoutSwitcherProps> = ({
                 background:
                   "linear-gradient(135deg, rgb(var(--th-accent-rgb)), rgb(var(--th-accent-3-rgb)))",
                 color: "var(--th-on-accent)",
-                boxShadow: "0 0 10px rgb(var(--th-on-accent-rgb) / 0.25)",
+                boxShadow: "0 2px 8px rgb(var(--th-accent-rgb) / 0.3)",
               }
             : {
                 background: "transparent",
-                color: "var(--th-on-accent-faint)",
+                color: "var(--th-text-muted)",
               }
         }
       >
