@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Wind, Mountain, Waves, CloudRain, Atom, Clock } from "lucide-react";
+import { Sparkles, Wind, Mountain, Waves, CloudRain, Snowflake, Flame, Binary, Atom, Clock } from "lucide-react";
 import { SCENES, type TDesktopScene } from "../model";
 
 interface IProps {
@@ -16,6 +16,9 @@ const ICONS: Record<TDesktopScene, ComponentType<{ className?: string }>> = {
   mountains: Mountain,
   ocean: Waves,
   rain: CloudRain,
+  snow: Snowflake,
+  campfire: Flame,
+  matrix: Binary,
   particles: Atom,
   clock: Clock,
 };
