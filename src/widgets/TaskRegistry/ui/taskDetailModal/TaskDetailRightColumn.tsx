@@ -4,8 +4,8 @@ import { cn } from "@shared/lib";
 import { If, Tooltip } from "@shared/ui";
 import type { Task } from "../../model/types";
 import { formatDueDate, getPriorityMeta, getStatusMeta, getCountdown } from "../../lib/helpers";
-import { Avatar } from "../Avatar";
 import { CountdownTimer } from "../Countdown";
+import { ColleagueCard } from "./ColleagueCard";
 
 export function TaskDetailRightColumn({
   task,
@@ -18,40 +18,22 @@ export function TaskDetailRightColumn({
   return (
     <div className="w-80 p-8 space-y-6 bg-slate-50/50 dark:bg-slate-800/40 overflow-y-auto shrink-0">
       <div className="space-y-4">
+        <If is={!!task.creator}>
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              Создатель
+            </label>
+            {task.creator && <ColleagueCard colleague={task.creator} />}
+          </div>
+        </If>
+
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
             {(task.assignees && task.assignees.length > 1) ? "Исполнители" : "Исполнитель"}
           </label>
           <div className="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
             {((task.assignees && task.assignees.length > 0) ? task.assignees : [task.assignee]).map((col, idx) => (
-              <div
-                key={col.id || idx}
-                className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm shrink-0 min-h-[64px]"
-              >
-                <Avatar colleague={col} className="w-10 h-10 text-xs shrink-0" />
-                <Tooltip
-                  title={
-                    <div className="p-0.5 max-w-xs">
-                      <p className="font-bold text-xs text-white">{col.name}</p>
-                      {col.role && (
-                        <p className="text-[10px] text-slate-300 mt-0.5 font-normal">
-                          {col.role}
-                        </p>
-                      )}
-                    </div>
-                  }
-                  placement="topLeft"
-                >
-                  <div className="min-w-0 flex-1 cursor-default">
-                    <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                      {col.name}
-                    </p>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                      {col.role}
-                    </p>
-                  </div>
-                </Tooltip>
-              </div>
+              <ColleagueCard key={col.id || idx} colleague={col} />
             ))}
           </div>
         </div>

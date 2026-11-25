@@ -7,6 +7,7 @@ import type { Pagination } from "../model/api";
 import { formatDueDate } from "../lib/helpers";
 import { Avatar } from "./Avatar";
 import { LiveCountdown } from "./Countdown";
+import { TaskCreatorCell } from "./TaskCreatorCell";
 
 interface TaskListViewProps {
 	tasks: Task[];
@@ -112,16 +113,17 @@ export const TaskListView = ({
 	return (
 		<div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-slate-100 dark:border-white/10 rounded-3xl p-5 shadow-xl shadow-purple-100/40 dark:shadow-none flex flex-col min-h-[500px]">
 			<div className="flex-1 overflow-x-auto">
-				<table className="w-full text-center border-separate border-spacing-y-2.5 min-w-[960px]">
+				<table className="w-full text-center border-separate border-spacing-y-2.5 min-w-[1140px]">
 					<thead>
 						<tr className="text-[11px] font-black uppercase tracking-wider text-purple-900 dark:text-purple-300">
-							<th className="px-3 py-2 w-[10%] text-center">КОД</th>
-							<th className="px-3 py-2 w-[22%] text-center">НАЗВАНИЕ</th>
-							<th className="px-3 py-2 w-[24%] text-left">ИСПОЛНИТЕЛЬ</th>
-							<th className="px-3 py-2 w-[12%] text-center">ПРИОРИТЕТ</th>
-							<th className="px-3 py-2 w-[12%] text-center">СТАТУС</th>
-							<th className="px-3 py-2 w-[10%] text-center">СРОК</th>
-							<th className="px-3 py-2 w-[10%] text-center">ОБРАТНЫЙ ОТСЧЁТ</th>
+							<th className="px-3 py-2 w-[8%] text-center">КОД</th>
+							<th className="px-3 py-2 w-[18%] text-center">НАЗВАНИЕ</th>
+							<th className="px-3 py-2 w-[19%] text-left">ИСПОЛНИТЕЛЬ</th>
+							<th className="px-3 py-2 w-[17%] text-left">СОЗДАТЕЛЬ</th>
+							<th className="px-3 py-2 w-[11%] text-center">ПРИОРИТЕТ</th>
+							<th className="px-3 py-2 w-[11%] text-center">СТАТУС</th>
+							<th className="px-3 py-2 w-[8%] text-center">СРОК</th>
+							<th className="px-3 py-2 w-[8%] text-center">ОБРАТНЫЙ ОТСЧЁТ</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -238,6 +240,10 @@ export const TaskListView = ({
 											)}
 										</td>
 
+										<td className="px-3 py-3.5 text-left">
+											<TaskCreatorCell creator={task.creator} />
+										</td>
+
 										{/* PRIORITY */}
 										<td className="px-3 py-3.5 text-center">
 											<Tooltip title={priorityBadge.label} placement="top">
@@ -302,7 +308,7 @@ export const TaskListView = ({
 
 						<If is={tasks.length === 0}>
 							<tr>
-								<td colSpan={7} className="py-16 text-center">
+								<td colSpan={8} className="py-16 text-center">
 									<div className="flex flex-col items-center gap-2">
 										<div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-300">
 											<Search size={24} />
