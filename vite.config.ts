@@ -5,6 +5,11 @@ import compression from "vite-plugin-compression";
 
 import path from "path";
 
+// Vite открывает браузер из переменной BROWSER. Без неё ссылку перехватывает
+// встроенный браузер редактора, поэтому по умолчанию явно просим Chrome;
+// своё значение (например, BROWSER=none) по-прежнему имеет приоритет.
+process.env.BROWSER ??= process.platform === "darwin" ? "google chrome" : "chrome";
+
 export default defineConfig({
   plugins: [
     react(),
@@ -19,6 +24,10 @@ export default defineConfig({
     }),
 
   ],
+
+  server: {
+    open: true,
+  },
 
   resolve: {
     alias: {
