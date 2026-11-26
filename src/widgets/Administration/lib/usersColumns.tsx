@@ -22,7 +22,6 @@ const actionMenuItemStyle: React.CSSProperties = {
 const actionMenuHover = (e: React.MouseEvent<HTMLButtonElement>) => {
   e.currentTarget.style.background = T.hoverBg;
 };
-
 const actionMenuLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
   e.currentTarget.style.background = "transparent";
 };
@@ -36,6 +35,7 @@ export const getUsersColumns = (
   {
     title: "Сотрудник",
     key: "user",
+    width: 240,
     render: (_, user) => {
       const primaryRole = user.roles[0];
       const roleCfg = getRoleColor(primaryRole);
@@ -69,6 +69,7 @@ export const getUsersColumns = (
     title: "Email",
     dataIndex: "email",
     key: "email",
+    width: 200,
     render: (text) => (
       <span style={{ fontSize: 12, color: T.textSecondary }}>{text || ""}</span>
     ),
@@ -77,11 +78,13 @@ export const getUsersColumns = (
     title: "Отдел",
     dataIndex: "department",
     key: "department",
+    width: 170,
     render: (text) => <span style={{ fontSize: 13, color: T.textPrimary }}>{text}</span>,
   },
   {
     title: "Роли",
     key: "roles",
+    width: 180,
     render: (_, user) => (
       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
         {user.roles.slice(0, 2).map((role) => {
@@ -123,6 +126,7 @@ export const getUsersColumns = (
   {
     title: "Статус",
     key: "status",
+    width: 130,
     render: (_, user) => {
       const statusCfg = EXT_STATUS_CFG[user.status] ?? EXT_STATUS_CFG["Активен"];
       return (
@@ -148,17 +152,20 @@ export const getUsersColumns = (
     title: "Активность",
     dataIndex: "lastActivity",
     key: "lastActivity",
+    width: 130,
     render: (text) => <span style={{ fontSize: 12, color: T.textSecondary }}>{text}</span>,
   },
   {
     title: "В системе с",
     dataIndex: "joinedDate",
     key: "joinedDate",
+    width: 130,
     render: (text) => <span style={{ fontSize: 12, color: T.textSecondary }}>{text}</span>,
   },
   {
     key: "actions",
-    width: 50,
+    width: 60,
+    fixed: "right",
     render: (_, user, idx) => (
       <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
         <button

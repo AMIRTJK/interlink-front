@@ -24,6 +24,6 @@ export const LOCK_TEXTS = {
   hidePassword: "Скрыть пароль",
   submit: "Разблокировать",
   logout: "Выйти из системы",
-  browserOnlyNotice:
-    "Блокировка пока работает на стороне браузера — серверная блокировка сеанса в разработке",
+  hideForm: "Скрыть",
+  revealHint: "Нажмите любую клавишу",
 } as const;

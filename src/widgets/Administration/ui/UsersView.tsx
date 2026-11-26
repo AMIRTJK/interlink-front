@@ -94,6 +94,7 @@ export function UsersView() {
         }}
       >
         <Table
+          className="admin__users-table"
           dataSource={users}
           columns={getUsersColumns(
             setProfileUser,
@@ -102,6 +103,7 @@ export function UsersView() {
             addToast,
           )}
           rowKey="id"
+          scroll={{ x: 1240, y: "calc(100vh - 440px)" }}
           rowSelection={{
             selectedRowKeys: Array.from(checkedUsers),
             onChange: (newSelectedRowKeys) => {

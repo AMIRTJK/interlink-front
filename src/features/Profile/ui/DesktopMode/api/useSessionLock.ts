@@ -20,8 +20,7 @@
  * - lock(): вызвать AUTH_LOCK, затем writeSessionLocked(true);
  * - unlock(): вместо verifyPasswordByLogin — AUTH_UNLOCK с паролем;
  * - isLocked: брать из auth/me (localStorage оставить как быстрый кэш до ответа);
- * - в http-интерцепторе на 423 включать writeSessionLocked(true);
- * - убрать LOCK_TEXTS.browserOnlyNotice с экрана блокировки.
+ * - в http-интерцепторе на 423 включать writeSessionLocked(true).
  */
 import { useCallback, useSyncExternalStore } from "react";
 import type { TUnlockResult } from "../lockModel";

@@ -2,6 +2,7 @@ import type { TDesktopScene } from "../model";
 import { SpaceBg } from "./SpaceBg";
 import { AuroraBg } from "./AuroraBg";
 import { RainBg } from "./RainBg";
+import { CampfireBg } from "./CampfireBg";
 import { ParticlesBg } from "./ParticlesBg";
 import { OceanBg } from "./OceanBg";
 import { MountainsBg } from "./MountainsBg";
@@ -20,6 +21,8 @@ export const SceneBackground = ({ scene, isDark }: IProps) => {
       return <AuroraBg isDark={isDark} />;
     case "rain":
       return <RainBg isDark={isDark} />;
+    case "campfire":
+      return <CampfireBg />;
     case "particles":
       return <ParticlesBg isDark={isDark} />;
     case "ocean":

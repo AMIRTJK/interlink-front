@@ -15,8 +15,6 @@ interface IProps {
   errors: Record<string, string>;
   onChange: (name: string, value: any) => void;
   employee?: IAdminUser | null;
-  onClose: () => void;
-  isPending: boolean;
 }
 
 export function EmployeeFormStepContainer({
@@ -28,8 +26,6 @@ export function EmployeeFormStepContainer({
   errors,
   onChange,
   employee,
-  onClose,
-  isPending,
 }: IProps) {
   return (
     <>
@@ -85,23 +81,6 @@ export function EmployeeFormStepContainer({
         isEdit={isEdit}
         initialPhoto={resolveEmployeePhotoUrl(employee) || undefined}
       />
-
-      <div className="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex-1 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors border-gray-200 dark:border-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer"
-        >
-          Отмена
-        </button>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="flex-1 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 transition-colors cursor-pointer"
-        >
-          {isEdit ? "Сохранить" : "Добавить сотрудника"}
-        </button>
-      </div>
     </>
   );
 }
