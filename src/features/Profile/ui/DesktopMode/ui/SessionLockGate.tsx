@@ -27,15 +27,13 @@ export const SessionLockGate = () => {
   useInertBackground(isLocked);
   useLockPageScroll(isLocked);
 
-  const mutedTone = isDark ? "text-white/45" : "text-slate-500";
-
   return (
     <AnimatePresence>
       {isLocked && (
         <DesktopMode
           userData={userData}
           isDark={isDark}
-          headerAction={
+          headerAction={(isSceneDark) => (
             <Tooltip
               title={LOCK_TEXTS.logout}
               placement="bottomRight"
@@ -45,17 +43,14 @@ export const SessionLockGate = () => {
                 type="button"
                 onClick={handleLogout}
                 aria-label={LOCK_TEXTS.logout}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 backdrop-blur-xl border cursor-pointer focus-visible:outline-2 focus-visible:outline-indigo-400 ${isDark ? "bg-white/10 hover:bg-white/20 border-white/20 text-white" : "bg-black/5 hover:bg-black/10 border-black/10 text-slate-800"}`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 backdrop-blur-xl border cursor-pointer focus-visible:outline-2 focus-visible:outline-indigo-400 ${isSceneDark ? "bg-white/10 hover:bg-white/20 border-white/20 text-white" : "bg-black/5 hover:bg-black/10 border-black/10 text-slate-800"}`}
               >
                 <LogOut size={18} />
               </button>
             </Tooltip>
-          }
+          )}
         >
-          <UnlockForm isDark={isDark} onUnlock={unlock} />
-          <p className={`text-[11px] leading-snug tracking-wide px-2 ${mutedTone}`}>
-            {LOCK_TEXTS.browserOnlyNotice}
-          </p>
+          {(isSceneDark) => <UnlockForm isDark={isSceneDark} onUnlock={unlock} />}
         </DesktopMode>
       )}
     </AnimatePresence>

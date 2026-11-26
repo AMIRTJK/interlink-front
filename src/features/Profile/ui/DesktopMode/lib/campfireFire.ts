@@ -8,23 +8,30 @@ interface IFireParticle {
   life: number;
   maxLife: number;
   size: number;
+  tongue: number;
 }
 
 export interface IFireState {
   flames: IFireParticle[];
   sparks: IFireParticle[];
+  smoke: IFireParticle[];
+  tick: number;
 }
 
 export interface IFireSprites {
   core: HTMLCanvasElement;
+  hot: HTMLCanvasElement;
   mid: HTMLCanvasElement;
   outer: HTMLCanvasElement;
   spark: HTMLCanvasElement;
+  smoke: HTMLCanvasElement;
 }
 
 const SPRITE_SIZE = 64;
-const FLAMES_PER_STEP = 3;
-const SPARK_CHANCE = 0.18;
+const FLAMES_PER_STEP = 8;
+const SPARK_CHANCE = 0.07;
+const SMOKE_EVERY = 6;
+const SMOKE_ALPHA = 0.015;
 
 const createSprite = (rgb: string): HTMLCanvasElement => {
   const sprite = document.createElement("canvas");
@@ -44,92 +51,174 @@ const createSprite = (rgb: string): HTMLCanvasElement => {
 
 // По спрайту на стадию жизни частицы: перекрашивать один спрайт в каждом кадре дороже.
 export const createFireSprites = (): IFireSprites => ({
-  core: createSprite("255, 221, 140"),
+  core: createSprite("255, 244, 214"),
+  hot: createSprite("253, 190, 84"),
   mid: createSprite("249, 115, 22"),
   outer: createSprite("185, 28, 28"),
   spark: createSprite("253, 186, 116"),
+  smoke: createSprite("120, 113, 108"),
 });
 
-export const createFireState = (): IFireState => ({ flames: [], sparks: [] });
+export const createFireState = (): IFireState => ({ flames: [], sparks: [], smoke: [], tick: 0 });
 
 // Неровное «дыхание» огня — сумма синусоид с некратными частотами, без повторяющегося ритма.
 export const getFlicker = (time: number) =>
   1 + Math.sin(time * 0.013) * 0.05 + Math.sin(time * 0.029 + 1) * 0.035 + Math.sin(time * 0.051 + 2) * 0.02;
 
+const getWind = (tick: number) => Math.sin(tick * 0.017) * 0.22 + Math.sin(tick * 0.047 + 1) * 0.1;
+
+// Сумма двух случайных даёт треугольное распределение: огонь плотнее в центре, реже по краям.
+const centered = () => Math.random() + Math.random() - 1;
+
+// Языки пламени: смещение от центра и фаза колыхания. Частица привязана к одному
+// языку — так огонь читается как несколько живых языков, а не как один столб.
+const TONGUES = [
+  { offset: -0.55, phase: 0 },
+  { offset: 0, phase: 2.1 },
+  { offset: 0.5, phase: 4.2 },
+] as const;
+const TONGUE_SPREAD = 20;
+// Языки вытянуты вверх: частица рисуется выше, чем шире, — так пламя не сливается в шар.
+const FLAME_STRETCH = { x: 0.7, y: 1.45 } as const;
+
 const spawnFlame = ({ x, y, scale }: IFirePlace): IFireParticle => ({
-  x: x + (Math.random() - 0.5) * 44 * scale,
+  x: x + centered() * 38 * scale,
   y: y - 6 * scale,
-  vx: (Math.random() - 0.5) * 0.4 * scale,
-  vy: -(1.1 + Math.random() * 1.3) * scale,
+  vx: centered() * 0.25 * scale,
+  vy: -(1.3 + Math.random() * 1.5) * scale,
   life: 0,
-  maxLife: 40 + Math.random() * 30,
-  size: (26 + Math.random() * 16) * scale,
+  maxLife: 24 + Math.random() * 26,
+  size: (18 + Math.random() * 14) * scale,
+  tongue: Math.floor(Math.random() * TONGUES.length),
 });
 
 const spawnSpark = ({ x, y, scale }: IFirePlace): IFireParticle => ({
-  x: x + (Math.random() - 0.5) * 30 * scale,
-  y: y - 20 * scale,
-  vx: (Math.random() - 0.5) * 0.9,
-  vy: -(2 + Math.random() * 2.2) * scale,
+  x: x + centered() * 26 * scale,
+  y: y - 34 * scale,
+  vx: centered() * 1.3,
+  vy: -(1.2 + Math.random() * 1.6) * scale,
   life: 0,
-  maxLife: 80 + Math.random() * 90,
-  size: (2 + Math.random() * 2.5) * scale,
+  maxLife: 40 + Math.random() * 60,
+  size: (1.4 + Math.random() * 1.8) * scale,
+  tongue: 0,
+});
+
+const spawnSmoke = ({ x, y, scale }: IFirePlace): IFireParticle => ({
+  x: x + centered() * 16 * scale,
+  y: y - 80 * scale,
+  vx: centered() * 0.25,
+  vy: -(0.4 + Math.random() * 0.3) * scale,
+  life: 0,
+  maxLife: 150 + Math.random() * 80,
+  size: 34 * scale,
+  tongue: 0,
 });
 
 export const stepFire = (state: IFireState, place: IFirePlace) => {
+  state.tick++;
+  const wind = getWind(state.tick) * place.scale;
+
   for (let i = 0; i < FLAMES_PER_STEP; i++) state.flames.push(spawnFlame(place));
   if (Math.random() < SPARK_CHANCE) state.sparks.push(spawnSpark(place));
+  if (state.tick % SMOKE_EVERY === 0) state.smoke.push(spawnSmoke(place));
 
-  // Языки пламени стягиваются к оси костра — так из облака частиц получается конус огня.
+  // Каждая частица тянется к оси своего языка; ось колышется и к верху сносится ветром.
   state.flames.forEach((flame) => {
     flame.life++;
-    flame.x += flame.vx + (place.x - flame.x) * 0.035;
+    const progress = flame.life / flame.maxLife;
+    const tongue = TONGUES[flame.tongue];
+    const sway = Math.sin(state.tick * 0.07 + tongue.phase) * 10 * progress;
+    const axis = place.x + (tongue.offset * TONGUE_SPREAD + sway) * place.scale + wind * progress * 14;
+    flame.x += flame.vx + (axis - flame.x) * (0.02 + progress * 0.08);
+    flame.vy *= 1.006;
     flame.y += flame.vy;
   });
 
   state.sparks.forEach((spark) => {
     spark.life++;
-    spark.vx += Math.sin(spark.life * 0.06 + spark.maxLife) * 0.03;
-    spark.vy *= 0.993;
+    spark.vx += Math.sin(spark.life * 0.08 + spark.maxLife) * 0.05 + wind * 0.01;
+    spark.vy *= 0.985;
     spark.x += spark.vx;
     spark.y += spark.vy;
   });
 
+  state.smoke.forEach((puff) => {
+    puff.life++;
+    puff.x += puff.vx + wind * 0.6;
+    puff.y += puff.vy;
+  });
+
   state.flames = state.flames.filter((flame) => flame.life < flame.maxLife);
   state.sparks = state.sparks.filter((spark) => spark.life < spark.maxLife);
+  state.smoke = state.smoke.filter((puff) => puff.life < puff.maxLife);
 };
 
-export const drawFireGlow = (ctx: CanvasRenderingContext2D, place: IFirePlace, flicker: number) => {
-  const radius = 260 * place.scale * flicker;
-  const glow = ctx.createRadialGradient(place.x, place.y, 0, place.x, place.y, radius);
-  glow.addColorStop(0, `rgba(251, 146, 60, ${0.32 * flicker})`);
-  glow.addColorStop(0.45, "rgba(234, 88, 12, 0.1)");
+// Ореол в воздухе плюс сплюснутое пятно света на земле прямо у огня. Свет на деревьях
+// и поляне даёт отдельный слой (campfireLight).
+export const drawFireGlow = (ctx: CanvasRenderingContext2D, { x, y, scale }: IFirePlace, flicker: number) => {
+  const radius = 340 * scale * flicker;
+  const glow = ctx.createRadialGradient(x, y - 20 * scale, 0, x, y - 20 * scale, radius);
+  glow.addColorStop(0, `rgba(251, 146, 60, ${0.2 * flicker})`);
+  glow.addColorStop(0.4, "rgba(234, 88, 12, 0.06)");
   glow.addColorStop(1, "rgba(234, 88, 12, 0)");
   ctx.fillStyle = glow;
-  ctx.fillRect(place.x - radius, place.y - radius, radius * 2, radius * 2);
+  ctx.fillRect(x - radius, y - 20 * scale - radius, radius * 2, radius * 2);
+
+  ctx.save();
+  ctx.translate(x, y + 10 * scale);
+  ctx.scale(1, 0.28);
+  const groundRadius = 190 * scale * flicker;
+  const ground = ctx.createRadialGradient(0, 0, 0, 0, 0, groundRadius);
+  ground.addColorStop(0, `rgba(253, 164, 80, ${0.45 * flicker})`);
+  ground.addColorStop(1, "rgba(253, 164, 80, 0)");
+  ctx.fillStyle = ground;
+  ctx.fillRect(-groundRadius, -groundRadius, groundRadius * 2, groundRadius * 2);
+  ctx.restore();
 };
 
 const pickFlameSprite = (progress: number, sprites: IFireSprites) => {
-  if (progress < 0.18) return sprites.core;
-  return progress < 0.6 ? sprites.mid : sprites.outer;
+  if (progress < 0.05) return sprites.core;
+  if (progress < 0.32) return sprites.hot;
+  return progress < 0.7 ? sprites.mid : sprites.outer;
+};
+
+const drawSprite = (ctx: CanvasRenderingContext2D, sprite: HTMLCanvasElement, x: number, y: number, size: number) => {
+  ctx.drawImage(sprite, x - size / 2, y - size / 2, size, size);
 };
 
 // Режим lighter складывает яркость перекрывающихся частиц — центр огня выгорает до белого.
-export const drawFire = (ctx: CanvasRenderingContext2D, state: IFireState, sprites: IFireSprites) => {
+export const drawFire = (
+  ctx: CanvasRenderingContext2D,
+  state: IFireState,
+  sprites: IFireSprites,
+  place: IFirePlace,
+  flicker: number,
+) => {
+  state.smoke.forEach((puff) => {
+    const progress = puff.life / puff.maxLife;
+    ctx.globalAlpha = Math.sin(progress * Math.PI) * SMOKE_ALPHA;
+    drawSprite(ctx, sprites.smoke, puff.x, puff.y, puff.size * (1 + progress * 2.5));
+  });
+
   ctx.globalCompositeOperation = "lighter";
+
+  ctx.globalAlpha = 0.12 * flicker;
+  drawSprite(ctx, sprites.hot, place.x, place.y - 8 * place.scale, 48 * place.scale);
 
   state.flames.forEach((flame) => {
     const progress = flame.life / flame.maxLife;
-    const size = flame.size * (1 - progress * 0.7);
-    ctx.globalAlpha = (1 - progress) * 0.3;
-    ctx.drawImage(pickFlameSprite(progress, sprites), flame.x - size / 2, flame.y - size / 2, size, size);
+    const fadeIn = Math.min(1, flame.life / 4);
+    ctx.globalAlpha = Math.pow(1 - progress, 1.1) * 0.24 * fadeIn;
+    const size = flame.size * (1 - progress * 0.75);
+    const width = size * FLAME_STRETCH.x;
+    const height = size * FLAME_STRETCH.y;
+    ctx.drawImage(pickFlameSprite(progress, sprites), flame.x - width / 2, flame.y - height / 2, width, height);
   });
 
   state.sparks.forEach((spark) => {
     const progress = spark.life / spark.maxLife;
-    const size = spark.size * 3;
-    ctx.globalAlpha = (1 - progress) * (0.6 + Math.random() * 0.4);
-    ctx.drawImage(sprites.spark, spark.x - size / 2, spark.y - size / 2, size, size);
+    ctx.globalAlpha = (1 - progress) * (0.55 + Math.random() * 0.45);
+    drawSprite(ctx, sprites.spark, spark.x, spark.y, spark.size * 3);
   });
 
   ctx.globalAlpha = 1;

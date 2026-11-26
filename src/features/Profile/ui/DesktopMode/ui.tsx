@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { IUser } from "@entities/login";
 import { Logo } from "@shared/ui";
 import { TDesktopScene, SCENES, STORAGE_SCENE_KEY } from "./model";
@@ -8,6 +8,9 @@ import { LOCK_TEXTS } from "./lockModel";
 import { SceneBackground } from "./Backgrounds/SceneBackground";
 import { useLockClock } from "./lib/useLockClock";
 import { UserCard } from "./ui/UserCard";
+import { RevealHint } from "./ui/RevealHint";
+import { HideFormButton } from "./ui/HideFormButton";
+import { useFormReveal } from "./lib/useFormReveal";
 import { SceneSwitcher } from "./ui/SceneSwitcher";
 import { Watch } from "./watch/ui/Watch";
 import { WatchVariantSwitcher } from "./watch/ui/WatchVariantSwitcher";
@@ -16,8 +19,10 @@ import { useWatchVariant } from "./watch/lib/useWatchVariant";
 interface IProps {
   userData: IUser | null;
   isDark: boolean;
-  headerAction?: ReactNode;
-  children?: ReactNode;
+  // Ночная сцена может переключить оформление на тёмное и при светлой теме —
+  // поэтому шапка и форма получают тему от экрана, а не берут её сами.
+  headerAction?: (isDark: boolean) => ReactNode;
+  children?: (isDark: boolean) => ReactNode;
 }
 
 // split: предмет сцены и карточка стоят рядом (на узком — друг под другом) и не
@@ -28,6 +33,14 @@ const LAYOUT_CLASSES = {
     time: "text-6xl md:text-8xl font-thin tracking-widest leading-none",
     date: "text-sm md:text-base font-semibold tracking-widest uppercase mt-4",
     card: "mt-10",
+  },
+  // stage: низ экрана занимает предмет сцены (костёр) — время и компактная карточка
+  // стоят наверху, всё пространство под ними отдано сцене.
+  stage: {
+    main: "relative z-10 flex flex-col items-center justify-start flex-1 text-center mt-[2vh] md:mt-[4vh]",
+    time: "text-5xl md:text-7xl font-thin tracking-widest leading-none",
+    date: "text-xs md:text-sm font-semibold tracking-widest uppercase mt-3",
+    card: "mt-6",
   },
   split: {
     main: "relative z-10 flex-1 min-h-0 overflow-y-auto my-4 md:my-6",
@@ -58,11 +71,24 @@ export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps
     localStorage.setItem(STORAGE_SCENE_KEY, scene);
   };
 
-  const isSplit = SCENES.find((scene) => scene.key === activeScene)?.layout === "split";
+  const sceneOption = SCENES.find((scene) => scene.key === activeScene);
+  const layout = sceneOption?.layout ?? "centered";
+  const classes = LAYOUT_CLASSES[layout];
+  const isSplit = layout === "split";
   const isClockScene = activeScene === "clock";
-  const textTone = isDark ? "text-white" : "text-slate-850";
-  const mutedTone = isDark ? "text-white/70" : "text-slate-600";
-  const centeredTimeStyle = isDark ? CENTERED_TIME_STYLE.dark : CENTERED_TIME_STYLE.light;
+  const isSceneDark = isDark || Boolean(sceneOption?.isAlwaysNight);
+  const isFormOnDemand = Boolean(sceneOption?.isFormOnDemand);
+  const { isRevealed, reveal, conceal } = useFormReveal(isFormOnDemand);
+  const textTone = isSceneDark ? "text-white" : "text-slate-850";
+  const mutedTone = isSceneDark ? "text-white/70" : "text-slate-600";
+  const centeredTimeStyle = isSceneDark ? CENTERED_TIME_STYLE.dark : CENTERED_TIME_STYLE.light;
+
+  // Щелчок по пустому месту сцены открывает скрытую форму и прячет открытую.
+  const handleStageClick = () => {
+    if (!isFormOnDemand) return;
+    if (isRevealed) conceal();
+    else reveal();
+  };
 
   return createPortal(
     <motion.div
@@ -82,48 +108,79 @@ export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps
 
       <header className="relative z-10 flex items-center justify-between w-full">
         <Logo
-          className={`text-xl font-bold tracking-[0.25em] ${isDark ? "text-white/80" : "text-slate-800/80"}`}
+          className={`text-xl font-bold tracking-[0.25em] ${isSceneDark ? "text-white/80" : "text-slate-800/80"}`}
         />
-        {headerAction}
+        {headerAction?.(isSceneDark)}
       </header>
 
-      {/* Дерево одно для обеих раскладок: при смене сцены форма пароля не перемонтируется. */}
-      <main className={isSplit ? LAYOUT_CLASSES.split.main : LAYOUT_CLASSES.centered.main}>
+      {/* Дерево одно для всех раскладок: при смене сцены форма пароля не перемонтируется. */}
+      <main className={classes.main} onClick={handleStageClick}>
         <div className={isSplit ? LAYOUT_CLASSES.split.row : "contents"}>
           {isClockScene && (
             <Watch
               key={watchVariant}
               variant={watchVariant}
-              isDark={isDark}
+              isDark={isSceneDark}
               className="shrink-0 aspect-[8/15] h-[min(42vh,340px)] md:h-[min(calc(100vh-20rem),460px)] lg:h-[min(calc(100vh-20rem),620px)]"
             />
           )}
           <div className={isSplit ? LAYOUT_CLASSES.split.column : "contents"}>
             <h1
-              className={`${isSplit ? LAYOUT_CLASSES.split.time : LAYOUT_CLASSES.centered.time} ${textTone}`}
+              className={`${classes.time} ${textTone}`}
               style={isSplit ? undefined : centeredTimeStyle}
             >
               {isSplit ? formattedShortTime : formattedTime}
             </h1>
-            <p className={`${isSplit ? LAYOUT_CLASSES.split.date : LAYOUT_CLASSES.centered.date} ${mutedTone}`}>
+            <p className={`${classes.date} ${mutedTone}`}>
               {formattedDate}
             </p>
-            <UserCard
-              userData={userData}
-              isDark={isDark}
-              className={isSplit ? LAYOUT_CLASSES.split.card : LAYOUT_CLASSES.centered.card}
-            >
-              {children}
-            </UserCard>
+            {isFormOnDemand ? (
+              // Место под карточку зарезервировано и при скрытой форме: граница над
+              // костром не двигается, и огонь не меняет размер. popLayout сразу выносит
+              // уходящий элемент из потока — подсказка не прыгает, а карточка монтируется
+              // без ожидания (иначе потеряется первый набранный символ пароля).
+              <div data-lock-anchor="" className="relative mt-6 w-full min-h-[11.5rem] flex flex-col items-center justify-start">
+                <AnimatePresence initial={false} mode="popLayout">
+                  {isRevealed ? (
+                    <motion.div
+                      key="card"
+                      /* Без opacity: прозрачность обёртки ломает размытие стекла,
+                         карточка гаснет и проявляется сама. */
+                      initial={{ y: 16, scale: 0.97 }}
+                      animate={{ y: 0, scale: 1 }}
+                      exit={{ y: 8, scale: 0.98, transition: { duration: 0.18, ease: "easeIn" } }}
+                      transition={{ duration: 0.35, ease: "easeOut" }}
+                      className="w-full flex justify-center"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <UserCard
+                        userData={userData}
+                        isDark={isSceneDark}
+                        variant="compact"
+                        cornerAction={<HideFormButton isDark={isSceneDark} onHide={conceal} />}
+                      >
+                        {children?.(isSceneDark)}
+                      </UserCard>
+                    </motion.div>
+                  ) : (
+                    <RevealHint key="hint" isDark={isSceneDark} onReveal={reveal} />
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <UserCard userData={userData} isDark={isSceneDark} className={classes.card}>
+                {children?.(isSceneDark)}
+              </UserCard>
+            )}
           </div>
         </div>
       </main>
 
-      <footer className="relative z-10 flex flex-col items-center gap-2.5 w-full">
+      <footer className="relative z-10 flex flex-col items-center gap-2.5 w-full" data-lock-footer="">
         {isClockScene && (
-          <WatchVariantSwitcher value={watchVariant} isDark={isDark} onChange={selectWatchVariant} />
+          <WatchVariantSwitcher value={watchVariant} isDark={isSceneDark} onChange={selectWatchVariant} />
         )}
-        <SceneSwitcher activeScene={activeScene} isDark={isDark} lang={lang} onSelect={selectScene} />
+        <SceneSwitcher activeScene={activeScene} isDark={isSceneDark} lang={lang} onSelect={selectScene} />
       </footer>
     </motion.div>,
     document.body
