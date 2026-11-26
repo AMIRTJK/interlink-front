@@ -156,21 +156,23 @@ export const stepFire = (state: IFireState, place: IFirePlace) => {
 // Ореол в воздухе плюс сплюснутое пятно света на земле прямо у огня. Свет на деревьях
 // и поляне даёт отдельный слой (campfireLight).
 export const drawFireGlow = (ctx: CanvasRenderingContext2D, { x, y, scale }: IFirePlace, flicker: number) => {
-  const radius = 340 * scale * flicker;
-  const glow = ctx.createRadialGradient(x, y - 20 * scale, 0, x, y - 20 * scale, radius);
-  glow.addColorStop(0, `rgba(251, 146, 60, ${0.2 * flicker})`);
-  glow.addColorStop(0.4, "rgba(234, 88, 12, 0.06)");
+  const radius = 260 * scale * flicker;
+  const glowY = y - 30 * scale;
+  const glow = ctx.createRadialGradient(x, glowY, 0, x, glowY, radius);
+  glow.addColorStop(0, `rgba(251, 146, 60, ${0.14 * flicker})`);
+  glow.addColorStop(0.3, "rgba(234, 88, 12, 0.04)");
   glow.addColorStop(1, "rgba(234, 88, 12, 0)");
   ctx.fillStyle = glow;
-  ctx.fillRect(x - radius, y - 20 * scale - radius, radius * 2, radius * 2);
+  ctx.fillRect(x - radius, glowY - radius, radius * 2, radius * 2);
 
   ctx.save();
   ctx.translate(x, y + 10 * scale);
-  ctx.scale(1, 0.28);
-  const groundRadius = 190 * scale * flicker;
+  ctx.scale(1, 0.3);
+  const groundRadius = 170 * scale * flicker;
   const ground = ctx.createRadialGradient(0, 0, 0, 0, 0, groundRadius);
-  ground.addColorStop(0, `rgba(253, 164, 80, ${0.45 * flicker})`);
-  ground.addColorStop(1, "rgba(253, 164, 80, 0)");
+  ground.addColorStop(0, `rgba(253, 164, 80, ${0.42 * flicker})`);
+  ground.addColorStop(0.3, `rgba(253, 140, 60, ${0.16 * flicker})`);
+  ground.addColorStop(1, "rgba(253, 140, 60, 0)");
   ctx.fillStyle = ground;
   ctx.fillRect(-groundRadius, -groundRadius, groundRadius * 2, groundRadius * 2);
   ctx.restore();

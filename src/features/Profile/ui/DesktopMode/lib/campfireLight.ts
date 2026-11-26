@@ -11,8 +11,8 @@ const FIRELIGHT_PALETTE: ILandscapePalette = {
 };
 
 // Свет падает пятном, вытянутым по горизонтали: дальше вбок по поляне, меньше вверх.
-const LIGHT_RADIUS = 330;
-const LIGHT_STRETCH_X = 1.6;
+const LIGHT_RADIUS = 230;
+const LIGHT_STRETCH_X = 1.45;
 
 /**
  * Слой «освещённого» пейзажа, обрезанный радиальной маской вокруг костра.
@@ -40,11 +40,16 @@ export const renderFirelightLayer = (
   // по спецификации canvas тоже стирается.
   ctx.globalCompositeOperation = "destination-in";
   ctx.save();
-  ctx.translate(place.x, place.y - 10 * place.scale);
+  // Источник света у земли: сильнее всего освещена поляна рядом с огнём,
+  // до дальних ёлок доходит лишь слабый отблеск у подножия.
+  ctx.translate(place.x, place.y + 4 * place.scale);
   ctx.scale(LIGHT_STRETCH_X, 1);
   const mask = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+  // Спад ближе к обратному квадрату: яркое ядро и быстрое затухание, без ровного пятна.
   mask.addColorStop(0, "rgba(0, 0, 0, 1)");
-  mask.addColorStop(0.35, "rgba(0, 0, 0, 0.6)");
+  mask.addColorStop(0.15, "rgba(0, 0, 0, 0.75)");
+  mask.addColorStop(0.4, "rgba(0, 0, 0, 0.3)");
+  mask.addColorStop(0.7, "rgba(0, 0, 0, 0.08)");
   mask.addColorStop(1, "rgba(0, 0, 0, 0)");
   ctx.fillStyle = mask;
   ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
@@ -53,4 +58,4 @@ export const renderFirelightLayer = (
 };
 
 // Свет дышит вместе с пламенем, но сильнее, чем сам ореол: так мерцание заметно на деревьях.
-export const getFirelightAlpha = (flicker: number) => Math.min(1, 0.55 * Math.pow(flicker, 4));
+export const getFirelightAlpha = (flicker: number) => Math.min(1, 0.7 * Math.pow(flicker, 2));
