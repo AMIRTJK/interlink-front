@@ -21,12 +21,8 @@ export const SceneBackground = ({ scene, isDark }: IProps) => {
       return <AuroraBg isDark={isDark} />;
     case "rain":
       return <RainBg isDark={isDark} />;
-    case "snow":
-      return <SnowBg isDark={isDark} />;
     case "campfire":
       return <CampfireBg />;
-    case "matrix":
-      return <MatrixBg isDark={isDark} />;
     case "particles":
       return <ParticlesBg isDark={isDark} />;
     case "ocean":
