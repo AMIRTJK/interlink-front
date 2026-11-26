@@ -21,7 +21,7 @@ import {
 } from "../lib/campfireFire";
 
 // Сколько шагов прогнать до статичного кадра, чтобы огонь успел разгореться.
-const WARMUP_STEPS = 90;
+const WARMUP_STEPS = 100;
 // Выше 2x разница не видна, а частиц с режимом lighter на кадр становится заметно дороже.
 const MAX_PIXEL_RATIO = 2;
 // Раскладку над огнём перечитываем раз в несколько кадров: карточка появляется,
@@ -30,6 +30,9 @@ const MEASURE_EVERY_FRAMES = 12;
 const REDUCED_MOTION_MEASURE_MS = 500;
 // Доля пути к новому месту за кадр — костёр плавно отступает, когда появляется форма.
 const PLACE_EASING = 0.08;
+// Фиксированный шаг симуляции физики огня (60 шагов в секунду), независимый от герцовки экрана.
+const SIMULATION_STEP_MS = 1000 / 60;
+const MAX_ACCUMULATED_MS = 100;
 
 const measureFireBounds = (): IFireBounds | null => {
   const anchor = document.querySelector(LOCK_ANCHOR_SELECTOR);
@@ -126,11 +129,23 @@ export const CampfireBg = () => {
       if (isReducedMotion) drawStill();
     };
 
+    let lastTime = 0;
+    let accumulatedTime = 0;
+
     const loop = (time: number) => {
-      frame++;
-      if (frame % MEASURE_EVERY_FRAMES === 0) retarget();
-      easeToTarget();
-      stepFire(fire, place);
+      if (!lastTime) lastTime = time;
+      const dt = Math.min(time - lastTime, MAX_ACCUMULATED_MS);
+      lastTime = time;
+      accumulatedTime += dt;
+
+      while (accumulatedTime >= SIMULATION_STEP_MS) {
+        frame++;
+        if (frame % MEASURE_EVERY_FRAMES === 0) retarget();
+        easeToTarget();
+        stepFire(fire, place);
+        accumulatedTime -= SIMULATION_STEP_MS;
+      }
+
       drawFrame(time);
       animationFrameId = requestAnimationFrame(loop);
     };

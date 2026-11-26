@@ -31,22 +31,23 @@ interface ILog {
 const tone = (rgb: readonly [number, number, number], shade: number) =>
   `rgb(${rgb.map((channel) => Math.round(channel * shade)).join(", ")})`;
 
-// Камни стоят по эллипсу — кольцо видно в перспективе, передние перекрывают шалаш.
+// Камни стоят вокруг костра со случайными вариациями расстояния и формы
 const createStones = ({ x, y, scale }: IFirePlace, random: TRandom): IStone[] =>
   Array.from({ length: STONE_COUNT }, (_, i) => {
-    const angle = (i / STONE_COUNT) * Math.PI * 2 + random() * 0.25;
+    const angle = (i / STONE_COUNT) * Math.PI * 2 + (random() - 0.5) * 0.3;
+    const rVar = 0.92 + random() * 0.16;
     return {
-      x: x + Math.cos(angle) * RING_RADIUS.x * scale,
-      y: y + 8 * scale + Math.sin(angle) * RING_RADIUS.y * scale,
-      rx: (5.5 + random() * 4.5) * scale,
-      ry: (4 + random() * 2.5) * scale,
-      rotation: (random() - 0.5) * 0.5,
-      shade: 0.8 + random() * 0.4,
+      x: x + Math.cos(angle) * RING_RADIUS.x * scale * rVar,
+      y: y + 8 * scale + Math.sin(angle) * RING_RADIUS.y * scale * rVar,
+      rx: (5 + random() * 3.5) * scale,
+      ry: (3.2 + random() * 2.2) * scale,
+      rotation: (random() - 0.5) * 0.6,
+      shade: 0.75 + random() * 0.35,
       isFront: Math.sin(angle) > 0,
     };
   });
 
-// Бок камня, обращённый к огню, светлый и тёплый, дальний — уходит в тень.
+// Бок камня, обращённый к огню, тёплый, дальний — мягко уходит в темноту поляны.
 const drawStone = (ctx: CanvasRenderingContext2D, stone: IStone, fireX: number, fireY: number) => {
   const towardFire = Math.atan2(fireY - stone.y, fireX - stone.x);
   const reach = Math.max(stone.rx, stone.ry);
@@ -56,9 +57,9 @@ const drawStone = (ctx: CanvasRenderingContext2D, stone: IStone, fireX: number, 
     stone.x - Math.cos(towardFire) * reach,
     stone.y - Math.sin(towardFire) * reach,
   );
-  shade.addColorStop(0, tone([206, 120, 66], stone.shade));
-  shade.addColorStop(0.25, tone([84, 56, 44], stone.shade));
-  shade.addColorStop(1, tone([22, 16, 16], stone.shade));
+  shade.addColorStop(0, tone([175, 95, 48], stone.shade));
+  shade.addColorStop(0.35, tone([54, 38, 32], stone.shade));
+  shade.addColorStop(1, tone([16, 14, 18], stone.shade));
   ctx.fillStyle = shade;
   ctx.beginPath();
   ctx.ellipse(stone.x, stone.y, stone.rx, stone.ry, stone.rotation, 0, Math.PI * 2);
