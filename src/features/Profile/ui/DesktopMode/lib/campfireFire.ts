@@ -44,9 +44,9 @@ const createSprite = (rgb: string): HTMLCanvasElement => {
 
 // По спрайту на стадию жизни частицы: перекрашивать один спрайт в каждом кадре дороже.
 export const createFireSprites = (): IFireSprites => ({
-  core: createSprite("255, 240, 200"),
-  mid: createSprite("251, 146, 60"),
-  outer: createSprite("220, 38, 38"),
+  core: createSprite("255, 221, 140"),
+  mid: createSprite("249, 115, 22"),
+  outer: createSprite("185, 28, 28"),
   spark: createSprite("253, 186, 116"),
 });
 
