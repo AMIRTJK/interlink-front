@@ -34,12 +34,13 @@ export const ChatSubHeader = ({
   // распадается на куски, поэтому в этом случае остаётся только форма.
 
   return (
+    // Без собственного backdrop-filter: окно чата уже размывает фон под собой,
+    // а вложенное размытие вокруг анимируемого блока собеседника Chrome рисовал
+    // светлым пятном у верхнего края — на /modules/chat оно заметно, потому что
+    // сверху стык с шапкой приложения.
     <div
       className="flex items-center justify-between px-6 py-3 border-b flex-shrink-0 border-[var(--th-divider)]"
-      style={{
-        background: "var(--th-composer-bg)",
-        backdropFilter: "blur(10px)",
-      }}
+      style={{ background: "var(--th-composer-bg)" }}
     >
       <motion.div
         key={`header-${activeContact.id}`}

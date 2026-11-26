@@ -43,6 +43,8 @@ export interface Task {
 	assignee: Colleague;
 	/** Полный список исполнителей задачи. */
 	assignees: Colleague[];
+	/** Создатель задачи; null — бэкенд не прислал. */
+	creator: Colleague | null;
 	dueDate: string; // ISO
 	createdAt: string; // ISO
 	tags: string[];

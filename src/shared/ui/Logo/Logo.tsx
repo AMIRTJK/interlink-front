@@ -1,4 +1,5 @@
 import { CSSProperties, FC } from "react";
+import { LOGO_PATH, LOGO_VIEW_BOX } from "./model";
 
 interface IProps {
   /** Доп. классы (размер шрифта и цвет задаём здесь: `text-xl text-zinc-900 dark:text-white`). */
@@ -9,26 +10,20 @@ interface IProps {
 /**
  * Логотип системы — «INFRATECH».
  *
- * Рисуется живым текстом шрифтом Orbitron (самостоятельно хостится в
- * /public/fonts, @font-face объявлен в global.css) — тем же, что и в
- * утверждённом макете ЭЦП-штампа. Живой текст, а не картинка, потому что:
- *   • цвет наследуется (currentColor) → корректно работает в светлой и тёмной теме;
- *   • масштабируется без потери чёткости;
- *   • единый источник бренда для всех мест приложения.
- *
- * Размер и цвет управляются классами родителя/пропом className.
+ * Векторный знак, встроенный инлайном, а не <img>: заливка currentColor
+ * наследует цвет текста (светлая/тёмная тема), а высота в em сохраняет
+ * прежнее управление размером через font-size родителя.
+ * Отдельный файл того же знака — public/images/infratech-logo.svg.
  */
 export const Logo: FC<IProps> = ({ className = "", style }) => (
-  <span
+  <svg
+    role="img"
     aria-label="INFRATECH"
-    className={`inline-block whitespace-nowrap leading-none select-none ${className}`}
-    style={{
-      fontFamily: '"Orbitron", ui-sans-serif, system-ui, sans-serif',
-      fontWeight: 500,
-      letterSpacing: "0.25em",
-      ...style,
-    }}
+    viewBox={LOGO_VIEW_BOX}
+    fill="currentColor"
+    className={`inline-block shrink-0 select-none h-[0.72em] w-auto ${className}`}
+    style={style}
   >
-    INFRATECH
-  </span>
+    <path d={LOGO_PATH} />
+  </svg>
 );

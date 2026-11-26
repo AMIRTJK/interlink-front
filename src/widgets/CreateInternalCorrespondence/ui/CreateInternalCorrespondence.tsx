@@ -100,6 +100,7 @@ import { useLocationStatePrefill } from "./createInternalCorrespondence/useLocat
 import { useSavedDocumentPrefill } from "./createInternalCorrespondence/useSavedDocumentPrefill";
 import { useComposeReplyPrefill } from "./createInternalCorrespondence/useComposeReplyPrefill";
 import { useWorkflowPrefill } from "./createInternalCorrespondence/useWorkflowPrefill";
+import { pickActiveSignature } from "./createInternalCorrespondence/documentPrefillMappers";
 import { useEditorKeyDown } from "./createInternalCorrespondence/useEditorKeyDown";
 import { useEditorCommands } from "./createInternalCorrespondence/useEditorCommands";
 import {
@@ -2246,15 +2247,12 @@ export const CreateInternalCorrespondence = ({
     resetHistory,
   ]);
 
-  const activeSignatures =
-    rawWorkflowData?.data?.signatures?.filter(
-      (sig: any) => sig.status !== "revoked",
-    ) || [];
-
-  const allSignaturesSigned =
-    activeSignatures.length > 0
-      ? activeSignatures.every((sig: any) => sig.status === "signed")
-      : false;
+  // Смотрим только подпись актуального подписанта — ту же, что показывает его
+  // карточка. При смене подписанта бэкенд не отзывает приглашение прежнего, и
+  // проверка «подписаны все» навсегда блокировала бы отправку.
+  const isActiveSignatureSigned =
+    pickActiveSignature(rawWorkflowData?.data?.signatures ?? [])?.status ===
+    "signed";
 
 
   useEffect(() => {
@@ -2479,7 +2477,7 @@ export const CreateInternalCorrespondence = ({
           canSave={canEditDocument}
           canSend={canSendDocument}
           canCancelSign={canCancelSignature}
-          allSignaturesSigned={allSignaturesSigned}
+          allSignaturesSigned={isActiveSignatureSigned}
           hasDocId={!!id}
         />
 

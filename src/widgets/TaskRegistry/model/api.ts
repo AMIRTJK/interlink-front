@@ -49,6 +49,7 @@ export interface IApiTask {
   sort_order?: number | null;
   is_overdue?: boolean;
   assignees?: IApiAssignee[] | null;
+  creator?: IApiAssignee | null;
   attachments?: IApiAttachment[] | null;
   attachments_count?: number;
   created_at?: string | null;
@@ -204,6 +205,7 @@ export const mapApiTaskToTask = (item: IApiTask): Task => {
     priority: normalizePriority(item.priority),
     assignee: assignees[0] || EMPTY_ASSIGNEE,
     assignees,
+    creator: item.creator ? mapAssigneeToColleague(item.creator) : null,
     dueDate: dueSource ? new Date(dueSource).toISOString() : "",
     createdAt: item.created_at
       ? new Date(item.created_at).toISOString()
