@@ -15,22 +15,22 @@ const CAMPFIRE_PALETTE = {
     treesFront: "rgb(3, 7, 18)",
   },
   light: {
-    sky: ["rgb(49, 46, 129)", "rgb(168, 85, 247)", "rgb(251, 146, 60)"],
-    starAlpha: 0.4,
-    moon: "rgb(255, 255, 255)",
-    treesBack: "rgb(76, 29, 149)",
-    treesFront: "rgb(30, 27, 75)",
+    sky: ["rgb(165, 180, 252)", "rgb(251, 207, 232)", "rgb(254, 215, 170)"],
+    starAlpha: 0.3,
+    moon: "rgb(255, 251, 235)",
+    treesBack: "rgb(124, 118, 176)",
+    treesFront: "rgb(55, 48, 107)",
   },
 } as const;
 
 const LOG_COLOR = "rgb(66, 32, 16)";
 const STONE_COLOR = "rgb(41, 37, 36)";
 
-// Костёр стоит сбоку: по центру экрана карточка с паролем, внизу — переключатель сцен.
+// Костёр стоит сбоку от карточки с паролем и выше переключателя сцен, который занимает низ экрана.
 export const getFirePlace = (width: number, height: number): IFirePlace => ({
   x: width * (width < MOBILE_BREAKPOINT ? 0.8 : 0.2),
-  y: height * 0.86,
-  scale: Math.min(Math.max(Math.min(width, height) / 540, 0.8), 2),
+  y: height * 0.8,
+  scale: Math.min(Math.max(Math.min(width, height) / 620, 0.7), 1.3),
 });
 
 // Детерминированный генератор: после ресайза лес и звёзды стоят на тех же местах.
@@ -153,8 +153,8 @@ export const renderCampfireBackdrop = (
 
   drawStars(ctx, width, height, palette.starAlpha);
   drawCrescent(ctx, width * 0.8, height * 0.16, Math.min(width, height) * 0.05, palette.moon);
-  drawPineRow(ctx, width, height, height * 0.74, [60, 120], palette.treesBack, 11);
-  drawPineRow(ctx, width, height, height * 0.82, [90, 170], palette.treesFront, 23);
+  drawPineRow(ctx, width, height, height * 0.66, [60, 120], palette.treesBack, 11);
+  drawPineRow(ctx, width, height, height * 0.74, [90, 170], palette.treesFront, 23);
   drawFirePit(ctx, place);
   return backdrop;
 };
