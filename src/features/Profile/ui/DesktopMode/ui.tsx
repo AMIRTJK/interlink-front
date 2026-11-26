@@ -59,7 +59,8 @@ const CENTERED_TIME_STYLE = {
 
 export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps) => {
   const [activeScene, setActiveScene] = useState<TDesktopScene>(() => {
-    return (localStorage.getItem(STORAGE_SCENE_KEY) as TDesktopScene) || "space";
+    const saved = localStorage.getItem(STORAGE_SCENE_KEY) as TDesktopScene;
+    return SCENES.some((s) => s.key === saved) ? saved : "space";
   });
   const { variant: watchVariant, selectVariant: selectWatchVariant } = useWatchVariant();
 
