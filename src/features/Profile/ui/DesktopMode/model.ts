@@ -1,4 +1,4 @@
-export type TDesktopScene = "space" | "aurora" | "mountains" | "ocean" | "rain" | "snow" | "campfire" | "matrix" | "particles" | "clock";
+export type TDesktopScene = "space" | "aurora" | "mountains" | "ocean" | "rain" | "campfire" | "particles" | "clock";
 
 /**
  * `centered` — фон декоративный, время и карточка стоят по центру поверх него.
@@ -26,9 +26,7 @@ export const SCENES: ISceneOption[] = [
   { key: "mountains", labelRu: "Горы", labelEn: "Mountains", layout: "centered" },
   { key: "ocean", labelRu: "Океан", labelEn: "Ocean", layout: "centered" },
   { key: "rain", labelRu: "Дождь", labelEn: "Rain", layout: "centered" },
-  { key: "snow", labelRu: "Снег", labelEn: "Snow", layout: "centered" },
   { key: "campfire", labelRu: "Костёр", labelEn: "Campfire", layout: "stage", isAlwaysNight: true, isFormOnDemand: true },
-  { key: "matrix", labelRu: "Матрица", labelEn: "Matrix", layout: "centered" },
   { key: "particles", labelRu: "Частицы", labelEn: "Particles", layout: "centered" },
   { key: "clock", labelRu: "Часы", labelEn: "Clock", layout: "split" },
 ];

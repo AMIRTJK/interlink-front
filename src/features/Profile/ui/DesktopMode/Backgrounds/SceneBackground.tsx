@@ -2,8 +2,6 @@ import type { TDesktopScene } from "../model";
 import { SpaceBg } from "./SpaceBg";
 import { AuroraBg } from "./AuroraBg";
 import { RainBg } from "./RainBg";
-import { SnowBg } from "./SnowBg";
-import { MatrixBg } from "./MatrixBg";
 import { CampfireBg } from "./CampfireBg";
 import { ParticlesBg } from "./ParticlesBg";
 import { OceanBg } from "./OceanBg";
