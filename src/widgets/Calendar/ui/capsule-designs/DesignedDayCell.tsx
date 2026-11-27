@@ -1,10 +1,11 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import type { Dayjs } from "dayjs";
 import type { Task } from "@features/tasks";
 import { getEventStyle } from "../../model";
 import { getWeekdayLabel, isWeekendDay, splitTemperature } from "../../lib";
 import type { IDayWeatherInfo } from "../../lib/useWeather";
 import { getWeatherValue } from "./WeatherReadout";
+import { SkyVideo } from "./SkyVideo";
 import "./sky.css";
 
 interface IProps {
@@ -39,12 +40,17 @@ export const DesignedDayCell = memo(
   ({ day, tasks, weather, isToday, onDayClick, onEventClick }: IProps) => {
     const hasEvents = tasks.length > 0;
     const weekdayTone = getWeekdayTone(isWeekendDay(day));
+    const skyKind = weather?.weatherType ?? "none";
+    const [isHovered, setIsHovered] = useState(false);
 
     return (
       <div
         onClick={() => onDayClick(day)}
-        className={`sky-card sky-card--${weather?.weatherType ?? "none"} ${CARD_BASE} ${isToday ? CARD_TODAY : CARD_HOVER}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`sky-card sky-card--${skyKind} ${CARD_BASE} ${isToday ? CARD_TODAY : CARD_HOVER}`}
       >
+        <SkyVideo kind={skyKind} isActive={isToday || isHovered} />
         <div className="relative! z-[2]! flex! flex-col! h-full! min-h-0!">
           {hasEvents ? (
             <>
