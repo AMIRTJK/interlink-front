@@ -43,7 +43,7 @@ export const EventFormFields = ({
 			>
 				<Input
 					placeholder="Например: Встреча с командой"
-					className="w-full! bg-zinc-100! hover:bg-zinc-200/70! focus:bg-zinc-50! shadow-none! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! h-10! px-4! transition-all! duration-200! text-sm! text-zinc-700!"
+					className="w-full! bg-zinc-100! dark:bg-slate-800! dark:hover:bg-slate-700! dark:border-slate-700/50! dark:text-slate-200! dark:placeholder:text-slate-500! hover:bg-zinc-200/70! focus:bg-zinc-50! dark:focus:bg-slate-900! shadow-none! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! h-10! px-4! transition-all! duration-200! text-sm! text-zinc-700!"
 				/>
 			</Form.Item>
 
@@ -60,7 +60,7 @@ export const EventFormFields = ({
 				<DatePicker
 					format="DD.MM.YYYY"
 					placeholder="Выберите дату"
-					className="w-full! bg-zinc-100! hover:bg-zinc-200/70! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! h-10! px-4! transition-all! duration-200! text-sm!"
+					className="w-full! bg-zinc-100! dark:bg-slate-800! dark:hover:bg-slate-700! dark:border-slate-700/50! dark:text-slate-200! dark:placeholder:text-slate-500! hover:bg-zinc-200/70! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! h-10! px-4! transition-all! duration-200! text-sm!"
 				/>
 			</Form.Item>
 
@@ -78,7 +78,7 @@ export const EventFormFields = ({
 					<TimePicker
 						format="HH:mm"
 						placeholder="10:00"
-						className="w-full! bg-zinc-100! hover:bg-zinc-200/70! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! h-10! px-4! transition-all! duration-200! text-sm!"
+						className="w-full! bg-zinc-100! dark:bg-slate-800! dark:hover:bg-slate-700! dark:border-slate-700/50! dark:text-slate-200! dark:placeholder:text-slate-500! hover:bg-zinc-200/70! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! h-10! px-4! transition-all! duration-200! text-sm!"
 					/>
 				</Form.Item>
 
@@ -94,7 +94,7 @@ export const EventFormFields = ({
 					<TimePicker
 						format="HH:mm"
 						placeholder="11:00"
-						className="w-full! bg-zinc-100! hover:bg-zinc-200/70! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! h-10! px-4! transition-all! duration-200! text-sm!"
+						className="w-full! bg-zinc-100! dark:bg-slate-800! dark:hover:bg-slate-700! dark:border-slate-700/50! dark:text-slate-200! dark:placeholder:text-slate-500! hover:bg-zinc-200/70! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! h-10! px-4! transition-all! duration-200! text-sm!"
 					/>
 				</Form.Item>
 			</div>
@@ -162,7 +162,7 @@ export const EventFormFields = ({
 				<Input.TextArea
 					placeholder="Детали события..."
 					autoSize={{ minRows: 3, maxRows: 6 }}
-					className="w-full! bg-zinc-100! pt-2! hover:bg-zinc-200/70! focus:bg-zinc-50! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! transition-all! duration-200! text-sm! text-zinc-700!"
+					className="w-full! bg-zinc-100! dark:bg-slate-800! dark:hover:bg-slate-700! dark:border-slate-700/50! dark:text-slate-200! dark:placeholder:text-slate-500! pt-2! hover:bg-zinc-200/70! focus:bg-zinc-50! dark:focus:bg-slate-900! border! border-zinc-200! focus:border-zinc-400! rounded-2xl! transition-all! duration-200! text-sm! text-zinc-700!"
 				/>
 			</Form.Item>
 		</>

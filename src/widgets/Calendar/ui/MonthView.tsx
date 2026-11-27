@@ -1,9 +1,10 @@
-import { useMemo, memo } from "react";
+import { useMemo, memo, type CSSProperties } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import type { Task } from "@features/tasks";
-import { getEventStyle, WeatherType } from "../model";
+import { getEventStyle, MONTH_GRID_BOTTOM_RESERVE_PX, WeatherType } from "../model";
 import { WeatherIcon } from "./WeatherIcon";
 import { useWeather } from "../lib/useWeather";
+import { useViewportFillOffset } from "../lib/useViewportFillOffset";
 
 interface IMonthViewProps {
   daysToShow: Dayjs[];
@@ -24,84 +25,30 @@ const WEEKDAYS = [
   { label: "ВС", isWeekend: true },
 ];
 
-const getMonthCardStyle = (
+const BASE_CARD = "bg-gradient-to-b from-white to-[#F8FAFC] dark:from-slate-800/70 dark:to-slate-900/70 text-[#1e293b] dark:text-slate-200";
+
+// Тёмные варианты держим в тех же классах: инлайновый градиент перекрывал бы dark:.
+const WEATHER_CARD: Record<WeatherType, string> = {
+  sun: "bg-gradient-to-b from-[#FFF7ED] to-[#FFEDD5] dark:from-orange-950/50 dark:to-amber-950/30 text-[#1e293b] dark:text-slate-200",
+  "sun-cloud": "bg-gradient-to-b from-[#FAF5FF] to-[#F3E8FF] dark:from-purple-950/50 dark:to-violet-950/30 text-[#1e293b] dark:text-slate-200",
+  rain: "bg-gradient-to-b from-[#F0F9FF] to-[#E0F2FE] dark:from-sky-950/50 dark:to-blue-950/30 text-[#1e293b] dark:text-slate-200",
+  snow: "bg-gradient-to-b from-[#FAF5FF] to-[#EEF2FF] dark:from-indigo-950/50 dark:to-violet-950/30 text-[#1e293b] dark:text-slate-200",
+  cloud: "bg-gradient-to-b from-[#F8FAFC] to-[#E2E8F0] dark:from-slate-800/70 dark:to-slate-700/40 text-[#1e293b] dark:text-slate-200",
+};
+
+const OTHER_MONTH_CARD = "bg-gradient-to-b from-white to-[#F8FAFC] dark:from-slate-900/60 dark:to-slate-900/30 opacity-40";
+
+const PAST_CARD = "bg-gradient-to-b from-[#F0F9FF] to-[#E0F2FE] dark:from-sky-950/30 dark:to-slate-900/50 text-[#1e293b] dark:text-slate-200";
+
+const getMonthCardClassName = (
   weather: WeatherType | null,
   isPreviousOrNextMonth: boolean,
   isPast: boolean = false,
 ) => {
-  if (isPreviousOrNextMonth) {
-    return {
-      className: "bg-[#fcfdfe] dark:bg-slate-900/40 opacity-40 shadow-[0_8px_20px_rgba(0,0,0,0.02)]",
-      style: {
-        background: "linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)",
-        boxShadow: "0 10px 24px -4px rgba(226, 232, 240, 0.6)",
-      },
-    };
-  }
-
-  if (isPast) {
-    return {
-      className: "text-[#1e293b] dark:text-slate-200",
-      style: {
-        background: "linear-gradient(180deg, #F0F9FF 0%, #E0F2FE 100%)",
-        boxShadow: "0 10px 24px -4px rgba(186, 230, 253, 0.6), 0 4px 10px -2px rgba(14, 165, 233, 0.08)",
-      },
-    };
-  }
-
-  if (!weather) {
-    return {
-      className: "text-[#1e293b]",
-      style: {
-        background: "linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)",
-        boxShadow: "0 10px 24px -4px rgba(226, 232, 240, 0.7), 0 4px 10px -2px rgba(100, 116, 139, 0.06)",
-      },
-    };
-  }
-
-  switch (weather) {
-    case "sun":
-      return {
-        className: "text-[#1e293b]",
-        style: {
-          background: "linear-gradient(180deg, #FFF7ED 0%, #FFEDD5 100%)",
-          boxShadow: "0 14px 30px -4px rgba(254, 215, 170, 0.7), 0 6px 14px -2px rgba(249, 115, 22, 0.12)",
-        },
-      };
-    case "sun-cloud":
-      return {
-        className: "text-[#1e293b]",
-        style: {
-          background: "linear-gradient(180deg, #FAF5FF 0%, #F3E8FF 100%)",
-          boxShadow: "0 14px 30px -4px rgba(233, 213, 255, 0.7), 0 6px 14px -2px rgba(168, 85, 247, 0.12)",
-        },
-      };
-    case "rain":
-      return {
-        className: "text-[#1e293b]",
-        style: {
-          background: "linear-gradient(180deg, #F0F9FF 0%, #E0F2FE 100%)",
-          boxShadow: "0 14px 30px -4px rgba(186, 230, 253, 0.7), 0 6px 14px -2px rgba(14, 165, 233, 0.12)",
-        },
-      };
-    case "snow":
-      return {
-        className: "text-[#1e293b]",
-        style: {
-          background: "linear-gradient(180deg, #FAF5FF 0%, #EEF2FF 100%)",
-          boxShadow: "0 14px 30px -4px rgba(224, 231, 255, 0.7), 0 6px 14px -2px rgba(99, 102, 241, 0.12)",
-        },
-      };
-    case "cloud":
-    default:
-      return {
-        className: "text-[#1e293b]",
-        style: {
-          background: "linear-gradient(180deg, #F8FAFC 0%, #E2E8F0 100%)",
-          boxShadow: "0 14px 30px -4px rgba(226, 232, 240, 0.8), 0 6px 14px -2px rgba(100, 116, 139, 0.1)",
-        },
-      };
-  }
+  if (isPreviousOrNextMonth) return OTHER_MONTH_CARD;
+  if (isPast) return PAST_CARD;
+  if (!weather) return BASE_CARD;
+  return WEATHER_CARD[weather] ?? WEATHER_CARD.cloud;
 };
 
 export const MonthView = memo(({
@@ -112,6 +59,17 @@ export const MonthView = memo(({
   onEventClick,
 }: IMonthViewProps) => {
   const { getWeatherForDate } = useWeather();
+  const { ref: gridRef, offset: gridOffset } = useViewportFillOffset<HTMLDivElement>(
+    MONTH_GRID_BOTTOM_RESERVE_PX,
+  );
+
+  const gridStyle = useMemo(
+    () =>
+      gridOffset === null
+        ? undefined
+        : ({ "--month-grid-offset": `${gridOffset}px` } as CSSProperties),
+    [gridOffset],
+  );
 
   const tasksMap = useMemo(() => {
     const map: Record<string, Task[]> = {};
@@ -129,9 +87,9 @@ export const MonthView = memo(({
         {WEEKDAYS.map((day) => (
           <div
             key={day.label}
-            className={`py-2! text-[11px]! font-black! tracking-wider! transition-all! flex! items-center! justify-center! ${
+            className={`py-2! text-xs! font-semibold! tracking-wider! transition-all! flex! items-center! justify-center! rounded-[1.25rem]! border! border-zinc-200! dark:border-slate-700/50! ${
               day.isWeekend
-                ? "border-2! border-[#fed7aa]! bg-[#fff7ed]! dark:bg-amber-950/40! text-[#ea580c]! dark:text-amber-400! rounded-[1.25rem]! shadow-xs!"
+                ? "bg-[#fff7ed]! dark:bg-amber-950/40! text-[#ea580c]! dark:text-amber-400!"
                 : "text-slate-400! dark:text-slate-500!"
             }`}
           >
@@ -141,7 +99,11 @@ export const MonthView = memo(({
       </div>
 
       {/* Grid of Days */}
-      <div className="grid! grid-cols-7! gap-3.5! auto-rows-[108px]">
+      <div
+        ref={gridRef}
+        style={gridStyle}
+        className="grid! grid-cols-7! gap-3.5! auto-rows-[108px] lg:grid-rows-6 lg:h-[calc(100dvh-var(--month-grid-offset,0px))] lg:min-h-[480px]"
+      >
         {daysToShow.map((day) => {
           const dateStr = day.format("YYYY-MM-DD");
           const dayTasks = tasksMap[dateStr] || [];
@@ -149,7 +111,7 @@ export const MonthView = memo(({
           const isToday = day.isSame(dayjs(), "day");
           const isPast = day.isBefore(dayjs(), "day");
           const dayWeather = getWeatherForDate(day);
-          const cardConfig = getMonthCardStyle(
+          const cardClassName = getMonthCardClassName(
             dayWeather?.weatherType ?? null,
             !inMonth,
             isPast && inMonth,
@@ -159,24 +121,23 @@ export const MonthView = memo(({
             <div
               key={dateStr}
               onClick={() => onDayClick(day)}
-              style={cardConfig.style}
-              className={`flex! flex-col! p-2.5! rounded-[1.6rem]! cursor-pointer! transition-all! duration-200! overflow-hidden! ${cardConfig.className}`}
+              className={`flex! flex-col! p-2.5! rounded-[1.6rem]! border! border-zinc-200! dark:border-slate-700/50! cursor-pointer! transition-all! duration-200! overflow-hidden! ${cardClassName}`}
             >
               {/* Cell Header: Date on left & White circular weather badge on right (if real weather exists) */}
               <div className="flex! items-center! justify-between! mb-1.5!">
                 {isToday ? (
-                  <div className="w-6! h-6! flex! items-center! justify-center! text-xs! font-extrabold! rounded-full! bg-[#00897b]! text-white! shadow-xs!">
+                  <div className="w-6! h-6! flex! items-center! justify-center! text-sm! font-semibold! rounded-full! bg-[#00897b]! text-white!">
                     {day.date()}
                   </div>
                 ) : (
-                  <span className="text-xs! font-black! text-slate-800! dark:text-slate-200! pl-1!">
+                  <span className="text-sm! font-semibold! text-slate-800! dark:text-slate-200! pl-1!">
                     {day.date()}
                   </span>
                 )}
 
                 {/* Render weather badge only if real weather data exists */}
                 {dayWeather ? (
-                  <div className="w-6! h-6! rounded-full! bg-white! dark:bg-slate-800! shadow-[0_2px_8px_rgba(0,0,0,0.06)]! flex! items-center! justify-center!">
+                  <div className="w-6! h-6! rounded-full! bg-white! dark:bg-slate-800! border! border-zinc-200! dark:border-slate-700/50! flex! items-center! justify-center!">
                     <WeatherIcon type={dayWeather.weatherType} size={13} />
                   </div>
                 ) : (
@@ -196,7 +157,7 @@ export const MonthView = memo(({
                         onEventClick(task);
                       }}
                       title={`${task.time ? task.time + " " : ""}${task.title}`}
-                      className="w-full! py-1! px-2! rounded-full! bg-white/90! dark:bg-slate-800/90! shadow-[0_2px_8px_rgba(0,0,0,0.04)]! text-[10px]! font-bold! flex! items-center! gap-1.5! truncate! transition-all!"
+                      className="w-full! py-1! px-2! rounded-full! bg-white/90! dark:bg-slate-800/90! border! border-zinc-200! dark:border-slate-700/50! text-xs! font-semibold! leading-tight! flex! items-center! gap-1.5! truncate! transition-all!"
                     >
                       <span className={`w-1.5! h-1.5! rounded-full! ${style.dot} flex-shrink-0!`} />
                       <span className={`${style.text} truncate!`}>

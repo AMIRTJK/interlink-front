@@ -71,14 +71,14 @@ export const CalendarSidebar = memo(({
       <button
         type="button"
         onClick={onCreateEvent}
-        className="w-full! py-3! px-4.5! rounded-2xl! bg-[#0d9488]! hover:bg-[#0f766e]! text-white! font-extrabold! text-xs! tracking-wide! flex! items-center! justify-center! gap-2! shadow-md! shadow-teal-500/20! hover:shadow-teal-500/30! active:scale-[0.98]! transition-all! cursor-pointer! border-0!"
+        className="w-full! py-3! px-4.5! rounded-2xl! bg-[#0d9488]! hover:bg-[#0f766e]! text-white! font-semibold! text-sm! flex! items-center! justify-center! gap-2! active:scale-[0.98]! transition-all! cursor-pointer! border-0!"
       >
         <Plus size={16} strokeWidth={3} />
         <span>Создать событие</span>
       </button>
 
       {/* Mini Month Picker Widget */}
-      <div className="bg-white/85! dark:bg-slate-900/85! backdrop-blur-xl! rounded-2xl! p-3.5! ui-glass ui-glass--forced border! border-zinc-200! dark:border-slate-800/60!">
+      <div className="bg-white/85! dark:bg-slate-900/85! backdrop-blur-xl! rounded-2xl! p-3.5! ui-glass ui-glass--forced border! border-zinc-200! dark:border-slate-700/50!">
         {/* Month Navigation Header */}
         <div className="flex! items-center! justify-between! mb-2.5! px-0.5!">
           <button
@@ -88,7 +88,7 @@ export const CalendarSidebar = memo(({
           >
             <ChevronLeft size={14} />
           </button>
-          <span className="font-extrabold! text-xs! text-slate-800! dark:text-slate-100! capitalize! tracking-tight!">
+          <span className="font-semibold! text-sm! text-slate-800! dark:text-slate-100! capitalize!">
             {currentDate.locale("ru").format("MMMM YYYY")}
           </span>
           <button
@@ -105,7 +105,7 @@ export const CalendarSidebar = memo(({
           {WEEKDAY_INITIALS.map((item, idx) => (
             <span
               key={idx}
-              className={`text-[10px]! font-extrabold! ${
+              className={`text-xs! font-semibold! ${
                 item.isWeekend ? "text-[#f97316]!" : "text-slate-400! dark:text-slate-500!"
               }`}
             >
@@ -125,9 +125,9 @@ export const CalendarSidebar = memo(({
                 key={day.format("YYYY-MM-DD")}
                 type="button"
                 onClick={() => onDateChange(day)}
-                className={`w-7! h-7! mx-auto! flex! items-center! justify-center! rounded-full! text-[11px]! font-bold! transition-all! cursor-pointer! border-0! ${
+                className={`w-7! h-7! mx-auto! flex! items-center! justify-center! rounded-full! text-xs! font-medium! transition-all! cursor-pointer! border-0! ${
                   isSelected
-                    ? "bg-[#0d9488]! text-white! font-black! shadow-sm! shadow-teal-500/30!"
+                    ? "bg-[#0d9488]! text-white! font-semibold!"
                     : isCurrentMonth
                     ? "text-slate-700! dark:text-slate-200! hover:bg-slate-100! dark:hover:bg-slate-800!"
                     : "text-slate-300! dark:text-slate-600!"
@@ -142,14 +142,14 @@ export const CalendarSidebar = memo(({
 
       {/* Upcoming Events */}
       <div className="flex! flex-col! gap-3!">
-        <h4 className="text-[10px]! font-black! tracking-widest! text-slate-400! uppercase! px-1! m-0!">
+        <h4 className="text-xs! font-semibold! tracking-wider! text-slate-400! uppercase! px-1! m-0!">
           ПРЕДСТОЯЩИЕ СОБЫТИЯ
         </h4>
 
         {upcomingGroups.length > 0 ? (
           upcomingGroups.map((group) => (
             <div key={group.dateLabel} className="flex! flex-col! gap-2!">
-              <span className="text-[9px]! font-black! tracking-wider! text-slate-400! uppercase! px-1!">
+              <span className="text-xs! font-medium! tracking-wide! text-slate-400! uppercase! px-1!">
                 {group.dateLabel}
               </span>
 
@@ -160,16 +160,16 @@ export const CalendarSidebar = memo(({
                   <div
                     key={item.id}
                     onClick={() => onEventClick(item)}
-                    className={`p-3! rounded-2xl! ${colorStyle.sidebarCard} border! backdrop-blur-md! shadow-[0_4px_15px_rgba(0,0,0,0.02)]! hover:shadow-md! transition-all! cursor-pointer! flex! flex-col! gap-1!`}
+                    className={`p-3! rounded-2xl! ${colorStyle.sidebarCard} border! backdrop-blur-md! transition-all! cursor-pointer! flex! flex-col! gap-1!`}
                   >
                     <div className="flex! items-center! gap-2!">
                       <span className={`w-2! h-2! rounded-full! ${colorStyle.dot} flex-shrink-0!`} />
-                      <span className="font-extrabold! text-xs! truncate!">
+                      <span className="font-semibold! text-sm! truncate!">
                         {item.title}
                       </span>
                     </div>
                     {item.time && (
-                      <span className="text-[10px]! font-semibold! opacity-80! pl-4!">
+                      <span className="text-xs! font-medium! opacity-80! pl-4!">
                         {item.time} {item.endTime ? `– ${item.endTime}` : ""}
                         {item.description ? ` • ${item.description}` : ""}
                       </span>
@@ -180,7 +180,7 @@ export const CalendarSidebar = memo(({
             </div>
           ))
         ) : (
-          <div className="p-4! rounded-2xl! bg-slate-50! dark:bg-slate-900/40! border! border-slate-100! dark:border-slate-800! text-center! text-xs! font-medium! text-slate-400!">
+          <div className="p-4! rounded-2xl! bg-slate-50! dark:bg-slate-900/40! border! border-zinc-200! dark:border-slate-700/50! text-center! text-sm! font-medium! text-slate-400!">
             Нет запланированных событий
           </div>
         )}
