@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Wind, Mountain, Waves, CloudRain, Flame, Atom, Clock } from "lucide-react";
+import { Sparkles, Wind, Mountain, Waves, CloudRain, Flame, Atom, Clock, TreePine } from "lucide-react";
 import { CONTROLS_FADE_TRANSITION, SCENES, type TDesktopScene } from "../model";
 
 interface IProps {
@@ -18,6 +18,7 @@ const ICONS: Record<TDesktopScene, ComponentType<{ className?: string }>> = {
   ocean: Waves,
   rain: CloudRain,
   campfire: Flame,
+  newyear: TreePine,
   particles: Atom,
   clock: Clock,
 };
@@ -55,7 +56,7 @@ export const SceneSwitcher = ({ activeScene, isDark, isVisible, lang, onSelect }
           )}
           <span className="relative z-10 flex items-center gap-1.5">
             <IconComponent className="w-3.5 h-3.5" />
-            {/* Сцен десять: с подписями панель помещается только на широком экране,
+            {/* Сцен много: с подписями панель помещается только на широком экране,
                 на остальных остаются иконки. */}
             <span className="hidden xl:inline">{label}</span>
           </span>

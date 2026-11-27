@@ -16,6 +16,8 @@ import { SceneSwitcher } from "./ui/SceneSwitcher";
 import { Watch } from "./watch/ui/Watch";
 import { WatchVariantSwitcher } from "./watch/ui/WatchVariantSwitcher";
 import { useWatchVariant } from "./watch/lib/useWatchVariant";
+import { useSpaceVariant } from "./space/lib/useSpaceVariant";
+import { SpaceVariantSwitcher } from "./space/ui/SpaceVariantSwitcher";
 
 interface IProps {
   userData: IUser | null;
@@ -64,6 +66,7 @@ export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps
     return SCENES.some((s) => s.key === saved) ? saved : DEFAULT_SCENE;
   });
   const { variant: watchVariant, selectVariant: selectWatchVariant } = useWatchVariant();
+  const { variant: spaceVariant, selectVariant: selectSpaceVariant } = useSpaceVariant();
 
   const lang = localStorage.getItem("lang") || "ru";
   const { formattedTime, formattedShortTime, formattedDate } = useLockClock(lang);
@@ -106,7 +109,7 @@ export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps
       data-session-lock=""
     >
       <div className="absolute inset-0 z-0">
-        <SceneBackground scene={activeScene} isDark={isDark} />
+        <SceneBackground scene={activeScene} isDark={isDark} spaceVariant={spaceVariant} />
       </div>
 
       <header className="relative z-10 flex items-center justify-between w-full">
@@ -195,6 +198,13 @@ export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps
             isDark={isSceneDark}
             isVisible={isControlsVisible}
             onChange={selectWatchVariant}
+          />
+        )}
+        {activeScene === "space" && (
+          <SpaceVariantSwitcher
+            value={spaceVariant}
+            isVisible={isControlsVisible}
+            onChange={selectSpaceVariant}
           />
         )}
         <SceneSwitcher
