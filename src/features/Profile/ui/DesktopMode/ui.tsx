@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { IUser } from "@entities/login";
 import { Logo } from "@shared/ui";
-import { TDesktopScene, SCENES, STORAGE_SCENE_KEY } from "./model";
+import { TDesktopScene, SCENES, STORAGE_SCENE_KEY, DEFAULT_SCENE } from "./model";
 import { LOCK_TEXTS } from "./lockModel";
 import { SceneBackground } from "./Backgrounds/SceneBackground";
 import { useLockClock } from "./lib/useLockClock";
@@ -60,7 +60,7 @@ const CENTERED_TIME_STYLE = {
 export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps) => {
   const [activeScene, setActiveScene] = useState<TDesktopScene>(() => {
     const saved = localStorage.getItem(STORAGE_SCENE_KEY) as TDesktopScene;
-    return SCENES.some((s) => s.key === saved) ? saved : "space";
+    return SCENES.some((s) => s.key === saved) ? saved : DEFAULT_SCENE;
   });
   const { variant: watchVariant, selectVariant: selectWatchVariant } = useWatchVariant();
 

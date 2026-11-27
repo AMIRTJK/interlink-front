@@ -53,19 +53,19 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
     >
       <div className="flex flex-col h-full">
         <div
-          className={`flex items-center shrink-0 py-6 ${
+          className={`flex items-center gap-3 shrink-0 py-6 ${
             collapsed ? "justify-center" : "justify-between"
           }`}
         >
           {!collapsed && (
             <div
-              className="cursor-pointer"
+              className="min-w-0 flex-1 flex items-center cursor-pointer"
               onClick={() => navigate(AppRoutes.PROFILE)}
             >
-              <Logo className="text-lg text-zinc-900 dark:text-white" />
+              <Logo className="max-w-full text-lg text-zinc-900 dark:text-white" />
             </div>
           )}
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             {!collapsed && (
               <Tooltip title="Создать папку" placement="right">
                 <Button

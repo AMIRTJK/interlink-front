@@ -6,6 +6,11 @@ export interface IDayWeatherInfo {
 	temp: string;
 	description: string;
 	weatherType: WeatherType;
+	// Сырые значения дня (только из дневного прогноза): дробная часть и H/L в капсулах.
+	max?: number;
+	min?: number;
+	// Дата дальше окна прогноза: погода тех же дат прошлого года, а не прогноз.
+	isEstimate?: boolean;
 }
 
 export interface IWeatherState {
@@ -40,11 +45,15 @@ export const mapWeatherCode = (
 
 const DUSHANBE_LAT = 38.56;
 const DUSHANBE_LON = 68.78;
-const WEATHER_CACHE_KEY = "calendar_weather_cache_v3";
+const WEATHER_CACHE_KEY = "calendar_weather_cache_v6";
+// Сетка месяца начинается до 41 дня раньше сегодняшнего: фактическую погоду берём с запасом.
+export const WEATHER_PAST_DAYS = 45;
+// Максимум open-meteo: хватает на хвост сетки месяца после текущего дня.
+export const WEATHER_FORECAST_DAYS = 16;
 const LOCATION_STORAGE_KEY = "calendar_user_location_v1";
 const WEATHER_CACHE_TTL_MS = 60 * 60 * 1000; // 1 час
 
-const loadLocationStorage = (): { lat: number; lon: number } => {
+export const loadLocationStorage = (): { lat: number; lon: number } => {
 	try {
 		const raw = localStorage.getItem(LOCATION_STORAGE_KEY);
 		if (raw) return JSON.parse(raw);
@@ -93,7 +102,7 @@ const executeWeatherFetch = async (
 	lon: number,
 ): Promise<IWeatherState> => {
 	try {
-		const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=8`;
+		const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&past_days=${WEATHER_PAST_DAYS}&forecast_days=${WEATHER_FORECAST_DAYS}`;
 		const res = await fetch(url);
 		if (!res.ok) throw new Error("Weather request failed");
 		const json = await res.json();
@@ -103,9 +112,9 @@ const executeWeatherFetch = async (
 		if (json?.daily?.time && Array.isArray(json.daily.time)) {
 			json.daily.time.forEach((dateStr: string, index: number) => {
 				const code = json.daily.weather_code?.[index] ?? 0;
-				const maxTemp = Math.round(
-					json.daily.temperature_2m_max?.[index] ?? 20,
-				);
+				const rawMax = json.daily.temperature_2m_max?.[index] ?? 20;
+				const rawMin = json.daily.temperature_2m_min?.[index] ?? rawMax;
+				const maxTemp = Math.round(rawMax);
 				const { description, weatherType } = mapWeatherCode(code);
 				const formattedTemp = maxTemp > 0 ? `+${maxTemp}°C` : `${maxTemp}°C`;
 
@@ -113,6 +122,8 @@ const executeWeatherFetch = async (
 					temp: formattedTemp,
 					description,
 					weatherType,
+					max: rawMax,
+					min: rawMin,
 				};
 			});
 		}
@@ -221,25 +232,13 @@ export const useWeather = () => {
 
 	const { current: currentWeather, dailyMap, isLoading } = weatherState;
 
-	const getWeatherForDate = useCallback(
+	const getAnyWeatherForDate = useCallback(
 		(date: Dayjs): IDayWeatherInfo | null => {
-			const today = dayjs().startOf("day");
-			const target = date.startOf("day");
-
-			// Показываем погоду только начиная с СЕГОДНЯ и до конца текущей недели (воскресенье)
-			if (target.isBefore(today)) {
-				return null;
-			}
-			const endOfWeek = today.endOf("isoWeek");
-			if (target.isAfter(endOfWeek)) {
-				return null;
-			}
-
 			const dateStr = date.format("YYYY-MM-DD");
 			if (dailyMap[dateStr]) {
 				return dailyMap[dateStr];
 			}
-			if (target.isSame(today) && currentWeather) {
+			if (date.isSame(dayjs(), "day") && currentWeather) {
 				return currentWeather;
 			}
 			return null;
@@ -247,13 +246,27 @@ export const useWeather = () => {
 		[dailyMap, currentWeather],
 	);
 
+	// Показываем погоду только начиная с СЕГОДНЯ и до конца текущей недели (воскресенье)
+	const getWeatherForDate = useCallback(
+		(date: Dayjs): IDayWeatherInfo | null => {
+			const today = dayjs().startOf("day");
+			const target = date.startOf("day");
+			if (target.isBefore(today) || target.isAfter(today.endOf("isoWeek"))) {
+				return null;
+			}
+			return getAnyWeatherForDate(date);
+		},
+		[getAnyWeatherForDate],
+	);
+
 	return useMemo(
 		() => ({
 			current: currentWeather,
 			getWeatherForDate,
+			getAnyWeatherForDate,
 			isLoading,
 		}),
-		[currentWeather, getWeatherForDate, isLoading],
+		[currentWeather, getWeatherForDate, getAnyWeatherForDate, isLoading],
 	);
 };
 

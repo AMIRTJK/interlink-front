@@ -46,11 +46,11 @@ export const CalendarHeader = memo(({
       {/* Left Section: Title and Weather (Weather badge shown only for single Day view) */}
       <div className="flex! items-center! gap-3! flex-wrap!">
         <div className="flex! flex-col!">
-          <h2 className="text-2xl! font-black! text-slate-800! dark:text-slate-100! m-0! tracking-tight! capitalize!">
+          <h2 className="text-xl! font-bold! text-slate-800! dark:text-slate-100! m-0! leading-tight! tracking-tight! capitalize!">
             {formatHeaderTitle()}
           </h2>
           {viewMode === "week" && (
-            <span className="text-xs! font-bold! text-slate-400! dark:text-slate-500! mt-0.5!">
+            <span className="text-xs! font-medium! text-slate-400! dark:text-slate-500! mt-0.5!">
               Неделя {weekNumber}
             </span>
           )}
@@ -58,12 +58,12 @@ export const CalendarHeader = memo(({
 
         {/* Show weather badge in header only in Day mode where it represents a specific single day */}
         {viewMode === "day" && dayWeather && (
-          <div className="flex! items-center! gap-2! py-1.5! px-3.5! rounded-full! bg-white/90! dark:bg-slate-800/90! border! border-slate-200/60! dark:border-slate-700/60! shadow-xs! backdrop-blur-md!">
+          <div className="flex! items-center! gap-2! py-1.5! px-3.5! rounded-full! bg-white/90! dark:bg-slate-800/90! border! border-zinc-200! dark:border-slate-700/50! backdrop-blur-md!">
             <WeatherIcon type={dayWeather.weatherType} size={15} />
-            <span className="text-xs! font-extrabold! text-slate-800! dark:text-slate-100!">
+            <span className="text-xs! font-semibold! text-slate-800! dark:text-slate-100!">
               {dayWeather.temp}
             </span>
-            <span className="text-xs! font-semibold! text-slate-400! dark:text-slate-400!">
+            <span className="text-xs! font-medium! text-slate-400! dark:text-slate-400!">
               • {dayWeather.description}
             </span>
           </div>
@@ -71,7 +71,7 @@ export const CalendarHeader = memo(({
       </div>
 
       {/* Right Mode Switcher Segmented Control */}
-      <div className="bg-slate-100/90! dark:bg-slate-800/90! backdrop-blur-md! p-1! rounded-full! border! border-slate-200/60! dark:border-slate-700/60! flex! items-center! gap-1!">
+      <div className="bg-slate-100/90! dark:bg-slate-800/90! backdrop-blur-md! p-1! rounded-full! border! border-zinc-200! dark:border-slate-700/50! flex! items-center! gap-1!">
         {VIEW_MODES.map(({ key, label }) => {
           const isActive = viewMode === key;
           return (
@@ -79,9 +79,9 @@ export const CalendarHeader = memo(({
               key={key}
               type="button"
               onClick={() => setViewMode(key)}
-              className={`px-5! py-1.5! rounded-full! text-xs! font-extrabold! transition-all! cursor-pointer! border-0! ${
+              className={`px-5! py-1.5! rounded-full! text-sm! font-semibold! transition-all! cursor-pointer! border-0! ${
                 isActive
-                  ? "bg-white! dark:bg-slate-900! text-slate-800! dark:text-slate-100! shadow-xs!"
+                  ? "bg-white! dark:bg-slate-900! text-slate-800! dark:text-slate-100! ring-1! ring-zinc-200! dark:ring-slate-700/50!"
                   : "text-slate-500! hover:text-slate-800! dark:text-slate-400! dark:hover:text-slate-200! bg-transparent!"
               }`}
             >

@@ -6,6 +6,8 @@ import { Tooltip } from "@shared/ui";
 import { getEventStyle } from "../model";
 import { WeatherIcon } from "./WeatherIcon";
 import { useWeather } from "../lib/useWeather";
+import { useCalendarWeather } from "../lib/useCalendarWeather";
+import { WeekColumnDesign, getWeekColumnDesignClass } from "./capsule-designs/WeekColumnDesign";
 
 interface IWeekViewProps {
   daysToShow: Dayjs[];
@@ -40,34 +42,6 @@ const formatHourLabel = (h: number) => {
   return `${String(h).padStart(2, "0")}:00`;
 };
 
-const getWeekColumnConfig = (colIdx: number) => {
-  if (colIdx === 0) {
-    return {
-      style: {
-        background: "linear-gradient(180deg, #FFF7ED 0%, #FFEDD5 100%)",
-        boxShadow: "0 14px 30px -4px rgba(254, 215, 170, 0.7)",
-      },
-      className: "border border-[#fed7aa]/80",
-    };
-  }
-  if (colIdx === 1 || colIdx === 2 || colIdx === 4 || colIdx === 5) {
-    return {
-      style: {
-        background: "linear-gradient(180deg, #FAF5FF 0%, #F3E8FF 100%)",
-        boxShadow: "0 14px 30px -4px rgba(233, 213, 255, 0.7)",
-      },
-      className: "border border-[#e9d5ff]/80",
-    };
-  }
-  return {
-    style: {
-      background: "linear-gradient(180deg, #F0F9FF 0%, #E0F2FE 100%)",
-      boxShadow: "0 14px 30px -4px rgba(186, 230, 253, 0.7)",
-    },
-    className: "border border-[#bae6fd]/80",
-  };
-};
-
 export const WeekView = memo(({
   daysToShow,
   tasks,
@@ -77,6 +51,7 @@ export const WeekView = memo(({
   onEventClick,
 }: IWeekViewProps) => {
   const { getWeatherForDate } = useWeather();
+  const getDayWeather = useCalendarWeather(daysToShow);
 
   const tasksMap = useMemo(() => {
     const map: Record<string, Task[]> = {};
@@ -114,11 +89,11 @@ export const WeekView = memo(({
               onClick={() => (onHeaderClick ? onHeaderClick(day) : onDayClick(day))}
               className={`flex-1! py-2! px-2! rounded-[1.25rem]! flex! items-center! justify-center! gap-1.5! cursor-pointer! transition-all! ${
                 isToday
-                  ? "bg-[#fff7ed]! border-2! border-[#fed7aa]! text-[#c2410c]! shadow-xs!"
-                  : "bg-white/80! dark:bg-slate-800/80! border! border-slate-100! dark:border-slate-700! text-slate-700! dark:text-slate-200! shadow-xs!"
+                  ? "bg-[#fff7ed]! dark:bg-amber-950/40! border! border-zinc-200! dark:border-slate-700/50! text-[#c2410c]! dark:text-amber-400!"
+                  : "bg-white/80! dark:bg-slate-800/80! border! border-zinc-200! dark:border-slate-700/50! text-slate-700! dark:text-slate-200!"
               }`}
             >
-              <span className="text-[11px]! font-black! tracking-wider! uppercase!">
+              <span className="text-xs! font-semibold! tracking-wider! uppercase!">
                 {day.locale("ru").format("ddd").toUpperCase()} {day.date()}
               </span>
               {dayWeather && <WeatherIcon type={dayWeather.weatherType} size={13} />}
@@ -134,7 +109,7 @@ export const WeekView = memo(({
           {HOURS.map((h) => (
             <div
               key={h}
-              className="flex! items-start! justify-end! pr-2.5! text-[9px]! font-extrabold! text-slate-400! dark:text-slate-500!"
+              className="flex! items-start! justify-end! pr-2.5! text-xs! font-medium! tabular-nums! text-slate-400! dark:text-slate-500!"
               style={{ height: HOUR_HEIGHT }}
             >
               <span className="-translate-y-2!">{formatHourLabel(h)}</span>
@@ -158,13 +133,14 @@ export const WeekView = memo(({
             const isToday = day.isSame(dayjs(), "day");
             const dateStr = day.format("YYYY-MM-DD");
             const dayTasks = tasksMap[dateStr] || [];
-            const colConfig = getWeekColumnConfig(colIdx);
+            const columnWeather = getDayWeather(day);
+            const colClassName = getWeekColumnDesignClass(columnWeather);
 
             return (
               <div
                 key={dateStr}
-                className={`relative! rounded-[1.8rem]! backdrop-blur-md! cursor-pointer! transition-colors! ${colConfig.className}`}
-                style={{ height: HOUR_HEIGHT * HOURS.length, gridColumn: colIdx + 1, ...colConfig.style }}
+                className={`relative! rounded-[1.8rem]! backdrop-blur-md! cursor-pointer! transition-colors! ${colClassName}`}
+                style={{ height: HOUR_HEIGHT * HOURS.length, gridColumn: colIdx + 1 }}
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const y = e.clientY - rect.top;
@@ -172,6 +148,7 @@ export const WeekView = memo(({
                   onDayClick(day, clickedHour);
                 }}
               >
+                <WeekColumnDesign weather={columnWeather} />
                 {/* Modern Current Time Indicator with Tooltip on hover */}
                 {isToday && (
                   <Tooltip title={`Текущее время: ${currentTimeLabel}`} placement="top">
@@ -180,7 +157,7 @@ export const WeekView = memo(({
                       style={{ top: currentTimeTop }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <span className="w-2.5! h-2.5! rounded-full! bg-teal-500! -ml-1! ring-4! ring-teal-500/25! shadow-sm! group-hover/timeline:scale-125! transition-transform!" />
+                      <span className="w-2.5! h-2.5! rounded-full! bg-teal-500! -ml-1! ring-4! ring-teal-500/25! group-hover/timeline:scale-125! transition-transform!" />
                       <div className="flex-1! h-[2px]! bg-gradient-to-r! from-teal-500! via-teal-500/80! to-teal-500/20! rounded-full! group-hover/timeline:h-[3px]! transition-all!" />
                     </div>
                   </Tooltip>
@@ -200,12 +177,12 @@ export const WeekView = memo(({
                       }}
                     >
                       <div
-                        className={`h-full! w-full! rounded-xl! p-2.5! ${style.bg} ${style.border} overflow-hidden! shadow-xs! hover:shadow-md! transition-all! cursor-pointer! flex! flex-col! justify-center!`}
+                        className={`h-full! w-full! rounded-xl! p-2.5! ${style.bg} ${style.border} overflow-hidden! transition-all! cursor-pointer! flex! flex-col! justify-center!`}
                       >
-                        <div className={`font-black! text-[11px]! ${style.text} truncate!`}>
+                        <div className={`font-semibold! text-xs! leading-tight! ${style.text} truncate!`}>
                           {task.title}
                         </div>
-                        <div className="text-[9px]! font-bold! opacity-80! truncate!">
+                        <div className="text-xs! font-medium! leading-tight! opacity-80! truncate!">
                           {task.time} {task.endTime ? `- ${task.endTime}` : ""}
                         </div>
                       </div>
