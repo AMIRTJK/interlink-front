@@ -1,11 +1,12 @@
 import type { ComponentType } from "react";
 import { motion } from "framer-motion";
 import { Sparkles, Wind, Mountain, Waves, CloudRain, Flame, Atom, Clock } from "lucide-react";
-import { SCENES, type TDesktopScene } from "../model";
+import { CONTROLS_FADE_TRANSITION, SCENES, type TDesktopScene } from "../model";
 
 interface IProps {
   activeScene: TDesktopScene;
   isDark: boolean;
+  isVisible: boolean;
   lang: string;
   onSelect: (scene: TDesktopScene) => void;
 }
@@ -21,9 +22,12 @@ const ICONS: Record<TDesktopScene, ComponentType<{ className?: string }>> = {
   clock: Clock,
 };
 
-export const SceneSwitcher = ({ activeScene, isDark, lang, onSelect }: IProps) => (
-  <div
-    className={`flex items-center gap-1 md:gap-1.5 p-1.5 max-w-full overflow-x-auto [scrollbar-width:none] rounded-full backdrop-blur-2xl backdrop-saturate-150 border ${isDark ? "bg-slate-950/45 border-white/10 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)]" : "bg-white/70 border-white/80 shadow-[0_12px_40px_-12px_rgba(49,46,129,0.3)]"}`}
+export const SceneSwitcher = ({ activeScene, isDark, isVisible, lang, onSelect }: IProps) => (
+  <motion.div
+    initial={false}
+    animate={{ opacity: isVisible ? 1 : 0 }}
+    transition={isVisible ? CONTROLS_FADE_TRANSITION.show : CONTROLS_FADE_TRANSITION.hide}
+    className={`flex items-center gap-1 md:gap-1.5 p-1.5 max-w-full overflow-x-auto [scrollbar-width:none] rounded-full backdrop-blur-2xl backdrop-saturate-150 border ${isVisible ? "" : "pointer-events-none"} ${isDark ? "bg-slate-950/45 border-white/10 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)]" : "bg-white/70 border-white/80 shadow-[0_12px_40px_-12px_rgba(49,46,129,0.3)]"}`}
   >
     {SCENES.map((scene) => {
       const IconComponent = ICONS[scene.key];
@@ -58,5 +62,5 @@ export const SceneSwitcher = ({ activeScene, isDark, lang, onSelect }: IProps) =
         </button>
       );
     })}
-  </div>
+  </motion.div>
 );

@@ -1,3 +1,5 @@
+import type { Transition } from "framer-motion";
+
 export type TDesktopScene = "space" | "aurora" | "mountains" | "ocean" | "rain" | "campfire" | "particles" | "clock";
 
 /**
@@ -42,3 +44,11 @@ export const LOCK_TOOLTIP_Z_INDEX = 10000;
 // блокировки: сцена «Костёр» ставит огонь в промежуток между ними.
 export const LOCK_ANCHOR_SELECTOR = "[data-lock-anchor]";
 export const LOCK_FOOTER_SELECTOR = "[data-lock-footer]";
+
+// Плавное появление и растворение кнопок управления без смещения:
+// прозрачность анимируем прямо на элементе с backdrop-filter (стекло гаснет целиком),
+// а отсутствие сдвига не ломает layoutId активной сцены и не дёргает раскладку.
+export const CONTROLS_FADE_TRANSITION: Record<"show" | "hide", Transition> = {
+  show: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
+  hide: { duration: 0.65, ease: [0.4, 0, 0.2, 1] },
+};
