@@ -1,3 +1,5 @@
+import type { Dayjs } from "dayjs";
+import "dayjs/locale/ru";
 import { Task } from "@features/tasks";
 
 export interface EventLayout {
@@ -96,3 +98,25 @@ export const calculateDayLayout = (tasks: Task[]): CalendarItem[] => {
 
   return items;
 };
+
+/** «28.64» → { whole: "28", fraction: ".6" }: крупная целая часть и мелкая дробная, как в погодных виджетах. */
+export const splitTemperature = (value: number): { whole: string; fraction: string } => {
+  const rounded = Math.round(value * 10) / 10;
+  const whole = Math.trunc(rounded);
+  const tenth = Math.abs(Math.round((rounded - whole) * 10));
+  const sign = rounded < 0 && whole === 0 ? "-" : "";
+  return { whole: `${sign}${whole}`, fraction: tenth ? `.${tenth}` : "" };
+};
+
+export const formatDegrees = (value: number): string => `${Math.round(value)}°`;
+
+// Open-meteo отдаёт «+14°C»; в капсулах единица лишняя — читается как в погодных виджетах.
+export const formatShortTemperature = (temp: string): string => temp.replace(/C$/, "");
+
+/** Короткое название дня недели для капсулы месяца: «Пн», «Вс». */
+export const getWeekdayLabel = (day: Dayjs): string => {
+  const label = day.locale("ru").format("dd");
+  return label.charAt(0).toUpperCase() + label.slice(1);
+};
+
+export const isWeekendDay = (day: Dayjs): boolean => day.day() === 0 || day.day() === 6;

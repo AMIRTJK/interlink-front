@@ -1,0 +1,99 @@
+/* Дизайн «Небо»: карточка-виджет погоды — фон-иллюстрация (сгенерирована,
+   слева пустое небо под текст, объекты справа), белая типографика.
+   Цвет под картинкой совпадает с её краем: он виден, пока картинка грузится,
+   и продолжает небо вниз в высоких колонках недели. */
+.sky-card {
+  --sky-fill: #a5c6e6;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: #fff;
+  text-shadow: 0 1px 3px rgb(30 64 120 / 0.35);
+  background: linear-gradient(160deg, #c3dbf1 0%, #a5c6e6 100%);
+}
+
+.sky-card--none,
+.sky-card--sun,
+.sky-card--sun-cloud,
+.sky-card--cloud,
+.sky-card--rain,
+.sky-card--snow {
+  background: var(--sky-image) 80% 55% / cover no-repeat, var(--sky-fill);
+}
+
+/* Прогноза нет (дата вне окна open-meteo): нейтральное туманное небо. */
+.sky-card--none {
+  --sky-image: url("../../assets/capsules/sky-unknown.webp");
+  --sky-fill: #959ab8;
+}
+
+.sky-card--sun {
+  --sky-image: url("../../assets/capsules/sky-sun.webp");
+  --sky-fill: #2f8ee3;
+}
+
+.sky-card--sun-cloud {
+  --sky-image: url("../../assets/capsules/sky-sun-cloud.webp");
+  --sky-fill: #b9e6fb;
+}
+
+.sky-card--cloud {
+  --sky-image: url("../../assets/capsules/sky-cloud.webp");
+  --sky-fill: #75879f;
+}
+
+.sky-card--rain {
+  --sky-image: url("../../assets/capsules/sky-rain.webp");
+  --sky-fill: #405269;
+}
+
+/* Фоны снега и переменной облачности светлые: белый текст на них не читается. */
+.sky-card--sun-cloud,
+.sky-card--snow {
+  --cap-weekend: #c2410c;
+  color: #1e3a5f;
+  text-shadow: none;
+}
+
+.sky-card--snow {
+  --sky-image: url("../../assets/capsules/sky-snow.webp");
+  --sky-fill: #dfe9fb;
+  color: #1e3a5f;
+  text-shadow: none;
+}
+
+/* Колонка недели высокая: картинка — шапкой сверху (видна правая часть с объектами),
+   ниже небо продолжается цветом её нижнего края. */
+.sky-card--column.sky-card--none,
+.sky-card--column.sky-card--sun,
+.sky-card--column.sky-card--sun-cloud,
+.sky-card--column.sky-card--cloud,
+.sky-card--column.sky-card--rain,
+.sky-card--column.sky-card--snow {
+  background:
+    linear-gradient(to bottom, transparent 150px, var(--sky-fill) 240px),
+    var(--sky-image) right top / auto 240px no-repeat,
+    var(--sky-fill);
+}
+
+/* Тёмная тема: то же небо, приглушённое вечерней дымкой поверх картинки. */
+.dark .sky-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgb(2 6 23 / 0.4);
+  pointer-events: none;
+}
+
+.dark .sky-card--sun-cloud,
+.dark .sky-card--snow {
+  --cap-weekend: #fcd34d;
+  color: #fff;
+  text-shadow: 0 1px 3px rgb(30 64 120 / 0.5);
+}
+
+.dark .sky-card--sun-cloud::before,
+.dark .sky-card--snow::before {
+  background: rgb(2 6 23 / 0.5);
+}

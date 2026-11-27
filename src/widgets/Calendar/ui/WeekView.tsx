@@ -6,6 +6,8 @@ import { Tooltip } from "@shared/ui";
 import { getEventStyle } from "../model";
 import { WeatherIcon } from "./WeatherIcon";
 import { useWeather } from "../lib/useWeather";
+import { useCalendarWeather } from "../lib/useCalendarWeather";
+import { WeekColumnDesign, getWeekColumnDesignClass } from "./capsule-designs/WeekColumnDesign";
 
 interface IWeekViewProps {
   daysToShow: Dayjs[];
@@ -40,18 +42,6 @@ const formatHourLabel = (h: number) => {
   return `${String(h).padStart(2, "0")}:00`;
 };
 
-// Градиенты — классами, а не инлайн-стилем: иначе dark:-варианты не применяются.
-const WEEK_COLUMN_BORDER = "border border-zinc-200 dark:border-slate-700/50";
-const WEEK_COLUMN_WARM = `${WEEK_COLUMN_BORDER} bg-gradient-to-b from-[#FFF7ED] to-[#FFEDD5] dark:from-orange-950/40 dark:to-amber-950/20`;
-const WEEK_COLUMN_VIOLET = `${WEEK_COLUMN_BORDER} bg-gradient-to-b from-[#FAF5FF] to-[#F3E8FF] dark:from-purple-950/40 dark:to-violet-950/20`;
-const WEEK_COLUMN_SKY = `${WEEK_COLUMN_BORDER} bg-gradient-to-b from-[#F0F9FF] to-[#E0F2FE] dark:from-sky-950/40 dark:to-blue-950/20`;
-
-const getWeekColumnClassName = (colIdx: number) => {
-  if (colIdx === 0) return WEEK_COLUMN_WARM;
-  if (colIdx === 1 || colIdx === 2 || colIdx === 4 || colIdx === 5) return WEEK_COLUMN_VIOLET;
-  return WEEK_COLUMN_SKY;
-};
-
 export const WeekView = memo(({
   daysToShow,
   tasks,
@@ -61,6 +51,7 @@ export const WeekView = memo(({
   onEventClick,
 }: IWeekViewProps) => {
   const { getWeatherForDate } = useWeather();
+  const getDayWeather = useCalendarWeather(daysToShow);
 
   const tasksMap = useMemo(() => {
     const map: Record<string, Task[]> = {};
@@ -142,7 +133,8 @@ export const WeekView = memo(({
             const isToday = day.isSame(dayjs(), "day");
             const dateStr = day.format("YYYY-MM-DD");
             const dayTasks = tasksMap[dateStr] || [];
-            const colClassName = getWeekColumnClassName(colIdx);
+            const columnWeather = getDayWeather(day);
+            const colClassName = getWeekColumnDesignClass(columnWeather);
 
             return (
               <div
@@ -156,6 +148,7 @@ export const WeekView = memo(({
                   onDayClick(day, clickedHour);
                 }}
               >
+                <WeekColumnDesign weather={columnWeather} />
                 {/* Modern Current Time Indicator with Tooltip on hover */}
                 {isToday && (
                   <Tooltip title={`Текущее время: ${currentTimeLabel}`} placement="top">
