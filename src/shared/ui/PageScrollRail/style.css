@@ -1,0 +1,174 @@
+/* Под модалками antd (z 1000), над содержимым страницы. */
+.ui-scroll-rail {
+  position: fixed;
+  top: 50%;
+  right: 4px;
+  z-index: 900;
+  width: 20px;
+  height: min(62vh, 560px);
+  transform: translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
+  touch-action: none;
+  user-select: none;
+  transition: opacity 0.4s ease;
+}
+
+/* В покое рельс невидим, но ловит курсор: наведение на правый край проявляет его. */
+.ui-scroll-rail[data-scrollable="true"] {
+  pointer-events: auto;
+  transition: opacity 0.5s ease;
+}
+
+.ui-scroll-rail[data-scrollable="true"][data-active="true"],
+.ui-scroll-rail[data-scrollable="true"]:hover,
+.ui-scroll-rail[data-scrollable="true"][data-dragging="true"] {
+  opacity: 1;
+  transition-duration: 0.25s;
+}
+
+.ui-scroll-rail__track,
+.ui-scroll-rail__ticks {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.ui-scroll-rail__track {
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgb(var(--th-accent-rgb) / 0.35) 10%,
+    rgb(var(--th-accent-2-rgb) / 0.35) 90%,
+    transparent
+  );
+}
+
+/* Риски шкалы через каждые 10% — проявляются только во время прокрутки. */
+.ui-scroll-rail__ticks {
+  width: 7px;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(var(--th-accent-rgb) / 0.45) 0 1px,
+    transparent 1px 10%
+  );
+  mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ui-scroll-rail[data-active="true"] .ui-scroll-rail__ticks,
+.ui-scroll-rail:hover .ui-scroll-rail__ticks {
+  opacity: 1;
+}
+
+.ui-scroll-rail__thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 36px;
+  cursor: grab;
+  will-change: transform;
+}
+
+.ui-scroll-rail[data-dragging="true"] .ui-scroll-rail__thumb {
+  cursor: grabbing;
+}
+
+.ui-scroll-rail__core {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 4px;
+  margin-left: -2px;
+  border-radius: 9999px;
+  background: linear-gradient(to bottom, rgb(var(--th-accent-2-rgb)), rgb(var(--th-accent-rgb)));
+  box-shadow:
+    0 0 10px rgb(var(--th-accent-rgb) / 0.55),
+    0 0 2px rgb(var(--th-accent-2-rgb));
+  transition: transform 0.2s ease;
+}
+
+.ui-scroll-rail:hover .ui-scroll-rail__core,
+.ui-scroll-rail[data-dragging="true"] .ui-scroll-rail__core {
+  transform: scaleX(1.5);
+}
+
+/* Световой шлейф позади бегунка: длина зависит от скорости прокрутки. */
+.ui-scroll-rail__streak {
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  height: 72px;
+  margin-left: -1px;
+  border-radius: 9999px;
+  transform: scaleY(0);
+  pointer-events: none;
+  transition: transform 0.25s ease-out;
+}
+
+.ui-scroll-rail[data-dir="down"] .ui-scroll-rail__streak {
+  bottom: 100%;
+  transform-origin: bottom;
+  background: linear-gradient(to top, rgb(var(--th-accent-2-rgb) / 0.8), transparent);
+}
+
+.ui-scroll-rail[data-dir="up"] .ui-scroll-rail__streak {
+  top: 100%;
+  transform-origin: top;
+  background: linear-gradient(to bottom, rgb(var(--th-accent-rgb) / 0.8), transparent);
+}
+
+.ui-scroll-rail__readout {
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  padding: 2px 6px;
+  border: 1px solid rgb(var(--th-accent-rgb) / 0.3);
+  border-radius: 6px;
+  background: rgb(255 255 255 / 0.85);
+  backdrop-filter: blur(6px);
+  color: rgb(var(--th-accent-rgb));
+  font: 600 12px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(4px, -50%);
+  pointer-events: none;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.dark .ui-scroll-rail__readout {
+  background: rgb(15 23 42 / 0.85);
+}
+
+.ui-scroll-rail[data-active="true"] .ui-scroll-rail__readout,
+.ui-scroll-rail:hover .ui-scroll-rail__readout {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-scroll-rail,
+  .ui-scroll-rail * {
+    transition: none !important;
+  }
+
+  .ui-scroll-rail__streak {
+    display: none;
+  }
+}
+
+/* Тач-устройства прокручивают пальцем — рельс там только мешает. */
+@media (pointer: coarse) {
+  .ui-scroll-rail {
+    display: none;
+  }
+}

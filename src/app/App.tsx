@@ -1,5 +1,5 @@
 import { AppRouter } from "./routes/AppRouter";
-import { ToastContainer } from "@shared/ui";
+import { PageScrollRail, ToastContainer } from "@shared/ui";
 import { ChatProvider } from "@widgets/Chat";
 import { RealtimeNotifications, ThemeTokens } from "./providers";
 
@@ -10,6 +10,7 @@ export const App = () => {
       <RealtimeNotifications />
       <AppRouter />
       <ToastContainer />
+      <PageScrollRail />
     </ChatProvider>
   );
 };
