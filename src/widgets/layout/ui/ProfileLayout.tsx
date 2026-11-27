@@ -7,6 +7,7 @@ import { THEMES, BACKGROUNDS } from "./designSettings";
 import { useLayoutMode } from "./useLayoutMode";
 import { useDesignSettings } from "./useDesignSettings";
 import { If } from "@shared/ui";
+import { NEW_YEAR_WINTER_BG, NewYearLayer, useNewYearMode } from "@features/NewYearMode";
 
 export const ProfileLayout = () => {
   const { currentTheme, setCurrentTheme, currentBg, setCurrentBg, isDarkMode } =
@@ -18,7 +19,10 @@ export const ProfileLayout = () => {
   const activeTheme = THEMES[currentTheme] || THEMES.emerald;
   const activeBg = BACKGROUNDS[currentBg] || BACKGROUNDS.arctic;
   const themeGradient = activeTheme.gradient;
-  const bgClass = isDarkMode ? activeBg.dark : activeBg.light;
+  const { isEffectActive } = useNewYearMode();
+  // Зимний фон новогоднего режима временно перекрывает выбранный, не трогая его.
+  const bgSource = isEffectActive("winterBg") ? NEW_YEAR_WINTER_BG : activeBg;
+  const bgClass = isDarkMode ? bgSource.dark : bgSource.light;
 
   return (
     <div
@@ -66,6 +70,8 @@ export const ProfileLayout = () => {
       {layoutMode === "bottom" && <BottomNav />}
 
       <ChatFloatingButton layoutMode={layoutMode} />
+
+      <NewYearLayer isBottomNav={layoutMode === "bottom"} />
     </div>
   );
 };

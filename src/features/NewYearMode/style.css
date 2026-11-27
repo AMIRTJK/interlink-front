@@ -1,0 +1,33 @@
+.new-year-garland__bulb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.new-year-garland__cap {
+  width: 4px;
+  height: 3px;
+  border-radius: 1px;
+  background: #71717a;
+}
+
+.new-year-garland__glass {
+  width: 7px;
+  height: 10px;
+  border-radius: 50% 50% 45% 45%;
+  animation: new-year-blink 1.8s ease-in-out infinite;
+}
+
+@keyframes new-year-blink {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .new-year-garland__glass {
+    animation: none;
+  }
+}

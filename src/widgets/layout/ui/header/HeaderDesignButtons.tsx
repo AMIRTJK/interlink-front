@@ -10,9 +10,11 @@ import {
   PanelRight,
   Maximize,
   Minimize,
+  Snowflake,
 } from "lucide-react";
 import { Tooltip } from "@shared/ui";
-import { useFullscreen } from "@shared/lib";
+import { cn, useFullscreen } from "@shared/lib";
+import { NewYearSettings, useNewYearMode } from "@features/NewYearMode";
 import type { LayoutMode } from "../designSettings";
 import { HeaderGlassButton } from "./HeaderGlassButton";
 import { HeaderThemePopover } from "./HeaderThemePopover";
@@ -49,7 +51,7 @@ const LAYOUT_ICONS: Record<LayoutMode, ReactNode> = {
 
 /**
  * Кнопки группы «Оформление» в исходном порядке: полноэкранный режим, светлая/тёмная
- * тема, стекло, цветовая тема, фон, макет. Один набор используется и в «пилюле»,
+ * тема, стекло, новогодний режим, цветовая тема, фон, макет. Один набор используется и в «пилюле»,
  * и в компактном поповере, поэтому состояние полноэкранного режима живёт здесь.
  */
 export const HeaderDesignButtons = ({
@@ -66,6 +68,7 @@ export const HeaderDesignButtons = ({
   popoverPlacement,
 }: IProps) => {
   const { isFullscreen, toggleFullscreen } = useFullscreen();
+  const { isEnabled: isNewYearEnabled } = useNewYearMode();
 
   const fullscreenLabel = isFullscreen
     ? "Выйти из полноэкранного режима"
@@ -100,6 +103,23 @@ export const HeaderDesignButtons = ({
       </Tooltip>
 
       {hasGlass && <HeaderGlassButton tooltipPlacement={tooltipPlacement} />}
+
+      <HeaderPopoverButton
+        label="Новогодний режим"
+        icon={
+          <Snowflake
+            {...ICON_PROPS}
+            className={cn(isNewYearEnabled && "text-sky-500 dark:text-sky-400")}
+          />
+        }
+        tooltipPlacement={tooltipPlacement}
+        popoverPlacement={popoverPlacement}
+        content={
+          <div className="w-[264px] p-2 bg-white dark:bg-zinc-800 rounded-[1.75rem]">
+            <NewYearSettings />
+          </div>
+        }
+      />
 
       <HeaderPopoverButton
         label="Выбор темы"

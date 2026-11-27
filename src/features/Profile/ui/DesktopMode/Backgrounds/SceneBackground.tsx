@@ -1,8 +1,10 @@
 import type { TDesktopScene } from "../model";
-import { SpaceBg } from "./SpaceBg";
+import type { TSpaceVariant } from "../space/model";
+import { SpacePlateBg } from "./SpacePlateBg";
 import { AuroraBg } from "./AuroraBg";
 import { RainBg } from "./RainBg";
 import { CampfireBg } from "./CampfireBg";
+import { NewYearBg } from "./NewYearBg";
 import { ParticlesBg } from "./ParticlesBg";
 import { OceanBg } from "./OceanBg";
 import { MountainsBg } from "./MountainsBg";
@@ -11,18 +13,21 @@ import { ClockBg } from "./ClockBg";
 interface IProps {
   scene: TDesktopScene;
   isDark: boolean;
+  spaceVariant: TSpaceVariant;
 }
 
-export const SceneBackground = ({ scene, isDark }: IProps) => {
+export const SceneBackground = ({ scene, isDark, spaceVariant }: IProps) => {
   switch (scene) {
     case "space":
-      return <SpaceBg isDark={isDark} />;
+      return <SpacePlateBg variant={spaceVariant} />;
     case "aurora":
       return <AuroraBg isDark={isDark} />;
     case "rain":
       return <RainBg isDark={isDark} />;
     case "campfire":
       return <CampfireBg />;
+    case "newyear":
+      return <NewYearBg />;
     case "particles":
       return <ParticlesBg isDark={isDark} />;
     case "ocean":
