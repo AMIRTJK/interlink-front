@@ -1,13 +1,25 @@
 import { useEffect, useState } from "react";
 import type { WeatherType } from "../../model";
+import skyCloudVideo from "../../assets/capsules/sky-cloud.webm";
+import skyRainVideo from "../../assets/capsules/sky-rain.webm";
+import skySnowVideo from "../../assets/capsules/sky-snow.webm";
+import skySunCloudVideo from "../../assets/capsules/sky-sun-cloud.webm";
+import skySunVideo from "../../assets/capsules/sky-sun.webm";
+import skyUnknownVideo from "../../assets/capsules/sky-unknown.webm";
 
 type TSkyKind = WeatherType | "none";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 // Зацикленные ролики фонов капсул (первый кадр = последнему = статичной картинке из sky.css).
-// Погоды без ролика остаются статичными.
-const SKY_VIDEOS: Partial<Record<TSkyKind, string>> = {};
+const SKY_VIDEOS: Record<TSkyKind, string> = {
+  sun: skySunVideo,
+  "sun-cloud": skySunCloudVideo,
+  cloud: skyCloudVideo,
+  rain: skyRainVideo,
+  snow: skySnowVideo,
+  none: skyUnknownVideo,
+};
 
 const usePrefersReducedMotion = () => {
   const [isReduced, setIsReduced] = useState(() => window.matchMedia(REDUCED_MOTION_QUERY).matches);
