@@ -21,15 +21,17 @@ export interface ISceneOption {
 }
 
 export const SCENES: ISceneOption[] = [
+  { key: "campfire", labelRu: "Костёр", labelEn: "Campfire", layout: "stage", isAlwaysNight: true, isFormOnDemand: true },
   { key: "space", labelRu: "Космос", labelEn: "Space", layout: "centered" },
   { key: "aurora", labelRu: "Сияние", labelEn: "Aurora", layout: "centered" },
   { key: "mountains", labelRu: "Горы", labelEn: "Mountains", layout: "centered" },
   { key: "ocean", labelRu: "Океан", labelEn: "Ocean", layout: "centered" },
   { key: "rain", labelRu: "Дождь", labelEn: "Rain", layout: "centered" },
-  { key: "campfire", labelRu: "Костёр", labelEn: "Campfire", layout: "stage", isAlwaysNight: true, isFormOnDemand: true },
   { key: "particles", labelRu: "Частицы", labelEn: "Particles", layout: "centered" },
   { key: "clock", labelRu: "Часы", labelEn: "Clock", layout: "split" },
 ];
+
+export const DEFAULT_SCENE: TDesktopScene = "campfire";
 
 export const STORAGE_SCENE_KEY = "desktop_mode_scene";
 
