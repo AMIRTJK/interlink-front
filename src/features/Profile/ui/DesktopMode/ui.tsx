@@ -11,6 +11,7 @@ import { UserCard } from "./ui/UserCard";
 import { RevealHint } from "./ui/RevealHint";
 import { HideFormButton } from "./ui/HideFormButton";
 import { useFormReveal } from "./lib/useFormReveal";
+import { usePointerActivity } from "./lib/usePointerActivity";
 import { SceneSwitcher } from "./ui/SceneSwitcher";
 import { Watch } from "./watch/ui/Watch";
 import { WatchVariantSwitcher } from "./watch/ui/WatchVariantSwitcher";
@@ -21,7 +22,7 @@ interface IProps {
   isDark: boolean;
   // Ночная сцена может переключить оформление на тёмное и при светлой теме —
   // поэтому шапка и форма получают тему от экрана, а не берут её сами.
-  headerAction?: (isDark: boolean) => ReactNode;
+  headerAction?: (isDark: boolean, isControlsVisible: boolean) => ReactNode;
   children?: (isDark: boolean) => ReactNode;
 }
 
@@ -80,6 +81,7 @@ export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps
   const isSceneDark = isDark || Boolean(sceneOption?.isAlwaysNight);
   const isFormOnDemand = Boolean(sceneOption?.isFormOnDemand);
   const { isRevealed, reveal, conceal } = useFormReveal(isFormOnDemand);
+  const { isControlsVisible, handleControlFocus, handleControlBlur } = usePointerActivity();
   const textTone = isSceneDark ? "text-white" : "text-slate-850";
   const mutedTone = isSceneDark ? "text-white/70" : "text-slate-600";
   const centeredTimeStyle = isSceneDark ? CENTERED_TIME_STYLE.dark : CENTERED_TIME_STYLE.light;
@@ -111,7 +113,11 @@ export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps
         <Logo
           className={`text-xl font-bold tracking-[0.25em] ${isSceneDark ? "text-white/80" : "text-slate-800/80"}`}
         />
-        {headerAction?.(isSceneDark)}
+        {headerAction && (
+          <div onFocus={handleControlFocus} onBlur={handleControlBlur}>
+            {headerAction(isSceneDark, isControlsVisible)}
+          </div>
+        )}
       </header>
 
       {/* Дерево одно для всех раскладок: при смене сцены форма пароля не перемонтируется. */}
@@ -177,11 +183,27 @@ export const DesktopMode = ({ userData, isDark, headerAction, children }: IProps
         </div>
       </main>
 
-      <footer className="relative z-10 flex flex-col items-center gap-2.5 w-full" data-lock-footer="">
+      <footer
+        className="relative z-10 flex flex-col items-center gap-2.5 w-full"
+        data-lock-footer=""
+        onFocus={handleControlFocus}
+        onBlur={handleControlBlur}
+      >
         {isClockScene && (
-          <WatchVariantSwitcher value={watchVariant} isDark={isSceneDark} onChange={selectWatchVariant} />
+          <WatchVariantSwitcher
+            value={watchVariant}
+            isDark={isSceneDark}
+            isVisible={isControlsVisible}
+            onChange={selectWatchVariant}
+          />
         )}
-        <SceneSwitcher activeScene={activeScene} isDark={isSceneDark} lang={lang} onSelect={selectScene} />
+        <SceneSwitcher
+          activeScene={activeScene}
+          isDark={isSceneDark}
+          isVisible={isControlsVisible}
+          lang={lang}
+          onSelect={selectScene}
+        />
       </footer>
     </motion.div>,
     document.body

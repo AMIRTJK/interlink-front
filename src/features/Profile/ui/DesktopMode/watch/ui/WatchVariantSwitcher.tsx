@@ -1,11 +1,13 @@
+import { motion } from "framer-motion";
 import { Tooltip } from "@shared/ui";
-import { LOCK_TOOLTIP_Z_INDEX } from "../../model";
+import { CONTROLS_FADE_TRANSITION, LOCK_TOOLTIP_Z_INDEX } from "../../model";
 import { WATCH_SWITCHER_LABEL, WATCH_VARIANTS, type TWatchVariant } from "../model";
 import { WATCH_SPECS } from "../specs";
 
 interface IProps {
   value: TWatchVariant;
   isDark: boolean;
+  isVisible: boolean;
   onChange: (variant: TWatchVariant) => void;
 }
 
@@ -20,11 +22,14 @@ const CHIP_TONES = {
   },
 } as const;
 
-export const WatchVariantSwitcher = ({ value, isDark, onChange }: IProps) => (
-  <div
+export const WatchVariantSwitcher = ({ value, isDark, isVisible, onChange }: IProps) => (
+  <motion.div
     role="group"
     aria-label={WATCH_SWITCHER_LABEL}
-    className={`flex flex-wrap justify-center items-center gap-1 p-1 rounded-full backdrop-blur-2xl border ${isDark ? "bg-black/30 border-white/10" : "bg-white/55 border-black/8"}`}
+    initial={false}
+    animate={{ opacity: isVisible ? 1 : 0 }}
+    transition={isVisible ? CONTROLS_FADE_TRANSITION.show : CONTROLS_FADE_TRANSITION.hide}
+    className={`flex flex-wrap justify-center items-center gap-1 p-1 rounded-full backdrop-blur-2xl border ${isVisible ? "" : "pointer-events-none"} ${isDark ? "bg-black/30 border-white/10" : "bg-white/55 border-black/8"}`}
   >
     {WATCH_VARIANTS.map((option) => {
       const spec = WATCH_SPECS[option.key];
@@ -32,7 +37,13 @@ export const WatchVariantSwitcher = ({ value, isDark, onChange }: IProps) => (
       const palette = isDark ? CHIP_TONES.dark : CHIP_TONES.light;
       const tone = isActive ? palette.active : palette.idle;
       return (
-        <Tooltip key={option.key} title={option.hint} placement="top" zIndex={LOCK_TOOLTIP_Z_INDEX}>
+        <Tooltip
+          key={option.key}
+          title={option.hint}
+          placement="top"
+          zIndex={LOCK_TOOLTIP_Z_INDEX}
+          open={isVisible ? undefined : false}
+        >
           <button
             type="button"
             onClick={() => onChange(option.key)}
@@ -50,5 +61,5 @@ export const WatchVariantSwitcher = ({ value, isDark, onChange }: IProps) => (
         </Tooltip>
       );
     })}
-  </div>
+  </motion.div>
 );
