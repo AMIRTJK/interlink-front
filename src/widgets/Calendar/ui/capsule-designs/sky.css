@@ -62,6 +62,26 @@
   text-shadow: none;
 }
 
+/* Живой фон поверх статичной картинки: то же кадрирование, что у background выше.
+   Отступ 1px оставляет видимым внутреннее кольцо наведения (inset-тень рисуется под детьми). */
+.sky-card__video {
+  position: absolute;
+  inset: 1px;
+  z-index: 0;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  border-radius: inherit;
+  object-fit: cover;
+  object-position: 80% 55%;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.sky-card__video--ready {
+  opacity: 1;
+}
+
 /* Колонка недели высокая: картинка — шапкой сверху (видна правая часть с объектами),
    ниже небо продолжается цветом её нижнего края. */
 .sky-card--column.sky-card--none,
