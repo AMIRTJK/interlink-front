@@ -1,5 +1,6 @@
-import { Blend, Moon, Palette, Sun, SwatchBook } from "lucide-react";
+import { Blend, Moon, Palette, Snowflake, Sun, SwatchBook } from "lucide-react";
 import { useGlassEffect } from "@shared/lib";
+import { NewYearSettings, useNewYearMode } from "@features/NewYearMode";
 import { HeaderMenu } from "./HeaderMenu";
 import { HeaderMenuItem } from "./HeaderMenuItem";
 import { HeaderMenuPanel } from "./HeaderMenuPanel";
@@ -15,8 +16,9 @@ interface IProps {
 
 const ICON_PROPS = { size: 18, strokeWidth: 2.2 } as const;
 const THEME_PANEL = "theme";
+const NEW_YEAR_PANEL = "newYear";
 
-/** Меню «Внешний вид»: светлая/тёмная тема, цветовая тема, эффект стекла. */
+/** Меню «Внешний вид»: светлая/тёмная тема, цветовая тема, эффект стекла, новогодний режим. */
 export const HeaderAppearanceMenu = ({
   isDarkMode,
   toggleTheme,
@@ -24,13 +26,18 @@ export const HeaderAppearanceMenu = ({
   setCurrentTheme,
 }: IProps) => {
   const { isGlassEnabled, toggleGlass } = useGlassEffect();
+  const { isEnabled: isNewYearEnabled } = useNewYearMode();
   return (
     <HeaderMenu
       label={HEADER_MENU_LABELS.appearance}
       icon={<SwatchBook {...ICON_PROPS} />}
     >
       {({ panel, openPanel, closePanel }) =>
-        panel === THEME_PANEL ? (
+        panel === NEW_YEAR_PANEL ? (
+          <HeaderMenuPanel title="Новогодний режим" onBack={closePanel}>
+            <NewYearSettings />
+          </HeaderMenuPanel>
+        ) : panel === THEME_PANEL ? (
           <HeaderMenuPanel title="Выбор темы" onBack={closePanel}>
             <HeaderOptionGrid
               options={THEME_OPTIONS}
@@ -57,7 +64,15 @@ export const HeaderAppearanceMenu = ({
               hint={isGlassEnabled ? "Вкл" : "Выкл"}
               isActive={isGlassEnabled}
               onClick={toggleGlass}
-            />          </>
+            />
+            <HeaderMenuItem
+              icon={<Snowflake {...ICON_PROPS} />}
+              label="Новогодний режим"
+              hint={isNewYearEnabled ? "Вкл" : "Выкл"}
+              isActive={isNewYearEnabled}
+              onClick={() => openPanel(NEW_YEAR_PANEL)}
+            />
+          </>
         )
       }
     </HeaderMenu>

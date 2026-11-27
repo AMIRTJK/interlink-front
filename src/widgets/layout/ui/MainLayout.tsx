@@ -13,6 +13,7 @@ import { useLayoutMode } from "./useLayoutMode";
 import { useDesignSettings } from "./useDesignSettings";
 import { THEMES, BACKGROUNDS } from "./designSettings";
 import { If } from "@shared/ui";
+import { NEW_YEAR_WINTER_BG, NewYearLayer, useNewYearMode } from "@features/NewYearMode";
 
 export const MainLayout = () => {
   const { pathname } = useLocation();
@@ -45,7 +46,10 @@ export const MainLayout = () => {
   const activeTheme = THEMES[currentTheme] || THEMES.emerald;
   const activeBg = BACKGROUNDS[currentBg] || BACKGROUNDS.arctic;
   const themeGradient = activeTheme.gradient;
-  const bgClass = isDarkMode ? activeBg.dark : activeBg.light;
+  const { isEffectActive } = useNewYearMode();
+  // Зимний фон новогоднего режима временно перекрывает выбранный, не трогая его.
+  const bgSource = isEffectActive("winterBg") ? NEW_YEAR_WINTER_BG : activeBg;
+  const bgClass = isDarkMode ? bgSource.dark : bgSource.light;
 
   // Детальные экраны корреспонденции скрывают всю навигацию — раскладку не применяем.
   if (shouldHideUI) {
@@ -60,6 +64,7 @@ export const MainLayout = () => {
             <Outlet />
           </main>
         </div>
+        <NewYearLayer />
       </div>
     );
   }
@@ -134,6 +139,8 @@ export const MainLayout = () => {
       {showBottomNav && <BottomNav />}
 
       <ChatFloatingButton layoutMode={effectiveLayout} />
+
+      <NewYearLayer isBottomNav={showBottomNav} />
     </div>
   );
 };
