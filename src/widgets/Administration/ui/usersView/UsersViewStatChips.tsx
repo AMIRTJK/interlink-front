@@ -11,40 +11,22 @@ interface IProps {
 
 export function UsersViewStatChips({ statChips }: IProps) {
   return (
-    <div style={{ display: "flex", gap: 8 }}>
+    <div className="flex flex-wrap gap-2">
       {statChips.map((chip) => (
         <div
           key={chip.label}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            background: T.surface,
-            border: `1px solid ${T.border}`,
-            borderRadius: 6,
-            padding: "4px 10px",
-            boxShadow: T.shadow,
-          }}
+          className="flex items-center gap-1.5 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-md px-2.5 py-1 shadow-xs"
         >
           {chip.dot && (
             <span
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: chip.dot,
-                display: "inline-block",
-              }}
+              className="w-1.5 h-1.5 rounded-full inline-block"
+              style={{ background: chip.dot }}
             />
           )}
-          <span
-            style={{ fontSize: 12, color: T.textSecondary, fontWeight: 500 }}
-          >
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
             {chip.label}
           </span>
-          <span
-            style={{ fontSize: 12, fontWeight: 700, color: T.textPrimary }}
-          >
+          <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
             {chip.value}
           </span>
         </div>

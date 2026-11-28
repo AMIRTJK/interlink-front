@@ -67,6 +67,8 @@ export interface ExtUser {
   id: string;
   fio: string;
   email: string;
+  corporateEmail?: string;
+  personalEmail?: string;
   position: string;
   department: string;
   roles: string[];

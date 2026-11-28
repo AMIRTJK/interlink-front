@@ -9,43 +9,12 @@ interface IProps {
 
 export function UserDrawerFooter({ onSave, isDisabled }: IProps) {
   return (
-    <div
-      style={{
-        padding: "12px 20px",
-        borderTop: `1px solid ${T.border}`,
-        display: "flex",
-        gap: 8,
-        flexShrink: 0,
-        background: T.surface,
-      }}
-    >
+    <div className="px-5 py-3 border-t border-slate-200 dark:border-slate-800 flex gap-2 shrink-0 bg-white dark:bg-slate-900">
       <button
         onClick={onSave}
         disabled={isDisabled}
-        style={{
-          flex: 1,
-          padding: "0 14px",
-          height: 36,
-          borderRadius: 8,
-          border: "none",
-          background: T.accent,
-          color: "#fff",
-          fontSize: 13,
-          fontWeight: 600,
-          cursor: "pointer",
-          fontFamily: T.font,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 6,
-          opacity: isDisabled ? 0.7 : 1,
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.background = "#2563EB";
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.background = T.accent;
-        }}
+        className="flex-1 px-3.5 h-9 rounded-lg border-0 bg-blue-500 hover:bg-blue-600 text-white text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-1.5 transition-colors disabled:opacity-70"
+        style={{ fontFamily: T.font }}
       >
         <Check size={13} />
         <span>Сохранить</span>

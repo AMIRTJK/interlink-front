@@ -1,4 +1,6 @@
 import * as React from "react";
+import { ConfigProvider, theme } from "antd";
+import { useIsDarkMode } from "@shared/lib";
 import { ToastContainer } from "./components";
 import { RoleDrawer } from "./RoleDrawer";
 import { CreateRoleModal } from "./CreateRoleModal";
@@ -13,6 +15,7 @@ import { RolesRegistryTable } from "./rolesView/RolesRegistryTable";
 import { RoleUsersTable } from "./rolesView/RoleUsersTable";
 
 export function RolesView() {
+  const isDarkMode = useIsDarkMode();
   const {
     toasts,
     addToast,
@@ -53,29 +56,13 @@ export function RolesView() {
   } = useRolesViewState();
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "stretch",
-        gap: 0,
-        flex: 1,
-        height: "calc(100vh - 135px)",
-        maxHeight: "calc(100vh - 135px)",
-        minHeight: 0,
-        overflow: "hidden",
+    <ConfigProvider
+      theme={{
+        algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
       }}
     >
-      <div
-        style={{
-          flex: 1,
-          minWidth: 0,
-          padding: "20px 24px 20px",
-          height: "100%",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      <div className="flex items-stretch gap-0 flex-1 min-h-0">
+        <div className="flex-1 min-w-0 px-6 py-5 flex flex-col">
         <RolesTopBar
           viewMode={viewMode}
           onSwitchView={switchView}
@@ -213,5 +200,6 @@ export function RolesView() {
       )}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
+    </ConfigProvider>
   );
 }

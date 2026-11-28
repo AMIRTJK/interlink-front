@@ -157,17 +157,10 @@ export function useUsersViewState() {
     [allRoleNames],
   );
 
-  const statChips = React.useMemo(() => {
-    const active = users.filter((u) => u.status === "Активен").length;
-    const inactive = users.filter((u) => u.status === "Неактивен").length;
-    const blocked = users.filter((u) => u.status === "Заблокирован").length;
-    return [
-      { label: "Всего", value: totalUsers, dot: null as string | null },
-      { label: "Активные", value: active, dot: T.success },
-      { label: "Неактивные", value: inactive, dot: "#94A3B8" },
-      { label: "Заблокированные", value: blocked, dot: T.danger },
-    ];
-  }, [users, totalUsers]);
+  const statChips = React.useMemo(
+    () => [{ label: "Всего", value: totalUsers, dot: null as string | null }],
+    [totalUsers],
+  );
 
   return {
     toasts,

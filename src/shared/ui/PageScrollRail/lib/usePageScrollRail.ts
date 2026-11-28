@@ -23,15 +23,13 @@ export const usePageScrollRail = () => {
   const railRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
   const streakRef = useRef<HTMLDivElement>(null);
-  const readoutRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const rail = railRef.current;
     const thumb = thumbRef.current;
     const streak = streakRef.current;
-    const readout = readoutRef.current;
     const appRoot = document.getElementById(APP_ROOT_ID);
-    if (!rail || !thumb || !streak || !readout || !appRoot) return;
+    if (!rail || !thumb || !streak || !appRoot) return;
 
     const doc = document.documentElement;
     const motionQuery = window.matchMedia(REDUCED_MOTION_QUERY);
@@ -63,7 +61,6 @@ export const usePageScrollRail = () => {
         thumb.style.height = `${height}px`;
       }
       thumb.style.transform = `translate3d(0, ${progress * travel}px, 0)`;
-      readout.textContent = `${Math.round(progress * 100)}%`;
     };
 
     const scheduleRender = () => {
@@ -169,5 +166,5 @@ export const usePageScrollRail = () => {
     };
   }, []);
 
-  return { railRef, thumbRef, streakRef, readoutRef };
+  return { railRef, thumbRef, streakRef };
 };

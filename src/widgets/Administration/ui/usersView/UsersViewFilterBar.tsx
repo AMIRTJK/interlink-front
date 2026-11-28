@@ -1,5 +1,5 @@
 import * as React from "react";
-import { X, Check } from "lucide-react";
+import { X, Check, Search } from "lucide-react";
 import { Select } from "antd";
 import { T, getRoleColor } from "../../theme/tokens";
 
@@ -37,75 +37,31 @@ export function UsersViewFilterBar({
   return (
     <>
       {/* Filter bar */}
-      <div
-        style={{
-          background: T.surface,
-          border: `1px solid ${T.border}`,
-          borderRadius: 10,
-          padding: "14px 16px",
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          boxShadow: T.shadow,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            background: T.bg,
-            border: `1px solid ${T.border}`,
-            borderRadius: 8,
-            padding: "0 12px",
-            width: 240,
-            height: 36,
-          }}
-        >
+      <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-[10px] px-4 py-3.5 flex flex-wrap items-center gap-3 shadow-xs">
+        <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-lg px-3 w-full sm:w-60 h-9">
+          <Search size={14} className="text-slate-400 shrink-0" />
           <input
             type="text"
-            className="admin__search-input"
+            className="admin__search-input w-full border-0 outline-none bg-transparent text-[13px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
             placeholder="Поиск сотрудника..."
             value={searchValue}
             onChange={(e) => onSearchValueChange(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") onApplySearch(searchValue);
             }}
-            style={{
-              border: "none",
-              outline: "none",
-              background: "transparent",
-              fontSize: 13,
-              color: T.textPrimary,
-              fontFamily: T.font,
-              width: "100%",
-            }}
+            style={{ fontFamily: T.font }}
           />
           {searchValue && (
             <>
               <button
                 onClick={onClearSearch}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  display: "flex",
-                  padding: 0,
-                  color: T.textSecondary,
-                }}
+                className="bg-transparent border-0 cursor-pointer flex p-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
                 <X size={14} />
               </button>
               <button
                 onClick={() => onApplySearch(searchValue)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  display: "flex",
-                  padding: 0,
-                  color: T.accent,
-                }}
+                className="bg-transparent border-0 cursor-pointer flex p-0 text-blue-500 hover:text-blue-600"
               >
                 <Check size={14} />
               </button>
@@ -115,7 +71,8 @@ export function UsersViewFilterBar({
         <Select
           value={chipFilter || ""}
           onChange={(v) => onChipFilterChange(v || null)}
-          style={{ width: 180, height: 36 }}
+          className="w-full sm:w-[180px]"
+          style={{ height: 36 }}
           options={[
             { value: "", label: "Все роли" },
             ...allRoleNames.map((role) => ({ value: role, label: role })),
@@ -125,7 +82,8 @@ export function UsersViewFilterBar({
         <Select
           value={departmentFilter || ""}
           onChange={(v) => onDepartmentFilterChange(v || null)}
-          style={{ width: 200, height: 36 }}
+          className="w-full sm:w-[200px]"
+          style={{ height: 36 }}
           options={[
             { value: "", label: "Все отделы" },
             ...departments.map((d) => ({ value: d.name, label: d.name })),
@@ -135,7 +93,8 @@ export function UsersViewFilterBar({
         <Select
           value={statusFilter || ""}
           onChange={(v) => onStatusFilterChange(v || null)}
-          style={{ width: 160, height: 36 }}
+          className="w-full sm:w-[160px]"
+          style={{ height: 36 }}
           options={[
             { value: "", label: "Все статусы" },
             { value: "active", label: "Активен" },
@@ -148,14 +107,7 @@ export function UsersViewFilterBar({
       </div>
 
       {/* Role filter chips */}
-      <div
-        style={{
-          display: "flex",
-          gap: 6,
-          overflowX: "auto",
-          scrollbarWidth: "none",
-        }}
-      >
+      <div className="flex flex-wrap gap-1.5">
         {chipFilters.map((chip) => {
           const isActive = chip.filter === chipFilter;
           const cfg = chip.filter ? getRoleColor(chip.filter) : null;
@@ -163,36 +115,26 @@ export function UsersViewFilterBar({
             <button
               key={chip.label}
               onClick={() => onChipFilterChange(chip.filter)}
+              className={`flex items-center gap-1.5 px-3 h-7 rounded-md text-xs font-medium cursor-pointer whitespace-nowrap shrink-0 transition-all border ${
+                isActive
+                  ? ""
+                  : "bg-white/90 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/80"
+              }`}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                padding: "0 12px",
-                height: 28,
-                borderRadius: 6,
-                border: isActive
-                  ? `1px solid ${cfg?.text ?? T.accent}`
-                  : `1px solid ${T.border}`,
-                background: isActive ? cfg?.bg ?? "#EFF6FF" : "transparent",
-                color: isActive ? cfg?.text ?? T.accent : T.textSecondary,
-                fontSize: 12,
-                fontWeight: 500,
-                cursor: "pointer",
                 fontFamily: T.font,
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-                transition: "all 0.15s",
+                ...(isActive
+                  ? {
+                      borderColor: cfg?.text ?? T.accent,
+                      background: cfg?.bg ?? "#EFF6FF",
+                      color: cfg?.text ?? T.accent,
+                    }
+                  : {}),
               }}
             >
               {cfg && (
                 <span
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: cfg.text,
-                    display: "inline-block",
-                  }}
+                  className="w-1.5 h-1.5 rounded-full inline-block"
+                  style={{ background: cfg.text }}
                 />
               )}
               <span>{chip.label}</span>
