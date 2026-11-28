@@ -21,6 +21,7 @@ export function RolesRegistryTable({
 }: IProps) {
   return (
     <div
+      className="ui-glass ui-glass--forced"
       style={{
         background: T.surface,
         borderRadius: 10,

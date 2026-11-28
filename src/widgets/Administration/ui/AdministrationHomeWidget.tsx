@@ -18,7 +18,6 @@ const SUBMODULES: {
   description: string;
   icon: React.ReactNode;
   accent: string;
-  accentBg: string;
 }[] = [
   {
     key: "users",
@@ -27,8 +26,7 @@ const SUBMODULES: {
     description:
       "Управление учётными записями сотрудников: просмотр, добавление, роли, статусы и доступы.",
     icon: <Users size={22} />,
-    accent: "#3B82F6",
-    accentBg: "#EFF6FF",
+    accent: "rgb(var(--th-accent-rgb))",
   },
   {
     key: "roles",
@@ -38,9 +36,13 @@ const SUBMODULES: {
       "Настройка ролей, прав доступа и разрешений для модулей системы электронного документооборота.",
     icon: <ShieldCheck size={22} />,
     accent: "#8B5CF6",
-    accentBg: "#F5F3FF",
   },
 ];
+
+// Полупрозрачный оттенок цвета модуля: пастель на светлом фоне, приглушённый
+// цвет на тёмном. Сплошные пастельные плашки в тёмной теме горели белым.
+const tint = (color: string, pct: number) =>
+  `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 
 const FEATURES: { icon: React.ReactNode; label: string }[] = [
   { icon: <UserCog size={15} />, label: "Управление сотрудниками" },
@@ -68,12 +70,14 @@ export function AdministrationHomeWidget() {
       <div style={{ maxWidth: 1040, width: "100%", margin: "0 auto" }}>
         {/* Hero */}
         <div
+          className="ui-glass ui-glass--forced"
           style={{
-            background: `linear-gradient(135deg, ${T.sidebar} 0%, #1E293B 100%)`,
+            background: T.surface,
+            border: `1px solid ${T.border}`,
             borderRadius: 16,
             padding: "32px 36px",
-            color: "#fff",
-            boxShadow: T.shadowMd,
+            color: T.textPrimary,
+            boxShadow: T.shadow,
             marginBottom: 28,
             position: "relative",
             overflow: "hidden",
@@ -92,14 +96,14 @@ export function AdministrationHomeWidget() {
                 width: 44,
                 height: 44,
                 borderRadius: 12,
-                background: "rgba(255,255,255,0.12)",
+                background: tint(T.accent, 14),
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
               }}
             >
-              <ShieldCheck size={24} color="#fff" />
+              <ShieldCheck size={24} color={T.accent} />
             </div>
             <div>
               <h1
@@ -116,7 +120,7 @@ export function AdministrationHomeWidget() {
                 style={{
                   margin: "2px 0 0",
                   fontSize: 14,
-                  color: "rgba(255,255,255,0.7)",
+                  color: T.textSecondary,
                 }}
               >
                 Центр управления пользователями и доступами системы
@@ -128,7 +132,7 @@ export function AdministrationHomeWidget() {
               margin: "0 0 18px",
               fontSize: 14,
               lineHeight: 1.6,
-              color: "rgba(255,255,255,0.82)",
+              color: T.textSecondary,
               maxWidth: 720,
             }}
           >
@@ -147,10 +151,11 @@ export function AdministrationHomeWidget() {
                   gap: 7,
                   padding: "6px 12px",
                   borderRadius: 20,
-                  background: "rgba(255,255,255,0.1)",
+                  background: T.hoverBg,
+                  border: `1px solid ${T.border}`,
                   fontSize: 12,
                   fontWeight: 500,
-                  color: "rgba(255,255,255,0.9)",
+                  color: T.textSecondary,
                 }}
               >
                 {f.icon}
@@ -198,22 +203,18 @@ export function AdministrationHomeWidget() {
                 padding: "24px 24px 20px",
                 cursor: "pointer",
                 boxShadow: T.shadow,
-                transition: "box-shadow 0.18s, transform 0.18s, border-color 0.18s",
+                transition: "box-shadow 0.18s, border-color 0.18s",
                 display: "flex",
                 flexDirection: "column",
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLDivElement).style.boxShadow =
                   T.shadowMd;
-                (e.currentTarget as HTMLDivElement).style.transform =
-                  "translateY(-2px)";
                 (e.currentTarget as HTMLDivElement).style.borderColor =
-                  m.accent + "55";
+                  tint(m.accent, 40);
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLDivElement).style.boxShadow = T.shadow;
-                (e.currentTarget as HTMLDivElement).style.transform =
-                  "translateY(0)";
                 (e.currentTarget as HTMLDivElement).style.borderColor =
                   T.border;
               }}
@@ -223,7 +224,7 @@ export function AdministrationHomeWidget() {
                   width: 48,
                   height: 48,
                   borderRadius: 12,
-                  background: m.accentBg,
+                  background: tint(m.accent, 14),
                   color: m.accent,
                   display: "flex",
                   alignItems: "center",

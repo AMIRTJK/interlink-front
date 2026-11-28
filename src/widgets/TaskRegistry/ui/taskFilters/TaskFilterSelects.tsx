@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Calendar } from "lucide-react";
+import { Calendar, ChevronDown } from "lucide-react";
 import { Select, DatePicker, ConfigProvider, type ThemeConfig } from "antd";
 import dayjs from "dayjs";
 import { cn } from "@shared/lib";
@@ -12,6 +12,9 @@ import { FIELD } from "./model";
 // Цвета и тёмный режим приходят из глобального AntdThemeProvider; здесь только
 // размеры, чтобы поля совпадали по высоте с остальной панелью.
 const FIELD_THEME: ThemeConfig = { token: { controlHeight: 32, fontSize: 12 } };
+
+// Шеврон как в остальном интерфейсе вместо тонкой стрелки antd.
+const SUFFIX = <ChevronDown size={14} strokeWidth={2.25} className="text-slate-400 dark:text-slate-500" />;
 
 const LABEL = "text-slate-400 dark:text-slate-500 font-medium whitespace-nowrap";
 const CONTROL =
@@ -35,10 +38,11 @@ export const TaskFilterSelects = ({ filters, colleagues, onFilterChange }: IProp
   return (
     <ConfigProvider theme={FIELD_THEME}>
       <Tooltip title={priorityLabel}>
-        <div className={cn(FIELD, "pl-3.5 pr-1")}>
+        <div className={cn(FIELD, "pl-3.5 pr-2")}>
           <span className={LABEL}>Приоритет</span>
           <Select
             variant="borderless"
+            suffixIcon={SUFFIX}
             value={filters.priority || undefined}
             placeholder="Все"
             onChange={(val) => onFilterChange({ priority: (val || "") as Priority })}
@@ -50,10 +54,11 @@ export const TaskFilterSelects = ({ filters, colleagues, onFilterChange }: IProp
       </Tooltip>
 
       <Tooltip title={assigneeLabel}>
-        <div className={cn(FIELD, "pl-3.5 pr-1")}>
+        <div className={cn(FIELD, "pl-3.5 pr-2")}>
           <span className={LABEL}>Исполнитель</span>
           <Select
             variant="borderless"
+            suffixIcon={SUFFIX}
             value={filters.assigneeId ? String(filters.assigneeId) : undefined}
             placeholder="Все"
             onChange={(val) => onFilterChange({ assigneeId: val || "" })}
@@ -66,7 +71,7 @@ export const TaskFilterSelects = ({ filters, colleagues, onFilterChange }: IProp
         </div>
       </Tooltip>
 
-      <div className={cn(FIELD, "pl-3.5 pr-1")}>
+      <div className={cn(FIELD, "pl-3.5 pr-2")}>
         <Calendar size={14} className="mr-1.5 shrink-0 text-slate-400" />
         <span className={LABEL}>Дедлайн</span>
         <DatePicker

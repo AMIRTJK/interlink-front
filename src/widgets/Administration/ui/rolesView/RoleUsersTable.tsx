@@ -177,6 +177,7 @@ export function RoleUsersTable({
 
   return (
     <div
+      className="ui-glass ui-glass--forced"
       style={{
         background: T.surface,
         borderRadius: 10,

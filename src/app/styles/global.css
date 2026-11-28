@@ -249,6 +249,27 @@ html.dark *,
   scrollbar-color: rgb(var(--th-accent-rgb) / 0.35) transparent;
 }
 
+/* Списки опций antd (Select, Cascader) рисуют собственную полосу прокрутки
+   (rc-virtual-list) со встроенным тёмно-серым ползунком — на тёмном меню он не
+   виден. Красим её как остальные полосы: цветом темы. */
+.rc-virtual-list-scrollbar-thumb {
+  background: rgb(var(--th-accent-rgb) / 0.3) !important;
+}
+
+.rc-virtual-list-scrollbar-thumb:hover,
+.rc-virtual-list-scrollbar-thumb-moving {
+  background: rgb(var(--th-accent-rgb) / 0.6) !important;
+}
+
+.dark .rc-virtual-list-scrollbar-thumb {
+  background: rgb(var(--th-accent-rgb) / 0.4) !important;
+}
+
+.dark .rc-virtual-list-scrollbar-thumb:hover,
+.dark .rc-virtual-list-scrollbar-thumb-moving {
+  background: rgb(var(--th-accent-rgb) / 0.75) !important;
+}
+
 /* Полоса прокрутки страницы занимает ширину, и при переходе между страницами со
    скроллом и без него контент сдвигается вбок. Скрываем её у корня, а прокрутку
    показывает PageScrollRail поверх контента. Внутренние области не затронуты. */
