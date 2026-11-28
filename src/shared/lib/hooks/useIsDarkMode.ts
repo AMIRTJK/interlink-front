@@ -21,6 +21,8 @@ export const useIsDarkMode = (): boolean => {
       setIsDark(el.classList.contains("dark")),
     );
     observer.observe(el, { attributes: true, attributeFilter: ["class"] });
+    // Класс мог появиться между рендером и подпиской (шапка ставит его своим эффектом).
+    setIsDark(el.classList.contains("dark"));
     return () => observer.disconnect();
   }, []);
 
