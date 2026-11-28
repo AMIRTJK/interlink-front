@@ -71,7 +71,7 @@ export const CalendarSidebar = memo(({
       <button
         type="button"
         onClick={onCreateEvent}
-        className="w-full! py-3! px-4.5! rounded-2xl! bg-[#0d9488]! hover:bg-[#0f766e]! text-white! font-semibold! text-sm! flex! items-center! justify-center! gap-2! active:scale-[0.98]! transition-all! cursor-pointer! border-0!"
+        className="w-full! py-3! px-4.5! rounded-2xl! bg-[rgb(var(--th-accent-rgb))]! hover:brightness-90! text-[var(--th-on-accent)]! font-semibold! text-sm! flex! items-center! justify-center! gap-2! active:scale-[0.98]! transition-all! cursor-pointer! border-0!"
       >
         <Plus size={16} strokeWidth={3} />
         <span>Создать событие</span>
@@ -127,7 +127,7 @@ export const CalendarSidebar = memo(({
                 onClick={() => onDateChange(day)}
                 className={`w-7! h-7! mx-auto! flex! items-center! justify-center! rounded-full! text-xs! font-medium! transition-all! cursor-pointer! border-0! ${
                   isSelected
-                    ? "bg-[#0d9488]! text-white! font-semibold!"
+                    ? "bg-[rgb(var(--th-accent-rgb))]! text-[var(--th-on-accent)]! font-semibold!"
                     : isCurrentMonth
                     ? "text-slate-700! dark:text-slate-200! hover:bg-slate-100! dark:hover:bg-slate-800!"
                     : "text-slate-300! dark:text-slate-600!"
