@@ -27,10 +27,14 @@ function userEmail(u: IAdminUser): string {
 
 export function adaptExtUser(u: IAdminUser): ExtUser {
   const fio = fullName(u);
+  const corporateEmail = u.corporate_email?.trim() || "";
+  const personalEmail = u.personal_email?.trim() || "";
   return {
     id: String(u.id),
     fio,
     email: userEmail(u),
+    corporateEmail,
+    personalEmail,
     position: u.position || "—",
     department: department(u),
     roles: extractPermNames(u.roles),
