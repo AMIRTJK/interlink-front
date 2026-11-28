@@ -36,7 +36,7 @@ export const SignerCard: React.FC<IProps> = ({ signer, idx }) => {
             {signer.name}
           </p>
         </div>
-        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border flex-shrink-0 bg-purple-50 text-purple-700 border-purple-200">
+        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border flex-shrink-0 bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/35 dark:text-purple-400 dark:border-purple-800/50">
           {signer.role}
         </span>
       </div>
@@ -56,7 +56,7 @@ export const SignerCard: React.FC<IProps> = ({ signer, idx }) => {
 
       {!signer.signed && (
         <div className="flex items-center gap-1.5">
-          <span className="w-4 h-4 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0 border border-amber-200">
+          <span className="w-4 h-4 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0 border border-amber-200 dark:bg-amber-900/35 dark:border-amber-800/50">
             <Clock size={9} className="text-amber-500" />
           </span>
           <span className="text-[11px] font-semibold text-amber-600">

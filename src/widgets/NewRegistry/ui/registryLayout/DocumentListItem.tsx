@@ -37,7 +37,7 @@ export const DocumentListItem = ({
       whileHover={{ x: 4, boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.1)" }}
       onClick={onClick}
       className={cn(
-        "ui-glass bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 transition-all duration-500 cursor-pointer mb-2 overflow-hidden relative",
+        "ui-glass bg-white dark:bg-th-raised rounded-lg border border-gray-200 dark:border-th-high transition-all duration-500 cursor-pointer mb-2 overflow-hidden relative",
         linkInfo?.borderColor,
       )}
     >
@@ -235,7 +235,7 @@ export const DocumentListItem = ({
                   placement="bottomRight"
                   overlayClassName="custom-registry-dropdown"
                 >
-                  <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md text-gray-500 dark:text-slate-400 transition-colors">
+                  <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-th-high rounded-md text-gray-500 dark:text-slate-400 transition-colors">
                     <MoreHorizontal size={16} />
                   </button>
                 </Dropdown>

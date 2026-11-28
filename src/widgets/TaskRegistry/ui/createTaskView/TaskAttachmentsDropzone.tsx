@@ -61,7 +61,7 @@ export function TaskAttachmentsDropzone({
         className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center gap-3 transition-colors ${
           isDragOver
             ? "border-[#10b981] bg-[#f0fdf4]"
-            : "border-[#d8defa] dark:border-white/10 bg-[#f4f6fe]/60 dark:bg-slate-900/50"
+            : "border-[#d8defa] dark:border-white/10 bg-[#f4f6fe]/60 dark:bg-th-base/50"
         }`}
       >
         <p className="text-xs font-medium text-[#9aa2c8] dark:text-slate-400">
@@ -71,7 +71,7 @@ export function TaskAttachmentsDropzone({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#ebedfa] hover:bg-[#e2e6f8] dark:bg-slate-800 dark:hover:bg-slate-700 border border-[#d2d8f8] dark:border-white/10 text-[#10b981] dark:text-emerald-400 font-bold text-xs rounded-2xl transition-all cursor-pointer shadow-2xs"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#ebedfa] hover:bg-[#e2e6f8] dark:bg-th-raised dark:hover:bg-th-high border border-[#d2d8f8] dark:border-white/10 text-[#10b981] dark:text-emerald-400 font-bold text-xs rounded-2xl transition-all cursor-pointer shadow-2xs"
         >
           <Upload size={13} />
           <span>Выбрать файлы</span>
@@ -98,7 +98,7 @@ export function TaskAttachmentsDropzone({
           {attachments.map((file) => (
             <div
               key={file.id}
-              className="group flex items-center gap-3 p-3 bg-white/70 dark:bg-slate-800/70 border border-slate-200/60 dark:border-white/10 rounded-xl hover:border-emerald-300 transition-colors"
+              className="group flex items-center gap-3 p-3 bg-white/70 dark:bg-th-raised/70 border border-slate-200/60 dark:border-white/10 rounded-xl hover:border-emerald-300 transition-colors"
             >
               <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-600 shrink-0">
                 <FileIcon size={18} />
@@ -121,7 +121,7 @@ export function TaskAttachmentsDropzone({
                       );
                     }
                   }}
-                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all text-slate-400 hover:text-emerald-600"
+                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-th-high rounded-lg transition-all text-slate-400 hover:text-emerald-600"
                 >
                   <Download size={15} />
                 </button>
@@ -147,7 +147,7 @@ export function TaskAttachmentsDropzone({
           {newFiles.map((file, index) => (
             <div
               key={`new-${index}-${file.name}`}
-              className="group flex items-center gap-3 p-3 bg-white/70 dark:bg-slate-800/70 border border-slate-200/60 dark:border-white/10 rounded-xl hover:border-emerald-300 transition-colors"
+              className="group flex items-center gap-3 p-3 bg-white/70 dark:bg-th-raised/70 border border-slate-200/60 dark:border-white/10 rounded-xl hover:border-emerald-300 transition-colors"
             >
               <div className="w-9 h-9 bg-amber-50 dark:bg-amber-900/30 rounded-lg flex items-center justify-center text-amber-600 shrink-0">
                 <FileIcon size={18} />

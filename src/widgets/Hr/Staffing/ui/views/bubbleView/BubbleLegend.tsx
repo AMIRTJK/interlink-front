@@ -16,7 +16,7 @@ export function BubbleLegend({ dark = false }: IProps) {
         <span>100% — заполнено</span>
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="w-2 h-2 rounded-full bg-indigo-400 inline-block" />
+        <span className="w-2 h-2 rounded-full bg-th-accent-400 inline-block" />
         <span>60–99% — норма</span>
       </span>
       <span className="flex items-center gap-1.5">

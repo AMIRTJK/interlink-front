@@ -105,7 +105,7 @@ export const ChatFloatingButton = ({ layoutMode }: IProps) => {
           }
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
-          className={`relative w-14 h-14 rounded-[2.5rem] bg-linear-to-br ${gradient} text-white shadow-xl border border-white/30 dark:border-zinc-700/40 flex items-center justify-center cursor-pointer focus:outline-none transition-shadow duration-300 hover:shadow-2xl`}
+          className={`relative w-14 h-14 rounded-[2.5rem] bg-linear-to-br ${gradient} text-white shadow-xl border border-white/30 dark:border-th-high/40 flex items-center justify-center cursor-pointer focus:outline-none transition-shadow duration-300 hover:shadow-2xl`}
         >
           <MessageSquare size={22} strokeWidth={2.2} />
 

@@ -123,7 +123,7 @@ export const VisorsPanel: React.FC<IProps> = ({
               key={visor.id}
               className="flex items-center gap-2.5 rounded-xl border border-slate-100 bg-slate-50 px-2.5 py-2"
             >
-              <span className="w-8 h-8 rounded-full bg-violet-100 text-violet-700 border border-violet-200 flex items-center justify-center text-[11px] font-bold flex-shrink-0">
+              <span className="w-8 h-8 rounded-full bg-violet-100 text-violet-700 border border-violet-200 flex items-center justify-center text-[11px] font-bold flex-shrink-0 dark:bg-violet-900/35 dark:text-violet-400 dark:border-violet-800/50">
                 {getVisorInitials(visor.full_name)}
               </span>
               <div className="flex-1 min-w-0">

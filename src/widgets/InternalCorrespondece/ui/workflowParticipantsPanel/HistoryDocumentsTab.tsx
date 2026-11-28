@@ -16,18 +16,18 @@ export const HistoryDocumentsTab = ({
           key={doc.id}
           className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
             isDarkMode
-              ? "bg-blue-900/20 border-blue-800/50 hover:bg-blue-900/40"
-              : "bg-blue-50/30 border-blue-100 hover:bg-blue-50"
+              ? "bg-th-accent-900/20 border-th-accent-800/50 hover:bg-th-accent-900/40"
+              : "bg-th-accent-50/30 border-th-accent-100 hover:bg-th-accent-50 dark:bg-th-accent-900/35 dark:border-th-accent-800/50"
           }`}
         >
-          <div className="mt-1 text-blue-500">
+          <div className="mt-1 text-th-accent-500">
             <FileTextOutlined />
           </div>
           <div className="flex-1">
             <div className="flex justify-between">
               <span
                 className={`font-semibold ${
-                  isDarkMode ? "text-blue-400" : "text-blue-700"
+                  isDarkMode ? "text-th-accent-400" : "text-th-accent-700"
                 }`}
               >
                 {doc.reg_number}
@@ -53,7 +53,7 @@ export const HistoryDocumentsTab = ({
                 target="_blank"
                 rel="noreferrer"
                 className={`text-xs hover:underline flex items-center gap-1 ${
-                  isDarkMode ? "text-blue-400" : "text-blue-600"
+                  isDarkMode ? "text-th-accent-400" : "text-th-accent-600"
                 }`}
               >
                 <EyeOutlined /> Открыть документ

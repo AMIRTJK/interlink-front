@@ -29,8 +29,8 @@ export const PptxPreview = ({
 
 	return (
 		<div className="w-full flex flex-col items-center gap-4">
-			<div className="w-full max-w-[960px] aspect-[16/9] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-2xl p-8 flex flex-col justify-between shadow-2xl border border-slate-700/60 relative overflow-hidden">
-				<div className="flex items-center justify-between border-b border-slate-700/50 pb-4">
+			<div className="w-full max-w-[960px] aspect-[16/9] bg-gradient-to-br from-th-base via-th-raised to-th-base text-white rounded-2xl p-8 flex flex-col justify-between shadow-2xl border border-th-high/60 relative overflow-hidden">
+				<div className="flex items-center justify-between border-b border-th-high/50 pb-4">
 					<div className="flex items-center gap-3">
 						<div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
 							P
@@ -39,7 +39,7 @@ export const PptxPreview = ({
 							{currentSlide?.title || fileName}
 						</h4>
 					</div>
-					<span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-amber-400">
+					<span className="text-xs font-semibold px-3 py-1 rounded-full bg-th-raised border border-th-high text-amber-400">
 						Слайд {currentSlideIndex + 1} из {pptxSlides.length}
 					</span>
 				</div>
@@ -63,18 +63,18 @@ export const PptxPreview = ({
 					</If>
 				</div>
 
-				<div className="flex items-center justify-between pt-3 border-t border-slate-700/50 text-[11px] text-slate-400">
+				<div className="flex items-center justify-between pt-3 border-t border-th-high/50 text-[11px] text-slate-400">
 					<span>{fileName}</span>
 					<span>Презентация PowerPoint</span>
 				</div>
 			</div>
 
-			<div className="flex items-center gap-3 bg-white dark:bg-slate-800 px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 shadow-md">
+			<div className="flex items-center gap-3 bg-white dark:bg-th-raised px-4 py-2 rounded-full border border-slate-200 dark:border-th-high shadow-md">
 				<button
 					type="button"
 					onClick={handlePrevSlide}
 					disabled={isFirstSlide}
-					className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+					className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-th-high disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
 				>
 					◀ Предыдущий
 				</button>
@@ -87,7 +87,7 @@ export const PptxPreview = ({
 					type="button"
 					onClick={handleNextSlide}
 					disabled={isLastSlide}
-					className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+					className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-th-high disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
 				>
 					Следующий ▶
 				</button>

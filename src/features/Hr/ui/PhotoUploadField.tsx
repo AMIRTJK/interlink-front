@@ -56,7 +56,7 @@ export const PhotoUploadField = ({ initialUrl, onChange }: IPhotoUploadFieldProp
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 border-2 border-dashed border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 hover:border-indigo-400 transition-colors flex items-center justify-center cursor-pointer"
+          className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 border-2 border-dashed border-gray-200 dark:border-th-raised bg-gray-50 dark:bg-th-base/50 hover:border-th-accent-400 transition-colors flex items-center justify-center cursor-pointer"
         >
           {preview ? (
             <img src={preview} alt="Фото" className="w-full h-full object-cover" onError={onRemove} />
@@ -69,7 +69,7 @@ export const PhotoUploadField = ({ initialUrl, onChange }: IPhotoUploadFieldProp
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 hover:border-indigo-400 text-gray-600 dark:text-slate-400 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all border-gray-200 dark:border-th-raised bg-gray-50 dark:bg-th-base/50 hover:border-th-accent-400 text-gray-600 dark:text-slate-400 cursor-pointer"
             >
               <Camera size={14} />
               {preview ? "Заменить фото" : "Загрузить фото"}
@@ -78,7 +78,7 @@ export const PhotoUploadField = ({ initialUrl, onChange }: IPhotoUploadFieldProp
               <button
                 type="button"
                 onClick={onRemove}
-                className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-800 text-gray-400 hover:text-red-500 hover:border-red-200 text-sm font-medium transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-th-raised text-gray-400 hover:text-red-500 hover:border-red-200 text-sm font-medium transition-colors cursor-pointer"
               >
                 <Trash2 size={14} />
               </button>

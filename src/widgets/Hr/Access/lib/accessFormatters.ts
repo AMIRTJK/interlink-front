@@ -69,7 +69,7 @@ export const getRoleColorMeta = (roleName: string) => {
     return {
       dot: "bg-blue-500!",
       text: "text-blue-600!",
-      badge: "bg-blue-50 text-blue-600! border border-blue-100",
+      badge: "bg-blue-50 text-blue-600! border border-blue-100 dark:bg-blue-900/35! dark:text-blue-400! dark:border-blue-800/50!",
       borderCell: "border-l-blue-500!",
     };
   }
@@ -77,7 +77,7 @@ export const getRoleColorMeta = (roleName: string) => {
     return {
       dot: "bg-emerald-500!",
       text: "text-emerald-600!",
-      badge: "bg-emerald-50 text-emerald-600! border border-emerald-100",
+      badge: "bg-emerald-50 text-emerald-600! border border-emerald-100 dark:bg-emerald-900/35! dark:text-emerald-400! dark:border-emerald-800/50!",
       borderCell: "border-l-emerald-500!",
     };
   }
@@ -85,7 +85,7 @@ export const getRoleColorMeta = (roleName: string) => {
     return {
       dot: "bg-orange-500!",
       text: "text-orange-600!",
-      badge: "bg-orange-50 text-orange-600! border border-orange-100",
+      badge: "bg-orange-50 text-orange-600! border border-orange-100 dark:bg-orange-900/35! dark:text-orange-400! dark:border-orange-800/50!",
       borderCell: "border-l-orange-500!",
     };
   }
@@ -93,7 +93,7 @@ export const getRoleColorMeta = (roleName: string) => {
     return {
       dot: "bg-indigo-500!",
       text: "text-indigo-600!",
-      badge: "bg-indigo-50 text-indigo-600! border border-indigo-100",
+      badge: "bg-indigo-50 text-indigo-600! border border-indigo-100 dark:bg-indigo-900/35! dark:text-indigo-400! dark:border-indigo-800/50!",
       borderCell: "border-l-indigo-500!",
     };
   }
@@ -101,14 +101,14 @@ export const getRoleColorMeta = (roleName: string) => {
     return {
       dot: "bg-purple-500!",
       text: "text-purple-600!",
-      badge: "bg-purple-50 text-purple-600! border border-purple-100",
+      badge: "bg-purple-50 text-purple-600! border border-purple-100 dark:bg-purple-900/35! dark:text-purple-400! dark:border-purple-800/50!",
       borderCell: "border-l-purple-500!",
     };
   }
   return {
     dot: "bg-slate-400!",
-    text: "text-slate-500!",
-    badge: "bg-slate-50 text-slate-500! border border-slate-200",
+    text: "text-slate-500! dark:text-slate-400!",
+    badge: "bg-slate-50 text-slate-500! border border-slate-200 dark:bg-th-base dark:text-slate-400! dark:border-th-high",
     borderCell: "border-l-slate-400!",
   };
 };

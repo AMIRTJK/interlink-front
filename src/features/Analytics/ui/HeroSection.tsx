@@ -18,7 +18,7 @@ export const HeroSection = ({ data }: HeroSectionProps) => {
         <Statistic
           title="Всего задач"
           value={data.totalTasks}
-          prefix={<RiseOutlined className="text-blue-500" />}
+          prefix={<RiseOutlined className="text-th-accent-500" />}
           valueStyle={{ fontWeight: "bold" }}
         />
       </Card>

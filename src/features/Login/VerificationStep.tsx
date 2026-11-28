@@ -54,7 +54,7 @@ export const VerificationStep = ({
 						value={digit}
 						onChange={(e) => onOtpChange(index, e.target.value)}
 						onKeyDown={(e) => onOtpKeyDown(index, e)}
-						className="w-10 h-12 sm:w-11 sm:h-14 bg-slate-900/25 border border-white/15 rounded-xl text-center text-xl font-bold text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-inner"
+						className="w-10 h-12 sm:w-11 sm:h-14 bg-th-base/25 border border-white/15 rounded-xl text-center text-xl font-bold text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-inner"
 					/>
 				))}
 			</div>
@@ -62,7 +62,7 @@ export const VerificationStep = ({
 			<button
 				type="submit"
 				disabled={otp.join("").length !== OTP_LENGTH || isVerifying}
-				className="w-full h-12 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold rounded-xl transition-all active:scale-[0.98]"
+				className="w-full h-12 bg-blue-600 hover:bg-blue-500 disabled:bg-th-raised disabled:text-slate-500 text-white font-semibold rounded-xl transition-all active:scale-[0.98]"
 			>
 				{isVerifying ? "Проверка..." : "Подтвердить вход"}
 			</button>

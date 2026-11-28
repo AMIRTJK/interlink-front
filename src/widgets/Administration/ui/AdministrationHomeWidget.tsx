@@ -190,6 +190,7 @@ export function AdministrationHomeWidget() {
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") navigate(m.route);
               }}
+              className="ui-glass ui-glass--forced"
               style={{
                 background: T.surface,
                 borderRadius: 14,

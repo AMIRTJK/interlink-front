@@ -39,13 +39,13 @@ export const FilterTabs = memo(({ activeTab, onTabChange, stats, activeTheme }: 
             className={`rounded-full! px-4! py-1.5! text-xs! font-semibold! transition-all! duration-200! cursor-pointer! flex! items-center! gap-1.5! border-0! ${
               isActive
                 ? `bg-gradient-to-r! ${activeTheme.gradient} text-white! shadow-md!`
-                : "bg-zinc-100! dark:bg-zinc-800! text-zinc-500! dark:text-zinc-400! hover:bg-zinc-200! dark:hover:bg-zinc-700!"
+                : "bg-zinc-100! dark:bg-th-raised! ui-glass-soft text-zinc-500! dark:text-zinc-400! hover:bg-zinc-200! dark:hover:bg-th-high!"
             }`}
           >
             <span>{tab.label}</span>
             <span
               className={`px-1.5! py-0.5! rounded-full! text-[10px]! font-bold! ${
-                isActive ? "bg-white/25! text-white!" : "bg-zinc-200/70! dark:bg-zinc-700! text-zinc-500! dark:text-zinc-400!"
+                isActive ? "bg-white/25! text-white!" : "bg-zinc-200/70! dark:bg-th-high! text-zinc-500! dark:text-zinc-400!"
               }`}
             >
               {tab.count}

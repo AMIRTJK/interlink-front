@@ -55,12 +55,12 @@ export const FileCard = React.memo(({
 			onDragOver={(e) => handleDragOver(e, index)}
 			onDrop={(e) => handleDrop(e, index)}
 			onDragEnd={handleDragEnd}
-			className={`group bg-white dark:bg-slate-800 rounded-[2rem] border transition-all duration-200 overflow-hidden ${
-				isDragging ? "opacity-30 border-indigo-400" : ""
+			className={`group ui-glass bg-white dark:bg-th-raised rounded-[2rem] border transition-all duration-200 overflow-hidden ${
+				isDragging ? "opacity-30 border-th-accent-400" : ""
 			} ${
 				isOver
-					? "border-2 border-indigo-500 scale-[1.02] shadow-indigo-100"
-					: "border-zinc-200 dark:border-slate-700 hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600"
+					? "border-2 border-th-accent-500 scale-[1.02] shadow-th-accent-100"
+					: "border-zinc-200 dark:border-th-high hover:shadow-md hover:border-slate-200 dark:hover:border-th-higher"
 			}`}
 		>
 			<FileCardCover
@@ -77,7 +77,7 @@ export const FileCard = React.memo(({
 				<Tooltip title={file.original_name}>
 					<h4
 						onClick={() => onView(file)}
-						className="text-sm font-bold text-slate-800 dark:text-zinc-200 truncate cursor-pointer hover:text-indigo-600 transition-colors"
+						className="text-sm font-bold text-slate-800 dark:text-zinc-200 truncate cursor-pointer hover:text-th-accent-600 transition-colors"
 					>
 						{file.original_name}
 					</h4>

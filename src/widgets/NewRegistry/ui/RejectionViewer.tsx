@@ -112,7 +112,7 @@ export const RejectionViewer = ({ rejection, rejections }: IProps) => {
           {history.map((item, idx) => (
             <div
               key={item.approval_id || item.signature_id || idx}
-              className="flex gap-3 p-3 rounded-lg border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/60 transition-all"
+              className="flex gap-3 p-3 rounded-lg border border-gray-100 dark:border-th-high hover:bg-gray-50 dark:hover:bg-th-raised/60 transition-all"
             >
               <Avatar className="bg-rose-500! text-xs! flex-shrink-0">
                 {initialsOf(item.user?.full_name)}
@@ -134,7 +134,7 @@ export const RejectionViewer = ({ rejection, rejections }: IProps) => {
                     {typeLabelOf(item.type)}
                   </span>
                   <If is={!!item.version}>
-                    <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300">
+                    <span className="px-1.5 py-0.5 rounded bg-th-accent-50 text-th-accent-600 dark:bg-th-accent-950/40 dark:text-th-accent-300">
                       Версия {item.version}
                     </span>
                   </If>

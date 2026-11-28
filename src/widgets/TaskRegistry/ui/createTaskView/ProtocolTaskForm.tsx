@@ -110,9 +110,9 @@ export function ProtocolTaskForm({
     >
       {/* Mode Status Bar when in View or Edit mode */}
       {mode === "view" && (
-        <div className="flex items-center justify-between gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50/50 dark:from-slate-800/80 dark:to-slate-800/40 border border-blue-200/80 dark:border-white/10 rounded-2xl">
+        <div className="flex items-center justify-between gap-4 p-4 bg-gradient-to-r from-th-accent-50 to-th-accent-50/50 dark:from-th-raised/80 dark:to-th-raised/40 border border-th-accent-200/80 dark:border-white/10 rounded-2xl">
           <div className="flex items-center gap-2.5">
-            <span className="px-3 py-1 bg-blue-600 text-white font-black text-[10px] uppercase tracking-wider rounded-xl">
+            <span className="px-3 py-1 bg-th-accent-600 text-white font-black text-[10px] uppercase tracking-wider rounded-xl">
               Режим просмотра
             </span>
             <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
@@ -123,9 +123,9 @@ export function ProtocolTaskForm({
             <button
               type="button"
               onClick={() => onModeChange("edit")}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-700 hover:bg-slate-50 border border-slate-200 dark:border-white/10 text-[#1e2548] dark:text-slate-100 font-extrabold text-xs rounded-xl shadow-2xs transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-th-high hover:bg-slate-50 border border-slate-200 dark:border-white/10 text-[#1e2548] dark:text-slate-100 font-extrabold text-xs rounded-xl shadow-2xs transition-all cursor-pointer"
             >
-              <Pen size={13} className="text-blue-600 dark:text-blue-400" />
+              <Pen size={13} className="text-th-accent-600 dark:text-th-accent-400" />
               <span>Редактировать протокол</span>
             </button>
           )}
@@ -210,7 +210,7 @@ export function ProtocolTaskForm({
               <button
                 type="button"
                 onClick={() => onModeChange("view")}
-                className="px-5 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-extrabold rounded-xl text-xs transition-all cursor-pointer"
+                className="px-5 py-3 bg-slate-100 dark:bg-th-raised hover:bg-slate-200 dark:hover:bg-th-high text-slate-600 dark:text-slate-300 font-extrabold rounded-xl text-xs transition-all cursor-pointer"
               >
                 Отмена
               </button>
@@ -226,7 +226,7 @@ export function ProtocolTaskForm({
             <button
               type="button"
               onClick={() => onModeChange("edit")}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl text-xs shadow-lg shadow-blue-200/80 dark:shadow-none transition-all cursor-pointer flex items-center gap-2"
+              className="px-6 py-3 bg-th-accent-600 hover:bg-th-accent-700 text-white font-extrabold rounded-xl text-xs shadow-lg shadow-th-accent-200/80 dark:shadow-none transition-all cursor-pointer flex items-center gap-2"
             >
               <Pen size={14} />
               <span>Редактировать протокол</span>

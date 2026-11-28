@@ -141,7 +141,7 @@ export function PersonalTaskForm({
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left container */}
-        <div className="lg:col-span-2 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-5">
+        <div className="lg:col-span-2 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none ui-glass ui-glass--flat dark:bg-th-base/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgb(var(--th-accent-rgb)/0.16)] dark:shadow-none space-y-5">
           {/* TASK TITLE */}
           <div className="space-y-1.5">
             <label className="text-[10px] font-black uppercase tracking-wider text-[#636e9c] dark:text-purple-300/60 block">
@@ -155,7 +155,7 @@ export function PersonalTaskForm({
                 if (e.target.value.trim()) onClearTitleError();
               }}
               className={cn(
-                "w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none transition-colors text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] focus:bg-white focus:border-[#3373e5]/40 focus:ring-2 focus:ring-[#3373e5]/15 shadow-[0_4px_16px_rgba(100,105,240,0.06)]",
+                "w-full px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl outline-none transition-colors text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] focus:bg-white focus:border-th-accent-600/40 focus:ring-2 focus:ring-th-accent-600/15 shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]",
                 titleError
                   ? "border-red-500 ring-1 ring-red-200"
                   : "",
@@ -177,7 +177,7 @@ export function PersonalTaskForm({
             <textarea
               value={formDescription}
               onChange={(e) => onFormDescriptionChange(e.target.value)}
-              className="w-full h-36 px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none transition-colors text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] resize-none focus:bg-white focus:border-[#3373e5]/40 focus:ring-2 focus:ring-[#3373e5]/15 shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+              className="w-full h-36 px-5 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl outline-none transition-colors text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] resize-none focus:bg-white focus:border-th-accent-600/40 focus:ring-2 focus:ring-th-accent-600/15 shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]"
               placeholder="Подробно опишите задачу..."
             />
           </div>
@@ -197,14 +197,13 @@ export function PersonalTaskForm({
         </div>
 
         {/* Right container */}
-        <div className="lg:col-span-1 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-4">
+        <div className="lg:col-span-1 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none ui-glass ui-glass--flat dark:bg-th-base/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgb(var(--th-accent-rgb)/0.16)] dark:shadow-none space-y-4">
           <ConfigProvider
             theme={{
               token: {
                 borderRadius: 16,
                 controlHeight: 46,
                 fontSize: 12,
-                colorPrimary: "#3373e5",
                 colorBgContainer: "transparent",
               },
               components: {
@@ -232,7 +231,7 @@ export function PersonalTaskForm({
                     </div>
                   ),
                 }))}
-                className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)] [&_.ant-select-selector]:border-none! [&_.ant-select-selector]:bg-transparent! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100!"
+                className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-base/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)] [&_.ant-select-selector]:border-none! [&_.ant-select-selector]:bg-transparent! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100!"
               />
             </div>
 
@@ -253,7 +252,7 @@ export function PersonalTaskForm({
                     </div>
                   ),
                 }))}
-                className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)] [&_.ant-select-selector]:border-none! [&_.ant-select-selector]:bg-transparent! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100!"
+                className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-base/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)] [&_.ant-select-selector]:border-none! [&_.ant-select-selector]:bg-transparent! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100!"
               />
             </div>
 
@@ -269,7 +268,7 @@ export function PersonalTaskForm({
                 placeholder="Выберите срок"
                 allowClear
                 placement="bottomLeft"
-                className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+                className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-base/90 border border-white/90 dark:border-white/10 rounded-2xl text-xs font-semibold text-[#1e2548] dark:text-slate-100 shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]"
               />
             </div>
           </ConfigProvider>
@@ -286,7 +285,7 @@ export function PersonalTaskForm({
                 value={formTags}
                 onChange={(e) => onFormTagsChange(e.target.value)}
                 placeholder="frontend, дизайн, срочно"
-                className="w-full pl-10 pr-10 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)] focus:bg-white focus:border-[#3373e5]/40 focus:ring-2 focus:ring-[#3373e5]/15 transition-colors"
+                className="w-full pl-10 pr-10 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)] focus:bg-white focus:border-th-accent-600/40 focus:ring-2 focus:ring-th-accent-600/15 transition-colors"
               />
               {formTags ? (
                 <button
@@ -314,7 +313,7 @@ export function PersonalTaskForm({
                     {visibleTags.map((tag, idx) => (
                       <Tooltip key={idx} title={`#${tag}`} placement="top">
                         <span
-                          className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40 truncate max-w-[85px] shrink-0 cursor-default"
+                          className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-th-accent-50 dark:bg-th-accent-950/50 text-th-accent-600 dark:text-th-accent-300 border border-th-accent-200/60 dark:border-th-accent-800/40 truncate max-w-[85px] shrink-0 cursor-default"
                         >
                           #{tag}
                         </span>
@@ -362,7 +361,7 @@ export function PersonalTaskForm({
                 }}
                 onFocus={() => onAssigneeOpenChange(true)}
                 onClick={() => onAssigneeOpenChange(true)}
-                className="w-full pl-5 pr-10 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+                className="w-full pl-5 pr-10 py-3.5 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] dark:text-slate-100 placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]"
                 placeholder="Поиск коллеги..."
               />
               {assigneeQuery ? (
@@ -384,7 +383,7 @@ export function PersonalTaskForm({
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
-                    className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto"
+                    className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white/95 dark:bg-th-raised/95 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto"
                   >
                     {filteredColleagues.length > 0 ? (
                       filteredColleagues.map((col) => {
@@ -395,8 +394,8 @@ export function PersonalTaskForm({
                             className={cn(
                               "w-full flex items-center justify-between gap-3 px-3.5 py-2 transition-colors text-left cursor-pointer select-none",
                               isSelected
-                                ? "bg-blue-50/80 dark:bg-blue-950/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/50"
-                                : "hover:bg-indigo-50/70 dark:hover:bg-slate-700/60",
+                                ? "bg-th-accent-50/80 dark:bg-th-accent-950/40 hover:bg-th-accent-100/70 dark:hover:bg-th-accent-900/50"
+                                : "hover:bg-th-accent-50/70 dark:hover:bg-th-high/60",
                             )}
                           >
                             <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -431,7 +430,7 @@ export function PersonalTaskForm({
                                     className={cn(
                                       "text-xs font-bold truncate",
                                       isSelected
-                                        ? "text-blue-700 dark:text-blue-300"
+                                        ? "text-th-accent-700 dark:text-th-accent-300"
                                         : "text-slate-800 dark:text-slate-100",
                                     )}
                                   >
@@ -453,8 +452,8 @@ export function PersonalTaskForm({
                               className={cn(
                                 "w-4.5 h-4.5 rounded-md flex items-center justify-center transition-all shrink-0 border cursor-pointer",
                                 isSelected
-                                  ? "bg-[#3373e5] border-[#3373e5] text-white shadow-2xs"
-                                  : "border-slate-300 dark:border-white/20 bg-white/80 dark:bg-slate-800 hover:border-[#3373e5]/50",
+                                  ? "bg-th-accent-600 border-th-accent-600 text-white shadow-2xs"
+                                  : "border-slate-300 dark:border-white/20 bg-white/80 dark:bg-th-raised hover:border-th-accent-600/50",
                               )}
                             >
                               {isSelected && <Check size={11} strokeWidth={3} />}
@@ -491,7 +490,7 @@ export function PersonalTaskForm({
                       return (
                         <span
                           key={id}
-                          className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-white dark:bg-slate-800 border border-[#3373e5]/20 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100 shrink-0"
+                          className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-white dark:bg-th-raised border border-th-accent-600/20 dark:border-white/10 rounded-full shadow-2xs text-xs font-bold text-[#1e2548] dark:text-slate-100 shrink-0"
                         >
                           <Avatar colleague={col} className="w-5 h-5 text-[8px]" />
                           <Tooltip

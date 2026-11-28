@@ -22,7 +22,7 @@ export const ResolutionSection = ({ onExecute }: IProps) => (
           <Avatar
             size={48}
             icon={<UserOutlined />}
-            className="bg-blue-100! text-blue-600!"
+            className="bg-th-accent-100! text-th-accent-600! dark:bg-th-accent-900/35! dark:text-th-accent-400!"
           />
           <div>
             <div className="font-bold text-base text-gray-900">
@@ -57,7 +57,7 @@ export const ResolutionSection = ({ onExecute }: IProps) => (
           >
             На исполнение
           </AntButton>
-          <AntButton className="border-[#0037AF]! text-[#0037AF]! h-10! rounded-lg! font-medium! text-sm! hover:bg-blue-50! w-full!">
+          <AntButton className="border-[#0037AF]! text-[#0037AF]! h-10! rounded-lg! font-medium! text-sm! hover:bg-th-accent-50! w-full!">
             Подготовить ответ
           </AntButton>
         </div>

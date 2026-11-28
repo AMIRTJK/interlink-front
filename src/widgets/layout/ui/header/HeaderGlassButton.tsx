@@ -8,10 +8,10 @@ interface IProps {
 }
 
 const BUTTON_CLASS =
-  "relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] backdrop-blur-xl border transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 shrink-0";
+  "relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] backdrop-blur-xl border transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-th-accent-400 shrink-0";
 
 const OFF_CLASS =
-  "bg-white/30 dark:bg-zinc-800/30 border-white/20 dark:border-zinc-700/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50";
+  "bg-white/30 dark:bg-th-raised/30 border-white/20 dark:border-th-high/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-th-high/50";
 
 /* Включённое состояние берём из токенов темы, чтобы кнопка подсвечивалась тем же
    акцентом, что и остальные активные элементы выбранной темы. */
@@ -41,7 +41,7 @@ export const HeaderGlassButton = ({ tooltipPlacement = "bottom" }: IProps) => {
         {isGlassEnabled && (
           <span
             aria-hidden="true"
-            className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[rgb(var(--th-accent-rgb))] border-2 border-white dark:border-zinc-800"
+            className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[rgb(var(--th-accent-rgb))] border-2 border-white dark:border-th-raised"
           />
         )}
       </button>

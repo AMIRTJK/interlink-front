@@ -115,7 +115,7 @@ export const HeaderDesignButtons = ({
         tooltipPlacement={tooltipPlacement}
         popoverPlacement={popoverPlacement}
         content={
-          <div className="w-[264px] p-2 bg-white dark:bg-zinc-800 rounded-[1.75rem]">
+          <div className="w-[264px] p-2 bg-white dark:bg-th-raised rounded-[1.75rem]">
             <NewYearSettings />
           </div>
         }

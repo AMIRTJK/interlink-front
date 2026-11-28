@@ -55,7 +55,7 @@ export const HeaderExecutionModal = ({
       <div className="flex items-center gap-2">
         <button
           onClick={toggleFullScreen}
-          className="hidden cursor-pointer md:block p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+          className="hidden cursor-pointer md:block p-2 text-gray-400 hover:text-th-accent-600 hover:bg-th-accent-50 rounded-lg transition-colors"
           title="Развернуть/Свернуть"
         >
           {isFullScreen ? (

@@ -30,7 +30,7 @@ export const OrderDetailSidebar = ({ record }: IProps) => {
           </div>
           <div className="py-2.5">
             <p className="text-[10px] text-slate-400 font-medium mb-0.5">Номер</p>
-            <span className="inline-block font-mono text-sm bg-slate-50 rounded px-2 py-0.5 text-slate-700">
+            <span className="inline-block font-mono text-sm bg-slate-50 rounded px-2 py-0.5 text-slate-700 dark:bg-th-base dark:text-slate-300">
               {record.number}
             </span>
           </div>
@@ -60,7 +60,7 @@ export const OrderDetailSidebar = ({ record }: IProps) => {
           >
             {executorInitials}
           </div>
-          <p className="text-sm font-medium text-slate-800 leading-tight">
+          <p className="text-sm font-medium text-slate-800 leading-tight dark:text-slate-100">
             {record.executorName}
           </p>
         </div>
@@ -95,10 +95,10 @@ export const OrderDetailSidebar = ({ record }: IProps) => {
                 href={att.download_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
+                className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors dark:bg-th-base dark:hover:bg-th-high"
               >
                 <FileText size={13} className="text-slate-400 shrink-0" />
-                <span className="text-xs text-blue-600 truncate flex-1 hover:underline">
+                <span className="text-xs text-th-accent-600 truncate flex-1 hover:underline">
                   {att.original_name}
                 </span>
               </a>

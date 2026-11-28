@@ -54,22 +54,22 @@ export const BottomNav = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[90] border-t border-white/20 dark:border-zinc-700/30 backdrop-blur-3xl bg-white/40 dark:bg-zinc-900/40 transition-all duration-300 ease-in-out px-6 py-4 shadow-lg flex items-center justify-between gap-4">
+    <div className="fixed bottom-0 left-0 right-0 z-[90] border-t border-white/20 dark:border-th-high/30 backdrop-blur-3xl ui-glass bg-white/40 dark:bg-th-base/40 transition-all duration-300 ease-in-out px-6 py-4 shadow-lg flex items-center justify-between gap-4">
       <div className="flex items-center gap-6 min-w-0">
         <Link to={AppRoutes.PROFILE} className="flex items-center gap-3 focus:outline-none rounded-lg shrink-0">
           <Logo className="text-base sm:text-lg md:text-xl text-zinc-900 dark:text-white" />
         </Link>
-        <div className="hidden md:flex items-center gap-4 min-w-0 pl-6 border-l border-zinc-900/10 dark:border-zinc-700/40">
+        <div className="hidden md:flex items-center gap-4 min-w-0 pl-6 border-l border-th-base/10 dark:border-th-high/40">
           <div className="relative shrink-0">
             <img
               src={avatarError ? userAvatar : (userData?.photo_url || resolvePhotoUrl(userData?.photo_path) || userAvatar)}
               alt="Аватар"
-              className="w-11 h-11 rounded-[2.5rem] border-2 border-white/60 dark:border-zinc-900/60 object-cover shadow-lg"
+              className="w-11 h-11 rounded-[2.5rem] border-2 border-white/60 dark:border-th-base/60 object-cover shadow-lg"
               onError={() => setAvatarError(true)}
             />
             <span className="absolute top-0 right-0 flex h-3 w-3">
               <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
-              <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-white/60 dark:border-zinc-900/60 bg-emerald-500 shadow-lg animate-live-breathe" />
+              <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-white/60 dark:border-th-base/60 bg-emerald-500 shadow-lg animate-live-breathe" />
             </span>
           </div>
           <div className="leading-tight min-w-0">
@@ -91,7 +91,7 @@ export const BottomNav = () => {
             overlayInnerStyle={{ borderRadius: "2.5rem", padding: 0, backgroundColor: "transparent" }}
           >
             <Tooltip title="Уведомления" placement="top">
-              <button aria-label="Уведомления" className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
+              <button aria-label="Уведомления" className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-th-raised/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-th-high/50 transition-colors border border-white/20 dark:border-th-high/30 cursor-pointer focus:outline-none">
                 <Bell size={18} strokeWidth={2.2} />
                 <If is={unreadCount > 0}>
                   <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose-500 text-[9px] text-white flex items-center justify-center rounded-full font-bold shadow-lg">{unreadCount > 9 ? "9+" : unreadCount}</span>
@@ -100,7 +100,7 @@ export const BottomNav = () => {
             </Tooltip>
           </Popover>
           <Tooltip title="Чат" placement="top">
-            <button onClick={openChat} aria-label="Чат" className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
+            <button onClick={openChat} aria-label="Чат" className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-th-raised/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-th-high/50 transition-colors border border-white/20 dark:border-th-high/30 cursor-pointer focus:outline-none">
               <MessageSquare size={18} strokeWidth={2.2} />
             </button>
           </Tooltip>
@@ -120,12 +120,12 @@ export const BottomNav = () => {
         />
         <HeaderButtonGroup label={HEADER_GROUP_LABELS.session}>
           <Tooltip title="Блокирование" placement="top">
-            <button onClick={lock} aria-label="Блокирование" className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-zinc-700/50 transition-colors border border-white/20 dark:border-zinc-700/30 cursor-pointer focus:outline-none">
+            <button onClick={lock} aria-label="Блокирование" className="relative flex items-center justify-center w-10 h-10 rounded-[2.5rem] bg-white/30 dark:bg-th-raised/30 text-zinc-600 dark:text-zinc-400 hover:bg-white/50 dark:hover:bg-th-high/50 transition-colors border border-white/20 dark:border-th-high/30 cursor-pointer focus:outline-none">
               <Lock size={18} strokeWidth={2.2} />
             </button>
           </Tooltip>
           <Tooltip title="Выйти" placement="topRight">
-            <button onClick={() => setShowLogoutConfirm(true)} aria-label="Выход" className="flex items-center gap-2 py-2 px-4 rounded-[2.5rem] bg-white/30 dark:bg-zinc-800/30 border border-white/20 dark:border-zinc-700/30 text-zinc-600 dark:text-zinc-300 font-semibold text-sm hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer focus:outline-none">
+            <button onClick={() => setShowLogoutConfirm(true)} aria-label="Выход" className="flex items-center gap-2 py-2 px-4 rounded-[2.5rem] bg-white/30 dark:bg-th-raised/30 border border-white/20 dark:border-th-high/30 text-zinc-600 dark:text-zinc-300 font-semibold text-sm hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer focus:outline-none">
               <LogOut size={16} strokeWidth={2.2} />
               <span className="hidden sm:inline">Выход</span>
             </button>

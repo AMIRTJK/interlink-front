@@ -232,9 +232,9 @@ export const getEventMeta = (event: ITimelineEvent) => {
     const versionLabel = formatVersionLabel(rawVersion);
     return {
       icon: FileText,
-      ring: "bg-slate-100 dark:bg-slate-700",
+      ring: "bg-slate-100 dark:bg-th-high",
       iconColor: "text-slate-500",
-      badge: "bg-slate-100 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300",
+      badge: "bg-slate-100 dark:bg-th-high border-slate-200 dark:border-th-higher text-slate-700 dark:text-slate-300",
       title: versionLabel ? `Создал новую версию (${versionLabel})` : "Создал новую версию",
       badgeText: versionLabel || "Версия",
     };
@@ -279,10 +279,10 @@ export const getEventMeta = (event: ITimelineEvent) => {
     const isApproved = action === "approved";
     return {
       icon: isApproved ? Handshake : X,
-      ring: isApproved ? "bg-blue-100 dark:bg-blue-900/40" : "bg-rose-100 dark:bg-rose-900/40",
-      iconColor: isApproved ? "text-blue-500" : "text-rose-500",
+      ring: isApproved ? "bg-th-accent-100 dark:bg-th-accent-900/40" : "bg-rose-100 dark:bg-rose-900/40",
+      iconColor: isApproved ? "text-th-accent-500" : "text-rose-500",
       badge: isApproved
-        ? "bg-blue-100 dark:bg-blue-900/40 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
+        ? "bg-th-accent-100 dark:bg-th-accent-900/40 border-th-accent-200 dark:border-th-accent-800 text-th-accent-700 dark:text-th-accent-300"
         : "bg-rose-100 dark:bg-rose-900/40 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300",
       title: isApproved ? "Согласовал документ" : "Вернул документ",
       badgeText: isApproved ? "Согласовано" : "Возвращено",
@@ -374,7 +374,7 @@ export const getEventMeta = (event: ITimelineEvent) => {
       ring: "bg-indigo-100 dark:bg-indigo-900/40",
       iconColor: "text-indigo-500",
       badge:
-        "bg-indigo-100 dark:bg-indigo-900/40 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300",
+        "bg-th-accent-100 dark:bg-th-accent-900/40 border-th-accent-200 dark:border-th-accent-800 text-th-accent-700 dark:text-th-accent-300",
       title: "Создал резолюцию",
       badgeText: "Резолюция",
     };
@@ -397,7 +397,7 @@ export const getEventMeta = (event: ITimelineEvent) => {
       ring: "bg-indigo-100 dark:bg-indigo-900/40",
       iconColor: "text-indigo-500",
       badge:
-        "bg-indigo-100 dark:bg-indigo-900/40 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300",
+        "bg-th-accent-100 dark:bg-th-accent-900/40 border-th-accent-200 dark:border-th-accent-800 text-th-accent-700 dark:text-th-accent-300",
       title,
       badgeText: "Поручение",
     };
@@ -414,7 +414,7 @@ export const getEventMeta = (event: ITimelineEvent) => {
       ring: "bg-blue-100 dark:bg-blue-900/40",
       iconColor: "text-blue-500",
       badge:
-        "bg-blue-100 dark:bg-blue-900/40 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300",
+        "bg-th-accent-100 dark:bg-th-accent-900/40 border-th-accent-200 dark:border-th-accent-800 text-th-accent-700 dark:text-th-accent-300",
       title: "Исполнил поручение",
       badgeText: "Исполнено",
     };
@@ -462,9 +462,9 @@ export const getEventMeta = (event: ITimelineEvent) => {
 
   return {
     icon: Clock,
-    ring: "bg-slate-100 dark:bg-slate-700",
+    ring: "bg-slate-100 dark:bg-th-high",
     iconColor: "text-slate-400",
-    badge: "bg-slate-100 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300",
+    badge: "bg-slate-100 dark:bg-th-high border-slate-200 dark:border-th-higher text-slate-600 dark:text-slate-300",
     title: action || type,
     badgeText: action || "Событие",
   };

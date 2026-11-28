@@ -169,7 +169,7 @@ export function ProtocolSignatures({
 			{/* Card 3: ЭЦП Руководителя */}
 			<div
 				className={cn(
-					"bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-5 relative",
+					"bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none ui-glass ui-glass--flat dark:bg-th-base/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgb(var(--th-accent-rgb)/0.16)] dark:shadow-none space-y-5 relative",
 					chairmanOpen ? "z-30" : "z-10",
 				)}
 			>
@@ -183,15 +183,15 @@ export function ProtocolSignatures({
 						</h3>
 					</div>
 					{chairmanSigned ? (
-						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 font-extrabold text-[9px] uppercase tracking-wider">
+						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 font-extrabold text-[9px] uppercase tracking-wider dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50">
 							<CheckCircle2 size={12} /> Подписано
 						</span>
 					) : selectedChairmen.length > 0 ? (
-						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-600 font-extrabold text-[9px] uppercase tracking-wider">
+						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-600 font-extrabold text-[9px] uppercase tracking-wider dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50">
 							Ожидает подписи
 						</span>
 					) : (
-						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-400 font-extrabold text-[9px] uppercase tracking-wider">
+						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-th-raised border border-slate-200 dark:border-white/10 text-slate-400 font-extrabold text-[9px] uppercase tracking-wider">
 							Не выбран
 						</span>
 					)}
@@ -220,7 +220,7 @@ export function ProtocolSignatures({
 							}
 							placement="topLeft"
 						>
-							<div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
+							<div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]">
 								<div className="flex items-center gap-3 min-w-0">
 									<Avatar
 										colleague={chair}
@@ -264,7 +264,7 @@ export function ProtocolSignatures({
 									}}
 									onFocus={() => setChairmanOpen(true)}
 									onClick={() => setChairmanOpen(true)}
-									className="w-full h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+									className="w-full h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]"
 									placeholder={
 										selectedChairmen.length === 0
 											? "Выберите председателя..."
@@ -278,7 +278,7 @@ export function ProtocolSignatures({
 											animate={{ opacity: 1, y: 0 }}
 											exit={{ opacity: 0, y: -4 }}
 											transition={{ duration: 0.12 }}
-											className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100/60 dark:divide-white/5"
+											className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-th-raised border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100/60 dark:divide-white/5"
 										>
 											{filteredChairmanOptions.map((col) => (
 												<Tooltip
@@ -304,7 +304,7 @@ export function ProtocolSignatures({
 															e.preventDefault();
 															handleAddChairman(col.id);
 														}}
-														className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+														className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-th-high/60 transition-colors text-left cursor-pointer"
 													>
 														<Avatar
 															colleague={col}
@@ -330,7 +330,7 @@ export function ProtocolSignatures({
 							<button
 								type="button"
 								onClick={() => setChairmanAdding(true)}
-								className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-dashed border-[#3373e5]/30 hover:border-[#3373e5] rounded-2xl p-3.5 text-center text-xs font-bold text-[#3373e5] shadow-2xs cursor-pointer hover:bg-white flex items-center justify-center gap-1.5 transition-all"
+								className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 border border-dashed border-th-accent-600/30 hover:border-th-accent-600 rounded-2xl p-3.5 text-center text-xs font-bold text-th-accent-600 shadow-2xs cursor-pointer hover:bg-white flex items-center justify-center gap-1.5 transition-all"
 							>
 								<Plus size={14} />
 								<span>Добавить ещё руководителя</span>
@@ -339,14 +339,14 @@ export function ProtocolSignatures({
 					)}
 
 					{chairmanSigned ? (
-						<div className="p-4 bg-emerald-50/80 border border-emerald-200/80 rounded-2xl text-center space-y-1">
+						<div className="p-4 bg-emerald-50/80 border border-emerald-200/80 rounded-2xl text-center space-y-1 dark:bg-emerald-900/35 dark:border-emerald-800/50">
 							<p className="text-xs font-bold text-emerald-700">
 								Подпись подтверждена
 							</p>
 							<p className="text-[10px] text-slate-400">{chairmanSigned}</p>
 						</div>
 					) : (
-						<div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-5 text-center text-xs font-bold text-[#9aa2c8] uppercase tracking-wider shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
+						<div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl p-5 text-center text-xs font-bold text-[#9aa2c8] uppercase tracking-wider shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]">
 							ЭЦП ПРЕДСЕДАТЕЛЯ
 						</div>
 					)}
@@ -367,7 +367,7 @@ export function ProtocolSignatures({
 			{/* Card 4: ЭЦП Секретаря */}
 			<div
 				className={cn(
-					"bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-5 relative",
+					"bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none ui-glass ui-glass--flat dark:bg-th-base/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgb(var(--th-accent-rgb)/0.16)] dark:shadow-none space-y-5 relative",
 					secretaryOpen ? "z-30" : "z-10",
 				)}
 			>
@@ -381,15 +381,15 @@ export function ProtocolSignatures({
 						</h3>
 					</div>
 					{secretarySigned ? (
-						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 font-extrabold text-[9px] uppercase tracking-wider">
+						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 font-extrabold text-[9px] uppercase tracking-wider dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50">
 							<CheckCircle2 size={12} /> Подписано
 						</span>
 					) : selectedSecretaries.length > 0 ? (
-						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-600 font-extrabold text-[9px] uppercase tracking-wider">
+						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-600 font-extrabold text-[9px] uppercase tracking-wider dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50">
 							Ожидает подписи
 						</span>
 					) : (
-						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-400 font-extrabold text-[9px] uppercase tracking-wider">
+						<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-th-raised border border-slate-200 dark:border-white/10 text-slate-400 font-extrabold text-[9px] uppercase tracking-wider">
 							Не выбран
 						</span>
 					)}
@@ -418,7 +418,7 @@ export function ProtocolSignatures({
 							}
 							placement="topLeft"
 						>
-							<div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
+							<div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]">
 								<div className="flex items-center gap-3 min-w-0">
 									<Avatar
 										colleague={sec}
@@ -462,7 +462,7 @@ export function ProtocolSignatures({
 									}}
 									onFocus={() => onSecretaryOpenChange(true)}
 									onClick={() => onSecretaryOpenChange(true)}
-									className="w-full h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgba(100,105,240,0.06)]"
+									className="w-full h-12 px-4 bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl outline-none text-xs font-semibold text-[#1e2548] placeholder:text-[#9aa2c8] shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]"
 									placeholder={
 										selectedSecretaries.length === 0
 											? "Выберите секретаря..."
@@ -476,7 +476,7 @@ export function ProtocolSignatures({
 											animate={{ opacity: 1, y: 0 }}
 											exit={{ opacity: 0, y: -4 }}
 											transition={{ duration: 0.12 }}
-											className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100/60 dark:divide-white/5"
+											className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-th-raised border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100/60 dark:divide-white/5"
 										>
 											{filteredSecretaryOptions.map((col) => (
 												<Tooltip
@@ -502,7 +502,7 @@ export function ProtocolSignatures({
 															e.preventDefault();
 															handleAddSecretary(col.id);
 														}}
-														className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors text-left cursor-pointer"
+														className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-th-high/60 transition-colors text-left cursor-pointer"
 													>
 														<Avatar
 															colleague={col}
@@ -528,7 +528,7 @@ export function ProtocolSignatures({
 							<button
 								type="button"
 								onClick={() => onSecretaryAddingChange(true)}
-								className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-dashed border-[#3373e5]/30 hover:border-[#3373e5] rounded-2xl p-3.5 text-center text-xs font-bold text-[#3373e5] shadow-2xs cursor-pointer hover:bg-white flex items-center justify-center gap-1.5 transition-all"
+								className="w-full bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 border border-dashed border-th-accent-600/30 hover:border-th-accent-600 rounded-2xl p-3.5 text-center text-xs font-bold text-th-accent-600 shadow-2xs cursor-pointer hover:bg-white flex items-center justify-center gap-1.5 transition-all"
 							>
 								<Plus size={14} />
 								<span>Добавить ещё секретаря</span>
@@ -537,14 +537,14 @@ export function ProtocolSignatures({
 					)}
 
 					{secretarySigned ? (
-						<div className="p-4 bg-emerald-50/80 border border-emerald-200/80 rounded-2xl text-center space-y-1">
+						<div className="p-4 bg-emerald-50/80 border border-emerald-200/80 rounded-2xl text-center space-y-1 dark:bg-emerald-900/35 dark:border-emerald-800/50">
 							<p className="text-xs font-bold text-emerald-700">
 								Подпись подтверждена
 							</p>
 							<p className="text-[10px] text-slate-400">{secretarySigned}</p>
 						</div>
 					) : (
-						<div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl p-5 text-center text-xs font-bold text-[#9aa2c8] uppercase tracking-wider shadow-[0_4px_16px_rgba(100,105,240,0.06)]">
+						<div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl p-5 text-center text-xs font-bold text-[#9aa2c8] uppercase tracking-wider shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)]">
 							ЭЦП СЕКРЕТАРЯ
 						</div>
 					)}

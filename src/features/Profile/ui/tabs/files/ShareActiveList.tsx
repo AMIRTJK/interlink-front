@@ -31,12 +31,12 @@ export const ShareActiveList = ({ activeShares, onRemove }: IProps) => {
 							placeholder="Поиск среди тех, у кого есть доступ..."
 							value={shareSearch}
 							onChange={(e) => setShareSearch(e.target.value)}
-							className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+							className="w-full bg-slate-50 dark:bg-th-deep text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-th-raised rounded-xl pl-9 pr-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 focus:border-th-accent-500 transition-all placeholder:text-slate-400"
 						/>
 					</div>
 				</If>
 
-				<div className="bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800 max-h-[420px]! overflow-y-auto">
+				<div className="bg-slate-50 dark:bg-th-deep rounded-2xl border border-slate-200 dark:border-th-raised divide-y divide-slate-100 dark:divide-th-raised max-h-[420px]! overflow-y-auto">
 					<If is={filteredShares.length === 0}>
 						<div className="p-4 text-center text-xs text-slate-400 dark:text-zinc-500">
 							Ничего не найдено
@@ -51,7 +51,7 @@ export const ShareActiveList = ({ activeShares, onRemove }: IProps) => {
 								className="flex items-center justify-between p-3"
 							>
 								<div className="flex items-center gap-3 min-w-0">
-									<div className="w-8 h-8 rounded-full bg-indigo-500! flex items-center justify-center text-white! text-xs font-bold shrink-0">
+									<div className="w-8 h-8 rounded-full bg-th-accent-500! flex items-center justify-center text-white! text-xs font-bold shrink-0">
 										{uName[0]?.toUpperCase() || "?"}
 									</div>
 									<div className="min-w-0">

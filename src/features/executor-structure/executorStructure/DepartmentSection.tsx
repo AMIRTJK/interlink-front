@@ -18,7 +18,7 @@ export const DepartmentSection: React.FC<DepartmentSectionProps> = ({
   if (departments.length === 0) return null;
 
   return (
-    <div className="relative border border-indigo-100 rounded-[32px] pt-8 pb-4 bg-white">
+    <div className="relative border border-th-accent-100 rounded-[32px] pt-8 pb-4 bg-white">
       <div className="max-h-[420px] overflow-y-auto no-scrollbar px-6 pb-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 justify-items-center items-start">
           {departments.map((dept) => (
@@ -32,7 +32,7 @@ export const DepartmentSection: React.FC<DepartmentSectionProps> = ({
           ))}
         </div>
       </div>
-      <span className="absolute -bottom-3 right-8 bg-[#f8fafc] px-3 text-xs md:text-sm text-indigo-300 font-medium rounded-md">
+      <span className="absolute -bottom-3 right-8 bg-[#f8fafc] px-3 text-xs md:text-sm text-th-accent-300 font-medium rounded-md">
         {title}
       </span>
     </div>

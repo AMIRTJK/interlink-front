@@ -28,7 +28,7 @@ export const SceneSwitcher = ({ activeScene, isDark, isVisible, lang, onSelect }
     initial={false}
     animate={{ opacity: isVisible ? 1 : 0 }}
     transition={isVisible ? CONTROLS_FADE_TRANSITION.show : CONTROLS_FADE_TRANSITION.hide}
-    className={`flex items-center gap-1 md:gap-1.5 p-1.5 max-w-full overflow-x-auto [scrollbar-width:none] rounded-full backdrop-blur-2xl backdrop-saturate-150 border ${isVisible ? "" : "pointer-events-none"} ${isDark ? "bg-slate-950/45 border-white/10 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)]" : "bg-white/70 border-white/80 shadow-[0_12px_40px_-12px_rgba(49,46,129,0.3)]"}`}
+    className={`flex items-center gap-1 md:gap-1.5 p-1.5 max-w-full overflow-x-auto [scrollbar-width:none] rounded-full backdrop-blur-2xl backdrop-saturate-150 border ${isVisible ? "" : "pointer-events-none"} ${isDark ? "bg-th-deep/45 border-white/10 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)]" : "bg-white/70 border-white/80 shadow-[0_12px_40px_-12px_rgba(49,46,129,0.3)]"}`}
   >
     {SCENES.map((scene) => {
       const IconComponent = ICONS[scene.key];
@@ -46,7 +46,7 @@ export const SceneSwitcher = ({ activeScene, isDark, isVisible, lang, onSelect }
           {isActive && (
             <motion.div
               layoutId="desktopActiveSceneBg"
-              className="absolute inset-0 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-full shadow-lg"
+              className="absolute inset-0 bg-gradient-to-r from-violet-600 to-th-accent-600 rounded-full shadow-lg"
               transition={{
                 type: "spring",
                 bounce: 0.15,

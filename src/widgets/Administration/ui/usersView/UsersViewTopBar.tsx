@@ -54,7 +54,7 @@ export function UsersViewTopBar({ onOpenAdd }: IProps) {
           fontWeight: 600,
           cursor: "pointer",
           fontFamily: T.font,
-          boxShadow: `0 2px 8px ${T.accent}35`,
+          boxShadow: `0 2px 8px rgb(var(--th-accent-rgb)/0.21)`,
           whiteSpace: "nowrap",
         }}
         onMouseEnter={(e) => {

@@ -26,7 +26,7 @@ export const SharedWithMeCard = ({ data, pagination, onPageChange }: IProps) => 
 			initial={{ opacity: 0, y: 16 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.3, delay: 0.12 }}
-			className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-slate-700/50 p-5 flex flex-col justify-between min-h-[340px]"
+			className="rounded-3xl bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 p-5 flex flex-col justify-between min-h-[340px]"
 		>
 			<div>
 				<div className="flex items-center justify-between mb-1">
@@ -37,13 +37,13 @@ export const SharedWithMeCard = ({ data, pagination, onPageChange }: IProps) => 
 						</h3>
 					</div>
 					<If is={data.length > 0}>
-						<div className="flex items-center gap-0.5 bg-slate-100/60 dark:bg-slate-900/50 p-0.5 rounded-lg border border-slate-200/30 dark:border-slate-800/40">
+						<div className="flex items-center gap-0.5 bg-slate-100/60 dark:bg-th-base/50 p-0.5 rounded-lg border border-slate-200/30 dark:border-th-raised/40">
 							<button
 								type="button"
 								onClick={() => setViewType("pie")}
 								className={`p-1 rounded-md transition-all cursor-pointer ${
 									viewType === "pie"
-										? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
+										? "bg-white dark:bg-th-raised text-th-accent-600 dark:text-th-accent-400 shadow-sm"
 										: "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
 								}`}
 								title="Диаграмма"
@@ -55,7 +55,7 @@ export const SharedWithMeCard = ({ data, pagination, onPageChange }: IProps) => 
 								onClick={() => setViewType("list")}
 								className={`p-1 rounded-md transition-all cursor-pointer ${
 									viewType === "list"
-										? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
+										? "bg-white dark:bg-th-raised text-th-accent-600 dark:text-th-accent-400 shadow-sm"
 										: "text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300"
 								}`}
 								title="Карточки"
@@ -131,7 +131,7 @@ export const SharedWithMeCard = ({ data, pagination, onPageChange }: IProps) => 
 										initial={{ opacity: 0, y: 8 }}
 										animate={{ opacity: 1, y: 0 }}
 										transition={{ duration: 0.2, delay: index * 0.04 }}
-										className="flex items-center justify-between p-3.5 bg-slate-50/50 dark:bg-slate-850/50 rounded-2xl border border-slate-100/70 dark:border-slate-800/40 hover:bg-slate-100/50 dark:hover:bg-slate-800/60 transition-all duration-200"
+										className="flex items-center justify-between p-3.5 bg-slate-50/50 dark:bg-th-raised/50 rounded-2xl border border-slate-100/70 dark:border-th-raised/40 hover:bg-slate-100/50 dark:hover:bg-th-raised/60 transition-all duration-200"
 									>
 										<div className="flex items-center gap-3 min-w-0">
 											<UserAvatar user={item.user} size={36} className="shrink-0 shadow-sm" />
@@ -144,7 +144,7 @@ export const SharedWithMeCard = ({ data, pagination, onPageChange }: IProps) => 
 												</div>
 											</div>
 										</div>
-										<span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 shrink-0 border border-indigo-100/30 dark:border-indigo-900/20">
+										<span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-th-accent-50 dark:bg-th-accent-950/40 text-th-accent-600 dark:text-th-accent-400 shrink-0 border border-th-accent-100/30 dark:border-th-accent-900/20">
 											{item.value} ф.
 										</span>
 									</motion.div>
@@ -156,7 +156,7 @@ export const SharedWithMeCard = ({ data, pagination, onPageChange }: IProps) => 
 			</div>
 
 			<If is={data.length > 0 && !!pagination}>
-				<div className="flex justify-end pt-3 border-t border-slate-100/40 dark:border-slate-800/20 mt-4 shrink-0">
+				<div className="flex justify-end pt-3 border-t border-slate-100/40 dark:border-th-raised/20 mt-4 shrink-0">
 					<Pagination
 						size="small"
 						current={pagination!.currentPage}

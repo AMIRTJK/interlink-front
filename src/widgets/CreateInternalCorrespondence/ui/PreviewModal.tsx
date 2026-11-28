@@ -420,7 +420,7 @@ export const PreviewModal = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] flex flex-col bg-slate-700/80 backdrop-blur-sm select-none overflow-hidden h-screen w-screen"
+        className="fixed inset-0 z-[9999] flex flex-col bg-th-high/80 backdrop-blur-sm select-none overflow-hidden h-screen w-screen"
         onClick={onClose}
       >
         {/* Скроллбар рабочей области — в тон тёмной модалке: тонкий, скруглённый,
@@ -441,11 +441,11 @@ export const PreviewModal = ({
 
         {/* Хедер модального окна */}
         <div
-          className="flex-shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-slate-800 border-b border-slate-600 h-16"
+          className="flex-shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-th-raised border-b border-th-higher h-16"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-th-accent-600 flex items-center justify-center flex-shrink-0">
               <Eye size={16} className="text-white" />
             </div>
             <div className="min-w-0">
@@ -465,10 +465,10 @@ export const PreviewModal = ({
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            <div className="hidden sm:flex items-center gap-1 bg-slate-700 border border-slate-600 rounded-xl px-1 py-1">
+            <div className="hidden sm:flex items-center gap-1 bg-th-high border border-th-higher rounded-xl px-1 py-1">
               <button
                 onClick={zoomOut}
-                className="p-1.5 rounded-lg text-slate-200 hover:bg-slate-600 transition-colors"
+                className="p-1.5 rounded-lg text-slate-200 hover:bg-th-higher transition-colors"
                 title="Уменьшить"
               >
                 <ZoomOut size={15} />
@@ -480,19 +480,19 @@ export const PreviewModal = ({
                 onFocus={handleScaleInputFocus}
                 onBlur={handleScaleInputBlur}
                 onKeyDown={handleScaleInputKeyDown}
-                className="w-12 bg-transparent text-slate-200 text-xs font-semibold text-center outline-none border-none focus:bg-slate-600 focus:ring-1 focus:ring-slate-500 rounded px-0.5 transition-colors"
+                className="w-12 bg-transparent text-slate-200 text-xs font-semibold text-center outline-none border-none focus:bg-th-higher focus:ring-1 focus:ring-slate-500 rounded px-0.5 transition-colors"
               />
               <button
                 onClick={zoomIn}
-                className="p-1.5 rounded-lg text-slate-200 hover:bg-slate-600 transition-colors"
+                className="p-1.5 rounded-lg text-slate-200 hover:bg-th-higher transition-colors"
                 title="Увеличить"
               >
                 <ZoomIn size={15} />
               </button>
-              <div className="w-px h-4 bg-slate-600 mx-1" />
+              <div className="w-px h-4 bg-th-higher mx-1" />
               <button
                 onClick={zoomToFit}
-                className="p-1.5 rounded-lg text-slate-200 hover:bg-slate-600 hover:text-white transition-colors flex items-center gap-1 text-xs font-semibold"
+                className="p-1.5 rounded-lg text-slate-200 hover:bg-th-higher hover:text-white transition-colors flex items-center gap-1 text-xs font-semibold"
                 title="Подогнать под размер экрана"
               >
                 <Maximize2 size={14} />
@@ -506,13 +506,13 @@ export const PreviewModal = ({
                   type="button"
                   onClick={() => setShowAttachments(!showAttachments)}
                   className={cn(
-                    "flex items-center gap-2 px-3.5 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer select-none",
-                    showAttachments && "bg-slate-600 border-slate-500"
+                    "flex items-center gap-2 px-3.5 py-2 bg-th-high hover:bg-th-higher border border-th-higher text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer select-none",
+                    showAttachments && "bg-th-higher border-slate-500"
                   )}
                 >
-                  <Paperclip size={14} className="text-blue-400" />
+                  <Paperclip size={14} className="text-th-accent-400" />
                   <span className="hidden md:inline">Вложения</span>
-                  <span className="flex items-center justify-center bg-blue-500/20 text-blue-300 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                  <span className="flex items-center justify-center bg-th-accent-500/20 text-th-accent-300 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                     {attachments!.length}
                   </span>
                 </button>
@@ -524,7 +524,7 @@ export const PreviewModal = ({
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 mt-2 w-72 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3 font-sans"
+                      className="absolute right-0 mt-2 w-72 bg-th-raised border border-th-high rounded-2xl shadow-2xl p-4 z-50 flex flex-col gap-3 font-sans"
                     >
                       <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                         Список вложений ({attachments!.length})
@@ -534,11 +534,11 @@ export const PreviewModal = ({
                           <div
                             key={file.id}
                             onClick={() => setPreviewAttachment(file)}
-                            className="flex items-center gap-3 px-3 py-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 hover:border-slate-500 rounded-xl text-xs text-slate-200 cursor-pointer transition-all group"
+                            className="flex items-center gap-3 px-3 py-2 bg-th-high/50 hover:bg-th-high border border-th-higher/50 hover:border-slate-500 rounded-xl text-xs text-slate-200 cursor-pointer transition-all group"
                           >
-                            <Paperclip size={14} className="text-blue-400 flex-shrink-0 group-hover:scale-105 transition-transform" />
+                            <Paperclip size={14} className="text-th-accent-400 flex-shrink-0 group-hover:scale-105 transition-transform" />
                             <div className="min-w-0 flex-1">
-                              <p className="font-semibold truncate text-slate-100 group-hover:text-blue-300 transition-colors" title={file.name}>
+                              <p className="font-semibold truncate text-slate-100 group-hover:text-th-accent-300 transition-colors" title={file.name}>
                                 {file.name}
                               </p>
                               <p className="text-[10px] text-slate-400">
@@ -552,7 +552,7 @@ export const PreviewModal = ({
                                 setPreviewAttachment(file);
                               }}
                               title="Просмотр вложения"
-                              className="text-slate-400 hover:text-indigo-400 transition-colors flex-shrink-0 cursor-pointer"
+                              className="text-slate-400 hover:text-th-accent-400 transition-colors flex-shrink-0 cursor-pointer"
                             >
                               <Eye size={14} />
                             </button>
@@ -564,7 +564,7 @@ export const PreviewModal = ({
                                   downloadAttachment(file);
                                 }}
                                 title="Скачать"
-                                className="text-slate-400 hover:text-blue-400 transition-colors flex-shrink-0 cursor-pointer"
+                                className="text-slate-400 hover:text-th-accent-400 transition-colors flex-shrink-0 cursor-pointer"
                               >
                                 <Download size={14} />
                               </button>
@@ -580,7 +580,7 @@ export const PreviewModal = ({
 
             <button
               onClick={onClose}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white text-sm font-medium rounded-xl transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-th-high hover:bg-th-higher border border-th-higher text-white text-sm font-medium rounded-xl transition-colors"
             >
               <X size={15} />
               <span className="hidden sm:inline">Закрыть</span>
@@ -590,7 +590,7 @@ export const PreviewModal = ({
 
         {/* Рабочая область */}
         <div
-          className="flex-1 flex flex-col justify-between items-center py-4 overflow-hidden bg-slate-900/10"
+          className="flex-1 flex flex-col justify-between items-center py-4 overflow-hidden bg-th-base/10"
           onClick={() => {
             if (showAttachments) setShowAttachments(false);
             else onClose();
@@ -701,13 +701,13 @@ export const PreviewModal = ({
 
           {/* Пагинация */}
           <div
-            className="flex-shrink-0 flex items-center gap-4 bg-slate-800 border border-slate-600 px-4 py-2 rounded-2xl shadow-xl z-10 my-2"
+            className="flex-shrink-0 flex items-center gap-4 bg-th-raised border border-th-higher px-4 py-2 rounded-2xl shadow-xl z-10 my-2"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               disabled={currentPage === 0}
               onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-              className="p-1.5 rounded-xl text-slate-200 hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+              className="p-1.5 rounded-xl text-slate-200 hover:bg-th-high disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
             >
               <ChevronLeft size={18} />
             </button>
@@ -721,7 +721,7 @@ export const PreviewModal = ({
               onClick={() =>
                 setCurrentPage((p) => Math.min(sheets.length - 1, p + 1))
               }
-              className="p-1.5 rounded-xl text-slate-200 hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+              className="p-1.5 rounded-xl text-slate-200 hover:bg-th-high disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
             >
               <ChevronRight size={18} />
             </button>

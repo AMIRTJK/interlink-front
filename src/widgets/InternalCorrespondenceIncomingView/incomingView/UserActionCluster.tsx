@@ -55,7 +55,7 @@ export const UserActionCluster: React.FC<IProps> = ({
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-xl transition-colors",
                   isAck
-                    ? "bg-emerald-50/70 border border-emerald-100/80"
+                    ? "bg-emerald-50/70 border border-emerald-100/80 dark:bg-emerald-900/35 dark:border-emerald-800/50"
                     : "hover:bg-slate-50"
                 )}
               >
@@ -84,7 +84,7 @@ export const UserActionCluster: React.FC<IProps> = ({
                 </div>
                 <If is={isAck}>
                   <div className="flex flex-col items-end flex-shrink-0">
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200/60">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200/60 dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50">
                       Ознакомлен
                     </span>
                     <If is={Boolean(when)}>

@@ -93,7 +93,7 @@ export const ModuleMenuHeader = ({
               } ${
                 isActive
                   ? `bg-linear-to-r ${activeGradient} text-white shadow-md`
-                  : "text-zinc-600 dark:text-zinc-400 hover:bg-white/40 dark:hover:bg-zinc-800/40"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-white/40 dark:hover:bg-th-raised/40"
               }`}
             >
               <span className="shrink-0">{icon}</span>
@@ -115,7 +115,7 @@ export const ModuleMenuHeader = ({
               className={`w-10 h-10 flex items-center justify-center rounded-[2.5rem] transition-all cursor-pointer ${
                 isActive
                   ? `bg-linear-to-r ${activeGradient} text-white shadow-md`
-                  : "text-zinc-600 dark:text-zinc-400 hover:bg-white/30 dark:hover:bg-zinc-800/30"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-white/30 dark:hover:bg-th-raised/30"
               }`}
             >
               {icon}

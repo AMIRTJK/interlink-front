@@ -75,13 +75,13 @@ export const DrawerActionsModal: React.FC<IActionsModal> = ({
               exit={{ x: 500, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className={`fixed right-5 top-5 bottom-5 rounded-2xl! min-h-[920px]! overflow-y-auto z-1001 w-[440px] shadow-2xl flex flex-col overflow-hidden ${
-                isDarkMode ? "bg-gray-900" : "bg-white"
+                isDarkMode ? "bg-th-base" : "bg-white"
               }`}
             >
               {/* Header */}
               <div
                 className={`flex flex-col ${
-                  isDarkMode ? "border-gray-800 bg-gray-900" : "border-gray-50 bg-white"
+                  isDarkMode ? "border-th-raised bg-th-base" : "border-gray-50 bg-white"
                 }`}
               >
                 <div className="flex justify-between px-6 py-4">

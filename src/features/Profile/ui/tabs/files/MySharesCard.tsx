@@ -13,7 +13,7 @@ export const MySharesCard = ({ data }: IProps) => {
 			initial={{ opacity: 0, y: 16 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.3, delay: 0.18 }}
-			className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-slate-700/50 p-5 flex flex-col justify-between min-h-[340px]"
+			className="rounded-3xl bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 p-5 flex flex-col justify-between min-h-[340px]"
 		>
 			<div>
 				<div className="flex items-center gap-2 mb-1">
@@ -38,7 +38,7 @@ export const MySharesCard = ({ data }: IProps) => {
 								initial={{ opacity: 0, y: 8 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ duration: 0.2, delay: index * 0.04 }}
-								className="flex items-center justify-between p-3.5 bg-slate-50/50 dark:bg-slate-850/50 rounded-2xl border border-slate-100/70 dark:border-slate-800/40 hover:bg-slate-100/50 dark:hover:bg-slate-800/60 transition-all duration-200"
+								className="flex items-center justify-between p-3.5 bg-slate-50/50 dark:bg-th-raised/50 rounded-2xl border border-slate-100/70 dark:border-th-raised/40 hover:bg-slate-100/50 dark:hover:bg-th-raised/60 transition-all duration-200"
 							>
 								<div className="flex items-center gap-3 min-w-0">
 									<div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center text-base shrink-0 border border-amber-100/20 dark:border-amber-900/10 shadow-sm">

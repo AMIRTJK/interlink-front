@@ -96,7 +96,7 @@ export const OutgoingActionsSection: React.FC<OutgoingActionsSectionProps> = ({
                     onClick={() => setViewAllSection(section.id)}
                     className={`py-2 px-3 text-center text-sm font-medium rounded-lg cursor-pointer transition-all border border-dashed ${
                       isDarkMode
-                        ? "text-gray-400 bg-gray-800/50 hover:bg-gray-800 hover:text-gray-200 border-gray-700"
+                        ? "text-gray-400 bg-th-raised/50 hover:bg-th-raised hover:text-gray-200 border-th-high"
                         : "text-gray-500 bg-gray-50 hover:bg-gray-100 hover:text-gray-700 border-gray-200"
                     }`}
                   >

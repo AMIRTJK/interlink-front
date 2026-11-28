@@ -22,7 +22,7 @@ export function CreateTaskHeader({
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
-          className="flex items-center gap-1 px-3.5 py-1.5 bg-[rgba(51,115,229,0.08)] dark:bg-slate-800/90 border border-[#3373e5]/20 dark:border-white/10 rounded-xl text-xs font-bold text-[#3373e5] hover:bg-[#3373e5]/15 dark:text-slate-400 dark:hover:text-slate-200 shadow-2xs transition-all cursor-pointer"
+          className="flex items-center gap-1 px-3.5 py-1.5 bg-[rgb(var(--th-accent-rgb)/0.08)] dark:bg-th-raised/90 border border-th-accent-600/20 dark:border-white/10 rounded-xl text-xs font-bold text-th-accent-600 hover:bg-th-accent-600/15 dark:text-slate-400 dark:hover:text-slate-200 shadow-2xs transition-all cursor-pointer"
         >
           <ChevronLeft size={15} />
           <span>Назад</span>
@@ -39,8 +39,8 @@ export function CreateTaskHeader({
           className={cn(
             "px-5 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer border",
             taskType === "personal"
-              ? "bg-white dark:bg-slate-800 border-[#10b981] text-[#10b981] dark:text-emerald-400 shadow-[0_4px_12px_rgba(16,185,129,0.12)]"
-              : "bg-[rgba(51,115,229,0.0588)] dark:bg-slate-800/50 border-[#3373e5]/15 dark:border-white/10 text-[#7e85b0] hover:text-[#3373e5]",
+              ? "bg-white dark:bg-th-raised border-[#10b981] text-[#10b981] dark:text-emerald-400 shadow-[0_4px_12px_rgba(16,185,129,0.12)]"
+              : "bg-[rgb(var(--th-accent-rgb)/0.0588)] dark:bg-th-raised/50 border-th-accent-600/15 dark:border-white/10 text-[#7e85b0] hover:text-th-accent-600",
           )}
         >
           Персональная задача
@@ -51,8 +51,8 @@ export function CreateTaskHeader({
           className={cn(
             "px-5 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer border",
             taskType === "protocol"
-              ? "bg-white dark:bg-slate-800 border-[#10b981] text-[#10b981] dark:text-emerald-400 shadow-[0_4px_12px_rgba(16,185,129,0.12)]"
-              : "bg-[rgba(51,115,229,0.0588)] dark:bg-slate-800/50 border-[#3373e5]/15 dark:border-white/10 text-[#7e85b0] hover:text-[#3373e5]",
+              ? "bg-white dark:bg-th-raised border-[#10b981] text-[#10b981] dark:text-emerald-400 shadow-[0_4px_12px_rgba(16,185,129,0.12)]"
+              : "bg-[rgb(var(--th-accent-rgb)/0.0588)] dark:bg-th-raised/50 border-th-accent-600/15 dark:border-white/10 text-[#7e85b0] hover:text-th-accent-600",
           )}
         >
           Протокол

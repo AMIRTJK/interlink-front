@@ -27,6 +27,7 @@ export function AdminTabsLayout() {
     >
       {/* Tab bar */}
       <div
+        className="ui-glass ui-glass--forced"
         style={{
           background: T.surface,
           borderBottom: `1px solid ${T.border}`,

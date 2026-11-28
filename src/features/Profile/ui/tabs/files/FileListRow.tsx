@@ -58,9 +58,9 @@ export const FileListRow = ({
 			onDrop={(e) => onDrop(e, index)}
 			onDragEnd={onDragEnd}
 			className={`group transition-all ${
-				isDragging ? "opacity-30 bg-indigo-50/50 dark:bg-indigo-950/20" : ""
+				isDragging ? "opacity-30 bg-th-accent-50/50 dark:bg-th-accent-950/20" : ""
 			} ${
-				isOver ? "border-t-2 border-t-indigo-500 bg-indigo-50/30 dark:bg-indigo-950/30" : "hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
+				isOver ? "border-t-2 border-t-th-accent-500 bg-th-accent-50/30 dark:bg-th-accent-950/30" : "hover:bg-slate-50/50 dark:hover:bg-th-raised/40"
 			}`}
 		>
 			{/* Checkbox */}
@@ -70,7 +70,7 @@ export const FileListRow = ({
 						type="checkbox"
 						checked={isSelected}
 						onChange={() => onToggleSelectFile(file.id)}
-						className="rounded border-slate-200 dark:border-slate-800 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
+						className="rounded border-slate-200 dark:border-th-raised text-th-accent-600 focus:ring-th-accent-500/20 w-4 h-4 cursor-pointer"
 					/>
 				</td>
 			</If>
@@ -90,7 +90,7 @@ export const FileListRow = ({
 					{getSmallIcon(file)}
 					<span
 						onClick={() => onView(file)}
-						className="text-sm font-bold text-slate-800 dark:text-zinc-200 hover:text-indigo-600 transition-colors cursor-pointer"
+						className="text-sm font-bold text-slate-800 dark:text-zinc-200 hover:text-th-accent-600 transition-colors cursor-pointer"
 					>
 						{file.original_name}
 					</span>
@@ -139,7 +139,7 @@ export const FileListRow = ({
 						<button
 							type="button"
 							onClick={() => onView(file)}
-							className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+							className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-th-raised rounded-lg transition-all cursor-pointer"
 						>
 							<Eye size={15} />
 						</button>
@@ -149,7 +149,7 @@ export const FileListRow = ({
 						<button
 							type="button"
 							onClick={() => downloadFile(file)}
-							className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+							className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-th-raised rounded-lg transition-all cursor-pointer"
 						>
 							<Download size={15} />
 						</button>
@@ -160,7 +160,7 @@ export const FileListRow = ({
 							<button
 								type="button"
 								onClick={() => onMove(file)}
-								className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+								className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-th-raised rounded-lg transition-all cursor-pointer"
 							>
 								<Folder size={15} />
 							</button>
@@ -172,7 +172,7 @@ export const FileListRow = ({
 							<button
 								type="button"
 								onClick={() => onShare(file)}
-								className="p-1.5 text-slate-400 hover:text-indigo-600! dark:hover:text-indigo-400! hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+								className="p-1.5 text-slate-400 hover:text-th-accent-600! dark:hover:text-th-accent-400! hover:bg-slate-100 dark:hover:bg-th-raised rounded-lg transition-all cursor-pointer"
 							>
 								<Share2 size={15} />
 							</button>

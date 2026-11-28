@@ -18,7 +18,7 @@ export const recipientFromUser = (user: any): RecipientOption => ({
   name: user.full_name,
   org: user.position || user.department || "Сотрудник",
   initials: initialsOf(user.full_name),
-  color: "bg-blue-100 text-blue-700",
+  color: "bg-blue-100 text-blue-700 dark:bg-blue-900/35 dark:text-blue-400",
 });
 
 // Отправитель исходного письма при «Ответить». ФИО здесь приходит из navigate
@@ -38,7 +38,7 @@ export const recipientFromComposeCreator = (creator: {
     .slice(0, 2)
     .join("")
     .toUpperCase(),
-  color: "bg-blue-100 text-blue-700",
+  color: "bg-blue-100 text-blue-700 dark:bg-blue-900/35 dark:text-blue-400",
 });
 
 // Согласующий из записи согласования сохранённого письма.
@@ -132,7 +132,7 @@ export const finalSignerFromSignature = (s: any): FinalSigner => ({
   name: s.user.full_name,
   role: s.user.position || "Сотрудник",
   initials: initialsOf(s.user.full_name),
-  color: "bg-purple-100 text-purple-700",
+  color: "bg-purple-100 text-purple-700 dark:bg-purple-900/35 dark:text-purple-400",
   dsApplied: s.status === "signed",
   dsDeclined: s.status === "declined",
   declineReason: s.decline_reason || s.reason,
@@ -146,7 +146,7 @@ export const finalSignerFromCreator = (creator: any): FinalSigner => ({
   name: creator.full_name,
   role: creator.position || "Автор документа",
   initials: initialsOf(creator.full_name),
-  color: "bg-purple-100 text-purple-700",
+  color: "bg-purple-100 text-purple-700 dark:bg-purple-900/35 dark:text-purple-400",
   dsApplied: false,
   dsLoading: false,
 });

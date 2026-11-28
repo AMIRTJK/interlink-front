@@ -161,7 +161,7 @@ export function OrgBubbleNode({
           dp >= 100
             ? '#10b981'
             : dp >= 60
-            ? '#6366f1'
+            ? 'var(--th-accent-500)'
             : dp >= 30
             ? '#f59e0b'
             : '#f43f5e';

@@ -15,33 +15,33 @@ export const ROLE_CHIP_STYLE_MAP: Record<
 > = {
   super_admin: {
     border: "border-blue-100!",
-    bg: "bg-blue-50/50!",
+    bg: "bg-blue-50/50! dark:bg-blue-900/35!",
     text: "text-blue-600!",
   },
   recipient: {
     border: "border-emerald-100!",
-    bg: "bg-emerald-50/50!",
+    bg: "bg-emerald-50/50! dark:bg-emerald-900/35!",
     text: "text-emerald-600!",
   },
   signer: {
     border: "border-orange-100!",
-    bg: "bg-orange-50/50!",
+    bg: "bg-orange-50/50! dark:bg-orange-900/35!",
     text: "text-orange-600!",
   },
   approvaler: {
     border: "border-indigo-100!",
-    bg: "bg-indigo-50/50!",
+    bg: "bg-indigo-50/50! dark:bg-indigo-900/35!",
     text: "text-indigo-600!",
   },
   controller: {
     border: "border-purple-100!",
-    bg: "bg-purple-50/50!",
+    bg: "bg-purple-50/50! dark:bg-purple-900/35!",
     text: "text-purple-600!",
   },
   observer: {
-    border: "border-slate-200!",
-    bg: "bg-slate-50!",
-    text: "text-slate-500!",
+    border: "border-slate-200! dark:border-th-high!",
+    bg: "bg-slate-50! dark:bg-th-base!",
+    text: "text-slate-500! dark:text-slate-400!",
   },
 };
 

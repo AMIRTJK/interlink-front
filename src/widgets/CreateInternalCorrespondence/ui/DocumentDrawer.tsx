@@ -44,10 +44,10 @@ export const DocumentDrawer = ({
     INBOX_DOC_TYPE_STYLE[docType] ??
     "bg-slate-50 text-slate-700 border-slate-200";
   const inboxStatusStyle: Record<Status, string> = {
-    "на резолюции": "bg-emerald-50 text-emerald-700 border-emerald-200",
-    "на исполнении": "bg-amber-50 text-amber-700 border-amber-200",
-    "на согласовании": "bg-blue-50 text-blue-700 border-blue-200",
-    "на подпись": "bg-purple-50 text-purple-700 border-purple-200",
+    "на резолюции": "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50",
+    "на исполнении": "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50",
+    "на согласовании": "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/35 dark:text-blue-400 dark:border-blue-800/50",
+    "на подпись": "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/35 dark:text-purple-400 dark:border-purple-800/50",
     завершено: "bg-slate-100 text-slate-600 border-slate-200",
   };
   const statusStyle = isOutbox
@@ -85,7 +85,7 @@ export const DocumentDrawer = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm"
+        className="fixed inset-0 z-40 bg-th-base/40 backdrop-blur-sm"
         onClick={onClose}
       />
       <motion.div
@@ -99,7 +99,7 @@ export const DocumentDrawer = ({
       >
         <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-th-accent-600 flex items-center justify-center flex-shrink-0">
               <Eye size={17} className="text-white" />
             </div>
             <div>
@@ -138,7 +138,7 @@ export const DocumentDrawer = ({
                     От кого
                   </p>
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-700 flex-shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-th-accent-100 flex items-center justify-center text-sm font-bold text-th-accent-700 flex-shrink-0 dark:bg-th-accent-900/35 dark:text-th-accent-400">
                       {item.sender
                         .split(" ")
                         .map((w: string) => w[0])
@@ -174,7 +174,7 @@ export const DocumentDrawer = ({
                   <div className="flex items-center gap-2">
                     <Calendar
                       size={14}
-                      className="text-blue-500 flex-shrink-0"
+                      className="text-th-accent-500 flex-shrink-0"
                     />
                     <p className="text-sm font-semibold text-slate-800">
                       {item.date}
@@ -275,13 +275,13 @@ export const DocumentDrawer = ({
                     {!showTaskEditor ? (
                       <button
                         onClick={() => setShowTaskEditor(true)}
-                        className="w-full flex items-start gap-2 px-3 py-2 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors text-left"
+                        className="w-full flex items-start gap-2 px-3 py-2 bg-th-accent-50 border border-th-accent-100 rounded-lg hover:bg-th-accent-100 transition-colors text-left dark:bg-th-accent-900/35 dark:border-th-accent-800/50"
                       >
                         <MessageSquare
                           size={13}
-                          className="text-blue-500 mt-0.5 flex-shrink-0"
+                          className="text-th-accent-500 mt-0.5 flex-shrink-0"
                         />
-                        <p className="text-[11px] font-medium text-blue-700">
+                        <p className="text-[11px] font-medium text-th-accent-700">
                           {customTask || taskTemplate}
                         </p>
                       </button>
@@ -310,7 +310,7 @@ export const DocumentDrawer = ({
                             value={customTask}
                             onChange={(e) => setCustomTask(e.target.value)}
                             placeholder="Введите поручение..."
-                            className="w-full text-[11px] text-slate-700 placeholder-slate-400 bg-amber-50/60 border border-amber-100 rounded-lg px-2.5 py-2 resize-none outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-300 transition-all"
+                            className="w-full text-[11px] text-slate-700 placeholder-slate-400 bg-amber-50/60 border border-amber-100 rounded-lg px-2.5 py-2 resize-none outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-300 transition-all dark:bg-amber-900/35 dark:border-amber-800/50"
                             rows={2}
                           />
                         </div>
@@ -330,7 +330,7 @@ export const DocumentDrawer = ({
                     <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
                       <Calendar
                         size={13}
-                        className="text-blue-500 flex-shrink-0"
+                        className="text-th-accent-500 flex-shrink-0"
                       />
                       <input
                         type="text"
@@ -352,10 +352,10 @@ export const DocumentDrawer = ({
                         className={cn(
                           "w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition-colors text-sm font-medium border",
                           visaStatus === "на рассмотрении"
-                            ? "bg-blue-50 border-blue-200 text-blue-700"
+                            ? "bg-th-accent-50 border-th-accent-200 text-th-accent-700 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50"
                             : visaStatus === "согласовано"
-                              ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                              : "bg-amber-50 border-amber-200 text-amber-700",
+                              ? "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50"
+                              : "bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50",
                         )}
                       >
                         <span>{visaStatus}</span>
@@ -410,7 +410,7 @@ export const DocumentDrawer = ({
                           "w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs font-semibold transition-all border",
                           ecpLoading
                             ? "bg-slate-100 text-slate-400 border-slate-200 cursor-wait"
-                            : "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100",
+                            : "bg-th-accent-50 border-th-accent-200 text-th-accent-700 hover:bg-th-accent-100 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50",
                         )}
                       >
                         {ecpLoading ? (
@@ -433,7 +433,7 @@ export const DocumentDrawer = ({
                       </button>
                     ) : (
                       <div className="space-y-2">
-                        <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg">
+                        <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg dark:bg-emerald-900/35 dark:border-emerald-800/50">
                           <Check
                             size={12}
                             className="text-emerald-600 flex-shrink-0"
@@ -444,7 +444,7 @@ export const DocumentDrawer = ({
                         </div>
                         <button
                           onClick={() => setShowDSStampAppendix(true)}
-                          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-lg text-[11px] font-semibold transition-colors"
+                          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-lg text-[11px] font-semibold transition-colors dark:bg-purple-900/35 dark:text-purple-400 dark:border-purple-800/50"
                         >
                           <FileType size={12} />
                           <span>Показать Приложение №1</span>

@@ -54,7 +54,7 @@ export const RolePermissionsSidebar = ({
     .toUpperCase();
 
   return (
-    <div className="w-[320px] bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col h-[750px]! justify-between relative overflow-hidden">
+    <div className="w-[320px] bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col h-[750px]! justify-between relative overflow-hidden dark:bg-th-raised dark:border-th-high">
       <AnimatePresence mode="wait">
         <motion.div
           key={role.id}
@@ -78,7 +78,7 @@ export const RolePermissionsSidebar = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               allowClear
-              className="rounded-xl! border-slate-200!"
+              className="rounded-xl! border-slate-200! dark:border-th-high!"
             />
           </div>
 
@@ -92,11 +92,11 @@ export const RolePermissionsSidebar = ({
             onPageChange={setSidebarPage}
           />
 
-          <div className="p-4 border-t border-slate-50 flex items-center justify-between gap-2.5 bg-slate-50/20">
+          <div className="p-4 border-t border-slate-50 flex items-center justify-between gap-2.5 bg-slate-50/20 dark:bg-th-base/20">
             <button
               onClick={handleSave}
               disabled={isUpdatePending}
-              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60 transition-colors shadow-sm"
+              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-th-accent-600 hover:bg-th-accent-700 text-white disabled:opacity-60 transition-colors shadow-sm"
             >
               <Check size={14} />
               <span>{"Сохранить"}</span>
@@ -104,7 +104,7 @@ export const RolePermissionsSidebar = ({
             <button
               onClick={handleDelete}
               disabled={isDeletePending}
-              className="flex items-center justify-center p-2.5 rounded-xl text-rose-500 hover:text-rose-600 bg-rose-50 hover:bg-rose-100/60 disabled:opacity-60 transition-colors"
+              className="flex items-center justify-center p-2.5 rounded-xl text-rose-500 hover:text-rose-600 bg-rose-50 hover:bg-rose-100/60 disabled:opacity-60 transition-colors dark:bg-rose-900/35"
             >
               <Trash2 size={15} />
             </button>

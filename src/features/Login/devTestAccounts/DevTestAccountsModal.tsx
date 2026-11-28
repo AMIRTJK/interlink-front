@@ -85,7 +85,7 @@ export const DevTestAccountsModal = ({
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
 					allowClear
-					className="h-10 rounded-xl bg-slate-900/40 border-white/15 text-white"
+					className="h-10 rounded-xl bg-th-base/40 border-white/15 text-white"
 				/>
 
 				{/* Total count */}
@@ -111,10 +111,10 @@ export const DevTestAccountsModal = ({
 									key={account.id}
 									type="button"
 									onClick={() => handleSelect(account)}
-									className="w-full text-left p-3 rounded-2xl bg-slate-900/30 hover:bg-blue-600/15 border border-white/10 hover:border-blue-500/40 transition-all group flex items-center justify-between gap-3 cursor-pointer"
+									className="w-full text-left p-3 rounded-2xl bg-th-base/30 hover:bg-blue-600/15 border border-white/10 hover:border-blue-500/40 transition-all group flex items-center justify-between gap-3 cursor-pointer"
 								>
 									<div className="flex items-center gap-3 min-w-0">
-										<div className="w-10 h-10 shrink-0 rounded-xl bg-slate-800/80 border border-white/10 flex items-center justify-center text-slate-300 font-semibold group-hover:bg-blue-500/20 group-hover:text-blue-300 group-hover:border-blue-500/30 transition-colors">
+										<div className="w-10 h-10 shrink-0 rounded-xl bg-th-raised/80 border border-white/10 flex items-center justify-center text-slate-300 font-semibold group-hover:bg-blue-500/20 group-hover:text-blue-300 group-hover:border-blue-500/30 transition-colors">
 											{account.fullName.charAt(0)}
 										</div>
 
@@ -124,7 +124,7 @@ export const DevTestAccountsModal = ({
 													{account.fullName}
 												</span>
 												{account.role && (
-													<span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-slate-800 text-slate-400 border border-white/10">
+													<span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-th-raised text-slate-400 border border-white/10">
 														{account.role}
 													</span>
 												)}

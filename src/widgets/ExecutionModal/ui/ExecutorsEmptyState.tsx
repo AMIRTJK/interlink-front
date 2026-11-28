@@ -11,14 +11,14 @@ export const ExecutorsEmptyState = ({
     <div
       className={`flex flex-col items-center max-w-md w-full animate-fade-in ${className || ""}`}
     >
-      <div className="mb-5 text-blue-100 bg-blue-50 p-6 rounded-full">
+      <div className="mb-5 text-th-accent-100 bg-th-accent-50 p-6 rounded-full dark:bg-th-accent-900/35">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth="1.5"
           stroke="currentColor"
-          className="w-16 h-16 text-blue-300"
+          className="w-16 h-16 text-th-accent-300"
         >
           <path
             strokeLinecap="round"
@@ -38,7 +38,7 @@ export const ExecutorsEmptyState = ({
 
       <button
         onClick={onAssignExecutors}
-        className="flex cursor-pointer items-center gap-2 text-[#0037AF] font-semibold hover:text-blue-700 hover:bg-blue-50 px-6 py-3 rounded-lg transition-colors active:transform active:scale-[0.98]"
+        className="flex cursor-pointer items-center gap-2 text-[#0037AF] font-semibold hover:text-th-accent-700 hover:bg-th-accent-50 px-6 py-3 rounded-lg transition-colors active:transform active:scale-[0.98]"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

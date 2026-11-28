@@ -110,8 +110,8 @@ input:-webkit-autofill:active {
 
 .active-pill-shadow {
   box-shadow:
-    0 4px 12px rgba(79, 70, 229, 0.15),
-    0 2px 4px rgba(79, 70, 229, 0.1);
+    0 4px 12px rgb(var(--th-accent-rgb)/0.15),
+    0 2px 4px rgb(var(--th-accent-rgb)/0.1);
 }
 
 .custom-form-item {

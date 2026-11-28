@@ -39,7 +39,7 @@ const getPriorityBadge = (priority: Priority) => {
 				label: "Средний",
 				dotBg: "bg-blue-500",
 				pillClass:
-					"bg-blue-50 dark:bg-blue-950/40 border-blue-200/70 dark:border-blue-900/50 text-blue-700 dark:text-blue-300",
+					"bg-th-accent-50 dark:bg-th-accent-950/40 border-th-accent-200/70 dark:border-th-accent-900/50 text-th-accent-700 dark:text-th-accent-300",
 			};
 		case "low":
 		default:
@@ -47,7 +47,7 @@ const getPriorityBadge = (priority: Priority) => {
 				label: "Низкий",
 				dotBg: "bg-slate-400",
 				pillClass:
-					"bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300",
+					"bg-slate-50 dark:bg-th-raised border-slate-200 dark:border-th-high text-slate-600 dark:text-slate-300",
 			};
 	}
 };
@@ -80,7 +80,7 @@ const getStatusBadge = (status: TaskStatus) => {
 				label: "В работе",
 				dotBg: "bg-blue-500",
 				pillClass:
-					"bg-blue-50 dark:bg-blue-950/40 border-blue-200/70 dark:border-blue-900/50 text-blue-600 dark:text-blue-400",
+					"bg-th-accent-50 dark:bg-th-accent-950/40 border-th-accent-200/70 dark:border-th-accent-900/50 text-th-accent-600 dark:text-th-accent-400",
 			};
 		case "new":
 		default:
@@ -111,7 +111,7 @@ export const TaskListView = ({
 	);
 
 	return (
-		<div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-slate-100 dark:border-white/10 rounded-3xl p-5 shadow-xl shadow-purple-100/40 dark:shadow-none flex flex-col min-h-[500px]">
+		<div className="ui-glass bg-white/90 dark:bg-th-base/90 backdrop-blur-2xl border border-slate-100 dark:border-white/10 rounded-3xl p-5 shadow-xl shadow-purple-100/40 dark:shadow-none flex flex-col min-h-[500px]">
 			<div className="flex-1 overflow-x-auto">
 				<table className="w-full text-center border-separate border-spacing-y-2.5 min-w-[1140px]">
 					<thead>
@@ -137,12 +137,12 @@ export const TaskListView = ({
 									<tr
 										key={task.id}
 										onClick={() => onOpenTask(task)}
-										className="bg-white dark:bg-slate-800/80 hover:bg-slate-50/90 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-white/10 rounded-2xl shadow-xs transition-all duration-150 cursor-pointer group"
+										className="ui-glass-soft bg-white dark:bg-th-raised/80 hover:bg-slate-50/90 dark:hover:bg-th-raised border border-slate-200/60 dark:border-white/10 rounded-2xl shadow-xs transition-all duration-150 cursor-pointer group"
 									>
 										{/* CODE */}
 										<td className="px-3 py-3.5 rounded-l-2xl text-center">
 											<Tooltip title={task.id} placement="top">
-												<span className="text-xs font-bold text-blue-600 dark:text-blue-400 group-hover:underline truncate block">
+												<span className="text-xs font-bold text-th-accent-600 dark:text-th-accent-400 group-hover:underline truncate block">
 													{task.id}
 												</span>
 											</Tooltip>
@@ -151,7 +151,7 @@ export const TaskListView = ({
 										{/* TITLE */}
 										<td className="px-3 py-3.5 text-center">
 											<Tooltip title={task.title} placement="top">
-												<div className="inline-flex items-center justify-center min-w-[125px] max-w-[220px] h-[34px] bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-white/10 rounded-2xl px-3 text-xs font-medium text-slate-700 dark:text-slate-200 cursor-default">
+												<div className="inline-flex items-center justify-center min-w-[125px] max-w-[220px] h-[34px] bg-slate-100/70 dark:bg-th-base/60 border border-slate-200/50 dark:border-white/10 rounded-2xl px-3 text-xs font-medium text-slate-700 dark:text-slate-200 cursor-default">
 													<span className="truncate">
 														{task.title}
 													</span>
@@ -199,11 +199,11 @@ export const TaskListView = ({
 																<Avatar
 																	key={a.id || i}
 																	colleague={a}
-																	className="w-8 h-8 text-xs font-bold ring-2 ring-white dark:ring-slate-800"
+																	className="w-8 h-8 text-xs font-bold ring-2 ring-white dark:ring-th-raised"
 																/>
 															))}
 															{task.assignees.length > 2 && (
-																<span className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-extrabold text-[10px] flex items-center justify-center ring-2 ring-white dark:ring-slate-800 shadow-xs">
+																<span className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-extrabold text-[10px] flex items-center justify-center ring-2 ring-white dark:ring-th-raised shadow-xs">
 																	+{task.assignees.length - 2}
 																</span>
 															)}
@@ -287,7 +287,7 @@ export const TaskListView = ({
 										{/* DUE DATE */}
 										<td className="px-3 py-3.5 text-center">
 											<Tooltip title={task.dueDate ? formattedDate : "Срок не указан"} placement="top">
-												<div className="inline-flex items-center justify-center min-w-[110px] h-[32px] bg-slate-100/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-white/10 rounded-2xl px-2.5 text-xs font-semibold text-slate-600 dark:text-slate-300 cursor-default">
+												<div className="inline-flex items-center justify-center min-w-[110px] h-[32px] bg-slate-100/70 dark:bg-th-base/60 border border-slate-200/50 dark:border-white/10 rounded-2xl px-2.5 text-xs font-semibold text-slate-600 dark:text-slate-300 cursor-default">
 													<span className="truncate">
 														{formattedDate}
 													</span>
@@ -310,7 +310,7 @@ export const TaskListView = ({
 							<tr>
 								<td colSpan={8} className="py-16 text-center">
 									<div className="flex flex-col items-center gap-2">
-										<div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-300">
+										<div className="w-12 h-12 bg-slate-100 dark:bg-th-raised rounded-full flex items-center justify-center text-slate-300">
 											<Search size={24} />
 										</div>
 										<p className="text-slate-500 dark:text-slate-400 font-bold text-sm">
@@ -333,7 +333,6 @@ export const TaskListView = ({
 					<ConfigProvider
 						theme={{
 							token: {
-								colorPrimary: "#9333ea",
 								borderRadius: 8,
 								fontSize: 12,
 							},

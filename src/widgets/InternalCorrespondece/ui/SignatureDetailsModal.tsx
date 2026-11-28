@@ -55,13 +55,13 @@ export const SignatureDetailsModal = ({
         <div className="flex flex-col gap-4 py-2">
           {/* Блок пользователя */}
           <div
-            className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${isDarkMode ? "bg-[#1f2937] border-gray-700" : "bg-gray-50 border-gray-100"}`}
+            className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${isDarkMode ? "bg-th-raised border-th-high" : "bg-gray-50 border-gray-100"}`}
           >
             <Avatar
               src={data.user?.photo_path}
               size="large"
               icon={<UserOutlined />}
-              className={isDarkMode ? "bg-gray-700!" : ""}
+              className={isDarkMode ? "bg-th-high!" : ""}
             />
             <div>
               <div
@@ -78,7 +78,7 @@ export const SignatureDetailsModal = ({
           </div>
 
           <Divider
-            className={`my-1! ${isDarkMode ? "border-gray-700!" : ""}`}
+            className={`my-1! ${isDarkMode ? "border-th-high!" : ""}`}
           />
 
           {/* Технические данные */}
@@ -105,7 +105,7 @@ export const SignatureDetailsModal = ({
                 <KeyOutlined /> Payload Hash (Отпечаток)
               </div>
               <div
-                className={`p-2 rounded border transition-colors ${isDarkMode ? "bg-gray-800 border-gray-700" : "bg-gray-100 border-gray-200"}`}
+                className={`p-2 rounded border transition-colors ${isDarkMode ? "bg-th-raised border-th-high" : "bg-gray-100 border-gray-200"}`}
               >
                 <Paragraph
                   copyable={{ tooltips: ["Копировать", "Скопировано!"] }}
@@ -140,7 +140,7 @@ export const SignatureDetailsModal = ({
 
           {/* Статус валидности */}
           <div
-            className={`border rounded-lg p-3 flex items-center gap-2 transition-colors ${isDarkMode ? "bg-[#00c9501a] border-green-900/50" : "bg-green-50 border-green-200"}`}
+            className={`border rounded-lg p-3 flex items-center gap-2 transition-colors ${isDarkMode ? "bg-[#00c9501a] border-green-900/50" : "bg-green-50 border-green-200 dark:bg-green-900/35 dark:border-green-800/50"}`}
           >
             <CheckCircleFilled className="text-green-500! text-lg!" />
             <div className="flex-1">

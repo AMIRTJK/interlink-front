@@ -17,7 +17,7 @@ export const NewYearSwitchRow = ({ label, hint, icon, isChecked, isMuted = false
     aria-checked={isChecked}
     onClick={onToggle}
     className={cn(
-      "w-full flex items-center gap-3 px-3 py-2.5 rounded-[1.25rem] text-left transition-colors cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400",
+      "w-full flex items-center gap-3 px-3 py-2.5 rounded-[1.25rem] text-left transition-colors cursor-pointer hover:bg-zinc-100 dark:hover:bg-th-high focus:outline-none focus-visible:ring-2 focus-visible:ring-th-accent-400",
       isMuted && "opacity-60",
     )}
   >
@@ -34,7 +34,7 @@ export const NewYearSwitchRow = ({ label, hint, icon, isChecked, isMuted = false
       aria-hidden="true"
       className={cn(
         "relative h-5 w-9 shrink-0 rounded-full transition-colors",
-        isChecked ? "bg-sky-500" : "bg-zinc-300 dark:bg-zinc-600",
+        isChecked ? "bg-sky-500" : "bg-zinc-300 dark:bg-th-higher",
       )}
     >
       <span

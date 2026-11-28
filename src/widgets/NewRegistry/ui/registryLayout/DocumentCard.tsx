@@ -32,7 +32,7 @@ export const DocumentCard = ({
       whileHover={{ y: -4, boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.15)" }}
       onClick={onClick}
       className={cn(
-        "ui-glass bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-500 cursor-pointer group flex flex-col justify-between relative overflow-hidden",
+        "ui-glass bg-white dark:bg-th-raised rounded-xl border border-gray-200 dark:border-th-high hover:border-th-accent-300 dark:hover:border-th-accent-500 transition-all duration-500 cursor-pointer group flex flex-col justify-between relative overflow-hidden",
         linkInfo?.borderColor,
       )}
     >
@@ -142,7 +142,7 @@ export const DocumentCard = ({
 
         {/* DYNAMIC BADGES */}
         {fieldConfig?.badges && fieldConfig.badges.length > 0 && (
-          <div className="pt-3 border-t border-gray-100 dark:border-slate-700 flex gap-2">
+          <div className="pt-3 border-t border-gray-100 dark:border-th-high flex gap-2">
             {fieldConfig.badges.map((badge: any, i: number) => {
               const style = getBadgeStyles(badge.color);
               return (
@@ -167,7 +167,7 @@ export const DocumentCard = ({
 
         {/* PEOPLE COLUMNS (списки пользователей с окном по клику) */}
         {fieldConfig?.people && fieldConfig.people.length > 0 && (
-          <div className="pt-3 mt-1 border-t border-gray-100 dark:border-slate-700 flex gap-2">
+          <div className="pt-3 mt-1 border-t border-gray-100 dark:border-th-high flex gap-2">
             {fieldConfig.people.map((col: any) => (
               <div key={col.key} className="flex-1 min-w-0">
                 <div className="flex items-center gap-1 mb-0.5 text-gray-400 dark:text-slate-500">

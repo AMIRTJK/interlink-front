@@ -16,7 +16,7 @@ export function TaskDetailRightColumn({
   const sMeta = getStatusMeta(task.status);
 
   return (
-    <div className="w-80 p-8 space-y-6 bg-slate-50/50 dark:bg-slate-800/40 overflow-y-auto shrink-0">
+    <div className="w-80 p-8 space-y-6 bg-slate-50/50 dark:bg-th-raised/40 overflow-y-auto shrink-0">
       <div className="space-y-4">
         <If is={!!task.creator}>
           <div className="flex flex-col gap-1">
@@ -43,7 +43,7 @@ export function TaskDetailRightColumn({
             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
               Приоритет
             </label>
-            <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10">
+            <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-th-raised rounded-xl border border-slate-200 dark:border-white/10">
               <div className={cn("w-2 h-2 rounded-full", pMeta.color)} />
               <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
                 {pMeta.label}
@@ -54,7 +54,7 @@ export function TaskDetailRightColumn({
             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
               Статус
             </label>
-            <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10">
+            <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-th-raised rounded-xl border border-slate-200 dark:border-white/10">
               <div className={cn("w-2 h-2 rounded-full", sMeta.color)} />
               <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
                 {sMeta.label}
@@ -67,7 +67,7 @@ export function TaskDetailRightColumn({
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
             Срок
           </label>
-          <div className="flex flex-col gap-1 px-3 py-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10">
+          <div className="flex flex-col gap-1 px-3 py-3 bg-white dark:bg-th-raised rounded-xl border border-slate-200 dark:border-white/10">
             <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
               <Calendar size={14} />
               <span className="text-xs font-bold">
@@ -86,7 +86,7 @@ export function TaskDetailRightColumn({
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
             Создано
           </label>
-          <p className="text-xs font-bold text-slate-600 dark:text-slate-300 px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl">
+          <p className="text-xs font-bold text-slate-600 dark:text-slate-300 px-3 py-2 bg-slate-100 dark:bg-th-raised rounded-xl">
             {formatDueDate(task.createdAt)}
           </p>
         </div>

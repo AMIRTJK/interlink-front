@@ -160,7 +160,7 @@ export const SignerPanel = ({
                     "flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border transition-colors",
                     isSigned
                       ? "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed"
-                      : "text-purple-600 bg-purple-50 border-purple-100 hover:bg-purple-100"
+                      : "text-purple-600 bg-purple-50 border-purple-100 hover:bg-purple-100 dark:bg-purple-900/35 dark:text-purple-400 dark:border-purple-800/50"
                   )}
                 >
                   <UserPlus size={12} />
@@ -196,7 +196,7 @@ export const SignerPanel = ({
                             }}
                             className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-purple-50 transition-colors text-left"
                           >
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-purple-100 text-purple-700">
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-purple-100 text-purple-700 dark:bg-purple-900/35 dark:text-purple-400">
                               {r.initials}
                             </div>
                             <div className="min-w-0">

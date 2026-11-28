@@ -259,7 +259,7 @@ export const getFirstDayOfMonth = (year: number, month: number) => {
 
 export const getInputClasses = (hasError?: boolean, disabled?: boolean) => {
   const inputShell = "w-full rounded-xl border text-sm outline-none transition-colors";
-  if (disabled) return `${inputShell} border-gray-200 bg-gray-100 dark:border-slate-800 dark:bg-slate-900 text-gray-400 dark:text-slate-600 cursor-not-allowed`;
+  if (disabled) return `${inputShell} border-gray-200 bg-gray-100 dark:border-th-raised dark:bg-th-base text-gray-400 dark:text-slate-600 cursor-not-allowed`;
   if (hasError) return `${inputShell} border-red-300 bg-red-50/30 dark:border-red-900/50 dark:bg-red-950/10 text-gray-800 dark:text-slate-200 focus:border-red-400 focus:ring-2 focus:ring-red-500/20`;
-  return `${inputShell} border-gray-200 bg-gray-50 dark:border-slate-800 dark:bg-slate-900/50 text-gray-800 dark:text-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20`;
+  return `${inputShell} border-gray-200 bg-gray-50 dark:border-th-raised dark:bg-th-base/50 text-gray-800 dark:text-slate-200 focus:border-th-accent-400 focus:ring-2 focus:ring-th-accent-500/20`;
 };

@@ -113,7 +113,7 @@ export const EmployeesWidget: React.FC = () => {
                   onClick={() => setPage(i + 1)}
                   className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
                     safePage === i + 1
-                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/30"
+                      ? "bg-th-accent-600 text-white shadow-md shadow-th-accent-900/30"
                       : "border border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
                   }`}
                 >
@@ -163,8 +163,8 @@ export const EmployeesWidget: React.FC = () => {
 
       <AnimatePresence>
         <If is={deletingId !== null}>
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl flex flex-col items-center text-center gap-4 animate-in fade-in zoom-in-95 duration-150">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-th-base/40 backdrop-blur-xs">
+            <div className="bg-white dark:bg-th-base border border-slate-200 dark:border-th-raised rounded-2xl p-6 max-w-sm w-full shadow-2xl flex flex-col items-center text-center gap-4 animate-in fade-in zoom-in-95 duration-150">
               <div className="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center text-rose-500">
                 <Trash2 size={24} />
               </div>
@@ -176,7 +176,7 @@ export const EmployeesWidget: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setDeletingId(null)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-th-raised text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-th-raised/50 transition-colors cursor-pointer"
                 >
                   Отмена
                 </button>

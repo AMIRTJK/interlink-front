@@ -62,14 +62,14 @@ export const Sidebar = ({ side, setLayoutMode, themeGradient }: IProps) => {
         collapsed ? "w-16" : "w-[256px]"
       } shrink-0 self-start sticky top-4 transition-all duration-300 ease-in-out`}
     >
-      <div className="relative bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/20 dark:border-zinc-700/30 shadow-lg flex flex-col h-[calc(100vh-2rem)] py-5 transition-all duration-300 ease-in-out">
+      <div className="relative ui-glass bg-white/40 dark:bg-th-base/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/20 dark:border-th-high/30 shadow-lg flex flex-col h-[calc(100vh-2rem)] py-5 transition-all duration-300 ease-in-out">
         <button
           onClick={() => setCollapsed(!collapsed)}
           title={collapsed ? "Развернуть" : "Свернуть"}
           aria-label={collapsed ? "Развернуть меню" : "Свернуть меню"}
           className={`absolute ${
             isLeft ? "-right-3" : "-left-3"
-          } top-8 z-20 w-6 h-6 rounded-full bg-white dark:bg-zinc-800 border border-white/40 dark:border-zinc-700/50 shadow-md flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer`}
+          } top-8 z-20 w-6 h-6 rounded-full bg-white dark:bg-th-raised border border-white/40 dark:border-th-high/50 shadow-md flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer`}
         >
           {isLeft ? (
             collapsed ? (
@@ -110,7 +110,7 @@ export const Sidebar = ({ side, setLayoutMode, themeGradient }: IProps) => {
           <ModuleMenu variant="header" navLayout="sidebar" collapsed={collapsed} />
         </div>
 
-        <div className="px-3 pt-4 mt-2 border-t border-white/20 dark:border-zinc-700/30 flex flex-col gap-2">
+        <div className="px-3 pt-4 mt-2 border-t border-white/20 dark:border-th-high/30 flex flex-col gap-2">
           <SidebarSystemButtons collapsed={collapsed} />
           <div
             className={`flex items-center gap-3 px-1 ${
@@ -121,10 +121,10 @@ export const Sidebar = ({ side, setLayoutMode, themeGradient }: IProps) => {
               <img
                 src={avatarError ? userAvatar : (userData?.photo_url || resolvePhotoUrl(userData?.photo_path) || userAvatar)}
                 alt="Аватар пользователя"
-                className="w-10 h-10 rounded-[2.5rem] border-2 border-white/60 dark:border-zinc-900/60 object-cover shadow-lg"
+                className="w-10 h-10 rounded-[2.5rem] border-2 border-white/60 dark:border-th-base/60 object-cover shadow-lg"
                 onError={() => setAvatarError(true)}
               />
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white/60 dark:border-zinc-900/60 bg-emerald-500" />
+              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white/60 dark:border-th-base/60 bg-emerald-500" />
             </div>
             {!collapsed && (
               <div className="overflow-hidden">
@@ -140,7 +140,7 @@ export const Sidebar = ({ side, setLayoutMode, themeGradient }: IProps) => {
           <button
             onClick={backToTop}
             title="Верхнее меню"
-            className={`flex items-center gap-3 rounded-[2.5rem] text-sm font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-white/40 dark:hover:bg-zinc-800/40 transition-all cursor-pointer ${
+            className={`flex items-center gap-3 rounded-[2.5rem] text-sm font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-white/40 dark:hover:bg-th-raised/40 transition-all cursor-pointer ${
               collapsed ? "justify-center px-0 py-2.5" : "px-4 py-2.5"
             }`}
           >

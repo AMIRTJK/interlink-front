@@ -47,7 +47,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
       trigger={null}
       width="325px"
       collapsedWidth="80px"
-      className={`ui-glass ui-glass--forced min-h-[480px]! border border-gray-200/80! dark:border-slate-700/80! bg-white! dark:bg-slate-800! shadow-md! rounded-3xl! ${collapsed ? "p-4!" : "p-6!"} ${
+      className={`ui-glass ui-glass--forced min-h-[480px]! border border-gray-200/80! dark:border-th-high/80! bg-white! dark:bg-th-raised! shadow-md! rounded-3xl! ${collapsed ? "p-4!" : "p-6!"} ${
         collapsed ? "w-[80px]! max-w-[80px]!" : "min-w-[301px]! max-w-[330px]!"
       } transition-all duration-500 ease-[0.23,1,0.32,1]`}
     >
@@ -72,7 +72,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
                   type="text"
                   icon={<PlusOutlined />}
                   onClick={() => handleAddClick(null)}
-                  className="h-6! w-6! text-gray-500! dark:text-slate-400! hover:text-indigo-600 addFolderRootSideBar"
+                  className="h-6! w-6! text-gray-500! dark:text-slate-400! hover:text-th-accent-600 addFolderRootSideBar"
                 />
               </Tooltip>
             )}
@@ -83,8 +83,8 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
                 onClick={() => setCollapsed(!collapsed)}
                 className={
                   collapsed
-                    ? "mx-auto h-7! w-7! outline-none! focus:outline-none! text-gray-500! dark:text-slate-400! hover:text-indigo-600"
-                    : "ml-auto outline-none! focus:outline-none! text-gray-500! dark:text-slate-400! hover:text-indigo-600"
+                    ? "mx-auto h-7! w-7! outline-none! focus:outline-none! text-gray-500! dark:text-slate-400! hover:text-th-accent-600"
+                    : "ml-auto outline-none! focus:outline-none! text-gray-500! dark:text-slate-400! hover:text-th-accent-600"
                 }
                 icon={
                   <span
@@ -105,7 +105,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
                     />
                   }
                   onClick={() => onVariantChange?.("horizontal")}
-                  className="h-7! w-7! flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 rounded-lg group text-gray-500! dark:text-slate-400! hover:text-indigo-600"
+                  className="h-7! w-7! flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 rounded-lg group text-gray-500! dark:text-slate-400! hover:text-th-accent-600"
                 />
               </Tooltip>
             )}
@@ -114,7 +114,7 @@ export const ModuleSidebarVertical: React.FC<IProps> = ({
 
         <motion.div
           key={`${variant}-${isInternal ? "internal" : "external"}`}
-          className="flex-1 overflow-y-auto custom-scrollbar"
+          className="flex-1 flex flex-col gap-1.5 overflow-y-auto custom-scrollbar"
           initial="hidden"
           animate="visible"
           variants={containerVariants}

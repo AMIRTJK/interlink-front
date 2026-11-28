@@ -48,15 +48,15 @@ export const HrHeader = ({ title, subtitle }: IHrHeaderProps) => {
     <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
       <div>
         <If is={!!title}>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">{title}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight dark:text-slate-100">{title}</h1>
         </If>
         <If is={subtitle != null}>
-          <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
+          <p className="text-sm text-gray-500 mt-1 dark:text-slate-400">{subtitle}</p>
         </If>
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
-        <div className="flex items-center gap-1 rounded-xl p-1 border border-gray-200 bg-white shadow-sm flex-wrap">
+        <div className="ui-glass flex items-center gap-1 rounded-xl p-1 border border-gray-200 bg-white shadow-sm flex-wrap dark:border-th-high dark:bg-th-raised">
           {TABS.map((t) => (
             <NavLink key={t.key} to={t.path} className="relative">
               {({ isActive }) => (
@@ -64,7 +64,7 @@ export const HrHeader = ({ title, subtitle }: IHrHeaderProps) => {
                   className={`relative flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap cursor-pointer ${
                     isActive
                       ? "text-white"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-slate-300 dark:hover:bg-th-high dark:hover:text-white"
                   }`}
                 >
                   <If is={isActive}>
@@ -75,7 +75,7 @@ export const HrHeader = ({ title, subtitle }: IHrHeaderProps) => {
                         stiffness: 420,
                         damping: 34,
                       }}
-                      className="absolute inset-0 bg-indigo-600 rounded-lg shadow-md shadow-indigo-900/30"
+                      className="absolute inset-0 bg-th-accent-600 rounded-lg shadow-md shadow-th-accent-900/30"
                     />
                   </If>
                   <span className="relative z-10 flex items-center gap-1.5">

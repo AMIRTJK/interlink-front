@@ -78,7 +78,7 @@ export const SidebarParticipantRow = ({
             src={user.photo_path}
             icon={<UserOutlined />}
             size="small"
-            className={isDarkMode ? "bg-gray-700!" : "bg-gray-200!"}
+            className={isDarkMode ? "bg-th-high!" : "bg-gray-200!"}
           />
           <div
             className={`absolute -top-1 -right-1 rounded-full leading-[0] ${meta.bg} text-[10px]`}
@@ -105,7 +105,7 @@ export const SidebarParticipantRow = ({
         <div
           className={`absolute -top-1 -right-1 rounded-full border leading-[0] ${
             meta.bg
-          } ${isDarkMode ? "border-[#111827]" : "border-white"}`}
+          } ${isDarkMode ? "border-th-base" : "border-white"}`}
         >
           {meta.icon}
         </div>
@@ -126,7 +126,7 @@ export const SidebarParticipantRow = ({
           >
             {fullName}
             <If is={isCurrentUser}>
-              <span className="text-blue-500 text-xs ml-1 font-normal">
+              <span className="text-th-accent-500 text-xs ml-1 font-normal">
                 (Вы)
               </span>
             </If>
@@ -190,9 +190,9 @@ export const SidebarParticipantRow = ({
                   className={`${
                     status !== "pending" || isReadOnly || !hasQRInSelectedVersion
                       ? isDarkMode
-                        ? "bg-gray-700 text-gray-500"
+                        ? "bg-th-high text-gray-500"
                         : "bg-[#f0f1f3]"
-                      : "bg-blue-600! hover:bg-blue-500!"
+                      : "bg-th-accent-600! hover:bg-th-accent-500!"
                   }`}
                 >
                   Подписать
@@ -210,9 +210,9 @@ export const SidebarParticipantRow = ({
               className={`${
                 status !== "pending" || isReadOnly
                   ? isDarkMode
-                    ? "bg-gray-700 text-gray-500"
+                    ? "bg-th-high text-gray-500"
                     : "bg-[#f0f1f3]"
-                  : "bg-blue-600! hover:bg-blue-500!"
+                  : "bg-th-accent-600! hover:bg-th-accent-500!"
               }`}
             >
               Согласовать
@@ -224,7 +224,7 @@ export const SidebarParticipantRow = ({
             className={`mt-2 p-2 rounded-lg text-xs leading-relaxed border ${
               isDarkMode
                 ? "bg-amber-950/30 border-amber-800/50 text-amber-200"
-                : "bg-amber-50/80 border-amber-200/80 text-amber-900"
+                : "bg-amber-50/80 border-amber-200/80 text-amber-900 dark:bg-amber-900/35 dark:text-amber-400 dark:border-amber-800/50"
             }`}
           >
             <span className="font-semibold block mb-0.5 text-[11px] opacity-80">

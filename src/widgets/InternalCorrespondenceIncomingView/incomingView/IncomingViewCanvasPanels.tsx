@@ -100,7 +100,7 @@ export const IncomingViewCanvasPanels: React.FC<IProps> = ({
       <div className="flex-1 overflow-x-auto bg-[#E8EAED] flex items-start justify-center py-8 px-8">
         {isResolvingBody ? (
           <div className="flex flex-col items-center gap-2 text-slate-400 py-20">
-            <Loader2 size={22} className="animate-spin text-blue-500" />
+            <Loader2 size={22} className="animate-spin text-th-accent-500" />
             <span className="text-xs font-semibold">
               Загрузка документа...
             </span>
@@ -169,9 +169,9 @@ export const IncomingViewCanvasPanels: React.FC<IProps> = ({
                       aria-label="Поручение"
                     >
                       <div className="flex flex-col items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-th-accent-500" />
                         <If is={assignmentsCount > 0}>
-                          <span className="w-4 h-4 rounded-full bg-indigo-500 text-white text-[9px] font-bold flex items-center justify-center">
+                          <span className="w-4 h-4 rounded-full bg-th-accent-500 text-white text-[9px] font-bold flex items-center justify-center">
                             {assignmentsCount}
                           </span>
                         </If>

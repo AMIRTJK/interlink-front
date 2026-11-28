@@ -50,7 +50,7 @@ export const DSStampPreview = ({
         <DSStamp {...stampProps} />
         {/* Подсказка при наведении. pointer-events-none — чтобы не перехватывать
             клики по пилюлям языка внутри штампа. */}
-        <div className="pointer-events-none absolute top-1 left-1 flex items-center gap-1 rounded-md bg-slate-900/70 px-1.5 py-1 text-[9px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="pointer-events-none absolute top-1 left-1 flex items-center gap-1 rounded-md bg-th-base/70 px-1.5 py-1 text-[9px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
           <Maximize2 size={10} />
           <span>Увеличить</span>
         </div>
@@ -61,7 +61,7 @@ export const DSStampPreview = ({
           {zoomOpen && (
             <motion.div
               key="ds-zoom"
-              className="fixed inset-0 z-[100001] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 font-sans"
+              className="fixed inset-0 z-[100001] flex items-center justify-center bg-th-base/70 backdrop-blur-sm p-4 font-sans"
               onClick={() => setZoomOpen(false)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

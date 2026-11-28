@@ -50,7 +50,7 @@ export const getBreadcrumbItems = (pathnames: string[]) => {
               {breadcrumbsMap[nameDecoded] || nameDecoded}
             </span>
           ) : (
-            <Link to={routeTo} className="hover:text-blue-600">
+            <Link to={routeTo} className="hover:text-th-accent-600">
               {breadcrumbsMap[nameDecoded] || nameDecoded}
             </Link>
           )}

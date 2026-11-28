@@ -117,7 +117,7 @@ export function PositionRowDisplayView({
               {pos.slots}
             </p>
           </div>
-          <div className={`w-px h-6 ${dark ? 'bg-gray-700' : 'bg-gray-100'}`} />
+          <div className={`w-px h-6 ${dark ? 'bg-th-high' : 'bg-gray-100'}`} />
           <div className="text-center">
             <p
               className={`text-[10px] font-semibold leading-none ${
@@ -133,7 +133,7 @@ export function PositionRowDisplayView({
           <If is={pos.salary > 0}>
             <div className="flex items-center gap-2">
               <div
-                className={`w-px h-6 ${dark ? 'bg-gray-700' : 'bg-gray-100'}`}
+                className={`w-px h-6 ${dark ? 'bg-th-high' : 'bg-gray-100'}`}
               />
               <div className="text-center">
                 <p
@@ -175,8 +175,8 @@ export function PositionRowDisplayView({
             }
             className={`p-1.5 rounded-lg transition-colors ${
               dark
-                ? 'text-indigo-400 hover:bg-indigo-900/30'
-                : 'text-indigo-400 hover:bg-indigo-50'
+                ? 'text-th-accent-400 hover:bg-th-accent-900/30'
+                : 'text-th-accent-400 hover:bg-th-accent-50'
             }`}
             title="Назначить сотрудника"
           >
@@ -186,7 +186,7 @@ export function PositionRowDisplayView({
             onClick={onStartEditing}
             className={`p-1.5 rounded-lg transition-colors ${
               dark
-                ? 'text-gray-500 hover:bg-gray-700'
+                ? 'text-gray-500 hover:bg-th-high'
                 : 'text-gray-400 hover:bg-gray-100'
             }`}
           >

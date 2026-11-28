@@ -23,7 +23,7 @@ export const TBtn = ({
       disabled
         ? "text-slate-300 cursor-not-allowed"
         : active
-          ? "bg-blue-100 text-blue-700"
+          ? "bg-th-accent-100 text-th-accent-700 dark:bg-th-accent-900/35 dark:text-th-accent-400"
           : "hover:bg-slate-100 text-slate-500 hover:text-slate-800",
     )}
   >

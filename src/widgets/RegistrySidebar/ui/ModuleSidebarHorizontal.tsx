@@ -28,14 +28,14 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
   handleAddClick,
 }) => {
   return (
-    <div className="ui-glass ui-glass--forced w-full border border-gray-200/80! dark:border-slate-700/80! bg-white! dark:bg-slate-800! shadow-md! transition-colors duration-500 rounded-3xl! py-2.5 px-6">
+    <div className="ui-glass ui-glass--forced w-full border border-gray-200/80! dark:border-th-high/80! bg-white! dark:bg-th-raised! shadow-md! transition-colors duration-500 rounded-3xl! py-2.5 px-6">
       <div className="flex items-center gap-6 h-full">
         <div className="flex items-center shrink-0 gap-2">
           <Button
             type="text"
             icon={<PlusOutlined />}
             onClick={() => handleAddClick(null)}
-            className="h-8! w-8! rounded-full! hover:bg-indigo-50! dark:hover:bg-indigo-950/40! text-gray-500! dark:text-slate-400! hover:text-indigo-600"
+            className="h-8! w-8! rounded-full! hover:bg-th-accent-50! dark:hover:bg-th-accent-950/40! text-gray-500! dark:text-slate-400! hover:text-th-accent-600"
           />
           <Tooltip title="Вертикальный вид" placement="bottom">
             <Button
@@ -47,7 +47,7 @@ export const ModuleSidebarHorizontal: React.FC<IProps> = ({
                 />
               }
               onClick={() => onVariantChange?.("vertical")}
-              className="h-8! w-8! rounded-full! hover:bg-gray-100! dark:hover:bg-slate-700! group text-gray-500! dark:text-slate-400! hover:text-indigo-600"
+              className="h-8! w-8! rounded-full! hover:bg-gray-100! dark:hover:bg-th-high! group text-gray-500! dark:text-slate-400! hover:text-th-accent-600"
             />
           </Tooltip>
         </div>

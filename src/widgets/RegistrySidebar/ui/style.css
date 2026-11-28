@@ -102,7 +102,7 @@
   > .ant-menu-sub
   > .ant-menu-submenu
   > .ant-menu-submenu-title::before {
-  background-color: #3b82f6;
+  background-color: var(--th-accent-500);
   left: 6px;
 }
 /* Hover Bg */
@@ -115,7 +115,7 @@
   > .ant-menu-sub
   > .ant-menu-submenu
   > .ant-menu-submenu-title:hover {
-  background-color: rgba(59, 130, 246, 0.08) !important;
+  background-color: rgb(var(--th-accent-rgb)/0.08) !important;
 }
 .registry-sidebar-style
   .ant-menu-submenu
@@ -126,7 +126,7 @@
   > .ant-menu-sub
   > .ant-menu-submenu-selected
   > .ant-menu-submenu-title {
-  background-color: rgba(59, 130, 246, 0.12) !important;
+  background-color: rgb(var(--th-accent-rgb)/0.12) !important;
 }
 .registry-sidebar-style
   .ant-menu-submenu
@@ -137,7 +137,7 @@
   > .ant-menu-sub
   > .ant-menu-submenu-selected
   > .ant-menu-submenu-title::before {
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 8px rgb(var(--th-accent-rgb)/0.4);
 }
 
 .registry-sidebar-style
@@ -763,8 +763,8 @@
 }
 
 .sidebar-tree-guide.guide-blue::before { 
-  background: linear-gradient(to bottom, #60a5fa, #3b82f6, #60a5fa); 
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(to bottom, var(--th-accent-400), var(--th-accent-500), var(--th-accent-400)); 
+  box-shadow: 0 0 10px rgb(var(--th-accent-rgb)/0.3);
 }
 .sidebar-tree-guide.guide-purple::before { 
   background: linear-gradient(to bottom, #a78bfa, #8b5cf6, #a78bfa); 
@@ -783,8 +783,8 @@
   box-shadow: 0 0 10px rgba(20, 184, 166, 0.3);
 }
 .sidebar-tree-guide.guide-indigo::before { 
-  background: linear-gradient(to bottom, #818cf8, #6366f1, #818cf8); 
-  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+  background: linear-gradient(to bottom, var(--th-accent-400), var(--th-accent-500), var(--th-accent-400)); 
+  box-shadow: 0 0 10px rgb(var(--th-accent-rgb)/0.3);
 }
 
 .sidebar-tree-guide:hover::before {
@@ -794,9 +794,9 @@
 }
 
 /* Фикс для ховера на конкретные цвета */
-.sidebar-tree-guide.guide-blue:hover::before { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+.sidebar-tree-guide.guide-blue:hover::before { box-shadow: 0 0 15px rgb(var(--th-accent-rgb)/0.5); }
 .sidebar-tree-guide.guide-purple:hover::before { box-shadow: 0 0 15px rgba(139, 92, 246, 0.5); }
 .sidebar-tree-guide.guide-pink:hover::before { box-shadow: 0 0 15px rgba(236, 72, 153, 0.5); }
 .sidebar-tree-guide.guide-orange:hover::before { box-shadow: 0 0 15px rgba(249, 115, 22, 0.5); }
 .sidebar-tree-guide.guide-teal:hover::before { box-shadow: 0 0 15px rgba(20, 184, 166, 0.5); }
-.sidebar-tree-guide.guide-indigo:hover::before { box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
+.sidebar-tree-guide.guide-indigo:hover::before { box-shadow: 0 0 15px rgb(var(--th-accent-rgb)/0.5); }

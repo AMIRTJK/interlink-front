@@ -37,7 +37,7 @@ export const SpaceVariantSwitcher = ({ value, isVisible, onChange }: IProps) => 
             onClick={() => onChange(option.key)}
             aria-label={`${option.label}: ${option.hint}`}
             aria-pressed={isActive}
-            className={`px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide transition-colors duration-300 cursor-pointer focus-visible:outline-2 focus-visible:outline-indigo-400 ${isActive ? ACTIVE_CLASS : IDLE_CLASS}`}
+            className={`px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide transition-colors duration-300 cursor-pointer focus-visible:outline-2 focus-visible:outline-th-accent-400 ${isActive ? ACTIVE_CLASS : IDLE_CLASS}`}
           >
             {option.label}
           </button>

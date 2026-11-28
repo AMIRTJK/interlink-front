@@ -58,8 +58,8 @@ export function RolesTopBar({
               width: 32,
               height: 32,
               borderRadius: 8,
-              border: viewMode === "block" ? "none" : `1px solid #E2E8F0`,
-              background: viewMode === "block" ? "#3B82F6" : "#FFFFFF",
+              border: viewMode === "block" ? "none" : `1px solid ${T.border}`,
+              background: viewMode === "block" ? T.accent : T.surface,
               color: viewMode === "block" ? "#FFFFFF" : "#94A3B8",
               display: "flex",
               alignItems: "center",
@@ -80,8 +80,8 @@ export function RolesTopBar({
               width: 32,
               height: 32,
               borderRadius: 8,
-              border: viewMode === "registry" ? "none" : `1px solid #E2E8F0`,
-              background: viewMode === "registry" ? "#3B82F6" : "#FFFFFF",
+              border: viewMode === "registry" ? "none" : `1px solid ${T.border}`,
+              background: viewMode === "registry" ? T.accent : T.surface,
               color: viewMode === "registry" ? "#FFFFFF" : "#94A3B8",
               display: "flex",
               alignItems: "center",
@@ -105,7 +105,7 @@ export function RolesTopBar({
             height: 36,
             borderRadius: 8,
             border: `1px solid ${T.border}`,
-            background: "#fff",
+            background: T.surface,
             color: T.textSecondary,
             fontSize: 13,
             fontWeight: 600,
@@ -119,7 +119,7 @@ export function RolesTopBar({
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLButtonElement).style.background =
-              "#fff";
+              T.surface;
           }}
         >
           <ShieldPlus size={14} />
@@ -141,7 +141,7 @@ export function RolesTopBar({
             fontWeight: 600,
             cursor: "pointer",
             fontFamily: T.font,
-            boxShadow: `0 2px 8px ${T.accent}35`,
+            boxShadow: `0 2px 8px rgb(var(--th-accent-rgb)/0.21)`,
             whiteSpace: "nowrap",
           }}
           onMouseEnter={(e) => {

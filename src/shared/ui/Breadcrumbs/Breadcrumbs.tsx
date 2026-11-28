@@ -47,7 +47,7 @@ export const Breadcrumbs: React.FC<IBreadcrumbsProps> = ({
                   type: "group",
                   label: (
                     <div className="flex items-center gap-2 px-1 py-1">
-                      <div className="w-1 h-3 rounded-full bg-blue-500/50" />
+                      <div className="w-1 h-3 rounded-full bg-th-accent-500/50" />
                       <span className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">
                         {opt.label}
                       </span>
@@ -62,7 +62,7 @@ export const Breadcrumbs: React.FC<IBreadcrumbsProps> = ({
                   <div className="flex items-center justify-between group/item py-1 relative">
                     <div className="flex items-center gap-3 relative">
                       <div className="p-1.5 bg-gray-50 rounded-lg group-hover/item:bg-blue-50 transition-colors duration-200 relative z-[1]">
-                        <span className="text-blue-500/70 group-hover/item:text-blue-600 transition-colors">
+                        <span className="text-th-accent-500/70 group-hover/item:text-blue-600 transition-colors">
                           {opt.icon || <Folder size={14} />}
                         </span>
                       </div>
@@ -70,7 +70,7 @@ export const Breadcrumbs: React.FC<IBreadcrumbsProps> = ({
                         {opt.label}
                       </span>
                     </div>
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 opacity-0 group-hover/item:opacity-100 transition-all scale-0 group-hover/item:scale-100 mr-1 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-th-accent-500 opacity-0 group-hover/item:opacity-100 transition-all scale-0 group-hover/item:scale-100 mr-1 shadow-[0_0_8px_rgb(var(--th-accent-rgb)/0.5)]" />
                   </div>
                 ),
                 onClick: () => opt.onClick(),
@@ -85,7 +85,7 @@ export const Breadcrumbs: React.FC<IBreadcrumbsProps> = ({
               className={cn(
                 "flex items-center justify-center px-2 py-1 rounded-lg transition-all duration-200 select-none group border border-transparent",
                 !isActive
-                  ? "cursor-pointer text-gray-500 gap-2 hover:text-blue-700 hover:bg-blue-50/80 hover:border-blue-100/50"
+                  ? "cursor-pointer text-gray-500 gap-2 hover:text-th-accent-700 hover:bg-th-accent-50/80 hover:border-th-accent-100/50"
                   : "text-gray-900 font-bold cursor-default bg-gray-100/30 border-gray-200/50 shadow-sm",
               )}
               onClick={!isActive ? item.onClick : undefined}
@@ -95,8 +95,8 @@ export const Breadcrumbs: React.FC<IBreadcrumbsProps> = ({
                   className={cn(
                     "flex items-center justify-center shrink-0",
                     !isActive
-                      ? "text-gray-400 group-hover:text-blue-500"
-                      : "text-blue-600",
+                      ? "text-gray-400 group-hover:text-th-accent-500"
+                      : "text-th-accent-600",
                   )}
                 >
                   {item.icon}
@@ -111,7 +111,7 @@ export const Breadcrumbs: React.FC<IBreadcrumbsProps> = ({
                   className={cn(
                     "transition-transform duration-300 shrink-0 opacity-60",
                     !isActive
-                      ? "group-hover:text-blue-500 group-hover:rotate-180"
+                      ? "group-hover:text-th-accent-500 group-hover:rotate-180"
                       : "",
                   )}
                 />

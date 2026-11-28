@@ -210,14 +210,14 @@
 
 /* Главный контейнер */
 .docView__left.is-dark {
-  background: #1f2937; /* gray-800 */
-  border-color: #374151; /* gray-700 */
+  background: var(--th-dark-raised); /* gray-800 */
+  border-color: var(--th-dark-high); /* gray-700 */
 }
 
 /* Шапка с названием документа */
 .docView__left.is-dark .docView__left-header {
-  background: #111827; /* gray-900 */
-  border-bottom: 1px solid #374151; /* gray-700 */
+  background: var(--th-dark-base); /* gray-900 */
+  border-bottom: 1px solid var(--th-dark-high); /* gray-700 */
 }
 
 .docView__left.is-dark .docView__left-header h3 {
@@ -226,14 +226,14 @@
 
 /* Область, где лежит сам документ (фон "стола") */
 .docView__left.is-dark .docView__preview {
-  background: #1f2937; /* gray-800 */
+  background: var(--th-dark-raised); /* gray-800 */
 }
 
 /* Заглушка, если файл не выбран */
 .docView__left.is-dark .preview-stub {
   color: #9ca3af; /* gray-400 */
-  background: #111827; /* gray-900 */
-  border: 1px dashed #4b5563; /* gray-600 */
+  background: var(--th-dark-base); /* gray-900 */
+  border: 1px dashed var(--th-dark-higher); /* gray-600 */
 }
 
 /* Небольшая тень для самих страниц PDF, чтобы они выделялись на темном фоне */

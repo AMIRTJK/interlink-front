@@ -24,15 +24,15 @@ export function UserProfileHeader({
   onClose,
 }: IProps) {
   return (
-    <div className="px-6 pt-5 pb-4 border-b border-slate-100">
+    <div className="px-6 pt-5 pb-4 border-b border-slate-100 dark:border-th-high">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold bg-blue-600 text-white select-none">
+          <div className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold bg-th-accent-600 text-white select-none">
             {getInitials(currentFullName)}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-xl font-bold text-slate-800">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
                 {currentFullName}
               </h3>
               <span
@@ -41,12 +41,12 @@ export function UserProfileHeader({
                 {statusMeta.label}
               </span>
             </div>
-            <p className="text-sm text-slate-500 font-medium">
+            <p className="text-sm text-slate-500 font-medium dark:text-slate-400">
               {currentPosition}
             </p>
             <div className="space-y-1 mt-2">
               {currentEmail && currentEmail !== "—" && (
-                <div className="flex items-center gap-2 text-xs text-slate-500">
+                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                   {currentEmail.includes("@") ? (
                     <Mail size={13} className="text-slate-400 shrink-0" />
                   ) : (
@@ -56,7 +56,7 @@ export function UserProfileHeader({
                 </div>
               )}
               {currentDepartment && currentDepartment !== "—" && (
-                <div className="flex items-center gap-2 text-xs text-slate-500">
+                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                   <Building2 size={13} className="text-slate-400 shrink-0" />
                   <span className="font-medium">{currentDepartment}</span>
                 </div>
@@ -72,7 +72,7 @@ export function UserProfileHeader({
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+          className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors dark:hover:bg-th-high"
         >
           <X size={20} />
         </button>

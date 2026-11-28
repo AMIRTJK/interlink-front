@@ -8,7 +8,7 @@ import "./style.css";
  * с клавиатуры и колесом остаётся нативной.
  */
 export const PageScrollRail = () => {
-  const { railRef, thumbRef, streakRef, readoutRef } = usePageScrollRail();
+  const { railRef, thumbRef, streakRef } = usePageScrollRail();
 
   return (
     <div
@@ -24,9 +24,6 @@ export const PageScrollRail = () => {
       <div ref={thumbRef} className="ui-scroll-rail__thumb">
         <div ref={streakRef} className="ui-scroll-rail__streak" />
         <div className="ui-scroll-rail__core" />
-        <span ref={readoutRef} className="ui-scroll-rail__readout">
-          0%
-        </span>
       </div>
     </div>
   );

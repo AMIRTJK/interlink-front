@@ -187,16 +187,16 @@ export const WorkflowParticipantsPanel = ({
       <div
         className={`absolute left-[15px] top-0 bottom-1/2 w-[2px] transition-colors ${
           isDarkMode
-            ? "bg-gray-700 group-hover:bg-blue-900"
-            : "bg-gray-100 group-hover:bg-blue-100"
+            ? "bg-th-high group-hover:bg-th-accent-900"
+            : "bg-gray-100 group-hover:bg-th-accent-100"
         }`}
       />
       <div className="relative z-10 w-[32px] flex justify-center">
         <div
           className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all text-[10px] ${
             isDarkMode
-              ? "bg-gray-800 border-gray-700 text-gray-400 group-hover:bg-blue-900/50 group-hover:border-blue-800 group-hover:text-blue-400"
-              : "bg-gray-50 border-gray-200 text-gray-400 group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-blue-500"
+              ? "bg-th-raised border-th-high text-gray-400 group-hover:bg-th-accent-900/50 group-hover:border-th-accent-800 group-hover:text-th-accent-400"
+              : "bg-gray-50 border-gray-200 text-gray-400 group-hover:bg-th-accent-50 group-hover:border-th-accent-200 group-hover:text-th-accent-500"
           }`}
         >
           <EyeOutlined />
@@ -206,15 +206,15 @@ export const WorkflowParticipantsPanel = ({
       <div
         className={`flex-1 py-2 border-b border-dashed transition-colors ${
           isDarkMode
-            ? "border-gray-700 group-hover:border-blue-800"
-            : "border-gray-200 group-hover:border-blue-200"
+            ? "border-th-high group-hover:border-th-accent-800"
+            : "border-gray-200 group-hover:border-th-accent-200"
         }`}
       >
         <span
           className={`text-xs font-medium transition-colors ${
             isDarkMode
-              ? "text-gray-400 group-hover:text-blue-400"
-              : "text-gray-500 group-hover:text-blue-600"
+              ? "text-gray-400 group-hover:text-th-accent-400"
+              : "text-gray-500 group-hover:text-th-accent-600"
           }`}
         >
           Показать остальных ({count})
@@ -233,7 +233,7 @@ export const WorkflowParticipantsPanel = ({
         ${isCollapsed ? "w-16 items-center py-4" : "w-80"}
         ${
           isDarkMode
-            ? "bg-[#111827] border-gray-800 shadow-gray-900/50 text-gray-200"
+            ? "bg-th-base border-th-raised shadow-gray-900/50 text-gray-200"
             : "bg-white border-gray-200 shadow-xl shadow-gray-200/50 text-gray-800"
         }
       `}
@@ -242,7 +242,7 @@ export const WorkflowParticipantsPanel = ({
           onClick={toggleCollapse}
           className={`absolute -left-3 top-6 border rounded-full w-6 h-6 flex items-center justify-center shadow-sm z-20 transition-transform hover:scale-110 cursor-pointer ${
             isDarkMode
-              ? "bg-gray-800 border-gray-700 hover:bg-gray-700 text-gray-400"
+              ? "bg-th-raised border-th-high hover:bg-th-high text-gray-400"
               : "bg-white border-gray-200 hover:bg-gray-50 text-gray-500"
           }`}
         >
@@ -257,7 +257,7 @@ export const WorkflowParticipantsPanel = ({
           <div
             className={`px-4 py-4 border-b shrink-0 z-10 flex justify-between items-center ${
               isDarkMode
-                ? "bg-[#111827] border-gray-800"
+                ? "bg-th-base border-th-raised"
                 : "bg-white border-gray-100"
             }`}
           >
@@ -304,7 +304,7 @@ export const WorkflowParticipantsPanel = ({
                     <span
                       className={`px-1.5 rounded text-[10px] ${
                         isDarkMode
-                          ? "bg-gray-800 text-gray-400"
+                          ? "bg-th-raised text-gray-400"
                           : "bg-gray-100 text-gray-600"
                       }`}
                     >
@@ -323,15 +323,15 @@ export const WorkflowParticipantsPanel = ({
                       onClick={() => openModal("documents")}
                       className={`mt-2 w-full py-2 px-3 border rounded-lg cursor-pointer transition-colors flex items-center justify-center gap-2 group ${
                         isDarkMode
-                          ? "bg-blue-900/20 hover:bg-blue-900/40 border-blue-900/50"
-                          : "bg-blue-50 hover:bg-blue-100 border-blue-100"
+                          ? "bg-th-accent-900/20 hover:bg-th-accent-900/40 border-th-accent-900/50"
+                          : "bg-th-accent-50 hover:bg-th-accent-100 border-th-accent-100 dark:bg-th-accent-900/35 dark:border-th-accent-800/50"
                       }`}
                     >
                       <span
                         className={`text-xs font-medium ${
                           isDarkMode
-                            ? "text-blue-400 group-hover:text-blue-300"
-                            : "text-blue-600 group-hover:text-blue-700"
+                            ? "text-th-accent-400 group-hover:text-th-accent-300"
+                            : "text-th-accent-600 group-hover:text-th-accent-700"
                         }`}
                       >
                         Показать все документы: {documents.length}
@@ -340,7 +340,7 @@ export const WorkflowParticipantsPanel = ({
                   )}
                   <Divider
                     className={`my-4! ${
-                      isDarkMode ? "border-gray-800!" : "border-gray-100!"
+                      isDarkMode ? "border-th-raised!" : "border-gray-100!"
                     }`}
                   />
                 </>
@@ -352,8 +352,8 @@ export const WorkflowParticipantsPanel = ({
                   <div
                     className={`mb-4 w-8 h-8 rounded-full flex items-center justify-center border cursor-pointer transition-colors ${
                       isDarkMode
-                        ? "bg-blue-900/30 text-blue-400 border-blue-800/50 hover:bg-blue-900/50"
-                        : "bg-blue-50 text-blue-500 border-blue-100 hover:bg-blue-100"
+                        ? "bg-th-accent-900/30 text-th-accent-400 border-th-accent-800/50 hover:bg-th-accent-900/50"
+                        : "bg-th-accent-50 text-th-accent-500 border-th-accent-100 hover:bg-th-accent-100 dark:bg-th-accent-900/35 dark:border-th-accent-800/50"
                     }`}
                     onClick={() => openModal("documents")}
                   >
@@ -375,7 +375,7 @@ export const WorkflowParticipantsPanel = ({
                     <span
                       className={`px-1.5 rounded text-[10px] ${
                         isDarkMode
-                          ? "bg-gray-800 text-gray-400"
+                          ? "bg-th-raised text-gray-400"
                           : "bg-gray-100 text-gray-600"
                       }`}
                     >
@@ -403,7 +403,7 @@ export const WorkflowParticipantsPanel = ({
                       onClick={() => openModal("versions")}
                       className={`mt-2 w-full py-2 px-3 border rounded-lg cursor-pointer transition-colors flex items-center justify-center gap-2 group ${
                         isDarkMode
-                          ? "bg-gray-800 hover:bg-gray-700 border-gray-700"
+                          ? "bg-th-raised hover:bg-th-high border-th-high"
                           : "bg-gray-50 hover:bg-gray-100 border-gray-200"
                       }`}
                     >
@@ -420,7 +420,7 @@ export const WorkflowParticipantsPanel = ({
                   )}
                   <Divider
                     className={`my-4! ${
-                      isDarkMode ? "border-gray-800!" : "border-gray-100!"
+                      isDarkMode ? "border-th-raised!" : "border-gray-100!"
                     }`}
                   />
                 </>
@@ -432,7 +432,7 @@ export const WorkflowParticipantsPanel = ({
                   <div
                     className={`mb-4 w-8 h-8 rounded-full flex items-center justify-center border cursor-pointer transition-colors ${
                       isDarkMode
-                        ? "bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700"
+                        ? "bg-th-raised text-gray-400 border-th-high hover:bg-th-high"
                         : "bg-gray-50 text-gray-500 border-gray-100 hover:bg-gray-100"
                     }`}
                     onClick={() => openModal("versions")}
@@ -461,7 +461,7 @@ export const WorkflowParticipantsPanel = ({
                   <span
                     className={`px-1.5 rounded text-[9px] ${
                       isDarkMode
-                        ? "bg-gray-800 text-gray-400"
+                        ? "bg-th-raised text-gray-400"
                         : "bg-gray-100 text-gray-500"
                     }`}
                   >
@@ -502,7 +502,7 @@ export const WorkflowParticipantsPanel = ({
                 <span
                   className={`px-1.5 rounded text-[9px] ${
                     isDarkMode
-                      ? "bg-gray-800 text-gray-400"
+                      ? "bg-th-raised text-gray-400"
                       : "bg-gray-100 text-gray-500"
                   }`}
                 >
@@ -511,7 +511,7 @@ export const WorkflowParticipantsPanel = ({
               </div>
 
               {currentVersionApprovers.length === 0 ? (
-                <div className="text-[11px] text-gray-400 py-3 text-center border border-dashed rounded-xl border-gray-200 dark:border-gray-800 mb-3">
+                <div className="text-[11px] text-gray-400 py-3 text-center border border-dashed rounded-xl border-gray-200 dark:border-th-raised mb-3">
                   Нет согласующих для этой версии
                 </div>
               ) : (
@@ -563,7 +563,7 @@ export const WorkflowParticipantsPanel = ({
             ))}
 
           {!isCollapsed && docId && (
-            <div className="p-3 border-t border-gray-100 dark:border-gray-800">
+            <div className="p-3 border-t border-gray-100 dark:border-th-raised">
               <AssignmentsSection
                 docId={docId}
                 currentUserId={currentUserId}
@@ -577,7 +577,7 @@ export const WorkflowParticipantsPanel = ({
           <div
             className={`p-4 border-t shrink-0 ${
               isDarkMode
-                ? "bg-[#111827] border-gray-800"
+                ? "bg-th-base border-th-raised"
                 : "bg-gray-50/50 border-gray-100"
             }`}
           >
@@ -586,8 +586,8 @@ export const WorkflowParticipantsPanel = ({
               onClick={() => openModal("participants")}
               className={`shadow-sm! h-9! font-medium! ${
                 isDarkMode
-                  ? "bg-[#1f2937]! border-gray-600! text-gray-300! hover:text-blue-400! hover:border-blue-500!"
-                  : "bg-white! border-gray-200! text-gray-600! hover:text-blue-600! hover:border-blue-200!"
+                  ? "bg-th-raised! border-th-higher! text-gray-300! hover:text-th-accent-400! hover:border-th-accent-500!"
+                  : "bg-white! border-gray-200! text-gray-600! hover:text-th-accent-600! hover:border-th-accent-200!"
               }`}
             >
               Полная история

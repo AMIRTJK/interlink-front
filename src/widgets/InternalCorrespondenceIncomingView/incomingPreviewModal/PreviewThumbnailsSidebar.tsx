@@ -37,7 +37,7 @@ export const PreviewThumbnailsSidebar: React.FC<IProps> = ({
             background: "white",
             border:
               currentPage === idx
-                ? "2px solid #6366f1"
+                ? "2px solid var(--th-accent-500)"
                 : "2px solid #e2e8f0",
             borderRadius: 4,
             cursor: "pointer",

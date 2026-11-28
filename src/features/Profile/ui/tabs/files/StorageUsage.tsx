@@ -89,7 +89,7 @@ export const StorageUsage = ({ meta, files }: IProps) => {
 	];
 
 	return (
-		<div className="bg-slate-50/50 dark:bg-slate-900/20 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
+		<div className="bg-slate-50/50 dark:bg-th-base/20 p-5 rounded-3xl border border-slate-100 dark:border-th-raised space-y-4">
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-2 text-slate-700 dark:text-zinc-300 font-semibold text-sm">
 					<HardDrive size={16} className="text-slate-400" />
@@ -100,7 +100,7 @@ export const StorageUsage = ({ meta, files }: IProps) => {
 				</span>
 			</div>
 
-			<div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+			<div className="w-full h-2 bg-slate-200 dark:bg-th-raised rounded-full overflow-hidden">
 				<div
 					className="storage-progress-bar h-full rounded-full transition-all duration-500"
 					style={{ width: `${displayPercentage}%` }}

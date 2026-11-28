@@ -35,7 +35,7 @@ export function UserPermissionsGroupList({
   return (
     <div className="flex-1 overflow-y-auto p-5 space-y-4 pt-2 relative">
       <If is={isDataLoading}>
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 dark:bg-th-raised/60">
           <Loader />
         </div>
       </If>
@@ -44,7 +44,7 @@ export function UserPermissionsGroupList({
           {"ПРАВА ПОЛЬЗОВАТЕЛЯ"}
         </p>
         {hasGroups && (
-          <span className="text-[10px] text-slate-400 font-bold bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100/60">
+          <span className="text-[10px] text-slate-400 font-bold bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100/60 dark:bg-th-base dark:border-th-high/60">
             {sidebarPage} / {totalSidebarPages || 1}
           </span>
         )}
@@ -54,7 +54,7 @@ export function UserPermissionsGroupList({
         {paginatedGroups.map(([moduleName, actions]) => (
           <div
             key={moduleName}
-            className="border border-slate-50 rounded-xl p-3 bg-slate-50/20 space-y-2.5"
+            className="border border-slate-50 rounded-xl p-3 bg-slate-50/20 space-y-2.5 dark:bg-th-base/20"
           >
             <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-0.5 leading-none">
               {MODULE_TRANSLATIONS[moduleName] || moduleName}
@@ -70,7 +70,7 @@ export function UserPermissionsGroupList({
                     key={act.name}
                     className="flex items-center justify-between"
                   >
-                    <span className="text-xs font-semibold text-slate-600">
+                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
                       {act.label}
                     </span>
                     <Switch
@@ -114,7 +114,7 @@ export function UserPermissionsGroupList({
               <button
                 onClick={() => onPageChange(Math.max(1, sidebarPage - 1))}
                 disabled={sidebarPage === 1}
-                className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
+                className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white dark:border-th-high dark:bg-th-raised"
               >
                 <svg
                   width="12"
@@ -135,8 +135,8 @@ export function UserPermissionsGroupList({
                   onClick={() => onPageChange(p)}
                   className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     sidebarPage === p
-                      ? "bg-blue-600 text-white border border-blue-600 shadow-sm"
-                      : "bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                      ? "bg-th-accent-600 text-white border border-th-accent-600 shadow-sm"
+                      : "bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:bg-th-raised dark:text-slate-400 dark:border-th-high dark:hover:bg-th-high"
                   }`}
                 >
                   {p}
@@ -147,7 +147,7 @@ export function UserPermissionsGroupList({
                   onPageChange(Math.min(totalSidebarPages, sidebarPage + 1))
                 }
                 disabled={sidebarPage === totalSidebarPages}
-                className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
+                className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white dark:border-th-high dark:bg-th-raised"
               >
                 <svg
                   width="12"

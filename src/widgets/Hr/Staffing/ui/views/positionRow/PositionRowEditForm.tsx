@@ -34,8 +34,8 @@ export function PositionRowEditForm({
   onSave,
 }: IProps) {
   const inputCls = dark
-    ? 'bg-gray-700 border-gray-600 text-gray-100'
-    : 'bg-white border-indigo-200 text-gray-800';
+    ? 'bg-th-high border-th-higher text-gray-100'
+    : 'bg-white border-th-accent-200 text-gray-800';
 
   return (
     <div className="px-4 py-3 space-y-3">
@@ -45,7 +45,7 @@ export function PositionRowEditForm({
             type="text"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
-            className={`w-full px-3 py-2 rounded-xl border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 ${inputCls}`}
+            className={`w-full px-3 py-2 rounded-xl border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 ${inputCls}`}
           />
         </div>
         <div>
@@ -96,7 +96,7 @@ export function PositionRowEditForm({
           <div
             className={`w-full px-3 py-2 rounded-xl border text-sm text-center font-semibold ${
               dark
-                ? 'border-gray-700 bg-gray-800/60 text-gray-500'
+                ? 'border-th-high bg-th-raised/60 text-gray-500'
                 : 'border-gray-100 bg-gray-50 text-gray-400'
             }`}
           >
@@ -125,14 +125,14 @@ export function PositionRowEditForm({
         <button
           onClick={onCancel}
           className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${
-            dark ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-500 hover:bg-gray-100'
+            dark ? 'text-gray-400 hover:bg-th-high' : 'text-gray-500 hover:bg-gray-100'
           }`}
         >
           Отмена
         </button>
         <button
           onClick={onSave}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition-colors shadow-sm"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-th-accent-600 text-white text-xs font-semibold hover:bg-th-accent-700 transition-colors shadow-sm"
         >
           <Check size={12} />
           <span>Сохранить</span>

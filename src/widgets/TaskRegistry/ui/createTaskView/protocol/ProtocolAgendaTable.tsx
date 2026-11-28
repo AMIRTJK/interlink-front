@@ -82,7 +82,7 @@ export function ProtocolAgendaTable({
   }, [colleagues]);
 
   return (
-    <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgba(100,105,240,0.16)] dark:shadow-none space-y-5">
+    <div className="bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none ui-glass ui-glass--flat dark:bg-th-base/90 backdrop-blur-2xl border border-white/80 dark:border-white/10 rounded-[2.5rem] p-7 shadow-[0_20px_60px_-10px_rgb(var(--th-accent-rgb)/0.16)] dark:shadow-none space-y-5">
       {/* Title Header with Add Row Button */}
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-lg font-black text-[#1e2548] dark:text-slate-100 tracking-tight">
@@ -104,7 +104,7 @@ export function ProtocolAgendaTable({
       {/* Table Section */}
       <div className="space-y-3 overflow-x-auto min-w-0">
         {/* Table Sub-Header Bar */}
-        <div className="min-w-[700px] bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl px-5 py-2.5 flex items-center text-[10px] font-black uppercase text-[#636e9c] dark:text-slate-400 tracking-wider shadow-[0_4px_16px_rgba(100,105,240,0.04)]">
+        <div className="min-w-[700px] bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl px-5 py-2.5 flex items-center text-[10px] font-black uppercase text-[#636e9c] dark:text-slate-400 tracking-wider shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.04)]">
           <div className="w-10 shrink-0">№</div>
           <div className="flex-1">ПОСТАВЛЕННАЯ ЗАДАЧА / ВОПРОС</div>
           <div className="w-32 shrink-0 text-center">ПРИОРИТЕТ</div>
@@ -129,12 +129,12 @@ export function ProtocolAgendaTable({
 
           return (
             <div key={row.id} className="space-y-2">
-              <div className="min-w-[700px] bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 border border-white/90 rounded-2xl px-4 py-3.5 shadow-[0_4px_16px_rgba(100,105,240,0.06)] flex items-start gap-3 text-xs font-semibold text-[#1e2548]">
+              <div className="min-w-[700px] bg-gradient-to-br from-white/95 to-[#d9e0f2]/40 dark:bg-none dark:bg-th-raised/60 dark:border-th-high/60 border border-white/90 rounded-2xl px-4 py-3.5 shadow-[0_4px_16px_rgb(var(--th-accent-rgb)/0.06)] flex items-start gap-3 text-xs font-semibold text-[#1e2548]">
                 {/* Expand Toggle */}
                 <button
                   type="button"
                   onClick={() => onToggleRowExpand(row.id)}
-                  className="text-[#9aa2c8] hover:text-[#3373e5] transition-colors cursor-pointer pt-1"
+                  className="text-[#9aa2c8] hover:text-th-accent-600 transition-colors cursor-pointer pt-1"
                 >
                   {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 </button>
@@ -151,7 +151,7 @@ export function ProtocolAgendaTable({
                       {row.title || <span className="text-slate-400 font-normal italic">Без названия</span>}
                     </div>
                   ) : (
-                    <div className="bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-white/10 rounded-xl p-2.5 shadow-2xs focus-within:border-[#3373e5] focus-within:ring-2 focus-within:ring-[#3373e5]/15 transition-all">
+                    <div className="bg-white/90 dark:bg-th-raised/90 border border-slate-200/80 dark:border-white/10 rounded-xl p-2.5 shadow-2xs focus-within:border-th-accent-600 focus-within:ring-2 focus-within:ring-th-accent-600/15 transition-all">
                       <Input.TextArea
                         variant="borderless"
                         autoSize={{ minRows: 1, maxRows: 6 }}
@@ -191,7 +191,7 @@ export function ProtocolAgendaTable({
                 {/* Status Badge Select */}
                 <div className="w-32 shrink-0 pt-0.5">
                   {isView ? (
-                    <div className="px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 text-blue-600 dark:text-blue-400 font-extrabold text-xs text-center">
+                    <div className="px-3 py-1.5 rounded-full bg-th-accent-50 dark:bg-th-accent-950/40 border border-th-accent-200 dark:border-th-accent-800/60 text-th-accent-600 dark:text-th-accent-400 font-extrabold text-xs text-center">
                       {statusOpt?.label || row.status}
                     </div>
                   ) : (
@@ -217,7 +217,7 @@ export function ProtocolAgendaTable({
                       {assigneeList.length > 0 ? (
                         assigneeList.map((c) => (
                           <Tooltip key={c.id} title={`${c.name} — ${c.role || "Сотрудник"}`}>
-                            <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 shadow-2xs">
+                            <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-white dark:bg-th-raised border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 shadow-2xs">
                               <Avatar colleague={c} className="w-4 h-4 text-[7px]" allowPreview={false} />
                               <span className="truncate max-w-[85px]">{c.name.split(" ")[0]}</span>
                             </span>
@@ -268,7 +268,7 @@ export function ProtocolAgendaTable({
                         }
                         options={colleagueOptions}
                         size="small"
-                        className="w-full text-xs font-bold [&_.ant-select-selector]:bg-white! dark:[&_.ant-select-selector]:bg-slate-800! [&_.ant-select-selector]:border-[#3373e5]/20! dark:[&_.ant-select-selector]:border-white/10! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100! [&_.ant-select-selector]:rounded-2xl!"
+                        className="w-full text-xs font-bold [&_.ant-select-selector]:bg-white! dark:[&_.ant-select-selector]:bg-slate-800! [&_.ant-select-selector]:border-th-accent-600/20! dark:[&_.ant-select-selector]:border-white/10! [&_.ant-select-selection-item]:text-[#1e2548]! dark:[&_.ant-select-selection-item]:text-slate-100! [&_.ant-select-selector]:rounded-2xl!"
                       />
                     </Tooltip>
                   )}
@@ -279,7 +279,7 @@ export function ProtocolAgendaTable({
                   <div className="w-16 shrink-0 flex items-center justify-center gap-2 text-[#9aa2c8] pt-1">
                     <button
                       type="button"
-                      className="hover:text-[#3373e5] transition-colors cursor-pointer"
+                      className="hover:text-th-accent-600 transition-colors cursor-pointer"
                       title="Прикрепить файл"
                     >
                       <Paperclip size={14} />
@@ -308,7 +308,7 @@ export function ProtocolAgendaTable({
                     {subs.map((sub) => (
                       <div
                         key={sub.id}
-                        className="flex items-start gap-2 p-2 bg-white/90 dark:bg-slate-800/90 border border-slate-200/70 dark:border-white/10 rounded-xl text-xs max-w-3xl shadow-2xs"
+                        className="flex items-start gap-2 p-2 bg-white/90 dark:bg-th-raised/90 border border-slate-200/70 dark:border-white/10 rounded-xl text-xs max-w-3xl shadow-2xs"
                       >
                         <span className="text-emerald-500 font-bold text-xs pt-0.5">•</span>
                         {isView ? (

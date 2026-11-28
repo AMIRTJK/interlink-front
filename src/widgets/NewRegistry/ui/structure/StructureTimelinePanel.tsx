@@ -124,7 +124,7 @@ export const StructureTimelinePanel: React.FC<IStructureTimelinePanelProps> = ({
             initial={{ scaleY: 0 }}
             animate={{ scaleY: 1 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="absolute left-[14px] top-0 bottom-4 w-px bg-slate-200 dark:bg-slate-700 origin-top"
+            className="absolute left-[14px] top-0 bottom-4 w-px bg-slate-200 dark:bg-th-high origin-top"
           />
           {timelineEvents.map((event, i) => (
             <EventRow

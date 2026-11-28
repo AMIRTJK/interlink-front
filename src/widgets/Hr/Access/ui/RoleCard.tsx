@@ -23,48 +23,48 @@ const ROLE_COLOR_CLASSES: Record<
 		border: "border-l-blue-500!",
 		dot: "bg-blue-500!",
 		text: "text-blue-600!",
-		bg: "bg-blue-50/20!",
-		selectBg: "bg-blue-50/10!",
+		bg: "bg-blue-50/20! dark:bg-blue-900/35!",
+		selectBg: "bg-blue-50/10! dark:bg-blue-900/35!",
 		ring: "ring-blue-500/20!",
 	},
 	recipient: {
 		border: "border-l-emerald-500!",
 		dot: "bg-emerald-500!",
 		text: "text-emerald-600!",
-		bg: "bg-emerald-50/20!",
-		selectBg: "bg-emerald-50/10!",
+		bg: "bg-emerald-50/20! dark:bg-emerald-900/35!",
+		selectBg: "bg-emerald-50/10! dark:bg-emerald-900/35!",
 		ring: "ring-emerald-500/20!",
 	},
 	signer: {
 		border: "border-l-orange-500!",
 		dot: "bg-orange-500!",
 		text: "text-orange-600!",
-		bg: "bg-orange-50/20!",
-		selectBg: "bg-orange-50/10!",
+		bg: "bg-orange-50/20! dark:bg-orange-900/35!",
+		selectBg: "bg-orange-50/10! dark:bg-orange-900/35!",
 		ring: "ring-orange-500/20!",
 	},
 	approvaler: {
 		border: "border-l-indigo-500!",
 		dot: "bg-indigo-500!",
 		text: "text-indigo-600!",
-		bg: "bg-indigo-50/20!",
-		selectBg: "bg-indigo-50/10!",
+		bg: "bg-indigo-50/20! dark:bg-indigo-900/35!",
+		selectBg: "bg-indigo-50/10! dark:bg-indigo-900/35!",
 		ring: "ring-indigo-500/20!",
 	},
 	controller: {
 		border: "border-l-purple-500!",
 		dot: "bg-purple-500!",
 		text: "text-purple-600!",
-		bg: "bg-purple-50/20!",
-		selectBg: "bg-purple-50/10!",
+		bg: "bg-purple-50/20! dark:bg-purple-900/35!",
+		selectBg: "bg-purple-50/10! dark:bg-purple-900/35!",
 		ring: "ring-purple-500/20!",
 	},
 	observer: {
 		border: "border-l-slate-400!",
 		dot: "bg-slate-400!",
-		text: "text-slate-500!",
-		bg: "bg-slate-50/20!",
-		selectBg: "bg-slate-50/10!",
+		text: "text-slate-500! dark:text-slate-400!",
+		bg: "bg-slate-50/20! dark:bg-th-base/20!",
+		selectBg: "bg-slate-50/10! dark:bg-th-base/10!",
 		ring: "ring-slate-400/20!",
 	},
 };
@@ -123,11 +123,11 @@ export const RoleCard = ({
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<span className={`w-2 h-2 rounded-full ${colors.dot}`} />
-						<h4 className="font-bold text-slate-800 text-[15px] leading-snug truncate">
+						<h4 className="font-bold text-slate-800 text-[15px] leading-snug truncate dark:text-slate-100">
 							{displayName}
 						</h4>
 					</div>
-					<span className="w-6 h-6 rounded-full bg-slate-50 text-slate-500 font-bold text-xs flex items-center justify-center border border-slate-100">
+					<span className="w-6 h-6 rounded-full bg-slate-50 text-slate-500 font-bold text-xs flex items-center justify-center border border-slate-100 dark:bg-th-base dark:text-slate-400 dark:border-th-high">
 						{userCount}
 					</span>
 				</div>
@@ -141,13 +141,13 @@ export const RoleCard = ({
 					{renderedTags.visible.map((tag, idx) => (
 						<span
 							key={idx}
-							className="px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-100 text-slate-500 text-[10px] font-semibold"
+							className="px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-100 text-slate-500 text-[10px] font-semibold dark:bg-th-base dark:border-th-high dark:text-slate-400"
 						>
 							{tag.length > 12 ? tag.slice(0, 10) + "..." : tag}
 						</span>
 					))}
 					{renderedTags.remainder > 0 && (
-						<span className="px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-100 text-slate-500 text-[10px] font-semibold">
+						<span className="px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-100 text-slate-500 text-[10px] font-semibold dark:bg-th-base dark:border-th-high dark:text-slate-400">
 							+{renderedTags.remainder}
 						</span>
 					)}
@@ -162,7 +162,7 @@ export const RoleCard = ({
 							e.stopPropagation();
 							onEdit();
 						}}
-						className="text-blue-600 hover:text-blue-700 transition-colors"
+						className="text-th-accent-600 hover:text-th-accent-700 transition-colors"
 					>
 						{"Ред."}
 					</button>

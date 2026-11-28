@@ -89,8 +89,8 @@ export const WeekView = memo(({
               onClick={() => (onHeaderClick ? onHeaderClick(day) : onDayClick(day))}
               className={`flex-1! py-2! px-2! rounded-[1.25rem]! flex! items-center! justify-center! gap-1.5! cursor-pointer! transition-all! ${
                 isToday
-                  ? "bg-[#fff7ed]! dark:bg-amber-950/40! border! border-zinc-200! dark:border-slate-700/50! text-[#c2410c]! dark:text-amber-400!"
-                  : "bg-white/80! dark:bg-slate-800/80! border! border-zinc-200! dark:border-slate-700/50! text-slate-700! dark:text-slate-200!"
+                  ? "bg-[#fff7ed]! dark:bg-amber-950/40! border! border-zinc-200! dark:border-th-high/50! text-[#c2410c]! dark:text-amber-400!"
+                  : "bg-white/80! dark:bg-th-raised/80! border! border-zinc-200! dark:border-th-high/50! text-slate-700! dark:text-slate-200!"
               }`}
             >
               <span className="text-xs! font-semibold! tracking-wider! uppercase!">
@@ -123,7 +123,7 @@ export const WeekView = memo(({
           {HOURS.map((h) => (
             <div
               key={h}
-              className="absolute! left-0! right-0! border-b! border-slate-200/30! dark:border-slate-700/20! pointer-events-none!"
+              className="absolute! left-0! right-0! border-b! border-slate-200/30! dark:border-th-high/20! pointer-events-none!"
               style={{ top: h * HOUR_HEIGHT, height: HOUR_HEIGHT }}
             />
           ))}

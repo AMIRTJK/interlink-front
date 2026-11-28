@@ -105,7 +105,7 @@ export const RecipientSelectorModal: React.FC<RecipientSelectorModalProps> = ({
                ? "border-pink-500 bg-pink-500/10"
                : "border-violet-500 bg-violet-500/10"
              : isDarkMode
-               ? "bg-gray-900/40 border-gray-700/30 hover:bg-gray-800"
+               ? "bg-th-base/40 border-th-high/30 hover:bg-th-raised"
                : "bg-gray-50/80 border-gray-200/50 hover:bg-gray-100"
          }
               `}
@@ -157,11 +157,11 @@ export const RecipientSelectorModal: React.FC<RecipientSelectorModalProps> = ({
             className={`
                relative flex flex-col w-full max-w-lg max-h-[80vh]
                rounded-3xl shadow-2xl backdrop-blur-2xl border
-               ${isDarkMode ? "bg-gray-800/95 border-gray-700/50" : "bg-white/95 border-gray-200/50"}
+               ${isDarkMode ? "bg-th-raised/95 border-th-high/50" : "bg-white/95 border-gray-200/50"}
              `}
           >
             <div
-              className={`px-6 py-5 flex items-center justify-between border-b ${isDarkMode ? "border-gray-700/50" : "border-gray-200/50"}`}
+              className={`px-6 py-5 flex items-center justify-between border-b ${isDarkMode ? "border-th-high/50" : "border-gray-200/50"}`}
             >
               <h3
                 className={`text-xl font-bold flex items-center gap-3 ${textPrimary}`}
@@ -183,7 +183,7 @@ export const RecipientSelectorModal: React.FC<RecipientSelectorModalProps> = ({
                 placeholder="Поиск..."
                 prefix={
                   <SearchOutlined
-                    className={`text-lg mr-2 transition-colors duration-300 ${isSearchFocused ? "text-blue-600" : "text-gray-400"}`}
+                    className={`text-lg mr-2 transition-colors duration-300 ${isSearchFocused ? "text-th-accent-600" : "text-gray-400"}`}
                   />
                 }
                 onFocus={() => setIsSearchFocused(true)}
@@ -196,13 +196,13 @@ export const RecipientSelectorModal: React.FC<RecipientSelectorModalProps> = ({
                   [&_.ant-input-clear-icon]:flex! [&_.ant-input-clear-icon]:items-center!
                   ${
                     isSearchFocused
-                      ? "border-blue-500! shadow-lg! shadow-blue-500/15!"
+                      ? "border-th-accent-500! shadow-lg! shadow-th-accent-500/15!"
                       : "shadow-sm!"
                   }
                   ${
                     isDarkMode
-                      ? `bg-gray-700/50! text-gray-100! [&_.ant-input]::placeholder:text-gray-500! [&_.ant-input-clear-icon]:text-gray-500! [&_.ant-input-clear-icon:hover]:text-gray-300! ${!isSearchFocused ? "border-gray-600! hover:border-gray-500!" : ""}`
-                      : `bg-gray-50/50! text-gray-900! [&_.ant-input]::placeholder:text-gray-400! [&_.ant-input-clear-icon]:text-gray-400! [&_.ant-input-clear-icon:hover]:text-gray-600! ${!isSearchFocused ? "border-gray-200! hover:border-blue-300!" : ""}`
+                      ? `bg-th-high/50! text-gray-100! [&_.ant-input]::placeholder:text-gray-500! [&_.ant-input-clear-icon]:text-gray-500! [&_.ant-input-clear-icon:hover]:text-gray-300! ${!isSearchFocused ? "border-th-higher! hover:border-gray-500!" : ""}`
+                      : `bg-gray-50/50! text-gray-900! [&_.ant-input]::placeholder:text-gray-400! [&_.ant-input-clear-icon]:text-gray-400! [&_.ant-input-clear-icon:hover]:text-gray-600! ${!isSearchFocused ? "border-gray-200! hover:border-th-accent-300!" : ""}`
                   }
                 `}
                 value={searchTerm}
@@ -216,7 +216,7 @@ export const RecipientSelectorModal: React.FC<RecipientSelectorModalProps> = ({
             </div>
 
             <div
-              className={`px-6 py-4 border-t flex items-center justify-between ${isDarkMode ? "border-gray-700/50" : "border-gray-200/50"}`}
+              className={`px-6 py-4 border-t flex items-center justify-between ${isDarkMode ? "border-th-high/50" : "border-gray-200/50"}`}
             >
               <p className={`text-sm ${textSecondary}`}>
                 Выбрано: {selectedRecipients.length}

@@ -39,13 +39,13 @@ export const AssignmentItem: React.FC<IProps> = ({
     <div
       className={`p-3.5 rounded-xl border flex flex-col gap-2.5 transition-all text-xs ${
         isDarkMode
-          ? "bg-gray-800/60 border-gray-700/80 text-gray-200"
+          ? "bg-th-raised/60 border-th-high/80 text-gray-200"
           : "bg-white border-gray-200/80 text-gray-800 shadow-xs"
       }`}
     >
-      <div className="flex items-center justify-between gap-2 border-b pb-2 border-gray-100 dark:border-gray-700/60">
+      <div className="flex items-center justify-between gap-2 border-b pb-2 border-gray-100 dark:border-th-high/60">
         <div className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-gray-200">
-          <UserOutlined className="text-indigo-500" />
+          <UserOutlined className="text-th-accent-500" />
           <span>{item.assignee?.full_name || `Исполнитель #${item.assignee_user_id}`}</span>
         </div>
         {renderStatus()}
@@ -62,8 +62,8 @@ export const AssignmentItem: React.FC<IProps> = ({
       </div>
 
       <If is={Boolean(item.task)}>
-        <div className="p-2 rounded-lg bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 text-[11px]">
-          <span className="font-semibold text-indigo-700 dark:text-indigo-300 block mb-0.5">
+        <div className="p-2 rounded-lg bg-th-accent-50/60 dark:bg-th-accent-950/30 border border-th-accent-100 dark:border-th-accent-900/40 text-[11px]">
+          <span className="font-semibold text-th-accent-700 dark:text-th-accent-300 block mb-0.5">
             📋 Задача #{item.task?.id}: {item.task?.title}
           </span>
           <span className="text-gray-500 dark:text-gray-400">
@@ -101,7 +101,7 @@ export const AssignmentItem: React.FC<IProps> = ({
             type="primary"
             size="small"
             onClick={() => onSubmitResult(item.id)}
-            className="bg-indigo-600! hover:bg-indigo-500!"
+            className="bg-th-accent-600! hover:bg-th-accent-500!"
           >
             Отправить результат
           </Button>

@@ -70,7 +70,7 @@
 
 /* === ТЕМНАЯ ТЕМА === */
 .comment-card.is-dark {
-  background: #1f2937; /* gray-800 */
+  background: var(--th-dark-raised); /* gray-800 */
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
 }
 

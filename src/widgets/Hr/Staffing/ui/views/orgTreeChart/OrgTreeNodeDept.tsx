@@ -144,8 +144,8 @@ export function OrgTreeNodeDept({
               }}
               className={`w-full flex items-center justify-center py-1 border-t text-[9px] font-semibold gap-1 transition-colors ${
                 dark
-                  ? 'border-gray-700 text-gray-500 hover:text-indigo-400 hover:bg-gray-700/50'
-                  : 'border-gray-100 text-gray-400 hover:text-indigo-500 hover:bg-indigo-50/50'
+                  ? 'border-th-high text-gray-500 hover:text-th-accent-400 hover:bg-th-high/50'
+                  : 'border-gray-100 text-gray-400 hover:text-th-accent-500 hover:bg-th-accent-50/50'
               }`}
             >
               <motion.div
@@ -162,8 +162,8 @@ export function OrgTreeNodeDept({
           onClick={() => onAddDept(orgId)}
           className={`mt-1.5 flex items-center gap-1 px-2 py-0.5 rounded-lg border border-dashed text-[9px] font-medium transition-all ${
             dark
-              ? 'border-indigo-700/40 text-indigo-500 hover:border-indigo-500 hover:bg-indigo-900/20'
-              : 'border-indigo-200 text-indigo-400 hover:border-indigo-400 hover:bg-indigo-50/50'
+              ? 'border-th-accent-700/40 text-th-accent-500 hover:border-th-accent-500 hover:bg-th-accent-900/20'
+              : 'border-th-accent-200 text-th-accent-400 hover:border-th-accent-400 hover:bg-th-accent-50/50'
           }`}
         >
           <Plus size={8} />
@@ -245,7 +245,7 @@ export function OrgTreeNodeDept({
                   <div
                     key={pos.id}
                     className={`flex items-center gap-1.5 px-1.5 py-1 rounded-lg ${
-                      dark ? 'bg-gray-800' : 'bg-white'
+                      dark ? 'bg-th-raised' : 'bg-white'
                     }`}
                   >
                     <div
@@ -253,7 +253,7 @@ export function OrgTreeNodeDept({
                         pp >= 100
                           ? 'bg-emerald-400'
                           : pp >= 60
-                          ? 'bg-indigo-400'
+                          ? 'bg-th-accent-400'
                           : pp >= 30
                           ? 'bg-amber-400'
                           : 'bg-rose-400'

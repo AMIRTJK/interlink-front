@@ -42,11 +42,11 @@ export const FilePreviewModal = ({
 	return (
 		<If is={Boolean(file)}>
 			<div
-				className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[10000] p-4"
+				className="fixed inset-0 bg-th-base/40 backdrop-blur-sm flex items-center justify-center z-[10000] p-4"
 				onClick={onClose}
 			>
 				<div
-					className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl w-full max-w-[92vw]! xl:max-w-[1600px]! overflow-hidden animate-in fade-in zoom-in duration-200"
+					className="bg-white dark:bg-th-base rounded-[2rem] border border-slate-100 dark:border-th-raised shadow-2xl w-full max-w-[92vw]! xl:max-w-[1600px]! overflow-hidden animate-in fade-in zoom-in duration-200"
 					onClick={(e) => e.stopPropagation()}
 				>
 					<PreviewHeader
@@ -54,12 +54,12 @@ export const FilePreviewModal = ({
 						onClose={onClose}
 					/>
 
-					<div className="p-8 flex flex-col items-center justify-center min-h-[420px] bg-slate-50/30 dark:bg-slate-900/30">
+					<div className="p-8 flex flex-col items-center justify-center min-h-[420px] bg-slate-50/30 dark:bg-th-base/30">
 						<PreviewStyles />
 
 						<If is={isLoading}>
 							<div className="flex flex-col items-center justify-center space-y-2">
-								<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+								<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-th-accent-600" />
 								<span className="text-xs text-slate-500 dark:text-zinc-400 font-semibold">
 									Загрузка предпросмотра...
 								</span>

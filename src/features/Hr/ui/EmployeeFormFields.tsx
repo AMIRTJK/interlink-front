@@ -39,8 +39,8 @@ interface IProps {
 }
 
 const GENDER_SEG: ISegOption[] = [
-  { value: "male", label: "Мужской", activeClass: "bg-indigo-100 text-indigo-700 border-transparent dark:bg-indigo-950 dark:text-indigo-300" },
-  { value: "female", label: "Женский", activeClass: "bg-indigo-100 text-indigo-700 border-transparent dark:bg-indigo-950 dark:text-indigo-300" },
+  { value: "male", label: "Мужской", activeClass: "bg-th-accent-100 text-th-accent-700 border-transparent dark:bg-th-accent-950 dark:text-th-accent-300" },
+  { value: "female", label: "Женский", activeClass: "bg-th-accent-100 text-th-accent-700 border-transparent dark:bg-th-accent-950 dark:text-th-accent-300" },
 ];
 
 const STATUS_SEG: ISegOption[] = [

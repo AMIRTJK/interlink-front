@@ -70,9 +70,9 @@ export const PositionRow = ({
     setEditSalary(String(pos.salary));
   };
 
-  const rowBorder = dark ? 'border-gray-700/40' : 'border-gray-50';
-  const rowHover = dark ? 'hover:bg-gray-800/60' : 'hover:bg-gray-50/80';
-  const editBg = dark ? 'bg-gray-800/60' : 'bg-indigo-50/60';
+  const rowBorder = dark ? 'border-th-high/40' : 'border-gray-50';
+  const rowHover = dark ? 'hover:bg-th-raised/60' : 'hover:bg-gray-50/80';
+  const editBg = dark ? 'bg-th-raised/60' : 'bg-th-accent-50/60';
 
   return (
     <motion.div

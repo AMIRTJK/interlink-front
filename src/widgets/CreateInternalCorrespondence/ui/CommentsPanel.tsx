@@ -81,7 +81,7 @@ export const CommentsPanel: React.FC<ICommentsPanelProps> = ({
               Комментарии
             </span>
             <If is={comments.length > 0}>
-              <span className="text-[10px] font-bold text-white bg-blue-500 rounded-full w-4 h-4 flex items-center justify-center -mt-1">
+              <span className="text-[10px] font-bold text-white bg-th-accent-500 rounded-full w-4 h-4 flex items-center justify-center -mt-1">
                 {comments.length}
               </span>
             </If>
@@ -115,11 +115,11 @@ export const CommentsPanel: React.FC<ICommentsPanelProps> = ({
               {/* Panel Header */}
               <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0 bg-slate-50/50">
                 <div className="flex items-center gap-2">
-                  <MessageSquare size={16} className="text-blue-500" />
+                  <MessageSquare size={16} className="text-th-accent-500" />
                   <span className="font-semibold text-sm text-slate-800">
                     Комментарии
                   </span>
-                  <span className="bg-blue-100 text-blue-700 text-xs rounded-full px-2 py-0.5 font-bold">
+                  <span className="bg-th-accent-100 text-th-accent-700 text-xs rounded-full px-2 py-0.5 font-bold dark:bg-th-accent-900/35 dark:text-th-accent-400">
                     {comments.length}
                   </span>
                 </div>
@@ -146,7 +146,7 @@ export const CommentsPanel: React.FC<ICommentsPanelProps> = ({
                     <button
                       type="button"
                       onClick={() => refetch()}
-                      className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
+                      className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-th-accent-600 bg-th-accent-50 border border-th-accent-100 rounded-lg hover:bg-th-accent-100 transition-colors cursor-pointer dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50"
                       aria-label="Повторить загрузку комментариев"
                     >
                       <RotateCw size={12} />
@@ -196,7 +196,7 @@ export const CommentsPanel: React.FC<ICommentsPanelProps> = ({
                       }
                     }}
                     placeholder="Напишите комментарий..."
-                    className="w-full text-xs p-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 resize-none transition-all placeholder:text-slate-400 disabled:opacity-60"
+                    className="w-full text-xs p-2.5 pr-10 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-th-accent-100 focus:border-th-accent-400 resize-none transition-all placeholder:text-slate-400 disabled:opacity-60"
                   />
                   <button
                     type="submit"
@@ -204,7 +204,7 @@ export const CommentsPanel: React.FC<ICommentsPanelProps> = ({
                     className={cn(
                       "absolute right-2 bottom-2.5 p-1.5 rounded-lg transition-all cursor-pointer",
                       !isSendDisabled
-                        ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
+                        ? "bg-th-accent-600 text-white shadow-sm hover:bg-th-accent-700"
                         : "bg-slate-100 text-slate-300 cursor-not-allowed",
                     )}
                     aria-label="Отправить комментарий"

@@ -49,7 +49,7 @@ export const TaskDetailModal = ({
     <ModalContainer onClose={onClose}>
       <div className="p-6 border-b border-slate-100 dark:border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500 dark:text-slate-400">
+          <span className="text-xs font-mono font-bold bg-slate-100 dark:bg-th-raised px-2 py-1 rounded text-slate-500 dark:text-slate-400">
             {task.id}
           </span>
           <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
@@ -58,7 +58,7 @@ export const TaskDetailModal = ({
         </div>
         <button
           onClick={onClose}
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-400"
+          className="p-2 hover:bg-slate-100 dark:hover:bg-th-raised rounded-full transition-colors text-slate-400"
         >
           <X size={20} />
         </button>

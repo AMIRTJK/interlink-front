@@ -85,7 +85,7 @@ export const ExecutorPills = ({
             <Avatar
               icon={<TeamOutlined />}
               size="small"
-              className={isMain ? "bg-white/30" : "bg-blue-100"}
+              className={isMain ? "bg-white/30" : "bg-th-accent-100 dark:bg-th-accent-900/35"}
             />
             <span className="resolution__form-pill-name">{dept.name}</span>
           </div>

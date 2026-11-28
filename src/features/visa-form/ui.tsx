@@ -108,7 +108,7 @@ export const VisaForm: React.FC<VisaFormProps> = ({
             <button
               onClick={onAssignExecutors}
               type="button"
-              className="w-full cursor-pointer bg-white border border-[#0037af] text-[#0037AF] rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-blue-50 transition-all group active:transform active:scale-[0.98]"
+              className="w-full cursor-pointer bg-white border border-[#0037af] text-[#0037AF] rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-th-accent-50 transition-all group active:transform active:scale-[0.98]"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

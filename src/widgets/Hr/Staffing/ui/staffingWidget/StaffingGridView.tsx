@@ -30,7 +30,7 @@ export function StaffingGridView({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: oIdx * 0.05, ease: [0.16, 1, 0.3, 1] }}
             className={`rounded-2xl border shadow-sm overflow-hidden flex flex-col ${
-              dark ? 'bg-gray-800/80 border-gray-700/60' : 'bg-white border-gray-100'
+              dark ? 'bg-th-raised/80 border-th-high/60' : 'bg-white border-gray-100'
             }`}
           >
             <div
@@ -76,7 +76,7 @@ export function StaffingGridView({
                   <div
                     key={dept.id}
                     className={`flex items-center gap-2 px-2.5 py-2 rounded-xl ${
-                      dark ? 'bg-gray-700/50' : 'bg-gray-50/80'
+                      dark ? 'bg-th-high/50' : 'bg-gray-50/80'
                     }`}
                   >
                     <LayoutGrid size={11} style={{ color: org.color }} className="shrink-0" />
@@ -115,8 +115,8 @@ export function StaffingGridView({
                 onClick={() => onAddDept(org.id)}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-xs font-medium transition-all ${
                   dark
-                    ? 'border-indigo-700/50 text-indigo-400 hover:border-indigo-500 hover:bg-indigo-900/20'
-                    : 'border-indigo-200 text-indigo-500 hover:border-indigo-400 hover:bg-indigo-50/50'
+                    ? 'border-th-accent-700/50 text-th-accent-400 hover:border-th-accent-500 hover:bg-th-accent-900/20'
+                    : 'border-th-accent-200 text-th-accent-500 hover:border-th-accent-400 hover:bg-th-accent-50/50'
                 }`}
               >
                 <Plus size={12} />
@@ -126,8 +126,8 @@ export function StaffingGridView({
                 onClick={() => onEditOrg(org)}
                 className={`p-2 rounded-xl border transition-all ${
                   dark
-                    ? 'border-gray-700 text-gray-500 hover:text-indigo-400 hover:border-indigo-700/50'
-                    : 'border-gray-200 text-gray-400 hover:text-indigo-500 hover:border-indigo-200'
+                    ? 'border-th-high text-gray-500 hover:text-th-accent-400 hover:border-th-accent-700/50'
+                    : 'border-gray-200 text-gray-400 hover:text-th-accent-500 hover:border-th-accent-200'
                 }`}
               >
                 <Pencil size={12} />
@@ -136,7 +136,7 @@ export function StaffingGridView({
                 onClick={() => {}}
                 className={`p-2 rounded-xl border transition-all ${
                   dark
-                    ? 'border-gray-700 text-gray-500 hover:text-red-400 hover:border-red-800/50'
+                    ? 'border-th-high text-gray-500 hover:text-red-400 hover:border-red-800/50'
                     : 'border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200'
                 }`}
               >

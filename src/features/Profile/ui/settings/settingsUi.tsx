@@ -67,7 +67,7 @@ export const PlainButton = ({
     className={`inline-flex items-center justify-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-medium transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 ${
       danger
         ? "border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-400 dark:hover:bg-rose-500/10"
-        : "border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+        : "border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-th-high dark:text-slate-200 dark:hover:bg-th-raised"
     } ${className}`}
   >
     {loading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -103,10 +103,10 @@ export const PasswordField = forwardRef<HTMLInputElement, TextFieldProps>(
             type={show ? "text" : "password"}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className={`w-full rounded-xl border bg-slate-50 px-3.5 py-2.5 pr-10 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent)]/20 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 ${
+            className={`w-full rounded-xl border bg-slate-50 px-3.5 py-2.5 pr-10 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent)]/20 dark:bg-th-raised dark:text-slate-100 dark:placeholder:text-slate-500 ${
               error
                 ? "border-rose-400 dark:border-rose-500/60"
-                : "border-slate-200 dark:border-slate-700"
+                : "border-slate-200 dark:border-th-high"
             }`}
           />
           <button
@@ -197,7 +197,7 @@ export const OtpInput = ({
           onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}
           onFocus={(e) => e.target.select()}
-          className="h-12 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 text-center text-lg font-semibold text-slate-900 outline-none transition-colors focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent)]/20 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          className="h-12 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 text-center text-lg font-semibold text-slate-900 outline-none transition-colors focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent)]/20 disabled:opacity-50 dark:border-th-high dark:bg-th-raised dark:text-slate-100"
         />
       ))}
     </div>

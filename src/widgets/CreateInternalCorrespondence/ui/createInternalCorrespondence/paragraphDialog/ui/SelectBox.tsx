@@ -143,10 +143,10 @@ export const SelectBox = <T extends string>({
         className={cn(
           "flex w-full items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5 text-left text-xs transition-colors focus:outline-none",
           disabled
-            ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300 dark:border-zinc-800 dark:bg-zinc-800/60 dark:text-zinc-600"
+            ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300 dark:border-th-raised dark:bg-th-raised/60 dark:text-zinc-600"
             : cn(
-                "cursor-pointer border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100",
-                isOpen && "border-blue-400 dark:border-blue-500",
+                "cursor-pointer border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-th-high dark:bg-th-raised dark:text-zinc-100",
+                isOpen && "border-th-accent-400 dark:border-th-accent-500",
               ),
         )}
       >
@@ -171,7 +171,7 @@ export const SelectBox = <T extends string>({
               exit={{ opacity: 0, y: -4, scale: 0.98 }}
               transition={{ duration: 0.14, ease: "easeOut" }}
               style={{ position: "fixed", ...position, maxHeight: PANEL_MAX_HEIGHT }}
-              className="z-[10000] overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 font-sans shadow-xl dark:border-zinc-700 dark:bg-zinc-800"
+              className="z-[10000] overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 font-sans shadow-xl dark:border-th-high dark:bg-th-raised"
             >
               {options.map((option, index) => (
                 <button
@@ -184,10 +184,10 @@ export const SelectBox = <T extends string>({
                   className={cn(
                     "flex w-full cursor-pointer items-center justify-between gap-2 px-3 py-1.5 text-left text-xs transition-colors",
                     option.value === value
-                      ? "font-semibold text-blue-700 dark:text-blue-400"
+                      ? "font-semibold text-th-accent-700 dark:text-th-accent-400"
                       : "text-slate-600 dark:text-zinc-300",
                     index === highlighted &&
-                      "bg-slate-100 dark:bg-zinc-700/60",
+                      "bg-slate-100 dark:bg-th-high/60",
                   )}
                 >
                   <span className="truncate">{option.label}</span>

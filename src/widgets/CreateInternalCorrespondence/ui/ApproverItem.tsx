@@ -36,7 +36,7 @@ export const ApproverItem = ({
       className={cn(
         "rounded-xl border transition-all overflow-hidden flex flex-col",
         approver.approved
-          ? "border-emerald-100 bg-emerald-50/40"
+          ? "border-emerald-100 bg-emerald-50/40 dark:bg-emerald-900/35 dark:border-emerald-800/50"
           : "border-slate-100 bg-slate-50/40",
       )}
     >
@@ -88,7 +88,7 @@ export const ApproverItem = ({
               })
             }
             disabled={isApproverInviting}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all border bg-th-accent-50 border-th-accent-200 text-th-accent-700 hover:bg-th-accent-100 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50"
           >
             <Send size={11} />
             <span>
@@ -99,7 +99,7 @@ export const ApproverItem = ({
       </If>
 
       <If is={Boolean(approver.note || (approver.approved && approver.comment))}>
-        <div className="px-3 py-2 bg-amber-50/70 border-t border-amber-100/80 text-[11px] text-slate-700">
+        <div className="px-3 py-2 bg-amber-50/70 border-t border-amber-100/80 text-[11px] text-slate-700 dark:bg-amber-900/35 dark:border-amber-800/50">
           <span className="font-semibold block text-[10px] text-amber-800 mb-0.5">
             💬 Комментарий:
           </span>
@@ -119,8 +119,8 @@ export const ApproverItem = ({
           className={cn(
             "px-3 py-2 border-t",
             approver.approved
-              ? "border-emerald-100 bg-emerald-50/60"
-              : "border-purple-100 bg-purple-50/40",
+              ? "border-emerald-100 bg-emerald-50/60 dark:bg-emerald-900/35 dark:border-emerald-800/50"
+              : "border-purple-100 bg-purple-50/40 dark:bg-purple-900/35 dark:border-purple-800/50",
           )}
         >
           <DSStampPreview

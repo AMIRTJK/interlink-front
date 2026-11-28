@@ -22,7 +22,7 @@ export const UserSection: React.FC<UserSectionProps> = ({
   if (users.length === 0) return null;
 
   return (
-    <div className="relative border border-blue-100 rounded-[32px] pt-8 pb-4 bg-white">
+    <div className="relative border border-th-accent-100 rounded-[32px] pt-8 pb-4 bg-white">
       <div className="max-h-[420px] overflow-y-auto no-scrollbar px-6 pb-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 justify-items-center items-start">
           {users.map((user) => (

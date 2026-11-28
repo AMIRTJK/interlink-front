@@ -48,7 +48,7 @@ export const IncomingLettersPanel = ({
             )}
             aria-label="Входящие письма"
           >
-            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-blue-500" />
+            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-th-accent-500" />
             <span
               style={{
                 writingMode: "vertical-rl",
@@ -116,7 +116,7 @@ export const IncomingLettersPanel = ({
                   <button
                     type="button"
                     onClick={onSaveLetters}
-                    className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-lg hover:bg-emerald-100 transition-colors cursor-pointer whitespace-nowrap"
+                    className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-lg hover:bg-emerald-100 transition-colors cursor-pointer whitespace-nowrap dark:bg-emerald-900/35 dark:text-emerald-400 dark:border-emerald-800/50"
                   >
                     <Check size={12} />
                     <span>Сохранить</span>
@@ -126,7 +126,7 @@ export const IncomingLettersPanel = ({
                   <button
                     type="button"
                     onClick={() => setShowSelectModal(true)}
-                    className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer whitespace-nowrap"
+                    className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-th-accent-600 bg-th-accent-50 border border-th-accent-100 rounded-lg hover:bg-th-accent-100 transition-colors cursor-pointer whitespace-nowrap dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50"
                   >
                     <Plus size={12} />
                     <span>Добавить</span>
@@ -152,7 +152,7 @@ export const IncomingLettersPanel = ({
                       <span className="text-xs font-bold text-slate-300 w-4 flex-shrink-0">
                         {idx + 1}
                       </span>
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-blue-100 text-blue-700">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-th-accent-100 text-th-accent-700 dark:bg-th-accent-900/35 dark:text-th-accent-400">
                         <Mail size={14} />
                       </div>
                       <div className="flex-1 min-w-0">

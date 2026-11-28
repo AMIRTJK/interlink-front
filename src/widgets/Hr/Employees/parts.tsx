@@ -25,7 +25,7 @@ export const Avatar = ({
     />
   ) : (
     <div
-      className={`${rounded} bg-blue-100 text-blue-700 font-bold flex items-center justify-center flex-shrink-0 text-xs`}
+      className={`${rounded} bg-th-accent-100 text-th-accent-700 font-bold flex items-center justify-center flex-shrink-0 text-xs`}
       style={{ width: size, height: size }}
     >
       {initials(e.fullName)}
@@ -59,19 +59,19 @@ export const Field = ({
   <div
     className={`flex items-center gap-3 p-4 rounded-xl transition-colors ${
       accent
-        ? "border bg-indigo-50 border-indigo-100"
-        : "bg-gray-50 hover:bg-indigo-50/60"
+        ? "border bg-th-accent-50 border-th-accent-100 dark:bg-th-accent-900/35 dark:border-th-accent-800/50"
+        : "bg-gray-50 hover:bg-th-accent-50/60"
     }`}
   >
     <div className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0">
-      <span className={accent ? "text-indigo-500" : "text-indigo-400"}>
+      <span className={accent ? "text-th-accent-500" : "text-th-accent-400"}>
         {icon}
       </span>
     </div>
     <div className="min-w-0 flex-1">
       <p
         className={`text-[11px] font-medium uppercase tracking-wide ${
-          accent ? "text-indigo-400" : "text-gray-500"
+          accent ? "text-th-accent-400" : "text-gray-500"
         }`}
       >
         {label}
@@ -80,7 +80,7 @@ export const Field = ({
         <p
           className={`text-sm break-words ${
             accent
-              ? "font-bold text-indigo-700"
+              ? "font-bold text-th-accent-700"
               : "font-semibold text-gray-800"
           }`}
         >
@@ -109,7 +109,7 @@ export const ActivityTab = () => (
         <div className="space-y-5">
           <div className="flex items-start gap-4">
             <div className="relative w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center shrink-0 z-10">
-              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+              <span className="w-2.5 h-2.5 rounded-full bg-th-accent-500" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-700 dark:text-slate-300">Повышение до старшего специалиста</p>
@@ -151,8 +151,8 @@ export const ActivityTab = () => (
 
 export const DocsTab = () => (
   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-    <div className="flex items-center gap-3 p-4 rounded-xl border bg-gray-50 border-gray-200 hover:border-indigo-200 dark:bg-slate-900/50 dark:border-slate-800 dark:hover:border-indigo-500/50 transition-all cursor-pointer">
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
+    <div className="flex items-center gap-3 p-4 rounded-xl border bg-gray-50 border-gray-200 hover:border-th-accent-200 dark:bg-th-base/50 dark:border-th-raised dark:hover:border-th-accent-500/50 transition-all cursor-pointer">
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-th-accent-50 dark:bg-th-accent-950/40 text-th-accent-600 dark:text-th-accent-400">
         <ScrollText size={16} />
       </div>
       <div className="min-w-0 flex-1">
@@ -164,8 +164,8 @@ export const DocsTab = () => (
       </div>
     </div>
 
-    <div className="flex items-center gap-3 p-4 rounded-xl border bg-gray-50 border-gray-200 hover:border-indigo-200 dark:bg-slate-900/50 dark:border-slate-800 dark:hover:border-indigo-500/50 transition-all cursor-pointer">
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
+    <div className="flex items-center gap-3 p-4 rounded-xl border bg-gray-50 border-gray-200 hover:border-th-accent-200 dark:bg-th-base/50 dark:border-th-raised dark:hover:border-th-accent-500/50 transition-all cursor-pointer">
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-th-accent-50 dark:bg-th-accent-950/40 text-th-accent-600 dark:text-th-accent-400">
         <FileText size={16} />
       </div>
       <div className="min-w-0 flex-1">
@@ -177,8 +177,8 @@ export const DocsTab = () => (
       </div>
     </div>
 
-    <div className="flex items-center gap-3 p-4 rounded-xl border bg-gray-50 border-gray-200 hover:border-indigo-200 dark:bg-slate-900/50 dark:border-slate-800 dark:hover:border-indigo-500/50 transition-all cursor-pointer">
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
+    <div className="flex items-center gap-3 p-4 rounded-xl border bg-gray-50 border-gray-200 hover:border-th-accent-200 dark:bg-th-base/50 dark:border-th-raised dark:hover:border-th-accent-500/50 transition-all cursor-pointer">
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-th-accent-50 dark:bg-th-accent-950/40 text-th-accent-600 dark:text-th-accent-400">
         <ClipboardList size={16} />
       </div>
       <div className="min-w-0 flex-1">
@@ -190,8 +190,8 @@ export const DocsTab = () => (
       </div>
     </div>
 
-    <div className="flex items-center gap-3 p-4 rounded-xl border bg-gray-50 border-gray-200 hover:border-indigo-200 dark:bg-slate-900/50 dark:border-slate-800 dark:hover:border-indigo-500/50 transition-all cursor-pointer">
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
+    <div className="flex items-center gap-3 p-4 rounded-xl border bg-gray-50 border-gray-200 hover:border-th-accent-200 dark:bg-th-base/50 dark:border-th-raised dark:hover:border-th-accent-500/50 transition-all cursor-pointer">
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-th-accent-50 dark:bg-th-accent-950/40 text-th-accent-600 dark:text-th-accent-400">
         <Shield size={16} />
       </div>
       <div className="min-w-0 flex-1">

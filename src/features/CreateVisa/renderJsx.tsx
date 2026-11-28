@@ -50,8 +50,8 @@ export const RenderJSX: React.FC = () => {
                 key={index}
                 className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex gap-3 animate-fade-in"
               >
-                <div className="bg-blue-50 p-2 rounded-full h-fit">
-                  <FileTextOutlined className="text-blue-500 text-lg" />
+                <div className="bg-th-accent-50 p-2 rounded-full h-fit dark:bg-th-accent-900/35">
+                  <FileTextOutlined className="text-th-accent-500 text-lg" />
                 </div>
                 <div>
                   <div className="font-medium text-gray-800">{visa}</div>

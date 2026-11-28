@@ -29,6 +29,6 @@ export const FormatIcon = ({ type }: IProps) => {
 			return <Archive size={iconSize} className="text-amber-500!" />;
 		case "document":
 		default:
-			return <FileText size={iconSize} className="text-blue-500!" />;
+			return <FileText size={iconSize} className="text-th-accent-500!" />;
 	}
 };

@@ -60,7 +60,7 @@ export const Avatar = ({
     return (
       <div
         className={cn(
-          "relative flex items-center justify-center rounded-full text-[10px] font-bold text-white shrink-0 select-none bg-slate-400 dark:bg-slate-600",
+          "relative flex items-center justify-center rounded-full text-[10px] font-bold text-white shrink-0 select-none bg-slate-400 dark:bg-th-higher",
           className || "w-8 h-8",
         )}
       >
@@ -93,7 +93,7 @@ export const Avatar = ({
       <div
         className={cn(
           "relative flex items-center justify-center rounded-full text-[10px] font-bold text-white shrink-0 select-none",
-          colleague.color || "bg-slate-400 dark:bg-slate-600",
+          colleague.color || "bg-slate-400 dark:bg-th-higher",
           className || "w-8 h-8",
         )}
       >
@@ -151,7 +151,7 @@ export const Avatar = ({
           <div
             className={cn(
               "absolute inset-0 rounded-full animate-pulse flex items-center justify-center text-[10px] font-bold text-white shrink-0",
-              colleague.color || "bg-slate-400 dark:bg-slate-600",
+              colleague.color || "bg-slate-400 dark:bg-th-higher",
             )}
           >
             {renderFallback()}

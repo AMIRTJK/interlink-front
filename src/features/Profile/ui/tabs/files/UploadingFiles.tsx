@@ -31,8 +31,8 @@ const UploadStatus = ({ item }: IItemProps) => {
 };
 
 const UploadingFileCard = ({ item }: IItemProps) => (
-	<div className="bg-white dark:bg-slate-800 rounded-[2rem] ui-glass border border-zinc-200 dark:border-slate-700 overflow-hidden">
-		<div className="h-32 flex items-center justify-center bg-slate-50 dark:bg-slate-900/40">
+	<div className="bg-white dark:bg-th-raised rounded-[2rem] ui-glass border border-zinc-200 dark:border-th-high overflow-hidden">
+		<div className="h-32 flex items-center justify-center bg-slate-50 dark:bg-th-base/40">
 			<Spin size="large" />
 		</div>
 		<div className="p-5 space-y-1">
@@ -79,7 +79,7 @@ export const UploadingFiles = ({ uploads, viewMode }: IProps) => {
 			<div
 				role="status"
 				aria-live="polite"
-				className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700"
+				className="ui-glass-soft bg-white dark:bg-th-raised rounded-3xl border border-slate-100 dark:border-th-high divide-y divide-slate-100 dark:divide-th-high"
 			>
 				{uploads.map((item) => (
 					<UploadingFileRow key={item.id} item={item} />

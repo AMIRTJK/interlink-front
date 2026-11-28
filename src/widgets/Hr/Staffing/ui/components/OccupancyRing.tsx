@@ -32,7 +32,7 @@ export const OccupancyRing = ({
                 pct >= 1
                   ? '#10b981'
                   : pct >= 0.6
-                  ? '#6366f1'
+                  ? 'var(--th-accent-500)'
                   : pct >= 0.3
                   ? '#f59e0b'
                   : '#f43f5e'
@@ -44,7 +44,7 @@ export const OccupancyRing = ({
                 pct >= 1
                   ? '#059669'
                   : pct >= 0.6
-                  ? '#4f46e5'
+                  ? 'var(--th-accent-600)'
                   : pct >= 0.3
                   ? '#d97706'
                   : '#e11d48'

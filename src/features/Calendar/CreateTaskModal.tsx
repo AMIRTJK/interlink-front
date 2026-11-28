@@ -212,7 +212,7 @@ export const CreateTaskModal = ({
 						users={usersList}
 					/>
 
-					<div className="border-t! border-zinc-100! dark:border-slate-700/50! mt-2! pt-3! pb-2! flex! items-center! justify-end! gap-3!">
+					<div className="border-t! border-zinc-100! dark:border-th-high/50! mt-2! pt-3! pb-2! flex! items-center! justify-end! gap-3!">
 						<button
 							type="button"
 							onClick={onClose}

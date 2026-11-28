@@ -42,13 +42,13 @@ export const RelatedPairCard: React.FC<IProps> = ({
       className={cn(
         "flex flex-col p-4 rounded-2xl border flex-shrink-0 transition-all shadow-2xs select-none min-w-[460px] max-w-[560px] bg-white",
         isPairCurrent
-          ? "border-blue-400 ring-2 ring-blue-100 shadow-sm"
-          : "border-slate-200 hover:border-blue-300 hover:shadow-xs",
+          ? "border-th-accent-400 ring-2 ring-th-accent-100 shadow-sm"
+          : "border-slate-200 hover:border-th-accent-300 hover:shadow-xs",
       )}
     >
       <div className="flex items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-slate-100 text-[11px]">
         <div className="flex items-center gap-2">
-          <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 font-semibold text-[10px] border border-blue-100">
+          <span className="px-2.5 py-0.5 rounded-full bg-th-accent-50 text-th-accent-600 font-semibold text-[10px] border border-th-accent-100 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50">
             {rel.link_label || "Ответное письмо"}
           </span>
           {formattedDate && (
@@ -83,7 +83,7 @@ export const RelatedPairCard: React.FC<IProps> = ({
         )}
 
         <div className="flex items-center justify-center shrink-0 px-1">
-          <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shadow-2xs">
+          <div className="w-8 h-8 rounded-full bg-th-accent-50 text-th-accent-600 flex items-center justify-center border border-th-accent-100 shadow-2xs dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50">
             <ArrowRight size={15} className="stroke-[2.5]" />
           </div>
         </div>

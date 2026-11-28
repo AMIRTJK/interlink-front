@@ -49,11 +49,11 @@ export const HistoryVersionsTab = ({
             className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer group mb-2 ${
               v.id === activeVersionId
                 ? isDarkMode
-                  ? "bg-[#1f2937] border-blue-500 shadow-sm"
-                  : "bg-blue-50/40 border-blue-500 shadow-sm"
+                  ? "bg-th-raised border-th-accent-500 shadow-sm"
+                  : "bg-th-accent-50/40 border-th-accent-500 shadow-sm dark:bg-th-accent-900/35"
                 : isDarkMode
-                  ? "bg-[#1f2937] border-gray-700 hover:bg-gray-800 hover:border-blue-500"
-                  : "bg-gray-50 border-gray-100 hover:bg-blue-50 hover:border-blue-200"
+                  ? "bg-th-raised border-th-high hover:bg-th-raised hover:border-th-accent-500"
+                  : "bg-gray-50 border-gray-100 hover:bg-th-accent-50 hover:border-th-accent-200"
             }`}
           >
             <div className="flex items-start gap-3">
@@ -61,15 +61,15 @@ export const HistoryVersionsTab = ({
                 src={author.photo_path}
                 icon={<UserOutlined />}
                 className={`mt-1! shrink-0! ${
-                  isDarkMode ? "bg-gray-700!" : "bg-gray-200!"
+                  isDarkMode ? "bg-th-high!" : "bg-gray-200!"
                 }`}
               />
               <div>
                 <div
                   className={`font-semibold transition-colors flex gap-1 ${
                     isDarkMode
-                      ? "text-gray-200 group-hover:text-blue-400"
-                      : "text-gray-700 group-hover:text-blue-700"
+                      ? "text-gray-200 group-hover:text-th-accent-400"
+                      : "text-gray-700 group-hover:text-th-accent-700"
                   }`}
                 >
                   <p>Версия {v.versionNumber}</p>
@@ -79,7 +79,7 @@ export const HistoryVersionsTab = ({
                         className={`px-1.5 rounded text-[10px] font-semibold self-center ${
                           isDarkMode
                             ? "bg-emerald-900/40 text-emerald-300"
-                            : "bg-emerald-50 text-emerald-700"
+                            : "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/35 dark:text-emerald-400"
                         }`}
                       >
                         ✓ {v.approvedCount}
@@ -93,7 +93,7 @@ export const HistoryVersionsTab = ({
                   )}
                   {v.is_current_signed && (
                     <Tooltip title="Подписанная версия">
-                      <SafetyCertificateOutlined className="text-blue-500! text-[13px]!" />
+                      <SafetyCertificateOutlined className="text-th-accent-500! text-[13px]!" />
                     </Tooltip>
                   )}
                 </div>
@@ -137,8 +137,8 @@ export const HistoryVersionsTab = ({
               <div
                 className={`self-center ${
                   isDarkMode
-                    ? "text-gray-500 group-hover:text-blue-400"
-                    : "text-gray-300 group-hover:text-blue-500"
+                    ? "text-gray-500 group-hover:text-th-accent-400"
+                    : "text-gray-300 group-hover:text-th-accent-500"
                 }`}
               >
                 <Tooltip title="Восстановить в редакторе">
@@ -147,7 +147,7 @@ export const HistoryVersionsTab = ({
                     icon={<EyeOutlined />}
                     size="small"
                     className={
-                      isDarkMode ? "text-gray-400! hover:text-blue-400!" : ""
+                      isDarkMode ? "text-gray-400! hover:text-th-accent-400!" : ""
                     }
                   />
                 </Tooltip>

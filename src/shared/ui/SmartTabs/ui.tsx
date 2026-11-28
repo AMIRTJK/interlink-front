@@ -28,7 +28,7 @@ export const SmartTabs: React.FC<IProps> = ({
           const isActive = activeKey === tab.key;
 
           const inactiveClass = isDarkMode
-            ? "bg-transparent text-gray-400 hover:bg-gray-800 hover:text-gray-100"
+            ? "bg-transparent text-gray-400 hover:bg-th-raised hover:text-gray-100"
             : "bg-transparent text-gray-500 hover:bg-white hover:text-gray-800";
 
           return (

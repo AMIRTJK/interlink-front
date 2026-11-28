@@ -94,7 +94,7 @@ export const ParagraphSpacingGroup = ({ fmt, onChange }: IProps) => {
           type="checkbox"
           checked={fmt.contextualSpacing}
           onChange={(e) => onChange({ contextualSpacing: e.target.checked })}
-          className="h-3.5 w-3.5 cursor-pointer accent-blue-600"
+          className="h-3.5 w-3.5 cursor-pointer accent-th-accent-600"
         />
         <span>Не добавлять интервал между абзацами одного стиля</span>
       </label>

@@ -42,7 +42,7 @@ export const RecipientField = ({
         <button
           type="button"
           onClick={onPickFromRegistry}
-          className="flex items-center justify-center px-1.5 py-1 rounded-lg text-[10px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors w-16 cursor-pointer"
+          className="flex items-center justify-center px-1.5 py-1 rounded-lg text-[10px] font-semibold text-th-accent-600 bg-th-accent-50 hover:bg-th-accent-100 border border-th-accent-200 transition-colors w-16 cursor-pointer dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50"
           title="Выбрать получателей из реестра"
         >
           Выбрать

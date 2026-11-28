@@ -46,7 +46,7 @@ export const RegistryHeaderBar = ({
   onTabChange,
 }: IProps) => (
   <motion.div
-    className="ui-glass bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-3 space-y-3 shrink-0 m-0"
+    className="ui-glass bg-white dark:bg-th-raised rounded-xl shadow-sm border border-gray-100 dark:border-th-high p-3 space-y-3 shrink-0 m-0"
     initial={{ opacity: 0, y: -20 }}
     animate={{ opacity: 1, y: 0 }}
   >
@@ -55,11 +55,11 @@ export const RegistryHeaderBar = ({
         <motion.button
           whileHover={{
             scale: 1.05,
-            boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.3)",
+            boxShadow: "0 10px 25px -5px rgb(var(--th-accent-rgb)/0.3)",
           }}
           whileTap={{ scale: 0.97 }}
           onClick={onCreateClick}
-          className="relative cursor-pointer flex items-center gap-2 px-6 py-2 overflow-hidden bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold text-sm shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
+          className="relative cursor-pointer flex items-center gap-2 px-6 py-2 overflow-hidden bg-gradient-to-r from-th-accent-600 to-th-accent-700 text-white rounded-lg font-semibold text-sm shadow-lg hover:from-th-accent-700 hover:to-th-accent-800 transition-all duration-300"
         >
           <AnimatePresence>
             {ripples.map((ripple) => (
@@ -82,11 +82,11 @@ export const RegistryHeaderBar = ({
       )}
 
       <div className="flex items-center gap-2">
-        <div className="ui-glass-soft flex items-center gap-2 text-xs text-gray-600 dark:text-slate-300 px-3 py-1.5 bg-gray-50 dark:bg-slate-700/50 rounded-full border border-gray-100 dark:border-slate-700 select-none">
+        <div className="ui-glass-soft h-9 flex items-center gap-2 text-xs text-gray-600 dark:text-slate-300 px-3.5 bg-gray-50 dark:bg-th-high/50 rounded-full border border-gray-100 dark:border-th-high select-none">
           <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
           <span className="font-medium">
             Всего:{" "}
-            <span className="text-blue-600 dark:text-blue-400 font-bold">
+            <span className="text-th-accent-600 dark:text-th-accent-400 font-bold">
               {totalRecords}
             </span>
           </span>
@@ -100,44 +100,44 @@ export const RegistryHeaderBar = ({
           )}
         </div>
 
-        <div className="ui-glass-soft flex items-center gap-1 bg-gray-100 dark:bg-slate-700/50 rounded-lg p-1">
+        <div className="ui-glass-soft h-9 flex items-center gap-1 bg-gray-100 dark:bg-th-high/50 rounded-full p-1 border border-gray-100 dark:border-th-high">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onViewModeChange("list")}
-            className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+            className={`cursor-pointer h-full flex items-center gap-1.5 px-3 rounded-full text-xs font-medium transition-all ${
               viewMode === "list"
-                ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm"
+                ? "bg-white dark:bg-th-raised text-th-accent-600 dark:text-th-accent-400 shadow-sm"
                 : "text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-100"
             }`}
           >
-            <List size={16} />
+            <List size={14} />
             <span>Список</span>
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onViewModeChange("block")}
-            className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+            className={`cursor-pointer h-full flex items-center gap-1.5 px-3 rounded-full text-xs font-medium transition-all ${
               viewMode === "block"
-                ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm"
+                ? "bg-white dark:bg-th-raised text-th-accent-600 dark:text-th-accent-400 shadow-sm"
                 : "text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-100"
             }`}
           >
-            <LayoutGrid size={16} />
+            <LayoutGrid size={14} />
             <span>Блоки</span>
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onViewModeChange("structure")}
-            className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+            className={`cursor-pointer h-full flex items-center gap-1.5 px-3 rounded-full text-xs font-medium transition-all ${
               viewMode === "structure"
-                ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm"
+                ? "bg-white dark:bg-th-raised text-th-accent-600 dark:text-th-accent-400 shadow-sm"
                 : "text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-100"
             }`}
           >
-            <Activity size={16} />
+            <Activity size={14} />
             <span>Структура</span>
           </motion.button>
         </div>
@@ -146,16 +146,16 @@ export const RegistryHeaderBar = ({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onOpenFilters}
-          className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative ${
+          className={`cursor-pointer h-9 flex items-center gap-1.5 px-4 rounded-full text-xs font-medium transition-all duration-300 relative border ${
             hasActiveFilters
-              ? "bg-blue-600 text-white shadow-md"
-              : "ui-glass-soft bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-600"
+              ? "bg-th-accent-600 border-transparent text-white shadow-md"
+              : "ui-glass-soft bg-gray-50 dark:bg-th-high/50 border-gray-100 dark:border-th-high text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-th-higher"
           }`}
         >
-          <Filter size={16} />
+          <Filter size={14} />
           <span>Фильтры</span>
           {hasActiveFilters && (
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-800" />
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-th-raised" />
           )}
         </motion.button>
       </div>
@@ -167,16 +167,16 @@ export const RegistryHeaderBar = ({
           <motion.button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
             transition={{ delay: index * 0.05, duration: 0.3 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             data-active={activeTabId === tab.id}
-            className={`relative group/tab cursor-pointer flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all whitespace-nowrap min-w-[108px] ${
+            className={`relative group/tab cursor-pointer h-9 flex items-center justify-center gap-1.5 px-3.5 text-xs font-medium rounded-full border transition-colors whitespace-nowrap min-w-[108px] ${
               activeTabId === tab.id
-                ? "text-white"
-                : "bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600"
+                ? "border-transparent text-white"
+                : "ui-glass-soft bg-gray-100 dark:bg-th-raised/90 border-zinc-200 dark:border-th-high/50 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-th-high"
             }`}
           >
             <If is={activeTabId === tab.id}>

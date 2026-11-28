@@ -47,7 +47,7 @@ export const VisorCandidatePicker: React.FC<IProps> = ({
         Кого пригласить
       </label>
 
-      <div className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
+      <div className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2 focus-within:border-th-accent-400 focus-within:ring-2 focus-within:ring-th-accent-100 transition-all">
         <Search size={13} className="text-slate-400 flex-shrink-0" />
         <input
           type="text"
@@ -62,7 +62,7 @@ export const VisorCandidatePicker: React.FC<IProps> = ({
         <If is={isLoading}>
           <Loader2
             size={13}
-            className="animate-spin text-indigo-400 flex-shrink-0"
+            className="animate-spin text-th-accent-400 flex-shrink-0"
           />
         </If>
       </div>
@@ -92,11 +92,11 @@ export const VisorCandidatePicker: React.FC<IProps> = ({
               className={cn(
                 "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl border text-left transition-colors",
                 isInvited
-                  ? "border-emerald-100 bg-emerald-50/60 cursor-not-allowed"
+                  ? "border-emerald-100 bg-emerald-50/60 cursor-not-allowed dark:bg-emerald-900/35 dark:border-emerald-800/50"
                   : "border-slate-100 hover:bg-slate-50 hover:border-slate-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60",
               )}
             >
-              <span className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-[11px] font-bold flex-shrink-0">
+              <span className="w-8 h-8 rounded-full bg-th-accent-50 text-th-accent-600 border border-th-accent-100 flex items-center justify-center text-[11px] font-bold flex-shrink-0 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50">
                 {getVisorInitials(candidate.full_name)}
               </span>
               <span className="flex-1 min-w-0">

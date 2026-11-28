@@ -35,7 +35,7 @@ export const SetRolesMultiSelect = ({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm flex items-center justify-between cursor-pointer hover:border-indigo-300 transition-colors"
+        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm flex items-center justify-between cursor-pointer hover:border-th-accent-300 transition-colors"
       >
         <span className={value.length ? "text-slate-900" : "text-slate-400"}>
           {value.length ? `Выбрано: ${value.length}` : placeholder}
@@ -49,13 +49,13 @@ export const SetRolesMultiSelect = ({
           {value.map((v) => (
             <span
               key={v}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-medium"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-th-accent-50 text-th-accent-700 text-xs font-medium dark:bg-th-accent-900/35 dark:text-th-accent-400"
             >
               {options.find((o) => o.value === v)?.label ?? v}
               <button
                 type="button"
                 onClick={() => toggle(v)}
-                className="hover:text-indigo-900 cursor-pointer"
+                className="hover:text-th-accent-900 cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -82,11 +82,11 @@ export const SetRolesMultiSelect = ({
                 type="button"
                 key={o.value}
                 onClick={() => toggle(o.value)}
-                className={`w-full px-3.5 py-2.5 text-sm text-left flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors ${value.includes(o.value) ? "bg-indigo-50 text-indigo-700" : "text-slate-700"}`}
+                className={`w-full px-3.5 py-2.5 text-sm text-left flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors ${value.includes(o.value) ? "bg-th-accent-50 text-th-accent-700 dark:bg-th-accent-900/35 dark:text-th-accent-400" : "text-slate-700"}`}
               >
                 <span>{o.label}</span>
                 <If is={value.includes(o.value)}>
-                  <Check className="w-4 h-4 text-indigo-600" />
+                  <Check className="w-4 h-4 text-th-accent-600" />
                 </If>
               </button>
             ))}

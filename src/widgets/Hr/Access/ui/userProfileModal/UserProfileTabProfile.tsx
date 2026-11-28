@@ -52,21 +52,21 @@ export function UserProfileTabProfile({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-3 gap-4">
-        <div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center">
-          <div className="text-2xl font-bold text-slate-800">142</div>
+        <div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center dark:border-th-high dark:bg-th-base/30">
+          <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">142</div>
           <div className="text-xs text-slate-400 font-medium mt-1">Документов</div>
         </div>
-        <div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center">
-          <div className="text-2xl font-bold text-slate-800">38</div>
+        <div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center dark:border-th-high dark:bg-th-base/30">
+          <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">38</div>
           <div className="text-xs text-slate-400 font-medium mt-1">Поручений</div>
         </div>
-        <div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center">
-          <div className="text-2xl font-bold text-slate-800">3</div>
+        <div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/30 flex flex-col justify-center dark:border-th-high dark:bg-th-base/30">
+          <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">3</div>
           <div className="text-xs text-slate-400 font-medium mt-1">Сессий</div>
         </div>
       </div>
 
-      <div className="border border-slate-100 rounded-2xl p-5 space-y-3">
+      <div className="border border-slate-100 rounded-2xl p-5 space-y-3 dark:border-th-high">
         <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
           Роли пользователя
         </h4>
@@ -79,7 +79,7 @@ export function UserProfileTabProfile({
           {selectedRoles.map((role) => {
             const style = ROLE_CHIP_STYLE_MAP[role] || {
               border: "border-blue-100!",
-              bg: "bg-blue-50/50!",
+              bg: "bg-blue-50/50! dark:bg-blue-900/35!",
               text: "text-blue-600!",
             };
             return (
@@ -106,7 +106,7 @@ export function UserProfileTabProfile({
           >
             <button
               type="button"
-              className="px-3 py-1 border border-dashed border-slate-300 hover:border-blue-500 hover:text-blue-600 rounded-xl text-sm text-slate-500 transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-50! disabled:cursor-not-allowed!"
+              className="px-3 py-1 border border-dashed border-slate-300 hover:border-th-accent-500 hover:text-th-accent-600 rounded-xl text-sm text-slate-500 transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-50! disabled:cursor-not-allowed! dark:border-th-high dark:text-slate-400"
             >
               <span>Добавить роль</span>
               <ChevronDown size={14} className="text-slate-400" />
@@ -115,7 +115,7 @@ export function UserProfileTabProfile({
         </div>
       </div>
 
-      <div className="border border-slate-100 rounded-2xl p-5 space-y-3">
+      <div className="border border-slate-100 rounded-2xl p-5 space-y-3 dark:border-th-high">
         <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
           Уровни доступа
         </h4>
@@ -134,15 +134,15 @@ export function UserProfileTabProfile({
                     key={perm}
                     className="flex items-center justify-between py-2 border-b border-slate-50/50"
                   >
-                    <span className="text-xs text-slate-600 font-semibold">
+                    <span className="text-xs text-slate-600 font-semibold dark:text-slate-300">
                       {mod} — {action}
                     </span>
                     {hasPermission ? (
-                      <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 text-[10px] font-bold select-none">
+                      <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 text-[10px] font-bold select-none dark:bg-emerald-900/35 dark:text-emerald-400">
                         Да
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-400 text-[10px] font-bold select-none">
+                      <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-400 text-[10px] font-bold select-none dark:bg-th-high">
                         Нет
                       </span>
                     )}
@@ -151,7 +151,7 @@ export function UserProfileTabProfile({
               })}
             </div>
             {relevantPermissions.length > ACCESS_PAGE_SIZE && (
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2 dark:border-th-high">
                 <span className="text-xs text-slate-400 font-medium mr-auto">
                   {(accessPage - 1) * ACCESS_PAGE_SIZE + 1}–
                   {Math.min(
@@ -163,7 +163,7 @@ export function UserProfileTabProfile({
                 <button
                   onClick={() => onAccessPageChange((p) => Math.max(1, p - 1))}
                   disabled={accessPage === 1}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer dark:border-th-high"
                 >
                   <svg
                     width="14"
@@ -178,7 +178,7 @@ export function UserProfileTabProfile({
                     <path d="M15 18l-6-6 6-6" />
                   </svg>
                 </button>
-                <span className="text-xs font-bold text-slate-600 min-w-[32px] text-center">
+                <span className="text-xs font-bold text-slate-600 min-w-[32px] text-center dark:text-slate-300">
                   {accessPage} /{" "}
                   {Math.ceil(relevantPermissions.length / ACCESS_PAGE_SIZE)}
                 </span>
@@ -195,7 +195,7 @@ export function UserProfileTabProfile({
                     accessPage >=
                     Math.ceil(relevantPermissions.length / ACCESS_PAGE_SIZE)
                   }
-                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer dark:border-th-high"
                 >
                   <svg
                     width="14"

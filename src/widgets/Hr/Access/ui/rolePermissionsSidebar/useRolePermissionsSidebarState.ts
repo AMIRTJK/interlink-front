@@ -144,19 +144,19 @@ export function useRolePermissionsSidebarState({
   };
 
   const colors = useMemo(() => {
-    if (!role) return { bg: "bg-slate-50 text-slate-500" };
+    if (!role) return { bg: "bg-slate-50 text-slate-500 dark:bg-th-base dark:text-slate-400" };
     const name = role.name.toLowerCase();
     if (name.includes("администратор") || name.includes("admin"))
-      return { bg: "bg-blue-50 text-blue-600" };
+      return { bg: "bg-th-accent-50 text-th-accent-600 dark:bg-th-accent-900/35 dark:text-th-accent-400" };
     if (name.includes("делопроизводитель") || name.includes("recipient"))
-      return { bg: "bg-emerald-50 text-emerald-600" };
+      return { bg: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/35 dark:text-emerald-400" };
     if (name.includes("руководитель") || name.includes("signer"))
-      return { bg: "bg-orange-50 text-orange-600" };
+      return { bg: "bg-orange-50 text-orange-600 dark:bg-orange-900/35 dark:text-orange-400" };
     if (name.includes("исполнитель") || name.includes("approval"))
-      return { bg: "bg-indigo-50 text-indigo-600" };
+      return { bg: "bg-th-accent-50 text-th-accent-600 dark:bg-th-accent-900/35 dark:text-th-accent-400" };
     if (name.includes("контрол") || name.includes("control"))
-      return { bg: "bg-purple-50 text-purple-600" };
-    return { bg: "bg-slate-50 text-slate-500" };
+      return { bg: "bg-purple-50 text-purple-600 dark:bg-purple-900/35 dark:text-purple-400" };
+    return { bg: "bg-slate-50 text-slate-500 dark:bg-th-base dark:text-slate-400" };
   }, [role?.name]);
 
   return {

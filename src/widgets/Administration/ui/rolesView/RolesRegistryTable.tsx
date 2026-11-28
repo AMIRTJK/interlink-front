@@ -66,7 +66,7 @@ export function RolesRegistryTable({
                 onClick={() => onCardClick(card.id)}
                 style={{
                   height: 48,
-                  borderBottom: `1px solid #F1F5F9`,
+                  borderBottom: `1px solid ${T.hoverBg}`,
                   background: isSelected ? `${borderColor}08` : "transparent",
                   cursor: "pointer",
                   transition: "background 0.12s",
@@ -75,7 +75,7 @@ export function RolesRegistryTable({
                 onMouseEnter={(e) => {
                   if (!isSelected)
                     (e.currentTarget as HTMLTableRowElement).style.background =
-                      "#F8FAFC";
+                      T.bg;
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLTableRowElement).style.background =

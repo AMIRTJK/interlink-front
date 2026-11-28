@@ -47,7 +47,7 @@ export const SessionLockGate = () => {
                 initial={false}
                 animate={{ opacity: isControlsVisible ? 1 : 0 }}
                 transition={isControlsVisible ? CONTROLS_FADE_TRANSITION.show : CONTROLS_FADE_TRANSITION.hide}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 backdrop-blur-xl border cursor-pointer focus-visible:outline-2 focus-visible:outline-indigo-400 ${isControlsVisible ? "" : "pointer-events-none"} ${isSceneDark ? "bg-white/10 hover:bg-white/20 border-white/20 text-white" : "bg-black/5 hover:bg-black/10 border-black/10 text-slate-800"}`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 backdrop-blur-xl border cursor-pointer focus-visible:outline-2 focus-visible:outline-th-accent-400 ${isControlsVisible ? "" : "pointer-events-none"} ${isSceneDark ? "bg-white/10 hover:bg-white/20 border-white/20 text-white" : "bg-black/5 hover:bg-black/10 border-black/10 text-slate-800"}`}
               >
                 <LogOut size={18} />
               </motion.button>

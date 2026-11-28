@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { ChevronDown, ArrowUp, ArrowDown } from "lucide-react";
-import { If } from "@shared/ui";
+import { If, Tooltip } from "@shared/ui";
 import { SORT_LABELS, SORT_OPTIONS } from "./filesHeaderModel";
 import type { TFilesSort, TFilesSortDir } from "./filesTabModel";
 
@@ -21,6 +21,7 @@ export const FilesHeaderSort = ({
 }: IProps) => {
 	const [sortOpen, setSortOpen] = useState(false);
 	const sortRef = useRef<HTMLDivElement>(null);
+	const sortDirLabel = sortDir === "asc" ? "По возрастанию" : "По убыванию";
 
 	useEffect(() => {
 		if (!sortOpen) return;
@@ -33,11 +34,11 @@ export const FilesHeaderSort = ({
 	}, [sortOpen]);
 
 	return (
-		<div className="flex items-center gap-1">
+		<div className="flex items-center gap-3">
 			<div className="relative" ref={sortRef}>
 				<button
 					onClick={() => setSortOpen((prev) => !prev)}
-					className="flex items-center gap-1.5 px-4 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-zinc-300 rounded-full border border-slate-200 dark:border-slate-700 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-all font-medium cursor-pointer"
+					className="flex items-center gap-1.5 px-4 py-2 ui-glass-soft bg-slate-50 dark:bg-th-raised/80 text-slate-600 dark:text-zinc-300 rounded-full border border-slate-200 dark:border-th-high text-sm hover:bg-slate-100 dark:hover:bg-th-high transition-all font-medium cursor-pointer"
 				>
 					<span>{SORT_LABELS[sortBy]}</span>
 					<ChevronDown
@@ -47,7 +48,7 @@ export const FilesHeaderSort = ({
 				</button>
 
 				<If is={sortOpen}>
-					<div className="absolute right-0 mt-1.5 w-32 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-xl py-1 z-50">
+					<div className="absolute right-0 mt-1.5 w-32 bg-white dark:bg-th-raised border border-slate-100 dark:border-th-high rounded-2xl shadow-xl py-1 z-50">
 						{SORT_OPTIONS.map((option) => (
 							<button
 								key={option}
@@ -57,8 +58,8 @@ export const FilesHeaderSort = ({
 								}}
 								className={`w-full text-left px-4 py-2 text-sm transition-colors cursor-pointer ${
 									sortBy === option
-										? "bg-slate-100 dark:bg-slate-700/60 text-slate-800 dark:text-zinc-100 font-semibold"
-										: "text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-slate-700"
+										? "bg-slate-100 dark:bg-th-high/60 text-slate-800 dark:text-zinc-100 font-semibold"
+										: "text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-th-high"
 								}`}
 								style={sortBy === option ? { color: accent } : undefined}
 							>
@@ -69,13 +70,16 @@ export const FilesHeaderSort = ({
 				</If>
 			</div>
 
-			<button
-				onClick={onSortDirToggle}
-				className="p-2 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-full text-slate-500 dark:text-zinc-300 cursor-pointer transition-all"
-				title={sortDir === "asc" ? "По возрастанию" : "По убыванию"}
-			>
-				{sortDir === "asc" ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
-			</button>
+			<Tooltip title={sortDirLabel}>
+				<button
+					type="button"
+					onClick={onSortDirToggle}
+					aria-label={sortDirLabel}
+					className="h-[38px] w-[38px] flex items-center justify-center ui-glass-soft bg-slate-50 dark:bg-th-raised/80 hover:bg-slate-100 dark:hover:bg-th-high border border-slate-200 dark:border-th-high rounded-full text-slate-500 dark:text-zinc-300 cursor-pointer transition-all"
+				>
+					{sortDir === "asc" ? <ArrowUp size={15} /> : <ArrowDown size={15} />}
+				</button>
+			</Tooltip>
 		</div>
 	);
 };

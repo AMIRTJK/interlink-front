@@ -30,7 +30,7 @@ export const LetterTypeSelect = ({
       className={cn(
         "w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl border text-sm font-medium transition-all",
         letterType
-          ? "bg-indigo-50 border-indigo-200 text-indigo-800"
+          ? "bg-th-accent-50 border-th-accent-200 text-th-accent-800 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50"
           : "bg-slate-50 border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600",
       )}
     >
@@ -38,7 +38,7 @@ export const LetterTypeSelect = ({
         <FileType
           size={15}
           className={
-            letterType ? "text-indigo-500" : "text-slate-400"
+            letterType ? "text-th-accent-500" : "text-slate-400"
           }
         />
         {letterType ? (
@@ -48,7 +48,7 @@ export const LetterTypeSelect = ({
                 (o) => o.value === letterType,
               )?.label ?? letterType}
             </span>
-            <span className="text-indigo-500 text-xs ml-2">
+            <span className="text-th-accent-500 text-xs ml-2">
               —{" "}
               {
                 letterTypeOptions.find(

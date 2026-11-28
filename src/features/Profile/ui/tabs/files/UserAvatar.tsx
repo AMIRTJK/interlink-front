@@ -4,7 +4,7 @@ import { Search, X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { IFileUser, resolveFilePhotoUrl, getUserInitials } from "./lib";
 
 const AVATAR_COLORS = [
-  "bg-indigo-500!",
+  "bg-th-accent-500!",
   "bg-emerald-500!",
   "bg-rose-500!",
   "bg-amber-500!",
@@ -43,7 +43,7 @@ export const UserAvatar = ({
     (user as any)?.profile_photo_url;
   const photo = resolveFilePhotoUrl(rawPhoto);
   const colorClass = AVATAR_COLORS[(user?.id ?? 0) % AVATAR_COLORS.length];
-  const ringClass = ring ? "ring-2 ring-white dark:ring-slate-900" : "";
+  const ringClass = ring ? "ring-2 ring-white dark:ring-th-base" : "";
   const initials = getUserInitials(user);
 
   if (!photo || failed) {
@@ -96,7 +96,7 @@ export const UserAvatar = ({
       >
         {!loaded && (
           <div
-            className="absolute inset-0 rounded-full animate-pulse bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-400 dark:text-zinc-500"
+            className="absolute inset-0 rounded-full animate-pulse bg-slate-200 dark:bg-th-raised flex items-center justify-center font-bold text-slate-400 dark:text-zinc-500"
             style={{ fontSize: Math.round(size * 0.38) }}
           >
             {initials}

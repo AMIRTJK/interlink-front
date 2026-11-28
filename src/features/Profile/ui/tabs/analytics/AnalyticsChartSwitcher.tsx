@@ -22,8 +22,8 @@ export const AnalyticsChartSwitcher = memo(({ current, onChange }: IProps) => {
 				onClick={() => onChange(type)}
 				className={`rounded-lg! p-1.5! transition-all! duration-200! cursor-pointer! ${
 					current === type
-						? "bg-white! dark:bg-zinc-700! shadow-sm! text-indigo-600! dark:text-indigo-400!"
-						: "bg-transparent! text-zinc-400! hover:text-zinc-600! dark:hover:text-zinc-200! hover:bg-zinc-200/50! dark:hover:bg-zinc-700/50!"
+						? "bg-th-accent-600! text-white! shadow-sm!"
+						: "bg-transparent! text-zinc-500! dark:text-zinc-400! hover:text-zinc-700! dark:hover:text-zinc-100! hover:bg-zinc-200/50! dark:hover:bg-th-high/50!"
 				}`}
 			>
 				{icon}
@@ -32,7 +32,7 @@ export const AnalyticsChartSwitcher = memo(({ current, onChange }: IProps) => {
 	);
 
 	return (
-		<div className="rounded-xl! bg-zinc-100! dark:bg-zinc-800! p-0.5! flex! gap-0.5!">
+		<div className="ui-glass-soft rounded-xl! bg-zinc-100! dark:bg-th-raised/90! border! border-zinc-200! dark:border-th-high/50! p-0.5! flex! gap-0.5!">
 			{renderBtn("bar", <BarChart2 size={14} />, "Столбцы")}
 			{renderBtn("line", <LineChartIcon size={14} />, "Линия")}
 			{renderBtn("area", <TrendingUp size={14} />, "Область")}

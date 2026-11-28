@@ -58,9 +58,9 @@ export const SelectedExecutorsList = ({
       {departments.map((dept) => (
         <div
           key={`dept-${dept.id}`}
-          className="flex items-center gap-2 bg-white border border-indigo-100 rounded-full pl-1 pr-3 py-1 shadow-sm select-none min-w-0"
+          className="flex items-center gap-2 bg-white border border-th-accent-100 rounded-full pl-1 pr-3 py-1 shadow-sm select-none min-w-0"
         >
-          <div className="w-6 h-6 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
+          <div className="w-6 h-6 rounded-full bg-th-accent-50 flex items-center justify-center text-th-accent-500 shrink-0 dark:bg-th-accent-900/35">
             <ApartmentOutlined style={{ fontSize: "14px" }} />
           </div>
           <span className="text-[12px] text-gray-700 font-medium truncate">

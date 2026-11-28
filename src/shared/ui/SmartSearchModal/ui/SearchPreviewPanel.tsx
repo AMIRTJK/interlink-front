@@ -13,7 +13,7 @@ export const SearchPreviewPanel: React.FC<IProps> = ({ item, isDarkMode }) => {
       <div
         className={`flex flex-col h-full rounded-3xl border p-5 items-center justify-center ${
           isDarkMode
-            ? "bg-gray-800 border-gray-700 text-gray-500"
+            ? "bg-th-raised border-th-high text-gray-500"
             : "bg-gray-50 border-gray-100 text-gray-300"
         }`}
       >
@@ -27,7 +27,7 @@ export const SearchPreviewPanel: React.FC<IProps> = ({ item, isDarkMode }) => {
       <div
         className={`flex-1 rounded-3xl border overflow-hidden relative ${
           isDarkMode
-            ? "bg-gray-800 border-gray-700"
+            ? "bg-th-raised border-th-high"
             : "bg-white border-gray-100"
         }`}
       >

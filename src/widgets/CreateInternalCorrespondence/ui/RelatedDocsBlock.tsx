@@ -73,13 +73,13 @@ export const RelatedDocsAccordion: React.FC<IProps> = ({
         )}
       >
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-th-accent-50 text-th-accent-600 flex items-center justify-center flex-shrink-0 dark:bg-th-accent-900/35 dark:text-th-accent-400">
             <Link2 size={16} />
           </div>
           <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
             Связанные документы
           </span>
-          <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-xs font-bold border border-blue-100">
+          <span className="px-2 py-0.5 rounded-full bg-th-accent-50 text-th-accent-600 text-xs font-bold border border-th-accent-100 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50">
             {count}
           </span>
         </div>
@@ -139,8 +139,8 @@ export const RelatedDocsAccordion: React.FC<IProps> = ({
                         className={cn(
                           "flex items-center gap-3 p-3.5 rounded-2xl border flex-shrink-0 cursor-pointer transition-all shadow-2xs select-none min-w-[280px] bg-white",
                           item.isCurrent
-                            ? "border-blue-400 ring-2 ring-blue-100 shadow-sm"
-                            : "border-slate-200 hover:border-blue-400 hover:bg-blue-50/30",
+                            ? "border-th-accent-400 ring-2 ring-th-accent-100 shadow-sm"
+                            : "border-slate-200 hover:border-th-accent-400 hover:bg-th-accent-50/30",
                         )}
                       >
                         <UserAvatar
@@ -160,7 +160,7 @@ export const RelatedDocsAccordion: React.FC<IProps> = ({
                                 "w-1.5 h-1.5 rounded-full shrink-0",
                                 item.kind === "incoming"
                                   ? "bg-emerald-500"
-                                  : "bg-blue-500",
+                                  : "bg-th-accent-500",
                               )}
                             />
                             <span className="truncate">

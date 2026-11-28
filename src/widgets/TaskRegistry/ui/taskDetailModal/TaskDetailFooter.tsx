@@ -26,7 +26,7 @@ export function TaskDetailFooter({
   onEdit,
 }: IProps) {
   return (
-    <div className="p-6 bg-slate-50/90 dark:bg-slate-800/80 border-t border-slate-200 dark:border-white/10 flex items-center justify-between gap-4">
+    <div className="p-6 bg-slate-50/90 dark:bg-th-raised/80 border-t border-slate-200 dark:border-white/10 flex items-center justify-between gap-4">
       <If is={Boolean(onDelete)}>
         <div className="relative flex items-center min-h-[40px]">
           <AnimatePresence mode="wait">
@@ -88,7 +88,7 @@ export function TaskDetailFooter({
       <div className="ml-auto flex items-center gap-3">
         <button
           onClick={onClose}
-          className="px-6 py-2.5 text-xs font-extrabold text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 border border-slate-200 dark:border-white/10 rounded-xl transition-all cursor-pointer active:scale-95"
+          className="px-6 py-2.5 text-xs font-extrabold text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-th-high/70 border border-slate-200 dark:border-white/10 rounded-xl transition-all cursor-pointer active:scale-95"
         >
           Закрыть
         </button>

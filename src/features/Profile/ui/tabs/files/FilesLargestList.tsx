@@ -27,7 +27,7 @@ const getIconConfig = (ext: string) => {
 		case "presentation":
 			return { icon: Presentation, color: "text-orange-500! bg-orange-50 dark:bg-orange-950/20" };
 		default:
-			return { icon: FileText, color: "text-blue-500! bg-blue-50 dark:bg-blue-950/20" };
+			return { icon: FileText, color: "text-th-accent-500! bg-th-accent-50 dark:bg-th-accent-950/20" };
 	}
 };
 
@@ -49,7 +49,7 @@ export const FilesLargestList = ({ largestFiles = [] }: IProps) => {
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.3, delay: 0.2 }}
-				className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-slate-700/50 p-5 flex flex-col items-center justify-center min-h-[320px]"
+				className="rounded-3xl bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 p-5 flex flex-col items-center justify-center min-h-[320px]"
 			>
 				<h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200 mb-4">
 					Самые крупные файлы
@@ -64,7 +64,7 @@ export const FilesLargestList = ({ largestFiles = [] }: IProps) => {
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.3, delay: 0.2 }}
-			className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-slate-700/50 p-5 flex flex-col min-h-[320px]"
+			className="rounded-3xl bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 p-5 flex flex-col min-h-[320px]"
 		>
 			<h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200 mb-4">
 				Самые крупные файлы
@@ -76,7 +76,7 @@ export const FilesLargestList = ({ largestFiles = [] }: IProps) => {
 					return (
 						<div
 							key={file.id}
-							className="flex items-center justify-between p-3 bg-slate-50/50 dark:bg-slate-850/50 rounded-2xl border border-slate-100/70 dark:border-slate-800/40 hover:bg-slate-100/50 dark:hover:bg-slate-800/60 transition-all duration-200"
+							className="flex items-center justify-between p-3 bg-slate-50/50 dark:bg-th-raised/50 rounded-2xl border border-slate-100/70 dark:border-th-raised/40 hover:bg-slate-100/50 dark:hover:bg-th-raised/60 transition-all duration-200"
 						>
 							<div className="flex items-center gap-3 min-w-0 flex-1">
 								<div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/20 shadow-sm ${color}`}>
@@ -95,7 +95,7 @@ export const FilesLargestList = ({ largestFiles = [] }: IProps) => {
 										<If is={!!file.folder}>
 											<>
 												<span>•</span>
-												<span className="text-indigo-600/80 dark:text-indigo-400/80 truncate">
+												<span className="text-th-accent-600/80 dark:text-th-accent-400/80 truncate">
 													{file.folder?.emoji || "📁"} {file.folder?.name}
 												</span>
 											</>

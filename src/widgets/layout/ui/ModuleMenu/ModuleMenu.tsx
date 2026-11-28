@@ -44,7 +44,7 @@ export const ModuleMenu = ({
   }
 
   return (
-    <div className={`menu-container ${variant}-mode`}>
+    <div className={`menu-container ${variant}-mode ui-glass ui-glass--forced`}>
       {hideTopLevel ? null : variant === "horizontal" || variant === "full" ? (
         <Menu
           onClick={(e) => handleNavigate(e.key)}

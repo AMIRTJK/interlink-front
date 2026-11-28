@@ -8,12 +8,12 @@ interface IProps {
 
 const getDropzoneStateClass = (isUploading: boolean, isDragOver: boolean) => {
 	if (isUploading) {
-		return "cursor-not-allowed border-slate-200 dark:border-slate-800 text-slate-400 opacity-70";
+		return "cursor-not-allowed border-slate-200 dark:border-th-raised text-slate-400 opacity-70";
 	}
 	if (isDragOver) {
-		return "cursor-pointer border-indigo-600 bg-indigo-50/30 text-indigo-600";
+		return "cursor-pointer border-th-accent-600 bg-th-accent-50/30 text-th-accent-600 dark:bg-th-accent-900/35 dark:text-th-accent-400";
 	}
-	return "cursor-pointer border-slate-200 dark:border-slate-800 text-slate-400 hover:border-slate-300 dark:hover:border-slate-700";
+	return "cursor-pointer border-slate-200 dark:border-th-raised text-slate-400 hover:border-slate-300 dark:hover:border-th-high";
 };
 
 export const FilesDropzone =({ onUpload, isUploading }: IProps) => {

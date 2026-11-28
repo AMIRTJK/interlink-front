@@ -43,9 +43,9 @@ export const EmojiPicker = ({ selectedEmoji, onSelectEmoji }: IProps) => {
 									key={emoji}
 									type="button"
 									onClick={() => onSelectEmoji(emoji)}
-									className={`w-10 h-10 flex! items-center! justify-center! text-2xl rounded-xl transition-all hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer ${
+									className={`w-10 h-10 flex! items-center! justify-center! text-2xl rounded-xl transition-all hover:bg-slate-100 dark:hover:bg-th-raised cursor-pointer ${
 										isSelected
-											? "border-2 border-indigo-500! bg-indigo-50 dark:bg-indigo-950/20"
+											? "border-2 border-th-accent-500! bg-th-accent-50 dark:bg-th-accent-950/20"
 											: "border-2 border-transparent"
 									}`}
 								>

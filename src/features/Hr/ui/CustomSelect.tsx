@@ -63,12 +63,12 @@ export const CustomSelect = ({
       </button>
 
       <If is={open}>
-        <div className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg py-1">
+        <div className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto rounded-xl border border-gray-200 dark:border-th-raised bg-white dark:bg-th-base shadow-lg py-1">
           <If is={allowClear}>
             <button
               type="button"
               onClick={() => handleSelect(undefined)}
-              className="w-full px-3 py-2 text-sm text-left text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800/50 cursor-pointer"
+              className="w-full px-3 py-2 text-sm text-left text-gray-400 hover:bg-gray-50 dark:hover:bg-th-raised/50 cursor-pointer"
             >
               — Не выбрано —
             </button>
@@ -83,13 +83,13 @@ export const CustomSelect = ({
                   type="button"
                   key={o.value}
                   onClick={() => handleSelect(o.value)}
-                  className={`w-full px-3 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-slate-800/50 cursor-pointer flex items-center justify-between ${
-                    active ? "text-indigo-600 dark:text-indigo-400 font-semibold bg-indigo-50/30 dark:bg-indigo-950/20" : "text-gray-700 dark:text-slate-300"
+                  className={`w-full px-3 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-th-raised/50 cursor-pointer flex items-center justify-between ${
+                    active ? "text-th-accent-600 dark:text-th-accent-400 font-semibold bg-th-accent-50/30 dark:bg-th-accent-950/20" : "text-gray-700 dark:text-slate-300"
                   }`}
                 >
                   <span>{o.label}</span>
                   <If is={active}>
-                    <Check size={14} className="text-indigo-600 dark:text-indigo-400" />
+                    <Check size={14} className="text-th-accent-600 dark:text-th-accent-400" />
                   </If>
                 </button>
               );

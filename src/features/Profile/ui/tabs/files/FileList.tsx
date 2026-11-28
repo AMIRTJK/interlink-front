@@ -42,7 +42,7 @@ export const FileList = memo(({
 	} = useFileDragReorder(files, onReorderFiles);
 
 	return (
-		<div className="overflow-x-auto bg-white dark:bg-slate-900 rounded-[2rem] ui-glass border border-zinc-200 dark:border-slate-800 p-4">
+		<div className="overflow-x-auto bg-white dark:bg-th-base rounded-[2rem] ui-glass border border-zinc-200 dark:border-th-raised p-4">
 			<table className="w-full text-left border-collapse min-w-[700px]">
 				<FileListHeader
 					files={files}
@@ -51,7 +51,7 @@ export const FileList = memo(({
 					onSelectAll={onSelectAll}
 					onDeselectAll={onDeselectAll}
 				/>
-				<tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
+				<tbody className="divide-y divide-slate-50 dark:divide-th-raised/50">
 					{files.map((file, index) => (
 						<FileListRow
 							key={file.id}

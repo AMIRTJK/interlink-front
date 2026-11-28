@@ -41,11 +41,11 @@ export const StaffingWidget = ({ dark = false }: IStaffingWidgetProps) => {
     ? state.organizations.find((o) => o.id === state.addPositionTarget?.orgId)?.departments.find((d) => d.id === state.addPositionTarget?.deptId) ?? null
     : null;
 
-  const headerCardBg = dark ? 'bg-gray-800/80 border-gray-700/60' : 'bg-white border-gray-100';
+  const headerCardBg = dark ? 'ui-glass bg-th-raised/80 border-th-high/60' : 'ui-glass bg-white border-gray-100';
   const titleText = dark ? 'text-gray-100' : 'text-gray-900';
   const subText = dark ? 'text-gray-400' : 'text-gray-500';
   const pdfBg = dark ? 'border-emerald-800/40 bg-emerald-900/20 text-emerald-400' : 'border-emerald-200 text-emerald-700';
-  const pdfUploadBtn = dark ? 'border-gray-700 text-gray-400 hover:border-gray-600 hover:bg-gray-700' : 'border-gray-200 text-gray-400 hover:border-gray-300 hover:bg-gray-50';
+  const pdfUploadBtn = dark ? 'border-th-high text-gray-400 hover:border-th-higher hover:bg-th-high' : 'border-gray-200 text-gray-400 hover:border-gray-300 hover:bg-gray-50';
 
   return (
     <div className="space-y-4 animate-in fade-in duration-300 h-full overflow-hidden">

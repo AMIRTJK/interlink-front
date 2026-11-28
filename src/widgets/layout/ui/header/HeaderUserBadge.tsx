@@ -34,7 +34,7 @@ export const HeaderUserBadge = memo(({
     <div
       className={`hidden md:flex items-center gap-4 min-w-0 ${
         showLogo
-          ? "pl-6 border-l border-zinc-900/10 dark:border-zinc-700/40"
+          ? "pl-6 border-l border-th-base/10 dark:border-th-high/40"
           : ""
       }`}
     >
@@ -42,12 +42,12 @@ export const HeaderUserBadge = memo(({
         <img
           src={photoUrl}
           alt="Аватар пользователя"
-          className="w-11 h-11 rounded-[2.5rem] border-2 border-white/60 dark:border-zinc-900/60 object-cover shadow-lg"
+          className="w-11 h-11 rounded-[2.5rem] border-2 border-white/60 dark:border-th-base/60 object-cover shadow-lg"
           onError={() => setAvatarError(true)}
         />
         <span className="absolute top-0 right-0 flex h-3 w-3">
           <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
-          <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-white/60 dark:border-zinc-900/60 bg-emerald-500 shadow-lg animate-live-breathe" />
+          <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-white/60 dark:border-th-base/60 bg-emerald-500 shadow-lg animate-live-breathe" />
         </span>
       </div>
       <div className="leading-tight min-w-0">

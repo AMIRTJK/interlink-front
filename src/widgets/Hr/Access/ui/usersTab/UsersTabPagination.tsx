@@ -37,7 +37,7 @@ export function UsersTabPagination({
         <button
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
-          className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
+          className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white dark:border-th-high dark:bg-th-raised"
         >
           <svg
             width="14"
@@ -58,8 +58,8 @@ export function UsersTabPagination({
             onClick={() => onPageChange(p)}
             className={`w-8 h-8 flex items-center justify-center rounded-xl text-xs font-bold transition-all cursor-pointer ${
               currentPage === p
-                ? "bg-blue-600 text-white border border-blue-600 shadow-sm"
-                : "bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                ? "bg-th-accent-600 text-white border border-th-accent-600 shadow-sm"
+                : "bg-white text-slate-500 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:bg-th-raised dark:text-slate-400 dark:border-th-high dark:hover:bg-th-high"
             }`}
           >
             {p}
@@ -68,7 +68,7 @@ export function UsersTabPagination({
         <button
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
-          className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
+          className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white dark:border-th-high dark:bg-th-raised"
         >
           <svg
             width="14"

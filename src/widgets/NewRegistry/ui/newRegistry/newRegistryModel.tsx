@@ -138,7 +138,7 @@ export const STATUS_CONFIG: Record<string, any> = {
 	default: {
 		label: "Документ",
 		icon: <FileEdit size={14} />,
-		gradient: "from-gray-500 to-gray-600",
+		gradient: "from-gray-500 to-th-higher",
 	},
 };
 

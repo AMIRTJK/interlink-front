@@ -274,6 +274,33 @@ export const getThemeAccentColor = (themeKey: string, isDark: boolean): string =
   return `rgb(${r}, ${g}, ${b})`;
 };
 
+/** Нейтрали уровней тёмной поверхности — те же, что у `--th-dark-*` в theme.css. */
+export type TDarkSurfaceLevel = "deep" | "base" | "raised" | "high" | "higher";
+
+const DARK_SURFACE_BASES: Record<TDarkSurfaceLevel, TRgb> = {
+  deep: [2, 4, 12],
+  base: [10, 14, 28],
+  raised: [24, 30, 46],
+  high: [44, 52, 70],
+  higher: [66, 76, 96],
+};
+
+const DARK_SURFACE_TINT = 0.08;
+
+/**
+ * Уровни тёмной поверхности темы значениями `rgb(...)` — для antd, который не
+ * читает CSS-переменные. Формула повторяет `--th-dark-*` из theme.css.
+ */
+export const getDarkSurfaceColors = (themeKey: string): Record<TDarkSurfaceLevel, string> => {
+  const [r, g, b] = buildThemeTokens(themeKey, true)["--th-accent-rgb"].split(" ").map(Number);
+  const accent: TRgb = [r, g, b];
+  const entries = Object.entries(DARK_SURFACE_BASES).map(([level, base]) => {
+    const [cr, cg, cb] = mix(base, accent, DARK_SURFACE_TINT);
+    return [level, `rgb(${cr}, ${cg}, ${cb})`];
+  });
+  return Object.fromEntries(entries) as Record<TDarkSurfaceLevel, string>;
+};
+
 /** Записывает токены активной темы в корень документа. */
 export const applyThemeTokens = (themeKey: string, isDark: boolean) => {
   if (typeof document === "undefined") return;

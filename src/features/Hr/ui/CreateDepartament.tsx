@@ -40,10 +40,10 @@ export const CreateDepartment = () => {
   };
 
   return (
-    <div className="w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+    <div className="w-full bg-white dark:bg-th-base rounded-2xl border border-slate-100 dark:border-th-raised shadow-sm">
       <div className="px-6 pt-6 pb-4 flex items-center gap-3.5">
-        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/50">
-          <FolderPlus className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-th-accent-50 dark:bg-th-accent-950/50">
+          <FolderPlus className="w-5 h-5 text-th-accent-600 dark:text-th-accent-400" />
         </div>
         <div>
           <h3 className="text-base font-semibold text-gray-900 dark:text-slate-100">
@@ -66,7 +66,7 @@ export const CreateDepartment = () => {
             onChange={(e) => setName(e.target.value)}
             placeholder="Юридический отдел 2"
             disabled={!isAllowed}
-            className="w-full px-3.5 py-2.5 rounded-xl border text-sm bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-gray-800 dark:text-slate-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-50"
+            className="w-full px-3.5 py-2.5 rounded-xl border text-sm bg-white dark:bg-th-deep border-slate-200 dark:border-th-raised text-gray-800 dark:text-slate-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 focus:border-th-accent-500 transition-all disabled:opacity-50"
           />
           <If is={errors.name}>
             <p className="mt-1 text-xs text-red-500">{errors.name}</p>
@@ -83,7 +83,7 @@ export const CreateDepartment = () => {
             onChange={(e) => setCode(e.target.value)}
             placeholder="legal2"
             disabled={!isAllowed}
-            className="w-full px-3.5 py-2.5 rounded-xl border text-sm bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-gray-800 dark:text-slate-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-50"
+            className="w-full px-3.5 py-2.5 rounded-xl border text-sm bg-white dark:bg-th-deep border-slate-200 dark:border-th-raised text-gray-800 dark:text-slate-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 focus:border-th-accent-500 transition-all disabled:opacity-50"
           />
           <If is={errors.code}>
             <p className="mt-1 text-xs text-red-500">{errors.code}</p>
@@ -94,7 +94,7 @@ export const CreateDepartment = () => {
           type="button"
           onClick={handleSubmit}
           disabled={!isAllowed || isPending}
-          className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-md shadow-indigo-900/30 disabled:opacity-50 cursor-pointer transition-colors"
+          className="w-full py-2.5 rounded-xl bg-th-accent-600 hover:bg-th-accent-700 text-white text-sm font-semibold shadow-md shadow-th-accent-900/30 disabled:opacity-50 cursor-pointer transition-colors"
         >
           {isPending ? 'Создание...' : 'Создать отдел'}
         </button>

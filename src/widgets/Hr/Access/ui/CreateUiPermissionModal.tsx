@@ -40,7 +40,7 @@ export const CreateUiPermissionModal = ({ open, onClose }: IProps) => {
 			maskTransitionName=""
 			title={
 				<div>
-					<p className="text-base font-bold text-slate-800 leading-tight">
+					<p className="text-base font-bold text-slate-800 leading-tight dark:text-slate-100">
 						{"Создание UI-права"}
 					</p>
 					<p className="text-xs text-slate-400">

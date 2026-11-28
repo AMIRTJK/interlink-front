@@ -20,7 +20,7 @@ export const OrderDetailModal = ({
   const statusCfg = getStatusConfig(record.status);
   const { day, month, year } = parseDate(record.date || record.orderDate || '');
   return (
-    <div className="fixed inset-4 z-50 flex flex-col rounded-2xl bg-white shadow-2xl overflow-hidden">
+    <div className="fixed inset-4 z-50 flex flex-col rounded-2xl bg-white shadow-2xl overflow-hidden dark:bg-th-raised">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -30,11 +30,11 @@ export const OrderDetailModal = ({
       />
 
       {/* TOP BAR */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0 dark:border-th-high">
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors shrink-0"
+            className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors shrink-0 dark:hover:bg-th-high dark:hover:text-white"
           >
             <ArrowLeft size={17} />
           </button>
@@ -61,7 +61,7 @@ export const OrderDetailModal = ({
           </button>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors dark:hover:bg-th-high dark:hover:text-white"
           >
             <X size={18} />
           </button>
@@ -69,35 +69,35 @@ export const OrderDetailModal = ({
       </div>
 
       {/* MODAL BODY */}
-      <div className="flex-1 overflow-y-auto bg-slate-50/50 p-6">
+      <div className="flex-1 overflow-y-auto bg-slate-50/50 p-6 dark:bg-th-base/50">
         <div className="flex gap-6 h-full">
           {/* LEFT — Document card */}
           <div className="flex-1 min-w-0">
-            <div className="bg-white rounded-2xl shadow-sm p-8">
+            <div className="bg-white rounded-2xl shadow-sm p-8 dark:bg-th-raised">
               {/* Header */}
               <div className="text-center mb-6">
                 <div className="flex items-center justify-center mb-3">
                   <div
-                    className="w-16 h-16 rounded-full flex items-center justify-center text-4xl border border-gray-200 bg-gray-50"
+                    className="w-16 h-16 rounded-full flex items-center justify-center text-4xl border border-gray-200 bg-gray-50 dark:border-th-high dark:bg-th-base"
                     aria-label="Герб"
                   >
                     🇹🇯
                   </div>
                 </div>
-                <p className="text-[12px] font-bold text-gray-900 uppercase tracking-wide leading-snug">
+                <p className="text-[12px] font-bold text-gray-900 uppercase tracking-wide leading-snug dark:text-slate-100">
                   МИНИСТЕРСТВО ФИНАНСОВ РЕСПУБЛИКИ ТАДЖИКИСТАН
                 </p>
-                <div className="border-t border-gray-300 my-3" />
-                <p className="text-[20px] font-bold text-gray-900 tracking-[0.22em]">
+                <div className="border-t border-gray-300 my-3 dark:border-th-high" />
+                <p className="text-[20px] font-bold text-gray-900 tracking-[0.22em] dark:text-slate-100">
                   П Р И К А З
                 </p>
-                <p className="text-[12px] text-slate-500 italic mt-1">
+                <p className="text-[12px] text-slate-500 italic mt-1 dark:text-slate-400">
                   {record.type}
                 </p>
               </div>
 
               {/* Date/Number row */}
-              <div className="flex items-baseline justify-between gap-4 mb-5 text-sm text-gray-700">
+              <div className="flex items-baseline justify-between gap-4 mb-5 text-sm text-gray-700 dark:text-slate-300">
                 <span>
                   <span>от «</span>
                   <span>{day}</span>
@@ -114,7 +114,7 @@ export const OrderDetailModal = ({
               </div>
 
               {/* Legal body */}
-              <p className="text-[12px] text-gray-600 leading-relaxed mb-4 text-justify">
+              <p className="text-[12px] text-gray-600 leading-relaxed mb-4 text-justify dark:text-slate-300">
                 В соответствии с постановлением Правительства Республики Таджикистан
                 от 31 октября 2014 года, №694 «О порядке назначения на должности и
                 освобождения от должностей руководителей местных структур
@@ -125,12 +125,12 @@ export const OrderDetailModal = ({
               </p>
 
               <If is={record.basis.trim().length > 0}>
-                <p className="text-[12px] text-gray-500 italic mb-4 text-justify leading-relaxed">
+                <p className="text-[12px] text-gray-500 italic mb-4 text-justify leading-relaxed dark:text-slate-400">
                   {record.basis}
                 </p>
               </If>
 
-              <p className="text-center text-[13px] font-bold text-gray-900 tracking-[0.18em] mb-5">
+              <p className="text-center text-[13px] font-bold text-gray-900 tracking-[0.18em] mb-5 dark:text-slate-100">
                 П Р И К А З Ы В А Ю:
               </p>
 
@@ -141,7 +141,7 @@ export const OrderDetailModal = ({
                     .map((point, idx) => (
                       <p
                         key={`pt-${idx}`}
-                        className="text-[12px] text-gray-800 leading-relaxed"
+                        className="text-[12px] text-gray-800 leading-relaxed dark:text-slate-100"
                       >
                         <span className="font-semibold">{idx + 1}. </span>
                         <span>{point}</span>
@@ -151,9 +151,9 @@ export const OrderDetailModal = ({
               </If>
 
               {/* Signature row */}
-              <div className="flex items-end justify-between gap-8 pt-6 border-t border-gray-200 mt-6">
+              <div className="flex items-end justify-between gap-8 pt-6 border-t border-gray-200 mt-6 dark:border-th-high">
                 <div>
-                  <p className="text-[12px] font-medium text-gray-800 mb-1">
+                  <p className="text-[12px] font-medium text-gray-800 mb-1 dark:text-slate-100">
                     Министр финансов
                   </p>
                   <div className="w-28 border-b border-gray-400 mt-5" />
@@ -165,7 +165,7 @@ export const OrderDetailModal = ({
                   <If is={!record.ministerSigned}>
                     <Shield size={15} className="text-slate-300 shrink-0" />
                   </If>
-                  <p className="text-[12px] font-semibold text-gray-800">
+                  <p className="text-[12px] font-semibold text-gray-800 dark:text-slate-100">
                     {record.ministerName}
                   </p>
                 </div>

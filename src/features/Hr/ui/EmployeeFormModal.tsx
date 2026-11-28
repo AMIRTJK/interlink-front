@@ -44,12 +44,12 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
       <div className="absolute inset-0" onClick={onClose} />
-      <div className="relative bg-white dark:bg-slate-900 rounded-2xl w-[94vw] max-w-[860px] max-h-[88vh] flex flex-col overflow-hidden shadow-2xl z-10 border border-gray-100 dark:border-slate-800">
+      <div className="relative bg-white dark:bg-th-base rounded-2xl w-[94vw] max-w-[860px] max-h-[88vh] flex flex-col overflow-hidden shadow-2xl z-10 border border-gray-100 dark:border-th-raised">
         <If is={showTitle}>
-          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-900 z-10 shrink-0">
+          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 dark:border-th-high bg-white dark:bg-th-base z-10 shrink-0">
             <div className="flex items-center gap-3">
               <If is={isEdit}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-sm overflow-hidden bg-indigo-500!">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-semibold text-sm shadow-sm overflow-hidden bg-th-accent-500!">
                   {badge}
                 </div>
               </If>
@@ -62,21 +62,21 @@ export const EmployeeFormModal = ({ open, onClose, employee }: IProps) => {
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-xl transition-colors hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 dark:text-slate-500 cursor-pointer"
+              className="p-2 rounded-xl transition-colors hover:bg-gray-100 dark:hover:bg-th-raised text-gray-400 dark:text-slate-500 cursor-pointer"
             >
               <X size={18} />
             </button>
           </div>
         </If>
         <If is={!showTitle}>
-          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-900 z-10 shrink-0">
+          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 dark:border-th-high bg-white dark:bg-th-base z-10 shrink-0">
             <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">
               Как сфотографировать паспорт
             </h2>
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-xl transition-colors hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 dark:text-slate-500 cursor-pointer"
+              className="p-2 rounded-xl transition-colors hover:bg-gray-100 dark:hover:bg-th-raised text-gray-400 dark:text-slate-500 cursor-pointer"
             >
               <X size={18} />
             </button>

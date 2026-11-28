@@ -30,7 +30,7 @@ export const NEW_YEAR_EFFECTS: INewYearEffectOption[] = [
 
 export const NEW_YEAR_WINTER_BG = {
   light: "from-sky-50 via-white to-blue-100",
-  dark: "from-slate-950 via-blue-950 to-indigo-950",
+  dark: "from-th-deep via-blue-950 to-indigo-950",
 } as const;
 
 /** Сколько дней после 1 января вместо отсчёта показываем поздравление. */

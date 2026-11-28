@@ -20,7 +20,7 @@ export const UnavailablePreview = ({
 
 	return (
 		<div className="flex flex-col items-center justify-center space-y-4 text-center">
-			<div className="w-24 h-24 rounded-[1.5rem] bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner">
+			<div className="w-24 h-24 rounded-[1.5rem] bg-slate-100 dark:bg-th-raised flex items-center justify-center shadow-inner">
 				<FormatIcon type={fileType} />
 			</div>
 			<div className="space-y-1">
@@ -41,7 +41,7 @@ export const UnavailablePreview = ({
 				<button
 					type="button"
 					onClick={onDownload}
-					className="px-6 py-2.5 rounded-full text-xs font-bold text-white! bg-indigo-600! hover:bg-indigo-700! transition-colors shadow-lg shadow-indigo-600/10 flex items-center gap-2 cursor-pointer"
+					className="px-6 py-2.5 rounded-full text-xs font-bold text-white! bg-th-accent-600! hover:bg-th-accent-700! transition-colors shadow-lg shadow-th-accent-600/10 flex items-center gap-2 cursor-pointer"
 				>
 					<Download size={14} />
 					<span>Скачать файл</span>

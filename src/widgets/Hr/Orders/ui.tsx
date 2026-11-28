@@ -50,15 +50,15 @@ export const OrdersWidget = () => {
   };
 
   return (
-    <div className="flex-1 overflow-auto bg-slate-50/50 p-6 min-h-0">
+    <div className="flex-1 overflow-auto bg-slate-50/50 p-6 min-h-0 dark:bg-th-base/50">
       <div className="w-full space-y-5">
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {statCards.map((card) => (
-            <div key={card.label} className="rounded-2xl px-5 py-4 bg-white border border-slate-100">
+            <div key={card.label} className="ui-glass rounded-2xl px-5 py-4 bg-white border border-slate-100 dark:bg-th-raised dark:border-th-high">
               <p className="text-[28px] font-bold leading-none tabular-nums" style={{ color: card.color }}>
                 {card.value}
               </p>
-              <p className="text-xs mt-2 text-slate-500">{card.label}</p>
+              <p className="text-xs mt-2 text-slate-500 dark:text-slate-400">{card.label}</p>
             </div>
           ))}
         </div>
@@ -70,7 +70,7 @@ export const OrdersWidget = () => {
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border border-transparent cursor-pointer ${
                 statusFilter === "Все"
                   ? "bg-[#1E3A5F] text-white"
-                  : "text-slate-500 hover:bg-slate-100 hover:text-[#1E3A5F]"
+                  : "text-slate-500 hover:bg-slate-100 hover:text-[#1E3A5F] dark:text-slate-400 dark:hover:bg-th-high"
               }`}
             >
               Все
@@ -82,7 +82,7 @@ export const OrdersWidget = () => {
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border border-transparent cursor-pointer ${
                   statusFilter === s
                     ? "bg-[#1E3A5F] text-white"
-                    : "text-slate-500 hover:bg-slate-100 hover:text-[#1E3A5F]"
+                    : "text-slate-500 hover:bg-slate-100 hover:text-[#1E3A5F] dark:text-slate-400 dark:hover:bg-th-high"
                 }`}
               >
                 {ORDER_STATUS_LABELS[s]}
@@ -101,7 +101,7 @@ export const OrdersWidget = () => {
                 placeholder="Поиск по приказам..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm bg-white border-slate-200 text-gray-700 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/10 focus:border-[#1E3A5F] transition-all"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm bg-white border-slate-200 text-gray-700 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/10 focus:border-[#1E3A5F] transition-all dark:bg-th-raised dark:border-th-high dark:text-slate-300"
               />
             </div>
             <button
@@ -109,13 +109,13 @@ export const OrdersWidget = () => {
               className={`relative flex items-center gap-1.5 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all cursor-pointer ${
                 filtersOpen || hasActiveFilters
                   ? "bg-[#1E3A5F]/5 border-[#1E3A5F]/30 text-[#1E3A5F]"
-                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-th-raised dark:border-th-high dark:text-slate-300 dark:hover:bg-th-high"
               }`}
             >
               <SlidersHorizontal size={15} />
               <span>Фильтры</span>
               <If is={hasActiveFilters}>
-                <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0 ml-1" />
+                <span className="w-2 h-2 rounded-full bg-th-accent-500 shrink-0 ml-1" />
               </If>
             </button>
             <button
@@ -123,7 +123,7 @@ export const OrdersWidget = () => {
                 setEditingOrder(null);
                 setNewOrderOpen(true);
               }}
-              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold transition-colors shadow-lg shadow-indigo-900/30 cursor-pointer shrink-0"
+              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-th-accent-600 text-white text-sm font-semibold transition-colors shadow-lg shadow-th-accent-900/30 cursor-pointer shrink-0"
             >
               <Plus size={16} />
               <span>Добавить</span>

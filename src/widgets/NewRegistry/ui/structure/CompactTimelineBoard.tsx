@@ -31,7 +31,7 @@ export const CompactTimelineBoard: React.FC<ICompactTimelineBoardProps> = ({
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
-        className="rounded-xl border border-slate-200/80 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/30 px-3 pt-2.5 pb-3 h-full"
+        className="rounded-xl border border-slate-200/80 dark:border-th-high bg-slate-50/70 dark:bg-th-base/30 px-3 pt-2.5 pb-3 h-full"
       >
         <div className="flex items-center gap-2 mb-2">
           <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
@@ -39,11 +39,11 @@ export const CompactTimelineBoard: React.FC<ICompactTimelineBoardProps> = ({
               ? `Этапы ${card.startIndex}–${card.startIndex + card.items.length - 1}`
               : `Этап ${card.startIndex}`}
           </span>
-          <span className="flex-1 h-px bg-slate-200/70 dark:bg-slate-700/70" />
+          <span className="flex-1 h-px bg-slate-200/70 dark:bg-th-high/70" />
         </div>
 
         <div className="relative pl-8">
-          <div className="absolute left-[14px] top-0 bottom-4 w-px bg-slate-200 dark:bg-slate-700" />
+          <div className="absolute left-[14px] top-0 bottom-4 w-px bg-slate-200 dark:bg-th-high" />
           {card.items.map((event, index) => (
             <EventRow
               key={event.performed_at + index}

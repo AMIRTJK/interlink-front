@@ -28,7 +28,7 @@ export const ResolutionInfoSidebar: React.FC<IProps> = ({ resolution }) => {
                     {/* Сведения о времени и валидности */}
                     <div className="resolution-execution__signature-row">
                         <span>Дата и время:</span>
-                        <span className="text-blue-700 font-bold">23.07.2025 • 14:32</span>
+                        <span className="text-th-accent-700 font-bold">23.07.2025 • 14:32</span>
                     </div>
                     
                     <div className="resolution-execution__signature-row">

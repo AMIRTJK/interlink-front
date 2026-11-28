@@ -63,9 +63,9 @@ export const ChangePassword = () => {
   };
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 dark:border-th-raised dark:bg-th-raised/40">
       <div className="flex items-center gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-400">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-th-accent-100 text-th-accent-600 dark:bg-th-accent-500/15 dark:text-th-accent-400">
           <KeyRound className="h-5 w-5" />
         </span>
         <div>

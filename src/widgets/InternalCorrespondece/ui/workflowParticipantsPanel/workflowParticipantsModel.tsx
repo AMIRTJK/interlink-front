@@ -15,14 +15,14 @@ export const getStatusMeta = (status: string, isDarkMode?: boolean) => {
     case "approved":
       return {
         color: "text-green-500",
-        bg: isDarkMode ? "bg-[#111827]" : "bg-white",
+        bg: isDarkMode ? "bg-th-base" : "bg-white",
         bgList: isDarkMode ? "bg-[#00c9501a]" : "bg-[#00c95026]",
         icon: <CheckCircleFilled className="text-green-500!" />,
       };
     case "returned":
       return {
         color: "text-amber-500",
-        bg: isDarkMode ? "bg-[#111827]" : "bg-white",
+        bg: isDarkMode ? "bg-th-base" : "bg-white",
         bgList: isDarkMode ? "bg-[#f59e0b1a]" : "bg-[#f59e0b26]",
         icon: <ClockCircleFilled className="text-amber-500!" />,
       };
@@ -30,15 +30,15 @@ export const getStatusMeta = (status: string, isDarkMode?: boolean) => {
     case "rejected":
       return {
         color: "text-red-500",
-        bg: isDarkMode ? "bg-[#111827]" : "bg-white",
+        bg: isDarkMode ? "bg-th-base" : "bg-white",
         bgList: isDarkMode ? "bg-[#ff4d4f1a]" : "bg-[#ff4d4f26]",
         icon: <CloseCircleFilled className="text-red-500!" />,
       };
     default:
       return {
         color: "text-gray-400",
-        bg: isDarkMode ? "bg-[#111827]" : "bg-white",
-        bgList: isDarkMode ? "bg-gray-800/50" : "bg-[#99a1af26]",
+        bg: isDarkMode ? "bg-th-base" : "bg-white",
+        bgList: isDarkMode ? "bg-th-raised/50" : "bg-[#99a1af26]",
         icon: <ClockCircleFilled className="text-gray-400!" />,
       };
   }

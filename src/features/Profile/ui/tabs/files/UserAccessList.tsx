@@ -44,13 +44,13 @@ const UserAccessRow = ({ user, isChecked, onToggle }: IUserAccessRowProps) => {
     return (
       <div className="flex items-center justify-between p-3 rounded-2xl animate-pulse">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 shrink-0" />
+          <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-th-raised shrink-0" />
           <div className="space-y-2 flex-1 min-w-0">
-            <div className="h-3.5 bg-slate-200 dark:bg-slate-800 rounded-md w-3/5" />
-            <div className="h-2.5 bg-slate-200/70 dark:bg-slate-800/70 rounded-md w-2/5" />
+            <div className="h-3.5 bg-slate-200 dark:bg-th-raised rounded-md w-3/5" />
+            <div className="h-2.5 bg-slate-200/70 dark:bg-th-raised/70 rounded-md w-2/5" />
           </div>
         </div>
-        <div className="w-5 h-5 rounded-full bg-slate-200/70 dark:bg-slate-800/70 shrink-0 ml-3" />
+        <div className="w-5 h-5 rounded-full bg-slate-200/70 dark:bg-th-raised/70 shrink-0 ml-3" />
         <img
           src={photo}
           alt=""
@@ -65,7 +65,7 @@ const UserAccessRow = ({ user, isChecked, onToggle }: IUserAccessRowProps) => {
   return (
     <div
       onClick={onToggle}
-      className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer animate-in fade-in duration-150"
+      className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-th-raised/50 transition-colors cursor-pointer animate-in fade-in duration-150"
     >
       <div className="flex items-center gap-3 min-w-0">
         <UserAvatar user={user} size={40} />
@@ -82,8 +82,8 @@ const UserAccessRow = ({ user, isChecked, onToggle }: IUserAccessRowProps) => {
       <div
         className={`w-5 h-5 rounded-full border flex-shrink-0 flex items-center justify-center transition-all ml-3 ${
           isChecked
-            ? "bg-indigo-600! border-indigo-600!"
-            : "border-slate-300 dark:border-slate-700 bg-transparent"
+            ? "bg-th-accent-600! border-th-accent-600!"
+            : "border-slate-300 dark:border-th-high bg-transparent"
         }`}
       >
         <If is={isChecked}>
@@ -135,7 +135,7 @@ export const UserAccessList = ({ selectedUsers, onToggleUser, excludeUserIds }: 
           placeholder="Поиск пользователя..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-slate-800 rounded-2xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+          className="w-full bg-slate-50 dark:bg-th-deep text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-th-raised rounded-2xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-th-accent-500/20 focus:border-th-accent-500 transition-all placeholder:text-slate-400"
         />
       </div>
 
@@ -148,19 +148,19 @@ export const UserAccessList = ({ selectedUsers, onToggleUser, excludeUserIds }: 
                 className="flex items-center justify-between p-3 rounded-2xl animate-pulse"
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 shrink-0" />
+                  <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-th-raised shrink-0" />
                   <div className="space-y-2 flex-1 min-w-0">
                     <div
-                      className="h-3.5 bg-slate-200 dark:bg-slate-800 rounded-md"
+                      className="h-3.5 bg-slate-200 dark:bg-th-raised rounded-md"
                       style={{ width: `${45 + (idx % 4) * 15}%` }}
                     />
                     <div
-                      className="h-2.5 bg-slate-200/70 dark:bg-slate-800/70 rounded-md"
+                      className="h-2.5 bg-slate-200/70 dark:bg-th-raised/70 rounded-md"
                       style={{ width: `${25 + (idx % 3) * 18}%` }}
                     />
                   </div>
                 </div>
-                <div className="w-5 h-5 rounded-full bg-slate-200/70 dark:bg-slate-800/70 shrink-0 ml-3" />
+                <div className="w-5 h-5 rounded-full bg-slate-200/70 dark:bg-th-raised/70 shrink-0 ml-3" />
               </div>
             ))}
           </div>

@@ -12,10 +12,10 @@ export function ModalContainer({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-th-base/60 backdrop-blur-sm"
       />
       <div
-        className="relative w-full max-w-4xl h-[90vh] min-h-[90vh] max-h-[90vh] overflow-hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/40 dark:border-white/10 rounded-3xl shadow-2xl flex flex-col"
+        className="relative w-full max-w-4xl h-[90vh] min-h-[90vh] max-h-[90vh] overflow-hidden bg-white/95 dark:bg-th-base/95 backdrop-blur-2xl border border-white/40 dark:border-white/10 rounded-3xl shadow-2xl flex flex-col"
       >
         {children}
       </div>

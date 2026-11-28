@@ -27,7 +27,7 @@ export const CompactStructurePagination: React.FC<ICompactStructurePaginationPro
 
   return (
     <div
-      className="flex items-center justify-between gap-3 mt-2 pt-2 border-t border-slate-100 dark:border-slate-700"
+      className="flex items-center justify-between gap-3 mt-2 pt-2 border-t border-slate-100 dark:border-th-high"
       onClick={(e) => e.stopPropagation()}
     >
       <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
@@ -43,8 +43,8 @@ export const CompactStructurePagination: React.FC<ICompactStructurePaginationPro
           className={cn(
             NAV_CLASS,
             isFirst
-              ? "border-slate-100 dark:border-slate-700 text-slate-300 dark:text-slate-600"
-              : "border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400",
+              ? "border-slate-100 dark:border-th-high text-slate-300 dark:text-slate-600"
+              : "border-slate-200 dark:border-th-higher text-slate-500 dark:text-slate-300 hover:border-th-accent-400 hover:text-th-accent-600 dark:hover:text-th-accent-400",
           )}
         >
           <ChevronLeft size={13} />
@@ -60,8 +60,8 @@ export const CompactStructurePagination: React.FC<ICompactStructurePaginationPro
             className={cn(
               "min-w-[22px] h-6 px-1.5 rounded-md text-[11px] font-bold transition-all cursor-pointer border",
               index === pageIndex
-                ? "bg-blue-600 border-blue-600 text-white shadow-xs"
-                : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400",
+                ? "bg-th-accent-600 border-th-accent-600 text-white shadow-xs"
+                : "bg-white dark:bg-th-raised border-slate-200 dark:border-th-higher text-slate-500 dark:text-slate-300 hover:border-th-accent-400 hover:text-th-accent-600 dark:hover:text-th-accent-400",
             )}
           >
             {index + 1}
@@ -76,8 +76,8 @@ export const CompactStructurePagination: React.FC<ICompactStructurePaginationPro
           className={cn(
             NAV_CLASS,
             isLast
-              ? "border-slate-100 dark:border-slate-700 text-slate-300 dark:text-slate-600"
-              : "border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400",
+              ? "border-slate-100 dark:border-th-high text-slate-300 dark:text-slate-600"
+              : "border-slate-200 dark:border-th-higher text-slate-500 dark:text-slate-300 hover:border-th-accent-400 hover:text-th-accent-600 dark:hover:text-th-accent-400",
           )}
         >
           <ChevronRight size={13} />

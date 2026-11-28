@@ -49,7 +49,7 @@ export const ActionToolbar: React.FC<IProps> = ({
       <div
         className={`flex flex-col flex-1 items-center justify-start gap-3 px-2 py-4 rounded-2xl backdrop-blur-xl border transition-colors duration-300 ${
           isDarkMode
-            ? "bg-[#1f2937]/90 border-gray-700 shadow-[0_8px_30px_rgba(0,0,0,0.3)]"
+            ? "bg-th-raised/90 border-th-high shadow-[0_8px_30px_rgba(0,0,0,0.3)]"
             : "bg-white/90 border-gray-200 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
         }`}
       >

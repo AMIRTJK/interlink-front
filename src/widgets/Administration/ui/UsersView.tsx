@@ -85,6 +85,7 @@ export function UsersView() {
 
       {/* Table */}
       <div
+        className="ui-glass ui-glass--forced"
         style={{
           background: T.surface,
           border: `1px solid ${T.border}`,

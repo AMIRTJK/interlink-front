@@ -63,14 +63,14 @@ export const RecipientsViewer = ({ data }: RecipientsViewerProps) => {
       {/* Триггер в таблице */}
       <div
         onClick={handleOpen}
-        className="group flex items-center gap-1.5 cursor-pointer hover:text-blue-600 transition-colors"
+        className="group flex items-center gap-1.5 cursor-pointer hover:text-th-accent-600 transition-colors"
       >
         <span className="truncate max-w-[150px]" title={firstRecipientName}>
           {firstRecipientName}
         </span>
 
         {othersCount > 0 && (
-          <span className="flex-shrink-0 text-xs font-medium bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-md group-hover:bg-blue-100 transition-colors">
+          <span className="flex-shrink-0 text-xs font-medium bg-th-accent-50 text-th-accent-600 px-1.5 py-0.5 rounded-md group-hover:bg-th-accent-100 transition-colors dark:bg-th-accent-900/35 dark:text-th-accent-400">
             +{othersCount}
           </span>
         )}
@@ -80,7 +80,7 @@ export const RecipientsViewer = ({ data }: RecipientsViewerProps) => {
       <Modal
         title={
           <div className="flex items-center gap-2">
-            <Users size={18} className="text-blue-600!" />
+            <Users size={18} className="text-th-accent-600!" />
             <span>Список получателей</span>
           </div>
         }
@@ -116,7 +116,7 @@ export const RecipientsViewer = ({ data }: RecipientsViewerProps) => {
                     key={idx}
                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all"
                   >
-                    <Avatar className="bg-blue-600! text-xs!">
+                    <Avatar className="bg-th-accent-600! text-xs!">
                       {r.user?.full_name?.[0] || "U"}
                     </Avatar>
                     <span className="text-gray-800 font-medium">

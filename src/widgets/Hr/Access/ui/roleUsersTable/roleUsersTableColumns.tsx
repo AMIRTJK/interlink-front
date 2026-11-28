@@ -28,11 +28,11 @@ export const buildRoleUsersColumns = ({
 				.toUpperCase();
 			return (
 				<div className="flex items-center gap-3">
-					<div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold bg-blue-50 text-blue-600">
+					<div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold bg-th-accent-50 text-th-accent-600 dark:bg-th-accent-900/35 dark:text-th-accent-400">
 						{initials || "—"}
 					</div>
 					<div>
-						<div className="font-semibold text-slate-800">
+						<div className="font-semibold text-slate-800 dark:text-slate-100">
 							{record.fullName}
 						</div>
 						<div className="text-xs text-slate-400 font-normal">
@@ -48,7 +48,7 @@ export const buildRoleUsersColumns = ({
 		dataIndex: "department",
 		key: "department",
 		render: (dept) => (
-			<span className="text-slate-700 font-medium">{dept}</span>
+			<span className="text-slate-700 font-medium dark:text-slate-300">{dept}</span>
 		),
 	},
 	{
@@ -87,7 +87,7 @@ export const buildRoleUsersColumns = ({
 		dataIndex: "joinedAt",
 		key: "joinedAt",
 		render: (val) => (
-			<span className="text-slate-500 font-normal">{val}</span>
+			<span className="text-slate-500 font-normal dark:text-slate-400">{val}</span>
 		),
 	},
 	{
@@ -123,7 +123,7 @@ export const buildRoleUsersColumns = ({
 						trigger={["click"]}
 						placement="bottomRight"
 					>
-						<button className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
+						<button className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors dark:hover:bg-th-high">
 							<MoreHorizontal size={18} />
 						</button>
 					</Dropdown>

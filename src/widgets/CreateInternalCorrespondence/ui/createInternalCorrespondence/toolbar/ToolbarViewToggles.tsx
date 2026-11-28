@@ -53,7 +53,7 @@ export const ToolbarViewToggles = ({
         type="checkbox"
         checked={rulerEnabled}
         onChange={(e) => toggleRuler(e.target.checked)}
-        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+        className="rounded border-slate-300 text-th-accent-600 focus:ring-th-accent-500 cursor-pointer"
       />
       <span>Линейка</span>
     </label>
@@ -79,7 +79,7 @@ export const ToolbarViewToggles = ({
         type="checkbox"
         checked={gridEnabled}
         onChange={(e) => toggleGrid(e.target.checked)}
-        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+        className="rounded border-slate-300 text-th-accent-600 focus:ring-th-accent-500 cursor-pointer"
       />
       <span>Сетка</span>
     </label>
@@ -89,7 +89,7 @@ export const ToolbarViewToggles = ({
         type="checkbox"
         checked={navPaneEnabled}
         onChange={(e) => toggleNavPane(e.target.checked)}
-        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+        className="rounded border-slate-300 text-th-accent-600 focus:ring-th-accent-500 cursor-pointer"
       />
       <span>Область навигации</span>
     </label>
@@ -101,7 +101,7 @@ export const ToolbarViewToggles = ({
             type="checkbox"
             checked={panelsInToolbar}
             onChange={(e) => setPanelsInToolbar(e.target.checked)}
-            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+            className="rounded border-slate-300 text-th-accent-600 focus:ring-th-accent-500 cursor-pointer"
           />
           <span>Панель разделов сверху</span>
         </label>
@@ -115,7 +115,7 @@ export const ToolbarViewToggles = ({
             type="checkbox"
             checked={showOriginalLetterSides}
             onChange={(e) => toggleOriginalLetterSides(e.target.checked)}
-            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+            className="rounded border-slate-300 text-th-accent-600 focus:ring-th-accent-500 cursor-pointer"
           />
           <span>Режим просмотра входящего письма</span>
         </label>
@@ -128,7 +128,7 @@ export const ToolbarViewToggles = ({
           type="checkbox"
           checked={showVersionCompareSides}
           onChange={(e) => toggleVersionCompareSides(e.target.checked)}
-          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+          className="rounded border-slate-300 text-th-accent-600 focus:ring-th-accent-500 cursor-pointer"
         />
         <span>Режим просмотра истории версий</span>
       </label>
@@ -143,7 +143,7 @@ export const ToolbarViewToggles = ({
           type="checkbox"
           checked={showAuthorship}
           onChange={(e) => toggleAuthorship(e.target.checked)}
-          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+          className="rounded border-slate-300 text-th-accent-600 focus:ring-th-accent-500 cursor-pointer"
         />
         <span>Рецензирование</span>
       </label>

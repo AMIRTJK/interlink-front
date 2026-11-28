@@ -19,11 +19,11 @@ export function OrgCuratorPickerSlot({
 }: IProps) {
   const labelCls = dark ? 'text-gray-400' : 'text-gray-500';
   const curatorBtnCls = dark
-    ? 'border-gray-700 bg-gray-800 text-gray-400 hover:border-indigo-600'
-    : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-indigo-300';
+    ? 'border-th-high bg-th-raised text-gray-400 hover:border-th-accent-600'
+    : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-th-accent-300';
   const curatorSelectedCls = dark
-    ? 'border-indigo-600/50 bg-indigo-900/20'
-    : 'border-indigo-200 bg-indigo-50';
+    ? 'border-th-accent-600/50 bg-th-accent-900/20'
+    : 'border-th-accent-200 bg-th-accent-50';
 
   return (
     <div>
@@ -45,14 +45,14 @@ export function OrgCuratorPickerSlot({
           <div className="flex-1 min-w-0">
             <p
               className={`text-sm font-semibold truncate ${
-                dark ? 'text-indigo-300' : 'text-indigo-800'
+                dark ? 'text-th-accent-300' : 'text-th-accent-800'
               }`}
             >
               {selectedEmp?.lastName} {selectedEmp?.firstName}
             </p>
             <p
               className={`text-xs truncate ${
-                dark ? 'text-indigo-400/70' : 'text-indigo-600/70'
+                dark ? 'text-th-accent-400/70' : 'text-th-accent-600/70'
               }`}
             >
               {selectedEmp?.position}
@@ -62,8 +62,8 @@ export function OrgCuratorPickerSlot({
             onClick={onClear}
             className={`p-1 rounded-lg transition-colors ${
               dark
-                ? 'text-indigo-400 hover:bg-indigo-900/40'
-                : 'text-indigo-500 hover:bg-indigo-100'
+                ? 'text-th-accent-400 hover:bg-th-accent-900/40'
+                : 'text-th-accent-500 hover:bg-th-accent-100'
             }`}
           >
             <X size={13} />
@@ -72,8 +72,8 @@ export function OrgCuratorPickerSlot({
             onClick={onOpenPicker}
             className={`p-1 rounded-lg transition-colors ${
               dark
-                ? 'text-indigo-400 hover:bg-indigo-900/40'
-                : 'text-indigo-500 hover:bg-indigo-100'
+                ? 'text-th-accent-400 hover:bg-th-accent-900/40'
+                : 'text-th-accent-500 hover:bg-th-accent-100'
             }`}
           >
             <Pencil size={13} />

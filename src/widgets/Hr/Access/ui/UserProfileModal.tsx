@@ -77,12 +77,12 @@ export const UserProfileModal = ({
   return (
     <ConfigProvider theme={{ token: { zIndexPopupBase: 10000 } }}>
       <div
-        className="fixed inset-0! z-9998! bg-slate-900/40! backdrop-blur-sm! flex! items-center! justify-center! p-4!"
+        className="fixed inset-0! z-9998! bg-th-base/40! backdrop-blur-sm! flex! items-center! justify-center! p-4!"
         onClick={onClose}
       >
         <div
           onClick={(ev) => ev.stopPropagation()}
-          className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col min-h-[800px]! max-h-[820px]!"
+          className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col min-h-[800px]! max-h-[820px]! dark:bg-th-raised"
         >
           <UserProfileHeader
             currentFullName={currentFullName}
@@ -98,7 +98,7 @@ export const UserProfileModal = ({
 
           <div className="px-6 py-6 overflow-y-auto flex-1 relative">
             <If is={isDataLoading}>
-              <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+              <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-th-raised/50">
                 <Loader />
               </div>
             </If>

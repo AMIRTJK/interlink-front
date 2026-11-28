@@ -20,7 +20,7 @@ export const PinnedFiles = ({ pinnedFiles, onUnpin }: IProps) => {
       case "archive":
         return <Archive size={14} className="text-amber-500!" />;
       default:
-        return <File size={14} className="text-blue-500!" />;
+        return <File size={14} className="text-th-accent-500!" />;
     }
   };
 
@@ -42,7 +42,7 @@ export const PinnedFiles = ({ pinnedFiles, onUnpin }: IProps) => {
                 <span className="max-w-[150px] truncate">{file.original_name}</span>
                 <button
                   onClick={() => onUnpin(file)}
-                  className="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors p-0.5 rounded-full cursor-pointer hover:bg-slate-200/50 dark:hover:bg-slate-800"
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors p-0.5 rounded-full cursor-pointer hover:bg-slate-200/50 dark:hover:bg-th-raised"
                 >
                   <X size={12} />
                 </button>

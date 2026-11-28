@@ -31,9 +31,9 @@ export const WelcomeAnimationSettings = () => {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+    <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 dark:border-th-raised dark:bg-th-raised/40">
       <div className="flex items-center gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-400">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-th-accent-100 text-th-accent-600 dark:bg-th-accent-500/15 dark:text-th-accent-400">
           <Sparkles className="h-5 w-5" />
         </span>
         <div className="min-w-0">
@@ -46,7 +46,7 @@ export const WelcomeAnimationSettings = () => {
         </div>
       </div>
 
-      <div className="mt-4 flex gap-1.5 rounded-xl bg-slate-100 p-1 dark:bg-slate-900/60">
+      <div className="mt-4 flex gap-1.5 rounded-xl bg-slate-100 p-1 dark:bg-th-base/60">
         {WELCOME_MODES.map((item) => (
           <button
             key={item.key}
@@ -54,7 +54,7 @@ export const WelcomeAnimationSettings = () => {
             onClick={() => handleMode(item.key)}
             className={`flex-1 cursor-pointer rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
               mode === item.key
-                ? "bg-white text-slate-800 shadow-sm dark:bg-slate-700 dark:text-slate-100"
+                ? "bg-white text-slate-800 shadow-sm dark:bg-th-high dark:text-slate-100"
                 : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             }`}
           >
@@ -77,8 +77,8 @@ export const WelcomeAnimationSettings = () => {
               key={item.key}
               className={`flex items-center gap-3 rounded-xl border p-2 transition-colors ${
                 isActive
-                  ? "border-indigo-300 bg-white dark:border-indigo-500/40 dark:bg-slate-800/80"
-                  : "border-transparent hover:bg-white dark:hover:bg-slate-800/50"
+                  ? "border-th-accent-300 bg-white dark:border-th-accent-500/40 dark:bg-th-raised/80"
+                  : "border-transparent hover:bg-white dark:hover:bg-th-raised/50"
               }`}
             >
               <button
@@ -109,7 +109,7 @@ export const WelcomeAnimationSettings = () => {
                 <button
                   type="button"
                   onClick={() => setPreviewKey(item.key)}
-                  className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+                  className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-th-high dark:hover:text-slate-100"
                 >
                   <Play className="h-3.5 w-3.5" />
                 </button>

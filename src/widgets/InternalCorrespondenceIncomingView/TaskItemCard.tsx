@@ -23,17 +23,17 @@ export interface IAssignmentData {
 }
 
 const PRIORITY_MAP: Record<string, { label: string; bg: string; text: string; border: string }> = {
-  low: { label: "Низкий", bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200" },
-  medium: { label: "Средний", bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200" },
-  high: { label: "Высокий", bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200" },
-  urgent: { label: "Срочный", bg: "bg-rose-50", text: "text-rose-700", border: "border-rose-200" },
+  low: { label: "Низкий", bg: "bg-emerald-50 dark:bg-emerald-900/35", text: "text-emerald-700", border: "border-emerald-200" },
+  medium: { label: "Средний", bg: "bg-blue-50 dark:bg-blue-900/35", text: "text-blue-700", border: "border-blue-200" },
+  high: { label: "Высокий", bg: "bg-amber-50 dark:bg-amber-900/35", text: "text-amber-700", border: "border-amber-200" },
+  urgent: { label: "Срочный", bg: "bg-rose-50 dark:bg-rose-900/35", text: "text-rose-700", border: "border-rose-200" },
 };
 
 const STATUS_MAP: Record<string, { label: string; bg: string; text: string }> = {
-  pending: { label: "В работе", bg: "bg-blue-50", text: "text-blue-600" },
-  submitted: { label: "На проверке", bg: "bg-amber-50", text: "text-amber-600" },
-  done: { label: "Исполнено", bg: "bg-emerald-50", text: "text-emerald-600" },
-  returned: { label: "Доработка", bg: "bg-rose-50", text: "text-rose-600" },
+  pending: { label: "В работе", bg: "bg-blue-50 dark:bg-blue-900/35", text: "text-blue-600" },
+  submitted: { label: "На проверке", bg: "bg-amber-50 dark:bg-amber-900/35", text: "text-amber-600" },
+  done: { label: "Исполнено", bg: "bg-emerald-50 dark:bg-emerald-900/35", text: "text-emerald-600" },
+  returned: { label: "Доработка", bg: "bg-rose-50 dark:bg-rose-900/35", text: "text-rose-600" },
 };
 
 const getInitials = (name?: string) => {
@@ -55,7 +55,7 @@ export const TaskItemCard = ({ item }: { item: IAssignmentData }) => {
     <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-2.5 text-xs font-sans">
       <div className="flex items-center justify-between gap-2 border-b border-slate-200/60 pb-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-indigo-500 text-white font-bold flex items-center justify-center text-[11px] flex-shrink-0 shadow-sm">
+          <div className="w-8 h-8 rounded-full bg-th-accent-500 text-white font-bold flex items-center justify-center text-[11px] flex-shrink-0 shadow-sm">
             {getInitials(user.full_name)}
           </div>
           <div className="min-w-0 flex-1">
@@ -87,14 +87,14 @@ export const TaskItemCard = ({ item }: { item: IAssignmentData }) => {
 
       <If is={!!item.due_at}>
         <div className="flex items-center gap-1.5 text-slate-600 text-[11px]">
-          <Clock size={13} className="text-indigo-500 flex-shrink-0" />
+          <Clock size={13} className="text-th-accent-500 flex-shrink-0" />
           <span className="font-semibold">Срок:</span>
           <span>{new Date(item.due_at!).toLocaleDateString("ru-RU")}</span>
         </div>
       </If>
 
       <If is={!!item.note}>
-        <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/60 text-[11px]">
+        <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/60 text-[11px] dark:bg-amber-900/35 dark:border-amber-800/50">
           <span className="font-semibold text-amber-800 block mb-0.5">Примечание:</span>
           <p className="text-amber-900 leading-normal">{item.note}</p>
         </div>

@@ -46,7 +46,7 @@ export const LogoutConfirmModal = ({
         aria-modal="true"
         aria-labelledby="logout-confirm-title"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm rounded-3xl bg-white dark:bg-zinc-900 border border-white/50 dark:border-zinc-700/60 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        className="w-full max-w-sm rounded-3xl bg-white dark:bg-th-base border border-white/50 dark:border-th-high/60 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
       >
         <div className="p-6 flex flex-col items-center text-center">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-red-50 dark:bg-red-500/10 text-red-500 mb-4">
@@ -67,7 +67,7 @@ export const LogoutConfirmModal = ({
               type="button"
               onClick={onCancel}
               disabled={loading}
-              className="flex-1 py-2.5 rounded-2xl font-semibold text-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50 cursor-pointer focus:outline-none"
+              className="flex-1 py-2.5 rounded-2xl font-semibold text-sm bg-zinc-100 dark:bg-th-raised text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-th-high transition-colors disabled:opacity-50 cursor-pointer focus:outline-none"
             >
               Отмена
             </button>

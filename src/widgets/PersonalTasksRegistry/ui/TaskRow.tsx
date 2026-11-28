@@ -47,7 +47,7 @@ export const TaskRow = ({ task, onOpen, onEdit, onDelete, userName }: IProps) =>
     <motion.tr
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       onClick={() => onOpen(task)}
-      className="group border-b border-zinc-100 dark:border-zinc-800 hover:bg-indigo-50/40 dark:hover:bg-indigo-900/10 transition-all duration-150 cursor-pointer"
+      className="group border-b border-zinc-100 dark:border-th-raised hover:bg-th-accent-50/40 dark:hover:bg-th-accent-900/10 transition-all duration-150 cursor-pointer"
     >
 
       <td className="px-4 py-3.5 align-top">
@@ -58,7 +58,7 @@ export const TaskRow = ({ task, onOpen, onEdit, onDelete, userName }: IProps) =>
         <div className="font-semibold text-sm text-zinc-800 dark:text-zinc-100 leading-snug">{task.title}</div>
         <div className="flex flex-wrap gap-1 mt-1.5">
           {task.tags?.slice(0, 3).map((tag) => (
-            <span key={tag} className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">
+            <span key={tag} className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-zinc-100 dark:bg-th-raised text-zinc-500 dark:text-zinc-400">
               #{tag}
             </span>
           ))}
@@ -79,7 +79,7 @@ export const TaskRow = ({ task, onOpen, onEdit, onDelete, userName }: IProps) =>
 
       <td className="px-4 py-3.5 align-top min-w-[140px]">
         <div className="flex items-center gap-2">
-          <div className="flex-1 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
+          <div className="flex-1 h-1.5 rounded-full bg-zinc-200 dark:bg-th-high overflow-hidden">
             <div className={`h-full rounded-full ${task.status === "overdue" ? "bg-red-500" : "bg-emerald-500"}`} style={{ width: `${task.progress}%` }} />
           </div>
           <span className="text-xs font-mono font-semibold text-zinc-500 dark:text-zinc-400 w-8 text-right">{task.progress}%</span>
@@ -103,7 +103,7 @@ export const TaskRow = ({ task, onOpen, onEdit, onDelete, userName }: IProps) =>
             </span>
           </If>
           <If is={countMeta.type !== "overdue"}>
-            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[11px] font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[11px] font-bold bg-zinc-100 dark:bg-th-raised text-zinc-500 dark:text-zinc-400">
               <span>●</span><span>{countMeta.text}</span>
             </span>
           </If>
@@ -112,7 +112,7 @@ export const TaskRow = ({ task, onOpen, onEdit, onDelete, userName }: IProps) =>
 
       <td className="px-4 py-3.5 align-top relative text-right" onClick={(e) => e.stopPropagation()}>
         <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
-          <button className="p-1.5 rounded-lg text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity duration-150 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 border-0 bg-transparent cursor-pointer flex items-center justify-center">
+          <button className="p-1.5 rounded-lg text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity duration-150 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-th-high border-0 bg-transparent cursor-pointer flex items-center justify-center">
             <MoreVertical size={16} />
           </button>
         </Dropdown>

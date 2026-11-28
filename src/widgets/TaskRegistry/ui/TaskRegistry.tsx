@@ -137,7 +137,7 @@ export const TaskRegistry = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="min-h-screen relative overflow-hidden selection:bg-th-accent-100 selection:text-th-accent-900">
       <AnimatePresence mode="wait">
         {view === "list" ? (
           <div key="list" className="w-full pb-10 relative z-10 flex flex-col gap-6">

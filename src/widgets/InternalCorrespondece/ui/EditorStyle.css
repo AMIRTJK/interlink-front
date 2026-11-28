@@ -225,14 +225,14 @@
 /*  ТЕМНАЯ ТЕМА  */
 
 .main-container.is-dark .editor-container_document-editor {
-	border-color: #374151; /* gray-700 */
+	border-color: var(--th-dark-high); /* gray-700 */
 }
 
 /* Фон вокруг листа бумаги */
 .main-container.is-dark .editor-container__editor-wrapper,
 .main-container.is-dark .is-read-page,
 .main-container.is-dark .custom-editor-container__editor-wrapper {
-	background: #111827; /* gray-900 */
+	background: var(--th-dark-base); /* gray-900 */
 }
 
 /* Сам лист бумаги (A4) */
@@ -240,20 +240,20 @@
 	.editor-container_document-editor
 	.editor-container__editor
 	.ck.ck-editor__editable {
-	background: #1f2937; /* gray-800 */
-	border-color: #4b5563; /* gray-600 */
+	background: var(--th-dark-raised); /* gray-800 */
+	border-color: var(--th-dark-higher); /* gray-600 */
 	color: #e5e7eb; /* text-gray-200 */
 	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
 }
 
 .main-container.is-dark .ck-focused {
-	border-color: #4b5563 !important;
+	border-color: var(--th-dark-higher) !important;
 }
 
 /*  ИСПРАВЛЕНИЕ ТУЛБАРА В ТЕМНОЙ ТЕМЕ  */
 .main-container.is-dark .editor-container__toolbar {
-	background-color: #1f2937; /* gray-800 */
-	border-bottom-color: #374151; /* gray-700 */
+	background-color: var(--th-dark-raised); /* gray-800 */
+	border-bottom-color: var(--th-dark-high); /* gray-700 */
 	color: #e5e7eb;
 }
 
@@ -273,26 +273,26 @@
 .main-container.is-dark
 	.editor-container__toolbar
 	.ck.ck-dropdown__button:hover {
-	background-color: #374151 !important; /* gray-700 */
+	background-color: var(--th-dark-high) !important; /* gray-700 */
 }
 
 /* Активная кнопка (например, включенный жирный шрифт) */
 .main-container.is-dark .editor-container__toolbar .ck.ck-button.ck-on {
-	background-color: #4b5563 !important; /* gray-600 */
-	color: #60a5fa !important; /* blue-400 */
+	background-color: var(--th-dark-higher) !important; /* gray-600 */
+	color: var(--th-accent-400) !important; /* blue-400 */
 }
 
 .main-container.is-dark
 	.editor-container__toolbar
 	.ck.ck-button.ck-on
 	.ck.ck-icon {
-	color: #60a5fa !important;
-	fill: #60a5fa !important;
+	color: var(--th-accent-400) !important;
+	fill: var(--th-accent-400) !important;
 }
 
 /* Разделители между группами кнопок */
 .main-container.is-dark .editor-container__toolbar .ck.ck-toolbar__separator {
-	background: #4b5563 !important;
+	background: var(--th-dark-higher) !important;
 }
 
 /*  ИСПРАВЛЕНИЕ ВЫПАДАЮЩИХ СПИСКОВ (Dropdown) В ТЕМНОЙ ТЕМЕ  */
@@ -313,7 +313,7 @@ body .ck.ck-theme-dark .ck.ck-list__item > .ck-button:hover {
 
 body .ck.ck-theme-dark .ck.ck-list__item > .ck-button.ck-on {
 	background: #4b5563 !important;
-	color: #60a5fa !important;
+	color: var(--th-accent-400) !important;
 }
 
 /*  КАСТОМНЫЙ СКРОЛЛБАР ДЛЯ ТЕМНОЙ ТЕМЫ

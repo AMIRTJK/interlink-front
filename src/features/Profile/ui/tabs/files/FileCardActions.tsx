@@ -69,7 +69,7 @@ export const FileCardActions = ({
 						e.stopPropagation();
 						onShare?.(file);
 					}}
-					className="p-1 text-slate-400 hover:text-indigo-600! dark:hover:text-indigo-400! rounded-lg transition-colors cursor-pointer"
+					className="p-1 text-slate-400 hover:text-th-accent-600! dark:hover:text-th-accent-400! rounded-lg transition-colors cursor-pointer"
 				>
 					<Share2 size={14} />
 				</button>

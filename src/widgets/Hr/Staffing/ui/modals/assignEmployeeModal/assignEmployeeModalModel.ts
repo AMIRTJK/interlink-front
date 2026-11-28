@@ -12,16 +12,16 @@ export interface IAssignModalTheme {
 }
 
 export const getAssignModalTheme = (dark: boolean): IAssignModalTheme => ({
-  cardBg: dark ? 'bg-gray-900' : 'bg-white',
-  headerBorder: dark ? 'border-gray-700/60' : 'border-gray-100',
+  cardBg: dark ? 'bg-th-base' : 'bg-white',
+  headerBorder: dark ? 'border-th-high/60' : 'border-gray-100',
   inputBg: dark
-    ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-600'
+    ? 'bg-th-raised border-th-high text-gray-100 placeholder:text-gray-600'
     : 'bg-gray-50 border-gray-200 text-gray-800 placeholder:text-gray-400',
-  assignedBg: dark ? 'bg-indigo-900/20' : 'bg-indigo-50',
-  assignedItemBg: dark ? 'bg-gray-800' : 'bg-white',
+  assignedBg: dark ? 'bg-th-accent-900/20' : 'bg-th-accent-50',
+  assignedItemBg: dark ? 'bg-th-raised' : 'bg-white',
   nameText: dark ? 'text-gray-100' : 'text-gray-800',
   subText: dark ? 'text-gray-400' : 'text-gray-500',
-  rowHover: dark ? 'hover:bg-gray-800' : 'hover:bg-gray-50',
+  rowHover: dark ? 'hover:bg-th-raised' : 'hover:bg-gray-50',
 });
 
 /** Блокирует скролл body, пока открыта модалка; счётчик в data-атрибуте позволяет вложенные модалки. */

@@ -49,12 +49,12 @@ export const FolderActionsModal = ({
       onOk={handleOk}
       okButtonProps={{
         disabled: !name.trim(),
-        className: "bg-indigo-600! hover:bg-indigo-700! text-white! rounded-full px-5",
+        className: "bg-th-accent-600! hover:bg-th-accent-700! text-white! rounded-full px-5",
       }}
       cancelButtonProps={{
         style: { display: "none" },
       }}
-      className="dark:bg-slate-900"
+      className="dark:bg-th-base"
       destroyOnClose
     >
       <div className="py-4 space-y-6">
@@ -90,7 +90,7 @@ export const FolderActionsModal = ({
             placeholder="Введите название..."
             onPressEnter={handleOk}
             autoFocus
-            className="rounded-xl border-slate-200 dark:border-slate-800 dark:bg-slate-800 dark:text-zinc-100"
+            className="rounded-xl border-slate-200 dark:border-th-raised dark:bg-th-raised dark:text-zinc-100"
           />
         </div>
       </div>

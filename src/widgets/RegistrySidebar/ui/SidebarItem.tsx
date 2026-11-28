@@ -94,22 +94,23 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   const hasChildren = item.children && item.children.length > 0;
   const isSelected = isActive;
   const isCollapsedMode = collapsed && depth === 0;
+  // Главный пункт выделяется заливкой цветом темы (как активная вкладка профиля),
+  // вложенные папки — мягкой подсветкой, чтобы не спорить с ним.
+  const isTopLevel = depth === 0;
 
   const content = (
       <motion.div
         variants={rowVariants}
         initial="visible"
-        whileHover={{
-          backgroundColor: "rgba(0, 0, 0, 0.015)",
-          transition: { duration: 0.2 }
-        }}
         className={cn(
           "flex items-center group focus:outline-none! active:outline-none! border border-transparent rounded-2xl cursor-pointer relative isolate select-none px-3 py-2",
           variant === "vertical" ? "w-full" : "max-w-[180px]",
           isCollapsedMode ? "justify-center px-0" : "gap-1",
           isSelected
-            ? "text-indigo-700! dark:text-indigo-300!"
-            : "text-gray-600! dark:text-slate-300! hover:text-indigo-600! hover:shadow-sm hover:shadow-indigo-200/20 transition-all duration-300",
+            ? isTopLevel
+              ? "text-white!"
+              : "text-th-accent-700! dark:text-th-accent-300!"
+            : "text-gray-600! dark:text-slate-300! hover:text-th-accent-600! dark:hover:text-th-accent-300! hover:bg-th-accent-500/8 dark:hover:bg-white/6 transition-colors duration-200",
           item.folderName === "Создать новую папку" && "opacity-80"
         )}
         onClick={(e) => {
@@ -121,11 +122,13 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           <motion.div
             layoutId="active-pill"
             className={cn(
-               "absolute border-white/50! active-pill-shadow!",
-               isCollapsedMode 
-                 ? "w-10 h-10 left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 rounded-full! from-indigo-500/15! to-purple-500/15! bg-linear-to-r!" 
-                 : "inset-0 rounded-2xl bg-linear-to-r! from-indigo-400/20! to-purple-400/20!",
-               depth > 0 && !isCollapsedMode && "from-indigo-300/10! to-purple-300/10!"
+               "absolute",
+               isCollapsedMode
+                 ? "w-10 h-10 left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 rounded-full! bg-th-accent-600! shadow-md shadow-th-accent-600/25"
+                 : "inset-0 rounded-2xl",
+               !isCollapsedMode && (isTopLevel
+                 ? "bg-th-accent-600! shadow-md shadow-th-accent-600/25"
+                 : "bg-th-accent-500/15! border border-th-accent-500/30!")
             )}
             transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
             style={{ zIndex: -1 }}
@@ -135,13 +138,16 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           variants={contentVariants}
           className={cn(
             "shrink-0! flex items-center justify-center w-8 h-8 transition-all duration-300 [&_svg_path]:stroke-current!",
-            isSelected && !isCollapsedMode && "bg-[#EEF2FF] dark:bg-indigo-950/50 rounded-xl",
+            isSelected && !isCollapsedMode && "rounded-xl",
+            isSelected && !isCollapsedMode && (isTopLevel ? "bg-white/15" : "bg-th-accent-50 dark:bg-th-accent-950/50"),
             isSelected
-              ? "text-indigo-600! shadow-indigo-200/40"
+              ? isTopLevel
+                ? "text-white!"
+                : "text-th-accent-600! dark:text-th-accent-300!"
               : cn(
-                  "group-hover:text-indigo-600!",
-                  depth === 0 ? "text-indigo-500!" :
-                  depth === 1 ? "text-blue-500!" :
+                  "group-hover:text-th-accent-600!",
+                  depth === 0 ? "text-th-accent-500!" :
+                  depth === 1 ? "text-th-accent-500!" :
                   depth === 2 ? "text-violet-500!" :
                   depth === 3 ? "text-pink-500!" :
                   depth === 4 ? "text-orange-500!" :

@@ -9,25 +9,25 @@ interface IProps {
 }
 
 export const OrderDocumentCard = ({ state, methods }: IProps) => (
-  <div className="flex-1 bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col">
+  <div className="flex-1 bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col dark:bg-th-raised dark:border-th-high">
     <SectionTitle num={2} title="ПРИКАЗ" />
 
-    <div className="flex-1 border border-slate-100 shadow-inner rounded-xl bg-white p-8 max-w-[794px] w-full self-center">
+    <div className="flex-1 border border-slate-100 shadow-inner rounded-xl bg-white p-8 max-w-[794px] w-full self-center dark:border-th-high dark:bg-th-raised">
       <div className="text-center mb-6">
         <div className="flex items-center justify-center mb-3">
-          <div className="w-16 h-16 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center bg-slate-50 text-slate-700 font-bold text-xl select-none">
+          <div className="w-16 h-16 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center bg-slate-50 text-slate-700 font-bold text-xl select-none dark:border-th-high dark:bg-th-base dark:text-slate-300">
             ТЖ
           </div>
         </div>
-        <p className="text-[12px] font-bold text-gray-900 uppercase tracking-wider">
+        <p className="text-[12px] font-bold text-gray-900 uppercase tracking-wider dark:text-slate-100">
           МИНИСТЕРСТВО ФИНАНСОВ РЕСПУБЛИКИ ТАДЖИКИСТАН
         </p>
-        <div className="border-t border-gray-300 my-4" />
-        <p className="text-[20px] font-bold text-gray-900 tracking-[0.2em] mb-1">П Р И К А З</p>
+        <div className="border-t border-gray-300 my-4 dark:border-th-high" />
+        <p className="text-[20px] font-bold text-gray-900 tracking-[0.2em] mb-1 dark:text-slate-100">П Р И К А З</p>
       </div>
 
-      <div className="flex justify-between items-end border-b border-gray-200 pb-2 mb-6">
-        <div className="flex items-center gap-2 text-[13px] text-gray-700">
+      <div className="flex justify-between items-end border-b border-gray-200 pb-2 mb-6 dark:border-th-high">
+        <div className="flex items-center gap-2 text-[13px] text-gray-700 dark:text-slate-300">
           <span>от</span>
           <DatePicker
             value={state.orderDate ? dayjs(state.orderDate) : null}
@@ -38,7 +38,7 @@ export const OrderDocumentCard = ({ state, methods }: IProps) => (
             className="text-center!"
           />
         </div>
-        <div className="flex items-center gap-2 text-[13px] text-gray-700">
+        <div className="flex items-center gap-2 text-[13px] text-gray-700 dark:text-slate-300">
           <span>№</span>
           <input
             type="text"
@@ -59,7 +59,7 @@ export const OrderDocumentCard = ({ state, methods }: IProps) => (
             e.target.style.height = `${e.target.scrollHeight}px`;
           }}
           placeholder="На основании заявления кандидата..."
-          className="w-full text-[12px] text-gray-700 leading-relaxed bg-transparent border-0 outline-none focus:bg-slate-50 rounded p-2 resize-none min-h-[80px]"
+          className="w-full text-[12px] text-gray-700 leading-relaxed bg-transparent border-0 outline-none focus:bg-slate-50 rounded p-2 resize-none min-h-[80px] dark:text-slate-300"
           rows={4}
         />
       </div>
@@ -82,15 +82,15 @@ export const OrderDocumentCard = ({ state, methods }: IProps) => (
             )}
           </div>
         ))}
-        <button onClick={methods.addPoint} className="w-full py-2.5 flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 text-slate-400 hover:text-[#1E3A5F] hover:border-[#1E3A5F] transition-all text-sm font-medium mt-2">
+        <button onClick={methods.addPoint} className="w-full py-2.5 flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 text-slate-400 hover:text-[#1E3A5F] hover:border-[#1E3A5F] transition-all text-sm font-medium mt-2 dark:border-th-high">
           <Plus size={16} />
           <span>Добавить пункт</span>
         </button>
       </div>
 
-      <div className="flex items-end justify-between pt-6 border-t border-slate-100">
+      <div className="flex items-end justify-between pt-6 border-t border-slate-100 dark:border-th-high">
         <div className="flex flex-col gap-3">
-          <span className="text-sm font-medium text-gray-700">Министр финансов</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-slate-300">Министр финансов</span>
           <button
             onClick={() => state.setMinisterSigned(true)}
             className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-bold text-white transition-all ${state.ministerSigned ? 'bg-emerald-500 shadow-emerald-500/20 shadow-md' : 'bg-[#1E3A5F] hover:bg-[#1E3A5F]/90'}`}

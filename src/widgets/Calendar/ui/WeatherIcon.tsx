@@ -17,7 +17,7 @@ export const WeatherIcon = memo(({ type, className = "", size = 14 }: IWeatherIc
     case "cloud":
       return <Cloud size={size} className={`text-slate-400 ${className}`} />;
     case "snow":
-      return <Snowflake size={size} className={`text-indigo-400 ${className}`} />;
+      return <Snowflake size={size} className={`text-th-accent-400 ${className}`} />;
     case "rain":
       return <CloudRain size={size} className={`text-teal-500 ${className}`} />;
     default:

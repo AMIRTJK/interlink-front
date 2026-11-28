@@ -23,7 +23,7 @@ export function RolePermissionsHeader({
           {initials || "РД"}
         </div>
         <div>
-          <h4 className="font-bold text-slate-800 text-sm leading-tight">
+          <h4 className="font-bold text-slate-800 text-sm leading-tight dark:text-slate-100">
             {roleName}
           </h4>
           <p className="text-[10px] text-slate-400 font-medium leading-none mt-0.5">
@@ -33,7 +33,7 @@ export function RolePermissionsHeader({
       </div>
       <button
         onClick={onClose}
-        className="p-1 rounded-full hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors"
+        className="p-1 rounded-full hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors dark:hover:bg-th-high"
       >
         <X size={16} />
       </button>

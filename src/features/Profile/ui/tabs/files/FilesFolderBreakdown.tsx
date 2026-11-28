@@ -19,7 +19,7 @@ export const FilesFolderBreakdown = ({ folderBreakdown }: IProps) => {
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.3, delay: 0.12 }}
-				className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-slate-700/50 p-5 flex flex-col items-center justify-center min-h-[320px]"
+				className="rounded-3xl bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 p-5 flex flex-col items-center justify-center min-h-[320px]"
 			>
 				<h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200 mb-4">
 					Распределение по папкам
@@ -36,7 +36,7 @@ export const FilesFolderBreakdown = ({ folderBreakdown }: IProps) => {
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.3, delay: 0.12 }}
-			className="rounded-3xl bg-white/70 dark:bg-slate-800/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-slate-700/50 p-5 flex flex-col min-h-[320px]"
+			className="rounded-3xl bg-white/70 dark:bg-th-raised/90 backdrop-blur-sm ui-glass border border-zinc-200 dark:border-th-high/50 p-5 flex flex-col min-h-[320px]"
 		>
 			<div className="flex items-center justify-between mb-4">
 				<h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-200">
@@ -50,20 +50,20 @@ export const FilesFolderBreakdown = ({ folderBreakdown }: IProps) => {
 					return (
 						<div
 							key={item.folder_id ?? "null-folder"}
-							className="flex items-center justify-between p-3 bg-slate-50/50 dark:bg-slate-850/50 rounded-2xl border border-slate-100/70 dark:border-slate-800/40 hover:bg-slate-100/50 dark:hover:bg-slate-800/60 transition-all duration-200"
+							className="flex items-center justify-between p-3 bg-slate-50/50 dark:bg-th-raised/50 rounded-2xl border border-slate-100/70 dark:border-th-raised/40 hover:bg-slate-100/50 dark:hover:bg-th-raised/60 transition-all duration-200"
 						>
 							<div className="flex items-center gap-3 min-w-0">
-								<div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-base shrink-0 border border-indigo-100/20 dark:border-indigo-900/10 shadow-sm">
+								<div className="w-9 h-9 rounded-xl bg-th-accent-50 dark:bg-th-accent-950/30 flex items-center justify-center text-base shrink-0 border border-th-accent-100/20 dark:border-th-accent-900/10 shadow-sm">
 									{isNullFolder ? (
 										<FileText
 											size={16}
-											className="text-indigo-600 dark:text-indigo-400"
+											className="text-th-accent-600 dark:text-th-accent-400"
 										/>
 									) : (
 										item.emoji || (
 											<Folder
 												size={16}
-												className="text-indigo-600 dark:text-indigo-400"
+												className="text-th-accent-600 dark:text-th-accent-400"
 											/>
 										)
 									)}
@@ -77,7 +77,7 @@ export const FilesFolderBreakdown = ({ folderBreakdown }: IProps) => {
 									</div>
 								</div>
 							</div>
-							<span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 shrink-0 border border-indigo-100/30 dark:border-indigo-900/20">
+							<span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-th-accent-50 dark:bg-th-accent-950/40 text-th-accent-600 dark:text-th-accent-400 shrink-0 border border-th-accent-100/30 dark:border-th-accent-900/20">
 								{item.total_size_human || formatBytes(item.total_size)}
 							</span>
 						</div>

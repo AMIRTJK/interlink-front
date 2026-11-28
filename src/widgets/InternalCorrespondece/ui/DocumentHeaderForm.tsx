@@ -126,7 +126,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
   const textSecondary = isDarkMode ? "text-gray-400!" : "text-gray-500!";
 
   const chipClass = isDarkMode
-    ? "bg-[#1f2937]! border-gray-700! text-gray-200! hover:border-gray-500!"
+    ? "bg-th-raised! border-th-high! text-gray-200! hover:border-gray-500!"
     : "bg-white! border-gray-200! text-gray-700! hover:border-gray-300!";
 
   return (
@@ -152,7 +152,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
         </Form.Item>
 
         <If is={Boolean(relationLabel || sourceDocument)}>
-          <div className="flex items-center gap-2 px-3 py-1.5 mb-1.5 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-lg text-xs text-blue-700 dark:text-blue-300">
+          <div className="flex items-center gap-2 px-3 py-1.5 mb-1.5 bg-th-accent-50/80 dark:bg-th-accent-950/40 border border-th-accent-200 dark:border-th-accent-800 rounded-lg text-xs text-th-accent-700 dark:text-th-accent-300">
             <span className="font-semibold">
               {relationLabel || (relationType === "reply" ? "Ответное письмо" : "Пересланное письмо")}
             </span>
@@ -225,7 +225,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
             )}
           </div>
           <div
-            className={`hidden sm:block w-px h-5 ${isDarkMode ? "bg-gray-700!" : "bg-gray-200!"}`}
+            className={`hidden sm:block w-px h-5 ${isDarkMode ? "bg-th-high!" : "bg-gray-200!"}`}
           ></div>
           <div className="flex items-center gap-2">
             <ClockCircleOutlined
@@ -249,7 +249,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
             </Form.Item>
           </div>
           <div
-            className={`hidden sm:block w-px h-5 ${isDarkMode ? "bg-gray-700!" : "bg-gray-200!"}`}
+            className={`hidden sm:block w-px h-5 ${isDarkMode ? "bg-th-high!" : "bg-gray-200!"}`}
           ></div>
           <div className="flex items-center gap-2">
             <span
@@ -264,7 +264,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
                 className={`
                   px-0! py-0! h-auto! w-32! text-sm! placeholder:text-sm!
                   rounded-none! border-b! focus:shadow-none! hover:bg-transparent! focus:border-gray-400!
-                  ${isDarkMode ? "border-gray-600! text-gray-300!" : "border-gray-300! text-[#4a5565]!"}
+                  ${isDarkMode ? "border-th-higher! text-gray-300!" : "border-gray-300! text-[#4a5565]!"}
                 `}
                 style={{ backgroundColor: "transparent", lineHeight: "1.5" }}
                 styles={{ input: { caretColor: "#A78BFA" } }}
@@ -274,7 +274,7 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
           {!isIncoming && (
             <>
               <div
-                className={`hidden sm:block w-px h-5 ${isDarkMode ? "bg-gray-700!" : "bg-gray-200!"}`}
+                className={`hidden sm:block w-px h-5 ${isDarkMode ? "bg-th-high!" : "bg-gray-200!"}`}
               ></div>
 
               <span
@@ -287,13 +287,6 @@ export const DocumentHeaderForm: React.FC<DocumentHeaderFormProps> = ({
                   algorithm: isDarkMode
                     ? theme.darkAlgorithm
                     : theme.defaultAlgorithm,
-                  token: isDarkMode
-                    ? {
-                        colorBgContainer: "#1f2937",
-                        colorBgElevated: "#1f2937",
-                        colorBorder: "#4b5563",
-                      }
-                    : {},
                 }}
               >
                 <SelectField

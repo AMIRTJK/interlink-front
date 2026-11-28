@@ -33,10 +33,10 @@ export const SearchListItem: React.FC<IProps> = ({
               : "border-[#8C52FF] bg-[rgba(167,139,250,0.12)]"
             : isActive
               ? isDarkMode
-                ? "border-gray-600 bg-gray-800"
+                ? "border-th-higher bg-th-raised"
                 : "border-gray-200 bg-gray-50"
               : isDarkMode
-                ? "border-gray-700 bg-gray-800 hover:bg-gray-700 hover:border-gray-500"
+                ? "border-th-high bg-th-raised hover:bg-th-high hover:border-gray-500"
                 : "border-gray-50 bg-white hover:bg-gray-50 hover:border-purple-200"
         }
         ${!isSelected && !isActive && (isDarkMode ? "shadow-none" : "shadow-sm")}
@@ -83,13 +83,13 @@ export const SearchListItem: React.FC<IProps> = ({
                 item.tag === "Входящее"
                   ? isDarkMode
                     ? "bg-purple-900/50 text-purple-300"
-                    : "bg-purple-100 text-purple-600"
+                    : "bg-purple-100 text-purple-600 dark:bg-purple-900/35 dark:text-purple-400"
                   : item.tag === "Отправленные"
                     ? isDarkMode
-                      ? "bg-blue-900/50 text-blue-300"
-                      : "bg-blue-100 text-blue-600"
+                      ? "bg-th-accent-900/50 text-th-accent-300"
+                      : "bg-th-accent-100 text-th-accent-600 dark:bg-th-accent-900/35 dark:text-th-accent-400"
                     : isDarkMode
-                      ? "bg-gray-700 text-gray-300"
+                      ? "bg-th-high text-gray-300"
                       : "bg-gray-100 text-gray-600"
               }`}
             >
@@ -105,7 +105,7 @@ export const SearchListItem: React.FC<IProps> = ({
               />
             ) : (
               <div
-                className={`w-5 h-5 rounded-full border-2 ${isDarkMode ? "border-gray-600" : "border-gray-200"}`}
+                className={`w-5 h-5 rounded-full border-2 ${isDarkMode ? "border-th-higher" : "border-gray-200"}`}
               />
             )}
           </div>

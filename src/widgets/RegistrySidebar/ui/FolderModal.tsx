@@ -82,7 +82,7 @@ export const FolderModal = ({
           >
             <Input
               placeholder="Введите название"
-              className="h-[46px]! px-4! text-[15px]! bg-white! dark:bg-slate-800! border border-gray-200! dark:border-slate-600! rounded-[22px]! placeholder:text-gray-400! dark:placeholder:text-slate-500! focus:border-indigo-400! focus:ring-1! focus:ring-indigo-200! transition-all!"
+              className="h-[46px]! px-4! text-[15px]! bg-white! dark:bg-th-raised! border border-gray-200! dark:border-th-higher! rounded-[22px]! placeholder:text-gray-400! dark:placeholder:text-slate-500! focus:border-th-accent-400! focus:ring-1! focus:ring-th-accent-200! transition-all!"
             />
           </Form.Item>
 
@@ -93,14 +93,14 @@ export const FolderModal = ({
           >
             <Input
               placeholder="Введите префикс"
-              className="h-[46px]! px-4! text-[15px]! bg-white! dark:bg-slate-800! border border-gray-200! dark:border-slate-600! rounded-[22px]! placeholder:text-gray-400! dark:placeholder:text-slate-500! focus:border-indigo-400! focus:ring-1! focus:ring-indigo-200! transition-all!"
+              className="h-[46px]! px-4! text-[15px]! bg-white! dark:bg-th-raised! border border-gray-200! dark:border-th-higher! rounded-[22px]! placeholder:text-gray-400! dark:placeholder:text-slate-500! focus:border-th-accent-400! focus:ring-1! focus:ring-th-accent-200! transition-all!"
             />
           </Form.Item>
 
           <div className="flex gap-3 pt-2">
             <Button
               onClick={onCancel}
-              className="flex-1! h-[50px]! text-[15px]! font-semibold! bg-white! dark:bg-slate-800! border border-gray-200! dark:border-slate-600! text-[#4a5568]! dark:text-slate-300! rounded-[25px]! hover:bg-gray-50! dark:hover:bg-slate-700! transition-all! shadow-sm!"
+              className="flex-1! h-[50px]! text-[15px]! font-semibold! bg-white! dark:bg-th-raised! border border-gray-200! dark:border-th-higher! text-[#4a5568]! dark:text-slate-300! rounded-[25px]! hover:bg-gray-50! dark:hover:bg-th-high! transition-all! shadow-sm!"
             >
               Отмена
             </Button>

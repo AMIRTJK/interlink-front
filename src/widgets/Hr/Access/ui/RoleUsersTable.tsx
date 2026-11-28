@@ -59,7 +59,7 @@ export const RoleUsersTable = ({
 					},
 					className: "cursor-pointer",
 				})}
-				className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm bg-white"
+				className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm bg-white dark:border-th-high dark:bg-th-raised"
 			/>
 
 			{total > pageSize && (

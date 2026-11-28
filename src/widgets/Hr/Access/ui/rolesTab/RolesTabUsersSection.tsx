@@ -32,12 +32,12 @@ export function RolesTabUsersSection({
   onDeleteUser,
 }: IProps) {
   return (
-    <div className="space-y-4 pt-4 border-t border-slate-100">
+    <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-th-high">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
-          <h3 className="text-[15px] font-bold text-slate-800 flex items-center gap-2 flex-wrap">
+          <h3 className="text-[15px] font-bold text-slate-800 flex items-center gap-2 flex-wrap dark:text-slate-100">
             <span>{"Пользователи с ролью:"}</span>
-            <span className="text-blue-600">{selectedRoleDisplayName}</span>
+            <span className="text-th-accent-600">{selectedRoleDisplayName}</span>
           </h3>
           <div className="text-xs text-slate-400 font-semibold pl-0.5">
             {"Найдено:"} {totalUsers}
@@ -48,7 +48,7 @@ export function RolesTabUsersSection({
           placeholder={"Поиск пользователя..."}
           prefix={<Search size={14} className="text-slate-400" />}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-72! rounded-xl! border-slate-200!"
+          className="w-72! rounded-xl! border-slate-200! dark:border-th-high!"
         />
       </div>
 

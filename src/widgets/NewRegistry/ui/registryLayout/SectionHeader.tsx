@@ -11,7 +11,7 @@ export const SectionHeader = ({
   breadcrumbs,
 }: any) => {
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-4 m-0 flex flex-col gap-2">
+    <div className="ui-glass bg-white dark:bg-th-raised rounded-xl shadow-sm border border-gray-100 dark:border-th-high p-4 m-0 flex flex-col gap-2">
       {breadcrumbs && breadcrumbs.length > 0 && (
         <Breadcrumbs items={breadcrumbs} className="py-0 mb-1" />
       )}
@@ -27,20 +27,20 @@ export const SectionHeader = ({
               ease: "easeInOut",
             }}
             className={`p-2 rounded-lg bg-gradient-to-r ${
-              activeStatusData?.gradient || "from-blue-50 to-blue-100"
+              activeStatusData?.gradient || "from-th-accent-50 to-th-accent-100"
             }`}
           >
             {activeStatusData?.icon ? (
               <div className="text-white">{activeStatusData.icon}</div>
             ) : (
-              <FileText size={18} className="text-blue-600" />
+              <FileText size={18} className="text-th-accent-600" />
             )}
           </motion.div>
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-slate-100">
               <span
                 className={`bg-gradient-to-r bg-clip-text text-transparent ${
-                  activeStatusData?.gradient || "from-gray-700 to-gray-900"
+                  activeStatusData?.gradient || "from-th-high to-th-base"
                 }`}
               >
                 {activeStatusData?.label || "Все документы"}

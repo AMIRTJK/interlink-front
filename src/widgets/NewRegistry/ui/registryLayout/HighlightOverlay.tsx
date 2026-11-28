@@ -23,7 +23,7 @@ export const HighlightOverlay = ({ isHighlighted, rounded = "lg" }: IProps) => (
         transition={{ duration: 0.5, ease: "easeInOut" }}
         className={`absolute inset-0 ${
           rounded === "xl" ? "rounded-xl" : "rounded-lg"
-        } ring-1 ring-inset ring-blue-500 border border-blue-500 pointer-events-none z-20 shadow-[0_0_14px_rgba(59,130,246,0.4)]`}
+        } ring-1 ring-inset ring-th-accent-500 border border-th-accent-500 pointer-events-none z-20 shadow-[0_0_14px_rgb(var(--th-accent-rgb)/0.4)]`}
       />
     )}
   </AnimatePresence>

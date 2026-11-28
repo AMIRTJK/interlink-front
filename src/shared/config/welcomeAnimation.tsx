@@ -74,7 +74,7 @@ export const WELCOME_ANIMATIONS: IWelcomeAnimationOption[] = [
     labelEn: "Protocol",
     descriptionRu: "Расшифровка данных и чек-лист защищённого подключения",
     durationMs: 6000,
-    swatch: "from-zinc-300 via-slate-500 to-slate-800",
+    swatch: "from-zinc-300 via-slate-500 to-th-raised",
     icon: SquareTerminal,
   },
 ];

@@ -100,12 +100,12 @@
 
 /* === ТЕМНАЯ ТЕМА ДЛЯ ВВОДА === */
 .chat-view.is-dark .chat-input-container {
-  background: #1f2937; /* gray-800 */
-  border-top-color: #374151; /* gray-700 */
+  background: var(--th-dark-raised); /* gray-800 */
+  border-top-color: var(--th-dark-high); /* gray-700 */
 }
 
 .chat-view.is-dark .chat-input__reply-preview {
-  background: #111827; /* gray-900 */
+  background: var(--th-dark-base); /* gray-900 */
   border-left-color: #8c52ff;
 }
 
@@ -118,8 +118,8 @@
 }
 
 .chat-view.is-dark .chat-input__textarea {
-  background: #111827 !important; /* gray-900 */
-  border-color: #374151 !important; /* gray-700 */
+  background: var(--th-dark-base) !important; /* gray-900 */
+  border-color: var(--th-dark-high) !important; /* gray-700 */
   color: #f3f4f6 !important; /* gray-100 */
 }
 
@@ -128,11 +128,11 @@
 }
 
 .chat-view.is-dark .chat-input__textarea:focus {
-  background: #1f2937 !important; /* gray-800 */
+  background: var(--th-dark-raised) !important; /* gray-800 */
   border-color: #8c52ff !important;
 }
 
 .chat-view.is-dark .chat-input__send-btn:disabled {
-  background: #374151; /* gray-700 */
+  background: var(--th-dark-high); /* gray-700 */
   color: #6b7280; /* gray-500 */
 }

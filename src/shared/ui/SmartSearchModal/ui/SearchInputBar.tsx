@@ -27,7 +27,7 @@ export const SearchInputBar = ({
           <SearchOutlined
             className={`text-lg! mr-2! transition-colors! duration-300! ${
               isSearchFocused
-                ? "text-blue-600!"
+                ? "text-th-accent-600!"
                 : isDarkMode
                   ? "text-gray-500!"
                   : "text-gray-400!"
@@ -38,10 +38,10 @@ export const SearchInputBar = ({
         onBlur={() => setIsSearchFocused(false)}
         className={`w-full! h-12! rounded-2xl! border! text-base! shadow-sm! transition-all! duration-300! ${
           isSearchFocused
-            ? "border-blue-500! shadow-lg! shadow-blue-500/15!"
+            ? "border-th-accent-500! shadow-lg! shadow-th-accent-500/15!"
             : isDarkMode
-              ? "bg-gray-800! border-gray-700! text-white! hover:border-gray-600!"
-              : "bg-white! border-gray-200! text-black! hover:border-blue-300!"
+              ? "bg-th-raised! border-th-high! text-white! hover:border-th-higher!"
+              : "bg-white! border-gray-200! text-black! hover:border-th-accent-300!"
         }`}
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}

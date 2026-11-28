@@ -1,0 +1,23 @@
+/* Нейтральные цвета администрирования. Разметка модуля красит инлайн-стилями из
+   `T` (tokens.ts), поэтому тёмный режим живёт здесь, в переменных: значения `T`
+   ссылаются на них, и `.dark` на <html> перекрашивает модуль целиком.
+   Тёмные поверхности — общие уровни темы (`--th-dark-*`, app/styles/theme.css). */
+:root {
+  --adm-bg: #f8fafc;
+  --adm-surface: #ffffff;
+  --adm-text: #0f172a;
+  --adm-text-muted: #64748b;
+  --adm-text-faint: #94a3b8;
+  --adm-border: #e2e8f0;
+  --adm-hover: #f1f5f9;
+}
+
+.dark {
+  --adm-bg: var(--th-dark-base);
+  --adm-surface: var(--th-dark-raised);
+  --adm-text: #f1f5f9;
+  --adm-text-muted: #94a3b8;
+  --adm-text-faint: #64748b;
+  --adm-border: var(--th-dark-high);
+  --adm-hover: var(--th-dark-high);
+}

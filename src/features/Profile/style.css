@@ -78,12 +78,12 @@
 }
 
 .profile-settings-icon:hover {
-  color: #2563eb !important;
+  color: var(--th-accent-600) !important;
   transform: rotate(90deg) !important;
 }
 
 .profile-avatar {
-  background-color: #2563eb;
+  background-color: var(--th-accent-600);
   border-radius: 50%;
 }
 

@@ -48,8 +48,8 @@ export const IncomingDetailsAccordion: React.FC<IProps> = ({
         </span>
         <div className="flex items-center gap-2 ml-2 flex-1 overflow-hidden">
           {/* Отправитель */}
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-semibold flex-shrink-0">
-            <span className="w-4 h-4 rounded-full bg-blue-500 text-white text-[9px] font-bold flex items-center justify-center">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-th-accent-50 border border-th-accent-100 text-th-accent-700 text-xs font-semibold flex-shrink-0 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50">
+            <span className="w-4 h-4 rounded-full bg-th-accent-500 text-white text-[9px] font-bold flex items-center justify-center">
               {senderInitials[0]}
             </span>
             <span className="truncate max-w-[160px]">{senderName}</span>
@@ -86,7 +86,7 @@ export const IncomingDetailsAccordion: React.FC<IProps> = ({
               {/* Отправитель */}
               <DetailField label="Отправитель">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[11px] font-bold flex-shrink-0 border border-blue-200">
+                  <div className="w-7 h-7 rounded-full bg-th-accent-100 text-th-accent-600 flex items-center justify-center text-[11px] font-bold flex-shrink-0 border border-th-accent-200 dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50">
                     {senderInitials}
                   </div>
                   <div className="min-w-0">
@@ -122,7 +122,7 @@ export const IncomingDetailsAccordion: React.FC<IProps> = ({
               {/* Дата */}
               <DetailField label="Дата">
                 <div className="flex items-center gap-1.5 text-slate-800">
-                  <Calendar size={13} className="text-blue-500 shrink-0" />
+                  <Calendar size={13} className="text-th-accent-500 shrink-0" />
                   <span className="text-xs font-semibold">
                     {formattedSentDate}
                   </span>
@@ -138,7 +138,7 @@ export const IncomingDetailsAccordion: React.FC<IProps> = ({
 
               {/* Тип документа */}
               <DetailField label="Тип документа">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-indigo-50 text-indigo-700 text-[11px] font-semibold rounded-full border border-indigo-100 w-fit">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-th-accent-50 text-th-accent-700 text-[11px] font-semibold rounded-full border border-th-accent-100 w-fit dark:bg-th-accent-900/35 dark:text-th-accent-400 dark:border-th-accent-800/50">
                   <FileType size={12} />
                   <span>Внутренний</span>
                 </span>

@@ -118,13 +118,13 @@ export const CustomDatePicker = ({
 			</button>
 
 			<If is={open}>
-				<div className="absolute z-20 mt-1 w-64 p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl flex flex-col gap-2">
+				<div className="absolute z-20 mt-1 w-64 p-3.5 rounded-2xl border border-gray-200 dark:border-th-raised bg-white dark:bg-th-base shadow-xl flex flex-col gap-2">
 					<If is={view === "calendar"}>
-						<div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800/80 pb-2">
+						<div className="flex items-center justify-between border-b border-gray-100 dark:border-th-raised/80 pb-2">
 							<button
 								type="button"
 								onClick={handlePrevMonth}
-								className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 cursor-pointer"
+								className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-th-raised text-gray-500 dark:text-slate-400 cursor-pointer"
 							>
 								<ChevronLeft size={16} />
 							</button>
@@ -134,14 +134,14 @@ export const CustomDatePicker = ({
 									setView("years");
 									setYearPage(Math.floor(currentYear / 12) * 12);
 								}}
-								className="text-xs font-bold text-gray-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 px-2 py-0.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer"
+								className="text-xs font-bold text-gray-800 dark:text-slate-200 hover:text-th-accent-600 dark:hover:text-th-accent-400 px-2 py-0.5 rounded-lg hover:bg-gray-100 dark:hover:bg-th-raised cursor-pointer"
 							>
 								{MONTHS[currentMonth]} {currentYear}
 							</button>
 							<button
 								type="button"
 								onClick={handleNextMonth}
-								className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 cursor-pointer"
+								className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-th-raised text-gray-500 dark:text-slate-400 cursor-pointer"
 							>
 								<ChevronRight size={16} />
 							</button>
@@ -176,8 +176,8 @@ export const CustomDatePicker = ({
 												onClick={() => handleSelectDay(day!)}
 												className={`h-7 w-7 flex items-center justify-center rounded-lg text-xs font-semibold cursor-pointer ${
 													isSel
-														? "bg-indigo-600! text-white!"
-														: "text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800"
+														? "bg-th-accent-600! text-white!"
+														: "text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-th-raised"
 												}`}
 											>
 												{day}
@@ -190,11 +190,11 @@ export const CustomDatePicker = ({
 					</If>
 
 					<If is={view === "years"}>
-						<div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800/80 pb-2">
+						<div className="flex items-center justify-between border-b border-gray-100 dark:border-th-raised/80 pb-2">
 							<button
 								type="button"
 								onClick={() => setYearPage((p) => p - 12)}
-								className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 cursor-pointer"
+								className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-th-raised text-gray-500 dark:text-slate-400 cursor-pointer"
 							>
 								<ChevronLeft size={16} />
 							</button>
@@ -204,7 +204,7 @@ export const CustomDatePicker = ({
 							<button
 								type="button"
 								onClick={() => setYearPage((p) => p + 12)}
-								className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 cursor-pointer"
+								className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-th-raised text-gray-500 dark:text-slate-400 cursor-pointer"
 							>
 								<ChevronRight size={16} />
 							</button>
@@ -220,8 +220,8 @@ export const CustomDatePicker = ({
 										onClick={() => handleSelectYear(y)}
 										className={`py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
 											isCurrent
-												? "bg-indigo-600! text-white!"
-												: "text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800"
+												? "bg-th-accent-600! text-white!"
+												: "text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-th-raised"
 										}`}
 									>
 										{y}
