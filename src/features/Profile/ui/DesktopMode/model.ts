@@ -35,12 +35,12 @@ export const SCENES: ISceneOption[] = [
   { key: "campfire", labelRu: "Костёр", labelEn: "Campfire", layout: "stage", isAlwaysNight: true, isFormOnDemand: true },
   { key: "newyear", labelRu: "Новый год", labelEn: "New Year", layout: "stage", isAlwaysNight: true, isFormOnDemand: true },
   { key: "space", labelRu: "Космос", labelEn: "Space", layout: "centered", isAlwaysNight: true, isFormOnDemand: true },
-  { key: "aurora", labelRu: "Сияние", labelEn: "Aurora", layout: "centered" },
-  { key: "mountains", labelRu: "Горы", labelEn: "Mountains", layout: "centered" },
-  { key: "ocean", labelRu: "Океан", labelEn: "Ocean", layout: "centered" },
-  { key: "rain", labelRu: "Дождь", labelEn: "Rain", layout: "centered" },
-  { key: "particles", labelRu: "Частицы", labelEn: "Particles", layout: "centered" },
-  { key: "clock", labelRu: "Часы", labelEn: "Clock", layout: "split" },
+  { key: "aurora", labelRu: "Сияние", labelEn: "Aurora", layout: "centered", isAlwaysNight: true, isFormOnDemand: true },
+  { key: "mountains", labelRu: "Горы", labelEn: "Mountains", layout: "centered", isAlwaysNight: true, isFormOnDemand: true },
+  { key: "ocean", labelRu: "Океан", labelEn: "Ocean", layout: "centered", isAlwaysNight: true, isFormOnDemand: true },
+  { key: "rain", labelRu: "Дождь", labelEn: "Rain", layout: "centered", isAlwaysNight: true, isFormOnDemand: true },
+  { key: "particles", labelRu: "Частицы", labelEn: "Particles", layout: "centered", isAlwaysNight: true, isFormOnDemand: true },
+  { key: "clock", labelRu: "Часы", labelEn: "Clock", layout: "split", isAlwaysNight: true },
 ];
 
 export const DEFAULT_SCENE: TDesktopScene = "campfire";
